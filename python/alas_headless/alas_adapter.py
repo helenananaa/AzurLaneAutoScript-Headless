@@ -15,6 +15,13 @@ from dataclasses import dataclass, field, replace
 from numbers import Real
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Set, Tuple, Union
 
+from .adapter import (
+    FlowScope,
+    ObservationRegistry,
+    ObserveRequest,
+    SemanticFrameIdentity,
+)
+from .adapter.flows import LOGIN_CHECK_CAPABILITY, register_login_observations
 from .alas_combat_admission import (
     AlasCampaignCombatAdmission,
     AlasCampaignCombatProof,
@@ -71,6 +78,19 @@ PINNED_CN_GAME_FINGERPRINT = AndroidPackageFingerprint(
     primary_abi="x86_64",
     base_apk_sha256="e6d3ef4baac2509cc97a289b91bfd5f9d0dcd7ad8994880a192298983208699f",
     il2cpp_sha256="e3f1cfc442b67f1d4c9877fd9ceaedc3d68f2842ad677445241b9cc9c05d1c67",
+)
+
+
+# B05 intentionally precedes the atomic frame clock in Milestone E.  This
+# sentinel labels a read-only compatibility envelope; it is never exported as
+# action evidence or passed to an ActionLease.
+_UNBOUND_READ_ONLY_FRAME_SHA256 = (
+    # sha256("alas-adapter-v2:unbound-read-only-frame")
+    "f31292f2b5c0c9f6919a5a5201aa6228ce4cbe9d76b3006af7175e0888bffa04"
+)
+_LEGACY_TASK_CONFIG_SHA256 = (
+    # sha256("alas-adapter-v2:legacy-task-config")
+    "dc5f75742bd2e66dd83f82bbce11f5224de0052bac545a3f9e4c605332fbaae7"
 )
 
 
@@ -782,6 +802,57 @@ class AlasSemanticAdapter:
         self._build_context: Optional[_BuildFlowContext] = None
         self._campaign_context: Optional[_CampaignFlowContext] = None
         self._observer_stale_since: Optional[float] = None
+        self._compat_observation_ordinal = 0
+        self._observation_registry = ObservationRegistry()
+        register_login_observations(
+            self._observation_registry,
+            enabled=lambda semantic_id: self.oracle.enabled(semantic_id),
+            frame_identity=self._compatibility_frame_identity,
+        )
+
+    def _compatibility_frame_identity(
+        self, request: ObserveRequest
+    ) -> SemanticFrameIdentity:
+        """Return an explicitly unbound envelope for pre-frame-clock reads."""
+
+        return SemanticFrameIdentity(
+            frame_id=request.frame_id,
+            pid=1,
+            generation=0,
+            scene_handle=0,
+            fingerprint_sha256=_UNBOUND_READ_ONLY_FRAME_SHA256,
+            raw_state_sha256=_UNBOUND_READ_ONLY_FRAME_SHA256,
+        )
+
+    def _registry_login_check(self) -> bool:
+        self._package_gate()
+        self._compat_observation_ordinal += 1
+        ordinal = self._compat_observation_ordinal
+        scope_id = "login-startup-{0}".format(ordinal)
+        frame_id = "unbound-login-{0}".format(ordinal)
+        scope = FlowScope(
+            scope_id=scope_id,
+            kind="login",
+            operation="startup",
+            parent_scope_id=None,
+            task_config_sha256=_LEGACY_TASK_CONFIG_SHA256,
+            allowed_capabilities=frozenset((LOGIN_CHECK_CAPABILITY,)),
+            deadline_monotonic_ns=time.monotonic_ns() + 1_000_000_000,
+        )
+        request = ObserveRequest(
+            scope_id=scope_id,
+            primitive="appear",
+            alas_resource="LOGIN_CHECK",
+            parameters={},
+            frame_id=frame_id,
+        )
+        return self._observation_registry.dispatch(scope, request).value
+
+    def _legacy_login_check_for_test(self) -> bool:
+        """Preserve the pre-B05 path solely as the parity-test oracle."""
+
+        self._package_gate()
+        return self.oracle.enabled("login/enter")
 
     @staticmethod
     def _button_name(button: Any) -> str:
@@ -1917,6 +1988,8 @@ class AlasSemanticAdapter:
             and time.monotonic() <= self._login_context.passive_transition_until
         ):
             return False
+        if name == "LOGIN_CHECK":
+            return self._registry_login_check()
         if (
             semantic_id is None
             and name not in MISSION_VIRTUAL_RESOURCES

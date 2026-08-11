@@ -876,6 +876,89 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.appear(NamedButton("ANDROID_NO_RESPOND"))
 
+    def test_login_check_registry_route_matches_legacy_read_contract(self):
+        for expected in (False, True):
+            with self.subTest(expected=expected):
+                adapter, oracle, gate_calls = self.make_adapter()
+                oracle.enabled_values["login/enter"] = expected
+
+                legacy_result = adapter._legacy_login_check_for_test()
+                legacy_oracle_calls = tuple(oracle.enabled_calls)
+                legacy_gate_calls = len(gate_calls)
+                oracle.enabled_calls.clear()
+                gate_calls.clear()
+
+                registry_result = adapter._appear_once(NamedButton("LOGIN_CHECK"))
+
+                self.assertEqual(registry_result, legacy_result)
+                self.assertEqual(tuple(oracle.enabled_calls), legacy_oracle_calls)
+                self.assertEqual(len(gate_calls), legacy_gate_calls)
+
+    def test_login_check_registry_route_matches_legacy_exception_contract(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+
+        def fail_closed(semantic_id):
+            oracle.enabled_calls.append(semantic_id)
+            raise SemanticGateClosed("observer snapshot is stale")
+
+        oracle.enabled = fail_closed
+        with self.assertRaises(SemanticGateClosed) as legacy:
+            adapter._legacy_login_check_for_test()
+        legacy_gate_calls = len(gate_calls)
+        legacy_oracle_calls = tuple(oracle.enabled_calls)
+        gate_calls.clear()
+        oracle.enabled_calls.clear()
+
+        with self.assertRaises(SemanticGateClosed) as routed:
+            adapter._appear_once(NamedButton("LOGIN_CHECK"))
+
+        self.assertEqual(type(routed.exception), type(legacy.exception))
+        self.assertEqual(str(routed.exception), str(legacy.exception))
+        self.assertEqual(len(gate_calls), legacy_gate_calls)
+        self.assertEqual(tuple(oracle.enabled_calls), legacy_oracle_calls)
+
+    def test_login_check_registry_route_matches_legacy_package_gate_failure(self):
+        oracle = FakeOracle()
+        gate_calls = []
+
+        def fail_closed():
+            gate_calls.append(True)
+            raise SemanticGateClosed("installed package fingerprint is not allowlisted")
+
+        adapter = AlasSemanticAdapter(oracle, fail_closed)
+        with self.assertRaises(SemanticGateClosed) as legacy:
+            adapter._legacy_login_check_for_test()
+        legacy_gate_calls = len(gate_calls)
+        legacy_oracle_calls = tuple(oracle.enabled_calls)
+        gate_calls.clear()
+
+        with self.assertRaises(SemanticGateClosed) as routed:
+            adapter._appear_once(NamedButton("LOGIN_CHECK"))
+
+        self.assertEqual(type(routed.exception), type(legacy.exception))
+        self.assertEqual(str(routed.exception), str(legacy.exception))
+        self.assertEqual(len(gate_calls), legacy_gate_calls)
+        self.assertEqual(tuple(oracle.enabled_calls), legacy_oracle_calls)
+
+    def test_only_login_check_uses_registry_dispatch(self):
+        adapter, _, _ = self.make_adapter()
+        with patch.object(
+            adapter._observation_registry,
+            "dispatch",
+            wraps=adapter._observation_registry.dispatch,
+        ) as dispatch:
+            self.assertEqual(
+                tuple(
+                    item.selector
+                    for item in adapter._observation_registry.inventory()
+                ),
+                ("LOGIN_CHECK",),
+            )
+            self.assertTrue(adapter.appear(NamedButton("MAIN_GOTO_CAMPAIGN")))
+            dispatch.assert_not_called()
+            self.assertTrue(adapter.appear(NamedButton("LOGIN_CHECK")))
+            self.assertEqual(dispatch.call_count, 1)
+
     def test_network_reconnect_popup_uses_only_exact_semantic_targets(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.enabled_values.update(
