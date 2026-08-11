@@ -27,8 +27,13 @@
     },
     {
       "order": 6,
+      "path": "integration/alas/series/0040-campaign-flow-ports.patch",
+      "sha256": "7f94aa7a3d15c360b6c90df1f70b553a3de9b765c7b8c48635ac7846521f0f10"
+    },
+    {
+      "order": 7,
       "path": "integration/alas/series/0090-legacy-task-hooks.patch",
-      "sha256": "806dd0482c51f7497f8cdfb5862208adcb23666e4364da4fb9215bbec1ef254a"
+      "sha256": "eac805cf45bcffbc9c8f9366229e3eccb6d8a50c9245a29ba96d8c5ee8e610d3"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

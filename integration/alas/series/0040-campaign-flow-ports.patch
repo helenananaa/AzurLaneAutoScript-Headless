@@ -1,0 +1,206 @@
+diff --git a/module/campaign/campaign_ocr.py b/module/campaign/campaign_ocr.py
+index f39a29ae80cc1cebe765250bfe63d5933011b10c..9c2d7f433e3ee424d1c342ad3614c078357d6216 100644
+--- a/module/campaign/campaign_ocr.py
++++ b/module/campaign/campaign_ocr.py
+@@ -2,6 +2,7 @@ import collections
+ 
+ from module.base.base import ModuleBase
+ from module.base.decorator import Config, cached_property, del_cached_property
++from module.base.button import Button
+ from module.base.timer import Timer
+ from module.base.utils import *
+ from module.exception import CampaignNameError
+@@ -17,6 +18,30 @@ class CampaignOcr(ModuleBase):
+     # An approximate area where stages will appear for faster template matching
+     _stage_detect_area = (87, 117, 1151, 636)
+ 
++    def _semantic_campaign_entrances(self):
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is None:
++            return None
++        state = semantic_session.campaign_page_state()
++        buttons = []
++        for stage in state.stages:
++            bounds = stage.button.bounds
++            if bounds is None:
++                raise CampaignNameError
++            area = tuple(int(round(value)) for value in (
++                bounds.left, bounds.top, bounds.right, bounds.bottom
++            ))
++            button = Button(
++                area=area,
++                color=(0, 0, 0),
++                button=area,
++                name=stage.stage_code,
++            )
++            button.semantic_campaign_stage_code = stage.stage_code
++            buttons.append(button)
++        return buttons
++
+     @staticmethod
+     def _campaign_get_chapter_index(name):
+         """
+@@ -134,6 +159,9 @@ class CampaignOcr(ModuleBase):
+ 
+     @Config.when(SERVER='en')
+     def campaign_extract_name_image(self, image):
++        semantic_buttons = self._semantic_campaign_entrances()
++        if semantic_buttons is not None:
++            return semantic_buttons
+         digits = []
+ 
+         if 'normal' in self.config.STAGE_ENTRANCE:
+@@ -197,6 +225,9 @@ class CampaignOcr(ModuleBase):
+         Returns:
+             list[Button]: List of Buttons of stage entrance.
+         """
++        semantic_buttons = self._semantic_campaign_entrances()
++        if semantic_buttons is not None:
++            return semantic_buttons
+         digits = []
+ 
+         if 'normal' in self.config.STAGE_ENTRANCE:
+@@ -289,6 +320,34 @@ class CampaignOcr(ModuleBase):
+         Args:
+             image (np.ndarray):
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            state = semantic_session.campaign_page_state()
++            chapters = {stage.stage_code.split('-', 1)[0] for stage in state.stages}
++            if len(chapters) != 1:
++                raise CampaignNameError
++            self.campaign_chapter = chapters.pop()
++            self.stage_entrance = {}
++            for stage in state.stages:
++                bounds = stage.button.bounds
++                if bounds is None:
++                    raise CampaignNameError
++                area = tuple(int(round(value)) for value in (
++                    bounds.left, bounds.top, bounds.right, bounds.bottom
++                ))
++                button = Button(
++                    area=area,
++                    color=(0, 0, 0),
++                    button=area,
++                    name=stage.stage_code,
++                )
++                button.semantic_campaign_stage_code = stage.stage_code
++                self.stage_entrance[stage.stage_code] = button
++            logger.attr('Chapter', self.campaign_chapter)
++            logger.attr('Stage', ', '.join(self.stage_entrance.keys()))
++            return
++
+         self.stage_entrance = {}
+         del_cached_property(self, '_stage_image')
+         del_cached_property(self, '_stage_image_gray')
+diff --git a/module/campaign/campaign_status.py b/module/campaign/campaign_status.py
+index 45e8179fc13aa9391bf37929735dd3b54c7fa159..55ba834c9b9b1c21a12126f5f0ece2637558652f 100644
+--- a/module/campaign/campaign_status.py
++++ b/module/campaign/campaign_status.py
+@@ -107,6 +107,11 @@ class CampaignStatus(UI):
+         Returns:
+             int: Oil amount
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.campaign_oil()
++
+         amount = 0
+         timeout = Timer(1, count=2).start()
+         while 1:
+diff --git a/module/map/map_fleet_preparation.py b/module/map/map_fleet_preparation.py
+index 38c9af5c1af621800fcbd1725d0ce151d3deff5b..68fc84e402fb6b626a8250aae34b273e461b8495 100644
+--- a/module/map/map_fleet_preparation.py
++++ b/module/map/map_fleet_preparation.py
+@@ -49,6 +49,20 @@ class FleetOperator:
+     def __str__(self):
+         return str(self._choose)[:-7]
+ 
++    def _semantic_adapter(self):
++        return getattr(self.main.device, 'semantic_adapter', None)
++
++    def _semantic_row_key(self):
++        name = getattr(self._choose, 'name', str(self._choose))
++        try:
++            return {
++                'FLEET_1_CHOOSE': 'fleet1',
++                'FLEET_2_CHOOSE': 'fleet2',
++                'SUBMARINE_CHOOSE': 'submarine',
++            }[name]
++        except KeyError as exc:
++            raise ValueError(f'Unknown semantic fleet row: {name}') from exc
++
+     def parse_fleet_bar(self, image):
+         """
+         Args:
+@@ -91,6 +105,10 @@ class FleetOperator:
+         Returns:
+             bool: If current fleet is allow to be chosen.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_row_allowed(
++                self._semantic_row_key())
+         return self.main.appear(self._clear, offset=FleetOperator.OFFSET)
+ 
+     def is_hard(self):
+@@ -98,6 +116,10 @@ class FleetOperator:
+         Returns:
+             bool: Whether to have a recommend. If so, this stage is a hard campaign.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_operator_is_hard(
++                self._semantic_row_key())
+         return self.main.appear(self._advice, offset=FleetOperator.OFFSET)
+ 
+     def is_hard_satisfied(self):
+@@ -110,6 +132,10 @@ class FleetOperator:
+             bool: If current fleet satisfies hard restrictions.
+                 Or None if this is not a hard mode
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_operator_hard_satisfied(
++                self._semantic_row_key())
+         if not self.is_hard():
+             return None
+ 
+@@ -253,6 +279,10 @@ class FleetOperator:
+         Returns:
+             list: List of int. Currently selected fleet ranges from 1 to 6.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_selected_indices(
++                self._semantic_row_key())
+         data = self.parse_fleet_bar(self.main.image_crop(self._bar.button, copy=False))
+         return data
+ 
+@@ -261,6 +291,11 @@ class FleetOperator:
+         Returns:
+             bool: If has selected to any fleet.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_operator_in_use(
++                self._semantic_row_key())
++
+         # Handle the info bar of auto search info.
+         # if area_cross_area(self._in_use.area, INFO_BAR_1.area):
+         #     self.main.handle_info_bar()
+@@ -290,6 +325,10 @@ class FleetOperator:
+         Returns:
+             bool: If dropdown menu appears.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_dropdown_opened()
++
+         # Check the brightness of the rightest column of the bar area.
+         luma = rgb2gray(self.main.image_crop(self._bar.button, copy=False))[:, -1]
+         # FLEET_PREPARATION is about 146~155
