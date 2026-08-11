@@ -3773,7 +3773,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with self.assertRaises(AlasSemanticUnmapped):
             session.click(NamedButton("UNREVIEWED_CLICK"))
 
-        self.assertIsNone(session.bridge.transport)
+        self.assertIsNone(session.runtime_handle)
 
     def test_environment_factory_requires_explicit_opt_in(self):
         environment = {
@@ -3808,7 +3808,10 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         }
         with patch.dict("os.environ", environment, clear=True):
             session = AlasSemanticSession.from_environment("emulator-test")
-        self.assertEqual(session.bridge.command_timeout_seconds, 30.0)
+        self.assertEqual(
+            session._runtime_handle_factory.command_timeout_seconds,
+            30.0,
+        )
 
         for malformed in ("030", "0", "121"):
             environment["ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS"] = malformed

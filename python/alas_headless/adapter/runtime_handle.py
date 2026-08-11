@@ -5,18 +5,35 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import asdict
-from typing import Any, Mapping
+from dataclasses import asdict, dataclass, field
+from typing import Any, Callable, Mapping, Optional
 
+from ..alas_package_process_lease import AlasPackageProcessLease
+from ..runtime_trace import RuntimeTraceRecorder
 from ..semantic_oracle import (
     AdbObserverBridge,
     AndroidPackageFingerprint,
     ObserverTransportError,
+    SemanticGateClosed,
 )
+from .ports import RuntimeHandlePort
 
 
 _SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 _REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+
+
+PINNED_CN_GAME_FINGERPRINT = AndroidPackageFingerprint(
+    version_name="9.7.10",
+    version_code=9710,
+    primary_abi="x86_64",
+    base_apk_sha256=(
+        "e6d3ef4baac2509cc97a289b91bfd5f9d0dcd7ad8994880a192298983208699f"
+    ),
+    il2cpp_sha256=(
+        "e3f1cfc442b67f1d4c9877fd9ceaedc3d68f2842ad677445241b9cc9c05d1c67"
+    ),
+)
 
 
 def semantic_runtime_fingerprint_sha256(
@@ -115,3 +132,109 @@ class AdbRuntimeHandle:
         duration_ms: int,
     ) -> None:
         self.__bridge.swipe(x1, y1, x2, y2, duration_ms)
+
+
+@dataclass
+class PinnedPackageGate:
+    """Cache one independent ADB verification of the installed package."""
+
+    bridge: AdbObserverBridge
+    expected: AndroidPackageFingerprint = PINNED_CN_GAME_FINGERPRINT
+    _verified_pid: Optional[int] = None
+
+    def accept_process_lease(self, lease: AlasPackageProcessLease) -> None:
+        if not isinstance(lease, AlasPackageProcessLease):
+            raise SemanticGateClosed("package process lease is not verified")
+        if (
+            self.bridge.pid is None
+            or lease.pid != self.bridge.pid
+            or lease.package != self.bridge.package
+        ):
+            raise SemanticGateClosed("package process lease PID changed")
+        self._verified_pid = lease.pid
+
+    def __call__(self) -> None:
+        if self.bridge.pid is None:
+            raise SemanticGateClosed("ADB observer bridge is not open")
+        if self._verified_pid == self.bridge.pid:
+            return
+        self.bridge.require_package_fingerprint(self.expected)
+        self._verified_pid = self.bridge.pid
+
+
+@dataclass
+class RuntimeHandlePackageGate:
+    """Bind a prepared backend-neutral handle to one expected identity."""
+
+    handle: RuntimeHandlePort
+    expected_fingerprint_sha256: str
+    package: str
+    driver_revision: str
+    process_lease: Optional[AlasPackageProcessLease] = None
+    _verified_pid: Optional[int] = None
+
+    def __call__(self) -> None:
+        if self.handle.fingerprint_sha256 != self.expected_fingerprint_sha256:
+            raise SemanticGateClosed("runtime handle fingerprint changed")
+        pid = self.handle.pid
+        if self.process_lease is not None and (
+            self.process_lease.pid != pid
+            or self.process_lease.package != self.package
+            or self.process_lease.driver_revision != self.driver_revision
+        ):
+            raise SemanticGateClosed("package process lease identity changed")
+        if self._verified_pid is not None and self._verified_pid != pid:
+            raise SemanticGateClosed("runtime handle PID changed")
+        self._verified_pid = pid
+
+
+@dataclass(frozen=True)
+class PreparedRuntimeHandle:
+    handle: RuntimeHandlePort
+    package_gate: Callable[[], None]
+
+
+@dataclass
+class AdbRuntimeHandleFactory:
+    """Prepare a bridge-backed handle without exposing ADB to the session."""
+
+    serial: str
+    package: str
+    adb: str
+    command_timeout_seconds: float
+    fingerprint_sha256: str
+    driver_revision: str
+    process_lease: Optional[AlasPackageProcessLease] = None
+    trace: Optional[RuntimeTraceRecorder] = None
+    _bridge: AdbObserverBridge = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._bridge = AdbObserverBridge(
+            self.serial,
+            self.package,
+            adb=self.adb,
+            command_timeout_seconds=self.command_timeout_seconds,
+            trace=self.trace,
+        )
+
+    def __call__(self) -> PreparedRuntimeHandle:
+        self._bridge.open()
+        package_gate = PinnedPackageGate(self._bridge)
+        if self.process_lease is None:
+            package_gate()
+        else:
+            if self.process_lease.driver_revision != self.driver_revision:
+                raise SemanticGateClosed(
+                    "package process lease driver revision changed"
+                )
+            package_gate.accept_process_lease(self.process_lease)
+        return PreparedRuntimeHandle(
+            handle=AdbRuntimeHandle(
+                self._bridge,
+                fingerprint_sha256=self.fingerprint_sha256,
+            ),
+            package_gate=package_gate,
+        )
+
+    def close(self) -> None:
+        self._bridge.close()

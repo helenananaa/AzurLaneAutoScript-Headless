@@ -29,7 +29,12 @@ from .registry import (
     ObservationRegistry,
 )
 from .runtime_handle import (
+    AdbRuntimeHandleFactory,
     AdbRuntimeHandle,
+    PINNED_CN_GAME_FINGERPRINT,
+    PinnedPackageGate,
+    PreparedRuntimeHandle,
+    RuntimeHandlePackageGate,
     semantic_runtime_fingerprint_sha256,
 )
 from .scope import FlowScopeStack
@@ -42,6 +47,7 @@ __all__ = (
     "ActionPort",
     "ActionReceiptV2",
     "AdbRuntimeHandle",
+    "AdbRuntimeHandleFactory",
     "AdapterContractError",
     "CapabilityClosureError",
     "FlowScope",
@@ -55,7 +61,11 @@ __all__ = (
     "ObserveRequest",
     "ObserveResult",
     "RuntimeHandleFactory",
+    "RuntimeHandlePackageGate",
     "RuntimeHandlePort",
+    "PINNED_CN_GAME_FINGERPRINT",
+    "PinnedPackageGate",
+    "PreparedRuntimeHandle",
     "SemanticFrameIdentity",
     "semantic_runtime_fingerprint_sha256",
     "StaleFrameError",

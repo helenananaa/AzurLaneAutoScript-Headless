@@ -16,11 +16,14 @@ from numbers import Real
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Set, Tuple, Union
 
 from .adapter import (
-    AdbRuntimeHandle,
+    AdbRuntimeHandleFactory,
     FlowScope,
     ObservationRegistry,
     ObserveRequest,
+    PINNED_CN_GAME_FINGERPRINT,
+    PinnedPackageGate,
     RuntimeHandlePort,
+    RuntimeHandlePackageGate,
     SemanticFrameIdentity,
     UnknownObservationError,
     semantic_runtime_fingerprint_sha256,
@@ -44,8 +47,6 @@ from .alas_package_process_lease import AlasPackageProcessLease
 from .runtime_trace import RuntimeTraceRecorder
 from .semantic_oracle import (
     ActionReceipt,
-    AdbObserverBridge,
-    AndroidPackageFingerprint,
     Bounds,
     BuildCostState,
     BuildPool,
@@ -80,15 +81,6 @@ from .semantic_oracle import (
     TacticalCandidateShipState,
     TacticalBookState,
     TacticalSkillState,
-)
-
-
-PINNED_CN_GAME_FINGERPRINT = AndroidPackageFingerprint(
-    version_name="9.7.10",
-    version_code=9710,
-    primary_abi="x86_64",
-    base_apk_sha256="e6d3ef4baac2509cc97a289b91bfd5f9d0dcd7ad8994880a192298983208699f",
-    il2cpp_sha256="e3f1cfc442b67f1d4c9877fd9ceaedc3d68f2842ad677445241b9cc9c05d1c67",
 )
 
 
@@ -685,98 +677,6 @@ class _CampaignFlowContext:
     combat_receipt: Optional[ActionReceipt] = None
     combat_proof: Optional[AlasCampaignCombatProof] = None
     passive_transition_until: float = 0.0
-
-
-@dataclass
-class PinnedPackageGate:
-    """Cache one independent ADB verification of the installed package."""
-
-    bridge: AdbObserverBridge
-    expected: AndroidPackageFingerprint = PINNED_CN_GAME_FINGERPRINT
-    _verified_pid: Optional[int] = None
-
-    def accept_process_lease(self, lease: AlasPackageProcessLease) -> None:
-        if not isinstance(lease, AlasPackageProcessLease):
-            raise SemanticGateClosed("package process lease is not verified")
-        if (
-            self.bridge.pid is None
-            or lease.pid != self.bridge.pid
-            or lease.package != self.bridge.package
-        ):
-            raise SemanticGateClosed("package process lease PID changed")
-        self._verified_pid = lease.pid
-
-    def __call__(self) -> None:
-        if self.bridge.pid is None:
-            raise SemanticGateClosed("ADB observer bridge is not open")
-        if self._verified_pid == self.bridge.pid:
-            return
-        self.bridge.require_package_fingerprint(self.expected)
-        self._verified_pid = self.bridge.pid
-
-
-@dataclass
-class _RuntimeHandlePackageGate:
-    """Bind a prepared non-ADB-specific handle to one expected identity."""
-
-    handle: RuntimeHandlePort
-    expected_fingerprint_sha256: str
-    package: str
-    driver_revision: str
-    process_lease: Optional[AlasPackageProcessLease] = None
-    _verified_pid: Optional[int] = None
-
-    def __call__(self) -> None:
-        if self.handle.fingerprint_sha256 != self.expected_fingerprint_sha256:
-            raise SemanticGateClosed("runtime handle fingerprint changed")
-        pid = self.handle.pid
-        if self.process_lease is not None and (
-            self.process_lease.pid != pid
-            or self.process_lease.package != self.package
-            or self.process_lease.driver_revision != self.driver_revision
-        ):
-            raise SemanticGateClosed("package process lease identity changed")
-        if self._verified_pid is not None and self._verified_pid != pid:
-            raise SemanticGateClosed("runtime handle PID changed")
-        self._verified_pid = pid
-
-
-@dataclass(frozen=True)
-class _PreparedRuntimeHandle:
-    handle: RuntimeHandlePort
-    package_gate: Callable[[], None]
-
-
-@dataclass
-class _AdbRuntimeHandleFactory:
-    """Prepare and release exactly one legacy ADB-backed runtime handle."""
-
-    bridge: AdbObserverBridge
-    fingerprint_sha256: str
-    driver_revision: str
-    process_lease: Optional[AlasPackageProcessLease] = None
-
-    def __call__(self) -> _PreparedRuntimeHandle:
-        self.bridge.open()
-        package_gate = PinnedPackageGate(self.bridge)
-        if self.process_lease is None:
-            package_gate()
-        else:
-            if self.process_lease.driver_revision != self.driver_revision:
-                raise SemanticGateClosed(
-                    "package process lease driver revision changed"
-                )
-            package_gate.accept_process_lease(self.process_lease)
-        return _PreparedRuntimeHandle(
-            handle=AdbRuntimeHandle(
-                self.bridge,
-                fingerprint_sha256=self.fingerprint_sha256,
-            ),
-            package_gate=package_gate,
-        )
-
-    def close(self) -> None:
-        self.bridge.close()
 
 
 class AlasSemanticAdapter:
@@ -5317,24 +5217,18 @@ class AlasSemanticSession:
         )
         self._runtime_handle = runtime_handle
         self._package_gate: Optional[Callable[[], None]] = None
-        self._runtime_handle_factory: Optional[_AdbRuntimeHandleFactory] = None
-        self.bridge: Optional[AdbObserverBridge]
+        self._runtime_handle_factory: Optional[AdbRuntimeHandleFactory] = None
         if runtime_handle is None:
-            self.bridge = AdbObserverBridge(
-                serial or "",
-                package,
+            self._runtime_handle_factory = AdbRuntimeHandleFactory(
+                serial=serial or "",
+                package=package,
                 adb=adb or "adb",
                 command_timeout_seconds=float(adb_command_timeout_seconds),
-                trace=trace,
-            )
-            self._runtime_handle_factory = _AdbRuntimeHandleFactory(
-                bridge=self.bridge,
                 fingerprint_sha256=self.expected_runtime_fingerprint_sha256,
                 driver_revision=driver_revision,
                 process_lease=package_process_lease,
+                trace=trace,
             )
-        else:
-            self.bridge = None
         self.adapter: Optional[AlasSemanticAdapter] = None
 
     @property
@@ -5345,7 +5239,7 @@ class AlasSemanticSession:
         handle = self._runtime_handle
         if handle is None:
             raise SemanticGateClosed("explicit runtime handle is unavailable")
-        package_gate = _RuntimeHandlePackageGate(
+        package_gate = RuntimeHandlePackageGate(
             handle=handle,
             expected_fingerprint_sha256=(
                 self.expected_runtime_fingerprint_sha256

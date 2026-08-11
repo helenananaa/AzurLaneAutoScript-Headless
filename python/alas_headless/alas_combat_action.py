@@ -35,7 +35,7 @@ ALAS_COMBAT_RESOURCE_ACTION_COMMIT_SCHEMA = (
 
 @dataclass(frozen=True)
 class AlasCombatResourceActionCommit:
-    """Receipt for one controlled ADB tap, not proof of its outcome."""
+    """Receipt for one controlled runtime-handle tap, not outcome proof."""
 
     resource_name: str
     action_name: str
@@ -113,13 +113,15 @@ def _action_variant_evidence(
 
 
 def _read_action(
-    bridge: Any,
+    runtime_handle: Any,
     manifest: AlasCombatObserverManifest,
     resource_name: str,
     action_name: Optional[str],
 ) -> Tuple[Mapping[str, Any], Any, ActionReceipt]:
-    snapshot_payload, button_payload, _ = request_observer_state(bridge.request)
-    ui_payload = bridge.request("GET /v1/ui\n")
+    snapshot_payload, button_payload, _ = request_observer_state(
+        runtime_handle.observer_request
+    )
+    ui_payload = runtime_handle.observer_request("GET /v1/ui\n")
     frame, snapshot = build_alas_combat_trace_frame(
         snapshot_payload, button_payload, ui_payload, manifest
     )
@@ -178,20 +180,20 @@ def commit_alas_combat_resource_action_for_evidence(
         raise SemanticGateClosed("combat evidence session identity changed")
 
     session.open()  # includes the independent pinned-package fingerprint gate
-    bridge = getattr(session, "bridge", None)
+    runtime_handle = getattr(session, "runtime_handle", None)
     component = getattr(session, "component", None)
-    if bridge is None or not component:
+    if runtime_handle is None or not component:
         raise SemanticGateClosed("combat evidence session is incomplete")
-    if bridge.pid != expected_pid:
+    if runtime_handle.pid != expected_pid:
         raise SemanticGateClosed("combat evidence process changed")
-    if bridge.foreground_component() != component:
+    if runtime_handle.foreground_component() != component:
         raise SemanticGateClosed("combat evidence game is not top-resumed")
 
     resolved_action, resource_evidence, action_mapping = _mapping_evidence(
         manifest, resource_name, action_name
     )
     first_frame, first_snapshot, first_receipt = _read_action(
-        bridge, manifest, resource_name, resolved_action
+        runtime_handle, manifest, resource_name, resolved_action
     )
     if first_snapshot.oracle_state.snapshot.get("pid") != expected_pid:
         raise SemanticGateClosed("combat evidence snapshot process changed")
@@ -208,7 +210,7 @@ def commit_alas_combat_resource_action_for_evidence(
         sleep(settle_interval_seconds)
         try:
             candidate_frame, candidate_snapshot, candidate_receipt = _read_action(
-                bridge, manifest, resource_name, resolved_action
+                runtime_handle, manifest, resource_name, resolved_action
             )
         except SemanticGateClosed as exc:
             last_error = exc
@@ -256,12 +258,12 @@ def commit_alas_combat_resource_action_for_evidence(
         or not 0 <= point.y < height
     ):
         raise SemanticGateClosed("combat evidence action point is outside screen")
-    if bridge.pid != expected_pid:
+    if runtime_handle.pid != expected_pid:
         raise SemanticGateClosed("combat evidence process changed before input")
-    if bridge.foreground_component() != component:
+    if runtime_handle.foreground_component() != component:
         raise SemanticGateClosed("combat evidence foreground changed before input")
 
-    bridge.tap(int(round(point.x)), int(round(point.y)))
+    runtime_handle.tap(int(round(point.x)), int(round(point.y)))
     return AlasCombatResourceActionCommit(
         resource_name=resource_name,
         action_name=resolved_action,

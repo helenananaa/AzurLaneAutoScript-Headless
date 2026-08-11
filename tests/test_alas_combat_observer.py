@@ -962,7 +962,7 @@ class AlasCombatObserverContractTests(unittest.TestCase):
             def foreground_component(self):
                 return "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
 
-            def request(self, request):
+            def observer_request(self, request):
                 index = min(self.request_count // 2, 1)
                 endpoint = request.strip().split("/")[-1]
                 self.request_count += 1
@@ -984,14 +984,14 @@ class AlasCombatObserverContractTests(unittest.TestCase):
             def tap(self, x, y):
                 self.taps.append((x, y))
 
-        bridge = Bridge()
+        runtime_handle = Bridge()
         session = mock.Mock()
         session.package = PACKAGE
         session.driver_revision = DRIVER
         session.component = (
             "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
         )
-        session.bridge = bridge
+        session.runtime_handle = runtime_handle
 
         commit = commit_alas_combat_resource_action_for_evidence(
             session,
@@ -1005,7 +1005,7 @@ class AlasCombatObserverContractTests(unittest.TestCase):
         )
 
         session.open.assert_called_once_with()
-        self.assertEqual(bridge.taps, [(100, 100)])
+        self.assertEqual(runtime_handle.taps, [(100, 100)])
         self.assertEqual(commit.first_generation, 20)
         self.assertEqual(commit.commit_generation, 21)
         self.assertEqual(commit.action_variant_id, "result-s")
@@ -1019,7 +1019,7 @@ class AlasCombatObserverContractTests(unittest.TestCase):
         session.component = (
             "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
         )
-        session.bridge.pid = 4243
+        session.runtime_handle.pid = 4243
 
         with self.assertRaisesRegex(SemanticGateClosed, "process changed"):
             commit_alas_combat_resource_action_for_evidence(
@@ -1031,8 +1031,8 @@ class AlasCombatObserverContractTests(unittest.TestCase):
                 action_budget=1,
                 sleep=lambda _: None,
             )
-        session.bridge.request.assert_not_called()
-        session.bridge.tap.assert_not_called()
+        session.runtime_handle.observer_request.assert_not_called()
+        session.runtime_handle.tap.assert_not_called()
 
     def test_live_evidence_action_rejects_endpoint_pid_drift(self):
         manifest = qualified_manifest()
@@ -1069,7 +1069,7 @@ class AlasCombatObserverContractTests(unittest.TestCase):
             def foreground_component(self):
                 return "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
 
-            def request(self, request):
+            def observer_request(self, request):
                 index = min(self.request_count // 2, 1)
                 endpoint = request.strip().split("/")[-1]
                 self.request_count += 1
@@ -1095,7 +1095,7 @@ class AlasCombatObserverContractTests(unittest.TestCase):
         session.component = (
             "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
         )
-        session.bridge = Bridge()
+        session.runtime_handle = Bridge()
 
         with self.assertRaisesRegex(SemanticGateClosed, "snapshot process changed"):
             commit_alas_combat_resource_action_for_evidence(
@@ -1108,7 +1108,7 @@ class AlasCombatObserverContractTests(unittest.TestCase):
                 settle_interval_seconds=0.01,
                 sleep=lambda _: None,
             )
-        self.assertEqual(session.bridge.taps, [])
+        self.assertEqual(session.runtime_handle.taps, [])
 
     def test_active_reviewed_blocker_closes_replay(self):
         blocker = AlasCombatUnitySelector(

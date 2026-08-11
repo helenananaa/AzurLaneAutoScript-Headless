@@ -66,7 +66,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         adapter = session.open()
 
         self.assertIs(session.runtime_handle, handle)
-        self.assertIsNone(session.bridge)
+        self.assertFalse(hasattr(session, "bridge"))
         self.assertIs(adapter.oracle._request.__self__, handle)
         self.assertIs(adapter.oracle._foreground_component.__self__, handle)
         self.assertIs(adapter.oracle._tap.__self__, handle)
@@ -143,8 +143,9 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         }
         with mock.patch.dict("os.environ", environment, clear=True):
             session = AlasSemanticSession.from_environment("device-1")
-        bridge = session.bridge
-        self.assertIsNotNone(bridge)
+        factory = session._runtime_handle_factory
+        self.assertIsNotNone(factory)
+        bridge = factory._bridge
         self.assertIsNone(session.runtime_handle)
 
         def mark_open():
@@ -169,8 +170,9 @@ class SessionRuntimeHandleTests(unittest.TestCase):
 
     def test_legacy_partial_open_closes_forwarding_and_clears_state(self):
         session = AlasSemanticSession("device-1", REVISION)
-        bridge = session.bridge
-        self.assertIsNotNone(bridge)
+        factory = session._runtime_handle_factory
+        self.assertIsNotNone(factory)
+        bridge = factory._bridge
 
         def fail_after_forward():
             bridge.pid = 4242
