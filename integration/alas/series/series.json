@@ -22,8 +22,13 @@
     },
     {
       "order": 5,
+      "path": "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+      "sha256": "b34dd1bae7ec1216cc98ae5b26150471b81c77283a918fe0b61570b44326d0d2"
+    },
+    {
+      "order": 6,
       "path": "integration/alas/series/0090-legacy-task-hooks.patch",
-      "sha256": "bb2582f98962f84c34cfd91526552cf3a6cb37b0c2fb0bc40712b466de5d45ef"
+      "sha256": "806dd0482c51f7497f8cdfb5862208adcb23666e4364da4fb9215bbec1ef254a"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",
