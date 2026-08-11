@@ -1,9 +1,22 @@
 """Flow-specific registrations for the semantic adapter kernel."""
 
-from .login import LOGIN_CHECK_CAPABILITY, register_login_observations
+from .login import (
+    LOGIN_ACTION_TARGETS,
+    LOGIN_CHECK_CAPABILITY,
+    LOGIN_OBSERVATION_TARGETS,
+    LoginActionIntent,
+    LoginFlow,
+    LoginFlowSnapshot,
+    register_login_observations,
+)
 
 
 __all__ = (
+    "LOGIN_ACTION_TARGETS",
     "LOGIN_CHECK_CAPABILITY",
+    "LOGIN_OBSERVATION_TARGETS",
+    "LoginActionIntent",
+    "LoginFlow",
+    "LoginFlowSnapshot",
     "register_login_observations",
 )
