@@ -71,6 +71,32 @@ LOGIN_TRANSIENT_MESSAGES = frozenset(
     }
 )
 
+LOGIN_UNSUPPORTED_PRESENCE_RESOURCES = frozenset(
+    {
+        "ANDROID_NO_RESPOND",
+        "AVATAR_EXPIRED",
+        "BACK_ARROW",
+        "EVENT_LIST_CHECK",
+        "LOGIN_GAME_UPDATE",
+        "LOGIN_RETURN_INFO",
+        "LOGIN_RETURN_SIGN",
+        "MAINTENANCE_ANNOUNCE",
+        "BATTLE_PASS_NEW_SEASON",
+        "BATTLE_PASS_NOTICE",
+        "GET_ITEMS_1",
+        "GET_ITEMS_2",
+        "GET_SHIP",
+        "META_CHECK",
+        "MONTHLY_PASS_NOTICE",
+        "PLAYER_CHECK",
+        "SHIPYARD_CHECK",
+        "GUILD_POPUP_CONFIRM",
+        "GUILD_POPUP_CANCEL",
+        "GET_MISSION",
+        "POPUP_SINGLE_WHITE",
+    }
+)
+
 
 @dataclass(frozen=True)
 class LoginFlowSnapshot:
@@ -103,6 +129,7 @@ class LoginFlow:
         package_gate: Callable[[], None],
         *,
         monotonic: Callable[[], float] = time.monotonic,
+        entry_observer: Callable[[], bool] | None = None,
     ) -> None:
         if package_gate is None or not callable(package_gate):
             raise ValueError("login flow requires a package identity gate")
@@ -111,6 +138,13 @@ class LoginFlow:
         self._oracle = oracle
         self._package_gate = package_gate
         self._monotonic = monotonic
+        self._entry_observer = (
+            entry_observer
+            if entry_observer is not None
+            else lambda: self._oracle.enabled(LOGIN_ENTRY_SEMANTIC_ID)
+        )
+        if not callable(self._entry_observer):
+            raise ValueError("login entry observer must be callable")
         self._context: _LoginContext | None = None
         self._last_action_intent: LoginActionIntent | None = None
 
@@ -155,7 +189,7 @@ class LoginFlow:
         finally:
             self.end()
 
-    def _popup_target(self) -> str | None:
+    def popup_target(self) -> str | None:
         targets = tuple(
             semantic_id
             for semantic_id in LOGIN_POPUP_CONFIRM_TARGETS
@@ -197,7 +231,7 @@ class LoginFlow:
         resource = self.normalize_resource(resource)
         context = self._context
         if context is not None and resource == "POPUP_CONFIRM":
-            return self._popup_target() is not None
+            return self.popup_target() is not None
         if (
             context is not None
             and resource == "LOGIN_CHECK"
@@ -209,6 +243,8 @@ class LoginFlow:
         if target is None:
             raise UnknownObservationError()
         self._package_gate()
+        if resource == "LOGIN_CHECK":
+            return self._entry_observer()
         return self._oracle.enabled(target)
 
     def observe_unknown(self) -> bool:
@@ -257,7 +293,7 @@ class LoginFlow:
         resource = self.normalize_resource(resource)
         context = self._context
         if context is not None and resource == "POPUP_CONFIRM":
-            semantic_id = self._popup_target()
+            semantic_id = self.popup_target()
             if semantic_id is None:
                 raise SemanticGateClosed("login popup identity is not proven")
             self._package_gate()

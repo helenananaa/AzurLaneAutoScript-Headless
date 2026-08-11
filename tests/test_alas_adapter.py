@@ -860,7 +860,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertFalse(adapter.match_template_color(NamedButton("LOGIN_CHECK")))
         oracle.enabled = original_enabled
         self.assertFalse(adapter.appear(NamedButton("ANDROID_NO_RESPOND")))
-        adapter._login_context.passive_transition_until = 0.0
+        adapter._login_flow._context.passive_transition_until = 0.0
         bulletin = adapter.click(NamedButton("LOGIN_ANNOUNCE"))
         self.assertFalse(adapter.appear(NamedButton("LOGIN_RETURN_SIGN")))
 
@@ -989,7 +989,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             oracle.click_calls, ["overlay/login-data-expired/confirm"]
         )
         self.assertGreater(
-            adapter._login_context.passive_transition_until,
+            adapter._login_flow.snapshot().passive_transition_until,
             time.monotonic() + 50.0,
         )
 
@@ -3440,7 +3440,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertFalse(adapter.appear(NamedButton("LOGIN_CHECK")))
         adapter._observer_stale_since = time.monotonic() - 6.0
         self.assertFalse(adapter.appear(NamedButton("LOGIN_CHECK")))
-        adapter._login_context.passive_transition_until = 0.0
+        adapter._login_flow._context.passive_transition_until = 0.0
         with self.assertRaisesRegex(
             SemanticGateClosed, "game activity is not top-resumed"
         ):

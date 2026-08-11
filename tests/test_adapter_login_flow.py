@@ -92,7 +92,7 @@ def outcome(call):
         return ("error", type(exc), str(exc))
 
 
-class LoginFlowParityTests(unittest.TestCase):
+class LoginFlowFacadeParityTests(unittest.TestCase):
     def make_pair(self, frame=None):
         frame = frame or LoginFrame()
         old_clock = Clock()
@@ -148,28 +148,51 @@ class LoginFlowParityTests(unittest.TestCase):
         self.assertEqual(old_oracle.events, new_oracle.events)
         self.assertTrue(new.snapshot().active)
         self.assertEqual(
-            old._login_context.passive_transition_until,
+            old._login_flow.snapshot().passive_transition_until,
             new.snapshot().passive_transition_until,
         )
-        self.assertIsNone(old._login_context.entry_receipt)
+        self.assertIsNone(old._login_flow.snapshot().entry_receipt)
         self.assertIsNone(new.snapshot().entry_receipt)
         self.assertIsNone(new.snapshot().action_budget)
 
         old.end_login()
         new.end()
-        self.assertIsNone(old._login_context)
+        self.assertFalse(old._login_flow.active)
         self.assertFalse(new.snapshot().active)
         self.assertIsNone(new.last_action_intent)
         old.end_login()
         new.end()
 
-    def test_staged_flow_is_not_active_in_production_facade(self):
+    def test_facade_owns_login_flow_and_keeps_exact_registry_inventory(self):
         old, _, _, _, _, _ = self.make_pair()
-        self.assertFalse(hasattr(old, "_login_flow"))
+        self.assertTrue(hasattr(old, "_login_flow"))
         self.assertEqual(
             tuple(item.selector for item in old._observation_registry.inventory()),
             ("LOGIN_CHECK",),
         )
+
+    def test_facade_selected_paths_do_not_consult_legacy_login_helpers(self):
+        expired = "overlay/login-data-expired/confirm"
+        frame = LoginFrame(enabled={expired: True})
+        old, _, old_clock, _, _, _ = self.make_pair(frame)
+        with patch("alas_headless.alas_adapter.time.monotonic", old_clock):
+            old.begin_login()
+        self.assertTrue(old._login_flow.active)
+        self.assertIsNone(old._login_context)
+
+        with patch.object(
+            old,
+            "_login_popup_target",
+            side_effect=AssertionError("legacy popup helper was called"),
+        ), patch.object(
+            old,
+            "_legacy_login_check_for_test",
+            side_effect=AssertionError("legacy entry helper was called"),
+        ):
+            self.assertTrue(old._appear_once(NamedButton("POPUP_CONFIRM")))
+            receipt = old.click(NamedButton("POPUP_CONFIRM_LOGIN"))
+
+        self.assertEqual(receipt.semantic_id, expired)
 
     def test_nested_begin_exception_and_gate_order_match(self):
         old, old_oracle, old_clock, new, new_oracle, _ = self.make_pair()
@@ -181,7 +204,7 @@ class LoginFlowParityTests(unittest.TestCase):
 
         self.assertEqual(old_result, new_result)
         self.assertEqual(old_oracle.events, new_oracle.events)
-        self.assertIsNone(old._login_context)
+        self.assertFalse(old._login_flow.active)
         self.assertFalse(new.active)
 
     def test_package_gate_failure_propagates_before_exact_observation(self):
@@ -229,7 +252,7 @@ class LoginFlowParityTests(unittest.TestCase):
                 except RuntimeError:
                     pass
 
-                self.assertIsNone(old._login_context)
+                self.assertFalse(old._login_flow.active)
                 self.assertFalse(new.active)
 
     def test_exact_observation_results_gate_and_oracle_sequence_match(self):
@@ -314,11 +337,11 @@ class LoginFlowParityTests(unittest.TestCase):
                 self.assertEqual(old_before, new_before)
                 self.assertIsNone(new.snapshot().action_budget)
                 self.assertEqual(
-                    old._login_context.passive_transition_until,
+                    old._login_flow.snapshot().passive_transition_until,
                     new.snapshot().passive_transition_until,
                 )
                 self.assertEqual(
-                    old._login_context.entry_receipt,
+                    old._login_flow.snapshot().entry_receipt,
                     new.snapshot().entry_receipt,
                 )
 

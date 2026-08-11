@@ -20,8 +20,16 @@ from .adapter import (
     ObservationRegistry,
     ObserveRequest,
     SemanticFrameIdentity,
+    UnknownObservationError,
 )
-from .adapter.flows import LOGIN_CHECK_CAPABILITY, register_login_observations
+from .adapter.flows import (
+    LOGIN_ACTION_TARGETS,
+    LOGIN_CHECK_CAPABILITY,
+    LOGIN_OBSERVATION_TARGETS,
+    LOGIN_UNSUPPORTED_PRESENCE_RESOURCES,
+    LoginFlow,
+    register_login_observations,
+)
 from .alas_combat_admission import (
     AlasCampaignCombatAdmission,
     AlasCampaignCombatProof,
@@ -809,6 +817,12 @@ class AlasSemanticAdapter:
             enabled=lambda semantic_id: self.oracle.enabled(semantic_id),
             frame_identity=self._compatibility_frame_identity,
         )
+        self._login_flow = LoginFlow(
+            self.oracle,
+            lambda: self._package_gate(),
+            monotonic=lambda: time.monotonic(),
+            entry_observer=self._dispatch_login_check_registry,
+        )
 
     def _compatibility_frame_identity(
         self, request: ObserveRequest
@@ -824,8 +838,7 @@ class AlasSemanticAdapter:
             raw_state_sha256=_UNBOUND_READ_ONLY_FRAME_SHA256,
         )
 
-    def _registry_login_check(self) -> bool:
-        self._package_gate()
+    def _dispatch_login_check_registry(self) -> bool:
         self._compat_observation_ordinal += 1
         ordinal = self._compat_observation_ordinal
         scope_id = "login-startup-{0}".format(ordinal)
@@ -916,10 +929,9 @@ class AlasSemanticAdapter:
         self._package_gate()
         if self._mission_context is not None:
             raise SemanticGateClosed("nested ALAS mission flow is not allowed")
-        if any(
+        if self._login_flow.active or any(
             context is not None
             for context in (
-                self._login_context,
                 self._research_context,
                 self._dorm_context,
                 self._build_context,
@@ -936,11 +948,9 @@ class AlasSemanticAdapter:
     def begin_login(self) -> None:
         """Open one original ALAS LoginHandler invocation."""
 
-        self._package_gate()
-        if any(
+        conflicting_flow_active = any(
             context is not None
             for context in (
-                self._login_context,
                 self._mission_context,
                 self._mail_context,
                 self._commission_context,
@@ -949,14 +959,11 @@ class AlasSemanticAdapter:
                 self._build_context,
                 self._campaign_context,
             )
-        ):
-            raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
-        self._login_context = _LoginFlowContext(
-            passive_transition_until=time.monotonic() + 20.0
         )
+        self._login_flow.begin(conflicting_flow_active=conflicting_flow_active)
 
     def end_login(self) -> None:
-        self._login_context = None
+        self._login_flow.end()
 
     def end_mission_reward(self) -> None:
         """Close the ALAS-owned mission invocation and discard all cached state."""
@@ -980,7 +987,7 @@ class AlasSemanticAdapter:
         self._package_gate()
         if (
             self._mail_context is not None
-            or self._login_context is not None
+            or self._login_flow.active
             or self._mission_context is not None
             or self._research_context is not None
             or self._dorm_context is not None
@@ -1002,7 +1009,7 @@ class AlasSemanticAdapter:
         self._package_gate()
         if (
             self._commission_context is not None
-            or self._login_context is not None
+            or self._login_flow.active
             or self._mail_context is not None
             or self._mission_context is not None
             or self._research_context is not None
@@ -1024,7 +1031,7 @@ class AlasSemanticAdapter:
         self._package_gate()
         if (
             self._commission_context is not None
-            or self._login_context is not None
+            or self._login_flow.active
             or self._mail_context is not None
             or self._mission_context is not None
             or self._research_context is not None
@@ -1042,10 +1049,9 @@ class AlasSemanticAdapter:
 
     def begin_research(self) -> None:
         self._package_gate()
-        if any(
+        if self._login_flow.active or any(
             context is not None
             for context in (
-                self._login_context,
                 self._mission_context,
                 self._mail_context,
                 self._commission_context,
@@ -1067,10 +1073,9 @@ class AlasSemanticAdapter:
 
     def begin_dorm(self) -> None:
         self._package_gate()
-        if any(
+        if self._login_flow.active or any(
             context is not None
             for context in (
-                self._login_context,
                 self._mission_context,
                 self._mail_context,
                 self._commission_context,
@@ -1092,10 +1097,9 @@ class AlasSemanticAdapter:
 
     def begin_build(self) -> None:
         self._package_gate()
-        if any(
+        if self._login_flow.active or any(
             context is not None
             for context in (
-                self._login_context,
                 self._mission_context,
                 self._mail_context,
                 self._commission_context,
@@ -1124,10 +1128,9 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign stage code is not canonical")
         if mode not in ("normal", "hard"):
             raise SemanticGateClosed("campaign mode is not reviewed")
-        if any(
+        if self._login_flow.active or any(
             context is not None
             for context in (
-                self._login_context,
                 self._mission_context,
                 self._mail_context,
                 self._commission_context,
@@ -1580,32 +1583,10 @@ class AlasSemanticAdapter:
         )
 
     def _known_login_surface_exists(self) -> bool:
-        try:
-            # False is still a reviewed login/main/campaign startup surface.
-            self.oracle.campaign_is_in_map()
-        except SemanticGateClosed:
-            return any(
-                self.oracle.enabled(target)
-                for target in (
-                    "overlay/bulletin/close",
-                    "overlay/network-reconnect/confirm",
-                    "overlay/login-data-expired/confirm",
-                )
-            )
-        return True
+        return self._login_flow.known_surface_exists()
 
     def _login_popup_target(self) -> Optional[str]:
-        targets = tuple(
-            semantic_id
-            for semantic_id in (
-                "overlay/login-data-expired/confirm",
-                "overlay/network-reconnect/confirm",
-            )
-            if self.oracle.enabled(semantic_id)
-        )
-        if len(targets) > 1:
-            raise SemanticGateClosed("login popup target is ambiguous")
-        return targets[0] if targets else None
+        return self._login_flow.popup_target()
 
     def _record_mission_transition(self, receipt: ActionReceipt) -> ActionReceipt:
         context = self._mission_context
@@ -1761,13 +1742,7 @@ class AlasSemanticAdapter:
 
     def _active_flow_allows_passive_probe(self) -> bool:
         now = time.monotonic()
-        if (
-            self._login_context is not None
-            and (
-                now <= self._login_context.passive_transition_until
-                or self._known_login_surface_exists()
-            )
-        ):
+        if self._login_flow.allows_passive_probe():
             return True
         if (
             self._mission_context is not None
@@ -1928,27 +1903,24 @@ class AlasSemanticAdapter:
         try:
             result = self._appear_once(button)
         except SemanticGateClosed as exc:
+            if self._login_flow.active:
+                result, stale_since = self._login_flow.handle_presence_failure(
+                    exc,
+                    self._observer_stale_since,
+                )
+                self._observer_stale_since = stale_since
+                return result
             message = str(exc)
             transient = message in (
                 "observer snapshot is stale",
                 "observer endpoints are not generation-coherent",
                 "Msgbox snapshots are not coherent",
             )
-            if (
-                message == "game activity is not top-resumed"
-                and self._login_context is not None
-            ):
-                transient = True
             if not transient:
                 raise
             now = time.monotonic()
             if self._observer_stale_since is None:
                 self._observer_stale_since = now
-            if (
-                self._login_context is not None
-                and now <= self._login_context.passive_transition_until
-            ):
-                return False
             if now - self._observer_stale_since <= 5.0:
                 return False
             raise
@@ -1979,6 +1951,22 @@ class AlasSemanticAdapter:
                     return False
                 raise
         semantic_id = self._mappings.get(name)
+        if name in LOGIN_OBSERVATION_TARGETS:
+            return self._login_flow.observe(name)
+        if self._login_flow.active and name == "POPUP_CONFIRM":
+            return self._login_flow.observe(name)
+        if self._login_flow.active and name == "GOTO_MAIN":
+            return self._login_flow.observe_goto_main()
+        if (
+            self._login_flow.active
+            and name in LOGIN_UNSUPPORTED_PRESENCE_RESOURCES
+        ):
+            try:
+                return self._login_flow.observe_unknown()
+            except UnknownObservationError as exc:
+                raise AlasSemanticUnmapped(
+                    "ALAS resource is not semantically mapped: {0}".format(name)
+                ) from exc
         if self._login_context is not None and name == "POPUP_CONFIRM":
             return self._login_popup_target() is not None
         if (
@@ -2004,7 +1992,7 @@ class AlasSemanticAdapter:
         ):
             if (
                 self._mission_context is None
-                and self._login_context is None
+                and not self._login_flow.active
                 and self._mail_context is None
                 and self._commission_context is None
                 and self._research_context is None
@@ -2017,9 +2005,9 @@ class AlasSemanticAdapter:
                 )
             self._package_gate()
             if (
-                self._login_context is not None
+                self._login_flow.active
                 and time.monotonic()
-                <= self._login_context.passive_transition_until
+                <= self._login_flow.snapshot().passive_transition_until
             ):
                 return False
             if (
@@ -2059,7 +2047,7 @@ class AlasSemanticAdapter:
             ):
                 return False
             if (
-                self._login_context is not None
+                self._login_flow.active
                 and self._known_login_surface_exists()
             ) or (
                 self._mission_context is not None
@@ -3877,6 +3865,17 @@ class AlasSemanticAdapter:
         campaign_stage_code = getattr(
             button, "semantic_campaign_stage_code", None
         )
+        if name in LOGIN_ACTION_TARGETS or (
+            self._login_flow.active and name in ("POPUP_CONFIRM", "GOTO_MAIN")
+        ):
+            try:
+                return self._login_flow.click(name)
+            except UnknownObservationError as exc:
+                raise AlasSemanticUnmapped(
+                    "ALAS resource is not semantically mapped for input: {0}".format(
+                        name
+                    )
+                ) from exc
         semantic_id = self._mappings.get(name)
         if self._login_context is not None and name == "POPUP_CONFIRM":
             semantic_id = self._login_popup_target()
