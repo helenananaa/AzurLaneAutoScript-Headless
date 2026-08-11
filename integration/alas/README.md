@@ -2,6 +2,21 @@
 
 Target: upstream commit `81ccf63b4540f00241628c82a58c02c7a2bb11af`.
 
+The ordered integration source is described by `series/series.json`. During
+the G01 transition it contains the existing combined patch as one member. A
+deterministic copy can be built without modifying that member:
+
+```powershell
+$env:PYTHONPATH = 'python'
+python scripts/python/build_alas_patch_series.py `
+  --output artifacts/alas-semantic-oracle-hooks.generated.patch
+```
+
+The builder requires consecutive order, the pinned upstream lock, safe
+repository-relative member paths, exact SHA-256 values, and LF-terminated
+bytes. G02 and G03 will split the member; G04 will make generated combined
+output authoritative for validation and release tooling.
+
 The patch adds opt-in observation and action ports without changing default
 ALAS behavior:
 
