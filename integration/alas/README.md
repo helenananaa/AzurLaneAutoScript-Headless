@@ -230,6 +230,23 @@ J3 is evidence reuse for screen semantics, not a prediction of the later G36
 live target. Defensive/recovery closure remains H04 work; both capability
 promotion and production readiness remain false.
 
+H04 materializes every H02 defensive root in
+`g36-defensive-preflight.json`. Automation has complete reviewed observation
+and action evidence. Alternate grades, ambush, guild/mission popups,
+mis-click, the unqualified network-white variant, retirement, and story each
+carry an explicit `qualification-stop` recovery before the original grid
+click. Rebuild the report with:
+
+```powershell
+python scripts/python/build_g36_defensive_preflight.py
+```
+
+`closure_complete=true` means there is no implicit unknown row; it does not
+mean execution is allowed. Because eight rows still require pre-grid recovery,
+`grid_click_allowed=false`, all policy grants remain zero, and both capability
+promotion and production readiness remain false. H05 may therefore run only
+the input-free preflight and must stop at the original grid-click boundary.
+
 G20 adds that replacement input boundary without changing the ALAS patch or
 state machine. It accepts six complete, hash-bound raw observer snapshots only
 when all 38 resource queries, blockers, three post-grid action Buttons, and

@@ -96,12 +96,23 @@ from .flows import (
     G36_NORMAL_COLOR_COUNT_RESOURCES,
     G36_NORMAL_COMBAT_PHASES,
 )
+from .defensive_preflight import (
+    DefensivePreflightRow,
+    DefensiveResolution,
+    G36_DEFENSIVE_PREFLIGHT_SCHEMA,
+    G36_DEFENSIVE_ROOT_SPECS,
+    G36DefensivePreflightReport,
+    build_g36_defensive_preflight,
+    g36_defensive_preflight_to_json,
+)
 
 
 __all__ = (
     "ACTION_CAPABILITIES",
     "CAPABILITY_REPORT_SCHEMA",
     "DEFAULT_CAPABILITY_INVENTORY",
+    "DefensivePreflightRow",
+    "DefensiveResolution",
     "LEGACY_CAPABILITY_TASK_CONFIG_SHA256",
     "RECOVERY_MANUAL_TAKEOVER",
     "RECOVERY_QUALIFICATION_STOP",
@@ -127,6 +138,9 @@ __all__ = (
     "G36_TASK_PROFILE_SCHEMA",
     "G36TaskProfile",
     "G36TaskProfileError",
+    "G36_DEFENSIVE_PREFLIGHT_SCHEMA",
+    "G36_DEFENSIVE_ROOT_SPECS",
+    "G36DefensivePreflightReport",
     "G36_NORMAL_APPEAR_RESOURCES",
     "G36_NORMAL_COLOR_COUNT_RESOURCES",
     "G36_NORMAL_COMBAT_PHASES",
@@ -162,10 +176,12 @@ __all__ = (
     "canonical_run_policy_json",
     "canonical_capability_report_json",
     "capability_closure_report",
+    "build_g36_defensive_preflight",
     "canonical_g36_task_profile_json",
     "compatibility_policy_sha256",
     "compatibility_profile",
     "load_run_policy",
+    "g36_defensive_preflight_to_json",
     "load_g36_task_profile",
     "parse_g36_task_profile",
     "parse_run_policy",
