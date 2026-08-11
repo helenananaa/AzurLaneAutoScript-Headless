@@ -32,7 +32,7 @@
     },
     {
       "order": 7,
-      "path": "integration/alas/series/0090-legacy-task-hooks.patch",
+      "path": "integration/alas/series/0050-combat-flow-ports.patch",
       "sha256": "eac805cf45bcffbc9c8f9366229e3eccb6d8a50c9245a29ba96d8c5ee8e610d3"
     }
   ],

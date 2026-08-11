@@ -139,6 +139,8 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
     def test_each_promoted_flow_has_exact_ownership_and_residual_is_disjoint(self):
         promoted = set()
         names = set(manifest_patch_names())
+        self.assertEqual(names & set(FLOW_PATHS), set(FLOW_PATHS))
+        self.assertNotIn("0090-legacy-task-hooks.patch", names)
         for name, expected_paths in FLOW_PATHS.items():
             if name in names:
                 actual = set(target_blobs(SERIES / name))

@@ -15,10 +15,12 @@ python scripts/python/build_alas_patch_series.py `
 
 The builder requires consecutive order, the pinned upstream lock, safe
 repository-relative member paths, exact SHA-256 values, and LF-terminated
-bytes. The full G02 series produces the same Git tree as the legacy combined
-patch, while the first two members apply and compile without claiming task
-coverage. G03 will split the legacy task member by flow; G04 will make
-generated combined output authoritative for validation and release tooling.
+bytes. The first two members apply and compile without claiming task coverage.
+G03 splits all task hooks into mission/mail, commission/tactical,
+research/dorm/build, campaign, and combat ownership groups; no legacy residual
+member remains. The complete series produces the same Git tree as the legacy
+combined patch. G04 will make generated combined output authoritative for
+validation and release tooling.
 
 The patch adds opt-in observation and action ports without changing default
 ALAS behavior:
