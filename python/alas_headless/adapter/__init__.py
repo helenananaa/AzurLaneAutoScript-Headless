@@ -28,7 +28,10 @@ from .registry import (
     ObservationRegistration,
     ObservationRegistry,
 )
-from .runtime_handle import AdbRuntimeHandle
+from .runtime_handle import (
+    AdbRuntimeHandle,
+    semantic_runtime_fingerprint_sha256,
+)
 from .scope import FlowScopeStack
 
 
@@ -54,6 +57,7 @@ __all__ = (
     "RuntimeHandleFactory",
     "RuntimeHandlePort",
     "SemanticFrameIdentity",
+    "semantic_runtime_fingerprint_sha256",
     "StaleFrameError",
     "UnknownObservationError",
     "UnsupportedPixelRead",

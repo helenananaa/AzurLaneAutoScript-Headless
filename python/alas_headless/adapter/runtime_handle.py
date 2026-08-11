@@ -2,13 +2,57 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import re
+from dataclasses import asdict
 from typing import Any, Mapping
 
-from ..semantic_oracle import AdbObserverBridge, ObserverTransportError
+from ..semantic_oracle import (
+    AdbObserverBridge,
+    AndroidPackageFingerprint,
+    ObserverTransportError,
+)
 
 
 _SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+_REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+
+
+def semantic_runtime_fingerprint_sha256(
+    *,
+    package: str,
+    component: str,
+    driver_revision: str,
+    game_fingerprint: AndroidPackageFingerprint,
+) -> str:
+    """Hash the backend-neutral identity required by one semantic session."""
+
+    if not isinstance(package, str) or not package:
+        raise ValueError("runtime fingerprint package is required")
+    if not isinstance(component, str) or not component:
+        raise ValueError("runtime fingerprint component is required")
+    if (
+        not isinstance(driver_revision, str)
+        or _REVISION_PATTERN.fullmatch(driver_revision) is None
+    ):
+        raise ValueError("runtime fingerprint driver revision must be pinned")
+    if not isinstance(game_fingerprint, AndroidPackageFingerprint):
+        raise TypeError("runtime fingerprint requires an Android package fingerprint")
+    payload = {
+        "component": component,
+        "driver_revision": driver_revision,
+        "game_fingerprint": asdict(game_fingerprint),
+        "package": package,
+        "schema": "alas-headless.semantic-runtime-identity/v1",
+    }
+    canonical = json.dumps(
+        payload,
+        ensure_ascii=True,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
 
 
 class AdbRuntimeHandle:

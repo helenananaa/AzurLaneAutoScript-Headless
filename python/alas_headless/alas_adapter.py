@@ -16,11 +16,14 @@ from numbers import Real
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Set, Tuple, Union
 
 from .adapter import (
+    AdbRuntimeHandle,
     FlowScope,
     ObservationRegistry,
     ObserveRequest,
+    RuntimeHandlePort,
     SemanticFrameIdentity,
     UnknownObservationError,
+    semantic_runtime_fingerprint_sha256,
 )
 from .adapter.flows import (
     LOGIN_ACTION_TARGETS,
@@ -710,6 +713,70 @@ class PinnedPackageGate:
             return
         self.bridge.require_package_fingerprint(self.expected)
         self._verified_pid = self.bridge.pid
+
+
+@dataclass
+class _RuntimeHandlePackageGate:
+    """Bind a prepared non-ADB-specific handle to one expected identity."""
+
+    handle: RuntimeHandlePort
+    expected_fingerprint_sha256: str
+    package: str
+    driver_revision: str
+    process_lease: Optional[AlasPackageProcessLease] = None
+    _verified_pid: Optional[int] = None
+
+    def __call__(self) -> None:
+        if self.handle.fingerprint_sha256 != self.expected_fingerprint_sha256:
+            raise SemanticGateClosed("runtime handle fingerprint changed")
+        pid = self.handle.pid
+        if self.process_lease is not None and (
+            self.process_lease.pid != pid
+            or self.process_lease.package != self.package
+            or self.process_lease.driver_revision != self.driver_revision
+        ):
+            raise SemanticGateClosed("package process lease identity changed")
+        if self._verified_pid is not None and self._verified_pid != pid:
+            raise SemanticGateClosed("runtime handle PID changed")
+        self._verified_pid = pid
+
+
+@dataclass(frozen=True)
+class _PreparedRuntimeHandle:
+    handle: RuntimeHandlePort
+    package_gate: Callable[[], None]
+
+
+@dataclass
+class _AdbRuntimeHandleFactory:
+    """Prepare and release exactly one legacy ADB-backed runtime handle."""
+
+    bridge: AdbObserverBridge
+    fingerprint_sha256: str
+    driver_revision: str
+    process_lease: Optional[AlasPackageProcessLease] = None
+
+    def __call__(self) -> _PreparedRuntimeHandle:
+        self.bridge.open()
+        package_gate = PinnedPackageGate(self.bridge)
+        if self.process_lease is None:
+            package_gate()
+        else:
+            if self.process_lease.driver_revision != self.driver_revision:
+                raise SemanticGateClosed(
+                    "package process lease driver revision changed"
+                )
+            package_gate.accept_process_lease(self.process_lease)
+        return _PreparedRuntimeHandle(
+            handle=AdbRuntimeHandle(
+                self.bridge,
+                fingerprint_sha256=self.fingerprint_sha256,
+            ),
+            package_gate=package_gate,
+        )
+
+    def close(self) -> None:
+        self.bridge.close()
 
 
 class AlasSemanticAdapter:
@@ -5119,15 +5186,15 @@ class AlasSemanticAdapter:
 
 
 class AlasSemanticSession:
-    """Own a lazy ADB bridge and adapter for one pinned ALAS device."""
+    """Own one lazy semantic adapter over a prepared runtime handle."""
 
     _REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 
     def __init__(
         self,
-        serial: str,
-        driver_revision: str,
-        adb: str = "adb",
+        serial: Optional[str] = None,
+        driver_revision: str = "",
+        adb: Optional[str] = None,
         package: str = "com.bilibili.azurlane",
         component: str = (
             "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
@@ -5153,9 +5220,21 @@ class AlasSemanticSession:
         observer_max_age_ms: int = 2500,
         package_process_lease: Optional[AlasPackageProcessLease] = None,
         trace: Optional[RuntimeTraceRecorder] = None,
+        runtime_handle: Optional[RuntimeHandlePort] = None,
     ) -> None:
-        if not serial:
-            raise ValueError("semantic ALAS mode requires an ADB serial")
+        if runtime_handle is None and not serial:
+            raise ValueError(
+                "semantic ALAS mode requires an ADB serial or runtime handle"
+            )
+        if runtime_handle is not None:
+            if not isinstance(runtime_handle, RuntimeHandlePort):
+                raise TypeError("semantic ALAS runtime handle is incomplete")
+            if serial is not None or adb is not None:
+                raise ValueError(
+                    "runtime handle conflicts with ADB serial or executable"
+                )
+            if adb_command_timeout_seconds != 10:
+                raise ValueError("runtime handle conflicts with ADB timeout")
         if not self._REVISION_PATTERN.fullmatch(driver_revision):
             raise ValueError("semantic ALAS mode requires a pinned ANGLE revision")
         if (
@@ -5228,14 +5307,62 @@ class AlasSemanticSession:
         self.package_process_lease = package_process_lease
         self.observer_max_age_ms = observer_max_age_ms
         self.trace = trace
-        self.bridge = AdbObserverBridge(
-            serial,
-            package,
-            adb=adb,
-            command_timeout_seconds=float(adb_command_timeout_seconds),
-            trace=trace,
+        self.expected_runtime_fingerprint_sha256 = (
+            semantic_runtime_fingerprint_sha256(
+                package=package,
+                component=component,
+                driver_revision=driver_revision,
+                game_fingerprint=PINNED_CN_GAME_FINGERPRINT,
+            )
         )
+        self._runtime_handle = runtime_handle
+        self._package_gate: Optional[Callable[[], None]] = None
+        self._runtime_handle_factory: Optional[_AdbRuntimeHandleFactory] = None
+        self.bridge: Optional[AdbObserverBridge]
+        if runtime_handle is None:
+            self.bridge = AdbObserverBridge(
+                serial or "",
+                package,
+                adb=adb or "adb",
+                command_timeout_seconds=float(adb_command_timeout_seconds),
+                trace=trace,
+            )
+            self._runtime_handle_factory = _AdbRuntimeHandleFactory(
+                bridge=self.bridge,
+                fingerprint_sha256=self.expected_runtime_fingerprint_sha256,
+                driver_revision=driver_revision,
+                process_lease=package_process_lease,
+            )
+        else:
+            self.bridge = None
         self.adapter: Optional[AlasSemanticAdapter] = None
+
+    @property
+    def runtime_handle(self) -> Optional[RuntimeHandlePort]:
+        return self._runtime_handle
+
+    def _prepare_explicit_runtime_handle(self) -> RuntimeHandlePort:
+        handle = self._runtime_handle
+        if handle is None:
+            raise SemanticGateClosed("explicit runtime handle is unavailable")
+        package_gate = _RuntimeHandlePackageGate(
+            handle=handle,
+            expected_fingerprint_sha256=(
+                self.expected_runtime_fingerprint_sha256
+            ),
+            package=self.package,
+            driver_revision=self.driver_revision,
+            process_lease=self.package_process_lease,
+        )
+        package_gate()
+        self._package_gate = package_gate
+        return handle
+
+    def _release_owned_runtime_handle(self) -> None:
+        if self._runtime_handle_factory is not None:
+            self._runtime_handle_factory.close()
+            self._runtime_handle = None
+        self._package_gate = None
 
     @classmethod
     def from_environment(cls, serial: str) -> "AlasSemanticSession":
@@ -5348,31 +5475,34 @@ class AlasSemanticSession:
         if self.adapter is not None:
             return self.adapter
         try:
-            self.bridge.open()
-            package_gate = PinnedPackageGate(self.bridge)
-            if self.package_process_lease is None:
-                package_gate()
-            else:
-                if (
-                    self.package_process_lease.driver_revision
-                    != self.driver_revision
-                ):
+            if self._runtime_handle is None:
+                factory = self._runtime_handle_factory
+                if factory is None:
                     raise SemanticGateClosed(
-                        "package process lease driver revision changed"
+                        "semantic runtime handle factory is unavailable"
                     )
-                package_gate.accept_process_lease(self.package_process_lease)
+                prepared = factory()
+                self._runtime_handle = prepared.handle
+                self._package_gate = prepared.package_gate
+            elif self._package_gate is None:
+                self._prepare_explicit_runtime_handle()
+            handle = self._runtime_handle
+            package_gate = self._package_gate
+            if handle is None or package_gate is None:
+                raise SemanticGateClosed("semantic runtime handle is unavailable")
+            package_gate()
             oracle = SemanticOracle(
-                self.bridge.request,
-                self.bridge.foreground_component,
-                self.bridge.tap,
+                handle.observer_request,
+                handle.foreground_component,
+                handle.tap,
                 OracleFingerprint(
                     package=self.package,
                     component=self.component,
                     driver_revision=self.driver_revision,
-                    expected_pid=self.bridge.pid,
+                    expected_pid=handle.pid,
                     max_age_ms=self.observer_max_age_ms,
                 ),
-                swipe=self.bridge.swipe,
+                swipe=handle.swipe,
             )
             self.adapter = AlasSemanticAdapter(
                 oracle,
@@ -5414,12 +5544,12 @@ class AlasSemanticSession:
                     outcome="error",
                     fields={"exception_type": type(exc).__name__},
                 )
-            self.bridge.close()
+            self._release_owned_runtime_handle()
             raise
 
     def close(self) -> None:
         self.adapter = None
-        self.bridge.close()
+        self._release_owned_runtime_handle()
         if self.trace is not None:
             self.trace.emit("semantic.session.close")
 
