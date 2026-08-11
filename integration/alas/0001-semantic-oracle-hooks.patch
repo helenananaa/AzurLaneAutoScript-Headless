@@ -827,6 +827,22 @@ index 1224c45..1d25a3b 100644
          self.handle_control_check(name)
          p1, p2 = ensure_int(p1, p2)
          logger.info(
+diff --git a/module/device/screenshot.py b/module/device/screenshot.py
+index 9940ee0..98cd179 100644
+--- a/module/device/screenshot.py
++++ b/module/device/screenshot.py
+@@ -56,6 +56,11 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
+         self._screenshot_interval.wait()
+         self._screenshot_interval.reset()
+ 
++        semantic_session = getattr(self, 'semantic_adapter', None)
++        if semantic_session is not None:
++            self.image = semantic_session.refresh_frame()
++            return self.image
++
+         for _ in range(2):
+             if self.screenshot_method_override:
+                 method = self.screenshot_method_override
 diff --git a/module/device/device.py b/module/device/device.py
 index 0d05f34..586c680 100644
 --- a/module/device/device.py

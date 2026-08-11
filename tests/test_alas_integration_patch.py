@@ -40,6 +40,19 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         ):
             self.assertIn(operation, self.patch_text)
 
+    def test_semantic_screenshot_refreshes_after_alas_interval_ownership(self):
+        self.assertIn(
+            "diff --git a/module/device/screenshot.py b/module/device/screenshot.py",
+            self.patch_text,
+        )
+        wait = self.patch_text.index("self._screenshot_interval.wait()")
+        reset = self.patch_text.index("self._screenshot_interval.reset()", wait)
+        refresh = self.patch_text.index("semantic_session.refresh_frame()", reset)
+        native_loop = self.patch_text.index("for _ in range(2):", refresh)
+        self.assertLess(wait, reset)
+        self.assertLess(reset, refresh)
+        self.assertLess(refresh, native_loop)
+
     def test_campaign_viewport_replaces_only_final_swipe_dispatch(self):
         self.assertIn(
             "semantic_adapter.begin_campaign_map_swipe_vector(",
