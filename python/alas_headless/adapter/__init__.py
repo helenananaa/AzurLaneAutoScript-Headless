@@ -11,6 +11,13 @@ from .errors import (
     UnsupportedPixelRead,
 )
 from .frame import SemanticFrame, SemanticFrameClock, SemanticFrameReader
+from .legacy_environment import (
+    LEGACY_BOOLEAN_GRANTS,
+    LEGACY_BUDGET_GRANTS,
+    LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES,
+    LegacyEnvironmentTranslation,
+    translate_legacy_semantic_environment,
+)
 from .ports import (
     ActionIntent,
     ActionLease,
@@ -70,6 +77,10 @@ __all__ = (
     "FlowScopeError",
     "FlowScopeStack",
     "FlowScopeToken",
+    "LEGACY_BOOLEAN_GRANTS",
+    "LEGACY_BUDGET_GRANTS",
+    "LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES",
+    "LegacyEnvironmentTranslation",
     "RunPolicyError",
     "ObservationPort",
     "ObservationHandler",
@@ -98,6 +109,7 @@ __all__ = (
     "load_run_policy",
     "parse_run_policy",
     "semantic_runtime_fingerprint_sha256",
+    "translate_legacy_semantic_environment",
     "StaleFrameError",
     "UnknownObservationError",
     "UnsupportedPixelRead",

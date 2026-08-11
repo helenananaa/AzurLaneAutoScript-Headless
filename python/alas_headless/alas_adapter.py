@@ -13,11 +13,13 @@ import re
 import time
 from dataclasses import dataclass, field, replace
 from numbers import Real
+from types import MappingProxyType
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Set, Tuple, Union
 
 from .adapter import (
     AdbRuntimeHandleFactory,
     FlowScope,
+    RunPolicy,
     ObservationRegistry,
     ObserveRequest,
     PINNED_CN_GAME_FINGERPRINT,
@@ -35,6 +37,7 @@ from .adapter import (
     StaleFrameError,
     UnknownObservationError,
     semantic_runtime_fingerprint_sha256,
+    translate_legacy_semantic_environment,
 )
 from .adapter.flows import (
     LOGIN_ACTION_TARGETS,
@@ -5144,6 +5147,8 @@ class AlasSemanticSession:
         package_process_lease: Optional[AlasPackageProcessLease] = None,
         trace: Optional[RuntimeTraceRecorder] = None,
         runtime_handle: Optional[RuntimeHandlePort] = None,
+        run_policy: Optional[RunPolicy] = None,
+        policy_grants: Optional[Mapping[str, int]] = None,
     ) -> None:
         if runtime_handle is None and not serial:
             raise ValueError(
@@ -5230,6 +5235,12 @@ class AlasSemanticSession:
         self.package_process_lease = package_process_lease
         self.observer_max_age_ms = observer_max_age_ms
         self.trace = trace
+        if run_policy is not None and not isinstance(run_policy, RunPolicy):
+            raise TypeError("semantic run policy is invalid")
+        self.run_policy = run_policy
+        if policy_grants is not None and not isinstance(policy_grants, Mapping):
+            raise TypeError("semantic policy grants are invalid")
+        self.policy_grants = MappingProxyType(dict(policy_grants or {}))
         self._pixel_audit = PixelAccessAudit(self._record_pixel_access)
         self.expected_runtime_fingerprint_sha256 = (
             semantic_runtime_fingerprint_sha256(
@@ -5328,110 +5339,24 @@ class AlasSemanticSession:
         self._package_gate = None
 
     @classmethod
-    def from_environment(cls, serial: str) -> "AlasSemanticSession":
-        if os.environ.get("ALAS_SEMANTIC_MODE") != "1":
-            raise SemanticGateClosed("ALAS semantic mode is not explicitly enabled")
-        revision = os.environ.get("ALAS_SEMANTIC_DRIVER_REVISION", "").lower()
-        adb = os.environ.get("ALAS_SEMANTIC_ADB", "adb")
-        raw_adb_timeout = os.environ.get(
-            "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS", "10"
+    def from_environment(
+        cls,
+        serial: str,
+        *,
+        run_policy: Optional[RunPolicy] = None,
+        trace: Optional[RuntimeTraceRecorder] = None,
+    ) -> "AlasSemanticSession":
+        translation = translate_legacy_semantic_environment(
+            os.environ,
+            explicit_policy=run_policy,
+            trace=trace,
         )
-        raw_start_budget = os.environ.get(
-            "ALAS_SEMANTIC_COMMISSION_START_BUDGET", "0"
-        )
-        raw_reward_budget = os.environ.get(
-            "ALAS_SEMANTIC_COMMISSION_REWARD_BUDGET", "0"
-        )
-        raw_tactical_assign_budget = os.environ.get(
-            "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET", "0"
-        )
-        raw_research_reward_budget = os.environ.get(
-            "ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET", "0"
-        )
-        raw_research_start_budget = os.environ.get(
-            "ALAS_SEMANTIC_RESEARCH_START_BUDGET", "0"
-        )
-        raw_dorm_collect_budget = os.environ.get(
-            "ALAS_SEMANTIC_DORM_COLLECT_BUDGET", "0"
-        )
-        raw_dorm_feed_budget = os.environ.get(
-            "ALAS_SEMANTIC_DORM_FEED_BUDGET", "0"
-        )
-        raw_build_submit_budget = os.environ.get(
-            "ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET", "0"
-        )
-        raw_campaign_stage_entry_budget = os.environ.get(
-            "ALAS_SEMANTIC_CAMPAIGN_STAGE_ENTRY_BUDGET", "0"
-        )
-        raw_campaign_fleet_mutation_budget = os.environ.get(
-            "ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET", "0"
-        )
-        raw_campaign_sortie_budget = os.environ.get(
-            "ALAS_SEMANTIC_CAMPAIGN_SORTIE_BUDGET", "0"
-        )
-        raw_campaign_combat_budget = os.environ.get(
-            "ALAS_SEMANTIC_CAMPAIGN_COMBAT_BUDGET", "0"
-        )
-        raw_campaign_viewport_swipe_budget = os.environ.get(
-            "ALAS_SEMANTIC_CAMPAIGN_VIEWPORT_SWIPE_BUDGET", "0"
-        )
-        for label, value in (
-            ("ADB command timeout", raw_adb_timeout),
-            ("tactical assign", raw_tactical_assign_budget),
-            ("commission reward", raw_reward_budget),
-            ("commission start", raw_start_budget),
-            ("research reward", raw_research_reward_budget),
-            ("research start", raw_research_start_budget),
-            ("dorm collect", raw_dorm_collect_budget),
-            ("dorm feed", raw_dorm_feed_budget),
-            ("build submit", raw_build_submit_budget),
-            ("campaign stage entry", raw_campaign_stage_entry_budget),
-            ("campaign fleet mutation", raw_campaign_fleet_mutation_budget),
-            ("campaign sortie", raw_campaign_sortie_budget),
-            ("campaign combat", raw_campaign_combat_budget),
-            ("campaign viewport swipe", raw_campaign_viewport_swipe_budget),
-        ):
-            if re.fullmatch(r"0|[1-9][0-9]*", value) is None:
-                raise SemanticGateClosed(
-                    "{0} budget must be a canonical non-negative integer".format(
-                        label
-                    )
-                )
-        if "ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS" in os.environ:
-            raise SemanticGateClosed(
-                "boolean commission reward opt-in was removed; use the integer budget"
-            )
         return cls(
             serial=serial,
-            driver_revision=revision,
-            adb=adb,
-            allow_mission_claim_once=(
-                os.environ.get("ALAS_SEMANTIC_ALLOW_MISSION_CLAIM_ONCE") == "1"
-            ),
-            allow_mail_mutations=(
-                os.environ.get("ALAS_SEMANTIC_ALLOW_MAIL_MUTATIONS") == "1"
-            ),
-            allow_tactical_rewards=(
-                os.environ.get("ALAS_SEMANTIC_ALLOW_TACTICAL_REWARDS") == "1"
-            ),
-            tactical_assign_budget=int(raw_tactical_assign_budget),
-            commission_reward_budget=int(raw_reward_budget),
-            commission_start_budget=int(raw_start_budget),
-            research_reward_budget=int(raw_research_reward_budget),
-            research_start_budget=int(raw_research_start_budget),
-            dorm_collect_budget=int(raw_dorm_collect_budget),
-            dorm_feed_budget=int(raw_dorm_feed_budget),
-            build_submit_budget=int(raw_build_submit_budget),
-            campaign_stage_entry_budget=int(raw_campaign_stage_entry_budget),
-            campaign_fleet_mutation_budget=int(
-                raw_campaign_fleet_mutation_budget
-            ),
-            campaign_sortie_budget=int(raw_campaign_sortie_budget),
-            campaign_combat_budget=int(raw_campaign_combat_budget),
-            campaign_viewport_swipe_budget=int(
-                raw_campaign_viewport_swipe_budget
-            ),
-            adb_command_timeout_seconds=int(raw_adb_timeout),
+            **translation.session_arguments,
+            trace=trace,
+            run_policy=run_policy,
+            policy_grants=translation.grants,
         )
 
     def open(self) -> AlasSemanticAdapter:
