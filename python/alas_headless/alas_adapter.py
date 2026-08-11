@@ -536,12 +536,6 @@ class _MissionFlowContext:
 
 
 @dataclass
-class _LoginFlowContext:
-    passive_transition_until: float = 0.0
-    entry_receipt: Optional[ActionReceipt] = None
-
-
-@dataclass
 class _MailFlowContext:
     entry_clicked: bool = False
     mutations_allowed: bool = False
@@ -802,7 +796,6 @@ class AlasSemanticAdapter:
             campaign_camera_positioning_budget
         )
         self._mission_context: Optional[_MissionFlowContext] = None
-        self._login_context: Optional[_LoginFlowContext] = None
         self._mail_context: Optional[_MailFlowContext] = None
         self._commission_context: Optional[_CommissionFlowContext] = None
         self._research_context: Optional[_ResearchFlowContext] = None
@@ -860,12 +853,6 @@ class AlasSemanticAdapter:
             frame_id=frame_id,
         )
         return self._observation_registry.dispatch(scope, request).value
-
-    def _legacy_login_check_for_test(self) -> bool:
-        """Preserve the pre-B05 path solely as the parity-test oracle."""
-
-        self._package_gate()
-        return self.oracle.enabled("login/enter")
 
     @staticmethod
     def _button_name(button: Any) -> str:
@@ -1582,12 +1569,6 @@ class AlasSemanticAdapter:
             )
         )
 
-    def _known_login_surface_exists(self) -> bool:
-        return self._login_flow.known_surface_exists()
-
-    def _login_popup_target(self) -> Optional[str]:
-        return self._login_flow.popup_target()
-
     def _record_mission_transition(self, receipt: ActionReceipt) -> ActionReceipt:
         context = self._mission_context
         if context is not None and receipt.semantic_id in (
@@ -1967,17 +1948,6 @@ class AlasSemanticAdapter:
                 raise AlasSemanticUnmapped(
                     "ALAS resource is not semantically mapped: {0}".format(name)
                 ) from exc
-        if self._login_context is not None and name == "POPUP_CONFIRM":
-            return self._login_popup_target() is not None
-        if (
-            self._login_context is not None
-            and semantic_id == "login/enter"
-            and self._login_context.entry_receipt is not None
-            and time.monotonic() <= self._login_context.passive_transition_until
-        ):
-            return False
-        if name == "LOGIN_CHECK":
-            return self._registry_login_check()
         if (
             semantic_id is None
             and name not in MISSION_VIRTUAL_RESOURCES
@@ -2048,7 +2018,7 @@ class AlasSemanticAdapter:
                 return False
             if (
                 self._login_flow.active
-                and self._known_login_surface_exists()
+                and self._login_flow.known_surface_exists()
             ) or (
                 self._mission_context is not None
                 and self._known_mission_surface_exists()
@@ -3877,10 +3847,6 @@ class AlasSemanticAdapter:
                     )
                 ) from exc
         semantic_id = self._mappings.get(name)
-        if self._login_context is not None and name == "POPUP_CONFIRM":
-            semantic_id = self._login_popup_target()
-            if semantic_id is None:
-                raise SemanticGateClosed("login popup identity is not proven")
         navbar_match = MISSION_NAVBAR_PATTERN.fullmatch(name)
         commission_row_match = COMMISSION_ROW_PATTERN.fullmatch(name)
         build_side_navbar_match = BUILD_SIDE_NAVBAR_PATTERN.fullmatch(name)
@@ -4691,21 +4657,6 @@ class AlasSemanticAdapter:
             if semantic_id == "main/more" and self._mission_context is not None:
                 self._mission_context.summary_entry_clicked = True
                 self._mission_context.summary_entry_receipt = receipt
-            if (
-                self._login_context is not None
-                and semantic_id in (
-                    "login/enter",
-                    "overlay/bulletin/close",
-                    "reward/award-info/close",
-                    "reward/award-info1/close",
-                    "overlay/login-data-expired/confirm",
-                )
-            ):
-                if semantic_id == "login/enter":
-                    self._login_context.entry_receipt = receipt
-                self._login_context.passive_transition_until = (
-                    time.monotonic() + 60.0
-                )
             if semantic_id == "main/mail" and self._mail_context is not None:
                 self._mail_context.entry_clicked = True
             receipt = self._record_mission_transition(receipt)

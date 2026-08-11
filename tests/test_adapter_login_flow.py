@@ -178,21 +178,18 @@ class LoginFlowFacadeParityTests(unittest.TestCase):
         with patch("alas_headless.alas_adapter.time.monotonic", old_clock):
             old.begin_login()
         self.assertTrue(old._login_flow.active)
-        self.assertIsNone(old._login_context)
+        self.assertFalse(hasattr(old, "_login" + "_context"))
 
         with patch.object(
-            old,
-            "_login_popup_target",
-            side_effect=AssertionError("legacy popup helper was called"),
-        ), patch.object(
-            old,
-            "_legacy_login_check_for_test",
-            side_effect=AssertionError("legacy entry helper was called"),
-        ):
+            old._login_flow,
+            "popup_target",
+            wraps=old._login_flow.popup_target,
+        ) as popup_target:
             self.assertTrue(old._appear_once(NamedButton("POPUP_CONFIRM")))
             receipt = old.click(NamedButton("POPUP_CONFIRM_LOGIN"))
 
         self.assertEqual(receipt.semantic_id, expired)
+        self.assertEqual(popup_target.call_count, 2)
 
     def test_nested_begin_exception_and_gate_order_match(self):
         old, old_oracle, old_clock, new, new_oracle, _ = self.make_pair()

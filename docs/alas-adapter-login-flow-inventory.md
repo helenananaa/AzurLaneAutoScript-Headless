@@ -1,6 +1,6 @@
 # ALAS adapter v2 login-flow inventory
 
-Status: C01 review inventory; no behavior has moved in this step.
+Status: C01 review inventory, updated with the C04 extraction evidence.
 
 This document freezes the complete login-owned surface before C02 extracts the
 flow. It is descriptive, not an authorization to add observations or input.
@@ -38,7 +38,7 @@ Controller entrypoints are:
 
 | Entrypoint | Current contract |
 | --- | --- |
-| `begin_login()` | Calls the package gate, rejects every already-active flow, then creates `_LoginFlowContext` with a 20-second passive-transition deadline. |
+| `begin_login()` | Calls the package gate, rejects every already-active flow, then delegates to `LoginFlow.begin()` with a 20-second passive-transition deadline. |
 | `end_login()` | Clears the login context. It is idempotent and performs no observation or input. |
 | `appear()` / `match_template_color()` | Preserve ALAS boolean presence semantics, including the bounded stale/foreground grace. |
 | `click()` | Resolves only an exact reviewed semantic target and delegates the final input to `SemanticOracle`. |
@@ -50,7 +50,7 @@ itself and every other active flow.
 
 ## 3. Context and timers
 
-`_LoginFlowContext` has exactly two fields:
+The private context owned by `LoginFlow` has exactly two fields:
 
 | Field | Reads | Writes |
 | --- | --- | --- |
@@ -80,10 +80,10 @@ There are no dynamic login resource patterns.
 | `POPUP_CANCEL` | `appear` | `enabled("overlay/network-reconnect/cancel")` | Presence half of ALAS' normal confirm-pair check. |
 | `POPUP_CONFIRM` while login is active | `appear` | In order: `enabled("overlay/login-data-expired/confirm")`, then `enabled("overlay/network-reconnect/confirm")`. | `True` for exactly one target, `False` for none, and gate-closed for two. This contextual branch currently does not invoke a new package gate before these reads; `begin_login()` already gated entry. |
 | `POPUP_CONFIRM_WHITE` | `appear` | `enabled("overlay/login-data-expired/confirm")` | Exact white expired-data confirmation branch. |
-| unknown direct login assets | `appear` | No asset-specific observation. | `False` only while the passive window is active or `_known_login_surface_exists()` independently proves a reviewed surface; otherwise raises `AlasSemanticUnmapped`. |
+| unknown direct login assets | `appear` | No asset-specific observation. | `False` only while the passive window is active or `LoginFlow.known_surface_exists()` independently proves a reviewed surface; otherwise raises `AlasSemanticUnmapped`. |
 | `GOTO_MAIN` | `appear` | `_goto_main_target()` probes the reviewed page roots below. | `True` only when exactly one reviewed return target exists; ambiguity raises. |
 
-`_known_login_surface_exists()` first calls `campaign_is_in_map()`. Either boolean
+`LoginFlow.known_surface_exists()` first calls `campaign_is_in_map()`. Either boolean
 result proves that the oracle recognized a reviewed campaign/main/startup
 surface. If that typed query closes, it falls back to `enabled()` checks for:
 
@@ -111,7 +111,7 @@ C02 parity, not approval for a future nonzero production policy.
 | `LOGIN_CHECK` | `login/enter` | Store `entry_receipt`; extend passive transition to 60 seconds. |
 | `LOGIN_ANNOUNCE`, `LOGIN_ANNOUNCE_2` | `overlay/bulletin/close` | Extend passive transition to 60 seconds. |
 | annotated `POPUP_CONFIRM_WHITE_LOGIN` | normalized to `POPUP_CONFIRM_WHITE`, then `overlay/login-data-expired/confirm` | Extend passive transition to 60 seconds. |
-| annotated `POPUP_CONFIRM_LOGIN` | normalized to `POPUP_CONFIRM`, then the unique target from `_login_popup_target()` | Expired-data confirm extends the transition. Network-reconnect confirm currently does not. |
+| annotated `POPUP_CONFIRM_LOGIN` | normalized to `POPUP_CONFIRM`, then the unique target from `LoginFlow.popup_target()` | Expired-data confirm extends the transition. Network-reconnect confirm currently does not. |
 | `GOTO_MAIN` | the unique target returned by `_goto_main_target()` | No login-context field changes. |
 
 Every action goes through the package gate before `oracle.click()`. The
@@ -217,9 +217,17 @@ Existing checked tests cover:
 - proof that only `LOGIN_CHECK` currently enters the registry;
 - integration-patch `begin_login()` / `end_login()` ownership hooks.
 
-Known gaps that C02-C04 must not conceal:
+C04 added `scripts/python/verify_alas_login_flow_replay.py`. Against a transient
+worktree created from the pinned upstream commit with the canonical patch
+applied, it imports the actual patched `module.handler.login.LoginHandler` and
+runs four Device-free paths: entry, bulletin, expired-data confirmation, and an
+injected handler failure. The first three produce exactly one virtual semantic
+action each; the failure produces none. All four close login scope and restore
+the screenshot interval. The verifier reports `android_input_injected=false`.
+Its ignored local result is `artifacts/login-flow-replay-c04.json`.
 
-- there is no pinned Device-free replay of the complete original login loop;
+Remaining gaps that later milestones must not conceal:
+
 - there is no live qualification for maintenance, update, Android dialog, CN
   agreement, returning-player, avatar-expired, or the broad main-popup set;
 - the B05 result frame is an explicitly unbound read-only compatibility envelope,
