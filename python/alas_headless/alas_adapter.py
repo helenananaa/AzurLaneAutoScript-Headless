@@ -611,8 +611,6 @@ class _CommissionFlowContext:
 
 @dataclass
 class _ResearchFlowContext:
-    start_budget: int = 0
-    reward_budget: int = 0
     selected_slot: Optional[int] = None
     selected_code: Optional[str] = None
     selected_status: Optional[ResearchProjectStatus] = None
@@ -630,13 +628,11 @@ class _ResearchFlowContext:
     last_projects_observed_at: float = 0.0
     queue_add_receipt: Optional[ActionReceipt] = None
     queue_confirm_receipt: Optional[ActionReceipt] = None
-    queue_add_uses_start_budget: bool = False
+    queue_add_requires_start_grant: bool = False
 
 
 @dataclass
 class _DormFlowContext:
-    collect_budget: int = 0
-    feed_budget: int = 0
     passive_transition_until: float = 0.0
     navigation_receipts: Dict[str, ActionReceipt] = field(default_factory=dict)
     feed_entry_receipt: Optional[ActionReceipt] = None
@@ -645,7 +641,6 @@ class _DormFlowContext:
 
 @dataclass
 class _BuildFlowContext:
-    submit_budget: int = 0
     prep_opened: bool = False
     warning_confirmed: bool = False
     coins_owned: Optional[int] = None
@@ -800,11 +795,6 @@ class AlasSemanticAdapter:
             raise ValueError(
                 "campaign camera positioning budget must be at most two"
             )
-        self._research_reward_budget = research_reward_budget
-        self._research_start_budget = research_start_budget
-        self._dorm_collect_budget = dorm_collect_budget
-        self._dorm_feed_budget = dorm_feed_budget
-        self._build_submit_budget = build_submit_budget
         self._campaign_stage_entry_budget = campaign_stage_entry_budget
         self._campaign_fleet_mutation_budget = campaign_fleet_mutation_budget
         self._campaign_sortie_budget = campaign_sortie_budget
@@ -1128,8 +1118,6 @@ class AlasSemanticAdapter:
         ):
             raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
         self._research_context = _ResearchFlowContext(
-            start_budget=self._research_start_budget,
-            reward_budget=self._research_reward_budget,
             passive_transition_until=time.monotonic() + 20.0,
         )
 
@@ -1152,8 +1140,6 @@ class AlasSemanticAdapter:
         ):
             raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
         self._dorm_context = _DormFlowContext(
-            collect_budget=self._dorm_collect_budget,
-            feed_budget=self._dorm_feed_budget,
             passive_transition_until=time.monotonic() + 20.0,
         )
 
@@ -1176,7 +1162,6 @@ class AlasSemanticAdapter:
         ):
             raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
         self._build_context = _BuildFlowContext(
-            submit_budget=self._build_submit_budget,
             passive_transition_until=time.monotonic() + 20.0,
         )
 
@@ -2253,7 +2238,7 @@ class AlasSemanticAdapter:
                     return False
                 return (
                     detail.can_start
-                    and self._research_context.start_budget > 0
+                    and self._action_ledger.allowed("research.start")
                     and self._research_context.start_receipt is None
                 )
             if name in ("POPUP_CANCEL", "POPUP_CONFIRM"):
@@ -2272,7 +2257,7 @@ class AlasSemanticAdapter:
                 return bool(
                     context.start_receipt is not None
                     and context.start_confirm_receipt is None
-                    and context.start_budget > 0
+                    and self._action_ledger.allowed("research.start")
                     and cost is not None
                     and cost
                     == (context.pending_resource_id, context.pending_resource_required)
@@ -2294,7 +2279,9 @@ class AlasSemanticAdapter:
                     queue = self.research_queue_state()
                 except SemanticGateClosed:
                     return False
-                return queue.reward_claimable and self._research_context.reward_budget > 0
+                return queue.reward_claimable and self._action_ledger.allowed(
+                    "research.reward"
+                )
             if name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3", "GET_ITEMS_RESEARCH_SAVE"):
                 return bool(
                     self._research_context.reward_receipts
@@ -2315,7 +2302,7 @@ class AlasSemanticAdapter:
         if name in DORM_VIRTUAL_RESOURCES and self._dorm_context is not None:
             if name == "DORM_QUICK_COLLECT":
                 return (
-                    self._dorm_context.collect_budget > 0
+                    self._action_ledger.allowed("dorm.collect")
                     and self.oracle.enabled("dorm/collect")
                 )
             if name == "DORM_FEED_ENTER":
@@ -2676,7 +2663,7 @@ class AlasSemanticAdapter:
             detail = self.oracle.research_detail_state()
             return bool(
                 detail.can_start
-                and self._research_context.start_budget > 0
+                and self._action_ledger.allowed("research.start")
                 and self._research_context.start_receipt is None
             )
         except SemanticGateClosed:
@@ -2723,7 +2710,7 @@ class AlasSemanticAdapter:
 
         if self._research_context is None:
             raise SemanticGateClosed("research queue used outside ALAS research flow")
-        if self._research_context.start_budget <= 0:
+        if not self._action_ledger.allowed("research.start"):
             return 0
         return self.research_queue_empty_slots()
 
@@ -2776,7 +2763,9 @@ class AlasSemanticAdapter:
         if self._dorm_context is None:
             raise SemanticGateClosed("dorm feed used outside ALAS dorm flow")
         context = self._dorm_context
-        if count > context.feed_budget:
+        if count > self._action_ledger.remaining("dorm.feed") or (
+            count > 0 and not self._action_ledger.allowed("dorm.feed")
+        ):
             raise SemanticGateClosed("dorm feed count exceeds the remaining budget")
         receipts = []
         for _ in range(count):
@@ -2789,7 +2778,6 @@ class AlasSemanticAdapter:
                 lambda: self.oracle.click_dorm_food(item.item_id),
             )
             clicked_at = time.monotonic()
-            context.feed_budget -= 1
             receipts.append(receipt)
             deadline = time.monotonic() + 5.0
             last_error: Optional[SemanticOracleError] = None
@@ -4412,7 +4400,7 @@ class AlasSemanticAdapter:
             if name == "RESEARCH_START":
                 detail = self.oracle.research_detail_state()
                 if (
-                    context.start_budget <= 0
+                    not self._action_ledger.allowed("research.start")
                     or context.start_receipt is not None
                     or not detail.can_start
                 ):
@@ -4432,18 +4420,17 @@ class AlasSemanticAdapter:
                     if context.queue_confirm_receipt is not None:
                         return context.queue_confirm_receipt
                     if (
-                        context.queue_add_uses_start_budget
-                        and context.start_budget <= 0
+                        context.queue_add_requires_start_grant
+                        and not self._action_ledger.allowed("research.start")
                     ):
                         raise SemanticGateClosed(
                             "research queue confirmation requires a positive budget"
                         )
-                    if context.queue_add_uses_start_budget:
+                    if context.queue_add_requires_start_grant:
                         receipt = self._dispatch_mutation(
                             "research.start",
                             lambda: self.oracle.click("research/queue/confirm"),
                         )
-                        context.start_budget -= 1
                     else:
                         receipt = self.oracle.click("research/queue/confirm")
                     context.queue_confirm_receipt = receipt
@@ -4457,7 +4444,7 @@ class AlasSemanticAdapter:
                 if (
                     context.start_receipt is None
                     or context.start_confirm_receipt is not None
-                    or context.start_budget <= 0
+                    or not self._action_ledger.allowed("research.start")
                     or self.oracle.research_start_prompt_cost() != expected
                 ):
                     raise SemanticGateClosed(
@@ -4467,7 +4454,6 @@ class AlasSemanticAdapter:
                     "research.start",
                     lambda: self.oracle.click("research/start/confirm"),
                 )
-                context.start_budget -= 1
                 context.start_confirm_receipt = receipt
                 context.last_queue_state = None
                 context.last_projects = None
@@ -4481,7 +4467,7 @@ class AlasSemanticAdapter:
                 confirmed_start = context.start_confirm_receipt is not None
                 existing_running = (
                     context.selected_status == ResearchProjectStatus.RUNNING
-                    and context.start_budget > 0
+                    and self._action_ledger.allowed("research.start")
                     and self.research_detail_is_running()
                     and self.research_detail_can_queue()
                 )
@@ -4492,7 +4478,7 @@ class AlasSemanticAdapter:
                 receipt = self.oracle.click_research_queue_add()
                 context.queue_add_receipt = receipt
                 context.queue_confirm_receipt = None
-                context.queue_add_uses_start_budget = existing_running
+                context.queue_add_requires_start_grant = existing_running
                 context.last_queue_state = None
                 context.last_projects = None
                 return self._record_mission_transition(receipt)
@@ -4500,13 +4486,14 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed("semantic research cancellation is not enabled")
             if name == "QUEUE_CLAIM_REWARD":
                 queue = self.oracle.research_queue_state()
-                if not queue.reward_claimable or context.reward_budget <= 0:
+                if not queue.reward_claimable or not self._action_ledger.allowed(
+                    "research.reward"
+                ):
                     raise SemanticGateClosed("research reward requires a positive budget")
                 receipt = self._dispatch_mutation(
                     "research.reward",
                     lambda: self.oracle.click("research/queue/claim"),
                 )
-                context.reward_budget -= 1
                 context.reward_receipts.append(receipt)
                 context.last_queue_state = None
                 context.last_projects = None
@@ -4543,13 +4530,12 @@ class AlasSemanticAdapter:
         if self._dorm_context is not None and name in DORM_VIRTUAL_RESOURCES:
             context = self._dorm_context
             if name == "DORM_QUICK_COLLECT":
-                if context.collect_budget <= 0:
+                if not self._action_ledger.allowed("dorm.collect"):
                     raise SemanticGateClosed("dorm collect requires a positive budget")
                 receipt = self._dispatch_mutation(
                     "dorm.collect",
                     lambda: self.oracle.click("dorm/collect"),
                 )
-                context.collect_budget -= 1
                 return receipt
             if name == "DORM_FEED_ENTER":
                 if (
@@ -4636,7 +4622,7 @@ class AlasSemanticAdapter:
                     )
                 submit = self.oracle.build_submit_state()
                 if (
-                    context.submit_budget <= 0
+                    not self._action_ledger.allowed("build.submit")
                     or submit.count != 1
                     or submit.cubes_owned < submit.cubes_required
                     or context.coins_owned is None
@@ -4650,7 +4636,6 @@ class AlasSemanticAdapter:
                     "build.submit",
                     lambda: self.oracle.click("build/prep/confirm"),
                 )
-                context.submit_budget -= 1
                 context.submit_receipt = receipt
                 return receipt
         if semantic_id is None and name == "GOTO_MAIN":
@@ -4701,7 +4686,7 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed("research project slot identity is ambiguous")
                 project = matches[0]
                 if project.status == ResearchProjectStatus.FINISHED:
-                    if self._research_context.reward_budget <= 0:
+                    if not self._action_ledger.allowed("research.reward"):
                         raise SemanticGateClosed(
                             "finished research claim requires a positive budget"
                         )
@@ -4709,7 +4694,6 @@ class AlasSemanticAdapter:
                         "research.reward",
                         lambda: self.oracle.click_research_project(slot),
                     )
-                    self._research_context.reward_budget -= 1
                     self._research_context.reward_receipts.append(receipt)
                     self._research_context.selected_slot = None
                     self._research_context.selected_code = None
@@ -4722,7 +4706,7 @@ class AlasSemanticAdapter:
                     self._research_context.last_projects = None
                     self._research_context.queue_add_receipt = None
                     self._research_context.queue_confirm_receipt = None
-                    self._research_context.queue_add_uses_start_budget = False
+                    self._research_context.queue_add_requires_start_grant = False
                     return receipt
                 receipt = self.oracle.click_research_project(slot)
                 self._research_context.selected_slot = slot
@@ -4734,7 +4718,7 @@ class AlasSemanticAdapter:
                 self._research_context.pending_resource_required = None
                 self._research_context.queue_add_receipt = None
                 self._research_context.queue_confirm_receipt = None
-                self._research_context.queue_add_uses_start_budget = False
+                self._research_context.queue_add_requires_start_grant = False
                 return receipt
             if self._mission_context is not None:
                 if (

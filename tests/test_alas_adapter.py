@@ -1133,13 +1133,13 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         adapter.click(NamedButton("ENTRANCE_1"))
         adapter.click(NamedButton("RESEARCH_START"))
-        self.assertEqual(adapter._research_context.start_budget, 1)
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 1)
         self.assertTrue(adapter.appear(NamedButton("POPUP_CANCEL")))
         self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
         receipt = adapter.click(NamedButton("POPUP_CONFIRM_RESEARCH_START"))
 
         self.assertEqual(receipt.semantic_id, "research/start/confirm")
-        self.assertEqual(adapter._research_context.start_budget, 0)
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
         with self.assertRaises(SemanticGateClosed):
             adapter.click(NamedButton("POPUP_CONFIRM"))
         self.assertEqual(
@@ -1173,12 +1173,12 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "research/detail/queue")
         self.assertEqual(duplicate, receipt)
-        self.assertEqual(adapter._research_context.start_budget, 1)
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 1)
         self.assertTrue(adapter.appear(NamedButton("POPUP_CANCEL")))
         self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
         confirm = adapter.click(NamedButton("POPUP_CONFIRM_RESEARCH_QUEUE"))
         self.assertEqual(confirm.semantic_id, "research/queue/confirm")
-        self.assertEqual(adapter._research_context.start_budget, 0)
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
         self.assertEqual(
             oracle.click_calls,
             [
@@ -1228,7 +1228,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(len(receipts), 1)
         self.assertEqual(receipts[0].semantic_id, "dorm/feed/item/50001")
-        self.assertEqual(adapter._dorm_context.feed_budget, 0)
+        self.assertEqual(adapter._action_ledger.remaining("dorm.feed"), 0)
         self.assertEqual(oracle.dorm_feed_state_value.food, 1000)
         self.assertEqual(oracle.dorm_feed_state_value.items[0].count, 4)
         with self.assertRaises(SemanticGateClosed):
@@ -1349,7 +1349,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         receipt = adapter.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER"))
 
         self.assertEqual(receipt.semantic_id, "build/prep/confirm")
-        self.assertEqual(adapter._build_context.submit_budget, 0)
+        self.assertEqual(adapter._action_ledger.remaining("build.submit"), 0)
         with self.assertRaises(SemanticGateClosed):
             adapter.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER"))
 
@@ -3598,9 +3598,10 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.begin_research()
 
         self.assertEqual(adapter.research_queue_fill_slots(), 5)
-        adapter._research_context.start_budget = 0
+        gated = AlasSemanticAdapter(oracle, lambda: None)
+        gated.begin_research()
         oracle.research_queue_visible_value = False
-        self.assertEqual(adapter.research_queue_fill_slots(), 0)
+        self.assertEqual(gated.research_queue_fill_slots(), 0)
 
     def test_research_detail_availability_is_false_before_selection(self):
         adapter, oracle, _ = self.make_adapter()
@@ -3616,13 +3617,18 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
     def test_research_detail_availability_includes_current_run_budget(self):
         oracle = FakeOracle()
-        adapter = AlasSemanticAdapter(oracle, lambda: None)
+        gated = AlasSemanticAdapter(oracle, lambda: None)
+        gated.begin_research()
+
+        self.assertFalse(gated.research_detail_available())
+        self.assertTrue(gated.appear(NamedButton("RESEARCH_UNAVAILABLE")))
+
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            research_start_budget=1,
+        )
         adapter.begin_research()
-
-        self.assertFalse(adapter.research_detail_available())
-        self.assertTrue(adapter.appear(NamedButton("RESEARCH_UNAVAILABLE")))
-
-        adapter._research_context.start_budget = 1
         self.assertTrue(adapter.research_detail_available())
         self.assertFalse(adapter.appear(NamedButton("RESEARCH_UNAVAILABLE")))
 

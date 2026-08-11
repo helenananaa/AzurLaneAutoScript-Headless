@@ -121,3 +121,10 @@ but no reward/start/assignment budget or initial reward boolean. Commission's
 reward/start compatibility queries and every tactical pre-confirm gate read
 the ledger. A tactical finish receipt, rather than a stale permission flag,
 owns its exact popup-close chain after the one reward grant is consumed.
+
+Research, dorm, and build are the third migrated family. Their contexts keep
+only project/queue evidence, navigation and transition receipts, stable dorm
+panel state, and build preparation proof. Research start/reward, dorm
+collect/feed, and build submit authority now comes exclusively from the
+ledger, including multi-item dorm feeds. Reopening a flow cannot recreate a
+grant, and a backend exception permanently consumes the dispatched grant.
