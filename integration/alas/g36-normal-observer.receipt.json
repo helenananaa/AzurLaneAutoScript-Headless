@@ -1,0 +1,35 @@
+{
+  "capability_promotion": false,
+  "capability_surface_sha256": "824f04773a3713c40dff3fb50293821dc0f0f50e0cd59301c9af719606ad476a",
+  "fixture_phase_tokens": false,
+  "fixture_sha256": "a20dbb78eaad6875f5e9f567350c8ddad7574de5ca590b482c891ed8dcb3f0fa",
+  "game_fingerprint": "9.7.10:9710:x86_64:e6d3ef4baac2509cc97a289b91bfd5f9d0dcd7ad8994880a192298983208699f:e3f1cfc442b67f1d4c9877fd9ceaedc3d68f2842ad677445241b9cc9c05d1c67",
+  "input_injected": false,
+  "observer_manifest_sha256": "d8e262a39057ba7d5611acc314a91419869d51a1825a32ece98b69fc6d0a633c",
+  "production_ready": false,
+  "profile_file_sha256": "bae74bc386e23999bb5131058592e75637adc27bf0d5decdba646fb26235b2ed",
+  "profile_id": "cn-9.7.10-12-4-normal-one-battle",
+  "schema": "alas-headless.g36-normal-observer-evidence/v1",
+  "source_artifact": "artifacts/g24-controlled-battle.fixture.json",
+  "source_artifact_sha256": "92a4b94dfcf9eb92db5b025c9e5d12e45a2cc5a3c1711cd256bb7c6d0b5630a1",
+  "source_frame_sha256": [
+    "e7905ad2b3a3eab3005af1d9524b85554542755e3d4f4bb51ad0a44046fb9e62",
+    "fd8cd649b696116281e63d8f4a24ddce24684b1b49d5ac9b10add5454b51731e",
+    "1b8cd0b7d98a146551ee7418110f2921219fb39f53aec1d83d6ad5b5f9353d86",
+    "1d36fce9e8a394ece7168c0ae7c0bcbc6d7be64367abb4be408f6c7b3a3c6d85",
+    "23eef063883fbf5f3b473fd684aabcef4a468f6244be53a07952e0288b7a857c",
+    "36e5ee49d8cda3332cee7d3bdad2901ba24bb6edbfa88eec8a6e1d39789cec68",
+    "ac826ce916507223ff040a30b40bd52ed609d99a0b623ca8ec5bcbca4c6a3f6f"
+  ],
+  "source_generations": [
+    3825,
+    5631,
+    6612,
+    7056,
+    7683,
+    8016,
+    8033
+  ],
+  "task_config_sha256": "bea8b149ecd634dcd33d8972c3eae69db8bbbb1e5c4951c3c11159211f489b2f",
+  "upstream_alas_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+}

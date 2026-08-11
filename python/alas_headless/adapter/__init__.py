@@ -89,6 +89,13 @@ from .task_profile import (
     load_g36_task_profile,
     parse_g36_task_profile,
 )
+from .flows import (
+    CombatFlow,
+    CombatFlowState,
+    G36_NORMAL_APPEAR_RESOURCES,
+    G36_NORMAL_COLOR_COUNT_RESOURCES,
+    G36_NORMAL_COMBAT_PHASES,
+)
 
 
 __all__ = (
@@ -111,6 +118,8 @@ __all__ = (
     "CapabilityClosureError",
     "CapabilityClosureReport",
     "CapabilityInventory",
+    "CombatFlow",
+    "CombatFlowState",
     "FlowScope",
     "FlowScopeError",
     "FlowScopeStack",
@@ -118,6 +127,9 @@ __all__ = (
     "G36_TASK_PROFILE_SCHEMA",
     "G36TaskProfile",
     "G36TaskProfileError",
+    "G36_NORMAL_APPEAR_RESOURCES",
+    "G36_NORMAL_COLOR_COUNT_RESOURCES",
+    "G36_NORMAL_COMBAT_PHASES",
     "LEGACY_BOOLEAN_GRANTS",
     "LEGACY_BUDGET_GRANTS",
     "LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES",

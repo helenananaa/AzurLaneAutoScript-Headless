@@ -31,11 +31,11 @@ from .alas_combat_state_replay import (
     AlasCampaignCombatReplay,
     AlasCombatReplayFrame,
     AlasCombatReplayPhase,
+    alas_combat_replay_phase_sequence,
 )
 from .semantic_oracle import (
     ActionReceipt,
     BUTTON_SCHEMA,
-    OBSERVER_SCHEMA,
     UI_SCHEMA,
     Bounds,
     ButtonState,
@@ -61,6 +61,17 @@ ALAS_COMBAT_OBSERVER_FIXTURE_SCHEMA = (
 )
 ALAS_COMBAT_OBSERVER_MANIFEST_SCHEMA = (
     "alas-headless.g27-combat-observer-manifest/v3"
+)
+ALAS_COMBAT_NORMAL_EVIDENCE_RESOURCE_NAMES = (
+    "AUTOMATION_ON",
+    "BATTLE_PREPARATION",
+    "BATTLE_STATUS_S",
+    "EXP_INFO_S",
+    "GET_ITEMS_1",
+    "GET_MISSION",
+    "IN_MAP",
+    "MAP_ENEMY_SEARCHING",
+    "PAUSE",
 )
 _SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
 _ACTION_PRECEDENCE_ALLOWLIST = {
@@ -1164,7 +1175,7 @@ def _visible_resource_names(
     visible = {
         name
         for name in ALAS_COMBAT_REPLAY_RESOURCE_NAMES
-        if _resource_visible(snapshot, mappings[name])
+        if name in mappings and _resource_visible(snapshot, mappings[name])
     }
     if "BATTLE_PREPARATION" in visible:
         # LevelStageView remains active behind ChapterPreCombatUI, whereas the
@@ -1388,6 +1399,122 @@ def build_alas_campaign_combat_replay_from_observer(
                     AlasCombatReplayPhase.BATTLE_PREPARATION_AUTOMATION_OFF,
                     AlasCombatReplayPhase.BATTLE_PREPARATION,
                 ),
+                combat_executing=phase is AlasCombatReplayPhase.COMBAT_EXECUTING,
+                enemy_searching=phase is AlasCombatReplayPhase.MAP_SEARCHING,
+                fleet_on_target=fleet_on_target,
+                current_fleet_on_target=current_on_target,
+                hp=hp,
+                levels=levels,
+            )
+        )
+    return AlasCampaignCombatReplay(
+        stage_code=admission.stage_code,
+        target_node=admission.target_node,
+        input_generation=admission.input_generation,
+        frames=tuple(frames),
+    )
+
+
+def build_alas_campaign_combat_normal_replay_from_observer(
+    admission: AlasCampaignCombatAdmission,
+    snapshots: Sequence[AlasCombatObserverSnapshot],
+    manifest: AlasCombatObserverManifest,
+) -> AlasCampaignCombatReplay:
+    """Build only the reviewed normal G36 path without promoting the manifest.
+
+    H03 deliberately admits a smaller evidence boundary than the production
+    replay builder above.  Every positive normal-path discriminator and the
+    ordered fleet statistics must be qualified, but defensive/recovery rows
+    remain closed for H04.  Empty, unqualified mappings are never evaluated:
+    ``all(())`` must not turn an unknown ALAS resource into a false positive.
+    """
+
+    if not isinstance(admission, AlasCampaignCombatAdmission):
+        raise SemanticGateClosed("normal combat replay requires an admission")
+    if not isinstance(manifest, AlasCombatObserverManifest):
+        raise SemanticGateClosed("normal combat replay manifest is not typed")
+    mappings = {item.resource_name: item for item in manifest.resources}
+    required_mappings = {}
+    for name in ALAS_COMBAT_NORMAL_EVIDENCE_RESOURCE_NAMES:
+        mapping = mappings.get(name)
+        if mapping is None or not mapping.qualified:
+            raise SemanticGateClosed(
+                "normal combat observation is not qualified: " + name
+            )
+        required_mappings[name] = mapping
+    _validate_stats_shape(manifest.fleet_stats)
+
+    phase_sequences = tuple(
+        alas_combat_replay_phase_sequence(
+            include_get_items=include_get_items,
+            include_get_mission=include_get_mission,
+        )
+        for include_get_items in (False, True)
+        for include_get_mission in (False, True)
+    )
+    if len(snapshots) not in {len(sequence) for sequence in phase_sequences}:
+        raise SemanticGateClosed(
+            "normal combat observer replay requires 6 to 8 snapshots"
+        )
+
+    validated = []
+    previous = admission.input_generation
+    qualified_blockers = tuple(
+        mapping for mapping in manifest.blockers if mapping.qualified
+    )
+    for snapshot in snapshots:
+        _validate_snapshot(snapshot, manifest)
+        if snapshot.generation <= previous:
+            raise SemanticGateClosed(
+                "normal combat observer generations are not strictly increasing"
+            )
+        previous = snapshot.generation
+        active_blockers = tuple(
+            mapping.blocker_name
+            for mapping in qualified_blockers
+            if all(
+                _selector_present(snapshot, selector)
+                for selector in mapping.selectors
+            )
+        )
+        if active_blockers:
+            raise SemanticGateClosed(
+                "normal combat observer blocker is active: "
+                + ", ".join(active_blockers)
+            )
+        visible = _visible_resource_names(snapshot, required_mappings)
+        validated.append((snapshot, visible))
+
+    matching_sequences = tuple(
+        sequence
+        for sequence in phase_sequences
+        if len(sequence) == len(validated)
+        and all(
+            set(visible) == set(ALAS_COMBAT_REPLAY_EXPECTED_RESOURCES[phase])
+            for phase, (_, visible) in zip(sequence, validated)
+        )
+    )
+    if len(matching_sequences) != 1:
+        raise SemanticGateClosed(
+            "normal combat observer records do not prove one phase sequence"
+        )
+
+    frames = []
+    for phase, (snapshot, visible) in zip(matching_sequences[0], validated):
+        in_map, fleet_on_target, current_on_target = _map_flags(
+            phase, snapshot.campaign_map, admission
+        )
+        hp: Tuple[float, ...] = ()
+        levels: Tuple[int, ...] = ()
+        if phase is AlasCombatReplayPhase.MAP_STABLE:
+            hp, levels = _fleet_stats(snapshot, manifest.fleet_stats)
+        frames.append(
+            AlasCombatReplayFrame(
+                generation=snapshot.generation,
+                phase=phase,
+                visible_resources=tuple(sorted(visible)),
+                in_map=in_map,
+                combat_loading=phase is AlasCombatReplayPhase.BATTLE_PREPARATION,
                 combat_executing=phase is AlasCombatReplayPhase.COMBAT_EXECUTING,
                 enemy_searching=phase is AlasCombatReplayPhase.MAP_SEARCHING,
                 fleet_on_target=fleet_on_target,

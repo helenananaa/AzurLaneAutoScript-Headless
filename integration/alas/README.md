@@ -198,6 +198,38 @@ The H02 surface is an inventory, not authority: every defensive root remains
 `requires-h04-review`, capability promotion is false, and production readiness
 is false.
 
+H03 replaces the synthetic phase tokens on the normal path with the reviewed
+G24 raw observer fixture. `g36-normal-observer.receipt.json` binds its seven
+source-frame hashes to the pinned game, task profile, H02 surface, and current
+observer manifest. The records infer preparation, executing, result S,
+optional item receipt, experience S, enemy searching, stable map, six HP
+values, and six levels. Stage the immutable reviewed artifact with:
+
+```powershell
+python scripts/python/stage_g36_normal_combat_evidence.py `
+  --source H:\program\AzurLaneAutoScript-Headless\artifacts\g24-controlled-battle.fixture.json
+```
+
+The normal-only builder evaluates qualified positive mappings and never treats
+an empty unqualified selector list as present. The typed combat flow resolves
+the pinned ALAS queries, including mutually exclusive negative result grades,
+and replaces the two color-count entrances with typed zero results. A pinned,
+patched ALAS checkout can reproduce `g36-normal-observer-replay.json` with:
+
+```powershell
+python scripts/python/qualify_alas_combat_state_replay.py `
+  --alas-root H:\program\AzurLaneAutoScript-g36-h03-patchcheck `
+  --observer-fixture integration/alas/g36-normal-observer.fixture.json `
+  --semantic-combat-flow `
+  --output integration/alas/g36-normal-observer-replay.json
+```
+
+The original ALAS state machine selects the reviewed same-cell J3 branch and
+completes its virtual one-battle replay with no framebuffer reads and no input.
+J3 is evidence reuse for screen semantics, not a prediction of the later G36
+live target. Defensive/recovery closure remains H04 work; both capability
+promotion and production readiness remain false.
+
 G20 adds that replacement input boundary without changing the ALAS patch or
 state machine. It accepts six complete, hash-bound raw observer snapshots only
 when all 38 resource queries, blockers, three post-grid action Buttons, and

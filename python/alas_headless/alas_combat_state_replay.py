@@ -13,7 +13,7 @@ import copy
 from dataclasses import dataclass
 from enum import Enum
 from types import MappingProxyType, MethodType
-from typing import Any, Mapping, Tuple
+from typing import Any, Callable, Mapping, Tuple
 
 from .alas_combat_admission import AlasCampaignCombatAdmission
 from .alas_decision_preview import (
@@ -706,11 +706,13 @@ class _ReplayDriver:
         admission: AlasCampaignCombatAdmission,
         grid: _SemanticGotoGrid,
         target_location: Tuple[int, int],
+        observation_flow_factory: Callable[[AlasCombatReplayFrame], Any] | None,
     ) -> None:
         self.replay = replay
         self.admission = admission
         self.grid = grid
         self.target_location = target_location
+        self.observation_flow_factory = observation_flow_factory
         self.index = -1
         self.section = "goto"
         self.searching_screenshots = 0
@@ -747,9 +749,24 @@ class _ReplayDriver:
     def query(self, name: str, *, primitive: str = "appear") -> bool:
         self.resource_queries.append(name)
         self.observation_requests.append(primitive + ":" + name)
+        if self.observation_flow_factory is not None:
+            flow = self.flow()
+            if primitive == "appear":
+                return bool(flow.appear(name))
+            if primitive == "image_color_count":
+                return bool(flow.image_color_count(name))
+            raise SemanticGateClosed("combat replay observation primitive changed")
         if primitive == "image_color_count":
             self.pixel_accesses.append(primitive + ":" + name)
         return name in self.frame.visible_resources
+
+    def flow(self) -> Any | None:
+        if self.observation_flow_factory is None:
+            return None
+        flow = self.observation_flow_factory(self.frame)
+        if flow is None:
+            raise SemanticGateClosed("combat observation flow is unavailable")
+        return flow
 
     def typed_read(self, name: str) -> None:
         self.direct_typed_state_reads.append(name)
@@ -984,6 +1001,8 @@ def replay_alas_campaign_combat_state_machine(
     admission: AlasCampaignCombatAdmission,
     state: CampaignMapState,
     replay: AlasCampaignCombatReplay,
+    *,
+    observation_flow_factory: Callable[[AlasCombatReplayFrame], Any] | None = None,
 ) -> AlasCampaignCombatStateReplayResult:
     """Run the pinned original ALAS combat chain with virtual typed inputs."""
 
@@ -1036,7 +1055,13 @@ def replay_alas_campaign_combat_state_machine(
         bounds=admission.bounds,
     )
     grid.may_boss = False
-    driver = _ReplayDriver(replay, admission, grid, target_location)
+    driver = _ReplayDriver(
+        replay,
+        admission,
+        grid,
+        target_location,
+        observation_flow_factory,
+    )
     grid.predict_fleet = lambda: driver.frame.fleet_on_target
     grid.predict_current_fleet = lambda: driver.frame.current_fleet_on_target
     sandbox.view = _ReplayView(grid, driver)
@@ -1128,27 +1153,44 @@ def replay_alas_campaign_combat_state_machine(
         driver.call_order.append("is_in_map:" + driver.frame.phase.value)
         driver.resource_queries.append("IN_MAP")
         driver.typed_read("is_in_map")
-        return driver.frame.in_map
+        flow = driver.flow()
+        return driver.frame.in_map if flow is None else bool(flow.is_in_map())
 
     def is_combat_loading(self: Any) -> bool:
         del self
         driver.call_order.append("is_combat_loading")
         driver.typed_read("is_combat_loading")
-        return driver.frame.combat_loading
+        flow = driver.flow()
+        return (
+            driver.frame.combat_loading
+            if flow is None
+            else bool(flow.is_combat_loading())
+        )
 
     def is_combat_executing(self: Any) -> Any:
         del self
         driver.call_order.append("is_combat_executing")
         driver.resource_queries.append("PAUSE")
         driver.typed_read("is_combat_executing")
-        return "PAUSE" if driver.frame.combat_executing else False
+        flow = driver.flow()
+        executing = (
+            driver.frame.combat_executing
+            if flow is None
+            else bool(flow.is_combat_executing())
+        )
+        return "PAUSE" if executing else False
 
     def enemy_searching_appear(self: Any) -> bool:
         del self
         driver.call_order.append("enemy_searching_appear")
         driver.resource_queries.append("MAP_ENEMY_SEARCHING")
         driver.typed_read("enemy_searching_appear")
-        return driver.frame.enemy_searching
+        flow = driver.flow()
+        return (
+            driver.frame.enemy_searching
+            if flow is None
+            else bool(flow.enemy_searching_appear())
+        )
 
     def combat_appear(self: Any) -> bool:
         del self
@@ -1206,7 +1248,9 @@ def replay_alas_campaign_combat_state_machine(
         del self
         driver.call_order.append("hp_get")
         driver.typed_read("hp_get")
-        hp = [float(value) for value in driver.frame.hp]
+        flow = driver.flow()
+        values = driver.frame.hp if flow is None else flow.hp_get()
+        hp = [float(value) for value in values]
         sandbox.hp = hp
         return hp
 
@@ -1214,7 +1258,9 @@ def replay_alas_campaign_combat_state_machine(
         del self
         driver.call_order.append("lv_get:" + str(bool(after_battle)))
         driver.typed_read("lv_get")
-        levels = [int(value) for value in driver.frame.levels]
+        flow = driver.flow()
+        values = driver.frame.levels if flow is None else flow.lv_get()
+        levels = [int(value) for value in values]
         sandbox.lv = levels
         return levels
 

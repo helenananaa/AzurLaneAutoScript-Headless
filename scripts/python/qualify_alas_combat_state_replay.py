@@ -5,10 +5,12 @@ state on ALAS's own static map and records virtual combat actions only.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import subprocess
 import sys
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -24,13 +26,20 @@ from alas_headless import (  # noqa: E402
     CampaignMapPickupState,
     CampaignMapState,
     Point,
+    build_alas_campaign_combat_normal_replay_from_observer,
     canonical_alas_campaign_combat_replay,
+    load_alas_combat_observer_fixture,
+    load_alas_combat_observer_manifest,
     prepare_alas_campaign_combat_admission,
     preview_alas_campaign_decision,
     replay_alas_campaign_combat_state_machine,
     synchronize_alas_campaign_map,
 )
-from alas_headless.adapter import load_g36_task_profile  # noqa: E402
+from alas_headless.adapter import (  # noqa: E402
+    CombatFlow,
+    CombatFlowState,
+    load_g36_task_profile,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,6 +51,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--include-get-items", action="store_true")
     parser.add_argument("--include-get-mission", action="store_true")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--observer-fixture", type=Path)
+    parser.add_argument(
+        "--observer-manifest",
+        type=Path,
+        default=ROOT / "integration" / "alas" / "combat-observer-manifest.json",
+    )
+    parser.add_argument("--semantic-combat-flow", action="store_true")
     parser.add_argument(
         "--profile",
         type=Path,
@@ -135,9 +151,69 @@ def build_state(campaign) -> CampaignMapState:
     )
 
 
+def build_observer_prebattle_state(snapshots) -> CampaignMapState:
+    """Reconstruct the exact same-cell input state preceding reviewed frames."""
+
+    stable = snapshots[-1].campaign_map
+    if stable is None:
+        raise SystemExit("observer fixture has no stable campaign map")
+    marker = stable.current_fleet_marker
+    current = tuple(fleet for fleet in stable.fleets if fleet.marker == marker)
+    if len(current) != 1:
+        raise SystemExit("observer fixture current fleet is ambiguous")
+    target = tuple(cell for cell in stable.cells if cell.node == current[0].node)
+    if len(target) != 1:
+        raise SystemExit("observer fixture target cell is ambiguous")
+    if any(enemy.node == current[0].node for enemy in stable.enemies):
+        raise SystemExit("observer stable map still has an enemy on target")
+    target_cell = target[0]
+    return replace(
+        stable,
+        generation=snapshots[0].generation - 1,
+        fleets=tuple(
+            replace(item, ammo=item.ammo + 1)
+            if item.marker == marker
+            else item
+            for item in stable.fleets
+        ),
+        enemies=stable.enemies
+        + (
+            CampaignMapEnemyState(
+                target_cell.row,
+                target_cell.column,
+                target_cell.node,
+                1204080,
+                "hm1",
+                1,
+                "Carrier",
+                113,
+                True,
+            ),
+        ),
+    )
+
+
 def main() -> int:
     args = parse_args()
     alas_root = args.alas_root.resolve()
+    if args.semantic_combat_flow and args.observer_fixture is None:
+        raise SystemExit("semantic combat flow requires an observer fixture")
+    if args.observer_fixture is not None and any(
+        (
+            args.include_automation_confirm,
+            args.include_automation_switch,
+            args.include_get_items,
+            args.include_get_mission,
+        )
+    ):
+        raise SystemExit("observer fixture determines its own phase sequence")
+    observer_fixture = (
+        args.observer_fixture.resolve()
+        if args.observer_fixture is not None
+        else None
+    )
+    observer_manifest = args.observer_manifest.resolve()
+    output = args.output.resolve() if args.output is not None else None
     profile = load_g36_task_profile(args.profile)
     actual_commit = subprocess.run(
         ["git", "-C", str(alas_root), "rev-parse", "HEAD"],
@@ -165,26 +241,50 @@ def main() -> int:
     )
     campaign = Campaign(config, device=SimpleNamespace(semantic_adapter=True))
     profile.require_alas_config(campaign.config)
-    state = build_state(campaign)
+    snapshots = None
+    manifest = None
+    if observer_fixture is None:
+        state = build_state(campaign)
+    else:
+        manifest = load_alas_combat_observer_manifest(observer_manifest)
+        snapshots = load_alas_combat_observer_fixture(
+            observer_fixture, manifest
+        )
+        state = build_observer_prebattle_state(snapshots)
     projection = synchronize_alas_campaign_map(campaign, state)
     decision = preview_alas_campaign_decision(campaign, projection)
     admission = prepare_alas_campaign_combat_admission(
         decision, state, input_generation=state.generation
     )
-    replay = canonical_alas_campaign_combat_replay(
-        admission,
-        include_automation_confirm=args.include_automation_confirm,
-        include_automation_switch=args.include_automation_switch,
-        include_get_items=args.include_get_items,
-        include_get_mission=args.include_get_mission,
-    )
+    if snapshots is None or manifest is None:
+        replay = canonical_alas_campaign_combat_replay(
+            admission,
+            include_automation_confirm=args.include_automation_confirm,
+            include_automation_switch=args.include_automation_switch,
+            include_get_items=args.include_get_items,
+            include_get_mission=args.include_get_mission,
+        )
+    else:
+        replay = build_alas_campaign_combat_normal_replay_from_observer(
+            admission, snapshots, manifest
+        )
 
     source_map_dict = campaign.MAP.__dict__
     source_grid_dicts = {
         tuple(grid.location): grid.__dict__ for grid in campaign.MAP
     }
     result = replay_alas_campaign_combat_state_machine(
-        campaign, projection, decision, admission, state, replay
+        campaign,
+        projection,
+        decision,
+        admission,
+        state,
+        replay,
+        observation_flow_factory=(
+            (lambda frame: CombatFlow(CombatFlowState(frame)))
+            if args.semantic_combat_flow
+            else None
+        ),
     )
     source_restored = (
         campaign.MAP.__dict__ is source_map_dict
@@ -200,9 +300,14 @@ def main() -> int:
         and result.ammo_after == result.ammo_before - 1
         and result.target_enemy_cleared
         and result.target_fleet_present
+        and (not args.semantic_combat_flow or not result.pixel_accesses)
     )
     document = {
-        "schema": "alas-headless.g19-combat-state-replay/v1",
+        "schema": (
+            "alas-headless.g36-normal-observer-replay/v1"
+            if observer_fixture is not None
+            else "alas-headless.g19-combat-state-replay/v1"
+        ),
         "upstream_alas_commit": actual_commit,
         "profile_id": profile.profile_id,
         "task_config_sha256": profile.sha256,
@@ -233,15 +338,26 @@ def main() -> int:
         "source_restored": source_restored,
         "projected_map_unchanged": result.projected_map_unchanged,
     }
+    if observer_fixture is not None:
+        document.update(
+            {
+                "observer_fixture_sha256": hashlib.sha256(
+                    observer_fixture.read_bytes()
+                ).hexdigest(),
+                "semantic_combat_flow": args.semantic_combat_flow,
+                "capability_promotion": False,
+                "production_ready": False,
+            }
+        )
     encoded = json.dumps(
         document,
         ensure_ascii=False,
         separators=(",", ":"),
         sort_keys=True,
     ) + "\n"
-    if args.output is not None:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(encoded, encoding="utf-8", newline="\n")
+    if output is not None:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(encoded, encoding="utf-8", newline="\n")
     print(encoded, end="")
     return 0 if passed else 1
 

@@ -66,6 +66,7 @@ from .alas_combat_branch_replay import (
     verify_alas_combat_branch_replay_record,
 )
 from .alas_combat_observer import (
+    ALAS_COMBAT_NORMAL_EVIDENCE_RESOURCE_NAMES,
     ALAS_COMBAT_OBSERVER_FIXTURE_SCHEMA,
     ALAS_COMBAT_OBSERVER_MANIFEST_SCHEMA,
     AlasCombatActionMapping,
@@ -85,6 +86,7 @@ from .alas_combat_observer import (
     alas_combat_unity_selector_to_json,
     audit_alas_combat_observer_manifest,
     build_alas_campaign_combat_replay_from_observer,
+    build_alas_campaign_combat_normal_replay_from_observer,
     canonical_alas_combat_observer_frame_sha256,
     load_alas_combat_observer_fixture,
     load_alas_combat_observer_manifest,
@@ -325,6 +327,7 @@ __all__ = (
     "ActionReceipt",
     "AdbObserverBridge",
     "BackendKind",
+    "ALAS_COMBAT_NORMAL_EVIDENCE_RESOURCE_NAMES",
     "ALAS_COMBAT_OBSERVER_FIXTURE_SCHEMA",
     "ALAS_COMBAT_OBSERVER_MANIFEST_SCHEMA",
     "ALAS_COMBAT_OBSERVER_CANDIDATE_SCHEMA",
@@ -533,6 +536,7 @@ __all__ = (
     "audit_alas_combat_rare_surface_mappings",
     "audit_alas_combat_result_surface_mappings",
     "alas_combat_replay_phase_sequence",
+    "build_alas_campaign_combat_normal_replay_from_observer",
     "build_alas_campaign_combat_replay_from_observer",
     "build_alas_campaign_camera_view",
     "build_alas_combat_observer_trace",
