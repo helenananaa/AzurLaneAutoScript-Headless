@@ -1,3 +1,4 @@
+import json
 import re
 import unittest
 from pathlib import Path
@@ -19,6 +20,42 @@ LIFECYCLE_PATHS = {
     "module/device/device.py",
     "module/handler/login.py",
 }
+FLOW_PATHS = {
+    "0010-mission-mail-flow-ports.patch": {
+        "module/freebies/mail_white.py",
+        "module/reward/reward.py",
+    },
+    "0020-commission-tactical-flow-ports.patch": {
+        "module/commission/commission.py",
+        "module/commission/project.py",
+        "module/tactical/tactical_class.py",
+    },
+    "0030-research-dorm-build-flow-ports.patch": {
+        "module/dorm/dorm.py",
+        "module/gacha/gacha_reward.py",
+        "module/research/project.py",
+        "module/research/research.py",
+        "module/research/rqueue.py",
+        "module/research/selector.py",
+        "module/research/series.py",
+        "module/research/ui.py",
+    },
+    "0040-campaign-flow-ports.patch": {
+        "module/campaign/campaign_ocr.py",
+        "module/campaign/campaign_status.py",
+        "module/map/map_fleet_preparation.py",
+    },
+    "0050-combat-flow-ports.patch": {
+        "module/campaign/run.py",
+        "module/map/camera.py",
+        "module/map/map_operation.py",
+    },
+}
+
+
+def manifest_patch_names():
+    document = json.loads((SERIES / "series.json").read_text(encoding="utf-8"))
+    return tuple(Path(member["path"]).name for member in document["members"])
 
 
 def target_blobs(path):
@@ -64,7 +101,10 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
     def test_split_members_are_disjoint_and_cover_legacy_surface(self):
         core = target_blobs(SERIES / "0001-core-ports.patch")
         lifecycle = target_blobs(SERIES / "0002-session-lifecycle.patch")
-        tasks = target_blobs(SERIES / "0090-legacy-task-hooks.patch")
+        task_members = manifest_patch_names()[2:]
+        tasks = {}
+        for name in task_members:
+            tasks.update(target_blobs(SERIES / name))
         legacy = target_blobs(ALAS / "0001-semantic-oracle-hooks.patch")
 
         self.assertEqual(set(core), CORE_PATHS)
@@ -79,11 +119,7 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
         legacy = target_blobs(ALAS / "0001-semantic-oracle-hooks.patch")
         split = {}
         split_mutations = {}
-        for name in (
-            "0001-core-ports.patch",
-            "0002-session-lifecycle.patch",
-            "0090-legacy-task-hooks.patch",
-        ):
+        for name in manifest_patch_names():
             split.update(target_blobs(SERIES / name))
             split_mutations.update(file_mutations(SERIES / name))
         legacy_mutations = file_mutations(
@@ -99,6 +135,22 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
             stale_legacy_indices,
             {"module/map/camera.py", "module/map/map_operation.py"},
         )
+
+    def test_each_promoted_flow_has_exact_ownership_and_residual_is_disjoint(self):
+        promoted = set()
+        names = set(manifest_patch_names())
+        for name, expected_paths in FLOW_PATHS.items():
+            if name in names:
+                actual = set(target_blobs(SERIES / name))
+                self.assertEqual(actual, expected_paths)
+                self.assertFalse(promoted & actual)
+                promoted.update(actual)
+        if "0090-legacy-task-hooks.patch" in names:
+            residual = set(
+                target_blobs(SERIES / "0090-legacy-task-hooks.patch")
+            )
+            self.assertFalse(promoted & residual)
+            self.assertEqual(len(promoted) + len(residual), 19)
 
     def test_core_prefix_contains_no_task_module(self):
         core_prefix = set(target_blobs(SERIES / "0001-core-ports.patch"))

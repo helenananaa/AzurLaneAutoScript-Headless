@@ -12,8 +12,13 @@
     },
     {
       "order": 3,
+      "path": "integration/alas/series/0010-mission-mail-flow-ports.patch",
+      "sha256": "6745e56bbd93fcc12443bd7d68a4932e9e862a2305f507e9f4ea90a578842746"
+    },
+    {
+      "order": 4,
       "path": "integration/alas/series/0090-legacy-task-hooks.patch",
-      "sha256": "db8920203a80ac08bcbb4ec6bbcc69ad839fa2dfb0dd2bacbc56fb3a3dafef52"
+      "sha256": "b65b36934d64a05301f2ec283c4b892826ea7e7b09eaffa490338c255e012a12"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

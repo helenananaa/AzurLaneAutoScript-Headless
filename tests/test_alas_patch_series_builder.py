@@ -73,7 +73,8 @@ class AlasPatchSeriesBuilderTests(unittest.TestCase):
                 output.read_bytes(),
                 b"".join(member.read_bytes() for member in members),
             )
-            self.assertEqual(result["member_count"], 3)
+            self.assertEqual(result["member_count"], len(members))
+            self.assertGreaterEqual(result["member_count"], 3)
             self.assertEqual(
                 result["combined_sha256"],
                 hashlib.sha256(output.read_bytes()).hexdigest(),
