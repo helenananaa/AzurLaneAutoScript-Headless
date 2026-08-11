@@ -11,6 +11,7 @@ from alas_headless.adapter import (
     RunPolicyError,
     RunPolicyIdentity,
     canonical_run_policy_json,
+    load_g36_task_profile,
     load_run_policy,
     parse_run_policy,
 )
@@ -19,9 +20,16 @@ from alas_headless.adapter import (
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "integration" / "alas" / "policies" / "zero-input.example.json"
 RUNTIME_LOCK = ROOT / "integration" / "runtime" / "runtime-lock.example.json"
+TASK_PROFILE = (
+    ROOT
+    / "integration"
+    / "alas"
+    / "profiles"
+    / "g36-12-4-normal-one-battle.zero-input.json"
+)
 UPSTREAM = "81ccf63b4540f00241628c82a58c02c7a2bb11af"
 RUNTIME_SHA = "e54d6b213265703f8aaf0f74e56c2fec0fed45f816cc2c467d5ae6fae3952066"
-TASK_SHA = "83a80303c11e9a7992b9713522385217df3cdba9f5da645e6cb6f5d4741b1f16"
+TASK_SHA = "bea8b149ecd634dcd33d8972c3eae69db8bbbb1e5c4951c3c11159211f489b2f"
 
 
 def example_document():
@@ -41,7 +49,7 @@ class AdapterPolicyTests(unittest.TestCase):
         policy = load_run_policy(EXAMPLE, expected_identity=identity)
 
         self.assertEqual(policy.identity, identity)
-        self.assertEqual(policy.profile_id, "cn-example-zero-input")
+        self.assertEqual(policy.profile_id, "cn-9.7.10-12-4-normal-one-battle")
         self.assertEqual(policy.total_grants, 0)
         self.assertTrue(all(amount == 0 for amount in policy.grants.values()))
         self.assertIsInstance(policy.grants, MappingProxyType)
@@ -59,6 +67,9 @@ class AdapterPolicyTests(unittest.TestCase):
     def test_example_runtime_identity_hash_is_current(self):
         self.assertEqual(hashlib.sha256(RUNTIME_LOCK.read_bytes()).hexdigest(), RUNTIME_SHA)
         self.assertEqual(example_document()["runtime_lock_sha256"], RUNTIME_SHA)
+        task_profile = load_g36_task_profile(TASK_PROFILE)
+        self.assertEqual(task_profile.sha256, TASK_SHA)
+        self.assertEqual(example_document()["task_config_sha256"], TASK_SHA)
 
     def test_canonical_serialization_is_stable_across_key_and_grant_order(self):
         document = example_document()
@@ -97,8 +108,8 @@ class AdapterPolicyTests(unittest.TestCase):
     def test_duplicate_top_level_and_grant_fields_fail(self):
         base = EXAMPLE.read_text(encoding="utf-8")
         duplicate_top = base.replace(
-            '  "profile_id": "cn-example-zero-input",',
-            '  "profile_id": "cn-example-zero-input",\n'
+            '  "profile_id": "cn-9.7.10-12-4-normal-one-battle",',
+            '  "profile_id": "cn-9.7.10-12-4-normal-one-battle",\n'
             '  "profile_id": "duplicate",',
         )
         duplicate_grant = base.replace(

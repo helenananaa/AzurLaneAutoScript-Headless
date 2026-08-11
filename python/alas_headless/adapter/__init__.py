@@ -81,6 +81,14 @@ from .runtime_handle import (
     semantic_runtime_fingerprint_sha256,
 )
 from .scope import FlowScopeStack
+from .task_profile import (
+    G36_TASK_PROFILE_SCHEMA,
+    G36TaskProfile,
+    G36TaskProfileError,
+    canonical_g36_task_profile_json,
+    load_g36_task_profile,
+    parse_g36_task_profile,
+)
 
 
 __all__ = (
@@ -107,6 +115,9 @@ __all__ = (
     "FlowScopeError",
     "FlowScopeStack",
     "FlowScopeToken",
+    "G36_TASK_PROFILE_SCHEMA",
+    "G36TaskProfile",
+    "G36TaskProfileError",
     "LEGACY_BOOLEAN_GRANTS",
     "LEGACY_BUDGET_GRANTS",
     "LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES",
@@ -139,9 +150,12 @@ __all__ = (
     "canonical_run_policy_json",
     "canonical_capability_report_json",
     "capability_closure_report",
+    "canonical_g36_task_profile_json",
     "compatibility_policy_sha256",
     "compatibility_profile",
     "load_run_policy",
+    "load_g36_task_profile",
+    "parse_g36_task_profile",
     "parse_run_policy",
     "recovery_capability",
     "semantic_runtime_fingerprint_sha256",

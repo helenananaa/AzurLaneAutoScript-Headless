@@ -31,9 +31,12 @@ through a later explicit check.
 `integration/alas/policies/zero-input.example.json` is the checked-in safe
 example. Its runtime hash is bound to
 `integration/runtime/runtime-lock.example.json`; its task-config hash is the
-SHA-256 of the explicit example identity
-`alas-adapter-v2:zero-input-example-task`. Every grant and the deadline are
-zero, and recovery is `qualification-stop`.
+canonical SHA-256 of
+`integration/alas/profiles/g36-12-4-normal-one-battle.zero-input.json`.
+That strict profile freezes the pinned CN 9.7.10, ALAS revision, 12-4 normal
+configuration, one-battle end condition, and every `_goto()`/combat branch
+setting admitted by G36. Every grant and the deadline remain zero, and
+recovery is `qualification-stop`.
 
 F01 validates capability-token syntax but deliberately does not invent the
 required capability taxonomy. F03 must compare these grant tokens against the
