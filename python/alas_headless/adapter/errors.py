@@ -52,6 +52,13 @@ class CapabilityClosureError(AdapterContractError):
     safe_message = "semantic capability closure is incomplete"
 
 
+class RunPolicyError(AdapterContractError):
+    """A run policy is malformed, ambiguous, or bound to another identity."""
+
+    code = "run-policy"
+    safe_message = "semantic run policy is invalid"
+
+
 class ActionLeaseError(AdapterContractError):
     """An action has no valid identity-bound single-use authority."""
 

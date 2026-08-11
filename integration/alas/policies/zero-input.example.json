@@ -1,0 +1,14 @@
+{
+  "schema": "alas-headless.run-policy/v1",
+  "profile_id": "cn-example-zero-input",
+  "upstream_alas_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af",
+  "runtime_lock_sha256": "b1a61830438e3bf0c47443b9e9f718fbc14ed29dfda57defa325ffb894339061",
+  "task_config_sha256": "83a80303c11e9a7992b9713522385217df3cdba9f5da645e6cb6f5d4741b1f16",
+  "grants": {
+    "campaign.grid_click": 0,
+    "campaign.stage_entry": 0,
+    "campaign.viewport_swipe": 0
+  },
+  "deadline_seconds": 0,
+  "recovery_policy": "qualification-stop"
+}

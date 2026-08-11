@@ -5,6 +5,7 @@ from .errors import (
     AdapterContractError,
     CapabilityClosureError,
     FlowScopeError,
+    RunPolicyError,
     StaleFrameError,
     UnknownObservationError,
     UnsupportedPixelRead,
@@ -29,6 +30,14 @@ from .pixel_guard import (
     PixelAccessOperation,
     PixelAccessRecord,
     SemanticPixelGuard,
+)
+from .policy import (
+    RecoveryPolicy,
+    RunPolicy,
+    RunPolicyIdentity,
+    canonical_run_policy_json,
+    load_run_policy,
+    parse_run_policy,
 )
 from .registry import (
     ObservationHandler,
@@ -61,6 +70,7 @@ __all__ = (
     "FlowScopeError",
     "FlowScopeStack",
     "FlowScopeToken",
+    "RunPolicyError",
     "ObservationPort",
     "ObservationHandler",
     "ObservationRegistration",
@@ -81,6 +91,12 @@ __all__ = (
     "PixelAccessOperation",
     "PixelAccessRecord",
     "SemanticPixelGuard",
+    "RecoveryPolicy",
+    "RunPolicy",
+    "RunPolicyIdentity",
+    "canonical_run_policy_json",
+    "load_run_policy",
+    "parse_run_policy",
     "semantic_runtime_fingerprint_sha256",
     "StaleFrameError",
     "UnknownObservationError",

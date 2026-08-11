@@ -10,6 +10,7 @@ from alas_headless.adapter import (
     AdapterContractError,
     CapabilityClosureError,
     FlowScopeError,
+    RunPolicyError,
     StaleFrameError,
     UnknownObservationError,
     UnsupportedPixelRead,
@@ -24,6 +25,7 @@ ERRORS = (
     UnsupportedPixelRead,
     StaleFrameError,
     CapabilityClosureError,
+    RunPolicyError,
     ActionLeaseError,
 )
 
