@@ -222,8 +222,11 @@ try {
 
     $manifest = [ordered]@{
         schema = 'alas-headless.g1-probe/v1'
+        outcome = 'pass'
         captured_at_utc = $capturedAt.ToString('o')
         serial = $Serial
+        abi = (Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'getprop',
+            'ro.product.cpu.abilist')).Trim()
         angle_apk_sha256 = (Get-FileHash -LiteralPath $angleApkPath -Algorithm SHA256).Hash.ToLowerInvariant()
         probe_apk_sha256 = (Get-FileHash -LiteralPath $probeApkPath -Algorithm SHA256).Hash.ToLowerInvariant()
         pid = [int]$targetPid
@@ -231,6 +234,8 @@ try {
         original_settings = $originalSettings
         memory_samples = $memorySamples
         contract = $contract
+        game_installed = $false
+        alas_workload_used = $false
     }
     Write-JsonFile -Path (Join-Path $outputDirectory 'manifest.json') -Value $manifest
     Write-Output $outputDirectory

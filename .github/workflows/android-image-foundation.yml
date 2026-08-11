@@ -1,0 +1,32 @@
+name: android-image-foundation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  static-foundation-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile Python entrypoints
+        run: python -m compileall -q python scripts/python
+      - name: Validate image policy
+        env:
+          PYTHONPATH: python
+        run: python scripts/python/validate_android_image_policy.py --policy integration/runtime/android-image-policy.example.json
+      - name: Run repository tests
+        env:
+          PYTHONPATH: python
+        run: python -m unittest discover -s tests -p 'test_*.py'
+      - name: Reject tracked proprietary Android artifacts
+        shell: bash
+        run: |
+          if git ls-files '*.apk' '*.aab' '*.apks' '*.obb' | grep -q .; then
+            echo 'Android package/resource artifacts must remain external to Git.' >&2
+            exit 1
+          fi

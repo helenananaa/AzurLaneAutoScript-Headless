@@ -7,6 +7,7 @@ param(
     [string]$UnityPackage = 'io.github.alasheadless.unitycontract',
     [string]$Activity = 'com.unity3d.player.UnityPlayerActivity',
     [string]$UnityCommandLine = '-force-gfx-st',
+    [ValidateSet('x86_64', 'arm64-v8a')][string]$ExpectedAbi = 'x86_64',
     [ValidateRange(500, 10000)][int]$MaxFreshnessMs = 2500,
     [string]$OutputRoot = (Join-Path (Resolve-Path (Join-Path $PSScriptRoot '..\..')) 'evidence')
 )
@@ -94,25 +95,58 @@ function Invoke-ObserverRequest {
 function Wait-ObserverSnapshot {
     param([Parameter(Mandatory = $true)][int]$Port,
           [Parameter(Mandatory = $true)][scriptblock]$Predicate,
+          [Parameter(Mandatory = $true)][int]$MaxAgeMs,
+          [AllowNull()]$Context = $null,
           [ValidateRange(1, 60)][int]$TimeoutSeconds = 20)
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     $last = $null
+    $lastPredicateResult = @()
     do {
         try {
             $last = Invoke-ObserverRequest -Port $Port -Request "GET /v1/snapshot`n"
-            if (& $Predicate $last) { return $last }
+            $lastPredicateResult = @(& $Predicate $last $MaxAgeMs $Context)
+            if ($lastPredicateResult.Count -eq 1 -and [bool]$lastPredicateResult[0]) {
+                return $last
+            }
         }
         catch {
             $last = [ordered]@{ error = $_.Exception.Message }
         }
         Start-Sleep -Milliseconds 500
     } while ((Get-Date) -lt $deadline)
-    throw "observer snapshot timeout: $($last | ConvertTo-Json -Compress)"
+    throw "observer snapshot timeout (predicate=$($lastPredicateResult -join ',')): $($last | ConvertTo-Json -Compress)"
+}
+
+function Get-SecureSetting {
+    param([Parameter(Mandatory = $true)][string]$Name)
+    return (Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'settings', 'get', 'secure', $Name)).Trim()
+}
+
+function Restore-SecureSetting {
+    param([Parameter(Mandatory = $true)][string]$Name, [AllowEmptyString()][string]$Value)
+    if ([string]::IsNullOrWhiteSpace($Value) -or $Value -eq 'null') {
+        Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'settings', 'delete', 'secure', $Name) |
+            Out-Null
+    }
+    else {
+        Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'settings', 'put', 'secure', $Name, $Value) |
+            Out-Null
+    }
+}
+
+function Get-FocusedWindowPackage {
+    $windows = Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'dumpsys', 'window')
+    $line = $windows -split "`r?`n" | Where-Object { $_ -match 'mCurrentFocus=' } |
+        Select-Object -First 1
+    if ($line -match 'ImmersiveModeConfirmation') { return '__immersive_confirmation__' }
+    if ($line -match 'u\d+\s+([^/\s}]+)/') { return $Matches[1] }
+    return $null
 }
 
 $settingNames = @('angle_debug_package', 'angle_gl_driver_selection_pkgs',
     'angle_gl_driver_selection_values', 'show_angle_in_use_dialog_box')
 $originalSettings = [ordered]@{}
+$originalImmersiveConfirmation = $null
 $settingsChanged = $false
 $forwardPort = $null
 $targetPid = $null
@@ -125,6 +159,7 @@ try {
         throw 'ADB device is not ready'
     }
     foreach ($name in $settingNames) { $originalSettings[$name] = Get-GlobalSetting -Name $name }
+    $originalImmersiveConfirmation = Get-SecureSetting -Name 'immersive_mode_confirmations'
 
     Invoke-Adb -Arguments @('-s', $Serial, 'install', '-r', '-d', '--force-queryable',
         $angleApkPath) | Out-Null
@@ -138,9 +173,15 @@ try {
         'angle_gl_driver_selection_values', 'angle') | Out-Null
     Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'settings', 'put', 'global',
         'show_angle_in_use_dialog_box', '0') | Out-Null
+    Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'settings', 'put', 'secure',
+        'immersive_mode_confirmations', 'confirmed') | Out-Null
 
     $component = "$UnityPackage/$Activity"
     $telemetryPath = "/sdcard/Android/data/$UnityPackage/files/alas-unity-contract.jsonl"
+    Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'input', 'keyevent', 'KEYCODE_WAKEUP') `
+        -AllowFailure | Out-Null
+    Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'wm', 'dismiss-keyguard') -AllowFailure |
+        Out-Null
     Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'am', 'force-stop', $UnityPackage) | Out-Null
     Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'rm', '-f', $telemetryPath) -AllowFailure |
         Out-Null
@@ -162,14 +203,24 @@ try {
     $forwardPort = [int](Invoke-Adb -Arguments @('-s', $Serial, 'forward', 'tcp:0',
         "localabstract:$socketName")).Trim()
 
-    $before = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 20 -Predicate {
-        param($snapshot)
+    $before = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 20 `
+        -MaxAgeMs $MaxFreshnessMs -Predicate {
+        param($snapshot, $freshnessMs)
         $snapshot.status -eq 'ok' -and $snapshot.flags -eq 15 -and $snapshot.main_thread -and
         $snapshot.button_count -ge 1 -and $snapshot.interactable_button_count -ge 1 -and
-        $snapshot.age_ms -le $MaxFreshnessMs
+        $snapshot.age_ms -le $freshnessMs
     }
     $beforeButtons = Invoke-ObserverRequest -Port $forwardPort -Request "GET /v1/buttons`n"
     $foregroundBefore = Get-ForegroundPackage
+    $focusedWindowBefore = Get-FocusedWindowPackage
+    if ($focusedWindowBefore -eq '__immersive_confirmation__') {
+        Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'input', 'keyevent', '4') | Out-Null
+        for ($focusAttempt = 0; $focusAttempt -lt 20; $focusAttempt++) {
+            Start-Sleep -Milliseconds 250
+            $focusedWindowBefore = Get-FocusedWindowPackage
+            if ($focusedWindowBefore -eq $UnityPackage) { break }
+        }
+    }
     $badRequest = Invoke-ObserverRequest -Port $forwardPort -Request "CALL il2cpp_runtime_invoke`n"
 
     $contractClickTargets = @($beforeButtons.buttons | Where-Object {
@@ -183,7 +234,8 @@ try {
         $_.adb_point.y -ge $_.adb_bounds.top -and
         $_.adb_point.y -le $_.adb_bounds.bottom
     })
-    if ($foregroundBefore -ne $UnityPackage -or $contractClickTargets.Count -ne 1) {
+    if ($foregroundBefore -ne $UnityPackage -or $focusedWindowBefore -ne $UnityPackage -or
+        $contractClickTargets.Count -ne 1) {
         throw 'contract Button is not the unique top EventSystem raycast target'
     }
     $contractClickTarget = $contractClickTargets[0]
@@ -191,19 +243,21 @@ try {
     $contractClickY = [int][Math]::Round([double]$contractClickTarget.adb_point.y)
     Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'input', 'tap', "$contractClickX",
         "$contractClickY") | Out-Null
-    $afterClick = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 15 -Predicate {
-        param($snapshot)
+    $afterClick = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 15 `
+        -MaxAgeMs $MaxFreshnessMs -Context $before -Predicate {
+        param($snapshot, $freshnessMs, $prior)
         $snapshot.status -eq 'ok' -and
-        [uint64]$snapshot.semantic_generation -gt [uint64]$before.semantic_generation -and
+        [uint64]$snapshot.semantic_generation -gt [uint64]$prior.semantic_generation -and
         $snapshot.semantic_code -eq 2 -and $snapshot.interactable_button_count -eq 0 -and
-        $snapshot.age_ms -le $MaxFreshnessMs
+        $snapshot.age_ms -le $freshnessMs
     }
 
-    $afterScene = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 25 -Predicate {
-        param($snapshot)
+    $afterScene = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 25 `
+        -MaxAgeMs $MaxFreshnessMs -Context $afterClick -Predicate {
+        param($snapshot, $freshnessMs, $prior)
         $snapshot.status -eq 'ok' -and
-        [uint64]$snapshot.scene_generation -gt [uint64]$afterClick.scene_generation -and
-        $snapshot.age_ms -le $MaxFreshnessMs
+        [uint64]$snapshot.scene_generation -gt [uint64]$prior.scene_generation -and
+        $snapshot.age_ms -le $freshnessMs
     }
 
     Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'input', 'keyevent', '3') | Out-Null
@@ -216,11 +270,12 @@ try {
 
     Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'am', 'start', '-W', '-n', $component) |
         Out-Null
-    $afterResume = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 15 -Predicate {
-        param($snapshot)
+    $afterResume = Wait-ObserverSnapshot -Port $forwardPort -TimeoutSeconds 15 `
+        -MaxAgeMs $MaxFreshnessMs -Context $afterScene -Predicate {
+        param($snapshot, $freshnessMs, $prior)
         $snapshot.status -eq 'ok' -and
-        [uint64]$snapshot.generation -gt [uint64]$afterScene.generation -and
-        $snapshot.age_ms -le $MaxFreshnessMs
+        [uint64]$snapshot.generation -gt [uint64]$prior.generation -and
+        $snapshot.age_ms -le $freshnessMs
     }
     $foregroundAfterResume = Get-ForegroundPackage
     $afterResumeButtons = Invoke-ObserverRequest -Port $forwardPort -Request "GET /v1/buttons`n"
@@ -309,7 +364,7 @@ try {
         $failures.Add('unity-main-thread-rendezvous-mismatch')
     }
     if (-not $versionCode -or [string]::IsNullOrWhiteSpace($versionName) -or
-        [string]::IsNullOrWhiteSpace($buildFingerprint) -or $abi -ne 'x86_64') {
+        [string]::IsNullOrWhiteSpace($buildFingerprint) -or $abi -ne $ExpectedAbi) {
         $failures.Add('android-version-fingerprint-incomplete')
     }
     if ($logText -match 'Fatal signal|FATAL EXCEPTION|AndroidRuntime.*FATAL') {
@@ -318,8 +373,10 @@ try {
 
     $manifest = [ordered]@{
         schema = 'alas-headless.g3-observer/v1'
+        outcome = if ($failures.Count -eq 0) { 'pass' } else { 'fail' }
         captured_at_utc = $capturedAt.ToString('o')
         serial = $Serial
+        abi = $abi
         package = $UnityPackage
         pid = [int]$targetPid
         socket_name = $socketName
@@ -354,10 +411,42 @@ try {
         bad_request_response = $badRequest
         failures = $failures
         passed = $failures.Count -eq 0
+        game_installed = $false
+        alas_workload_used = $false
     }
     Write-JsonFile -Path (Join-Path $outputDirectory 'manifest.json') -Value $manifest
     if ($failures.Count -gt 0) { throw "G3 observer contract failed: $($failures -join ', ')" }
     Write-Output $outputDirectory
+}
+catch {
+    $failure = $_
+    $failureRecord = [ordered]@{
+        schema = 'alas-headless.g3-observer-failure/v1'
+        captured_at_utc = [DateTimeOffset]::UtcNow.ToString('o')
+        serial = $Serial
+        package = $UnityPackage
+        pid = $targetPid
+        message = $failure.Exception.Message
+        before_snapshot = $before
+        before_buttons = $beforeButtons
+        click_target = $contractClickTarget
+        foreground_before = $foregroundBefore
+        focused_window_before = $focusedWindowBefore
+        game_installed = $false
+        alas_workload_used = $false
+    }
+    Write-JsonFile -Path (Join-Path $outputDirectory 'failure.json') -Value $failureRecord
+    if ($targetPid -match '^\d+$') {
+        $failureLog = Invoke-Adb -Arguments @('-s', $Serial, 'logcat', '--pid', $targetPid, '-d') `
+            -AllowFailure
+        [IO.File]::WriteAllText((Join-Path $outputDirectory 'failure-logcat.txt'), $failureLog,
+            [Text.UTF8Encoding]::new($false))
+    }
+    $failureWindows = Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'dumpsys', 'window') `
+        -AllowFailure
+    [IO.File]::WriteAllText((Join-Path $outputDirectory 'failure-dumpsys-window.txt'),
+        $failureWindows, [Text.UTF8Encoding]::new($false))
+    throw
 }
 finally {
     if ($forwardPort) {
@@ -368,6 +457,8 @@ finally {
         foreach ($name in $settingNames) {
             Restore-GlobalSetting -Name $name -Value $originalSettings[$name]
         }
+        Restore-SecureSetting -Name 'immersive_mode_confirmations' `
+            -Value $originalImmersiveConfirmation
     }
     Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'am', 'force-stop', $UnityPackage) `
         -AllowFailure | Out-Null

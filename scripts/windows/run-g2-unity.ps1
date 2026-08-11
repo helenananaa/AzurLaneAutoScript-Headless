@@ -72,6 +72,23 @@ function Restore-GlobalSetting {
     }
 }
 
+function Get-SecureSetting {
+    param([string]$Name)
+    return (Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'settings', 'get', 'secure', $Name)).Trim()
+}
+
+function Restore-SecureSetting {
+    param([string]$Name, [AllowEmptyString()][string]$Value)
+    if ([string]::IsNullOrWhiteSpace($Value) -or $Value -eq 'null') {
+        Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'settings', 'delete', 'secure', $Name) |
+            Out-Null
+    }
+    else {
+        Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'settings', 'put', 'secure', $Name, $Value) |
+            Out-Null
+    }
+}
+
 function Get-MemorySample {
     param([Parameter(Mandatory = $true)][int]$ProcessId)
     $meminfo = Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'dumpsys', 'meminfo',
@@ -131,6 +148,7 @@ $settingNames = @(
     'show_angle_in_use_dialog_box'
 )
 $originalSettings = [ordered]@{}
+$originalImmersiveConfirmation = $null
 $settingsChanged = $false
 $targetPid = ''
 
@@ -141,6 +159,7 @@ try {
     $deviceState = (Invoke-Adb -Arguments @('-s', $Serial, 'get-state')).Trim()
     if ($deviceState -ne 'device') { throw "ADB device is not ready: '$deviceState'" }
     foreach ($name in $settingNames) { $originalSettings[$name] = Get-GlobalSetting -Name $name }
+    $originalImmersiveConfirmation = Get-SecureSetting -Name 'immersive_mode_confirmations'
 
     if ($DriverMode -eq 'null') {
         Invoke-Adb -Arguments @('-s', $Serial, 'install', '-r', '-d', '--force-queryable',
@@ -149,6 +168,8 @@ try {
     Invoke-Adb -Arguments @('-s', $Serial, 'install', '-r', $unityApkPath) | Out-Null
 
     $settingsChanged = $true
+    Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'settings', 'put', 'secure',
+        'immersive_mode_confirmations', 'confirmed') | Out-Null
     if ($DriverMode -eq 'null') {
         Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'settings', 'put', 'global',
             'angle_debug_package', $AnglePackage) | Out-Null
@@ -193,15 +214,18 @@ try {
     $clicked = $false
     $pauseResume = $false
     $processFailure = $null
+    $tapX = [int][Math]::Round($ExpectedWidth * 640.0 / 1280.0)
+    $tapY = [int][Math]::Round($ExpectedHeight * 580.0 / 720.0)
     while ($clock.Elapsed.TotalSeconds -lt $DurationSeconds) {
         $samples.Add((Get-MemorySample -ProcessId ([int]$targetPid)))
         $hostSample = Get-HostSample
         if ($hostSample) { $hostSamples.Add($hostSample) }
         $elapsed = [int][Math]::Floor($clock.Elapsed.TotalSeconds)
         if (-not $clicked -and $elapsed -ge 10) {
-            Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'input', 'tap', '640', '580') |
+            Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'input', 'tap',
+                $tapX.ToString(), $tapY.ToString()) |
                 Out-Null
-            $actions.Add([ordered]@{ elapsed_seconds = $elapsed; action = 'tap'; x = 640; y = 580 })
+            $actions.Add([ordered]@{ elapsed_seconds = $elapsed; action = 'tap'; x = $tapX; y = $tapY })
             $clicked = $true
         }
         if (-not $pauseResume -and $elapsed -ge 20) {
@@ -293,8 +317,11 @@ try {
 
     $manifest = [ordered]@{
         schema = 'alas-headless.g2-unity/v2'
+        outcome = if ($failures.Count -eq 0) { 'pass' } else { 'fail' }
         captured_at_utc = $capturedAt.ToString('o')
         serial = $Serial
+        abi = (Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'getprop',
+            'ro.product.cpu.abilist')).Trim()
         driver_mode = $DriverMode
         unity_command_line = if ([string]::IsNullOrWhiteSpace($UnityCommandLine)) {
             $null
@@ -305,6 +332,7 @@ try {
             (Get-FileHash -LiteralPath $angleApkPath -Algorithm SHA256).Hash.ToLowerInvariant()
         } else { $null }
         unity_apk_sha256 = (Get-FileHash -LiteralPath $unityApkPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        apk_sha256 = (Get-FileHash -LiteralPath $unityApkPath -Algorithm SHA256).Hash.ToLowerInvariant()
         pid = [int]$targetPid
         host_process_id = if ($HostProcessId -gt 0) { $HostProcessId } else { $null }
         host_logical_processor_count = [Environment]::ProcessorCount
@@ -322,6 +350,8 @@ try {
         last_heartbeat = $lastHeartbeat
         failures = $failures
         passed = $failures.Count -eq 0
+        game_installed = $false
+        alas_workload_used = $false
     }
     Write-JsonFile -Path (Join-Path $outputDirectory 'manifest.json') -Value $manifest
     if ($failures.Count -gt 0) { throw "G2 contract failed: $($failures -join ', ')" }
@@ -332,6 +362,8 @@ finally {
         foreach ($name in $settingNames) {
             Restore-GlobalSetting -Name $name -Value $originalSettings[$name]
         }
+        Restore-SecureSetting -Name 'immersive_mode_confirmations' `
+            -Value $originalImmersiveConfirmation
     }
     Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'am', 'force-stop', $UnityPackage) `
         -AllowFailure | Out-Null

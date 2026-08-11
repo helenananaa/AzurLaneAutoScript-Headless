@@ -2030,13 +2030,26 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
 #endif
 
 Il2CppDynamicProbe ProbeIl2CppDynamicSymbols() {
-  static const Il2CppDynamicProbe result = [] {
+  // EGL can be initialized while Unity is still completing libil2cpp startup.
+  // Never freeze a partial namespace observation for the lifetime of the
+  // process; cache only the exact fixed allowlist contract.
+  static std::mutex resolutionMutex;
+  static Il2CppDynamicProbe successfulResult;
+  std::lock_guard<std::mutex> lock(resolutionMutex);
+  if (successfulResult.dynamicParsed &&
+      successfulResult.symbolCount == kIl2CppAllowlistSize) {
+    return successfulResult;
+  }
+  Il2CppDynamicProbe result = [] {
     Il2CppDynamicProbe resolved;
 #if defined(ANGLE_PLATFORM_ANDROID)
     dl_iterate_phdr(FindAndResolveIl2Cpp, &resolved);
 #endif
     return resolved;
   }();
+  if (result.dynamicParsed && result.symbolCount == kIl2CppAllowlistSize) {
+    successfulResult = result;
+  }
   return result;
 }
 

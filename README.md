@@ -25,6 +25,9 @@ exact-fingerprint evidence index are documented in the
 infrastructure with executable reference adapters for external ADB and Linux
 KVM. Redroid, TCG, and ARM64 QEMU remain explicit plan-only adapters; none of
 this claims a validated long-running ALAS workload.
+The step-by-step, no-ALAS-workload phase for reproducible x86_64/ARM64 Android
+images, external game updates, safe pruning, and rollback is documented in the
+[Android image foundation runbook](docs/android-image-foundation-runbook.zh-CN.md).
 The latest evidence-scoped result is recorded in [validation status](docs/status.md).
 The completed Android NULL contract run is documented in the
 [G1 validation report](docs/g1-validation-report.md).
@@ -231,8 +234,11 @@ Unity.exe -batchmode -quit `
   -logFile -
 ```
 
-The resulting player is x86_64, IL2CPP, and written to
-`unity/HeadlessContract/Build/HeadlessContract.apk`.
+The default player is x86_64, IL2CPP, and is written to
+`unity/HeadlessContract/Build/HeadlessContract.apk`. Set
+`ALAS_UNITY_TARGET_CPU=arm64` before the same build invocation to produce the
+ARM64-only `unity/HeadlessContract/Build/HeadlessContract-arm64.apk`; any other
+value fails before the build starts.
 
 The G3 runner launches the contract with Unity's supported `unity` Intent extra
 and `-force-gfx-st`, then validates the typed local socket and negative gates:
