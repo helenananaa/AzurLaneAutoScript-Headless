@@ -99,8 +99,8 @@ boundary is implemented.
 `ActionLedger` consumes a positive grant under a lock immediately before the
 final mutation backend call. A backend exception, ambiguous result, later
 receipt failure, exhausted grant, incomplete closure, or closed session never
-restores authority. F03 keeps the legacy per-flow budget as a temporary second
-gate; F04 removes those duplicate owners one flow family at a time.
+restores authority. F03 initially kept the legacy per-flow budget as a
+temporary second gate; F04 has now removed every duplicate flow owner.
 
 ### F04 migration status
 
@@ -128,3 +128,10 @@ panel state, and build preparation proof. Research start/reward, dorm
 collect/feed, and build submit authority now comes exclusively from the
 ledger, including multi-item dorm feeds. Reopening a flow cannot recreate a
 grant, and a backend exception permanently consumes the dispatched grant.
+
+Campaign is the final migrated family. Its context retains ALAS-owned stage,
+fleet, sortie, map, camera, target-recheck, and combat evidence, but none of
+the six campaign action budgets. Stage entry, fleet mutation, sortie, grid
+click, viewport swipe, and qualification-only camera positioning all query
+and consume the run ledger. Flow reopen preserves only genuinely unused
+run-wide grants; it never reconstructs the configured allowance.

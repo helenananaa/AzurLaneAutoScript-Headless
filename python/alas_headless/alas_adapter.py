@@ -677,9 +677,6 @@ class CampaignCameraPositioningAdmission:
 class _CampaignFlowContext:
     stage_code: str
     mode: str = "normal"
-    entry_budget: int = 0
-    fleet_mutation_budget: int = 0
-    sortie_budget: int = 0
     menu_entry_receipt: Optional[ActionReceipt] = None
     entry_receipt: Optional[ActionReceipt] = None
     map_preparation_receipt: Optional[ActionReceipt] = None
@@ -701,9 +698,6 @@ class _CampaignFlowContext:
     sortie_receipt: Optional[ActionReceipt] = None
     map_entry_state: Optional[CampaignMapEntryState] = None
     sortie_proof: Optional[CampaignSortieProof] = None
-    combat_budget: int = 0
-    viewport_swipe_budget: int = 0
-    camera_positioning_budget: int = 0
     map_state: Optional[CampaignMapState] = None
     map_columns: Optional[int] = None
     map_rows: Optional[int] = None
@@ -795,14 +789,6 @@ class AlasSemanticAdapter:
             raise ValueError(
                 "campaign camera positioning budget must be at most two"
             )
-        self._campaign_stage_entry_budget = campaign_stage_entry_budget
-        self._campaign_fleet_mutation_budget = campaign_fleet_mutation_budget
-        self._campaign_sortie_budget = campaign_sortie_budget
-        self._campaign_combat_budget = campaign_combat_budget
-        self._campaign_viewport_swipe_budget = campaign_viewport_swipe_budget
-        self._campaign_camera_positioning_budget = (
-            campaign_camera_positioning_budget
-        )
         if action_ledger is None:
             grants = _legacy_action_grants(
                 allow_mission_claim_once=allow_mission_claim_once,
@@ -1194,14 +1180,6 @@ class AlasSemanticAdapter:
         self._campaign_context = _CampaignFlowContext(
             stage_code=stage_code,
             mode=mode,
-            entry_budget=self._campaign_stage_entry_budget,
-            fleet_mutation_budget=self._campaign_fleet_mutation_budget,
-            sortie_budget=self._campaign_sortie_budget,
-            combat_budget=self._campaign_combat_budget,
-            viewport_swipe_budget=self._campaign_viewport_swipe_budget,
-            camera_positioning_budget=(
-                self._campaign_camera_positioning_budget
-            ),
             passive_transition_until=time.monotonic() + 20.0,
         )
 
@@ -1213,7 +1191,10 @@ class AlasSemanticAdapter:
 
     def campaign_stage_entry_allowed(self) -> bool:
         context = self._require_campaign_context()
-        return context.entry_budget > 0 and context.entry_receipt is None
+        return (
+            self._action_ledger.allowed("campaign.stage_entry")
+            and context.entry_receipt is None
+        )
 
     def campaign_map_preparation_committed(self) -> bool:
         context = self._require_campaign_context()
@@ -1261,7 +1242,7 @@ class AlasSemanticAdapter:
         initial = self.oracle.campaign_fleet_selection_state(context.stage_code)
         context.initial_fleet_state = initial
         context.requested_fleets = (fleet1, fleet2, submarine)
-        if context.fleet_mutation_budget == 0:
+        if not self._action_ledger.allowed("campaign.fleet_mutation"):
             return False
 
         values = dict(
@@ -1316,10 +1297,11 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign fleet preflight did not reach the request")
         context.required_fleet_mutations = len(operations)
         context.expected_fleet_mutations = tuple(operations)
-        if context.fleet_mutation_budget < len(operations):
+        remaining = self._action_ledger.remaining("campaign.fleet_mutation")
+        if remaining < len(operations):
             raise SemanticGateClosed(
                 "campaign fleet mutation budget is below the preflight requirement: "
-                "{0} < {1}".format(context.fleet_mutation_budget, len(operations))
+                "{0} < {1}".format(remaining, len(operations))
             )
         return True
 
@@ -1395,9 +1377,9 @@ class AlasSemanticAdapter:
         context = self._require_campaign_context()
         if context.sortie_receipt is not None or context.sortie_authorized:
             raise SemanticGateClosed("campaign sortie was already authorized")
-        if context.sortie_budget == 0:
+        if not self._action_ledger.allowed("campaign.sortie"):
             return False
-        if context.sortie_budget != 1:
+        if self._action_ledger.remaining("campaign.sortie") != 1:
             raise SemanticGateClosed(
                 "campaign sortie is qualified only with an exact budget of one"
             )
@@ -1451,7 +1433,7 @@ class AlasSemanticAdapter:
         if (
             not context.sortie_authorized
             or context.sortie_receipt is None
-            or context.sortie_budget != 0
+            or self._action_ledger.remaining("campaign.sortie") != 0
             or context.initial_fleet_state is None
             or context.prepared_fleet_state is None
             or context.requested_fleets is None
@@ -2891,7 +2873,13 @@ class AlasSemanticAdapter:
 
         self._package_gate()
         context = self._require_campaign_context()
-        if not 1 <= context.camera_positioning_budget <= 2:
+        camera_grants = self._action_ledger.remaining(
+            "campaign.camera_positioning"
+        )
+        if (
+            not self._action_ledger.allowed("campaign.camera_positioning")
+            or not 1 <= camera_grants <= 2
+        ):
             raise SemanticGateClosed(
                 "campaign camera positioning requires one or two budget units"
             )
@@ -2951,9 +2939,9 @@ class AlasSemanticAdapter:
 
         self._package_gate()
         context = self._require_campaign_context()
-        if context.combat_budget == 0:
+        if not self._action_ledger.allowed("campaign.grid_click"):
             return None
-        if context.combat_budget != 1:
+        if self._action_ledger.remaining("campaign.grid_click") != 1:
             raise SemanticGateClosed(
                 "campaign combat requires exactly one remaining budget unit"
             )
@@ -2973,7 +2961,10 @@ class AlasSemanticAdapter:
         # cell is already top-raycast: original ALAS may still center a
         # visible target before its grid click.  A covered target remains
         # forbidden unless that separate capability was granted.
-        viewport_required = context.viewport_swipe_budget == 1
+        viewport_required = bool(
+            self._action_ledger.allowed("campaign.viewport_swipe")
+            and self._action_ledger.remaining("campaign.viewport_swipe") == 1
+        )
         if target.raycast_top is not True and not viewport_required:
             raise SemanticGateClosed(
                 "campaign combat covered target requires one viewport swipe budget"
@@ -3061,14 +3052,18 @@ class AlasSemanticAdapter:
         context = self._require_campaign_context()
         combat_ready = (
             context.viewport_swipe_required
-            and context.viewport_swipe_budget == 1
+            and self._action_ledger.allowed("campaign.viewport_swipe")
+            and self._action_ledger.remaining("campaign.viewport_swipe") == 1
             and context.combat_admission is not None
             and context.camera_positioning_admission is None
             and context.viewport_swipe_proof is None
             and context.combat_receipt is None
         )
         positioning_ready = (
-            1 <= context.camera_positioning_budget <= 2
+            self._action_ledger.allowed("campaign.camera_positioning")
+            and 1
+            <= self._action_ledger.remaining("campaign.camera_positioning")
+            <= 2
             and context.camera_positioning_admission is not None
             and context.combat_admission is None
             and not context.camera_positioning_completed
@@ -3265,14 +3260,22 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign map viewport lease is incomplete")
 
         if positioning is not None:
-            if not 1 <= context.camera_positioning_budget <= 2:
+            if (
+                not self._action_ledger.allowed("campaign.camera_positioning")
+                or not 1
+                <= self._action_ledger.remaining("campaign.camera_positioning")
+                <= 2
+            ):
                 raise SemanticGateClosed(
                     "campaign camera positioning lease is incomplete"
                 )
             capability = "campaign.camera_positioning"
             target_node = positioning.target_node
         else:
-            if context.viewport_swipe_budget != 1:
+            if (
+                not self._action_ledger.allowed("campaign.viewport_swipe")
+                or self._action_ledger.remaining("campaign.viewport_swipe") != 1
+            ):
                 raise SemanticGateClosed("campaign map viewport lease is incomplete")
             assert combat is not None
             capability = "campaign.viewport_swipe"
@@ -3292,10 +3295,6 @@ class AlasSemanticAdapter:
                 expected_fleet_count=context.map_expected_fleet_count,
             ),
         )
-        if positioning is not None:
-            context.camera_positioning_budget -= 1
-        else:
-            context.viewport_swipe_budget -= 1
         context.map_state = proof.post_state
         if positioning is not None:
             context.camera_positioning_proofs.append(proof)
@@ -3353,7 +3352,6 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "campaign camera positioning completion changed target"
             )
-        context.camera_positioning_budget = 0
         context.camera_positioning_completed = True
         return tuple(context.camera_positioning_proofs)
 
@@ -3536,7 +3534,11 @@ class AlasSemanticAdapter:
         node = self._campaign_node(location)
         if node != admission.target_node:
             raise SemanticGateClosed("campaign combat grid target changed")
-        if context.combat_budget != 1 or context.combat_receipt is not None:
+        if (
+            not self._action_ledger.allowed("campaign.grid_click")
+            or self._action_ledger.remaining("campaign.grid_click") != 1
+            or context.combat_receipt is not None
+        ):
             raise SemanticGateClosed(
                 "campaign combat grid requires one remaining budget unit"
             )
@@ -3546,7 +3548,6 @@ class AlasSemanticAdapter:
         )
         # The ADB tap has happened.  Consume and record the lease before any
         # subsequent assertion so an anomalous receipt can never be replayed.
-        context.combat_budget -= 1
         context.combat_admission = replace(
             admission, input_generation=receipt.generation
         )
@@ -4012,7 +4013,10 @@ class AlasSemanticAdapter:
                 or name != campaign_stage_code
             ):
                 raise SemanticGateClosed("campaign stage identity changed")
-            if context.entry_budget <= 0 or context.entry_receipt is not None:
+            if (
+                not self._action_ledger.allowed("campaign.stage_entry")
+                or context.entry_receipt is not None
+            ):
                 raise SemanticGateClosed(
                     "campaign stage entry requires one remaining budget unit"
                 )
@@ -4021,7 +4025,6 @@ class AlasSemanticAdapter:
                 "campaign.stage_entry",
                 lambda: self.oracle.click_campaign_stage(campaign_stage_code),
             )
-            context.entry_budget -= 1
             context.entry_receipt = receipt
             context.passive_transition_until = time.monotonic() + 20.0
             return receipt
@@ -4029,7 +4032,8 @@ class AlasSemanticAdapter:
             context = self._require_campaign_context()
             if (
                 not context.sortie_authorized
-                or context.sortie_budget != 1
+                or not self._action_ledger.allowed("campaign.sortie")
+                or self._action_ledger.remaining("campaign.sortie") != 1
                 or context.sortie_receipt is not None
                 or context.prepared_fleet_state is None
             ):
@@ -4044,7 +4048,6 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed(
                     "campaign sortie target predates prepared fleet state"
                 )
-            context.sortie_budget -= 1
             context.sortie_receipt = receipt
             context.passive_transition_until = time.monotonic() + 30.0
             return receipt
@@ -4141,7 +4144,7 @@ class AlasSemanticAdapter:
                     path=clear_button.path,
                 )
             if (
-                context.fleet_mutation_budget <= 0
+                not self._action_ledger.allowed("campaign.fleet_mutation")
                 or len(context.fleet_mutation_receipts)
                 >= context.required_fleet_mutations
             ):
@@ -4152,7 +4155,6 @@ class AlasSemanticAdapter:
                 "campaign.fleet_mutation",
                 lambda: self.oracle.click_campaign_fleet_row(row_key, "clear"),
             )
-            context.fleet_mutation_budget -= 1
             context.fleet_mutation_receipts.append(receipt)
             context.passive_transition_until = time.monotonic() + 20.0
             return receipt
@@ -4177,7 +4179,7 @@ class AlasSemanticAdapter:
                     "campaign fleet option is absent or already selected"
                 )
             if (
-                context.fleet_mutation_budget <= 0
+                not self._action_ledger.allowed("campaign.fleet_mutation")
                 or len(context.fleet_mutation_receipts)
                 >= context.required_fleet_mutations
             ):
@@ -4188,7 +4190,6 @@ class AlasSemanticAdapter:
                 "campaign.fleet_mutation",
                 lambda: self.oracle.click_campaign_fleet_option(index),
             )
-            context.fleet_mutation_budget -= 1
             context.fleet_mutation_receipts.append(receipt)
             context.fleet_dropdown_row = None
             context.fleet_dropdown_previous_index = None
