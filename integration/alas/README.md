@@ -180,6 +180,24 @@ actions are virtual records only. The canonical ALAS patch deliberately does
 not import or invoke this synthetic replay; the production runner remains at
 the G18 capture boundary until every phase has an exact live Unity mapping.
 
+G36 freezes that replay against
+`profiles/g36-12-4-normal-one-battle.zero-input.json`. The normal replay
+evidence records observation primitives, direct typed-state reads, Device
+methods, pixel entrances, actions, sleeps, and timer boundaries while unknown
+Device access remains rejecting. `g36-capability-surface.json` compares the
+result with G19 and the exact G28 defensive scenarios. Rebuild it with:
+
+```powershell
+$env:PYTHONPATH = 'python'
+python scripts/python/build_g36_capability_surface.py `
+  --normal integration/alas/g36-normal-replay-surface.json `
+  --output integration/alas/g36-capability-surface.json
+```
+
+The H02 surface is an inventory, not authority: every defensive root remains
+`requires-h04-review`, capability promotion is false, and production readiness
+is false.
+
 G20 adds that replacement input boundary without changing the ALAS patch or
 state machine. It accepts six complete, hash-bound raw observer snapshots only
 when all 38 resource queries, blockers, three post-grid action Buttons, and

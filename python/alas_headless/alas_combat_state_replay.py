@@ -113,6 +113,10 @@ class AlasCampaignCombatStateReplayResult:
     virtual_sleeps: Tuple[str, ...]
     call_order: Tuple[str, ...]
     resource_queries: Tuple[str, ...]
+    observation_requests: Tuple[str, ...]
+    direct_typed_state_reads: Tuple[str, ...]
+    device_methods: Tuple[str, ...]
+    pixel_accesses: Tuple[str, ...]
     hp_after: Tuple[float, ...]
     levels_after: Tuple[int, ...]
     target_enemy_cleared: bool
@@ -460,6 +464,8 @@ _MUTABLE_TIMER_FIELDS = (
     "submarine_call_timer",
 )
 
+ALAS_COMBAT_REPLAY_TIMER_BOUNDARIES = _MUTABLE_TIMER_FIELDS
+
 
 def _expected_resource_query_names(
     replay: AlasCampaignCombatReplay,
@@ -713,6 +719,10 @@ class _ReplayDriver:
         self.call_order: list[str] = []
         self.resource_queries: list[str] = []
         self.sleep_calls: list[str] = []
+        self.observation_requests: list[str] = []
+        self.direct_typed_state_reads: list[str] = []
+        self.device_methods: list[str] = []
+        self.pixel_accesses: list[str] = []
 
     @property
     def frame(self) -> AlasCombatReplayFrame:
@@ -734,11 +744,21 @@ class _ReplayDriver:
             raise SemanticGateClosed("combat replay has no next phase")
         return self.replay.frames[next_index].phase
 
-    def query(self, name: str) -> bool:
+    def query(self, name: str, *, primitive: str = "appear") -> bool:
         self.resource_queries.append(name)
+        self.observation_requests.append(primitive + ":" + name)
+        if primitive == "image_color_count":
+            self.pixel_accesses.append(primitive + ":" + name)
         return name in self.frame.visible_resources
 
+    def typed_read(self, name: str) -> None:
+        self.direct_typed_state_reads.append(name)
+
+    def device_method(self, name: str) -> None:
+        self.device_methods.append(name)
+
     def click(self, button: Any) -> None:
+        self.device_method("click")
         annotation = getattr(button, "__str__", None)
         if button is self.grid and annotation == self.target_location:
             if self.index != -1:
@@ -793,6 +813,7 @@ class _ReplayDriver:
         self.advance(self.next_phase())
 
     def screenshot(self) -> None:
+        self.device_method("screenshot")
         self.call_order.append("device.screenshot:" + self.section)
         if (
             self.section == "combat_execute"
@@ -809,6 +830,7 @@ class _ReplayDriver:
                 self.advance(AlasCombatReplayPhase.MAP_STABLE)
 
     def sleep(self, duration: Any) -> None:
+        self.device_method("sleep")
         self.sleep_calls.append(str(duration))
 
     def validate_complete(self) -> None:
@@ -883,13 +905,14 @@ class _ReplayDevice:
         self._driver.sleep(duration)
 
     def stuck_record_clear(self) -> None:
-        pass
+        self._driver.device_method("stuck_record_clear")
 
     def click_record_clear(self) -> None:
-        pass
+        self._driver.device_method("click_record_clear")
 
     def screenshot_interval_set(self, *args: Any, **kwargs: Any) -> None:
         del args, kwargs
+        self._driver.device_method("screenshot_interval_set")
 
     def __getattr__(self, name: str) -> Any:
         raise SemanticGateClosed(
@@ -1034,6 +1057,7 @@ def replay_alas_campaign_combat_state_machine(
     def hp_retreat(self: Any) -> bool:
         del self
         driver.call_order.append("hp_retreat_triggered")
+        driver.typed_read("hp_retreat_triggered")
         return bool(original_hp_retreat())
 
     def fleet_set(
@@ -1050,6 +1074,7 @@ def replay_alas_campaign_combat_state_machine(
     def in_sight(self: Any, location: Any, sight: Any = None) -> Any:
         del self
         driver.call_order.append("in_sight")
+        driver.typed_read("in_sight")
         if (
             _location_tuple(location) != target_location
             or tuple(int(value) for value in sight) != expected_sight
@@ -1063,6 +1088,7 @@ def replay_alas_campaign_combat_state_machine(
     def focus_to_grid_center(self: Any, tolerance: Any = None) -> Any:
         del self
         driver.call_order.append("focus_to_grid_center")
+        driver.typed_read("focus_to_grid_center")
         result = original_focus_center(tolerance=tolerance)
         if result not in (False, None):
             raise SemanticGateClosed("combat replay attempted a centering swipe")
@@ -1071,6 +1097,7 @@ def replay_alas_campaign_combat_state_machine(
     def convert_global_to_local(self: Any, location: Any) -> Any:
         del self
         driver.call_order.append("convert_global_to_local")
+        driver.typed_read("convert_global_to_local")
         if _location_tuple(location) != target_location:
             raise SemanticGateClosed("combat replay conversion target changed")
         result = original_convert(location)
@@ -1081,10 +1108,12 @@ def replay_alas_campaign_combat_state_machine(
     def ambush_color_initial(self: Any) -> None:
         del self
         driver.call_order.append("ambush_color_initial")
+        driver.typed_read("ambush_color_initial")
 
     def enemy_searching_color_initial(self: Any) -> Any:
         del self
         driver.call_order.append("enemy_searching_color_initial")
+        driver.typed_read("enemy_searching_color_initial")
         return original_enemy_searching()
 
     def appear(self: Any, button: Any, *args: Any, **kwargs: Any) -> bool:
@@ -1098,23 +1127,27 @@ def replay_alas_campaign_combat_state_machine(
         del self
         driver.call_order.append("is_in_map:" + driver.frame.phase.value)
         driver.resource_queries.append("IN_MAP")
+        driver.typed_read("is_in_map")
         return driver.frame.in_map
 
     def is_combat_loading(self: Any) -> bool:
         del self
         driver.call_order.append("is_combat_loading")
+        driver.typed_read("is_combat_loading")
         return driver.frame.combat_loading
 
     def is_combat_executing(self: Any) -> Any:
         del self
         driver.call_order.append("is_combat_executing")
         driver.resource_queries.append("PAUSE")
+        driver.typed_read("is_combat_executing")
         return "PAUSE" if driver.frame.combat_executing else False
 
     def enemy_searching_appear(self: Any) -> bool:
         del self
         driver.call_order.append("enemy_searching_appear")
         driver.resource_queries.append("MAP_ENEMY_SEARCHING")
+        driver.typed_read("enemy_searching_appear")
         return driver.frame.enemy_searching
 
     def combat_appear(self: Any) -> bool:
@@ -1172,6 +1205,7 @@ def replay_alas_campaign_combat_state_machine(
     def hp_get(self: Any) -> list[float]:
         del self
         driver.call_order.append("hp_get")
+        driver.typed_read("hp_get")
         hp = [float(value) for value in driver.frame.hp]
         sandbox.hp = hp
         return hp
@@ -1179,6 +1213,7 @@ def replay_alas_campaign_combat_state_machine(
     def lv_get(self: Any, after_battle: bool = False) -> list[int]:
         del self
         driver.call_order.append("lv_get:" + str(bool(after_battle)))
+        driver.typed_read("lv_get")
         levels = [int(value) for value in driver.frame.levels]
         sandbox.lv = levels
         return levels
@@ -1190,32 +1225,37 @@ def replay_alas_campaign_combat_state_machine(
         name = getattr(button, "name", None)
         if not isinstance(name, str):
             raise SemanticGateClosed("combat replay color query is unnamed")
-        driver.resource_queries.append(name)
+        driver.query(name, primitive="image_color_count")
         return False
 
     def false_air_raid(self: Any) -> bool:
         del self
         driver.call_order.append("air_raid_appear:false")
+        driver.typed_read("air_raid_appear")
         return False
 
     def false_ambush(self: Any) -> bool:
         del self
         driver.call_order.append("ambush_appear:false")
+        driver.typed_read("ambush_appear")
         return False
 
     def info_bar_count(self: Any) -> int:
         del self
         driver.call_order.append("info_bar_count:0")
+        driver.typed_read("info_bar_count")
         return 0
 
     def is_story_black(self: Any) -> bool:
         del self
         driver.call_order.append("story_black:false")
+        driver.typed_read("story_black")
         return False
 
     def predict(self: Any) -> None:
         del self
         driver.call_order.append("predict:semantic_map_stable")
+        driver.typed_read("map_predict")
 
     def find_path_initial(self: Any) -> Any:
         del self
@@ -1325,6 +1365,10 @@ def replay_alas_campaign_combat_state_machine(
             virtual_sleeps=tuple(driver.sleep_calls),
             call_order=tuple(driver.call_order),
             resource_queries=tuple(driver.resource_queries),
+            observation_requests=tuple(driver.observation_requests),
+            direct_typed_state_reads=tuple(driver.direct_typed_state_reads),
+            device_methods=tuple(driver.device_methods),
+            pixel_accesses=tuple(driver.pixel_accesses),
             hp_after=tuple(float(value) for value in sandbox.hp),
             levels_after=tuple(int(value) for value in sandbox.lv),
             target_enemy_cleared=not bool(target.is_enemy),

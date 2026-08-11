@@ -7,6 +7,7 @@ state on ALAS's own static map and records virtual combat actions only.
 import argparse
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -29,6 +30,7 @@ from alas_headless import (  # noqa: E402
     replay_alas_campaign_combat_state_machine,
     synchronize_alas_campaign_map,
 )
+from alas_headless.adapter import load_g36_task_profile  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -39,6 +41,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--include-automation-switch", action="store_true")
     parser.add_argument("--include-get-items", action="store_true")
     parser.add_argument("--include-get-mission", action="store_true")
+    parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--profile",
+        type=Path,
+        default=(
+            ROOT
+            / "integration"
+            / "alas"
+            / "profiles"
+            / "g36-12-4-normal-one-battle.zero-input.json"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -124,6 +138,15 @@ def build_state(campaign) -> CampaignMapState:
 def main() -> int:
     args = parse_args()
     alas_root = args.alas_root.resolve()
+    profile = load_g36_task_profile(args.profile)
+    actual_commit = subprocess.run(
+        ["git", "-C", str(alas_root), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if actual_commit != profile.upstream_alas_commit:
+        raise SystemExit("ALAS checkout does not match the G36 task profile")
     if not (alas_root / "campaign" / "campaign_main" / "campaign_12_4.py").is_file():
         raise SystemExit("ALAS checkout is missing pinned campaign_12_4.py")
     sys.path.insert(0, str(alas_root))
@@ -132,10 +155,16 @@ def main() -> int:
     from campaign.campaign_main.campaign_12_4 import Campaign
     from module.config.config import AzurLaneConfig
 
-    campaign = Campaign(
-        AzurLaneConfig(args.config, task="Campaign"),
-        device=SimpleNamespace(semantic_adapter=True),
+    config = AzurLaneConfig(args.config, task="Campaign")
+    config.override(
+        Emulator_ScreenshotMethod="ADB",
+        Emulator_ControlMethod="ADB",
+        Campaign_UseAutoSearch=False,
+        Campaign_Use2xBook=False,
+        Submarine_Mode="do_not_use",
     )
+    campaign = Campaign(config, device=SimpleNamespace(semantic_adapter=True))
+    profile.require_alas_config(campaign.config)
     state = build_state(campaign)
     projection = synchronize_alas_campaign_map(campaign, state)
     decision = preview_alas_campaign_decision(campaign, projection)
@@ -172,35 +201,48 @@ def main() -> int:
         and result.target_enemy_cleared
         and result.target_fleet_present
     )
-    print(
-        json.dumps(
-            {
-                "schema": "alas-headless.g19-combat-state-replay/v1",
-                "passed": passed,
-                "input_injected": False,
-                "cells": len(state.cells),
-                "land": len(state.land_nodes),
-                "stage": result.stage_code,
-                "target": result.target_node,
-                "battle": [
-                    result.battle_count_before,
-                    result.battle_count_after,
-                ],
-                "ammo": [result.ammo_before, result.ammo_after],
-                "expected_end": result.expected_end,
-                "phases": result.phases,
-                "virtual_actions": result.virtual_actions,
-                "virtual_sleeps": result.virtual_sleeps,
-                "resource_query_count": len(result.resource_queries),
-                "resource_query_names": sorted(set(result.resource_queries)),
-                "resource_query_unique_count": len(set(result.resource_queries)),
-                "source_restored": source_restored,
-                "projected_map_unchanged": result.projected_map_unchanged,
-            },
-            ensure_ascii=False,
-            sort_keys=True,
-        )
-    )
+    document = {
+        "schema": "alas-headless.g19-combat-state-replay/v1",
+        "upstream_alas_commit": actual_commit,
+        "profile_id": profile.profile_id,
+        "task_config_sha256": profile.sha256,
+        "passed": passed,
+        "input_injected": False,
+        "cells": len(state.cells),
+        "land": len(state.land_nodes),
+        "stage": result.stage_code,
+        "target": result.target_node,
+        "battle": [
+            result.battle_count_before,
+            result.battle_count_after,
+        ],
+        "ammo": [result.ammo_before, result.ammo_after],
+        "expected_end": result.expected_end,
+        "phases": result.phases,
+        "virtual_actions": result.virtual_actions,
+        "virtual_sleeps": result.virtual_sleeps,
+        "resource_query_count": len(result.resource_queries),
+        "resource_query_names": sorted(set(result.resource_queries)),
+        "resource_query_unique_count": len(set(result.resource_queries)),
+        "observation_requests": sorted(set(result.observation_requests)),
+        "direct_typed_state_reads": sorted(
+            set(result.direct_typed_state_reads)
+        ),
+        "device_methods": sorted(set(result.device_methods)),
+        "pixel_accesses": sorted(set(result.pixel_accesses)),
+        "source_restored": source_restored,
+        "projected_map_unchanged": result.projected_map_unchanged,
+    }
+    encoded = json.dumps(
+        document,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ) + "\n"
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(encoded, encoding="utf-8", newline="\n")
+    print(encoded, end="")
     return 0 if passed else 1
 
 
