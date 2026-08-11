@@ -1,0 +1,229 @@
+diff --git a/module/base/base.py b/module/base/base.py
+index dfd12a94182f193411eda70c4ae5ef048f124a4b..448d06ff94417b43d6b3633a95581e946f617a7c 100644
+--- a/module/base/base.py
++++ b/module/base/base.py
+@@ -70,6 +70,9 @@ class ModuleBase:
+         The import is paralleled since taking screenshot is I/O-bound while importing is CPU-bound,
+         thus would speed up the startup 0.5 ~ 1.0s and even 5s on slow PCs.
+         """
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            logger.info('Semantic mode uses typed text, skip early_ocr_import')
++            return
+         if ModuleBase.EARLY_OCR_IMPORT:
+             return
+         if not self.config.is_actual_task:
+@@ -247,7 +250,10 @@ class ModuleBase:
+             if not self.interval_timer[button.name].reached():
+                 return False
+ 
+-        if isinstance(button, HierarchyButton):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            appear = semantic_adapter.appear(button)
++        elif isinstance(button, HierarchyButton):
+             appear = bool(button)
+         elif offset:
+             if isinstance(offset, bool):
+@@ -285,8 +291,12 @@ class ModuleBase:
+             if not self.interval_timer[button.name].reached():
+                 return False
+ 
+-        appear = button.match_template_color(
+-            self.device.image, offset=offset, similarity=similarity, threshold=threshold)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            appear = semantic_adapter.match_template_color(button)
++        else:
++            appear = button.match_template_color(
++                self.device.image, offset=offset, similarity=similarity, threshold=threshold)
+ 
+         if appear and interval:
+             self.interval_timer[button.name].reset()
+@@ -373,6 +383,10 @@ class ModuleBase:
+         Returns:
+             bool:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.image_color_count(
++                button, color=color, threshold=threshold, count=count)
+         if isinstance(button, np.ndarray):
+             image = button
+         else:
+diff --git a/module/device/control.py b/module/device/control.py
+index 1224c45475f24ccbec28589e78c4a2d5df4ffd64..1d25a3bd6c4904c3a9a6f81548125ce529179965 100644
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -17,6 +17,14 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+ 
+     @cached_property
+     def click_methods(self):
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            def reject_semantic_raw_click(*args, **kwargs):
++                semantic_adapter.reject_raw_input('low-level click')
++            return {
++                name: reject_semantic_raw_click for name in
++                ('ADB', 'uiautomator2', 'minitouch', 'Hermit', 'MaaTouch', 'nemu_ipc')
++            }
+         return {
+             'ADB': self.click_adb,
+             'uiautomator2': self.click_uiautomator2,
+@@ -35,6 +43,11 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+         """
+         if control_check:
+             self.handle_control_check(button)
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            receipt = semantic_adapter.click(button)
++            logger.info(f'Semantic click {receipt.semantic_id} @ {receipt.path}')
++            return receipt
+         x, y = random_rectangle_point(button.button)
+         x, y = ensure_int(x, y)
+         logger.info(
+@@ -47,6 +60,9 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+         method(x, y)
+ 
+     def multi_click(self, button, n, interval=(0.1, 0.2)):
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.reject_raw_input('multi_click')
+         self.handle_control_check(button)
+         click_timer = Timer(0.1)
+         for _ in range(n):
+@@ -64,6 +80,9 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+             button (button.Button): AzurLane Button instance.
+             duration(int, float, tuple):
+         """
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.reject_raw_input('long_click')
+         self.handle_control_check(button)
+         x, y = random_rectangle_point(button.button)
+         x, y = ensure_int(x, y)
+@@ -86,6 +105,7 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+             self.swipe_adb((x, y), (x, y), duration)
+ 
+     def swipe(self, p1, p2, duration=(0.1, 0.2), name='SWIPE', distance_check=True):
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
+         self.handle_control_check(name)
+         p1, p2 = ensure_int(p1, p2)
+         duration = ensure_time(duration)
+@@ -106,6 +126,15 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+                 logger.info('Swipe distance < 10px, dropped')
+                 return
+ 
++        if semantic_adapter is not None:
++            receipt = semantic_adapter.swipe(
++                p1, p2, duration=duration, name=name,
++                distance_check=distance_check)
++            logger.info(
++                f'Semantic swipe {receipt.semantic_id} '
++                f'{receipt.start} -> {receipt.end}')
++            return receipt
++
+         if method == 'minitouch':
+             self.swipe_minitouch(p1, p2)
+         elif method == 'uiautomator2':
+@@ -137,18 +166,42 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+             name (str): Swipe name
+             distance_check: (bool):
+         """
+-        p1, p2 = random_rectangle_vector_opted(
+-            vector,
+-            box=box,
+-            random_range=random_range,
+-            padding=padding,
+-            whitelist_area=whitelist_area,
+-            blacklist_area=blacklist_area
+-        )
+-        self.swipe(p1, p2, duration=duration, name=name, distance_check=distance_check)
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        semantic_intent = None
++        if semantic_adapter is not None:
++            semantic_intent = semantic_adapter.begin_campaign_map_swipe_vector(
++                vector,
++                box=box,
++                random_range=random_range,
++                padding=padding,
++                duration=duration,
++                whitelist_area=whitelist_area,
++                blacklist_area=blacklist_area,
++                name=name,
++                distance_check=distance_check,
++            )
++        try:
++            p1, p2 = random_rectangle_vector_opted(
++                vector,
++                box=box,
++                random_range=random_range,
++                padding=padding,
++                whitelist_area=whitelist_area,
++                blacklist_area=blacklist_area
++            )
++            return self.swipe(
++                p1, p2, duration=duration, name=name,
++                distance_check=distance_check)
++        finally:
++            if semantic_intent is not None:
++                semantic_adapter.end_campaign_map_swipe_vector(
++                    semantic_intent)
+ 
+     def drag(self, p1, p2, segments=1, shake=(0, 15), point_random=(-10, -10, 10, 10), shake_random=(-5, -5, 5, 5),
+              swipe_duration=0.25, shake_duration=0.1, name='DRAG'):
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.reject_raw_input('drag')
+         self.handle_control_check(name)
+         p1, p2 = ensure_int(p1, p2)
+         logger.info(
+diff --git a/module/device/screenshot.py b/module/device/screenshot.py
+index 9940ee05560747db9a025de8033cebe3ce19d8fe..65f5dde7d0183df5e6e0db87326d37a00708d083 100644
+--- a/module/device/screenshot.py
++++ b/module/device/screenshot.py
+@@ -56,6 +56,12 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
+         self._screenshot_interval.wait()
+         self._screenshot_interval.reset()
+ 
++        semantic_session = getattr(self, 'semantic_adapter', None)
++        if semantic_session is not None:
++            frame = semantic_session.refresh_frame()
++            self.image = semantic_session.pixel_guard(frame)
++            return self.image
++
+         for _ in range(2):
+             if self.screenshot_method_override:
+                 method = self.screenshot_method_override
+diff --git a/module/ocr/ocr.py b/module/ocr/ocr.py
+index 9dfd4f00cb0d52466c496da677115509163a6592..9fca01bd4151210252be61629d6fbeda7443af15 100644
+--- a/module/ocr/ocr.py
++++ b/module/ocr/ocr.py
+@@ -90,6 +90,28 @@ class Ocr:
+         """
+         start_time = time.time()
+ 
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            if direct_ocr:
++                semantic_session.reject_raw_input('direct OCR without screen areas')
++            result_list = semantic_session.ocr_text(
++                self.buttons, alphabet=self.alphabet
++            )
++            if not isinstance(result_list, list):
++                result_list = [result_list]
++            result_list = [self.after_process(result) for result in result_list]
++            if len(self.buttons) == 1:
++                result_list = result_list[0]
++            if self.SHOW_LOG:
++                logger.attr(
++                    name='%s semantic %ss' % (
++                        self.name, float2str(time.time() - start_time)
++                    ),
++                    text=str(result_list)
++                )
++            return result_list
++
+         if direct_ocr:
+             image_list = [self.pre_process(i) for i in image]
+         else:

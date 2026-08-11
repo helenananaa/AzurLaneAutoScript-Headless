@@ -1,0 +1,71 @@
+diff --git a/module/device/device.py b/module/device/device.py
+index 0d05f343807c19ac88b96e1e31248219d723ab43..6b002e4d8e20f6ae5356817cfabeba5a6b425cf7 100644
+--- a/module/device/device.py
++++ b/module/device/device.py
+@@ -1,4 +1,5 @@
+ import collections
++import os
+ from datetime import datetime
+ 
+ from lxml import etree
+@@ -88,6 +89,20 @@ class Device(Screenshot, Control, AppControl):
+                     )
+                     raise RequestHumanTakeover
+ 
++        self.semantic_adapter = None
++        if os.environ.get('ALAS_SEMANTIC_MODE') == '1':
++            from alas_headless import AlasSemanticSession, bind_semantic_session
++            self.semantic_adapter = AlasSemanticSession.from_environment(
++                serial=self.config.Emulator_Serial
++            )
++            self._semantic_session_token = bind_semantic_session(
++                self.semantic_adapter
++            )
++            self.__dict__.pop('click_methods', None)
++            logger.warning(
++                'ALAS semantic mode enabled; unmapped detection and raw input fail closed'
++            )
++
+         # Auto-fill emulator info
+         if IS_WINDOWS and self.config.EmulatorInfo_Emulator == 'auto':
+             _ = self.emulator_instance
+@@ -179,6 +194,11 @@ class Device(Screenshot, Control, AppControl):
+         if threshold < diff < 86400 - threshold:
+             return False
+ 
++        semantic_session = getattr(self, 'semantic_adapter', None)
++        if semantic_session is not None:
++            semantic_session.reject_pixel_access(
++                'template-access', 'Device.handle_night_commission'
++            )
+         if GET_MISSION.match(self.image, offset=True):
+             logger.info('Night commission appear.')
+             self.click(GET_MISSION)
+diff --git a/module/handler/login.py b/module/handler/login.py
+index 57deabe0b6c107792cafdbcd166c527360006e6c..1d2e7d4a251f3d4363c65b59b8992d04f6b9cf2b 100644
+--- a/module/handler/login.py
++++ b/module/handler/login.py
+@@ -144,12 +144,19 @@ class LoginHandler(UI):
+             GameTooManyClickError:
+             GameNotRunningError:
+         """
+-        logger.info('handle_app_login')
+-        self.device.screenshot_interval_set(1.0)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_login()
+         try:
+-            self._handle_app_login()
++            logger.info('handle_app_login')
++            self.device.screenshot_interval_set(1.0)
++            try:
++                self._handle_app_login()
++            finally:
++                self.device.screenshot_interval_set()
+         finally:
+-            self.device.screenshot_interval_set()
++            if semantic_adapter is not None:
++                semantic_adapter.end_login()
+ 
+     def app_stop(self):
+         logger.hr('App stop')

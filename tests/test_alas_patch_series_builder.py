@@ -60,17 +60,23 @@ class TemporarySeries:
 
 
 class AlasPatchSeriesBuilderTests(unittest.TestCase):
-    def test_checked_in_single_member_build_is_byte_identical_to_combined_patch(self):
+    def test_checked_in_series_build_is_exact_member_concatenation(self):
         manifest = ROOT / "integration" / "alas" / "series" / "series.json"
-        combined = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "combined.patch"
             result = build_patch_series(manifest, output)
-            self.assertEqual(output.read_bytes(), combined.read_bytes())
-            self.assertEqual(result["member_count"], 1)
+            members = tuple(
+                ROOT / path
+                for path in result["members"]
+            )
+            self.assertEqual(
+                output.read_bytes(),
+                b"".join(member.read_bytes() for member in members),
+            )
+            self.assertEqual(result["member_count"], 3)
             self.assertEqual(
                 result["combined_sha256"],
-                "4b8dc28165fdebd0453f0e1de1f3824e8e342c05a6abba7fe6cd22f917cdbf60",
+                hashlib.sha256(output.read_bytes()).hexdigest(),
             )
 
     def test_build_is_deterministic_and_reports_ordered_members(self):

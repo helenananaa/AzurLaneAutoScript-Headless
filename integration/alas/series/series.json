@@ -2,8 +2,18 @@
   "members": [
     {
       "order": 1,
-      "path": "integration/alas/0001-semantic-oracle-hooks.patch",
-      "sha256": "4b8dc28165fdebd0453f0e1de1f3824e8e342c05a6abba7fe6cd22f917cdbf60"
+      "path": "integration/alas/series/0001-core-ports.patch",
+      "sha256": "955f477c9186890e82ca0a5e6d5e452db45b0d9425f36d96b875736d88b7b694"
+    },
+    {
+      "order": 2,
+      "path": "integration/alas/series/0002-session-lifecycle.patch",
+      "sha256": "23706cfde968d70eb48755ecd6b8cf76732b807ab6c4a0ad0d7e5b75e7d844ea"
+    },
+    {
+      "order": 3,
+      "path": "integration/alas/series/0090-legacy-task-hooks.patch",
+      "sha256": "db8920203a80ac08bcbb4ec6bbcc69ad839fa2dfb0dd2bacbc56fb3a3dafef52"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

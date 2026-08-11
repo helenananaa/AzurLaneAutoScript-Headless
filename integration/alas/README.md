@@ -2,9 +2,10 @@
 
 Target: upstream commit `81ccf63b4540f00241628c82a58c02c7a2bb11af`.
 
-The ordered integration source is described by `series/series.json`. During
-the G01 transition it contains the existing combined patch as one member. A
-deterministic copy can be built without modifying that member:
+The ordered integration source is described by `series/series.json`. G02
+separates core observation/final-input ports, session lifecycle, and the
+remaining legacy task hooks into three Git-commit-derived members. A
+deterministic combined patch can be built without modifying those members:
 
 ```powershell
 $env:PYTHONPATH = 'python'
@@ -14,8 +15,10 @@ python scripts/python/build_alas_patch_series.py `
 
 The builder requires consecutive order, the pinned upstream lock, safe
 repository-relative member paths, exact SHA-256 values, and LF-terminated
-bytes. G02 and G03 will split the member; G04 will make generated combined
-output authoritative for validation and release tooling.
+bytes. The full G02 series produces the same Git tree as the legacy combined
+patch, while the first two members apply and compile without claiming task
+coverage. G03 will split the legacy task member by flow; G04 will make
+generated combined output authoritative for validation and release tooling.
 
 The patch adds opt-in observation and action ports without changing default
 ALAS behavior:
