@@ -28,6 +28,7 @@ from .registry import (
     ObservationRegistration,
     ObservationRegistry,
 )
+from .runtime_handle import AdbRuntimeHandle
 from .scope import FlowScopeStack
 
 
@@ -37,6 +38,7 @@ __all__ = (
     "ActionLease",
     "ActionPort",
     "ActionReceiptV2",
+    "AdbRuntimeHandle",
     "AdapterContractError",
     "CapabilityClosureError",
     "FlowScope",
