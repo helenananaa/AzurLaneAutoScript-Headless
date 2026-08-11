@@ -9,7 +9,9 @@ from alas_headless import (
 )
 from alas_headless.adapter import (
     AdbRuntimeHandle,
+    SemanticPixelGuard,
     StaleFrameError,
+    UnsupportedPixelRead,
     semantic_runtime_fingerprint_sha256,
 )
 from alas_headless.semantic_oracle import ObserverTransportError
@@ -140,6 +142,61 @@ class FrameRuntimeHandle(FakeRuntimeHandle):
 
 
 class SessionRuntimeHandleTests(unittest.TestCase):
+    def test_session_wraps_only_the_current_frame_in_a_pixel_guard(self):
+        handle = FrameRuntimeHandle()
+        trace = mock.Mock()
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=handle,
+            trace=trace,
+        )
+        frame = session.refresh_frame()
+        guard = session.pixel_guard(frame)
+
+        self.assertIsInstance(guard, SemanticPixelGuard)
+        self.assertEqual(guard.frame_id, frame.frame_id)
+        with self.assertRaises(UnsupportedPixelRead):
+            guard.template_input("Device.handle_night_commission")
+
+        records = session.pixel_access_records()
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0].operation.value, "template-access")
+        pixel_events = [
+            call
+            for call in trace.emit.call_args_list
+            if call.args and call.args[0] == "semantic.pixel.unsupported"
+        ]
+        self.assertEqual(len(pixel_events), 1)
+        self.assertEqual(pixel_events[0].kwargs["outcome"], "error")
+        self.assertEqual(
+            pixel_events[0].kwargs["fields"]["consumer"],
+            "Device.handle_night_commission",
+        )
+
+        handle.generation = 11
+        session.refresh_frame()
+        with self.assertRaises(StaleFrameError):
+            session.pixel_guard(frame)
+
+    def test_direct_session_pixel_rejection_requires_a_current_frame(self):
+        handle = FrameRuntimeHandle()
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=handle,
+        )
+
+        with self.assertRaises(StaleFrameError):
+            session.reject_pixel_access(
+                "template-access",
+                "Device.handle_night_commission",
+            )
+        session.refresh_frame()
+        with self.assertRaises(UnsupportedPixelRead):
+            session.reject_pixel_access(
+                "template-access",
+                "Device.handle_night_commission",
+            )
+
     def test_login_reads_require_refresh_and_reuse_one_frame_acquisition(self):
         handle = FrameRuntimeHandle()
         session = AlasSemanticSession(

@@ -233,8 +233,29 @@ class ReplayOracle:
 
 class ReplayDevice:
     def __init__(self, adapter: Any) -> None:
+        from alas_headless.adapter import (
+            PixelAccessAudit,
+            SemanticFrame,
+            SemanticPixelGuard,
+        )
+
         self.semantic_adapter = adapter
         self.events: list[tuple[Any, ...]] = []
+        self.pixel_audit = PixelAccessAudit()
+        self.image = SemanticPixelGuard(
+            SemanticFrame(
+                frame_id="login-replay-pixel-frame",
+                pid=4242,
+                generation=7,
+                scene_handle=-76,
+                captured_monotonic_ns=1_000_000_000,
+                age_ms=20,
+                fingerprint_sha256="a" * 64,
+                raw_state_sha256="b" * 64,
+                projections={"snapshot": {"generation": 7}},
+            ),
+            self.pixel_audit,
+        )
 
     def screenshot_interval_set(self, value: float | None = None) -> None:
         self.events.append(("screenshot_interval_set", value))
@@ -364,6 +385,8 @@ def run_scenario(handler_class: Any, scenario: str) -> Mapping[str, Any]:
     handler.handle_app_login()
     if adapter._login_flow.active:
         raise LoginReplayError("login scope leaked after successful replay")
+    if device.pixel_audit.records():
+        raise LoginReplayError("login replay consumed framebuffer pixels")
     clicks = [event[1] for event in oracle.events if event[0] == "click"]
     expected = {
         "entry": ["login/enter"],
@@ -384,6 +407,8 @@ def run_scenario(handler_class: Any, scenario: str) -> Mapping[str, Any]:
         "frame_id": frame_identity.frame_id,
         "scope_closed": not adapter._login_flow.active,
         "android_input_injected": False,
+        "classified_pixel_accesses": 0,
+        "unclassified_pixel_accesses": 0,
     }
 
 
@@ -423,6 +448,8 @@ def run_failure_scenario(handler_class: Any) -> Mapping[str, Any]:
         raise LoginReplayError("failed login replay did not restore interval")
     if any(event[0] == "click" for event in oracle.events):
         raise LoginReplayError("failed login replay unexpectedly dispatched input")
+    if device.pixel_audit.records():
+        raise LoginReplayError("failed login replay consumed framebuffer pixels")
     return {
         "scenario": "failure",
         "exception": "scripted login replay failure",
@@ -430,6 +457,8 @@ def run_failure_scenario(handler_class: Any) -> Mapping[str, Any]:
         "scope_closed": not adapter._login_flow.active,
         "frame_id": frame_identity.frame_id,
         "android_input_injected": False,
+        "classified_pixel_accesses": 0,
+        "unclassified_pixel_accesses": 0,
     }
 
 
@@ -470,6 +499,8 @@ def verify(upstream: Path) -> Mapping[str, Any]:
         "failure_scenario": failure,
         "scenario_count": len(scenarios) + 1,
         "android_input_injected": False,
+        "classified_pixel_accesses": 0,
+        "unclassified_pixel_accesses": 0,
     }
 
 

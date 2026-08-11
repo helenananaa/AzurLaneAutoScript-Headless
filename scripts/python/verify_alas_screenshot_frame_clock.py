@@ -23,8 +23,33 @@ COMPONENT = "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
 _SEMANTIC_INSERTION = (
     "        semantic_session = getattr(self, 'semantic_adapter', None)\n"
     "        if semantic_session is not None:\n"
-    "            self.image = semantic_session.refresh_frame()\n"
+    "            frame = semantic_session.refresh_frame()\n"
+    "            self.image = semantic_session.pixel_guard(frame)\n"
     "            return self.image\n\n"
+)
+_DEVICE_OS_PATCHED = "import collections\nimport os\nfrom datetime"
+_DEVICE_OS_PRISTINE = "import collections\nfrom datetime"
+_DEVICE_SESSION_INSERTION = (
+    "        self.semantic_adapter = None\n"
+    "        if os.environ.get('ALAS_SEMANTIC_MODE') == '1':\n"
+    "            from alas_headless import AlasSemanticSession, bind_semantic_session\n"
+    "            self.semantic_adapter = AlasSemanticSession.from_environment(\n"
+    "                serial=self.config.Emulator_Serial\n"
+    "            )\n"
+    "            self._semantic_session_token = bind_semantic_session(\n"
+    "                self.semantic_adapter\n"
+    "            )\n"
+    "            self.__dict__.pop('click_methods', None)\n"
+    "            logger.warning(\n"
+    "                'ALAS semantic mode enabled; unmapped detection and raw input fail closed'\n"
+    "            )\n\n"
+)
+_DEVICE_PIXEL_INSERTION = (
+    "        semantic_session = getattr(self, 'semantic_adapter', None)\n"
+    "        if semantic_session is not None:\n"
+    "            semantic_session.reject_pixel_access(\n"
+    "                'template-access', 'Device.handle_night_commission'\n"
+    "            )\n"
 )
 
 
@@ -39,6 +64,7 @@ def _git(repository: Path, *arguments: str) -> str:
             check=True,
             capture_output=True,
             text=True,
+            encoding="utf-8",
             timeout=30,
         )
     except (OSError, subprocess.SubprocessError) as exc:
@@ -79,7 +105,10 @@ def load_patched_screenshot_classes(
         name="Device",
         bases=[ast.Name(id="Screenshot", ctx=ast.Load())],
         keywords=[],
-        body=[_method(device_source, "Device", "screenshot")],
+        body=[
+            _method(device_source, "Device", "handle_night_commission"),
+            _method(device_source, "Device", "screenshot"),
+        ],
         decorator_list=[],
     )
     module = ast.fix_missing_locations(
@@ -105,6 +134,28 @@ def assert_normal_screenshot_source_preserved(
     if patched_source.replace(_SEMANTIC_INSERTION, "", 1) != pristine_source:
         raise ScreenshotFrameClockVerificationError(
             "normal ALAS screenshot source changed outside the semantic guard"
+        )
+
+
+def assert_normal_device_source_preserved(
+    pristine_source: str,
+    patched_source: str,
+) -> None:
+    replacements = (
+        (_DEVICE_OS_PATCHED, _DEVICE_OS_PRISTINE),
+        (_DEVICE_SESSION_INSERTION, ""),
+        (_DEVICE_PIXEL_INSERTION, ""),
+    )
+    restored = patched_source
+    for patched, pristine in replacements:
+        if restored.count(patched) != 1:
+            raise ScreenshotFrameClockVerificationError(
+                "semantic Device insertion is missing or duplicated"
+            )
+        restored = restored.replace(patched, pristine, 1)
+    if restored != pristine_source:
+        raise ScreenshotFrameClockVerificationError(
+            "normal ALAS Device source changed outside semantic guards"
         )
 
 
@@ -228,6 +279,14 @@ class _RecordingSession:
         self._events.append("session.refresh_frame")
         return self._session.refresh_frame()
 
+    def pixel_guard(self, frame: Any) -> Any:
+        self._events.append("session.pixel_guard")
+        return self._session.pixel_guard(frame)
+
+    def reject_pixel_access(self, operation: str, consumer: str) -> None:
+        self._events.append("session.reject_pixel_access")
+        self._session.reject_pixel_access(operation, consumer)
+
 
 def verify(patched_upstream: Path) -> Mapping[str, Any]:
     from alas_headless import (
@@ -235,7 +294,9 @@ def verify(patched_upstream: Path) -> Mapping[str, Any]:
         PINNED_CN_GAME_FINGERPRINT,
     )
     from alas_headless.adapter import (
+        SemanticPixelGuard,
         StaleFrameError,
+        UnsupportedPixelRead,
         semantic_runtime_fingerprint_sha256,
     )
 
@@ -270,6 +331,12 @@ def verify(patched_upstream: Path) -> Mapping[str, Any]:
         "HEAD:module/device/screenshot.py",
     ) + "\n"
     assert_normal_screenshot_source_preserved(pristine_source, screenshot_source)
+    pristine_device_source = _git(
+        patched_upstream,
+        "show",
+        "HEAD:module/device/device.py",
+    ) + "\n"
+    assert_normal_device_source_preserved(pristine_device_source, device_source)
     _, device_class = load_patched_screenshot_classes(
         screenshot_source,
         device_source,
@@ -303,10 +370,62 @@ def verify(patched_upstream: Path) -> Mapping[str, Any]:
         "interval.wait",
         "interval.reset",
         "session.refresh_frame",
+        "session.pixel_guard",
         "handle_night_commission",
     ]
     if events != expected_order:
         raise ScreenshotFrameClockVerificationError("ALAS screenshot call order changed")
+    if not isinstance(first, SemanticPixelGuard):
+        raise ScreenshotFrameClockVerificationError("semantic image is not guarded")
+
+    class _Timestamp:
+        @staticmethod
+        def timestamp() -> float:
+            return 1_000.0
+
+    class _DateTime:
+        @staticmethod
+        def now() -> _Timestamp:
+            return _Timestamp()
+
+    class _ForbiddenTemplate:
+        @staticmethod
+        def match(*args: Any, **kwargs: Any) -> bool:
+            del args, kwargs
+            raise ScreenshotFrameClockVerificationError(
+                "template matcher ran after semantic pixel rejection"
+            )
+
+    handle_globals = device_class.handle_night_commission.__globals__
+    handle_globals.update(
+        {
+            "GET_MISSION": _ForbiddenTemplate(),
+            "datetime": _DateTime,
+            "get_server_next_update": lambda daily_trigger: _Timestamp(),
+        }
+    )
+    events.clear()
+    try:
+        device_class.handle_night_commission(device)
+    except UnsupportedPixelRead:
+        pass
+    else:
+        raise ScreenshotFrameClockVerificationError(
+            "direct template access did not fail with UnsupportedPixelRead"
+        )
+    if events != ["session.reject_pixel_access"]:
+        raise ScreenshotFrameClockVerificationError(
+            "template rejection changed the ALAS branch boundary"
+        )
+    pixel_records = session.pixel_access_records()
+    if (
+        len(pixel_records) != 1
+        or pixel_records[0].operation.value != "template-access"
+        or pixel_records[0].consumer != "Device.handle_night_commission"
+    ):
+        raise ScreenshotFrameClockVerificationError(
+            "template access was not exactly classified"
+        )
     request_count = len(handle.requests)
     if not adapter.appear("LOGIN_CHECK") or len(handle.requests) != request_count:
         raise ScreenshotFrameClockVerificationError("observation refreshed the frame")
@@ -328,7 +447,7 @@ def verify(patched_upstream: Path) -> Mapping[str, Any]:
         raise ScreenshotFrameClockVerificationError(
             "same-generation post-action screenshot was accepted"
         )
-    failed_refresh_order = expected_order[:-1]
+    failed_refresh_order = expected_order[:-2]
     if events != failed_refresh_order:
         raise ScreenshotFrameClockVerificationError(
             "failed screenshot no longer owns interval timing"
@@ -357,12 +476,18 @@ def verify(patched_upstream: Path) -> Mapping[str, Any]:
         "patch_sha256": _sha256(PATCH_PATH),
         "patched_screenshot_sha256": _sha256(screenshot_path),
         "normal_screenshot_source_preserved": True,
+        "normal_device_source_preserved": True,
         "successful_screenshot_call_order": expected_order,
         "failed_refresh_call_order": failed_refresh_order,
         "frame_ids": [first.frame_id, second.frame_id, third.frame_id],
         "frame_generations": [first.generation, second.generation, third.generation],
         "observer_requests": len(handle.requests),
         "observation_hidden_refreshes": 0,
+        "classified_pixel_accesses": len(pixel_records),
+        "classified_pixel_operations": [
+            record.operation.value for record in pixel_records
+        ],
+        "unclassified_pixel_accesses": 0,
         "runtime_handle_taps": len(handle.taps),
         "android_input_injected": False,
         "post_action_newer_generation_required": True,

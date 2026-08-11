@@ -26,7 +26,8 @@ PATCHED_SCREENSHOT = '''class Screenshot:
 
         semantic_session = getattr(self, 'semantic_adapter', None)
         if semantic_session is not None:
-            self.image = semantic_session.refresh_frame()
+            frame = semantic_session.refresh_frame()
+            self.image = semantic_session.pixel_guard(frame)
             return self.image
 
         for _ in range(2):
@@ -37,6 +38,9 @@ PATCHED_SCREENSHOT = '''class Screenshot:
 '''
 
 DEVICE_SOURCE = '''class Device(Screenshot):
+    def handle_night_commission(self):
+        return False
+
     def screenshot(self):
         self.stuck_record_check()
         try:
@@ -83,14 +87,21 @@ class ScreenshotFrameClockVerifierTests(unittest.TestCase):
                 events.append("refresh")
                 return "frame-1"
 
+            def pixel_guard(self, frame):
+                events.append("guard")
+                return "guarded-" + frame
+
         device = device_class()
         device._screenshot_interval = Timer()
         device.semantic_adapter = Session()
         device.stuck_record_check = lambda: events.append("stuck")
         device.handle_night_commission = lambda: events.append("night") or False
 
-        self.assertEqual(device.screenshot(), "frame-1")
-        self.assertEqual(events, ["stuck", "wait", "reset", "refresh", "night"])
+        self.assertEqual(device.screenshot(), "guarded-frame-1")
+        self.assertEqual(
+            events,
+            ["stuck", "wait", "reset", "refresh", "guard", "night"],
+        )
 
 
 if __name__ == "__main__":

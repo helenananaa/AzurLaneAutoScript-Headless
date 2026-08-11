@@ -22,6 +22,9 @@ substitute. Step E04 must replace it with the classified unsupported-pixel
 sentinel before any supported semantic replay may consume `device.image` as an
 array. No black or synthetic image is introduced.
 
+Step E04 subsequently replaced this temporary value with
+`SemanticPixelGuard`; see `docs/alas-adapter-pixel-access-inventory.md`.
+
 ## Executed evidence
 
 `scripts/python/verify_alas_screenshot_frame_clock.py` reads and executes the

@@ -48,10 +48,16 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         wait = self.patch_text.index("self._screenshot_interval.wait()")
         reset = self.patch_text.index("self._screenshot_interval.reset()", wait)
         refresh = self.patch_text.index("semantic_session.refresh_frame()", reset)
+        guard = self.patch_text.index("semantic_session.pixel_guard(frame)", refresh)
         native_loop = self.patch_text.index("for _ in range(2):", refresh)
         self.assertLess(wait, reset)
         self.assertLess(reset, refresh)
-        self.assertLess(refresh, native_loop)
+        self.assertLess(refresh, guard)
+        self.assertLess(guard, native_loop)
+        self.assertIn(
+            "'template-access', 'Device.handle_night_commission'",
+            self.patch_text,
+        )
 
     def test_campaign_viewport_replaces_only_final_swipe_dispatch(self):
         self.assertIn(

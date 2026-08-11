@@ -22,12 +22,16 @@ from .adapter import (
     ObserveRequest,
     PINNED_CN_GAME_FINGERPRINT,
     PinnedPackageGate,
+    PixelAccessAudit,
+    PixelAccessOperation,
+    PixelAccessRecord,
     RuntimeHandlePort,
     RuntimeHandlePackageGate,
     SemanticFrame,
     SemanticFrameClock,
     SemanticFrameIdentity,
     SemanticFrameReader,
+    SemanticPixelGuard,
     StaleFrameError,
     UnknownObservationError,
     semantic_runtime_fingerprint_sha256,
@@ -5226,6 +5230,7 @@ class AlasSemanticSession:
         self.package_process_lease = package_process_lease
         self.observer_max_age_ms = observer_max_age_ms
         self.trace = trace
+        self._pixel_audit = PixelAccessAudit(self._record_pixel_access)
         self.expected_runtime_fingerprint_sha256 = (
             semantic_runtime_fingerprint_sha256(
                 package=package,
@@ -5251,6 +5256,45 @@ class AlasSemanticSession:
                 trace=trace,
             )
         self.adapter: Optional[AlasSemanticAdapter] = None
+
+    def _record_pixel_access(self, record: PixelAccessRecord) -> None:
+        if self.trace is not None:
+            self.trace.emit(
+                "semantic.pixel.unsupported",
+                outcome="error",
+                fields={
+                    "ordinal": record.ordinal,
+                    "frame_id": record.frame_id,
+                    "generation": record.generation,
+                    "operation": record.operation.value,
+                    "consumer": record.consumer,
+                },
+            )
+
+    def pixel_access_records(self) -> tuple[PixelAccessRecord, ...]:
+        return self._pixel_audit.records()
+
+    def pixel_guard(self, frame: SemanticFrame) -> SemanticPixelGuard:
+        if self._frame_clock is None:
+            raise StaleFrameError()
+        current = self._frame_clock.borrow(frame.frame_id)
+        if current is not frame:
+            raise StaleFrameError()
+        return SemanticPixelGuard(frame, self._pixel_audit)
+
+    def reject_pixel_access(
+        self,
+        operation: str,
+        consumer: str,
+    ) -> None:
+        try:
+            classified = PixelAccessOperation(operation)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("pixel access operation is not classified") from exc
+        if self._frame_clock is None:
+            raise StaleFrameError()
+        frame = self._frame_clock.borrow()
+        self._pixel_audit.reject(frame, classified, consumer)
 
     @property
     def runtime_handle(self) -> Optional[RuntimeHandlePort]:

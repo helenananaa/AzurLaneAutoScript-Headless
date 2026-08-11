@@ -24,6 +24,12 @@ from .ports import (
     RuntimeHandlePort,
     SemanticFrameIdentity,
 )
+from .pixel_guard import (
+    PixelAccessAudit,
+    PixelAccessOperation,
+    PixelAccessRecord,
+    SemanticPixelGuard,
+)
 from .registry import (
     ObservationHandler,
     ObservationRegistration,
@@ -71,6 +77,10 @@ __all__ = (
     "SemanticFrame",
     "SemanticFrameClock",
     "SemanticFrameReader",
+    "PixelAccessAudit",
+    "PixelAccessOperation",
+    "PixelAccessRecord",
+    "SemanticPixelGuard",
     "semantic_runtime_fingerprint_sha256",
     "StaleFrameError",
     "UnknownObservationError",
