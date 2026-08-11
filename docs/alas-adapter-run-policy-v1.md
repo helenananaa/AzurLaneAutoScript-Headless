@@ -114,3 +114,10 @@ Every ledger-backed `ActionReceipt` now carries the exact lowercase policy
 SHA-256 and capability ID. `MissionClaimReceipt` propagates those fields from
 the one claim action. A partial authority annotation is invalid, and ordinary
 navigation receipts remain explicitly unarmed with both fields absent.
+
+Commission and tactical are the second migrated family. Their shared context
+keeps selected-row, transition-proof, popup-chain, and idempotency receipts,
+but no reward/start/assignment budget or initial reward boolean. Commission's
+reward/start compatibility queries and every tactical pre-confirm gate read
+the ledger. A tactical finish receipt, rather than a stale permission flag,
+owns its exact popup-close chain after the one reward grant is consumed.

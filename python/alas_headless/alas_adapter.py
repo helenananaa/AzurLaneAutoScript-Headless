@@ -594,13 +594,10 @@ class _MailFlowContext:
 @dataclass
 class _CommissionFlowContext:
     flow_kind: str = "commission"
-    rewards_allowed: bool = False
-    reward_budget: int = 0
     reward_detected_count: Optional[int] = None
     reward_claim_receipt: Optional[ActionReceipt] = None
     reward_close_receipts: List[ActionReceipt] = field(default_factory=list)
     reward_proof: Optional[CommissionRewardProof] = None
-    start_budget: int = 0
     selected_signature: Optional[Tuple[Union[int, str], ...]] = None
     selected_at: float = 0.0
     start_receipt: Optional[ActionReceipt] = None
@@ -608,8 +605,8 @@ class _CommissionFlowContext:
     start_proof: Optional[CommissionStartProof] = None
     passive_transition_until: float = 0.0
     cancelled_tactical_prompts: Set[str] = field(default_factory=set)
-    assign_budget: int = 0
     tactical_back_receipt: Optional[ActionReceipt] = None
+    tactical_reward_receipt: Optional[ActionReceipt] = None
 
 
 @dataclass
@@ -775,7 +772,6 @@ class AlasSemanticAdapter:
             for name, semantic_id in self._mappings.items()
         ):
             raise ValueError("ALAS semantic mappings must be non-empty")
-        self._allow_tactical_rewards = bool(allow_tactical_rewards)
         for label, budget in (
             ("tactical assign", tactical_assign_budget),
             ("commission reward", commission_reward_budget),
@@ -804,9 +800,6 @@ class AlasSemanticAdapter:
             raise ValueError(
                 "campaign camera positioning budget must be at most two"
             )
-        self._commission_reward_budget = commission_reward_budget
-        self._tactical_assign_budget = tactical_assign_budget
-        self._commission_start_budget = commission_start_budget
         self._research_reward_budget = research_reward_budget
         self._research_start_budget = research_start_budget
         self._dorm_collect_budget = dorm_collect_budget
@@ -1096,8 +1089,6 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
         self._commission_context = _CommissionFlowContext(
             flow_kind="commission",
-            reward_budget=self._commission_reward_budget,
-            start_budget=self._commission_start_budget,
             passive_transition_until=time.monotonic() + 20.0,
         )
 
@@ -1118,8 +1109,6 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
         self._commission_context = _CommissionFlowContext(
             flow_kind="tactical",
-            rewards_allowed=self._allow_tactical_rewards,
-            assign_budget=self._tactical_assign_budget,
             passive_transition_until=time.monotonic() + 20.0,
         )
 
@@ -2426,7 +2415,7 @@ class AlasSemanticAdapter:
                 return self.oracle.enabled(target)
             if name == "POPUP_CONFIRM":
                 return (
-                    self._commission_context.assign_budget > 0
+                    self._action_ledger.allowed("tactical.assign")
                     and self.oracle.enabled("tactical/course/confirm")
                 )
         if semantic_id is None and name == "CAMPAIGN_MENU_CHECK":
@@ -2509,9 +2498,10 @@ class AlasSemanticAdapter:
                     if name == "COMMISSION_ADVICE":
                         return detail.selected_ship_count < 3
                     return (
-                        detail.selected_ship_count >= 3
+                        context.flow_kind == "commission"
+                        and detail.selected_ship_count >= 3
                         and detail.oil_cost == 0
-                        and context.start_budget > 0
+                        and self._action_ledger.allowed("commission.start")
                         and context.start_receipt is None
                     )
                 if name == "EXP_INFO_S_REWARD":
@@ -3657,7 +3647,10 @@ class AlasSemanticAdapter:
         self, min_level: int, start_index: int
     ) -> bool:
         context = self._require_commission_context()
-        if context.flow_kind != "tactical" or context.assign_budget <= 0:
+        if (
+            context.flow_kind != "tactical"
+            or not self._action_ledger.allowed("tactical.assign")
+        ):
             raise SemanticGateClosed("tactical assignment requires a positive budget")
         if min_level < 1 or start_index < 0:
             raise ValueError("tactical ship selection bounds are invalid")
@@ -3688,7 +3681,10 @@ class AlasSemanticAdapter:
 
     def tactical_select_first_trainable_skill(self) -> bool:
         context = self._require_commission_context()
-        if context.flow_kind != "tactical" or context.assign_budget <= 0:
+        if (
+            context.flow_kind != "tactical"
+            or not self._action_ledger.allowed("tactical.assign")
+        ):
             raise SemanticGateClosed("tactical assignment requires a positive budget")
         skill = next(
             (skill for skill in self.oracle.tactical_skills() if not skill.max_level),
@@ -3713,7 +3709,10 @@ class AlasSemanticAdapter:
 
     def tactical_select_book(self, position: int) -> ActionReceipt:
         context = self._require_commission_context()
-        if context.flow_kind != "tactical" or context.assign_budget <= 0:
+        if (
+            context.flow_kind != "tactical"
+            or not self._action_ledger.allowed("tactical.assign")
+        ):
             raise SemanticGateClosed("tactical assignment requires a positive budget")
         before = self.oracle.tactical_books()
         matches = tuple(book for book in before if book.position == position)
@@ -3802,7 +3801,7 @@ class AlasSemanticAdapter:
         context = self._require_commission_context()
         return (
             context.flow_kind == "commission"
-            and context.reward_budget > 0
+            and self._action_ledger.allowed("commission.reward")
             and context.reward_detected_count == 1
             and context.reward_claim_receipt is None
         )
@@ -3861,7 +3860,11 @@ class AlasSemanticAdapter:
         return context.reward_proof
 
     def commission_start_allowed(self) -> bool:
-        return self._require_commission_context().start_budget > 0
+        context = self._require_commission_context()
+        return (
+            context.flow_kind == "commission"
+            and self._action_ledger.allowed("commission.start")
+        )
 
     def commission_detail_state(self) -> CommissionDetailState:
         self._package_gate()
@@ -3921,7 +3924,7 @@ class AlasSemanticAdapter:
             return False
         if (
             self._commission_context.flow_kind != "tactical"
-            or not self._commission_context.rewards_allowed
+            or not self._action_ledger.allowed("tactical.reward")
         ):
             raise SemanticGateClosed(
                 "tactical reward requires the separate explicit opt-in"
@@ -4334,7 +4337,7 @@ class AlasSemanticAdapter:
         ):
             context = self._commission_context
             if name == "ADD_NEW_STUDENT":
-                if context.assign_budget <= 0:
+                if not self._action_ledger.allowed("tactical.assign"):
                     raise SemanticGateClosed(
                         "tactical assignment requires a positive budget"
                     )
@@ -4364,7 +4367,7 @@ class AlasSemanticAdapter:
                     context.tactical_back_receipt = receipt
                 return receipt
             if name == "TACTICAL_CLASS_START":
-                if context.assign_budget <= 0:
+                if not self._action_ledger.allowed("tactical.assign"):
                     raise SemanticGateClosed(
                         "tactical course start requires a positive budget"
                     )
@@ -4379,7 +4382,7 @@ class AlasSemanticAdapter:
             if name == "TACTICAL_CLASS_CANCEL":
                 return self.oracle.click("tactical/book/cancel")
             if name == "POPUP_CONFIRM":
-                if context.assign_budget <= 0:
+                if not self._action_ledger.allowed("tactical.assign"):
                     raise SemanticGateClosed(
                         "tactical course confirmation requires a positive budget"
                     )
@@ -4387,7 +4390,6 @@ class AlasSemanticAdapter:
                     "tactical.assign",
                     lambda: self.oracle.click("tactical/course/confirm"),
                 )
-                context.assign_budget -= 1
                 return receipt
             raise AlasSemanticUnmapped(
                 "tactical resource requires a typed workflow helper: {0}".format(name)
@@ -4769,19 +4771,24 @@ class AlasSemanticAdapter:
                         "commission.reward",
                         lambda: self.oracle.click(semantic_id),
                     )
-                    context.reward_budget -= 1
                     context.reward_claim_receipt = receipt
                     return self._record_mission_transition(receipt)
-                if context.flow_kind != "tactical" or not context.rewards_allowed:
+                if context.flow_kind != "tactical":
                     raise SemanticGateClosed(
                         "tactical reward requires the separate explicit opt-in"
                     )
-                return self._record_mission_transition(
+                if context.tactical_reward_receipt is not None:
+                    return context.tactical_reward_receipt
+                if not self._action_ledger.allowed("tactical.reward"):
+                    raise SemanticGateClosed(
+                        "tactical reward requires the separate explicit opt-in"
+                    )
+                context.tactical_reward_receipt = self._record_mission_transition(
                     self._dispatch_mutation(
-                        "tactical.reward",
-                        lambda: self.oracle.click(semantic_id),
+                        "tactical.reward", lambda: self.oracle.click(semantic_id)
                     )
                 )
+                return context.tactical_reward_receipt
             if (
                 self._research_context is not None
                 and semantic_id in (
@@ -4842,7 +4849,7 @@ class AlasSemanticAdapter:
                     )
                 if context.start_receipt is not None:
                     return context.start_receipt
-                if context.start_budget <= 0:
+                if not self._action_ledger.allowed("commission.start"):
                     raise SemanticGateClosed(
                         "commission start input requires a positive independent budget"
                     )
@@ -4866,7 +4873,6 @@ class AlasSemanticAdapter:
                         context.selected_signature
                     ),
                 )
-                context.start_budget -= 1
                 context.start_receipt = receipt
                 context.start_clicked_at = time.monotonic()
                 return receipt
@@ -4894,7 +4900,7 @@ class AlasSemanticAdapter:
                     for recorded in context.reward_close_receipts:
                         if recorded.semantic_id == "reward/ship-exp/close":
                             return recorded
-                elif not context.rewards_allowed:
+                elif context.tactical_reward_receipt is None:
                     raise SemanticGateClosed(
                         "tactical reward requires the separate explicit opt-in"
                     )
@@ -4909,7 +4915,7 @@ class AlasSemanticAdapter:
                         raise SemanticGateClosed(
                             "commission reward popup requires a budgeted finish input"
                         )
-                elif not context.rewards_allowed:
+                elif context.tactical_reward_receipt is None:
                     raise SemanticGateClosed(
                         "tactical reward requires the separate explicit opt-in"
                     )

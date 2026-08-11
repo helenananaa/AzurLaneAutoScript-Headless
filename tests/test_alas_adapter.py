@@ -1207,11 +1207,11 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.begin_tactical()
 
         adapter.click(NamedButton("TACTICAL_CLASS_START"))
-        self.assertEqual(adapter._commission_context.assign_budget, 1)
+        self.assertEqual(adapter._action_ledger.remaining("tactical.assign"), 1)
         receipt = adapter.click(NamedButton("POPUP_CONFIRM"))
 
         self.assertEqual(receipt.semantic_id, "tactical/course/confirm")
-        self.assertEqual(adapter._commission_context.assign_budget, 0)
+        self.assertEqual(adapter._action_ledger.remaining("tactical.assign"), 0)
         with self.assertRaises(SemanticGateClosed):
             adapter.click(NamedButton("POPUP_CONFIRM"))
 
