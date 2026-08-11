@@ -125,9 +125,9 @@ class LoginFlow:
 
     def __init__(
         self,
-        oracle: Any,
         package_gate: Callable[[], None],
         *,
+        observation_oracle: Callable[[], Any],
         monotonic: Callable[[], float] = time.monotonic,
         entry_observer: Callable[[], bool] | None = None,
     ) -> None:
@@ -135,13 +135,15 @@ class LoginFlow:
             raise ValueError("login flow requires a package identity gate")
         if not callable(monotonic):
             raise ValueError("login flow requires a monotonic clock")
-        self._oracle = oracle
+        if not callable(observation_oracle):
+            raise ValueError("login flow requires an explicit frame observer")
+        self._observation_oracle = observation_oracle
         self._package_gate = package_gate
         self._monotonic = monotonic
         self._entry_observer = (
             entry_observer
             if entry_observer is not None
-            else lambda: self._oracle.enabled(LOGIN_ENTRY_SEMANTIC_ID)
+            else lambda: self._reader().enabled(LOGIN_ENTRY_SEMANTIC_ID)
         )
         if not callable(self._entry_observer):
             raise ValueError("login entry observer must be callable")
@@ -190,10 +192,11 @@ class LoginFlow:
             self.end()
 
     def popup_target(self) -> str | None:
+        reader = self._reader()
         targets = tuple(
             semantic_id
             for semantic_id in LOGIN_POPUP_CONFIRM_TARGETS
-            if self._oracle.enabled(semantic_id)
+            if reader.enabled(semantic_id)
         )
         if len(targets) > 1:
             raise SemanticGateClosed("login popup target is ambiguous")
@@ -208,11 +211,12 @@ class LoginFlow:
         return resource
 
     def known_surface_exists(self) -> bool:
+        reader = self._reader()
         try:
-            self._oracle.campaign_is_in_map()
+            reader.campaign_is_in_map()
         except SemanticGateClosed:
             return any(
-                self._oracle.enabled(target)
+                reader.enabled(target)
                 for target in LOGIN_KNOWN_FALLBACK_TARGETS
             )
         return True
@@ -245,7 +249,7 @@ class LoginFlow:
         self._package_gate()
         if resource == "LOGIN_CHECK":
             return self._entry_observer()
-        return self._oracle.enabled(target)
+        return self._reader().enabled(target)
 
     def observe_unknown(self) -> bool:
         self._package_gate()
@@ -259,17 +263,18 @@ class LoginFlow:
         raise UnknownObservationError()
 
     def goto_main_target(self) -> str | None:
+        reader = self._reader()
         targets = []
-        if self._oracle.campaign_menu_is_entry() and self._oracle.enabled(
+        if reader.campaign_menu_is_entry() and reader.enabled(
             "campaign-menu/page/back"
         ):
             targets.append("campaign-menu/page/back")
         try:
-            self._oracle.build_queue_timers()
+            reader.build_queue_timers()
         except SemanticGateClosed:
             pass
         else:
-            if self._oracle.enabled("build/page/back"):
+            if reader.enabled("build/page/back"):
                 targets.append("build/page/back")
         for identity, target in (
             ("task/page/back", "task/page/back"),
@@ -277,7 +282,7 @@ class LoginFlow:
             ("research-menu/page/back", "research-menu/page/back"),
             ("research/page/back", "research/page/back"),
         ):
-            if self._oracle.exists(identity) and self._oracle.enabled(target):
+            if reader.exists(identity) and reader.enabled(target):
                 targets.append(target)
         unique = tuple(dict.fromkeys(targets))
         if len(unique) > 1:
@@ -308,7 +313,7 @@ class LoginFlow:
                 raise UnknownObservationError()
             self._package_gate()
         self._last_action_intent = LoginActionIntent(resource, semantic_id)
-        receipt = self._oracle.click(semantic_id)
+        receipt = self._reader().click(semantic_id)
         if context is not None and semantic_id in LOGIN_RECORDED_TRANSITION_TARGETS:
             if semantic_id == LOGIN_ENTRY_SEMANTIC_ID:
                 context.entry_receipt = receipt
@@ -316,6 +321,12 @@ class LoginFlow:
                 self._monotonic() + LOGIN_ACTION_TRANSITION_SECONDS
             )
         return receipt
+
+    def _reader(self) -> Any:
+        reader = self._observation_oracle()
+        if reader is None:
+            raise SemanticGateClosed("login frame observer is unavailable")
+        return reader
 
     def handle_presence_failure(
         self,

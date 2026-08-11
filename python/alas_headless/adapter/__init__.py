@@ -9,7 +9,7 @@ from .errors import (
     UnknownObservationError,
     UnsupportedPixelRead,
 )
-from .frame import SemanticFrame, SemanticFrameClock
+from .frame import SemanticFrame, SemanticFrameClock, SemanticFrameReader
 from .ports import (
     ActionIntent,
     ActionLease,
@@ -70,6 +70,7 @@ __all__ = (
     "SemanticFrameIdentity",
     "SemanticFrame",
     "SemanticFrameClock",
+    "SemanticFrameReader",
     "semantic_runtime_fingerprint_sha256",
     "StaleFrameError",
     "UnknownObservationError",

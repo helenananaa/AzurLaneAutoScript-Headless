@@ -340,10 +340,24 @@ def load_patched_login_handler(upstream: Path):
 
 def run_scenario(handler_class: Any, scenario: str) -> Mapping[str, Any]:
     from alas_headless import AlasSemanticAdapter
+    from alas_headless.adapter import SemanticFrameIdentity
 
     oracle = ReplayOracle(scenario)
     gate_calls: list[bool] = []
-    adapter = AlasSemanticAdapter(oracle, lambda: gate_calls.append(True))
+    frame_identity = SemanticFrameIdentity(
+        frame_id="login-replay-{0}".format(scenario),
+        pid=4242,
+        generation=7,
+        scene_handle=-76,
+        fingerprint_sha256="a" * 64,
+        raw_state_sha256="b" * 64,
+    )
+    adapter = AlasSemanticAdapter(
+        oracle,
+        lambda: gate_calls.append(True),
+        frame_observation_oracle=lambda: oracle,
+        frame_identity_provider=lambda: frame_identity,
+    )
     device = ReplayDevice(adapter)
     config = types.SimpleNamespace(SERVER="cn")
     handler = handler_class(config, device)
@@ -367,6 +381,7 @@ def run_scenario(handler_class: Any, scenario: str) -> Mapping[str, Any]:
         "semantic_actions": clicks,
         "package_gate_calls": len(gate_calls),
         "registry_dispatches": adapter._compat_observation_ordinal,
+        "frame_id": frame_identity.frame_id,
         "scope_closed": not adapter._login_flow.active,
         "android_input_injected": False,
     }
@@ -374,10 +389,24 @@ def run_scenario(handler_class: Any, scenario: str) -> Mapping[str, Any]:
 
 def run_failure_scenario(handler_class: Any) -> Mapping[str, Any]:
     from alas_headless import AlasSemanticAdapter
+    from alas_headless.adapter import SemanticFrameIdentity
 
     oracle = ReplayOracle("entry")
     gate_calls: list[bool] = []
-    adapter = AlasSemanticAdapter(oracle, lambda: gate_calls.append(True))
+    frame_identity = SemanticFrameIdentity(
+        frame_id="login-replay-failure",
+        pid=4242,
+        generation=7,
+        scene_handle=-76,
+        fingerprint_sha256="a" * 64,
+        raw_state_sha256="b" * 64,
+    )
+    adapter = AlasSemanticAdapter(
+        oracle,
+        lambda: gate_calls.append(True),
+        frame_observation_oracle=lambda: oracle,
+        frame_identity_provider=lambda: frame_identity,
+    )
     device = ReplayDevice(adapter)
     handler = handler_class(types.SimpleNamespace(SERVER="cn"), device)
     handler.fail_in_main = True
@@ -399,6 +428,7 @@ def run_failure_scenario(handler_class: Any) -> Mapping[str, Any]:
         "exception": "scripted login replay failure",
         "package_gate_calls": len(gate_calls),
         "scope_closed": not adapter._login_flow.active,
+        "frame_id": frame_identity.frame_id,
         "android_input_injected": False,
     }
 

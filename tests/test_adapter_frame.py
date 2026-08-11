@@ -5,6 +5,7 @@ import unittest
 
 from alas_headless.adapter import (
     SemanticFrameClock,
+    SemanticFrameReader,
     StaleFrameError,
 )
 from alas_headless.semantic_oracle import (
@@ -44,8 +45,8 @@ def snapshot(generation=10, age_ms=20, scene_handle=-76):
 def buttons(generation=10, age_ms=20):
     records = [
         {
-            "name": "LOGIN_CHECK",
-            "path": "Canvas/Login/Enter",
+            "name": "LoginUI2(Clone)",
+            "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)",
             "active_in_hierarchy": True,
             "active_and_enabled": True,
             "interactable": True,
@@ -77,6 +78,33 @@ def buttons(generation=10, age_ms=20):
     }
 
 
+def ui(generation=10, age_ms=20):
+    return {
+        "protocol_schema": "alas-headless.observer/v1",
+        "semantic_schema": "alas-headless.ui/v1",
+        "status": "ok",
+        "package": PACKAGE,
+        "pid": 4242,
+        "peer_uid": 2000,
+        "driver_revision": REVISION,
+        "schema": 1,
+        "generation": generation,
+        "age_ms": age_ms,
+        "method_mask": 15,
+        "toggle_count": 0,
+        "text_count": 0,
+        "image_count": 0,
+        "toggle_truncated": False,
+        "text_truncated": False,
+        "image_truncated": False,
+        "error_count": 0,
+        "skipped_count": 0,
+        "toggles": [],
+        "texts": [],
+        "images": [],
+    }
+
+
 class MutableClock:
     def __init__(self, value=1_000_000_000):
         self.value = value
@@ -91,20 +119,24 @@ class FakeRuntimeHandle:
         self.pid = 4242
         self.snapshot = snapshot()
         self.buttons = buttons()
+        self.ui = ui()
         self.requests = []
         self.foreground_calls = 0
         self.after_request = None
 
     def observer_request(self, request_line):
         self.requests.append(request_line)
-        if request_line != "GET /v1/state\n":
-            raise AssertionError("semantic frame used a non-atomic endpoint")
-        value = {
-            "protocol_schema": "alas-headless.observer/v1",
-            "status": "ok",
-            "snapshot": copy.deepcopy(self.snapshot),
-            "buttons": copy.deepcopy(self.buttons),
-        }
+        if request_line == "GET /v1/state\n":
+            value = {
+                "protocol_schema": "alas-headless.observer/v1",
+                "status": "ok",
+                "snapshot": copy.deepcopy(self.snapshot),
+                "buttons": copy.deepcopy(self.buttons),
+            }
+        elif request_line == "GET /v1/ui\n":
+            value = copy.deepcopy(self.ui)
+        else:
+            raise AssertionError("semantic frame used an unreviewed endpoint")
         if self.after_request is not None:
             self.after_request()
         return value
@@ -187,6 +219,34 @@ class SemanticFrameTests(unittest.TestCase):
         self.assertEqual(handle.requests, ["GET /v1/state\n"])
         with self.assertRaises(StaleFrameError):
             clock.borrow("frame-10-other")
+
+    def test_frame_reader_uses_explicit_ui_projection_without_transport(self):
+        handle, _, clock = make_clock()
+        frame = clock.acquire(include_ui=True)
+        live_request_count = len(handle.requests)
+        reader = SemanticFrameReader(clock, clock._oracle)
+
+        first = reader.oracle()
+        self.assertTrue(first.enabled("login/enter"))
+        self.assertFalse(first.exists("main/task"))
+        self.assertEqual(first.read_ui_state().generation, 10)
+        self.assertIs(reader.oracle(), first)
+
+        self.assertEqual(
+            handle.requests,
+            ["GET /v1/state\n", "GET /v1/ui\n"],
+        )
+        self.assertEqual(len(handle.requests), live_request_count)
+        self.assertEqual(reader.identity(), frame.identity)
+
+    def test_ui_projection_must_share_the_exact_frame_generation(self):
+        handle, _, clock = make_clock()
+        handle.ui["generation"] = 11
+
+        with self.assertRaisesRegex(SemanticGateClosed, "mixes UI"):
+            clock.acquire(include_ui=True)
+
+        self.assertIsNone(clock.current_frame_id)
 
     def test_combined_state_cannot_mix_generations(self):
         handle, _, clock = make_clock()

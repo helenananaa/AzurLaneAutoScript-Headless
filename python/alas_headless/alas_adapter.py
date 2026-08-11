@@ -24,7 +24,11 @@ from .adapter import (
     PinnedPackageGate,
     RuntimeHandlePort,
     RuntimeHandlePackageGate,
+    SemanticFrame,
+    SemanticFrameClock,
     SemanticFrameIdentity,
+    SemanticFrameReader,
+    StaleFrameError,
     UnknownObservationError,
     semantic_runtime_fingerprint_sha256,
 )
@@ -84,13 +88,6 @@ from .semantic_oracle import (
 )
 
 
-# B05 intentionally precedes the atomic frame clock in Milestone E.  This
-# sentinel labels a read-only compatibility envelope; it is never exported as
-# action evidence or passed to an ActionLease.
-_UNBOUND_READ_ONLY_FRAME_SHA256 = (
-    # sha256("alas-adapter-v2:unbound-read-only-frame")
-    "f31292f2b5c0c9f6919a5a5201aa6228ce4cbe9d76b3006af7175e0888bffa04"
-)
 _LEGACY_TASK_CONFIG_SHA256 = (
     # sha256("alas-adapter-v2:legacy-task-config")
     "dc5f75742bd2e66dd83f82bbce11f5224de0052bac545a3f9e4c605332fbaae7"
@@ -704,6 +701,10 @@ class AlasSemanticAdapter:
         campaign_combat_budget: int = 0,
         campaign_viewport_swipe_budget: int = 0,
         campaign_camera_positioning_budget: int = 0,
+        frame_observation_oracle: Optional[Callable[[], Any]] = None,
+        frame_identity_provider: Optional[
+            Callable[[], SemanticFrameIdentity]
+        ] = None,
     ) -> None:
         if package_gate is None:
             raise ValueError("semantic ALAS mode requires a package identity gate")
@@ -770,39 +771,55 @@ class AlasSemanticAdapter:
         self._build_context: Optional[_BuildFlowContext] = None
         self._campaign_context: Optional[_CampaignFlowContext] = None
         self._observer_stale_since: Optional[float] = None
+        self._frame_observation_oracle = frame_observation_oracle
+        self._frame_identity_provider = frame_identity_provider
         self._compat_observation_ordinal = 0
         self._observation_registry = ObservationRegistry()
         register_login_observations(
             self._observation_registry,
-            enabled=lambda semantic_id: self.oracle.enabled(semantic_id),
-            frame_identity=self._compatibility_frame_identity,
+            enabled=lambda semantic_id: (
+                self._require_frame_observation_oracle().enabled(semantic_id)
+            ),
+            frame_identity=self._frame_identity_for_request,
         )
         self._login_flow = LoginFlow(
-            self.oracle,
             lambda: self._package_gate(),
+            observation_oracle=self._require_frame_observation_oracle,
             monotonic=lambda: time.monotonic(),
             entry_observer=self._dispatch_login_check_registry,
         )
 
-    def _compatibility_frame_identity(
+    def _require_frame_observation_oracle(self) -> Any:
+        provider = self._frame_observation_oracle
+        if provider is None:
+            raise StaleFrameError()
+        reader = provider()
+        if reader is None:
+            raise StaleFrameError()
+        return reader
+
+    def _current_frame_identity(self) -> SemanticFrameIdentity:
+        provider = self._frame_identity_provider
+        if provider is None:
+            raise StaleFrameError()
+        identity = provider()
+        if not isinstance(identity, SemanticFrameIdentity):
+            raise StaleFrameError()
+        return identity
+
+    def _frame_identity_for_request(
         self, request: ObserveRequest
     ) -> SemanticFrameIdentity:
-        """Return an explicitly unbound envelope for pre-frame-clock reads."""
-
-        return SemanticFrameIdentity(
-            frame_id=request.frame_id,
-            pid=1,
-            generation=0,
-            scene_handle=0,
-            fingerprint_sha256=_UNBOUND_READ_ONLY_FRAME_SHA256,
-            raw_state_sha256=_UNBOUND_READ_ONLY_FRAME_SHA256,
-        )
+        identity = self._current_frame_identity()
+        if identity.frame_id != request.frame_id:
+            raise StaleFrameError()
+        return identity
 
     def _dispatch_login_check_registry(self) -> bool:
         self._compat_observation_ordinal += 1
         ordinal = self._compat_observation_ordinal
         scope_id = "login-startup-{0}".format(ordinal)
-        frame_id = "unbound-login-{0}".format(ordinal)
+        frame_id = self._current_frame_identity().frame_id
         scope = FlowScope(
             scope_id=scope_id,
             kind="login",
@@ -1899,7 +1916,9 @@ class AlasSemanticAdapter:
                     return False
                 raise
         semantic_id = self._mappings.get(name)
-        if name in LOGIN_OBSERVATION_TARGETS:
+        if name == "LOGIN_CHECK" or (
+            self._login_flow.active and name in LOGIN_OBSERVATION_TARGETS
+        ):
             return self._login_flow.observe(name)
         if self._login_flow.active and name == "POPUP_CONFIRM":
             return self._login_flow.observe(name)
@@ -5218,6 +5237,8 @@ class AlasSemanticSession:
         self._runtime_handle = runtime_handle
         self._package_gate: Optional[Callable[[], None]] = None
         self._runtime_handle_factory: Optional[AdbRuntimeHandleFactory] = None
+        self._frame_clock: Optional[SemanticFrameClock] = None
+        self._frame_reader: Optional[SemanticFrameReader] = None
         if runtime_handle is None:
             self._runtime_handle_factory = AdbRuntimeHandleFactory(
                 serial=serial or "",
@@ -5253,6 +5274,10 @@ class AlasSemanticSession:
         return handle
 
     def _release_owned_runtime_handle(self) -> None:
+        if self._frame_clock is not None:
+            self._frame_clock.close()
+        self._frame_clock = None
+        self._frame_reader = None
         if self._runtime_handle_factory is not None:
             self._runtime_handle_factory.close()
             self._runtime_handle = None
@@ -5385,10 +5410,33 @@ class AlasSemanticSession:
             if handle is None or package_gate is None:
                 raise SemanticGateClosed("semantic runtime handle is unavailable")
             package_gate()
+
+            def invalidate_current_frame() -> None:
+                frame_clock = self._frame_clock
+                if frame_clock is None or frame_clock.current_frame_id is None:
+                    return
+                frame_id = frame_clock.current_frame_id
+                frame_clock.borrow(frame_id)
+                frame_clock.invalidate(frame_id)
+
+            def invalidate_then_tap(x: int, y: int) -> None:
+                invalidate_current_frame()
+                handle.tap(x, y)
+
+            def invalidate_then_swipe(
+                x1: int,
+                y1: int,
+                x2: int,
+                y2: int,
+                duration_ms: int,
+            ) -> None:
+                invalidate_current_frame()
+                handle.swipe(x1, y1, x2, y2, duration_ms)
+
             oracle = SemanticOracle(
                 handle.observer_request,
                 handle.foreground_component,
-                handle.tap,
+                invalidate_then_tap,
                 OracleFingerprint(
                     package=self.package,
                     component=self.component,
@@ -5396,8 +5444,10 @@ class AlasSemanticSession:
                     expected_pid=handle.pid,
                     max_age_ms=self.observer_max_age_ms,
                 ),
-                swipe=handle.swipe,
+                swipe=invalidate_then_swipe,
             )
+            self._frame_clock = SemanticFrameClock(handle, oracle)
+            self._frame_reader = SemanticFrameReader(self._frame_clock, oracle)
             self.adapter = AlasSemanticAdapter(
                 oracle,
                 package_gate,
@@ -5424,6 +5474,8 @@ class AlasSemanticSession:
                 campaign_camera_positioning_budget=(
                     self.campaign_camera_positioning_budget
                 ),
+                frame_observation_oracle=self._frame_reader.oracle,
+                frame_identity_provider=self._frame_reader.identity,
             )
             if self.trace is not None:
                 self.trace.emit(
@@ -5446,6 +5498,23 @@ class AlasSemanticSession:
         self._release_owned_runtime_handle()
         if self.trace is not None:
             self.trace.emit("semantic.session.close")
+
+    def refresh_frame(self) -> SemanticFrame:
+        self.open()
+        if self._frame_clock is None:
+            raise StaleFrameError()
+        previous_frame_id = self._frame_clock.current_frame_id
+        frame = self._frame_clock.acquire(include_ui=True)
+        if self.trace is not None:
+            self.trace.emit(
+                "semantic.frame.refresh",
+                fields={
+                    "previous_frame_id": previous_frame_id,
+                    "frame_id": frame.frame_id,
+                    "generation": frame.generation,
+                },
+            )
+        return frame
 
     def __enter__(self) -> AlasSemanticAdapter:
         return self.open()

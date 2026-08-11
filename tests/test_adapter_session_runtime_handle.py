@@ -1,3 +1,4 @@
+import copy
 import unittest
 from unittest import mock
 
@@ -8,6 +9,7 @@ from alas_headless import (
 )
 from alas_headless.adapter import (
     AdbRuntimeHandle,
+    StaleFrameError,
     semantic_runtime_fingerprint_sha256,
 )
 from alas_headless.semantic_oracle import ObserverTransportError
@@ -55,7 +57,219 @@ class FakeRuntimeHandle:
         self.swipes.append((x1, y1, x2, y2, duration_ms))
 
 
+class FrameRuntimeHandle(FakeRuntimeHandle):
+    def __init__(self):
+        super().__init__()
+        self.generation = 10
+
+    def observer_request(self, request_line):
+        self.requests.append(request_line)
+        identity = {
+            "protocol_schema": "alas-headless.observer/v1",
+            "status": "ok",
+            "package": PACKAGE,
+            "pid": self.pid,
+            "peer_uid": 2000,
+            "driver_revision": REVISION,
+            "generation": self.generation,
+            "age_ms": 20,
+        }
+        if request_line == "GET /v1/state\n":
+            snapshot = dict(
+                identity,
+                snapshot_schema=1,
+                main_thread=True,
+                flags=15,
+                ui_stage=100,
+                ui_method_mask=15,
+                width=1280,
+                height=720,
+                scene_handle=-76,
+            )
+            records = [
+                {
+                    "name": "LoginUI2(Clone)",
+                    "path": "UICamera/Canvas/UIMain/LoginUI2(Clone)",
+                    "active_in_hierarchy": True,
+                    "active_and_enabled": True,
+                    "interactable": True,
+                    "raycast_top": True,
+                    "adb_point": {"x": 640.0, "y": 360.0},
+                    "adb_bounds": {
+                        "left": 600.0,
+                        "top": 330.0,
+                        "right": 680.0,
+                        "bottom": 390.0,
+                    },
+                }
+            ]
+            button_state = dict(
+                identity,
+                semantic_schema="alas-headless.buttons/v1",
+                schema=1,
+                button_count=1,
+                truncated=False,
+                error_count=0,
+                buttons=records,
+            )
+            return {
+                "protocol_schema": "alas-headless.observer/v1",
+                "status": "ok",
+                "snapshot": copy.deepcopy(snapshot),
+                "buttons": copy.deepcopy(button_state),
+            }
+        if request_line == "GET /v1/ui\n":
+            return dict(
+                identity,
+                semantic_schema="alas-headless.ui/v1",
+                schema=1,
+                method_mask=15,
+                toggle_count=0,
+                text_count=0,
+                image_count=0,
+                toggle_truncated=False,
+                text_truncated=False,
+                image_truncated=False,
+                error_count=0,
+                skipped_count=0,
+                toggles=[],
+                texts=[],
+                images=[],
+            )
+        raise AssertionError("unexpected observer request: {0}".format(request_line))
+
+
 class SessionRuntimeHandleTests(unittest.TestCase):
+    def test_login_reads_require_refresh_and_reuse_one_frame_acquisition(self):
+        handle = FrameRuntimeHandle()
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=handle,
+        )
+        adapter = session.open()
+        adapter.begin_login()
+
+        with self.assertRaises(StaleFrameError):
+            adapter.appear("LOGIN_CHECK")
+        self.assertEqual(handle.requests, [])
+
+        first = session.refresh_frame()
+        self.assertTrue(adapter.appear("LOGIN_CHECK"))
+        self.assertTrue(adapter.match_template_color("LOGIN_CHECK"))
+        self.assertFalse(adapter.appear("LOGIN_ANNOUNCE"))
+        self.assertEqual(
+            handle.requests,
+            ["GET /v1/state\n", "GET /v1/ui\n"],
+        )
+        self.assertIs(session._frame_clock.borrow(), first)
+
+        handle.generation = 11
+        second = session.refresh_frame()
+        self.assertEqual(second.generation, 11)
+        self.assertNotEqual(second.frame_id, first.frame_id)
+        self.assertEqual(len(handle.requests), 4)
+
+    def test_session_close_clears_current_frame(self):
+        handle = FrameRuntimeHandle()
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=handle,
+        )
+        session.refresh_frame()
+        frame_clock = session._frame_clock
+        session.close()
+
+        self.assertIsNone(session._frame_clock)
+        with self.assertRaises(StaleFrameError):
+            frame_clock.borrow()
+
+    def test_live_input_invalidates_frame_before_runtime_tap(self):
+        handle = FrameRuntimeHandle()
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=handle,
+        )
+        adapter = session.open()
+        adapter.begin_login()
+        frame = session.refresh_frame()
+
+        receipt = adapter.click("LOGIN_CHECK")
+
+        self.assertEqual(receipt.semantic_id, "login/enter")
+        self.assertEqual(handle.taps, [(640, 360)])
+        self.assertEqual(
+            handle.requests,
+            ["GET /v1/state\n", "GET /v1/ui\n"],
+        )
+        with self.assertRaises(StaleFrameError):
+            session._frame_clock.borrow()
+        with self.assertRaises(StaleFrameError):
+            session.refresh_frame()
+        handle.generation = frame.generation + 1
+        self.assertEqual(session.refresh_frame().generation, 11)
+
+    def test_live_input_rechecks_frame_age_before_runtime_tap(self):
+        handle = FrameRuntimeHandle()
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=handle,
+        )
+        adapter = session.open()
+        adapter.begin_login()
+        frame = session.refresh_frame()
+        frame_clock = session._frame_clock
+        clock_reads = iter(
+            (
+                frame.captured_monotonic_ns,
+                frame.captured_monotonic_ns,
+                frame.captured_monotonic_ns
+                + int((frame_clock._maximum_age_ms + 1) * 1_000_000),
+            )
+        )
+        frame_clock._monotonic_ns = lambda: next(clock_reads)
+
+        with self.assertRaises(StaleFrameError):
+            adapter.click("LOGIN_CHECK")
+
+        self.assertEqual(handle.taps, [])
+        self.assertIsNone(frame_clock.current_frame_id)
+
+    def test_deliberate_refresh_records_the_frame_transition(self):
+        handle = FrameRuntimeHandle()
+        trace = mock.Mock()
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=handle,
+            trace=trace,
+        )
+
+        first = session.refresh_frame()
+        handle.generation = 11
+        second = session.refresh_frame()
+
+        frame_events = [
+            call
+            for call in trace.emit.call_args_list
+            if call.args and call.args[0] == "semantic.frame.refresh"
+        ]
+        self.assertEqual(len(frame_events), 2)
+        self.assertEqual(
+            frame_events[0].kwargs["fields"],
+            {
+                "previous_frame_id": None,
+                "frame_id": first.frame_id,
+                "generation": 10,
+            },
+        )
+        self.assertEqual(
+            frame_events[1].kwargs["fields"],
+            {
+                "previous_frame_id": first.frame_id,
+                "frame_id": second.frame_id,
+                "generation": 11,
+            },
+        )
+
     def test_explicit_handle_path_wires_only_the_protocol(self):
         handle = FakeRuntimeHandle()
         session = AlasSemanticSession(
@@ -69,8 +283,8 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         self.assertFalse(hasattr(session, "bridge"))
         self.assertIs(adapter.oracle._request.__self__, handle)
         self.assertIs(adapter.oracle._foreground_component.__self__, handle)
-        self.assertIs(adapter.oracle._tap.__self__, handle)
-        self.assertIs(adapter.oracle._swipe.__self__, handle)
+        self.assertTrue(callable(adapter.oracle._tap))
+        self.assertTrue(callable(adapter.oracle._swipe))
         self.assertEqual(adapter.oracle.fingerprint.expected_pid, 4242)
         self.assertEqual(handle.requests, [])
 

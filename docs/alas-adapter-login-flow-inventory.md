@@ -226,6 +226,15 @@ action each; the failure produces none. All four close login scope and restore
 the screenshot interval. The verifier reports `android_input_injected=false`.
 Its ignored local result is `artifacts/login-flow-replay-c04.json`.
 
+E02 reran the same pinned patched-handler replay after removing live-oracle
+reads from `LoginFlow`. Every replay scenario now carries an explicit frame
+identity, and the result remains 4/4 with the same semantic action sequences,
+scope cleanup, package-gate counts, and `android_input_injected=false`. The
+ignored result is `artifacts/login-flow-replay-e02.json`. Session-level tests
+separately use real raw state/UI fixtures: `refresh_frame()` performs the only
+two transport requests, repeated login observations borrow that frame with no
+additional request, and a runtime input invalidates it before the tap.
+
 Remaining gaps that later milestones must not conceal:
 
 - there is no live qualification for maintenance, update, Android dialog, CN

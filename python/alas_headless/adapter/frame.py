@@ -32,6 +32,14 @@ def _freeze(value: Any) -> Any:
     raise SemanticGateClosed("semantic frame contains a mutable projection value")
 
 
+def _thaw(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {key: _thaw(child) for key, child in value.items()}
+    if isinstance(value, tuple):
+        return [_thaw(child) for child in value]
+    return value
+
+
 def _canonical_sha256(value: Mapping[str, Any]) -> str:
     try:
         encoded = json.dumps(
@@ -151,12 +159,13 @@ class SemanticFrameClock:
             raise StaleFrameError()
         return fingerprint, pid
 
-    def acquire(self) -> SemanticFrame:
+    def acquire(self, *, include_ui: bool = False) -> SemanticFrame:
         if self._closed:
             raise StaleFrameError()
         try:
             fingerprint_before, pid_before = self._runtime_identity()
             state = self._oracle.read_state()
+            ui_state = self._oracle.read_ui_state() if include_ui else None
             fingerprint_after, pid_after = self._runtime_identity()
             if (
                 fingerprint_after != fingerprint_before
@@ -176,16 +185,35 @@ class SemanticFrameClock:
             if generation != button_generation or state.generation != generation:
                 raise SemanticGateClosed("semantic frame mixes observer generations")
             scene_handle = _integer(snapshot.get("scene_handle"), "scene_handle")
-            age_ms = max(
+            ages = [
                 _age(snapshot.get("age_ms"), "snapshot", self._maximum_age_ms),
                 _age(buttons.get("age_ms"), "buttons", self._maximum_age_ms),
-            )
+            ]
             if (
                 self._invalidated_generation is not None
                 and generation <= self._invalidated_generation
             ):
                 raise StaleFrameError()
             raw_payload = {"buttons": buttons, "snapshot": snapshot}
+            if ui_state is not None:
+                if ui_state.generation != generation:
+                    raise SemanticGateClosed(
+                        "semantic frame mixes UI and state generations"
+                    )
+                ui_snapshot = ui_state.snapshot
+                if ui_snapshot.get("pid") != pid_after:
+                    raise SemanticGateClosed(
+                        "semantic frame UI disagrees on PID"
+                    )
+                ages.append(
+                    _age(
+                        ui_snapshot.get("age_ms"),
+                        "UI",
+                        self._maximum_age_ms,
+                    )
+                )
+                raw_payload["ui"] = ui_snapshot
+            age_ms = max(ages)
             raw_state_sha256 = _canonical_sha256(raw_payload)
             captured = self._monotonic_ns()
             if isinstance(captured, bool) or not isinstance(captured, int) or captured <= 0:
@@ -245,3 +273,80 @@ class SemanticFrameClock:
         self._current = None
         self._invalidated_generation = None
         self._closed = True
+
+
+class _FrameBoundSemanticOracle(SemanticOracle):
+    """Disable transition retry loops for one immutable frame."""
+
+    def _retry_transition_read(
+        self,
+        reader: Callable[[], Any],
+        *,
+        attempts: int = 1,
+        interval_seconds: float = 0.0,
+    ) -> Any:
+        del attempts, interval_seconds
+        return reader()
+
+
+class SemanticFrameReader:
+    """Expose SemanticOracle reads backed only by the currently borrowed frame."""
+
+    def __init__(
+        self,
+        clock: SemanticFrameClock,
+        live_oracle: SemanticOracle,
+    ) -> None:
+        if not isinstance(clock, SemanticFrameClock):
+            raise TypeError("semantic frame reader requires a frame clock")
+        if not isinstance(live_oracle, SemanticOracle):
+            raise TypeError("semantic frame reader requires a SemanticOracle")
+        self._clock = clock
+        self._live_oracle = live_oracle
+        self._frame_id: str | None = None
+        self._oracle: SemanticOracle | None = None
+
+    def identity(self) -> SemanticFrameIdentity:
+        return self._clock.borrow().identity
+
+    def oracle(self) -> SemanticOracle:
+        frame = self._clock.borrow()
+        if self._oracle is not None and self._frame_id == frame.frame_id:
+            return self._oracle
+        frame_id = frame.frame_id
+
+        def request(request_line: str) -> Mapping[str, Any]:
+            current = self._clock.borrow(frame_id)
+            projections = current.projections
+            if request_line == "GET /v1/state\n":
+                return {
+                    "protocol_schema": "alas-headless.observer/v1",
+                    "status": "ok",
+                    "snapshot": _thaw(projections["snapshot"]),
+                    "buttons": _thaw(projections["buttons"]),
+                }
+            if request_line == "GET /v1/snapshot\n":
+                return _thaw(projections["snapshot"])
+            if request_line == "GET /v1/buttons\n":
+                return _thaw(projections["buttons"])
+            if request_line == "GET /v1/ui\n" and "ui" in projections:
+                return _thaw(projections["ui"])
+            raise StaleFrameError()
+
+        live = self._live_oracle
+        self._oracle = _FrameBoundSemanticOracle(
+            request,
+            live._foreground_component,
+            live._tap,
+            live.fingerprint,
+            targets=live._targets.values(),
+            image_targets=live._image_targets.values(),
+            toggle_targets=live._toggle_targets.values(),
+            text_targets=live._text_targets.values(),
+            blockers=live._blockers,
+            monotonic=live._monotonic,
+            sleep=lambda _: None,
+            swipe=live._swipe,
+        )
+        self._frame_id = frame_id
+        return self._oracle

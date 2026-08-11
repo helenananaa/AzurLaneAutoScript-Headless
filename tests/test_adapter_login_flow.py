@@ -10,7 +10,7 @@ from alas_headless import (
     Point,
     SemanticGateClosed,
 )
-from alas_headless.adapter import UnknownObservationError
+from alas_headless.adapter import SemanticFrameIdentity, UnknownObservationError
 from alas_headless.adapter.flows.login import (
     LOGIN_ACTION_TARGETS,
     LOGIN_OBSERVATION_TARGETS,
@@ -102,10 +102,19 @@ class LoginFlowFacadeParityTests(unittest.TestCase):
         old = AlasSemanticAdapter(
             old_oracle,
             lambda: old_oracle.events.append(("package_gate",)),
+            frame_observation_oracle=lambda: old_oracle,
+            frame_identity_provider=lambda: SemanticFrameIdentity(
+                frame_id="login-parity-frame",
+                pid=1,
+                generation=7,
+                scene_handle=-76,
+                fingerprint_sha256="a" * 64,
+                raw_state_sha256="b" * 64,
+            ),
         )
         new = LoginFlow(
-            new_oracle,
             lambda: new_oracle.events.append(("package_gate",)),
+            observation_oracle=lambda: new_oracle,
             monotonic=new_clock,
         )
         return old, old_oracle, old_clock, new, new_oracle, new_clock

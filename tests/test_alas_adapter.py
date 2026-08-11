@@ -27,6 +27,7 @@ from alas_headless import (
     SemanticGateClosed,
 )
 from alas_headless.semantic_oracle import ActionReceipt, AdbObserverBridge
+from alas_headless.adapter import SemanticFrameIdentity
 
 
 class NamedButton:
@@ -828,10 +829,26 @@ class FakePackageBridge:
 
 
 class AlasSemanticAdapterTests(unittest.TestCase):
+    @staticmethod
+    def frame_identity():
+        return SemanticFrameIdentity(
+            frame_id="adapter-unit-frame",
+            pid=1234,
+            generation=10,
+            scene_handle=-76,
+            fingerprint_sha256="a" * 64,
+            raw_state_sha256="b" * 64,
+        )
+
     def make_adapter(self):
         oracle = FakeOracle()
         gate_calls = []
-        adapter = AlasSemanticAdapter(oracle, lambda: gate_calls.append(True))
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: gate_calls.append(True),
+            frame_observation_oracle=lambda: oracle,
+            frame_identity_provider=self.frame_identity,
+        )
         return adapter, oracle, gate_calls
 
     def test_confirmed_main_aliases_route_to_semantic_targets(self):
@@ -911,7 +928,12 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             gate_calls.append(True)
             raise SemanticGateClosed("installed package fingerprint is not allowlisted")
 
-        adapter = AlasSemanticAdapter(oracle, fail_closed)
+        adapter = AlasSemanticAdapter(
+            oracle,
+            fail_closed,
+            frame_observation_oracle=lambda: oracle,
+            frame_identity_provider=self.frame_identity,
+        )
         with self.assertRaises(SemanticGateClosed) as routed:
             adapter._appear_once(NamedButton("LOGIN_CHECK"))
 
