@@ -260,6 +260,21 @@ class ActionReceipt:
     point: Point
     bounds: Bounds
     path: str
+    policy_sha256: Optional[str] = None
+    capability_id: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if (self.policy_sha256 is None) != (self.capability_id is None):
+            raise ValueError("action receipt authority metadata is incomplete")
+        if self.policy_sha256 is None:
+            return
+        if re.fullmatch(r"[0-9a-f]{64}", self.policy_sha256) is None:
+            raise ValueError("action receipt policy hash is malformed")
+        if re.fullmatch(
+            r"[a-z0-9]+(?:[._-][a-z0-9]+)+",
+            self.capability_id or "",
+        ) is None:
+            raise ValueError("action receipt capability ID is malformed")
 
 
 class MissionDisposition(str, Enum):

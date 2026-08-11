@@ -101,3 +101,16 @@ final mutation backend call. A backend exception, ambiguous result, later
 receipt failure, exhausted grant, incomplete closure, or closed session never
 restores authority. F03 keeps the legacy per-flow budget as a temporary second
 gate; F04 removes those duplicate owners one flow family at a time.
+
+### F04 migration status
+
+Mission and mail are the first migrated family. Their flow contexts retain
+only ALAS-owned observation, navigation, and state-machine cache. Mission's
+`mission_claim_allowed()` is now a compatibility view of
+`ActionLedger.allowed("mission.claim")`; mail mutation admission reads the
+same ledger directly. Ending or reopening either flow never recreates a grant.
+
+Every ledger-backed `ActionReceipt` now carries the exact lowercase policy
+SHA-256 and capability ID. `MissionClaimReceipt` propagates those fields from
+the one claim action. A partial authority annotation is invalid, and ordinary
+navigation receipts remain explicitly unarmed with both fields absent.

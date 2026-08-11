@@ -528,6 +528,8 @@ class MissionClaimReceipt:
     pre_claim_row_count: int
     post_claim_row_count: int
     unfinished_row_count: int
+    policy_sha256: str
+    capability_id: str
     claim_input_count: int = 1
     dismissed_overlays: Tuple[str, ...] = ()
 
@@ -573,7 +575,6 @@ class CampaignSortieProof:
 class _MissionFlowContext:
     daily: bool
     weekly: bool
-    claim_budget: int
     summary_entry_clicked: bool = False
     entry_clicked: bool = False
     summary_entry_receipt: Optional[ActionReceipt] = None
@@ -588,7 +589,6 @@ class _MissionFlowContext:
 @dataclass
 class _MailFlowContext:
     entry_clicked: bool = False
-    mutations_allowed: bool = False
 
 
 @dataclass
@@ -775,8 +775,6 @@ class AlasSemanticAdapter:
             for name, semantic_id in self._mappings.items()
         ):
             raise ValueError("ALAS semantic mappings must be non-empty")
-        self._allow_mission_claim_once = bool(allow_mission_claim_once)
-        self._allow_mail_mutations = bool(allow_mail_mutations)
         self._allow_tactical_rewards = bool(allow_tactical_rewards)
         for label, budget in (
             ("tactical assign", tactical_assign_budget),
@@ -890,7 +888,14 @@ class AlasSemanticAdapter:
         capability: str,
         operation: Callable[[], Any],
     ) -> Any:
-        return self._action_ledger.dispatch(capability, operation).value
+        dispatch = self._action_ledger.dispatch(capability, operation)
+        if isinstance(dispatch.value, ActionReceipt):
+            return replace(
+                dispatch.value,
+                policy_sha256=dispatch.policy_sha256,
+                capability_id=dispatch.capability,
+            )
+        return dispatch.value
 
     def _require_frame_observation_oracle(self) -> Any:
         provider = self._frame_observation_oracle
@@ -1016,7 +1021,6 @@ class AlasSemanticAdapter:
         self._mission_context = _MissionFlowContext(
             daily=bool(daily),
             weekly=bool(weekly),
-            claim_budget=(1 if self._allow_mission_claim_once else 0),
         )
 
     def begin_login(self) -> None:
@@ -1052,8 +1056,8 @@ class AlasSemanticAdapter:
     def mission_claim_allowed(self) -> bool:
         """Expose the remaining input budget without weakening the click gate."""
 
-        context = self._require_mission_context()
-        return context.claim_budget > 0
+        self._require_mission_context()
+        return self._action_ledger.allowed("mission.claim")
 
     def begin_mail(self) -> None:
         """Open one ALAS-owned mail state-machine invocation."""
@@ -1070,9 +1074,7 @@ class AlasSemanticAdapter:
             or self._campaign_context is not None
         ):
             raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
-        self._mail_context = _MailFlowContext(
-            mutations_allowed=self._allow_mail_mutations
-        )
+        self._mail_context = _MailFlowContext()
 
     def end_mail(self) -> None:
         self._mail_context = None
@@ -4956,7 +4958,7 @@ class AlasSemanticAdapter:
             if toggle_target is not None:
                 return self.oracle.click_toggle(toggle_target)
             if name in ("MAIL_BATCH_CLAIM", "MAIL_BATCH_DELETE"):
-                if not self._mail_context.mutations_allowed:
+                if not self._action_ledger.allowed("mail.mutation"):
                     raise SemanticGateClosed(
                         "mail mutation requires the separate explicit opt-in"
                     )
@@ -4996,7 +4998,7 @@ class AlasSemanticAdapter:
                 or state.claim_all is None
             ):
                 raise SemanticGateClosed("stable mission claim-all is absent")
-            if context.claim_budget <= 0:
+            if not self._action_ledger.allowed("mission.claim"):
                 raise SemanticGateClosed(
                     "mission claim input requires the separate one-claim opt-in"
                 )
@@ -5004,7 +5006,6 @@ class AlasSemanticAdapter:
                 "mission.claim",
                 lambda: self.oracle.click("task/claim/all"),
             )
-            context.claim_budget -= 1
             return receipt
         if name == "MISSION_SINGLE":
             raise SemanticGateClosed("numeric-row mission claiming is not validated")
@@ -5234,6 +5235,8 @@ class AlasSemanticAdapter:
         if post_page.disposition != MissionDisposition.UNFINISHED:
             raise SemanticGateClosed("post-claim mission state is not proven unfinished")
         exit_receipt = self._return_from_mission(timeout_seconds)
+        if claim_receipt.policy_sha256 is None or claim_receipt.capability_id is None:
+            raise SemanticGateClosed("mission claim receipt authority is incomplete")
         return MissionClaimReceipt(
             outcome="claimed-all-once",
             pre_claim_generation=page.generation,
@@ -5245,6 +5248,8 @@ class AlasSemanticAdapter:
             pre_claim_row_count=len(page.claim_rows),
             post_claim_row_count=len(post_page.claim_rows),
             unfinished_row_count=len(post_page.unfinished_rows),
+            policy_sha256=claim_receipt.policy_sha256,
+            capability_id=claim_receipt.capability_id,
             claim_input_count=1,
             dismissed_overlays=dismissed_overlays,
         )

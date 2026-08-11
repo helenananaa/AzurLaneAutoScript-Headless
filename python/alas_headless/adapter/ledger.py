@@ -105,6 +105,12 @@ class ActionLedger:
         with self._lock:
             return self._remaining.get(capability, 0)
 
+    def allowed(self, capability: str) -> bool:
+        if not self._report.ready or capability not in self.profile.required_grants:
+            return False
+        with self._lock:
+            return not self._closed and self._remaining.get(capability, 0) > 0
+
     def dispatch(
         self,
         capability: str,
