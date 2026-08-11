@@ -23,6 +23,7 @@ from .ports import (
     RuntimeHandlePort,
     SemanticFrameIdentity,
 )
+from .scope import FlowScopeStack
 
 
 __all__ = (
@@ -35,6 +36,7 @@ __all__ = (
     "CapabilityClosureError",
     "FlowScope",
     "FlowScopeError",
+    "FlowScopeStack",
     "FlowScopeToken",
     "ObservationPort",
     "ObserveRequest",
