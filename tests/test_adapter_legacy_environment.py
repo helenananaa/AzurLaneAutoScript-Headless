@@ -175,7 +175,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
                     )
 
     def test_explicit_policy_replaces_default_legacy_grants(self):
-        policy = explicit_policy({"mission.claim": 3, "campaign.combat": 2})
+        policy = explicit_policy({"mission.claim": 3, "campaign.grid_click": 2})
         result = translate_legacy_semantic_environment(
             BASE_ENVIRONMENT,
             explicit_policy=policy,

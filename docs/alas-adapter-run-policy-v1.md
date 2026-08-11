@@ -61,7 +61,7 @@ session is created. It retains these compatibility grant IDs:
 | `ALAS_SEMANTIC_CAMPAIGN_STAGE_ENTRY_BUDGET` | `campaign.stage_entry` |
 | `ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET` | `campaign.fleet_mutation` |
 | `ALAS_SEMANTIC_CAMPAIGN_SORTIE_BUDGET` | `campaign.sortie` |
-| `ALAS_SEMANTIC_CAMPAIGN_COMBAT_BUDGET` | `campaign.combat` |
+| `ALAS_SEMANTIC_CAMPAIGN_COMBAT_BUDGET` | `campaign.grid_click` |
 | `ALAS_SEMANTIC_CAMPAIGN_VIEWPORT_SWIPE_BUDGET` | `campaign.viewport_swipe` |
 
 Absent legacy variables produce zero grants. The three retained boolean
@@ -71,3 +71,33 @@ still rejected on presence. An explicit policy may replace the default legacy
 grant set, but cannot be combined with any nonzero legacy grant. F02 does not
 yet claim that this list is sufficient task capability closure; F03 owns that
 preflight decision.
+
+## F03 capability closure and action ledger
+
+`TaskCapabilityProfile` binds one canonical profile ID and task-config SHA-256
+to four available-capability requirements: observations, actions, recoveries,
+and evidence. `required_grants` is a strict subset of `required_actions`.
+This distinction is intentional: a task can require already-qualified exact
+follow-up action ports while arming only one policy-controlled initiating
+action, such as the G36 `campaign.grid_click`.
+
+Admission produces `alas-headless.capability-closure/v1`. Its canonical report
+contains the exact required and available sets, positive policy grants,
+selected recovery, missing sets, unrelated grants, readiness, and a derived
+SHA-256. A session refuses construction when:
+
+- a required capability is not implemented by the supplied inventory;
+- a required action grant is zero or absent;
+- a positive grant is unrelated to the exact task profile;
+- the selected recovery differs from the required and available recovery;
+- the profile ID or task-config hash differs from the explicit run policy.
+
+The default inventory advertises `recovery.qualification_stop` only. The
+`manual-takeover` policy enum does not imply that its operational ownership
+boundary is implemented.
+
+`ActionLedger` consumes a positive grant under a lock immediately before the
+final mutation backend call. A backend exception, ambiguous result, later
+receipt failure, exhausted grant, incomplete closure, or closed session never
+restores authority. F03 keeps the legacy per-flow budget as a temporary second
+gate; F04 removes those duplicate owners one flow family at a time.

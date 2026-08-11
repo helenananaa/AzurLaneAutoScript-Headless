@@ -17,9 +17,12 @@ from types import MappingProxyType
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Set, Tuple, Union
 
 from .adapter import (
+    DEFAULT_CAPABILITY_INVENTORY,
+    ActionLedger,
     AdbRuntimeHandleFactory,
+    CapabilityClosureError,
+    CapabilityInventory,
     FlowScope,
-    RunPolicy,
     ObservationRegistry,
     ObserveRequest,
     PINNED_CN_GAME_FINGERPRINT,
@@ -29,13 +32,18 @@ from .adapter import (
     PixelAccessRecord,
     RuntimeHandlePort,
     RuntimeHandlePackageGate,
+    RunPolicy,
+    RecoveryPolicy,
     SemanticFrame,
     SemanticFrameClock,
     SemanticFrameIdentity,
     SemanticFrameReader,
     SemanticPixelGuard,
     StaleFrameError,
+    TaskCapabilityProfile,
     UnknownObservationError,
+    compatibility_policy_sha256,
+    compatibility_profile,
     semantic_runtime_fingerprint_sha256,
     translate_legacy_semantic_environment,
 )
@@ -99,6 +107,49 @@ _LEGACY_TASK_CONFIG_SHA256 = (
     # sha256("alas-adapter-v2:legacy-task-config")
     "dc5f75742bd2e66dd83f82bbce11f5224de0052bac545a3f9e4c605332fbaae7"
 )
+
+
+def _legacy_action_grants(
+    *,
+    allow_mission_claim_once: bool,
+    allow_mail_mutations: bool,
+    allow_tactical_rewards: bool,
+    tactical_assign_budget: int,
+    commission_reward_budget: int,
+    commission_start_budget: int,
+    research_reward_budget: int,
+    research_start_budget: int,
+    dorm_collect_budget: int,
+    dorm_feed_budget: int,
+    build_submit_budget: int,
+    campaign_stage_entry_budget: int,
+    campaign_fleet_mutation_budget: int,
+    campaign_sortie_budget: int,
+    campaign_combat_budget: int,
+    campaign_viewport_swipe_budget: int,
+    campaign_camera_positioning_budget: int,
+) -> Mapping[str, int]:
+    return MappingProxyType(
+        {
+            "mission.claim": int(bool(allow_mission_claim_once)),
+            "mail.mutation": int(bool(allow_mail_mutations)),
+            "tactical.reward": int(bool(allow_tactical_rewards)),
+            "tactical.assign": tactical_assign_budget,
+            "commission.reward": commission_reward_budget,
+            "commission.start": commission_start_budget,
+            "research.reward": research_reward_budget,
+            "research.start": research_start_budget,
+            "dorm.collect": dorm_collect_budget,
+            "dorm.feed": dorm_feed_budget,
+            "build.submit": build_submit_budget,
+            "campaign.stage_entry": campaign_stage_entry_budget,
+            "campaign.fleet_mutation": campaign_fleet_mutation_budget,
+            "campaign.sortie": campaign_sortie_budget,
+            "campaign.grid_click": campaign_combat_budget,
+            "campaign.viewport_swipe": campaign_viewport_swipe_budget,
+            "campaign.camera_positioning": campaign_camera_positioning_budget,
+        }
+    )
 
 
 # These aliases are intentionally asymmetric.  For example, BACK_ARROW is not
@@ -712,6 +763,7 @@ class AlasSemanticAdapter:
         frame_identity_provider: Optional[
             Callable[[], SemanticFrameIdentity]
         ] = None,
+        action_ledger: Optional[ActionLedger] = None,
     ) -> None:
         if package_gate is None:
             raise ValueError("semantic ALAS mode requires a package identity gate")
@@ -770,6 +822,43 @@ class AlasSemanticAdapter:
         self._campaign_camera_positioning_budget = (
             campaign_camera_positioning_budget
         )
+        if action_ledger is None:
+            grants = _legacy_action_grants(
+                allow_mission_claim_once=allow_mission_claim_once,
+                allow_mail_mutations=allow_mail_mutations,
+                allow_tactical_rewards=allow_tactical_rewards,
+                tactical_assign_budget=tactical_assign_budget,
+                commission_reward_budget=commission_reward_budget,
+                commission_start_budget=commission_start_budget,
+                research_reward_budget=research_reward_budget,
+                research_start_budget=research_start_budget,
+                dorm_collect_budget=dorm_collect_budget,
+                dorm_feed_budget=dorm_feed_budget,
+                build_submit_budget=build_submit_budget,
+                campaign_stage_entry_budget=campaign_stage_entry_budget,
+                campaign_fleet_mutation_budget=campaign_fleet_mutation_budget,
+                campaign_sortie_budget=campaign_sortie_budget,
+                campaign_combat_budget=campaign_combat_budget,
+                campaign_viewport_swipe_budget=campaign_viewport_swipe_budget,
+                campaign_camera_positioning_budget=(
+                    campaign_camera_positioning_budget
+                ),
+            )
+            profile = compatibility_profile("legacy-adapter", grants)
+            action_ledger = ActionLedger(
+                profile=profile,
+                inventory=DEFAULT_CAPABILITY_INVENTORY,
+                grants=grants,
+                recovery_policy=RecoveryPolicy.QUALIFICATION_STOP,
+                policy_sha256=compatibility_policy_sha256(
+                    profile.profile_id,
+                    grants,
+                ),
+            )
+        elif not isinstance(action_ledger, ActionLedger):
+            raise TypeError("semantic action ledger is invalid")
+        action_ledger.require_preflight()
+        self._action_ledger = action_ledger
         self._mission_context: Optional[_MissionFlowContext] = None
         self._mail_context: Optional[_MailFlowContext] = None
         self._commission_context: Optional[_CommissionFlowContext] = None
@@ -795,6 +884,13 @@ class AlasSemanticAdapter:
             monotonic=lambda: time.monotonic(),
             entry_observer=self._dispatch_login_check_registry,
         )
+
+    def _dispatch_mutation(
+        self,
+        capability: str,
+        operation: Callable[[], Any],
+    ) -> Any:
+        return self._action_ledger.dispatch(capability, operation).value
 
     def _require_frame_observation_oracle(self) -> Any:
         provider = self._frame_observation_oracle
@@ -2696,7 +2792,10 @@ class AlasSemanticAdapter:
             item = before.items[item_index]
             if item.count <= 0 or before.food + item.value > before.capacity:
                 raise SemanticGateClosed("dorm feed item is unavailable or would overflow")
-            receipt = self.oracle.click_dorm_food(item.item_id)
+            receipt = self._dispatch_mutation(
+                "dorm.feed",
+                lambda: self.oracle.click_dorm_food(item.item_id),
+            )
             clicked_at = time.monotonic()
             context.feed_budget -= 1
             receipts.append(receipt)
@@ -3190,26 +3289,33 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed(
                     "campaign camera positioning lease is incomplete"
                 )
-            context.camera_positioning_budget -= 1
+            capability = "campaign.camera_positioning"
             target_node = positioning.target_node
         else:
             if context.viewport_swipe_budget != 1:
                 raise SemanticGateClosed("campaign map viewport lease is incomplete")
             assert combat is not None
-            context.viewport_swipe_budget -= 1
+            capability = "campaign.viewport_swipe"
             target_node = combat.target_node
-        proof = self.oracle.campaign_map_viewport_swipe(
-            context.map_state,
-            target_node,
-            intent,
-            start=start,
-            end=end,
-            duration_ms=int(round(float(duration) * 1000.0)),
-            columns=context.map_columns,
-            rows=context.map_rows,
-            land_cells=context.map_land_cells,
-            expected_fleet_count=context.map_expected_fleet_count,
+        proof = self._dispatch_mutation(
+            capability,
+            lambda: self.oracle.campaign_map_viewport_swipe(
+                context.map_state,
+                target_node,
+                intent,
+                start=start,
+                end=end,
+                duration_ms=int(round(float(duration) * 1000.0)),
+                columns=context.map_columns,
+                rows=context.map_rows,
+                land_cells=context.map_land_cells,
+                expected_fleet_count=context.map_expected_fleet_count,
+            ),
         )
+        if positioning is not None:
+            context.camera_positioning_budget -= 1
+        else:
+            context.viewport_swipe_budget -= 1
         context.map_state = proof.post_state
         if positioning is not None:
             context.camera_positioning_proofs.append(proof)
@@ -3454,7 +3560,10 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "campaign combat grid requires one remaining budget unit"
             )
-        receipt = self.oracle.click_campaign_map_cell(context.map_state, node)
+        receipt = self._dispatch_mutation(
+            "campaign.grid_click",
+            lambda: self.oracle.click_campaign_map_cell(context.map_state, node),
+        )
         # The ADB tap has happened.  Consume and record the lease before any
         # subsequent assertion so an anomalous receipt can never be replayed.
         context.combat_budget -= 1
@@ -3915,7 +4024,10 @@ class AlasSemanticAdapter:
                     "campaign stage entry requires one remaining budget unit"
                 )
             context.oil_before_sortie = self.oracle.campaign_oil()
-            receipt = self.oracle.click_campaign_stage(campaign_stage_code)
+            receipt = self._dispatch_mutation(
+                "campaign.stage_entry",
+                lambda: self.oracle.click_campaign_stage(campaign_stage_code),
+            )
             context.entry_budget -= 1
             context.entry_receipt = receipt
             context.passive_transition_until = time.monotonic() + 20.0
@@ -3931,7 +4043,10 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed(
                     "campaign sortie requires one authorized budget unit"
                 )
-            receipt = self.oracle.click_campaign_sortie(context.stage_code)
+            receipt = self._dispatch_mutation(
+                "campaign.sortie",
+                lambda: self.oracle.click_campaign_sortie(context.stage_code),
+            )
             if receipt.generation < context.prepared_fleet_state.generation:
                 raise SemanticGateClosed(
                     "campaign sortie target predates prepared fleet state"
@@ -4040,7 +4155,10 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed(
                     "campaign fleet clear requires a remaining mutation budget"
                 )
-            receipt = self.oracle.click_campaign_fleet_row(row_key, "clear")
+            receipt = self._dispatch_mutation(
+                "campaign.fleet_mutation",
+                lambda: self.oracle.click_campaign_fleet_row(row_key, "clear"),
+            )
             context.fleet_mutation_budget -= 1
             context.fleet_mutation_receipts.append(receipt)
             context.passive_transition_until = time.monotonic() + 20.0
@@ -4073,7 +4191,10 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed(
                     "campaign fleet selection requires a remaining mutation budget"
                 )
-            receipt = self.oracle.click_campaign_fleet_option(index)
+            receipt = self._dispatch_mutation(
+                "campaign.fleet_mutation",
+                lambda: self.oracle.click_campaign_fleet_option(index),
+            )
             context.fleet_mutation_budget -= 1
             context.fleet_mutation_receipts.append(receipt)
             context.fleet_dropdown_row = None
@@ -4260,7 +4381,10 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed(
                         "tactical course confirmation requires a positive budget"
                     )
-                receipt = self.oracle.click("tactical/course/confirm")
+                receipt = self._dispatch_mutation(
+                    "tactical.assign",
+                    lambda: self.oracle.click("tactical/course/confirm"),
+                )
                 context.assign_budget -= 1
                 return receipt
             raise AlasSemanticUnmapped(
@@ -4310,9 +4434,14 @@ class AlasSemanticAdapter:
                         raise SemanticGateClosed(
                             "research queue confirmation requires a positive budget"
                         )
-                    receipt = self.oracle.click("research/queue/confirm")
                     if context.queue_add_uses_start_budget:
+                        receipt = self._dispatch_mutation(
+                            "research.start",
+                            lambda: self.oracle.click("research/queue/confirm"),
+                        )
                         context.start_budget -= 1
+                    else:
+                        receipt = self.oracle.click("research/queue/confirm")
                     context.queue_confirm_receipt = receipt
                     context.last_queue_state = None
                     context.last_projects = None
@@ -4330,7 +4459,10 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed(
                         "research start confirmation does not match the budgeted project"
                     )
-                receipt = self.oracle.click("research/start/confirm")
+                receipt = self._dispatch_mutation(
+                    "research.start",
+                    lambda: self.oracle.click("research/start/confirm"),
+                )
                 context.start_budget -= 1
                 context.start_confirm_receipt = receipt
                 context.last_queue_state = None
@@ -4366,7 +4498,10 @@ class AlasSemanticAdapter:
                 queue = self.oracle.research_queue_state()
                 if not queue.reward_claimable or context.reward_budget <= 0:
                     raise SemanticGateClosed("research reward requires a positive budget")
-                receipt = self.oracle.click("research/queue/claim")
+                receipt = self._dispatch_mutation(
+                    "research.reward",
+                    lambda: self.oracle.click("research/queue/claim"),
+                )
                 context.reward_budget -= 1
                 context.reward_receipts.append(receipt)
                 context.last_queue_state = None
@@ -4406,7 +4541,10 @@ class AlasSemanticAdapter:
             if name == "DORM_QUICK_COLLECT":
                 if context.collect_budget <= 0:
                     raise SemanticGateClosed("dorm collect requires a positive budget")
-                receipt = self.oracle.click("dorm/collect")
+                receipt = self._dispatch_mutation(
+                    "dorm.collect",
+                    lambda: self.oracle.click("dorm/collect"),
+                )
                 context.collect_budget -= 1
                 return receipt
             if name == "DORM_FEED_ENTER":
@@ -4504,7 +4642,10 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed(
                         "construction submit requires one build, sufficient resources, and a positive budget"
                     )
-                receipt = self.oracle.click("build/prep/confirm")
+                receipt = self._dispatch_mutation(
+                    "build.submit",
+                    lambda: self.oracle.click("build/prep/confirm"),
+                )
                 context.submit_budget -= 1
                 context.submit_receipt = receipt
                 return receipt
@@ -4560,7 +4701,10 @@ class AlasSemanticAdapter:
                         raise SemanticGateClosed(
                             "finished research claim requires a positive budget"
                         )
-                    receipt = self.oracle.click_research_project(slot)
+                    receipt = self._dispatch_mutation(
+                        "research.reward",
+                        lambda: self.oracle.click_research_project(slot),
+                    )
                     self._research_context.reward_budget -= 1
                     self._research_context.reward_receipts.append(receipt)
                     self._research_context.selected_slot = None
@@ -4619,7 +4763,10 @@ class AlasSemanticAdapter:
                         raise SemanticGateClosed(
                             "commission reward requires one finished row and a positive budget"
                         )
-                    receipt = self.oracle.click(semantic_id)
+                    receipt = self._dispatch_mutation(
+                        "commission.reward",
+                        lambda: self.oracle.click(semantic_id),
+                    )
                     context.reward_budget -= 1
                     context.reward_claim_receipt = receipt
                     return self._record_mission_transition(receipt)
@@ -4627,6 +4774,12 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed(
                         "tactical reward requires the separate explicit opt-in"
                     )
+                return self._record_mission_transition(
+                    self._dispatch_mutation(
+                        "tactical.reward",
+                        lambda: self.oracle.click(semantic_id),
+                    )
+                )
             if (
                 self._research_context is not None
                 and semantic_id in (
@@ -4705,8 +4858,11 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed(
                         "semantic commission start is limited to zero-oil rows"
                     )
-                receipt = self.oracle.click_commission_start(
-                    context.selected_signature
+                receipt = self._dispatch_mutation(
+                    "commission.start",
+                    lambda: self.oracle.click_commission_start(
+                        context.selected_signature
+                    ),
                 )
                 context.start_budget -= 1
                 context.start_receipt = receipt
@@ -4809,7 +4965,10 @@ class AlasSemanticAdapter:
                     if name == "MAIL_BATCH_CLAIM"
                     else "mail/manage/delete"
                 )
-                return self.oracle.click(target)
+                return self._dispatch_mutation(
+                    "mail.mutation",
+                    lambda: self.oracle.click(target),
+                )
             if name == "GOTO_MAIN_WHITE":
                 if not self._mail_context.entry_clicked:
                     raise SemanticGateClosed("mail entry identity is not proven")
@@ -4841,8 +5000,12 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed(
                     "mission claim input requires the separate one-claim opt-in"
                 )
+            receipt = self._dispatch_mutation(
+                "mission.claim",
+                lambda: self.oracle.click("task/claim/all"),
+            )
             context.claim_budget -= 1
-            return self.oracle.click("task/claim/all")
+            return receipt
         if name == "MISSION_SINGLE":
             raise SemanticGateClosed("numeric-row mission claiming is not validated")
         if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
@@ -5049,7 +5212,10 @@ class AlasSemanticAdapter:
         ):
             raise SemanticGateClosed("unique actionable mission claim-all is absent")
 
-        claim_receipt = self.oracle.click("task/claim/all")
+        claim_receipt = self._dispatch_mutation(
+            "mission.claim",
+            lambda: self.oracle.click("task/claim/all"),
+        )
         popup_semantic_id, _ = self.oracle.wait_for_any(
             (
                 "reward/award-info/close",
@@ -5149,6 +5315,8 @@ class AlasSemanticSession:
         runtime_handle: Optional[RuntimeHandlePort] = None,
         run_policy: Optional[RunPolicy] = None,
         policy_grants: Optional[Mapping[str, int]] = None,
+        capability_profile: Optional[TaskCapabilityProfile] = None,
+        capability_inventory: Optional[CapabilityInventory] = None,
     ) -> None:
         if runtime_handle is None and not serial:
             raise ValueError(
@@ -5240,7 +5408,74 @@ class AlasSemanticSession:
         self.run_policy = run_policy
         if policy_grants is not None and not isinstance(policy_grants, Mapping):
             raise TypeError("semantic policy grants are invalid")
-        self.policy_grants = MappingProxyType(dict(policy_grants or {}))
+        legacy_grants = _legacy_action_grants(
+            allow_mission_claim_once=allow_mission_claim_once,
+            allow_mail_mutations=allow_mail_mutations,
+            allow_tactical_rewards=allow_tactical_rewards,
+            tactical_assign_budget=tactical_assign_budget,
+            commission_reward_budget=commission_reward_budget,
+            commission_start_budget=commission_start_budget,
+            research_reward_budget=research_reward_budget,
+            research_start_budget=research_start_budget,
+            dorm_collect_budget=dorm_collect_budget,
+            dorm_feed_budget=dorm_feed_budget,
+            build_submit_budget=build_submit_budget,
+            campaign_stage_entry_budget=campaign_stage_entry_budget,
+            campaign_fleet_mutation_budget=campaign_fleet_mutation_budget,
+            campaign_sortie_budget=campaign_sortie_budget,
+            campaign_combat_budget=campaign_combat_budget,
+            campaign_viewport_swipe_budget=campaign_viewport_swipe_budget,
+            campaign_camera_positioning_budget=campaign_camera_positioning_budget,
+        )
+        effective_grants = dict(policy_grants or legacy_grants)
+        self.policy_grants = MappingProxyType(effective_grants)
+        if capability_profile is not None and not isinstance(
+            capability_profile, TaskCapabilityProfile
+        ):
+            raise TypeError("semantic capability profile is invalid")
+        if capability_inventory is None:
+            capability_inventory = DEFAULT_CAPABILITY_INVENTORY
+        elif not isinstance(capability_inventory, CapabilityInventory):
+            raise TypeError("semantic capability inventory is invalid")
+        recovery_policy = (
+            run_policy.recovery_policy
+            if run_policy is not None
+            else RecoveryPolicy.QUALIFICATION_STOP
+        )
+        if capability_profile is None:
+            capability_profile = (
+                TaskCapabilityProfile(profile_id=run_policy.profile_id)
+                if run_policy is not None
+                else compatibility_profile("legacy-session", effective_grants)
+            )
+        if (
+            run_policy is not None
+            and capability_profile.profile_id != run_policy.profile_id
+        ):
+            raise CapabilityClosureError()
+        if (
+            run_policy is not None
+            and capability_profile.task_config_sha256
+            != run_policy.task_config_sha256
+        ):
+            raise CapabilityClosureError()
+        policy_sha256 = (
+            run_policy.sha256
+            if run_policy is not None
+            else compatibility_policy_sha256(
+                capability_profile.profile_id,
+                effective_grants,
+                recovery_policy,
+            )
+        )
+        self.action_ledger = ActionLedger(
+            profile=capability_profile,
+            inventory=capability_inventory,
+            grants=effective_grants,
+            recovery_policy=recovery_policy,
+            policy_sha256=policy_sha256,
+        )
+        self.capability_report = self.action_ledger.require_preflight()
         self._pixel_audit = PixelAccessAudit(self._record_pixel_access)
         self.expected_runtime_fingerprint_sha256 = (
             semantic_runtime_fingerprint_sha256(
@@ -5445,6 +5680,7 @@ class AlasSemanticSession:
                 ),
                 frame_observation_oracle=self._frame_reader.oracle,
                 frame_identity_provider=self._frame_reader.identity,
+                action_ledger=self.action_ledger,
             )
             if self.trace is not None:
                 self.trace.emit(
@@ -5464,6 +5700,7 @@ class AlasSemanticSession:
 
     def close(self) -> None:
         self.adapter = None
+        self.action_ledger.close()
         self._release_owned_runtime_handle()
         if self.trace is not None:
             self.trace.emit("semantic.session.close")

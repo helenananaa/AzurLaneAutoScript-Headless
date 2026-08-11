@@ -10,6 +10,21 @@ from .errors import (
     UnknownObservationError,
     UnsupportedPixelRead,
 )
+from .capabilities import (
+    ACTION_CAPABILITIES,
+    CAPABILITY_REPORT_SCHEMA,
+    DEFAULT_CAPABILITY_INVENTORY,
+    LEGACY_CAPABILITY_TASK_CONFIG_SHA256,
+    RECOVERY_MANUAL_TAKEOVER,
+    RECOVERY_QUALIFICATION_STOP,
+    CapabilityClosureReport,
+    CapabilityInventory,
+    TaskCapabilityProfile,
+    canonical_capability_report_json,
+    capability_closure_report,
+    compatibility_profile,
+    recovery_capability,
+)
 from .frame import SemanticFrame, SemanticFrameClock, SemanticFrameReader
 from .legacy_environment import (
     LEGACY_BOOLEAN_GRANTS,
@@ -17,6 +32,11 @@ from .legacy_environment import (
     LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES,
     LegacyEnvironmentTranslation,
     translate_legacy_semantic_environment,
+)
+from .ledger import (
+    ActionGrantDispatch,
+    ActionLedger,
+    compatibility_policy_sha256,
 )
 from .ports import (
     ActionIntent,
@@ -64,15 +84,25 @@ from .scope import FlowScopeStack
 
 
 __all__ = (
+    "ACTION_CAPABILITIES",
+    "CAPABILITY_REPORT_SCHEMA",
+    "DEFAULT_CAPABILITY_INVENTORY",
+    "LEGACY_CAPABILITY_TASK_CONFIG_SHA256",
+    "RECOVERY_MANUAL_TAKEOVER",
+    "RECOVERY_QUALIFICATION_STOP",
     "ActionLeaseError",
+    "ActionGrantDispatch",
     "ActionIntent",
     "ActionLease",
     "ActionPort",
     "ActionReceiptV2",
+    "ActionLedger",
     "AdbRuntimeHandle",
     "AdbRuntimeHandleFactory",
     "AdapterContractError",
     "CapabilityClosureError",
+    "CapabilityClosureReport",
+    "CapabilityInventory",
     "FlowScope",
     "FlowScopeError",
     "FlowScopeStack",
@@ -81,6 +111,7 @@ __all__ = (
     "LEGACY_BUDGET_GRANTS",
     "LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES",
     "LegacyEnvironmentTranslation",
+    "TaskCapabilityProfile",
     "RunPolicyError",
     "ObservationPort",
     "ObservationHandler",
@@ -106,8 +137,13 @@ __all__ = (
     "RunPolicy",
     "RunPolicyIdentity",
     "canonical_run_policy_json",
+    "canonical_capability_report_json",
+    "capability_closure_report",
+    "compatibility_policy_sha256",
+    "compatibility_profile",
     "load_run_policy",
     "parse_run_policy",
+    "recovery_capability",
     "semantic_runtime_fingerprint_sha256",
     "translate_legacy_semantic_environment",
     "StaleFrameError",

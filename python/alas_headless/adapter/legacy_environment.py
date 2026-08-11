@@ -86,7 +86,7 @@ LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
             "campaign sortie",
         ),
         "ALAS_SEMANTIC_CAMPAIGN_COMBAT_BUDGET": (
-            "campaign.combat",
+            "campaign.grid_click",
             "campaign combat",
         ),
         "ALAS_SEMANTIC_CAMPAIGN_VIEWPORT_SWIPE_BUDGET": (
@@ -148,7 +148,7 @@ class LegacyEnvironmentTranslation:
                 "campaign_stage_entry_budget": self.grant("campaign.stage_entry"),
                 "campaign_fleet_mutation_budget": self.grant("campaign.fleet_mutation"),
                 "campaign_sortie_budget": self.grant("campaign.sortie"),
-                "campaign_combat_budget": self.grant("campaign.combat"),
+                "campaign_combat_budget": self.grant("campaign.grid_click"),
                 "campaign_viewport_swipe_budget": self.grant("campaign.viewport_swipe"),
                 "adb_command_timeout_seconds": self.adb_command_timeout_seconds,
             }

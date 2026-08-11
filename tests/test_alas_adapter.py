@@ -840,7 +840,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             raw_state_sha256="b" * 64,
         )
 
-    def make_adapter(self):
+    def make_adapter(self, **authority):
         oracle = FakeOracle()
         gate_calls = []
         adapter = AlasSemanticAdapter(
@@ -848,6 +848,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             lambda: gate_calls.append(True),
             frame_observation_oracle=lambda: oracle,
             frame_identity_provider=self.frame_identity,
+            **authority,
         )
         return adapter, oracle, gate_calls
 
@@ -3711,7 +3712,9 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(len(gate_calls), 1)
 
     def test_mission_claim_all_closes_popup_and_proves_unfinished(self):
-        adapter, oracle, gate_calls = self.make_adapter()
+        adapter, oracle, gate_calls = self.make_adapter(
+            allow_mission_claim_once=True
+        )
         oracle.mission_dispositions = [
             MissionDisposition.CLAIMABLE_ALL,
             MissionDisposition.UNFINISHED,
@@ -3739,8 +3742,10 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
         self.assertEqual(len(gate_calls), 1)
 
-    def test_reward_hook_claim_requires_separate_opt_in(self):
-        adapter, oracle, gate_calls = self.make_adapter()
+    def test_reward_hook_claim_requires_policy_and_call_opt_in(self):
+        adapter, oracle, gate_calls = self.make_adapter(
+            allow_mission_claim_once=True
+        )
         oracle.mission_dispositions = [
             MissionDisposition.CLAIMABLE_ALL,
             MissionDisposition.UNFINISHED,
@@ -3755,6 +3760,18 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(receipt.claim_input_count, 1)
         self.assertIn("task/claim/all", oracle.click_calls)
         self.assertEqual(len(gate_calls), 1)
+
+    def test_reward_hook_call_opt_in_cannot_bypass_zero_input_policy(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.mission_dispositions = [MissionDisposition.CLAIMABLE_ALL]
+
+        with self.assertRaises(SemanticGateClosed):
+            adapter.run_mission_reward(
+                timeout_seconds=12,
+                allow_claim_once=True,
+            )
+
+        self.assertEqual(oracle.click_calls, ["main/task"])
 
     def test_mission_claim_refuses_row_only_before_claim_input(self):
         adapter, oracle, gate_calls = self.make_adapter()
