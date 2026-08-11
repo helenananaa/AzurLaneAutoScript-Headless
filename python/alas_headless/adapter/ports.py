@@ -165,7 +165,10 @@ class SemanticFrameIdentity:
         _require_token(self.frame_id, "frame_id")
         _require_integer(self.pid, "pid", minimum=1)
         _require_integer(self.generation, "generation")
-        _require_integer(self.scene_handle, "scene_handle")
+        if isinstance(self.scene_handle, bool) or not isinstance(
+            self.scene_handle, int
+        ):
+            raise ValueError("scene_handle must be an integer")
         _require_sha256(self.fingerprint_sha256, "fingerprint_sha256")
         _require_sha256(self.raw_state_sha256, "raw_state_sha256")
 
