@@ -23,6 +23,11 @@ from .ports import (
     RuntimeHandlePort,
     SemanticFrameIdentity,
 )
+from .registry import (
+    ObservationHandler,
+    ObservationRegistration,
+    ObservationRegistry,
+)
 from .scope import FlowScopeStack
 
 
@@ -39,6 +44,9 @@ __all__ = (
     "FlowScopeStack",
     "FlowScopeToken",
     "ObservationPort",
+    "ObservationHandler",
+    "ObservationRegistration",
+    "ObservationRegistry",
     "ObserveRequest",
     "ObserveResult",
     "RuntimeHandleFactory",
