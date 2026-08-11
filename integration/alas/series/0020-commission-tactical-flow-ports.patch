@@ -1,0 +1,503 @@
+diff --git a/module/commission/commission.py b/module/commission/commission.py
+index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0ce64b07b 100644
+--- a/module/commission/commission.py
++++ b/module/commission/commission.py
+@@ -89,6 +89,21 @@ class RewardCommission(UI, InfoHandler):
+         Returns:
+             SelectedGrids:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            if semantic_adapter.appear(COMMISSION_DAILY):
++                list_mode = 'daily'
++            elif semantic_adapter.appear(COMMISSION_URGENT):
++                list_mode = 'urgent'
++            else:
++                raise RequestHumanTakeover
++            rows = semantic_adapter.commission_rows()
++            return SelectedGrids([
++                Commission.from_semantic(
++                    row, config=self.config, list_mode=list_mode
++                ) for row in rows
++            ])
++
+         commissions = SelectedGrids([])
+         for _ in range(trial):
+             if skip_first_screenshot:
+@@ -239,6 +254,12 @@ class RewardCommission(UI, InfoHandler):
+         return True
+ 
+     def _commission_swipe(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            state = semantic_adapter.commission_scroll_state()
++            if not state.scrollable or state.at_bottom:
++                return False
++            return semantic_adapter.commission_scroll_next() is not None
+         if COMMISSION_SCROLL.appear(main=self):
+             if COMMISSION_SCROLL.at_bottom(main=self):
+                 return False
+@@ -249,6 +270,12 @@ class RewardCommission(UI, InfoHandler):
+             return False
+ 
+     def _commission_swipe_to_top(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            state = semantic_adapter.commission_scroll_state()
++            if not state.scrollable or state.at_top:
++                return False
++            return semantic_adapter.commission_scroll_to_top() is not None
+         if not COMMISSION_SCROLL.appear(main=self):
+             return False
+         COMMISSION_SCROLL.set_top(main=self, skip_first_screenshot=True)
+@@ -347,6 +374,7 @@ class RewardCommission(UI, InfoHandler):
+         self.interval_clear(COMMISSION_START)
+         comm_timer = Timer(7)
+         count = 0
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         while 1:
+             if skip_first_screenshot:
+                 skip_first_screenshot = False
+@@ -354,6 +382,18 @@ class RewardCommission(UI, InfoHandler):
+                 self.device.screenshot()
+ 
+             # End
++            if semantic_adapter is not None:
++                if semantic_adapter.commission_start_confirmed():
++                    proof = semantic_adapter.commission_start_proof()
++                    logger.attr(
++                        'SemanticCommissionStart',
++                        f'{proof.name}: {proof.before_duration_seconds}s -> '
++                        f'{proof.after_duration_seconds}s, '
++                        f'{proof.after_status_sprite}',
++                    )
++                    semantic_adapter.close_started_commission_detail()
++                    self.ui_ensure(page_commission)
++                    break
+             if self.info_bar_count():
+                 break
+             if count >= 3:
+@@ -381,19 +421,22 @@ class RewardCommission(UI, InfoHandler):
+                 continue
+             # Check if is the right commission
+             if self.appear(COMMISSION_ADVICE, offset=(5, 20), interval=7):
+-                area = (0, 0, image_size(self.device.image)[0], COMMISSION_ADVICE.button[1])
+-                current = self.commission_detect(area=area)
+-                if is_urgent:
+-                    current.call('convert_to_night')  # Convert extra commission to night
+-                if current.count >= 1:
+-                    current = current[0]
+-                    if current == comm:
+-                        logger.info('Selected to the correct commission')
+-                    else:
+-                        logger.warning('Selected to the wrong commission')
+-                        return False
++                if semantic_adapter is not None:
++                    logger.info('Selected exact typed commission row')
+                 else:
+-                    logger.warning('No selected commission detected, assuming correct')
++                    area = (0, 0, image_size(self.device.image)[0], COMMISSION_ADVICE.button[1])
++                    current = self.commission_detect(area=area)
++                    if is_urgent:
++                        current.call('convert_to_night')  # Convert extra commission to night
++                    if current.count >= 1:
++                        current = current[0]
++                        if current == comm:
++                            logger.info('Selected to the correct commission')
++                        else:
++                            logger.warning('Selected to the wrong commission')
++                            return False
++                    else:
++                        logger.warning('No selected commission detected, assuming correct')
+                 self.device.click(COMMISSION_ADVICE)
+                 count += 1
+                 self.interval_reset(COMMISSION_ADVICE)
+@@ -476,19 +519,51 @@ class RewardCommission(UI, InfoHandler):
+         logger.hr('Commission run', level=1)
+         if self.daily_choose:
+             for comm in self.daily_choose:
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if (
++                    semantic_adapter is not None
++                    and not semantic_adapter.commission_start_allowed()
++                ):
++                    logger.info('Semantic commission start budget exhausted')
++                    break
+                 self._commission_ensure_mode('daily')
+                 self._commission_swipe_to_top()
+                 self.handle_info_bar()
+                 if self._commission_find_and_start(comm, is_urgent=False):
+                     comm.convert_to_running()
++                    if (
++                        semantic_adapter is not None
++                        and not semantic_adapter.commission_start_allowed()
++                    ):
++                        logger.info(
++                            'Semantic commission start budget exhausted after '
++                            'proven start; skip mode reset'
++                        )
++                        break
+                 self._commission_mode_reset()
+         if self.urgent_choose:
+             for comm in self.urgent_choose:
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if (
++                    semantic_adapter is not None
++                    and not semantic_adapter.commission_start_allowed()
++                ):
++                    logger.info('Semantic commission start budget exhausted')
++                    break
+                 self._commission_ensure_mode('urgent')
+                 self._commission_swipe_to_top()
+                 self.handle_info_bar()
+                 if self._commission_find_and_start(comm, is_urgent=True):
+                     comm.convert_to_running()
++                    if (
++                        semantic_adapter is not None
++                        and not semantic_adapter.commission_start_allowed()
++                    ):
++                        logger.info(
++                            'Semantic commission start budget exhausted after '
++                            'proven start; skip mode reset'
++                        )
++                        break
+                 self._commission_mode_reset()
+         if not self.daily_choose and not self.urgent_choose:
+             logger.info('No commission chose')
+@@ -606,34 +681,63 @@ class RewardCommission(UI, InfoHandler):
+             in: Any
+             out: page_commission
+         """
+-        self.ui_ensure(page_reward)
+-        self.commission_receive()
+-
+-        # info_bar appears when get ship in Launch Ceremony commissions
+-        # This is a game bug, the info_bar shows get ship, will appear over and over again, until you click get_ship.
+-        self.handle_info_bar()
+-        self.commission_start()
+-
+-        # Scheduler
+-        total = self.daily.add_by_eq(self.urgent)
+-        future_finish = sorted([f for f in total.get('finish_time') if f is not None])
+-        logger.info(f'Commission finish: {[str(f) for f in future_finish]}')
+-        if len(future_finish):
+-            self.config.task_delay(target=future_finish)
+-        else:
+-            logger.info('No commission running')
+-            self.config.task_delay(success=False)
+-
+-        # Delay GemsFarming
+-        if self.config.cross_get(keys='GemsFarming.GemsFarming.CommissionLimit', default=False):
+-            daily = self.daily.select(category_str='daily', status='pending').count
+-            filtered_urgent = self.comm_choose.intersect_by_eq(self.urgent.select(status='pending')).count
+-            logger.info(f'Daily commission: {daily}, filtered_urgent: {filtered_urgent}')
+-            if daily > 0 and filtered_urgent >= 1:
+-                logger.info('Having daily commissions to do, delay task `GemsFarming`')
+-                self.config.task_delay(
+-                    minute=120, target=future_finish if len(future_finish) else None, task='GemsFarming')
+-            elif filtered_urgent >= 4:
+-                logger.info('Having too many urgent commissions, delay task `GemsFarming`')
+-                self.config.task_delay(
+-                    minute=120, target=future_finish if len(future_finish) else None, task='GemsFarming')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_commission()
++        try:
++            self.ui_ensure(page_reward)
++            if (
++                semantic_adapter is not None
++                and semantic_adapter.commission_reward_pending()
++                and not semantic_adapter.commission_reward_allowed()
++            ):
++                logger.info(
++                    'Semantic commission reward pending; reward budget is closed '
++                    'or the finished count is not exactly one'
++                )
++                return
++            self.commission_receive()
++            if (
++                semantic_adapter is not None
++                and semantic_adapter.commission_reward_claimed()
++            ):
++                proof = semantic_adapter.confirm_commission_reward()
++                logger.attr(
++                    'SemanticCommissionReward',
++                    f'{proof.before_finished_count} -> '
++                    f'{proof.after_finished_count}, '
++                    f'close={list(proof.close_semantic_ids)}',
++                )
++                self.ui_ensure(page_commission)
++
++            # info_bar appears when get ship in Launch Ceremony commissions
++            # This is a game bug, the info_bar shows get ship, will appear over and over again, until you click get_ship.
++            self.handle_info_bar()
++            self.commission_start()
++
++            # Scheduler
++            total = self.daily.add_by_eq(self.urgent)
++            future_finish = sorted([f for f in total.get('finish_time') if f is not None])
++            logger.info(f'Commission finish: {[str(f) for f in future_finish]}')
++            if len(future_finish):
++                self.config.task_delay(target=future_finish)
++            else:
++                logger.info('No commission running')
++                self.config.task_delay(success=False)
++
++            # Delay GemsFarming
++            if self.config.cross_get(keys='GemsFarming.GemsFarming.CommissionLimit', default=False):
++                daily = self.daily.select(category_str='daily', status='pending').count
++                filtered_urgent = self.comm_choose.intersect_by_eq(self.urgent.select(status='pending')).count
++                logger.info(f'Daily commission: {daily}, filtered_urgent: {filtered_urgent}')
++                if daily > 0 and filtered_urgent >= 1:
++                    logger.info('Having daily commissions to do, delay task `GemsFarming`')
++                    self.config.task_delay(
++                        minute=120, target=future_finish if len(future_finish) else None, task='GemsFarming')
++                elif filtered_urgent >= 4:
++                    logger.info('Having too many urgent commissions, delay task `GemsFarming`')
++                    self.config.task_delay(
++                        minute=120, target=future_finish if len(future_finish) else None, task='GemsFarming')
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_commission()
+diff --git a/module/commission/project.py b/module/commission/project.py
+index cd88c16282b4f6c8bcf9eac2202e836797869e3c..efa9500e8b5c759653038f4867dbf2f365269384 100644
+--- a/module/commission/project.py
++++ b/module/commission/project.py
+@@ -106,6 +106,58 @@ class Commission:
+     # Value: 1:30, 1:45, 2:00, 8:00, 12:00, ...
+     duration_hm: str
+ 
++    @classmethod
++    def from_semantic(cls, state, config, list_mode):
++        """Build the normal ALAS commission model from one typed Unity row."""
++        if list_mode not in ('daily', 'urgent'):
++            raise ValueError('Unknown semantic commission list mode')
++        self = cls.__new__(cls)
++        self.config = config
++        self.name = state.name
++        self.duration = timedelta(seconds=state.duration_seconds)
++        self.expire = timedelta(seconds=0)
++        self.status = state.status.value
++        self.valid = True
++        self.semantic_signature = state.signature
++        self.semantic_row_key = (list_mode, state.index)
++        self.genre = self.commission_name_parse(self.name)
++        if not self.genre:
++            self.valid = False
++        self.suffix_image = None
++        self.suffix_hash = ''
++        self.repeat_count = 1
++        self.create_time = datetime.now()
++        self.category_str = 'unknown'
++        self.genre_str = 'unknown'
++        self.duration_hour = 'unknown'
++        self.duration_hm = 'unknown'
++        if self.valid:
++            self.category_str, self.genre_str = self.genre.split('_', 1)
++            self.duration_hour = str(
++                int(self.duration.total_seconds() / 36) / 100).strip('.0')
++            self.duration_hm = str(self.duration).rsplit(':', 1)[0]
++
++        bounds = state.button.bounds
++        if bounds is None:
++            self.valid = False
++            area = (0, 0, 0, 0)
++        else:
++            area = tuple(int(round(value)) for value in (
++                bounds.left, bounds.top, bounds.right, bounds.bottom))
++        self.area = area
++        self.y = area[3]
++        self.image = None
++        self.button = Button(
++            area=area,
++            color=(),
++            button=area,
++            name=f'COMMISSION_ROW_{state.index}',
++        )
++        self.button.semantic_commission_signature = state.signature
++        self.semantic_level = state.level
++        self.semantic_type_sprite = state.type_sprite
++        return self
++
+     def __init__(self, image, y, config):
+         self.config = config
+         self.y = y
+@@ -342,6 +394,11 @@ class Commission:
+         """
+         if not isinstance(other, Commission):
+             return False
++        if hasattr(self, 'semantic_row_key') or hasattr(other, 'semantic_row_key'):
++            return (
++                getattr(self, 'semantic_row_key', None)
++                == getattr(other, 'semantic_row_key', None)
++            )
+         threshold = timedelta(seconds=120)
+         if not self.valid or not other.valid:
+             return False
+@@ -514,6 +571,11 @@ class Commission:
+         Returns:
+             bool:
+         """
++        # Typed Unity rows carry no screenshot. Event commissions need a
++        # separate reviewed semantic classifier; never fall back to pixels.
++        if getattr(self, 'semantic_signature', None) is not None:
++            return False
++
+         # Event commission in Vacation Lane, with pink area on the left.
+         # area = area_offset((5, 5, 30, 30), self.area[0:2])
+         # return color_similar(color1=get_color(self.image, area), color2=(239, 166, 231))
+diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
+index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..d794d42cefad01041bca024298935e3ba09d0d97 100644
+--- a/module/tactical/tactical_class.py
++++ b/module/tactical/tactical_class.py
+@@ -1,4 +1,4 @@
+-from datetime import datetime
++from datetime import datetime, timedelta
+ 
+ import module.config.server as server
+ from module.base.button import Button, ButtonGrid
+@@ -177,11 +177,31 @@ class Book:
+         factor = 1 if not self.exp else 1.5 if self.tier < 4 else 2
+         self.exp_value = self.exp_tier[self.tier] * factor
+ 
++    @classmethod
++    def from_semantic(cls, state):
++        book = cls.__new__(cls)
++        book.button = BOOKS_GRID.buttons[state.position]
++        book.semantic_position = state.position
++        book.genre = state.genre
++        book.tier = state.tier
++        book.exp = state.exp_bonus
++        book.valid = bool(book.genre and book.tier and state.count > 0)
++        book.genre_str = cls.genre_name.get(book.genre, 'unknown')
++        book.tier_str = f'T{book.tier}' if book.tier else 'Tn'
++        book.same_str = 'same' if book.exp else 'unknown'
++        factor = 1 if not book.exp else 1.5 if book.tier < 4 else 2
++        book.exp_value = cls.exp_tier[book.tier] * factor
++        return book
++
+     def check_selected(self, image):
+         """
+         Args:
+             image (np.ndarray): Screenshot
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None and hasattr(self, 'semantic_position'):
++            return semantic_session.tactical_book_selected(self.semantic_position)
+         area = self.button.area
+         check_area = tuple([area[0], area[3] + 2, area[2], area[3] + 4])
+         im = rgb2gray(crop(image, check_area, copy=False))
+@@ -225,7 +245,15 @@ class RewardTacticalClass(Dock):
+                 logger.info('Not in TACTICAL_CLASS_START anymore, exit')
+                 return False
+ 
+-            books = SelectedGrids([Book(self.device.image, button) for button in BOOKS_GRID.buttons]).select(valid=True)
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
++            if semantic_session is not None:
++                books = SelectedGrids([
++                    Book.from_semantic(state)
++                    for state in semantic_session.tactical_books()
++                ]).select(valid=True)
++            else:
++                books = SelectedGrids([Book(self.device.image, button) for button in BOOKS_GRID.buttons]).select(valid=True)
+             self.books = books
+             logger.attr('Book_count', books.count)
+             logger.attr('Books', str(books))
+@@ -264,7 +292,12 @@ class RewardTacticalClass(Dock):
+                 break
+ 
+             if interval.reached():
+-                self.device.click(book.button)
++                from alas_headless import current_semantic_session
++                semantic_session = current_semantic_session()
++                if semantic_session is not None and hasattr(book, 'semantic_position'):
++                    semantic_session.tactical_select_book(book.semantic_position)
++                else:
++                    self.device.click(book.button)
+                 interval.reset()
+                 continue
+ 
+@@ -383,6 +416,17 @@ class RewardTacticalClass(Dock):
+         Get the future finish time.
+         """
+         logger.hr('Tactical get finish')
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            now = datetime.now()
++            remains = semantic_session.tactical_remaining_seconds()
++            self.tactical_finish = [
++                (now + timedelta(seconds=remain)).replace(microsecond=0)
++                for remain in remains if remain
++            ]
++            logger.info(f'Tactical finish: {[str(f) for f in self.tactical_finish]}')
++            return self.tactical_finish
+         grids = ButtonGrid(
+             origin=(421, 596), delta=(223, 0), button_shape=(139, 27), grid_shape=(4, 1), name='TACTICAL_REMAIN')
+ 
+@@ -482,6 +526,10 @@ class RewardTacticalClass(Dock):
+                 continue
+             if self.ui_main_appear_then_click(page_reward, interval=3):
+                 continue
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
++            if semantic_session is not None and semantic_session.cancel_tactical_continue_if_present():
++                continue
+             if self.handle_popup_confirm('TACTICAL'):
+                 self.interval_reset([BOOK_EMPTY_POPUP])
+                 continue
+@@ -609,6 +657,10 @@ class RewardTacticalClass(Dock):
+             out: Unknown, may TACTICAL_CLASS_START, page_tactical
+         """
+         logger.hr('Tactical skill choose')
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.tactical_select_first_trainable_skill()
+         selected_skill = self.find_not_full_level_skill()
+ 
+         # If can't select a skill, think this ship no need study
+@@ -625,6 +677,22 @@ class RewardTacticalClass(Dock):
+ 
+     def select_suitable_ship(self):
+         logger.hr(f'Select suitable ship')
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            try:
++                min_level = int(self.config.AddNewStudent_MinLevel)
++                if min_level < 1:
++                    min_level = 1
++            except (ValueError, TypeError) as e:
++                logger.warning(
++                    f'Invalid AddNewStudent_MinLevel: '
++                    f'{self.config.AddNewStudent_MinLevel}, {e}')
++                min_level = 1
++            logger.attr('AddNewStudent_MinLevel', min_level)
++            return semantic_session.tactical_select_suitable_ship(
++                min_level, self.dock_select_index)
++
+ 
+         # Set if favorite from config
+         self.dock_favourite_set(enable=self.config.AddNewStudent_Favorite, wait_loading=False)
+@@ -737,9 +805,15 @@ class RewardTacticalClass(Dock):
+             in: Any
+             out: page_tactical
+         """
+-        self.ui_ensure(page_reward)
+-
+-        self.tactical_class_receive()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_tactical()
++        try:
++            self.ui_ensure(page_reward)
++            self.tactical_class_receive()
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_tactical()
+ 
+         if self.tactical_finish:
+             self.config.task_delay(target=self.tactical_finish)

@@ -17,8 +17,13 @@
     },
     {
       "order": 4,
+      "path": "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+      "sha256": "88ab335699cd5133b7f3d83c84490908766ca2b81cff71efc33d987edb3a72f3"
+    },
+    {
+      "order": 5,
       "path": "integration/alas/series/0090-legacy-task-hooks.patch",
-      "sha256": "b65b36934d64a05301f2ec283c4b892826ea7e7b09eaffa490338c255e012a12"
+      "sha256": "bb2582f98962f84c34cfd91526552cf3a6cb37b0c2fb0bc40712b466de5d45ef"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",
