@@ -14,6 +14,17 @@ import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any, Mapping, Sequence
 
+try:
+    from .build_alas_patch_series import (
+        AlasPatchSeriesError,
+        check_generated_patch,
+    )
+except ImportError:  # Direct script execution.
+    from build_alas_patch_series import (  # type: ignore[no-redef]
+        AlasPatchSeriesError,
+        check_generated_patch,
+    )
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = "alas-headless.patch-tree-verification/v1"
@@ -21,10 +32,23 @@ UPSTREAM_LOCK_SCHEMA = "alas-headless.alas-upstream-lock/v1"
 COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 PATCH_HEADER_PATTERN = re.compile(r"^diff --git a/(\S+) b/(\S+)$")
 ALLOWED_PATCH_ROOTS = frozenset({"campaign", "module"})
+CANONICAL_PATCH = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
+SERIES_MANIFEST = ROOT / "integration" / "alas" / "series" / "series.json"
 
 
 class AlasPatchVerificationError(RuntimeError):
     """The pinned patch cannot be verified without weakening its boundary."""
+
+
+def _require_authoritative_combined(patch: Path) -> None:
+    if patch.resolve() != CANONICAL_PATCH.resolve():
+        return
+    try:
+        check_generated_patch(SERIES_MANIFEST, CANONICAL_PATCH, root=ROOT)
+    except AlasPatchSeriesError as exc:
+        raise AlasPatchVerificationError(
+            "canonical combined patch differs from authoritative series"
+        ) from exc
 
 
 def _run(
@@ -182,6 +206,7 @@ def plan_patch_verification(
     expected_commit: str,
 ) -> Mapping[str, Any]:
     changed_files = parse_patch_paths(patch)
+    _require_authoritative_combined(patch)
     inspect_upstream(upstream, expected_commit=expected_commit)
     check_patch_applies(upstream, patch)
     return _result_document(
@@ -213,6 +238,7 @@ def execute_patch_verification(
     if output.exists():
         raise AlasPatchVerificationError("verification output directory already exists")
     changed_files = parse_patch_paths(patch)
+    _require_authoritative_combined(patch)
     inspect_upstream(upstream, expected_commit=expected_commit)
     check_patch_applies(upstream, patch)
     patch_sha256 = _sha256(patch)

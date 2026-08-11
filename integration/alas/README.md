@@ -477,12 +477,19 @@ full replay remains gated by the resulting natural nonempty queue.
 To stage this against a compatible ALAS checkout:
 
 ```powershell
+$env:PYTHONPATH = 'python'
+python scripts/python/build_alas_patch_series.py --check integration/alas/0001-semantic-oracle-hooks.patch
 git apply --check H:\program\AzurLaneAutoScript-Headless\integration\alas\0001-semantic-oracle-hooks.patch
 git apply H:\program\AzurLaneAutoScript-Headless\integration\alas\0001-semantic-oracle-hooks.patch
 $env:PYTHONPATH = 'H:\program\AzurLaneAutoScript-Headless\python'
 $env:ALAS_SEMANTIC_MODE = '1'
 $env:ALAS_SEMANTIC_DRIVER_REVISION = (Get-Content H:\program\AzurLaneAutoScript-Headless\ANGLE_REVISION -Raw).Trim()
 ```
+
+The `0001-semantic-oracle-hooks.patch` path above is a checked-in compatibility
+output, not an editable source. Edit the ordered `series/*.patch` members and
+their manifest, regenerate the combined file, and require `--check` before
+validation or release use.
 
 Do not enable unattended ALAS operation yet. The ALAS-owned reward flow has a
 fresh live zero-claim double run. Commission has two separately bounded live

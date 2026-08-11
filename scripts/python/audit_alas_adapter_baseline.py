@@ -12,6 +12,17 @@ import subprocess
 from pathlib import Path, PurePosixPath
 from typing import Any, Iterable, Mapping, Sequence
 
+try:
+    from .build_alas_patch_series import (
+        AlasPatchSeriesError,
+        check_generated_patch,
+    )
+except ImportError:  # Direct script execution.
+    from build_alas_patch_series import (  # type: ignore[no-redef]
+        AlasPatchSeriesError,
+        check_generated_patch,
+    )
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = "alas-headless.adapter-baseline/v1"
@@ -343,10 +354,17 @@ def collect_baseline(
     adapter_path = root / "python" / "alas_headless" / "alas_adapter.py"
     oracle_path = root / "python" / "alas_headless" / "semantic_oracle.py"
     patch_path = root / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
+    series_manifest_path = root / "integration" / "alas" / "series" / "series.json"
     manifest_path = root / "integration" / "alas" / "combat-observer-manifest.json"
     adapter_source, adapter_tree = _parse_python(adapter_path)
     oracle_source, oracle_tree = _parse_python(oracle_path)
     sources = tuple(tracked_paths) if tracked_paths is not None else tracked_source_paths(root)
+    try:
+        check_generated_patch(series_manifest_path, patch_path, root=root)
+    except AlasPatchSeriesError as exc:
+        raise AdapterBaselineError(
+            "generated integration patch differs from authoritative series"
+        ) from exc
     document = {
         "schema": SCHEMA,
         "core_commit": core_commit,
@@ -371,6 +389,7 @@ def collect_baseline(
         "artifact_sha256": {
             "combat_observer_manifest": _sha256(manifest_path),
             "integration_patch": _sha256(patch_path),
+            "patch_series_manifest": _sha256(series_manifest_path),
         },
     }
     validate_baseline_document(document)

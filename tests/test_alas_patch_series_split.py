@@ -115,7 +115,7 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
         self.assertFalse(set(lifecycle) & set(tasks))
         self.assertEqual(set(core) | set(lifecycle) | set(tasks), set(legacy))
 
-    def test_split_transformations_match_legacy_including_stale_index_cases(self):
+    def test_split_target_blobs_match_generated_combined_patch(self):
         legacy = target_blobs(ALAS / "0001-semantic-oracle-hooks.patch")
         split = {}
         split_mutations = {}
@@ -133,7 +133,7 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                 self.assertEqual(split_mutations[path], legacy_mutations[path])
         self.assertEqual(
             stale_legacy_indices,
-            {"module/map/camera.py", "module/map/map_operation.py"},
+            set(),
         )
 
     def test_each_promoted_flow_has_exact_ownership_and_residual_is_disjoint(self):

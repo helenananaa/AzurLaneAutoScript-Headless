@@ -15,10 +15,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+try:
+    from .build_alas_patch_series import check_generated_patch
+except ImportError:  # Direct script execution.
+    from build_alas_patch_series import check_generated_patch
+
 
 ROOT = Path(__file__).resolve().parents[2]
 LOCK_PATH = ROOT / "integration" / "alas" / "upstream-lock.json"
 PATCH_PATH = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
+SERIES_MANIFEST_PATH = ROOT / "integration" / "alas" / "series" / "series.json"
 SCHEMA = "alas-headless.login-flow-replay/v1"
 PATCHED_LOGIN_SHA256 = (
     "eea129c71f7bb7e9fd96fcc03ca295fcab43a4ec6f06e1e01cf0b13b66cb6cfe"
@@ -463,6 +469,7 @@ def run_failure_scenario(handler_class: Any) -> Mapping[str, Any]:
 
 
 def verify(upstream: Path) -> Mapping[str, Any]:
+    check_generated_patch(SERIES_MANIFEST_PATH, PATCH_PATH, root=ROOT)
     upstream = upstream.resolve()
     login_source = upstream / "module" / "handler" / "login.py"
     if not login_source.is_file():
@@ -493,6 +500,7 @@ def verify(upstream: Path) -> Mapping[str, Any]:
         "passed": True,
         "upstream_commit": expected_commit,
         "patch_sha256": _sha256(PATCH_PATH),
+        "patch_series_manifest_sha256": _sha256(SERIES_MANIFEST_PATH),
         "patched_login_sha256": _sha256(source_path),
         "handler_module": "module.handler.login.LoginHandler",
         "scenarios": scenarios,

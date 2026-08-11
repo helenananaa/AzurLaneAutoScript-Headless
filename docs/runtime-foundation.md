@@ -180,7 +180,8 @@ examples live in
 shows the complete `alas-headless.runtime-lock/v1` document. The validator
 requires exact section fields and binds:
 
-- repository, upstream ALAS, and integration patch identities;
+- repository, upstream ALAS, generated integration patch, and authoritative
+  patch-series manifest identities;
 - ANGLE revision, patch set, APK, ABI, and observer schema;
 - Android image, provision profile, backend, API level, ABI, and fingerprint;
 - game package, region, version, APK, ABI, and `libil2cpp.so`;

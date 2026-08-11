@@ -152,6 +152,30 @@ def build_patch_series(
     }
 
 
+def check_generated_patch(
+    manifest_path: Path,
+    generated_path: Path,
+    *,
+    root: Path = ROOT,
+) -> Mapping[str, Any]:
+    upstream_commit, members = validate_manifest(manifest_path, root=root)
+    combined = b"".join(member[4] for member in members)
+    try:
+        checked_in = generated_path.read_bytes()
+    except OSError as exc:
+        raise AlasPatchSeriesError("generated combined patch cannot be read") from exc
+    if checked_in != combined:
+        raise AlasPatchSeriesError("checked-in combined patch differs from series")
+    return {
+        "schema": "alas-headless.alas-patch-series-check/v1",
+        "upstream_commit": upstream_commit,
+        "member_count": len(members),
+        "byte_count": len(combined),
+        "combined_sha256": _sha256(combined),
+        "generated_path": generated_path.resolve().relative_to(root.resolve()).as_posix(),
+    }
+
+
 def parse_args(argv: Sequence[str] = ()) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -159,13 +183,18 @@ def parse_args(argv: Sequence[str] = ()) -> argparse.Namespace:
         type=Path,
         default=ROOT / "integration" / "alas" / "series" / "series.json",
     )
-    parser.add_argument("--output", type=Path, required=True)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--output", type=Path)
+    mode.add_argument("--check", type=Path)
     return parser.parse_args(list(argv) if argv else None)
 
 
 def main(argv: Sequence[str] = ()) -> int:
     arguments = parse_args(argv)
-    result = build_patch_series(arguments.manifest, arguments.output)
+    if arguments.output is not None:
+        result = build_patch_series(arguments.manifest, arguments.output)
+    else:
+        result = check_generated_patch(arguments.manifest, arguments.check)
     print(canonical_json(result), end="")
     return 0
 

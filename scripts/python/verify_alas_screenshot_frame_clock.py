@@ -12,10 +12,16 @@ import subprocess
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+try:
+    from .build_alas_patch_series import check_generated_patch
+except ImportError:  # Direct script execution.
+    from build_alas_patch_series import check_generated_patch
+
 
 ROOT = Path(__file__).resolve().parents[2]
 LOCK_PATH = ROOT / "integration" / "alas" / "upstream-lock.json"
 PATCH_PATH = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
+SERIES_MANIFEST_PATH = ROOT / "integration" / "alas" / "series" / "series.json"
 SCHEMA = "alas-headless.screenshot-frame-clock-verification/v1"
 REVISION = "be80ce591a481c12d60c50d6040d40c035b40a2b"
 PACKAGE = "com.bilibili.azurlane"
@@ -289,6 +295,7 @@ class _RecordingSession:
 
 
 def verify(patched_upstream: Path) -> Mapping[str, Any]:
+    check_generated_patch(SERIES_MANIFEST_PATH, PATCH_PATH, root=ROOT)
     from alas_headless import (
         AlasSemanticSession,
         PINNED_CN_GAME_FINGERPRINT,
@@ -474,6 +481,7 @@ def verify(patched_upstream: Path) -> Mapping[str, Any]:
         "passed": True,
         "upstream_commit": expected_commit,
         "patch_sha256": _sha256(PATCH_PATH),
+        "patch_series_manifest_sha256": _sha256(SERIES_MANIFEST_PATH),
         "patched_screenshot_sha256": _sha256(screenshot_path),
         "normal_screenshot_source_preserved": True,
         "normal_device_source_preserved": True,

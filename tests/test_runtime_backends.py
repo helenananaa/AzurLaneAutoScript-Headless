@@ -45,6 +45,7 @@ def make_lock(backend):
                 "core_commit": COMMIT,
                 "alas_upstream_commit": "c" * 40,
                 "alas_patch_sha256": HASH,
+                "alas_patch_series_manifest_sha256": HASH,
             },
             "angle": {
                 "revision": "d" * 40,

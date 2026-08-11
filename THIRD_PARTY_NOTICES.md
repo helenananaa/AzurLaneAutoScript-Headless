@@ -15,9 +15,12 @@ Copyright remains with the respective contributors.
 - Upstream: <https://github.com/LmeSzinc/AzurLaneAutoScript>
 - Pinned integration commit: `81ccf63b4540f00241628c82a58c02c7a2bb11af`
 - Upstream license: GNU General Public License v3.0
-- Local integration surface: `integration/alas/0001-semantic-oracle-hooks.patch`
+- Editable integration surface: `integration/alas/series/*.patch` ordered by
+  `integration/alas/series/series.json`
+- Generated compatibility output:
+  `integration/alas/0001-semantic-oracle-hooks.patch`
 
-The integration patch modifies and contains context from GPL-covered ALAS
+The integration patch series modifies and contains context from GPL-covered ALAS
 source. It is distributed under `GPL-3.0-only`. This repository does not
 contain a complete ALAS checkout; users obtain ALAS from its upstream project
 and apply the pinned patch explicitly.

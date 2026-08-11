@@ -10,10 +10,22 @@ import subprocess
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+try:
+    from .build_alas_patch_series import (
+        AlasPatchSeriesError,
+        check_generated_patch,
+    )
+except ImportError:  # Direct script execution.
+    from build_alas_patch_series import (  # type: ignore[no-redef]
+        AlasPatchSeriesError,
+        check_generated_patch,
+    )
+
 
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "integration" / "alas" / "pixel-access-inventory-e04.json"
 PATCH_PATH = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
+SERIES_MANIFEST_PATH = ROOT / "integration" / "alas" / "series" / "series.json"
 DEFENSIVE_REPLAY_PATH = (
     ROOT / "integration" / "alas" / "combat-defensive-branch-replay-g28.json"
 )
@@ -68,10 +80,17 @@ def _git(repository: Path, *arguments: str) -> str:
 
 
 def validate_inventory(value: Mapping[str, Any]) -> None:
+    try:
+        check_generated_patch(SERIES_MANIFEST_PATH, PATCH_PATH, root=ROOT)
+    except AlasPatchSeriesError as exc:
+        raise PixelInventoryVerificationError(
+            "generated combined patch differs from authoritative series"
+        ) from exc
     expected_keys = {
         "schema",
         "upstream_commit",
         "combined_patch_sha256",
+        "patch_series_manifest_sha256",
         "replay_surfaces",
         "triggered_consumers",
         "totals",
@@ -82,6 +101,10 @@ def validate_inventory(value: Mapping[str, Any]) -> None:
         raise PixelInventoryVerificationError("pixel inventory fields are not exact")
     if value.get("combined_patch_sha256") != _sha256(PATCH_PATH):
         raise PixelInventoryVerificationError("pixel inventory patch hash drifted")
+    if value.get("patch_series_manifest_sha256") != _sha256(SERIES_MANIFEST_PATH):
+        raise PixelInventoryVerificationError(
+            "pixel inventory patch series manifest hash drifted"
+        )
     if value.get("android_input_injected") is not False:
         raise PixelInventoryVerificationError("pixel inventory injected Android input")
     if value.get("production_ready") is not False:
@@ -190,6 +213,8 @@ def verify(
     frame_clock = _read_json(frame_clock_path)
     if (
         login.get("passed") is not True
+        or login.get("patch_series_manifest_sha256")
+        != inventory["patch_series_manifest_sha256"]
         or login.get("scenario_count") != 4
         or login.get("classified_pixel_accesses") != 0
         or login.get("unclassified_pixel_accesses") != 0
@@ -204,6 +229,8 @@ def verify(
         raise PixelInventoryVerificationError("login scenario consumed pixels")
     if (
         frame_clock.get("passed") is not True
+        or frame_clock.get("patch_series_manifest_sha256")
+        != inventory["patch_series_manifest_sha256"]
         or frame_clock.get("normal_device_source_preserved") is not True
         or frame_clock.get("classified_pixel_accesses") != 1
         or frame_clock.get("classified_pixel_operations") != ["template-access"]
@@ -264,6 +291,9 @@ def verify(
         "passed": True,
         "upstream_commit": inventory["upstream_commit"],
         "combined_patch_sha256": inventory["combined_patch_sha256"],
+        "patch_series_manifest_sha256": inventory[
+            "patch_series_manifest_sha256"
+        ],
         "replay_surfaces": len(inventory["replay_surfaces"]),
         "triggered_consumers": len(inventory["triggered_consumers"]),
         "classified_pixel_accesses": inventory["totals"][

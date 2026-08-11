@@ -28,6 +28,7 @@ def make_lock():
             "core_commit": COMMIT,
             "alas_upstream_commit": "c" * 40,
             "alas_patch_sha256": HASH,
+            "alas_patch_series_manifest_sha256": HASH,
         },
         "angle": {
             "revision": "d" * 40,
@@ -132,6 +133,10 @@ class RuntimeArtifactsTests(unittest.TestCase):
         lock = RuntimeLock.from_mapping(json.loads(path.read_text(encoding="utf-8")))
         self.assertEqual(len(lock.sha256), 64)
         self.assertEqual(expected_artifact_hashes(lock)["angle-apk"], HASH)
+        self.assertEqual(
+            expected_artifact_hashes(lock)["alas-patch-series-manifest"],
+            HASH,
+        )
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ from scripts.python.build_alas_patch_series import (
     ROOT,
     build_patch_series,
     canonical_json,
+    check_generated_patch,
     validate_manifest,
 )
 
@@ -161,6 +162,26 @@ class AlasPatchSeriesBuilderTests(unittest.TestCase):
         document = json.loads(manifest.read_text(encoding="utf-8"))
         self.assertEqual(manifest.read_text(encoding="utf-8"), canonical_json(document))
         self.assertNotIn(str(ROOT), manifest.read_text(encoding="utf-8"))
+
+    def test_checked_in_generated_patch_must_match_validated_member_bytes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = TemporarySeries(Path(directory) / "repository")
+            generated = fixture.root / "integration" / "alas" / "combined.patch"
+            generated.write_bytes(fixture.member.read_bytes())
+            result = check_generated_patch(
+                fixture.manifest,
+                generated,
+                root=fixture.root,
+            )
+            self.assertEqual(result["generated_path"], "integration/alas/combined.patch")
+
+            generated.write_bytes(generated.read_bytes() + b"# drift\n")
+            with self.assertRaisesRegex(AlasPatchSeriesError, "differs from series"):
+                check_generated_patch(
+                    fixture.manifest,
+                    generated,
+                    root=fixture.root,
+                )
 
 
 if __name__ == "__main__":

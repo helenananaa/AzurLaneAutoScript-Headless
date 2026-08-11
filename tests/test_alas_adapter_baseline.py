@@ -45,6 +45,10 @@ class AlasAdapterBaselineTests(unittest.TestCase):
             document["source_metrics"]["semantic_oracle"]["line_count"],
             7_000,
         )
+        self.assertEqual(
+            document["artifact_sha256"]["patch_series_manifest"],
+            "5996b43adf8a724a4908c06c9a6ff034ee681aca84157a7cd59c68d7b1d7538f",
+        )
         self.assertIn(
             "appear",
             document["public_adapter_methods"]["AlasSemanticAdapter"],

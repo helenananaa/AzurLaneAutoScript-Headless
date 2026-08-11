@@ -1,5 +1,5 @@
 diff --git a/module/base/base.py b/module/base/base.py
-index dfd12a9..448d06f 100644
+index dfd12a94182f193411eda70c4ae5ef048f124a4b..448d06ff94417b43d6b3633a95581e946f617a7c 100644
 --- a/module/base/base.py
 +++ b/module/base/base.py
 @@ -70,6 +70,9 @@ class ModuleBase:
@@ -50,310 +50,398 @@ index dfd12a9..448d06f 100644
          if isinstance(button, np.ndarray):
              image = button
          else:
-diff --git a/module/campaign/campaign_ocr.py b/module/campaign/campaign_ocr.py
-index f39a29a..9c2d7f4 100644
---- a/module/campaign/campaign_ocr.py
-+++ b/module/campaign/campaign_ocr.py
-@@ -2,6 +2,7 @@ import collections
+diff --git a/module/device/control.py b/module/device/control.py
+index 1224c45475f24ccbec28589e78c4a2d5df4ffd64..1d25a3bd6c4904c3a9a6f81548125ce529179965 100644
+--- a/module/device/control.py
++++ b/module/device/control.py
+@@ -17,6 +17,14 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
  
- from module.base.base import ModuleBase
- from module.base.decorator import Config, cached_property, del_cached_property
-+from module.base.button import Button
- from module.base.timer import Timer
- from module.base.utils import *
- from module.exception import CampaignNameError
-@@ -17,6 +18,30 @@ class CampaignOcr(ModuleBase):
-     # An approximate area where stages will appear for faster template matching
-     _stage_detect_area = (87, 117, 1151, 636)
+     @cached_property
+     def click_methods(self):
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            def reject_semantic_raw_click(*args, **kwargs):
++                semantic_adapter.reject_raw_input('low-level click')
++            return {
++                name: reject_semantic_raw_click for name in
++                ('ADB', 'uiautomator2', 'minitouch', 'Hermit', 'MaaTouch', 'nemu_ipc')
++            }
+         return {
+             'ADB': self.click_adb,
+             'uiautomator2': self.click_uiautomator2,
+@@ -35,6 +43,11 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+         """
+         if control_check:
+             self.handle_control_check(button)
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            receipt = semantic_adapter.click(button)
++            logger.info(f'Semantic click {receipt.semantic_id} @ {receipt.path}')
++            return receipt
+         x, y = random_rectangle_point(button.button)
+         x, y = ensure_int(x, y)
+         logger.info(
+@@ -47,6 +60,9 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+         method(x, y)
  
-+    def _semantic_campaign_entrances(self):
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is None:
-+            return None
-+        state = semantic_session.campaign_page_state()
-+        buttons = []
-+        for stage in state.stages:
-+            bounds = stage.button.bounds
-+            if bounds is None:
-+                raise CampaignNameError
-+            area = tuple(int(round(value)) for value in (
-+                bounds.left, bounds.top, bounds.right, bounds.bottom
-+            ))
-+            button = Button(
-+                area=area,
-+                color=(0, 0, 0),
-+                button=area,
-+                name=stage.stage_code,
-+            )
-+            button.semantic_campaign_stage_code = stage.stage_code
-+            buttons.append(button)
-+        return buttons
-+
-     @staticmethod
-     def _campaign_get_chapter_index(name):
+     def multi_click(self, button, n, interval=(0.1, 0.2)):
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.reject_raw_input('multi_click')
+         self.handle_control_check(button)
+         click_timer = Timer(0.1)
+         for _ in range(n):
+@@ -64,6 +80,9 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+             button (button.Button): AzurLane Button instance.
+             duration(int, float, tuple):
          """
-@@ -134,6 +159,9 @@ class CampaignOcr(ModuleBase):
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.reject_raw_input('long_click')
+         self.handle_control_check(button)
+         x, y = random_rectangle_point(button.button)
+         x, y = ensure_int(x, y)
+@@ -86,6 +105,7 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+             self.swipe_adb((x, y), (x, y), duration)
  
-     @Config.when(SERVER='en')
-     def campaign_extract_name_image(self, image):
-+        semantic_buttons = self._semantic_campaign_entrances()
-+        if semantic_buttons is not None:
-+            return semantic_buttons
-         digits = []
+     def swipe(self, p1, p2, duration=(0.1, 0.2), name='SWIPE', distance_check=True):
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
+         self.handle_control_check(name)
+         p1, p2 = ensure_int(p1, p2)
+         duration = ensure_time(duration)
+@@ -106,6 +126,15 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+                 logger.info('Swipe distance < 10px, dropped')
+                 return
  
-         if 'normal' in self.config.STAGE_ENTRANCE:
-@@ -197,6 +225,9 @@ class CampaignOcr(ModuleBase):
-         Returns:
-             list[Button]: List of Buttons of stage entrance.
-         """
-+        semantic_buttons = self._semantic_campaign_entrances()
-+        if semantic_buttons is not None:
-+            return semantic_buttons
-         digits = []
- 
-         if 'normal' in self.config.STAGE_ENTRANCE:
-@@ -289,6 +320,34 @@ class CampaignOcr(ModuleBase):
-         Args:
-             image (np.ndarray):
-         """
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            state = semantic_session.campaign_page_state()
-+            chapters = {stage.stage_code.split('-', 1)[0] for stage in state.stages}
-+            if len(chapters) != 1:
-+                raise CampaignNameError
-+            self.campaign_chapter = chapters.pop()
-+            self.stage_entrance = {}
-+            for stage in state.stages:
-+                bounds = stage.button.bounds
-+                if bounds is None:
-+                    raise CampaignNameError
-+                area = tuple(int(round(value)) for value in (
-+                    bounds.left, bounds.top, bounds.right, bounds.bottom
-+                ))
-+                button = Button(
-+                    area=area,
-+                    color=(0, 0, 0),
-+                    button=area,
-+                    name=stage.stage_code,
-+                )
-+                button.semantic_campaign_stage_code = stage.stage_code
-+                self.stage_entrance[stage.stage_code] = button
-+            logger.attr('Chapter', self.campaign_chapter)
-+            logger.attr('Stage', ', '.join(self.stage_entrance.keys()))
-+            return
-+
-         self.stage_entrance = {}
-         del_cached_property(self, '_stage_image')
-         del_cached_property(self, '_stage_image_gray')
-diff --git a/module/campaign/campaign_status.py b/module/campaign/campaign_status.py
-index 45e8179..55ba834 100644
---- a/module/campaign/campaign_status.py
-+++ b/module/campaign/campaign_status.py
-@@ -107,6 +107,11 @@ class CampaignStatus(UI):
-         Returns:
-             int: Oil amount
-         """
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            return semantic_session.campaign_oil()
-+
-         amount = 0
-         timeout = Timer(1, count=2).start()
-         while 1:
-diff --git a/module/campaign/run.py b/module/campaign/run.py
-index 5703330..584a196 100644
---- a/module/campaign/run.py
-+++ b/module/campaign/run.py
-@@ -366,6 +366,16 @@ class CampaignRun(CampaignEvent):
-             self.config.task_stop('Commission notice found')
- 
-     def run(self, name, folder='campaign_main', mode='normal', total=0):
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if semantic_adapter is None:
-+            return self._run(name, folder=folder, mode=mode, total=total)
-+        semantic_adapter.begin_campaign_pre_sortie(name, mode=mode)
-+        try:
-+            return self._run(name, folder=folder, mode=mode, total=total)
-+        finally:
-+            semantic_adapter.end_campaign_pre_sortie()
-+
-+    def _run(self, name, folder='campaign_main', mode='normal', total=0):
-         """
-         Args:
-             name (str): Name of .py file.
-@@ -373,6 +383,7 @@ class CampaignRun(CampaignEvent):
-             mode (str): `normal` or `hard`
-             total (int):
-         """
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-         name, folder = self.handle_stage_name(name, folder, mode=mode)
-         self.config.override(Campaign_Name=name, Campaign_Event=folder)
-         self.load_campaign(name, folder=folder)
-@@ -399,6 +410,114 @@ class CampaignRun(CampaignEvent):
-                 self.device.screenshot()
-             self.campaign.device.image = self.device.image
-             if self.campaign.is_in_map():
-+                if semantic_adapter is not None:
-+                    campaign_map = self.campaign.MAP
-+                    state = semantic_adapter.campaign_map_state(
-+                        columns=campaign_map.shape[0] + 1,
-+                        rows=campaign_map.shape[1] + 1,
-+                        land_cells=tuple(
-+                            grid.location for grid in campaign_map
-+                            if grid.is_land
-+                        ),
-+                        expected_fleet_count=sum((
-+                            bool(self.campaign.config.Fleet_Fleet1),
-+                            bool(self.campaign.config.Fleet_Fleet2),
-+                        )),
-+                    )
-+                    from alas_headless import (
-+                        preview_alas_campaign_decision,
-+                        preview_alas_campaign_goto_input,
-+                        synchronize_alas_campaign_map,
-+                    )
-+                    projection = synchronize_alas_campaign_map(
-+                        self.campaign, state
-+                    )
-+                    logger.info(
-+                        f'Semantic campaign map model: {state.stage_code}, '
-+                        f'{state.columns}x{state.rows}, '
-+                        f'cells={len(state.cells)}, land={len(state.land_nodes)}, '
-+                        f'fleets={[fleet.node for fleet in state.fleets]}, '
-+                        f'enemies={[enemy.node for enemy in state.enemies]}, '
-+                        f'pickups={[pickup.node for pickup in state.pickups]}, '
-+                        f'generation={state.generation}'
-+                    )
-+                    route_count = sum(
-+                        len(fleet.enemy_routes) + len(fleet.pickup_routes)
-+                        for fleet in projection.fleets
-+                    )
-+                    logger.info(
-+                        'Semantic ALAS map projection: '
-+                        f'displayed={projection.displayed_fleet_index}, '
-+                        f'current={projection.current_fleet_index}, '
-+                        f'fleets={{'
-+                        + ', '.join(
-+                            f'{fleet.fleet_index}'
-+                            f'{"*" if fleet.is_current else ""}:'
-+                            f'{fleet.marker}:{fleet.origin_node}'
-+                            f'->enemy={fleet.recommended_enemy_node}'
-+                            f',ammo={fleet.recommended_pickup_node}'
-+                            for fleet in projection.fleets
-+                        )
-+                        + '} '
-+                        f'routes={route_count} '
-+                        f'generation={projection.generation}'
-+                    )
-+                    decision = preview_alas_campaign_decision(
-+                        self.campaign, projection
-+                    )
-+                    logger.info(
-+                        'Semantic ALAS campaign decision: '
-+                        f'branch={decision.branch_name}, '
-+                        f'battle={decision.battle_count}, '
-+                        f'fleet={decision.fleet_index}:{decision.fleet_marker}, '
-+                        f'target={decision.target_kind}:{decision.target_node}, '
-+                        f'expected={decision.expected}, '
-+                        f'cost={decision.cost}, '
-+                        f'route={list(decision.route_nodes)}, '
-+                        f'goto_nodes={list(decision.goto_nodes)}, '
-+                        f'generation={decision.generation}'
-+                    )
-+                    admission = semantic_adapter.authorize_campaign_combat(
-+                        decision, state
-+                    )
-+                    if admission is not None:
-+                        logger.info(
-+                            'Semantic ALAS combat admission: '
-+                            f'battle={admission.battle_count}, '
-+                            f'fleet={admission.fleet_index}:'
-+                            f'{admission.fleet_marker}, '
-+                            f'target={admission.target_node}:'
-+                            f'{admission.enemy_object_id}, '
-+                            f'ammo={admission.ammo_before}, '
-+                            f'path={admission.cell_path}, '
-+                            f'generation={admission.generation}'
-+                            f'->{admission.input_generation}'
-+                        )
-+                        goto_input = preview_alas_campaign_goto_input(
-+                            self.campaign,
-+                            projection,
-+                            decision,
-+                            admission,
-+                            state,
-+                        )
-+                        logger.info(
-+                            'Semantic ALAS goto input preview: '
-+                            f'battle={goto_input.battle_count}, '
-+                            f'fleet={goto_input.fleet_index}:'
-+                            f'{goto_input.fleet_marker}, '
-+                            f'target={goto_input.target_node}, '
-+                            f'camera={goto_input.camera_node}, '
-+                            f'local={goto_input.local_location}, '
-+                            f'sight={goto_input.sight}, '
-+                            f'path={goto_input.cell_path}, '
-+                            f'calls={list(goto_input.call_order)}, '
-+                            f'generation={goto_input.generation}'
-+                            f'->{goto_input.input_generation}'
-+                        )
-+                        raise ScriptEnd(
-+                            'Semantic ALAS goto input preview validation complete'
-+                        )
-+                    return True
-                 logger.info('Already in map, retreating.')
-                 try:
-                     self.campaign.withdraw()
-@@ -435,6 +554,12 @@ class CampaignRun(CampaignEvent):
-             self.device.stuck_record_clear()
-             self.device.click_record_clear()
-             try:
-+                if (
-+                    semantic_adapter is not None
-+                    and not semantic_adapter.campaign_stage_entry_allowed()
-+                ):
-+                    raise ScriptEnd(
-+                        'Semantic campaign stage-entry budget is zero')
-                 self.campaign.run()
-             except ScriptEnd as e:
-                 logger.hr('Script end')
-diff --git a/module/map/camera.py b/module/map/camera.py
-index 9fa9cba..7474343 100644
---- a/module/map/camera.py
-+++ b/module/map/camera.py
-@@ -109,7 +109,26 @@ class Camera(MapOperation):
-     def _update_view(self):
-         """
-         Update map view
-         """
-+        from alas_headless import (
-+            current_semantic_session,
-+            install_alas_campaign_camera_view,
-+        )
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            state = semantic_session.campaign_camera_state()
-+            observation = install_alas_campaign_camera_view(
-+                self,
-+                state,
-+                target_node=semantic_session.campaign_camera_target_node(),
-+            )
++        if semantic_adapter is not None:
++            receipt = semantic_adapter.swipe(
++                p1, p2, duration=duration, name=name,
++                distance_check=distance_check)
 +            logger.info(
-+                'Semantic ALAS camera view: '
-+                f'camera={observation.camera_node}, '
-+                f'center_offset={observation.center_offset}, '
-+                f'generation={observation.generation}'
++                f'Semantic swipe {receipt.semantic_id} '
++                f'{receipt.start} -> {receipt.end}')
++            return receipt
++
+         if method == 'minitouch':
+             self.swipe_minitouch(p1, p2)
+         elif method == 'uiautomator2':
+@@ -137,18 +166,42 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+             name (str): Swipe name
+             distance_check: (bool):
+         """
+-        p1, p2 = random_rectangle_vector_opted(
+-            vector,
+-            box=box,
+-            random_range=random_range,
+-            padding=padding,
+-            whitelist_area=whitelist_area,
+-            blacklist_area=blacklist_area
+-        )
+-        self.swipe(p1, p2, duration=duration, name=name, distance_check=distance_check)
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        semantic_intent = None
++        if semantic_adapter is not None:
++            semantic_intent = semantic_adapter.begin_campaign_map_swipe_vector(
++                vector,
++                box=box,
++                random_range=random_range,
++                padding=padding,
++                duration=duration,
++                whitelist_area=whitelist_area,
++                blacklist_area=blacklist_area,
++                name=name,
++                distance_check=distance_check,
++            )
++        try:
++            p1, p2 = random_rectangle_vector_opted(
++                vector,
++                box=box,
++                random_range=random_range,
++                padding=padding,
++                whitelist_area=whitelist_area,
++                blacklist_area=blacklist_area
++            )
++            return self.swipe(
++                p1, p2, duration=duration, name=name,
++                distance_check=distance_check)
++        finally:
++            if semantic_intent is not None:
++                semantic_adapter.end_campaign_map_swipe_vector(
++                    semantic_intent)
+ 
+     def drag(self, p1, p2, segments=1, shake=(0, 15), point_random=(-10, -10, 10, 10), shake_random=(-5, -5, 5, 5),
+              swipe_duration=0.25, shake_duration=0.1, name='DRAG'):
++        semantic_adapter = getattr(self, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.reject_raw_input('drag')
+         self.handle_control_check(name)
+         p1, p2 = ensure_int(p1, p2)
+         logger.info(
+diff --git a/module/device/screenshot.py b/module/device/screenshot.py
+index 9940ee05560747db9a025de8033cebe3ce19d8fe..65f5dde7d0183df5e6e0db87326d37a00708d083 100644
+--- a/module/device/screenshot.py
++++ b/module/device/screenshot.py
+@@ -56,6 +56,12 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
+         self._screenshot_interval.wait()
+         self._screenshot_interval.reset()
+ 
++        semantic_session = getattr(self, 'semantic_adapter', None)
++        if semantic_session is not None:
++            frame = semantic_session.refresh_frame()
++            self.image = semantic_session.pixel_guard(frame)
++            return self.image
++
+         for _ in range(2):
+             if self.screenshot_method_override:
+                 method = self.screenshot_method_override
+diff --git a/module/ocr/ocr.py b/module/ocr/ocr.py
+index 9dfd4f00cb0d52466c496da677115509163a6592..9fca01bd4151210252be61629d6fbeda7443af15 100644
+--- a/module/ocr/ocr.py
++++ b/module/ocr/ocr.py
+@@ -90,6 +90,28 @@ class Ocr:
+         """
+         start_time = time.time()
+ 
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            if direct_ocr:
++                semantic_session.reject_raw_input('direct OCR without screen areas')
++            result_list = semantic_session.ocr_text(
++                self.buttons, alphabet=self.alphabet
++            )
++            if not isinstance(result_list, list):
++                result_list = [result_list]
++            result_list = [self.after_process(result) for result in result_list]
++            if len(self.buttons) == 1:
++                result_list = result_list[0]
++            if self.SHOW_LOG:
++                logger.attr(
++                    name='%s semantic %ss' % (
++                        self.name, float2str(time.time() - start_time)
++                    ),
++                    text=str(result_list)
++                )
++            return result_list
++
+         if direct_ocr:
+             image_list = [self.pre_process(i) for i in image]
+         else:
+diff --git a/module/device/device.py b/module/device/device.py
+index 0d05f343807c19ac88b96e1e31248219d723ab43..6b002e4d8e20f6ae5356817cfabeba5a6b425cf7 100644
+--- a/module/device/device.py
++++ b/module/device/device.py
+@@ -1,4 +1,5 @@
+ import collections
++import os
+ from datetime import datetime
+ 
+ from lxml import etree
+@@ -88,6 +89,20 @@ class Device(Screenshot, Control, AppControl):
+                     )
+                     raise RequestHumanTakeover
+ 
++        self.semantic_adapter = None
++        if os.environ.get('ALAS_SEMANTIC_MODE') == '1':
++            from alas_headless import AlasSemanticSession, bind_semantic_session
++            self.semantic_adapter = AlasSemanticSession.from_environment(
++                serial=self.config.Emulator_Serial
++            )
++            self._semantic_session_token = bind_semantic_session(
++                self.semantic_adapter
++            )
++            self.__dict__.pop('click_methods', None)
++            logger.warning(
++                'ALAS semantic mode enabled; unmapped detection and raw input fail closed'
++            )
++
+         # Auto-fill emulator info
+         if IS_WINDOWS and self.config.EmulatorInfo_Emulator == 'auto':
+             _ = self.emulator_instance
+@@ -179,6 +194,11 @@ class Device(Screenshot, Control, AppControl):
+         if threshold < diff < 86400 - threshold:
+             return False
+ 
++        semantic_session = getattr(self, 'semantic_adapter', None)
++        if semantic_session is not None:
++            semantic_session.reject_pixel_access(
++                'template-access', 'Device.handle_night_commission'
++            )
+         if GET_MISSION.match(self.image, offset=True):
+             logger.info('Night commission appear.')
+             self.click(GET_MISSION)
+diff --git a/module/handler/login.py b/module/handler/login.py
+index 57deabe0b6c107792cafdbcd166c527360006e6c..1d2e7d4a251f3d4363c65b59b8992d04f6b9cf2b 100644
+--- a/module/handler/login.py
++++ b/module/handler/login.py
+@@ -144,12 +144,19 @@ class LoginHandler(UI):
+             GameTooManyClickError:
+             GameNotRunningError:
+         """
+-        logger.info('handle_app_login')
+-        self.device.screenshot_interval_set(1.0)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_login()
+         try:
+-            self._handle_app_login()
++            logger.info('handle_app_login')
++            self.device.screenshot_interval_set(1.0)
++            try:
++                self._handle_app_login()
++            finally:
++                self.device.screenshot_interval_set()
+         finally:
+-            self.device.screenshot_interval_set()
++            if semantic_adapter is not None:
++                semantic_adapter.end_login()
+ 
+     def app_stop(self):
+         logger.hr('App stop')
+diff --git a/module/freebies/mail_white.py b/module/freebies/mail_white.py
+index 6d9e42f4a4777d63ff1c26a14782f6074892921e..25a9dcc177da8cebcf280ec2864c2e6f24523a17 100644
+--- a/module/freebies/mail_white.py
++++ b/module/freebies/mail_white.py
+@@ -257,23 +257,30 @@ class MailWhite(UI):
+             logger.warning('Nothing to claim')
+             return False
+ 
+-        # Must using white UI
+-        self.ui_ensure(page_main)
+-        if self.appear(page_main_white.check_button, offset=(30, 30)):
+-            logger.info('At page_main_white')
+-            pass
+-        elif self.appear(page_main.check_button, offset=(5, 5)):
+-            logger.info('At page_main')
+-            pass
+-        else:
+-            logger.warning('Unknown page_main, cannot enter mail page')
+-            return False
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_mail()
++        try:
++            # Must using white UI
++            self.ui_ensure(page_main)
++            if self.appear(page_main_white.check_button, offset=(30, 30)):
++                logger.info('At page_main_white')
++                pass
++            elif self.appear(page_main.check_button, offset=(5, 5)):
++                logger.info('At page_main')
++                pass
++            else:
++                logger.warning('Unknown page_main, cannot enter mail page')
++                return False
+ 
+-        # Claim
+-        self.mail_claim(
+-            merit=merit,
+-            maintenance=maintenance,
+-            trade_license=trade_license,
+-            delete=delete,
+-        )
+-        return True
++            # Claim
++            self.mail_claim(
++                merit=merit,
++                maintenance=maintenance,
++                trade_license=trade_license,
++                delete=delete,
 +            )
 +            return True
-         self._view_init()
-         try:
-             if not self.is_in_map() \
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_mail()
+diff --git a/module/reward/reward.py b/module/reward/reward.py
+index 50a71717bfbe8be953e8bb2acb0fffb2f718120a..3df61a5a750cfaaab8772c1b843d6d03b5691220 100644
+--- a/module/reward/reward.py
++++ b/module/reward/reward.py
+@@ -166,6 +166,14 @@ class Reward(UI):
+                 logger.info('Mission collect finished')
+                 break
+             elif state in [MISSION_MULTI, MISSION_SINGLE]:
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if (
++                    semantic_adapter is not None
++                    and not semantic_adapter.mission_claim_allowed()
++                ):
++                    logger.info(
++                        'Mission claimable state observed; semantic claim budget is zero')
++                    break
+                 # Clear any existing interval for the following assets
+                 self.interval_clear([GET_ITEMS_1, GET_ITEMS_2, MISSION_MULTI, MISSION_SINGLE, GET_SHIP])
+                 self._reward_mission_claim_click()
+@@ -234,16 +242,27 @@ class Reward(UI):
+         """
+         if not daily and not weekly:
+             return False
+-        logger.hr('Mission reward')
+-        if not self.reward_mission_notice():
+-            return False
+-
+-        self.ui_goto(page_mission, skip_first_screenshot=True)
+-
+-        if daily:
+-            self._reward_mission_all()
+-        if weekly:
+-            self._reward_mission_weekly()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        owns_semantic_flow = (
++            semantic_adapter is not None
++            and not semantic_adapter.mission_reward_active()
++        )
++        if owns_semantic_flow:
++            semantic_adapter.begin_mission_reward(daily=daily, weekly=weekly)
++        try:
++            logger.hr('Mission reward')
++            if not self.reward_mission_notice():
++                return False
++
++            self.ui_goto(page_mission, skip_first_screenshot=True)
++
++            if daily:
++                self._reward_mission_all()
++            if weekly:
++                self._reward_mission_weekly()
++        finally:
++            if owns_semantic_flow:
++                semantic_adapter.end_mission_reward()
+ 
+     @cached_property
+     def _reward_side_navbar(self):
+@@ -300,12 +319,21 @@ class Reward(UI):
+             in: Any page
+             out: page_main or page_mission, may have info_bar
+         """
+-        self.ui_ensure(page_reward)
+-        self.reward_receive(
+-            oil=self.config.Reward_CollectOil,
+-            coin=self.config.Reward_CollectCoin,
+-            exp=self.config.Reward_CollectExp)
+-        self.ui_goto(page_main)
+-        self.reward_mission(daily=self.config.Reward_CollectMission,
+-                            weekly=self.config.Reward_CollectWeeklyMission)
+-        self.config.task_delay(success=True)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_mission_reward(
++                daily=self.config.Reward_CollectMission,
++                weekly=self.config.Reward_CollectWeeklyMission)
++        try:
++            self.ui_ensure(page_reward)
++            self.reward_receive(
++                oil=self.config.Reward_CollectOil,
++                coin=self.config.Reward_CollectCoin,
++                exp=self.config.Reward_CollectExp)
++            self.ui_goto(page_main)
++            self.reward_mission(daily=self.config.Reward_CollectMission,
++                                weekly=self.config.Reward_CollectWeeklyMission)
++            self.config.task_delay(success=True)
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_mission_reward()
 diff --git a/module/commission/commission.py b/module/commission/commission.py
-index 195d84a..fda74c4 100644
+index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0ce64b07b 100644
 --- a/module/commission/commission.py
 +++ b/module/commission/commission.py
 @@ -89,6 +89,21 @@ class RewardCommission(UI, InfoHandler):
@@ -614,7 +702,7 @@ index 195d84a..fda74c4 100644
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_commission()
 diff --git a/module/commission/project.py b/module/commission/project.py
-index cd88c16..efa9500 100644
+index cd88c16282b4f6c8bcf9eac2202e836797869e3c..efa9500e8b5c759653038f4867dbf2f365269384 100644
 --- a/module/commission/project.py
 +++ b/module/commission/project.py
 @@ -106,6 +106,58 @@ class Commission:
@@ -700,868 +788,8 @@ index cd88c16..efa9500 100644
          # Event commission in Vacation Lane, with pink area on the left.
          # area = area_offset((5, 5, 30, 30), self.area[0:2])
          # return color_similar(color1=get_color(self.image, area), color2=(239, 166, 231))
-diff --git a/module/device/control.py b/module/device/control.py
-index 1224c45..1d25a3b 100644
---- a/module/device/control.py
-+++ b/module/device/control.py
-@@ -17,6 +17,14 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
- 
-     @cached_property
-     def click_methods(self):
-+        semantic_adapter = getattr(self, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            def reject_semantic_raw_click(*args, **kwargs):
-+                semantic_adapter.reject_raw_input('low-level click')
-+            return {
-+                name: reject_semantic_raw_click for name in
-+                ('ADB', 'uiautomator2', 'minitouch', 'Hermit', 'MaaTouch', 'nemu_ipc')
-+            }
-         return {
-             'ADB': self.click_adb,
-             'uiautomator2': self.click_uiautomator2,
-@@ -35,6 +43,11 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
-         """
-         if control_check:
-             self.handle_control_check(button)
-+        semantic_adapter = getattr(self, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            receipt = semantic_adapter.click(button)
-+            logger.info(f'Semantic click {receipt.semantic_id} @ {receipt.path}')
-+            return receipt
-         x, y = random_rectangle_point(button.button)
-         x, y = ensure_int(x, y)
-         logger.info(
-@@ -47,6 +60,9 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
-         method(x, y)
- 
-     def multi_click(self, button, n, interval=(0.1, 0.2)):
-+        semantic_adapter = getattr(self, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            semantic_adapter.reject_raw_input('multi_click')
-         self.handle_control_check(button)
-         click_timer = Timer(0.1)
-         for _ in range(n):
-@@ -64,6 +80,9 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
-             button (button.Button): AzurLane Button instance.
-             duration(int, float, tuple):
-         """
-+        semantic_adapter = getattr(self, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            semantic_adapter.reject_raw_input('long_click')
-         self.handle_control_check(button)
-         x, y = random_rectangle_point(button.button)
-         x, y = ensure_int(x, y)
-@@ -86,6 +105,7 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
-             self.swipe_adb((x, y), (x, y), duration)
- 
-     def swipe(self, p1, p2, duration=(0.1, 0.2), name='SWIPE', distance_check=True):
-+        semantic_adapter = getattr(self, 'semantic_adapter', None)
-         self.handle_control_check(name)
-         p1, p2 = ensure_int(p1, p2)
-         duration = ensure_time(duration)
-@@ -106,6 +126,15 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
-                 logger.info('Swipe distance < 10px, dropped')
-                 return
- 
-+        if semantic_adapter is not None:
-+            receipt = semantic_adapter.swipe(
-+                p1, p2, duration=duration, name=name,
-+                distance_check=distance_check)
-+            logger.info(
-+                f'Semantic swipe {receipt.semantic_id} '
-+                f'{receipt.start} -> {receipt.end}')
-+            return receipt
-+
-         if method == 'minitouch':
-             self.swipe_minitouch(p1, p2)
-         elif method == 'uiautomator2':
-@@ -137,18 +166,42 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
-             name (str): Swipe name
-             distance_check: (bool):
-         """
--        p1, p2 = random_rectangle_vector_opted(
--            vector,
--            box=box,
--            random_range=random_range,
--            padding=padding,
--            whitelist_area=whitelist_area,
--            blacklist_area=blacklist_area
--        )
--        self.swipe(p1, p2, duration=duration, name=name, distance_check=distance_check)
-+        semantic_adapter = getattr(self, 'semantic_adapter', None)
-+        semantic_intent = None
-+        if semantic_adapter is not None:
-+            semantic_intent = semantic_adapter.begin_campaign_map_swipe_vector(
-+                vector,
-+                box=box,
-+                random_range=random_range,
-+                padding=padding,
-+                duration=duration,
-+                whitelist_area=whitelist_area,
-+                blacklist_area=blacklist_area,
-+                name=name,
-+                distance_check=distance_check,
-+            )
-+        try:
-+            p1, p2 = random_rectangle_vector_opted(
-+                vector,
-+                box=box,
-+                random_range=random_range,
-+                padding=padding,
-+                whitelist_area=whitelist_area,
-+                blacklist_area=blacklist_area
-+            )
-+            return self.swipe(
-+                p1, p2, duration=duration, name=name,
-+                distance_check=distance_check)
-+        finally:
-+            if semantic_intent is not None:
-+                semantic_adapter.end_campaign_map_swipe_vector(
-+                    semantic_intent)
- 
-     def drag(self, p1, p2, segments=1, shake=(0, 15), point_random=(-10, -10, 10, 10), shake_random=(-5, -5, 5, 5),
-              swipe_duration=0.25, shake_duration=0.1, name='DRAG'):
-+        semantic_adapter = getattr(self, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            semantic_adapter.reject_raw_input('drag')
-         self.handle_control_check(name)
-         p1, p2 = ensure_int(p1, p2)
-         logger.info(
-diff --git a/module/device/screenshot.py b/module/device/screenshot.py
-index 9940ee0..65f5dde 100644
---- a/module/device/screenshot.py
-+++ b/module/device/screenshot.py
-@@ -56,6 +56,12 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
-         self._screenshot_interval.wait()
-         self._screenshot_interval.reset()
- 
-+        semantic_session = getattr(self, 'semantic_adapter', None)
-+        if semantic_session is not None:
-+            frame = semantic_session.refresh_frame()
-+            self.image = semantic_session.pixel_guard(frame)
-+            return self.image
-+
-         for _ in range(2):
-             if self.screenshot_method_override:
-                 method = self.screenshot_method_override
-diff --git a/module/device/device.py b/module/device/device.py
-index 0d05f34..6b002e4 100644
---- a/module/device/device.py
-+++ b/module/device/device.py
-@@ -1,4 +1,5 @@
- import collections
-+import os
- from datetime import datetime
- 
- from lxml import etree
-@@ -88,6 +89,20 @@ class Device(Screenshot, Control, AppControl):
-                     )
-                     raise RequestHumanTakeover
- 
-+        self.semantic_adapter = None
-+        if os.environ.get('ALAS_SEMANTIC_MODE') == '1':
-+            from alas_headless import AlasSemanticSession, bind_semantic_session
-+            self.semantic_adapter = AlasSemanticSession.from_environment(
-+                serial=self.config.Emulator_Serial
-+            )
-+            self._semantic_session_token = bind_semantic_session(
-+                self.semantic_adapter
-+            )
-+            self.__dict__.pop('click_methods', None)
-+            logger.warning(
-+                'ALAS semantic mode enabled; unmapped detection and raw input fail closed'
-+            )
-+
-         # Auto-fill emulator info
-         if IS_WINDOWS and self.config.EmulatorInfo_Emulator == 'auto':
-             _ = self.emulator_instance
-@@ -179,6 +194,11 @@ class Device(Screenshot, Control, AppControl):
-         if threshold < diff < 86400 - threshold:
-             return False
- 
-+        semantic_session = getattr(self, 'semantic_adapter', None)
-+        if semantic_session is not None:
-+            semantic_session.reject_pixel_access(
-+                'template-access', 'Device.handle_night_commission'
-+            )
-         if GET_MISSION.match(self.image, offset=True):
-             logger.info('Night commission appear.')
-             self.click(GET_MISSION)
-diff --git a/module/dorm/dorm.py b/module/dorm/dorm.py
-index c3c9545..3710781 100644
---- a/module/dorm/dorm.py
-+++ b/module/dorm/dorm.py
-@@ -284,6 +284,12 @@ class RewardDorm(UI):
-         Pages:
-             in: DORM_FEED_CHECK
-         """
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            index = self._dorm_food.buttons.index(button)
-+            semantic_session.dorm_feed_food(index, count)
-+            return
-         logger.info(f'Dorm feed {button} x {count}')
-         if count <= 3:
-             for _ in range(count):
-@@ -313,6 +319,14 @@ class RewardDorm(UI):
-         Pages:
-             in: DORM_FEED_CHECK
-         """
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            state = semantic_session.dorm_feed_state()
-+            food = [Food(feed=item.value, amount=item.count) for item in state.items]
-+            fill = state.capacity - state.food
-+            logger.info(f'Dorm food: {[f.amount for f in food]}, to fill: {fill}')
-+            return food, fill
-         has_food = [self._dorm_has_food(button) for button in self._dorm_food.buttons]
-         amount = self._dorm_food_ocr.ocr(self.device.image)
-         amount = [a if hf else 0 for a, hf in zip(amount, has_food)]
-@@ -546,6 +560,10 @@ class RewardDorm(UI):
-         Pages:
-             in: page_dorm
-         """
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            return semantic_session.dorm_state().occupied_slots
-         timeout = Timer(2, count=4).start()
-         current = 0
-         for _ in self.loop():
-@@ -607,7 +625,7 @@ class RewardDorm(UI):
-         delay = dict_delay.get(ships, self.config.Scheduler_SuccessInterval)
-         return delay
- 
--    def run(self):
-+    def _run_alas_state_machine(self):
-         """
-         Pages:
-             in: Any page
-@@ -627,3 +645,14 @@ class RewardDorm(UI):
-         delay = self.cal_dorm_delay(ships)
-         logger.info(f'Ships in dorm: {ships}, task to delay: {delay}')
-         self.config.task_delay(minute=delay)
-+
-+    def run(self):
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            semantic_adapter.begin_dorm()
-+        try:
-+            # ALAS still owns feed filtering, collect loop, and scheduling.
-+            return self._run_alas_state_machine()
-+        finally:
-+            if semantic_adapter is not None:
-+                semantic_adapter.end_dorm()
-diff --git a/module/freebies/mail_white.py b/module/freebies/mail_white.py
-index 6d9e42f..25a9dcc 100644
---- a/module/freebies/mail_white.py
-+++ b/module/freebies/mail_white.py
-@@ -257,23 +257,30 @@ class MailWhite(UI):
-             logger.warning('Nothing to claim')
-             return False
- 
--        # Must using white UI
--        self.ui_ensure(page_main)
--        if self.appear(page_main_white.check_button, offset=(30, 30)):
--            logger.info('At page_main_white')
--            pass
--        elif self.appear(page_main.check_button, offset=(5, 5)):
--            logger.info('At page_main')
--            pass
--        else:
--            logger.warning('Unknown page_main, cannot enter mail page')
--            return False
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            semantic_adapter.begin_mail()
-+        try:
-+            # Must using white UI
-+            self.ui_ensure(page_main)
-+            if self.appear(page_main_white.check_button, offset=(30, 30)):
-+                logger.info('At page_main_white')
-+                pass
-+            elif self.appear(page_main.check_button, offset=(5, 5)):
-+                logger.info('At page_main')
-+                pass
-+            else:
-+                logger.warning('Unknown page_main, cannot enter mail page')
-+                return False
- 
--        # Claim
--        self.mail_claim(
--            merit=merit,
--            maintenance=maintenance,
--            trade_license=trade_license,
--            delete=delete,
--        )
--        return True
-+            # Claim
-+            self.mail_claim(
-+                merit=merit,
-+                maintenance=maintenance,
-+                trade_license=trade_license,
-+                delete=delete,
-+            )
-+            return True
-+        finally:
-+            if semantic_adapter is not None:
-+                semantic_adapter.end_mail()
-diff --git a/module/gacha/gacha_reward.py b/module/gacha/gacha_reward.py
-index 08c9307..9fcf6e0 100644
---- a/module/gacha/gacha_reward.py
-+++ b/module/gacha/gacha_reward.py
-@@ -85,6 +85,14 @@ class RewardGacha(GachaUI, Retirement):
-         if ocr_submit is None:
-             raise ScriptError('Failed to identify ocr asset required, '
-                               'cannot continue prep work')
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            state = semantic_session.build_submit_state()
-+            if target != 1 or state.count != 1:
-+                raise ScriptError('Semantic construction currently admits one order only')
-+            return True
-+
-         area = ocr_submit.buttons[0]
-         ocr_submit.buttons = [(BUILD_MINUS.button[2] + 3, area[1], BUILD_PLUS.button[0] - 3, area[3])]
-         self.ui_ensure_index(target, letter=ocr_submit, prev_button=BUILD_MINUS,
-@@ -297,9 +305,15 @@ class RewardGacha(GachaUI, Retirement):
-         # main Build page
-         self.gacha_flush_queue()
- 
--        # OCR Gold and Cubes
--        self.build_coin_count = OCR_COIN.ocr(self.device.image)
--        self.build_cube_count = OCR_BUILD_CUBE_COUNT.ocr(self.device.image)
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            costs = semantic_session.build_costs()
-+            self.build_coin_count = semantic_session.build_coins_owned()
-+            self.build_cube_count = costs.cubes_owned
-+        else:
-+            self.build_coin_count = OCR_COIN.ocr(self.device.image)
-+            self.build_cube_count = OCR_BUILD_CUBE_COUNT.ocr(self.device.image)
- 
-         # Transition to appropriate target construction pool
-         # Returns appropriate costs for gacha as well
-@@ -341,7 +355,7 @@ class RewardGacha(GachaUI, Retirement):
- 
-         return result
- 
--    def run(self):
-+    def _run_alas_state_machine(self):
-         """
-         Handle gacha operations if configured to do so.
- 
-@@ -351,3 +365,14 @@ class RewardGacha(GachaUI, Retirement):
-         """
-         self.gacha_run()
-         self.config.task_delay(server_update=True)
-+
-+    def run(self):
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            semantic_adapter.begin_build()
-+        try:
-+            # ALAS still owns pool choice, affordability, and submit scheduling.
-+            return self._run_alas_state_machine()
-+        finally:
-+            if semantic_adapter is not None:
-+                semantic_adapter.end_build()
-diff --git a/module/map/map_fleet_preparation.py b/module/map/map_fleet_preparation.py
-index 38c9af5..68fc84e 100644
---- a/module/map/map_fleet_preparation.py
-+++ b/module/map/map_fleet_preparation.py
-@@ -49,6 +49,20 @@ class FleetOperator:
-     def __str__(self):
-         return str(self._choose)[:-7]
- 
-+    def _semantic_adapter(self):
-+        return getattr(self.main.device, 'semantic_adapter', None)
-+
-+    def _semantic_row_key(self):
-+        name = getattr(self._choose, 'name', str(self._choose))
-+        try:
-+            return {
-+                'FLEET_1_CHOOSE': 'fleet1',
-+                'FLEET_2_CHOOSE': 'fleet2',
-+                'SUBMARINE_CHOOSE': 'submarine',
-+            }[name]
-+        except KeyError as exc:
-+            raise ValueError(f'Unknown semantic fleet row: {name}') from exc
-+
-     def parse_fleet_bar(self, image):
-         """
-         Args:
-@@ -91,6 +105,10 @@ class FleetOperator:
-         Returns:
-             bool: If current fleet is allow to be chosen.
-         """
-+        semantic_adapter = self._semantic_adapter()
-+        if semantic_adapter is not None:
-+            return semantic_adapter.campaign_fleet_row_allowed(
-+                self._semantic_row_key())
-         return self.main.appear(self._clear, offset=FleetOperator.OFFSET)
- 
-     def is_hard(self):
-@@ -98,6 +116,10 @@ class FleetOperator:
-         Returns:
-             bool: Whether to have a recommend. If so, this stage is a hard campaign.
-         """
-+        semantic_adapter = self._semantic_adapter()
-+        if semantic_adapter is not None:
-+            return semantic_adapter.campaign_fleet_operator_is_hard(
-+                self._semantic_row_key())
-         return self.main.appear(self._advice, offset=FleetOperator.OFFSET)
- 
-     def is_hard_satisfied(self):
-@@ -110,6 +132,10 @@ class FleetOperator:
-             bool: If current fleet satisfies hard restrictions.
-                 Or None if this is not a hard mode
-         """
-+        semantic_adapter = self._semantic_adapter()
-+        if semantic_adapter is not None:
-+            return semantic_adapter.campaign_fleet_operator_hard_satisfied(
-+                self._semantic_row_key())
-         if not self.is_hard():
-             return None
- 
-@@ -253,6 +279,10 @@ class FleetOperator:
-         Returns:
-             list: List of int. Currently selected fleet ranges from 1 to 6.
-         """
-+        semantic_adapter = self._semantic_adapter()
-+        if semantic_adapter is not None:
-+            return semantic_adapter.campaign_fleet_selected_indices(
-+                self._semantic_row_key())
-         data = self.parse_fleet_bar(self.main.image_crop(self._bar.button, copy=False))
-         return data
- 
-@@ -261,6 +291,11 @@ class FleetOperator:
-         Returns:
-             bool: If has selected to any fleet.
-         """
-+        semantic_adapter = self._semantic_adapter()
-+        if semantic_adapter is not None:
-+            return semantic_adapter.campaign_fleet_operator_in_use(
-+                self._semantic_row_key())
-+
-         # Handle the info bar of auto search info.
-         # if area_cross_area(self._in_use.area, INFO_BAR_1.area):
-         #     self.main.handle_info_bar()
-@@ -290,6 +325,10 @@ class FleetOperator:
-         Returns:
-             bool: If dropdown menu appears.
-         """
-+        semantic_adapter = self._semantic_adapter()
-+        if semantic_adapter is not None:
-+            return semantic_adapter.campaign_fleet_dropdown_opened()
-+
-         # Check the brightness of the rightest column of the bar area.
-         luma = rgb2gray(self.main.image_crop(self._bar.button, copy=False))[:, -1]
-         # FLEET_PREPARATION is about 146~155
-diff --git a/module/map/map_operation.py b/module/map/map_operation.py
-index c44e099..8c708f5 100644
---- a/module/map/map_operation.py
-+++ b/module/map/map_operation.py
-@@ -119,6 +119,7 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
-         self.stage_entrance = button
-         self.map_clear_percentage_prev = -1
-         self.map_clear_percentage_timer.reset()
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
- 
-         with self.stat.new(
-                 genre=self.config.campaign_name, method=self.config.DropRecord_CombatRecord
-@@ -150,6 +151,106 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
-                 else:
-                     checked_in_map = True
- 
-+                # Semantic campaign validation follows the same ALAS states.
-+                # Each later input boundary remains independently budgeted.
-+                if (
-+                    semantic_adapter is not None
-+                    and semantic_adapter.campaign_pre_sortie_active()
-+                ):
-+                    if semantic_adapter.campaign_sortie_committed():
-+                        if self.is_in_map():
-+                            proof = semantic_adapter.confirm_campaign_sortie()
-+                            logger.info(
-+                                f'Semantic campaign sortie proof: '
-+                                f'{proof.stage_code}, {proof.initial_fleets}'
-+                                f'->{proof.prepared_fleets}, '
-+                                f'mutations={proof.mutation_semantic_ids}, '
-+                                f'oil={proof.oil_before_sortie}>='
-+                                f'{proof.required_oil}, '
-+                                f'{proof.sortie_generation}'
-+                                f'->{proof.map_generation}, '
-+                                f'root={proof.map_root_path}'
-+                            )
-+                            raise ScriptEnd(
-+                                'Semantic campaign sortie validation complete'
-+                            )
-+                        continue
-+                    if self.appear(FLEET_PREPARATION, offset=(20, 50)):
-+                        fleet_authorized = False
-+                        sortie_clicked = False
-+                        try:
-+                            fleet_authorized = (
-+                                semantic_adapter.authorize_campaign_fleet_preparation(
-+                                    self.config.Fleet_Fleet1,
-+                                    self.config.Fleet_Fleet2,
-+                                    self.config.Submarine_Fleet,
-+                                )
-+                            )
-+                            if fleet_authorized:
-+                                self.handle_2x_book_setting(mode='prep')
-+                                self.fleet_preparation()
-+                                semantic_adapter.confirm_campaign_fleet_selection()
-+                                self.handle_auto_submarine_call_disable()
-+                                self.handle_auto_search_setting()
-+                                self.map_fleet_checked = True
-+                                if semantic_adapter.authorize_campaign_sortie(
-+                                    use_auto_search=(
-+                                        self.config.Campaign_UseAutoSearch
-+                                    ),
-+                                    use_2x_book=self.config.Campaign_Use2xBook,
-+                                    submarine_mode=self.config.Submarine_Mode,
-+                                    fleet_order=self.config.Fleet_FleetOrder,
-+                                ):
-+                                    self.device.click(FLEET_PREPARATION)
-+                                    fleet_click += 1
-+                                    fleet_timer.reset()
-+                                    campaign_timer.reset()
-+                                    sortie_clicked = True
-+                        finally:
-+                            if not sortie_clicked:
-+                                try:
-+                                    semantic_adapter.close_campaign_fleet_dropdown_for_rollback()
-+                                finally:
-+                                    self.enter_map_cancel()
-+                        if sortie_clicked:
-+                            continue
-+                        if fleet_authorized:
-+                            proof = semantic_adapter.confirm_campaign_fleet_preparation()
-+                            logger.info(
-+                                f'Semantic campaign fleet-preparation proof: '
-+                                f'{proof.stage_code}, {proof.initial_fleets}'
-+                                f'->{proof.prepared_fleets}, '
-+                                f'mutations={proof.mutation_semantic_ids}, '
-+                                f'{proof.cancel_generation}'
-+                                f'->{proof.restored_generation}'
-+                            )
-+                        else:
-+                            proof = semantic_adapter.confirm_campaign_pre_sortie()
-+                            logger.info(
-+                                f'Semantic campaign pre-sortie proof: '
-+                                f'{proof.stage_code}, {proof.preparation_kind}, '
-+                                f'{proof.entry_generation}'
-+                                f'->{proof.cancel_generation}'
-+                                f'->{proof.restored_generation}'
-+                            )
-+                        raise ScriptEnd(
-+                            'Semantic campaign pre-sortie validation complete'
-+                        )
-+                    if self.appear(MAP_PREPARATION, offset=(20, 20)):
-+                        self.handle_auto_search()
-+                        self.device.click(MAP_PREPARATION)
-+                        map_click += 1
-+                        map_timer.reset()
-+                        campaign_timer.reset()
-+                        continue
-+                    # A semantic observation can advance between two appear()
-+                    # calls.  Once map preparation is committed, never let an
-+                    # unhandled transition generation fall through to the
-+                    # original fleet/sortie input branches below.  Earlier
-+                    # ALAS navigation and recovery states remain unchanged.
-+                    if semantic_adapter.campaign_map_preparation_committed():
-+                        continue
-+
-                 # Accidental clicks
-                 if self.appear(DAILY_CHECK, offset=(20, 20), interval=3):
-                     logger.info(f'{DAILY_CHECK} -> {BACK_ARROW}')
-diff --git a/module/ocr/ocr.py b/module/ocr/ocr.py
-index 9dfd4f0..9fca01b 100644
---- a/module/ocr/ocr.py
-+++ b/module/ocr/ocr.py
-@@ -90,6 +90,28 @@ class Ocr:
-         """
-         start_time = time.time()
- 
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            if direct_ocr:
-+                semantic_session.reject_raw_input('direct OCR without screen areas')
-+            result_list = semantic_session.ocr_text(
-+                self.buttons, alphabet=self.alphabet
-+            )
-+            if not isinstance(result_list, list):
-+                result_list = [result_list]
-+            result_list = [self.after_process(result) for result in result_list]
-+            if len(self.buttons) == 1:
-+                result_list = result_list[0]
-+            if self.SHOW_LOG:
-+                logger.attr(
-+                    name='%s semantic %ss' % (
-+                        self.name, float2str(time.time() - start_time)
-+                    ),
-+                    text=str(result_list)
-+                )
-+            return result_list
-+
-         if direct_ocr:
-             image_list = [self.pre_process(i) for i in image]
-         else:
-diff --git a/module/research/project.py b/module/research/project.py
-index c7b54dc..a7bc576 100644
---- a/module/research/project.py
-+++ b/module/research/project.py
-@@ -147,6 +147,10 @@ def get_research_finished(image):
-     Returns:
-         int: Index of the finished project, 0 to 4. Return None if no project finished.
-     """
-+    from alas_headless import current_semantic_session
-+    semantic_session = current_semantic_session()
-+    if semantic_session is not None:
-+        return semantic_session.research_finished_index()
-     for index in [2, 1, 3, 0, 4]:
-         button = RESEARCH_STATUS[index]
-         color = get_color(image, button.area)
-diff --git a/module/research/research.py b/module/research/research.py
-index 6ffd45e..ff4edac 100644
---- a/module/research/research.py
-+++ b/module/research/research.py
-@@ -200,7 +200,12 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
-             else:
-                 self.device.screenshot()
- 
--            max_rgb = np.max(rgb2gray(self.image_crop(RESEARCH_UNAVAILABLE, copy=False)))
-+            from alas_headless import current_semantic_session
-+            semantic_session = current_semantic_session()
-+            if semantic_session is not None:
-+                max_rgb = 255 if semantic_session.research_detail_available() else 0
-+            else:
-+                max_rgb = np.max(rgb2gray(self.image_crop(RESEARCH_UNAVAILABLE, copy=False)))
- 
-             # Don't use interval here, RESEARCH_CHECK already appeared 5 seconds ago
-             if click_timer.reached() and self.is_in_research():
-@@ -566,7 +571,7 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
- 
-         return True
- 
--    def run(self):
-+    def _run_alas_state_machine(self):
-         """
-         Pages:
-             in: Any page
-@@ -602,3 +607,14 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
-             # ten minutes in advance to avoid idle research.
-             self.end_time = self.end_time + timedelta(minutes=-10)
-         self.config.task_delay(target=self.end_time)
-+
-+    def run(self):
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            semantic_adapter.begin_research()
-+        try:
-+            # ALAS still owns selection, queue filling, retry, and scheduling.
-+            return self._run_alas_state_machine()
-+        finally:
-+            if semantic_adapter is not None:
-+                semantic_adapter.end_research()
-diff --git a/module/research/rqueue.py b/module/research/rqueue.py
-index e836c5c..bb47dae 100644
---- a/module/research/rqueue.py
-+++ b/module/research/rqueue.py
-@@ -1,4 +1,4 @@
--from datetime import datetime
-+from datetime import datetime, timedelta
- 
- from module.base.button import ButtonGrid
- from module.base.decorator import cached_property, Config
-@@ -59,6 +59,11 @@ class ResearchQueue(ResearchUI):
-             bool: True if able add to queue,
-                 False if project requirements not satisfied, can't be added to queue
-         """
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            return semantic_session.research_detail_can_queue()
-+
-         # RESEARCH_QUEUE_ADD.area is the letter `Queue`
-         # RESEARCH_QUEUE_ADD.button is the entire clickable area of button
-         # Available: (90, 142, 203)
-@@ -139,6 +144,11 @@ class ResearchQueue(ResearchUI):
-         Pages:
-             in: is_in_queue
-         """
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            return semantic_session.research_queue_fill_slots()
-+
-         status = [self._queue_status_detect(button) for button in self.queue_status_grids.buttons]
-         logger.info(f'Research queue: {status}')
-         status = status[::-1]
-@@ -161,6 +171,12 @@ class ResearchQueue(ResearchUI):
-         Raises:
-             GameBugError:
-         """
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            remain = semantic_session.research_queue_remaining_seconds()
-+            return datetime.now() + timedelta(seconds=remain)
-+
-         if self.image_color_count(QUEUE_REMAIN, color=(123, 125, 123), threshold=235, count=100):
-             logger.error('The first research of queue is not running,'
-                          'probably a game bug from AL,'
-diff --git a/module/research/selector.py b/module/research/selector.py
-index 05146c3..5ff693d 100644
---- a/module/research/selector.py
-+++ b/module/research/selector.py
-@@ -123,6 +123,17 @@ class ResearchSelector(ResearchUI):
- 
-     @Config.when(SERVER=None)
-     def research_detect(self):
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            from module.research.project import ResearchProject
-+            states = semantic_session.research_projects()
-+            self.projects = [
-+                ResearchProject(name=state.code, series=state.series)
-+                for state in states
-+            ]
-+            logger.info(f'Research projects: {[str(project) for project in self.projects]}')
-+            return
-         timeout = Timer(5, count=5).start()
-         while 1:
-             projects = research_detect(self.device.image)
-diff --git a/module/research/series.py b/module/research/series.py
-index 89e534c..d399d42 100644
---- a/module/research/series.py
-+++ b/module/research/series.py
-@@ -46,6 +46,10 @@ def get_research_series_3(image, series_button=RESEARCH_SERIES):
-     Returns:
-         list[int]:
-     """
-+    from alas_headless import current_semantic_session
-+    semantic_session = current_semantic_session()
-+    if semantic_session is not None:
-+        return semantic_session.research_series()
-     return [
-         match_series(crop(image, area_pad(button.area, pad=-10), copy=False), scaling)
-         for scaling, button in zip(RESEARCH_SCALING, series_button)
-diff --git a/module/research/ui.py b/module/research/ui.py
-index 3f652c1..dea1bd5 100644
---- a/module/research/ui.py
-+++ b/module/research/ui.py
-@@ -99,6 +99,12 @@ class ResearchUI(UI):
-         Returns:
-             list[str]: List of project status
-         """
-+        from alas_headless import current_semantic_session
-+        semantic_session = current_semantic_session()
-+        if semantic_session is not None:
-+            out = semantic_session.research_statuses()
-+            logger.info(f'Research status: {out}')
-+            return out
-         out = []
-         for index, status, scaling in zip(range(5), RESEARCH_STATUS, RESEARCH_SCALING):
-             info = status.crop((0, -40, 200, 0))
-diff --git a/module/reward/reward.py b/module/reward/reward.py
-index 50a7171..3df61a5 100644
---- a/module/reward/reward.py
-+++ b/module/reward/reward.py
-@@ -166,6 +166,14 @@ class Reward(UI):
-                 logger.info('Mission collect finished')
-                 break
-             elif state in [MISSION_MULTI, MISSION_SINGLE]:
-+                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+                if (
-+                    semantic_adapter is not None
-+                    and not semantic_adapter.mission_claim_allowed()
-+                ):
-+                    logger.info(
-+                        'Mission claimable state observed; semantic claim budget is zero')
-+                    break
-                 # Clear any existing interval for the following assets
-                 self.interval_clear([GET_ITEMS_1, GET_ITEMS_2, MISSION_MULTI, MISSION_SINGLE, GET_SHIP])
-                 self._reward_mission_claim_click()
-@@ -234,16 +242,27 @@ class Reward(UI):
-         """
-         if not daily and not weekly:
-             return False
--        logger.hr('Mission reward')
--        if not self.reward_mission_notice():
--            return False
--
--        self.ui_goto(page_mission, skip_first_screenshot=True)
--
--        if daily:
--            self._reward_mission_all()
--        if weekly:
--            self._reward_mission_weekly()
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        owns_semantic_flow = (
-+            semantic_adapter is not None
-+            and not semantic_adapter.mission_reward_active()
-+        )
-+        if owns_semantic_flow:
-+            semantic_adapter.begin_mission_reward(daily=daily, weekly=weekly)
-+        try:
-+            logger.hr('Mission reward')
-+            if not self.reward_mission_notice():
-+                return False
-+
-+            self.ui_goto(page_mission, skip_first_screenshot=True)
-+
-+            if daily:
-+                self._reward_mission_all()
-+            if weekly:
-+                self._reward_mission_weekly()
-+        finally:
-+            if owns_semantic_flow:
-+                semantic_adapter.end_mission_reward()
- 
-     @cached_property
-     def _reward_side_navbar(self):
-@@ -300,12 +319,21 @@ class Reward(UI):
-             in: Any page
-             out: page_main or page_mission, may have info_bar
-         """
--        self.ui_ensure(page_reward)
--        self.reward_receive(
--            oil=self.config.Reward_CollectOil,
--            coin=self.config.Reward_CollectCoin,
--            exp=self.config.Reward_CollectExp)
--        self.ui_goto(page_main)
--        self.reward_mission(daily=self.config.Reward_CollectMission,
--                            weekly=self.config.Reward_CollectWeeklyMission)
--        self.config.task_delay(success=True)
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            semantic_adapter.begin_mission_reward(
-+                daily=self.config.Reward_CollectMission,
-+                weekly=self.config.Reward_CollectWeeklyMission)
-+        try:
-+            self.ui_ensure(page_reward)
-+            self.reward_receive(
-+                oil=self.config.Reward_CollectOil,
-+                coin=self.config.Reward_CollectCoin,
-+                exp=self.config.Reward_CollectExp)
-+            self.ui_goto(page_main)
-+            self.reward_mission(daily=self.config.Reward_CollectMission,
-+                                weekly=self.config.Reward_CollectWeeklyMission)
-+            self.config.task_delay(success=True)
-+        finally:
-+            if semantic_adapter is not None:
-+                semantic_adapter.end_mission_reward()
 diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
-index 0e518a4..d794d42 100644
+index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..d794d42cefad01041bca024298935e3ba09d0d97 100644
 --- a/module/tactical/tactical_class.py
 +++ b/module/tactical/tactical_class.py
 @@ -1,4 +1,4 @@
@@ -1715,31 +943,802 @@ index 0e518a4..d794d42 100644
  
          if self.tactical_finish:
              self.config.task_delay(target=self.tactical_finish)
-diff --git a/module/handler/login.py b/module/handler/login.py
-index 57deabe..1d2e7d4 100644
---- a/module/handler/login.py
-+++ b/module/handler/login.py
-@@ -144,12 +144,19 @@ class LoginHandler(UI):
-             GameTooManyClickError:
-             GameNotRunningError:
+diff --git a/module/dorm/dorm.py b/module/dorm/dorm.py
+index c3c9545999b72754bce1c3f47196ac2fc2031249..3710781b6d438a2ec1fa82a6e348c1add28a3629 100644
+--- a/module/dorm/dorm.py
++++ b/module/dorm/dorm.py
+@@ -284,6 +284,12 @@ class RewardDorm(UI):
+         Pages:
+             in: DORM_FEED_CHECK
          """
--        logger.info('handle_app_login')
--        self.device.screenshot_interval_set(1.0)
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            index = self._dorm_food.buttons.index(button)
++            semantic_session.dorm_feed_food(index, count)
++            return
+         logger.info(f'Dorm feed {button} x {count}')
+         if count <= 3:
+             for _ in range(count):
+@@ -313,6 +319,14 @@ class RewardDorm(UI):
+         Pages:
+             in: DORM_FEED_CHECK
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            state = semantic_session.dorm_feed_state()
++            food = [Food(feed=item.value, amount=item.count) for item in state.items]
++            fill = state.capacity - state.food
++            logger.info(f'Dorm food: {[f.amount for f in food]}, to fill: {fill}')
++            return food, fill
+         has_food = [self._dorm_has_food(button) for button in self._dorm_food.buttons]
+         amount = self._dorm_food_ocr.ocr(self.device.image)
+         amount = [a if hf else 0 for a, hf in zip(amount, has_food)]
+@@ -546,6 +560,10 @@ class RewardDorm(UI):
+         Pages:
+             in: page_dorm
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.dorm_state().occupied_slots
+         timeout = Timer(2, count=4).start()
+         current = 0
+         for _ in self.loop():
+@@ -607,7 +625,7 @@ class RewardDorm(UI):
+         delay = dict_delay.get(ships, self.config.Scheduler_SuccessInterval)
+         return delay
+ 
+-    def run(self):
++    def _run_alas_state_machine(self):
+         """
+         Pages:
+             in: Any page
+@@ -627,3 +645,14 @@ class RewardDorm(UI):
+         delay = self.cal_dorm_delay(ships)
+         logger.info(f'Ships in dorm: {ships}, task to delay: {delay}')
+         self.config.task_delay(minute=delay)
++
++    def run(self):
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
-+            semantic_adapter.begin_login()
-         try:
--            self._handle_app_login()
-+            logger.info('handle_app_login')
-+            self.device.screenshot_interval_set(1.0)
-+            try:
-+                self._handle_app_login()
-+            finally:
-+                self.device.screenshot_interval_set()
-         finally:
--            self.device.screenshot_interval_set()
++            semantic_adapter.begin_dorm()
++        try:
++            # ALAS still owns feed filtering, collect loop, and scheduling.
++            return self._run_alas_state_machine()
++        finally:
 +            if semantic_adapter is not None:
-+                semantic_adapter.end_login()
++                semantic_adapter.end_dorm()
+diff --git a/module/gacha/gacha_reward.py b/module/gacha/gacha_reward.py
+index 08c93073b1e52d249bd4815a75b7895456b394d1..9fcf6e06d9cc79a5b6f565a818392db6d73292ca 100644
+--- a/module/gacha/gacha_reward.py
++++ b/module/gacha/gacha_reward.py
+@@ -85,6 +85,14 @@ class RewardGacha(GachaUI, Retirement):
+         if ocr_submit is None:
+             raise ScriptError('Failed to identify ocr asset required, '
+                               'cannot continue prep work')
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            state = semantic_session.build_submit_state()
++            if target != 1 or state.count != 1:
++                raise ScriptError('Semantic construction currently admits one order only')
++            return True
++
+         area = ocr_submit.buttons[0]
+         ocr_submit.buttons = [(BUILD_MINUS.button[2] + 3, area[1], BUILD_PLUS.button[0] - 3, area[3])]
+         self.ui_ensure_index(target, letter=ocr_submit, prev_button=BUILD_MINUS,
+@@ -297,9 +305,15 @@ class RewardGacha(GachaUI, Retirement):
+         # main Build page
+         self.gacha_flush_queue()
  
-     def app_stop(self):
-         logger.hr('App stop')
+-        # OCR Gold and Cubes
+-        self.build_coin_count = OCR_COIN.ocr(self.device.image)
+-        self.build_cube_count = OCR_BUILD_CUBE_COUNT.ocr(self.device.image)
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            costs = semantic_session.build_costs()
++            self.build_coin_count = semantic_session.build_coins_owned()
++            self.build_cube_count = costs.cubes_owned
++        else:
++            self.build_coin_count = OCR_COIN.ocr(self.device.image)
++            self.build_cube_count = OCR_BUILD_CUBE_COUNT.ocr(self.device.image)
+ 
+         # Transition to appropriate target construction pool
+         # Returns appropriate costs for gacha as well
+@@ -341,7 +355,7 @@ class RewardGacha(GachaUI, Retirement):
+ 
+         return result
+ 
+-    def run(self):
++    def _run_alas_state_machine(self):
+         """
+         Handle gacha operations if configured to do so.
+ 
+@@ -351,3 +365,14 @@ class RewardGacha(GachaUI, Retirement):
+         """
+         self.gacha_run()
+         self.config.task_delay(server_update=True)
++
++    def run(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_build()
++        try:
++            # ALAS still owns pool choice, affordability, and submit scheduling.
++            return self._run_alas_state_machine()
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_build()
+diff --git a/module/research/project.py b/module/research/project.py
+index c7b54dcb4d41d65777b954a26dea5ce24340507b..a7bc57698b80c8c6169e5d94ca100ed2cd09ab17 100644
+--- a/module/research/project.py
++++ b/module/research/project.py
+@@ -147,6 +147,10 @@ def get_research_finished(image):
+     Returns:
+         int: Index of the finished project, 0 to 4. Return None if no project finished.
+     """
++    from alas_headless import current_semantic_session
++    semantic_session = current_semantic_session()
++    if semantic_session is not None:
++        return semantic_session.research_finished_index()
+     for index in [2, 1, 3, 0, 4]:
+         button = RESEARCH_STATUS[index]
+         color = get_color(image, button.area)
+diff --git a/module/research/research.py b/module/research/research.py
+index 6ffd45eed346403875be07ca12a1602fa5fe6cb8..ff4edac597c7679007403578bdadd2567cde440f 100644
+--- a/module/research/research.py
++++ b/module/research/research.py
+@@ -200,7 +200,12 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+             else:
+                 self.device.screenshot()
+ 
+-            max_rgb = np.max(rgb2gray(self.image_crop(RESEARCH_UNAVAILABLE, copy=False)))
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
++            if semantic_session is not None:
++                max_rgb = 255 if semantic_session.research_detail_available() else 0
++            else:
++                max_rgb = np.max(rgb2gray(self.image_crop(RESEARCH_UNAVAILABLE, copy=False)))
+ 
+             # Don't use interval here, RESEARCH_CHECK already appeared 5 seconds ago
+             if click_timer.reached() and self.is_in_research():
+@@ -566,7 +571,7 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+ 
+         return True
+ 
+-    def run(self):
++    def _run_alas_state_machine(self):
+         """
+         Pages:
+             in: Any page
+@@ -602,3 +607,14 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+             # ten minutes in advance to avoid idle research.
+             self.end_time = self.end_time + timedelta(minutes=-10)
+         self.config.task_delay(target=self.end_time)
++
++    def run(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_research()
++        try:
++            # ALAS still owns selection, queue filling, retry, and scheduling.
++            return self._run_alas_state_machine()
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_research()
+diff --git a/module/research/rqueue.py b/module/research/rqueue.py
+index e836c5cb93abd1673a33b0b117e7faef695c68cb..bb47daef0d359de7db764257a08cf6ac43f73ddb 100644
+--- a/module/research/rqueue.py
++++ b/module/research/rqueue.py
+@@ -1,4 +1,4 @@
+-from datetime import datetime
++from datetime import datetime, timedelta
+ 
+ from module.base.button import ButtonGrid
+ from module.base.decorator import cached_property, Config
+@@ -59,6 +59,11 @@ class ResearchQueue(ResearchUI):
+             bool: True if able add to queue,
+                 False if project requirements not satisfied, can't be added to queue
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.research_detail_can_queue()
++
+         # RESEARCH_QUEUE_ADD.area is the letter `Queue`
+         # RESEARCH_QUEUE_ADD.button is the entire clickable area of button
+         # Available: (90, 142, 203)
+@@ -139,6 +144,11 @@ class ResearchQueue(ResearchUI):
+         Pages:
+             in: is_in_queue
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.research_queue_fill_slots()
++
+         status = [self._queue_status_detect(button) for button in self.queue_status_grids.buttons]
+         logger.info(f'Research queue: {status}')
+         status = status[::-1]
+@@ -161,6 +171,12 @@ class ResearchQueue(ResearchUI):
+         Raises:
+             GameBugError:
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            remain = semantic_session.research_queue_remaining_seconds()
++            return datetime.now() + timedelta(seconds=remain)
++
+         if self.image_color_count(QUEUE_REMAIN, color=(123, 125, 123), threshold=235, count=100):
+             logger.error('The first research of queue is not running,'
+                          'probably a game bug from AL,'
+diff --git a/module/research/selector.py b/module/research/selector.py
+index 05146c3308213214bb9fab21f4874135f6739113..5ff693dbf83bf2493bae17489621c1e42f8aa4c2 100644
+--- a/module/research/selector.py
++++ b/module/research/selector.py
+@@ -123,6 +123,17 @@ class ResearchSelector(ResearchUI):
+ 
+     @Config.when(SERVER=None)
+     def research_detect(self):
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            from module.research.project import ResearchProject
++            states = semantic_session.research_projects()
++            self.projects = [
++                ResearchProject(name=state.code, series=state.series)
++                for state in states
++            ]
++            logger.info(f'Research projects: {[str(project) for project in self.projects]}')
++            return
+         timeout = Timer(5, count=5).start()
+         while 1:
+             projects = research_detect(self.device.image)
+diff --git a/module/research/series.py b/module/research/series.py
+index 89e534c45e8ee356007ed47f52ce64b0242186c9..d399d423785825558991092079a77fa0df9ad4a8 100644
+--- a/module/research/series.py
++++ b/module/research/series.py
+@@ -46,6 +46,10 @@ def get_research_series_3(image, series_button=RESEARCH_SERIES):
+     Returns:
+         list[int]:
+     """
++    from alas_headless import current_semantic_session
++    semantic_session = current_semantic_session()
++    if semantic_session is not None:
++        return semantic_session.research_series()
+     return [
+         match_series(crop(image, area_pad(button.area, pad=-10), copy=False), scaling)
+         for scaling, button in zip(RESEARCH_SCALING, series_button)
+diff --git a/module/research/ui.py b/module/research/ui.py
+index 3f652c11f1d66e47e6945bf8050697ef1a0f27d4..dea1bd5f71465a1419ceff74a8b549811d9080ad 100644
+--- a/module/research/ui.py
++++ b/module/research/ui.py
+@@ -99,6 +99,12 @@ class ResearchUI(UI):
+         Returns:
+             list[str]: List of project status
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            out = semantic_session.research_statuses()
++            logger.info(f'Research status: {out}')
++            return out
+         out = []
+         for index, status, scaling in zip(range(5), RESEARCH_STATUS, RESEARCH_SCALING):
+             info = status.crop((0, -40, 200, 0))
+diff --git a/module/campaign/campaign_ocr.py b/module/campaign/campaign_ocr.py
+index f39a29ae80cc1cebe765250bfe63d5933011b10c..9c2d7f433e3ee424d1c342ad3614c078357d6216 100644
+--- a/module/campaign/campaign_ocr.py
++++ b/module/campaign/campaign_ocr.py
+@@ -2,6 +2,7 @@ import collections
+ 
+ from module.base.base import ModuleBase
+ from module.base.decorator import Config, cached_property, del_cached_property
++from module.base.button import Button
+ from module.base.timer import Timer
+ from module.base.utils import *
+ from module.exception import CampaignNameError
+@@ -17,6 +18,30 @@ class CampaignOcr(ModuleBase):
+     # An approximate area where stages will appear for faster template matching
+     _stage_detect_area = (87, 117, 1151, 636)
+ 
++    def _semantic_campaign_entrances(self):
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is None:
++            return None
++        state = semantic_session.campaign_page_state()
++        buttons = []
++        for stage in state.stages:
++            bounds = stage.button.bounds
++            if bounds is None:
++                raise CampaignNameError
++            area = tuple(int(round(value)) for value in (
++                bounds.left, bounds.top, bounds.right, bounds.bottom
++            ))
++            button = Button(
++                area=area,
++                color=(0, 0, 0),
++                button=area,
++                name=stage.stage_code,
++            )
++            button.semantic_campaign_stage_code = stage.stage_code
++            buttons.append(button)
++        return buttons
++
+     @staticmethod
+     def _campaign_get_chapter_index(name):
+         """
+@@ -134,6 +159,9 @@ class CampaignOcr(ModuleBase):
+ 
+     @Config.when(SERVER='en')
+     def campaign_extract_name_image(self, image):
++        semantic_buttons = self._semantic_campaign_entrances()
++        if semantic_buttons is not None:
++            return semantic_buttons
+         digits = []
+ 
+         if 'normal' in self.config.STAGE_ENTRANCE:
+@@ -197,6 +225,9 @@ class CampaignOcr(ModuleBase):
+         Returns:
+             list[Button]: List of Buttons of stage entrance.
+         """
++        semantic_buttons = self._semantic_campaign_entrances()
++        if semantic_buttons is not None:
++            return semantic_buttons
+         digits = []
+ 
+         if 'normal' in self.config.STAGE_ENTRANCE:
+@@ -289,6 +320,34 @@ class CampaignOcr(ModuleBase):
+         Args:
+             image (np.ndarray):
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            state = semantic_session.campaign_page_state()
++            chapters = {stage.stage_code.split('-', 1)[0] for stage in state.stages}
++            if len(chapters) != 1:
++                raise CampaignNameError
++            self.campaign_chapter = chapters.pop()
++            self.stage_entrance = {}
++            for stage in state.stages:
++                bounds = stage.button.bounds
++                if bounds is None:
++                    raise CampaignNameError
++                area = tuple(int(round(value)) for value in (
++                    bounds.left, bounds.top, bounds.right, bounds.bottom
++                ))
++                button = Button(
++                    area=area,
++                    color=(0, 0, 0),
++                    button=area,
++                    name=stage.stage_code,
++                )
++                button.semantic_campaign_stage_code = stage.stage_code
++                self.stage_entrance[stage.stage_code] = button
++            logger.attr('Chapter', self.campaign_chapter)
++            logger.attr('Stage', ', '.join(self.stage_entrance.keys()))
++            return
++
+         self.stage_entrance = {}
+         del_cached_property(self, '_stage_image')
+         del_cached_property(self, '_stage_image_gray')
+diff --git a/module/campaign/campaign_status.py b/module/campaign/campaign_status.py
+index 45e8179fc13aa9391bf37929735dd3b54c7fa159..55ba834c9b9b1c21a12126f5f0ece2637558652f 100644
+--- a/module/campaign/campaign_status.py
++++ b/module/campaign/campaign_status.py
+@@ -107,6 +107,11 @@ class CampaignStatus(UI):
+         Returns:
+             int: Oil amount
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.campaign_oil()
++
+         amount = 0
+         timeout = Timer(1, count=2).start()
+         while 1:
+diff --git a/module/map/map_fleet_preparation.py b/module/map/map_fleet_preparation.py
+index 38c9af5c1af621800fcbd1725d0ce151d3deff5b..68fc84e402fb6b626a8250aae34b273e461b8495 100644
+--- a/module/map/map_fleet_preparation.py
++++ b/module/map/map_fleet_preparation.py
+@@ -49,6 +49,20 @@ class FleetOperator:
+     def __str__(self):
+         return str(self._choose)[:-7]
+ 
++    def _semantic_adapter(self):
++        return getattr(self.main.device, 'semantic_adapter', None)
++
++    def _semantic_row_key(self):
++        name = getattr(self._choose, 'name', str(self._choose))
++        try:
++            return {
++                'FLEET_1_CHOOSE': 'fleet1',
++                'FLEET_2_CHOOSE': 'fleet2',
++                'SUBMARINE_CHOOSE': 'submarine',
++            }[name]
++        except KeyError as exc:
++            raise ValueError(f'Unknown semantic fleet row: {name}') from exc
++
+     def parse_fleet_bar(self, image):
+         """
+         Args:
+@@ -91,6 +105,10 @@ class FleetOperator:
+         Returns:
+             bool: If current fleet is allow to be chosen.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_row_allowed(
++                self._semantic_row_key())
+         return self.main.appear(self._clear, offset=FleetOperator.OFFSET)
+ 
+     def is_hard(self):
+@@ -98,6 +116,10 @@ class FleetOperator:
+         Returns:
+             bool: Whether to have a recommend. If so, this stage is a hard campaign.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_operator_is_hard(
++                self._semantic_row_key())
+         return self.main.appear(self._advice, offset=FleetOperator.OFFSET)
+ 
+     def is_hard_satisfied(self):
+@@ -110,6 +132,10 @@ class FleetOperator:
+             bool: If current fleet satisfies hard restrictions.
+                 Or None if this is not a hard mode
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_operator_hard_satisfied(
++                self._semantic_row_key())
+         if not self.is_hard():
+             return None
+ 
+@@ -253,6 +279,10 @@ class FleetOperator:
+         Returns:
+             list: List of int. Currently selected fleet ranges from 1 to 6.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_selected_indices(
++                self._semantic_row_key())
+         data = self.parse_fleet_bar(self.main.image_crop(self._bar.button, copy=False))
+         return data
+ 
+@@ -261,6 +291,11 @@ class FleetOperator:
+         Returns:
+             bool: If has selected to any fleet.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_operator_in_use(
++                self._semantic_row_key())
++
+         # Handle the info bar of auto search info.
+         # if area_cross_area(self._in_use.area, INFO_BAR_1.area):
+         #     self.main.handle_info_bar()
+@@ -290,6 +325,10 @@ class FleetOperator:
+         Returns:
+             bool: If dropdown menu appears.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_fleet_dropdown_opened()
++
+         # Check the brightness of the rightest column of the bar area.
+         luma = rgb2gray(self.main.image_crop(self._bar.button, copy=False))[:, -1]
+         # FLEET_PREPARATION is about 146~155
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+index 57033308f4cfa16bafbf6ddba6b3ecb372a3e2b4..584a19618fdd059f99721bd001ee5411430a2c59 100644
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -366,6 +366,16 @@ class CampaignRun(CampaignEvent):
+             self.config.task_stop('Commission notice found')
+ 
+     def run(self, name, folder='campaign_main', mode='normal', total=0):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is None:
++            return self._run(name, folder=folder, mode=mode, total=total)
++        semantic_adapter.begin_campaign_pre_sortie(name, mode=mode)
++        try:
++            return self._run(name, folder=folder, mode=mode, total=total)
++        finally:
++            semantic_adapter.end_campaign_pre_sortie()
++
++    def _run(self, name, folder='campaign_main', mode='normal', total=0):
+         """
+         Args:
+             name (str): Name of .py file.
+@@ -373,6 +383,7 @@ class CampaignRun(CampaignEvent):
+             mode (str): `normal` or `hard`
+             total (int):
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         name, folder = self.handle_stage_name(name, folder, mode=mode)
+         self.config.override(Campaign_Name=name, Campaign_Event=folder)
+         self.load_campaign(name, folder=folder)
+@@ -399,6 +410,114 @@ class CampaignRun(CampaignEvent):
+                 self.device.screenshot()
+             self.campaign.device.image = self.device.image
+             if self.campaign.is_in_map():
++                if semantic_adapter is not None:
++                    campaign_map = self.campaign.MAP
++                    state = semantic_adapter.campaign_map_state(
++                        columns=campaign_map.shape[0] + 1,
++                        rows=campaign_map.shape[1] + 1,
++                        land_cells=tuple(
++                            grid.location for grid in campaign_map
++                            if grid.is_land
++                        ),
++                        expected_fleet_count=sum((
++                            bool(self.campaign.config.Fleet_Fleet1),
++                            bool(self.campaign.config.Fleet_Fleet2),
++                        )),
++                    )
++                    from alas_headless import (
++                        preview_alas_campaign_decision,
++                        preview_alas_campaign_goto_input,
++                        synchronize_alas_campaign_map,
++                    )
++                    projection = synchronize_alas_campaign_map(
++                        self.campaign, state
++                    )
++                    logger.info(
++                        f'Semantic campaign map model: {state.stage_code}, '
++                        f'{state.columns}x{state.rows}, '
++                        f'cells={len(state.cells)}, land={len(state.land_nodes)}, '
++                        f'fleets={[fleet.node for fleet in state.fleets]}, '
++                        f'enemies={[enemy.node for enemy in state.enemies]}, '
++                        f'pickups={[pickup.node for pickup in state.pickups]}, '
++                        f'generation={state.generation}'
++                    )
++                    route_count = sum(
++                        len(fleet.enemy_routes) + len(fleet.pickup_routes)
++                        for fleet in projection.fleets
++                    )
++                    logger.info(
++                        'Semantic ALAS map projection: '
++                        f'displayed={projection.displayed_fleet_index}, '
++                        f'current={projection.current_fleet_index}, '
++                        f'fleets={{'
++                        + ', '.join(
++                            f'{fleet.fleet_index}'
++                            f'{"*" if fleet.is_current else ""}:'
++                            f'{fleet.marker}:{fleet.origin_node}'
++                            f'->enemy={fleet.recommended_enemy_node}'
++                            f',ammo={fleet.recommended_pickup_node}'
++                            for fleet in projection.fleets
++                        )
++                        + '} '
++                        f'routes={route_count} '
++                        f'generation={projection.generation}'
++                    )
++                    decision = preview_alas_campaign_decision(
++                        self.campaign, projection
++                    )
++                    logger.info(
++                        'Semantic ALAS campaign decision: '
++                        f'branch={decision.branch_name}, '
++                        f'battle={decision.battle_count}, '
++                        f'fleet={decision.fleet_index}:{decision.fleet_marker}, '
++                        f'target={decision.target_kind}:{decision.target_node}, '
++                        f'expected={decision.expected}, '
++                        f'cost={decision.cost}, '
++                        f'route={list(decision.route_nodes)}, '
++                        f'goto_nodes={list(decision.goto_nodes)}, '
++                        f'generation={decision.generation}'
++                    )
++                    admission = semantic_adapter.authorize_campaign_combat(
++                        decision, state
++                    )
++                    if admission is not None:
++                        logger.info(
++                            'Semantic ALAS combat admission: '
++                            f'battle={admission.battle_count}, '
++                            f'fleet={admission.fleet_index}:'
++                            f'{admission.fleet_marker}, '
++                            f'target={admission.target_node}:'
++                            f'{admission.enemy_object_id}, '
++                            f'ammo={admission.ammo_before}, '
++                            f'path={admission.cell_path}, '
++                            f'generation={admission.generation}'
++                            f'->{admission.input_generation}'
++                        )
++                        goto_input = preview_alas_campaign_goto_input(
++                            self.campaign,
++                            projection,
++                            decision,
++                            admission,
++                            state,
++                        )
++                        logger.info(
++                            'Semantic ALAS goto input preview: '
++                            f'battle={goto_input.battle_count}, '
++                            f'fleet={goto_input.fleet_index}:'
++                            f'{goto_input.fleet_marker}, '
++                            f'target={goto_input.target_node}, '
++                            f'camera={goto_input.camera_node}, '
++                            f'local={goto_input.local_location}, '
++                            f'sight={goto_input.sight}, '
++                            f'path={goto_input.cell_path}, '
++                            f'calls={list(goto_input.call_order)}, '
++                            f'generation={goto_input.generation}'
++                            f'->{goto_input.input_generation}'
++                        )
++                        raise ScriptEnd(
++                            'Semantic ALAS goto input preview validation complete'
++                        )
++                    return True
+                 logger.info('Already in map, retreating.')
+                 try:
+                     self.campaign.withdraw()
+@@ -435,6 +554,12 @@ class CampaignRun(CampaignEvent):
+             self.device.stuck_record_clear()
+             self.device.click_record_clear()
+             try:
++                if (
++                    semantic_adapter is not None
++                    and not semantic_adapter.campaign_stage_entry_allowed()
++                ):
++                    raise ScriptEnd(
++                        'Semantic campaign stage-entry budget is zero')
+                 self.campaign.run()
+             except ScriptEnd as e:
+                 logger.hr('Script end')
+diff --git a/module/map/camera.py b/module/map/camera.py
+index 9fa9cba26d38f15f1bdb09322ea12d2a153f971a..f0725b376a9857352300a6314d72c6f5dc803661 100644
+--- a/module/map/camera.py
++++ b/module/map/camera.py
+@@ -110,6 +110,25 @@ class Camera(MapOperation):
+         """
+         Update map view
+         """
++        from alas_headless import (
++            current_semantic_session,
++            install_alas_campaign_camera_view,
++        )
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            state = semantic_session.campaign_camera_state()
++            observation = install_alas_campaign_camera_view(
++                self,
++                state,
++                target_node=semantic_session.campaign_camera_target_node(),
++            )
++            logger.info(
++                'Semantic ALAS camera view: '
++                f'camera={observation.camera_node}, '
++                f'center_offset={observation.center_offset}, '
++                f'generation={observation.generation}'
++            )
++            return True
+         self._view_init()
+         try:
+             if not self.is_in_map() \
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+index c44e0996e1923a5ad9e4f94cc5087b6e6c3fe5eb..96c91164f5a6889161ac66394cc587cd17c8c595 100644
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -119,6 +119,7 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+         self.stage_entrance = button
+         self.map_clear_percentage_prev = -1
+         self.map_clear_percentage_timer.reset()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+ 
+         with self.stat.new(
+                 genre=self.config.campaign_name, method=self.config.DropRecord_CombatRecord
+@@ -150,6 +151,106 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                 else:
+                     checked_in_map = True
+ 
++                # Semantic campaign validation follows the same ALAS states.
++                # Each later input boundary remains independently budgeted.
++                if (
++                    semantic_adapter is not None
++                    and semantic_adapter.campaign_pre_sortie_active()
++                ):
++                    if semantic_adapter.campaign_sortie_committed():
++                        if self.is_in_map():
++                            proof = semantic_adapter.confirm_campaign_sortie()
++                            logger.info(
++                                f'Semantic campaign sortie proof: '
++                                f'{proof.stage_code}, {proof.initial_fleets}'
++                                f'->{proof.prepared_fleets}, '
++                                f'mutations={proof.mutation_semantic_ids}, '
++                                f'oil={proof.oil_before_sortie}>='
++                                f'{proof.required_oil}, '
++                                f'{proof.sortie_generation}'
++                                f'->{proof.map_generation}, '
++                                f'root={proof.map_root_path}'
++                            )
++                            raise ScriptEnd(
++                                'Semantic campaign sortie validation complete'
++                            )
++                        continue
++                    if self.appear(FLEET_PREPARATION, offset=(20, 50)):
++                        fleet_authorized = False
++                        sortie_clicked = False
++                        try:
++                            fleet_authorized = (
++                                semantic_adapter.authorize_campaign_fleet_preparation(
++                                    self.config.Fleet_Fleet1,
++                                    self.config.Fleet_Fleet2,
++                                    self.config.Submarine_Fleet,
++                                )
++                            )
++                            if fleet_authorized:
++                                self.handle_2x_book_setting(mode='prep')
++                                self.fleet_preparation()
++                                semantic_adapter.confirm_campaign_fleet_selection()
++                                self.handle_auto_submarine_call_disable()
++                                self.handle_auto_search_setting()
++                                self.map_fleet_checked = True
++                                if semantic_adapter.authorize_campaign_sortie(
++                                    use_auto_search=(
++                                        self.config.Campaign_UseAutoSearch
++                                    ),
++                                    use_2x_book=self.config.Campaign_Use2xBook,
++                                    submarine_mode=self.config.Submarine_Mode,
++                                    fleet_order=self.config.Fleet_FleetOrder,
++                                ):
++                                    self.device.click(FLEET_PREPARATION)
++                                    fleet_click += 1
++                                    fleet_timer.reset()
++                                    campaign_timer.reset()
++                                    sortie_clicked = True
++                        finally:
++                            if not sortie_clicked:
++                                try:
++                                    semantic_adapter.close_campaign_fleet_dropdown_for_rollback()
++                                finally:
++                                    self.enter_map_cancel()
++                        if sortie_clicked:
++                            continue
++                        if fleet_authorized:
++                            proof = semantic_adapter.confirm_campaign_fleet_preparation()
++                            logger.info(
++                                f'Semantic campaign fleet-preparation proof: '
++                                f'{proof.stage_code}, {proof.initial_fleets}'
++                                f'->{proof.prepared_fleets}, '
++                                f'mutations={proof.mutation_semantic_ids}, '
++                                f'{proof.cancel_generation}'
++                                f'->{proof.restored_generation}'
++                            )
++                        else:
++                            proof = semantic_adapter.confirm_campaign_pre_sortie()
++                            logger.info(
++                                f'Semantic campaign pre-sortie proof: '
++                                f'{proof.stage_code}, {proof.preparation_kind}, '
++                                f'{proof.entry_generation}'
++                                f'->{proof.cancel_generation}'
++                                f'->{proof.restored_generation}'
++                            )
++                        raise ScriptEnd(
++                            'Semantic campaign pre-sortie validation complete'
++                        )
++                    if self.appear(MAP_PREPARATION, offset=(20, 20)):
++                        self.handle_auto_search()
++                        self.device.click(MAP_PREPARATION)
++                        map_click += 1
++                        map_timer.reset()
++                        campaign_timer.reset()
++                        continue
++                    # A semantic observation can advance between two appear()
++                    # calls.  Once map preparation is committed, never let an
++                    # unhandled transition generation fall through to the
++                    # original fleet/sortie input branches below.  Earlier
++                    # ALAS navigation and recovery states remain unchanged.
++                    if semantic_adapter.campaign_map_preparation_committed():
++                        continue
++
+                 # Accidental clicks
+                 if self.appear(DAILY_CHECK, offset=(20, 20), interval=3):
+                     logger.info(f'{DAILY_CHECK} -> {BACK_ARROW}')

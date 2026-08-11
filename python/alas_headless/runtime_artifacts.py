@@ -113,11 +113,19 @@ class RuntimeLock:
 
         core = _required_mapping(value, "core")
         _require_exact_fields(
-            core, "core", ("core_commit", "alas_upstream_commit", "alas_patch_sha256")
+            core,
+            "core",
+            (
+                "core_commit",
+                "alas_upstream_commit",
+                "alas_patch_sha256",
+                "alas_patch_series_manifest_sha256",
+            ),
         )
         _required_commit(core, "core_commit")
         _required_commit(core, "alas_upstream_commit")
         _required_hash(core, "alas_patch_sha256")
+        _required_hash(core, "alas_patch_series_manifest_sha256")
 
         angle = _required_mapping(value, "angle")
         _require_exact_fields(
@@ -313,6 +321,9 @@ def expected_artifact_hashes(runtime_lock: RuntimeLock) -> Mapping[str, str]:
     document = runtime_lock.document
     return {
         "alas-patch": document["core"]["alas_patch_sha256"],
+        "alas-patch-series-manifest": document["core"][
+            "alas_patch_series_manifest_sha256"
+        ],
         "angle-apk": document["angle"]["apk_sha256"],
         "angle-patchset": document["angle"]["patchset_sha256"],
         "android-system-image": document["android"]["system_image_sha256"],

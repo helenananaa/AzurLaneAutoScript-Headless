@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "integration" / "alas" / "policies" / "zero-input.example.json"
 RUNTIME_LOCK = ROOT / "integration" / "runtime" / "runtime-lock.example.json"
 UPSTREAM = "81ccf63b4540f00241628c82a58c02c7a2bb11af"
-RUNTIME_SHA = "b1a61830438e3bf0c47443b9e9f718fbc14ed29dfda57defa325ffb894339061"
+RUNTIME_SHA = "e54d6b213265703f8aaf0f74e56c2fec0fed45f816cc2c467d5ae6fae3952066"
 TASK_SHA = "83a80303c11e9a7992b9713522385217df3cdba9f5da645e6cb6f5d4741b1f16"
 
 

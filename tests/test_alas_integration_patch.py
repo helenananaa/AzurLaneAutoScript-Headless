@@ -1,14 +1,17 @@
 import unittest
 from pathlib import Path
 
+from scripts.python.build_alas_patch_series import check_generated_patch
+
 
 class AlasIntegrationPatchTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         root = Path(__file__).resolve().parents[1]
-        cls.patch_text = (
-            root / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
-        ).read_text(encoding="utf-8")
+        manifest = root / "integration" / "alas" / "series" / "series.json"
+        generated = root / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
+        check_generated_patch(manifest, generated, root=root)
+        cls.patch_text = generated.read_text(encoding="utf-8")
 
     def test_reward_hook_brackets_instead_of_replacing_alas_state_machine(self):
         self.assertIn("semantic_adapter.begin_mission_reward", self.patch_text)
@@ -92,7 +95,7 @@ class AlasIntegrationPatchTests(unittest.TestCase):
             "observation = install_alas_campaign_camera_view(",
             self.patch_text,
         )
-        self.assertIn("def _update_view(self):", self.patch_text)
+        self.assertIn("self._view_init()", self.patch_text)
         self.assertNotIn("def update(self, camera=True", self.patch_text)
 
     def test_login_hook_brackets_original_handler_state_machine(self):
