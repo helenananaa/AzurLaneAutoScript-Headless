@@ -8,6 +8,7 @@ import platform
 import re
 import shutil
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -70,7 +71,10 @@ class AndroidImageSourceLock:
         revision = str(platform_source.get("revision", ""))
         if re.fullmatch(r"android-[0-9]+\.[0-9]+\.[0-9]+_r[0-9]+", revision) is None:
             raise AndroidImageSourceError("platform revision must be an immutable AOSP tag")
-        _commit(platform_source.get("commit"), "platform.commit")
+        tag_object = _commit(platform_source.get("tag_object"), "platform.tag_object")
+        manifest_commit = _commit(platform_source.get("commit"), "platform.commit")
+        if tag_object == manifest_commit:
+            raise AndroidImageSourceError("annotated platform tag object and commit must differ")
 
         redroid = _mapping(document.get("redroid"), "redroid")
         expected_urls = {
@@ -124,6 +128,17 @@ class AndroidImageSourceLock:
             raise AndroidImageSourceError("build RAM floor cannot be below AOSP's 64 GiB reference")
         if build.get("commands") != ["m", "m sbom"]:
             raise AndroidImageSourceError("build must produce the product and official AOSP SBOM")
+        if int(build.get("source_date_epoch", 0)) <= 0:
+            raise AndroidImageSourceError("source_date_epoch must be a positive locked timestamp")
+        for field, expected in (
+            ("build_number", "alas-android-14-r75"),
+            ("build_username", "alas-builder"),
+            ("build_hostname", "alas-builder"),
+            ("timezone", "UTC"),
+            ("locale", "C"),
+        ):
+            if build.get(field) != expected:
+                raise AndroidImageSourceError("build.{0} must be deterministic".format(field))
         if build.get("resolved_manifest_required") is not True:
             raise AndroidImageSourceError("resolved repo manifest is mandatory")
         if build.get("game_artifact_allowed") is not False:
@@ -236,10 +251,10 @@ def verify_remote_refs(lock: AndroidImageSourceLock) -> Mapping[str, Any]:
     redroid = lock.document["redroid"]
     refs = [
         (
-            "platform-manifest",
+            "platform-manifest-tag-object",
             platform_source["manifest_url"],
             "refs/tags/{0}".format(platform_source["revision"]),
-            platform_source["commit"],
+            platform_source["tag_object"],
         ),
         (
             "redroid-local-manifests",
@@ -278,6 +293,35 @@ def verify_remote_refs(lock: AndroidImageSourceLock) -> Mapping[str, Any]:
         records.append({
             "name": name, "url": url, "ref": ref, "expected_commit": expected,
             "observed_commit": observed or None, "outcome": outcome,
+        })
+    with tempfile.TemporaryDirectory(prefix="alas-platform-tag-") as raw:
+        subprocess.run(["git", "init", "-q", raw], check=True)
+        fetched = subprocess.run(
+            ["git", "-C", raw, "fetch", "-q", "--depth=1",
+             platform_source["manifest_url"],
+             "refs/tags/{0}".format(platform_source["revision"])],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding="utf-8", errors="replace", check=False,
+        )
+        peeled = ""
+        if fetched.returncode == 0:
+            result = subprocess.run(
+                ["git", "-C", raw, "rev-parse", "FETCH_HEAD^{commit}"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                encoding="utf-8", errors="replace", check=False,
+            )
+            if result.returncode == 0:
+                peeled = result.stdout.strip()
+        peeled_outcome = "pass" if peeled == platform_source["commit"] else "blocked"
+        if peeled_outcome != "pass":
+            blockers.append("platform-manifest-peeled-commit-mismatch")
+        records.append({
+            "name": "platform-manifest-peeled-commit",
+            "url": platform_source["manifest_url"],
+            "ref": "refs/tags/{0}^{{commit}}".format(platform_source["revision"]),
+            "expected_commit": platform_source["commit"],
+            "observed_commit": peeled or None,
+            "outcome": peeled_outcome,
         })
     return {
         "schema": "alas-headless.android-image-source-remote-verification/v1",

@@ -34,6 +34,19 @@ class AndroidImageSourceTests(unittest.TestCase):
         with self.assertRaisesRegex(AndroidImageSourceError, "immutable Git commit"):
             AndroidImageSourceLock.from_mapping(value)
 
+    def test_platform_annotated_tag_and_peeled_commit_are_both_locked(self) -> None:
+        lock = AndroidImageSourceLock.from_mapping(copy.deepcopy(self.value))
+        self.assertNotEqual(
+            lock.document["platform"]["tag_object"],
+            lock.document["platform"]["commit"],
+        )
+
+    def test_rejects_nondeterministic_build_identity(self) -> None:
+        value = copy.deepcopy(self.value)
+        value["build"]["build_username"] = "root"
+        with self.assertRaisesRegex(AndroidImageSourceError, "must be deterministic"):
+            AndroidImageSourceLock.from_mapping(value)
+
     def test_rejects_patch_set_different_from_aosp_tag(self) -> None:
         value = copy.deepcopy(self.value)
         value["redroid"]["patch_set"] = "android-14.0.0_r2"

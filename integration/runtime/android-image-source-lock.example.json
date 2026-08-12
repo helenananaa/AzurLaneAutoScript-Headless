@@ -3,7 +3,8 @@
   "platform": {
     "manifest_url": "https://android.googlesource.com/platform/manifest",
     "revision": "android-14.0.0_r75",
-    "commit": "c49a52c108f10a64f6122af27fd27f96b8d45424"
+    "tag_object": "c49a52c108f10a64f6122af27fd27f96b8d45424",
+    "commit": "e3b1a5113daede938922ed29c36806e0aac2ecb3"
   },
   "redroid": {
     "local_manifests_url": "https://github.com/remote-android/local_manifests.git",
@@ -67,6 +68,12 @@
       "m",
       "m sbom"
     ],
+    "source_date_epoch": 1731467710,
+    "build_number": "alas-android-14-r75",
+    "build_username": "alas-builder",
+    "build_hostname": "alas-builder",
+    "timezone": "UTC",
+    "locale": "C",
     "resolved_manifest_required": true,
     "game_artifact_allowed": false
   }

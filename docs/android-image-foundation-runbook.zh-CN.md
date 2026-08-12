@@ -109,6 +109,12 @@ NOTICE/SBOM SHA-256
 
 源码锁是 `integration/runtime/android-image-source-lock.example.json`。它固定 AOSP tag/commit、Redroid local manifest commit、patch commit/patch set，以及两个 64 位 product；只有分支名或 tag 名而没有 40 位 commit 不算锁定。
 
+其中 AOSP release tag 是 annotated tag，必须同时固定 tag object 和 peeled manifest
+commit；`repo init` 后核对的是 peeled commit。构建环境还固定 `BUILD_DATETIME`、
+`BUILD_NUMBER`、`BUILD_USERNAME`、`BUILD_HOSTNAME`、UTC 与 C locale，并在生成
+`build.prop` 后反向校验。任何一项使用当前时间、root用户名或随机宿主名，都不能进入
+两轮复现比较。
+
 ```powershell
 $env:PYTHONPATH = 'python'
 python scripts/python/validate_android_image_source_lock.py `

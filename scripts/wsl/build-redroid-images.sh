@@ -106,6 +106,16 @@ local_manifests_commit=$(json_field redroid.local_manifests_commit)
 patches_url=$(json_field redroid.patches_url)
 patches_commit=$(json_field redroid.patches_commit)
 patch_set=$(json_field redroid.patch_set)
+source_date_epoch=$(json_field build.source_date_epoch)
+export BUILD_DATETIME="$source_date_epoch"
+export SOURCE_DATE_EPOCH="$source_date_epoch"
+export BUILD_NUMBER=$(json_field build.build_number)
+export BUILD_USERNAME=$(json_field build.build_username)
+export BUILD_HOSTNAME=$(json_field build.build_hostname)
+export TZ=$(json_field build.timezone)
+export LC_ALL=$(json_field build.locale)
+export LANG="$LC_ALL"
+export GIT_COMMITTER_DATE="@$source_date_epoch +0000"
 
 cd "$source_root"
 if [[ ! -d .repo ]]; then
@@ -138,8 +148,10 @@ print("</manifest>")
 PY
 repo sync -c --fail-fast -j"$(nproc)"
 repo manifest -r -o "$evidence_root/resolved-manifest.xml"
-source_date_epoch=$(git -C .repo/manifests show -s --format=%ct "$platform_commit")
-[[ $source_date_epoch =~ ^[0-9]+$ ]] || { echo "invalid SOURCE_DATE_EPOCH" >&2; exit 1; }
+observed_source_epoch=$(git -C .repo/manifests show -s --format=%ct "$platform_commit")
+[[ $observed_source_epoch == "$source_date_epoch" ]] || {
+    echo "locked SOURCE_DATE_EPOCH differs from manifest commit" >&2; exit 1;
+}
 python3 - "$source_lock" "$evidence_root/resolved-manifest.xml" <<'PY'
 import json, sys
 import xml.etree.ElementTree as ET
@@ -224,6 +236,15 @@ build_one() {
     local fingerprint patch
     fingerprint=$(sed -n 's/^ro.build.fingerprint=//p' "$build_prop" | head -n1)
     patch=$(sed -n 's/^ro.build.version.security_patch=//p' "$build_prop" | head -n1)
+    local observed_user observed_host observed_date observed_incremental
+    observed_user=$(sed -n 's/^ro.build.user=//p' "$build_prop" | head -n1)
+    observed_host=$(sed -n 's/^ro.build.host=//p' "$build_prop" | head -n1)
+    observed_date=$(sed -n 's/^ro.build.date.utc=//p' "$build_prop" | head -n1)
+    observed_incremental=$(sed -n 's/^ro.build.version.incremental=//p' "$build_prop" | head -n1)
+    [[ $observed_user == "$BUILD_USERNAME" && $observed_host == "$BUILD_HOSTNAME" \
+        && $observed_date == "$BUILD_DATETIME" && $observed_incremental == "$BUILD_NUMBER" ]] || {
+        echo "built image identity differs from deterministic build environment" >&2; exit 1;
+    }
     local oci_archive="$evidence_root/redroid-$abi.oci.tar"
     local oci_identity="$evidence_root/redroid-$abi.oci-build.json"
     sudo "$repo_root/scripts/wsl/package-redroid-oci.sh" \
