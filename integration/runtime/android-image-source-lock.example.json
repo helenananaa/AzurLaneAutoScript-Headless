@@ -87,12 +87,12 @@
   "products": [
     {
       "abi": "x86_64",
-      "lunch": "redroid_x86_64_only-userdebug",
+      "lunch": "redroid_x86_64_only-trunk_staging-userdebug",
       "product_out": "redroid_x86_64_only"
     },
     {
       "abi": "arm64-v8a",
-      "lunch": "redroid_arm64_only-userdebug",
+      "lunch": "redroid_arm64_only-trunk_staging-userdebug",
       "product_out": "redroid_arm64_only"
     }
   ],

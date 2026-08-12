@@ -37,7 +37,7 @@ class AndroidImageSupplyChainTests(unittest.TestCase):
             "source_lock_sha256": lock.sha256,
         }), encoding="utf-8")
         return create_build_provenance(
-            lock, resolved, "arm64-v8a", "redroid_arm64_only-userdebug",
+            lock, resolved, "arm64-v8a", "redroid_arm64_only-trunk_staging-userdebug",
             "redroid_arm64_only", "fingerprint/test", "2025-05-05",
             ["system.img=" + str(directory / "system.img"),
              "vendor.img=" + str(directory / "vendor.img"),
@@ -78,7 +78,7 @@ class AndroidImageSupplyChainTests(unittest.TestCase):
             with self.assertRaisesRegex(AndroidImageSupplyChainError, "SPDX 2.3"):
                 create_build_provenance(
                     lock, directory / "resolved.xml", "arm64-v8a",
-                    "redroid_arm64_only-userdebug", "redroid_arm64_only", "fp",
+                    "redroid_arm64_only-trunk_staging-userdebug", "redroid_arm64_only", "fp",
                     "2025-05-05", ["system.img=" + str(directory / "system.img"),
                     "vendor.img=" + str(directory / "vendor.img"),
                     "redroid-native-fbe-overlay.json=" + str(directory / "redroid-native-fbe-overlay.json")], sbom,

@@ -87,6 +87,16 @@ class AndroidImageSourceTests(unittest.TestCase):
         with self.assertRaisesRegex(AndroidImageSourceError, "exact 64-bit"):
             AndroidImageSourceLock.from_mapping(value)
 
+    def test_targets_use_android_14_release_aware_lunch_choices(self) -> None:
+        lock = AndroidImageSourceLock.from_mapping(copy.deepcopy(self.value))
+        self.assertEqual(
+            [item["lunch"] for item in lock.document["products"]],
+            [
+                "redroid_x86_64_only-trunk_staging-userdebug",
+                "redroid_arm64_only-trunk_staging-userdebug",
+            ],
+        )
+
     def test_rejects_game_artifact_in_build(self) -> None:
         value = copy.deepcopy(self.value)
         value["build"]["game_artifact_allowed"] = True

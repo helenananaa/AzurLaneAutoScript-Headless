@@ -17,8 +17,14 @@ from typing import Any, Mapping, Sequence
 SOURCE_LOCK_SCHEMA = "alas-headless.android-image-source-lock/v1"
 GIT_COMMIT = re.compile(r"^[0-9a-f]{40}$")
 TARGETS = {
-    "x86_64": ("redroid_x86_64_only-userdebug", "redroid_x86_64_only"),
-    "arm64-v8a": ("redroid_arm64_only-userdebug", "redroid_arm64_only"),
+    "x86_64": (
+        "redroid_x86_64_only-trunk_staging-userdebug",
+        "redroid_x86_64_only",
+    ),
+    "arm64-v8a": (
+        "redroid_arm64_only-trunk_staging-userdebug",
+        "redroid_arm64_only",
+    ),
 }
 REDROID_PROJECTS = {
     "device_redroid": "device/redroid",

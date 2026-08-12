@@ -284,5 +284,5 @@ build_one() {
         --output "$evidence_root/provenance-$abi.json"
 }
 
-build_one x86_64 redroid_x86_64_only-userdebug redroid_x86_64_only
-build_one arm64-v8a redroid_arm64_only-userdebug redroid_arm64_only
+build_one x86_64 redroid_x86_64_only-trunk_staging-userdebug redroid_x86_64_only
+build_one arm64-v8a redroid_arm64_only-trunk_staging-userdebug redroid_arm64_only
