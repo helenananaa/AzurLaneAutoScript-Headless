@@ -45,6 +45,12 @@ def release_inputs(abi: str):
         "candidate_image_digest": "sha256:" + "c" * 64,
         "candidate_userdata_preserved": True,
         "rollback_snapshot_restored": True,
+        "previous_fingerprint_before": "previous/fingerprint",
+        "candidate_fingerprint": "candidate/fingerprint",
+        "previous_fingerprint_after": "previous/fingerprint",
+        "previous_api_before": "31",
+        "candidate_api": "34",
+        "previous_api_after": "31",
         "lab_cleaned": True,
         "game_installed": False,
         "alas_workload_used": False,
@@ -115,6 +121,8 @@ class AndroidImageReleaseTests(unittest.TestCase):
                 {
                     "schema": "alas-headless.oci-image-identity/v1",
                     "manifest_digest": "sha256:" + "c" * 64,
+                    "platform_manifest_digest": "sha256:" + "d" * 64,
+                    "platform_descriptor": {"platform": {"architecture": "arm64", "os": "linux"}},
                     "architecture": "arm64",
                     "immutable": True,
                 },
@@ -130,6 +138,8 @@ class AndroidImageReleaseTests(unittest.TestCase):
             "arm64-v8a", None, None, None, {}, None, None,
             {"schema": "alas-headless.oci-image-identity/v1",
              "manifest_digest": "sha256:" + "c" * 64,
+             "platform_manifest_digest": "sha256:" + "d" * 64,
+             "platform_descriptor": {"platform": {"architecture": "arm64", "os": "linux"}},
              "architecture": "arm64", "immutable": True},
             provenance, reproducibility, rollback,
         )
@@ -142,6 +152,8 @@ class AndroidImageReleaseTests(unittest.TestCase):
             {
                 "schema": "alas-headless.oci-image-identity/v1",
                 "manifest_digest": "latest",
+                "platform_manifest_digest": "broken",
+                "platform_descriptor": {"platform": {"architecture": "amd64", "os": "linux"}},
                 "architecture": "amd64",
                 "immutable": False,
             },
@@ -156,6 +168,22 @@ class AndroidImageReleaseTests(unittest.TestCase):
         self.assertIn("build-provenance-missing", record["blockers"])
         self.assertIn("reproducibility-evidence-missing", record["blockers"])
         self.assertIn("image-rollback-evidence-missing", record["blockers"])
+
+    def test_rollback_requires_candidate_and_restored_platform_identity(self) -> None:
+        provenance, reproducibility, rollback = release_inputs("arm64-v8a")
+        rollback["candidate_fingerprint"] = rollback["previous_fingerprint_before"]
+        rollback["previous_api_after"] = "34"
+        record = target_record(
+            "arm64-v8a", None, None, None, {}, None, None,
+            {"schema": "alas-headless.oci-image-identity/v1",
+             "manifest_digest": "sha256:" + "c" * 64,
+             "platform_manifest_digest": "sha256:" + "d" * 64,
+             "platform_descriptor": {"platform": {"architecture": "arm64", "os": "linux"}},
+             "architecture": "arm64", "immutable": True},
+            provenance, reproducibility, rollback,
+        )
+        self.assertIn("image-rollback-candidate-identity-not-proven", record["blockers"])
+        self.assertIn("image-rollback-previous-api-not-restored", record["blockers"])
 
 
 if __name__ == "__main__":

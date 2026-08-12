@@ -38,6 +38,7 @@ PY
 
 manifest_url=$(json_field platform.manifest_url)
 platform_revision=$(json_field platform.revision)
+platform_commit=$(json_field platform.commit)
 local_manifests_url=$(json_field redroid.local_manifests_url)
 local_manifests_commit=$(json_field redroid.local_manifests_commit)
 patches_url=$(json_field redroid.patches_url)
@@ -46,12 +47,45 @@ patch_set=$(json_field redroid.patch_set)
 
 cd "$source_root"
 repo init -u "$manifest_url" -b "$platform_revision" --git-lfs --depth=1
+[[ $(git -C .repo/manifests rev-parse HEAD) == "$platform_commit" ]] || {
+    echo "repo init manifest commit differs from source lock" >&2; exit 1;
+}
 git init .repo/local_manifests
 git -C .repo/local_manifests remote add origin "$local_manifests_url"
 git -C .repo/local_manifests fetch --depth=1 origin "$local_manifests_commit"
 git -C .repo/local_manifests checkout --detach FETCH_HEAD
+python3 - "$source_lock" > .repo/local_manifests/zz-alas-source-lock.xml <<'PY'
+import json, sys
+from xml.sax.saxutils import quoteattr
+
+value = json.load(open(sys.argv[1], encoding="utf-8"))
+print('<?xml version="1.0" encoding="UTF-8"?>')
+print("<manifest>")
+for project in value["redroid"]["projects"]:
+    print(
+        "  <extend-project name={0} path={1} revision={2} />".format(
+            quoteattr(project["name"]), quoteattr(project["path"]),
+            quoteattr(project["commit"])
+        )
+    )
+print("</manifest>")
+PY
 repo sync -c --fail-fast -j"$(nproc)"
 repo manifest -r -o "$evidence_root/resolved-manifest.xml"
+python3 - "$source_lock" "$evidence_root/resolved-manifest.xml" <<'PY'
+import json, sys
+import xml.etree.ElementTree as ET
+
+lock = json.load(open(sys.argv[1], encoding="utf-8"))
+resolved = {
+    (item.get("name"), item.get("path")): item.get("revision")
+    for item in ET.parse(sys.argv[2]).getroot().findall("project")
+}
+for project in lock["redroid"]["projects"]:
+    key = (project["name"], project["path"])
+    if resolved.get(key) != project["commit"]:
+        raise SystemExit("resolved manifest mismatch for {0}".format(key))
+PY
 
 patch_root="$evidence_root/redroid-patches"
 git clone --no-checkout "$patches_url" "$patch_root"

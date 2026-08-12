@@ -110,6 +110,16 @@ def target_record(
             blockers.append("image-identity-abi-mismatch")
         if image_identity.get("immutable") is not True:
             blockers.append("image-identity-not-immutable")
+        if OCI_DIGEST.fullmatch(str(image_identity.get("platform_manifest_digest", ""))) is None:
+            blockers.append("image-identity-platform-digest-invalid")
+        descriptor = image_identity.get("platform_descriptor")
+        platform_value = descriptor.get("platform", {}) if isinstance(descriptor, Mapping) else {}
+        if (
+            not isinstance(platform_value, Mapping)
+            or platform_value.get("architecture") != expected_architecture
+            or platform_value.get("os") != "linux"
+        ):
+            blockers.append("image-identity-platform-descriptor-invalid")
     else:
         blockers.append("image-artifact-missing")
 
@@ -274,6 +284,17 @@ def target_record(
             blockers.append("image-rollback-digest-invalid")
         if rollback_evidence.get("candidate_userdata_preserved") is not True or rollback_evidence.get("rollback_snapshot_restored") is not True:
             blockers.append("image-rollback-userdata-not-proven")
+        previous_fingerprint = str(rollback_evidence.get("previous_fingerprint_before", ""))
+        candidate_fingerprint = str(rollback_evidence.get("candidate_fingerprint", ""))
+        if not previous_fingerprint or not candidate_fingerprint or previous_fingerprint == candidate_fingerprint:
+            blockers.append("image-rollback-candidate-identity-not-proven")
+        if rollback_evidence.get("previous_fingerprint_after") != previous_fingerprint:
+            blockers.append("image-rollback-previous-identity-not-restored")
+        previous_api = str(rollback_evidence.get("previous_api_before", ""))
+        if not previous_api or rollback_evidence.get("previous_api_after") != previous_api:
+            blockers.append("image-rollback-previous-api-not-restored")
+        if not str(rollback_evidence.get("candidate_api", "")):
+            blockers.append("image-rollback-candidate-api-not-proven")
         if rollback_evidence.get("lab_cleaned") is not True:
             blockers.append("image-rollback-lab-not-cleaned")
         if rollback_evidence.get("game_installed") is not False or rollback_evidence.get("alas_workload_used") is not False:

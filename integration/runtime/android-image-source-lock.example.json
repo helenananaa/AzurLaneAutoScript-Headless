@@ -12,7 +12,39 @@
     "patches_url": "https://github.com/remote-android/redroid-patches.git",
     "patches_revision": "master",
     "patches_commit": "a5c70c0dd89c12b5027c902ab4182f31d38f3bb7",
-    "patch_set": "android-14.0.0_r75"
+    "patch_set": "android-14.0.0_r75",
+    "projects": [
+      {
+        "name": "device_redroid",
+        "path": "device/redroid",
+        "revision": "redroid-14.0.0",
+        "commit": "6321a200f47f5bdb3265378db46b34965821a08a"
+      },
+      {
+        "name": "device_redroid-prebuilts",
+        "path": "device/redroid-prebuilts",
+        "revision": "master",
+        "commit": "6248d6a71db7222d1b1c4545b90e3850dffca55f"
+      },
+      {
+        "name": "redroid-c2",
+        "path": "hardware/redroid/c2",
+        "revision": "master",
+        "commit": "98c7c28bb134ea05e020fc29440c809672b6eb3e"
+      },
+      {
+        "name": "redroid-omx",
+        "path": "hardware/redroid/omx",
+        "revision": "master",
+        "commit": "c1917368fdc999f67574d070488245d357d06dd7"
+      },
+      {
+        "name": "vendor_redroid",
+        "path": "vendor/redroid",
+        "revision": "master",
+        "commit": "1686c1825c146891d06004e35e7c362b58d3f1bc"
+      }
+    ]
   },
   "products": [
     {

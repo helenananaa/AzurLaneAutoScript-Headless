@@ -38,6 +38,18 @@ class AndroidImageSourceTests(unittest.TestCase):
         with self.assertRaisesRegex(AndroidImageSourceError, "exactly match"):
             AndroidImageSourceLock.from_mapping(value)
 
+    def test_rejects_unlocked_transitive_redroid_project(self) -> None:
+        value = copy.deepcopy(self.value)
+        value["redroid"]["projects"][1]["commit"] = "master"
+        with self.assertRaisesRegex(AndroidImageSourceError, "immutable Git commit"):
+            AndroidImageSourceLock.from_mapping(value)
+
+    def test_rejects_missing_transitive_redroid_project(self) -> None:
+        value = copy.deepcopy(self.value)
+        value["redroid"]["projects"].pop()
+        with self.assertRaisesRegex(AndroidImageSourceError, "all Redroid"):
+            AndroidImageSourceLock.from_mapping(value)
+
     def test_rejects_32_bit_or_single_arch_product(self) -> None:
         value = copy.deepcopy(self.value)
         value["products"] = value["products"][:1]

@@ -19,6 +19,13 @@ TARGETS = {
     "x86_64": ("redroid_x86_64_only-userdebug", "redroid_x86_64_only"),
     "arm64-v8a": ("redroid_arm64_only-userdebug", "redroid_arm64_only"),
 }
+REDROID_PROJECTS = {
+    "device_redroid": "device/redroid",
+    "device_redroid-prebuilts": "device/redroid-prebuilts",
+    "redroid-c2": "hardware/redroid/c2",
+    "redroid-omx": "hardware/redroid/omx",
+    "vendor_redroid": "vendor/redroid",
+}
 
 
 class AndroidImageSourceError(ValueError):
@@ -77,6 +84,21 @@ class AndroidImageSourceLock:
         _commit(redroid.get("patches_commit"), "redroid.patches_commit")
         if redroid.get("patch_set") != revision:
             raise AndroidImageSourceError("Redroid patch_set must exactly match AOSP revision")
+        projects = redroid.get("projects")
+        if not isinstance(projects, Sequence) or isinstance(projects, (str, bytes)):
+            raise AndroidImageSourceError("redroid.projects must be an array")
+        observed_projects = {}
+        for item in projects:
+            project = _mapping(item, "redroid project")
+            name = str(project.get("name", ""))
+            if name in observed_projects:
+                raise AndroidImageSourceError("duplicate Redroid project: {0}".format(name))
+            observed_projects[name] = str(project.get("path", ""))
+            if not str(project.get("revision", "")).strip():
+                raise AndroidImageSourceError("Redroid project revision is mandatory")
+            _commit(project.get("commit"), "redroid.projects[{0}].commit".format(name))
+        if observed_projects != REDROID_PROJECTS:
+            raise AndroidImageSourceError("all Redroid local-manifest projects must be commit locked")
 
         products = document.get("products")
         if not isinstance(products, Sequence) or isinstance(products, (str, bytes)):
@@ -168,7 +190,7 @@ def verify_remote_refs(lock: AndroidImageSourceLock) -> Mapping[str, Any]:
     """Verify that every human-readable upstream ref still names the locked commit."""
     platform_source = lock.document["platform"]
     redroid = lock.document["redroid"]
-    refs = (
+    refs = [
         (
             "platform-manifest",
             platform_source["manifest_url"],
@@ -187,7 +209,14 @@ def verify_remote_refs(lock: AndroidImageSourceLock) -> Mapping[str, Any]:
             "refs/heads/{0}".format(redroid["patches_revision"]),
             redroid["patches_commit"],
         ),
-    )
+    ]
+    for project in redroid["projects"]:
+        refs.append((
+            "redroid-project:{0}".format(project["name"]),
+            "https://github.com/remote-android/{0}.git".format(project["name"]),
+            "refs/heads/{0}".format(project["revision"]),
+            project["commit"],
+        ))
     records = []
     blockers = []
     for name, url, ref, expected in refs:

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,6 +13,7 @@ from typing import Any, Mapping, Sequence
 
 
 SCHEMA = "alas-headless.oci-image-identity/v1"
+DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 def ssh_json(ssh: Path, target: str, arguments: Sequence[str]) -> Any:
@@ -62,13 +64,19 @@ def main(argv: Sequence[str] = ()) -> int:
     if not isinstance(config, dict) or not isinstance(descriptor, dict):
         raise ValueError("container image metadata is incomplete")
     reference = str(config.get("Image", ""))
-    digest = str(descriptor.get("digest", ""))
+    platform_manifest_digest = str(descriptor.get("digest", ""))
+    reference_digest = reference.rsplit("@", 1)[1] if "@" in reference else ""
     repo_digests = image.get("RepoDigests", [])
+    descriptor_platform = descriptor.get("platform", {})
     immutable = (
         "@sha256:" in reference
-        and reference.rsplit("@", 1)[1] == digest
+        and DIGEST.fullmatch(reference_digest) is not None
+        and DIGEST.fullmatch(platform_manifest_digest) is not None
         and isinstance(repo_digests, list)
         and reference in repo_digests
+        and isinstance(descriptor_platform, dict)
+        and descriptor_platform.get("architecture") == image.get("Architecture")
+        and descriptor_platform.get("os") == image.get("Os")
     )
     if not immutable:
         raise ValueError("container is not bound to its inspected OCI manifest digest")
@@ -85,7 +93,9 @@ def main(argv: Sequence[str] = ()) -> int:
         "container_running": container.get("State", {}).get("Running"),
         "image_reference": reference,
         "image_id": image_id,
-        "manifest_digest": digest,
+        "manifest_digest": reference_digest,
+        "platform_manifest_digest": platform_manifest_digest,
+        "platform_descriptor": descriptor,
         "repo_digests": repo_digests,
         "architecture": image.get("Architecture"),
         "os": image.get("Os"),

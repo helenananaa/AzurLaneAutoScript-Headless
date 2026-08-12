@@ -86,6 +86,9 @@ stop_image() {
 
 start_image "$previous_image"
 previous_firstboot_before=$(docker exec "$container" getprop ro.runtime.firstboot)
+previous_fingerprint_before=$(docker exec "$container" getprop ro.build.fingerprint)
+previous_api_before=$(docker exec "$container" getprop ro.build.version.sdk)
+[[ -n $previous_fingerprint_before && -n $previous_api_before ]]
 docker exec "$container" sh -c "printf '%s' '$sentinel' > '$sentinel_path'"
 [[ $(docker exec "$container" cat "$sentinel_path") == "$sentinel" ]]
 stop_image
@@ -95,6 +98,12 @@ snapshot_sha256=$(sha256sum "$snapshot" | awk '{print $1}')
 
 start_image "$candidate_image"
 candidate_firstboot=$(docker exec "$container" getprop ro.runtime.firstboot)
+candidate_fingerprint=$(docker exec "$container" getprop ro.build.fingerprint)
+candidate_api=$(docker exec "$container" getprop ro.build.version.sdk)
+[[ -n $candidate_fingerprint && -n $candidate_api ]]
+[[ $candidate_fingerprint != "$previous_fingerprint_before" ]] || {
+    echo "candidate build fingerprint did not change" >&2; exit 1;
+}
 candidate_preserved=false
 [[ $(docker exec "$container" cat "$sentinel_path" 2>/dev/null || true) == "$sentinel" ]] && candidate_preserved=true
 stop_image
@@ -107,6 +116,14 @@ tar --xattrs --acls --selinux --numeric-owner -xpf "$snapshot" -C "$resolved_dat
 
 start_image "$previous_image"
 previous_firstboot_after=$(docker exec "$container" getprop ro.runtime.firstboot)
+previous_fingerprint_after=$(docker exec "$container" getprop ro.build.fingerprint)
+previous_api_after=$(docker exec "$container" getprop ro.build.version.sdk)
+[[ $previous_fingerprint_after == "$previous_fingerprint_before" ]] || {
+    echo "rollback did not restore previous build fingerprint" >&2; exit 1;
+}
+[[ $previous_api_after == "$previous_api_before" ]] || {
+    echo "rollback did not restore previous API level" >&2; exit 1;
+}
 rollback_preserved=false
 [[ $(docker exec "$container" cat "$sentinel_path" 2>/dev/null || true) == "$sentinel" ]] && rollback_preserved=true
 stop_image
@@ -126,8 +143,14 @@ cat <<JSON
   "candidate_userdata_preserved": $candidate_preserved,
   "rollback_snapshot_restored": $rollback_preserved,
   "previous_firstboot_before": "$previous_firstboot_before",
+  "previous_fingerprint_before": "$previous_fingerprint_before",
+  "previous_api_before": "$previous_api_before",
   "candidate_firstboot": "$candidate_firstboot",
+  "candidate_fingerprint": "$candidate_fingerprint",
+  "candidate_api": "$candidate_api",
   "previous_firstboot_after": "$previous_firstboot_after",
+  "previous_fingerprint_after": "$previous_fingerprint_after",
+  "previous_api_after": "$previous_api_after",
   "lab_cleaned": $cleaned,
   "game_installed": false,
   "alas_workload_used": false
