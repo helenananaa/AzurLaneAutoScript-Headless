@@ -46,6 +46,10 @@ class AndroidImageSourceTests(unittest.TestCase):
         value["build"]["build_username"] = "root"
         with self.assertRaisesRegex(AndroidImageSourceError, "must be deterministic"):
             AndroidImageSourceLock.from_mapping(value)
+        value = copy.deepcopy(self.value)
+        value["build"]["git_identity"]["email"] = "root@builder"
+        with self.assertRaisesRegex(AndroidImageSourceError, "git_identity"):
+            AndroidImageSourceLock.from_mapping(value)
 
     def test_rejects_patch_set_different_from_aosp_tag(self) -> None:
         value = copy.deepcopy(self.value)

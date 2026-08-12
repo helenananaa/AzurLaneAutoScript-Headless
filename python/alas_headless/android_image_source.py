@@ -139,6 +139,12 @@ class AndroidImageSourceLock:
         ):
             if build.get(field) != expected:
                 raise AndroidImageSourceError("build.{0} must be deterministic".format(field))
+        git_identity = _mapping(build.get("git_identity"), "build.git_identity")
+        if (
+            git_identity.get("name") != "ALAS Android Builder"
+            or git_identity.get("email") != "alas-android-builder@invalid.example"
+        ):
+            raise AndroidImageSourceError("build.git_identity must be deterministic")
         if build.get("resolved_manifest_required") is not True:
             raise AndroidImageSourceError("resolved repo manifest is mandatory")
         if build.get("game_artifact_allowed") is not False:

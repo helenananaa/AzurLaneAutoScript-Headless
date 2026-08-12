@@ -72,6 +72,10 @@
     "build_number": "alas-android-14-r75",
     "build_username": "alas-builder",
     "build_hostname": "alas-builder",
+    "git_identity": {
+      "name": "ALAS Android Builder",
+      "email": "alas-android-builder@invalid.example"
+    },
     "timezone": "UTC",
     "locale": "C",
     "resolved_manifest_required": true,
