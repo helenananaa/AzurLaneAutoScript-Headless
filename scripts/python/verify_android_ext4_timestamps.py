@@ -44,7 +44,7 @@ def inspect(image: Path, epoch: int) -> dict:
     if any(value != epoch for value in inode_values.values()):
         raise ValueError("root inode timestamps are not locked epoch: " + str(image))
     return {
-        "path": str(image.resolve()), "superblock": values,
+        "image": image.name, "superblock": values,
         "root_inode_epoch": inode_values,
     }
 
