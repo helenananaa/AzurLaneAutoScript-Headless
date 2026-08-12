@@ -55,6 +55,7 @@ WEBVIEW_PROJECTS = {
         "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_x86_64.git",
     ),
 }
+SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
 class AndroidImageSourceError(ValueError):
@@ -146,6 +147,33 @@ class AndroidImageSourceLock:
             _commit(project.get("commit"), "redroid.webview_projects[{0}].commit".format(name))
         if observed_webview != WEBVIEW_PROJECTS:
             raise AndroidImageSourceError("all WebView local-manifest projects must be commit locked")
+
+        project_patches = document.get("project_patches")
+        if not isinstance(project_patches, Sequence) or isinstance(
+            project_patches, (str, bytes)
+        ) or not project_patches:
+            raise AndroidImageSourceError("project_patches must be a non-empty array")
+        observed_patch_paths = set()
+        for item in project_patches:
+            patch = _mapping(item, "project patch")
+            project = str(patch.get("project", ""))
+            path = str(patch.get("path", ""))
+            digest = str(patch.get("sha256", ""))
+            if project not in {"frameworks/base", "build/make"}:
+                raise AndroidImageSourceError("project patch target is not approved")
+            if not path.startswith("integration/runtime/aosp-patches/") or (
+                ".." in Path(path).parts
+            ):
+                raise AndroidImageSourceError(
+                    "project patch path must stay under aosp-patches"
+                )
+            if path in observed_patch_paths:
+                raise AndroidImageSourceError("duplicate project patch path: " + path)
+            observed_patch_paths.add(path)
+            if SHA256.fullmatch(digest) is None:
+                raise AndroidImageSourceError("project patch sha256 must be immutable")
+            if not str(patch.get("commit_message", "")).startswith("ALAS: "):
+                raise AndroidImageSourceError("project patch commit_message must be locked")
 
         products = document.get("products")
         if not isinstance(products, Sequence) or isinstance(products, (str, bytes)):

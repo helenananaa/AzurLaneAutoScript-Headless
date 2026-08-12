@@ -37,6 +37,8 @@ export HOME="$source_root/.alas-build-home"
 export XDG_CACHE_HOME="$HOME/.cache"
 export GOCACHE="$XDG_CACHE_HOME/go-build"
 export CCACHE_DIR="$XDG_CACHE_HOME/ccache"
+export OUT_DIR="$source_root/out"
+unset OUT_DIR_COMMON_BASE
 mkdir -p "$GOCACHE" "$CCACHE_DIR"
 
 run_json_evidence() {
@@ -129,6 +131,8 @@ export TZ=$(json_field build.timezone)
 export LC_ALL=$(json_field build.locale)
 export LANG="$LC_ALL"
 export GIT_COMMITTER_DATE="@$source_date_epoch +0000"
+export GIT_AUTHOR_DATE="$GIT_COMMITTER_DATE"
+export E2FSPROGS_FAKE_TIME="$source_date_epoch"
 
 cd "$source_root"
 if [[ ! -d .repo ]]; then
@@ -224,6 +228,43 @@ if find "$source_root/.repo/projects" "$source_root/.repo/project-objects" \
     echo "unfinished git-am state after Redroid patch application" >&2
     exit 1
 fi
+project_patch_marker="$source_root/.alas-project-patches-applied"
+project_patch_identity=$(python3 - "$source_lock" <<'PY'
+import hashlib, json, sys
+value = json.load(open(sys.argv[1], encoding="utf-8"))["project_patches"]
+print(hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest())
+PY
+)
+if [[ -e "$project_patch_marker" ]]; then
+    [[ $(cat "$project_patch_marker") == "$project_patch_identity" ]] || {
+        echo "project patch resume marker mismatch" >&2; exit 1;
+    }
+else
+    python3 - "$source_lock" "$repo_root" "$source_root" <<'PY'
+import hashlib, json, pathlib, subprocess, sys
+lock = json.load(open(sys.argv[1], encoding="utf-8"))
+repo_root, source_root = map(pathlib.Path, sys.argv[2:])
+for item in lock["project_patches"]:
+    patch = (repo_root / item["path"]).resolve()
+    if repo_root.resolve() not in patch.parents:
+        raise SystemExit("project patch escapes repository")
+    if hashlib.sha256(patch.read_bytes()).hexdigest() != item["sha256"]:
+        raise SystemExit("project patch digest mismatch: " + item["path"])
+    project = source_root / item["project"]
+    subprocess.run(["git", "-C", str(project), "apply", "--check", str(patch)], check=True)
+    subprocess.run(["git", "-C", str(project), "apply", "--index", str(patch)], check=True)
+    subprocess.run([
+        "git", "-C", str(project), "commit", "-m",
+        item["commit_message"],
+    ], check=True)
+PY
+    python3 - "$source_lock" >> "$evidence_root/apply-patches.log" <<'PY'
+import json, sys
+for item in json.load(open(sys.argv[1], encoding="utf-8"))["project_patches"]:
+    print("process project: " + item["project"])
+PY
+    printf '%s\n' "$project_patch_identity" > "$project_patch_marker"
+fi
 run_json_evidence "$evidence_root/post-patch-state.json" \
     python3 "$repo_root/scripts/python/capture_redroid_post_patch_state.py" \
     --source-lock "$source_lock" --source-root "$source_root" \
@@ -266,8 +307,14 @@ build_one() {
     [[ -f $sbom ]] || sbom="$source_root/out/dist/sbom/sbom.spdx.json"
     [[ -f $sbom ]] || sbom="$source_root/out/dist/sbom.spdx.json"
     [[ -f $sbom ]] || { echo "AOSP SPDX 2.3 SBOM missing for $abi" >&2; exit 1; }
+    python3 "$repo_root/scripts/python/normalize_android_sbom.py" \
+        --sbom "$sbom" --source-date-epoch "$source_date_epoch"
     local notice="$product_dir/obj/NOTICE.xml.gz"
     [[ -f $notice ]] || { echo "product NOTICE.xml.gz missing for $abi" >&2; exit 1; }
+    run_json_evidence "$evidence_root/ext4-timestamps-$abi.json" \
+        python3 "$repo_root/scripts/python/verify_android_ext4_timestamps.py" \
+        --image "$product_dir/system.img" --image "$product_dir/vendor.img" \
+        --source-date-epoch "$source_date_epoch"
     local fingerprint patch
     fingerprint=$(sed -n \
         -e 's/^ro.system.build.fingerprint=//p' \
@@ -302,6 +349,7 @@ build_one() {
         --artifact "redroid.oci.tar=$oci_archive" \
         --artifact "redroid-native-fbe-overlay.json=$overlay_evidence" \
         --artifact "post-patch-state.json=$evidence_root/post-patch-state.json" \
+        --artifact "ext4-timestamps.json=$evidence_root/ext4-timestamps-$abi.json" \
         --sbom "$sbom" --notice "$notice" \
         --installed-files "$product_dir/installed-files.txt" \
         --host-preflight "$evidence_root/host-preflight.json" \

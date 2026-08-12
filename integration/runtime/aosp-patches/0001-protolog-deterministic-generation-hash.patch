@@ -1,0 +1,50 @@
+diff --git a/tools/protologtool/src/com/android/protolog/tool/ProtoLogTool.kt b/tools/protologtool/src/com/android/protolog/tool/ProtoLogTool.kt
+index 1381847c..d0e04d15 100644
+--- a/tools/protologtool/src/com/android/protolog/tool/ProtoLogTool.kt
++++ b/tools/protologtool/src/com/android/protolog/tool/ProtoLogTool.kt
+@@ -34,13 +34,12 @@ import java.io.FileInputStream
+ import java.io.FileNotFoundException
+ import java.io.FileOutputStream
+ import java.io.OutputStream
++import java.security.MessageDigest
+ import java.time.LocalDateTime
+ import java.util.concurrent.ExecutorService
+ import java.util.concurrent.Executors
+ import java.util.jar.JarOutputStream
+ import java.util.zip.ZipEntry
+-import kotlin.math.abs
+-import kotlin.random.Random
+ import kotlin.system.exitProcess
+ 
+ object ProtoLogTool {
+@@ -71,8 +70,29 @@ object ProtoLogTool {
+         return entry
+     }
+ 
++    private fun deterministicGenerationHash(command: CommandOptions): Int {
++        val digest = MessageDigest.getInstance("SHA-256")
++        digest.update(command.protoLogClassNameArg.toByteArray())
++        digest.update(0.toByte())
++        digest.update(command.protoLogGroupsClassNameArg.toByteArray())
++        command.javaSourceArgs
++            .map { path ->
++                MessageDigest.getInstance("SHA-256")
++                    .digest(injector.readText(File(path)).toByteArray())
++                    .joinToString("") { byte -> "%02x".format(byte) }
++            }
++            .sorted()
++            .forEach { sourceDigest ->
++                digest.update(0.toByte())
++                digest.update(sourceDigest.toByteArray())
++            }
++        return digest.digest().take(4).fold(0) { value, byte ->
++            (value shl 8) or (byte.toInt() and 0xff)
++        } and Int.MAX_VALUE
++    }
++
+     private fun processClasses(command: CommandOptions) {
+-        val generationHash = abs(Random.nextInt())
++        val generationHash = deterministicGenerationHash(command)
+         // Need to generate a new impl class to inject static constants into the class.
+         val generatedProtoLogImplClass =
+             "com.android.internal.protolog.ProtoLogImpl_$generationHash"

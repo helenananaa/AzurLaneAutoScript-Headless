@@ -103,6 +103,12 @@ class AndroidImageSourceTests(unittest.TestCase):
         with self.assertRaisesRegex(AndroidImageSourceError, "external"):
             AndroidImageSourceLock.from_mapping(value)
 
+    def test_project_patch_is_content_addressed(self) -> None:
+        value = copy.deepcopy(self.value)
+        value["project_patches"][0]["sha256"] = "main"
+        with self.assertRaisesRegex(AndroidImageSourceError, "sha256"):
+            AndroidImageSourceLock.from_mapping(value)
+
     def test_wsl_requires_real_backing_drive_capacity(self) -> None:
         gib = 1024 ** 3
         missing = disk_checks(600 * gib, 400 * gib, "microsoft-standard-WSL2", None)

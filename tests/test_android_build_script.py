@@ -31,6 +31,8 @@ class AndroidBuildScriptTests(unittest.TestCase):
         self.assertIn('export XDG_CACHE_HOME="$HOME/.cache"', script)
         self.assertIn('export GOCACHE="$XDG_CACHE_HOME/go-build"', script)
         self.assertIn('export CCACHE_DIR="$XDG_CACHE_HOME/ccache"', script)
+        self.assertIn('export OUT_DIR="$source_root/out"', script)
+        self.assertIn('unset OUT_DIR_COMMON_BASE', script)
 
     def test_non_executable_packager_is_run_through_bash(self) -> None:
         self.assertIn(
@@ -47,6 +49,14 @@ class AndroidBuildScriptTests(unittest.TestCase):
         script = self.script()
         self.assertIn('if [[ ! -e "$resolved_manifest" ]]; then', script)
         self.assertIn('post-patch-state.json', script)
+
+    def test_project_patches_and_artifact_times_are_deterministic(self) -> None:
+        script = self.script()
+        self.assertIn('.alas-project-patches-applied', script)
+        self.assertIn('git", "-C", str(project), "apply", "--check"', script)
+        self.assertIn('export E2FSPROGS_FAKE_TIME="$source_date_epoch"', script)
+        self.assertIn('normalize_android_sbom.py', script)
+        self.assertIn('verify_android_ext4_timestamps.py', script)
 
 
 if __name__ == "__main__":
