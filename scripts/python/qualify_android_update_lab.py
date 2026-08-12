@@ -102,7 +102,13 @@ def main(argv: Sequence[str] = ()) -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--host-port", type=int, default=0)
     parser.add_argument("--skip-android-restart", action="store_true")
+    parser.add_argument("--restart-program", type=Path)
+    parser.add_argument("--restart-arg", action="append", default=[])
     arguments = parser.parse_args(list(argv) if argv else None)
+    if arguments.restart_arg and arguments.restart_program is None:
+        parser.error("--restart-arg requires --restart-program")
+    if arguments.restart_program is not None and not arguments.restart_program.is_file():
+        parser.error("--restart-program must be a file")
 
     output = arguments.output.resolve()
     if output.exists():
@@ -322,8 +328,73 @@ def main(argv: Sequence[str] = ()) -> int:
                     time.sleep(0.5)
                 if observed < 2 * 1024 * 1024:
                     raise AndroidUpdateLabError("restart interruption point was not observed")
-                adb.run(["reboot"], timeout_seconds=20)
+                firstboot_before = adb.shell(["getprop", "ro.runtime.firstboot"]).stdout.strip()
+                restart_method = "adb-reboot"
+                if arguments.restart_program is None:
+                    try:
+                        adb.run(["reboot"], timeout_seconds=20)
+                    except subprocess.TimeoutExpired:
+                        # Some container Android backends close neither side of the ADB
+                        # transport while processing reboot.  The firstboot identity below
+                        # remains the authoritative proof that a restart actually occurred.
+                        pass
+                else:
+                    restart_method = "external-program"
+                    restart_command = [str(arguments.restart_program)] + list(
+                        arguments.restart_arg
+                    )
+                    subprocess.run(
+                        restart_command,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                        timeout=120,
+                        check=True,
+                    )
+                if ":" in arguments.serial:
+                    subprocess.run(
+                        [str(arguments.adb), "disconnect", arguments.serial],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                        timeout=10,
+                        check=False,
+                    )
+                    connect_deadline = time.monotonic() + 120
+                    while time.monotonic() < connect_deadline:
+                        connected = subprocess.run(
+                            [str(arguments.adb), "connect", arguments.serial],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            text=True,
+                            encoding="utf-8",
+                            errors="replace",
+                            timeout=10,
+                            check=False,
+                        )
+                        if connected.returncode == 0:
+                            state = adb.run(["get-state"], timeout_seconds=10, check=False)
+                            if state.stdout.strip() == "device":
+                                break
+                        time.sleep(1)
+                    else:
+                        raise AndroidUpdateLabError("ADB TCP transport did not reconnect")
                 adb.wait_boot(300)
+                firstboot_after = adb.shell(
+                    ["getprop", "ro.runtime.firstboot"]
+                ).stdout.strip()
+                if (
+                    not firstboot_before
+                    or not firstboot_after
+                    or firstboot_after == firstboot_before
+                ):
+                    raise AndroidUpdateLabError(
+                        "Android restart identity did not change"
+                    )
                 adb.run(["reverse", reverse_endpoint, reverse_endpoint])
                 reverse_list = adb.run(["reverse", "--list"])
                 if reverse_endpoint not in reverse_list.stdout:
@@ -338,6 +409,14 @@ def main(argv: Sequence[str] = ()) -> int:
                 promoted = adb.wait_status(("promoted",), 30)
                 return {
                     "interrupted_bytes": observed,
+                    "restart_method": restart_method,
+                    "restart_command": (
+                        restart_command
+                        if arguments.restart_program is not None
+                        else [str(arguments.adb), "-s", arguments.serial, "reboot"]
+                    ),
+                    "firstboot_before": firstboot_before,
+                    "firstboot_after": firstboot_after,
                     "transport_ready": reverse_list.stdout,
                     "promoted": promoted,
                 }

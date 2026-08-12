@@ -43,6 +43,7 @@ def main(argv: Sequence[str] = ()) -> int:
         parser.add_argument("--{0}-contract-apk".format(prefix), type=Path)
         parser.add_argument("--{0}-angle-apk".format(prefix), type=Path)
         parser.add_argument("--{0}-image".format(prefix), type=Path)
+        parser.add_argument("--{0}-image-identity".format(prefix), type=Path)
         parser.add_argument("--{0}-gles-evidence".format(prefix), type=Path)
         parser.add_argument("--{0}-unity-evidence".format(prefix), type=Path)
         parser.add_argument("--{0}-observer-evidence".format(prefix), type=Path)
@@ -70,6 +71,7 @@ def main(argv: Sequence[str] = ()) -> int:
                 "observer-contract": optional_json(args.x86_64_observer_evidence),
             },
             optional_json(args.x86_64_audit), optional_json(args.x86_64_update_evidence),
+            optional_json(args.x86_64_image_identity),
         ),
         "arm64-v8a": target_record(
             "arm64-v8a", args.arm64_contract_apk, args.arm64_angle_apk,
@@ -80,6 +82,7 @@ def main(argv: Sequence[str] = ()) -> int:
                 "observer-contract": optional_json(args.arm64_observer_evidence),
             },
             optional_json(args.arm64_audit), optional_json(args.arm64_update_evidence),
+            optional_json(args.arm64_image_identity),
         ),
     }
     manifest = build_release_manifest(policy, source, targets)

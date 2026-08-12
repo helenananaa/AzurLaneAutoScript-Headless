@@ -33,6 +33,13 @@ namespace rx::alas {
 namespace {
 constexpr char kProtocolSchema[] = "alas-headless.observer/v1";
 constexpr char kDriverRevision[] = "be80ce591a481c12d60c50d6040d40c035b40a2b";
+#if defined(__aarch64__)
+constexpr char kRuntimeAbi[] = "arm64-v8a";
+#elif defined(__x86_64__)
+constexpr char kRuntimeAbi[] = "x86_64";
+#else
+constexpr char kRuntimeAbi[] = "unknown";
+#endif
 
 #if defined(ANGLE_PLATFORM_ANDROID)
 std::string ReadProcessPackage() {
@@ -121,7 +128,7 @@ std::string SnapshotResponseFor(uid_t peerUid, const std::string &package,
   const int count = ANGLE_UNSAFE_TODO(std::snprintf(
       response, sizeof(response),
       "{\"protocol_schema\":\"%s\",\"status\":\"ok\",\"package\":\"%s\","
-      "\"pid\":%u,\"uid\":%u,\"peer_uid\":%u,\"abi\":\"x86_64\","
+      "\"pid\":%u,\"uid\":%u,\"peer_uid\":%u,\"abi\":\"%s\","
       "\"driver_revision\":\"%s\",\"snapshot_schema\":%u,"
       "\"snapshot_struct_size\":%u,\"generation\":%" PRIu64
       ",\"scene_generation\":%" PRIu64 ",\"semantic_generation\":%" PRIu64
@@ -133,7 +140,7 @@ std::string SnapshotResponseFor(uid_t peerUid, const std::string &package,
       "\"active_button_count\":%u,\"interactable_button_count\":%u,"
       "\"scene_handle\":%d,\"ui_stage\":%u,\"ui_method_mask\":%u}\n",
       kProtocolSchema, package.c_str(), snapshot.processId, getuid(), peerUid,
-      kDriverRevision, snapshot.schema, snapshot.structSize,
+      kRuntimeAbi, kDriverRevision, snapshot.schema, snapshot.structSize,
       snapshot.requestGeneration, snapshot.sceneGeneration,
       snapshot.semanticGeneration, snapshot.monotonicNanos, now, ageMillis,
       snapshot.tid, snapshot.assemblyCount, snapshot.semanticCode,

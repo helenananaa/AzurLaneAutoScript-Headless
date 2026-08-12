@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
@@ -14,6 +15,8 @@ from .android_image_policy import AndroidImagePolicy
 
 RELEASE_SCHEMA = "alas-headless.android-image-foundation-release/v1"
 TARGET_ABIS = ("x86_64", "arm64-v8a")
+OCI_IDENTITY_SCHEMA = "alas-headless.oci-image-identity/v1"
+OCI_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 def hash_file(path: Path) -> Mapping[str, Any]:
@@ -50,6 +53,7 @@ def target_record(
     contract_evidence: Mapping[str, Optional[Mapping[str, Any]]],
     foundation_audit: Optional[Mapping[str, Any]],
     update_evidence: Optional[Mapping[str, Any]],
+    image_identity: Optional[Mapping[str, Any]] = None,
 ) -> Mapping[str, Any]:
     blockers = []
     contract = None
@@ -73,10 +77,26 @@ def target_record(
             blockers.append("angle-artifact-abi-mismatch")
 
     image = None
-    if image_artifact is None:
-        blockers.append("image-artifact-missing")
-    else:
+    if image_artifact is not None and image_identity is not None:
+        blockers.append("image-identity-ambiguous")
+    elif image_artifact is not None:
         image = hash_file(image_artifact)
+        image["kind"] = "file"
+    elif image_identity is not None:
+        image = dict(image_identity)
+        image["kind"] = "oci"
+        digest = str(image_identity.get("manifest_digest", ""))
+        expected_architecture = "arm64" if abi == "arm64-v8a" else "amd64"
+        if image_identity.get("schema") != OCI_IDENTITY_SCHEMA:
+            blockers.append("image-identity-schema-mismatch")
+        if OCI_DIGEST.fullmatch(digest) is None:
+            blockers.append("image-identity-digest-invalid")
+        if image_identity.get("architecture") != expected_architecture:
+            blockers.append("image-identity-abi-mismatch")
+        if image_identity.get("immutable") is not True:
+            blockers.append("image-identity-not-immutable")
+    else:
+        blockers.append("image-artifact-missing")
 
     contracts: Dict[str, Any] = {}
     for gate in ("gles-contract", "unity-contract", "observer-contract"):

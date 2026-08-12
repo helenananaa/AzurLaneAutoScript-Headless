@@ -64,7 +64,9 @@ function Restore-GlobalSetting {
 
 function Get-ForegroundPackage {
     $activities = Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'dumpsys', 'activity', 'activities')
-    $line = $activities -split "`r?`n" | Where-Object { $_ -match 'topResumedActivity=' } |
+    $line = $activities -split "`r?`n" | Where-Object {
+        $_ -match 'topResumedActivity=|mResumedActivity:'
+    } |
         Select-Object -First 1
     if ($line -match 'u\d+\s+([^/\s]+)/') { return $Matches[1] }
     return $null
@@ -319,7 +321,7 @@ try {
     if ($before.package -ne $UnityPackage -or $before.pid -ne [int]$targetPid) {
         $failures.Add('observer-process-identity-mismatch')
     }
-    if ($before.driver_revision -ne $expectedDriverRevision -or $before.abi -ne 'x86_64') {
+    if ($before.driver_revision -ne $expectedDriverRevision -or $before.abi -ne $ExpectedAbi) {
         $failures.Add('observer-version-fingerprint-mismatch')
     }
     if ($before.peer_uid -ne 2000) { $failures.Add('observer-peer-credential-mismatch') }

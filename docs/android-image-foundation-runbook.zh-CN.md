@@ -361,7 +361,7 @@ python scripts/python/create_android_image_release.py `
   --x86-64-update-evidence <x86-update-manifest.json> `
   --arm64-contract-apk unity\HeadlessContract\Build\HeadlessContract-arm64.apk `
   --arm64-angle-apk <arm64-observer-angle.apk> `
-  --arm64-image <arm64-system-or-oci-export> `
+  --arm64-image-identity <arm64-oci-identity.json> `
   --arm64-gles-evidence <arm64-gles-evidence.json> `
   --arm64-unity-evidence <arm64-unity-evidence.json> `
   --arm64-observer-evidence <arm64-observer-evidence.json> `
@@ -379,6 +379,29 @@ export ALAS_REDROID_IMAGE='registry.example/redroid@sha256:<digest>'
 ```
 
 当前 x86 Windows 主机或未运行 Docker/binderfs 的环境应返回 `blocked`；不得把预检失败改写成 plan PASS。
+
+Redroid 使用 OCI 镜像时，先从运行容器只读采集 digest、架构、端口和 `/data` 挂载身份：
+
+```powershell
+python scripts/python/capture_redroid_image_identity.py `
+  --ssh C:\Windows\System32\OpenSSH\ssh.exe `
+  --target root@<arm-host> `
+  --container redroid-arm64 `
+  --output evidence\android-image-foundation\redroid-arm64-image-identity.json
+```
+
+更新实验中的 Android restart 对 Redroid 应使用容器 restart hook，并以 `ro.runtime.firstboot` 变化作为完成证明；三轮独立 restart 可执行：
+
+```powershell
+python scripts/python/qualify_redroid_restart.py `
+  --serial 127.0.0.1:15555 `
+  --adb F:\platform-tools\adb.exe `
+  --ssh C:\Windows\System32\OpenSSH\ssh.exe `
+  --target root@<arm-host> `
+  --container redroid-arm64 `
+  --rounds 3 `
+  --output evidence\android-image-foundation\redroid-restart-arm64-3round.json
+```
 
 在真实 ALAS 工作负载出现前，只允许以下发布状态：
 
@@ -422,23 +445,29 @@ built
 本 worktree 已完成以下不依赖真实 ALAS 挂机数据的基础工作：
 
 - 策略 `compat-foundation-v1` 校验通过，SHA-256 为 `622d7fb202d020fda5ad87291c8fb36f546af0562a927ea6df9c461a83844233`；
-- 仓库全量测试 `449 passed`；
+- 仓库全量测试 `451 passed`；
 - x86_64 与 ARM64 Unity 合同 APK 均已构建并确认只含目标 ABI；当前 SHA-256 分别为 `6030c2d4ba41b7b29150490b3d977991e01084a83e523b6a64d98fdfd5a3ceb0` 与 `dcd02e4aa10fb972ea9d7ba20c54b46ccab9f016308d8634d0207af4cbf51a61`；
-- 最新 observer ANGLE x86_64/ARM64 APK 已从固定 ANGLE revision 交叉构建，SHA-256 分别为 `a8900b27ad5c5956b55a8d6c25fedb6bc8ce9fb78efbc0c906fcaa11d53b7b2b` 与 `5644adcb11dec7fd8ff8d9c2dc61d7a5df6f741d69131ecc0e377fc712e19390`；
+- 最新 observer ANGLE x86_64/ARM64 APK 已从固定 ANGLE revision 交叉构建，SHA-256 分别为 `98941a4fb1fc99b201cde6b86498da6c132a74c0cf5d60b4b72fcb3dbff627fe` 与 `8670115d326ddc39ccc5ae2cd36352e7377c3c23f8360aa358649ec959e40ccb`；observer ABI 由编译目标生成，不再硬编码 x86_64；
 - x86_64 更新实验完整通过：错签拒绝、单 APK、ABI split、userdata migration、进程中断续传、低空间、Android 重启续传、原子提升与回滚；
 - 更新实验 APK 的四个资格哈希与重建后清单完全一致；
 - API 32 x86_64 专用 AVD 的 21 项受保护能力全部通过；
 - 三轮禁用 snapshot 的冷启动为 `20.234 / 23.000 / 24.047 s`，中位数 `23.000 s`，userdata 哨兵三轮保留；
 - 卸载全部合成合同包后的 600 秒 idle 样本：设备 CPU busy `0.207%`、Used RAM `980245 KiB`、Free RAM `994255 KiB`。这些数值只是未精简基线；
 - 当前 x86 G1 NULL GLES、G2 Unity 与 G3 observer 合同全部通过；G3 包含 32/32 IL2CPP allowlist、`flags=15`、typed UI stage 100、唯一可点击语义按钮、点击后的 semantic generation、场景 generation、Home 陈旧动作拒绝与恢复后 freshness。测试脚本会保存并恢复 Android secure `immersive_mode_confirmations`，避免系统首次沉浸提示遮挡 ADB 点击；
-- 从 clean commit 生成的 fail-closed 候选清单将 x86_64 标记为 `platform-and-update-qualified`，且 x86 target blockers 为空；清单属于本地 evidence，不进入 Git。
+- ARM64 宿主 `47.77.183.3` 上的 digest-pinned Redroid Android 12/API 31 基线已通过 ARM G1/G2/G3；G1 普通 Activity 的逻辑 surface 为 `1280×648`，Unity 沉浸式 surface 为 `1280×720`；
+- ARM64 更新实验完整通过，并实际安装 `split_config.arm64_v8a.apk`；Redroid 容器 restart 前后 `ro.runtime.firstboot` 改变，随后完成资源续传和指针回滚；
+- ARM64 三轮 Redroid restart 为 `17.750 / 17.828 / 18.141 s`，每轮 OCI digest 不变且 `/data` sentinel 保留；
+- ARM64 卸载合成包后的 600 秒 idle 样本为 CPU busy `0.195%`、Used RAM `1078446 KiB`、Free RAM `5982526 KiB`，只是未精简基线；
+- ARM64 OCI identity 已固定到 `redroid/redroid@sha256:d3fb6daeaed9a7c98b05d649ed925ad9c6f45f578d1fd8c386951595d53778b2`，ADB 只绑定宿主 `127.0.0.1:5555`，`/data` 使用独立持久化挂载；
+- fail-closed 候选清单中 x86_64 无 blocker；ARM64 的镜像身份、G1/G2/G3 和更新证据均闭环。
 
 当前仍然 fail-closed 的项目：
 
-- 当前机器不是 ARM64 Linux 宿主，且没有可执行的 ARM64 Redroid/binder/cgroup v2 环境，所以 ARM64 只有 Unity/ANGLE 构建制品，没有冷启动、G1/G2/G3、更新和能力审计结果；
-- 当前 x86 镜像是内容哈希固定的 SDK API 32 基线，并不是本项目从固定 AOSP 产品配置构建出的精简镜像；尚未删除任何系统服务；
+- 当前 Redroid `/data` 是宿主 ext4 bind mount，镜像没有 `ro.crypto.type=file` 或 FBE fstab 合同；ARM 受保护能力为 20/21，`device-encrypted-storage` 必须保持 fail，不能通过启动参数豁免；
+- 当前 ARM 基线的安全补丁级别为 `2021-10-05`，需要在自维护镜像线更新，不能作为长期发布基线；
+- 当前 x86 镜像是内容哈希固定的 SDK API 32 基线，ARM 是 digest 固定的 stock Redroid 基线；二者都不是本项目从固定 AOSP/Redroid 产品配置构建出的精简镜像，尚未删除任何系统服务；
 - worktree 未提交时，发布清单还会附加 `source:dirty-worktree` blocker；
-- 在 ARM64 运行线和可复现 AOSP/Redroid 镜像构建入口补齐前，双架构 release promotion 必须保持 `blocked`；x86 单目标资格不等于双架构发布完成。
+- 在支持 FBE、更新安全补丁且可复现的自维护 AOSP/Redroid 构建入口补齐前，双架构 release promotion 必须保持 `blocked`。
 
 冷启动复测命令：
 
