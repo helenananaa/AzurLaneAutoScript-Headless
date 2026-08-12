@@ -13,19 +13,45 @@ evidence_root=$(realpath -m "$3")
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 
 [[ ! -e "$source_root" || -d "$source_root" ]] || { echo "source root is not a directory" >&2; exit 1; }
-if [[ -d "$source_root" ]] && [[ -n $(find "$source_root" -mindepth 1 -maxdepth 1 -print -quit) ]]; then
-    echo "source root must be absent or empty: $source_root" >&2
-    exit 1
-fi
 mkdir -p "$source_root" "$evidence_root"
 
 export PYTHONPATH="$repo_root/python"
 python3 "$repo_root/scripts/python/validate_android_image_source_lock.py" --source-lock "$source_lock"
 source_lock_sha256=$(python3 "$repo_root/scripts/python/validate_android_image_source_lock.py" --source-lock "$source_lock" | tail -n1)
+resume_marker="$source_root/.alas-redroid-build-source-lock"
+if [[ -e "$resume_marker" ]]; then
+    [[ -f "$resume_marker" && $(cat "$resume_marker") == "$source_lock_sha256" ]] || {
+        echo "source root resume marker differs from source lock" >&2; exit 1;
+    }
+elif [[ -n $(find "$source_root" -mindepth 1 -maxdepth 1 -print -quit) ]]; then
+    echo "source root is non-empty and has no matching resume marker: $source_root" >&2
+    exit 1
+else
+    printf '%s\n' "$source_lock_sha256" > "$resume_marker"
+fi
+
+run_json_evidence() {
+    local output=$1
+    shift
+    if [[ ! -e "$output" ]]; then
+        "$@" --output "$output"
+        return
+    fi
+    local temporary
+    temporary=$(mktemp "$evidence_root/.resume-evidence.XXXXXX")
+    rm -f "$temporary"
+    "$@" --output "$temporary" >/dev/null
+    cmp -s "$output" "$temporary" || {
+        rm -f "$temporary"
+        echo "existing evidence differs during resume: $output" >&2
+        exit 1
+    }
+    rm -f "$temporary"
+}
+
 preflight_args=(
     --source-lock "$source_lock" --root "$source_root"
     --evidence-root "$evidence_root" --require-non-root-device
-    --output "$evidence_root/host-preflight.json"
 )
 if [[ -n ${ALAS_BUILD_BACKING_FREE_BYTES:-} ]]; then
     [[ $ALAS_BUILD_BACKING_FREE_BYTES =~ ^[0-9]+$ ]] || {
@@ -33,9 +59,34 @@ if [[ -n ${ALAS_BUILD_BACKING_FREE_BYTES:-} ]]; then
     }
     preflight_args+=(--backing-free-bytes "$ALAS_BUILD_BACKING_FREE_BYTES")
 fi
-python3 "$repo_root/scripts/python/preflight_redroid_build.py" "${preflight_args[@]}"
-python3 "$repo_root/scripts/python/verify_android_image_source_remotes.py" \
-    --source-lock "$source_lock" --output "$evidence_root/source-remotes.json"
+preflight_evidence="$evidence_root/host-preflight.json"
+if [[ ! -e "$preflight_evidence" ]]; then
+    python3 "$repo_root/scripts/python/preflight_redroid_build.py" \
+        "${preflight_args[@]}" --output "$preflight_evidence"
+else
+    current_preflight=$(mktemp "$evidence_root/.resume-preflight.XXXXXX")
+    rm -f "$current_preflight"
+    python3 "$repo_root/scripts/python/preflight_redroid_build.py" \
+        "${preflight_args[@]}" --output "$current_preflight" >/dev/null
+    python3 - "$preflight_evidence" "$current_preflight" <<'PY'
+import json, sys
+initial = json.load(open(sys.argv[1], encoding="utf-8"))
+current = json.load(open(sys.argv[2], encoding="utf-8"))
+for value, label in ((initial, "initial"), (current, "current")):
+    if value.get("outcome") != "pass":
+        raise SystemExit(label + " build-host preflight is not pass")
+for key in (
+    "source_lock_sha256", "root", "evidence_root", "work_device",
+    "evidence_device", "system_root_device", "require_non_root_device",
+):
+    if initial.get(key) != current.get(key):
+        raise SystemExit("build-host identity changed during resume: " + key)
+PY
+    rm -f "$current_preflight"
+fi
+run_json_evidence "$evidence_root/source-remotes.json" \
+    python3 "$repo_root/scripts/python/verify_android_image_source_remotes.py" \
+    --source-lock "$source_lock"
 
 json_field() {
     python3 - "$source_lock" "$1" <<'PY'
@@ -57,14 +108,18 @@ patches_commit=$(json_field redroid.patches_commit)
 patch_set=$(json_field redroid.patch_set)
 
 cd "$source_root"
-repo init -u "$manifest_url" -b "$platform_revision" --git-lfs --depth=1
+if [[ ! -d .repo ]]; then
+    repo init -u "$manifest_url" -b "$platform_revision" --git-lfs --depth=1
+fi
 [[ $(git -C .repo/manifests rev-parse HEAD) == "$platform_commit" ]] || {
     echo "repo init manifest commit differs from source lock" >&2; exit 1;
 }
-git init .repo/local_manifests
-git -C .repo/local_manifests remote add origin "$local_manifests_url"
+if [[ ! -d .repo/local_manifests/.git ]]; then
+    git init .repo/local_manifests
+    git -C .repo/local_manifests remote add origin "$local_manifests_url"
+fi
 git -C .repo/local_manifests fetch --depth=1 origin "$local_manifests_commit"
-git -C .repo/local_manifests checkout --detach FETCH_HEAD
+git -C .repo/local_manifests checkout --detach "$local_manifests_commit"
 python3 - "$source_lock" > .repo/local_manifests/zz-alas-source-lock.xml <<'PY'
 import json, sys
 from xml.sax.saxutils import quoteattr
@@ -100,18 +155,32 @@ for project in lock["redroid"]["projects"]:
         raise SystemExit("resolved manifest mismatch for {0}".format(key))
 PY
 
-patch_root="$evidence_root/redroid-patches"
-git clone --no-checkout "$patches_url" "$patch_root"
+patch_root="$source_root/.alas-redroid-patches"
+if [[ ! -d "$patch_root/.git" ]]; then
+    git clone --no-checkout "$patches_url" "$patch_root"
+fi
+git -C "$patch_root" fetch origin "$patches_commit"
 git -C "$patch_root" checkout --detach "$patches_commit"
 [[ -d "$patch_root/$patch_set" ]] || { echo "locked patch set missing: $patch_set" >&2; exit 1; }
-set +e
-"$patch_root/apply-patch.sh" "$source_root" "$patch_set" 2>&1 | tee "$evidence_root/apply-patches.log"
-patch_rc=${PIPESTATUS[0]}
-set -e
-[[ $patch_rc -eq 0 ]] || { echo "Redroid patch driver failed" >&2; exit 1; }
-if grep -Fq '[ERROR]' "$evidence_root/apply-patches.log"; then
-    echo "Redroid patch driver reported a rejected patch" >&2
-    exit 1
+patch_marker="$source_root/.alas-redroid-patches-applied"
+if [[ -e "$patch_marker" ]]; then
+    [[ $(cat "$patch_marker") == "$patches_commit:$patch_set" ]] || {
+        echo "patch resume marker mismatch" >&2; exit 1;
+    }
+else
+    [[ ! -e "$evidence_root/apply-patches.log" ]] || {
+        echo "patch log exists without completion marker; manual audit required" >&2; exit 1;
+    }
+    set +e
+    "$patch_root/apply-patch.sh" "$source_root" "$patch_set" 2>&1 | tee "$evidence_root/apply-patches.log"
+    patch_rc=${PIPESTATUS[0]}
+    set -e
+    [[ $patch_rc -eq 0 ]] || { echo "Redroid patch driver failed" >&2; exit 1; }
+    if grep -Fq '[ERROR]' "$evidence_root/apply-patches.log"; then
+        echo "Redroid patch driver reported a rejected patch" >&2
+        exit 1
+    fi
+    printf '%s:%s\n' "$patches_commit" "$patch_set" > "$patch_marker"
 fi
 if find "$source_root/.repo/projects" "$source_root/.repo/project-objects" \
     -type d \( -name rebase-apply -o -name rebase-merge \) -print 2>/dev/null | grep -q .; then
@@ -124,11 +193,12 @@ fi
 # replace any pre-existing local customization.
 overlay_root="$repo_root/integration/runtime/redroid-native-fbe"
 overlay_evidence="$evidence_root/redroid-native-fbe-overlay.json"
-python3 "$repo_root/scripts/python/validate_redroid_native_fbe_overlay.py" \
-    --overlay "$overlay_root" --source-lock "$source_lock" --output "$overlay_evidence"
-[[ ! -e "$source_root/product.mk" ]] || {
-    echo "refusing to overwrite existing AOSP product.mk" >&2; exit 1;
-}
+run_json_evidence "$overlay_evidence" \
+    python3 "$repo_root/scripts/python/validate_redroid_native_fbe_overlay.py" \
+    --overlay "$overlay_root" --source-lock "$source_lock"
+if [[ -e "$source_root/product.mk" ]] && ! cmp -s "$overlay_root/product.mk" "$source_root/product.mk"; then
+    echo "refusing to overwrite different AOSP product.mk" >&2; exit 1
+fi
 mkdir -p "$source_root/alas/redroid-native-fbe"
 cp "$overlay_root/fstab.redroid" "$source_root/alas/redroid-native-fbe/fstab.redroid"
 cp "$overlay_root/init.alas-fbe.rc" "$source_root/alas/redroid-native-fbe/init.alas-fbe.rc"
