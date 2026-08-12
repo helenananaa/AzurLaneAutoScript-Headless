@@ -546,7 +546,7 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 本 worktree 已完成以下不依赖真实 ALAS 挂机数据的基础工作：
 
 - 策略 `compat-foundation-v1` 校验通过，SHA-256 为 `622d7fb202d020fda5ad87291c8fb36f546af0562a927ea6df9c461a83844233`；
-- 当前仓库全量测试 `471 passed`；
+- 当前仓库全量测试 `473 passed`；
 - x86_64 与 ARM64 Unity 合同 APK 均已构建并确认只含目标 ABI；当前 SHA-256 分别为 `6030c2d4ba41b7b29150490b3d977991e01084a83e523b6a64d98fdfd5a3ceb0` 与 `dcd02e4aa10fb972ea9d7ba20c54b46ccab9f016308d8634d0207af4cbf51a61`；
 - 最新 observer ANGLE x86_64/ARM64 APK 已从固定 ANGLE revision 交叉构建，SHA-256 分别为 `98941a4fb1fc99b201cde6b86498da6c132a74c0cf5d60b4b72fcb3dbff627fe` 与 `8670115d326ddc39ccc5ae2cd36352e7377c3c23f8360aa358649ec959e40ccb`；observer ABI 由编译目标生成，不再硬编码 x86_64；
 - x86_64 更新实验完整通过：错签拒绝、单 APK、ABI split、userdata migration、进程中断续传、低空间、Android 重启续传、原子提升与回滚；
@@ -566,6 +566,7 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 - 确定性 Redroid OCI layout/archive 生成器已实现；同输入双次字节一致性单测通过，合成 x86_64 与 ARM64 archive 均已由 Docker 29 实际 load/inspect，且不包含游戏；
 - digest-pinned stock Redroid 14/API 34 ARM64 基线已独立通过 G1/G2/G3 与完整更新实验，安全补丁为 `2024-05-05`；600 秒无游戏/无 ALAS 空闲基线为 CPU busy `0.222%`、Used RAM `1078133 KiB`，只用于该镜像基线记录；
 - Android 14 ARM64 受保护能力仍为 20/21，唯一失败是 `device-encrypted-storage`。官方 Redroid 14 device 产品配置明确设置 `PRODUCT_BUILD_USERDATA_IMAGE := false`，宿主目录直接 bind 到 `/data`，所以 FBE 不能靠属性或普通 fstab overlay 修复；
+- FBE 受保护能力门已改为五路复合验证：`ro.crypto.state=encrypted`、`ro.crypto.type=file`、PackageManager FBE feature=true、`sm get-fbe-mode=native` 和 mount/vold service 存在；缺任一项或仅为 `emulated` 都失败；
 - Android 12 digest `d3fb…78b2` → Android 14 digest `0a61…69aa` → 恢复快照 → Android 12 的真实回退已通过；证据同时验证候选 fingerprint/API 34 与恢复后的旧 fingerprint/API 31，避免用可空的 `ro.runtime.firstboot` 冒充候选身份；
 - OCI identity 现在分别记录 registry/index digest 与架构平台 manifest digest；运行配置仍必须用 index digest，tag 或缺失平台 descriptor 都无法通过发布门；
 - fail-closed 候选清单中 x86_64 无 blocker；ARM64 的镜像身份、G1/G2/G3 和更新证据均闭环。
