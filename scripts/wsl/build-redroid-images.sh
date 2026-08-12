@@ -247,9 +247,9 @@ build_one() {
     # shellcheck disable=SC1091
     source build/envsetup.sh
     lunch "$lunch_target"
-    set -u
     m -j"$(nproc)"
     m sbom -j"$(nproc)"
+    set -u
     local product_dir="$source_root/out/target/product/$product_name"
     local build_prop="$product_dir/system/build.prop"
     [[ -f $build_prop ]] || build_prop="$product_dir/system/system/build.prop"

@@ -20,6 +20,8 @@ class AndroidBuildScriptTests(unittest.TestCase):
     # shellcheck disable=SC1091
     source build/envsetup.sh
     lunch \"$lunch_target\"
+    m -j\"$(nproc)\"
+    m sbom -j\"$(nproc)\"
     set -u"""
         self.assertIn(expected, script)
 
