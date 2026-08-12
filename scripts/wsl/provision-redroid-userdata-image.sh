@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-    echo "usage: $0 --image ABS_PATH --size-mib N --mount ABS_PATH --output ABS_PATH" >&2
+    echo "usage: $0 [--role userdata|metadata] --image ABS_PATH --size-mib N --mount ABS_PATH --output ABS_PATH" >&2
     exit 2
 }
 
@@ -10,18 +10,21 @@ image=""
 size_mib=""
 mountpoint=""
 output=""
+role="userdata"
 while (($#)); do
     case "$1" in
         --image) image="${2:-}"; shift 2 ;;
         --size-mib) size_mib="${2:-}"; shift 2 ;;
         --mount) mountpoint="${2:-}"; shift 2 ;;
         --output) output="${2:-}"; shift 2 ;;
+        --role) role="${2:-}"; shift 2 ;;
         *) usage ;;
     esac
 done
 
 [[ $EUID -eq 0 ]] || { echo "must run as root" >&2; exit 1; }
 [[ "$image" == /* && "$mountpoint" == /* && "$output" == /* ]] || usage
+[[ "$role" == userdata || "$role" == metadata ]] || { echo "invalid --role" >&2; exit 1; }
 [[ "$size_mib" =~ ^[0-9]+$ ]] && ((size_mib >= 256)) || {
     echo "--size-mib must be an integer >= 256" >&2; exit 1;
 }
@@ -65,7 +68,7 @@ trap cleanup EXIT
 
 truncate -s "${size_mib}M" "$image"
 image_created=true
-mkfs.ext4 -q -F -L alas_userdata -O encrypt,metadata_csum,64bit "$image"
+mkfs.ext4 -q -F -L "alas_${role}" -O encrypt,metadata_csum,64bit "$image"
 loopdev="$(losetup --find --show "$image")"
 root_source="$(findmnt -no SOURCE /)"
 [[ "$loopdev" != "$root_source" ]] || { echo "refusing host root device" >&2; exit 1; }
@@ -80,6 +83,7 @@ PROBE_IMAGE="$image" PROBE_SIZE_MIB="$size_mib" PROBE_MOUNT="$mountpoint" \
 PROBE_OUTPUT="$output" PROBE_LOOP="$loopdev" PROBE_ROOT="$root_source" \
 PROBE_FSTYPE="$filesystem_type" PROBE_OPTIONS="$mount_options" \
 PROBE_UUID="$filesystem_uuid" PROBE_FEATURES="$features" \
+PROBE_ROLE="$role" \
 python3 - <<'PY'
 import json
 import os
@@ -88,6 +92,7 @@ from pathlib import Path
 probe = {
     "schema": "alas-headless.redroid-userdata-volume-probe/v1",
     "scope": "empty-lab-volume",
+    "role": os.environ["PROBE_ROLE"],
     "created_new": True,
     "backing_file_existed_before": False,
     "production_data_touched": False,

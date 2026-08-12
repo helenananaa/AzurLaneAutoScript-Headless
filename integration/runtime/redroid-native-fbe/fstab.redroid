@@ -1,0 +1,4 @@
+# Android fstab for isolated Redroid metadata and userdata block devices.
+# <src>                     <mnt_point> <type> <mnt_flags>                         <fs_mgr_flags>
+/dev/block/alas_metadata    /metadata   ext4   noatime,nosuid,nodev                wait,check,formattable
+/dev/block/alas_userdata    /data       ext4   noatime,nosuid,nodev,errors=panic   wait,check,quota,fileencryption=aes-256-xts:aes-256-cts,reservedsize=128M,fsverity,keydirectory=/metadata/vold/metadata_encryption,latemount

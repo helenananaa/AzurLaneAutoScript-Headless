@@ -4,12 +4,14 @@ import copy
 import unittest
 
 from alas_headless.android_userdata_volume import qualify_userdata_volume
+from alas_headless.android_userdata_volume import qualify_fbe_volume_set
 
 
 class AndroidUserdataVolumeTests(unittest.TestCase):
     def setUp(self) -> None:
         self.probe = {
             "schema": "alas-headless.redroid-userdata-volume-probe/v1",
+            "role": "userdata",
             "scope": "empty-lab-volume",
             "created_new": True,
             "backing_file_existed_before": False,
@@ -61,6 +63,21 @@ class AndroidUserdataVolumeTests(unittest.TestCase):
         probe["android_fbe_claimed"] = True
         result = qualify_userdata_volume(probe)
         self.assertIn("host-volume-must-not-claim-android-fbe", result["blockers"])
+
+    def test_distinct_userdata_and_metadata_form_host_volume_set(self) -> None:
+        userdata = qualify_userdata_volume(self.probe)
+        metadata_probe = copy.deepcopy(self.probe)
+        metadata_probe["role"] = "metadata"
+        metadata_probe["backing_file"] = "/var/lib/redroid-volumes/metadata.img"
+        metadata_probe["filesystem_uuid"] = "metadata-uuid"
+        metadata = qualify_userdata_volume(metadata_probe)
+        result = qualify_fbe_volume_set(userdata, metadata)
+        self.assertEqual(result["outcome"], "pass")
+        self.assertFalse(result["android_fbe_proven"])
+
+        metadata["probe"]["filesystem_uuid"] = self.probe.get("filesystem_uuid")
+        result = qualify_fbe_volume_set(userdata, metadata)
+        self.assertIn("volume-filesystem-uuids-not-distinct", result["blockers"])
 
 
 if __name__ == "__main__":

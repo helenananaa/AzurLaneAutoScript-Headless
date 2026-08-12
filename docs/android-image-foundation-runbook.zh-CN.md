@@ -175,6 +175,14 @@ provenance 必须同时绑定源码锁、resolved manifest、fingerprint、安�
 
 `build-redroid-images.sh` 在每个 product 完成后自动调用 `package-redroid-oci.sh`。打包器只读挂载 system/vendor，按路径排序、统一 `SOURCE_DATE_EPOCH`、owner/group 和 pax 时间字段，保留 xattr，生成单平台 OCI layout archive；OCI config 固定 Redroid entrypoint，并写入 ABI、fingerprint、源码锁和 `game-delivery=external-install` labels。archive 同样进入 provenance。
 
+构建脚本还会强制校验并注入
+`integration/runtime/redroid-native-fbe`。该 overlay 固定 AOSP 14 goldfish 与 Redroid
+device 的上游依据，复制双卷 fstab 和 init mount 顺序；其验证 JSON 作为构建 artifact
+进入 provenance 和双构建一致性比较，并必须与主 source lock 的 AOSP revision、Redroid
+device commit 和 source-lock SHA-256 一致。若源码树已经存在本地 `product.mk`，脚本会拒绝
+覆盖。静态 overlay 通过只说明构建输入完整，不能替代设备上的五路 FBE 和 Direct Boot
+运行证据。
+
 单独调试打包器时：
 
 ```bash
@@ -204,12 +212,13 @@ Redroid stock 的目录 bind 不能满足 Android native FBE。自维护线必�
 
 在以上链路实测前，`device-encrypted-storage` 必须保持 fail；宿主 LUKS/fscrypt 只能作为额外的 at-rest 控制，不能冒充 Android FBE/Direct Boot。
 
-可先在 Linux/Redroid 宿主制备一个完全隔离的空实验卷，验证块设备和 ext4
+可先在 Linux/Redroid 宿主制备两个完全隔离的空实验卷，验证块设备和 ext4
 `encrypt` 前置能力。脚本只允许创建原本不存在的新镜像文件，拒绝生产 `/data`
 路径、非空或已挂载目录，并在失败时删除本轮新建镜像：
 
 ```bash
 sudo ./scripts/wsl/provision-redroid-userdata-image.sh \
+  --role userdata \
   --image /var/lib/redroid-volumes/fbe-lab/userdata.img \
   --size-mib 1024 \
   --mount /mnt/redroid-userdata-fbe-lab \
@@ -217,10 +226,24 @@ sudo ./scripts/wsl/provision-redroid-userdata-image.sh \
 PYTHONPATH=python python3 scripts/python/qualify_redroid_userdata_volume.py \
   --probe /var/lib/redroid-volumes/fbe-lab/probe.json \
   --output evidence/android-image-foundation/userdata-volume-host-qualification.json
+sudo ./scripts/wsl/provision-redroid-userdata-image.sh \
+  --role metadata \
+  --image /var/lib/redroid-volumes/fbe-lab/metadata.img \
+  --size-mib 256 \
+  --mount /mnt/redroid-metadata-fbe-lab \
+  --output /var/lib/redroid-volumes/fbe-lab/metadata-probe.json
+PYTHONPATH=python python3 scripts/python/qualify_redroid_userdata_volume.py \
+  --probe /var/lib/redroid-volumes/fbe-lab/metadata-probe.json \
+  --output evidence/android-image-foundation/metadata-volume-host-qualification.json
+PYTHONPATH=python python3 scripts/python/qualify_redroid_fbe_volume_set.py \
+  --userdata evidence/android-image-foundation/userdata-volume-host-qualification.json \
+  --metadata evidence/android-image-foundation/metadata-volume-host-qualification.json \
+  --output evidence/android-image-foundation/fbe-volume-set-host-qualification.json
 ```
 
-该资格结果的上限固定为 `host-volume-qualified`，并显式记录
-`android_fbe_proven=false`、`direct_boot_proven=false`。只有把这个卷交给自建
+单卷资格上限固定为 `host-volume-qualified`，双卷集合上限固定为
+`host-fbe-volume-set-qualified`，并显式记录
+`android_fbe_proven=false`、`direct_boot_proven=false`。只有把这两个卷交给自建
 Redroid 的 `/data` fstab、完成 Android 五路 FBE 门和 Direct Boot/CE 解锁恢复实验后，
 才能提升为 Android FBE 证据。
 
@@ -507,6 +530,7 @@ python scripts/python/create_android_image_release.py `
   --arm64-reproducibility-evidence <arm64-reproducibility.json> `
   --arm64-rollback-evidence <arm64-image-rollback.json> `
   --arm64-userdata-volume-evidence <arm64-host-volume-qualification.json> `
+  --arm64-fbe-volume-set-evidence <arm64-host-fbe-volume-set.json> `
   --output evidence\android-image-foundation\release-candidate.json `
   --require-promotable
 ```
@@ -599,7 +623,7 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 本 worktree 已完成以下不依赖真实 ALAS 挂机数据的基础工作：
 
 - 策略 `compat-foundation-v1` 校验通过，SHA-256 为 `622d7fb202d020fda5ad87291c8fb36f546af0562a927ea6df9c461a83844233`；
-- 当前仓库全量测试 `481 passed`；
+- 当前仓库全量测试 `486 passed`；
 - x86_64 与 ARM64 Unity 合同 APK 均已构建并确认只含目标 ABI；当前 SHA-256 分别为 `6030c2d4ba41b7b29150490b3d977991e01084a83e523b6a64d98fdfd5a3ceb0` 与 `dcd02e4aa10fb972ea9d7ba20c54b46ccab9f016308d8634d0207af4cbf51a61`；
 - 最新 observer ANGLE x86_64/ARM64 APK 已从固定 ANGLE revision 交叉构建，SHA-256 分别为 `98941a4fb1fc99b201cde6b86498da6c132a74c0cf5d60b4b72fcb3dbff627fe` 与 `8670115d326ddc39ccc5ae2cd36352e7377c3c23f8360aa358649ec959e40ccb`；observer ABI 由编译目标生成，不再硬编码 x86_64；
 - x86_64 更新实验完整通过：错签拒绝、单 APK、ABI split、userdata migration、进程中断续传、低空间、Android 重启续传、原子提升与回滚；

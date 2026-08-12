@@ -118,6 +118,21 @@ if find "$source_root/.repo/projects" "$source_root/.repo/project-objects" \
     exit 1
 fi
 
+# Upstream Redroid intentionally leaves product.mk as a local extension point.
+# Bind our reviewed dual-volume FBE overlay into every build, and refuse to
+# replace any pre-existing local customization.
+overlay_root="$repo_root/integration/runtime/redroid-native-fbe"
+overlay_evidence="$evidence_root/redroid-native-fbe-overlay.json"
+python3 "$repo_root/scripts/python/validate_redroid_native_fbe_overlay.py" \
+    --overlay "$overlay_root" --source-lock "$source_lock" --output "$overlay_evidence"
+[[ ! -e "$source_root/product.mk" ]] || {
+    echo "refusing to overwrite existing AOSP product.mk" >&2; exit 1;
+}
+mkdir -p "$source_root/alas/redroid-native-fbe"
+cp "$overlay_root/fstab.redroid" "$source_root/alas/redroid-native-fbe/fstab.redroid"
+cp "$overlay_root/init.alas-fbe.rc" "$source_root/alas/redroid-native-fbe/init.alas-fbe.rc"
+cp "$overlay_root/product.mk" "$source_root/product.mk"
+
 build_one() {
     local abi=$1 lunch_target=$2 product_name=$3
     # shellcheck disable=SC1091
@@ -152,6 +167,7 @@ build_one() {
         --artifact "system.img=$product_dir/system.img" \
         --artifact "vendor.img=$product_dir/vendor.img" \
         --artifact "redroid.oci.tar=$oci_archive" \
+        --artifact "redroid-native-fbe-overlay.json=$overlay_evidence" \
         --sbom "$sbom" --notice "$notice" \
         --installed-files "$product_dir/installed-files.txt" \
         --host-preflight "$evidence_root/host-preflight.json" \

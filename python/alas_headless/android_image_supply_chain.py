@@ -15,6 +15,7 @@ PROVENANCE_SCHEMA = "alas-headless.android-image-build-provenance/v1"
 REPRODUCIBILITY_SCHEMA = "alas-headless.android-image-reproducibility/v1"
 FORBIDDEN_GAME_TOKENS = ("com.bilibili.azurlane", "azurlane")
 ABIS = ("x86_64", "arm64-v8a")
+FBE_OVERLAY_VALIDATION_SCHEMA = "alas-headless.redroid-native-fbe-overlay-validation/v1"
 
 
 class AndroidImageSupplyChainError(ValueError):
@@ -51,8 +52,11 @@ def _parse_named_paths(values: Iterable[str]) -> Sequence[Tuple[str, Path]]:
             raise AndroidImageSupplyChainError("duplicate artifact name: {0}".format(name))
         observed.add(name)
         parsed.append((name, Path(raw_path)))
-    if not {"system.img", "vendor.img"}.issubset(observed):
-        raise AndroidImageSupplyChainError("system.img and vendor.img artifacts are mandatory")
+    mandatory = {"system.img", "vendor.img", "redroid-native-fbe-overlay.json"}
+    if not mandatory.issubset(observed):
+        raise AndroidImageSupplyChainError(
+            "system.img, vendor.img, and redroid-native-fbe-overlay.json artifacts are mandatory"
+        )
     return parsed
 
 
@@ -105,9 +109,25 @@ def create_build_provenance(
         raise AndroidImageSupplyChainError("security patch must use YYYY-MM-DD")
 
     artifact_records: Dict[str, Mapping[str, Any]] = {}
-    for name, path in _parse_named_paths(artifacts):
+    parsed_artifacts = _parse_named_paths(artifacts)
+    overlay_validation = None
+    for name, path in parsed_artifacts:
         _nonempty(path, "build artifact")
         artifact_records[name] = hash_file(path)
+        if name == "redroid-native-fbe-overlay.json":
+            overlay_validation = json.loads(path.read_text(encoding="utf-8"))
+    if (
+        not isinstance(overlay_validation, Mapping)
+        or overlay_validation.get("schema") != FBE_OVERLAY_VALIDATION_SCHEMA
+        or overlay_validation.get("outcome") != "pass"
+        or overlay_validation.get("game_artifact_included") is not False
+        or overlay_validation.get("android_fbe_proven") is not False
+        or overlay_validation.get("direct_boot_proven") is not False
+        or overlay_validation.get("source_lock_sha256") != source_lock.sha256
+    ):
+        raise AndroidImageSupplyChainError(
+            "native FBE overlay validation must pass without claiming runtime FBE"
+        )
     return {
         "schema": PROVENANCE_SCHEMA,
         "source_lock_sha256": source_lock.sha256,
@@ -118,6 +138,16 @@ def create_build_provenance(
             "security_patch": security_patch,
         },
         "artifacts": artifact_records,
+        "native_fbe_overlay": {
+            "schema": overlay_validation.get("schema"),
+            "outcome": overlay_validation.get("outcome"),
+            "android_fbe_proven": False,
+            "direct_boot_proven": False,
+            "source_lock_sha256": overlay_validation.get("source_lock_sha256"),
+            "artifact_sha256": artifact_records[
+                "redroid-native-fbe-overlay.json"
+            ]["sha256"],
+        },
         "sbom": dict(hash_file(sbom), format="SPDX-2.3"),
         "notices": [hash_file(path) for path in notices],
         "installed_files": hash_file(installed_files),

@@ -13,6 +13,7 @@ from typing import Any, Mapping
 
 PROBE_SCHEMA = "alas-headless.redroid-userdata-volume-probe/v1"
 QUALIFICATION_SCHEMA = "alas-headless.redroid-userdata-volume-qualification/v1"
+VOLUME_SET_SCHEMA = "alas-headless.redroid-host-fbe-volume-set/v1"
 FORBIDDEN_MOUNTPOINTS = {"/", "/data", "/var/lib/redroid/data"}
 
 
@@ -58,6 +59,9 @@ def qualify_userdata_volume(probe: Mapping[str, Any]) -> Mapping[str, Any]:
         blockers.append("mountpoint-was-not-empty")
     if probe.get("android_fbe_claimed") is not False:
         blockers.append("host-volume-must-not-claim-android-fbe")
+    role = str(probe.get("role", "userdata"))
+    if role not in {"userdata", "metadata"}:
+        blockers.append("volume-role-invalid")
 
     return {
         "schema": QUALIFICATION_SCHEMA,
@@ -65,6 +69,43 @@ def qualify_userdata_volume(probe: Mapping[str, Any]) -> Mapping[str, Any]:
         "ceiling": "host-volume-qualified",
         "android_fbe_proven": False,
         "direct_boot_proven": False,
+        "role": role,
         "blockers": blockers,
         "probe": dict(probe),
+    }
+
+
+def qualify_fbe_volume_set(
+    userdata: Mapping[str, Any], metadata: Mapping[str, Any]
+) -> Mapping[str, Any]:
+    """Bind distinct host userdata and metadata qualifications as one input set."""
+    blockers = []
+    for role, value in (("userdata", userdata), ("metadata", metadata)):
+        if value.get("schema") != QUALIFICATION_SCHEMA or value.get("outcome") != "pass":
+            blockers.append("{0}-qualification-not-pass".format(role))
+        if value.get("role", "userdata") != role:
+            blockers.append("{0}-role-mismatch".format(role))
+        if value.get("android_fbe_proven") is not False or value.get("direct_boot_proven") is not False:
+            blockers.append("{0}-qualification-overclaims-fbe".format(role))
+    user_probe = userdata.get("probe", {})
+    meta_probe = metadata.get("probe", {})
+    if not isinstance(user_probe, Mapping) or not isinstance(meta_probe, Mapping):
+        blockers.append("volume-probes-invalid")
+    else:
+        if user_probe.get("backing_file") == meta_probe.get("backing_file"):
+            blockers.append("volume-backing-files-not-distinct")
+        if user_probe.get("filesystem_uuid") == meta_probe.get("filesystem_uuid"):
+            blockers.append("volume-filesystem-uuids-not-distinct")
+        if user_probe.get("production_data_touched") is not False or meta_probe.get(
+            "production_data_touched"
+        ) is not False:
+            blockers.append("production-data-may-have-been-touched")
+    return {
+        "schema": VOLUME_SET_SCHEMA,
+        "outcome": "pass" if not blockers else "fail",
+        "ceiling": "host-fbe-volume-set-qualified",
+        "android_fbe_proven": False,
+        "direct_boot_proven": False,
+        "blockers": blockers,
+        "volumes": {"userdata": dict(userdata), "metadata": dict(metadata)},
     }

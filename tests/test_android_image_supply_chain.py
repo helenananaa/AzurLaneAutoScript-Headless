@@ -30,10 +30,18 @@ class AndroidImageSupplyChainTests(unittest.TestCase):
         for name in ("system.img", "vendor.img"):
             (directory / name).write_bytes(name.encode("ascii"))
         lock = self.source_lock()
+        (directory / "redroid-native-fbe-overlay.json").write_text(json.dumps({
+            "schema": "alas-headless.redroid-native-fbe-overlay-validation/v1",
+            "outcome": "pass", "game_artifact_included": False,
+            "android_fbe_proven": False, "direct_boot_proven": False,
+            "source_lock_sha256": lock.sha256,
+        }), encoding="utf-8")
         return create_build_provenance(
             lock, resolved, "arm64-v8a", "redroid_arm64_only-userdebug",
             "redroid_arm64_only", "fingerprint/test", "2025-05-05",
-            ["system.img=" + str(directory / "system.img"), "vendor.img=" + str(directory / "vendor.img")],
+            ["system.img=" + str(directory / "system.img"),
+             "vendor.img=" + str(directory / "vendor.img"),
+             "redroid-native-fbe-overlay.json=" + str(directory / "redroid-native-fbe-overlay.json")],
             sbom, [notice], installed,
             {"outcome": "pass", "source_lock_sha256": lock.sha256},
         )
@@ -72,7 +80,8 @@ class AndroidImageSupplyChainTests(unittest.TestCase):
                     lock, directory / "resolved.xml", "arm64-v8a",
                     "redroid_arm64_only-userdebug", "redroid_arm64_only", "fp",
                     "2025-05-05", ["system.img=" + str(directory / "system.img"),
-                    "vendor.img=" + str(directory / "vendor.img")], sbom,
+                    "vendor.img=" + str(directory / "vendor.img"),
+                    "redroid-native-fbe-overlay.json=" + str(directory / "redroid-native-fbe-overlay.json")], sbom,
                     [directory / "NOTICE.xml.gz"], directory / "installed-files.txt",
                     {"outcome": "pass", "source_lock_sha256": lock.sha256},
                 )
