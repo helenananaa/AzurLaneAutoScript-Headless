@@ -231,9 +231,14 @@ cp "$overlay_root/product.mk" "$source_root/product.mk"
 
 build_one() {
     local abi=$1 lunch_target=$2 product_name=$3
+    # AOSP's envsetup probes variables such as TOP before defining them. Keep
+    # strict nounset everywhere else, but do not impose it on the upstream
+    # shell initialisation contract.
+    set +u
     # shellcheck disable=SC1091
     source build/envsetup.sh
     lunch "$lunch_target"
+    set -u
     m -j"$(nproc)"
     m sbom -j"$(nproc)"
     local product_dir="$source_root/out/target/product/$product_name"
