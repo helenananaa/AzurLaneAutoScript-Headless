@@ -30,6 +30,15 @@ else
     printf '%s\n' "$source_lock_sha256" > "$resume_marker"
 fi
 
+# systemd build units intentionally have no login HOME. Android 14's release
+# config compiles Go helpers and therefore requires a writable cache. Keep all
+# build state on the dedicated work device alongside the source tree.
+export HOME="$source_root/.alas-build-home"
+export XDG_CACHE_HOME="$HOME/.cache"
+export GOCACHE="$XDG_CACHE_HOME/go-build"
+export CCACHE_DIR="$XDG_CACHE_HOME/ccache"
+mkdir -p "$GOCACHE" "$CCACHE_DIR"
+
 run_json_evidence() {
     local output=$1
     shift
