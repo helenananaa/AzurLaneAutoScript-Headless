@@ -16,7 +16,7 @@ jobs:
       - name: Compile Python entrypoints
         run: python -m compileall -q python scripts/python
       - name: Parse Redroid build entrypoint
-        run: bash -n scripts/wsl/build-redroid-images.sh scripts/wsl/qualify-redroid-image-rollback.sh
+        run: bash -n scripts/wsl/build-redroid-images.sh scripts/wsl/package-redroid-oci.sh scripts/wsl/qualify-redroid-image-rollback.sh
       - name: Validate image policy
         env:
           PYTHONPATH: python

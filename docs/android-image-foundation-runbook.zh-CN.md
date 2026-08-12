@@ -158,6 +158,25 @@ PYTHONPATH=python python3 scripts/python/compare_android_image_builds.py \
 
 provenance 必须同时绑定源码锁、resolved manifest、fingerprint、安全补丁、`system.img`/`vendor.img`、AOSP SPDX 2.3 SBOM、NOTICE 与 installed-files；inventory 中发现游戏包名会直接失败。源码锁还逐个固定 local manifest 引入的五个 Redroid 子项目；构建器用 `extend-project` overlay 锁 commit，并在 sync 后逐项核对 `repo manifest -r`，不能让上游 `master` 漂移。当前仓库已有可执行构建入口，但尚未在满足资源下限的宿主完成上述两次全量构建，因此仍不得称为可复现发布制品。
 
+### 3.3 确定性 OCI 打包
+
+`build-redroid-images.sh` 在每个 product 完成后自动调用 `package-redroid-oci.sh`。打包器只读挂载 system/vendor，按路径排序、统一 `SOURCE_DATE_EPOCH`、owner/group 和 pax 时间字段，保留 xattr，生成单平台 OCI layout archive；OCI config 固定 Redroid entrypoint，并写入 ABI、fingerprint、源码锁和 `game-delivery=external-install` labels。archive 同样进入 provenance。
+
+单独调试打包器时：
+
+```bash
+sudo ./scripts/wsl/package-redroid-oci.sh \
+  out/target/product/redroid_arm64_only/system.img \
+  out/target/product/redroid_arm64_only/vendor.img \
+  arm64-v8a <source-lock-sha256> '<build-fingerprint>' <source-date-epoch> \
+  evidence/redroid-arm64-v8a.oci.tar \
+  evidence/redroid-arm64-v8a.oci-build.json
+
+docker load --platform linux/arm64 -i evidence/redroid-arm64-v8a.oci.tar
+```
+
+同一 rootfs layer、源码锁、fingerprint 和 epoch 必须生成相同 archive SHA-256 与 manifest digest。合成 rootfs 已在 Docker 29 containerd image store 上分别完成 x86_64/ARM64 `load + inspect` 冒烟；这证明打包格式可消费，不代表真实 Android product 已构建或启动。
+
 ## 4. 构建双架构 ANGLE 制品
 
 以下命令在 WSL 中执行。ANGLE 源码和 depot_tools 放在仓库外，避免污染 Git：
@@ -527,7 +546,7 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 本 worktree 已完成以下不依赖真实 ALAS 挂机数据的基础工作：
 
 - 策略 `compat-foundation-v1` 校验通过，SHA-256 为 `622d7fb202d020fda5ad87291c8fb36f546af0562a927ea6df9c461a83844233`；
-- 当前仓库全量测试 `468 passed`；
+- 当前仓库全量测试 `471 passed`；
 - x86_64 与 ARM64 Unity 合同 APK 均已构建并确认只含目标 ABI；当前 SHA-256 分别为 `6030c2d4ba41b7b29150490b3d977991e01084a83e523b6a64d98fdfd5a3ceb0` 与 `dcd02e4aa10fb972ea9d7ba20c54b46ccab9f016308d8634d0207af4cbf51a61`；
 - 最新 observer ANGLE x86_64/ARM64 APK 已从固定 ANGLE revision 交叉构建，SHA-256 分别为 `98941a4fb1fc99b201cde6b86498da6c132a74c0cf5d60b4b72fcb3dbff627fe` 与 `8670115d326ddc39ccc5ae2cd36352e7377c3c23f8360aa358649ec959e40ccb`；observer ABI 由编译目标生成，不再硬编码 x86_64；
 - x86_64 更新实验完整通过：错签拒绝、单 APK、ABI split、userdata migration、进程中断续传、低空间、Android 重启续传、原子提升与回滚；
@@ -544,6 +563,7 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 - ARM64 已完成一次独立临时 `/data` 的真实 OCI 回退：Android 12 digest `d3fb…78b2` → Android 13 digest `5a42…c13b` → 恢复快照 → Android 12 digest；候选与回退后的 sentinel 均保留且实验目录清理，证据为 `redroid-image-rollback-arm64-20260812.json`；
 - 自维护源码锁已固定 AOSP `android-14.0.0_r75`、Redroid 14 local manifests、对应 patch set 与五个 transitive Redroid 项目 commit，八组远端 ref/commit 实时核验通过，源码锁 SHA-256 为 `3e8d154222c164d41ba045fac14335ece1d3546338e62e8de089bf57abbf65eb`；
 - 双 ABI 构建入口、AOSP SPDX 2.3 SBOM/NOTICE provenance、installed-files 游戏制品负检、两次构建 payload 一致性门与 release 强制绑定均已实现；
+- 确定性 Redroid OCI layout/archive 生成器已实现；同输入双次字节一致性单测通过，合成 x86_64 与 ARM64 archive 均已由 Docker 29 实际 load/inspect，且不包含游戏；
 - digest-pinned stock Redroid 14/API 34 ARM64 基线已独立通过 G1/G2/G3 与完整更新实验，安全补丁为 `2024-05-05`；600 秒无游戏/无 ALAS 空闲基线为 CPU busy `0.222%`、Used RAM `1078133 KiB`，只用于该镜像基线记录；
 - Android 14 ARM64 受保护能力仍为 20/21，唯一失败是 `device-encrypted-storage`。官方 Redroid 14 device 产品配置明确设置 `PRODUCT_BUILD_USERDATA_IMAGE := false`，宿主目录直接 bind 到 `/data`，所以 FBE 不能靠属性或普通 fstab overlay 修复；
 - Android 12 digest `d3fb…78b2` → Android 14 digest `0a61…69aa` → 恢复快照 → Android 12 的真实回退已通过；证据同时验证候选 fingerprint/API 34 与恢复后的旧 fingerprint/API 31，避免用可空的 `ro.runtime.firstboot` 冒充候选身份；

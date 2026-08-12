@@ -21,6 +21,7 @@ mkdir -p "$source_root" "$evidence_root"
 
 export PYTHONPATH="$repo_root/python"
 python3 "$repo_root/scripts/python/validate_android_image_source_lock.py" --source-lock "$source_lock"
+source_lock_sha256=$(python3 "$repo_root/scripts/python/validate_android_image_source_lock.py" --source-lock "$source_lock" | tail -n1)
 python3 "$repo_root/scripts/python/preflight_redroid_build.py" \
     --source-lock "$source_lock" --root / --output "$evidence_root/host-preflight.json"
 python3 "$repo_root/scripts/python/verify_android_image_source_remotes.py" \
@@ -72,6 +73,8 @@ print("</manifest>")
 PY
 repo sync -c --fail-fast -j"$(nproc)"
 repo manifest -r -o "$evidence_root/resolved-manifest.xml"
+source_date_epoch=$(git -C .repo/manifests show -s --format=%ct "$platform_commit")
+[[ $source_date_epoch =~ ^[0-9]+$ ]] || { echo "invalid SOURCE_DATE_EPOCH" >&2; exit 1; }
 python3 - "$source_lock" "$evidence_root/resolved-manifest.xml" <<'PY'
 import json, sys
 import xml.etree.ElementTree as ET
@@ -126,6 +129,12 @@ build_one() {
     local fingerprint patch
     fingerprint=$(sed -n 's/^ro.build.fingerprint=//p' "$build_prop" | head -n1)
     patch=$(sed -n 's/^ro.build.version.security_patch=//p' "$build_prop" | head -n1)
+    local oci_archive="$evidence_root/redroid-$abi.oci.tar"
+    local oci_identity="$evidence_root/redroid-$abi.oci-build.json"
+    sudo "$repo_root/scripts/wsl/package-redroid-oci.sh" \
+        "$product_dir/system.img" "$product_dir/vendor.img" "$abi" \
+        "$source_lock_sha256" "$fingerprint" "$source_date_epoch" \
+        "$oci_archive" "$oci_identity"
     python3 "$repo_root/scripts/python/create_android_build_provenance.py" \
         --source-lock "$source_lock" \
         --resolved-manifest "$evidence_root/resolved-manifest.xml" \
@@ -133,6 +142,7 @@ build_one() {
         --build-fingerprint "$fingerprint" --security-patch "$patch" \
         --artifact "system.img=$product_dir/system.img" \
         --artifact "vendor.img=$product_dir/vendor.img" \
+        --artifact "redroid.oci.tar=$oci_archive" \
         --sbom "$sbom" --notice "$notice" \
         --installed-files "$product_dir/installed-files.txt" \
         --host-preflight "$evidence_root/host-preflight.json" \
