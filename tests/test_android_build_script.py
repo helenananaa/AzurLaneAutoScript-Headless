@@ -32,6 +32,12 @@ class AndroidBuildScriptTests(unittest.TestCase):
         self.assertIn('export GOCACHE="$XDG_CACHE_HOME/go-build"', script)
         self.assertIn('export CCACHE_DIR="$XDG_CACHE_HOME/ccache"', script)
 
+    def test_non_executable_packager_is_run_through_bash(self) -> None:
+        self.assertIn(
+            'sudo /bin/bash "$repo_root/scripts/wsl/package-redroid-oci.sh"',
+            self.script(),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

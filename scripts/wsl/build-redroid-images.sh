@@ -274,7 +274,7 @@ build_one() {
     }
     local oci_archive="$evidence_root/redroid-$abi.oci.tar"
     local oci_identity="$evidence_root/redroid-$abi.oci-build.json"
-    sudo "$repo_root/scripts/wsl/package-redroid-oci.sh" \
+    sudo /bin/bash "$repo_root/scripts/wsl/package-redroid-oci.sh" \
         "$product_dir/system.img" "$product_dir/vendor.img" "$abi" \
         "$source_lock_sha256" "$fingerprint" "$source_date_epoch" \
         "$oci_archive" "$oci_identity"
