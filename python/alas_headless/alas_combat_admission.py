@@ -91,10 +91,10 @@ def prepare_alas_campaign_combat_admission(
 ) -> AlasCampaignCombatAdmission:
     """Bind one same-cell or bounded-route decision to its exact map cell.
 
-    G23 admits at most three orthogonal steps when every intermediate node is
-    a typed passable cell with no enemy, fleet, or pickup.  Fleet switching,
-    ammunition pickups, bosses, portals, diagonal routes, and longer movement
-    remain outside this contract.
+    Admit the exact orthogonal ALAS route when every intermediate node is a
+    typed passable cell with no enemy, fleet, or pickup. Fleet switching,
+    ammunition pickups, portals, and diagonal routes remain outside this
+    contract.
     """
 
     if not isinstance(decision, AlasCampaignDecisionPreview):
@@ -111,8 +111,11 @@ def prepare_alas_campaign_combat_admission(
         raise SemanticGateClosed("campaign combat decision generation changed")
     if decision.stage_code != state.stage_code:
         raise SemanticGateClosed("campaign combat stage identity changed")
-    if decision.target_kind != "enemy" or decision.expected != "combat":
-        raise SemanticGateClosed("campaign combat target is not a normal enemy")
+    if decision.target_kind != "enemy" or decision.expected not in (
+        "combat",
+        "combat_boss",
+    ):
+        raise SemanticGateClosed("campaign combat target is not an enemy")
     if (
         isinstance(decision.cost, bool)
         or not isinstance(decision.cost, int)
@@ -132,7 +135,7 @@ def prepare_alas_campaign_combat_admission(
         and all(match is not None for match in route_matches)
     )
     bounded_route = (
-        2 <= len(decision.route_nodes) <= 4
+        2 <= len(decision.route_nodes) <= len(state.cells)
         and decision.cost > 0
         and decision.origin_node != decision.target_node
         and decision.route_nodes[0] == decision.origin_node
@@ -152,7 +155,7 @@ def prepare_alas_campaign_combat_admission(
         )
     if not (same_cell or bounded_route) or decision.goto_nodes != (decision.target_node,):
         raise SemanticGateClosed(
-            "campaign combat admission is limited to a same-cell or three-step route"
+            "campaign combat admission requires one exact orthogonal route"
         )
     if decision.step_optimize:
         raise SemanticGateClosed("campaign combat fleet-step movement is not admitted")

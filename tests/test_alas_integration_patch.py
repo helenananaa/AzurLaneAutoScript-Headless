@@ -269,8 +269,7 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         self.assertIn("grid.location for grid in campaign_map", self.patch_text)
         self.assertIn("if grid.is_land", self.patch_text)
         self.assertIn("expected_fleet_count=sum((", self.patch_text)
-        self.assertIn("Semantic campaign map model:", self.patch_text)
-        self.assertIn("+                    return True", self.patch_text)
+        self.assertIn("semantic_map_resume = True", self.patch_text)
         self.assertIn("logger.info('Already in map, retreating.')", self.patch_text)
 
     def test_campaign_map_projection_delegates_to_alas_without_movement(self):
@@ -282,14 +281,7 @@ class AlasIntegrationPatchTests(unittest.TestCase):
             "synchronize_alas_campaign_map(",
             self.patch_text,
         )
-        self.assertIn("self.campaign, state", self.patch_text)
-        self.assertIn("Semantic ALAS map projection:", self.patch_text)
-        self.assertIn("recommended_enemy_node", self.patch_text)
-        self.assertIn("recommended_pickup_node", self.patch_text)
-        self.assertIn("projection.displayed_fleet_index", self.patch_text)
-        self.assertIn("projection.current_fleet_index", self.patch_text)
-        self.assertIn("fleet.fleet_index", self.patch_text)
-        self.assertIn("fleet.is_current", self.patch_text)
+        self.assertIn("synchronize_alas_campaign_map(self, state)", self.patch_text)
         self.assertNotIn("semantic_map_projection.goto", self.patch_text)
         self.assertNotIn("semantic_map_projection.map_control_init", self.patch_text)
 
@@ -302,22 +294,19 @@ class AlasIntegrationPatchTests(unittest.TestCase):
             "decision = preview_alas_campaign_decision(",
             self.patch_text,
         )
-        self.assertIn("self.campaign, projection", self.patch_text)
-        self.assertIn("Semantic ALAS campaign decision:", self.patch_text)
+        self.assertIn("preview_alas_campaign_decision(self, projection)", self.patch_text)
         self.assertIn("decision.branch_name", self.patch_text)
         self.assertIn("decision.fleet_index", self.patch_text)
         self.assertIn("decision.target_node", self.patch_text)
         self.assertIn("decision.route_nodes", self.patch_text)
-        self.assertIn("decision.goto_nodes", self.patch_text)
         self.assertNotIn("self.campaign.goto(decision", self.patch_text)
         self.assertNotIn("self.campaign._goto(decision", self.patch_text)
 
-    def test_campaign_combat_admission_runs_captured_native_goto_prefix(self):
+    def test_campaign_combat_admission_runs_before_each_native_alas_battle(self):
         self.assertIn(
             "semantic_adapter.authorize_campaign_combat(",
             self.patch_text,
         )
-        self.assertIn("Semantic ALAS combat admission:", self.patch_text)
         self.assertIn(
             "preview_alas_campaign_goto_input,",
             self.patch_text,
@@ -326,9 +315,11 @@ class AlasIntegrationPatchTests(unittest.TestCase):
             "goto_input = preview_alas_campaign_goto_input(",
             self.patch_text,
         )
-        self.assertIn("Semantic ALAS goto input preview:", self.patch_text)
-        self.assertIn("goto_input.call_order", self.patch_text)
-        self.assertIn(
+        self.assertIn("self.semantic_prepare_a_battle()", self.patch_text)
+        self.assertIn("complete_campaign_combat_round(", self.patch_text)
+        self.assertIn("Semantic ALAS battle ready:", self.patch_text)
+        self.assertIn("Already in semantic campaign map, resuming ALAS.", self.patch_text)
+        self.assertNotIn(
             "Semantic ALAS goto input preview validation complete",
             self.patch_text,
         )

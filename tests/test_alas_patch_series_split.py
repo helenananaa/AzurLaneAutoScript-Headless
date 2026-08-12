@@ -46,6 +46,7 @@ FLOW_PATHS = {
         "module/map/map_fleet_preparation.py",
     },
     "0050-combat-flow-ports.patch": {
+        "module/campaign/campaign_base.py",
         "module/campaign/run.py",
         "module/map/camera.py",
         "module/map/map_operation.py",
@@ -109,7 +110,7 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
 
         self.assertEqual(set(core), CORE_PATHS)
         self.assertEqual(set(lifecycle), LIFECYCLE_PATHS)
-        self.assertEqual(len(tasks), 19)
+        self.assertEqual(len(tasks), 20)
         self.assertFalse(set(core) & set(lifecycle))
         self.assertFalse(set(core) & set(tasks))
         self.assertFalse(set(lifecycle) & set(tasks))
@@ -152,7 +153,7 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                 target_blobs(SERIES / "0090-legacy-task-hooks.patch")
             )
             self.assertFalse(promoted & residual)
-            self.assertEqual(len(promoted) + len(residual), 19)
+            self.assertEqual(len(promoted) + len(residual), 20)
 
     def test_core_prefix_contains_no_task_module(self):
         core_prefix = set(target_blobs(SERIES / "0001-core-ports.patch"))

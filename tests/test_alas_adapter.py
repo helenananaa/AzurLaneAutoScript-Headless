@@ -2254,6 +2254,91 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual((proof.battle_count_before, proof.battle_count_after), (0, 1))
         self.assertEqual(oracle.click_calls, ["campaign/map/grid/D6"])
 
+    def test_campaign_combat_budget_can_advance_to_the_next_alas_battle(self):
+        oracle = FakeOracle()
+        oracle.campaign_map_state_value = make_campaign_combat_state()
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_combat_budget=2,
+        )
+        adapter.begin_campaign_pre_sortie("12-4")
+        state = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        self.assertIsNotNone(
+            adapter.authorize_campaign_combat(
+                make_campaign_combat_decision(), state
+            )
+        )
+        adapter.click(CampaignGridButton((3, 5)))
+        oracle.campaign_map_state_value = make_campaign_combat_state(
+            generation=55, after=True
+        )
+
+        proof = adapter.complete_campaign_combat_round(battle_count_after=1)
+
+        self.assertIsNotNone(proof)
+        self.assertFalse(adapter.campaign_combat_committed())
+        self.assertEqual(adapter._action_ledger.remaining("campaign.grid_click"), 1)
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_combat_admits_alas_boss_over_a_long_orthogonal_route(self):
+        oracle = FakeOracle()
+        base = make_campaign_combat_state()
+        nodes = ("D6", "E6", "F6", "G6", "H6")
+        cells = tuple(
+            replace(
+                base.cells[0],
+                column=index + 4,
+                node=node,
+                button_path="root/DragLayer/plane/quads/" + node,
+            )
+            for index, node in enumerate(nodes)
+        )
+        state = replace(
+            base,
+            cells=cells,
+            enemies=(
+                replace(
+                    base.enemies[0],
+                    column=8,
+                    node="H6",
+                    fighting=False,
+                ),
+            ),
+        )
+        oracle.campaign_map_state_value = state
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_combat_budget=1,
+        )
+        adapter.begin_campaign_pre_sortie("12-4")
+        current = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        decision = replace(
+            make_campaign_combat_decision(),
+            target_node="H6",
+            expected="combat_boss",
+            cost=4,
+            route_nodes=nodes,
+            goto_nodes=("H6",),
+        )
+
+        admission = adapter.authorize_campaign_combat(decision, current)
+
+        self.assertIsNotNone(admission)
+        self.assertEqual(admission.target_node, "H6")
+        adapter.end_campaign_pre_sortie()
+
     def test_campaign_viewport_swipe_is_one_use_and_updates_exact_grid_geometry(self):
         oracle = FakeOracle()
         oracle.campaign_map_state_value = make_campaign_combat_state()
@@ -2657,7 +2742,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             route_nodes=("D6", "D5"),
         )
 
-        with self.assertRaisesRegex(SemanticGateClosed, "same-cell or three-step route"):
+        with self.assertRaisesRegex(SemanticGateClosed, "exact orthogonal route"):
             adapter.authorize_campaign_combat(decision, current)
 
         self.assertEqual(oracle.click_calls, [])

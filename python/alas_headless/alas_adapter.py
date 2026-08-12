@@ -2941,10 +2941,8 @@ class AlasSemanticAdapter:
         context = self._require_campaign_context()
         if not self._action_ledger.allowed("campaign.grid_click"):
             return None
-        if self._action_ledger.remaining("campaign.grid_click") != 1:
-            raise SemanticGateClosed(
-                "campaign combat requires exactly one remaining budget unit"
-            )
+        if self._action_ledger.remaining("campaign.grid_click") < 1:
+            return None
         if (
             context.combat_admission is not None
             or context.combat_receipt is not None
@@ -2983,6 +2981,32 @@ class AlasSemanticAdapter:
         context.combat_admission = admission
         context.viewport_swipe_required = viewport_required
         return admission
+
+    def complete_campaign_combat_round(
+        self,
+        battle_count_after: int,
+    ) -> Optional[AlasCampaignCombatProof]:
+        """Close the previous ALAS battle before admitting its next decision."""
+
+        context = self._require_campaign_context()
+        if context.combat_receipt is None:
+            if context.combat_admission is not None:
+                raise SemanticGateClosed(
+                    "previous campaign combat admission was not committed"
+                )
+            return None
+        proof = self.confirm_campaign_combat(battle_count_after)
+        context.combat_admission = None
+        context.viewport_swipe_required = False
+        context.viewport_swipe_intent = None
+        context.viewport_swipe_proof = None
+        context.camera_positioning_admission = None
+        context.camera_positioning_proofs.clear()
+        context.camera_positioning_completed = False
+        context.target_recheck_proof = None
+        context.combat_receipt = None
+        context.combat_proof = None
+        return proof
 
     @staticmethod
     def _campaign_swipe_pair(value: Any, label: str) -> Tuple[float, float]:
@@ -3536,11 +3560,11 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign combat grid target changed")
         if (
             not self._action_ledger.allowed("campaign.grid_click")
-            or self._action_ledger.remaining("campaign.grid_click") != 1
+            or self._action_ledger.remaining("campaign.grid_click") < 1
             or context.combat_receipt is not None
         ):
             raise SemanticGateClosed(
-                "campaign combat grid requires one remaining budget unit"
+                "campaign combat grid requires remaining budget"
             )
         receipt = self._dispatch_mutation(
             "campaign.grid_click",
@@ -5857,6 +5881,12 @@ class AlasSemanticSession:
         battle_count_after: int,
     ) -> AlasCampaignCombatProof:
         return self.open().confirm_campaign_combat(battle_count_after)
+
+    def complete_campaign_combat_round(
+        self,
+        battle_count_after: int,
+    ) -> Optional[AlasCampaignCombatProof]:
+        return self.open().complete_campaign_combat_round(battle_count_after)
 
     def begin_campaign_map_swipe_vector(
         self, vector: Any, **kwargs: Any
