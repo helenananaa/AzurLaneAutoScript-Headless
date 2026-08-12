@@ -208,6 +208,32 @@ def compare_build_provenance(first: Mapping[str, Any], second: Mapping[str, Any]
                 left.get("sha256") != right.get("sha256")
             ):
                 blockers.append("artifact-digest-mismatch:{0}".format(name))
+    for key in ("sbom", "installed_files"):
+        left = first.get(key)
+        right = second.get(key)
+        left_digest = left.get("sha256") if isinstance(left, Mapping) else None
+        right_digest = right.get("sha256") if isinstance(right, Mapping) else None
+        if not left_digest or left_digest != right_digest:
+            blockers.append("{0}-digest-mismatch".format(key.replace("_", "-")))
+    first_notices = first.get("notices")
+    second_notices = second.get("notices")
+    if not isinstance(first_notices, Sequence) or isinstance(first_notices, (str, bytes)):
+        blockers.append("build-1-notices-invalid")
+    elif not isinstance(second_notices, Sequence) or isinstance(second_notices, (str, bytes)):
+        blockers.append("build-2-notices-invalid")
+    else:
+        left_notice_digests = [
+            item.get("sha256") if isinstance(item, Mapping) else None
+            for item in first_notices
+        ]
+        right_notice_digests = [
+            item.get("sha256") if isinstance(item, Mapping) else None
+            for item in second_notices
+        ]
+        if not left_notice_digests or left_notice_digests != right_notice_digests:
+            blockers.append("notice-digest-mismatch")
+    if first.get("build_identity") != second.get("build_identity"):
+        blockers.append("build-identity-mismatch")
     return {
         "schema": REPRODUCIBILITY_SCHEMA,
         "outcome": "pass" if not blockers else "blocked",

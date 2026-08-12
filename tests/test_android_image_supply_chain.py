@@ -75,6 +75,23 @@ class AndroidImageSupplyChainTests(unittest.TestCase):
             self.assertEqual(result["outcome"], "blocked")
             self.assertIn("artifact-digest-mismatch:system.img", result["blockers"])
 
+    def test_reproducibility_compares_sbom_notice_inventory_and_identity(self) -> None:
+        with TemporaryDirectory() as raw:
+            first = self.create(Path(raw))
+            second = json.loads(json.dumps(first))
+            second["sbom"]["sha256"] = "1" * 64
+            second["notices"][0]["sha256"] = "2" * 64
+            second["installed_files"]["sha256"] = "3" * 64
+            second["build_identity"]["fingerprint"] = "different/fingerprint"
+
+            result = compare_build_provenance(first, second)
+
+            self.assertEqual(result["outcome"], "blocked")
+            self.assertIn("sbom-digest-mismatch", result["blockers"])
+            self.assertIn("notice-digest-mismatch", result["blockers"])
+            self.assertIn("installed-files-digest-mismatch", result["blockers"])
+            self.assertIn("build-identity-mismatch", result["blockers"])
+
     def test_requires_official_spdx_23_shape(self) -> None:
         with TemporaryDirectory() as raw:
             directory = Path(raw)
