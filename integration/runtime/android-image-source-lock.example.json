@@ -1,0 +1,41 @@
+{
+  "schema": "alas-headless.android-image-source-lock/v1",
+  "platform": {
+    "manifest_url": "https://android.googlesource.com/platform/manifest",
+    "revision": "android-14.0.0_r75",
+    "commit": "c49a52c108f10a64f6122af27fd27f96b8d45424"
+  },
+  "redroid": {
+    "local_manifests_url": "https://github.com/remote-android/local_manifests.git",
+    "local_manifests_revision": "14.0.0",
+    "local_manifests_commit": "d801ec2ab62b45b920bada57260701d2b1c60321",
+    "patches_url": "https://github.com/remote-android/redroid-patches.git",
+    "patches_revision": "master",
+    "patches_commit": "a5c70c0dd89c12b5027c902ab4182f31d38f3bb7",
+    "patch_set": "android-14.0.0_r75"
+  },
+  "products": [
+    {
+      "abi": "x86_64",
+      "lunch": "redroid_x86_64_only-userdebug",
+      "product_out": "redroid_x86_64_only"
+    },
+    {
+      "abi": "arm64-v8a",
+      "lunch": "redroid_arm64_only-userdebug",
+      "product_out": "redroid_arm64_only"
+    }
+  ],
+  "build": {
+    "host_os": "linux",
+    "host_arch": "x86_64",
+    "minimum_free_disk_gib": 400,
+    "minimum_ram_gib": 64,
+    "commands": [
+      "m",
+      "m sbom"
+    ],
+    "resolved_manifest_required": true,
+    "game_artifact_allowed": false
+  }
+}

@@ -15,10 +15,16 @@ jobs:
           python-version: '3.11'
       - name: Compile Python entrypoints
         run: python -m compileall -q python scripts/python
+      - name: Parse Redroid build entrypoint
+        run: bash -n scripts/wsl/build-redroid-images.sh scripts/wsl/qualify-redroid-image-rollback.sh
       - name: Validate image policy
         env:
           PYTHONPATH: python
         run: python scripts/python/validate_android_image_policy.py --policy integration/runtime/android-image-policy.example.json
+      - name: Validate immutable image source lock
+        env:
+          PYTHONPATH: python
+        run: python scripts/python/validate_android_image_source_lock.py --source-lock integration/runtime/android-image-source-lock.example.json
       - name: Run repository tests
         env:
           PYTHONPATH: python

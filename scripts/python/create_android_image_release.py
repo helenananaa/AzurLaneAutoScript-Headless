@@ -14,6 +14,7 @@ from alas_headless.android_image_release import TARGET_ABIS
 from alas_headless.android_image_release import build_release_manifest
 from alas_headless.android_image_release import load_json
 from alas_headless.android_image_release import target_record
+from alas_headless.android_image_source import AndroidImageSourceLock
 
 
 def optional_json(path: Optional[Path]) -> Optional[Mapping[str, object]]:
@@ -39,6 +40,7 @@ def main(argv: Sequence[str] = ()) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--policy", required=True, type=Path)
+    parser.add_argument("--source-lock", required=True, type=Path)
     for prefix in ("x86-64", "arm64"):
         parser.add_argument("--{0}-contract-apk".format(prefix), type=Path)
         parser.add_argument("--{0}-angle-apk".format(prefix), type=Path)
@@ -49,6 +51,9 @@ def main(argv: Sequence[str] = ()) -> int:
         parser.add_argument("--{0}-observer-evidence".format(prefix), type=Path)
         parser.add_argument("--{0}-audit".format(prefix), type=Path)
         parser.add_argument("--{0}-update-evidence".format(prefix), type=Path)
+        parser.add_argument("--{0}-build-provenance".format(prefix), type=Path)
+        parser.add_argument("--{0}-reproducibility-evidence".format(prefix), type=Path)
+        parser.add_argument("--{0}-rollback-evidence".format(prefix), type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--require-promotable", action="store_true")
     args = parser.parse_args(list(argv) if argv else None)
@@ -56,10 +61,12 @@ def main(argv: Sequence[str] = ()) -> int:
         parser.error("--output must not already exist")
 
     policy = AndroidImagePolicy.from_mapping(load_json(args.policy))
+    source_lock = AndroidImageSourceLock.from_path(args.source_lock)
     status = git_output(args.repo, "status", "--porcelain")
     source = {
         "commit": git_output(args.repo, "rev-parse", "HEAD"),
         "dirty": bool(status),
+        "source_lock_sha256": source_lock.sha256,
     }
     targets = {
         "x86_64": target_record(
@@ -72,6 +79,9 @@ def main(argv: Sequence[str] = ()) -> int:
             },
             optional_json(args.x86_64_audit), optional_json(args.x86_64_update_evidence),
             optional_json(args.x86_64_image_identity),
+            optional_json(args.x86_64_build_provenance),
+            optional_json(args.x86_64_reproducibility_evidence),
+            optional_json(args.x86_64_rollback_evidence),
         ),
         "arm64-v8a": target_record(
             "arm64-v8a", args.arm64_contract_apk, args.arm64_angle_apk,
@@ -83,6 +93,9 @@ def main(argv: Sequence[str] = ()) -> int:
             },
             optional_json(args.arm64_audit), optional_json(args.arm64_update_evidence),
             optional_json(args.arm64_image_identity),
+            optional_json(args.arm64_build_provenance),
+            optional_json(args.arm64_reproducibility_evidence),
+            optional_json(args.arm64_rollback_evidence),
         ),
     }
     manifest = build_release_manifest(policy, source, targets)

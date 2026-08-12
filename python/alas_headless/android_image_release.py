@@ -16,7 +16,19 @@ from .android_image_policy import AndroidImagePolicy
 RELEASE_SCHEMA = "alas-headless.android-image-foundation-release/v1"
 TARGET_ABIS = ("x86_64", "arm64-v8a")
 OCI_IDENTITY_SCHEMA = "alas-headless.oci-image-identity/v1"
+PROVENANCE_SCHEMA = "alas-headless.android-image-build-provenance/v1"
+REPRODUCIBILITY_SCHEMA = "alas-headless.android-image-reproducibility/v1"
+ROLLBACK_SCHEMA = "alas-headless.redroid-image-rollback/v1"
 OCI_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
+SHA256 = re.compile(r"^[0-9a-f]{64}$")
+
+
+def valid_hashed_file(value: Any) -> bool:
+    return (
+        isinstance(value, Mapping)
+        and SHA256.fullmatch(str(value.get("sha256", ""))) is not None
+        and int(value.get("bytes", 0)) > 0
+    )
 
 
 def hash_file(path: Path) -> Mapping[str, Any]:
@@ -54,6 +66,9 @@ def target_record(
     foundation_audit: Optional[Mapping[str, Any]],
     update_evidence: Optional[Mapping[str, Any]],
     image_identity: Optional[Mapping[str, Any]] = None,
+    build_provenance: Optional[Mapping[str, Any]] = None,
+    reproducibility_evidence: Optional[Mapping[str, Any]] = None,
+    rollback_evidence: Optional[Mapping[str, Any]] = None,
 ) -> Mapping[str, Any]:
     blockers = []
     contract = None
@@ -187,6 +202,87 @@ def target_record(
         if split_token not in split_paths:
             blockers.append("update-qualification-abi-mismatch")
 
+    provenance_summary = None
+    if build_provenance is None:
+        blockers.append("build-provenance-missing")
+    else:
+        provenance_summary = {
+            "schema": build_provenance.get("schema"),
+            "source_lock_sha256": build_provenance.get("source_lock_sha256"),
+            "target": build_provenance.get("target"),
+            "build_identity": build_provenance.get("build_identity"),
+            "artifacts": build_provenance.get("artifacts"),
+            "sbom": build_provenance.get("sbom"),
+            "notices": build_provenance.get("notices"),
+        }
+        target = build_provenance.get("target", {})
+        if build_provenance.get("schema") != PROVENANCE_SCHEMA:
+            blockers.append("build-provenance-schema-mismatch")
+        if not isinstance(target, Mapping) or target.get("abi") != abi:
+            blockers.append("build-provenance-abi-mismatch")
+        if build_provenance.get("game_artifact_included") is not False or build_provenance.get("alas_workload_used") is not False:
+            blockers.append("build-provenance-scope-invalid")
+        artifacts = build_provenance.get("artifacts", {})
+        if not isinstance(artifacts, Mapping) or not all(
+            valid_hashed_file(artifacts.get(name)) for name in ("system.img", "vendor.img")
+        ):
+            blockers.append("build-provenance-artifacts-invalid")
+        if not valid_hashed_file(build_provenance.get("resolved_manifest")):
+            blockers.append("build-provenance-resolved-manifest-invalid")
+        sbom = build_provenance.get("sbom")
+        if not valid_hashed_file(sbom) or sbom.get("format") != "SPDX-2.3":
+            blockers.append("build-provenance-sbom-invalid")
+        notices = build_provenance.get("notices")
+        if not isinstance(notices, list) or not notices or not all(valid_hashed_file(item) for item in notices):
+            blockers.append("build-provenance-notices-invalid")
+        if not valid_hashed_file(build_provenance.get("installed_files")):
+            blockers.append("build-provenance-inventory-invalid")
+        host_preflight = build_provenance.get("host_preflight")
+        if not isinstance(host_preflight, Mapping) or host_preflight.get("outcome") != "pass":
+            blockers.append("build-provenance-host-preflight-invalid")
+
+    reproducibility_summary = None
+    if reproducibility_evidence is None:
+        blockers.append("reproducibility-evidence-missing")
+    else:
+        reproducibility_summary = dict(reproducibility_evidence)
+        target = reproducibility_evidence.get("target", {})
+        if reproducibility_evidence.get("schema") != REPRODUCIBILITY_SCHEMA or reproducibility_evidence.get("outcome") != "pass":
+            blockers.append("reproducibility-evidence-not-pass")
+        if not isinstance(target, Mapping) or target.get("abi") != abi:
+            blockers.append("reproducibility-evidence-abi-mismatch")
+        if reproducibility_evidence.get("alas_workload_used") is not False:
+            blockers.append("reproducibility-evidence-scope-invalid")
+        if build_provenance is not None and (
+            reproducibility_evidence.get("source_lock_sha256")
+            != build_provenance.get("source_lock_sha256")
+        ):
+            blockers.append("reproducibility-evidence-source-lock-mismatch")
+
+    rollback_summary = None
+    if rollback_evidence is None:
+        blockers.append("image-rollback-evidence-missing")
+    else:
+        rollback_summary = dict(rollback_evidence)
+        previous = str(rollback_evidence.get("previous_image_digest", ""))
+        candidate = str(rollback_evidence.get("candidate_image_digest", ""))
+        if rollback_evidence.get("schema") != ROLLBACK_SCHEMA or rollback_evidence.get("outcome") != "pass":
+            blockers.append("image-rollback-evidence-not-pass")
+        if rollback_evidence.get("abi") != abi:
+            blockers.append("image-rollback-evidence-abi-mismatch")
+        if OCI_DIGEST.fullmatch(previous) is None or OCI_DIGEST.fullmatch(candidate) is None or previous == candidate:
+            blockers.append("image-rollback-digest-invalid")
+        if rollback_evidence.get("candidate_userdata_preserved") is not True or rollback_evidence.get("rollback_snapshot_restored") is not True:
+            blockers.append("image-rollback-userdata-not-proven")
+        if rollback_evidence.get("lab_cleaned") is not True:
+            blockers.append("image-rollback-lab-not-cleaned")
+        if rollback_evidence.get("game_installed") is not False or rollback_evidence.get("alas_workload_used") is not False:
+            blockers.append("image-rollback-scope-invalid")
+        if image_identity is not None and candidate != image_identity.get("manifest_digest"):
+            blockers.append("image-rollback-candidate-mismatch")
+        if image_artifact is not None:
+            blockers.append("image-rollback-candidate-unbound")
+
     return {
         "abi": abi,
         "outcome": "platform-and-update-qualified" if not blockers else "blocked",
@@ -197,6 +293,9 @@ def target_record(
         "contract_evidence": contracts,
         "foundation_audit": audit_summary,
         "update_qualification": update_summary,
+        "build_provenance": provenance_summary,
+        "reproducibility": reproducibility_summary,
+        "image_rollback": rollback_summary,
     }
 
 
@@ -215,6 +314,9 @@ def build_release_manifest(
         audit = record.get("foundation_audit")
         if isinstance(audit, Mapping) and audit.get("policy_sha256") != policy.sha256:
             target_blockers.append("foundation-audit-policy-mismatch")
+        provenance = record.get("build_provenance")
+        if not isinstance(provenance, Mapping) or provenance.get("source_lock_sha256") != source.get("source_lock_sha256"):
+            target_blockers.append("build-provenance-source-lock-mismatch")
         record["blockers"] = sorted(set(target_blockers))
         record["outcome"] = (
             "platform-and-update-qualified" if not target_blockers else "blocked"
@@ -226,6 +328,8 @@ def build_release_manifest(
     ]
     if source.get("dirty") is not False:
         blockers.append("source:dirty-worktree")
+    if re.fullmatch(r"[0-9a-f]{64}", str(source.get("source_lock_sha256", ""))) is None:
+        blockers.append("source:source-lock-missing")
     return {
         "schema": RELEASE_SCHEMA,
         "policy_sha256": policy.sha256,

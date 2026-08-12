@@ -12,12 +12,57 @@ class FakePolicy:
     sha256 = "a" * 64
 
 
+def release_inputs(abi: str):
+    source_lock = "c" * 64
+    provenance = {
+        "schema": "alas-headless.android-image-build-provenance/v1",
+        "source_lock_sha256": source_lock,
+        "target": {"abi": abi},
+        "game_artifact_included": False,
+        "alas_workload_used": False,
+        "resolved_manifest": {"sha256": "3" * 64, "bytes": 1},
+        "artifacts": {
+            "system.img": {"sha256": "4" * 64, "bytes": 1},
+            "vendor.img": {"sha256": "5" * 64, "bytes": 1},
+        },
+        "sbom": {"sha256": "6" * 64, "bytes": 1, "format": "SPDX-2.3"},
+        "notices": [{"sha256": "7" * 64, "bytes": 1}],
+        "installed_files": {"sha256": "8" * 64, "bytes": 1},
+        "host_preflight": {"outcome": "pass"},
+    }
+    reproducibility = {
+        "schema": "alas-headless.android-image-reproducibility/v1",
+        "outcome": "pass",
+        "target": {"abi": abi},
+        "source_lock_sha256": source_lock,
+        "alas_workload_used": False,
+    }
+    rollback = {
+        "schema": "alas-headless.redroid-image-rollback/v1",
+        "outcome": "pass",
+        "abi": abi,
+        "previous_image_digest": "sha256:" + "1" * 64,
+        "candidate_image_digest": "sha256:" + "c" * 64,
+        "candidate_userdata_preserved": True,
+        "rollback_snapshot_restored": True,
+        "lab_cleaned": True,
+        "game_installed": False,
+        "alas_workload_used": False,
+    }
+    return provenance, reproducibility, rollback
+
+
 class AndroidImageReleaseTests(unittest.TestCase):
     def test_dual_target_clean_release_can_promote(self) -> None:
-        target = {"blockers": [], "outcome": "platform-and-update-qualified"}
+        source_lock_sha256 = "c" * 64
+        target = {
+            "blockers": [],
+            "outcome": "platform-and-update-qualified",
+            "build_provenance": {"source_lock_sha256": source_lock_sha256},
+        }
         value = build_release_manifest(
             FakePolicy(),
-            {"commit": "b" * 40, "dirty": False},
+            {"commit": "b" * 40, "dirty": False, "source_lock_sha256": source_lock_sha256},
             {"x86_64": target, "arm64-v8a": target},
         )
         self.assertEqual(value["promotion"]["outcome"], "pass")
@@ -56,6 +101,7 @@ class AndroidImageReleaseTests(unittest.TestCase):
                 "alas_workload_used": False,
                 "apk_sha256": None,
             }
+            provenance, reproducibility, rollback = release_inputs("arm64-v8a")
             record = target_record(
                 "arm64-v8a",
                 apk,
@@ -72,11 +118,25 @@ class AndroidImageReleaseTests(unittest.TestCase):
                     "architecture": "arm64",
                     "immutable": True,
                 },
+                provenance, reproducibility, rollback,
             )
             self.assertNotIn("image-artifact-missing", record["blockers"])
             self.assertEqual(record["image_artifact"]["kind"], "oci")
 
+    def test_rollback_candidate_must_match_released_oci_digest(self) -> None:
+        provenance, reproducibility, rollback = release_inputs("arm64-v8a")
+        rollback["candidate_image_digest"] = "sha256:" + "d" * 64
+        record = target_record(
+            "arm64-v8a", None, None, None, {}, None, None,
+            {"schema": "alas-headless.oci-image-identity/v1",
+             "manifest_digest": "sha256:" + "c" * 64,
+             "architecture": "arm64", "immutable": True},
+            provenance, reproducibility, rollback,
+        )
+        self.assertIn("image-rollback-candidate-mismatch", record["blockers"])
+
     def test_oci_identity_fails_closed_on_architecture_and_tag(self) -> None:
+        provenance, reproducibility, rollback = release_inputs("arm64-v8a")
         record = target_record(
             "arm64-v8a", None, None, None, {}, None, None,
             {
@@ -85,10 +145,17 @@ class AndroidImageReleaseTests(unittest.TestCase):
                 "architecture": "amd64",
                 "immutable": False,
             },
+            provenance, reproducibility, rollback,
         )
         self.assertIn("image-identity-digest-invalid", record["blockers"])
         self.assertIn("image-identity-abi-mismatch", record["blockers"])
         self.assertIn("image-identity-not-immutable", record["blockers"])
+
+    def test_target_fails_closed_without_supply_chain_and_image_rollback(self) -> None:
+        record = target_record("arm64-v8a", None, None, None, {}, None, None)
+        self.assertIn("build-provenance-missing", record["blockers"])
+        self.assertIn("reproducibility-evidence-missing", record["blockers"])
+        self.assertIn("image-rollback-evidence-missing", record["blockers"])
 
 
 if __name__ == "__main__":

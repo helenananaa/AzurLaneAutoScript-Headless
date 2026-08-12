@@ -105,13 +105,58 @@ NOTICE/SBOM SHA-256
 
 这些记录属于镜像证据，不是 ALAS 性能结论。
 
-### 当前缺口门
+### 3.1 固定源码并做构建宿主预检
 
-仓库尚无 AOSP/Redroid 镜像构建器，也没有可执行 Redroid 和 ARM64-QEMU provisioner。在这些入口实现前：
+源码锁是 `integration/runtime/android-image-source-lock.example.json`。它固定 AOSP tag/commit、Redroid local manifest commit、patch commit/patch set，以及两个 64 位 product；只有分支名或 tag 名而没有 40 位 commit 不算锁定。
 
-- 可以固定策略、构建合同 APK、准备产品配置和制品清单；
-- 不得把手工制作的镜像称为可复现发布制品；
-- 不得把 plan-only 输出称为真实启动通过。
+```powershell
+$env:PYTHONPATH = 'python'
+python scripts/python/validate_android_image_source_lock.py `
+  --source-lock integration/runtime/android-image-source-lock.example.json
+python scripts/python/verify_android_image_source_remotes.py `
+  --source-lock integration/runtime/android-image-source-lock.example.json `
+  --output evidence/android-image-foundation/source-remotes.json
+```
+
+正式同步前在 Linux x86_64 构建机执行资源预检。400 GiB 可用空间、64 GiB RAM 和 `repo` 缺一项都返回非零，不允许绕过：
+
+```bash
+PYTHONPATH=python python3 scripts/python/preflight_redroid_build.py \
+  --source-lock integration/runtime/android-image-source-lock.example.json \
+  --root / \
+  --output evidence/android-image-foundation/build-host-preflight.json
+```
+
+### 3.2 同步、构建并生成供应链证据
+
+构建入口只接受空目录，按 commit checkout local manifest/patch，输出 `repo manifest -r`，检查 patch driver 的隐性 `[ERROR]`，依次构建两个 ABI，并调用 AOSP 官方 `m sbom`：
+
+```bash
+./scripts/wsl/build-redroid-images.sh \
+  integration/runtime/android-image-source-lock.example.json \
+  /srv/android/redroid-14-r75 \
+  /srv/android/evidence/redroid-14-r75-build-1
+```
+
+必须在干净、独立输出目录再执行第二次，随后比较两次 payload：
+
+```bash
+./scripts/wsl/build-redroid-images.sh \
+  integration/runtime/android-image-source-lock.example.json \
+  /srv/android/redroid-14-r75-rebuild \
+  /srv/android/evidence/redroid-14-r75-build-2
+
+PYTHONPATH=python python3 scripts/python/compare_android_image_builds.py \
+  --first /srv/android/evidence/redroid-14-r75-build-1/provenance-x86_64.json \
+  --second /srv/android/evidence/redroid-14-r75-build-2/provenance-x86_64.json \
+  --output /srv/android/evidence/reproducibility-x86_64.json
+PYTHONPATH=python python3 scripts/python/compare_android_image_builds.py \
+  --first /srv/android/evidence/redroid-14-r75-build-1/provenance-arm64-v8a.json \
+  --second /srv/android/evidence/redroid-14-r75-build-2/provenance-arm64-v8a.json \
+  --output /srv/android/evidence/reproducibility-arm64-v8a.json
+```
+
+provenance 必须同时绑定源码锁、resolved manifest、fingerprint、安全补丁、`system.img`/`vendor.img`、AOSP SPDX 2.3 SBOM、NOTICE 与 installed-files；inventory 中发现游戏包名会直接失败。当前仓库已有可执行构建入口，但尚未在满足资源下限的宿主完成上述两次全量构建，因此仍不得称为可复现发布制品。
 
 ## 4. 构建双架构 ANGLE 制品
 
@@ -344,6 +389,24 @@ x86_64 与 ARM64 是否分别通过
 
 若任何功能门失败，隔离该候选，不把它与其他删除项合并后继续试。
 
+每次只允许一个有明确假设和精确 removal allowlist 的精简变更。基线/候选 installed-files、provenance、受保护能力、G1/G2/G3、更新和真实镜像回退证据必须一起提交给门禁：
+
+```powershell
+python scripts/python/qualify_android_image_slimming.py `
+  --change <one-change.json> `
+  --baseline-provenance <baseline-provenance.json> `
+  --candidate-provenance <candidate-provenance.json> `
+  --baseline-inventory <baseline-installed-files.txt> `
+  --candidate-inventory <candidate-installed-files.txt> `
+  --audit <candidate-foundation-audit.json> `
+  --gles <candidate-g1.json> --unity <candidate-g2.json> `
+  --observer <candidate-g3.json> --update <candidate-update.json> `
+  --rollback <candidate-image-rollback.json> `
+  --output <one-change-qualification.json>
+```
+
+门禁拒绝未声明删除、allowlist 中未实际发生的删除、payload 未减小、跨源码锁比较，以及任何功能证据或 scope 不通过。它只证明该次变更在平台合同上可接受，不代表 ALAS 挂机性能变好。
+
 ## 10. 发布规则
 
 生成双架构候选清单时，即使 ARM64 尚未具备运行宿主也要提供 ARM64 合同 APK；缺少镜像、设备审计或更新证据会自动阻止 promotion：
@@ -351,14 +414,18 @@ x86_64 与 ARM64 是否分别通过
 ```powershell
 python scripts/python/create_android_image_release.py `
   --policy integration/runtime/android-image-policy.example.json `
+  --source-lock integration/runtime/android-image-source-lock.example.json `
   --x86-64-contract-apk unity\HeadlessContract\Build\HeadlessContract.apk `
   --x86-64-angle-apk <x86-observer-angle.apk> `
-  --x86-64-image <x86-system.img> `
+  --x86-64-image-identity <x86-oci-identity.json> `
   --x86-64-gles-evidence <x86-gles-evidence.json> `
   --x86-64-unity-evidence <x86-unity-evidence.json> `
   --x86-64-observer-evidence <x86-observer-evidence.json> `
   --x86-64-audit <x86-foundation-audit.json> `
   --x86-64-update-evidence <x86-update-manifest.json> `
+  --x86-64-build-provenance <x86-provenance.json> `
+  --x86-64-reproducibility-evidence <x86-reproducibility.json> `
+  --x86-64-rollback-evidence <x86-image-rollback.json> `
   --arm64-contract-apk unity\HeadlessContract\Build\HeadlessContract-arm64.apk `
   --arm64-angle-apk <arm64-observer-angle.apk> `
   --arm64-image-identity <arm64-oci-identity.json> `
@@ -367,6 +434,9 @@ python scripts/python/create_android_image_release.py `
   --arm64-observer-evidence <arm64-observer-evidence.json> `
   --arm64-audit <arm64-foundation-audit.json> `
   --arm64-update-evidence <arm64-update-manifest.json> `
+  --arm64-build-provenance <arm64-provenance.json> `
+  --arm64-reproducibility-evidence <arm64-reproducibility.json> `
+  --arm64-rollback-evidence <arm64-image-rollback.json> `
   --output evidence\android-image-foundation\release-candidate.json `
   --require-promotable
 ```
@@ -414,6 +484,18 @@ built
 
 发布目录或 OCI registry 只使用内容 digest。`latest` 可以作为人类可读别名，但运行时锁、证据和回滚都不得依赖它。
 
+真实镜像回退必须使用与生产数据隔离的临时 `/data`，并显式传入两个不同 digest：
+
+```bash
+sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
+  registry.example/redroid@sha256:<previous> \
+  registry.example/redroid@sha256:<candidate> \
+  arm64-v8a 15557 1280 720 240 \
+  > evidence/android-image-foundation/redroid-image-rollback-arm64.json
+```
+
+脚本验证旧镜像写入、候选镜像继承、带 xattr/ACL/SELinux 的 `/data` 快照恢复，以及再次启动旧镜像；临时目录不在 `/var/lib/redroid/rollback-lab.*` 时拒绝删除。x86_64 必须在 x86_64 Redroid 宿主用同一脚本独立执行，不能复用 ARM 结果。
+
 每个发布候选至少包含：
 
 - 源 revision 和构建命令；
@@ -445,7 +527,7 @@ built
 本 worktree 已完成以下不依赖真实 ALAS 挂机数据的基础工作：
 
 - 策略 `compat-foundation-v1` 校验通过，SHA-256 为 `622d7fb202d020fda5ad87291c8fb36f546af0562a927ea6df9c461a83844233`；
-- 仓库全量测试 `451 passed`；
+- 当前仓库全量测试 `465 passed`；
 - x86_64 与 ARM64 Unity 合同 APK 均已构建并确认只含目标 ABI；当前 SHA-256 分别为 `6030c2d4ba41b7b29150490b3d977991e01084a83e523b6a64d98fdfd5a3ceb0` 与 `dcd02e4aa10fb972ea9d7ba20c54b46ccab9f016308d8634d0207af4cbf51a61`；
 - 最新 observer ANGLE x86_64/ARM64 APK 已从固定 ANGLE revision 交叉构建，SHA-256 分别为 `98941a4fb1fc99b201cde6b86498da6c132a74c0cf5d60b4b72fcb3dbff627fe` 与 `8670115d326ddc39ccc5ae2cd36352e7377c3c23f8360aa358649ec959e40ccb`；observer ABI 由编译目标生成，不再硬编码 x86_64；
 - x86_64 更新实验完整通过：错签拒绝、单 APK、ABI split、userdata migration、进程中断续传、低空间、Android 重启续传、原子提升与回滚；
@@ -459,6 +541,9 @@ built
 - ARM64 三轮 Redroid restart 为 `17.750 / 17.828 / 18.141 s`，每轮 OCI digest 不变且 `/data` sentinel 保留；
 - ARM64 卸载合成包后的 600 秒 idle 样本为 CPU busy `0.195%`、Used RAM `1078446 KiB`、Free RAM `5982526 KiB`，只是未精简基线；
 - ARM64 OCI identity 已固定到 `redroid/redroid@sha256:d3fb6daeaed9a7c98b05d649ed925ad9c6f45f578d1fd8c386951595d53778b2`，ADB 只绑定宿主 `127.0.0.1:5555`，`/data` 使用独立持久化挂载；
+- ARM64 已完成一次独立临时 `/data` 的真实 OCI 回退：Android 12 digest `d3fb…78b2` → Android 13 digest `5a42…c13b` → 恢复快照 → Android 12 digest；候选与回退后的 sentinel 均保留且实验目录清理，证据为 `redroid-image-rollback-arm64-20260812.json`；
+- 自维护源码锁已固定 AOSP `android-14.0.0_r75`、Redroid 14 local manifests 与对应 patch set，三组远端 ref/commit 实时核验通过，源码锁 SHA-256 为 `2d5ce0cc996e6915e9fb786e6af63d385db9af7e7b4b5673a3b5bb8e809102af`；
+- 双 ABI 构建入口、AOSP SPDX 2.3 SBOM/NOTICE provenance、installed-files 游戏制品负检、两次构建 payload 一致性门与 release 强制绑定均已实现；
 - fail-closed 候选清单中 x86_64 无 blocker；ARM64 的镜像身份、G1/G2/G3 和更新证据均闭环。
 
 当前仍然 fail-closed 的项目：
@@ -466,6 +551,8 @@ built
 - 当前 Redroid `/data` 是宿主 ext4 bind mount，镜像没有 `ro.crypto.type=file` 或 FBE fstab 合同；ARM 受保护能力为 20/21，`device-encrypted-storage` 必须保持 fail，不能通过启动参数豁免；
 - 当前 ARM 基线的安全补丁级别为 `2021-10-05`，需要在自维护镜像线更新，不能作为长期发布基线；
 - 当前 x86 镜像是内容哈希固定的 SDK API 32 基线，ARM 是 digest 固定的 stock Redroid 基线；二者都不是本项目从固定 AOSP/Redroid 产品配置构建出的精简镜像，尚未删除任何系统服务；
+- 当前 WSL 已安装 `repo` launcher，构建预检的系统、架构、磁盘、Git、Repo 项全部通过；唯一 blocker 是 RAM 仅 `20971327488` bytes，低于锁中依据 AOSP 官方要求设置的 64 GiB 下限。因此没有启动可能不可靠的全量构建，也没有生成伪 SBOM/provenance；
+- x86_64 的真实 Redroid OCI 镜像回退尚未执行；ARM 回退证据不能替代 x86 证据；
 - worktree 未提交时，发布清单还会附加 `source:dirty-worktree` blocker；
 - 在支持 FBE、更新安全补丁且可复现的自维护 AOSP/Redroid 构建入口补齐前，双架构 release promotion 必须保持 `blocked`。
 
