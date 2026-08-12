@@ -43,6 +43,11 @@ class AndroidBuildScriptTests(unittest.TestCase):
         self.assertIn("s/^ro.system.build.fingerprint=//p", script)
         self.assertIn('[[ -n $fingerprint ]]', script)
 
+    def test_resume_does_not_sync_over_redroid_patches(self) -> None:
+        script = self.script()
+        self.assertIn('if [[ ! -e "$resolved_manifest" ]]; then', script)
+        self.assertIn('post-patch-state.json', script)
+
 
 if __name__ == "__main__":
     unittest.main()

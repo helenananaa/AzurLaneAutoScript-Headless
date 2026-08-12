@@ -52,10 +52,13 @@ def _parse_named_paths(values: Iterable[str]) -> Sequence[Tuple[str, Path]]:
             raise AndroidImageSupplyChainError("duplicate artifact name: {0}".format(name))
         observed.add(name)
         parsed.append((name, Path(raw_path)))
-    mandatory = {"system.img", "vendor.img", "redroid-native-fbe-overlay.json"}
+    mandatory = {
+        "system.img", "vendor.img", "redroid-native-fbe-overlay.json",
+        "post-patch-state.json",
+    }
     if not mandatory.issubset(observed):
         raise AndroidImageSupplyChainError(
-            "system.img, vendor.img, and redroid-native-fbe-overlay.json artifacts are mandatory"
+            "system.img, vendor.img, Redroid post-patch state, and FBE overlay artifacts are mandatory"
         )
     return parsed
 
@@ -111,11 +114,14 @@ def create_build_provenance(
     artifact_records: Dict[str, Mapping[str, Any]] = {}
     parsed_artifacts = _parse_named_paths(artifacts)
     overlay_validation = None
+    post_patch_state = None
     for name, path in parsed_artifacts:
         _nonempty(path, "build artifact")
         artifact_records[name] = hash_file(path)
         if name == "redroid-native-fbe-overlay.json":
             overlay_validation = json.loads(path.read_text(encoding="utf-8"))
+        elif name == "post-patch-state.json":
+            post_patch_state = json.loads(path.read_text(encoding="utf-8"))
     if (
         not isinstance(overlay_validation, Mapping)
         or overlay_validation.get("schema") != FBE_OVERLAY_VALIDATION_SCHEMA
@@ -128,6 +134,15 @@ def create_build_provenance(
         raise AndroidImageSupplyChainError(
             "native FBE overlay validation must pass without claiming runtime FBE"
         )
+    if (
+        not isinstance(post_patch_state, Mapping)
+        or post_patch_state.get("schema") != "alas-headless.redroid-post-patch-state/v1"
+        or post_patch_state.get("outcome") != "pass"
+        or post_patch_state.get("source_lock_sha256") != source_lock.sha256
+        or post_patch_state.get("alas_workload_used") is not False
+        or not post_patch_state.get("projects")
+    ):
+        raise AndroidImageSupplyChainError("Redroid post-patch state must be complete and source-locked")
     return {
         "schema": PROVENANCE_SCHEMA,
         "source_lock_sha256": source_lock.sha256,
@@ -147,6 +162,12 @@ def create_build_provenance(
             "artifact_sha256": artifact_records[
                 "redroid-native-fbe-overlay.json"
             ]["sha256"],
+        },
+        "redroid_post_patch_state": {
+            "schema": post_patch_state.get("schema"),
+            "source_lock_sha256": post_patch_state.get("source_lock_sha256"),
+            "artifact_sha256": artifact_records["post-patch-state.json"]["sha256"],
+            "project_count": len(post_patch_state["projects"]),
         },
         "sbom": dict(hash_file(sbom), format="SPDX-2.3"),
         "notices": [hash_file(path) for path in notices],

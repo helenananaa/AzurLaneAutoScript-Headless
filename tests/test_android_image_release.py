@@ -31,6 +31,7 @@ def release_inputs(abi: str):
             "system.img": {"sha256": "4" * 64, "bytes": 1},
             "vendor.img": {"sha256": "5" * 64, "bytes": 1},
             "redroid-native-fbe-overlay.json": {"sha256": "9" * 64, "bytes": 1},
+            "post-patch-state.json": {"sha256": "8" * 64, "bytes": 1},
         },
         "native_fbe_overlay": {
             "schema": "alas-headless.redroid-native-fbe-overlay-validation/v1",

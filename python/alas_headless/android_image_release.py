@@ -265,7 +265,8 @@ def target_record(
         artifacts = build_provenance.get("artifacts", {})
         if not isinstance(artifacts, Mapping) or not all(
             valid_hashed_file(artifacts.get(name)) for name in (
-                "system.img", "vendor.img", "redroid-native-fbe-overlay.json"
+                "system.img", "vendor.img", "redroid-native-fbe-overlay.json",
+                "post-patch-state.json",
             )
         ):
             blockers.append("build-provenance-artifacts-invalid")

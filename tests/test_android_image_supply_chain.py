@@ -36,11 +36,19 @@ class AndroidImageSupplyChainTests(unittest.TestCase):
             "android_fbe_proven": False, "direct_boot_proven": False,
             "source_lock_sha256": lock.sha256,
         }), encoding="utf-8")
+        (directory / "post-patch-state.json").write_text(json.dumps({
+            "schema": "alas-headless.redroid-post-patch-state/v1",
+            "outcome": "pass", "source_lock_sha256": lock.sha256,
+            "alas_workload_used": False,
+            "projects": [{"path": "system/core", "upstream_revision": "a" * 40,
+                          "head": "b" * 40, "tree": "c" * 40}],
+        }), encoding="utf-8")
         return create_build_provenance(
             lock, resolved, "arm64-v8a", "redroid_arm64_only-trunk_staging-userdebug",
             "redroid_arm64_only", "fingerprint/test", "2025-05-05",
             ["system.img=" + str(directory / "system.img"),
              "vendor.img=" + str(directory / "vendor.img"),
+             "post-patch-state.json=" + str(directory / "post-patch-state.json"),
              "redroid-native-fbe-overlay.json=" + str(directory / "redroid-native-fbe-overlay.json")],
             sbom, [notice], installed,
             {"outcome": "pass", "source_lock_sha256": lock.sha256},
@@ -81,6 +89,7 @@ class AndroidImageSupplyChainTests(unittest.TestCase):
                     "redroid_arm64_only-trunk_staging-userdebug", "redroid_arm64_only", "fp",
                     "2025-05-05", ["system.img=" + str(directory / "system.img"),
                     "vendor.img=" + str(directory / "vendor.img"),
+                    "post-patch-state.json=" + str(directory / "post-patch-state.json"),
                     "redroid-native-fbe-overlay.json=" + str(directory / "redroid-native-fbe-overlay.json")], sbom,
                     [directory / "NOTICE.xml.gz"], directory / "installed-files.txt",
                     {"outcome": "pass", "source_lock_sha256": lock.sha256},

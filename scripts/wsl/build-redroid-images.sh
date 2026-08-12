@@ -159,22 +159,25 @@ for project in value["redroid"]["projects"] + value["redroid"]["webview_projects
     )
 print("</manifest>")
 PY
-sync_passed=false
-for attempt in 1 2 3 4 5; do
-    if repo sync -c --fail-fast -j8; then
-        sync_passed=true
-        break
-    fi
-    echo "repo sync attempt $attempt failed; retaining objects for a rate-limited retry" >&2
-    (( attempt < 5 )) && sleep $((attempt * 15))
-done
-[[ $sync_passed == true ]] || { echo "repo sync exhausted five attempts" >&2; exit 1; }
-repo manifest -r -o "$evidence_root/resolved-manifest.xml"
+resolved_manifest="$evidence_root/resolved-manifest.xml"
+if [[ ! -e "$resolved_manifest" ]]; then
+    sync_passed=false
+    for attempt in 1 2 3 4 5; do
+        if repo sync -c --fail-fast -j8; then
+            sync_passed=true
+            break
+        fi
+        echo "repo sync attempt $attempt failed; retaining objects for a rate-limited retry" >&2
+        (( attempt < 5 )) && sleep $((attempt * 15))
+    done
+    [[ $sync_passed == true ]] || { echo "repo sync exhausted five attempts" >&2; exit 1; }
+    repo manifest -r -o "$resolved_manifest"
+fi
 observed_source_epoch=$(git -C .repo/manifests show -s --format=%ct "$platform_commit")
 [[ $observed_source_epoch == "$source_date_epoch" ]] || {
     echo "locked SOURCE_DATE_EPOCH differs from manifest commit" >&2; exit 1;
 }
-python3 - "$source_lock" "$evidence_root/resolved-manifest.xml" <<'PY'
+python3 - "$source_lock" "$resolved_manifest" <<'PY'
 import json, sys
 import xml.etree.ElementTree as ET
 
@@ -221,6 +224,11 @@ if find "$source_root/.repo/projects" "$source_root/.repo/project-objects" \
     echo "unfinished git-am state after Redroid patch application" >&2
     exit 1
 fi
+run_json_evidence "$evidence_root/post-patch-state.json" \
+    python3 "$repo_root/scripts/python/capture_redroid_post_patch_state.py" \
+    --source-lock "$source_lock" --source-root "$source_root" \
+    --resolved-manifest "$resolved_manifest" \
+    --apply-log "$evidence_root/apply-patches.log"
 
 # Upstream Redroid intentionally leaves product.mk as a local extension point.
 # Bind our reviewed dual-volume FBE overlay into every build, and refuse to
@@ -293,6 +301,7 @@ build_one() {
         --artifact "vendor.img=$product_dir/vendor.img" \
         --artifact "redroid.oci.tar=$oci_archive" \
         --artifact "redroid-native-fbe-overlay.json=$overlay_evidence" \
+        --artifact "post-patch-state.json=$evidence_root/post-patch-state.json" \
         --sbom "$sbom" --notice "$notice" \
         --installed-files "$product_dir/installed-files.txt" \
         --host-preflight "$evidence_root/host-preflight.json" \
