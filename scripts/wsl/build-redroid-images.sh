@@ -261,7 +261,13 @@ build_one() {
     local notice="$product_dir/obj/NOTICE.xml.gz"
     [[ -f $notice ]] || { echo "product NOTICE.xml.gz missing for $abi" >&2; exit 1; }
     local fingerprint patch
-    fingerprint=$(sed -n 's/^ro.build.fingerprint=//p' "$build_prop" | head -n1)
+    fingerprint=$(sed -n \
+        -e 's/^ro.system.build.fingerprint=//p' \
+        -e 's/^ro.build.fingerprint=//p' \
+        "$build_prop" | head -n1)
+    [[ -n $fingerprint ]] || {
+        echo "system build fingerprint missing for $abi" >&2; exit 1;
+    }
     patch=$(sed -n 's/^ro.build.version.security_patch=//p' "$build_prop" | head -n1)
     local observed_user observed_host observed_date observed_incremental
     observed_user=$(sed -n 's/^ro.build.user=//p' "$build_prop" | head -n1)

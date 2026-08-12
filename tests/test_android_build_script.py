@@ -38,6 +38,11 @@ class AndroidBuildScriptTests(unittest.TestCase):
             self.script(),
         )
 
+    def test_android_14_partition_fingerprint_is_supported(self) -> None:
+        script = self.script()
+        self.assertIn("s/^ro.system.build.fingerprint=//p", script)
+        self.assertIn('[[ -n $fingerprint ]]', script)
+
 
 if __name__ == "__main__":
     unittest.main()
