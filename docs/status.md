@@ -2,6 +2,26 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-12
+
+### H05 rendered G36 live preflight: qualification passed
+
+- A visible `1280x720` AVD on PID `3094` retained the pinned game, observer,
+  runtime, task-profile, defensive-closure, and upstream ALAS identities.
+- Original ALAS selected `battle_0`, fleet 1, enemy E3, and route
+  `F5,F4,F3,E3` twice from one unchanged map.
+- Both original `_goto()` prefixes reached `device.click(grid)` with identical
+  E3 path, point, bounds, and top-raycast geometry. Generations were
+  `43830 -> 43839` and `43849 -> 43858`.
+- The signed bundle is
+  `a8dfdb91c41da228b49dc706c0f6496ef3bb94e10b875ad08a541779af10a240`;
+  Android, grid, camera, and aggregate input flags are false, unknown calls are
+  zero, and capability/production promotion remain false.
+- Authorized stage/fleet/sortie, one bounded intermediate F5 movement, and
+  exact network recovery were setup-only and excluded from both H05 runs.
+
+See [G36 input-free live preflight](g36-live-preflight-validation-report.md).
+
 ## 2026-08-11
 
 ### G35 natural `_goto()` camera branch: qualification passed

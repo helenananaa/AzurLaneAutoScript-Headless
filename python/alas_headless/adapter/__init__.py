@@ -105,6 +105,10 @@ from .defensive_preflight import (
     build_g36_defensive_preflight,
     g36_defensive_preflight_to_json,
 )
+from .live_preflight import (
+    G36_LIVE_PREFLIGHT_SCHEMA,
+    build_g36_live_preflight_bundle,
+)
 
 
 __all__ = (
@@ -182,6 +186,8 @@ __all__ = (
     "compatibility_profile",
     "load_run_policy",
     "g36_defensive_preflight_to_json",
+    "G36_LIVE_PREFLIGHT_SCHEMA",
+    "build_g36_live_preflight_bundle",
     "load_g36_task_profile",
     "parse_g36_task_profile",
     "parse_run_policy",

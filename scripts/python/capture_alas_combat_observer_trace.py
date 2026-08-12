@@ -117,15 +117,18 @@ def main() -> int:
     last_generation = -1
     try:
         session.open()  # includes the independent pinned package fingerprint gate
+        handle = session.runtime_handle
+        if handle is None:
+            raise SemanticGateClosed("semantic runtime handle is unavailable")
         deadline = time.monotonic() + args.duration_seconds
         while time.monotonic() < deadline and len(samples) < args.max_samples:
             started = time.monotonic()
             try:
-                if session.bridge.foreground_component() != session.component:
+                if handle.foreground_component() != session.component:
                     raise SemanticGateClosed("game activity is not top-resumed")
-                snapshot = session.bridge.request("GET /v1/snapshot\n")
-                buttons = session.bridge.request("GET /v1/buttons\n")
-                ui = session.bridge.request("GET /v1/ui\n")
+                snapshot = handle.observer_request("GET /v1/snapshot\n")
+                buttons = handle.observer_request("GET /v1/buttons\n")
+                ui = handle.observer_request("GET /v1/ui\n")
                 frame, typed = build_alas_combat_trace_frame(
                     snapshot, buttons, ui, manifest
                 )
@@ -169,7 +172,7 @@ def main() -> int:
                 "schema": "alas-headless.g21-combat-trace-capture-result/v1",
                 "passed": True,
                 "output": str(args.output.resolve()),
-                "pid": trace["pid"],
+                "pid": handle.pid,
                 "sample_count": len(samples),
                 "first_generation": generations[0],
                 "last_generation": generations[-1],

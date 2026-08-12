@@ -247,6 +247,15 @@ mean execution is allowed. Because eight rows still require pre-grid recovery,
 promotion and production readiness remain false. H05 may therefore run only
 the input-free preflight and must stop at the original grid-click boundary.
 
+H05's rendered live qualification is frozen in `g36-live-preflight.json` and
+documented in `docs/g36-live-preflight-validation-report.md`. On PID `3094`,
+two unchanged-map runs selected original ALAS `battle_0` route
+`F5,F4,F3,E3`, rechecked the same exact top-raycast E3 geometry, and stopped at
+the original `device.click(grid)` boundary. Bundle
+`a8dfdb91c41da228b49dc706c0f6496ef3bb94e10b875ad08a541779af10a240`
+has zero unknown calls and all Android/grid/camera input flags false. It does
+not promote capability or production readiness.
+
 G20 adds that replacement input boundary without changing the ALAS patch or
 state machine. It accepts six complete, hash-bound raw observer snapshots only
 when all 38 resource queries, blockers, three post-grid action Buttons, and
