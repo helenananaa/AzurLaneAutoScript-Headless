@@ -539,6 +539,8 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 - 已知限制；
 - 明确的 `alas_workload_qualified=false`。
 
+发布清单对每份 G1/G2/G3、审计、更新、OCI identity、provenance、复现和回退 JSON 记录绝对路径、字节数与 SHA-256；缺少文件身份会 fail。清单字段摘要不能替代原始证据哈希。
+
 游戏 APK、游戏资源、账号 userdata 和包含账号信息的证据不得进入公开制品。
 
 ## 11. 本阶段完成定义

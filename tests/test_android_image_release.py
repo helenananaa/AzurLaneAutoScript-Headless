@@ -12,6 +12,10 @@ class FakePolicy:
     sha256 = "a" * 64
 
 
+def evidence_identity():
+    return {"path": "/evidence.json", "bytes": 1, "sha256": "e" * 64}
+
+
 def release_inputs(abi: str):
     source_lock = "c" * 64
     provenance = {
@@ -29,6 +33,7 @@ def release_inputs(abi: str):
         "notices": [{"sha256": "7" * 64, "bytes": 1}],
         "installed_files": {"sha256": "8" * 64, "bytes": 1},
         "host_preflight": {"outcome": "pass"},
+        "_evidence_file": evidence_identity(),
     }
     reproducibility = {
         "schema": "alas-headless.android-image-reproducibility/v1",
@@ -36,6 +41,7 @@ def release_inputs(abi: str):
         "target": {"abi": abi},
         "source_lock_sha256": source_lock,
         "alas_workload_used": False,
+        "_evidence_file": evidence_identity(),
     }
     rollback = {
         "schema": "alas-headless.redroid-image-rollback/v1",
@@ -54,6 +60,7 @@ def release_inputs(abi: str):
         "lab_cleaned": True,
         "game_installed": False,
         "alas_workload_used": False,
+        "_evidence_file": evidence_identity(),
     }
     return provenance, reproducibility, rollback
 
@@ -106,6 +113,7 @@ class AndroidImageReleaseTests(unittest.TestCase):
                 "game_installed": False,
                 "alas_workload_used": False,
                 "apk_sha256": None,
+                "_evidence_file": evidence_identity(),
             }
             provenance, reproducibility, rollback = release_inputs("arm64-v8a")
             record = target_record(
@@ -125,10 +133,13 @@ class AndroidImageReleaseTests(unittest.TestCase):
                     "platform_descriptor": {"platform": {"architecture": "arm64", "os": "linux"}},
                     "architecture": "arm64",
                     "immutable": True,
+                    "_evidence_file": evidence_identity(),
                 },
                 provenance, reproducibility, rollback,
             )
             self.assertNotIn("image-artifact-missing", record["blockers"])
+            self.assertNotIn("image-identity-evidence-file-invalid", record["blockers"])
+            self.assertNotIn("gles-contract-evidence-file-invalid", record["blockers"])
             self.assertEqual(record["image_artifact"]["kind"], "oci")
 
     def test_rollback_candidate_must_match_released_oci_digest(self) -> None:
@@ -156,6 +167,7 @@ class AndroidImageReleaseTests(unittest.TestCase):
                 "platform_descriptor": {"platform": {"architecture": "amd64", "os": "linux"}},
                 "architecture": "amd64",
                 "immutable": False,
+                "_evidence_file": evidence_identity(),
             },
             provenance, reproducibility, rollback,
         )

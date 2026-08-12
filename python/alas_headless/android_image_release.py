@@ -31,6 +31,14 @@ def valid_hashed_file(value: Any) -> bool:
     )
 
 
+def evidence_file(value: Mapping[str, Any], blocker: str, blockers: list[str]) -> Any:
+    identity = value.get("_evidence_file")
+    if not valid_hashed_file(identity):
+        blockers.append(blocker)
+        return None
+    return dict(identity)
+
+
 def hash_file(path: Path) -> Mapping[str, Any]:
     digest = hashlib.sha256()
     size = 0
@@ -99,6 +107,10 @@ def target_record(
         image["kind"] = "file"
     elif image_identity is not None:
         image = dict(image_identity)
+        image["evidence_file"] = evidence_file(
+            image_identity, "image-identity-evidence-file-invalid", blockers
+        )
+        image.pop("_evidence_file", None)
         image["kind"] = "oci"
         digest = str(image_identity.get("manifest_digest", ""))
         expected_architecture = "arm64" if abi == "arm64-v8a" else "amd64"
@@ -134,6 +146,9 @@ def target_record(
             "schema": evidence.get("schema"),
             "outcome": evidence.get("outcome"),
             "abi": evidence.get("abi"),
+            "evidence_file": evidence_file(
+                evidence, "{0}-evidence-file-invalid".format(gate), blockers
+            ),
         }
         contracts[gate] = summary
         if evidence.get("outcome") != "pass":
@@ -166,6 +181,9 @@ def target_record(
             "outcome": foundation_audit.get("outcome"),
             "policy_sha256": foundation_audit.get("policy_sha256"),
             "identity": identity,
+            "evidence_file": evidence_file(
+                foundation_audit, "foundation-audit-evidence-file-invalid", blockers
+            ),
         }
         if foundation_audit.get("schema") != AUDIT_SCHEMA or foundation_audit.get("outcome") != "pass":
             blockers.append("foundation-audit-not-pass")
@@ -188,6 +206,9 @@ def target_record(
             "schema": update_evidence.get("schema"),
             "outcome": update_evidence.get("outcome"),
             "passed_phases": sorted(item for item in passed if isinstance(item, str)),
+            "evidence_file": evidence_file(
+                update_evidence, "update-qualification-evidence-file-invalid", blockers
+            ),
         }
         required = {
             "wrong-signer-negative",
@@ -224,6 +245,9 @@ def target_record(
             "artifacts": build_provenance.get("artifacts"),
             "sbom": build_provenance.get("sbom"),
             "notices": build_provenance.get("notices"),
+            "evidence_file": evidence_file(
+                build_provenance, "build-provenance-evidence-file-invalid", blockers
+            ),
         }
         target = build_provenance.get("target", {})
         if build_provenance.get("schema") != PROVENANCE_SCHEMA:
@@ -256,6 +280,10 @@ def target_record(
         blockers.append("reproducibility-evidence-missing")
     else:
         reproducibility_summary = dict(reproducibility_evidence)
+        reproducibility_summary["evidence_file"] = evidence_file(
+            reproducibility_evidence, "reproducibility-evidence-file-invalid", blockers
+        )
+        reproducibility_summary.pop("_evidence_file", None)
         target = reproducibility_evidence.get("target", {})
         if reproducibility_evidence.get("schema") != REPRODUCIBILITY_SCHEMA or reproducibility_evidence.get("outcome") != "pass":
             blockers.append("reproducibility-evidence-not-pass")
@@ -274,6 +302,10 @@ def target_record(
         blockers.append("image-rollback-evidence-missing")
     else:
         rollback_summary = dict(rollback_evidence)
+        rollback_summary["evidence_file"] = evidence_file(
+            rollback_evidence, "image-rollback-evidence-file-invalid", blockers
+        )
+        rollback_summary.pop("_evidence_file", None)
         previous = str(rollback_evidence.get("previous_image_digest", ""))
         candidate = str(rollback_evidence.get("candidate_image_digest", ""))
         if rollback_evidence.get("schema") != ROLLBACK_SCHEMA or rollback_evidence.get("outcome") != "pass":

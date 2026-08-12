@@ -12,13 +12,18 @@ from typing import Mapping, Optional, Sequence
 from alas_headless.android_image_policy import AndroidImagePolicy
 from alas_headless.android_image_release import TARGET_ABIS
 from alas_headless.android_image_release import build_release_manifest
+from alas_headless.android_image_release import hash_file
 from alas_headless.android_image_release import load_json
 from alas_headless.android_image_release import target_record
 from alas_headless.android_image_source import AndroidImageSourceLock
 
 
 def optional_json(path: Optional[Path]) -> Optional[Mapping[str, object]]:
-    return None if path is None else load_json(path)
+    if path is None:
+        return None
+    value = dict(load_json(path))
+    value["_evidence_file"] = hash_file(path)
+    return value
 
 
 def git_output(repo: Path, *arguments: str) -> str:
