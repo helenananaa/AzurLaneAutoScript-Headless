@@ -151,6 +151,12 @@ wsl.exe -e sh -lc "cd /mnt/h/program/AzurLaneAutoScript-Headless-android-image-f
   /srv/android/evidence/redroid-14-r75-build-1
 ```
 
+构建入口按 `SOURCE_ROOT` 所在文件系统检查 400 GiB 下限，并要求源码目录与证据目录
+位于同一个、不同于宿主 `/` 的设备。不能用根盘剩余空间代替 AOSP 工作盘，也不能把
+源码放根盘后只把 `out` 链接到数据盘。对于本文使用的专用服务器，两个独立构建应分别
+使用 `/mnt/aosp/src/build-1`、`/mnt/aosp/src/build-2`，证据使用
+`/mnt/aosp/evidence/build-1`、`/mnt/aosp/evidence/build-2`。
+
 必须在干净、独立输出目录再执行第二次，随后比较两次 payload：
 
 ```bash

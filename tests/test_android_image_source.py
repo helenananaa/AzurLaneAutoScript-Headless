@@ -8,6 +8,7 @@ from pathlib import Path
 from alas_headless.android_image_source import AndroidImageSourceError
 from alas_headless.android_image_source import AndroidImageSourceLock
 from alas_headless.android_image_source import disk_checks
+from alas_headless.android_image_source import host_preflight
 
 
 class AndroidImageSourceTests(unittest.TestCase):
@@ -73,6 +74,20 @@ class AndroidImageSourceTests(unittest.TestCase):
         self.assertFalse(low["disk_floor"])
         enough = disk_checks(600 * gib, 400 * gib, "microsoft-standard-WSL2", 500 * gib)
         self.assertTrue(all(enough.values()))
+
+    def test_host_preflight_records_work_and_evidence_devices(self) -> None:
+        lock = AndroidImageSourceLock.from_mapping(copy.deepcopy(self.value))
+        result = host_preflight(lock, Path.cwd(), evidence_root=Path.cwd())
+        self.assertTrue(result["checks"]["work_and_evidence_same_device"])
+        self.assertEqual(result["work_device"], result["evidence_device"])
+        self.assertIn("system_root_device", result)
+
+    def test_non_root_device_requirement_fails_on_system_root(self) -> None:
+        lock = AndroidImageSourceLock.from_mapping(copy.deepcopy(self.value))
+        result = host_preflight(
+            lock, Path("/"), evidence_root=Path("/"), require_non_root_device=True
+        )
+        self.assertFalse(result["checks"]["work_device_not_system_root"])
 
 
 if __name__ == "__main__":

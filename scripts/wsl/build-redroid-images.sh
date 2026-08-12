@@ -23,7 +23,8 @@ export PYTHONPATH="$repo_root/python"
 python3 "$repo_root/scripts/python/validate_android_image_source_lock.py" --source-lock "$source_lock"
 source_lock_sha256=$(python3 "$repo_root/scripts/python/validate_android_image_source_lock.py" --source-lock "$source_lock" | tail -n1)
 preflight_args=(
-    --source-lock "$source_lock" --root /
+    --source-lock "$source_lock" --root "$source_root"
+    --evidence-root "$evidence_root" --require-non-root-device
     --output "$evidence_root/host-preflight.json"
 )
 if [[ -n ${ALAS_BUILD_BACKING_FREE_BYTES:-} ]]; then

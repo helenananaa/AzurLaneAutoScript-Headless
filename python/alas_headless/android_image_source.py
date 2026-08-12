@@ -159,10 +159,17 @@ def host_preflight(
     lock: AndroidImageSourceLock,
     root: Path = Path("/"),
     backing_free_bytes: int | None = None,
+    evidence_root: Path | None = None,
+    require_non_root_device: bool = False,
 ) -> Mapping[str, Any]:
     """Return an evidence record; callers must require outcome=pass before sync/build."""
     build = _mapping(lock.document["build"], "build")
+    root = root.resolve()
+    evidence_root = evidence_root.resolve() if evidence_root is not None else None
     disk = shutil.disk_usage(root)
+    work_stat = root.stat()
+    system_root_stat = Path("/").stat()
+    evidence_stat = evidence_root.stat() if evidence_root is not None else None
     memory_bytes = 0
     meminfo = Path("/proc/meminfo")
     if meminfo.exists():
@@ -177,6 +184,14 @@ def host_preflight(
         "ram_floor": memory_bytes >= int(build["minimum_ram_gib"]) * 1024 ** 3,
         "git_available": shutil.which("git") is not None,
         "repo_available": shutil.which("repo") is not None,
+        "work_path_exists": root.is_dir(),
+        "evidence_path_exists": evidence_root is None or evidence_root.is_dir(),
+        "work_and_evidence_same_device": (
+            evidence_stat is None or work_stat.st_dev == evidence_stat.st_dev
+        ),
+        "work_device_not_system_root": (
+            not require_non_root_device or work_stat.st_dev != system_root_stat.st_dev
+        ),
     }
     checks.update(disk_checks(
         disk.free, minimum_disk_bytes, platform.release(), backing_free_bytes
@@ -199,6 +214,11 @@ def host_preflight(
         "schema": "alas-headless.android-image-build-host-preflight/v1",
         "source_lock_sha256": lock.sha256,
         "root": str(root.resolve()),
+        "evidence_root": str(evidence_root) if evidence_root is not None else None,
+        "work_device": int(work_stat.st_dev),
+        "evidence_device": int(evidence_stat.st_dev) if evidence_stat is not None else None,
+        "system_root_device": int(system_root_stat.st_dev),
+        "require_non_root_device": require_non_root_device,
         "free_disk_bytes": disk.free,
         "backing_free_bytes": backing_free_bytes,
         "memory_bytes": memory_bytes,
