@@ -22,8 +22,17 @@ mkdir -p "$source_root" "$evidence_root"
 export PYTHONPATH="$repo_root/python"
 python3 "$repo_root/scripts/python/validate_android_image_source_lock.py" --source-lock "$source_lock"
 source_lock_sha256=$(python3 "$repo_root/scripts/python/validate_android_image_source_lock.py" --source-lock "$source_lock" | tail -n1)
-python3 "$repo_root/scripts/python/preflight_redroid_build.py" \
-    --source-lock "$source_lock" --root / --output "$evidence_root/host-preflight.json"
+preflight_args=(
+    --source-lock "$source_lock" --root /
+    --output "$evidence_root/host-preflight.json"
+)
+if [[ -n ${ALAS_BUILD_BACKING_FREE_BYTES:-} ]]; then
+    [[ $ALAS_BUILD_BACKING_FREE_BYTES =~ ^[0-9]+$ ]] || {
+        echo "ALAS_BUILD_BACKING_FREE_BYTES must be an integer" >&2; exit 1;
+    }
+    preflight_args+=(--backing-free-bytes "$ALAS_BUILD_BACKING_FREE_BYTES")
+fi
+python3 "$repo_root/scripts/python/preflight_redroid_build.py" "${preflight_args[@]}"
 python3 "$repo_root/scripts/python/verify_android_image_source_remotes.py" \
     --source-lock "$source_lock" --output "$evidence_root/source-remotes.json"
 

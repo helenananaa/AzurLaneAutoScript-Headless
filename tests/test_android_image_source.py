@@ -7,6 +7,7 @@ from pathlib import Path
 
 from alas_headless.android_image_source import AndroidImageSourceError
 from alas_headless.android_image_source import AndroidImageSourceLock
+from alas_headless.android_image_source import disk_checks
 
 
 class AndroidImageSourceTests(unittest.TestCase):
@@ -61,6 +62,17 @@ class AndroidImageSourceTests(unittest.TestCase):
         value["build"]["game_artifact_allowed"] = True
         with self.assertRaisesRegex(AndroidImageSourceError, "external"):
             AndroidImageSourceLock.from_mapping(value)
+
+    def test_wsl_requires_real_backing_drive_capacity(self) -> None:
+        gib = 1024 ** 3
+        missing = disk_checks(600 * gib, 400 * gib, "microsoft-standard-WSL2", None)
+        self.assertFalse(missing["backing_disk_verified"])
+        self.assertFalse(missing["disk_floor"])
+        low = disk_checks(600 * gib, 400 * gib, "microsoft-standard-WSL2", 218 * gib)
+        self.assertTrue(low["backing_disk_verified"])
+        self.assertFalse(low["disk_floor"])
+        enough = disk_checks(600 * gib, 400 * gib, "microsoft-standard-WSL2", 500 * gib)
+        self.assertTrue(all(enough.values()))
 
 
 if __name__ == "__main__":

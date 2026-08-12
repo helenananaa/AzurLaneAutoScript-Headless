@@ -139,7 +139,27 @@ class AndroidImageSourceLock:
         return cls.from_mapping(value)
 
 
-def host_preflight(lock: AndroidImageSourceLock, root: Path = Path("/")) -> Mapping[str, Any]:
+def disk_checks(
+    filesystem_free_bytes: int,
+    minimum_bytes: int,
+    kernel_release: str,
+    backing_free_bytes: int | None,
+) -> Mapping[str, bool]:
+    is_wsl = "microsoft" in kernel_release.lower()
+    return {
+        "backing_disk_verified": not is_wsl or backing_free_bytes is not None,
+        "disk_floor": (
+            filesystem_free_bytes >= minimum_bytes
+            and (not is_wsl or (backing_free_bytes or 0) >= minimum_bytes)
+        ),
+    }
+
+
+def host_preflight(
+    lock: AndroidImageSourceLock,
+    root: Path = Path("/"),
+    backing_free_bytes: int | None = None,
+) -> Mapping[str, Any]:
     """Return an evidence record; callers must require outcome=pass before sync/build."""
     build = _mapping(lock.document["build"], "build")
     disk = shutil.disk_usage(root)
@@ -150,14 +170,17 @@ def host_preflight(lock: AndroidImageSourceLock, root: Path = Path("/")) -> Mapp
             if line.startswith("MemTotal:"):
                 memory_bytes = int(line.split()[1]) * 1024
                 break
+    minimum_disk_bytes = int(build["minimum_free_disk_gib"]) * 1024 ** 3
     checks = {
         "host_os_linux": platform.system().lower() == "linux",
         "host_arch_x86_64": platform.machine().lower() in ("x86_64", "amd64"),
-        "disk_floor": disk.free >= int(build["minimum_free_disk_gib"]) * 1024 ** 3,
         "ram_floor": memory_bytes >= int(build["minimum_ram_gib"]) * 1024 ** 3,
         "git_available": shutil.which("git") is not None,
         "repo_available": shutil.which("repo") is not None,
     }
+    checks.update(disk_checks(
+        disk.free, minimum_disk_bytes, platform.release(), backing_free_bytes
+    ))
     tools = {}
     for name, command in (
         ("git", ("git", "--version")),
@@ -177,6 +200,7 @@ def host_preflight(lock: AndroidImageSourceLock, root: Path = Path("/")) -> Mapp
         "source_lock_sha256": lock.sha256,
         "root": str(root.resolve()),
         "free_disk_bytes": disk.free,
+        "backing_free_bytes": backing_free_bytes,
         "memory_bytes": memory_bytes,
         "checks": checks,
         "tools": tools,

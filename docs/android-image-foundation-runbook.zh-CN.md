@@ -127,6 +127,19 @@ PYTHONPATH=python python3 scripts/python/preflight_redroid_build.py \
   --output evidence/android-image-foundation/build-host-preflight.json
 ```
 
+WSL 的 ext4.vhdx 是稀疏文件，Linux 内看到的空闲量不代表宿主盘还能增长多少。WSL 预检必须同时传入 VHD 所在 Windows 盘的真实 free bytes；省略该值会以 `backing_disk_verified` 失败：
+
+```powershell
+$backingFree = (Get-PSDrive -Name H).Free
+wsl.exe -e sh -lc "cd /mnt/h/program/AzurLaneAutoScript-Headless-android-image-foundation && \
+  PYTHONPATH=python python3 scripts/python/preflight_redroid_build.py \
+  --source-lock integration/runtime/android-image-source-lock.example.json \
+  --root / --backing-free-bytes $backingFree \
+  --output evidence/android-image-foundation/build-host-preflight.json"
+```
+
+调用完整构建器时把同一值放入 `ALAS_BUILD_BACKING_FREE_BYTES`。这不是资源 override；低于锁定下限仍会失败。
+
 ### 3.2 同步、构建并生成供应链证据
 
 构建入口只接受空目录，按 commit checkout local manifest/patch，输出 `repo manifest -r`，检查 patch driver 的隐性 `[ERROR]`，依次构建两个 ABI，并调用 AOSP 官方 `m sbom`：
@@ -562,7 +575,7 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 本 worktree 已完成以下不依赖真实 ALAS 挂机数据的基础工作：
 
 - 策略 `compat-foundation-v1` 校验通过，SHA-256 为 `622d7fb202d020fda5ad87291c8fb36f546af0562a927ea6df9c461a83844233`；
-- 当前仓库全量测试 `473 passed`；
+- 当前仓库全量测试 `474 passed`；
 - x86_64 与 ARM64 Unity 合同 APK 均已构建并确认只含目标 ABI；当前 SHA-256 分别为 `6030c2d4ba41b7b29150490b3d977991e01084a83e523b6a64d98fdfd5a3ceb0` 与 `dcd02e4aa10fb972ea9d7ba20c54b46ccab9f016308d8634d0207af4cbf51a61`；
 - 最新 observer ANGLE x86_64/ARM64 APK 已从固定 ANGLE revision 交叉构建，SHA-256 分别为 `98941a4fb1fc99b201cde6b86498da6c132a74c0cf5d60b4b72fcb3dbff627fe` 与 `8670115d326ddc39ccc5ae2cd36352e7377c3c23f8360aa358649ec959e40ccb`；observer ABI 由编译目标生成，不再硬编码 x86_64；
 - x86_64 更新实验完整通过：错签拒绝、单 APK、ABI split、userdata migration、进程中断续传、低空间、Android 重启续传、原子提升与回滚；
@@ -592,7 +605,7 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 - 当前 Redroid `/data` 是宿主 ext4 bind mount，镜像没有 `ro.crypto.type=file` 或 FBE fstab 合同；ARM 受保护能力为 20/21，`device-encrypted-storage` 必须保持 fail，不能通过启动参数豁免；
 - 当前 ARM 基线的安全补丁级别为 `2021-10-05`，需要在自维护镜像线更新，不能作为长期发布基线；
 - 当前 x86 镜像是内容哈希固定的 SDK API 32 基线，ARM 是 digest 固定的 stock Redroid 基线；二者都不是本项目从固定 AOSP/Redroid 产品配置构建出的精简镜像，尚未删除任何系统服务；
-- 当前 WSL 已安装 `repo` launcher，构建预检的系统、架构、磁盘、Git、Repo 项全部通过；唯一 blocker 是 RAM 仅 `20971327488` bytes，低于锁中依据 AOSP 官方要求设置的 64 GiB 下限。因此没有启动可能不可靠的全量构建，也没有生成伪 SBOM/provenance；
+- 当前 WSL 已安装 `repo` launcher，系统、架构、Git、Repo 项通过；VHD 内部虽报告约 621 GiB 可用，但 VHD 所在 H 盘实际仅约 218.5 GiB 可用，低于 400 GiB 下限；RAM 仅 `20971327488` bytes，也低于 64 GiB 下限。因此没有启动完整 sync/build，也没有生成伪 SBOM/provenance；
 - x86_64 的真实 Redroid OCI 镜像回退尚未执行；ARM 回退证据不能替代 x86 证据；
 - worktree 未提交时，发布清单还会附加 `source:dirty-worktree` blocker；
 - 在支持 FBE、更新安全补丁且可复现的自维护 AOSP/Redroid 构建入口补齐前，双架构 release promotion 必须保持 `blocked`。
