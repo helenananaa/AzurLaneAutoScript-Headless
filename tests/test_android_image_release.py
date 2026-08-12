@@ -66,6 +66,31 @@ def release_inputs(abi: str):
 
 
 class AndroidImageReleaseTests(unittest.TestCase):
+    def test_host_userdata_volume_is_bound_but_cannot_claim_android_fbe(self) -> None:
+        evidence = {
+            "schema": "alas-headless.redroid-userdata-volume-qualification/v1",
+            "outcome": "pass",
+            "ceiling": "host-volume-qualified",
+            "android_fbe_proven": False,
+            "direct_boot_proven": False,
+            "_evidence_file": evidence_identity(),
+        }
+        record = target_record(
+            "arm64-v8a", None, None, None, {}, None, None,
+            userdata_volume_evidence=evidence,
+        )
+        self.assertEqual(record["host_userdata_volume"]["outcome"], "pass")
+        self.assertNotIn("userdata-volume-evidence-file-invalid", record["blockers"])
+        self.assertNotIn("userdata-volume-evidence-overclaims-fbe", record["blockers"])
+
+        overclaim = dict(evidence)
+        overclaim["android_fbe_proven"] = True
+        record = target_record(
+            "arm64-v8a", None, None, None, {}, None, None,
+            userdata_volume_evidence=overclaim,
+        )
+        self.assertIn("userdata-volume-evidence-overclaims-fbe", record["blockers"])
+
     def test_dual_target_clean_release_can_promote(self) -> None:
         source_lock_sha256 = "c" * 64
         target = {

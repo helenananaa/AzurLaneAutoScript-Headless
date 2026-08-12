@@ -204,6 +204,26 @@ Redroid stock 的目录 bind 不能满足 Android native FBE。自维护线必�
 
 在以上链路实测前，`device-encrypted-storage` 必须保持 fail；宿主 LUKS/fscrypt 只能作为额外的 at-rest 控制，不能冒充 Android FBE/Direct Boot。
 
+可先在 Linux/Redroid 宿主制备一个完全隔离的空实验卷，验证块设备和 ext4
+`encrypt` 前置能力。脚本只允许创建原本不存在的新镜像文件，拒绝生产 `/data`
+路径、非空或已挂载目录，并在失败时删除本轮新建镜像：
+
+```bash
+sudo ./scripts/wsl/provision-redroid-userdata-image.sh \
+  --image /var/lib/redroid-volumes/fbe-lab/userdata.img \
+  --size-mib 1024 \
+  --mount /mnt/redroid-userdata-fbe-lab \
+  --output /var/lib/redroid-volumes/fbe-lab/probe.json
+PYTHONPATH=python python3 scripts/python/qualify_redroid_userdata_volume.py \
+  --probe /var/lib/redroid-volumes/fbe-lab/probe.json \
+  --output evidence/android-image-foundation/userdata-volume-host-qualification.json
+```
+
+该资格结果的上限固定为 `host-volume-qualified`，并显式记录
+`android_fbe_proven=false`、`direct_boot_proven=false`。只有把这个卷交给自建
+Redroid 的 `/data` fstab、完成 Android 五路 FBE 门和 Direct Boot/CE 解锁恢复实验后，
+才能提升为 Android FBE 证据。
+
 ## 4. 构建双架构 ANGLE 制品
 
 以下命令在 WSL 中执行。ANGLE 源码和 depot_tools 放在仓库外，避免污染 Git：
@@ -361,9 +381,12 @@ adb install-multiple -r 安装 v2 split 集合
 
 通过条件：升级成功路径保留 userdata；所有负例 fail closed；旧镜像和升级前 userdata 快照仍可启动。真实游戏 APK 不进入仓库或公开 Release。
 
-### 当前缺口门
+### 当前实现
 
-上述成对测试 APK 和自动化执行器尚未进入仓库。本 worktree 只固定合同，不伪造通过结果。实现时应使用独立测试包名和测试证书，不得复用游戏包名。
+成对单 APK、ABI split、同签名迁移包、错签负例和自动化执行器已经位于
+`probes/android-update-lab` 与 `scripts/python/qualify_android_update_lab.py`。x86_64
+和 ARM64 的完整实验都已有通过证据。它们始终使用独立测试包名和测试证书，
+不会复用或提交真实游戏包；发布门仍要求每个 ABI 分别提供自己的最新实验清单。
 
 ## 8. 验证游戏内资源更新能力
 
@@ -483,6 +506,7 @@ python scripts/python/create_android_image_release.py `
   --arm64-build-provenance <arm64-provenance.json> `
   --arm64-reproducibility-evidence <arm64-reproducibility.json> `
   --arm64-rollback-evidence <arm64-image-rollback.json> `
+  --arm64-userdata-volume-evidence <arm64-host-volume-qualification.json> `
   --output evidence\android-image-foundation\release-candidate.json `
   --require-promotable
 ```
@@ -575,7 +599,7 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 本 worktree 已完成以下不依赖真实 ALAS 挂机数据的基础工作：
 
 - 策略 `compat-foundation-v1` 校验通过，SHA-256 为 `622d7fb202d020fda5ad87291c8fb36f546af0562a927ea6df9c461a83844233`；
-- 当前仓库全量测试 `474 passed`；
+- 当前仓库全量测试 `481 passed`；
 - x86_64 与 ARM64 Unity 合同 APK 均已构建并确认只含目标 ABI；当前 SHA-256 分别为 `6030c2d4ba41b7b29150490b3d977991e01084a83e523b6a64d98fdfd5a3ceb0` 与 `dcd02e4aa10fb972ea9d7ba20c54b46ccab9f016308d8634d0207af4cbf51a61`；
 - 最新 observer ANGLE x86_64/ARM64 APK 已从固定 ANGLE revision 交叉构建，SHA-256 分别为 `98941a4fb1fc99b201cde6b86498da6c132a74c0cf5d60b4b72fcb3dbff627fe` 与 `8670115d326ddc39ccc5ae2cd36352e7377c3c23f8360aa358649ec959e40ccb`；observer ABI 由编译目标生成，不再硬编码 x86_64；
 - x86_64 更新实验完整通过：错签拒绝、单 APK、ABI split、userdata migration、进程中断续传、低空间、Android 重启续传、原子提升与回滚；
@@ -598,16 +622,23 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 - FBE 受保护能力门已改为五路复合验证：`ro.crypto.state=encrypted`、`ro.crypto.type=file`、PackageManager FBE feature=true、`sm get-fbe-mode=native` 和 mount/vold service 存在；缺任一项或仅为 `emulated` 都失败；
 - Android 12 digest `d3fb…78b2` → Android 14 digest `0a61…69aa` → 恢复快照 → Android 12 的真实回退已通过；证据同时验证候选 fingerprint/API 34 与恢复后的旧 fingerprint/API 31，避免用可空的 `ro.runtime.firstboot` 冒充候选身份；
 - OCI identity 现在分别记录 registry/index digest 与架构平台 manifest digest；运行配置仍必须用 index digest，tag 或缺失平台 descriptor 都无法通过发布门；
-- fail-closed 候选清单中 x86_64 无 blocker；ARM64 的镜像身份、G1/G2/G3 和更新证据均闭环。
+- ARM64 宿主已用全新 512 MiB 稀疏镜像实际完成独立 loop block、ext4 `encrypt`、
+  `rw,nodev,nosuid` 临时挂载与自动释放验证；资格证据上限固定为
+  `host-volume-qualified`，并明确 `android_fbe_proven=false`、
+  `direct_boot_proven=false`。生产 `/var/lib/redroid/data` 未被挂载或修改；
+- 与干净提交绑定的 fail-closed 候选清单中，双架构 G1/G2/G3 和更新证据均闭环；
+  仍保留自建 provenance/reproducibility、x86 OCI 回退以及 ARM FBE blocker。
 
 当前仍然 fail-closed 的项目：
 
 - 当前 Redroid `/data` 是宿主 ext4 bind mount，镜像没有 `ro.crypto.type=file` 或 FBE fstab 合同；ARM 受保护能力为 20/21，`device-encrypted-storage` 必须保持 fail，不能通过启动参数豁免；
-- 当前 ARM 基线的安全补丁级别为 `2021-10-05`，需要在自维护镜像线更新，不能作为长期发布基线；
+- 当前生产 Android 12 ARM 基线的安全补丁级别为 `2021-10-05`；已验证的 stock
+  Android 14 候选也仅为 `2024-05-05`。二者都需要由自维护镜像线替代，不能作为长期发布基线；
 - 当前 x86 镜像是内容哈希固定的 SDK API 32 基线，ARM 是 digest 固定的 stock Redroid 基线；二者都不是本项目从固定 AOSP/Redroid 产品配置构建出的精简镜像，尚未删除任何系统服务；
 - 当前 WSL 已安装 `repo` launcher，系统、架构、Git、Repo 项通过；VHD 内部虽报告约 621 GiB 可用，但 VHD 所在 H 盘实际仅约 218.5 GiB 可用，低于 400 GiB 下限；RAM 仅 `20971327488` bytes，也低于 64 GiB 下限。因此没有启动完整 sync/build，也没有生成伪 SBOM/provenance；
 - x86_64 的真实 Redroid OCI 镜像回退尚未执行；ARM 回退证据不能替代 x86 证据；
-- worktree 未提交时，发布清单还会附加 `source:dirty-worktree` blocker；
+- worktree 未提交时，发布清单还会附加 `source:dirty-worktree` blocker；最新干净候选
+  的实际 blocker 是双架构 build provenance/reproducibility、x86 OCI 回退和 ARM FBE；
 - 在支持 FBE、更新安全补丁且可复现的自维护 AOSP/Redroid 构建入口补齐前，双架构 release promotion 必须保持 `blocked`。
 
 冷启动复测命令：

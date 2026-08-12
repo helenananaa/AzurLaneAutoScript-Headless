@@ -59,6 +59,7 @@ def main(argv: Sequence[str] = ()) -> int:
         parser.add_argument("--{0}-build-provenance".format(prefix), type=Path)
         parser.add_argument("--{0}-reproducibility-evidence".format(prefix), type=Path)
         parser.add_argument("--{0}-rollback-evidence".format(prefix), type=Path)
+        parser.add_argument("--{0}-userdata-volume-evidence".format(prefix), type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--require-promotable", action="store_true")
     args = parser.parse_args(list(argv) if argv else None)
@@ -87,6 +88,7 @@ def main(argv: Sequence[str] = ()) -> int:
             optional_json(args.x86_64_build_provenance),
             optional_json(args.x86_64_reproducibility_evidence),
             optional_json(args.x86_64_rollback_evidence),
+            optional_json(args.x86_64_userdata_volume_evidence),
         ),
         "arm64-v8a": target_record(
             "arm64-v8a", args.arm64_contract_apk, args.arm64_angle_apk,
@@ -101,6 +103,7 @@ def main(argv: Sequence[str] = ()) -> int:
             optional_json(args.arm64_build_provenance),
             optional_json(args.arm64_reproducibility_evidence),
             optional_json(args.arm64_rollback_evidence),
+            optional_json(args.arm64_userdata_volume_evidence),
         ),
     }
     manifest = build_release_manifest(policy, source, targets)

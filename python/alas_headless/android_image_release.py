@@ -11,6 +11,7 @@ from typing import Any, Dict, Mapping, Optional
 
 from .android_foundation_audit import AUDIT_SCHEMA
 from .android_image_policy import AndroidImagePolicy
+from .android_userdata_volume import QUALIFICATION_SCHEMA as USERDATA_VOLUME_SCHEMA
 
 
 RELEASE_SCHEMA = "alas-headless.android-image-foundation-release/v1"
@@ -77,6 +78,7 @@ def target_record(
     build_provenance: Optional[Mapping[str, Any]] = None,
     reproducibility_evidence: Optional[Mapping[str, Any]] = None,
     rollback_evidence: Optional[Mapping[str, Any]] = None,
+    userdata_volume_evidence: Optional[Mapping[str, Any]] = None,
 ) -> Mapping[str, Any]:
     blockers = []
     contract = None
@@ -336,6 +338,32 @@ def target_record(
         if image_artifact is not None:
             blockers.append("image-rollback-candidate-unbound")
 
+    userdata_volume_summary = None
+    if userdata_volume_evidence is not None:
+        userdata_volume_summary = {
+            "schema": userdata_volume_evidence.get("schema"),
+            "outcome": userdata_volume_evidence.get("outcome"),
+            "ceiling": userdata_volume_evidence.get("ceiling"),
+            "android_fbe_proven": userdata_volume_evidence.get("android_fbe_proven"),
+            "direct_boot_proven": userdata_volume_evidence.get("direct_boot_proven"),
+            "evidence_file": evidence_file(
+                userdata_volume_evidence,
+                "userdata-volume-evidence-file-invalid",
+                blockers,
+            ),
+        }
+        if (
+            userdata_volume_evidence.get("schema") != USERDATA_VOLUME_SCHEMA
+            or userdata_volume_evidence.get("outcome") != "pass"
+            or userdata_volume_evidence.get("ceiling") != "host-volume-qualified"
+        ):
+            blockers.append("userdata-volume-evidence-not-pass")
+        if (
+            userdata_volume_evidence.get("android_fbe_proven") is not False
+            or userdata_volume_evidence.get("direct_boot_proven") is not False
+        ):
+            blockers.append("userdata-volume-evidence-overclaims-fbe")
+
     return {
         "abi": abi,
         "outcome": "platform-and-update-qualified" if not blockers else "blocked",
@@ -349,6 +377,7 @@ def target_record(
         "build_provenance": provenance_summary,
         "reproducibility": reproducibility_summary,
         "image_rollback": rollback_summary,
+        "host_userdata_volume": userdata_volume_summary,
     }
 
 
