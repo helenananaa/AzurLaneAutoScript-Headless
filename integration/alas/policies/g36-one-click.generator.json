@@ -1,0 +1,16 @@
+{
+  "schema": "alas-headless.g36-one-click-policy-generator/v1",
+  "profile_id": "cn-9.7.10-12-4-normal-one-battle",
+  "upstream_alas_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af",
+  "runtime_lock_sha256": "e54d6b213265703f8aaf0f74e56c2fec0fed45f816cc2c467d5ae6fae3952066",
+  "task_config_sha256": "bea8b149ecd634dcd33d8972c3eae69db8bbbb1e5c4951c3c11159211f489b2f",
+  "accepted_live_preflight_sha256": "a8dfdb91c41da228b49dc706c0f6496ef3bb94e10b875ad08a541779af10a240",
+  "accepted_preflight_identity_sha256": "1776ac85a05f925ec4eae558deea43d7033972f9a5e3e55493c1c20cdc78e1e3",
+  "deadline_seconds": 30,
+  "grant": {
+    "campaign.grid_click": 1
+  },
+  "recovery_policy": "qualification-stop",
+  "production_enabled": false,
+  "live_policy_emitted": false
+}

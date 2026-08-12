@@ -583,3 +583,11 @@ update and grid recheck, fleet movement, and battle input,
 Lua/game-state access, other reward popups,
 gestures outside the exact commission handle, and full unattended task flows
 remain fail-closed.
+
+The I01 G36 one-click artifact is deliberately an inert generator input, not
+a checked-in live/default policy. It binds the accepted H05 bundle and exact
+E3 target identity, and can emit only one 30-second
+`campaign.grid_click` qualification envelope with `qualification-stop` and
+`production_enabled=false`. See
+`docs/g36-one-click-qualification-policy.md`; live mutation remains
+disconnected until I02 adds independent dual arming.

@@ -4,6 +4,20 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-12
 
+### I01 G36 one-click qualification policy: implementation passed
+
+- The checked-in artifact is an inert generator input, not a live or default
+  policy; it contains no serial, PID, local evidence path, or account data.
+- It accepts only the signed H05 bundle and exact stable runtime/map/ALAS/E3
+  target identity, then emits one 30-second `campaign.grid_click` grant with
+  `qualification-stop` recovery and `production_enabled=false`.
+- Identity, target, authority, deadline, recovery, and production-marker
+  tampering fail closed. The full Python suite passes `661/661`.
+- I01 performs no device connection or input. The policy remains disconnected
+  until I02 adds two independent mutation-arm switches.
+
+See [G36 one-click qualification policy](g36-one-click-qualification-policy.md).
+
 ### H05 rendered G36 live preflight: qualification passed
 
 - A visible `1280x720` AVD on PID `3094` retained the pinned game, observer,

@@ -109,6 +109,16 @@ from .live_preflight import (
     G36_LIVE_PREFLIGHT_SCHEMA,
     build_g36_live_preflight_bundle,
 )
+from .g36_one_click_policy import (
+    G36_ONE_CLICK_CAPABILITY,
+    G36_ONE_CLICK_GENERATOR_SCHEMA,
+    G36_ONE_CLICK_QUALIFICATION_SCHEMA,
+    G36OneClickQualificationPolicy,
+    build_g36_one_click_qualification_policy,
+    canonical_g36_one_click_qualification_json,
+    g36_preflight_identity_document,
+    g36_preflight_identity_sha256,
+)
 
 
 __all__ = (
@@ -188,6 +198,14 @@ __all__ = (
     "g36_defensive_preflight_to_json",
     "G36_LIVE_PREFLIGHT_SCHEMA",
     "build_g36_live_preflight_bundle",
+    "G36_ONE_CLICK_CAPABILITY",
+    "G36_ONE_CLICK_GENERATOR_SCHEMA",
+    "G36_ONE_CLICK_QUALIFICATION_SCHEMA",
+    "G36OneClickQualificationPolicy",
+    "build_g36_one_click_qualification_policy",
+    "canonical_g36_one_click_qualification_json",
+    "g36_preflight_identity_document",
+    "g36_preflight_identity_sha256",
     "load_g36_task_profile",
     "parse_g36_task_profile",
     "parse_run_policy",
