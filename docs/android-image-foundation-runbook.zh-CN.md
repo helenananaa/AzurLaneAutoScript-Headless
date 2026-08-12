@@ -590,6 +590,12 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 
 脚本验证旧镜像写入、候选镜像继承、带 xattr/ACL/SELinux 的 `/data` 快照恢复，以及再次启动旧镜像；临时目录不在 `/var/lib/redroid/rollback-lab.*` 时拒绝删除。x86_64 必须在 x86_64 Redroid 宿主用同一脚本独立执行，不能复用 ARM 结果。
 
+脚本会按 ABI 显式固定 `linux/amd64` 或 `linux/arm64`，并强制宿主架构与镜像原生
+一致。禁止使用 QEMU/binfmt 执行 privileged Redroid 回退：实测这种组合虽然能启动
+x86 Android userspace，但容器的 mount 操作可能传播并遮蔽 ARM 宿主 `/usr`，会破坏
+SSH shell 与 containerd/runc。x86_64 回退必须在具备 Binder 的原生 x86_64 Linux
+宿主执行；仿真结果不得进入发布证据。
+
 每个发布候选至少包含：
 
 - 源 revision 和构建命令；
@@ -664,6 +670,26 @@ sudo ./scripts/wsl/qualify-redroid-image-rollback.sh \
 - worktree 未提交时，发布清单还会附加 `source:dirty-worktree` blocker；最新干净候选
   的实际 blocker 是双架构 build provenance/reproducibility、x86 OCI 回退和 ARM FBE；
 - 在支持 FBE、更新安全补丁且可复现的自维护 AOSP/Redroid 构建入口补齐前，双架构 release promotion 必须保持 `blocked`。
+
+### ARM 宿主恢复检查（跨架构实验后）
+
+若曾在 ARM 宿主用 QEMU/binfmt 启动 privileged x86 Redroid，并出现 `/bin/bash`、
+`/usr/bin/runc` 或 `containerd-shim-runc-v2` 不可见，必须从云控制台重启宿主；不要
+通过覆盖系统二进制或修改 root shell 绕过。重启后按顺序执行：
+
+```bash
+test -x /bin/bash && test -x /usr/bin/runc && test -x /usr/bin/containerd-shim-runc-v2
+docker ps --filter name=redroid-arm64
+docker inspect redroid-arm64 --format '{{.HostConfig.RestartPolicy.Name}} {{range .Mounts}}{{.Source}}:{{.Destination}}{{end}}'
+find /var/lib/redroid -maxdepth 1 -type d -name 'rollback-lab.*' -print
+find /var/lib/redroid -maxdepth 1 -type d -name 'x86-qemu-lab.*' -print
+test ! -e /proc/sys/fs/binfmt_misc/qemu-x86_64 || cat /proc/sys/fs/binfmt_misc/qemu-x86_64
+```
+
+确认生产容器仍为 digest-pinned ARM 镜像且 `/data` 仍指向
+`/var/lib/redroid/data`；只删除名称精确匹配的临时实验目录。重启会自动清空临时
+binfmt 注册。生产容器 restart policy 已确认为 `unless-stopped`，但仍必须实际检查
+Android boot complete、fingerprint、API 和 userdata sentinel，不能仅凭 Docker 状态声称恢复。
 
 冷启动复测命令：
 

@@ -24,6 +24,8 @@ def release_inputs(abi: str):
         "target": {"abi": abi},
         "game_artifact_included": False,
         "alas_workload_used": False,
+        "platform": "linux/arm64" if abi == "arm64-v8a" else "linux/amd64",
+        "performance_claim_allowed": False,
         "resolved_manifest": {"sha256": "3" * 64, "bytes": 1},
         "artifacts": {
             "system.img": {"sha256": "4" * 64, "bytes": 1},

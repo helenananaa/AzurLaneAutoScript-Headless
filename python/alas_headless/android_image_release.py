@@ -351,6 +351,11 @@ def target_record(
             blockers.append("image-rollback-lab-not-cleaned")
         if rollback_evidence.get("game_installed") is not False or rollback_evidence.get("alas_workload_used") is not False:
             blockers.append("image-rollback-scope-invalid")
+        expected_platform = "linux/arm64" if abi == "arm64-v8a" else "linux/amd64"
+        if rollback_evidence.get("platform", expected_platform) != expected_platform:
+            blockers.append("image-rollback-platform-mismatch")
+        if rollback_evidence.get("performance_claim_allowed", False) is not False:
+            blockers.append("image-rollback-performance-scope-invalid")
         if image_identity is not None and candidate != image_identity.get("manifest_digest"):
             blockers.append("image-rollback-candidate-mismatch")
         if image_artifact is not None:

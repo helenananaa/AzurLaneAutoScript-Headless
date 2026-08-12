@@ -28,10 +28,21 @@ if ss -H -ltn "sport = :$host_port" | grep -q .; then
     exit 1
 fi
 
-docker pull "$previous_image" >/dev/null
-docker pull "$candidate_image" >/dev/null
 expected_arch=amd64
 [[ $abi == arm64-v8a ]] && expected_arch=arm64
+platform="linux/$expected_arch"
+host_arch=$(uname -m)
+execution_mode=native
+host_expected=amd64
+[[ $host_arch == x86_64 || $host_arch == amd64 ]] && host_normalized=amd64 || host_normalized=$host_arch
+[[ $expected_arch == arm64 ]] && host_expected=arm64
+[[ $host_arch == aarch64 ]] && host_normalized=arm64
+[[ $host_normalized == "$host_expected" ]] || {
+    echo "privileged Redroid rollback requires a native-architecture host; binfmt emulation is forbidden" >&2
+    exit 1
+}
+docker pull --platform "$platform" "$previous_image" >/dev/null
+docker pull --platform "$platform" "$candidate_image" >/dev/null
 previous_arch=$(docker image inspect "$previous_image" --format '{{.Architecture}}')
 candidate_arch=$(docker image inspect "$candidate_image" --format '{{.Architecture}}')
 [[ $previous_arch == "$expected_arch" && $candidate_arch == "$expected_arch" ]] || {
@@ -71,7 +82,7 @@ wait_boot() {
 
 start_image() {
     local image=$1
-    docker run -d --name "$container" --privileged \
+    docker run -d --name "$container" --platform "$platform" --privileged \
         -v "$data_dir:/data" -p "127.0.0.1:$host_port:5555" \
         "$image" \
         "androidboot.redroid_width=$width" \
@@ -137,6 +148,10 @@ cat <<JSON
   "schema": "alas-headless.redroid-image-rollback/v1",
   "outcome": "pass",
   "abi": "$abi",
+  "platform": "$platform",
+  "host_architecture": "$host_arch",
+  "execution_mode": "$execution_mode",
+  "performance_claim_allowed": false,
   "previous_image_digest": "$previous_digest",
   "candidate_image_digest": "$candidate_digest",
   "snapshot_sha256": "$snapshot_sha256",
