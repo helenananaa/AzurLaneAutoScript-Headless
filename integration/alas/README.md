@@ -591,3 +591,8 @@ E3 target identity, and can emit only one 30-second
 `production_enabled=false`. See
 `docs/g36-one-click-qualification-policy.md`; live mutation remains
 disconnected until I02 adds independent dual arming.
+
+I02 adds `scripts/python/qualify_g36_controlled_input.py`. It is plan-only by
+default and requires both `--execute` and `--allow-semantic-input` plus a new
+evidence directory before the I03 operational gate can be reached. Either
+switch alone and any pre-existing output directory fail before device access.

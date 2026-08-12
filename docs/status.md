@@ -4,6 +4,19 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-12
 
+### I02 controlled G36 mutation arming: implementation passed
+
+- The controlled-input CLI defaults to a read-only policy/target plan and
+  exposes no serial or account data in its summary.
+- `--execute` and `--allow-semantic-input` are independently required; either
+  switch alone refuses before any ADB or ALAS access.
+- A dual-armed invocation refuses a pre-existing evidence directory without
+  modifying it. Live dispatch remains reserved for the explicit I03
+  operational gate, so I02 itself injected no input. The full Python suite
+  passes `664/664`.
+
+See [G36 controlled-input arming](g36-controlled-input-arming.md).
+
 ### I01 G36 one-click qualification policy: implementation passed
 
 - The checked-in artifact is an inert generator input, not a live or default
