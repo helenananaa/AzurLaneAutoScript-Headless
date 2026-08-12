@@ -107,7 +107,7 @@ NOTICE/SBOM SHA-256
 
 ### 3.1 固定源码并做构建宿主预检
 
-源码锁是 `integration/runtime/android-image-source-lock.example.json`。它固定 AOSP tag/commit、Redroid local manifest commit、patch commit/patch set，以及两个 64 位 product；只有分支名或 tag 名而没有 40 位 commit 不算锁定。
+源码锁是 `integration/runtime/android-image-source-lock.example.json`。它固定 AOSP tag/commit、Redroid local manifest commit、patch commit/patch set、五个 Redroid项目、Chromium WebView stub及四个 Lineage ABI预编译项目，以及两个 64 位 product；只有分支名或 tag 名而没有 40 位 commit 不算锁定。
 
 其中 AOSP release tag 是 annotated tag，必须同时固定 tag object 和 peeled manifest
 commit；`repo init` 后核对的是 peeled commit。构建环境还固定 `BUILD_DATETIME`、

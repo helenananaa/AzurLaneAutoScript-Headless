@@ -45,6 +45,43 @@
         "revision": "master",
         "commit": "1686c1825c146891d06004e35e7c362b58d3f1bc"
       }
+    ],
+    "webview_projects": [
+      {
+        "name": "chromium-webview-stub",
+        "path": "external/chromium-webview",
+        "url": "https://github.com/remote-android/chromium-webview-stub.git",
+        "revision": "redroid-14.0.0",
+        "commit": "5072dfbb967078fb872ef2d7a4ee9c37a02d5a05"
+      },
+      {
+        "name": "android_external_chromium-webview_prebuilt_arm",
+        "path": "external/chromium-webview/prebuilt/arm",
+        "url": "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_arm.git",
+        "revision": "main",
+        "commit": "2f2702a1b5c4614c19fdc992da5f85abd735d199"
+      },
+      {
+        "name": "android_external_chromium-webview_prebuilt_arm64",
+        "path": "external/chromium-webview/prebuilt/arm64",
+        "url": "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_arm64.git",
+        "revision": "main",
+        "commit": "a04c6d4ccf0994efe32409446c4297b0e129ddcc"
+      },
+      {
+        "name": "android_external_chromium-webview_prebuilt_x86",
+        "path": "external/chromium-webview/prebuilt/x86",
+        "url": "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_x86.git",
+        "revision": "main",
+        "commit": "f57ab0fd6a19fb57d27fac8efbcd31d4c0893933"
+      },
+      {
+        "name": "android_external_chromium-webview_prebuilt_x86_64",
+        "path": "external/chromium-webview/prebuilt/x86_64",
+        "url": "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_x86_64.git",
+        "revision": "main",
+        "commit": "74bc304c32135220898a0f9a8c8661d9747a60b8"
+      }
     ]
   },
   "products": [

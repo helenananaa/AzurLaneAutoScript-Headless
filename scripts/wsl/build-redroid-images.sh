@@ -141,7 +141,7 @@ from xml.sax.saxutils import quoteattr
 value = json.load(open(sys.argv[1], encoding="utf-8"))
 print('<?xml version="1.0" encoding="UTF-8"?>')
 print("<manifest>")
-for project in value["redroid"]["projects"]:
+for project in value["redroid"]["projects"] + value["redroid"]["webview_projects"]:
     print(
         "  <extend-project name={0} path={1} revision={2} />".format(
             quoteattr(project["name"]), quoteattr(project["path"]),
@@ -150,7 +150,16 @@ for project in value["redroid"]["projects"]:
     )
 print("</manifest>")
 PY
-repo sync -c --fail-fast -j"$(nproc)"
+sync_passed=false
+for attempt in 1 2 3 4 5; do
+    if repo sync -c --fail-fast -j8; then
+        sync_passed=true
+        break
+    fi
+    echo "repo sync attempt $attempt failed; retaining objects for a rate-limited retry" >&2
+    (( attempt < 5 )) && sleep $((attempt * 15))
+done
+[[ $sync_passed == true ]] || { echo "repo sync exhausted five attempts" >&2; exit 1; }
 repo manifest -r -o "$evidence_root/resolved-manifest.xml"
 observed_source_epoch=$(git -C .repo/manifests show -s --format=%ct "$platform_commit")
 [[ $observed_source_epoch == "$source_date_epoch" ]] || {
@@ -165,7 +174,7 @@ resolved = {
     (item.get("name"), item.get("path")): item.get("revision")
     for item in ET.parse(sys.argv[2]).getroot().findall("project")
 }
-for project in lock["redroid"]["projects"]:
+for project in lock["redroid"]["projects"] + lock["redroid"]["webview_projects"]:
     key = (project["name"], project["path"])
     if resolved.get(key) != project["commit"]:
         raise SystemExit("resolved manifest mismatch for {0}".format(key))

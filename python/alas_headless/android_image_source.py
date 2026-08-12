@@ -27,6 +27,28 @@ REDROID_PROJECTS = {
     "redroid-omx": "hardware/redroid/omx",
     "vendor_redroid": "vendor/redroid",
 }
+WEBVIEW_PROJECTS = {
+    "chromium-webview-stub": (
+        "external/chromium-webview",
+        "https://github.com/remote-android/chromium-webview-stub.git",
+    ),
+    "android_external_chromium-webview_prebuilt_arm": (
+        "external/chromium-webview/prebuilt/arm",
+        "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_arm.git",
+    ),
+    "android_external_chromium-webview_prebuilt_arm64": (
+        "external/chromium-webview/prebuilt/arm64",
+        "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_arm64.git",
+    ),
+    "android_external_chromium-webview_prebuilt_x86": (
+        "external/chromium-webview/prebuilt/x86",
+        "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_x86.git",
+    ),
+    "android_external_chromium-webview_prebuilt_x86_64": (
+        "external/chromium-webview/prebuilt/x86_64",
+        "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_x86_64.git",
+    ),
+}
 
 
 class AndroidImageSourceError(ValueError):
@@ -103,6 +125,21 @@ class AndroidImageSourceLock:
             _commit(project.get("commit"), "redroid.projects[{0}].commit".format(name))
         if observed_projects != REDROID_PROJECTS:
             raise AndroidImageSourceError("all Redroid local-manifest projects must be commit locked")
+        webview_projects = redroid.get("webview_projects")
+        if not isinstance(webview_projects, Sequence) or isinstance(webview_projects, (str, bytes)):
+            raise AndroidImageSourceError("redroid.webview_projects must be an array")
+        observed_webview = {}
+        for item in webview_projects:
+            project = _mapping(item, "WebView project")
+            name = str(project.get("name", ""))
+            if name in observed_webview:
+                raise AndroidImageSourceError("duplicate WebView project: {0}".format(name))
+            observed_webview[name] = (str(project.get("path", "")), str(project.get("url", "")))
+            if not str(project.get("revision", "")).strip():
+                raise AndroidImageSourceError("WebView project revision is mandatory")
+            _commit(project.get("commit"), "redroid.webview_projects[{0}].commit".format(name))
+        if observed_webview != WEBVIEW_PROJECTS:
+            raise AndroidImageSourceError("all WebView local-manifest projects must be commit locked")
 
         products = document.get("products")
         if not isinstance(products, Sequence) or isinstance(products, (str, bytes)):
@@ -279,6 +316,13 @@ def verify_remote_refs(lock: AndroidImageSourceLock) -> Mapping[str, Any]:
         refs.append((
             "redroid-project:{0}".format(project["name"]),
             "https://github.com/remote-android/{0}.git".format(project["name"]),
+            "refs/heads/{0}".format(project["revision"]),
+            project["commit"],
+        ))
+    for project in redroid["webview_projects"]:
+        refs.append((
+            "webview-project:{0}".format(project["name"]),
+            project["url"],
             "refs/heads/{0}".format(project["revision"]),
             project["commit"],
         ))

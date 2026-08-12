@@ -69,6 +69,18 @@ class AndroidImageSourceTests(unittest.TestCase):
         with self.assertRaisesRegex(AndroidImageSourceError, "all Redroid"):
             AndroidImageSourceLock.from_mapping(value)
 
+    def test_rejects_unlocked_webview_project(self) -> None:
+        value = copy.deepcopy(self.value)
+        value["redroid"]["webview_projects"][0]["commit"] = "main"
+        with self.assertRaisesRegex(AndroidImageSourceError, "immutable Git commit"):
+            AndroidImageSourceLock.from_mapping(value)
+
+    def test_rejects_missing_webview_abi_project(self) -> None:
+        value = copy.deepcopy(self.value)
+        value["redroid"]["webview_projects"].pop()
+        with self.assertRaisesRegex(AndroidImageSourceError, "all WebView"):
+            AndroidImageSourceLock.from_mapping(value)
+
     def test_rejects_32_bit_or_single_arch_product(self) -> None:
         value = copy.deepcopy(self.value)
         value["products"] = value["products"][:1]
