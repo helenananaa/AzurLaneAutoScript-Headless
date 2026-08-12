@@ -177,6 +177,20 @@ docker load --platform linux/arm64 -i evidence/redroid-arm64-v8a.oci.tar
 
 同一 rootfs layer、源码锁、fingerprint 和 epoch 必须生成相同 archive SHA-256 与 manifest digest。合成 rootfs 已在 Docker 29 containerd image store 上分别完成 x86_64/ARM64 `load + inspect` 冒烟；这证明打包格式可消费，不代表真实 Android product 已构建或启动。
 
+### 3.4 FBE 的 userdata 模型迁移
+
+Redroid stock 的目录 bind 不能满足 Android native FBE。自维护线必须把每个实例的 userdata 改成独立块设备，禁止直接在宿主根分区上启用特性或就地试验：
+
+1. 在实验宿主创建可丢弃的独立 userdata 块卷，不使用生产 `/var/lib/redroid/data`；
+2. ext4 必须具备 `encrypt` feature，宿主内核必须有 `CONFIG_FS_ENCRYPTION=y`；当前 ARM 宿主内核满足，根 ext4 不满足；
+3. 将该设备以固定容器内路径提供给 Redroid，不再 `-v host-dir:/data`；
+4. 自维护 product 生成 userdata/fstab 合同，`/data` 使用 AOSP 推荐的 `fileencryption`，KeyMint 在 `early_hal`、vold 在 `post-fs-data` 前可用；
+5. 首次格式化只允许在空实验卷上执行；现有 userdata 必须走备份、校验、恢复迁移，FBE on-disk format 不能作为普通 OTA 原地切换；
+6. 通过五路 native FBE 门后，还要用测试凭据重启，验证 Direct Boot 时 DE 可用、CE 未解锁，解锁后 CE 与更新 userdata 恢复；
+7. 镜像回退必须同时恢复与旧镜像匹配的块卷快照，不能把新 FBE 卷直接交给不兼容旧镜像。
+
+在以上链路实测前，`device-encrypted-storage` 必须保持 fail；宿主 LUKS/fscrypt 只能作为额外的 at-rest 控制，不能冒充 Android FBE/Direct Boot。
+
 ## 4. 构建双架构 ANGLE 制品
 
 以下命令在 WSL 中执行。ANGLE 源码和 depot_tools 放在仓库外，避免污染 Git：
