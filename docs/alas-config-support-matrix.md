@@ -200,6 +200,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 固定上游回放覆盖全部 16 种合法组合和 24 个非法单字段案例，执行原快速前进中的自动寻敌/2x 书选择、舰队锁定开关，以及伏击时规避/迎战分支。开关控件和伏击处理均由确定性夹具代替，没有调用真实地图方法、进入战斗、消耗 2x 书、页面输入或 Android 注入，mutation budget 为 0。因此四字段只提升 `offline`；真实控件后置条件、非周回地图、控件不可用、伏击观察及规避失败仍未闭环，`Name/Event/Mode` 的动态路由也不在本批范围。
 
+### 1.23 本轮 Data Key 两开关契约
+
+`DataKey.Collect` 和 `DataKey.ForceCollect` 现在只接受精确布尔值，并在原 `Freebies.run()` 开始处、BattlePass/DataKey/Mail/SupplyPack 任一子模块运行前 fail-closed。关闭 Collect 时仍保留 Mail 和次日调度；ForceCollect 只保留原容量已满时继续产生领取候选的语义。
+
+固定上游回放覆盖四种开关组合和 12 个非法单字段案例，并执行原 `DataKey.data_key_collect()` 的已领取、容量恰好已满且不强制、已满且强制、尚余一格四个边界。真实 `_data_key_collect()` 循环从未调用，mutation budget 为 0，没有领取档案密钥、处理上限弹窗、页面输入或 Android 注入。两字段只提升 `offline`；现有 300/300 实机观察不能外推为强制领取、领取收据、上限弹窗或库存变化闭环。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -242,7 +248,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | 只有勋章商店一次 DR 图纸购买；其他商店、过滤/子选项和刷新未闭环 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 可识别 30/30 并停止；系列、舰船、数量和实际蓝图消耗未验证 |
 | 36 | Gacha | Scheduler, Gacha | L | 一次轻型建造闭环；其他卡池、1-10 次、快速完成、票券及队列领取未闭环 |
-| 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | Mail 四开关和 SupplyPack 两字段已离线完成；Data Key 有证据，BattlePass 不可用，补给包当前实机无免费项且未执行领取 |
+| 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；Data Key 实机仅有 300/300 观察，BattlePass 不可用，补给包当前无免费项且未执行领取 |
 | 38 | Minigame | Scheduler | L | 当前抚顺小游戏路径可用；没有字段配置，但其他轮换小游戏仍属于该任务支持范围 |
 | 39 | PrivateQuarters | Scheduler, PrivateQuarters | M | 蛋糕、玫瑰、互动和 7 个舰船选项均缺适配 |
 | 40 | OpsiGeneral | OpsiGeneral | P | 共享页面可读；随机事件、明石过滤、行动力购买、维修阈值、油量和 Logger 未完整覆盖 |
@@ -344,7 +350,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Shipyard | `ResearchSeries`=1..6; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 同上，且 PR/DR 页面切换不能串页 |
 | Gacha | `Amount`=1..10; `Pool`=`light/heavy/special/event/wishing_well`; `UseDrill`; `UseTicket` | L | 50 个数量/卡池组合可按等价类压缩；票券、快速完成、队列满、活动池不存在、资源不足和领取 |
 | BattlePass | `Collect` | B | 开关两值、入口不可用、免费/付费奖励区别、无奖励和领取结果 |
-| DataKey | `Collect`; `ForceCollect` | L | 四组合、上限、普通/强制领取、无可领和结果校验 |
+| DataKey | `Collect`; `ForceCollect` | L | 四组合、非法值和已领取/满容量/强制/有余量边界已离线完成；仍缺真实普通/强制领取、上限弹窗和库存后置条件 |
 | Mail | `ClaimMerit`; `ClaimMaintenance`; `ClaimTradeLicense`; `DeleteCollected` | P | 16 组合、不同邮件类型、附件为空、容量上限、只删除已领取和误删保护 |
 | SupplyPack | `Collect`; `DayOfWeek`=0..6 | B | 开关、七天、日期比较和高油保护已离线覆盖；仍缺免费包已领/可领、跨日、真实领取收据和购买项误触保护实机证据 |
 | PrivateQuarters | `BuyCake`; `BuyRoses`; `TargetInteract`; `TargetShip`=`anchorage/noshiro/sirius/new_jersey/taihou/aegir/nakhimov` | M | 三开关组合、7 舰船、目标未解锁、货币不足、互动次数和购买确认 |
@@ -539,8 +545,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Daily.TacticalTraining` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "second" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Daily.TacticalTrainingFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Daily.UseDailySkip` | Daily | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `DataKey.Collect` | Freebies | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `DataKey.ForceCollect` | Freebies | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
+| `DataKey.Collect` | Freebies | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `DataKey.ForceCollect` | Freebies | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Dorm.Collect` | Dorm | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Dorm.Feed` | Dorm | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Dorm.FeedFilter` | Dorm | type=textarea; display=default | input/default: "20000 > 10000 > 5000 > 3000 > 2000 > 1000" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |

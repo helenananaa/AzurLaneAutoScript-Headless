@@ -130,6 +130,7 @@ class ReplayConfig:
         self.SupplyPack_DayOfWeek = day
         self.BattlePass_Collect = False
         self.DataKey_Collect = False
+        self.DataKey_ForceCollect = False
         self.events: list[tuple[Any, ...]] = []
 
     def task_delay(self, **kwargs: object) -> None:

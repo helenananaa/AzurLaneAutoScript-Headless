@@ -303,9 +303,24 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 97 changed files, all 96 patched Python files compile, and
-  the repository suite passes `887/887` tests, including Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `892/892` tests, including Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
+
+### Data Key collection configuration: offline contract passed
+
+- `DataKey.Collect` and `DataKey.ForceCollect` admit exact booleans at the
+  beginning of original `Freebies.run()`, before BattlePass, DataKey, Mail, or
+  SupplyPack can navigate. Disabled DataKey collection still preserves Mail
+  and next-server-update scheduling.
+- Pinned replay covers all four switch combinations and 12 invalid
+  single-field cases. Original `DataKey.data_key_collect()` is also replayed
+  for already-collected, exact-full forced/unforced, and one-slot-free states.
+- The real `_data_key_collect()` loop is never called. Mutation budget is `0`,
+  with no key receipt, page input, popup confirmation, or Android injection.
+- Both fields move only to `offline=complete`. The existing 300/300 live
+  observation is not evidence for forced collection, a new key receipt,
+  capacity-limit popup handling, or post-claim inventory changes.
 
 ### Campaign shared switch configuration: offline contract passed
 
