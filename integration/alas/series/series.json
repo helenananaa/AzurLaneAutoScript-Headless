@@ -74,6 +74,11 @@
       "order": 15,
       "path": "integration/alas/series/0130-enhancement-flow-ports.patch",
       "sha256": "c009fd4b11d97f493e419e2936ad0405b25b98927a1fcb04df50933cc15db348"
+    },
+    {
+      "order": 16,
+      "path": "integration/alas/series/0140-scheduler-contract.patch",
+      "sha256": "95077d5a2febf95567d141dc1a9f559839c7e8a4200b1b3aff56d40a4502a125"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

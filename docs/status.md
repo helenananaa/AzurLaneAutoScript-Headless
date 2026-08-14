@@ -126,10 +126,13 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   not evidence of the narrower first-acquisition `NEW_SHIP` marker. Per the
   user's direction, no probabilistic ship grind was attempted; this branch is
   explicitly skipped and remains fail-closed pending a natural sample.
-- The 15-member patch includes the StopCondition, retirement, and formal
-  enhancement-task ports and is validated against pinned upstream `81ccf63b`:
-  it applies as 91 changed files, every patched Python file compiles, and the
-  repository test suite passes `790/790` when scoped to `tests/`.
+- The 16-member patch includes the StopCondition, retirement, formal
+  enhancement, and shared Scheduler fail-closed contracts. The Scheduler gate
+  validates all 50 six-field task surfaces before the original ALAS queueing
+  method; offline replay covers 15 configuration equivalence classes without
+  running a real account task queue. Against pinned upstream `81ccf63b`, the
+  patch applies as 92 changed files, every patched Python file compiles, and
+  the repository suite passes `808/808` tests.
 
 ### EventB ship-drop closure: implementation passed, natural live proof pending
 

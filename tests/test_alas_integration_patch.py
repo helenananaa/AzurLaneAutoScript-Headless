@@ -203,6 +203,12 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         self.assertIn("diff --git a/module/dorm/dorm.py", self.patch_text)
         self.assertIn("semantic_session.dorm_state().occupied_slots", self.patch_text)
 
+    def test_shared_scheduler_is_validated_before_original_queueing(self):
+        self.assertIn("diff --git a/module/config/config.py", self.patch_text)
+        gate = self.patch_text.index("validate_alas_scheduler_config(self.data)")
+        queue = self.patch_text.index("pending = []", gate)
+        self.assertLess(gate, queue)
+
     def test_five_new_flows_preserve_alas_state_machine_ownership(self):
         for begin, end in (
             ("begin_tactical()", "end_tactical()"),

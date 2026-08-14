@@ -134,6 +134,9 @@ FLOW_PATHS = {
     "0130-enhancement-flow-ports.patch": {
         "module/retire/enhancement.py",
     },
+    "0140-scheduler-contract.patch": {
+        "module/config/config.py",
+    },
 }
 
 

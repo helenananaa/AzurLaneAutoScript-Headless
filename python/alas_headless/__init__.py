@@ -1,5 +1,11 @@
 """Controller-side components for AzurLaneAutoScript Headless."""
 
+from .alas_scheduler_contract import (
+    AlasSchedulerTaskSnapshot,
+    SCHEDULER_FIELDS,
+    validate_alas_scheduler_config,
+)
+
 from .alas_map_sync import (
     AlasCampaignFleetPlan,
     AlasCampaignMapProjection,
@@ -340,6 +346,9 @@ from .runtime_qualification import (
 )
 
 __all__ = (
+    "AlasSchedulerTaskSnapshot",
+    "SCHEDULER_FIELDS",
+    "validate_alas_scheduler_config",
     "ActionReceipt",
     "AdbObserverBridge",
     "BackendKind",

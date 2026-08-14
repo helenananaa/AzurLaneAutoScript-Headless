@@ -5259,9 +5259,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "not_applicable",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "python/alas_headless/alas_scheduler_replay.py",
+        "python/alas_headless/alas_scheduler_contract.py",
+        "tests/test_alas_integration_patch.py"
+      ],
       "group_code": "R",
       "metadata": "type=input; display=hide",
       "panels": [
@@ -5327,9 +5332,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "not_applicable",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "python/alas_headless/alas_scheduler_replay.py",
+        "python/alas_headless/alas_scheduler_contract.py",
+        "tests/test_alas_integration_patch.py"
+      ],
       "group_code": "R",
       "metadata": "type=checkbox/lock/state; display=default",
       "panels": [
@@ -5395,9 +5405,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "not_applicable",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "python/alas_headless/alas_scheduler_replay.py",
+        "python/alas_headless/alas_scheduler_contract.py",
+        "tests/test_alas_integration_patch.py"
+      ],
       "group_code": "R",
       "metadata": "type=input; display=hide",
       "panels": [
@@ -5463,9 +5478,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "not_applicable",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "python/alas_headless/alas_scheduler_replay.py",
+        "python/alas_headless/alas_scheduler_contract.py",
+        "tests/test_alas_integration_patch.py"
+      ],
       "group_code": "R",
       "metadata": "type=datetime; display=default; validate=datetime",
       "panels": [
@@ -5531,9 +5551,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "not_applicable",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "python/alas_headless/alas_scheduler_replay.py",
+        "python/alas_headless/alas_scheduler_contract.py",
+        "tests/test_alas_integration_patch.py"
+      ],
       "group_code": "R",
       "metadata": "type=input; display=hide",
       "panels": [
@@ -5599,9 +5624,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "not_applicable",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "python/alas_headless/alas_scheduler_replay.py",
+        "python/alas_headless/alas_scheduler_contract.py",
+        "tests/test_alas_integration_patch.py"
+      ],
       "group_code": "R",
       "metadata": "type=input; display=hide",
       "panels": [
@@ -7134,9 +7164,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "2d6521f5d357395be5433df4ab25d1b78a0b3b2ea05f2322d13f13deb6b35a94",
-      "manifest_sha256": "7f05d36b4e4902a519538105cc2848db8e367a1abf846853e78787918cbb8df9",
-      "member_count": 15
+      "combined_sha256": "0814925328507fcb0ff94b08ba3e4e7aa15a9ea7ce1c5c5dee9517c2434c4a0e",
+      "manifest_sha256": "c0de1211b109209c242cadfef748c8279fc8868f6b3c14a19e03bf6674831c4f",
+      "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

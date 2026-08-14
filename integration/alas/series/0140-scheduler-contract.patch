@@ -1,0 +1,15 @@
+diff --git a/module/config/config.py b/module/config/config.py
+index eb5a5dca..4a170071 100644
+--- a/module/config/config.py
++++ b/module/config/config.py
+@@ -202,6 +202,10 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+         """
+         Calculate tasks, set pending_task and waiting_task
+         """
++        from alas_headless import validate_alas_scheduler_config
++
++        validate_alas_scheduler_config(self.data)
++
+         pending = []
+         waiting = []
+         error = []
