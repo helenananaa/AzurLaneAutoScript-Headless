@@ -4,6 +4,44 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-14
 
+### Mail shared configuration: all boolean combinations classified offline
+
+- The four `Mail` toggles now pass all 16 boolean combinations through the
+  pinned, patched `MailWhite.run()` state machine with navigation and
+  `mail_claim()` replaced by input-free stubs. Four representative non-boolean
+  values fail before flow ownership or navigation.
+- The replay preserves the original no-claim early return, including the
+  delete-only combination. Selected claim combinations reach the unchanged
+  final `mail_claim()` call with all four values intact; no claim, delete,
+  confirmation, device connection, or Android input occurs.
+- This promotes only the four fields' offline dimension. Existing mail action
+  grants remain default-denied and budgeted, and observation/action/live stay
+  partial; destructive live authority is not broadened.
+
+### Fleet shared configuration: complete offline classification and early refusal
+
+- The nine shared `Fleet` fields used by 12 normal/event campaign panels now
+  pass a 68-case, input-free replay against the pinned and patched ALAS tree.
+  All Fleet 1 indices `1..6`, Fleet 2 `0..6`, and both step ranges `2..5`
+  preserve ALAS's original boss/current/reversed-fleet routing.
+- Source audit proves `Fleet1Formation` and `Fleet2Formation` have no original
+  ALAS business/state-machine read outside generated configuration; the new
+  bounded pre-navigation gate is their only patched read. Semantic mode therefore
+  accepts the existing `double_line` baseline but rejects `line_ahead` and
+  `diamond` before navigation instead of pretending the setting took effect.
+- All five combat modes are classified. Only `combat_auto` is admitted because
+  the other four still require untyped directional or weapon input. All four
+  Fleet orders preserve original ALAS boss routing offline, while semantic
+  campaign navigation remains limited to the reviewed
+  `fleet1_mob_fleet2_boss` order.
+- The campaign patch calls the pure configuration gate before opening its
+  semantic pre-sortie context. Invalid integers, booleans, enums, and every
+  valid-but-unqualified branch fail closed with mutation budget `0` and no
+  Android input. This promotes only the nine fields' offline dimension; their
+  observation, action, and live dimensions remain partial.
+- Repository-root `pytest -q` is now scoped to `tests/`, so ignored ALAS
+  archives can no longer become accidental test modules.
+
 ### Official one-click retirement: live transaction and typed port passed
 
 - The game-owned quick-retirement settings are now read and enforced from the
@@ -132,7 +170,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 92 changed files, every patched Python file compiles, and
-  the repository suite passes `808/808` tests.
+  the repository suite passes `818/818` tests.
 
 ### EventB ship-drop closure: implementation passed, natural live proof pending
 

@@ -13,7 +13,7 @@
     {
       "order": 3,
       "path": "integration/alas/series/0010-mission-mail-flow-ports.patch",
-      "sha256": "f81b4c44e77214cd89173beb06c0bcf43646b8f0bc450fd025f2b6e49911bb5f"
+      "sha256": "da70a1dd444da681278428c02022e47c44ca8a5b6b0e2af730075b745b9ab397"
     },
     {
       "order": 4,
@@ -33,7 +33,7 @@
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "8ff5cfde8b9cf34fd4998d28b39850c4b9492ee0279733ffa92a7a8a9c8b07a3"
+      "sha256": "ee5b4defa41ca9b328415d6c79dc70843ca5e0fcc6b903791bd18217445f3049"
     },
     {
       "order": 8,

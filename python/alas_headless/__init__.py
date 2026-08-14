@@ -5,6 +5,18 @@ from .alas_scheduler_contract import (
     SCHEDULER_FIELDS,
     validate_alas_scheduler_config,
 )
+from .alas_fleet_config_contract import (
+    AlasFleetConfigSnapshot,
+    FLEET_FORMATIONS,
+    FLEET_MODES,
+    FLEET_ORDERS,
+    FLEET_STEPS,
+    validate_alas_fleet_config,
+)
+from .alas_mail_config_contract import (
+    AlasMailConfigSnapshot,
+    validate_alas_mail_config,
+)
 
 from .alas_map_sync import (
     AlasCampaignFleetPlan,

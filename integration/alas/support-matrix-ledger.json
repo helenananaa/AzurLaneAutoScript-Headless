@@ -2297,9 +2297,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_contract.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2327,9 +2333,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_contract.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2357,9 +2369,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_contract.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2387,9 +2405,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_contract.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2417,9 +2441,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_contract.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2447,9 +2477,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_contract.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2477,9 +2513,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_contract.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2507,9 +2549,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_contract.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2537,9 +2585,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_contract.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/display",
       "panels": [
@@ -3578,9 +3632,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_mail_config.py",
+        "python/alas_headless/alas_mail_config_contract.py",
+        "python/alas_headless/alas_mail_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -3597,9 +3657,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_mail_config.py",
+        "python/alas_headless/alas_mail_config_contract.py",
+        "python/alas_headless/alas_mail_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -3616,9 +3682,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_mail_config.py",
+        "python/alas_headless/alas_mail_config_contract.py",
+        "python/alas_headless/alas_mail_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -3635,9 +3707,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_mail_config.py",
+        "python/alas_headless/alas_mail_config_contract.py",
+        "python/alas_headless/alas_mail_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -6986,6 +7064,166 @@
   "promotions": [
     {
       "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_mail_config.py",
+        "python/alas_headless/alas_mail_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Mail.ClaimMaintenance",
+      "note": "Both boolean values are covered in the 16-combination input-free replay and reach the unchanged final mail_claim stub only when a claim category is selected."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_mail_config.py",
+        "python/alas_headless/alas_mail_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Mail.ClaimMerit",
+      "note": "Both boolean values are covered in the 16-combination input-free replay; non-boolean values fail before flow ownership or navigation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_mail_config.py",
+        "python/alas_headless/alas_mail_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Mail.ClaimTradeLicense",
+      "note": "Both boolean values are covered in the 16-combination input-free replay and preserve the original no-selection early return."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_mail_config.py",
+        "python/alas_headless/alas_mail_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Mail.DeleteCollected",
+      "note": "Both boolean values are classified without mutation; delete-only remains an original early return and destructive live authority is not broadened."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "Fleet.Fleet1",
+      "note": "All six configured indices pass the typed selection preflight; malformed and boolean values fail before navigation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "Fleet.Fleet1Formation",
+      "note": "All three values are classified; source audit proves pinned ALAS does not consume the field, so non-default values fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "Fleet.Fleet1Mode",
+      "note": "All five values are classified; combat_auto is admitted and modes requiring untyped manual actions fail before navigation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "Fleet.Fleet1Step",
+      "note": "Values two through five preserve the original ALAS current-fleet and reversed-fleet routing."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "Fleet.Fleet2",
+      "note": "Disabled zero and all six configured indices pass typed preflight; out-of-range values fail before navigation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "Fleet.Fleet2Formation",
+      "note": "All three values are classified; source audit proves pinned ALAS does not consume the field, so non-default values fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "Fleet.Fleet2Mode",
+      "note": "All five values are classified; combat_auto is admitted and modes requiring untyped manual actions fail before navigation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "Fleet.Fleet2Step",
+      "note": "Values two through five preserve the original ALAS current-fleet and reversed-fleet routing."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_fleet_config.py",
+        "python/alas_headless/alas_fleet_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "Fleet.FleetOrder",
+      "note": "All four orders preserve original ALAS boss routing offline; only the reviewed mob-boss order is admitted to semantic navigation."
+    },
+    {
+      "dimensions": {
         "action": "complete",
         "configuration": "complete",
         "observation": "complete",
@@ -7164,8 +7402,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "0814925328507fcb0ff94b08ba3e4e7aa15a9ea7ce1c5c5dee9517c2434c4a0e",
-      "manifest_sha256": "c0de1211b109209c242cadfef748c8279fc8868f6b3c14a19e03bf6674831c4f",
+      "combined_sha256": "58fda5dcccd5c01a57d0d0d2eb4b982b5b111ffadf3789e39ac17698fe8f44d2",
+      "manifest_sha256": "edd91e50e46fabcba255a5b0e3a8caa3f4012a09f38e76fafdffdb0bc2cb8158",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

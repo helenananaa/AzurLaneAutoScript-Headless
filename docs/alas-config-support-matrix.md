@@ -98,6 +98,18 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 离线回放直接抽取固定/已打补丁上游的 `Function`、`Filter`、`get_next_task`、`task_delay`、`ensure_time`、`get_server_next_update` 和 `nearest_future`，使用冻结时钟和临时内存配置完成 **19 条契约断言**：启用/禁用、合法/非法 datetime、固定/区间间隔、跨日及正负服务器偏移、成功/失败、跨任务写入、重复恢复、持久化 `NextRun`、override 重绑保留和无调度环。Headless 只在原 `get_next_task()` 排队前增加全量六字段 fail-closed 校验；调度优先级、延迟选择、持久化和循环仍由原 ALAS 拥有。本轮没有运行真实账号任务队列或注入 Android 输入，因此六字段仅把 `offline` 提升为 `complete`，既有 `live=partial` 保持不变。
 
+### 1.6 本轮 Fleet 九字段确定性分类
+
+固定/已打补丁 ALAS 的九个 `Fleet` 字段现由 **68 条确定性断言**完整分类。`Fleet1=1..6`、`Fleet2=0..6` 和两组 `Step=2..5` 均通过纯配置门禁，并直接回放原 ALAS 的 Boss 舰队、当前舰队与反转舰队分支。两组 `Formation` 经全量 Python AST 读取审计确认在固定上游原业务/状态机中没有运行时消费点；新加的有界导航前门禁是补丁中的唯一读取。除现有 `double_line` 基线外的两个值会在导航前明确拒绝，不再让用户误以为设置生效。
+
+五种战斗模式均已分类，但只有 `combat_auto` 具有已审阅语义动作；其余模式依赖方向长按或武器释放，继续 fail-closed。四种 `FleetOrder` 的原 ALAS Boss 路由均完成离线回放，但当前语义出击只放行已有实机证据的 `fleet1_mob_fleet2_boss`。配置门禁在 `begin_campaign_pre_sortie()` 前执行，mutation budget 为 `0`，不连接设备、不注入 Android 输入。九字段只将 `offline` 提升为 `complete`；观察、动作和实机仍为部分支持，面板状态不提升为 `F`。
+
+### 1.7 本轮 Mail 四字段全组合离线分类
+
+固定/已打补丁 ALAS 的 `Mail.ClaimMerit`、`ClaimMaintenance`、`ClaimTradeLicense` 与 `DeleteCollected` 已覆盖全部 **16 个布尔组合**。回放直接执行原 `MailWhite.run()`；页面导航与最终 `mail_claim()` 被输入为空的记录桩替换，证明有领取类别时四个值原样传递，无领取类别时保留原提前返回，其中“仅删除”为真仍不会进入页面。四种代表性非布尔值在取得流程所有权和导航前 fail-closed。
+
+本轮 mutation budget 为 `0`，没有连接设备、领取邮件、删除邮件、确认弹窗或注入 Android 输入。四字段只将 `offline` 提升为 `complete`；既有邮件动作仍需显式、有限预算，观察、动作和实机维度保持 `partial`，`Freebies` 面板仍为 `P`。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -140,7 +152,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | 只有勋章商店一次 DR 图纸购买；其他商店、过滤/子选项和刷新未闭环 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 可识别 30/30 并停止；系列、舰船、数量和实际蓝图消耗未验证 |
 | 36 | Gacha | Scheduler, Gacha | L | 一次轻型建造闭环；其他卡池、1-10 次、快速完成、票券及队列领取未闭环 |
-| 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | Data Key 和部分邮件有证据；BattlePass 不可用，补给包无免费项，其余开关组合未闭环 |
+| 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | Mail 四开关已全组合离线分类且实机动作仍为部分；Data Key 有证据，BattlePass 不可用，补给包无免费项 |
 | 38 | Minigame | Scheduler | L | 当前抚顺小游戏路径可用；没有字段配置，但其他轮换小游戏仍属于该任务支持范围 |
 | 39 | PrivateQuarters | Scheduler, PrivateQuarters | M | 蛋糕、玫瑰、互动和 7 个舰船选项均缺适配 |
 | 40 | OpsiGeneral | OpsiGeneral | P | 共享页面可读；随机事件、明石过滤、行动力购买、维修阈值、油量和 Logger 未完整覆盖 |
@@ -188,7 +200,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 |---|---|:---:|---|
 | Campaign | `Name`; `Event`; `Mode`=`normal/hard`; `UseClearMode`; `UseFleetLock`; `UseAutoSearch`; `Use2xBook`; `AmbushEvade` | P | 每个面板允许的关卡/活动值可进入；normal/hard、5 个开关的真假分支、不可用/未解锁/关卡变更均需识别；`Event` 当前还包含 48 个档案活动值，必须逐项登记支持或显式拒绝 |
 | StopCondition | `OilLimit`; `RunCount`; `MapAchievement`=`non_stop/100_percent_clear/map_3_stars/threat_safe/threat_safe_without_3_stars`; `StageIncrease`; `GetNewShip`; `ReachLevel` | P | 每个停止条件分别触发并停止在正确页面；0/边界/达到/未达到、条件同时满足、普通掉落与首次获得必须可区分 |
-| Fleet | `Fleet1`=1..6; `Fleet1Formation`=`line_ahead/double_line/diamond`; `Fleet1Mode`=`combat_auto/combat_manual/stand_still_in_the_middle/hide_in_bottom_left/hide_in_upper_left`; `Fleet1Step`=2..5; `Fleet2`=0..6; `Fleet2Formation` 同三阵型；`Fleet2Mode` 同五模式；`Fleet2Step`=2..5; `FleetOrder` 四种主力/Boss/待机组合 | P | 舰队 0/1..6、三阵型、五模式、步数和四顺序均需验证选择结果；当前仅默认阵型/顺序路径有证据 |
+| Fleet | `Fleet1`=1..6; `Fleet1Formation`=`line_ahead/double_line/diamond`; `Fleet1Mode`=`combat_auto/combat_manual/stand_still_in_the_middle/hide_in_bottom_left/hide_in_upper_left`; `Fleet1Step`=2..5; `Fleet2`=0..6; `Fleet2Formation` 同三阵型；`Fleet2Mode` 同五模式；`Fleet2Step`=2..5; `FleetOrder` 四种主力/Boss/待机组合 | P | 九字段全部值已离线分类；索引和步数保留原 ALAS 路由。固定上游不消费 Formation，非默认值提前拒绝；手动战斗模式缺 typed 方向/武器输入，非默认 FleetOrder 缺实机语义出击证据，故观察、动作和实机仍不完整 |
 | Submarine | `Fleet`=0/1/2; `Mode`=`do_not_use/hunt_only/boss_only/hunt_and_boss/every_combat`; `AutoSearchMode`=`sub_standby/sub_auto_call`; `DistanceToBoss`=`to_boss_position/1_grid_to_boss/2_grid_to_boss/use_open_ocean_support` | P | 无潜艇、未解锁、所有召唤策略、Boss 距离和自动寻敌组合；不能把不出现潜艇按钮当作成功调用 |
 | Emotion | `Mode`=`calculate/ignore/calculate_ignore`; `Fleet1Value`; `Fleet1Record`; `Fleet1Control`; `Fleet1Recover`; `Fleet1Oath`; `Fleet2Value`; `Fleet2Record`; `Fleet2Control`; `Fleet2Recover`; `Fleet2Oath`; 两个 `Control` 均为 `keep_exp_bonus/prevent_green_face/prevent_yellow_face/prevent_red_face`，两个 `Recover` 均为 `not_in_dormitory/dormitory_floor_1/dormitory_floor_2` | P | 三模式、两舰队、四阈值策略、两层宿舍、誓约与非誓约、记录时间恢复、低心情等待/切换均需确定性测试 |
 | HpControl | `UseHpBalance`; `UseEmergencyRepair`; `UseLowHpRetreat`; `HpBalanceThreshold`; `HpBalanceWeight`; `RepairUseSingleThreshold`; `RepairUseMultiThreshold`; `LowHpRetreatThreshold` | P | 三开关全部组合、阈值边界、权重解析、单体/群体维修、无维修道具、低血撤退与战败恢复 |
@@ -494,15 +506,15 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Exercise.OpponentRefreshRecord` | Exercise | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `Exercise.OpponentRefreshValue` | Exercise | type=input; display=default | input/default: 0 | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `Exercise.OpponentTrial` | Exercise | type=input; display=default | input/default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Fleet.Fleet1` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Fleet.Fleet1Formation` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "diamond", "double_line", "line_ahead"; default: "double_line" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
-| `Fleet.Fleet1Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "combat_auto", "combat_manual", "hide_in_bottom_left", "hide_in_upper_left", "stand_still_in_the_middle"; default: "combat_auto" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Fleet.Fleet1Step` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 2, 3, 4, 5; default: 3 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
-| `Fleet.Fleet2` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 2 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Fleet.Fleet2Formation` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "diamond", "double_line", "line_ahead"; default: "double_line" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
-| `Fleet.Fleet2Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "combat_auto", "combat_manual", "hide_in_bottom_left", "hide_in_upper_left", "stand_still_in_the_middle"; default: "combat_auto" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
-| `Fleet.Fleet2Step` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 2, 3, 4, 5; default: 2 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
-| `Fleet.FleetOrder` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/display | options: "fleet1_all_fleet2_standby", "fleet1_boss_fleet2_mob", "fleet1_mob_fleet2_boss", "fleet1_standby_fleet2_all"; default: "fleet1_all_fleet2_standby", "fleet1_mob_fleet2_boss" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
+| `Fleet.Fleet1` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Fleet.Fleet1Formation` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "diamond", "double_line", "line_ahead"; default: "double_line" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Fleet.Fleet1Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "combat_auto", "combat_manual", "hide_in_bottom_left", "hide_in_upper_left", "stand_still_in_the_middle"; default: "combat_auto" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Fleet.Fleet1Step` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 2, 3, 4, 5; default: 3 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Fleet.Fleet2` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 2 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Fleet.Fleet2Formation` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "diamond", "double_line", "line_ahead"; default: "double_line" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Fleet.Fleet2Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "combat_auto", "combat_manual", "hide_in_bottom_left", "hide_in_upper_left", "stand_still_in_the_middle"; default: "combat_auto" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Fleet.Fleet2Step` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 2, 3, 4, 5; default: 2 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Fleet.FleetOrder` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/display | options: "fleet1_all_fleet2_standby", "fleet1_boss_fleet2_mob", "fleet1_mob_fleet2_boss", "fleet1_standby_fleet2_all"; default: "fleet1_all_fleet2_standby", "fleet1_mob_fleet2_boss" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Gacha.Amount` | Gacha | type=select; display=default | options: 1, 10, 2, 3, 4, 5, 6, 7, 8, 9; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Gacha.Pool` | Gacha | type=select; display=default | options: "event", "heavy", "light", "special", "wishing_well"; default: "light" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Gacha.UseDrill` | Gacha | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
@@ -552,10 +564,10 @@ python scripts/python/verify_alas_support_matrix.py `
 | `HpControl.UseEmergencyRepair` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `HpControl.UseHpBalance` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `HpControl.UseLowHpRetreat` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Mail.ClaimMaintenance` | Freebies | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Mail.ClaimMerit` | Freebies | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Mail.ClaimTradeLicense` | Freebies | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Mail.DeleteCollected` | Freebies | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Mail.ClaimMaintenance` | Freebies | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Mail.ClaimMerit` | Freebies | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Mail.ClaimTradeLicense` | Freebies | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Mail.DeleteCollected` | Freebies | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `MedalShop2.Filter` | ShopOnce | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
 | `MedalShop2.PLATE_T1` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `MedalShop2.PLATE_T2` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |

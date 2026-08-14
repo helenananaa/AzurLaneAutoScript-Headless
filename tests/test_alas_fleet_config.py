@@ -1,0 +1,104 @@
+import ast
+import unittest
+from pathlib import Path
+
+from alas_headless.alas_fleet_config_contract import validate_alas_fleet_config
+from alas_headless.alas_fleet_config_replay import verify_fleet_config
+from alas_headless.semantic_oracle import SemanticGateClosed
+
+
+ROOT = Path(__file__).resolve().parents[1]
+LIVE_ALAS = Path(r"H:\program\AzurLaneAutoScript-alas-topdown-live")
+
+
+def defaults():
+    return {
+        "fleet1": 1,
+        "fleet1_formation": "double_line",
+        "fleet1_mode": "combat_auto",
+        "fleet1_step": 3,
+        "fleet2": 2,
+        "fleet2_formation": "double_line",
+        "fleet2_mode": "combat_auto",
+        "fleet2_step": 2,
+        "fleet_order": "fleet1_mob_fleet2_boss",
+    }
+
+
+class AlasFleetConfigTests(unittest.TestCase):
+    def test_exact_live_tree_replay_when_available(self):
+        if not LIVE_ALAS.joinpath("module/map/fleet.py").is_file():
+            self.skipTest("local pinned/patched ALAS verification tree is unavailable")
+        result = verify_fleet_config(LIVE_ALAS)
+        self.assertTrue(result["passed"])
+        self.assertEqual(result["field_count"], 9)
+        self.assertGreaterEqual(result["case_count"], 50)
+        self.assertEqual(result["mutation_budget"], 0)
+        self.assertFalse(result["android_input_injected"])
+
+    def test_steps_and_fleet_indices_are_exhaustively_accepted(self):
+        for field, values in (
+            ("fleet1", range(1, 7)),
+            ("fleet2", range(0, 7)),
+            ("fleet1_step", range(2, 6)),
+            ("fleet2_step", range(2, 6)),
+        ):
+            for value in values:
+                with self.subTest(field=field, value=value):
+                    config = defaults()
+                    config[field] = value
+                    self.assertEqual(
+                        getattr(validate_alas_fleet_config(**config), field), value
+                    )
+
+    def test_valid_but_unqualified_values_fail_before_navigation(self):
+        for field, value in (
+            ("fleet1_formation", "diamond"),
+            ("fleet2_formation", "line_ahead"),
+            ("fleet1_mode", "combat_manual"),
+            ("fleet2_mode", "hide_in_upper_left"),
+            ("fleet_order", "fleet1_all_fleet2_standby"),
+        ):
+            with self.subTest(field=field, value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                config = defaults()
+                config[field] = value
+                validate_alas_fleet_config(**config)
+
+    def test_invalid_values_fail_closed(self):
+        for field, value in (
+            ("fleet1", 0),
+            ("fleet1", True),
+            ("fleet2", 7),
+            ("fleet1_step", 1),
+            ("fleet1_mode", "unknown"),
+        ):
+            with self.subTest(field=field, value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                config = defaults()
+                config[field] = value
+                validate_alas_fleet_config(**config)
+
+    def test_patch_validates_before_campaign_context(self):
+        patch = ROOT.joinpath(
+            "integration/alas/series/0050-combat-flow-ports.patch"
+        ).read_text(encoding="utf-8")
+        self.assertIn("semantic_adapter.validate_campaign_fleet_config(", patch)
+        self.assertLess(
+            patch.index("semantic_adapter.validate_campaign_fleet_config("),
+            patch.index("semantic_adapter.begin_campaign_pre_sortie("),
+        )
+
+    def test_sources_compile(self):
+        for relative in (
+            "python/alas_headless/alas_fleet_config_contract.py",
+            "python/alas_headless/alas_fleet_config_replay.py",
+            "scripts/python/verify_alas_fleet_config.py",
+        ):
+            ast.parse(ROOT.joinpath(relative).read_text(encoding="utf-8"))
+
+
+if __name__ == "__main__":
+    unittest.main()

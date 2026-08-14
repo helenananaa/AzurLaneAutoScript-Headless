@@ -74,6 +74,14 @@ from .alas_combat_state_replay import (
 )
 from .alas_combat_trace import build_alas_combat_trace_frame
 from .alas_decision_preview import AlasCampaignDecisionPreview
+from .alas_fleet_config_contract import (
+    AlasFleetConfigSnapshot,
+    validate_alas_fleet_config,
+)
+from .alas_mail_config_contract import (
+    AlasMailConfigSnapshot,
+    validate_alas_mail_config,
+)
 from .alas_package_process_lease import AlasPackageProcessLease
 from .runtime_trace import RuntimeTraceRecorder
 from .semantic_oracle import (
@@ -1481,6 +1489,9 @@ class AlasSemanticAdapter:
 
         return self._mail_context is not None
 
+    def validate_mail_config(self, **values: object) -> AlasMailConfigSnapshot:
+        return validate_alas_mail_config(**values)
+
     def mission_claim_allowed(self) -> bool:
         """Expose the remaining input budget without weakening the click gate."""
 
@@ -1750,6 +1761,11 @@ class AlasSemanticAdapter:
 
     def campaign_pre_sortie_active(self) -> bool:
         return self._campaign_context is not None
+
+    def validate_campaign_fleet_config(
+        self, **values: object
+    ) -> AlasFleetConfigSnapshot:
+        return validate_alas_fleet_config(**values)
 
     def campaign_stage_entry_allowed(self) -> bool:
         context = self._require_campaign_context()
@@ -9624,6 +9640,9 @@ class AlasSemanticSession:
     def mail_reward_active(self) -> bool:
         return bool(self.adapter is not None and self.adapter.mail_reward_active())
 
+    def validate_mail_config(self, **values: object) -> AlasMailConfigSnapshot:
+        return self.open().validate_mail_config(**values)
+
     def mission_claim_allowed(self) -> bool:
         return self.open().mission_claim_allowed()
 
@@ -9782,6 +9801,11 @@ class AlasSemanticSession:
             self.adapter is not None
             and self.adapter.campaign_pre_sortie_active()
         )
+
+    def validate_campaign_fleet_config(
+        self, **values: object
+    ) -> AlasFleetConfigSnapshot:
+        return self.open().validate_campaign_fleet_config(**values)
 
     def campaign_hard_remain(self) -> int:
         return self.open().campaign_hard_remain()

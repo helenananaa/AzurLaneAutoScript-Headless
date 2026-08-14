@@ -10,7 +10,21 @@ index 6d9e42f4..d25882e3 100644
              return
  
          if merit:
-@@ -257,23 +258,32 @@ class MailWhite(UI):
+@@ -250,30 +251,45 @@ class MailWhite(UI):
+         merit = self.config.Mail_ClaimMerit
+         maintenance = self.config.Mail_ClaimMaintenance
+         trade_license = self.config.Mail_ClaimTradeLicense
+         delete = self.config.Mail_DeleteCollected
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.validate_mail_config(
++                claim_merit=merit,
++                claim_maintenance=maintenance,
++                claim_trade_license=trade_license,
++                delete_collected=delete)
+         logger.info(f'Mail reward: merit={merit}, maintenance={maintenance}, '
+                     f'trade_license={trade_license}, delete={delete}')
+         if not merit and not maintenance and not trade_license:
              logger.warning('Nothing to claim')
              return False
  
@@ -25,7 +39,6 @@ index 6d9e42f4..d25882e3 100644
 -        else:
 -            logger.warning('Unknown page_main, cannot enter mail page')
 -            return False
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
 +            semantic_adapter.begin_mail()
 +        try:
