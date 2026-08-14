@@ -206,6 +206,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 固定上游回放覆盖四种开关组合和 12 个非法单字段案例，并执行原 `DataKey.data_key_collect()` 的已领取、容量恰好已满且不强制、已满且强制、尚余一格四个边界。真实 `_data_key_collect()` 循环从未调用，mutation budget 为 0，没有领取档案密钥、处理上限弹窗、页面输入或 Android 注入。两字段只提升 `offline`；现有 300/300 实机观察不能外推为强制领取、领取收据、上限弹窗或库存变化闭环。
 
+### 1.24 本轮 GameManager 重启开关契约与 EventStory 跳过记录
+
+`GameManager.AutoRestart` 现在只接受精确布尔值，并在原任务停止应用前 fail-closed。固定上游回放覆盖普通/语义两种后端与真假开关：false 只保留停止，普通 true 保留停止、启动和登录，语义 true 保留冷重启端口和登录。设备与语义生命周期方法均为夹具，mutation budget 为 0，没有真实停止/启动进程、登录或 Android 输入；该字段只提升 `offline`，启动/停止失败和重试边界仍需实机证据。
+
+`EventStory.SkipBattle` 本轮明确跳过而不提升：固定上游最终配置把它锁为 true，但运行时代码完全不读取该字段，并在剧情战斗处无条件重启应用。支持 false 需要上游提供或单独评审一套继续战斗状态机，以及覆盖代表性活动布局的确定性战斗/结算观察；当前只有故事节点语义适配，强行补分支会重写业务状态机。重新进入条件是获得该原始行为和可回放的战斗、结算夹具。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -268,10 +274,10 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 54 | OpsiCrossMonth | Scheduler | B | 非月末安全跳过；月末执行、重置和跨月恢复未验证 |
 | 55 | Daemon | Daemon | P | 单轮条件路径可用；进入地图开关、长期值守和稀有恢复分支未闭环 |
 | 56 | OpsiDaemon | OpsiDaemon | P | 单轮条件路径可用；修船/选敌各开关组合及长期恢复未闭环 |
-| 57 | EventStory | EventStory | P | 46 个故事中只跑过一条入口路径；战斗转场、跳过战斗及其他故事结构未闭环 |
+| 57 | EventStory | EventStory | P | `SkipBattle` 在固定上游锁为 true 且无运行时消费者；false 需要新的剧情战斗状态机和多活动观察，当前仅一条入口路径，战斗转场及其他故事结构未闭环 |
 | 58 | Benchmark | Benchmark | L | 当前设备默认 `screenshot_click` 跑过；设备类型和测试场景矩阵未覆盖 |
 | 59 | AzurLaneUncensored | AzurLaneUncensored | P | 本地 localization 路径可用；`Repository` 对应的远端同步在上游被注释，配置与能力不一致 |
-| 60 | GameManager | GameManager | L | `AutoRestart=true` 跑过；`false`、只停不启和异常生命周期未覆盖 |
+| 60 | GameManager | GameManager | L | `AutoRestart` 两值及普通/语义生命周期决策已离线完成，true 有一次实机冷重启；已停止、启动/停止/登录失败和重试上限仍未覆盖 |
 
 ## 3. 配置组字段级矩阵
 
@@ -384,10 +390,10 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 |---|---|:---:|---|
 | Daemon | `EnterMap` | P | 开关两值、主界面/地图内启动、恢复循环和未知弹窗 |
 | OpsiDaemon | `RepairShip`; `SelectEnemy` | P | 四组合、无需维修/需要维修、无敌人/有敌人、长期循环和异常恢复 |
-| EventStory | `SkipBattle`（当前只允许 true） | P | 所有可发现故事入口、剧情选项、战斗转场、活动结束和幂等领取；固定 true 也不能跳过分支验收 |
+| EventStory | `SkipBattle`（当前只允许 true） | P | 固定上游锁 true 且无字段消费者，实际始终重启跳过战斗；false 需上游/评审后的继续战斗状态机及多活动战斗、结算夹具，当前不外推完成 |
 | Benchmark | `DeviceType`=`emulator/plone_cloud_with_adb/phone_cloud_without_adb/android_phone/android_phone_vmos`; `TestScene`=`screenshot_click/screenshot/click` | L | 5×3 矩阵或等价性证明；无截图设备、无 ADB 设备和纯点击场景必须报告真实能力 |
 | AzurLaneUncensored | `Repository` | P | 先决定恢复远端同步还是删除/禁用该配置；网络失败、仓库不可达、本地文件和回滚必须有明确契约 |
-| GameManager | `AutoRestart` | L | true/false、游戏已开/已关/卡死、启动失败、停止失败和重试上限 |
+| GameManager | `AutoRestart` | L | true/false 与普通/语义后端决策已离线完成；仍缺游戏已关/卡死、启动失败、停止失败、登录失败和重试上限实机闭环 |
 
 ## 4. 关键中断面与观察缺口
 
@@ -615,7 +621,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Gacha.Pool` | Gacha | type=select; display=default | options: "event", "heavy", "light", "special", "wishing_well"; default: "light" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Gacha.UseDrill` | Gacha | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `Gacha.UseTicket` | Gacha | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `GameManager.AutoRestart` | GameManager | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `GameManager.AutoRestart` | GameManager | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `GemsFarming.ChangeFlagship` | GemsFarming | type=select; display=default | options: "ship_equip", "ship"; default: "ship" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `GemsFarming.ChangeVanguard` | GemsFarming | type=select; display=default | options: "disabled", "ship_equip", "ship"; default: "ship" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `GemsFarming.CommissionLimit` | GemsFarming | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

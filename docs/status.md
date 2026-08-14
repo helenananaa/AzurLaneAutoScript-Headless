@@ -303,9 +303,34 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 97 changed files, all 96 patched Python files compile, and
-  the repository suite passes `892/892` tests, including Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `897/897` tests, including Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
+
+### Game Manager restart configuration: offline contract passed
+
+- `GameManager.AutoRestart` admits exact booleans before the original task can
+  stop the app. Invalid values fail before normal or semantic lifecycle calls.
+- Pinned replay preserves stop-only behavior for `false`, stop/start/login for
+  normal `true`, and semantic cold-restart/login for Headless `true`, covering
+  both backend modes without replacing the original task entry.
+- Device and semantic lifecycle methods are fixtures. Mutation budget is `0`;
+  no real process stop, start, login, or Android input occurs.
+- The field moves only to `offline=complete`. Existing live evidence covers
+  one enabled cold restart; disabled mode, already-stopped state, start/stop
+  failures, login failure, and retry bounds remain live gaps.
+
+### EventStory SkipBattle: explicitly deferred
+
+- Pinned upstream exposes `EventStory.SkipBattle` as a locked `true` value but
+  never reads it; `run_event_story()` always restarts the app at battle.
+- The existing semantic patch adapts story-node observation but does not add a
+  non-skip battle state machine. Treating locked `true` as both values would be
+  a false completion claim.
+- Supporting `false` requires upstream business behavior or a reviewed battle
+  continuation state machine, deterministic observation across representative
+  event layouts, and battle/settlement fixtures. Until then the field remains
+  partial and unknown story/battle states remain fail-closed.
 
 ### Data Key collection configuration: offline contract passed
 

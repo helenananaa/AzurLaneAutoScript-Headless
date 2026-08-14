@@ -5997,12 +5997,17 @@ diff --git a/module/daemon/game_manager.py b/module/daemon/game_manager.py
 index 8ecdbf77..f5e8b975 100644
 --- a/module/daemon/game_manager.py
 +++ b/module/daemon/game_manager.py
-@@ -5,6 +5,13 @@ from module.logger import logger
+@@ -5,9 +5,21 @@ from module.logger import logger
  class GameManager(LoginHandler):
      def run(self):
++        from alas_headless import validate_alas_game_manager_config
++        manager_config = validate_alas_game_manager_config(
++            auto_restart=self.config.GameManager_AutoRestart,
++        )
++
          logger.hr('Force Stop AzurLane', level=1)
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if semantic_adapter is not None and self.config.GameManager_AutoRestart:
++        if semantic_adapter is not None and manager_config.auto_restart:
 +            semantic_adapter.restart_game_for_manager()
 +            logger.info('Semantic cold restart submitted with -force-gfx-st')
 +            self.handle_app_login()
@@ -6011,6 +6016,10 @@ index 8ecdbf77..f5e8b975 100644
          self.device.app_stop()
          logger.info('Force Stop finished')
  
+-        if self.config.GameManager_AutoRestart:
++        if manager_config.auto_restart:
+             self.device.app_start()
+             self.handle_app_login()
 diff --git a/module/daemon/os_daemon.py b/module/daemon/os_daemon.py
 index 6fdc403a..ed67e8ae 100644
 --- a/module/daemon/os_daemon.py

@@ -2922,9 +2922,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_game_manager_config.py",
+        "python/alas_headless/alas_game_manager_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -8686,6 +8691,19 @@
       ],
       "field": "DataKey.ForceCollect",
       "note": "Both booleans preserve the original full-capacity stop versus forced collection candidate; invalid values fail before navigation or collection."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_game_manager_config.py",
+        "python/alas_headless/alas_game_manager_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "GameManager.AutoRestart",
+      "note": "Both booleans preserve stop-only versus restart-and-login behavior across normal and semantic backends; invalid values fail before any app lifecycle call."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8698,8 +8716,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "abc9a4bc3186d4eac027a9c2d3fa9813dad1795ee0845bf210a3bf62b0c69c74",
-      "manifest_sha256": "86b5019b5e6b1051118cef3c46702619c573a402a37eaec49f030bb2523f31c7",
+      "combined_sha256": "49682b2c2f149e41c9ceaf729c576adcfedfaf55688feb3ac579e0f1d25c2fc5",
+      "manifest_sha256": "3b85ed1d38d6b4dbc1d68e4f3bd655dbe62bc46b28cbe95956627bb0a73c3197",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
