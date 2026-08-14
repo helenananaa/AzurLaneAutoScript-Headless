@@ -194,6 +194,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 固定上游回放覆盖全部 32 种合法开关组合和 20 个非法单字段案例，执行原 Reward 参数转发与调度尾部、RaidDaily EX 下 `CollectMission` 的真假转发，以及非 EX 绕过。真实资源、任务和周常领取方法均未调用，mutation budget 为 0，没有页面输入或 Android 注入。因此五字段只提升 `offline`；资源上限、日常/周常领取后置条件、红点、数字行、空页和特殊舰船奖励仍需实机闭环。
 
+### 1.22 本轮 Campaign 四个共享开关契约
+
+`Campaign.UseFleetLock`、`UseAutoSearch`、`Use2xBook` 和 `AmbushEvade` 现在只接受精确布尔值，并在原 `CampaignRun.run()` 第一条语句统一校验。非法值会在关卡名转换、地图模块加载、页面导航和语义预出击 scope 之前 fail-closed；该入口覆盖 16 个普通、活动、共斗、突袭、档案和每日地图面板。
+
+固定上游回放覆盖全部 16 种合法组合和 24 个非法单字段案例，执行原快速前进中的自动寻敌/2x 书选择、舰队锁定开关，以及伏击时规避/迎战分支。开关控件和伏击处理均由确定性夹具代替，没有调用真实地图方法、进入战斗、消耗 2x 书、页面输入或 Android 注入，mutation budget 为 0。因此四字段只提升 `offline`；真实控件后置条件、非周回地图、控件不可用、伏击观察及规避失败仍未闭环，`Name/Event/Mode` 的动态路由也不在本批范围。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -282,7 +288,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| Campaign | `Name`; `Event`; `Mode`=`normal/hard`; `UseClearMode`; `UseFleetLock`; `UseAutoSearch`; `Use2xBook`; `AmbushEvade` | P | `UseClearMode` 两值及原地图标志/自动寻敌/2x 书决策已离线完成；仍缺 typed 开关输入与 postcondition。其他字段仍需逐值闭环，`Event` 的 48 个档案活动值必须逐项登记支持或显式拒绝 |
+| Campaign | `Name`; `Event`; `Mode`=`normal/hard`; `UseClearMode`; `UseFleetLock`; `UseAutoSearch`; `Use2xBook`; `AmbushEvade` | P | 五个布尔开关的全组合、原快速前进/锁定/伏击分支及入口 fail-closed 已离线完成；仍缺真实控件后置条件、非周回地图与伏击失败闭环。`Name/Mode/Event` 仍需逐值路由验证，`Event` 的 48 个档案活动值必须逐项登记支持或显式拒绝 |
 | StopCondition | `OilLimit`; `RunCount`; `MapAchievement`=`non_stop/100_percent_clear/map_3_stars/threat_safe/threat_safe_without_3_stars`; `StageIncrease`; `GetNewShip`; `ReachLevel` | P | 每个停止条件分别触发并停止在正确页面；0/边界/达到/未达到、条件同时满足、普通掉落与首次获得必须可区分 |
 | Fleet | `Fleet1`=1..6; `Fleet1Formation`=`line_ahead/double_line/diamond`; `Fleet1Mode`=`combat_auto/combat_manual/stand_still_in_the_middle/hide_in_bottom_left/hide_in_upper_left`; `Fleet1Step`=2..5; `Fleet2`=0..6; `Fleet2Formation` 同三阵型；`Fleet2Mode` 同五模式；`Fleet2Step`=2..5; `FleetOrder` 四种主力/Boss/待机组合 | P | 九字段全部值已离线分类；索引和步数保留原 ALAS 路由。固定上游不消费 Formation，非默认值提前拒绝；手动战斗模式缺 typed 方向/武器输入，非默认 FleetOrder 缺实机语义出击证据，故观察、动作和实机仍不完整 |
 | Submarine | `Fleet`=0/1/2; `Mode`=`do_not_use/hunt_only/boss_only/hunt_and_boss/every_combat`; `AutoSearchMode`=`sub_standby/sub_auto_call`; `DistanceToBoss`=`to_boss_position/1_grid_to_boss/2_grid_to_boss/use_open_ocean_support` | P | 四字段已完成原决策离线回放；`Fleet=0` 的 40 个惰性组合可用，`Fleet=1/2` 因编队、策略、移动和呼叫输入未接管而在导航前拒绝 |
@@ -499,14 +505,14 @@ python scripts/python/verify_alas_support_matrix.py `
 | `BuyFurniture.BuyOption` | Dorm | type=select; display=default | options: "all", "set"; default: "all" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `BuyFurniture.Enable` | Dorm | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `BuyFurniture.LastRun` | Dorm | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Campaign.AmbushEvade` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
+| `Campaign.AmbushEvade` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Campaign.Event` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "campaign_main", "coalition_20260723", "event_20260625_cn", "event_20260813_cn", "raid_20260212", "war_archives_20180607_cn", "war_archives_20180726_cn", "war_archives_20181020_en", "war_archives_20181026_en", "war_archives_20181227_cn", "war_archives_20190221_en", "war_archives_20190314_en", "war_archives_20190321_en", "war_archives_20190620_en", "war_archives_20190911_cn", "war_archives_20191010_en", "war_archives_20191031_en", "war_archives_20200312_cn", "war_archives_20200507_cn", "war_archives_20200603_cn", "war_archives_20200806_cn", "war_archives_20200820_cn", "war_archives_20200903_cn", "war_archives_20200917_cn", "war_archives_20201012_cn", "war_archives_20201029_cn", "war_archives_20201229_cn", "war_archives_20210225_cn", "war_archives_20210325_cn", "war_archives_20210422_cn", "war_archives_20210527_cn", "war_archives_20210624_cn", "war_archives_20210819_cn", "war_archives_20210916_cn", "war_archives_20211014_cn", "war_archives_20211028_cn", "war_archives_20211111_cn", "war_archives_20211229_cn", "war_archives_20220210_cn", "war_archives_20220224_cn", "war_archives_20220324_cn", "war_archives_20220414_cn", "war_archives_20220428_cn", "war_archives_20220526_cn", "war_archives_20220728_cn", "war_archives_20220818_cn", "war_archives_20220915_cn", "war_archives_20221222_cn", "war_archives_20230223_cn", "war_archives_20230525_cn", "war_archives_20230803_cn", "war_archives_20231026_cn", "war_archives_20240725_cn"; default: "campaign_main" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Mode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "hard", "normal"; default: "normal" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Name` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: "12-4", "dynamic", "sp" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Campaign.Use2xBook` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Campaign.UseAutoSearch` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false, true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Campaign.Use2xBook` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Campaign.UseAutoSearch` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false, true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Campaign.UseClearMode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Campaign.UseFleetLock` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Campaign.UseFleetLock` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Coalition.Fleet` | Coalition, CoalitionSp | type=select; display=default | options: "multi", "single"; default: "single" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Coalition.Mode` | Coalition, CoalitionSp | type=select; display=default/hide | options: "easy", "hard", "normal", "sp"; default: "hard", "sp" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Commission.CustomFilter` | Commission | type=textarea; display=default | input/default: <long default in args.json> | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |

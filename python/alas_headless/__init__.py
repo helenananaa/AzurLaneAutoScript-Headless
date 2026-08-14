@@ -44,6 +44,10 @@ from .alas_campaign_clear_mode_config_contract import (
     AlasCampaignClearModeConfigSnapshot,
     validate_alas_campaign_clear_mode_config,
 )
+from .alas_campaign_switch_config_contract import (
+    AlasCampaignSwitchConfigSnapshot,
+    validate_alas_campaign_switch_config,
+)
 from .alas_tactical_config_contract import (
     AlasTacticalConfigSnapshot,
     validate_alas_tactical_config,

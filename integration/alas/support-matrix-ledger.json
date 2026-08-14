@@ -254,9 +254,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_campaign_switch_config.py",
+        "python/alas_headless/alas_campaign_switch_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
       "panels": [
@@ -390,9 +395,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_campaign_switch_config.py",
+        "python/alas_headless/alas_campaign_switch_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
       "panels": [
@@ -424,9 +434,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_campaign_switch_config.py",
+        "python/alas_headless/alas_campaign_switch_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
       "panels": [
@@ -497,9 +512,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_campaign_switch_config.py",
+        "python/alas_headless/alas_campaign_switch_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
       "panels": [
@@ -8578,6 +8598,58 @@
       ],
       "field": "Reward.CollectWeeklyMission",
       "note": "Both boolean values preserve original Reward mission forwarding and are also validated at the shared RaidDaily entry; invalid values fail before either flow."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_campaign_switch_config.py",
+        "python/alas_headless/alas_campaign_switch_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Campaign.UseFleetLock",
+      "note": "Both booleans preserve the original fleet-lock switch state and invalid values fail at CampaignRun.run before stage routing or navigation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_campaign_switch_config.py",
+        "python/alas_headless/alas_campaign_switch_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Campaign.UseAutoSearch",
+      "note": "Both booleans preserve original clear-mode auto-search selection and invalid values fail before campaign routing or input."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_campaign_switch_config.py",
+        "python/alas_headless/alas_campaign_switch_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Campaign.Use2xBook",
+      "note": "Both booleans preserve original fast-forward two-times-book selection and invalid values fail before campaign routing or input."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_campaign_switch_config.py",
+        "python/alas_headless/alas_campaign_switch_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Campaign.AmbushEvade",
+      "note": "Both booleans preserve the original evade versus attack branch and invalid values fail before campaign routing, ambush handling, or input."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8590,8 +8662,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "bbf212d6c9b2f7119c98d76d57ec1f978302626995d76c74880be7083f6d78bc",
-      "manifest_sha256": "2d93c55be7a521318d62cdfa6756c78a8b2f4cbf055bafc3edfec10d7f0b8126",
+      "combined_sha256": "d89a577bb270c65927f63661389e0be070eb1d4b3c97167f5e4e2ad4edfc2aac",
+      "manifest_sha256": "64b44f9b4d9ce16ee6c4920da3cd0b50cae9eea9b64717923537fe9a0eda6826",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

@@ -122,10 +122,22 @@ diff --git a/module/campaign/run.py b/module/campaign/run.py
 index 57033308..c70ee57c 100644
 --- a/module/campaign/run.py
 +++ b/module/campaign/run.py
-@@ -366,6 +366,46 @@ class CampaignRun(CampaignEvent):
+@@ -366,6 +366,58 @@ class CampaignRun(CampaignEvent):
              self.config.task_stop('Commission notice found')
  
++    def _validate_campaign_switch_config(self):
++        from alas_headless import validate_alas_campaign_switch_config
++
++        return validate_alas_campaign_switch_config(
++            use_fleet_lock=self.config.Campaign_UseFleetLock,
++            use_auto_search=self.config.Campaign_UseAutoSearch,
++            use_2x_book=self.config.Campaign_Use2xBook,
++            ambush_evade=self.config.Campaign_AmbushEvade,
++        )
++
      def run(self, name, folder='campaign_main', mode='normal', total=0):
++        self._validate_campaign_switch_config()
++
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is None:
 +            return self._run(name, folder=folder, mode=mode, total=total)

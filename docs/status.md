@@ -303,9 +303,26 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 97 changed files, all 96 patched Python files compile, and
-  the repository suite passes `882/882` tests, including Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `887/887` tests, including Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
+
+### Campaign shared switch configuration: offline contract passed
+
+- `Campaign.UseFleetLock`, `UseAutoSearch`, `Use2xBook`, and `AmbushEvade`
+  admit exact booleans at the first statement of original `CampaignRun.run()`.
+  Invalid values fail before stage-name routing, map loading, navigation, or
+  semantic pre-sortie scope.
+- Pinned replay covers all 16 boolean combinations and 24 invalid single-field
+  cases. It executes original fast-forward auto-search/2x-book selection,
+  fleet-lock on/off selection, and ambush evade/attack dispatch.
+- Switch widgets and ambush handlers are deterministic fixtures: no real map
+  method, combat, book consumption, page input, or Android injection occurs;
+  mutation budget is `0`.
+- These four fields move only to `offline=complete`. Their real UI
+  postconditions, non-clear maps, unavailable controls, ambush detection and
+  evade failure remain live/action gaps; `Campaign.Name`, `Event`, and `Mode`
+  remain partial because their dynamic routing surface is outside this batch.
 
 ### Reward collection configuration: offline contract passed
 
