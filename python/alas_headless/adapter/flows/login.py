@@ -27,6 +27,7 @@ LOGIN_OBSERVATION_TARGETS: Mapping[str, str] = MappingProxyType(
         "LOGIN_CHECK": LOGIN_ENTRY_SEMANTIC_ID,
         "LOGIN_ANNOUNCE": "overlay/bulletin/close",
         "LOGIN_ANNOUNCE_2": "overlay/bulletin/close",
+        "LOGIN_GAME_UPDATE": "login/update/download",
         "POPUP_CANCEL": "overlay/network-reconnect/cancel",
         "POPUP_CONFIRM_WHITE": "overlay/login-data-expired/confirm",
     }
@@ -37,6 +38,7 @@ LOGIN_ACTION_TARGETS: Mapping[str, str] = MappingProxyType(
         "LOGIN_CHECK": LOGIN_ENTRY_SEMANTIC_ID,
         "LOGIN_ANNOUNCE": "overlay/bulletin/close",
         "LOGIN_ANNOUNCE_2": "overlay/bulletin/close",
+        "LOGIN_GAME_UPDATE": "login/update/download",
         "POPUP_CANCEL": "overlay/network-reconnect/cancel",
         "POPUP_CONFIRM_WHITE": "overlay/login-data-expired/confirm",
     }
@@ -49,6 +51,7 @@ LOGIN_RECORDED_TRANSITION_TARGETS = frozenset(
         "reward/award-info/close",
         "reward/award-info1/close",
         "overlay/login-data-expired/confirm",
+        "login/update/download",
     }
 )
 
@@ -77,7 +80,6 @@ LOGIN_UNSUPPORTED_PRESENCE_RESOURCES = frozenset(
         "AVATAR_EXPIRED",
         "BACK_ARROW",
         "EVENT_LIST_CHECK",
-        "LOGIN_GAME_UPDATE",
         "LOGIN_RETURN_INFO",
         "LOGIN_RETURN_SIGN",
         "MAINTENANCE_ANNOUNCE",
@@ -182,6 +184,21 @@ class LoginFlow:
     def end(self) -> None:
         self._context = None
         self._last_action_intent = None
+
+    def extend_passive_transition(self, seconds: float) -> None:
+        """Extend only an active owned login transition after a cold restart."""
+
+        if isinstance(seconds, bool) or not isinstance(seconds, (int, float)):
+            raise TypeError("login transition extension must be numeric")
+        if not 0 < float(seconds) <= 120.0:
+            raise ValueError("login transition extension must be within (0, 120]")
+        context = self._context
+        if context is None:
+            raise SemanticGateClosed("login flow is not active")
+        context.passive_transition_until = max(
+            context.passive_transition_until,
+            self._monotonic() + float(seconds),
+        )
 
     @contextmanager
     def activate(self, *, conflicting_flow_active: bool) -> Iterator[None]:

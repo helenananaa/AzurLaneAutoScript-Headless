@@ -232,7 +232,11 @@ def synchronize_alas_campaign_map(
     ):
         raise SemanticGateClosed("ALAS campaign map interface is incomplete")
     source_map = campaign.MAP
-    if getattr(source_map, "name", None) != state.stage_code:
+    source_name = getattr(source_map, "name", None)
+    if (
+        not isinstance(source_name, str)
+        or source_name.casefold() != state.stage_code.casefold()
+    ):
         raise SemanticGateClosed("ALAS map projection stage disagrees with ALAS")
     if getattr(source_map, "shape", None) != (state.columns - 1, state.rows - 1):
         raise SemanticGateClosed("ALAS map projection shape disagrees with ALAS")
@@ -312,7 +316,14 @@ def synchronize_alas_campaign_map(
                 "ALAS map projection enemy coordinates disagree"
             )
         grid = source_map[location]
-        if grid.is_land or not grid.may_enemy:
+        is_boss = enemy.genre.lower() == "boss"
+        if enemy.is_siren:
+            permitted = bool(getattr(grid, "may_siren", False))
+        elif is_boss:
+            permitted = grid.may_boss
+        else:
+            permitted = grid.may_enemy
+        if grid.is_land or not permitted:
             raise SemanticGateClosed("ALAS map projection enemy violates static map")
     for pickup in state.pickups:
         location = _node_to_location(
@@ -367,6 +378,19 @@ def synchronize_alas_campaign_map(
         projected_map = copy.deepcopy(source_map)
         campaign.map_data_init(projected_map)
 
+        pickup_locations = {
+            _node_to_location(
+                pickup.node,
+                columns=state.columns,
+                rows=state.rows,
+            )
+            for pickup in state.pickups
+        }
+        for grid in campaign.map:
+            if grid.may_ammo and grid.location not in pickup_locations:
+                grid.may_ammo = False
+        campaign.ammo_count = len(pickup_locations)
+
         marker_locations = {}
         for fleet in state.fleets:
             location = _node_to_location(
@@ -396,9 +420,15 @@ def synchronize_alas_campaign_map(
                 enemy.node, columns=state.columns, rows=state.rows
             )
             grid = campaign.map[location]
-            grid.is_enemy = True
-            grid.enemy_scale = enemy.scale
-            grid.enemy_genre = enemy.genre
+            if enemy.is_siren:
+                grid.is_siren = True
+            elif enemy.genre.lower() == "boss":
+                grid.is_boss = True
+            else:
+                grid.is_enemy = True
+                grid.enemy_scale = enemy.scale
+                grid.enemy_genre = enemy.genre
+        campaign.siren_count = sum(enemy.is_siren for enemy in state.enemies)
         for pickup in state.pickups:
             location = _node_to_location(
                 pickup.node, columns=state.columns, rows=state.rows

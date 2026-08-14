@@ -12,12 +12,15 @@
 namespace rx::alas {
 
 constexpr size_t kIl2CppAllowlistSize = 32;
-constexpr size_t kMaxObserverButtons = 128;
-constexpr size_t kMaxObserverToggles = 64;
+// Archive and event hub pages can expose more than 128 active Button
+// components at once. Keep the complete typed set so page-level controls are
+// not dropped behind repeated content cards.
+constexpr size_t kMaxObserverButtons = 512;
+constexpr size_t kMaxObserverToggles = 128;
 // Combat result pages keep the underlying damage-number Text objects active.
 // Preserve completeness instead of truncating the result overlay at 192.
 constexpr size_t kMaxObserverTexts = 512;
-constexpr size_t kMaxObserverImages = 512;
+constexpr size_t kMaxObserverImages = 1024;
 constexpr size_t kObserverNameBytes = 96;
 constexpr size_t kObserverPathBytes = 384;
 constexpr size_t kObserverTextBytes = 512;

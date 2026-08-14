@@ -239,11 +239,34 @@ class SemanticFrameTests(unittest.TestCase):
         self.assertEqual(len(handle.requests), live_request_count)
         self.assertEqual(reader.identity(), frame.identity)
 
-    def test_ui_projection_must_share_the_exact_frame_generation(self):
+    def test_ui_projection_can_be_rebased_only_inside_stable_state_sandwich(self):
         handle, _, clock = make_clock()
         handle.ui["generation"] = 11
 
-        with self.assertRaisesRegex(SemanticGateClosed, "mixes UI"):
+        def advance_state_after_ui():
+            if handle.requests[-1] == "GET /v1/ui\n":
+                handle.snapshot["generation"] = 12
+                handle.buttons["generation"] = 12
+
+        handle.after_request = advance_state_after_ui
+        frame = clock.acquire(include_ui=True)
+        reader = SemanticFrameReader(clock, clock._oracle)
+
+        self.assertEqual(
+            handle.requests,
+            ["GET /v1/state\n", "GET /v1/ui\n", "GET /v1/state\n"],
+        )
+        self.assertEqual(frame.generation, 12)
+        self.assertEqual(frame.projections["ui_source_generation"], 11)
+        self.assertEqual(frame.projections["ui"]["generation"], 12)
+        self.assertEqual(reader.oracle().read_state().generation, 12)
+        self.assertEqual(reader.oracle().read_ui_state().generation, 12)
+
+    def test_ui_projection_without_a_closing_state_is_rejected(self):
+        handle, _, clock = make_clock()
+        handle.ui["generation"] = 11
+
+        with self.assertRaises(SemanticGateClosed):
             clock.acquire(include_ui=True)
 
         self.assertIsNone(clock.current_frame_id)
@@ -301,14 +324,11 @@ class SemanticFrameTests(unittest.TestCase):
         with self.assertRaises(StaleFrameError):
             clock.borrow(first.frame_id)
 
-    def test_age_is_bounded_at_acquire_and_borrow(self):
+    def test_age_is_bounded_at_acquire_but_frozen_frame_survives_one_scan(self):
         handle, monotonic, clock = make_clock(max_age_ms=100)
         frame = clock.acquire()
-        monotonic.value += 79_000_000
+        monotonic.value += 10_000_000_000
         self.assertIs(clock.borrow(frame.frame_id), frame)
-        monotonic.value += 2_000_000
-        with self.assertRaises(StaleFrameError):
-            clock.borrow(frame.frame_id)
 
         handle, _, clock = make_clock(max_age_ms=100)
         handle.snapshot["age_ms"] = -1

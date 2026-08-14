@@ -1,5 +1,5 @@
 diff --git a/module/device/device.py b/module/device/device.py
-index 0d05f343807c19ac88b96e1e31248219d723ab43..6b002e4d8e20f6ae5356817cfabeba5a6b425cf7 100644
+index 0d05f343..185afc01 100644
 --- a/module/device/device.py
 +++ b/module/device/device.py
 @@ -1,4 +1,5 @@
@@ -29,23 +29,78 @@ index 0d05f343807c19ac88b96e1e31248219d723ab43..6b002e4d8e20f6ae5356817cfabeba5a
          # Auto-fill emulator info
          if IS_WINDOWS and self.config.EmulatorInfo_Emulator == 'auto':
              _ = self.emulator_instance
-@@ -179,6 +194,11 @@ class Device(Screenshot, Control, AppControl):
+@@ -179,6 +194,9 @@ class Device(Screenshot, Control, AppControl):
          if threshold < diff < 86400 - threshold:
              return False
  
 +        semantic_session = getattr(self, 'semantic_adapter', None)
 +        if semantic_session is not None:
-+            semantic_session.reject_pixel_access(
-+                'template-access', 'Device.handle_night_commission'
-+            )
++            return False
          if GET_MISSION.match(self.image, offset=True):
              logger.info('Night commission appear.')
              self.click(GET_MISSION)
 diff --git a/module/handler/login.py b/module/handler/login.py
-index 57deabe0b6c107792cafdbcd166c527360006e6c..1d2e7d4a251f3d4363c65b59b8992d04f6b9cf2b 100644
+index 57deabe0..77e83eef 100644
 --- a/module/handler/login.py
 +++ b/module/handler/login.py
-@@ -144,12 +144,19 @@ class LoginHandler(UI):
+@@ -15,6 +15,7 @@ from module.map.assets import *
+ from module.ui.assets import *
+ from module.ui.page import page_campaign_menu
+ from module.ui.ui import UI
++from module.exception import GamePageUnknownError
+ 
+ 
+ class LoginHandler(UI):
+@@ -46,11 +47,29 @@ class LoginHandler(UI):
+ 
+             self.device.screenshot()
+ 
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None and semantic_adapter.server_maintenance_visible():
++                logger.warning('Game server is under maintenance')
++                raise GamePageUnknownError
++            if semantic_adapter is not None and semantic_adapter.login_update_in_progress():
++                self.device.stuck_record_clear()
++                continue
++            if semantic_adapter is not None and semantic_adapter.restart_game_after_update():
++                logger.info('Completed game update requires a cold restart')
++                self.device.stuck_record_clear()
++                self.device.click_record_clear()
++                login_success = False
++                confirm_timer.reset()
++                orientation_timer.reset()
++                continue
++
+             # End
+             if self.is_in_main():
+                 if confirm_timer.reached():
+                     logger.info('Login to main confirm')
+                     break
++                if semantic_adapter is not None:
++                    continue
+             else:
+                 confirm_timer.reset()
+ 
+@@ -60,6 +79,8 @@ class LoginHandler(UI):
+                 if not login_success:
+                     logger.info('Login success')
+                     login_success = True
++                if semantic_adapter is not None:
++                    continue
+             if self.appear(ANDROID_NO_RESPOND, offset=(30, 30), interval=5):
+                 logger.warning('Emulator no respond')
+                 self.device.click_record_add(ANDROID_NO_RESPOND)
+@@ -78,7 +99,8 @@ class LoginHandler(UI):
+                 continue
+             if self.appear_then_click(LOGIN_GAME_UPDATE, offset=(30, 30), interval=5):
+                 continue
+-            if server.server == 'cn' and not login_success:
++            if (server.server == 'cn' and not login_success
++                    and semantic_adapter is None):
+                 if self.handle_cn_user_agreement():
+                     continue
+             # Player return
+@@ -144,12 +166,19 @@ class LoginHandler(UI):
              GameTooManyClickError:
              GameNotRunningError:
          """

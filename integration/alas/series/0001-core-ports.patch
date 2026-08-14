@@ -1,5 +1,5 @@
 diff --git a/module/base/base.py b/module/base/base.py
-index dfd12a94182f193411eda70c4ae5ef048f124a4b..448d06ff94417b43d6b3633a95581e946f617a7c 100644
+index dfd12a94..f31b35bd 100644
 --- a/module/base/base.py
 +++ b/module/base/base.py
 @@ -70,6 +70,9 @@ class ModuleBase:
@@ -39,7 +39,17 @@ index dfd12a94182f193411eda70c4ae5ef048f124a4b..448d06ff94417b43d6b3633a95581e94
  
          if appear and interval:
              self.interval_timer[button.name].reset()
-@@ -373,6 +383,10 @@ class ModuleBase:
+@@ -302,6 +312,9 @@ class ModuleBase:
+                 self.device.sleep(self.config.WAIT_BEFORE_SAVING_SCREEN_SHOT)
+                 self.device.screenshot()
+                 self.device.save_screenshot(genre=genre)
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None:
++                return semantic_adapter.click_if_present(button) is not None
+             self.device.click(button)
+         return appear
+ 
+@@ -373,6 +386,10 @@ class ModuleBase:
          Returns:
              bool:
          """
@@ -51,7 +61,7 @@ index dfd12a94182f193411eda70c4ae5ef048f124a4b..448d06ff94417b43d6b3633a95581e94
              image = button
          else:
 diff --git a/module/device/control.py b/module/device/control.py
-index 1224c45475f24ccbec28589e78c4a2d5df4ffd64..1d25a3bd6c4904c3a9a6f81548125ce529179965 100644
+index 1224c454..88376a16 100644
 --- a/module/device/control.py
 +++ b/module/device/control.py
 @@ -17,6 +17,14 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
@@ -69,29 +79,45 @@ index 1224c45475f24ccbec28589e78c4a2d5df4ffd64..1d25a3bd6c4904c3a9a6f81548125ce5
          return {
              'ADB': self.click_adb,
              'uiautomator2': self.click_uiautomator2,
-@@ -35,6 +43,11 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+@@ -35,6 +43,20 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
          """
          if control_check:
              self.handle_control_check(button)
 +        semantic_adapter = getattr(self, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
++            if (
++                semantic_adapter.campaign_combat_active()
++                and not semantic_adapter.campaign_combat_committed()
++                and semantic_adapter.campaign_map_viewport_swipe_committed()
++            ):
++                state = semantic_adapter.campaign_camera_state()
++                semantic_adapter.recheck_campaign_combat_target_after_camera_view(
++                    state
++                )
 +            receipt = semantic_adapter.click(button)
 +            logger.info(f'Semantic click {receipt.semantic_id} @ {receipt.path}')
 +            return receipt
          x, y = random_rectangle_point(button.button)
          x, y = ensure_int(x, y)
          logger.info(
-@@ -47,6 +60,9 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+@@ -47,6 +69,16 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
          method(x, y)
  
      def multi_click(self, button, n, interval=(0.1, 0.2)):
 +        semantic_adapter = getattr(self, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
-+            semantic_adapter.reject_raw_input('multi_click')
++            click_timer = Timer(0.1)
++            for _ in range(n):
++                remain = ensure_time(interval) - click_timer.current_time()
++                if remain > 0:
++                    self.sleep(remain)
++                click_timer.reset()
++                self.click(button, control_check=False)
++            return
          self.handle_control_check(button)
          click_timer = Timer(0.1)
          for _ in range(n):
-@@ -64,6 +80,9 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+@@ -64,6 +96,9 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
              button (button.Button): AzurLane Button instance.
              duration(int, float, tuple):
          """
@@ -101,7 +127,7 @@ index 1224c45475f24ccbec28589e78c4a2d5df4ffd64..1d25a3bd6c4904c3a9a6f81548125ce5
          self.handle_control_check(button)
          x, y = random_rectangle_point(button.button)
          x, y = ensure_int(x, y)
-@@ -86,6 +105,7 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+@@ -86,6 +121,7 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
              self.swipe_adb((x, y), (x, y), duration)
  
      def swipe(self, p1, p2, duration=(0.1, 0.2), name='SWIPE', distance_check=True):
@@ -109,11 +135,12 @@ index 1224c45475f24ccbec28589e78c4a2d5df4ffd64..1d25a3bd6c4904c3a9a6f81548125ce5
          self.handle_control_check(name)
          p1, p2 = ensure_int(p1, p2)
          duration = ensure_time(duration)
-@@ -106,6 +126,15 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+@@ -106,6 +142,16 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
                  logger.info('Swipe distance < 10px, dropped')
                  return
  
 +        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
 +            receipt = semantic_adapter.swipe(
 +                p1, p2, duration=duration, name=name,
 +                distance_check=distance_check)
@@ -125,7 +152,7 @@ index 1224c45475f24ccbec28589e78c4a2d5df4ffd64..1d25a3bd6c4904c3a9a6f81548125ce5
          if method == 'minitouch':
              self.swipe_minitouch(p1, p2)
          elif method == 'uiautomator2':
-@@ -137,18 +166,42 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
+@@ -137,18 +183,51 @@ class Control(Hermit, Minitouch, Scrcpy, MaaTouch, NemuIpc):
              name (str): Swipe name
              distance_check: (bool):
          """
@@ -141,7 +168,12 @@ index 1224c45475f24ccbec28589e78c4a2d5df4ffd64..1d25a3bd6c4904c3a9a6f81548125ce5
 +        semantic_adapter = getattr(self, 'semantic_adapter', None)
 +        semantic_intent = None
 +        if semantic_adapter is not None:
-+            semantic_intent = semantic_adapter.begin_campaign_map_swipe_vector(
++            begin_swipe = (
++                semantic_adapter.begin_operation_siren_globe_swipe_vector
++                if name.startswith('GLOBE_SWIPE_')
++                else semantic_adapter.begin_campaign_map_swipe_vector
++            )
++            semantic_intent = begin_swipe(
 +                vector,
 +                box=box,
 +                random_range=random_range,
@@ -166,8 +198,12 @@ index 1224c45475f24ccbec28589e78c4a2d5df4ffd64..1d25a3bd6c4904c3a9a6f81548125ce5
 +                distance_check=distance_check)
 +        finally:
 +            if semantic_intent is not None:
-+                semantic_adapter.end_campaign_map_swipe_vector(
-+                    semantic_intent)
++                end_swipe = (
++                    semantic_adapter.end_operation_siren_globe_swipe_vector
++                    if name.startswith('GLOBE_SWIPE_')
++                    else semantic_adapter.end_campaign_map_swipe_vector
++                )
++                end_swipe(semantic_intent)
  
      def drag(self, p1, p2, segments=1, shake=(0, 15), point_random=(-10, -10, 10, 10), shake_random=(-5, -5, 5, 5),
               swipe_duration=0.25, shake_duration=0.1, name='DRAG'):
@@ -178,7 +214,7 @@ index 1224c45475f24ccbec28589e78c4a2d5df4ffd64..1d25a3bd6c4904c3a9a6f81548125ce5
          p1, p2 = ensure_int(p1, p2)
          logger.info(
 diff --git a/module/device/screenshot.py b/module/device/screenshot.py
-index 9940ee05560747db9a025de8033cebe3ce19d8fe..65f5dde7d0183df5e6e0db87326d37a00708d083 100644
+index 9940ee05..65f5dde7 100644
 --- a/module/device/screenshot.py
 +++ b/module/device/screenshot.py
 @@ -56,6 +56,12 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
@@ -195,7 +231,7 @@ index 9940ee05560747db9a025de8033cebe3ce19d8fe..65f5dde7d0183df5e6e0db87326d37a0
              if self.screenshot_method_override:
                  method = self.screenshot_method_override
 diff --git a/module/ocr/ocr.py b/module/ocr/ocr.py
-index 9dfd4f00cb0d52466c496da677115509163a6592..9fca01bd4151210252be61629d6fbeda7443af15 100644
+index 9dfd4f00..9fca01bd 100644
 --- a/module/ocr/ocr.py
 +++ b/module/ocr/ocr.py
 @@ -90,6 +90,28 @@ class Ocr:

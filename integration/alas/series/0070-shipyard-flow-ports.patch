@@ -1,0 +1,73 @@
+diff --git a/module/shipyard/ui.py b/module/shipyard/ui.py
+index abb6c787..0978105f 100644
+--- a/module/shipyard/ui.py
++++ b/module/shipyard/ui.py
+@@ -31,6 +31,14 @@ class ShipyardUI(UI):
+         Returns:
+             bool if appear
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            state = semantic_session.shipyard_state(self._shipyard_focus_index)
++            if state.cannot_strengthen:
++                logger.info('Ship at full strength for current level, '
++                            'no more BPs can be consumed')
++            return state.cannot_strengthen
+         if self.appear(SHIPYARD_PROGRESS_DEV, offset=(20, 20)) \
+                 or self.appear(SHIPYARD_PROGRESS_FATE, offset=(20, 20)) \
+                 or self.appear(SHIPYARD_LEVEL_NOT_ENOUGH_FATE, offset=(20, 20)) \
+@@ -131,6 +139,10 @@ class ShipyardUI(UI):
+             logger.warning(f'Cannot parse for count from index {index}')
+             return -1
+ 
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.shipyard_state(index).blueprint_count
+         result = OCR_SHIPYARD_BP_COUNT_GRID.ocr(self.device.image)
+ 
+         return result[index - 1]
+@@ -163,6 +175,11 @@ class ShipyardUI(UI):
+             logger.warning(f'Research Series {series} is not selectable')
+             return False
+ 
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.shipyard_select_series(series)
++            return True
+         self.ui_click(SHIPYARD_SERIES_SELECT_ENTER, appear_button=self._shipyard_in_ui,
+                       check_button=SHIPYARD_SERIES_SELECT_CHECK,
+                       skip_first_screenshot=skip_first_screenshot)
+@@ -205,6 +222,14 @@ class ShipyardUI(UI):
+                 logger.warning(f'Index for bottom Navbar {left} is not selectable')
+                 return False
+ 
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            if left is None:
++                raise ValueError('semantic shipyard requires a left index')
++            self._shipyard_focus_index = left
++            semantic_session.shipyard_select_ship(left)
++            return True
+         ensured = False
+         if self._shipyard_bottom_navbar.set(self, left=left, right=right, skip_first_screenshot=skip_first_screenshot):
+             ensured = True
+@@ -359,6 +384,15 @@ class ShipyardUI(UI):
+         Returns:
+             bool whether entered
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            state = semantic_session.shipyard_state(self._shipyard_focus_index)
++            if state.research_status != 'complete':
++                logger.warning('Cannot enter buy interface, focused '
++                               'ship has not yet been fully researched')
++                return False
++            return True
+         if self.appear(SHIPYARD_RESEARCH_INCOMPLETE, offset=(20, 20)) \
+                 or self.appear(SHIPYARD_RESEARCH_IN_PROGRESS, offset=(20, 20)):
+             logger.warning('Cannot enter buy interface, focused '

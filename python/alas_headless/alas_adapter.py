@@ -13,6 +13,7 @@ import re
 import time
 from dataclasses import dataclass, field, replace
 from numbers import Real
+from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Set, Tuple, Union
 
@@ -61,6 +62,17 @@ from .alas_combat_admission import (
     prepare_alas_campaign_combat_admission,
     prove_alas_campaign_combat_transition,
 )
+from .alas_combat_action import commit_alas_combat_resource_action_for_evidence
+from .alas_combat_observer import (
+    AlasCombatObserverManifest,
+    alas_combat_visible_resource_names,
+    load_alas_combat_observer_manifest,
+)
+from .alas_combat_state_replay import (
+    ALAS_COMBAT_DEFENSIVE_RESOURCE_NAMES,
+    ALAS_COMBAT_RESOURCE_ACTION_TARGETS,
+)
+from .alas_combat_trace import build_alas_combat_trace_frame
 from .alas_decision_preview import AlasCampaignDecisionPreview
 from .alas_package_process_lease import AlasPackageProcessLease
 from .runtime_trace import RuntimeTraceRecorder
@@ -85,13 +97,25 @@ from .semantic_oracle import (
     CommissionStartProof,
     DormState,
     DormFeedState,
+    GeneralShopItemState,
     MissionPageState,
     MissionDisposition,
+    MetaEntranceState,
+    MetaAssistState,
     Point,
     SemanticGateClosed,
     SemanticOracleError,
+    ShipyardState,
+    SemanticTargetMissing,
     SemanticOracle,
     OracleFingerprint,
+    OperationSirenState,
+    OperationSirenGlobeState,
+    OperationSirenGlobeSwipeReceipt,
+    OperationSirenStorageState,
+    OperationSirenStorageScrollReceipt,
+    ObserverTransportError,
+    request_observer_state,
     ResearchProjectState,
     ResearchProjectStatus,
     ResearchDetailState,
@@ -113,6 +137,10 @@ def _legacy_action_grants(
     *,
     allow_mission_claim_once: bool,
     allow_mail_mutations: bool,
+    mail_mutation_budget: int,
+    minigame_play_budget: int,
+    meta_assist_budget: int,
+    operation_siren_coordinate_checkout_budget: int,
     allow_tactical_rewards: bool,
     tactical_assign_budget: int,
     commission_reward_budget: int,
@@ -122,6 +150,7 @@ def _legacy_action_grants(
     dorm_collect_budget: int,
     dorm_feed_budget: int,
     build_submit_budget: int,
+    shop_purchase_budget: int,
     campaign_stage_entry_budget: int,
     campaign_fleet_mutation_budget: int,
     campaign_sortie_budget: int,
@@ -132,7 +161,14 @@ def _legacy_action_grants(
     return MappingProxyType(
         {
             "mission.claim": int(bool(allow_mission_claim_once)),
-            "mail.mutation": int(bool(allow_mail_mutations)),
+            "mail.mutation": max(
+                int(bool(allow_mail_mutations)), mail_mutation_budget
+            ),
+            "minigame.play": minigame_play_budget,
+            "meta.assist": meta_assist_budget,
+            "operation_siren.coordinate_checkout": (
+                operation_siren_coordinate_checkout_budget
+            ),
             "tactical.reward": int(bool(allow_tactical_rewards)),
             "tactical.assign": tactical_assign_budget,
             "commission.reward": commission_reward_budget,
@@ -142,6 +178,7 @@ def _legacy_action_grants(
             "dorm.collect": dorm_collect_budget,
             "dorm.feed": dorm_feed_budget,
             "build.submit": build_submit_budget,
+            "shop.purchase": shop_purchase_budget,
             "campaign.stage_entry": campaign_stage_entry_budget,
             "campaign.fleet_mutation": campaign_fleet_mutation_budget,
             "campaign.sortie": campaign_sortie_budget,
@@ -161,6 +198,10 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "MAIN_GOTO_CAMPAIGN_WHITE": "main/battle",
     "MAIN_GOTO_FLEET": "main/formation",
     "MAIN_GOTO_FLEET_WHITE": "main/formation",
+    "CAMPAIGN_MENU_GOTO_EVENT": "campaign-menu/event",
+    "SWITCH_20241219_COMBAT": "event/mode/battle",
+    "SWITCH_20241219_STORY": "event/mode/story",
+    "EVENT_CHECK": "event/mode/story",
     "MAIN_GOTO_BUILD": "main/build",
     "MAIN_GOTO_BUILD_WHITE": "main/build",
     "MAIN_GOTO_DORMMENU": "main/live",
@@ -171,12 +212,69 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "DORMMENU_GOTO_DORM": "dorm-menu/dorm",
     "DORMMENU_GOTO_MEOWFFICER": "dorm-menu/meowfficer",
     "DORMMENU_GOTO_PRIVATE_QUARTERS": "dorm-menu/private-quarters",
+    "ACADEMY_GOTO_MUNITIONS": "academy/munitions",
+    "ACADEMY_GOTO_GAME_ROOM": "academy/game-room",
+    "GAME_ROOM_GOTO_MAIN": "game-room/home",
     "DORM_GOTO_MAIN": "dorm/page/back",
+    "OS_CHECK": "os/page/back",
+    "MAP_GOTO_GLOBE": "os/map/globe",
+    "MAP_GOTO_GLOBE_FOG": "os/map/globe",
+    "PORT_ENTER": "os/port/enter",
+    "PORT_GOTO_SUPPLY": "os/port/supply",
+    "PORT_CHECK": "os/port/supply",
+    "PORT_SUPPLY_CHECK": "os/shop/back",
+    "OS_SHOP_CHECK": "os/shop/back",
+    "GLOBE_GOTO_MAP": "os/globe/map",
+    "EXCHANGE_ENTER": "os/globe/voucher",
+    "EXCHANGE_CHECK": "os/voucher/back",
+    "MISSION_OVERVIEW_ENTER": "os/globe/mission-overview",
+    "MISSION_OVERVIEW_CHECK": "os/mission-overview/back",
+    "MISSION_ENTER": "os/map/mission-list",
+    "STORAGE_ENTER": "os/map/storage",
+    "STORAGE_CHECK": "os/storage/back",
+    "STORAGE_COORDINATE_CHECKOUT": "os/storage/detail/checkout",
+    "MISSION_QUIT": "os/mission-list/close",
+    "ZONE_ENTRANCE": "os/globe/zone-enter",
+    "ORDER_ENTER": "os/map/order",
+    "AUTO_SEARCH_OS_MAP_OPTION_OFF": "os/map/auto-search/off",
+    "AUTO_SEARCH_OS_MAP_OPTION_OFF_DISABLED": "os/map/auto-search/off",
+    "AUTO_SEARCH_OS_MAP_OPTION_ON": "os/map/auto-search/on",
+    "OS_GAME_TIPS": "os/help/close",
     "DORM_INFO": "dorm/statistics/confirm",
     "DORM_FEED_CANCEL": "dorm/empty-food/cancel",
     "CAMPAIGN_MENU_GOTO_CAMPAIGN": "campaign-menu/normal",
+    "CAMPAIGN_MENU_GOTO_EXERCISE": "campaign-menu/exercise",
+    "CAMPAIGN_MENU_GOTO_WAR_ARCHIVES": "campaign-menu/archive",
+    "CAMPAIGN_MENU_GOTO_OS": "campaign-menu/os",
+    "WAR_ARCHIVES_GOTO_CAMPAIGN_MENU": "archive/page/back",
+    "OPPONENT_1": "exercise/opponent/1",
+    "OPPONENT_2": "exercise/opponent/2",
+    "OPPONENT_3": "exercise/opponent/3",
+    "OPPONENT_4": "exercise/opponent/4",
+    "OPPONENT_0_0": "exercise/opponent/1",
+    "OPPONENT_1_0": "exercise/opponent/2",
+    "OPPONENT_2_0": "exercise/opponent/3",
+    "OPPONENT_3_0": "exercise/opponent/4",
+    "EXERCISE_PREPARATION": "exercise/opponent/start",
+    "CAMPAIGN_MENU_GOTO_DAILY": "campaign-menu/daily",
+    "DAILY_CHECK": "daily/page/back",
+    "DAILY_NEXT": "daily/next",
+    "DAILY_PREV": "daily/prev",
+    "BATTLE_PREPARATION": "daily/precombat/start",
+    "BATTLE_PREPARATION_WITH_OVERLAY": "daily/precombat/start",
     "RESHMENU_GOTO_RESEARCH": "research-menu/research",
     "RESHMENU_GOTO_SHIPYARD": "research-menu/shipyard",
+    "SHIPYARD_SERIES_SELECT_ENTER": "shipyard/series/open",
+    "SHIPYARD_SERIES_SELECT_CHECK": "shipyard/series/1",
+    "SHIPYARD_SERIES_GRID_0_0": "shipyard/series/1",
+    "SHIPYARD_SERIES_GRID_1_0": "shipyard/series/2",
+    "SHIPYARD_SERIES_GRID_2_0": "shipyard/series/3",
+    "SHIPYARD_SERIES_GRID_0_1": "shipyard/series/4",
+    "SHIPYARD_SERIES_GRID_1_1": "shipyard/series/5",
+    "SHIPYARD_SERIES_GRID_2_1": "shipyard/series/6",
+    "SHIPYARD_SERIES_GRID_0_2": "shipyard/series/7",
+    "SHIPYARD_SERIES_GRID_1_2": "shipyard/series/8",
+    "SHIPYARD_SERIES_GRID_2_2": "shipyard/series/9",
     "RESHMENU_GOTO_META": "research-menu/meta",
     "ENTRANCE_1": "research/project/1",
     "ENTRANCE_2": "research/project/2",
@@ -195,10 +293,20 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "MAIL_ENTER_WHITE": "main/mail",
     "MAIL_CHECK": "mail/page/back",
     "MAIL_MANAGE": "mail/manage",
+    "SHOP_GOTO_SUPPLY_PACK": "shop/gift-pack",
     "MISSION_CHECK": "task/page/back",
     "COMMISSION_CHECK": "commission/page/back",
     "REWARD_CHECK": "reward/page/back",
     "REWARD_GOTO_MAIN": "reward/page/back",
+    "META_ENTRANCE": "reward/meta/enter",
+    "META_CHECK": "meta/page/back",
+    "META_MAIN_BEACON_ENTRANCE": "meta/current/open",
+    "META_MAIN_DOSSIER_ENTRANCE": "meta/dossier/open",
+    "BEACON_LIST": "meta/current/list",
+    "ASH_START": "meta/assist/start",
+    "OIL": "reward/resource/oil",
+    "COIN": "reward/resource/coin",
+    "EXP": "reward/resource/exp",
     "REWARD_1": "reward/commission/finish",
     "REWARD_1_WHITE": "reward/commission/finish",
     "REWARD_GOTO_COMMISSION": "reward/commission/go",
@@ -209,6 +317,7 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "REWARD_GOTO_TACTICAL_WHITE": "reward/tactical/go",
     "LOGIN_ANNOUNCE": "overlay/bulletin/close",
     "LOGIN_ANNOUNCE_2": "overlay/bulletin/close",
+    "LOGIN_RETURN_SIGN": "event-list/page/back",
     "AUTO_SEARCH_MENU_EXIT": "reward/campaign-total/exit",
     "POPUP_CANCEL": "overlay/network-reconnect/cancel",
     "POPUP_CONFIRM": "overlay/network-reconnect/confirm",
@@ -253,6 +362,7 @@ BUILD_SIDE_NAVBAR_TARGETS = (
     "build/nav/unseam",
 )
 BUILD_POOL_NAVBAR_TARGETS = {
+    0: "build/pool/event",
     1: "build/pool/light",
     2: "build/pool/heavy",
     3: "build/pool/special",
@@ -363,23 +473,45 @@ CAMPAIGN_AUTO_SEARCH_OFF_RESOURCES = frozenset(
 CAMPAIGN_AUTO_SEARCH_RESOURCES = (
     CAMPAIGN_AUTO_SEARCH_ON_RESOURCES | CAMPAIGN_AUTO_SEARCH_OFF_RESOURCES
 )
+CAMPAIGN_STRATEGY_FORMATION_RESOURCES: Mapping[str, str] = {
+    "FORMATION_1": "line_ahead",
+    "FORMATION_2": "double_line",
+    "FORMATION_3": "diamond",
+}
+CAMPAIGN_STRATEGY_RESOURCES = frozenset(
+    {"STRATEGY_OPENED", *CAMPAIGN_STRATEGY_FORMATION_RESOURCES.keys()}
+)
+EVENT_CAMPAIGN_ASIDE_RESOURCES: Mapping[str, str] = {
+    "CHAPTER_20241219_PART1": "part1",
+    "CHAPTER_20241219_PART2": "part2",
+    "CHAPTER_20241219_SP": "sp",
+    "CHAPTER_20241219_EX": "ex",
+}
 CAMPAIGN_VIRTUAL_RESOURCES = frozenset(
     {
         "CAMPAIGN_CHECK",
         "CAMPAIGN_MENU_CHECK",
+        "CAMPAIGN_MENU_NO_EVENT",
         "EVENT_LIST_CHECK",
         "BACK_ARROW",
         "SWITCH_1_NORMAL",
         "SWITCH_1_HARD",
+        "CHAPTER_PREV",
+        "CHAPTER_NEXT",
         "SWITCH_2_HARD",
         "SWITCH_2_EX",
         "GOTO_MAIN",
         "IN_MAP",
+        "FLEET_NUM_1",
+        "FLEET_NUM_2",
+        "SWITCH_OVER",
         "MAP_PREPARATION",
         "FLEET_PREPARATION",
         "MAP_PREPARATION_CANCEL",
+        *EVENT_CAMPAIGN_ASIDE_RESOURCES.keys(),
         *CAMPAIGN_AUTO_SEARCH_RESOURCES,
         *CAMPAIGN_FLEET_ROW_RESOURCES.keys(),
+        *CAMPAIGN_STRATEGY_RESOURCES,
     }
 )
 CAMPAIGN_CLICK_RESOURCES = frozenset(
@@ -389,6 +521,12 @@ CAMPAIGN_CLICK_RESOURCES = frozenset(
         "MAP_PREPARATION",
         "MAP_PREPARATION_CANCEL",
         "FLEET_PREPARATION",
+        "SWITCH_OVER",
+        "SWITCH_1_NORMAL",
+        "SWITCH_1_HARD",
+        "CHAPTER_PREV",
+        "CHAPTER_NEXT",
+        *EVENT_CAMPAIGN_ASIDE_RESOURCES.keys(),
         *CAMPAIGN_AUTO_SEARCH_RESOURCES,
         "FLEET_1_CHOOSE",
         "FLEET_1_CLEAR",
@@ -396,16 +534,44 @@ CAMPAIGN_CLICK_RESOURCES = frozenset(
         "FLEET_2_CLEAR",
         "SUBMARINE_CHOOSE",
         "SUBMARINE_CLEAR",
+        "STRATEGY_OPEN",
+        *CAMPAIGN_STRATEGY_RESOURCES,
     }
 )
 PAGE_VIRTUAL_RESOURCES = frozenset(
     {
+        "DAILY_CHECK",
+        "DAILY_ENTER",
+        "DAILY_ENTER_CHECK",
+        "DAILY_MISSION_1",
+        "DAILY_MISSION_2",
+        "DAILY_MISSION_3",
+        "BATTLE_PREPARATION",
+        "BATTLE_PREPARATION_WITH_OVERLAY",
+        "EXERCISE_CHECK",
+        "ACADEMY_CHECK",
+        "MUNITIONS_CHECK",
+        "NAV_GENERAL",
+        "NAV_MONTHLY",
+        "TAB_GENERAL",
+        "TAB_MERIT",
+        "TAB_GUILD",
+        "TAB_META",
+        "TAB_PRIZE",
+        "TAB_CORE_LIMITED",
+        "TAB_CORE_MONTHLY",
+        "TAB_MEDAL",
+        "TAB_PROTOTYPE",
         "BUILD_CHECK",
         "DORMMENU_CHECK",
         "DORM_CHECK",
         "RESHMENU_CHECK",
         "RESEARCH_CHECK",
+        "SHIPYARD_CHECK",
         "TACTICAL_CHECK",
+        "WAR_ARCHIVES_CHECK",
+        "DATA_KEY_COLLECTED",
+        "DATA_KEY_COLLECT",
     }
 )
 RESEARCH_VIRTUAL_RESOURCES = frozenset(
@@ -449,6 +615,24 @@ DORM_VIRTUAL_RESOURCES = frozenset(
         "DORM_FEED_ENTER",
         "DORM_FEED_CANCEL",
         "POPUP_CANCEL",
+    }
+)
+MINIGAME_VIRTUAL_RESOURCES = frozenset(
+    {
+        "GAME_ROOM_CHECK",
+        "GOTO_CHOOSE_GAME",
+        "MINIGAME_SCROLL_AREA",
+        "NEW_YEAR_CHALLENGE_ENTRANCE",
+        "NEW_YEAR_CHALLENGE_FIRST_TIME",
+        "NEW_YEAR_CHALLENGE_ADD_COIN",
+        "NEW_YEAR_CHALLENGE_DEC_COIN",
+        "NEW_YEAR_CHALLENGE_START",
+        "NEW_YEAR_CHALLENGE_END",
+        "NEW_YEAR_CHALLENGE_EXIT",
+        "BACK",
+        "COIN_POPUP",
+        "POPUP_CANCEL",
+        "POPUP_CONFIRM",
     }
 )
 BUILD_VIRTUAL_RESOURCES = frozenset(
@@ -589,6 +773,13 @@ class _MissionFlowContext:
 @dataclass
 class _MailFlowContext:
     entry_clicked: bool = False
+    recovered_existing_page: bool = False
+    initial_surface_probed: bool = False
+    surface_kind: Optional[str] = None
+    leaving_page_until: float = 0.0
+    pending_confirmation: Optional[str] = None
+    recovered_confirmation: bool = False
+    passive_transition_until: float = 0.0
 
 
 @dataclass
@@ -642,10 +833,28 @@ class _DormFlowContext:
 @dataclass
 class _BuildFlowContext:
     prep_opened: bool = False
+    prep_validated: bool = False
     warning_confirmed: bool = False
     coins_owned: Optional[int] = None
     submit_receipt: Optional[ActionReceipt] = None
     passive_transition_until: float = 0.0
+
+
+@dataclass
+class _SupplyPackFlowContext:
+    cached_oil: Optional[int] = None
+    gift_pack_selected: bool = False
+    passive_transition_until: float = 0.0
+
+
+@dataclass
+class _MinigameFlowContext:
+    passive_transition_until: float = 0.0
+    ticket_prompt_confirmed: bool = False
+    entry_receipt: Optional[ActionReceipt] = None
+    play_receipt: Optional[ActionReceipt] = None
+    selected_tickets: int = 0
+    coins_owned: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -681,6 +890,7 @@ class _CampaignFlowContext:
     entry_receipt: Optional[ActionReceipt] = None
     map_preparation_receipt: Optional[ActionReceipt] = None
     auto_search_toggle_receipt: Optional[ActionReceipt] = None
+    map_preparation_oil_cost: Optional[int] = None
     preparation_kind: Optional[str] = None
     cancel_receipt: Optional[ActionReceipt] = None
     proof: Optional[CampaignPreSortieProof] = None
@@ -715,9 +925,19 @@ class _CampaignFlowContext:
     ] = field(default_factory=list)
     camera_positioning_completed: bool = False
     target_recheck_proof: Optional[CampaignMapTargetRecheckProof] = None
+    combat_route_receipts: List[ActionReceipt] = field(default_factory=list)
+    map_fleet_switch_receipts: List[ActionReceipt] = field(default_factory=list)
     combat_receipt: Optional[ActionReceipt] = None
     combat_proof: Optional[AlasCampaignCombatProof] = None
     passive_transition_until: float = 0.0
+
+
+@dataclass(frozen=True)
+class _OperationSirenGlobeSwipeIntent:
+    name: str
+    pixel_vector: Tuple[float, float]
+    box: Tuple[int, int, int, int]
+    duration_range: Tuple[float, float]
 
 
 class AlasSemanticAdapter:
@@ -730,6 +950,10 @@ class AlasSemanticAdapter:
         mappings: Mapping[str, str] = DEFAULT_ALAS_BUTTON_TARGETS,
         allow_mission_claim_once: bool = False,
         allow_mail_mutations: bool = False,
+        mail_mutation_budget: int = 0,
+        minigame_play_budget: int = 0,
+        meta_assist_budget: int = 0,
+        operation_siren_coordinate_checkout_budget: int = 0,
         allow_tactical_rewards: bool = False,
         tactical_assign_budget: int = 0,
         commission_reward_budget: int = 0,
@@ -739,6 +963,7 @@ class AlasSemanticAdapter:
         dorm_collect_budget: int = 0,
         dorm_feed_budget: int = 0,
         build_submit_budget: int = 0,
+        shop_purchase_budget: int = 0,
         campaign_stage_entry_budget: int = 0,
         campaign_fleet_mutation_budget: int = 0,
         campaign_sortie_budget: int = 0,
@@ -762,6 +987,13 @@ class AlasSemanticAdapter:
         ):
             raise ValueError("ALAS semantic mappings must be non-empty")
         for label, budget in (
+            ("mail mutation", mail_mutation_budget),
+            ("minigame play", minigame_play_budget),
+            ("META assist", meta_assist_budget),
+            (
+                "Operation Siren coordinate checkout",
+                operation_siren_coordinate_checkout_budget,
+            ),
             ("tactical assign", tactical_assign_budget),
             ("commission reward", commission_reward_budget),
             ("commission start", commission_start_budget),
@@ -770,6 +1002,7 @@ class AlasSemanticAdapter:
             ("dorm collect", dorm_collect_budget),
             ("dorm feed", dorm_feed_budget),
             ("build submit", build_submit_budget),
+            ("shop purchase", shop_purchase_budget),
             ("campaign stage entry", campaign_stage_entry_budget),
             ("campaign fleet mutation", campaign_fleet_mutation_budget),
             ("campaign sortie", campaign_sortie_budget),
@@ -793,6 +1026,12 @@ class AlasSemanticAdapter:
             grants = _legacy_action_grants(
                 allow_mission_claim_once=allow_mission_claim_once,
                 allow_mail_mutations=allow_mail_mutations,
+                mail_mutation_budget=mail_mutation_budget,
+                minigame_play_budget=minigame_play_budget,
+                meta_assist_budget=meta_assist_budget,
+                operation_siren_coordinate_checkout_budget=(
+                    operation_siren_coordinate_checkout_budget
+                ),
                 allow_tactical_rewards=allow_tactical_rewards,
                 tactical_assign_budget=tactical_assign_budget,
                 commission_reward_budget=commission_reward_budget,
@@ -802,6 +1041,7 @@ class AlasSemanticAdapter:
                 dorm_collect_budget=dorm_collect_budget,
                 dorm_feed_budget=dorm_feed_budget,
                 build_submit_budget=build_submit_budget,
+                shop_purchase_budget=shop_purchase_budget,
                 campaign_stage_entry_budget=campaign_stage_entry_budget,
                 campaign_fleet_mutation_budget=campaign_fleet_mutation_budget,
                 campaign_sortie_budget=campaign_sortie_budget,
@@ -832,7 +1072,12 @@ class AlasSemanticAdapter:
         self._research_context: Optional[_ResearchFlowContext] = None
         self._dorm_context: Optional[_DormFlowContext] = None
         self._build_context: Optional[_BuildFlowContext] = None
+        self._supply_pack_context: Optional[_SupplyPackFlowContext] = None
+        self._minigame_context: Optional[_MinigameFlowContext] = None
         self._campaign_context: Optional[_CampaignFlowContext] = None
+        self._operation_siren_globe_swipe_intent: Optional[
+            _OperationSirenGlobeSwipeIntent
+        ] = None
         self._observer_stale_since: Optional[float] = None
         self._frame_observation_oracle = frame_observation_oracle
         self._frame_identity_provider = frame_identity_provider
@@ -865,6 +1110,58 @@ class AlasSemanticAdapter:
                 capability_id=dispatch.capability,
             )
         return dispatch.value
+
+    def purchase_shop_item_once(
+        self,
+        index: int,
+        expected_name: str,
+        expected_cost: str,
+        expected_price: int,
+    ) -> ActionReceipt:
+        if not self._action_ledger.allowed("shop.purchase"):
+            raise SemanticGateClosed(
+                "shop purchase requires a positive transaction budget"
+            )
+        items = self.oracle.general_shop_items()
+        matches = tuple(item for item in items if item.index == index)
+        if len(matches) != 1:
+            raise SemanticGateClosed("selected shop item is absent")
+        item = matches[0]
+        if (
+            item.canonical_name != expected_name
+            or item.cost != expected_cost
+            or item.price != expected_price
+        ):
+            raise SemanticGateClosed("selected shop item identity changed")
+        self.oracle.click_shop_item(index)
+        deadline = time.monotonic() + 5.0
+        while True:
+            try:
+                quantity = self.oracle.shop_purchase_dialog_quantity(
+                    item.display_name
+                )
+            except SemanticGateClosed:
+                if time.monotonic() >= deadline:
+                    raise
+                time.sleep(0.2)
+                continue
+            if quantity is not None:
+                break
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed("shop purchase dialog did not open")
+            time.sleep(0.2)
+        if quantity != 1:
+            raise SemanticGateClosed("shop purchase did not default to one item")
+        receipt = self._dispatch_mutation(
+            "shop.purchase",
+            lambda: self.oracle.click_shop_purchase_confirm(item.display_name, 1),
+        )
+        deadline = time.monotonic() + 8.0
+        while self.oracle.shop_purchase_dialog_quantity(item.display_name) is not None:
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed("shop purchase confirmation did not close")
+            time.sleep(0.2)
+        return receipt
 
     def _require_frame_observation_oracle(self) -> Any:
         provider = self._frame_observation_oracle
@@ -927,7 +1224,14 @@ class AlasSemanticAdapter:
             "POPUP_CONFIRM_RESEARCH_START",
             "POPUP_CONFIRM_RESEARCH_QUEUE",
             "POPUP_CONFIRM_LOGIN",
+            "POPUP_CONFIRM_CAMPAIGN_RECONNECT",
+            "POPUP_CONFIRM_COMBAT_STATUS",
             "POPUP_CONFIRM_WHITE_LOGIN",
+            "POPUP_CONFIRM_UI_ADDITIONAL",
+            "POPUP_CONFIRM_MAIL_CLAIM",
+            "POPUP_CONFIRM_MAIL_QUIT",
+            "POPUP_CONFIRM_TICKETS_FULL",
+            "POPUP_CONFIRM_MINIGAME_ENTER",
         ):
             return (
                 "POPUP_CONFIRM_WHITE"
@@ -962,6 +1266,7 @@ class AlasSemanticAdapter:
             or name in PAGE_VIRTUAL_RESOURCES
             or name in RESEARCH_VIRTUAL_RESOURCES
             or name in DORM_VIRTUAL_RESOURCES
+            or name in MINIGAME_VIRTUAL_RESOURCES
             or name in BUILD_VIRTUAL_RESOURCES
             or name in TACTICAL_VIRTUAL_RESOURCES
             or CAMPAIGN_FLEET_BAR_PATTERN.fullmatch(name)
@@ -982,6 +1287,8 @@ class AlasSemanticAdapter:
             for context in (
                 self._research_context,
                 self._dorm_context,
+                self._supply_pack_context,
+                self._minigame_context,
                 self._build_context,
                 self._campaign_context,
             )
@@ -1003,6 +1310,8 @@ class AlasSemanticAdapter:
                 self._commission_context,
                 self._research_context,
                 self._dorm_context,
+                self._supply_pack_context,
+                self._minigame_context,
                 self._build_context,
                 self._campaign_context,
             )
@@ -1022,6 +1331,11 @@ class AlasSemanticAdapter:
 
         return self._mission_context is not None
 
+    def mail_reward_active(self) -> bool:
+        """Return whether ALAS currently owns the white-mail flow."""
+
+        return self._mail_context is not None
+
     def mission_claim_allowed(self) -> bool:
         """Expose the remaining input budget without weakening the click gate."""
 
@@ -1038,12 +1352,16 @@ class AlasSemanticAdapter:
             or self._mission_context is not None
             or self._research_context is not None
             or self._dorm_context is not None
+            or self._supply_pack_context is not None
+            or self._minigame_context is not None
             or self._build_context is not None
             or self._commission_context is not None
             or self._campaign_context is not None
         ):
             raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
-        self._mail_context = _MailFlowContext()
+        self._mail_context = _MailFlowContext(
+            passive_transition_until=time.monotonic() + 20.0,
+        )
 
     def end_mail(self) -> None:
         self._mail_context = None
@@ -1059,6 +1377,8 @@ class AlasSemanticAdapter:
             or self._mission_context is not None
             or self._research_context is not None
             or self._dorm_context is not None
+            or self._supply_pack_context is not None
+            or self._minigame_context is not None
             or self._build_context is not None
             or self._campaign_context is not None
         ):
@@ -1079,6 +1399,8 @@ class AlasSemanticAdapter:
             or self._mission_context is not None
             or self._research_context is not None
             or self._dorm_context is not None
+            or self._supply_pack_context is not None
+            or self._minigame_context is not None
             or self._build_context is not None
             or self._campaign_context is not None
         ):
@@ -1098,6 +1420,8 @@ class AlasSemanticAdapter:
                 self._commission_context,
                 self._research_context,
                 self._dorm_context,
+                self._supply_pack_context,
+                self._minigame_context,
                 self._build_context,
                 self._campaign_context,
             )
@@ -1120,13 +1444,19 @@ class AlasSemanticAdapter:
                 self._commission_context,
                 self._research_context,
                 self._dorm_context,
+                self._supply_pack_context,
+                self._minigame_context,
                 self._build_context,
                 self._campaign_context,
             )
         ):
             raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
         self._dorm_context = _DormFlowContext(
-            passive_transition_until=time.monotonic() + 20.0,
+            # Device startup plus ALAS' full current-page enumeration can take
+            # more than 20 seconds on the headless emulator.  During this
+            # bounded discovery window unrelated assets are presence-only
+            # probes; mutation still stays fail closed in click().
+            passive_transition_until=time.monotonic() + 60.0,
         )
 
     def end_dorm(self) -> None:
@@ -1142,6 +1472,8 @@ class AlasSemanticAdapter:
                 self._commission_context,
                 self._research_context,
                 self._dorm_context,
+                self._supply_pack_context,
+                self._minigame_context,
                 self._build_context,
                 self._campaign_context,
             )
@@ -1154,13 +1486,96 @@ class AlasSemanticAdapter:
     def end_build(self) -> None:
         self._build_context = None
 
+    def begin_supply_pack(self) -> None:
+        self._package_gate()
+        if self._login_flow.active or any(
+            context is not None
+            for context in (
+                self._mission_context,
+                self._mail_context,
+                self._commission_context,
+                self._research_context,
+                self._dorm_context,
+                self._build_context,
+                self._supply_pack_context,
+                self._minigame_context,
+                self._campaign_context,
+            )
+        ):
+            raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
+        self._supply_pack_context = _SupplyPackFlowContext(
+            passive_transition_until=time.monotonic() + 20.0,
+        )
+
+    def end_supply_pack(self) -> None:
+        self._supply_pack_context = None
+
+    def supply_pack_active(self) -> bool:
+        return self._supply_pack_context is not None
+
+    def begin_minigame(self) -> None:
+        self._package_gate()
+        if self._login_flow.active or any(
+            context is not None
+            for context in (
+                self._mission_context,
+                self._mail_context,
+                self._commission_context,
+                self._research_context,
+                self._dorm_context,
+                self._build_context,
+                self._supply_pack_context,
+                self._minigame_context,
+                self._campaign_context,
+            )
+        ):
+            raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
+        self._minigame_context = _MinigameFlowContext(
+            passive_transition_until=time.monotonic() + 20.0,
+        )
+
+    def end_minigame(self) -> None:
+        self._minigame_context = None
+
+    def minigame_active(self) -> bool:
+        return self._minigame_context is not None
+
+    def minigame_play_allowed(self) -> bool:
+        context = self._require_minigame_context()
+        return context.play_receipt is not None or self._action_ledger.allowed(
+            "minigame.play"
+        )
+
+    def minigame_prepare_default_ticket(self) -> int:
+        """Prove Fushun's current default one-ticket play without mutating UI."""
+
+        self._package_gate()
+        context = self._require_minigame_context()
+        if not self._action_ledger.allowed("minigame.play"):
+            raise SemanticGateClosed("minigame play requires a positive budget")
+        progress, monthly_limit = self.oracle.new_year_challenge_ticket_count()
+        owned = context.coins_owned
+        if owned is None:
+            raise SemanticGateClosed(
+                "new-year challenge ticket inventory was not proven before entry"
+            )
+        if owned < 1 or monthly_limit != 20 or not 0 <= progress <= monthly_limit:
+            raise SemanticGateClosed(
+                "new-year challenge default ticket state is inconsistent"
+            )
+        context.selected_tickets = 1
+        return 1
+
     def begin_campaign_pre_sortie(
         self, stage_code: str, mode: str = "normal"
     ) -> None:
         """Open one ALAS-owned bounded campaign entry invocation."""
 
         self._package_gate()
-        if re.fullmatch(r"[1-9][0-9]*-[1-9][0-9]*", stage_code) is None:
+        if re.fullmatch(
+            r"(?:[1-9][0-9]*-[1-9][0-9]*|[A-Z][1-9][0-9]*)",
+            stage_code.upper(),
+        ) is None:
             raise SemanticGateClosed("campaign stage code is not canonical")
         if mode not in ("normal", "hard"):
             raise SemanticGateClosed("campaign mode is not reviewed")
@@ -1172,13 +1587,15 @@ class AlasSemanticAdapter:
                 self._commission_context,
                 self._research_context,
                 self._dorm_context,
+                self._supply_pack_context,
+                self._minigame_context,
                 self._build_context,
                 self._campaign_context,
             )
         ):
             raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
         self._campaign_context = _CampaignFlowContext(
-            stage_code=stage_code,
+            stage_code=stage_code.lower(),
             mode=mode,
             passive_transition_until=time.monotonic() + 20.0,
         )
@@ -1218,7 +1635,10 @@ class AlasSemanticAdapter:
 
     def _campaign_fleet_row(self, row_key: str) -> CampaignFleetRowState:
         context = self._require_campaign_context()
-        state = self.oracle.campaign_fleet_selection_state(context.stage_code)
+        state = self.oracle.campaign_fleet_selection_state(
+            context.stage_code,
+            fallback_oil_cost=context.map_preparation_oil_cost,
+        )
         matches = tuple(row for row in state.rows if row.row_key == row_key)
         if len(matches) != 1:
             raise SemanticGateClosed("campaign fleet row is absent or ambiguous")
@@ -1239,7 +1659,10 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign fleet configuration is outside 1 through 6")
         if context.initial_fleet_state is not None:
             raise SemanticGateClosed("campaign fleet preparation was already authorized")
-        initial = self.oracle.campaign_fleet_selection_state(context.stage_code)
+        initial = self.oracle.campaign_fleet_selection_state(
+            context.stage_code,
+            fallback_oil_cost=context.map_preparation_oil_cost,
+        )
         context.initial_fleet_state = initial
         context.requested_fleets = (fleet1, fleet2, submarine)
         if not self._action_ledger.allowed("campaign.fleet_mutation"):
@@ -1346,7 +1769,10 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign fleet preparation was not authorized")
         if context.fleet_dropdown_row is not None:
             raise SemanticGateClosed("campaign fleet dropdown remains open")
-        prepared = self.oracle.campaign_fleet_selection_state(context.stage_code)
+        prepared = self.oracle.campaign_fleet_selection_state(
+            context.stage_code,
+            fallback_oil_cost=context.map_preparation_oil_cost,
+        )
         if self._campaign_fleet_tuple(prepared) != context.requested_fleets:
             raise SemanticGateClosed("campaign fleet selection did not match the request")
         if len(context.fleet_mutation_receipts) != context.required_fleet_mutations:
@@ -1592,6 +2018,13 @@ class AlasSemanticAdapter:
             )
         return self._commission_context
 
+    def _require_minigame_context(self) -> _MinigameFlowContext:
+        if self._minigame_context is None:
+            raise SemanticGateClosed(
+                "minigame resource used outside ALAS minigame flow"
+            )
+        return self._minigame_context
+
     def _require_campaign_context(self) -> _CampaignFlowContext:
         if self._campaign_context is None:
             raise SemanticGateClosed(
@@ -1611,6 +2044,7 @@ class AlasSemanticAdapter:
                 "reward/award-info1/close",
                 "overlay/bulletin/close",
                 "overlay/guild-message/close",
+                "event-list/page/back",
             )
         )
 
@@ -1737,6 +2171,15 @@ class AlasSemanticAdapter:
             for semantic_id in (
                 "reward/page/back",
                 "main/build",
+            )
+        ):
+            return True
+        return self._current_build_surface_exists()
+
+    def _current_build_surface_exists(self) -> bool:
+        if any(
+            self.oracle.exists(semantic_id)
+            for semantic_id in (
                 "build/page/start",
                 "build/page/back",
                 "build/prep/confirm",
@@ -1748,6 +2191,34 @@ class AlasSemanticAdapter:
         except SemanticGateClosed:
             return False
         return True
+
+    def _known_minigame_surface_exists(self) -> bool:
+        if self._minigame_context is None:
+            return False
+        try:
+            return bool(
+                self.oracle.game_room_page_visible()
+                or self.oracle.academy_page_visible()
+                or self.oracle.exists("dorm-menu/page/root")
+                or self.oracle.minigame_ticket_prompt_visible()
+                or self.oracle.new_year_challenge_help_visible()
+                or self.oracle.new_year_challenge_result() is not None
+                or self._new_year_challenge_surface_visible()
+            )
+        except SemanticGateClosed:
+            return False
+
+    def _new_year_challenge_surface_visible(self) -> bool:
+        try:
+            self.oracle.new_year_challenge_ticket_count()
+            return True
+        except SemanticGateClosed:
+            pass
+        try:
+            self.oracle.new_year_challenge_attack_state()
+            return True
+        except SemanticGateClosed:
+            return False
 
     def _known_campaign_surface_exists(self) -> bool:
         if self._campaign_context is not None:
@@ -1766,8 +2237,112 @@ class AlasSemanticAdapter:
             return False
         return True
 
+    def campaign_story_black(self) -> bool:
+        """Reject the pixel-only black-story heuristic on proven campaign UI."""
+
+        self._package_gate()
+        if self._campaign_context is None:
+            if (
+                self.oracle.daily_page_visible()
+                or self.oracle.daily_precombat_visible()
+                or self.oracle.daily_combat_visible()
+                or self.oracle.daily_battle_result_visible()
+            ):
+                return False
+            if any(
+                context is not None
+                for context in (
+                    self._mission_context,
+                    self._mail_context,
+                    self._commission_context,
+                    self._research_context,
+                    self._dorm_context,
+                    self._minigame_context,
+                    self._build_context,
+                )
+            ):
+                return False
+            for opsi_reader in (
+                self.oracle.operation_siren_state,
+                self.oracle.operation_siren_globe_state,
+            ):
+                try:
+                    opsi_reader()
+                except SemanticGateClosed:
+                    continue
+                return False
+            # InfoHandler runs this heuristic on every UI transition.  A
+            # proven non-campaign surface cannot be a campaign story frame.
+            if any(
+                checker()
+                for checker in (
+                    self._known_mission_surface_exists,
+                    self._known_mail_surface_exists,
+                    self._known_commission_surface_exists,
+                    self._known_research_surface_exists,
+                    self._known_dorm_surface_exists,
+                    self._known_minigame_surface_exists,
+                    self._known_build_surface_exists,
+                )
+            ):
+                return False
+            raise AlasSemanticUnmapped(
+                "campaign story surface is not semantically mapped"
+            )
+        if self._known_campaign_surface_exists():
+            return False
+        raise AlasSemanticUnmapped(
+            "campaign story surface is not semantically mapped"
+        )
+
+    def daily_current_active(self) -> bool:
+        self._package_gate()
+        return self.oracle.daily_current_active()
+
+    def daily_current_remain(self) -> int:
+        self._package_gate()
+        return self.oracle.daily_current_remain()
+
+    def daily_detail_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.daily_detail_visible()
+
+    def daily_precombat_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.daily_precombat_visible()
+
+    def server_maintenance_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.server_maintenance_visible()
+
+    def login_update_in_progress(self) -> bool:
+        self._package_gate()
+        return self.oracle.login_update_in_progress()
+
+    def login_update_restart_required(self) -> bool:
+        self._package_gate()
+        return self.oracle.login_update_restart_required()
+
+    def login_update_restart_prompt_available(self) -> bool:
+        self._package_gate()
+        return self.oracle.login_update_restart_prompt_available()
+
+    def click_login_update_restart_prompt(self) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_login_update_restart_prompt()
+
+    def click_daily_back(self) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_daily_control("daily/page/back")
+
+    def click_daily_precombat_back(self) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_daily_precombat_back()
+
     def _active_flow_allows_passive_probe(self) -> bool:
         now = time.monotonic()
+        if self.oracle.exists("os/voucher/back"):
+            return True
         if self._login_flow.allows_passive_probe():
             return True
         if (
@@ -1778,7 +2353,13 @@ class AlasSemanticAdapter:
             )
         ):
             return True
-        if self._mail_context is not None and self._known_mail_surface_exists():
+        if (
+            self._mail_context is not None
+            and (
+                now <= self._mail_context.passive_transition_until
+                or self._known_mail_surface_exists()
+            )
+        ):
             return True
         if (
             self._commission_context is not None
@@ -1813,6 +2394,14 @@ class AlasSemanticAdapter:
         ):
             return True
         if (
+            self._minigame_context is not None
+            and (
+                now <= self._minigame_context.passive_transition_until
+                or self._known_minigame_surface_exists()
+            )
+        ):
+            return True
+        if (
             self._campaign_context is not None
             and (
                 now <= self._campaign_context.passive_transition_until
@@ -1821,6 +2410,12 @@ class AlasSemanticAdapter:
         ):
             return True
         return False
+
+    def _shipyard_page_visible(self) -> bool:
+        """Read the optional shipyard probe without breaking narrow test ports."""
+
+        probe = getattr(self.oracle, "shipyard_page_visible", None)
+        return bool(probe()) if callable(probe) else False
 
     def _stable_mission_state(self) -> Optional[MissionPageState]:
         context = self._require_mission_context()
@@ -1869,9 +2464,39 @@ class AlasSemanticAdapter:
 
     def _goto_main_target(self) -> Optional[str]:
         targets = []
+        try:
+            self.oracle.operation_siren_state()
+        except SemanticGateClosed:
+            pass
+        else:
+            targets.append("os/page/back")
+        if self.oracle.exists("event-list/page/back") and self.oracle.enabled(
+            "event-list/page/back"
+        ):
+            # ActivityMainUI can open asynchronously at the server-day
+            # rollover. Its exact back control is the reviewed recovery path.
+            targets.append("event-list/page/back")
+        if self.oracle.game_room_page_visible():
+            # GAME_ROOM_GOTO_MAIN is the reviewed top-right home control.  It
+            # is a delegated Unity raycast target, so page recovery must use
+            # the typed room identity rather than enabled(), which correctly
+            # remains false for the raw target.
+            targets.append("game-room/home")
         if self.oracle.campaign_menu_is_entry() and self.oracle.enabled(
             "campaign-menu/page/back"
         ):
+            targets.append("campaign-menu/page/back")
+        if self.oracle.event_campaign_page_visible() and self.oracle.enabled(
+            "campaign-menu/page/back"
+        ):
+            # LevelSelectSPFullUI is nested under LevelMainScene and reuses
+            # the exact top-chapter back control to return to main.
+            targets.append("campaign-menu/page/back")
+        try:
+            self.oracle.campaign_page_state()
+        except SemanticGateClosed:
+            pass
+        else:
             targets.append("campaign-menu/page/back")
         try:
             self.oracle.build_queue_timers()
@@ -1885,6 +2510,7 @@ class AlasSemanticAdapter:
             ("build/page/start", "build/page/back"),
             ("research-menu/page/back", "research-menu/page/back"),
             ("research/page/back", "research/page/back"),
+            ("shipyard/page/root", "shipyard/page/back"),
         ):
             if self.oracle.exists(identity) and self.oracle.enabled(target):
                 targets.append(target)
@@ -1970,6 +2596,17 @@ class AlasSemanticAdapter:
             try:
                 return self.oracle.campaign_stage_actionable(campaign_stage_code)
             except SemanticGateClosed:
+                # NetworkDown can mount after enter_map() checked popups but
+                # before this later stage-presence probe.  Treat that exact,
+                # topmost reconnect prompt as a transient non-match; the next
+                # ALAS loop iteration handles and confirms it before retrying
+                # the stage.  Other identity failures remain fail-closed.
+                if self.oracle.enabled("overlay/network-reconnect/confirm"):
+                    return False
+                if self.oracle.campaign_preparation_state(
+                    campaign_stage_code
+                ) is not None:
+                    return False
                 if (
                     context.entry_receipt is not None
                     and time.monotonic() <= context.passive_transition_until
@@ -1977,6 +2614,149 @@ class AlasSemanticAdapter:
                     return False
                 raise
         semantic_id = self._mappings.get(name)
+        if (
+            self._campaign_context is not None
+            and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+        ):
+            reconnect_target = (
+                "overlay/network-reconnect/confirm"
+                if name == "POPUP_CONFIRM"
+                else "overlay/network-reconnect/cancel"
+            )
+            if self.oracle.enabled(reconnect_target):
+                return True
+        if name == "EVENT_CHECK" and self._campaign_context is not None:
+            try:
+                if self.oracle.campaign_preparation_state(
+                    self._campaign_context.stage_code
+                ) is not None:
+                    return True
+            except (SemanticGateClosed, SemanticTargetMissing):
+                pass
+        if semantic_id == "os/page/back":
+            # Unity may retain the old LevelOrigin hierarchy briefly after
+            # leaving Operation Siren.  A proven main page wins over that
+            # stale back button so ALAS does not click it repeatedly.
+            if self.oracle.main_page_visible():
+                return False
+            try:
+                self.oracle.operation_siren_state()
+                return True
+            except SemanticGateClosed:
+                return False
+        if semantic_id == "os/map/globe":
+            try:
+                self.oracle.operation_siren_state()
+                return self.oracle.exists("os/map/globe")
+            except SemanticGateClosed:
+                return False
+        if semantic_id in (
+            "os/port/supply",
+            "os/port/back",
+            "os/shop/back",
+            "os/voucher/back",
+        ):
+            return self.oracle.exists(semantic_id)
+        if semantic_id == "os/globe/map":
+            return self.oracle.operation_siren_globe_visible()
+        if semantic_id == "os/globe/voucher":
+            try:
+                self.oracle.operation_siren_globe_state()
+                return self.oracle.exists("os/globe/voucher")
+            except SemanticGateClosed:
+                return False
+        if semantic_id == "os/globe/mission-overview":
+            try:
+                self.oracle.operation_siren_globe_state()
+                return self.oracle.exists("os/globe/mission-overview")
+            except SemanticGateClosed:
+                return False
+        if semantic_id == "os/mission-overview/back":
+            return self.oracle.operation_siren_mission_overview_visible()
+        if name == "MISSION_OVERVIEW_EMPTY":
+            return self.oracle.operation_siren_mission_overview_empty()
+        if name == "MISSION_OVERVIEW_ACCEPT_SINGLE":
+            return self.oracle.operation_siren_mission_overview_accept_available()
+        if name == "MISSION_OVERVIEW_ACCEPT":
+            # The current client exposes exact per-row accept Buttons.  Do not
+            # guess that the unrelated title option is the legacy claim-all
+            # pixel asset; the row path below remains the reviewed action.
+            return False
+        if semantic_id == "os/globe/zone-enter":
+            try:
+                self.oracle.operation_siren_globe_state()
+                return self.oracle.exists("os/globe/zone-enter")
+            except SemanticGateClosed:
+                return False
+        if semantic_id == "os/map/order":
+            try:
+                self.oracle.operation_siren_state()
+                return self.oracle.exists("os/map/order")
+            except SemanticGateClosed:
+                return False
+        if semantic_id == "os/map/mission-list":
+            try:
+                self.oracle.operation_siren_state()
+                return self.oracle.exists("os/map/mission-list")
+            except SemanticGateClosed:
+                return False
+        if semantic_id == "os/mission-list/close":
+            return self.oracle.operation_siren_mission_list_visible()
+        if semantic_id == "os/storage/back":
+            return self.oracle.operation_siren_storage_visible()
+        if semantic_id == "os/storage/detail/checkout":
+            return self.oracle.operation_siren_storage_detail() is not None
+        if name == "MISSION_CHECK":
+            if self.oracle.operation_siren_mission_list_visible():
+                return True
+        if name == "OS_MONTHBOSS_NORMAL":
+            return self.oracle.operation_siren_month_boss_difficulty() == "normal"
+        if name == "OS_MONTHBOSS_HARD":
+            return self.oracle.operation_siren_month_boss_difficulty() == "hard"
+        if name == "MISSION_FINISH":
+            try:
+                return self.oracle.operation_siren_mission_finish_available()
+            except SemanticTargetMissing:
+                return False
+        if name == "MISSION_CHECKOUT":
+            try:
+                return self.oracle.operation_siren_mission_checkout_available()
+            except SemanticTargetMissing:
+                return False
+        if semantic_id == "campaign-menu/os":
+            return self.oracle.campaign_os_entrance_available()
+        if semantic_id == "campaign-menu/event":
+            if not self.oracle.campaign_menu_is_entry():
+                return False
+            return self.oracle.enabled("campaign-menu/event")
+        if semantic_id == "event/mode/story":
+            if name == "EVENT_CHECK":
+                return self.oracle.event_campaign_page_visible()
+            return self.oracle.exists("event/mode/battle")
+        if semantic_id == "event/mode/battle":
+            return self.oracle.exists("event/mode/story")
+        if semantic_id == "reward/meta/enter":
+            return self.oracle.meta_entrance_available()
+        if semantic_id == "meta/page/back":
+            try:
+                self.oracle.meta_entrance_state()
+                return True
+            except SemanticGateClosed:
+                return False
+        if semantic_id in ("meta/current/open", "meta/dossier/open"):
+            try:
+                self.oracle.meta_entrance_state()
+                return True
+            except SemanticGateClosed:
+                return False
+        if semantic_id == "meta/current/list":
+            return self.oracle.enabled("meta/current/list")
+        if semantic_id == "meta/assist/start":
+            try:
+                self.oracle.meta_assist_state()
+                return True
+            except SemanticGateClosed:
+                return False
         if name == "LOGIN_CHECK" or (
             self._login_flow.active and name in LOGIN_OBSERVATION_TARGETS
         ):
@@ -1995,6 +2775,220 @@ class AlasSemanticAdapter:
                 raise AlasSemanticUnmapped(
                     "ALAS resource is not semantically mapped: {0}".format(name)
                 ) from exc
+        if self._mail_context is not None:
+            context = self._mail_context
+            if time.monotonic() <= context.leaving_page_until:
+                if name in (
+                    "MAIN_GOTO_CAMPAIGN",
+                    "MAIN_GOTO_CAMPAIGN_WHITE",
+                ):
+                    return self.oracle.main_page_visible()
+                return False
+            if not context.initial_surface_probed:
+                context.surface_kind = self.oracle.mail_surface_kind()
+                context.initial_surface_probed = True
+                if context.surface_kind in ("manager", "page", "confirmation"):
+                    context.recovered_existing_page = True
+            surface = context.surface_kind
+            if surface == "blocked":
+                if name == "POPUP_CONFIRM":
+                    return self.oracle.enabled("overlay/network-reconnect/confirm")
+                if name == "POPUP_CANCEL":
+                    return self.oracle.enabled("overlay/network-reconnect/cancel")
+                return False
+            if surface in ("manager", "page"):
+                if name == "MAIL_CHECK":
+                    return True
+                if name == "MAIL_MANAGE":
+                    return surface == "manager"
+                if name == "GOTO_MAIN_WHITE":
+                    return True
+                if name in (
+                    "MAIN_GOTO_CAMPAIGN",
+                    "MAIN_GOTO_CAMPAIGN_WHITE",
+                ):
+                    return False
+                if name not in (
+                    "POPUP_CONFIRM",
+                    "POPUP_CANCEL",
+                    "POPUP_CONFIRM_UI_ADDITIONAL",
+                    "POPUP_CONFIRM_MAIL_CLAIM",
+                    "POPUP_CONFIRM_MAIL_QUIT",
+                    *MAIL_VIRTUAL_RESOURCES,
+                ):
+                    return False
+        if self._supply_pack_context is not None:
+            context = self._supply_pack_context
+            if name == "SHOP_CHECK":
+                visible = self.oracle.recommendation_shop_visible()
+                if visible and context.cached_oil is None:
+                    context.cached_oil = self.oracle.shop_oil()
+                return visible
+            if name == "SUPPLY_PACK_CHECK":
+                visible = self.oracle.gift_pack_page_visible()
+                context.gift_pack_selected = visible
+                return visible
+            if name == "SHOP_GOTO_SUPPLY_PACK":
+                return bool(
+                    self.oracle.recommendation_shop_visible()
+                    and not self.oracle.gift_pack_page_visible()
+                )
+            if name == "FREE_SUPPLY_PACK":
+                return self.oracle.free_weekly_supply_pack_available()
+            if name == "SHOP_OCR_OIL_CHECK":
+                if context.cached_oil is None:
+                    context.cached_oil = self.oracle.shop_oil()
+                return True
+            if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
+                return self._award_close_target() is not None
+            if name in ("BUY_CONFIRM", "POPUP_CONFIRM", "POPUP_CANCEL"):
+                return False
+            if semantic_id is None:
+                return False
+        if (
+            name not in ("LOGIN_ANNOUNCE", "LOGIN_ANNOUNCE_2")
+            and self.oracle.enabled("overlay/bulletin/close")
+        ):
+            # A bulletin may be mounted after a task has already established
+            # its flow context (for example immediately after a cold login).
+            # Page enumeration must see every underlying page probe as false
+            # until ui_additional() reaches the exact close target.
+            return False
+        if (
+            not self._login_flow.active
+            and self._mission_context is None
+            and self._mail_context is None
+            and self._commission_context is None
+            and self._research_context is None
+            and self._dorm_context is None
+            and self._build_context is None
+            and self._campaign_context is None
+            and name not in ("LOGIN_ANNOUNCE", "LOGIN_ANNOUNCE_2")
+            and (
+                self.oracle.enabled("login/enter")
+                or self.oracle.enabled("overlay/bulletin/close")
+            )
+        ):
+            # Page enumeration precedes ui_additional(); every page identity,
+            # including virtual identities, is false on the exact login or
+            # bulletin overlay so ALAS reaches its own additional handlers.
+            return False
+        event_campaign_selector_visible = self.oracle.event_campaign_page_visible()
+        if event_campaign_selector_visible and self._campaign_context is not None:
+            try:
+                event_campaign_selector_visible = (
+                    self.oracle.campaign_preparation_state(
+                        self._campaign_context.stage_code
+                    )
+                    is None
+                )
+            except (SemanticGateClosed, SemanticTargetMissing):
+                pass
+        if event_campaign_selector_visible:
+            # The event battle/story selector keeps the generic campaign root
+            # mounted.  During Page.iter_pages, only EVENT_CHECK is a valid
+            # identity; unrelated page probes (including CAMPAIGN_CHECK) are
+            # known absent on this exact surface.
+            if name == "EVENT_CHECK":
+                return True
+            if name == "SWITCH_20241219_COMBAT":
+                return self.oracle.exists("event/mode/story")
+            if name == "SWITCH_20241219_STORY":
+                return self.oracle.exists("event/mode/battle")
+            if name in EVENT_CAMPAIGN_ASIDE_RESOURCES:
+                return self.oracle.event_campaign_aside_selected(
+                    EVENT_CAMPAIGN_ASIDE_RESOURCES[name]
+                )
+            if name not in (
+                "SWITCH_20241219_COMBAT",
+                "SWITCH_20241219_STORY",
+                *EVENT_CAMPAIGN_ASIDE_RESOURCES.keys(),
+            ):
+                return False
+        if (
+            (self._minigame_context is not None or self._dorm_context is not None)
+            and self.oracle.exists("dorm-menu/page/root")
+        ):
+            # MainLiveAreaUI is an overlay above the still-mounted main page.
+            # The underlying main/build button is not evidence of BuildShipUI;
+            # during live-area routes the exact overlay owns page discovery.
+            return name == "DORMMENU_CHECK"
+        if (
+            semantic_id is None
+            and name not in ("BUILD_CHECK", "GOTO_MAIN")
+            and name not in BUILD_VIRTUAL_RESOURCES
+            and (
+                (
+                    self._build_context is not None
+                    and self._known_build_surface_exists()
+                )
+                or self._current_build_surface_exists()
+            )
+        ):
+            # Page.check resources include both ordinary assets and virtual
+            # identifiers such as EVENT_LIST_CHECK.  A typed construction
+            # pool/queue proves all of those unrelated probes absent until
+            # enumeration reaches BUILD_CHECK.
+            return False
+        if (
+            semantic_id is None
+            and name not in ("WAR_ARCHIVES_CHECK", "DATA_KEY_COLLECTED", "DATA_KEY_COLLECT")
+            and self.oracle.war_archives_page_visible()
+        ):
+            # The exact archive root proves unrelated generic page probes
+            # absent until Page enumeration reaches WAR_ARCHIVES_CHECK.
+            return False
+        if (
+            self._mail_context is not None
+            and self._mail_context.recovered_existing_page
+            and name
+            not in (
+                "MAIL_CHECK",
+                "MAIL_MANAGE",
+                "MAIN_GOTO_CAMPAIGN",
+                "MAIN_GOTO_CAMPAIGN_WHITE",
+                "POPUP_CONFIRM",
+                "POPUP_CANCEL",
+                "POPUP_CONFIRM_UI_ADDITIONAL",
+                "POPUP_CONFIRM_MAIL_CLAIM",
+                "POPUP_CONFIRM_MAIL_QUIT",
+                *MAIL_VIRTUAL_RESOURCES,
+            )
+        ):
+            # Once an exact MailUI/manager/confirmation surface has been
+            # proven, generic Page.iter_pages() checks are known absences.
+            # Avoid issuing one observer round trip for every unrelated mapped
+            # page before ALAS reaches MAIL_CHECK or the main-page identity.
+            return False
+        if (
+            self._mail_context is not None
+            and semantic_id is None
+            and name not in MAIL_VIRTUAL_RESOURCES
+            and self._known_mail_surface_exists()
+        ):
+            # Mail page/manager identity makes unrelated generic page and
+            # popup probes safely absent during ALAS' enumeration pass.
+            return False
+        if (
+            self._mail_context is not None
+            and semantic_id is None
+            and name not in MAIL_VIRTUAL_RESOURCES
+            and time.monotonic() <= self._mail_context.passive_transition_until
+        ):
+            # During initial page discovery, unknown pixel-only page checks are
+            # passive absences. Mapped exact pages (for example task/page/back)
+            # continue below and may be used by ALAS' normal page graph.
+            return False
+        if (
+            self._minigame_context is not None
+            and semantic_id is None
+            and name not in MINIGAME_VIRTUAL_RESOURCES
+            and time.monotonic() <= self._minigame_context.passive_transition_until
+        ):
+            # The game-room transition mounts several optional pixel-only
+            # surfaces. They are passive absences until an exact typed surface
+            # below proves the next ALAS state.
+            return False
         if (
             semantic_id is None
             and name not in MISSION_VIRTUAL_RESOURCES
@@ -2004,9 +2998,53 @@ class AlasSemanticAdapter:
             and name not in PAGE_VIRTUAL_RESOURCES
             and name not in RESEARCH_VIRTUAL_RESOURCES
             and name not in DORM_VIRTUAL_RESOURCES
+            and name not in MINIGAME_VIRTUAL_RESOURCES
             and name not in BUILD_VIRTUAL_RESOURCES
             and name not in TACTICAL_VIRTUAL_RESOURCES
         ):
+            if (
+                self.oracle.daily_page_visible()
+                or self.oracle.daily_precombat_visible()
+            ):
+                # Generic Page enumeration probes every other page identity
+                # before reaching DAILY_CHECK. The exact DailyLevelUI root is
+                # sufficient to make those presence-only probes false.
+                return False
+            if self.oracle.exercise_page_visible():
+                # Generic page enumeration reaches EXERCISE_CHECK only after
+                # probing unrelated page identities.
+                return False
+            if self._shipyard_page_visible() or self.oracle.exists(
+                "research-menu/page/back"
+            ):
+                # Generic page enumeration reaches SHIPYARD_CHECK only after
+                # probing unrelated page identities. The exact blueprint UI
+                # root plus actionable top back control prove those absent.
+                return False
+            if self.oracle.exists("os/voucher/back"):
+                # WorldShopUI can be the retained surface when a voucher task
+                # is restarted. Generic Page enumeration reaches no legacy
+                # pixel identity for it; the exact typed back control proves
+                # all unrelated page probes absent until EXCHANGE_CHECK is
+                # queried by the Operation Siren handler.
+                return False
+            opsi_known = False
+            for opsi_reader in (
+                self.oracle.operation_siren_state,
+                self.oracle.operation_siren_globe_state,
+            ):
+                try:
+                    opsi_reader()
+                except SemanticGateClosed:
+                    continue
+                opsi_known = True
+                break
+            if opsi_known:
+                # Operation Siren handlers probe many optional tips, rewards,
+                # missions and event overlays on every stable map iteration.
+                # A proven local/globe identity makes those presence-only
+                # probes absent; unknown clicks remain fail-closed.
+                return False
             if (
                 self._mission_context is None
                 and not self._login_flow.active
@@ -2014,6 +3052,7 @@ class AlasSemanticAdapter:
                 and self._commission_context is None
                 and self._research_context is None
                 and self._dorm_context is None
+                and self._minigame_context is None
                 and self._build_context is None
                 and self._campaign_context is None
             ):
@@ -2052,6 +3091,12 @@ class AlasSemanticAdapter:
             ):
                 return False
             if (
+                self._minigame_context is not None
+                and time.monotonic()
+                <= self._minigame_context.passive_transition_until
+            ):
+                return False
+            if (
                 self._build_context is not None
                 and time.monotonic()
                 <= self._build_context.passive_transition_until
@@ -2082,6 +3127,9 @@ class AlasSemanticAdapter:
                 self._dorm_context is not None
                 and self._known_dorm_surface_exists()
             ) or (
+                self._minigame_context is not None
+                and self._known_minigame_surface_exists()
+            ) or (
                 self._build_context is not None
                 and self._known_build_surface_exists()
             ) or (
@@ -2096,6 +3144,17 @@ class AlasSemanticAdapter:
                 "ALAS resource is not semantically mapped: {0}".format(name)
             )
         self._package_gate()
+        if (
+            self._campaign_context is not None
+            and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+        ):
+            reconnect_target = (
+                "overlay/network-reconnect/confirm"
+                if name == "POPUP_CONFIRM"
+                else "overlay/network-reconnect/cancel"
+            )
+            if self.oracle.enabled(reconnect_target):
+                return True
         if self._mission_context is not None:
             if (
                 semantic_id == "main/more"
@@ -2104,7 +3163,59 @@ class AlasSemanticAdapter:
                 return False
             if semantic_id == "main/task" and self._mission_context.entry_clicked:
                 return False
+        if name in ("POPUP_CONFIRM", "POPUP_CANCEL"):
+            if self.oracle.operation_siren_exit_prompt_visible():
+                return True
+            if self.oracle.meta_assist_sortie_prompt_visible():
+                return True
         if name in PAGE_VIRTUAL_RESOURCES:
+            if name == "WAR_ARCHIVES_CHECK":
+                return self.oracle.war_archives_page_visible()
+            if name == "DATA_KEY_COLLECTED":
+                return self.oracle.war_archives_data_key_collected()
+            if name == "DATA_KEY_COLLECT":
+                return not self.oracle.war_archives_data_key_collected()
+            if name == "EXERCISE_CHECK":
+                if self.oracle.exercise_page_visible():
+                    return True
+                if self._active_flow_allows_passive_probe():
+                    return False
+                raise AlasSemanticUnmapped(
+                    "ALAS resource is not semantically mapped: EXERCISE_CHECK"
+                )
+        if name in PAGE_VIRTUAL_RESOURCES:
+            if name == "ACADEMY_CHECK":
+                return self.oracle.academy_page_visible()
+            if name == "MUNITIONS_CHECK":
+                return self.oracle.munitions_page_visible()
+            if name == "NAV_GENERAL":
+                return self.oracle.shop_general_nav_selected()
+            if name == "NAV_MONTHLY":
+                return self.oracle.shop_selected_nav_label() == "月度商店"
+            if name == "TAB_GENERAL":
+                return self.oracle.shop_general_tab_selected()
+            shop_tab_labels = {
+                "TAB_MERIT": "军需",
+                "TAB_GUILD": "舰队",
+                "TAB_META": "META",
+                "TAB_PRIZE": "奖券",
+                "TAB_CORE_LIMITED": "核心限定",
+                "TAB_CORE_MONTHLY": "核心月度",
+                "TAB_MEDAL": "勋章",
+                "TAB_PROTOTYPE": "原型",
+            }
+            if name in shop_tab_labels:
+                return self.oracle.shop_selected_tab_label() == shop_tab_labels[name]
+            if name == "DAILY_CHECK":
+                return self.oracle.daily_page_visible()
+            if name in ("BATTLE_PREPARATION", "BATTLE_PREPARATION_WITH_OVERLAY"):
+                return self.oracle.daily_precombat_visible()
+            if name == "DAILY_ENTER":
+                return self.oracle.daily_current_active()
+            if name == "DAILY_ENTER_CHECK":
+                return self.oracle.daily_detail_visible()
+            if name.startswith("DAILY_MISSION_"):
+                return self.oracle.daily_stage_available(int(name.rsplit("_", 1)[1]))
             if (
                 name == "DORM_CHECK"
                 and self._dorm_context is not None
@@ -2122,15 +3233,51 @@ class AlasSemanticAdapter:
                     return len(self.oracle.research_projects()) == 5
                 except SemanticGateClosed:
                     return False
+            if name == "SHIPYARD_CHECK":
+                return self._shipyard_page_visible()
+            if name == "BUILD_CHECK":
+                if self.oracle.exists("build/page/start"):
+                    return True
+                try:
+                    self.oracle.build_queue_timers()
+                except SemanticGateClosed:
+                    return False
+                return True
             target = {
-                "BUILD_CHECK": "build/page/start",
                 "DORMMENU_CHECK": "dorm-menu/page/root",
                 "DORM_CHECK": "dorm/page/manage",
                 "RESHMENU_CHECK": "research-menu/page/back",
                 "RESEARCH_CHECK": "research/page/back",
+                "SHIPYARD_CHECK": "shipyard/page/root",
                 "TACTICAL_CHECK": "tactical/page/back",
             }[name]
             return self.oracle.exists(target)
+        if self._campaign_context is not None and name in (
+            "FLEET_NUM_1",
+            "FLEET_NUM_2",
+        ):
+            expected = 1 if name == "FLEET_NUM_1" else 2
+            return self.oracle.campaign_map_displayed_fleet_index() == expected
+        if self._campaign_context is not None and name == "STRATEGY_OPENED":
+            return self.oracle.campaign_strategy_panel_visible()
+        if (
+            self._campaign_context is not None
+            and name in CAMPAIGN_STRATEGY_FORMATION_RESOURCES
+        ):
+            if not self.oracle.campaign_strategy_panel_visible():
+                return False
+            return self.oracle.campaign_strategy_formation() == (
+                CAMPAIGN_STRATEGY_FORMATION_RESOURCES[name]
+            )
+        if self._campaign_context is not None and name == "SWITCH_OVER":
+            context = self._require_campaign_context()
+            admission = context.combat_admission
+            if admission is None:
+                return False
+            state = self._refresh_campaign_map_state()
+            if state.displayed_fleet_index == admission.fleet_index:
+                return False
+            return self.oracle.campaign_map_fleet_switch_available()
         if (
             self._campaign_context is not None
             and name in CAMPAIGN_FLEET_ROW_RESOURCES
@@ -2311,6 +3458,99 @@ class AlasSemanticAdapter:
                 )
             if name == "POPUP_CANCEL":
                 return self.oracle.enabled("dorm/feed/shop/cancel")
+        if (
+            self._dorm_context is not None
+            and name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3")
+        ):
+            # Dorm navigation and quick collect share ALAS' generic reward
+            # probes. Only an exact AwardInfo close control counts here.
+            return self._award_close_target() is not None
+        if name in MINIGAME_VIRTUAL_RESOURCES and self._minigame_context is not None:
+            if name == "GAME_ROOM_CHECK":
+                return self.oracle.game_room_page_visible()
+            if name == "GOTO_CHOOSE_GAME":
+                return self.oracle.game_room_page_visible() and not self.oracle.game_room_list_visible()
+            if name == "MINIGAME_SCROLL_AREA":
+                return self.oracle.game_room_list_visible()
+            if name == "NEW_YEAR_CHALLENGE_ENTRANCE":
+                try:
+                    ui_state = self.oracle.read_ui_state()
+                except SemanticGateClosed:
+                    return False
+                return any(
+                    image.active_in_hierarchy
+                    and image.bounds is not None
+                    and image.sprite == "fushun2"
+                    and image.bounds.bottom > 0
+                    and image.bounds.top < 720
+                  for image in ui_state.images
+                )
+            if name == "NEW_YEAR_CHALLENGE_FIRST_TIME":
+                # The reviewed current surface is the normal Fushun prepare
+                # page (help/start pair), not the one-time tutorial overlay.
+                return False
+            if name in (
+                "NEW_YEAR_CHALLENGE_ADD_COIN",
+                "NEW_YEAR_CHALLENGE_DEC_COIN",
+            ):
+                try:
+                    selected, owned = self.oracle.new_year_challenge_ticket_count()
+                except SemanticGateClosed:
+                    return False
+                if name == "NEW_YEAR_CHALLENGE_ADD_COIN":
+                    return selected < owned and (
+                        self._minigame_context.play_receipt is not None
+                        or self._action_ledger.allowed("minigame.play")
+                    )
+                return selected > 0
+            if name == "NEW_YEAR_CHALLENGE_START":
+                try:
+                    state = self.oracle.read_state()
+                except SemanticGateClosed:
+                    return False
+                starts = tuple(
+                    button
+                    for button in state.buttons
+                    if button.name == "btn_start"
+                    and button.path.endswith(
+                        "GameRoomFushun2UI(Clone)/btn_start"
+                    )
+                    and button.active_in_hierarchy
+                    and button.active_and_enabled
+                    and button.interactable
+                    and button.bounds is not None
+                )
+                helps = tuple(
+                    button
+                    for button in state.buttons
+                    if button.name == "btn_help"
+                    and button.path.endswith(
+                        "GameRoomFushun2UI(Clone)/btn_help"
+                    )
+                    and button.active_in_hierarchy
+                    and button.active_and_enabled
+                    and button.bounds is not None
+                )
+                return len(starts) == 1 and len(helps) == 1
+            if name == "NEW_YEAR_CHALLENGE_END":
+                try:
+                    return self.oracle.new_year_challenge_result() is not None
+                except SemanticGateClosed:
+                    return False
+            if name == "NEW_YEAR_CHALLENGE_EXIT":
+                return False
+            if name == "BACK":
+                if self.oracle.new_year_challenge_result() is not None:
+                    return False
+                try:
+                    self.oracle.new_year_challenge_ticket_count()
+                    return True
+                except SemanticGateClosed:
+                    return self.oracle.game_room_page_visible()
+            if name == "COIN_POPUP":
+                return False
+            if name in ("POPUP_CANCEL", "POPUP_CONFIRM"):
+                return self.oracle.minigame_ticket_prompt_visible()
         if name in BUILD_VIRTUAL_RESOURCES and self._build_context is not None:
             if name == "BUILD_SUBMIT_ORDERS":
                 return self.oracle.enabled("build/page/start")
@@ -2336,6 +3576,12 @@ class AlasSemanticAdapter:
             if name in ("POPUP_CONFIRM", "POPUP_CONFIRM_GACHA_PREP"):
                 if self.oracle.enabled("build/warning/confirm"):
                     return not self._build_context.warning_confirmed
+                if name == "POPUP_CONFIRM":
+                    return bool(
+                        self._build_context.prep_validated
+                        and self.oracle.enabled("build/prep/confirm")
+                        and self._build_context.submit_receipt is None
+                    )
                 return False
             if name == "POPUP_CONFIRM_GACHA_ORDER":
                 return bool(
@@ -2388,13 +3634,17 @@ class AlasSemanticAdapter:
                     and self.oracle.enabled("tactical/course/confirm")
                 )
         if semantic_id is None and name == "CAMPAIGN_MENU_CHECK":
-            if self.oracle.campaign_menu_is_entry():
-                return True
-            # MAIN_GOTO_CAMPAIGN resumes an unfinished sortie directly into
-            # LevelGrid.  Treat that exact map root as completion of the UI
-            # graph's campaign-menu hop; CampaignRun immediately performs its
-            # own IN_MAP branch and retains state-machine ownership.
-            return self.oracle.campaign_is_in_map()
+            return self.oracle.campaign_menu_is_entry()
+        if semantic_id is None and name == "ACADEMY_CHECK":
+            return self.oracle.academy_page_visible()
+        if semantic_id is None and name == "MUNITIONS_CHECK":
+            return self.oracle.munitions_page_visible()
+        if semantic_id is None and name == "NAV_GENERAL":
+            return self.oracle.shop_general_nav_selected()
+        if semantic_id is None and name == "TAB_GENERAL":
+            return self.oracle.shop_general_tab_selected()
+        if semantic_id is None and name == "CAMPAIGN_MENU_NO_EVENT":
+            return not self.oracle.campaign_event_entrance_available()
         if semantic_id is None and name == "CAMPAIGN_CHECK":
             if self._campaign_context is not None:
                 if self._campaign_preparation_kind() is not None:
@@ -2416,7 +3666,14 @@ class AlasSemanticAdapter:
                         return False
                     raise
             return self.oracle.campaign_page_is_normal()
+        if semantic_id is None and name in (
+            "BATTLE_PREPARATION",
+            "BATTLE_PREPARATION_WITH_OVERLAY",
+        ):
+            return self.oracle.daily_precombat_visible()
         if semantic_id is None and name == "IN_MAP":
+            if self.oracle.daily_precombat_visible():
+                return False
             if self._campaign_context is not None:
                 if self._campaign_context.sortie_receipt is not None:
                     try:
@@ -2438,10 +3695,152 @@ class AlasSemanticAdapter:
                     return False
             return self.oracle.campaign_is_in_map()
         if semantic_id is None and name == "GOTO_MAIN":
+            if self._mail_context is not None and self.oracle.enabled("mail/manage/back"):
+                return True
             return self._goto_main_target() is not None
         if self._mail_context is not None and name == "MAIL_MANAGE":
-            return self.oracle.enabled("mail/manage")
+            return bool(
+                self.oracle.enabled("mail/manage")
+                or self.oracle.enabled("mail/manage/back")
+            )
+        if self._mail_context is not None and name in ("POPUP_CONFIRM", "POPUP_CANCEL"):
+            kind = self.oracle.mail_confirmation_kind()
+            if (
+                kind is not None
+                and self._mail_context.pending_confirmation is None
+            ):
+                self._mail_context.recovered_existing_page = True
+                if kind == "empty":
+                    self._mail_context.pending_confirmation = kind
+                    self._mail_context.recovered_confirmation = False
+                elif self._action_ledger.allowed("mail.mutation"):
+                    self._mail_context.pending_confirmation = kind
+                    self._mail_context.recovered_confirmation = True
+            matched = bool(
+                kind is not None
+                and (
+                    kind == self._mail_context.pending_confirmation
+                    or (
+                        kind == "empty"
+                        and self._mail_context.pending_confirmation in ("claim", "delete")
+                    )
+                )
+            )
+            return matched
+        if self._mail_context is not None and name == "MAIL_CHECK":
+            # MailMgrMsgboxUI overlays, but does not replace, the MailUI page.
+            # Preserve ALAS' page identity only while the exact manager back
+            # control proves that this is the owned mail overlay.
+            if self.oracle.enabled("mail/manage/back"):
+                self._mail_context.recovered_existing_page = True
+                return self.oracle.exists("mail/page/back")
+            if self.oracle.enabled("mail/page/back"):
+                # An interrupted prior invocation may leave the exact MailUI
+                # page itself foregrounded with no manager overlay.
+                self._mail_context.recovered_existing_page = True
+                return True
+        if (
+            self._mail_context is not None
+            and name in ("MAIN_GOTO_CAMPAIGN", "MAIN_GOTO_CAMPAIGN_WHITE")
+        ):
+            # ALAS uses the battle entrance as the new-main page identity.  On
+            # return from MailUI it can mount one frame before the formation
+            # entrance; only the complete exact main-page pair is a stable
+            # destination for this flow.
+            if self.oracle.enabled("mail/manage/back"):
+                return False
+            if self.oracle.enabled("mail/page/back"):
+                return False
+            return self.oracle.main_page_visible()
+        if self._mail_context is not None and name in MAIL_VIRTUAL_RESOURCES:
+            if name == "GOTO_MAIN_WHITE":
+                return bool(
+                    self.oracle.enabled("mail/manage/back")
+                    or self.oracle.enabled("mail/page/back")
+                )
+            if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
+                return self._award_close_target() is not None
+            if name == "MAIL_BATCH_CLAIM":
+                return self.oracle.enabled("mail/manage/claim")
+            if name == "MAIL_BATCH_DELETE":
+                return self.oracle.enabled("mail/manage/delete")
+            if name == "MAIL_WHITE_EMPTY":
+                return self.oracle.mail_is_empty()
+            return False
+        if (
+            self._mail_context is None
+            and name in MAIL_VIRTUAL_RESOURCES
+            and name not in MISSION_VIRTUAL_RESOURCES
+        ):
+            raise AlasSemanticUnmapped(
+                "ALAS mail resource used outside mail flow: {0}".format(name)
+            )
         if semantic_id is None:
+            if name in ("GUILD_POPUP_CONFIRM", "GUILD_POPUP_CANCEL"):
+                # The guild-message popup is a global overlay.  Operation
+                # Siren's map-event loop probes it while reading any map, so
+                # its exact close target remains observable outside the
+                # main-page mission reward flow as well.
+                if self.oracle.enabled("overlay/guild-message/close"):
+                    return True
+                if not any(
+                    context is not None
+                    for context in (
+                        self._mission_context,
+                        self._mail_context,
+                        self._commission_context,
+                        self._research_context,
+                        self._dorm_context,
+                        self._minigame_context,
+                        self._build_context,
+                        self._campaign_context,
+                    )
+                ):
+                    return False
+            if (
+                self._minigame_context is not None
+                and self._known_minigame_surface_exists()
+                and name not in MINIGAME_VIRTUAL_RESOURCES
+            ):
+                # Generic popup/page handlers probe mission rewards and many
+                # unrelated assets while the exact game-room/Fushun surface is
+                # already known. Presence is safely false; click() remains
+                # fail-closed for all unowned resources.
+                return False
+            if self._shipyard_page_visible() or self.oracle.exists(
+                "research-menu/page/back"
+            ):
+                # The exact shipyard page owns this enumeration pass. All
+                # unrelated virtual page/popup probes are absent until ALAS
+                # reaches SHIPYARD_CHECK above.
+                return False
+            opsi_known = False
+            for opsi_reader in (
+                self.oracle.operation_siren_state,
+                self.oracle.operation_siren_globe_state,
+            ):
+                try:
+                    opsi_reader()
+                except SemanticGateClosed:
+                    continue
+                opsi_known = True
+                break
+            if opsi_known:
+                if name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3"):
+                    return self._award_close_target() is not None
+                return False
+            if (
+                self.oracle.daily_page_visible()
+                or self.oracle.daily_precombat_visible()
+                or self.oracle.daily_combat_visible()
+                or self.oracle.daily_battle_result_visible()
+            ):
+                if name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3"):
+                    return self._award_close_target() is not None
+                # Daily's transition loop probes reward, skip, popup and combat
+                # resources before accepting BATTLE_PREPARATION.  On the exact
+                # DailyLevelUI/PreCombatUI surfaces, unrelated probes are absent.
+                return False
             if (
                 self._commission_context is not None
                 and name in COMMISSION_VIRTUAL_RESOURCES
@@ -2479,18 +3878,6 @@ class AlasSemanticAdapter:
                     return self._award_close_target() is not None
                 if name == "GET_SHIP":
                     return False
-            if self._mail_context is not None and name in MAIL_VIRTUAL_RESOURCES:
-                if name == "GOTO_MAIN_WHITE":
-                    return self.oracle.enabled("mail/page/back")
-                if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
-                    return self._award_close_target() is not None
-                if name == "MAIL_BATCH_CLAIM":
-                    return self.oracle.enabled("mail/manage/claim")
-                if name == "MAIL_BATCH_DELETE":
-                    return self.oracle.enabled("mail/manage/delete")
-                if name == "MAIL_WHITE_EMPTY":
-                    return self.oracle.mail_is_empty()
-                return False
             if (
                 self._mission_context is not None
                 and name in MISSION_VIRTUAL_RESOURCES
@@ -2560,6 +3947,47 @@ class AlasSemanticAdapter:
 
         self._package_gate()
         bounds = self._ocr_bounds(areas)
+        if (
+            len(bounds) == 1
+            and bounds[0] == Bounds(1153.0, 140.0, 1178.0, 165.0)
+            and self.oracle.exercise_page_visible()
+        ):
+            value = str(self.oracle.exercise_remaining())
+            if alphabet is not None and any(
+                character not in alphabet for character in value
+            ):
+                raise SemanticGateClosed(
+                    "typed text violates the ALAS OCR alphabet contract"
+                )
+            return value
+        if len(bounds) == 1 and bounds[0] == Bounds(133.0, 39.0, 250.0, 72.0):
+            value = self.oracle.war_archives_data_key_text()
+            if alphabet is not None and any(character not in alphabet for character in value):
+                raise SemanticGateClosed(
+                    "typed text violates the ALAS OCR alphabet contract"
+                )
+            return value
+        if (
+            self._supply_pack_context is not None
+            and len(bounds) == 1
+            and bounds[0] == Bounds(700.0, 23.0, 785.0, 47.0)
+        ):
+            context = self._supply_pack_context
+            if context.cached_oil is None:
+                context.cached_oil = self.oracle.shop_oil()
+            return str(context.cached_oil)
+        if (
+            self._minigame_context is not None
+            and len(bounds) == 1
+            and bounds[0] == Bounds(1093.0, 24.0, 1133.0, 51.0)
+        ):
+            return str(self.oracle.minigame_coin_amount())
+        if (
+            self._minigame_context is not None
+            and len(bounds) == 1
+            and bounds[0] == Bounds(377.0, 636.0, 408.0, 669.0)
+        ):
+            return str(self.minigame_prepare_default_ticket())
         groups = self.oracle.text_groups_in_bounds(bounds)
         values: List[str] = []
         for group in groups:
@@ -2632,6 +4060,38 @@ class AlasSemanticAdapter:
         self._research_context.last_projects = projects
         self._research_context.last_projects_observed_at = time.monotonic()
         return projects
+
+    def shipyard_select_series(self, series: int) -> ActionReceipt:
+        self._package_gate()
+        if not 1 <= series <= 9:
+            raise ValueError("shipyard series must be in [1, 9]")
+        self.oracle.click("shipyard/series/open")
+        receipt = self.oracle.click("shipyard/series/{0}".format(series))
+        deadline = time.monotonic() + 8.0
+        while time.monotonic() < deadline:
+            if self._shipyard_page_visible() and not self.oracle.exists(
+                "shipyard/series/1"
+            ):
+                return receipt
+            time.sleep(0.25)
+        raise SemanticGateClosed("shipyard series transition timed out")
+
+    def shipyard_select_ship(self, index: int) -> ShipyardState:
+        self._package_gate()
+        self.oracle.click_shipyard_ship(index)
+        deadline = time.monotonic() + 8.0
+        last_error: Optional[SemanticOracleError] = None
+        while time.monotonic() < deadline:
+            try:
+                return self.oracle.shipyard_state(index)
+            except SemanticOracleError as exc:
+                last_error = exc
+                time.sleep(0.25)
+        raise SemanticGateClosed("shipyard ship transition timed out") from last_error
+
+    def shipyard_state(self, index: int) -> ShipyardState:
+        self._package_gate()
+        return self.oracle.shipyard_state(index)
 
     def research_detail_state(self) -> ResearchDetailState:
         self._package_gate()
@@ -2710,6 +4170,93 @@ class AlasSemanticAdapter:
     def dorm_state(self) -> DormState:
         self._package_gate()
         return self.oracle.dorm_state()
+
+    def operation_siren_state(self) -> OperationSirenState:
+        self._package_gate()
+        return self.oracle.operation_siren_state()
+
+    def operation_siren_map_visible(self) -> bool:
+        self._package_gate()
+        try:
+            self.oracle.operation_siren_state()
+            return True
+        except SemanticGateClosed:
+            return False
+
+    def operation_siren_globe_state(self) -> OperationSirenGlobeState:
+        self._package_gate()
+        last_error: Optional[SemanticGateClosed] = None
+        for attempt in range(16):
+            try:
+                return self.oracle.operation_siren_globe_state()
+            except SemanticGateClosed as exc:
+                last_error = exc
+                if not self.oracle.operation_siren_globe_visible():
+                    raise
+                if attempt < 15:
+                    time.sleep(0.25)
+        assert last_error is not None
+        raise last_error
+
+    def operation_siren_globe_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.operation_siren_globe_visible()
+
+    def operation_siren_storage_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.operation_siren_storage_visible()
+
+    def operation_siren_storage_state(self) -> OperationSirenStorageState:
+        self._package_gate()
+        return self.oracle.operation_siren_storage_state()
+
+    def click_operation_siren_storage_item(self, item_type: str) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_operation_siren_storage_item(item_type)
+
+    def operation_siren_storage_scroll_for_abyssal(
+        self,
+    ) -> OperationSirenStorageScrollReceipt:
+        self._package_gate()
+        return self.oracle.operation_siren_storage_scroll_for_abyssal()
+
+    def click_operation_siren_storage_back(self) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_operation_siren_storage_back()
+
+    def operation_siren_storage_detail(self) -> Optional[Tuple[str, str, int]]:
+        self._package_gate()
+        return self.oracle.operation_siren_storage_detail()
+
+    def click_operation_siren_storage_detail_close(self) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_operation_siren_storage_detail_close()
+
+    def operation_siren_coordinate_checkout_allowed(self) -> bool:
+        return self._action_ledger.allowed("operation_siren.coordinate_checkout")
+
+    def click_operation_siren_storage_detail_checkout(self) -> ActionReceipt:
+        self._package_gate()
+        return self._dispatch_mutation(
+            "operation_siren.coordinate_checkout",
+            self.oracle.click_operation_siren_storage_detail_checkout,
+        )
+
+    def click_operation_siren_globe_zone(
+        self, expected_zone_name: str, point: Tuple[float, float]
+    ) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_operation_siren_globe_zone(
+            expected_zone_name, point
+        )
+
+    def meta_entrance_state(self) -> MetaEntranceState:
+        self._package_gate()
+        return self.oracle.meta_entrance_state()
+
+    def meta_assist_state(self) -> MetaAssistState:
+        self._package_gate()
+        return self.oracle.meta_assist_state()
 
     def dorm_feed_state(self) -> DormFeedState:
         self._package_gate()
@@ -2795,7 +4342,10 @@ class AlasSemanticAdapter:
 
     def build_submit_state(self) -> BuildSubmitState:
         self._package_gate()
-        return self.oracle.build_submit_state()
+        state = self.oracle.build_submit_state()
+        if self._build_context is not None:
+            self._build_context.prep_validated = True
+        return state
 
     def build_coins_owned(self) -> int:
         if self._build_context is None:
@@ -2832,8 +4382,63 @@ class AlasSemanticAdapter:
 
     def campaign_oil(self) -> int:
         self._package_gate()
-        self._require_campaign_context()
         return self.oracle.campaign_oil()
+
+    def campaign_auto_search_selected(self) -> bool:
+        self._package_gate()
+        self._require_campaign_context()
+        if self._campaign_preparation_kind() != "map":
+            raise SemanticGateClosed(
+                "campaign auto-search state requires the map-preparation layer"
+            )
+        return self.oracle.campaign_auto_search_selected()
+
+    def campaign_hard_remain(self) -> int:
+        self._package_gate()
+        context = self._require_campaign_context()
+        if context.mode != "hard":
+            raise SemanticGateClosed("hard quota used outside hard campaign flow")
+        return self.oracle.campaign_hard_remain()
+
+    def campaign_map_formation(self) -> str:
+        self._package_gate()
+        self._require_campaign_context()
+        return self.oracle.campaign_map_formation()
+
+    def campaign_fleet_hp(self) -> Tuple[float, ...]:
+        self._package_gate()
+        try:
+            self.oracle.operation_siren_state()
+        except SemanticGateClosed:
+            pass
+        else:
+            # WorldMap mounts before its left-side fleet panel.  ALAS asks
+            # for HP immediately after entering the map, so wait only for the
+            # exact six-bar contract while the exact local-map identity stays
+            # present.  Never substitute synthetic HP values.
+            deadline = time.monotonic() + 6.0
+            while True:
+                try:
+                    return self.oracle.operation_siren_fleet_hp()
+                except SemanticGateClosed as exc:
+                    if str(exc) != (
+                        "Operation Siren fleet HP bars are absent or incomplete"
+                    ):
+                        raise
+                    if time.monotonic() >= deadline:
+                        raise
+                    self.oracle.operation_siren_state()
+                    time.sleep(0.25)
+        self._require_campaign_context()
+        return self.oracle.campaign_fleet_hp()
+
+    def operation_siren_need_repair(self) -> Tuple[bool, ...]:
+        self._package_gate()
+        return self.oracle.operation_siren_need_repair()
+
+    def operation_siren_low_resolve_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.operation_siren_low_resolve_visible()
 
     def campaign_map_state(
         self,
@@ -2864,6 +4469,26 @@ class AlasSemanticAdapter:
         context.map_rows = rows
         context.map_land_cells = tuple(tuple(item) for item in land_cells)
         context.map_expected_fleet_count = expected_fleet_count
+        return state
+
+    def _refresh_campaign_map_state(self) -> CampaignMapState:
+        context = self._require_campaign_context()
+        if (
+            context.map_columns is None
+            or context.map_rows is None
+            or context.map_expected_fleet_count is None
+        ):
+            raise SemanticGateClosed(
+                "campaign map dimensions are unavailable for fleet switching"
+            )
+        state = self.oracle.campaign_map_state(
+            context.stage_code,
+            columns=context.map_columns,
+            rows=context.map_rows,
+            land_cells=context.map_land_cells,
+            expected_fleet_count=context.map_expected_fleet_count,
+        )
+        context.map_state = state
         return state
 
     def authorize_campaign_camera_positioning(
@@ -2941,37 +4566,41 @@ class AlasSemanticAdapter:
         context = self._require_campaign_context()
         if not self._action_ledger.allowed("campaign.grid_click"):
             return None
-        if self._action_ledger.remaining("campaign.grid_click") < 1:
-            return None
         if (
             context.combat_admission is not None
+            or context.combat_route_receipts
             or context.combat_receipt is not None
             or context.combat_proof is not None
         ):
             raise SemanticGateClosed("campaign combat admission is single-use")
         if context.map_state is not state:
             raise SemanticGateClosed("campaign combat map state is not current")
-        target = self.oracle.campaign_map_cell_viewport_target(
-            state, decision.target_node
-        )
-        # A one-unit viewport budget explicitly arms one ALAS-owned camera
-        # move for this admitted target.  This is independent of whether the
-        # cell is already top-raycast: original ALAS may still center a
-        # visible target before its grid click.  A covered target remains
-        # forbidden unless that separate capability was granted.
-        viewport_required = bool(
-            self._action_ledger.allowed("campaign.viewport_swipe")
-            and self._action_ledger.remaining("campaign.viewport_swipe") == 1
-        )
-        if target.raycast_top is not True and not viewport_required:
-            raise SemanticGateClosed(
-                "campaign combat covered target requires one viewport swipe budget"
-            )
         admission = prepare_alas_campaign_combat_admission(
             decision,
             state,
             input_generation=state.generation,
         )
+        if self._action_ledger.remaining("campaign.grid_click") < len(
+            admission.input_nodes
+        ):
+            return None
+        targets = tuple(
+            self.oracle.campaign_map_cell_viewport_target(state, node)
+            for node in admission.input_nodes
+        )
+        # Reserve at most one ALAS-owned viewport movement for every explicit
+        # goto input.  ALAS may skip a reservation when its fresh View already
+        # considers that waypoint in sight.
+        viewport_authorized = bool(
+            self._action_ledger.allowed("campaign.viewport_swipe")
+            and self._action_ledger.remaining("campaign.viewport_swipe")
+            >= len(admission.input_nodes)
+        )
+        if any(target.raycast_top is not True for target in targets) and not viewport_authorized:
+            raise SemanticGateClosed(
+                "campaign combat covered input requires viewport swipe budget"
+            )
+        target = targets[-1]
         if (
             target.path != admission.cell_path
             or target.point != admission.point
@@ -2979,7 +4608,9 @@ class AlasSemanticAdapter:
         ):
             raise SemanticGateClosed("campaign combat target changed during preflight")
         context.combat_admission = admission
-        context.viewport_swipe_required = viewport_required
+        context.viewport_swipe_required = (
+            targets[0].raycast_top is not True
+        )
         return admission
 
     def complete_campaign_combat_round(
@@ -2997,6 +4628,7 @@ class AlasSemanticAdapter:
             return None
         proof = self.confirm_campaign_combat(battle_count_after)
         context.combat_admission = None
+        context.combat_route_receipts.clear()
         context.viewport_swipe_required = False
         context.viewport_swipe_intent = None
         context.viewport_swipe_proof = None
@@ -3075,12 +4707,12 @@ class AlasSemanticAdapter:
         self._package_gate()
         context = self._require_campaign_context()
         combat_ready = (
-            context.viewport_swipe_required
-            and self._action_ledger.allowed("campaign.viewport_swipe")
-            and self._action_ledger.remaining("campaign.viewport_swipe") == 1
+            self._action_ledger.allowed("campaign.viewport_swipe")
+            and self._action_ledger.remaining("campaign.viewport_swipe") >= 1
             and context.combat_admission is not None
+            and len(context.combat_route_receipts)
+            < len(context.combat_admission.input_nodes)
             and context.camera_positioning_admission is None
-            and context.viewport_swipe_proof is None
             and context.combat_receipt is None
         )
         positioning_ready = (
@@ -3175,6 +4807,114 @@ class AlasSemanticAdapter:
         context.viewport_swipe_intent = intent
         return intent
 
+    def recover_campaign_map_network_reconnect(self) -> bool:
+        """Dismiss one exact NetworkDown prompt before ALAS moves the camera.
+
+        A reconnect dialog can mount after ALAS has admitted a route but before
+        its camera swipe.  Keep route and camera ownership with ALAS, while
+        recovering only the already-reviewed, exact reconnect prompt and
+        proving that the same logical map returned before allowing the caller
+        to retry its swipe.
+        """
+
+        self._package_gate()
+        context = self._require_campaign_context()
+        if context.map_state is None:
+            raise SemanticGateClosed("campaign map state is unavailable")
+        if context.viewport_swipe_intent is not None:
+            raise SemanticGateClosed(
+                "campaign map reconnect cannot interrupt an armed swipe"
+            )
+        target = "overlay/network-reconnect/confirm"
+        if not self.oracle.enabled(target):
+            return False
+
+        previous = context.map_state
+        self.oracle.click(target)
+        context.passive_transition_until = time.monotonic() + 20.0
+        deadline = time.monotonic() + 20.0
+        while True:
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed(
+                    "campaign map reconnect did not return to the map"
+                )
+            if self.oracle.enabled(target):
+                time.sleep(0.2)
+                continue
+            try:
+                refreshed = self.oracle.campaign_map_state(
+                    context.stage_code,
+                    columns=context.map_columns,
+                    rows=context.map_rows,
+                    land_cells=context.map_land_cells,
+                    expected_fleet_count=context.map_expected_fleet_count,
+                )
+            except (SemanticGateClosed, SemanticTargetMissing):
+                time.sleep(0.2)
+                continue
+            if refreshed.signature != previous.signature:
+                raise SemanticGateClosed(
+                    "campaign map changed while recovering network reconnect"
+                )
+            context.map_state = refreshed
+            return True
+
+    def begin_operation_siren_globe_swipe_vector(
+        self,
+        vector: Any,
+        *,
+        box: Any,
+        random_range: Any,
+        padding: Any,
+        duration: Any,
+        whitelist_area: Any,
+        blacklist_area: Any,
+        name: Any,
+        distance_check: Any,
+    ) -> _OperationSirenGlobeSwipeIntent:
+        """Authorize one camera-only swipe selected by ALAS's globe logic."""
+
+        self._package_gate()
+        self.oracle.operation_siren_globe_state()
+        if self._operation_siren_globe_swipe_intent is not None:
+            raise SemanticGateClosed("operation siren globe swipe is already armed")
+        if not isinstance(name, str) or re.fullmatch(
+            r"GLOBE_SWIPE_-?[0-9]+_-?[0-9]+", name
+        ) is None:
+            raise SemanticGateClosed("operation siren globe swipe name is not canonical")
+        pixel_vector = self._campaign_swipe_pair(
+            vector, "operation siren globe pixel vector"
+        )
+        if not 10.0 <= math.hypot(*pixel_vector) <= 1200.0:
+            raise SemanticGateClosed("operation siren globe swipe vector is outside limits")
+        exact_box = self._campaign_swipe_box(box, "operation siren globe swipe box")
+        if exact_box != (20.0, 220.0, 980.0, 620.0):
+            raise SemanticGateClosed("operation siren globe swipe box changed")
+        if tuple(random_range) != (0, 0, 0, 0) or padding != 15:
+            raise SemanticGateClosed("operation siren globe swipe selection changed")
+        if whitelist_area is not None or blacklist_area is not None:
+            raise SemanticGateClosed("operation siren globe swipe areas changed")
+        duration_range = self._campaign_swipe_pair(
+            duration, "operation siren globe swipe duration"
+        )
+        if duration_range != (0.1, 0.2) or distance_check is not True:
+            raise SemanticGateClosed("operation siren globe swipe timing changed")
+        intent = _OperationSirenGlobeSwipeIntent(
+            name=name,
+            pixel_vector=pixel_vector,
+            box=tuple(int(item) for item in exact_box),
+            duration_range=duration_range,
+        )
+        self._operation_siren_globe_swipe_intent = intent
+        return intent
+
+    def end_operation_siren_globe_swipe_vector(
+        self, intent: _OperationSirenGlobeSwipeIntent
+    ) -> None:
+        if self._operation_siren_globe_swipe_intent is not intent:
+            raise SemanticGateClosed("operation siren globe swipe token changed")
+        self._operation_siren_globe_swipe_intent = None
+
     def end_campaign_map_swipe_vector(
         self, intent: CampaignMapViewportSwipeIntent
     ) -> None:
@@ -3214,10 +4954,46 @@ class AlasSemanticAdapter:
         duration: Any,
         name: Any,
         distance_check: Any,
-    ) -> CampaignMapViewportSwipeProof:
+    ) -> Union[CampaignMapViewportSwipeProof, OperationSirenGlobeSwipeReceipt]:
         """Replace only the final dispatch of one armed ALAS map swipe."""
 
         self._package_gate()
+        globe_intent = self._operation_siren_globe_swipe_intent
+        if globe_intent is not None:
+            if name != globe_intent.name or distance_check is not True:
+                raise SemanticGateClosed("operation siren globe final input changed")
+            start_pair = self._campaign_swipe_pair(
+                p1, "operation siren globe swipe start"
+            )
+            end_pair = self._campaign_swipe_pair(
+                p2, "operation siren globe swipe end"
+            )
+            if any(not float(item).is_integer() for item in (*start_pair, *end_pair)):
+                raise SemanticGateClosed("operation siren globe endpoints are not integral")
+            start = tuple(int(item) for item in start_pair)
+            end = tuple(int(item) for item in end_pair)
+            left, top, right, bottom = globe_intent.box
+            if any(
+                not (left <= point[0] <= right and top <= point[1] <= bottom)
+                for point in (start, end)
+            ):
+                raise SemanticGateClosed("operation siren globe endpoint left its box")
+            expected_delta = tuple(
+                int(round(value)) for value in globe_intent.pixel_vector
+            )
+            if (end[0] - start[0], end[1] - start[1]) != expected_delta:
+                raise SemanticGateClosed("operation siren globe selected vector changed")
+            if (
+                isinstance(duration, bool)
+                or not isinstance(duration, (int, float))
+                or not 0.20 <= float(duration) <= 0.60
+            ):
+                raise SemanticGateClosed("operation siren globe final duration changed")
+            return self.oracle.operation_siren_globe_swipe(
+                start,
+                end,
+                int(round(float(duration) * 1000.0)),
+            )
         context = self._require_campaign_context()
         intent = context.viewport_swipe_intent
         if intent is None:
@@ -3265,11 +5041,28 @@ class AlasSemanticAdapter:
                 for area in intent.blacklist_areas
             ):
                 raise SemanticGateClosed("campaign map viewport path entered its blacklist")
-        if (
-            isinstance(duration, bool)
-            or not isinstance(duration, (int, float))
-            or not math.isfinite(float(duration))
-            or not 0.20 <= float(duration) <= 0.60
+        duration_value = (
+            float(duration)
+            if isinstance(duration, (int, float)) and not isinstance(duration, bool)
+            else float("nan")
+        )
+        # ALAS passes the sampled 0.1-0.2s duration unchanged to MaaTouch,
+        # minitouch, scrcpy, nemu_ipc, and uiautomator2.  Its ADB branch alone
+        # multiplies the same sampled value by 2.5 before final dispatch.  Bind
+        # the semantic input to exactly those two source-derived intervals;
+        # the gap between them and every other timing remain closed.
+        direct_duration = (
+            intent.duration_range[0]
+            <= duration_value
+            <= intent.duration_range[1]
+        )
+        adb_duration = (
+            intent.duration_range[0] * 2.5
+            <= duration_value
+            <= intent.duration_range[1] * 2.5
+        )
+        if not math.isfinite(duration_value) or not (
+            direct_duration or adb_duration
         ):
             raise SemanticGateClosed("campaign map viewport final duration changed")
         positioning = context.camera_positioning_admission
@@ -3298,12 +5091,18 @@ class AlasSemanticAdapter:
         else:
             if (
                 not self._action_ledger.allowed("campaign.viewport_swipe")
-                or self._action_ledger.remaining("campaign.viewport_swipe") != 1
+                or self._action_ledger.remaining("campaign.viewport_swipe") < 1
             ):
                 raise SemanticGateClosed("campaign map viewport lease is incomplete")
             assert combat is not None
             capability = "campaign.viewport_swipe"
-            target_node = combat.target_node
+            target_node = combat.input_nodes[len(context.combat_route_receipts)]
+            # One ALAS in_sight() call can legitimately require more than one
+            # clamped camera gesture.  Each gesture is independently budgeted
+            # and proven; the next proof replaces the previous one for the
+            # still-uncommitted grid input.
+            context.viewport_swipe_proof = None
+            context.target_recheck_proof = None
         proof = self._dispatch_mutation(
             capability,
             lambda: self.oracle.campaign_map_viewport_swipe(
@@ -3312,7 +5111,7 @@ class AlasSemanticAdapter:
                 intent,
                 start=start,
                 end=end,
-                duration_ms=int(round(float(duration) * 1000.0)),
+                duration_ms=int(round(duration_value * 1000.0)),
                 columns=context.map_columns,
                 rows=context.map_rows,
                 land_cells=context.map_land_cells,
@@ -3329,8 +5128,16 @@ class AlasSemanticAdapter:
             context.combat_admission = replace(
                 combat,
                 input_generation=proof.post_generation,
-                point=proof.target_after_point,
-                bounds=proof.target_after_bounds,
+                point=(
+                    proof.target_after_point
+                    if target_node == combat.target_node
+                    else combat.point
+                ),
+                bounds=(
+                    proof.target_after_bounds
+                    if target_node == combat.target_node
+                    else combat.bounds
+                ),
             )
         return proof
 
@@ -3418,12 +5225,29 @@ class AlasSemanticAdapter:
             land_cells=context.map_land_cells,
             expected_fleet_count=context.map_expected_fleet_count,
         )
-        if state.signature != context.map_state.signature:
+        admission = context.combat_admission
+        if admission is not None and context.combat_route_receipts:
+            self._validate_campaign_combat_route_state(
+                context, state, for_next_input=False
+            )
+        elif admission is not None and context.map_fleet_switch_receipts:
+            if (
+                state.current_fleet_marker != admission.fleet_marker
+                or state.displayed_fleet_index != admission.fleet_index
+            ):
+                raise SemanticGateClosed(
+                    "campaign camera observation did not prove fleet switch"
+                )
+        elif state.signature != context.map_state.signature:
             raise SemanticGateClosed(
                 "campaign camera observation changed logical map state"
             )
-        admission = context.combat_admission
-        if admission is not None and state.signature != admission.map_signature:
+        if (
+            admission is not None
+            and not context.combat_route_receipts
+            and not context.map_fleet_switch_receipts
+            and state.signature != admission.map_signature
+        ):
             raise SemanticGateClosed(
                 "campaign camera observation changed admitted map state"
             )
@@ -3442,6 +5266,9 @@ class AlasSemanticAdapter:
         context = self._require_campaign_context()
         admission = context.combat_admission
         if admission is not None:
+            index = len(context.combat_route_receipts)
+            if index < len(admission.input_nodes):
+                return admission.input_nodes[index]
             return admission.target_node
         positioning = context.camera_positioning_admission
         return None if positioning is None else positioning.target_node
@@ -3475,29 +5302,40 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "campaign target recheck requires a proven camera view"
             )
+        route_index = len(context.combat_route_receipts)
+        if route_index >= len(admission.input_nodes):
+            raise SemanticGateClosed("campaign target recheck has no remaining input")
+        target_node = admission.input_nodes[route_index]
+        expected_path = next(
+            cell.button_path for cell in state.cells if cell.node == target_node
+        )
+        self._validate_campaign_combat_route_state(
+            context,
+            state,
+            for_next_input=True,
+        )
         if (
-            state.signature != admission.map_signature
-            or state.generation < viewport.post_generation
-            or viewport.target_node != admission.target_node
-            or viewport.target_path != admission.cell_path
+            state.generation < viewport.post_generation
+            or viewport.target_node != target_node
+            or viewport.target_path != expected_path
         ):
             raise SemanticGateClosed(
                 "campaign target recheck changed viewport identity"
             )
         target = self.oracle.campaign_map_cell_input(
-            state, admission.target_node
+            state, target_node
         )
-        if target.path != admission.cell_path:
+        if target.path != expected_path:
             raise SemanticGateClosed("campaign target recheck changed cell path")
         assert target.point is not None and target.bounds is not None
         context.combat_admission = replace(
             admission,
             input_generation=max(admission.input_generation, state.generation),
-            point=target.point,
-            bounds=target.bounds,
+            point=(target.point if target_node == admission.target_node else admission.point),
+            bounds=(target.bounds if target_node == admission.target_node else admission.bounds),
         )
         proof = CampaignMapTargetRecheckProof(
-            target_node=admission.target_node,
+            target_node=target_node,
             viewport_post_generation=viewport.post_generation,
             camera_state_generation=state.generation,
             recheck_generation=state.generation,
@@ -3535,8 +5373,107 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign combat grid location is outside bounds")
         return chr(ord("A") + column) + str(row + 1)
 
+    @staticmethod
+    def _validate_campaign_combat_route_state(
+        context: _CampaignFlowContext,
+        state: CampaignMapState,
+        *,
+        for_next_input: bool,
+    ) -> None:
+        """Keep a multi-input ALAS route bound to the admitted logical map."""
+
+        admission = context.combat_admission
+        if admission is None:
+            raise SemanticGateClosed("campaign combat admission is absent")
+        baseline = admission.map_signature
+        if (
+            state.stage_code != admission.stage_code
+            or tuple((cell.node, cell.button_path) for cell in state.cells)
+            != tuple(baseline[3])
+            or state.land_nodes != tuple(baseline[4])
+            or state.current_fleet_marker != admission.fleet_marker
+            or state.displayed_fleet_index != admission.fleet_index
+        ):
+            raise SemanticGateClosed("campaign combat route changed map identity")
+
+        route_index = len(context.combat_route_receipts)
+        if route_index > len(admission.input_nodes):
+            raise SemanticGateClosed("campaign combat route input count changed")
+        previous_node = (
+            admission.origin_node
+            if route_index == 0
+            else admission.input_nodes[route_index - 1]
+        )
+        fleets = tuple(
+            fleet for fleet in state.fleets if fleet.marker == admission.fleet_marker
+        )
+        if len(fleets) != 1 or fleets[0].ammo != admission.ammo_before:
+            raise SemanticGateClosed("campaign combat route fleet identity changed")
+        if for_next_input:
+            if fleets[0].node != previous_node:
+                raise SemanticGateClosed(
+                    "campaign combat route has not reached its previous input"
+                )
+        else:
+            prior_node = (
+                admission.origin_node
+                if route_index <= 1
+                else admission.input_nodes[route_index - 2]
+            )
+            if fleets[0].node not in (prior_node, previous_node):
+                raise SemanticGateClosed(
+                    "campaign combat route fleet left its admitted progress"
+                )
+
+        # Unity may reorder sibling fleet/enemy attachments after a camera
+        # movement or a fleet step.  These collections are logical sets; bind
+        # every exact member while ignoring only hierarchy enumeration order.
+        normalized_fleets = tuple(
+            sorted(
+                (
+                    fleet.marker,
+                    admission.origin_node
+                    if fleet.marker == admission.fleet_marker
+                    else fleet.node,
+                    fleet.ammo,
+                    fleet.ammo_capacity,
+                )
+                for fleet in state.fleets
+            )
+        )
+        baseline_fleets = tuple(sorted(tuple(baseline[5])))
+        current_enemies = tuple(
+            sorted(
+                (
+                    enemy.node,
+                    enemy.object_id,
+                    enemy.sprite,
+                    enemy.scale,
+                    enemy.genre,
+                    enemy.level,
+                    enemy.fighting,
+                    enemy.is_siren,
+                )
+                for enemy in state.enemies
+            )
+        )
+        baseline_enemies = tuple(sorted(tuple(baseline[6])))
+        current_pickups = tuple(
+            sorted(
+                (pickup.node, pickup.kind, pickup.sprite)
+                for pickup in state.pickups
+            )
+        )
+        baseline_pickups = tuple(sorted(tuple(baseline[7])))
+        if (
+            normalized_fleets != baseline_fleets
+            or current_enemies != baseline_enemies
+            or current_pickups != baseline_pickups
+        ):
+            raise SemanticGateClosed("campaign combat route dynamic state changed")
+
     def click_campaign_combat_grid(self, button: Any) -> ActionReceipt:
-        """Consume the one budget only at ALAS's original `device.click(grid)`."""
+        """Consume each budget unit at ALAS's original `device.click(grid)`."""
 
         self._package_gate()
         context = self._require_campaign_context()
@@ -3544,10 +5481,6 @@ class AlasSemanticAdapter:
         location = self._campaign_grid_location(button)
         if admission is None or location is None or context.map_state is None:
             raise SemanticGateClosed("campaign combat grid input is not authorized")
-        if context.viewport_swipe_required:
-            raise SemanticGateClosed(
-                "campaign combat grid input requires proven viewport movement"
-            )
         if (
             context.viewport_swipe_proof is not None
             and context.target_recheck_proof is None
@@ -3556,7 +5489,49 @@ class AlasSemanticAdapter:
                 "campaign combat grid input requires post-camera target recheck"
             )
         node = self._campaign_node(location)
-        if node != admission.target_node:
+        route_index = len(context.combat_route_receipts)
+        if route_index >= len(admission.input_nodes):
+            # After combat_status has returned to the exact stable map, ALAS's
+            # goto loop submits the target grid once more while confirming the
+            # fleet's arrival.  This is not another combat mutation.  Admit a
+            # no-input acknowledgement only when the fresh post-state proves
+            # the original enemy disappeared, the admitted fleet occupies the
+            # same target, and ammunition decreased exactly once.  A missed
+            # first tap, a different cell, or any ambiguous map still fails
+            # closed and never receives a second physical input.
+            if (
+                node != admission.target_node
+                or context.combat_receipt is None
+                or route_index != len(admission.input_nodes)
+                or context.map_columns is None
+                or context.map_rows is None
+                or context.map_expected_fleet_count is None
+            ):
+                raise SemanticGateClosed(
+                    "campaign combat grid requires remaining budget"
+                )
+            post_state = self.oracle.campaign_map_state(
+                context.stage_code,
+                columns=context.map_columns,
+                rows=context.map_rows,
+                land_cells=context.map_land_cells,
+                expected_fleet_count=context.map_expected_fleet_count,
+            )
+            try:
+                prove_alas_campaign_combat_transition(
+                    admission,
+                    post_state,
+                    battle_count_after=admission.battle_count + 1,
+                    input_path=context.combat_receipt.path,
+                )
+            except SemanticGateClosed as exc:
+                raise SemanticGateClosed(
+                    "campaign combat grid requires proven post-state"
+                ) from exc
+            context.map_state = post_state
+            return context.combat_receipt
+        expected_node = admission.input_nodes[route_index]
+        if node != expected_node:
             raise SemanticGateClosed("campaign combat grid target changed")
         if (
             not self._action_ledger.allowed("campaign.grid_click")
@@ -3566,28 +5541,72 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "campaign combat grid requires remaining budget"
             )
+        if (
+            context.map_columns is None
+            or context.map_rows is None
+            or context.map_expected_fleet_count is None
+        ):
+            raise SemanticGateClosed("campaign combat map topology is incomplete")
+        state = self.oracle.campaign_map_state(
+            context.stage_code,
+            columns=context.map_columns,
+            rows=context.map_rows,
+            land_cells=context.map_land_cells,
+            expected_fleet_count=context.map_expected_fleet_count,
+        )
+        self._validate_campaign_combat_route_state(
+            context, state, for_next_input=True
+        )
+        if context.viewport_swipe_required:
+            raise SemanticGateClosed(
+                "campaign combat grid input requires proven viewport movement"
+            )
+        target = self.oracle.campaign_map_cell_input(state, node)
+        assert target.point is not None and target.bounds is not None
         receipt = self._dispatch_mutation(
             "campaign.grid_click",
-            lambda: self.oracle.click_campaign_map_cell(context.map_state, node),
+            lambda: self.oracle.click_campaign_map_cell(state, node),
         )
         # The ADB tap has happened.  Consume and record the lease before any
         # subsequent assertion so an anomalous receipt can never be replayed.
-        context.combat_admission = replace(
-            admission, input_generation=receipt.generation
-        )
-        context.combat_receipt = receipt
+        context.map_state = state
+        context.combat_route_receipts.append(receipt)
         if (
-            receipt.path != admission.cell_path
-            or receipt.point != admission.point
-            or receipt.bounds != admission.bounds
+            receipt.path != target.path
+            or receipt.point != target.point
+            or receipt.bounds != target.bounds
             or receipt.generation < admission.input_generation
         ):
             raise SemanticGateClosed("campaign combat input receipt changed")
+        context.combat_admission = replace(
+            admission,
+            input_generation=receipt.generation,
+            cell_path=(target.path if node == admission.target_node else admission.cell_path),
+            point=(target.point if node == admission.target_node else admission.point),
+            bounds=(target.bounds if node == admission.target_node else admission.bounds),
+        )
+        if node == admission.target_node:
+            context.combat_receipt = receipt
+            context.passive_transition_until = time.monotonic() + 30.0
+        else:
+            # The intermediate tap has already started a passive fleet
+            # transition, so the next cell cannot be re-read synchronously.
+            # ALAS's next in_sight() call owns any required camera movement;
+            # the eventual grid input still requires a fresh top-raycast read.
+            context.viewport_swipe_proof = None
+            context.target_recheck_proof = None
+            context.viewport_swipe_required = False
         return receipt
 
     def campaign_combat_committed(self) -> bool:
-        context = self._require_campaign_context()
-        return context.combat_receipt is not None
+        context = self._campaign_context
+        return context is not None and context.combat_receipt is not None
+
+    def campaign_combat_active(self) -> bool:
+        """Report the admitted ALAS goto/combat lease, including waypoints."""
+
+        context = self._campaign_context
+        return context is not None and context.combat_admission is not None
 
     def confirm_campaign_combat(
         self,
@@ -3788,6 +5807,18 @@ class AlasSemanticAdapter:
         self._require_commission_context()
         return self.oracle.commission_scroll_to_top()
 
+    def minigame_scroll_visible(self) -> bool:
+        self._package_gate()
+        if self._minigame_context is None:
+            raise SemanticGateClosed("minigame scroll used outside minigame flow")
+        return self.oracle.game_room_list_visible()
+
+    def minigame_scroll_set(self, position: float) -> bool:
+        self._package_gate()
+        if self._minigame_context is None:
+            raise SemanticGateClosed("minigame scroll used outside minigame flow")
+        return self.oracle.minigame_scroll_to(position)
+
     def commission_reward_pending(self) -> bool:
         """Detect a finished commission only from the typed reward summary."""
 
@@ -3967,11 +5998,154 @@ class AlasSemanticAdapter:
                     )
                 ) from exc
         semantic_id = self._mappings.get(name)
+        if (
+            self._campaign_context is not None
+            and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+        ):
+            reconnect_target = (
+                "overlay/network-reconnect/confirm"
+                if name == "POPUP_CONFIRM"
+                else "overlay/network-reconnect/cancel"
+            )
+            if self.oracle.enabled(reconnect_target):
+                receipt = self.oracle.click(reconnect_target)
+                self._campaign_context.passive_transition_until = (
+                    time.monotonic() + 20.0
+                )
+                return receipt
         navbar_match = MISSION_NAVBAR_PATTERN.fullmatch(name)
         commission_row_match = COMMISSION_ROW_PATTERN.fullmatch(name)
         build_side_navbar_match = BUILD_SIDE_NAVBAR_PATTERN.fullmatch(name)
         build_pool_navbar_match = BUILD_POOL_NAVBAR_PATTERN.fullmatch(name)
         campaign_fleet_bar_match = CAMPAIGN_FLEET_BAR_PATTERN.fullmatch(name)
+        if self._supply_pack_context is not None:
+            context = self._supply_pack_context
+            if name == "SHOP_GOTO_SUPPLY_PACK":
+                receipt = self.oracle.click_toggle("shop/gift-pack")
+                context.gift_pack_selected = True
+                context.passive_transition_until = time.monotonic() + 12.0
+                return receipt
+            if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
+                target = self._award_close_target()
+                if target is None:
+                    raise SemanticGateClosed("supply-pack reward popup is absent")
+                return self.oracle.click(target)
+            if name in ("FREE_SUPPLY_PACK", "BUY_CONFIRM"):
+                raise SemanticGateClosed(
+                    "free weekly supply pack purchase is unavailable"
+                )
+        if name == "MISSION_OVERVIEW_ACCEPT_SINGLE":
+            return self.oracle.click_operation_siren_mission_overview_accept()
+        if name == "MISSION_FINISH":
+            return self.oracle.click_operation_siren_mission_finish()
+        if name == "MISSION_CHECKOUT":
+            return self.oracle.click_operation_siren_mission_checkout()
+        if self._minigame_context is not None:
+            context = self._minigame_context
+            if name == "GOTO_CHOOSE_GAME":
+                receipt = self.oracle.click("game-room/list")
+                context.passive_transition_until = time.monotonic() + 12.0
+                return receipt
+            if name == "NEW_YEAR_CHALLENGE_ENTRANCE":
+                context.coins_owned = self.oracle.minigame_coin_amount()
+                receipt = self.oracle.click_new_year_challenge_entry()
+                context.entry_receipt = receipt
+                context.passive_transition_until = time.monotonic() + 12.0
+                return receipt
+            if name == "NEW_YEAR_CHALLENGE_ADD_COIN":
+                raise SemanticGateClosed(
+                    "qualification play uses the reviewed default one-ticket cost"
+                )
+            if name == "NEW_YEAR_CHALLENGE_DEC_COIN":
+                raise SemanticGateClosed(
+                    "qualification play does not permit deselecting its consumed lease"
+                )
+            if name == "NEW_YEAR_CHALLENGE_START":
+                if context.selected_tickets != 1 or context.play_receipt is not None:
+                    raise SemanticGateClosed(
+                        "new-year challenge start requires one admitted ticket"
+                    )
+                receipt = self._dispatch_mutation(
+                    "minigame.play",
+                    lambda: self.oracle.click_new_year_challenge_prepare_control(
+                        "start"
+                    ),
+                )
+                context.play_receipt = receipt
+                context.passive_transition_until = time.monotonic() + 12.0
+                return receipt
+            if name == "NEW_YEAR_CHALLENGE_END":
+                receipt = self.oracle.click_new_year_challenge_result_close()
+                context.passive_transition_until = time.monotonic() + 12.0
+                return receipt
+            if name == "NEW_YEAR_CHALLENGE_EXIT":
+                raise SemanticGateClosed(
+                    "current Fushun result closes directly to its prepare page"
+                )
+            if name == "BACK":
+                if self.oracle.new_year_challenge_result() is not None:
+                    raise SemanticGateClosed(
+                        "new-year challenge result must close before back"
+                    )
+                try:
+                    self.oracle.new_year_challenge_ticket_count()
+                except SemanticGateClosed:
+                    if self.oracle.game_room_list_visible():
+                        return self.oracle.click("game-room/list")
+                    return self.oracle.click("game-room/back")
+                receipt = self.oracle.click_new_year_challenge_prepare_control(
+                    "back"
+                )
+                context.passive_transition_until = time.monotonic() + 12.0
+                return receipt
+            if name in ("POPUP_CANCEL", "POPUP_CONFIRM"):
+                target = (
+                    "minigame/tickets/cancel"
+                    if name == "POPUP_CANCEL"
+                    else "minigame/tickets/confirm"
+                )
+                receipt = self.oracle.click(target)
+                if name == "POPUP_CONFIRM":
+                    context.ticket_prompt_confirmed = True
+                context.passive_transition_until = time.monotonic() + 12.0
+                return receipt
+        if (
+            self._mail_context is not None
+            and self._mail_context.surface_kind == "blocked"
+            and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+        ):
+            target = (
+                "overlay/network-reconnect/confirm"
+                if name == "POPUP_CONFIRM"
+                else "overlay/network-reconnect/cancel"
+            )
+            receipt = self.oracle.click(target)
+            self._mail_context.initial_surface_probed = False
+            self._mail_context.surface_kind = None
+            return receipt
+        if self._campaign_context is not None and name == "STRATEGY_OPEN":
+            receipt = self.oracle.click_campaign_strategy_open()
+            self._campaign_context.passive_transition_until = (
+                time.monotonic() + 5.0
+            )
+            return receipt
+        if self._campaign_context is not None and name == "STRATEGY_OPENED":
+            receipt = self.oracle.click_campaign_strategy_close()
+            self._campaign_context.passive_transition_until = (
+                time.monotonic() + 5.0
+            )
+            return receipt
+        if (
+            self._campaign_context is not None
+            and name in CAMPAIGN_STRATEGY_FORMATION_RESOURCES
+        ):
+            receipt = self.oracle.click_campaign_strategy_formation(
+                CAMPAIGN_STRATEGY_FORMATION_RESOURCES[name]
+            )
+            self._campaign_context.passive_transition_until = (
+                time.monotonic() + 5.0
+            )
+            return receipt
         if name == "BACK_ARROW" and all(
             context is None
             for context in (
@@ -3984,9 +6158,20 @@ class AlasSemanticAdapter:
                 self._campaign_context,
             )
         ):
+            if self.oracle.daily_page_visible():
+                return self.oracle.click_daily_control("daily/page/back")
+            if (
+                self.oracle.campaign_page_is_normal()
+                and self.oracle.enabled("campaign-menu/page/back")
+            ):
+                return self.oracle.click("campaign-menu/page/back")
             raise AlasSemanticUnmapped(
                 "ALAS resource is not semantically mapped for input: BACK_ARROW"
             )
+        if name == "DAILY_ENTER":
+            return self.oracle.click_daily_current_card()
+        if name.startswith("DAILY_MISSION_"):
+            return self.oracle.click_daily_stage(int(name.rsplit("_", 1)[1]))
         if (
             semantic_id is None
             and name not in MISSION_CLICK_RESOURCES
@@ -4052,6 +6237,65 @@ class AlasSemanticAdapter:
             context.entry_receipt = receipt
             context.passive_transition_until = time.monotonic() + 20.0
             return receipt
+        if self._campaign_context is not None and name in (
+            "SWITCH_1_NORMAL",
+            "SWITCH_1_HARD",
+        ):
+            destination = "normal" if name == "SWITCH_1_NORMAL" else "hard"
+            receipt = self.oracle.click_campaign_mode_switch(destination)
+            self._campaign_context.passive_transition_until = (
+                time.monotonic() + 20.0
+            )
+            return receipt
+        if (
+            self._campaign_context is not None
+            and name in EVENT_CAMPAIGN_ASIDE_RESOURCES
+        ):
+            receipt = self.oracle.click_event_campaign_aside(
+                EVENT_CAMPAIGN_ASIDE_RESOURCES[name]
+            )
+            self._campaign_context.passive_transition_until = (
+                time.monotonic() + 20.0
+            )
+            return receipt
+        if self._campaign_context is not None and name in (
+            "CHAPTER_PREV",
+            "CHAPTER_NEXT",
+        ):
+            direction = "previous" if name == "CHAPTER_PREV" else "next"
+            receipt = self.oracle.click_campaign_chapter(direction)
+            self._campaign_context.passive_transition_until = (
+                time.monotonic() + 20.0
+            )
+            return receipt
+        if self._campaign_context is not None and name == "SWITCH_OVER":
+            context = self._require_campaign_context()
+            admission = context.combat_admission
+            if admission is None:
+                raise SemanticGateClosed(
+                    "campaign map fleet switch requires an ALAS combat decision"
+                )
+            displayed_fleet_index = (
+                self.oracle.campaign_map_displayed_fleet_index()
+            )
+            if displayed_fleet_index == admission.fleet_index:
+                raise SemanticGateClosed(
+                    "campaign map fleet switch target is already displayed"
+                )
+            if (
+                not self._action_ledger.allowed("campaign.fleet_mutation")
+                or len(context.map_fleet_switch_receipts) >= 1
+            ):
+                raise SemanticGateClosed(
+                    "campaign map fleet switch requires one mutation budget unit"
+                )
+            receipt = self._dispatch_mutation(
+                "campaign.fleet_mutation",
+                self.oracle.click_campaign_map_fleet_switch,
+            )
+            context.map_fleet_switch_receipts.append(receipt)
+            context.passive_transition_until = time.monotonic() + 5.0
+            return receipt
         if self._campaign_context is not None and name == "FLEET_PREPARATION":
             context = self._require_campaign_context()
             if (
@@ -4066,7 +6310,10 @@ class AlasSemanticAdapter:
                 )
             receipt = self._dispatch_mutation(
                 "campaign.sortie",
-                lambda: self.oracle.click_campaign_sortie(context.stage_code),
+                lambda: self.oracle.click_campaign_sortie(
+                    context.stage_code,
+                    fallback_oil_cost=context.map_preparation_oil_cost,
+                ),
             )
             if receipt.generation < context.prepared_fleet_state.generation:
                 raise SemanticGateClosed(
@@ -4133,7 +6380,8 @@ class AlasSemanticAdapter:
             row = self._campaign_fleet_row(row_key)
             if not row.in_use:
                 observed = self.oracle.campaign_fleet_selection_state(
-                    context.stage_code
+                    context.stage_code,
+                    fallback_oil_cost=context.map_preparation_oil_cost,
                 )
                 matches = tuple(
                     candidate
@@ -4274,6 +6522,16 @@ class AlasSemanticAdapter:
             # The oracle action below performs a fresh, exact page/stage/
             # raycast proof immediately before input, so let that final proof
             # decide rather than failing on the advisory pre-read.
+            observed_preparation = self.oracle.campaign_preparation_state(
+                context.stage_code
+            )
+            if (
+                observed_preparation is not None
+                and observed_preparation.kind == "map"
+            ):
+                context.map_preparation_oil_cost = getattr(
+                    observed_preparation, "oil_cost", None
+                )
             receipt = self.oracle.click_campaign_map_preparation(
                 context.stage_code
             )
@@ -4285,11 +6543,28 @@ class AlasSemanticAdapter:
             and name == "MAP_PREPARATION_CANCEL"
         ):
             context = self._require_campaign_context()
-            if context.entry_receipt is None or context.cancel_receipt is not None:
+            if context.cancel_receipt is not None:
                 raise SemanticGateClosed(
                     "campaign preparation cancel is not currently allowed"
                 )
             kind = self._campaign_preparation_kind()
+            if kind == "map" and context.entry_receipt is None:
+                # ALAS deliberately closes an already-open stage detail while
+                # discovering the current page.  A new process has no local
+                # entry receipt for that inherited overlay, but the observer's
+                # exact stage/page/raycast proof still makes this reversible
+                # cancel safe.  Do not consume the flow's later cancel receipt:
+                # the normal pre-sortie proof must still perform its own
+                # entry -> preparation -> cancel sequence.
+                receipt = self.oracle.cancel_campaign_map_preparation(
+                    context.stage_code
+                )
+                context.passive_transition_until = time.monotonic() + 20.0
+                return receipt
+            if context.entry_receipt is None:
+                raise SemanticGateClosed(
+                    "campaign preparation cancel requires proven stage entry"
+                )
             if kind == "fleet":
                 if context.map_preparation_receipt is None:
                     raise SemanticGateClosed(
@@ -4341,7 +6616,7 @@ class AlasSemanticAdapter:
             index = int(build_pool_navbar_match.group(1))
             target = BUILD_POOL_NAVBAR_TARGETS.get(index)
             if target is None:
-                raise SemanticGateClosed("event construction pool is not qualified")
+                raise SemanticGateClosed("construction pool index is not qualified")
             return self.oracle.click_toggle(target)
         if (
             self._commission_context is not None
@@ -4552,8 +6827,16 @@ class AlasSemanticAdapter:
                 context.navigation_receipts["research/page/back"] = receipt
                 return receipt
 
-        if self._dorm_context is not None and name in DORM_VIRTUAL_RESOURCES:
+        if self._dorm_context is not None and (
+            name in DORM_VIRTUAL_RESOURCES
+            or name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3")
+        ):
             context = self._dorm_context
+            if name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3"):
+                target = self._award_close_target()
+                if target is None:
+                    raise SemanticGateClosed("reviewed dorm reward popup is absent")
+                return self.oracle.click(target)
             if name == "DORM_QUICK_COLLECT":
                 if not self._action_ledger.allowed("dorm.collect"):
                     raise SemanticGateClosed("dorm collect requires a positive budget")
@@ -4664,9 +6947,19 @@ class AlasSemanticAdapter:
                 context.submit_receipt = receipt
                 return receipt
         if semantic_id is None and name == "GOTO_MAIN":
+            if self._mail_context is not None and self.oracle.enabled("mail/manage/back"):
+                return self._record_mission_transition(
+                    self.oracle.click("mail/manage/back")
+                )
             target = self._goto_main_target()
             if target is None:
+                if self.oracle.main_page_visible():
+                    return self.oracle.main_page_receipt()
                 raise SemanticGateClosed("GOTO_MAIN has no reviewed page target")
+            if target == "os/page/back":
+                return self._record_mission_transition(
+                    self.oracle.click_operation_siren_back()
+                )
             if (
                 self._research_context is not None
                 and target in ("research/page/back", "research-menu/page/back")
@@ -4686,7 +6979,85 @@ class AlasSemanticAdapter:
             if self.oracle.enabled("mail/manage/back"):
                 return self.oracle.click("mail/manage/back")
             return self.oracle.click("mail/manage")
+        if self._mail_context is not None and name == "POPUP_CONFIRM":
+            # Route the shared ALAS popup asset through the owned mail flow
+            # before the generic mapping can interpret it as a network
+            # reconnect confirmation.
+            context = self._mail_context
+            kind = self.oracle.mail_confirmation_kind()
+            if kind is None or not (
+                kind == context.pending_confirmation
+                or (
+                    kind == "empty"
+                    and context.pending_confirmation in ("claim", "delete")
+                )
+            ):
+                raise SemanticGateClosed("mail confirmation identity changed")
+            if context.recovered_confirmation and kind != "empty":
+                receipt = self._dispatch_mutation(
+                    "mail.mutation",
+                    lambda: self.oracle.click("mail/confirm/claim"),
+                )
+            else:
+                receipt = self.oracle.click("mail/confirm/claim")
+            context.pending_confirmation = None
+            context.recovered_confirmation = False
+            return receipt
+        if name in ("POPUP_CONFIRM", "POPUP_CANCEL"):
+            if self.oracle.operation_siren_exit_prompt_visible():
+                return self.oracle.click_operation_siren_exit(
+                    confirm=name == "POPUP_CONFIRM"
+                )
+            if self.oracle.meta_assist_sortie_prompt_visible():
+                if name == "POPUP_CONFIRM":
+                    return self._dispatch_mutation(
+                        "meta.assist",
+                        lambda: self.oracle.click_meta_assist_sortie(True),
+                    )
+                return self.oracle.click_meta_assist_sortie(False)
         if semantic_id is not None:
+            if semantic_id == "campaign-menu/exercise":
+                return self.oracle.click_campaign_exercise_entrance()
+            if semantic_id == "campaign-menu/archive":
+                return self.oracle.click_campaign_archive_entrance()
+            if semantic_id == "campaign-menu/os":
+                return self.oracle.click_campaign_os_entrance()
+            if semantic_id == "campaign-menu/event":
+                return self.oracle.click_campaign_event_entrance()
+            if semantic_id == "event/mode/story":
+                return self.oracle.click_event_story_mode()
+            if semantic_id == "event/mode/battle":
+                return self.oracle.click_event_battle_mode()
+            if semantic_id == "os/page/back":
+                return self.oracle.click_operation_siren_back()
+            if semantic_id == "os/map/globe":
+                return self.oracle.click_operation_siren_globe()
+            if semantic_id == "os/globe/map":
+                return self.oracle.click_operation_siren_globe_map()
+            if semantic_id == "os/globe/voucher":
+                return self.oracle.click_operation_siren_voucher()
+            if semantic_id == "os/globe/zone-enter":
+                return self.oracle.click_operation_siren_globe_zone_enter()
+            if semantic_id == "os/shop/back":
+                return self.oracle.click("os/shop/back")
+            if semantic_id == "os/voucher/back":
+                return self.oracle.click("os/voucher/back")
+            if semantic_id == "reward/meta/enter":
+                return self.oracle.click_meta_entrance()
+            if semantic_id in ("meta/current/open", "meta/dossier/open"):
+                return self.oracle.click_meta_card(
+                    dossier=semantic_id == "meta/dossier/open"
+                )
+            if semantic_id == "meta/current/list":
+                return self.oracle.click_meta_current_list()
+            if semantic_id == "meta/assist/start":
+                return self.oracle.click_meta_assist_start()
+            if semantic_id == "campaign-menu/daily":
+                return self.oracle.click_campaign_daily_entrance()
+            if semantic_id == "daily/precombat/start":
+                return self.oracle.click_daily_precombat_start()
+            if semantic_id in ("daily/next", "daily/prev"):
+                return self.oracle.click_daily_control(semantic_id)
             if (
                 self._dorm_context is not None
                 and semantic_id in ("main/live", "dorm-menu/dorm", "dorm/page/back")
@@ -4823,6 +7194,20 @@ class AlasSemanticAdapter:
                 self._mission_context.summary_entry_receipt = receipt
             if semantic_id == "main/mail" and self._mail_context is not None:
                 self._mail_context.entry_clicked = True
+            if (
+                self._minigame_context is not None
+                and semantic_id
+                in (
+                    "main/live",
+                    "dorm-menu/academy",
+                    "academy/game-room",
+                    "game-room/back",
+                    "game-room/home",
+                )
+            ):
+                self._minigame_context.passive_transition_until = (
+                    time.monotonic() + 20.0
+                )
             receipt = self._record_mission_transition(receipt)
             if (
                 self._research_context is not None
@@ -4982,14 +7367,33 @@ class AlasSemanticAdapter:
                     if name == "MAIL_BATCH_CLAIM"
                     else "mail/manage/delete"
                 )
-                return self._dispatch_mutation(
+                receipt = self._dispatch_mutation(
                     "mail.mutation",
                     lambda: self.oracle.click(target),
                 )
+                self._mail_context.pending_confirmation = (
+                    "claim" if name == "MAIL_BATCH_CLAIM" else "delete"
+                )
+                return receipt
             if name == "GOTO_MAIN_WHITE":
-                if not self._mail_context.entry_clicked:
+                if self._mail_context.surface_kind == "manager" or self.oracle.enabled("mail/manage/back"):
+                    # Recovery may begin on a manager overlay left by an
+                    # interrupted prior ALAS invocation. Its exact enabled
+                    # back target is sufficient to dismiss only that overlay.
+                    receipt = self.oracle.click("mail/manage/back")
+                    self._mail_context.initial_surface_probed = False
+                    self._mail_context.surface_kind = None
+                    return receipt
+                if not (
+                    self._mail_context.entry_clicked
+                    or self._mail_context.recovered_existing_page
+                ):
                     raise SemanticGateClosed("mail entry identity is not proven")
-                return self.oracle.click("mail/page/back")
+                receipt = self.oracle.click("mail/page/back")
+                self._mail_context.initial_surface_probed = False
+                self._mail_context.surface_kind = None
+                self._mail_context.leaving_page_until = time.monotonic() + 12.0
+                return receipt
             if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
                 target = self._award_close_target()
                 if target is None:
@@ -5003,6 +7407,11 @@ class AlasSemanticAdapter:
             return self.oracle.click_image(
                 MISSION_NAVBAR_TARGETS[int(navbar_match.group(1))]
             )
+
+        if name == "GUILD_POPUP_CANCEL":
+            if not self.oracle.enabled("overlay/guild-message/close"):
+                raise SemanticGateClosed("reviewed guild-message close is absent")
+            return self.oracle.click("overlay/guild-message/close")
 
         context = self._require_mission_context()
         if name == "MISSION_MULTI":
@@ -5029,10 +7438,6 @@ class AlasSemanticAdapter:
             if target is None:
                 raise SemanticGateClosed("reviewed reward popup close is absent")
             return self.oracle.click(target)
-        if name == "GUILD_POPUP_CANCEL":
-            if not self.oracle.enabled("overlay/guild-message/close"):
-                raise SemanticGateClosed("reviewed guild-message close is absent")
-            return self.oracle.click("overlay/guild-message/close")
         raise AlasSemanticUnmapped(
             "ALAS resource is not semantically mapped for input: {0}".format(name)
         )
@@ -5097,6 +7502,11 @@ class AlasSemanticAdapter:
             if normalized_color == BUILD_POOL_NAVBAR_ACTIVE_COLOR:
                 return selected
             if normalized_color == BUILD_POOL_NAVBAR_INACTIVE_COLOR:
+                if index == 0 and not self.oracle.exists(target):
+                    # The event construction pool is optional.  An unselected
+                    # toggle alone cannot distinguish an absent seasonal pool
+                    # from a present inactive tab.
+                    return False
                 return not selected
             raise SemanticGateClosed(
                 "unexpected construction pool-navbar color contract"
@@ -5313,6 +7723,10 @@ class AlasSemanticSession:
         ),
         allow_mission_claim_once: bool = False,
         allow_mail_mutations: bool = False,
+        mail_mutation_budget: int = 0,
+        minigame_play_budget: int = 0,
+        meta_assist_budget: int = 0,
+        operation_siren_coordinate_checkout_budget: int = 0,
         allow_tactical_rewards: bool = False,
         tactical_assign_budget: int = 0,
         commission_reward_budget: int = 0,
@@ -5322,6 +7736,7 @@ class AlasSemanticSession:
         dorm_collect_budget: int = 0,
         dorm_feed_budget: int = 0,
         build_submit_budget: int = 0,
+        shop_purchase_budget: int = 0,
         campaign_stage_entry_budget: int = 0,
         campaign_fleet_mutation_budget: int = 0,
         campaign_sortie_budget: int = 0,
@@ -5375,8 +7790,21 @@ class AlasSemanticSession:
         self.component = component
         self.allow_mission_claim_once = bool(allow_mission_claim_once)
         self.allow_mail_mutations = bool(allow_mail_mutations)
+        self.mail_mutation_budget = mail_mutation_budget
+        self.minigame_play_budget = minigame_play_budget
+        self.meta_assist_budget = meta_assist_budget
+        self.operation_siren_coordinate_checkout_budget = (
+            operation_siren_coordinate_checkout_budget
+        )
         self.allow_tactical_rewards = bool(allow_tactical_rewards)
         for label, budget in (
+            ("mail mutation", mail_mutation_budget),
+            ("minigame play", minigame_play_budget),
+            ("META assist", meta_assist_budget),
+            (
+                "Operation Siren coordinate checkout",
+                operation_siren_coordinate_checkout_budget,
+            ),
             ("tactical assign", tactical_assign_budget),
             ("commission reward", commission_reward_budget),
             ("commission start", commission_start_budget),
@@ -5385,6 +7813,7 @@ class AlasSemanticSession:
             ("dorm collect", dorm_collect_budget),
             ("dorm feed", dorm_feed_budget),
             ("build submit", build_submit_budget),
+            ("shop purchase", shop_purchase_budget),
             ("campaign stage entry", campaign_stage_entry_budget),
             ("campaign fleet mutation", campaign_fleet_mutation_budget),
             ("campaign sortie", campaign_sortie_budget),
@@ -5412,6 +7841,7 @@ class AlasSemanticSession:
         self.dorm_collect_budget = dorm_collect_budget
         self.dorm_feed_budget = dorm_feed_budget
         self.build_submit_budget = build_submit_budget
+        self.shop_purchase_budget = shop_purchase_budget
         self.campaign_stage_entry_budget = campaign_stage_entry_budget
         self.campaign_fleet_mutation_budget = campaign_fleet_mutation_budget
         self.campaign_sortie_budget = campaign_sortie_budget
@@ -5431,6 +7861,12 @@ class AlasSemanticSession:
         legacy_grants = _legacy_action_grants(
             allow_mission_claim_once=allow_mission_claim_once,
             allow_mail_mutations=allow_mail_mutations,
+            mail_mutation_budget=mail_mutation_budget,
+            minigame_play_budget=minigame_play_budget,
+            meta_assist_budget=meta_assist_budget,
+            operation_siren_coordinate_checkout_budget=(
+                operation_siren_coordinate_checkout_budget
+            ),
             allow_tactical_rewards=allow_tactical_rewards,
             tactical_assign_budget=tactical_assign_budget,
             commission_reward_budget=commission_reward_budget,
@@ -5440,6 +7876,7 @@ class AlasSemanticSession:
             dorm_collect_budget=dorm_collect_budget,
             dorm_feed_budget=dorm_feed_budget,
             build_submit_budget=build_submit_budget,
+            shop_purchase_budget=shop_purchase_budget,
             campaign_stage_entry_budget=campaign_stage_entry_budget,
             campaign_fleet_mutation_budget=campaign_fleet_mutation_budget,
             campaign_sortie_budget=campaign_sortie_budget,
@@ -5522,6 +7959,14 @@ class AlasSemanticSession:
                 trace=trace,
             )
         self.adapter: Optional[AlasSemanticAdapter] = None
+        self._combat_manifest: Optional[AlasCombatObserverManifest] = None
+        self._combat_last_generation = 0
+        self._combat_automation_source: Optional[str] = None
+        self._combat_result_transition_until = 0.0
+        self._combat_result_observation: Optional[Tuple[str, float]] = None
+        self._combat_last_result_receipt: Optional[ActionReceipt] = None
+        self._login_update_restart_performed = False
+        self._game_manager_restart_pending = False
 
     def _record_pixel_access(self, record: PixelAccessRecord) -> None:
         if self.trace is not None:
@@ -5640,7 +8085,10 @@ class AlasSemanticSession:
                 if frame_clock is None or frame_clock.current_frame_id is None:
                     return
                 frame_id = frame_clock.current_frame_id
-                frame_clock.borrow(frame_id)
+                # A semantic target is re-read immediately before input, but
+                # that does not authorize input from an expired ALAS frame.
+                # Keep the final mutation boundary fail closed as well.
+                frame_clock.borrow(frame_id, require_fresh=True)
                 frame_clock.invalidate(frame_id)
 
             def invalidate_then_tap(x: int, y: int) -> None:
@@ -5677,6 +8125,12 @@ class AlasSemanticSession:
                 package_gate,
                 allow_mission_claim_once=self.allow_mission_claim_once,
                 allow_mail_mutations=self.allow_mail_mutations,
+                mail_mutation_budget=self.mail_mutation_budget,
+                minigame_play_budget=self.minigame_play_budget,
+                meta_assist_budget=self.meta_assist_budget,
+                operation_siren_coordinate_checkout_budget=(
+                    self.operation_siren_coordinate_checkout_budget
+                ),
                 allow_tactical_rewards=self.allow_tactical_rewards,
                 tactical_assign_budget=self.tactical_assign_budget,
                 commission_reward_budget=self.commission_reward_budget,
@@ -5686,6 +8140,7 @@ class AlasSemanticSession:
                 dorm_collect_budget=self.dorm_collect_budget,
                 dorm_feed_budget=self.dorm_feed_budget,
                 build_submit_budget=self.build_submit_budget,
+                shop_purchase_budget=self.shop_purchase_budget,
                 campaign_stage_entry_budget=self.campaign_stage_entry_budget,
                 campaign_fleet_mutation_budget=(
                     self.campaign_fleet_mutation_budget
@@ -5730,7 +8185,88 @@ class AlasSemanticSession:
         if self._frame_clock is None:
             raise StaleFrameError()
         previous_frame_id = self._frame_clock.current_frame_id
-        frame = self._frame_clock.acquire(include_ui=True)
+        # A Unity transition can keep changing the full hierarchy while the
+        # atomic Button/state endpoint is already healthy.  ALAS screenshots
+        # are polling boundaries, so retry only this explicit cross-generation
+        # condition and still fail closed for every other semantic error.
+        attempt = 0
+        while True:
+            try:
+                frame = self._frame_clock.acquire(include_ui=True)
+                break
+            except (
+                SemanticGateClosed,
+                StaleFrameError,
+                ObserverTransportError,
+            ) as exc:
+                message = str(exc)
+                retryable = isinstance(exc, StaleFrameError) or message in (
+                    "semantic frame mixes UI and state generations",
+                    "observer snapshot is stale",
+                    "observer endpoints are not generation-coherent",
+                    "game activity is not top-resumed",
+                )
+                login_snapshot = self.open()._login_flow.snapshot()
+                in_login_transition = bool(
+                    login_snapshot.active
+                    and time.monotonic()
+                    <= login_snapshot.passive_transition_until
+                )
+                extended_login_retry = bool(
+                    in_login_transition
+                    and (
+                        isinstance(exc, ObserverTransportError)
+                        or (
+                            isinstance(exc, SemanticGateClosed)
+                            and message
+                            in (
+                                "observer snapshot is stale",
+                                "observer endpoints are not generation-coherent",
+                                "game activity is not top-resumed",
+                            )
+                        )
+                    )
+                    and attempt < 399
+                )
+                in_combat_result_transition = bool(
+                    time.monotonic() <= self._combat_result_transition_until
+                )
+                extended_combat_result_retry = bool(
+                    in_combat_result_transition
+                    and (
+                        isinstance(exc, (StaleFrameError, ObserverTransportError))
+                        or (
+                            isinstance(exc, SemanticGateClosed)
+                            and message
+                            in (
+                                "semantic frame mixes UI and state generations",
+                                "observer snapshot is stale",
+                                "observer endpoints are not generation-coherent",
+                                "game activity is not top-resumed",
+                            )
+                        )
+                    )
+                    and attempt < 79
+                )
+                retryable = retryable or bool(
+                    in_login_transition and isinstance(exc, ObserverTransportError)
+                )
+                retryable = retryable or bool(
+                    in_combat_result_transition
+                    and isinstance(exc, ObserverTransportError)
+                )
+                if not retryable or (
+                    attempt >= 2
+                    and not extended_login_retry
+                    and not extended_combat_result_retry
+                ):
+                    raise
+                attempt += 1
+                time.sleep(0.15)
+        if time.monotonic() <= self._combat_result_transition_until:
+            # One coherent post-action frame closes this exact transition.
+            # A later result-page action must arm its own window again.
+            self._combat_result_transition_until = 0.0
         if self.trace is not None:
             self.trace.emit(
                 "semantic.frame.refresh",
@@ -5761,8 +8297,292 @@ class AlasSemanticSession:
                 ) from exc
         return self.adapter.semantic_id_for(button)
 
+    def _live_combat_manifest(self) -> AlasCombatObserverManifest:
+        if self._combat_manifest is None:
+            path = (
+                Path(__file__).resolve().parents[2]
+                / "integration"
+                / "alas"
+                / "combat-observer-manifest.json"
+            )
+            self._combat_manifest = load_alas_combat_observer_manifest(path)
+        return self._combat_manifest
+
+    def _live_combat_snapshot(self) -> Any:
+        adapter = self.open()
+        if not adapter.campaign_combat_committed():
+            raise SemanticGateClosed(
+                "live combat observation requires one committed ALAS grid input"
+            )
+        handle = self._runtime_handle
+        if handle is None:
+            raise SemanticGateClosed("semantic runtime handle is unavailable")
+        snapshot_payload, button_payload, _ = request_observer_state(
+            handle.observer_request
+        )
+        ui_payload = handle.observer_request("GET /v1/ui\n")
+        _, snapshot = build_alas_combat_trace_frame(
+            snapshot_payload,
+            button_payload,
+            ui_payload,
+            self._live_combat_manifest(),
+        )
+        return snapshot
+
+    def _live_combat_visible(self) -> Tuple[str, ...]:
+        return alas_combat_visible_resource_names(
+            self._live_combat_snapshot(), self._live_combat_manifest()
+        )
+
+    def _campaign_combat_transition_error(self, exc: Exception) -> bool:
+        adapter = self.adapter
+        context = None if adapter is None else adapter._campaign_context
+        message = str(exc)
+        transient_observer_read = bool(
+            message.startswith(
+                "combat action control is not exact top-raycast actionable:"
+            )
+            or message
+            in (
+                "combat fixture endpoint completeness changed",
+                "combat fixture endpoint generations disagree",
+            )
+        )
+        return bool(
+            transient_observer_read
+            and context is not None
+            and adapter.campaign_combat_committed()
+            and time.monotonic() <= context.passive_transition_until
+        )
+
+    def combat_is_loading(self) -> bool:
+        if self.open().oracle.daily_combat_visible():
+            return True
+        if not self.open().campaign_combat_committed():
+            return False
+        try:
+            visible = set(self._live_combat_visible())
+        except SemanticGateClosed as exc:
+            if self._campaign_combat_transition_error(exc):
+                # The target grid input is committed and ChapterPreCombatUI
+                # exists, but its start control is still mounting. Report the
+                # bounded state as loading so ALAS enters its own preparation
+                # loop instead of re-reading the covered map underneath it.
+                return True
+            raise
+        return bool(
+            visible.intersection(
+                {
+                    "AUTOMATION_CONFIRM_CHECK",
+                    "BATTLE_PREPARATION",
+                    "BATTLE_PREPARATION_WITH_OVERLAY",
+                    "PAUSE",
+                }
+            )
+        )
+
+    def combat_is_executing(self) -> bool:
+        if self.open().oracle.daily_combat_visible():
+            return True
+        if not self.open().campaign_combat_committed():
+            return False
+        try:
+            return "PAUSE" in self._live_combat_visible()
+        except SemanticGateClosed as exc:
+            if self._campaign_combat_transition_error(exc):
+                return False
+            raise
+
+    def close_campaign_battle_fail_tip_if_present(self) -> bool:
+        self.refresh_frame()
+        return self.open().oracle.close_campaign_battle_fail_tip_if_present()
+
+    def combat_enemy_searching(self) -> bool:
+        if not self.open().campaign_combat_committed():
+            return False
+        return "MAP_ENEMY_SEARCHING" in self._live_combat_visible()
+
+    def _live_combat_click(
+        self,
+        resource_name: str,
+        *,
+        action_name: Optional[str] = None,
+    ) -> ActionReceipt:
+        adapter = self.open()
+        if not adapter.campaign_combat_committed():
+            raise SemanticGateClosed(
+                "live combat input requires one committed ALAS grid input"
+            )
+        handle = self._runtime_handle
+        if handle is None:
+            raise SemanticGateClosed("semantic runtime handle is unavailable")
+        targets = ALAS_COMBAT_RESOURCE_ACTION_TARGETS.get(resource_name, ())
+        if action_name is None and resource_name in targets:
+            action_name = resource_name
+        commit = commit_alas_combat_resource_action_for_evidence(
+            self,
+            self._live_combat_manifest(),
+            resource_name,
+            action_name=action_name,
+            expected_pid=handle.pid,
+            minimum_generation=self._combat_last_generation,
+            action_budget=1,
+        )
+        self._combat_last_generation = commit.commit_generation
+        if commit.action_name in ("AUTOMATION_SWITCH", "BATTLE_PREPARATION"):
+            context = adapter._campaign_context
+            if context is not None:
+                transition_seconds = (
+                    12.0
+                    if commit.action_name == "AUTOMATION_SWITCH"
+                    else 30.0
+                )
+                context.passive_transition_until = max(
+                    context.passive_transition_until,
+                    time.monotonic() + transition_seconds,
+                )
+        if commit.action_name in (
+            "BATTLE_STATUS_S",
+            "GET_ITEMS_1",
+            "GET_ITEMS_1_RETIREMENT_SAVE",
+            "EXP_INFO_S",
+        ):
+            self._combat_last_result_receipt = commit.receipt
+            self._arm_combat_result_transition(adapter)
+        return commit.receipt
+
+    def _arm_combat_result_transition(
+        self,
+        adapter: AlasSemanticAdapter,
+        transition_seconds: float = 12.0,
+    ) -> None:
+        """Allow only the brief observer gap after an exact result action."""
+
+        deadline = time.monotonic() + transition_seconds
+        self._combat_result_transition_until = max(
+            self._combat_result_transition_until,
+            deadline,
+        )
+        context = adapter._campaign_context
+        if context is not None:
+            context.passive_transition_until = max(
+                context.passive_transition_until,
+                deadline,
+            )
+
+    def _click_live_combat_automation_switch(self) -> ActionReceipt:
+        resource_name = self._combat_automation_source
+        if resource_name not in ("AUTOMATION_OFF", "AUTOMATION_ON"):
+            raise SemanticGateClosed(
+                "combat automation switch requires a preceding exact state probe"
+            )
+        try:
+            return self._live_combat_click(
+                resource_name,
+                action_name="AUTOMATION_SWITCH",
+            )
+        finally:
+            # The action commit revalidates the same source resource on two
+            # increasing snapshots. Never reuse that prior ALAS observation
+            # for a second toggle, whether the commit succeeds or fails.
+            self._combat_automation_source = None
+
     def appear(self, button: Any) -> bool:
-        return self.open().appear(button)
+        name = AlasSemanticAdapter._button_name(button)
+        adapter = self.open()
+        if adapter._login_flow.active:
+            # Startup/login owns its own bounded stale-frame handling and
+            # exact popup inventory. Do not run unrelated daily-combat probes
+            # first while Unity is still mounting the main scene.
+            return adapter.appear(button)
+        if adapter._mail_context is not None:
+            # MailMgrMsgboxUI is a legitimate overlay above MailUI.  Let the
+            # mail flow's own virtual-resource handlers classify it before
+            # generic reward/result probes apply unrelated blocker rules.
+            return adapter.appear(button)
+        if adapter._minigame_context is not None:
+            # GameHallUI legitimately sits under its ticket-limit Msgbox and
+            # list overlay. Let the minigame context classify those before
+            # generic reward/combat probes apply unrelated blocker rules.
+            return adapter.appear(button)
+        if (
+            adapter._campaign_context is not None
+            and adapter.oracle.enabled("overlay/network-reconnect/confirm")
+        ):
+            # NetworkDown may mount over a battle result or NewShipUI.  While
+            # that exact topmost prompt is present, do not ask the combat
+            # observer to classify the covered hierarchy: it correctly sees
+            # `network_down` as a blocker and would fail before ALAS reaches
+            # its generic popup handler.  Expose only the reviewed reconnect
+            # pair; every unrelated combat/resource probe is absent until the
+            # prompt is confirmed.
+            if name == "POPUP_CONFIRM":
+                return True
+            if name == "POPUP_CANCEL":
+                return adapter.oracle.enabled(
+                    "overlay/network-reconnect/cancel"
+                )
+            return False
+        if adapter.oracle.daily_battle_result_visible():
+            if name == "BATTLE_STATUS_S":
+                self._combat_result_observation = (name, time.monotonic())
+                return True
+            return False
+        if adapter.oracle.enabled("reward/award-info/close"):
+            return name == "GET_ITEMS_1"
+        if adapter.oracle.daily_combat_visible():
+            self._daily_combat_seen_at = time.monotonic()
+            if name == "AUTOMATION_ON":
+                return True
+            # Combat preparation/status loops probe many optional pixel-only
+            # popups. The exact live CombatUI root proves those are absent.
+            return False
+        if (
+            name in ALAS_COMBAT_DEFENSIVE_RESOURCE_NAMES
+            and self.adapter is not None
+            and self.adapter.campaign_combat_committed()
+        ):
+            try:
+                visible = name in self._live_combat_visible()
+                if visible and name in ("AUTOMATION_OFF", "AUTOMATION_ON"):
+                    self._combat_automation_source = name
+                if visible and name == "BATTLE_STATUS_S":
+                    self._combat_result_observation = (name, time.monotonic())
+                return visible
+            except SemanticGateClosed as exc:
+                if self._campaign_combat_transition_error(exc):
+                    # ChapterPreCombatUI mounts its Button before the same
+                    # control becomes the exact top raycast.  This is a
+                    # bounded post-grid transition only; outside it the same
+                    # mismatch remains fail-closed.
+                    return False
+                raise
+        try:
+            return self.open().appear(button)
+        except AlasSemanticUnmapped:
+            # The battle can switch to its result hierarchy between the
+            # session-level surface check above and Adapter.appear()'s fresh
+            # observer read.  Re-read once: on a proven Daily combat/result
+            # surface every optional pixel popup is absent, while the result
+            # sentinel remains the only positive probe.
+            self.refresh_frame()
+            oracle = self.open().oracle
+            if oracle.daily_battle_result_visible():
+                if name == "BATTLE_STATUS_S":
+                    self._combat_result_observation = (name, time.monotonic())
+                    return True
+                return False
+            if oracle.daily_combat_visible():
+                self._daily_combat_seen_at = time.monotonic()
+                return name == "AUTOMATION_ON"
+            if time.monotonic() - getattr(
+                self, "_daily_combat_seen_at", float("-inf")
+            ) <= 20.0:
+                # Unity briefly removes CombatUI before mounting the grade
+                # result page.  Keep ALAS polling without inventing a target;
+                # the next exact combat/result hierarchy decides the probe.
+                return False
+            raise
 
     def match_template_color(self, button: Any) -> bool:
         return self.open().match_template_color(button)
@@ -5787,8 +8607,50 @@ class AlasSemanticSession:
     ) -> Union[str, List[str]]:
         return self.open().ocr_text(areas, alphabet=alphabet)
 
+    def general_shop_items(self) -> Tuple[GeneralShopItemState, ...]:
+        return self.open().oracle.general_shop_items()
+
+    def operation_siren_shop_items(self):
+        return self.open().oracle.operation_siren_shop_items()
+
+    def operation_siren_shop_currency(self) -> int:
+        return self.open().oracle.operation_siren_shop_currency()
+
+    def operation_siren_voucher_items(self):
+        return self.open().oracle.operation_siren_voucher_items()
+
+    def operation_siren_voucher_currency(self) -> int:
+        return self.open().oracle.operation_siren_voucher_currency()
+
+    def shop_purchase_allowed(self) -> bool:
+        return self.open()._action_ledger.allowed("shop.purchase")
+
+    def purchase_shop_item_once(
+        self,
+        index: int,
+        expected_name: str,
+        expected_cost: str,
+        expected_price: int,
+    ) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().purchase_shop_item_once(
+            index, expected_name, expected_cost, expected_price
+        )
+
+    def shop_refresh_available(self) -> bool:
+        return self.open().oracle.shop_refresh_available()
+
     def research_projects(self) -> Tuple[ResearchProjectState, ...]:
         return self.open().research_projects()
+
+    def shipyard_select_series(self, series: int) -> ActionReceipt:
+        return self.open().shipyard_select_series(series)
+
+    def shipyard_select_ship(self, index: int) -> ShipyardState:
+        return self.open().shipyard_select_ship(index)
+
+    def shipyard_state(self, index: int) -> ShipyardState:
+        return self.open().shipyard_state(index)
 
     def research_detail_state(self) -> ResearchDetailState:
         return self.open().research_detail_state()
@@ -5823,6 +8685,60 @@ class AlasSemanticSession:
     def dorm_state(self) -> DormState:
         return self.open().dorm_state()
 
+    def operation_siren_state(self) -> OperationSirenState:
+        return self.open().operation_siren_state()
+
+    def operation_siren_map_visible(self) -> bool:
+        return self.open().operation_siren_map_visible()
+
+    def operation_siren_globe_state(self) -> OperationSirenGlobeState:
+        return self.open().operation_siren_globe_state()
+
+    def operation_siren_globe_visible(self) -> bool:
+        return self.open().operation_siren_globe_visible()
+
+    def operation_siren_storage_visible(self) -> bool:
+        return self.open().operation_siren_storage_visible()
+
+    def operation_siren_storage_state(self) -> OperationSirenStorageState:
+        return self.open().operation_siren_storage_state()
+
+    def click_operation_siren_storage_item(self, item_type: str) -> ActionReceipt:
+        return self.open().click_operation_siren_storage_item(item_type)
+
+    def operation_siren_storage_scroll_for_abyssal(
+        self,
+    ) -> OperationSirenStorageScrollReceipt:
+        return self.open().operation_siren_storage_scroll_for_abyssal()
+
+    def click_operation_siren_storage_back(self) -> ActionReceipt:
+        return self.open().click_operation_siren_storage_back()
+
+    def operation_siren_storage_detail(self) -> Optional[Tuple[str, str, int]]:
+        return self.open().operation_siren_storage_detail()
+
+    def click_operation_siren_storage_detail_close(self) -> ActionReceipt:
+        return self.open().click_operation_siren_storage_detail_close()
+
+    def operation_siren_coordinate_checkout_allowed(self) -> bool:
+        return self.open().operation_siren_coordinate_checkout_allowed()
+
+    def click_operation_siren_storage_detail_checkout(self) -> ActionReceipt:
+        return self.open().click_operation_siren_storage_detail_checkout()
+
+    def click_operation_siren_globe_zone(
+        self, expected_zone_name: str, point: Tuple[float, float]
+    ) -> ActionReceipt:
+        return self.open().click_operation_siren_globe_zone(
+            expected_zone_name, point
+        )
+
+    def meta_entrance_state(self) -> MetaEntranceState:
+        return self.open().meta_entrance_state()
+
+    def meta_assist_state(self) -> MetaAssistState:
+        return self.open().meta_assist_state()
+
     def dorm_feed_state(self) -> DormFeedState:
         return self.open().dorm_feed_state()
 
@@ -5843,6 +8759,21 @@ class AlasSemanticSession:
 
     def campaign_oil(self) -> int:
         return self.open().campaign_oil()
+
+    def campaign_auto_search_selected(self) -> bool:
+        return self.open().campaign_auto_search_selected()
+
+    def campaign_map_formation(self) -> str:
+        return self.open().campaign_map_formation()
+
+    def campaign_fleet_hp(self) -> Tuple[float, ...]:
+        return self.open().campaign_fleet_hp()
+
+    def operation_siren_need_repair(self) -> Tuple[bool, ...]:
+        return self.open().operation_siren_need_repair()
+
+    def operation_siren_low_resolve_visible(self) -> bool:
+        return self.open().operation_siren_low_resolve_visible()
 
     def campaign_map_state(
         self,
@@ -5876,6 +8807,9 @@ class AlasSemanticSession:
     def campaign_combat_committed(self) -> bool:
         return self.open().campaign_combat_committed()
 
+    def campaign_combat_active(self) -> bool:
+        return self.open().campaign_combat_active()
+
     def confirm_campaign_combat(
         self,
         battle_count_after: int,
@@ -5893,10 +8827,25 @@ class AlasSemanticSession:
     ) -> CampaignMapViewportSwipeIntent:
         return self.open().begin_campaign_map_swipe_vector(vector, **kwargs)
 
+    def recover_campaign_map_network_reconnect(self) -> bool:
+        return self.open().recover_campaign_map_network_reconnect()
+
+    def begin_operation_siren_globe_swipe_vector(
+        self, vector: Any, **kwargs: Any
+    ) -> _OperationSirenGlobeSwipeIntent:
+        return self.open().begin_operation_siren_globe_swipe_vector(
+            vector, **kwargs
+        )
+
     def end_campaign_map_swipe_vector(
         self, intent: CampaignMapViewportSwipeIntent
     ) -> None:
         self.open().end_campaign_map_swipe_vector(intent)
+
+    def end_operation_siren_globe_swipe_vector(
+        self, intent: _OperationSirenGlobeSwipeIntent
+    ) -> None:
+        self.open().end_operation_siren_globe_swipe_vector(intent)
 
     def swipe(
         self,
@@ -5906,7 +8855,7 @@ class AlasSemanticSession:
         duration: Any,
         name: Any,
         distance_check: Any,
-    ) -> CampaignMapViewportSwipeProof:
+    ) -> Union[CampaignMapViewportSwipeProof, OperationSirenGlobeSwipeReceipt]:
         return self.open().swipe(
             p1,
             p2,
@@ -6073,6 +9022,13 @@ class AlasSemanticSession:
     def commission_scroll_to_top(self) -> Optional[CommissionScrollProof]:
         return self.open().commission_scroll_to_top()
 
+    def minigame_scroll_visible(self) -> bool:
+        return self.open().minigame_scroll_visible()
+
+    def minigame_scroll_set(self, position: float) -> bool:
+        self.refresh_frame()
+        return self.open().minigame_scroll_set(position)
+
     def commission_reward_pending(self) -> bool:
         return self.open().commission_reward_pending()
 
@@ -6103,15 +9059,150 @@ class AlasSemanticSession:
     def cancel_tactical_continue_if_present(self) -> bool:
         return self.open().cancel_tactical_continue_if_present()
 
+    def _combat_result_action_oracle(
+        self, adapter: AlasSemanticAdapter
+    ) -> Any:
+        """Return a current immutable frame oracle for one result action."""
+
+        if not isinstance(adapter, AlasSemanticAdapter):
+            return adapter.oracle
+        try:
+            frame_clock = self._frame_clock
+            if frame_clock is not None:
+                frame_clock.borrow(require_fresh=True)
+            return adapter._require_frame_observation_oracle()
+        except StaleFrameError:
+            # Some ALAS result handlers probe the next overlay immediately
+            # after the previous exact click, before their loop takes another
+            # screenshot. That prior click intentionally invalidated its
+            # lease; acquire a new immutable frame and re-prove the next exact
+            # target instead of extending or reusing the expired lease.
+            self.refresh_frame()
+            return adapter._require_frame_observation_oracle()
+
     def click(self, button: Any) -> ActionReceipt:
         if AlasSemanticAdapter._campaign_grid_location(button) is not None:
+            self.refresh_frame()
             return self.open().click_campaign_combat_grid(button)
         name = AlasSemanticAdapter._button_name(button)
+        shop_item_index = getattr(button, "semantic_shop_index", None)
+        if shop_item_index is not None:
+            self.refresh_frame()
+            return self.open().oracle.click_shop_item(shop_item_index)
+        shop_nav_labels = {
+            "NAV_GENERAL": "补给商店",
+            "NAV_MONTHLY": "月度商店",
+        }
+        if name in shop_nav_labels:
+            self.refresh_frame()
+            return self.open().oracle.click_shop_nav(shop_nav_labels[name])
+        shop_tab_labels = {
+            "TAB_MERIT": "军需",
+            "TAB_GUILD": "舰队",
+            "TAB_META": "META",
+            "TAB_PRIZE": "奖券",
+            "TAB_CORE_LIMITED": "核心限定",
+            "TAB_CORE_MONTHLY": "核心月度",
+            "TAB_MEDAL": "勋章",
+            "TAB_PROTOTYPE": "原型",
+        }
+        if name in shop_tab_labels:
+            self.refresh_frame()
+            return self.open().oracle.click_shop_tab(shop_tab_labels[name])
+        if name in ("BATTLE_STATUS_S", "BATTLE_STATUS_D", "CLICK_SAFE_AREA"):
+            adapter = self.open()
+            # Reuse the immutable ALAS frame that authorized this click.  A
+            # second live observer read can take longer than the input lease
+            # on a busy result transition, producing a TOCTOU stale-frame
+            # failure even though the exact result target was already proven.
+            # The frame-bound oracle performs the same semantic checks without
+            # hidden refreshes, and the final tap still invalidates that lease.
+            result_oracle = self._combat_result_action_oracle(adapter)
+            if result_oracle.daily_battle_result_visible():
+                receipt = result_oracle.click_daily_battle_result()
+                self._combat_result_observation = None
+                self._combat_last_result_receipt = receipt
+                if adapter.campaign_combat_committed():
+                    self._arm_combat_result_transition(adapter)
+                return receipt
+            observation = self._combat_result_observation
+            if (
+                name == "BATTLE_STATUS_S"
+                and adapter.campaign_combat_committed()
+                and observation is not None
+                and observation[0] == name
+                # A3's large typed result hierarchy can take several seconds
+                # between ALAS's positive probe and its subsequent click.
+                # This remains a passive, no-input acknowledgement; the exact
+                # positive observation and six-second lease are sufficient
+                # even when refreshing that frame correctly closed the prior
+                # post-action transition window.
+                and time.monotonic() <= observation[1] + 6.0
+                and self._combat_last_result_receipt is not None
+            ):
+                # ALAS deliberately sleeps between appear() and click().  The
+                # exact result page can finish its own transition during that
+                # delay.  Consume the one-use positive observation without
+                # injecting another input; every ordinary combat action still
+                # revalidates and fails closed below.
+                self._combat_result_observation = None
+                return replace(
+                    self._combat_last_result_receipt,
+                    semantic_id="combat/result-transition/passive",
+                )
+        if name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3"):
+            adapter = self.open()
+            result_oracle = self._combat_result_action_oracle(adapter)
+            if result_oracle.campaign_battle_reward_visible():
+                target = (
+                    "reward/award-info/close"
+                    if result_oracle.enabled("reward/award-info/close")
+                    else "reward/award-info1/close"
+                )
+                receipt = result_oracle.click(target)
+                self._combat_last_result_receipt = receipt
+                self._arm_combat_result_transition(adapter)
+                return receipt
+        if (
+            name == "CLICK_SAFE_AREA"
+            and self.open().oracle.enabled("reward/award-info/close")
+        ):
+            self.refresh_frame()
+            return self.open().oracle.click("reward/award-info/close")
+        if name == "GOTO_MAIN" and self.open().oracle.exercise_page_visible():
+            self.refresh_frame()
+            return self.open().oracle.click("exercise/page/back")
+        if (
+            name in ALAS_COMBAT_RESOURCE_ACTION_TARGETS
+            and self.adapter is not None
+            and self.adapter.campaign_combat_committed()
+        ):
+            return self._live_combat_click(name)
+        if (
+            name == "AUTOMATION_SWITCH"
+            and self.adapter is not None
+            and self.adapter.campaign_combat_committed()
+        ):
+            return self._click_live_combat_automation_switch()
+        if (
+            name == "COMBAT_AUTO_SWITCH"
+            and self.adapter is not None
+            and self.adapter.campaign_combat_committed()
+        ):
+            # Original CombatAuto probes COMBAT_AUTO first and reaches this
+            # action only when that exact manual-mode resource was visible.
+            return self._live_combat_click("COMBAT_AUTO")
+        if name == "SWITCH_OVER" and self.adapter is not None:
+            self.refresh_frame()
         campaign_stage_code = getattr(
             button, "semantic_campaign_stage_code", None
         )
         if (
             name not in DEFAULT_ALAS_BUTTON_TARGETS
+            and name not in LOGIN_ACTION_TARGETS
+            and name != "DAILY_ENTER"
+            and not name.startswith("DAILY_MISSION_")
+            and name not in ("MISSION_FINISH", "MISSION_CHECKOUT")
             and name not in MISSION_CLICK_RESOURCES
             and name not in MAIL_CLICK_RESOURCES
             and name not in CAMPAIGN_CLICK_RESOURCES
@@ -6122,6 +9213,10 @@ class AlasSemanticSession:
             and not (
                 self.adapter is not None
                 and name in DORM_VIRTUAL_RESOURCES
+            )
+            and not (
+                self.adapter is not None
+                and name in MINIGAME_VIRTUAL_RESOURCES
             )
             and not (
                 self.adapter is not None
@@ -6145,13 +9240,62 @@ class AlasSemanticSession:
             raise AlasSemanticUnmapped(
                 "ALAS resource is not semantically mapped for input: {0}".format(name)
             )
+        # A page scan can legitimately take longer than one frame lease.  The
+        # semantic target is re-read by Adapter.click(); refresh the frozen
+        # screenshot-equivalent immediately before that read/input boundary.
+        self.refresh_frame()
         return self.open().click(button)
+
+    def click_if_present(self, button: Any) -> Optional[ActionReceipt]:
+        """Dispatch a presence-driven ALAS click only if its target remains."""
+
+        try:
+            return self.click(button)
+        except SemanticTargetMissing:
+            return None
+
+    def campaign_story_black(self) -> bool:
+        oracle = self.open().oracle
+        if oracle.daily_combat_visible():
+            self._daily_combat_seen_at = time.monotonic()
+            return False
+        if oracle.daily_battle_result_visible():
+            return False
+        if time.monotonic() - getattr(
+            self, "_daily_combat_seen_at", float("-inf")
+        ) <= 20.0:
+            return False
+        return self.open().campaign_story_black()
+
+    def daily_current_active(self) -> bool:
+        return self.open().daily_current_active()
+
+    def daily_current_remain(self) -> int:
+        return self.open().daily_current_remain()
+
+    def daily_detail_visible(self) -> bool:
+        return self.open().daily_detail_visible()
+
+    def daily_precombat_visible(self) -> bool:
+        return self.open().daily_precombat_visible()
+
+    def click_daily_back(self) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().click_daily_back()
+
+    def click_daily_precombat_back(self) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().click_daily_precombat_back()
 
     def begin_mission_reward(self, daily: bool, weekly: bool) -> None:
         self.open().begin_mission_reward(daily=daily, weekly=weekly)
 
     def begin_login(self) -> None:
-        self.open().begin_login()
+        adapter = self.open()
+        adapter.begin_login()
+        if self._game_manager_restart_pending:
+            adapter._login_flow.extend_passive_transition(120.0)
+            self._game_manager_restart_pending = False
 
     def end_login(self) -> None:
         if self.adapter is not None:
@@ -6166,6 +9310,9 @@ class AlasSemanticSession:
             self.adapter is not None and self.adapter.mission_reward_active()
         )
 
+    def mail_reward_active(self) -> bool:
+        return bool(self.adapter is not None and self.adapter.mail_reward_active())
+
     def mission_claim_allowed(self) -> bool:
         return self.open().mission_claim_allowed()
 
@@ -6175,6 +9322,105 @@ class AlasSemanticSession:
     def end_mail(self) -> None:
         if self.adapter is not None:
             self.adapter.end_mail()
+
+    def begin_supply_pack(self) -> None:
+        self.open().begin_supply_pack()
+
+    def end_supply_pack(self) -> None:
+        if self.adapter is not None:
+            self.adapter.end_supply_pack()
+
+    def supply_pack_active(self) -> bool:
+        return bool(
+            self.adapter is not None and self.adapter.supply_pack_active()
+        )
+
+    def begin_minigame(self) -> None:
+        self.open().begin_minigame()
+
+    def end_minigame(self) -> None:
+        if self.adapter is not None:
+            self.adapter.end_minigame()
+
+    def minigame_active(self) -> bool:
+        return bool(self.adapter is not None and self.adapter.minigame_active())
+
+    def minigame_play_allowed(self) -> bool:
+        return self.open().minigame_play_allowed()
+
+    def minigame_prepare_default_ticket(self) -> int:
+        self.refresh_frame()
+        return self.open().minigame_prepare_default_ticket()
+
+    def minigame_help_visible(self) -> bool:
+        self.refresh_frame()
+        return self.open().oracle.new_year_challenge_help_visible()
+
+    def minigame_close_help(self) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().oracle.click_new_year_challenge_help()
+
+    def minigame_result(self) -> Optional[Tuple[int, int]]:
+        self.refresh_frame()
+        return self.open().oracle.new_year_challenge_result()
+
+    def minigame_attack_state(self) -> Tuple[int, int, bool]:
+        self.refresh_frame()
+        return self.open().oracle.new_year_challenge_attack_state()
+
+    def minigame_attack(self, key: str) -> Optional[ActionReceipt]:
+        self.refresh_frame()
+        context = self.open()._require_minigame_context()
+        if context.play_receipt is None:
+            raise SemanticGateClosed("minigame attack used before admitted start")
+        return self.open().oracle.click_new_year_challenge_attack_key(key)
+
+    def minigame_attack_combo(
+        self, first_key: str
+    ) -> Tuple[ActionReceipt, ...]:
+        self.refresh_frame()
+        context = self.open()._require_minigame_context()
+        if context.play_receipt is None:
+            raise SemanticGateClosed("minigame combo used before admitted start")
+        return self.open().oracle.click_new_year_challenge_attack_combo(first_key)
+
+    def minigame_tick(
+        self, first_key: str
+    ) -> Tuple[Optional[Tuple[int, int]], int, Tuple[ActionReceipt, ...]]:
+        self.refresh_frame()
+        context = self.open()._require_minigame_context()
+        if context.play_receipt is None:
+            raise SemanticGateClosed("minigame tick used before admitted start")
+        return self.open().oracle.new_year_challenge_tick(first_key)
+
+    def minigame_exit_new_year(self) -> Tuple[ActionReceipt, ...]:
+        """Return from Fushun prepare/list to the stable game-room page."""
+
+        self.refresh_frame()
+        adapter = self.open()
+        context = adapter._require_minigame_context()
+        receipts = []
+        if adapter.oracle.new_year_challenge_result() is not None:
+            receipts.append(adapter.oracle.click_new_year_challenge_result_close())
+            context.passive_transition_until = time.monotonic() + 12.0
+            time.sleep(0.5)
+            self.refresh_frame()
+        try:
+            adapter.oracle.new_year_challenge_ticket_count()
+        except SemanticGateClosed:
+            pass
+        else:
+            receipts.append(
+                adapter.oracle.click_new_year_challenge_prepare_control("back")
+            )
+            context.passive_transition_until = time.monotonic() + 12.0
+            time.sleep(0.75)
+            self.refresh_frame()
+        if not adapter.oracle.game_room_page_visible():
+            raise SemanticGateClosed(
+                "new-year challenge exit did not restore the game room"
+            )
+        return tuple(receipts)
 
     def begin_commission(self) -> None:
         self.open().begin_commission()
@@ -6225,6 +9471,134 @@ class AlasSemanticSession:
             self.adapter is not None
             and self.adapter.campaign_pre_sortie_active()
         )
+
+    def campaign_hard_remain(self) -> int:
+        return self.open().campaign_hard_remain()
+
+    @staticmethod
+    def _login_probe_is_transient(adapter: AlasSemanticAdapter, exc: Exception) -> bool:
+        snapshot = adapter._login_flow.snapshot()
+        return bool(
+            snapshot.active
+            and time.monotonic() <= snapshot.passive_transition_until
+            and (
+                isinstance(exc, ObserverTransportError)
+                or str(exc)
+                in (
+                    "observer snapshot is stale",
+                    "observer endpoints are not generation-coherent",
+                    "Msgbox snapshots are not coherent",
+                    "game activity is not top-resumed",
+                )
+            )
+        )
+
+    def server_maintenance_visible(self) -> bool:
+        adapter = self.open()
+        try:
+            return adapter.server_maintenance_visible()
+        except (SemanticGateClosed, ObserverTransportError) as exc:
+            if self._login_probe_is_transient(adapter, exc):
+                return False
+            raise
+
+    def login_update_in_progress(self) -> bool:
+        adapter = self.open()
+        try:
+            return adapter.login_update_in_progress()
+        except (SemanticGateClosed, ObserverTransportError) as exc:
+            if self._login_probe_is_transient(adapter, exc):
+                return False
+            raise
+
+    def _login_update_restart_required_on_frame(
+        self, adapter: AlasSemanticAdapter
+    ) -> bool:
+        """Evaluate update completion from one coherent immutable frame."""
+
+        live_oracle = adapter.oracle
+        self.refresh_frame()
+        frame_oracle = adapter._require_frame_observation_oracle()
+        # The update-progress latch belongs to this game process, not to an
+        # individual frame reader. Preserve it while the immutable oracle
+        # evaluates the completion text/opening transition.
+        frame_oracle._login_update_seen = live_oracle._login_update_seen
+        frame_oracle._login_update_restart_consumed = (
+            live_oracle._login_update_restart_consumed
+        )
+        required = frame_oracle.login_update_restart_required()
+        if frame_oracle._login_update_restart_consumed:
+            live_oracle._login_update_restart_consumed = True
+        return required
+
+    def restart_game_after_update(self) -> bool:
+        if self._login_update_restart_performed:
+            return False
+        adapter = self.open()
+        try:
+            explicit_prompt = adapter.login_update_restart_prompt_available()
+        except (SemanticGateClosed, ObserverTransportError) as exc:
+            if self._login_probe_is_transient(adapter, exc):
+                return False
+            raise
+        try:
+            if explicit_prompt:
+                # The prompt matcher performs a coherent multi-endpoint read. Get
+                # one fresh ALAS frame immediately before its owned confirmation
+                # input, just like the normal session click boundary.
+                self.refresh_frame()
+                adapter = self.open()
+                adapter.click_login_update_restart_prompt()
+                if self.trace is not None:
+                    self.trace.emit("semantic.login.update_restart_prompt")
+            elif not self._login_update_restart_required_on_frame(adapter):
+                return False
+        except (SemanticGateClosed, ObserverTransportError) as exc:
+            if self._login_probe_is_transient(adapter, exc):
+                return False
+            raise
+        factory = self._runtime_handle_factory
+        if factory is None or self.package_process_lease is not None:
+            raise SemanticGateClosed(
+                "post-update game restart requires an owned ADB runtime"
+            )
+        adapter.end_login()
+        self.adapter = None
+        self._release_owned_runtime_handle()
+        factory.restart_game(self.component)
+        # This session may rebuild its Oracle before Unity has removed the
+        # completion text. Preserve exactly one restart across that rebuild.
+        self._login_update_restart_performed = True
+        self.begin_login()
+        # Unity can expose the newly-created observer socket before its first
+        # post-update scene frame is fresh. Scope the longer grace to this one
+        # owned cold-restart recovery; normal transitions retain their existing
+        # short stale-frame limit.
+        self.open()._login_flow.extend_passive_transition(120.0)
+        if self.trace is not None:
+            self.trace.emit("semantic.login.update_restart")
+        return True
+
+    def restart_game_for_manager(self) -> bool:
+        """Cold-restart the pinned game for ALAS GameManager ownership."""
+
+        factory = self._runtime_handle_factory
+        if factory is None or self.package_process_lease is not None:
+            raise SemanticGateClosed(
+                "game-manager restart requires an owned ADB runtime"
+            )
+        if self.adapter is not None:
+            self.adapter.end_login()
+        self.adapter = None
+        self._release_owned_runtime_handle()
+        factory.restart_game(self.component)
+        # GameManager's LoginHandler owns the next login-flow boundary.  Mark
+        # the freshly restarted process so that boundary receives the same
+        # boot grace as an in-flow post-update restart without nesting flows.
+        self._game_manager_restart_pending = True
+        if self.trace is not None:
+            self.trace.emit("semantic.game_manager.restart")
+        return True
 
     def run_mission_reward(
         self,

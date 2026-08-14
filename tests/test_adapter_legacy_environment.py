@@ -51,6 +51,10 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS",
             "ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS",
             "ALAS_SEMANTIC_ALLOW_MAIL_MUTATIONS",
+            "ALAS_SEMANTIC_MAIL_MUTATION_BUDGET",
+            "ALAS_SEMANTIC_META_ASSIST_BUDGET",
+            "ALAS_SEMANTIC_MINIGAME_PLAY_BUDGET",
+            "ALAS_SEMANTIC_OPSI_COORDINATE_CHECKOUT_BUDGET",
             "ALAS_SEMANTIC_ALLOW_MISSION_CLAIM_ONCE",
             "ALAS_SEMANTIC_ALLOW_TACTICAL_REWARDS",
             "ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET",
@@ -67,6 +71,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             "ALAS_SEMANTIC_MODE",
             "ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET",
             "ALAS_SEMANTIC_RESEARCH_START_BUDGET",
+            "ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET",
             "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET",
         }
         self.assertEqual(LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES, expected)
@@ -158,6 +163,29 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
                 environment[variable] = "true"
                 result = translate_legacy_semantic_environment(environment)
                 self.assertEqual(result.grant(capability), 0)
+
+    def test_mail_integer_budget_extends_boolean_compatibility_grant(self):
+        boolean_environment = dict(BASE_ENVIRONMENT)
+        boolean_environment["ALAS_SEMANTIC_ALLOW_MAIL_MUTATIONS"] = "1"
+        boolean_result = translate_legacy_semantic_environment(boolean_environment)
+        self.assertEqual(boolean_result.grant("mail.mutation"), 1)
+        self.assertEqual(boolean_result.session_arguments["mail_mutation_budget"], 1)
+
+        budget_environment = dict(boolean_environment)
+        budget_environment["ALAS_SEMANTIC_MAIL_MUTATION_BUDGET"] = "2"
+        budget_result = translate_legacy_semantic_environment(budget_environment)
+        self.assertEqual(budget_result.grant("mail.mutation"), 2)
+        self.assertEqual(budget_result.session_arguments["mail_mutation_budget"], 2)
+
+    def test_operation_siren_coordinate_checkout_budget_is_explicit(self):
+        environment = dict(BASE_ENVIRONMENT)
+        environment["ALAS_SEMANTIC_OPSI_COORDINATE_CHECKOUT_BUDGET"] = "2"
+        result = translate_legacy_semantic_environment(environment)
+        self.assertEqual(result.grant("operation_siren.coordinate_checkout"), 2)
+        self.assertEqual(
+            result.session_arguments["operation_siren_coordinate_checkout_budget"],
+            2,
+        )
 
     def test_explicit_policy_conflicts_with_any_nondefault_legacy_grant(self):
         policy = explicit_policy({"mission.claim": 3})

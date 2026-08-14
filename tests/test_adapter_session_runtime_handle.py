@@ -1,5 +1,6 @@
 import copy
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 
 from alas_headless import (
@@ -14,7 +15,9 @@ from alas_headless.adapter import (
     UnsupportedPixelRead,
     semantic_runtime_fingerprint_sha256,
 )
+from alas_headless.alas_adapter import AlasSemanticAdapter
 from alas_headless.semantic_oracle import ObserverTransportError
+from alas_headless.semantic_oracle import ActionReceipt, Bounds, Point
 
 
 REVISION = "be80ce591a481c12d60c50d6040d40c035b40a2b"
@@ -142,6 +145,373 @@ class FrameRuntimeHandle(FakeRuntimeHandle):
 
 
 class SessionRuntimeHandleTests(unittest.TestCase):
+    def test_combat_loading_keeps_exact_precombat_mount_transition_bounded(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        context = SimpleNamespace(passive_transition_until=120.0)
+        session.adapter = SimpleNamespace(
+            oracle=SimpleNamespace(daily_combat_visible=lambda: False),
+            campaign_combat_committed=lambda: True,
+            _campaign_context=context,
+        )
+        error = SemanticGateClosed(
+            "combat action control is not exact top-raycast actionable: start"
+        )
+
+        with mock.patch.object(
+            session,
+            "_live_combat_visible",
+            side_effect=error,
+        ), mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=100.0,
+        ):
+            self.assertTrue(session.combat_is_loading())
+            self.assertFalse(session.combat_is_executing())
+
+        with mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=100.0,
+        ):
+            self.assertTrue(
+                session._campaign_combat_transition_error(
+                    SemanticGateClosed(
+                        "combat fixture endpoint completeness changed"
+                    )
+                )
+            )
+            self.assertTrue(
+                session._campaign_combat_transition_error(
+                    SemanticGateClosed(
+                        "combat fixture endpoint generations disagree"
+                    )
+                )
+            )
+            self.assertFalse(
+                session._campaign_combat_transition_error(
+                    SemanticGateClosed(
+                        "combat fixture endpoint payload is malformed"
+                    )
+                )
+            )
+
+        context.passive_transition_until = 90.0
+        with mock.patch.object(
+            session,
+            "_live_combat_visible",
+            side_effect=error,
+        ), mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=100.0,
+        ), self.assertRaises(SemanticGateClosed):
+            session.combat_is_loading()
+
+    def test_battle_start_commit_extends_its_own_passive_transition_window(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        context = SimpleNamespace(passive_transition_until=50.0)
+        session.adapter = SimpleNamespace(
+            campaign_combat_committed=lambda: True,
+            _campaign_context=context,
+        )
+        receipt = object()
+        commit = SimpleNamespace(
+            commit_generation=81,
+            action_name="BATTLE_PREPARATION",
+            receipt=receipt,
+        )
+
+        with mock.patch.object(
+            session,
+            "_live_combat_manifest",
+            return_value=object(),
+        ), mock.patch(
+            "alas_headless.alas_adapter."
+            "commit_alas_combat_resource_action_for_evidence",
+            return_value=commit,
+        ), mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=100.0,
+        ):
+            actual = session._live_combat_click("BATTLE_PREPARATION")
+
+        self.assertIs(actual, receipt)
+        self.assertEqual(session._combat_last_generation, 81)
+        self.assertEqual(context.passive_transition_until, 130.0)
+
+    def test_exact_battle_result_click_arms_bounded_frame_transition(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        receipt = object()
+        context = SimpleNamespace(passive_transition_until=50.0)
+        oracle = SimpleNamespace(
+            daily_battle_result_visible=lambda: True,
+            click_daily_battle_result=lambda: receipt,
+        )
+        live_oracle = SimpleNamespace(
+            daily_battle_result_visible=mock.Mock(
+                side_effect=AssertionError("result click must reuse ALAS frame")
+            ),
+            click_daily_battle_result=mock.Mock(
+                side_effect=AssertionError("result click must reuse ALAS frame")
+            ),
+        )
+        session.adapter = SimpleNamespace(
+            oracle=live_oracle,
+            campaign_combat_committed=lambda: True,
+            _campaign_context=context,
+        )
+
+        with mock.patch.object(
+            AlasSemanticAdapter,
+            "_require_frame_observation_oracle",
+            return_value=oracle,
+        ), mock.patch.object(
+            session,
+            "open",
+            return_value=mock.Mock(
+                spec=AlasSemanticAdapter,
+                campaign_combat_committed=lambda: True,
+                _campaign_context=context,
+            ),
+        ):
+            adapter = session.open.return_value
+            adapter._require_frame_observation_oracle.return_value = oracle
+
+            with mock.patch(
+                "alas_headless.alas_adapter.time.monotonic",
+                return_value=100.0,
+            ):
+                actual = session.click("BATTLE_STATUS_S")
+
+        self.assertIs(actual, receipt)
+        self.assertEqual(session._combat_result_transition_until, 112.0)
+        self.assertEqual(context.passive_transition_until, 112.0)
+
+    def test_interrupted_campaign_reward_reuses_exact_result_stack_frame(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        receipt = ActionReceipt(
+            semantic_id="reward/award-info/close",
+            generation=83,
+            point=Point(640, 360),
+            bounds=Bounds(600, 320, 680, 400),
+            path="Combat/Result/Award/close",
+        )
+        result_oracle = SimpleNamespace(
+            campaign_battle_reward_visible=lambda: True,
+            enabled=lambda semantic_id: semantic_id == "reward/award-info/close",
+            click=mock.Mock(return_value=receipt),
+        )
+        adapter = mock.Mock(spec=AlasSemanticAdapter)
+        adapter._require_frame_observation_oracle.return_value = result_oracle
+        adapter._campaign_context = None
+
+        with mock.patch.object(session, "open", return_value=adapter), mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=100.0,
+        ):
+            actual = session.click("GET_ITEMS_1")
+
+        self.assertIs(actual, receipt)
+        result_oracle.click.assert_called_once_with("reward/award-info/close")
+        self.assertEqual(session._combat_result_transition_until, 112.0)
+
+    def test_result_chain_reacquires_after_prior_click_invalidated_frame(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        expected = object()
+        adapter = mock.Mock(spec=AlasSemanticAdapter)
+        adapter._require_frame_observation_oracle.side_effect = (
+            StaleFrameError(),
+            expected,
+        )
+
+        with mock.patch.object(session, "refresh_frame") as refresh:
+            actual = session._combat_result_action_oracle(adapter)
+
+        self.assertIs(actual, expected)
+        refresh.assert_called_once_with()
+        self.assertEqual(
+            adapter._require_frame_observation_oracle.call_count, 2
+        )
+
+    def test_result_chain_reacquires_present_but_expired_frame(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        expected = object()
+        adapter = mock.Mock(spec=AlasSemanticAdapter)
+        adapter._require_frame_observation_oracle.return_value = expected
+        session._frame_clock = mock.Mock()
+        session._frame_clock.borrow.side_effect = StaleFrameError()
+
+        with mock.patch.object(session, "refresh_frame") as refresh:
+            actual = session._combat_result_action_oracle(adapter)
+
+        self.assertIs(actual, expected)
+        session._frame_clock.borrow.assert_called_once_with(require_fresh=True)
+        refresh.assert_called_once_with()
+
+    def test_battle_result_click_race_consumes_one_positive_observation_without_input(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        receipt = ActionReceipt(
+            semantic_id="daily/battle/result",
+            generation=80,
+            point=Point(640, 360),
+            bounds=Bounds(600, 320, 680, 400),
+            path="Combat/Result/confirm",
+        )
+        visibility = iter((True, True, False))
+        click_result = mock.Mock(return_value=receipt)
+        oracle = SimpleNamespace(
+            daily_battle_result_visible=lambda: next(visibility),
+            click_daily_battle_result=click_result,
+            enabled=lambda _semantic_id: False,
+            daily_combat_visible=lambda: False,
+        )
+        context = SimpleNamespace(passive_transition_until=0.0)
+        session.adapter = SimpleNamespace(
+            oracle=oracle,
+            campaign_combat_committed=lambda: True,
+            _campaign_context=context,
+            _login_flow=SimpleNamespace(active=False),
+            _mail_context=None,
+            _minigame_context=None,
+        )
+
+        with mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            side_effect=(100.0, 100.0, 105.5, 105.5),
+        ):
+            self.assertIs(session.click("BATTLE_STATUS_S"), receipt)
+            self.assertTrue(session.appear("BATTLE_STATUS_S"))
+            session._combat_result_transition_until = 0.0
+            passive = session.click("BATTLE_STATUS_S")
+
+        self.assertEqual(
+            passive.semantic_id, "combat/result-transition/passive"
+        )
+        self.assertEqual(passive.path, receipt.path)
+        click_result.assert_called_once_with()
+        self.assertIsNone(session._combat_result_observation)
+
+    def test_combat_manifest_result_probe_arms_same_click_race_guard(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        session.adapter = SimpleNamespace(
+            oracle=SimpleNamespace(
+                daily_battle_result_visible=lambda: False,
+                enabled=lambda _semantic_id: False,
+                daily_combat_visible=lambda: False,
+            ),
+            campaign_combat_committed=lambda: True,
+            _campaign_context=None,
+            _login_flow=SimpleNamespace(active=False),
+            _mail_context=None,
+            _minigame_context=None,
+        )
+
+        with mock.patch.object(
+            session,
+            "_live_combat_visible",
+            return_value=frozenset(("BATTLE_STATUS_S",)),
+        ), mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=100.0,
+        ):
+            self.assertTrue(session.appear("BATTLE_STATUS_S"))
+
+        self.assertEqual(
+            session._combat_result_observation,
+            ("BATTLE_STATUS_S", 100.0),
+        )
+
+    def test_exact_battle_result_transition_retries_stale_frame_until_coherent(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        expected = mock.Mock(generation=82, frame_id="frame-82")
+        session.adapter = SimpleNamespace(
+            _login_flow=SimpleNamespace(
+                snapshot=lambda: SimpleNamespace(
+                    active=False,
+                    passive_transition_until=0.0,
+                )
+            )
+        )
+        session._frame_clock = mock.Mock(
+            current_frame_id="frame-81",
+        )
+        session._frame_clock.acquire.side_effect = (
+            StaleFrameError(),
+            StaleFrameError(),
+            StaleFrameError(),
+            expected,
+        )
+        session._combat_result_transition_until = 112.0
+
+        with mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=100.0,
+        ), mock.patch("alas_headless.alas_adapter.time.sleep"):
+            actual = session.refresh_frame()
+
+        self.assertIs(actual, expected)
+        self.assertEqual(session._frame_clock.acquire.call_count, 4)
+        self.assertEqual(session._combat_result_transition_until, 0.0)
+
+    def test_combat_automation_switch_is_bound_to_last_exact_state_probe(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        receipt = object()
+        session._combat_automation_source = "AUTOMATION_OFF"
+
+        with mock.patch.object(
+            session,
+            "_live_combat_click",
+            return_value=receipt,
+        ) as click:
+            actual = session._click_live_combat_automation_switch()
+
+        self.assertIs(actual, receipt)
+        click.assert_called_once_with(
+            "AUTOMATION_OFF",
+            action_name="AUTOMATION_SWITCH",
+        )
+        self.assertIsNone(session._combat_automation_source)
+
+    def test_combat_automation_switch_requires_preceding_state_probe(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+
+        with self.assertRaisesRegex(
+            SemanticGateClosed,
+            "preceding exact state probe",
+        ):
+            session._click_live_combat_automation_switch()
+
     def test_session_wraps_only_the_current_frame_in_a_pixel_guard(self):
         handle = FrameRuntimeHandle()
         trace = mock.Mock()
@@ -225,6 +595,28 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         self.assertEqual(second.generation, 11)
         self.assertNotEqual(second.frame_id, first.frame_id)
         self.assertEqual(len(handle.requests), 4)
+
+    def test_login_transition_retries_transient_adb_transport_failure(self):
+        handle = FrameRuntimeHandle()
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=handle,
+        )
+        adapter = session.open()
+        adapter.begin_login()
+        expected = mock.Mock(generation=11, frame_id="frame-11")
+        with mock.patch.object(
+            session._frame_clock,
+            "acquire",
+            side_effect=(
+                ObserverTransportError("ADB command failed"),
+                expected,
+            ),
+        ) as acquire, mock.patch("alas_headless.alas_adapter.time.sleep"):
+            actual = session.refresh_frame()
+
+        self.assertIs(actual, expected)
+        self.assertEqual(acquire.call_count, 2)
 
     def test_session_close_clears_current_frame(self):
         handle = FrameRuntimeHandle()
@@ -463,6 +855,86 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         self.assertIsNone(bridge.transport)
         self.assertIsNone(session.runtime_handle)
         self.assertIsNone(session.adapter)
+
+    def test_game_manager_restart_defers_login_flow_to_handler(self):
+        session = AlasSemanticSession("device-1", REVISION)
+        factory = session._runtime_handle_factory
+        self.assertIsNotNone(factory)
+
+        with mock.patch.object(factory, "restart_game") as restart_game:
+            self.assertTrue(session.restart_game_for_manager())
+
+        restart_game.assert_called_once_with(COMPONENT)
+        self.assertTrue(session._game_manager_restart_pending)
+        fake_adapter = mock.Mock()
+        with mock.patch.object(session, "open", return_value=fake_adapter):
+            session.begin_login()
+
+        fake_adapter.begin_login.assert_called_once_with()
+        fake_adapter._login_flow.extend_passive_transition.assert_called_once_with(
+            120.0
+        )
+        self.assertFalse(session._game_manager_restart_pending)
+
+    def test_login_msgbox_probes_tolerate_stale_observer_during_boot_grace(self):
+        handle = FrameRuntimeHandle()
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=handle,
+        )
+        adapter = session.open()
+        adapter.begin_login()
+        failure = SemanticGateClosed("observer snapshot is stale")
+
+        with mock.patch.object(
+            adapter, "server_maintenance_visible", side_effect=failure
+        ):
+            self.assertFalse(session.server_maintenance_visible())
+        with mock.patch.object(
+            adapter, "login_update_in_progress", side_effect=failure
+        ):
+            self.assertFalse(session.login_update_in_progress())
+        with mock.patch.object(
+            adapter, "login_update_restart_prompt_available", return_value=False
+        ), mock.patch.object(
+            session,
+            "_login_update_restart_required_on_frame",
+            side_effect=failure,
+        ):
+            self.assertFalse(session.restart_game_after_update())
+
+    def test_update_restart_preflight_uses_coherent_frame_and_process_latch(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        live_oracle = SimpleNamespace(
+            _login_update_seen=True,
+            _login_update_restart_consumed=False,
+        )
+        frame_oracle = SimpleNamespace(
+            _login_update_seen=False,
+            _login_update_restart_consumed=False,
+        )
+
+        def required():
+            self.assertTrue(frame_oracle._login_update_seen)
+            frame_oracle._login_update_restart_consumed = True
+            return True
+
+        frame_oracle.login_update_restart_required = required
+        adapter = SimpleNamespace(
+            oracle=live_oracle,
+            _require_frame_observation_oracle=lambda: frame_oracle,
+        )
+
+        with mock.patch.object(session, "refresh_frame") as refresh:
+            self.assertTrue(
+                session._login_update_restart_required_on_frame(adapter)
+            )
+
+        refresh.assert_called_once_with()
+        self.assertTrue(live_oracle._login_update_restart_consumed)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,27 @@
 diff --git a/module/dorm/dorm.py b/module/dorm/dorm.py
-index c3c9545999b72754bce1c3f47196ac2fc2031249..3710781b6d438a2ec1fa82a6e348c1add28a3629 100644
+index c3c95459..f9fb2ef5 100644
 --- a/module/dorm/dorm.py
 +++ b/module/dorm/dorm.py
-@@ -284,6 +284,12 @@ class RewardDorm(UI):
+@@ -240,6 +240,18 @@ class RewardDorm(UI):
+         """
+         logger.hr('Dorm collect')
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # The typed one-click control is both the availability proof and
++            # the only admitted collect mutation.  When it is absent there is
++            # nothing to collect; do not wait on the legacy pixel info bar.
++            if not self.appear(DORM_QUICK_COLLECT):
++                logger.info('No dorm coins or loves to collect')
++                return 0
++            self.device.click(DORM_QUICK_COLLECT)
++            logger.info('Dorm quick collect executed')
++            return 1
++
+         self.ensure_no_info_bar()
+ 
+         # Set a timer to avoid Alas failing to detect the info_bar by accident.
+@@ -284,6 +296,12 @@ class RewardDorm(UI):
          Pages:
              in: DORM_FEED_CHECK
          """
@@ -15,7 +34,7 @@ index c3c9545999b72754bce1c3f47196ac2fc2031249..3710781b6d438a2ec1fa82a6e348c1ad
          logger.info(f'Dorm feed {button} x {count}')
          if count <= 3:
              for _ in range(count):
-@@ -313,6 +319,14 @@ class RewardDorm(UI):
+@@ -313,6 +331,14 @@ class RewardDorm(UI):
          Pages:
              in: DORM_FEED_CHECK
          """
@@ -30,7 +49,7 @@ index c3c9545999b72754bce1c3f47196ac2fc2031249..3710781b6d438a2ec1fa82a6e348c1ad
          has_food = [self._dorm_has_food(button) for button in self._dorm_food.buttons]
          amount = self._dorm_food_ocr.ocr(self.device.image)
          amount = [a if hf else 0 for a, hf in zip(amount, has_food)]
-@@ -546,6 +560,10 @@ class RewardDorm(UI):
+@@ -546,6 +572,10 @@ class RewardDorm(UI):
          Pages:
              in: page_dorm
          """
@@ -41,7 +60,7 @@ index c3c9545999b72754bce1c3f47196ac2fc2031249..3710781b6d438a2ec1fa82a6e348c1ad
          timeout = Timer(2, count=4).start()
          current = 0
          for _ in self.loop():
-@@ -607,7 +625,7 @@ class RewardDorm(UI):
+@@ -607,7 +637,7 @@ class RewardDorm(UI):
          delay = dict_delay.get(ships, self.config.Scheduler_SuccessInterval)
          return delay
  
@@ -50,7 +69,7 @@ index c3c9545999b72754bce1c3f47196ac2fc2031249..3710781b6d438a2ec1fa82a6e348c1ad
          """
          Pages:
              in: Any page
-@@ -627,3 +645,14 @@ class RewardDorm(UI):
+@@ -627,3 +657,14 @@ class RewardDorm(UI):
          delay = self.cal_dorm_delay(ships)
          logger.info(f'Ships in dorm: {ships}, task to delay: {delay}')
          self.config.task_delay(minute=delay)
@@ -66,7 +85,7 @@ index c3c9545999b72754bce1c3f47196ac2fc2031249..3710781b6d438a2ec1fa82a6e348c1ad
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_dorm()
 diff --git a/module/gacha/gacha_reward.py b/module/gacha/gacha_reward.py
-index 08c93073b1e52d249bd4815a75b7895456b394d1..9fcf6e06d9cc79a5b6f565a818392db6d73292ca 100644
+index 08c93073..9fcf6e06 100644
 --- a/module/gacha/gacha_reward.py
 +++ b/module/gacha/gacha_reward.py
 @@ -85,6 +85,14 @@ class RewardGacha(GachaUI, Retirement):
@@ -128,7 +147,7 @@ index 08c93073b1e52d249bd4815a75b7895456b394d1..9fcf6e06d9cc79a5b6f565a818392db6
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_build()
 diff --git a/module/research/project.py b/module/research/project.py
-index c7b54dcb4d41d65777b954a26dea5ce24340507b..a7bc57698b80c8c6169e5d94ca100ed2cd09ab17 100644
+index c7b54dcb..a7bc5769 100644
 --- a/module/research/project.py
 +++ b/module/research/project.py
 @@ -147,6 +147,10 @@ def get_research_finished(image):
@@ -143,7 +162,7 @@ index c7b54dcb4d41d65777b954a26dea5ce24340507b..a7bc57698b80c8c6169e5d94ca100ed2
          button = RESEARCH_STATUS[index]
          color = get_color(image, button.area)
 diff --git a/module/research/research.py b/module/research/research.py
-index 6ffd45eed346403875be07ca12a1602fa5fe6cb8..ff4edac597c7679007403578bdadd2567cde440f 100644
+index 6ffd45ee..ff4edac5 100644
 --- a/module/research/research.py
 +++ b/module/research/research.py
 @@ -200,7 +200,12 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
@@ -185,7 +204,7 @@ index 6ffd45eed346403875be07ca12a1602fa5fe6cb8..ff4edac597c7679007403578bdadd256
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_research()
 diff --git a/module/research/rqueue.py b/module/research/rqueue.py
-index e836c5cb93abd1673a33b0b117e7faef695c68cb..bb47daef0d359de7db764257a08cf6ac43f73ddb 100644
+index e836c5cb..bb47daef 100644
 --- a/module/research/rqueue.py
 +++ b/module/research/rqueue.py
 @@ -1,4 +1,4 @@
@@ -232,7 +251,7 @@ index e836c5cb93abd1673a33b0b117e7faef695c68cb..bb47daef0d359de7db764257a08cf6ac
              logger.error('The first research of queue is not running,'
                           'probably a game bug from AL,'
 diff --git a/module/research/selector.py b/module/research/selector.py
-index 05146c3308213214bb9fab21f4874135f6739113..5ff693dbf83bf2493bae17489621c1e42f8aa4c2 100644
+index 05146c33..5ff693db 100644
 --- a/module/research/selector.py
 +++ b/module/research/selector.py
 @@ -123,6 +123,17 @@ class ResearchSelector(ResearchUI):
@@ -254,7 +273,7 @@ index 05146c3308213214bb9fab21f4874135f6739113..5ff693dbf83bf2493bae17489621c1e4
          while 1:
              projects = research_detect(self.device.image)
 diff --git a/module/research/series.py b/module/research/series.py
-index 89e534c45e8ee356007ed47f52ce64b0242186c9..d399d423785825558991092079a77fa0df9ad4a8 100644
+index 89e534c4..d399d423 100644
 --- a/module/research/series.py
 +++ b/module/research/series.py
 @@ -46,6 +46,10 @@ def get_research_series_3(image, series_button=RESEARCH_SERIES):
@@ -269,7 +288,7 @@ index 89e534c45e8ee356007ed47f52ce64b0242186c9..d399d423785825558991092079a77fa0
          match_series(crop(image, area_pad(button.area, pad=-10), copy=False), scaling)
          for scaling, button in zip(RESEARCH_SCALING, series_button)
 diff --git a/module/research/ui.py b/module/research/ui.py
-index 3f652c11f1d66e47e6945bf8050697ef1a0f27d4..dea1bd5f71465a1419ceff74a8b549811d9080ad 100644
+index 3f652c11..dea1bd5f 100644
 --- a/module/research/ui.py
 +++ b/module/research/ui.py
 @@ -99,6 +99,12 @@ class ResearchUI(UI):

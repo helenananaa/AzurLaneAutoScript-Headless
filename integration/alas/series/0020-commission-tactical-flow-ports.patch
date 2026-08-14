@@ -1,5 +1,5 @@
 diff --git a/module/commission/commission.py b/module/commission/commission.py
-index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0ce64b07b 100644
+index 195d84a1..fda74c41 100644
 --- a/module/commission/commission.py
 +++ b/module/commission/commission.py
 @@ -89,6 +89,21 @@ class RewardCommission(UI, InfoHandler):
@@ -260,7 +260,7 @@ index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_commission()
 diff --git a/module/commission/project.py b/module/commission/project.py
-index cd88c16282b4f6c8bcf9eac2202e836797869e3c..efa9500e8b5c759653038f4867dbf2f365269384 100644
+index cd88c162..efa9500e 100644
 --- a/module/commission/project.py
 +++ b/module/commission/project.py
 @@ -106,6 +106,58 @@ class Commission:
@@ -347,7 +347,7 @@ index cd88c16282b4f6c8bcf9eac2202e836797869e3c..efa9500e8b5c759653038f4867dbf2f3
          # area = area_offset((5, 5, 30, 30), self.area[0:2])
          # return color_similar(color1=get_color(self.image, area), color2=(239, 166, 231))
 diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
-index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..d794d42cefad01041bca024298935e3ba09d0d97 100644
+index 0e518a49..d794d42c 100644
 --- a/module/tactical/tactical_class.py
 +++ b/module/tactical/tactical_class.py
 @@ -1,4 +1,4 @@

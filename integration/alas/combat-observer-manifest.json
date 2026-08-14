@@ -227,8 +227,49 @@
     },
     {
       "resource_name": "BATTLE_STATUS_D",
-      "selectors": [],
-      "evidence_sha256": ""
+      "selectors": [
+        {
+          "kind": "button",
+          "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultGradePage(Clone)",
+          "name": "NewBattleResultGradePage(Clone)",
+          "sprite": "",
+          "text": "",
+          "require_top_raycast": true
+        },
+        {
+          "kind": "image",
+          "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultGradePage(Clone)/bg/grade/icon",
+          "name": "icon",
+          "sprite": "letter_D",
+          "text": "",
+          "require_top_raycast": false
+        },
+        {
+          "kind": "image",
+          "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultGradePage(Clone)/bg/grade/Text",
+          "name": "Text",
+          "sprite": "label_d",
+          "text": "",
+          "require_top_raycast": false
+        },
+        {
+          "kind": "text",
+          "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/Effect/bg03/Text",
+          "name": "Text",
+          "sprite": "",
+          "text": "DEFEAT",
+          "require_top_raycast": false
+        },
+        {
+          "kind": "text",
+          "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultGradePage(Clone)/bg/ResultEffect/Tips/dianjijixu/bg20",
+          "name": "bg20",
+          "sprite": "",
+          "text": "点击继续",
+          "require_top_raycast": false
+        }
+      ],
+      "evidence_sha256": "e5aa9af64173114449f3932f8a5d045b8c7c5547d03f263967220d09ca20491a"
     },
     {
       "resource_name": "BATTLE_STATUS_S",
@@ -299,6 +340,48 @@
       "evidence_sha256": "86969f8d986ca488ad9bf333b539e90f369801eede1ff0a0ad1bb31195ccaeee"
     },
     {
+      "resource_name": "COMBAT_AUTO",
+      "selectors": [
+        {
+          "kind": "image",
+          "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn/off",
+          "name": "off",
+          "sprite": "auto_off",
+          "text": "",
+          "require_top_raycast": false
+        }
+      ],
+      "evidence_sha256": "873de4ff8e449c390eae33f667b8fb8820300775335f0942de5dd7fa2fa2b58c"
+    },
+    {
+      "resource_name": "COMBAT_AUTO_133",
+      "selectors": [
+        {
+          "kind": "image",
+          "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn/off",
+          "name": "off",
+          "sprite": "auto_off",
+          "text": "",
+          "require_top_raycast": false
+        }
+      ],
+      "evidence_sha256": "873de4ff8e449c390eae33f667b8fb8820300775335f0942de5dd7fa2fa2b58c"
+    },
+    {
+      "resource_name": "COMBAT_AUTO_150",
+      "selectors": [
+        {
+          "kind": "image",
+          "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn/off",
+          "name": "off",
+          "sprite": "auto_off",
+          "text": "",
+          "require_top_raycast": false
+        }
+      ],
+      "evidence_sha256": "873de4ff8e449c390eae33f667b8fb8820300775335f0942de5dd7fa2fa2b58c"
+    },
+    {
       "resource_name": "DAILY_CHECK",
       "selectors": [],
       "evidence_sha256": ""
@@ -325,8 +408,49 @@
     },
     {
       "resource_name": "EXP_INFO_B",
-      "selectors": [],
-      "evidence_sha256": ""
+      "selectors": [
+        {
+          "kind": "button",
+          "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn",
+          "name": "confirmBtn",
+          "sprite": "",
+          "text": "",
+          "require_top_raycast": true
+        },
+        {
+          "kind": "image",
+          "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn",
+          "name": "confirmBtn",
+          "sprite": "btn_big_yellow",
+          "text": "",
+          "require_top_raycast": false
+        },
+        {
+          "kind": "image",
+          "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultStatisticsPage(Clone)/top/grade/icon",
+          "name": "icon",
+          "sprite": "letter_D",
+          "text": "",
+          "require_top_raycast": false
+        },
+        {
+          "kind": "image",
+          "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultStatisticsPage(Clone)/top/grade/Text",
+          "name": "Text",
+          "sprite": "label_d",
+          "text": "",
+          "require_top_raycast": false
+        },
+        {
+          "kind": "text",
+          "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn/Text",
+          "name": "Text",
+          "sprite": "",
+          "text": "确 定",
+          "require_top_raycast": false
+        }
+      ],
+      "evidence_sha256": "b7d56d07ef5d72995011e6ac798988c5bc399f201b5d2601b053ff4e57cfb62a"
     },
     {
       "resource_name": "EXP_INFO_S",
@@ -832,6 +956,25 @@
       ]
     },
     {
+      "action_name": "COMBAT_AUTO_SWITCH",
+      "variants": [
+        {
+          "variant_id": "combat_standard_off",
+          "selectors": [
+            {
+              "kind": "image",
+              "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn/off",
+              "name": "off",
+              "sprite": "auto_off",
+              "text": "",
+              "require_top_raycast": true
+            }
+          ],
+          "evidence_sha256": "873de4ff8e449c390eae33f667b8fb8820300775335f0942de5dd7fa2fa2b58c"
+        }
+      ]
+    },
+    {
       "action_name": "BATTLE_STATUS_A",
       "variants": []
     },
@@ -845,7 +988,22 @@
     },
     {
       "action_name": "BATTLE_STATUS_D",
-      "variants": []
+      "variants": [
+        {
+          "variant_id": "default",
+          "selectors": [
+            {
+              "kind": "button",
+              "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultGradePage(Clone)",
+              "name": "NewBattleResultGradePage(Clone)",
+              "sprite": "",
+              "text": "",
+              "require_top_raycast": true
+            }
+          ],
+          "evidence_sha256": "e5aa9af64173114449f3932f8a5d045b8c7c5547d03f263967220d09ca20491a"
+        }
+      ]
     },
     {
       "action_name": "BATTLE_STATUS_S",
@@ -876,7 +1034,22 @@
     },
     {
       "action_name": "EXP_INFO_B",
-      "variants": []
+      "variants": [
+        {
+          "variant_id": "default",
+          "selectors": [
+            {
+              "kind": "button",
+              "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn",
+              "name": "confirmBtn",
+              "sprite": "",
+              "text": "",
+              "require_top_raycast": true
+            }
+          ],
+          "evidence_sha256": "b7d56d07ef5d72995011e6ac798988c5bc399f201b5d2601b053ff4e57cfb62a"
+        }
+      ]
     },
     {
       "action_name": "EXP_INFO_S",

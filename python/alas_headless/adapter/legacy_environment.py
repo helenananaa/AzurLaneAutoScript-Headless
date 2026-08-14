@@ -5,7 +5,12 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Any, Mapping, Protocol
+from typing import Any, Mapping
+
+try:
+    from typing import Protocol
+except ImportError:  # Python 3.7 in the pinned ALAS runtime
+    from typing_extensions import Protocol
 
 from ..semantic_oracle import SemanticGateClosed
 from .policy import RunPolicy
@@ -17,6 +22,10 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS",
         "ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS",
         "ALAS_SEMANTIC_ALLOW_MAIL_MUTATIONS",
+        "ALAS_SEMANTIC_MAIL_MUTATION_BUDGET",
+        "ALAS_SEMANTIC_META_ASSIST_BUDGET",
+        "ALAS_SEMANTIC_MINIGAME_PLAY_BUDGET",
+        "ALAS_SEMANTIC_OPSI_COORDINATE_CHECKOUT_BUDGET",
         "ALAS_SEMANTIC_ALLOW_MISSION_CLAIM_ONCE",
         "ALAS_SEMANTIC_ALLOW_TACTICAL_REWARDS",
         "ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET",
@@ -33,6 +42,7 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_MODE",
         "ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET",
         "ALAS_SEMANTIC_RESEARCH_START_BUDGET",
+        "ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET",
         "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET",
     }
 )
@@ -47,6 +57,22 @@ LEGACY_BOOLEAN_GRANTS: Mapping[str, str] = MappingProxyType(
 
 LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
     {
+        "ALAS_SEMANTIC_MAIL_MUTATION_BUDGET": (
+            "mail.mutation",
+            "mail mutation",
+        ),
+        "ALAS_SEMANTIC_MINIGAME_PLAY_BUDGET": (
+            "minigame.play",
+            "minigame play",
+        ),
+        "ALAS_SEMANTIC_META_ASSIST_BUDGET": (
+            "meta.assist",
+            "META assist",
+        ),
+        "ALAS_SEMANTIC_OPSI_COORDINATE_CHECKOUT_BUDGET": (
+            "operation_siren.coordinate_checkout",
+            "Operation Siren coordinate checkout",
+        ),
         "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET": (
             "tactical.assign",
             "tactical assign",
@@ -73,6 +99,7 @@ LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
         ),
         "ALAS_SEMANTIC_DORM_FEED_BUDGET": ("dorm.feed", "dorm feed"),
         "ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET": ("build.submit", "build submit"),
+        "ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET": ("shop.purchase", "shop purchase"),
         "ALAS_SEMANTIC_CAMPAIGN_STAGE_ENTRY_BUDGET": (
             "campaign.stage_entry",
             "campaign stage entry",
@@ -136,6 +163,12 @@ class LegacyEnvironmentTranslation:
                 "adb": self.adb,
                 "allow_mission_claim_once": self.grant("mission.claim") > 0,
                 "allow_mail_mutations": self.grant("mail.mutation") > 0,
+                "mail_mutation_budget": self.grant("mail.mutation"),
+                "minigame_play_budget": self.grant("minigame.play"),
+                "meta_assist_budget": self.grant("meta.assist"),
+                "operation_siren_coordinate_checkout_budget": self.grant(
+                    "operation_siren.coordinate_checkout"
+                ),
                 "allow_tactical_rewards": self.grant("tactical.reward") > 0,
                 "tactical_assign_budget": self.grant("tactical.assign"),
                 "commission_reward_budget": self.grant("commission.reward"),
@@ -145,6 +178,7 @@ class LegacyEnvironmentTranslation:
                 "dorm_collect_budget": self.grant("dorm.collect"),
                 "dorm_feed_budget": self.grant("dorm.feed"),
                 "build_submit_budget": self.grant("build.submit"),
+                "shop_purchase_budget": self.grant("shop.purchase"),
                 "campaign_stage_entry_budget": self.grant("campaign.stage_entry"),
                 "campaign_fleet_mutation_budget": self.grant("campaign.fleet_mutation"),
                 "campaign_sortie_budget": self.grant("campaign.sortie"),
@@ -206,7 +240,8 @@ def translate_legacy_semantic_environment(
     for variable, capability in LEGACY_BOOLEAN_GRANTS.items():
         legacy_grants[capability] = 1 if environment.get(variable) == "1" else 0
     for variable, (capability, label) in LEGACY_BUDGET_GRANTS.items():
-        legacy_grants[capability] = _canonical_integer(variable, label, environment)
+        budget = _canonical_integer(variable, label, environment)
+        legacy_grants[capability] = max(legacy_grants.get(capability, 0), budget)
 
     nondefault = sum(value > 0 for value in legacy_grants.values())
     if explicit_policy is not None and nondefault:

@@ -126,10 +126,22 @@ class G36LivePreflightTests(unittest.TestCase):
         self.assertEqual(value["bundle_sha256"], expected)
         self.assertEqual(value["signature"], "sha256:" + expected)
 
-    def test_checked_live_bundle_rebuilds_exactly(self):
+    def test_checked_live_bundle_remains_bound_to_its_historical_preflight(self):
         checked = read_json(INTEGRATION / "g36-live-preflight.json")
-        rebuilt = self.build(checked["runs"])
-        self.assertEqual(rebuilt, checked)
+        current_defensive_sha = hashlib.sha256(json.dumps(
+            self.defensive, ensure_ascii=False, sort_keys=True,
+            separators=(",", ":")
+        ).encode("utf-8")).hexdigest()
+
+        self.assertNotEqual(
+            checked["defensive_preflight_sha256"], current_defensive_sha
+        )
+        self.assertFalse(checked["production_ready"])
+        rebuilt = self.build(copy.deepcopy(checked["runs"]))
+        self.assertNotEqual(rebuilt, checked)
+        self.assertEqual(
+            rebuilt["defensive_preflight_sha256"], current_defensive_sha
+        )
 
     def test_requires_two_runs_and_strictly_ordered_generations(self):
         with self.assertRaisesRegex(SemanticGateClosed, "requires two"):

@@ -76,6 +76,25 @@ class MissionMailLedgerTests(unittest.TestCase):
             adapter.click(NamedButton("MAIL_BATCH_DELETE"))
         self.assertEqual(oracle.click_calls, ["mail/manage/claim"])
 
+    def test_mail_two_action_budget_allows_claim_then_delete_only(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            mail_mutation_budget=2,
+        )
+        adapter.begin_mail()
+        claim = adapter.click(NamedButton("MAIL_BATCH_CLAIM"))
+        delete = adapter.click(NamedButton("MAIL_BATCH_DELETE"))
+        self.assertEqual(claim.capability_id, "mail.mutation")
+        self.assertEqual(delete.capability_id, "mail.mutation")
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton("MAIL_BATCH_CLAIM"))
+        self.assertEqual(
+            oracle.click_calls,
+            ["mail/manage/claim", "mail/manage/delete"],
+        )
+
     def test_mission_backend_exception_consumes_authority_permanently(self):
         oracle = FakeOracle()
         adapter = AlasSemanticAdapter(

@@ -137,6 +137,25 @@ class AlasPatchTreeVerificationTests(unittest.TestCase):
             with self.assertRaisesRegex(AlasPatchVerificationError, "allowlisted"):
                 parse_patch_paths(unsafe)
 
+            allowed_json = parent / "allowed-json.patch"
+            allowed_json.write_text(
+                "diff --git a/module/config/argument/args.json "
+                "b/module/config/argument/args.json\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                parse_patch_paths(allowed_json),
+                ("module/config/argument/args.json",),
+            )
+
+            unsafe_json = parent / "unsafe-json.patch"
+            unsafe_json.write_text(
+                "diff --git a/module/config/other.json b/module/config/other.json\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(AlasPatchVerificationError, "allowlisted"):
+                parse_patch_paths(unsafe_json)
+
             output = parent / "existing"
             output.mkdir()
             with self.assertRaisesRegex(AlasPatchVerificationError, "already exists"):

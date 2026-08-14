@@ -108,7 +108,7 @@ if ! grep -Fq 'std::array<void *, 4096> objects' \
   echo "Long-session Unity object capacity is missing" >&2
   exit 1
 fi
-if ! grep -Fq 'kMaxObserverImages = 512' \
+if ! grep -Fq 'kMaxObserverImages = 1024' \
     "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.h"; then
   echo "Complete campaign-map Image capacity is missing" >&2
   exit 1
@@ -284,9 +284,9 @@ if ! grep -Fq 'kIl2CppAllowlistSize = 32' \
   echo "32-symbol raycast observer allowlist is missing" >&2
   exit 1
 fi
-if ! grep -Fq 'kMaxObserverButtons = 128' \
+if ! grep -Fq 'kMaxObserverButtons = 512' \
     "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.h"; then
-  echo "128-record Button capacity is missing" >&2
+  echo "512-record Button capacity is missing" >&2
   exit 1
 fi
 if ! grep -Fq 'TaskScene(Clone)/blur_panel/adapt/top/GetAllButton' \

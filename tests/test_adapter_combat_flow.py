@@ -51,6 +51,7 @@ def reviewed_replay():
         origin_node="J3",
         target_node="J3",
         route_nodes=("J3",),
+        input_nodes=("J3",),
         enemy_object_id=1204080,
         enemy_sprite="hm1",
         enemy_level=113,
@@ -129,6 +130,12 @@ class G36NormalCombatFlowTests(unittest.TestCase):
         )
         self.assertEqual(receipt["fixture_sha256"], file_sha256(FIXTURE_PATH))
         self.assertEqual(
+            receipt["observer_manifest_sha256"],
+            "d8e262a39057ba7d5611acc314a91419869d51a1825a32ece98b69fc6d0a633c",
+        )
+        # The checked raw receipt remains bound to the observer manifest used
+        # during capture. Later mappings must not silently rebind old evidence.
+        self.assertNotEqual(
             receipt["observer_manifest_sha256"], file_sha256(MANIFEST_PATH)
         )
         self.assertFalse(receipt["fixture_phase_tokens"])

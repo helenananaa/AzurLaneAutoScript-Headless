@@ -1,0 +1,545 @@
+diff --git a/module/config/argument/args.json b/module/config/argument/args.json
+index 0c46c9dd..a553286f 100644
+--- a/module/config/argument/args.json
++++ b/module/config/argument/args.json
+@@ -1664,22 +1664,24 @@
+         "type": "select",
+         "value": "campaign_main",
+         "option": [
+-          "event_20260625_cn"
++          "event_20260625_cn",
++          "event_20260813_cn"
+         ],
+         "option_cn": [
+-          "event_20260625_cn"
++          "event_20260813_cn"
+         ],
+         "option_en": [
+-          "event_20260625_cn"
++          "event_20260813_cn"
+         ],
+         "option_jp": [
+-          "event_20260625_cn"
++          "event_20260813_cn"
+         ],
+         "option_tw": [
+           "event_20260625_cn"
+         ],
+         "option_bold": [
+-          "event_20260625_cn"
++          "event_20260625_cn",
++          "event_20260813_cn"
+         ]
+       },
+       "Mode": {
+@@ -9442,4 +9444,4 @@
+       }
+     }
+   }
+-}
+\ No newline at end of file
++}
+diff --git a/module/daemon/benchmark.py b/module/daemon/benchmark.py
+index 19fcf7f0..01301dfe 100644
+--- a/module/daemon/benchmark.py
++++ b/module/daemon/benchmark.py
+@@ -4,6 +4,7 @@ import typing as t
+ import numpy as np
+ from rich.table import Table
+ from rich.text import Text
++from alas_headless import SemanticGateClosed, SemanticTargetMissing
+ 
+ from module.base.utils import float2str as float2str_
+ from module.base.utils import random_rectangle_point
+@@ -173,6 +174,90 @@ class Benchmark(DaemonBase, CampaignUI):
+ 
+         return fastest_screenshot, fastest_click
+ 
++    def semantic_observe(self):
++        """Acquire one coherent state/button/UI generation from the observer."""
++        session = self.device.semantic_adapter
++        frame = session.refresh_frame()
++        if frame.generation <= 0:
++            raise RequestHumanTakeover('Invalid semantic frame generation')
++        return frame
++
++    def semantic_reversible_input(self):
++        """Measure a reversible main/settings transition, never a raw tap."""
++        session = self.device.semantic_adapter
++        session.refresh_frame()
++        oracle = session.open().oracle
++        if oracle.exists('settings/back'):
++            return oracle.click_and_wait('settings/back', 'main/settings', 3.0)
++        if oracle.main_page_visible():
++            return oracle.click_and_wait('main/settings', 'settings/back', 3.0)
++        raise RequestHumanTakeover(
++            'Semantic benchmark requires main or settings page identity'
++        )
++
++    def semantic_ensure_main(self):
++        """Return through reviewed event/campaign layers with a fresh frame each time."""
++        session = self.device.semantic_adapter
++        for _ in range(12):
++            session.refresh_frame()
++            oracle = session.open().oracle
++            if oracle.main_page_visible():
++                return True
++            target = None
++            if oracle.event_campaign_page_visible():
++                target = 'campaign-menu/page/back'
++            else:
++                try:
++                    oracle.campaign_page_state()
++                except (SemanticGateClosed, SemanticTargetMissing):
++                    pass
++                else:
++                    target = 'campaign-menu/page/back'
++            if target is None and oracle.campaign_menu_is_entry():
++                target = 'campaign-menu/page/back'
++            if target is None:
++                raise RequestHumanTakeover(
++                    'Semantic benchmark cannot recover the current page'
++                )
++            oracle.click(target)
++            time.sleep(0.5)
++        raise RequestHumanTakeover('Semantic benchmark main-page recovery timed out')
++
++    def run_semantic(self):
++        """Benchmark observer latency and reviewed reversible UI round trips."""
++        logger.hr('Semantic Benchmark', level=1)
++        logger.attr('DeviceType', 'semantic_observer')
++        logger.attr('TestScene', self.config.Benchmark_TestScene)
++        self.semantic_ensure_main()
++
++        observe = []
++        control = []
++        if 'screenshot' in self.config.Benchmark_TestScene:
++            observe.append([
++                'semantic_observe',
++                self.benchmark_test(self.semantic_observe),
++            ])
++        if 'click' in self.config.Benchmark_TestScene:
++            control.append([
++                'semantic_reversible_input',
++                self.benchmark_test(self.semantic_reversible_input),
++            ])
++
++        logger.hr('Benchmark Results', level=1)
++        if observe:
++            self.show(
++                test='Semantic observation',
++                data=observe,
++                evaluate_func=self.evaluate_screenshot,
++            )
++        if control:
++            self.show(
++                test='Semantic UI round trip',
++                data=control,
++                evaluate_func=self.evaluate_click,
++            )
++        return observe, control
++
+     def get_test_methods(self) -> t.Tuple[t.Tuple[str], t.Tuple[str]]:
+         device = self.config.Benchmark_DeviceType
+         # device == 'emulator'
+@@ -214,6 +299,8 @@ class Benchmark(DaemonBase, CampaignUI):
+         return tuple(screenshot), tuple(click)
+ 
+     def run(self):
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            return self.run_semantic()
+         self.config.override(Emulator_ScreenshotMethod='ADB')
+         self.device.uninstall_minicap()
+         self.ensure_campaign_ui('7-2', mode='normal')
+diff --git a/module/daemon/daemon.py b/module/daemon/daemon.py
+index 7bfc8531..143cc0c2 100644
+--- a/module/daemon/daemon.py
++++ b/module/daemon/daemon.py
+@@ -6,59 +6,74 @@ from module.map.map_operation import FLEET_PREPARATION, MAP_PREPARATION
+ 
+ 
+ class AzurLaneDaemon(DaemonBase, CampaignBase):
++    def run_once(self):
++        """Handle one daemon polling iteration.
++
++        The semantic backend exposes a proven main-page idle state.  Returning
++        there avoids probing unrelated pixel-only recovery surfaces while no
++        battle or map takeover is active, and also makes the daemon entrypoint
++        independently smoke-testable.
++        """
++        self.device.screenshot()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.is_in_main():
++            return 'idle'
++
++        # If is running a combat, do nothing.
++        if self.is_combat_executing():
++            return 'combat_executing'
++
++        # Combat
++        if self.combat_appear():
++            self.combat_preparation()
++            return 'combat_preparation'
++        try:
++            if self.handle_battle_status():
++                self.combat_status(expected_end='no_searching')
++                return 'battle_status'
++        except CampaignEnd:
++            return 'campaign_end'
++
++        # Map operation
++        if self.appear_then_click(MAP_AMBUSH_EVADE, offset=(20, 20)):
++            self.device.sleep(1)
++            return 'ambush_evaded'
++        if self.handle_mystery_items():
++            return 'mystery_items'
++
++        # Map preparation
++        if self.config.Daemon_EnterMap:
++            if self.appear_then_click(MAP_PREPARATION, offset=(20, 20), interval=2):
++                return 'map_preparation'
++            if self.appear_then_click(FLEET_PREPARATION, offset=(20, 50), interval=2):
++                return 'fleet_preparation'
++
++        # Retire
++        if self.handle_retirement():
++            return 'retirement'
++
++        # Emotion
++        pass
++
++        # Urgent commission
++        if self.handle_urgent_commission():
++            return 'urgent_commission'
++
++        # Popups
++        if self.handle_guild_popup_cancel():
++            return 'guild_popup'
++        if self.handle_vote_popup():
++            return 'vote_popup'
++
++        # Story
++        if self.story_skip():
++            return 'story'
++
++        return 'waiting'
++
+     def run(self):
+         while 1:
+-            self.device.screenshot()
+-
+-            # If is running a combat, do nothing.
+-            if self.is_combat_executing():
+-                continue
+-
+-            # Combat
+-            if self.combat_appear():
+-                self.combat_preparation()
+-            try:
+-                if self.handle_battle_status():
+-                    self.combat_status(expected_end='no_searching')
+-                    continue
+-            except CampaignEnd:
+-                continue
+-
+-            # Map operation
+-            if self.appear_then_click(MAP_AMBUSH_EVADE, offset=(20, 20)):
+-                self.device.sleep(1)
+-                continue
+-            if self.handle_mystery_items():
+-                continue
+-
+-            # Map preparation
+-            if self.config.Daemon_EnterMap:
+-                if self.appear_then_click(MAP_PREPARATION, offset=(20, 20), interval=2):
+-                    continue
+-                if self.appear_then_click(FLEET_PREPARATION, offset=(20, 50), interval=2):
+-                    continue
+-
+-            # Retire
+-            if self.handle_retirement():
+-                continue
+-
+-            # Emotion
+-            pass
+-
+-            # Urgent commission
+-            if self.handle_urgent_commission():
+-                continue
+-
+-            # Popups
+-            if self.handle_guild_popup_cancel():
+-                return True
+-            if self.handle_vote_popup():
+-                continue
+-
+-            # Story
+-            if self.story_skip():
+-                continue
+-
++            self.run_once()
+             # End
+             # No end condition, stop it manually.
+ 
+diff --git a/module/daemon/game_manager.py b/module/daemon/game_manager.py
+index 8ecdbf77..f5e8b975 100644
+--- a/module/daemon/game_manager.py
++++ b/module/daemon/game_manager.py
+@@ -5,6 +5,13 @@ from module.logger import logger
+ class GameManager(LoginHandler):
+     def run(self):
+         logger.hr('Force Stop AzurLane', level=1)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.config.GameManager_AutoRestart:
++            semantic_adapter.restart_game_for_manager()
++            logger.info('Semantic cold restart submitted with -force-gfx-st')
++            self.handle_app_login()
++            return
++
+         self.device.app_stop()
+         logger.info('Force Stop finished')
+ 
+diff --git a/module/daemon/os_daemon.py b/module/daemon/os_daemon.py
+index 6fdc403a..ed67e8ae 100644
+--- a/module/daemon/os_daemon.py
++++ b/module/daemon/os_daemon.py
+@@ -7,6 +7,7 @@ from module.os.fleet import OSFleet
+ from module.os_combat.combat import ContinuousCombat
+ from module.os_handler.assets import AUTO_SEARCH_REWARD
+ from module.os_handler.port import PORT_ENTER, PortHandler
++from alas_headless import SemanticGateClosed
+ 
+ 
+ class AzurLaneDaemon(DaemonBase, OSFleet, PortHandler):
+@@ -16,51 +17,73 @@ class AzurLaneDaemon(DaemonBase, OSFleet, PortHandler):
+ 
+         return super()._os_combat_expected_end()
+ 
+-    def run(self):
++    def run_once(self):
++        """Handle one Operation Siren daemon polling iteration."""
+         self.config.merge(OSConfig())
+         self.config.override(HOMO_EDGE_DETECT=False)
+-        while 1:
+-            self.device.screenshot()
++        self.device.screenshot()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            oracle = semantic_adapter.open().oracle
++            try:
++                if oracle.operation_siren_state() and oracle.exists(
++                        'os/map/auto-search/off'):
++                    logger.warning(
++                        'Operation Siren auto search is locked; daemon waits '
++                        'without selecting or moving to a target'
++                    )
++                    return 'auto_search_locked'
++            except SemanticGateClosed:
++                # Only absence of the OS local-map surface is admitted here;
++                # other semantic failures still reach the normal handlers.
++                pass
+ 
+-            # If is running a combat, do nothing.
+-            if self.is_combat_executing():
+-                continue
++        # If is running a combat, do nothing.
++        if self.is_combat_executing():
++            return 'combat_executing'
+ 
+-            # Combat
+-            if self.combat_appear():
+-                self.combat_preparation()
+-            try:
+-                if self.handle_battle_status():
+-                    self.combat_status(expected_end='no_searching')
+-                    continue
+-            except (CampaignEnd, ContinuousCombat):
+-                continue
+-            if self.appear_then_click(EXP_INFO_C, interval=2):
+-                continue
+-            if self.appear_then_click(EXP_INFO_D, interval=2):
+-                continue
++        # Combat
++        if self.combat_appear():
++            self.combat_preparation()
++            return 'combat_preparation'
++        try:
++            if self.handle_battle_status():
++                self.combat_status(expected_end='no_searching')
++                return 'battle_status'
++        except (CampaignEnd, ContinuousCombat):
++            return 'combat_end'
++        if self.appear_then_click(EXP_INFO_C, interval=2):
++            return 'exp_info_c'
++        if self.appear_then_click(EXP_INFO_D, interval=2):
++            return 'exp_info_d'
+ 
+-            # Map events
+-            if self.handle_map_event():
+-                self._nearest_object_click_timer.clear()
+-                continue
+-            if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50), interval=2):
+-                continue
++        # Map events
++        if self.handle_map_event():
++            self._nearest_object_click_timer.clear()
++            return 'map_event'
++        if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50), interval=2):
++            return 'auto_search_reward'
++
++        # Port repair
++        if self.config.OpsiDaemon_RepairShip:
++            if self.appear(PORT_ENTER, offset=(20, 20), interval=30):
++                self.port_enter()
++                self.port_dock_repair()
++                self.port_quit()
++                self.interval_reset(PORT_ENTER)
++                logger.info('Port repair finished, '
++                            'please move your fleet out of the port in 30s to avoid repairing again')
++                return 'port_repair'
+ 
+-            # Port repair
+-            if self.config.OpsiDaemon_RepairShip:
+-                if self.appear(PORT_ENTER, offset=(20, 20), interval=30):
+-                    self.port_enter()
+-                    self.port_dock_repair()
+-                    self.port_quit()
+-                    self.interval_reset(PORT_ENTER)
+-                    logger.info('Port repair finished, '
+-                                'please move your fleet out of the port in 30s to avoid repairing again')
++        if self.config.OpsiDaemon_SelectEnemy:
++            if self.click_nearest_object():
++                return 'nearest_object'
+ 
+-            if self.config.OpsiDaemon_SelectEnemy:
+-                if self.click_nearest_object():
+-                    continue
++        return 'waiting'
+ 
++    def run(self):
++        while 1:
++            self.run_once()
+             # End
+             # No end condition, stop it manually.
+ 
+diff --git a/module/daemon/uncensored.py b/module/daemon/uncensored.py
+index aadd0e82..6402506b 100644
+--- a/module/daemon/uncensored.py
++++ b/module/daemon/uncensored.py
+@@ -1,6 +1,7 @@
+-import shutil
++import os
++import hashlib
++from pathlib import Path
+ 
+-from deploy.git import GitManager
+ from deploy.utils import *
+ from module.handler.login import LoginHandler
+ from module.logger import logger
+@@ -14,14 +15,13 @@ Localization_skin = true
+ class AzurLaneUncensored(LoginHandler):
+     def create_level1_uncensored(self):
+         logger.info('Create level 1 uncensored')
+-        folder = './files'
+-        try:
+-            shutil.rmtree(folder)
+-        except FileNotFoundError:
+-            pass
+-        os.makedirs(folder, exist_ok=True)
+-        with open(os.path.join(folder, 'localization.txt'), 'w', encoding='utf-8') as f:
+-            f.write(localization_txt)
++        folder = Path.cwd().resolve() / 'files'
++        folder.mkdir(parents=True, exist_ok=True)
++        target = folder / 'localization.txt'
++        target.write_text(localization_txt, encoding='utf-8')
++        if target.read_text(encoding='utf-8') != localization_txt:
++            raise RuntimeError('Uncensored localization payload verification failed')
++        return target
+ 
+     def run(self):
+         """
+@@ -30,48 +30,54 @@ class AzurLaneUncensored(LoginHandler):
+         2. Adb push to emulator
+         3. Restart game
+         """
+-        if self.config.AzurLaneUncensored_Repository == 'https://gitee.com/LmeSzinc/AzurLaneUncensored':
+-            self.config.AzurLaneUncensored_Repository = 'https://e.coding.net/llop18870/alas/AzurLaneUncensored.git'
+-
+         repo = self.config.AzurLaneUncensored_Repository
+         folder = './toolkit/AzurLaneUncensored'
+ 
+         logger.hr('Update AzurLaneUncensored', level=1)
+         logger.info('This will take a while at first use')
+-        manager = GitManager()
+-        manager.config['GitExecutable'] = os.path.abspath(manager.config['GitExecutable'])
+-        manager.config['AdbExecutable'] = os.path.abspath(manager.config['AdbExecutable'])
+-        os.makedirs(folder, exist_ok=True)
+-        prev = os.getcwd()
+-
+-        # Running in ./toolkit/AzurLaneUncensored
+-        os.chdir(folder)
+-        # Monkey patch `print()` build-in to show logs.
+-        self.create_level1_uncensored()
+-        # manager.git_repository_init(
+-        #     repo=repo,
+-        #     source='origin',
+-        #     branch='master',
+-        #     proxy=manager.config['GitProxy'],
+-        #     keep_changes=False
+-        # )
++        folder = Path(folder).resolve()
++        folder.mkdir(parents=True, exist_ok=True)
++        prev = Path.cwd()
++        try:
++            os.chdir(str(folder))
++            payload = self.create_level1_uncensored()
++            # Repository sync is intentionally not claimed while upstream's
++            # git_repository_init remains disabled. Level-1 localization is a
++            # complete deterministic payload and does not need network input.
++            logger.attr('Repository', repo)
++            logger.attr('RepositorySync', 'disabled (level-1 payload)')
+ 
+-        logger.hr('Push Uncensored Files', level=1)
+-        logger.info('This will take a few seconds')
+-        command = ['push', 'files', f'/sdcard/Android/data/{self.device.package}']
+-        logger.info(f'Command: {command}')
+-        self.device.adb_command(command, timeout=30)
+-        logger.info('Push success')
++            logger.hr('Push Uncensored Files', level=1)
++            remote = (
++                f'/sdcard/Android/data/{self.device.package}/files/'
++                'localization.txt'
++            )
++            command = ['push', str(payload), remote]
++            logger.info(f'Command: {command}')
++            self.device.adb_command(command, timeout=30)
++            installed_hash = self.device.adb_shell(
++                ['sha256sum', remote], timeout=10
++            ).split()[0].lower()
++            local_hash = hashlib.sha256(payload.read_bytes()).hexdigest()
++            if installed_hash != local_hash:
++                raise RuntimeError('Remote uncensored payload verification failed')
++            logger.info('Push and remote verification success')
++        finally:
++            os.chdir(str(prev))
+ 
+-        # Back to root folder
+-        os.chdir(prev)
+         logger.hr('Restart AzurLane', level=1)
+         self.config.override(Error_HandleError=True)
+-        self.device.app_stop()
+-        self.device.app_start()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.restart_game_for_manager()
++            logger.info('Semantic cold restart submitted with -force-gfx-st')
++        else:
++            self.device.app_stop()
++            self.device.app_start()
+         self.handle_app_login()
+ 
+         logger.info('Uncensored Finished')
++        return True
+ 
+ 
+ if __name__ == '__main__':

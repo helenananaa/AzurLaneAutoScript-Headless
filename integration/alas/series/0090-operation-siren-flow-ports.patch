@@ -1,0 +1,904 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+index 4417f871..d6006bbb 100644
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -178,8 +178,13 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+         Calculate current HP, also detects the wrench (Ship died, need to repair)
+         """
+         super().hp_get()
+-        ship_icon = self._hp_grid().crop((0, -67, 67, 0))
+-        need_repair = [TEMPLATE_EMPTY_HP.match(self.image_crop(button, copy=False)) for button in ship_icon.buttons]
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            need_repair = list(semantic_session.operation_siren_need_repair())
++        else:
++            ship_icon = self._hp_grid().crop((0, -67, 67, 0))
++            need_repair = [TEMPLATE_EMPTY_HP.match(self.image_crop(button, copy=False)) for button in ship_icon.buttons]
+         self.need_repair = need_repair
+         logger.attr('Repair icon', need_repair)
+ 
+@@ -202,6 +207,10 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+         """
+         Whether low resolve debuff appears on current fleet
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.operation_siren_low_resolve_visible()
+         return self.image_color_count(
+             FLEET_LOW_RESOLVE, color=FLEET_LOW_RESOLVE.color, threshold=221, count=250)
+ 
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+index c4e375f0..12d5cac5 100644
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -23,6 +23,18 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+             self.globe.load_globe_map()
+ 
+     def globe_update(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            state = semantic_adapter.operation_siren_globe_state()
++            self._globe_init()
++            selected = self.name_to_zone(state.zone_name)
++            pinned_screen = np.array(ZONE_PINNED.button[:2], dtype=float)
++            pinned_globe = self.globe.screen2globe([pinned_screen])[0]
++            self.globe_camera = tuple(
++                selected.location - pinned_globe + self.globe.homo_center
++            )
++            logger.attr('Globe_center', self.camera_to_zone(self.globe_camera).zone_id)
++            return
+         # Handle random black screenshots
+         timeout = Timer(5, count=10).start()
+         while 1:
+@@ -90,10 +102,12 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+         Returns:
+             bool: if camera moved.
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         name = 'GLOBE_SWIPE_' + '_'.join([str(int(round(x))) for x in vector])
+         if np.linalg.norm(vector) <= 25:
+             logger.warning(f'Globe swipe to short: {vector}')
+             vector = np.sign(vector) * 25
++        globe_vector = np.array(vector, dtype=float)
+ 
+         if self.config.DEVICE_CONTROL_METHOD == 'minitouch':
+             distance = self.config.MAP_SWIPE_MULTIPLY_MINITOUCH
+@@ -107,7 +121,18 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+         self.device.swipe_vector(vector, name=name, box=box)
+         self.device.sleep(0.3)
+ 
+-        self.globe_update()
++        if semantic_adapter is not None:
++            # ALAS computed ``globe_vector`` from the desired globe-camera
++            # displacement using OS_GLOBE_SWIPE_MULTIPLY just above this
++            # method.  The selected-zone panel intentionally disappears
++            # during a camera drag, so advance the same ALAS camera model
++            # instead of trying to OCR/re-read that transient panel.
++            self.globe_camera = tuple(
++                np.array(self.globe_camera, dtype=float)
++                + globe_vector * np.array(self.config.OS_GLOBE_SWIPE_MULTIPLY)
++            )
++        else:
++            self.globe_update()
+ 
+     def globe_wait_until_stable(self):
+         prev = self.globe_camera
+@@ -225,6 +250,31 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+         zone = self.name_to_zone(zone)
+         logger.info(f'Globe focus_to: {zone.zone_id}')
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            for _ in range(5):
++                if semantic_adapter.operation_siren_globe_state().zone_name == zone.cn:
++                    self.globe_update()
++                    logger.attr('Globe_pinned', zone)
++                    return
++                self.globe_in_sight(zone)
++                # Match ``zone_to_button()`` below: ALAS represents a zone by
++                # the pin's lower-left anchor, then clicks the centre of its
++                # (0, -10, 16, 0) button area.
++                point = tuple(self.globe2screen([zone.location])[0] + (8, -5))
++                logger.info(f'Semantic globe zone point: {point}')
++                receipt = semantic_adapter.click_operation_siren_globe_zone(
++                    zone.cn, point)
++                self.globe_update()
++                if self.get_globe_pinned_zone() == zone:
++                    logger.attr('Globe_pinned', zone)
++                    return
++                logger.warning(
++                    f'Semantic globe selected an adjacent zone via '
++                    f'{receipt.semantic_id}; recalibrate and retry'
++                )
++            raise GameStuckError('Semantic globe could not select the expected zone')
++
+         while 1:
+             if self.handle_zone_pinned():
+                 self.globe_update()
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+index 1a9a7895..fe133663 100644
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -24,6 +24,9 @@ class GlobeOperation(ActionPointHandler):
+     _zone_unpin_interval = Timer(0.5)
+ 
+     def is_in_globe(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.operation_siren_globe_visible()
+         return self.appear(GLOBE_GOTO_MAP, offset=(20, 20))
+ 
+     def get_zone_pinned(self):
+@@ -31,6 +34,17 @@ class GlobeOperation(ActionPointHandler):
+         Returns:
+             Button:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            try:
++                semantic_adapter.operation_siren_globe_state()
++            except Exception:
++                return None
++            # The typed SVFloatPanel proves a zone is pinned.  The exact
++            # selected zone name is resolved by get_globe_pinned_zone(); for
++            # the common port/ordinary route there is no alternate zone type.
++            return ZONE_DANGEROUS
++
+         for zone in ZONE_TYPES:
+             if self.appear(zone, offset=(20, 20)):
+                 for button in ASSETS_PINNED_ZONE:
+@@ -326,6 +340,11 @@ class GlobeOperation(ActionPointHandler):
+             if self.handle_popup_confirm('GOTO_GLOBE'):
+                 continue
+ 
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            # The selected SVFloatPanel is our camera anchor.  Keep it pinned;
++            # globe_focus_to() will replace it with the requested exact zone.
++            return
++
+         confirm_timer = Timer(1, count=2).start()
+         unpinned = 0
+         for _ in self.loop():
+diff --git a/module/os/map.py b/module/os/map.py
+index 9a900aa3..4e68d397 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -13,7 +13,7 @@ from module.os.fleet import OSFleet
+ from module.os.globe_camera import GlobeCamera
+ from module.os.globe_operation import RewardUncollectedError
+ from module.os_handler.assets import AUTO_SEARCH_OS_MAP_OPTION_OFF, AUTO_SEARCH_OS_MAP_OPTION_OFF_DISABLED, \
+-    AUTO_SEARCH_OS_MAP_OPTION_ON, AUTO_SEARCH_REWARD
++    AUTO_SEARCH_OS_MAP_OPTION_ON, AUTO_SEARCH_REWARD, EXCHANGE_CHECK, PORT_GOTO_SUPPLY
+ from module.os_handler.strategic import StrategicSearchHandler
+ from module.ui.assets import GOTO_MAIN
+ from module.ui.page import page_os
+@@ -51,6 +51,36 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+         )
+ 
+         # UI switching
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.open().oracle.operation_siren_mission_list_visible()
++        ):
++            logger.info('Recover retained Operation Siren mission list')
++            semantic_adapter.refresh_frame()
++            semantic_adapter.open().oracle.click('os/mission-list/close')
++            for _ in self.loop():
++                if self.is_in_map():
++                    break
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.open().oracle.operation_siren_mission_overview_visible()
++        ):
++            logger.info('Recover retained Operation Siren mission overview')
++            semantic_adapter.refresh_frame()
++            semantic_adapter.open().oracle.click_operation_siren_mission_overview_back()
++            for _ in self.loop():
++                if self.is_in_globe():
++                    break
++            self.os_globe_goto_map()
++        if semantic_adapter is not None and semantic_adapter.appear(EXCHANGE_CHECK):
++            logger.info('Recover retained Operation Siren voucher page')
++            semantic_adapter.refresh_frame()
++            semantic_adapter.open().oracle.click('os/voucher/back')
++            for _ in self.loop():
++                if self.is_in_globe():
++                    break
++            self.os_globe_goto_map()
+         if self.is_in_map():
+             logger.info('Already in os map')
+         elif self.is_in_globe():
+@@ -65,8 +95,21 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+ 
+         # self.map_init()
+         self.hp_reset()
+-        self.handle_after_auto_search()
+-        self.handle_current_fleet_resolve(revert=False)
++        semantic_auto_search_locked = bool(
++            semantic_adapter is not None
++            and self.config.task.command != 'OpsiExplore'
++            and semantic_adapter.open().oracle.exists('os/map/auto-search/off')
++        )
++        if semantic_adapter is not None and semantic_adapter.appear(PORT_GOTO_SUPPLY):
++            logger.info('Already in Operation Siren port; skip local-map fleet checks')
++        elif semantic_auto_search_locked:
++            logger.warning(
++                'Operation Siren auto search is locked; skip the initial '
++                'local-map fleet checks for this non-exploration task'
++            )
++        else:
++            self.handle_after_auto_search()
++            self.handle_current_fleet_resolve(revert=False)
+ 
+         # Exit from special zones types, only SAFE and DANGEROUS are acceptable.
+         if self.is_in_special_zone():
+@@ -78,8 +121,20 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+             logger.info('In zone 22, 44, 154, skip running first auto search')
+             self.handle_ash_beacon_attack()
+         else:
+-            self.run_auto_search(rescan=False)
+-            self.handle_after_auto_search()
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
++            if (
++                semantic_session is not None
++                and self.config.task.command != 'OpsiExplore'
++                and semantic_session.open().oracle.exists('os/map/auto-search/off')
++            ):
++                logger.warning(
++                    'Operation Siren auto search is locked; skip the initial '
++                    'clear for this non-exploration task'
++                )
++            else:
++                self.run_auto_search(rescan=False)
++                self.handle_after_auto_search()
+ 
+     def get_current_zone_from_globe(self):
+         """
+diff --git a/module/os/tasks/archive.py b/module/os/tasks/archive.py
+index 0a7d8dcc..7769f5a0 100644
+--- a/module/os/tasks/archive.py
++++ b/module/os/tasks/archive.py
+@@ -34,7 +34,18 @@ class OpsiArchive(OSMap):
+         while True:
+             # In case logger bought manually,
+             # finish pre-existing archive zone
+-            self.os_finish_daily_mission(question=False, rescan=False)
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            semantic_auto_search_locked = bool(
++                semantic_adapter is not None
++                and semantic_adapter.open().oracle.exists('os/map/auto-search/off')
++            )
++            if semantic_auto_search_locked:
++                logger.warning(
++                    'Operation Siren auto search is locked; skip clearing the '
++                    'pre-existing mission before archive purchase'
++                )
++            else:
++                self.os_finish_daily_mission(question=False, rescan=False)
+ 
+             logger.hr('OS voucher', level=1)
+             self._os_voucher_enter()
+diff --git a/module/os/tasks/hazard_leveling.py b/module/os/tasks/hazard_leveling.py
+index 03501dc8..866f4c51 100644
+--- a/module/os/tasks/hazard_leveling.py
++++ b/module/os/tasks/hazard_leveling.py
+@@ -5,6 +5,17 @@ from module.os.map import OSMap
+ class OpsiHazard1Leveling(OSMap):
+     def os_hazard1_leveling(self):
+         logger.hr('OS hazard 1 leveling', level=1)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.open().oracle.exists('os/map/auto-search/off')
++        ):
++            logger.warning(
++                'Operation Siren auto search is locked; cannot run hazard-1 '
++                'strategic search on this account'
++            )
++            self.config.task_delay(server_update=True)
++            self.config.task_stop()
+         # Without these enabled, CL1 gains 0 profits
+         self.config.override(
+             OpsiGeneral_DoRandomMapEvent=True,
+diff --git a/module/os/tasks/meowfficer_farming.py b/module/os/tasks/meowfficer_farming.py
+index 43d629c5..513b70ad 100644
+--- a/module/os/tasks/meowfficer_farming.py
++++ b/module/os/tasks/meowfficer_farming.py
+@@ -38,6 +38,18 @@ class OpsiMeowfficerFarming(OSMap):
+             self.config.task_delay(server_update=True)
+             self.config.task_stop()
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.open().oracle.exists('os/map/auto-search/off')
++        ):
++            logger.warning(
++                'Operation Siren auto search is locked; cannot run '
++                'meowfficer farming on this account'
++            )
++            self.config.task_delay(server_update=True)
++            self.config.task_stop()
++
+         ap_checked = False
+         while True:
+             self.config.OS_ACTION_POINT_PRESERVE = preserve
+diff --git a/module/os/tasks/month_boss.py b/module/os/tasks/month_boss.py
+index 948b5149..ea23a757 100644
+--- a/module/os/tasks/month_boss.py
++++ b/module/os/tasks/month_boss.py
+@@ -9,6 +9,14 @@ from module.os_handler.assets import OS_MONTHBOSS_NORMAL, OS_MONTHBOSS_HARD
+ 
+ class OpsiMonthBoss(OSMap):
+     def get_adaptability(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            state = semantic_adapter.operation_siren_globe_state()
++            return (
++                state.offense_adaptability,
++                state.survival_adaptability,
++                state.tactical_adaptability,
++            )
+         adaptability = OCR_OS_ADAPTABILITY.ocr(self.device.image)
+ 
+         return adaptability
+diff --git a/module/os/tasks/voucher.py b/module/os/tasks/voucher.py
+index a3c84ab5..16330ba6 100644
+--- a/module/os/tasks/voucher.py
++++ b/module/os/tasks/voucher.py
+@@ -12,6 +12,15 @@ class OpsiVoucher(OSMap):
+                       offset=(200, 20), retry_wait=3, skip_first_screenshot=True)
+ 
+     def _os_voucher_exit(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
++            semantic_adapter.open().oracle.click('os/voucher/back')
++            for _ in self.loop():
++                if self.appear(EXCHANGE_ENTER, offset=(200, 20)):
++                    break
++            self.os_globe_goto_map()
++            return
+         self.ui_back(check_button=EXCHANGE_ENTER, appear_button=EXCHANGE_CHECK,
+                      offset=(200, 20), retry_wait=3, skip_first_screenshot=True)
+         self.os_globe_goto_map()
+@@ -21,7 +30,13 @@ class OpsiVoucher(OSMap):
+         self._os_voucher_enter()
+         VoucherShop(self.config, self.device).run()
+         self._os_voucher_exit()
+-        self.logger_use()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and not semantic_adapter.shop_purchase_allowed():
++            logger.info(
++                'Skip Operation Siren storage logger use; mutation budget is 0'
++            )
++        else:
++            self.logger_use()
+ 
+         next_reset = get_os_next_reset()
+         logger.info('OS voucher finished, delay to next reset')
+diff --git a/module/os_ash/ash.py b/module/os_ash/ash.py
+index 0d54085a..60f5a7f6 100644
+--- a/module/os_ash/ash.py
++++ b/module/os_ash/ash.py
+@@ -92,6 +92,21 @@ class OSAsh(UI, MapEventHandler):
+         """
+         if self._ash_fully_collected:
+             return 0
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            state = semantic_session.operation_siren_state()
++            status = state.beacon_points
++            daily = state.daily_beacon_points
++            logger.info(f'Ash beacon status: semantic {status}/{state.beacon_capacity}, '
++                        f'daily {daily}/{state.daily_beacon_capacity}')
++            if daily >= state.daily_beacon_capacity:
++                logger.info('Ash beacon fully collected today')
++                self._ash_fully_collected = True
++            elif status >= state.beacon_capacity:
++                logger.info('Ash beacon data reached the holding limit')
++                self._ash_fully_collected = True
++            return max(status, 0)
+         if self.image_color_count(ASH_COLLECT_STATUS, color=(235, 235, 235), threshold=221, count=20):
+             logger.info('Ash beacon status: light')
+             ocr_collect = DigitCounter(
+diff --git a/module/os_handler/enemy_searching.py b/module/os_handler/enemy_searching.py
+index e8e07363..62f4cd1e 100644
+--- a/module/os_handler/enemy_searching.py
++++ b/module/os_handler/enemy_searching.py
+@@ -6,6 +6,9 @@ from module.os_handler.assets import AUTO_SEARCH_REWARD, IN_MAP, ORDER_ENTER
+ 
+ class EnemySearchingHandler(EnemySearchingHandler_):
+     def is_in_map(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.operation_siren_map_visible()
+         if IN_MAP.match_luma(self.device.image, offset=(200, 5)):
+             return True
+         if self.match_template_color(MAP_GOTO_GLOBE_FOG, offset=(5, 5)):
+diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
+index 51bf64f1..284cd05a 100644
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -71,6 +71,12 @@ class MapEventHandler(EnemySearchingHandler):
+         return False
+ 
+     def handle_map_archives(self, drop=None):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # These are optional archive-introduction overlays.  Until their
++            # exact hierarchy is captured, do not let their legacy pixel
++            # probes escape the semantic boundary on an otherwise proven map.
++            return False
+         if self.appear(MAP_ARCHIVES, interval=5):
+             if drop:
+                 drop.add(self.device.image)
+@@ -112,6 +118,17 @@ class MapEventHandler(EnemySearchingHandler):
+         Returns:
+             str: Event that handled
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # A transient CN NetworkDown Msgbox can cover the whole local map
++            # while auto-search is polling.  POPUP_CONFIRM is narrowed by the
++            # semantic oracle to the exact reconnect wording, so consume only
++            # that reviewed overlay and keep the current exploration loop.
++            from module.handler.assets import POPUP_CONFIRM
++            if semantic_adapter.appear(POPUP_CONFIRM):
++                logger.info('Operation Siren network reconnect')
++                self.device.click(POPUP_CONFIRM)
++                return 'network_reconnect'
+         if self.handle_map_get_items(drop=drop):
+             return 'map_get_items'
+         if self.handle_os_game_tips():
+@@ -215,6 +232,20 @@ class MapEventHandler(EnemySearchingHandler):
+         Returns:
+             bool: If clicked.
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # The current CN client exposes the locked auto-search switch as
++            # an interactable Unity Button, but ignores clicks until OpSi
++            # story progression unlocks it.  One ignored input must not become
++            # ALAS' repeated three-second click loop.  Treat the persistent
++            # off state as unavailable and let the existing unlock timer report
++            # the account condition without scheduling a game restart.
++            from alas_headless import current_semantic_session
++            session = current_semantic_session()
++            if session is not None and session.open().oracle.exists(
++                'os/map/auto-search/off'
++            ):
++                return False
+         if self.match_template_color(AUTO_SEARCH_OS_MAP_OPTION_OFF, offset=(5, 120)):
+             if self.info_bar_count() >= 2:
+                 self.device.screenshot_interval_set()
+diff --git a/module/os_handler/mission.py b/module/os_handler/mission.py
+index 376ac1db..7296840d 100644
+--- a/module/os_handler/mission.py
++++ b/module/os_handler/mission.py
+@@ -135,6 +135,7 @@ class MissionHandler(GlobeOperation, ZoneManager):
+             return False
+ 
+         logger.info('Checkout os mission')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         for _ in self.loop():
+             # End
+             if self.is_zone_pinned():
+@@ -151,6 +152,21 @@ class MissionHandler(GlobeOperation, ZoneManager):
+                 return 'already_at_mission_zone'
+ 
+             if self.appear_then_click(MISSION_CHECKOUT, offset=checkout_offset, interval=2):
++                if semantic_adapter is not None:
++                    for _ in self.loop():
++                        if semantic_adapter.open().oracle.operation_siren_mission_list_visible():
++                            continue
++                        if self.is_zone_pinned():
++                            if self.get_zone_pinned_name() == 'ARCHIVE':
++                                logger.info('Pinned at archive zone')
++                                self.globe_enter(zone=self.name_to_zone(72))
++                                return 'pinned_at_archive_zone'
++                            logger.info('Pinned at mission zone')
++                            self.globe_enter(zone=self.name_to_zone(72))
++                            return 'pinned_at_mission_zone'
++                        if self.is_in_map():
++                            logger.info('Already at mission zone')
++                            return 'already_at_mission_zone'
+                 continue
+             if self.handle_popup_confirm('OS_MISSION_CHECKOUT'):
+                 # Popup: Submarine will retreat after exiting current zone.
+@@ -172,9 +188,17 @@ class MissionHandler(GlobeOperation, ZoneManager):
+         # is_in_map
+         self.os_map_goto_globe(unpin=False)
+         # is_in_globe
+-        self.ui_click(MISSION_OVERVIEW_ENTER, check_button=MISSION_OVERVIEW_CHECK,
+-                      offset=(200, 20), retry_wait=3, additional=self.handle_manjuu,
+-                      skip_first_screenshot=True)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
++            semantic_adapter.open().oracle.click_operation_siren_mission_overview()
++            for _ in self.loop():
++                if self.appear(MISSION_OVERVIEW_CHECK, offset=(200, 20)):
++                    break
++        else:
++            self.ui_click(MISSION_OVERVIEW_ENTER, check_button=MISSION_OVERVIEW_CHECK,
++                          offset=(200, 20), retry_wait=3, additional=self.handle_manjuu,
++                          skip_first_screenshot=True)
+ 
+         timeout = 5
+         accept_button_timer = Timer(timeout)
+@@ -192,7 +216,7 @@ class MissionHandler(GlobeOperation, ZoneManager):
+                 success = False
+                 break
+ 
+-            if self.handle_manjuu():
++            if semantic_adapter is None and self.handle_manjuu():
+                 continue
+             # Click
+             if self.appear_then_click(MISSION_OVERVIEW_ACCEPT, offset=(20, 20), interval=timeout):
+@@ -201,8 +225,15 @@ class MissionHandler(GlobeOperation, ZoneManager):
+                 continue
+ 
+         # is_in_globe
+-        self.ui_back(appear_button=MISSION_OVERVIEW_CHECK, check_button=self.is_in_globe,
+-                     skip_first_screenshot=True)
++        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
++            semantic_adapter.open().oracle.click_operation_siren_mission_overview_back()
++            for _ in self.loop():
++                if self.is_in_globe():
++                    break
++        else:
++            self.ui_back(appear_button=MISSION_OVERVIEW_CHECK, check_button=self.is_in_globe,
++                         skip_first_screenshot=True)
+         # is_in_map
+         self.os_globe_goto_map()
+         return success
+diff --git a/module/os_handler/port.py b/module/os_handler/port.py
+index fac02df5..ff27df84 100644
+--- a/module/os_handler/port.py
++++ b/module/os_handler/port.py
+@@ -19,6 +19,8 @@ class PortHandler(OSShop):
+         """
+         logger.info('Port enter')
+         for _ in self.loop():
++            if self.appear(PORT_SUPPLY_CHECK, offset=(20, 20)):
++                break
+             if self.appear(PORT_CHECK, offset=(20, 20)):
+                 break
+             if self.appear_then_click(PORT_ENTER, offset=(20, 20), interval=5):
+@@ -35,6 +37,12 @@ class PortHandler(OSShop):
+             out: IN_MAP
+         """
+         logger.info('Port quit')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
++            semantic_adapter.open().oracle.click('os/port/back')
++            self.wait_os_map_buttons()
++            return
+         self.ui_back(appear_button=PORT_CHECK, check_button=self.is_in_map,
+                      skip_first_screenshot=skip_first_screenshot)
+         # Buttons at the bottom has an animation to show
+@@ -87,8 +95,10 @@ class PortHandler(OSShop):
+             in: PORT_CHECK
+             out: PORT_SUPPLY_CHECK
+         """
++        if self.appear(PORT_SUPPLY_CHECK, offset=(20, 20)):
++            return
+         self.ui_click(PORT_GOTO_SUPPLY, appear_button=PORT_CHECK, check_button=PORT_SUPPLY_CHECK,
+-                      skip_first_screenshot=True)
++                      additional=self.handle_map_event, skip_first_screenshot=True)
+         # Port items has an animation to show
+         self.device.sleep(0.5)
+         self.device.screenshot()
+@@ -99,6 +109,14 @@ class PortHandler(OSShop):
+             in: PORT_SUPPLY_CHECK
+             out: PORT_CHECK
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
++            semantic_adapter.open().oracle.click('os/shop/back')
++            for _ in self.loop():
++                if self.appear(PORT_CHECK, offset=(20, 20)):
++                    return
++            return
+         self.ui_back(appear_button=PORT_SUPPLY_CHECK, check_button=PORT_CHECK, skip_first_screenshot=True)
+ 
+     def port_dock_repair(self):
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+index b0b0453d..b5520ff5 100644
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -15,6 +15,9 @@ SCROLL_STORAGE = Scroll(STORATE_SCROLL, color=(247, 211, 66))
+ 
+ class StorageHandler(GlobeOperation, ZoneManager):
+     def is_in_storage(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.operation_siren_storage_visible()
+         return self.appear(STORAGE_CHECK, offset=(20, 20))
+ 
+     def storage_enter(self):
+@@ -46,6 +49,14 @@ class StorageHandler(GlobeOperation, ZoneManager):
+             out: is_in_map
+         """
+         logger.info('Storage quit')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
++            semantic_adapter.click_operation_siren_storage_back()
++            for _ in self.loop():
++                if self.is_in_map():
++                    break
++            return
+         self.ui_back(STORAGE_ENTER, offset=(200, 5), skip_first_screenshot=True)
+ 
+     def _storage_item_use(self, button):
+@@ -228,6 +239,44 @@ class StorageHandler(GlobeOperation, ZoneManager):
+                  is_in_map, in previous zone if no more obscure/abyssal coordinates.
+         """
+         logger.hr(f'Storage checkout item {item}')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            state = semantic_adapter.operation_siren_storage_state()
++            available = sum(
++                entry.count for entry in state.items if entry.item_type == item
++            )
++            logger.attr(f'Storage_{item}', available)
++            if available <= 0:
++                logger.info(f'No more {item} items in storage')
++                self.storage_quit()
++                return False
++            if not semantic_adapter.operation_siren_coordinate_checkout_allowed():
++                logger.warning(
++                    f'{item} coordinate found, but coordinate checkout budget is 0; '
++                    'leave inventory unchanged'
++                )
++                self.storage_quit()
++                return False
++            if item == 'ABYSSAL' and not any(
++                entry.item_type == item and entry.actionable for entry in state.items
++            ):
++                semantic_adapter.refresh_frame()
++                semantic_adapter.operation_siren_storage_scroll_for_abyssal()
++            semantic_adapter.refresh_frame()
++            semantic_adapter.click_operation_siren_storage_item(item)
++            for _ in self.loop():
++                if semantic_adapter.operation_siren_storage_detail() is not None:
++                    break
++            semantic_adapter.refresh_frame()
++            semantic_adapter.click_operation_siren_storage_detail_checkout()
++            for _ in self.loop():
++                if self.is_zone_pinned():
++                    break
++                if self.handle_popup_confirm('STORAGE_CHECKOUT'):
++                    continue
++            self.zone_type_select((item,))
++            self.globe_enter(zone=self.name_to_zone(72))
++            return True
+         if SCROLL_STORAGE.appear(main=self):
+             SCROLL_STORAGE.set_top(main=self)
+ 
+diff --git a/module/os_shop/port_shop.py b/module/os_shop/port_shop.py
+index 56e0554e..9cebc1c1 100644
+--- a/module/os_shop/port_shop.py
++++ b/module/os_shop/port_shop.py
+@@ -1,6 +1,6 @@
+ from typing import List
+ 
+-from module.base.button import ButtonGrid
++from module.base.button import Button, ButtonGrid
+ from module.base.decorator import cached_property
+ from module.base.template import Template
+ from module.logger import logger
+@@ -14,6 +14,12 @@ from module.statistics.utils import load_folder
+ 
+ 
+ class PortShop(OSStatus, OSShopUI, Selector, MapEventHandler):
++    def _semantic_unified_os_shop(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is None:
++            return None
++        return semantic_adapter.operation_siren_shop_items()
++
+     @cached_property
+     def TEMPLATES(self) -> List[Template]:
+         TEMPLATES = []
+@@ -124,6 +130,34 @@ class PortShop(OSStatus, OSShopUI, Selector, MapEventHandler):
+         Returns:
+             list[Item]:
+         """
++        records = self._semantic_unified_os_shop()
++        if records is not None:
++            logger.info(f'Unified OpsiShop: {len(records)} items')
++            items = []
++            synthetic = __import__('numpy').zeros((720, 1280, 3), dtype=__import__('numpy').uint8)
++            for record in records:
++                bounds = record.bounds
++                button = Button(
++                    area=(int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom)),
++                    color=(0, 0, 0),
++                    button=(int(bounds.left), int(bounds.top), int(bounds.right), int(bounds.bottom)),
++                    name=f'OS_SHOP_SEMANTIC_{record.index}',
++                )
++                item = Item(synthetic, button)
++                item.is_valid = True
++                item.name = record.canonical_name
++                item.amount = record.amount
++                item.count = record.remaining
++                item.total_count = record.total
++                item.cost = record.currency
++                item.price = record.price
++                item.shop_index = record.index // 5
++                item.scroll_pos = float(record.index // 5)
++                items.append(item)
++            logger.info(f'Unified OpsiShop currency: {getattr(self.device, "semantic_adapter").operation_siren_shop_currency()}')
++            logger.info(f'Unified OpsiShop items: {[str(item) for item in items]}')
++            return items
++
+         items = []
+         self.device.click_record.clear()
+ 
+diff --git a/module/os_shop/shop.py b/module/os_shop/shop.py
+index b97f0c0d..c7bf38d3 100644
+--- a/module/os_shop/shop.py
++++ b/module/os_shop/shop.py
+@@ -208,6 +208,7 @@ class OSShop(PortShop, AkashiShop):
+         Pages:
+             in: PORT_SUPPLY_CHECK
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         items = self.scan_all()
+         if not len(items):
+             logger.warning('Empty OS shop.')
+@@ -216,6 +217,9 @@ class OSShop(PortShop, AkashiShop):
+         if not len(items):
+             logger.warning('Nothing to buy.')
+             return False
++        if semantic_adapter is not None and not semantic_adapter.shop_purchase_allowed():
++            logger.info('Unified OpsiShop scan finished; purchase budget is 0')
++            return True
+         self.os_shop_get_coins()
+         skip_get_coins = True
+         items.reverse()
+diff --git a/module/shop/shop_voucher.py b/module/shop/shop_voucher.py
+index ca149f03..5d6d27e9 100644
+--- a/module/shop/shop_voucher.py
++++ b/module/shop/shop_voucher.py
+@@ -1,4 +1,4 @@
+-from module.base.button import ButtonGrid
++from module.base.button import Button, ButtonGrid
+ from module.base.decorator import cached_property, del_cached_property
+ from module.base.timer import Timer
+ from module.config.redirect_utils.shop_filter import voucher_redirect
+@@ -19,6 +19,12 @@ TEMPLATE_VOUCHER_ICON = Template('./assets/shop/cost/Voucher.png')
+ 
+ 
+ class VoucherShop(ShopClerk, ShopStatus):
++    def _semantic_voucher_records(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is None:
++            return None
++        return semantic_adapter.operation_siren_voucher_items()
++
+     @cached_property
+     def shop_filter(self):
+         """
+@@ -44,6 +50,10 @@ class VoucherShop(ShopClerk, ShopStatus):
+         items are not loaded that fast,
+         wait until any voucher icon appears
+         """
++        records = self._semantic_voucher_records()
++        if records is not None:
++            logger.info(f'Unified OpsiVoucher: {len(records)} items')
++            return
+         timeout = Timer(1, count=3).start()
+         while 1:
+             if skip_first_screenshot:
+@@ -243,6 +253,26 @@ class VoucherShop(ShopClerk, ShopStatus):
+         logger.hr('Voucher Shop', level=1)
+         self.wait_until_voucher_appear()
+ 
++        records = self._semantic_voucher_records()
++        if records is not None:
++            semantic_adapter = getattr(self.device, 'semantic_adapter')
++            balance = semantic_adapter.operation_siren_voucher_currency()
++            logger.info(f'Unified OpsiVoucher currency: {balance}')
++            logger.info(
++                'Unified OpsiVoucher items: '
++                + str([
++                    f'{record.canonical_name}_x{record.amount}_{record.currency}_x{record.price}'
++                    f'_{record.remaining}/{record.total}'
++                    for record in records
++                ])
++            )
++            if not semantic_adapter.shop_purchase_allowed():
++                logger.info('Unified OpsiVoucher scan finished; purchase budget is 0')
++                return
++            raise RuntimeError(
++                'Unified OpsiVoucher purchase is not adapted for a positive budget'
++            )
++
+         # Execute buy operations
+         VOUCHER_SHOP_SCROLL.set_top(main=self)
+         while 1:
+@@ -273,6 +303,38 @@ class VoucherShop(ShopClerk, ShopStatus):
+         logger.hr('Voucher Shop Once', level=1)
+         self.wait_until_voucher_appear()
+ 
++        records = self._semantic_voucher_records()
++        if records is not None:
++            semantic_adapter = getattr(self.device, 'semantic_adapter')
++            balance = semantic_adapter.operation_siren_voucher_currency()
++            archives = [
++                record for record in records
++                if record.canonical_name.startswith('LoggerArchive')
++                and not record.sold_out
++                and record.remaining > 0
++            ]
++            logger.info(f'Unified OpsiArchive currency: {balance}')
++            logger.info(
++                'Unified OpsiArchive loggers: '
++                + str([
++                    f'{record.canonical_name}_{record.remaining}/{record.total}'
++                    f'_{record.currency}_x{record.price}'
++                    for record in archives
++                ])
++            )
++            if not archives:
++                logger.info('No logger archives available for purchase')
++                return False
++            if not semantic_adapter.shop_purchase_allowed():
++                logger.info(
++                    'Logger archives are available, but purchase budget is 0; '
++                    'leave vouchers unchanged'
++                )
++                return False
++            raise RuntimeError(
++                'Unified OpsiArchive purchase is not adapted for a positive budget'
++            )
++
+         # Execute buy operations
+         items = self.shop_get_items()
+         self.shop_currency()
+diff --git a/module/ui/scroll.py b/module/ui/scroll.py
+index 5b86d7bb..88f549ff 100644
+--- a/module/ui/scroll.py
++++ b/module/ui/scroll.py
+@@ -61,6 +61,9 @@ class Scroll:
+         Returns:
+             float: 0 to 1.
+         """
++        semantic_adapter = getattr(main.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.name == 'MINIGAME_SCROLL_AREA':
++            return semantic_adapter.open().oracle.minigame_scroll_position()
+         mask = self.match_color(main)
+         middle = np.mean(np.where(mask)[0])
+ 
+@@ -109,6 +112,9 @@ class Scroll:
+         Returns:
+             bool
+         """
++        semantic_adapter = getattr(main.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.name == 'MINIGAME_SCROLL_AREA':
++            return semantic_adapter.minigame_scroll_visible()
+         return np.mean(self.match_color(main)) > 0.1
+ 
+     def at_top(self, main):
+@@ -131,6 +137,9 @@ class Scroll:
+         Returns:
+             bool: If dragged.
+         """
++        semantic_adapter = getattr(main.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.name == 'MINIGAME_SCROLL_AREA':
++            return int(semantic_adapter.minigame_scroll_set(float(position)))
+         logger.info(f'{self.name} set to {position}')
+         self.drag_interval.clear()
+         self.drag_timeout.reset()

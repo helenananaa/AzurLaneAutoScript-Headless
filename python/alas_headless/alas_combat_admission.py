@@ -1,10 +1,9 @@
 """Decision-bound admission data for one ALAS-owned campaign combat.
 
-This module does not execute movement or combat.  It validates that the first
-state-changing grid input selected by ALAS still names either the exact
-fighting enemy under the current fleet or one ordinary enemy reached through
-at most three empty orthogonal cells.  The adapter owns the separate input
-budget and the native ALAS state machine remains the only execution owner.
+This module does not execute movement or combat.  It validates the exact
+ordered grid-input sequence selected by ALAS: zero or more empty waypoints,
+followed by the fighting enemy.  The adapter owns the separate input budget
+and the native ALAS state machine remains the only execution owner.
 """
 
 import re
@@ -32,6 +31,7 @@ class AlasCampaignCombatAdmission:
     origin_node: str
     target_node: str
     route_nodes: Tuple[str, ...]
+    input_nodes: Tuple[str, ...]
     enemy_object_id: int
     enemy_sprite: str
     enemy_level: int
@@ -55,6 +55,7 @@ class AlasCampaignCombatAdmission:
             self.origin_node,
             self.target_node,
             self.route_nodes,
+            self.input_nodes,
             self.enemy_object_id,
             self.enemy_sprite,
             self.enemy_level,
@@ -89,12 +90,16 @@ def prepare_alas_campaign_combat_admission(
     *,
     input_generation: int,
 ) -> AlasCampaignCombatAdmission:
-    """Bind one same-cell or bounded-route decision to its exact map cell.
+    """Bind one same-cell or orthogonal-route decision to its exact inputs.
 
     Admit the exact orthogonal ALAS route when every intermediate node is a
-    typed passable cell with no enemy, fleet, or pickup. Fleet switching,
-    ammunition pickups, portals, and diagonal routes remain outside this
-    contract.
+    typed passable cell with no enemy or pickup. ALAS treats another friendly
+    fleet as traversable and deliberately omits that occupied cell from its
+    ordered click nodes; permit that case only when the fleet has a different
+    marker and ALAS does not click its cell. A decision may select the other
+    already-projected fleet; the adapter must prove that exact fleet switch
+    before admitting the first grid input. Ammunition pickups, portals, and
+    diagonal routes remain outside this contract.
     """
 
     if not isinstance(decision, AlasCampaignDecisionPreview):
@@ -114,8 +119,14 @@ def prepare_alas_campaign_combat_admission(
     if decision.target_kind != "enemy" or decision.expected not in (
         "combat",
         "combat_boss",
+        "combat_siren",
     ):
-        raise SemanticGateClosed("campaign combat target is not an enemy")
+        raise SemanticGateClosed(
+            "campaign combat target is not an enemy: kind={0}, expected={1}".format(
+                decision.target_kind,
+                decision.expected,
+            )
+        )
     if (
         isinstance(decision.cost, bool)
         or not isinstance(decision.cost, int)
@@ -153,13 +164,39 @@ def prepare_alas_campaign_combat_admission(
             abs(left[0] - right[0]) + abs(left[1] - right[1]) == 1
             for left, right in zip(coordinates, coordinates[1:])
         )
-    if not (same_cell or bounded_route) or decision.goto_nodes != (decision.target_node,):
+    input_nodes = decision.goto_nodes
+    if (
+        not (same_cell or bounded_route)
+        or not isinstance(input_nodes, tuple)
+        or not input_nodes
+        or any(not isinstance(node, str) for node in input_nodes)
+        or input_nodes[-1] != decision.target_node
+        or len(set(input_nodes)) != len(input_nodes)
+    ):
         raise SemanticGateClosed(
-            "campaign combat admission requires one exact orthogonal route"
+            "campaign combat admission requires one exact orthogonal route "
+            "with ordered inputs"
         )
-    if decision.step_optimize:
-        raise SemanticGateClosed("campaign combat fleet-step movement is not admitted")
-
+    if same_cell:
+        if input_nodes != (decision.target_node,):
+            raise SemanticGateClosed(
+                "campaign combat same-cell input route changed"
+            )
+    else:
+        route_indices = {node: index for index, node in enumerate(decision.route_nodes)}
+        try:
+            input_indices = tuple(route_indices[node] for node in input_nodes)
+        except KeyError as exc:
+            raise SemanticGateClosed(
+                "campaign combat input left the admitted route"
+            ) from exc
+        if (
+            input_indices[0] <= 0
+            or any(left >= right for left, right in zip(input_indices, input_indices[1:]))
+        ):
+            raise SemanticGateClosed(
+                "campaign combat input order changed"
+            )
     cells = tuple(cell for cell in state.cells if cell.node == decision.target_node)
     enemies = tuple(
         enemy for enemy in state.enemies if enemy.node == decision.target_node
@@ -176,8 +213,12 @@ def prepare_alas_campaign_combat_admission(
         raise SemanticGateClosed(
             "campaign combat target fighting state disagrees with the route"
         )
-    if len(fleets) != 1 or state.current_fleet_marker != decision.fleet_marker:
-        raise SemanticGateClosed("campaign combat current fleet identity changed")
+    if (decision.expected == "combat_siren") != enemies[0].is_siren:
+        raise SemanticGateClosed(
+            "campaign combat target kind disagrees with the enemy identity"
+        )
+    if len(fleets) != 1:
+        raise SemanticGateClosed("campaign combat fleet identity changed")
     if fleets[0].ammo <= 0:
         raise SemanticGateClosed("campaign combat requires positive fleet ammunition")
     route_cells = tuple(
@@ -188,9 +229,19 @@ def prepare_alas_campaign_combat_admission(
     intermediate_nodes = frozenset(decision.route_nodes[1:-1])
     if any(
         item.node in intermediate_nodes
-        for item in (*state.enemies, *state.fleets, *state.pickups)
+        for item in (*state.enemies, *state.pickups)
     ):
         raise SemanticGateClosed("campaign combat route intermediate is occupied")
+    intermediate_fleets = tuple(
+        fleet for fleet in state.fleets if fleet.node in intermediate_nodes
+    )
+    if any(
+        fleet.marker == decision.fleet_marker or fleet.node in input_nodes
+        for fleet in intermediate_fleets
+    ):
+        raise SemanticGateClosed(
+            "campaign combat route input targets an occupied fleet cell"
+        )
     if not same_cell and any(
         item.node == decision.target_node
         for item in (*state.fleets, *state.pickups)
@@ -210,6 +261,7 @@ def prepare_alas_campaign_combat_admission(
         origin_node=decision.origin_node,
         target_node=decision.target_node,
         route_nodes=decision.route_nodes,
+        input_nodes=input_nodes,
         enemy_object_id=enemy.object_id,
         enemy_sprite=enemy.sprite,
         enemy_level=enemy.level,

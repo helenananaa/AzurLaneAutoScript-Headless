@@ -27,7 +27,7 @@ PATCH_PATH = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
 SERIES_MANIFEST_PATH = ROOT / "integration" / "alas" / "series" / "series.json"
 SCHEMA = "alas-headless.login-flow-replay/v1"
 PATCHED_LOGIN_SHA256 = (
-    "eea129c71f7bb7e9fd96fcc03ca295fcab43a4ec6f06e1e01cf0b13b66cb6cfe"
+    "06008b920efd3804b28cabaf0d74b25b15516be1ecd541e94e9836313bdbd056"
 )
 
 
@@ -206,6 +206,9 @@ class ReplayOracle:
     def enabled(self, semantic_id: str) -> bool:
         self.events.append(("enabled", semantic_id))
         return self.enabled_values.get(semantic_id, False)
+
+    def server_maintenance_visible(self) -> bool:
+        return False
 
     def click(self, semantic_id: str):
         from alas_headless import ActionReceipt, Bounds, Point

@@ -154,6 +154,15 @@ class AlasSemanticCampaignGrid:
             np.asarray(points, dtype=float) + np.asarray(self.location, dtype=float)
         )
 
+    def predict_fleet(self) -> bool:
+        return self.is_fleet
+
+    def predict_current_fleet(self) -> bool:
+        return self.is_current_fleet
+
+    def predict_submarine(self) -> bool:
+        return False
+
 
 class _AlasSemanticGridSelection:
     def __init__(self, grids: Iterable[AlasSemanticCampaignGrid]) -> None:
@@ -196,14 +205,11 @@ class AlasSemanticCampaignView:
         self.center_loca = observation.camera_location
         self.center_offset = np.asarray(observation.center_offset, dtype=float)
         self.swipe_base = np.asarray(observation.swipe_base, dtype=float)
-        # Edge correction needs the exact rendered map boundary, which the
-        # current typed surface does not expose.  Internal views are qualified;
-        # observations whose screen center reaches a map edge are rejected by
-        # the builder instead of fabricating these flags.
-        self.left_edge = False
-        self.right_edge = False
-        self.lower_edge = False
-        self.upper_edge = False
+        column, row = observation.camera_location
+        self.left_edge = column == 0
+        self.right_edge = column == state.columns - 1
+        self.lower_edge = row == 0
+        self.upper_edge = row == state.rows - 1
 
     def __iter__(self):
         return iter(self.grids.values())
@@ -256,7 +262,10 @@ class AlasSemanticCampaignView:
             after.camera_location[index] - before.camera_location[index]
             for index in range(2)
         )
-        if delta == (0, 0) or abs(delta[0]) > 4 or abs(delta[1]) > 3:
+        # ALAS requests at most (4, 3), but Unity clamps the camera at a map
+        # edge after applying the fractional center correction.  The observed
+        # logical delta can therefore be one cell larger on either axis.
+        if delta == (0, 0) or abs(delta[0]) > 5 or abs(delta[1]) > 4:
             raise SemanticGateClosed("ALAS camera observed swipe is outside limits")
         return delta
 
@@ -373,14 +382,26 @@ def build_alas_campaign_camera_view(
     continuous, maximum_residual, rms_residual, projector = _fit_projective_camera(
         state, exact_center
     )
+    # Unity can overscroll the perspective camera slightly beyond a map edge
+    # while the edge cells remain coherent and actionable.  Clamp only that
+    # sub-cell overshoot back to the logical edge; reject larger excursions.
+    adjusted = list(continuous)
+    for axis, limit in enumerate((state.columns, state.rows)):
+        if -1.0 < adjusted[axis] < 0.0:
+            adjusted[axis] = 0.0
+        elif limit - 1.0 <= adjusted[axis] < limit:
+            pass
+        elif limit <= adjusted[axis] < limit + 1.0:
+            adjusted[axis] = math.nextafter(float(limit), 0.0)
+    continuous = (adjusted[0], adjusted[1])
     camera = (math.floor(continuous[0]), math.floor(continuous[1]))
     center_offset = (
         continuous[0] - camera[0],
         continuous[1] - camera[1],
     )
     if not (
-        0 < camera[0] < state.columns - 1
-        and 0 < camera[1] < state.rows - 1
+        0 <= camera[0] < state.columns
+        and 0 <= camera[1] < state.rows
         and all(0.0 <= value < 1.0 for value in center_offset)
     ):
         raise SemanticGateClosed(
@@ -462,5 +483,10 @@ def install_alas_campaign_camera_view(
         target_node=target_node,
     )
     campaign.view = view
+    # Camera._update_view_data() applies a pending ALAS swipe to the previous
+    # camera coordinate.  Seed the coordinate only when no swipe is awaiting
+    # that native reconciliation, otherwise the delta would be applied twice.
+    if getattr(campaign, "_prev_view", None) is None:
+        campaign.camera = view.semantic_observation.camera_location
     campaign.semantic_camera_view_observation = view.semantic_observation
     return view.semantic_observation

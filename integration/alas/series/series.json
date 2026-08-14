@@ -3,37 +3,62 @@
     {
       "order": 1,
       "path": "integration/alas/series/0001-core-ports.patch",
-      "sha256": "955f477c9186890e82ca0a5e6d5e452db45b0d9425f36d96b875736d88b7b694"
+      "sha256": "22fd3a4f65b3af446954524093ee0d51284e26c622e406d481d6a979eeab4297"
     },
     {
       "order": 2,
       "path": "integration/alas/series/0002-session-lifecycle.patch",
-      "sha256": "23706cfde968d70eb48755ecd6b8cf76732b807ab6c4a0ad0d7e5b75e7d844ea"
+      "sha256": "db4d8d960f8e86cba8a15ea21cb17a1ff42f31de8c511d813fb24038ddbf90f0"
     },
     {
       "order": 3,
       "path": "integration/alas/series/0010-mission-mail-flow-ports.patch",
-      "sha256": "6745e56bbd93fcc12443bd7d68a4932e9e862a2305f507e9f4ea90a578842746"
+      "sha256": "f81b4c44e77214cd89173beb06c0bcf43646b8f0bc450fd025f2b6e49911bb5f"
     },
     {
       "order": 4,
       "path": "integration/alas/series/0020-commission-tactical-flow-ports.patch",
-      "sha256": "88ab335699cd5133b7f3d83c84490908766ca2b81cff71efc33d987edb3a72f3"
+      "sha256": "5be191ab61063fc6b9cd1e293eee3cf2416e477c95a21f4009c16b1bc7d495ee"
     },
     {
       "order": 5,
       "path": "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
-      "sha256": "b34dd1bae7ec1216cc98ae5b26150471b81c77283a918fe0b61570b44326d0d2"
+      "sha256": "ba3c0fa594986018e1dc65023af53993f094b9b6e18998268901e77faf6bcbb4"
     },
     {
       "order": 6,
       "path": "integration/alas/series/0040-campaign-flow-ports.patch",
-      "sha256": "7f94aa7a3d15c360b6c90df1f70b553a3de9b765c7b8c48635ac7846521f0f10"
+      "sha256": "3114d1f9334ba80033bbbf7a04d16f6ffe0ce6a7b857efa878f9d7a32a4a4c24"
     },
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "595adf4ebb04e1bbc05eef6f25a645d31652a85f327934f1a764bd35be3fbf8f"
+      "sha256": "79146e6e3785843b5fc663a950e797b017d165ec4648dc7ba023ef3ef146a4dd"
+    },
+    {
+      "order": 8,
+      "path": "integration/alas/series/0060-shop-flow-ports.patch",
+      "sha256": "9c3ba305464921aee432f9c62b641675b70df31bb8dd131671b95d934152e448"
+    },
+    {
+      "order": 9,
+      "path": "integration/alas/series/0070-shipyard-flow-ports.patch",
+      "sha256": "b0967a127eb33074dd62836b19cf4edfaaa432898e3eea39e709789b9cda6022"
+    },
+    {
+      "order": 10,
+      "path": "integration/alas/series/0080-current-task-flow-ports.patch",
+      "sha256": "97da01cdc142df2152ba389f582f340bf3eab16526fe5196f011e1b80e384b74"
+    },
+    {
+      "order": 11,
+      "path": "integration/alas/series/0090-operation-siren-flow-ports.patch",
+      "sha256": "f27e1317848e26c7adb0b78508004ea4a8b4d12d066f10576b9196c9197547e9"
+    },
+    {
+      "order": 12,
+      "path": "integration/alas/series/0100-tool-flow-ports.patch",
+      "sha256": "94b7c4fc55e874bd758483d962f58e45e3a218ac773ade5303fb3ce5e638b2d8"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

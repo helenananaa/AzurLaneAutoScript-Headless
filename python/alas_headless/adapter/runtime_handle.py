@@ -238,3 +238,7 @@ class AdbRuntimeHandleFactory:
 
     def close(self) -> None:
         self._bridge.close()
+
+    def restart_game(self, component: str) -> None:
+        self.close()
+        self._bridge.restart_game(component)

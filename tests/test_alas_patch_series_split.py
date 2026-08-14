@@ -8,7 +8,9 @@ ROOT = Path(__file__).resolve().parents[1]
 ALAS = ROOT / "integration" / "alas"
 SERIES = ALAS / "series"
 DIFF_PATTERN = re.compile(r"^diff --git a/(.+) b/(.+)$")
-INDEX_PATTERN = re.compile(r"^index ([0-9a-f]+)\.\.([0-9a-f]+) [0-7]{6}$")
+INDEX_PATTERN = re.compile(
+    r"^index ([0-9a-f]+)\.\.([0-9a-f]+)(?: [0-7]{6})?$"
+)
 
 CORE_PATHS = {
     "module/base/base.py",
@@ -43,13 +45,84 @@ FLOW_PATHS = {
     "0040-campaign-flow-ports.patch": {
         "module/campaign/campaign_ocr.py",
         "module/campaign/campaign_status.py",
+        "module/handler/auto_search.py",
         "module/map/map_fleet_preparation.py",
+        "module/ui/ui.py",
     },
     "0050-combat-flow-ports.patch": {
         "module/campaign/campaign_base.py",
         "module/campaign/run.py",
+        "module/combat/combat.py",
+        "module/combat/hp_balancer.py",
+        "module/exercise/combat.py",
+        "module/handler/info_handler.py",
+        "module/handler/strategy.py",
         "module/map/camera.py",
+        "module/map/fleet.py",
         "module/map/map_operation.py",
+    },
+    "0060-shop-flow-ports.patch": {
+        "module/shop/base.py",
+        "module/shop/clerk.py",
+        "module/shop/shop_medal.py",
+        "module/shop/ui.py",
+    },
+    "0070-shipyard-flow-ports.patch": {
+        "module/shipyard/ui.py",
+    },
+    "0080-current-task-flow-ports.patch": {
+        "campaign/event_20260813_cn/a1.py",
+        "campaign/event_20260813_cn/a2.py",
+        "campaign/event_20260813_cn/a3.py",
+        "campaign/event_20260813_cn/b1.py",
+        "campaign/event_20260813_cn/b2.py",
+        "campaign/event_20260813_cn/b3.py",
+        "campaign/event_20260813_cn/c1.py",
+        "campaign/event_20260813_cn/c2.py",
+        "campaign/event_20260813_cn/c3.py",
+        "campaign/event_20260813_cn/d1.py",
+        "campaign/event_20260813_cn/d2.py",
+        "campaign/event_20260813_cn/d3.py",
+        "campaign/event_20260813_cn/sp.py",
+        "module/campaign/campaign_ui.py",
+        "module/daily/daily.py",
+        "module/eventstory/eventstory.py",
+        "module/freebies/supply_pack.py",
+        "module/handler/ambush.py",
+        "module/handler/enemy_searching.py",
+        "module/handler/mystery.py",
+        "module/hard/hard.py",
+        "module/minigame/minigame.py",
+        "module/minigame/new_year_challenge.py",
+    },
+    "0090-operation-siren-flow-ports.patch": {
+        "module/os/fleet.py",
+        "module/os/globe_camera.py",
+        "module/os/globe_operation.py",
+        "module/os/map.py",
+        "module/os/tasks/archive.py",
+        "module/os/tasks/hazard_leveling.py",
+        "module/os/tasks/meowfficer_farming.py",
+        "module/os/tasks/month_boss.py",
+        "module/os/tasks/voucher.py",
+        "module/os_ash/ash.py",
+        "module/os_handler/enemy_searching.py",
+        "module/os_handler/map_event.py",
+        "module/os_handler/mission.py",
+        "module/os_handler/port.py",
+        "module/os_handler/storage.py",
+        "module/os_shop/port_shop.py",
+        "module/os_shop/shop.py",
+        "module/shop/shop_voucher.py",
+        "module/ui/scroll.py",
+    },
+    "0100-tool-flow-ports.patch": {
+        "module/config/argument/args.json",
+        "module/daemon/benchmark.py",
+        "module/daemon/daemon.py",
+        "module/daemon/game_manager.py",
+        "module/daemon/os_daemon.py",
+        "module/daemon/uncensored.py",
     },
 }
 
@@ -110,7 +183,8 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
 
         self.assertEqual(set(core), CORE_PATHS)
         self.assertEqual(set(lifecycle), LIFECYCLE_PATHS)
-        self.assertEqual(len(tasks), 20)
+        expected_tasks = set().union(*FLOW_PATHS.values())
+        self.assertEqual(set(tasks), expected_tasks)
         self.assertFalse(set(core) & set(lifecycle))
         self.assertFalse(set(core) & set(tasks))
         self.assertFalse(set(lifecycle) & set(tasks))

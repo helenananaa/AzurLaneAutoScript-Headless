@@ -34,6 +34,7 @@ class FakeGrid:
         is_land=False,
         may_enemy=False,
         may_boss=False,
+        may_siren=False,
         may_ammo=False,
         weight=50,
     ):
@@ -41,6 +42,7 @@ class FakeGrid:
         self.is_land = is_land
         self.may_enemy = may_enemy
         self.may_boss = may_boss
+        self.may_siren = may_siren
         self.may_ammo = may_ammo
         self.weight = weight
         self.reset()
@@ -49,6 +51,7 @@ class FakeGrid:
         self.is_fleet = False
         self.is_current_fleet = False
         self.is_enemy = False
+        self.is_boss = False
         self.is_siren = False
         self.is_portal = False
         self.is_ammo = False
@@ -398,6 +401,55 @@ def make_zero_distance_state():
 
 
 class AlasCampaignMapSyncTests(unittest.TestCase):
+    def test_event_stage_identity_is_case_normalized(self):
+        campaign = FakeCampaign()
+        campaign.MAP.name = "A1"
+        state = replace(make_state(), stage_code="a1")
+
+        projection = synchronize_alas_campaign_map(campaign, state)
+
+        self.assertEqual(projection.stage_code, "a1")
+
+    def test_siren_decision_is_admitted_only_for_typed_siren(self):
+        campaign = FakeGotoCampaign()
+        state = make_state()
+        projection = synchronize_alas_campaign_map(campaign, state)
+        decision = replace(
+            preview_alas_campaign_decision(campaign, projection),
+            expected="combat_siren",
+            goto_nodes=("A1",),
+            step_optimize=True,
+        )
+        siren_state = replace(
+            state,
+            enemies=(replace(state.enemies[0], is_siren=True, genre="Siren"),),
+        )
+        campaign.MAP[(0, 0)].may_enemy = False
+        campaign.MAP[(0, 0)].may_siren = True
+        siren_projection = synchronize_alas_campaign_map(campaign, siren_state)
+
+        admission = prepare_alas_campaign_combat_admission(
+            decision,
+            siren_state,
+            input_generation=siren_state.generation,
+        )
+
+        self.assertEqual(admission.target_node, "A1")
+        preview = preview_alas_campaign_goto_input(
+            campaign,
+            siren_projection,
+            decision,
+            admission,
+            siren_state,
+        )
+        self.assertEqual(preview.expected, "combat_siren")
+        with self.assertRaisesRegex(SemanticGateClosed, "kind disagrees"):
+            prepare_alas_campaign_combat_admission(
+                decision,
+                state,
+                input_generation=state.generation,
+            )
+
     def test_projects_typed_state_and_delegates_routes_to_alas_map(self):
         campaign = FakeCampaign()
 
@@ -500,6 +552,51 @@ class AlasCampaignMapSyncTests(unittest.TestCase):
 
         self.assertEqual(campaign.map_data_init_calls, 0)
         self.assertFalse(hasattr(campaign, "semantic_map_projection"))
+
+    def test_projects_boss_on_boss_only_static_node(self):
+        campaign = FakeCampaign()
+        campaign.MAP[(0, 0)].may_enemy = False
+        campaign.MAP[(0, 0)].may_boss = True
+        state = replace(
+            make_state(),
+            enemies=(
+                replace(
+                    make_state().enemies[0],
+                    sprite="bossicon",
+                    scale=0,
+                    genre="Boss",
+                ),
+            ),
+        )
+
+        synchronize_alas_campaign_map(campaign, state)
+
+        self.assertTrue(campaign.map[(0, 0)].is_boss)
+        self.assertFalse(campaign.map[(0, 0)].is_enemy)
+
+    def test_projects_siren_on_siren_only_static_node(self):
+        campaign = FakeCampaign()
+        campaign.MAP[(0, 0)].may_enemy = False
+        campaign.MAP[(0, 0)].may_siren = True
+        state = replace(
+            make_state(),
+            enemies=(
+                replace(
+                    make_state().enemies[0],
+                    object_id=0,
+                    sprite="emotion_qz",
+                    scale=0,
+                    genre="Siren",
+                    is_siren=True,
+                ),
+            ),
+        )
+
+        synchronize_alas_campaign_map(campaign, state)
+
+        self.assertTrue(campaign.map[(0, 0)].is_siren)
+        self.assertFalse(campaign.map[(0, 0)].is_enemy)
+        self.assertEqual(campaign.siren_count, 1)
 
     def test_rolls_back_campaign_if_alas_initializer_fails(self):
         campaign = FakeCampaign()
@@ -783,7 +880,106 @@ class AlasCampaignGotoInputPreviewTests(unittest.TestCase):
         self.assertEqual(preview.route_nodes, decision.route_nodes)
         self.assertEqual(preview.call_order[-1], "device.click")
 
-    def test_three_step_route_rejects_an_occupied_intermediate(self):
+    def test_route_longer_than_four_nodes_reuses_original_goto_prefix(self):
+        campaign = FakeGotoCampaign()
+        campaign.MAP.shape = (5, 1)
+        campaign.MAP.grids = {
+            (column, row): FakeGrid(
+                (column, row),
+                is_land=(row == 0 and column > 0),
+                may_enemy=(row == 0 and column == 0),
+            )
+            for row in range(2)
+            for column in range(6)
+        }
+        cells = tuple(
+            CampaignMapCellState(
+                row=row,
+                column=column,
+                node=chr(ord("A") + column - 1) + str(row),
+                button_path="root/" + chr(ord("A") + column - 1) + str(row),
+                point=Point(10.0, 10.0),
+                bounds=Bounds(0.0, 0.0, 20.0, 20.0),
+            )
+            for row, column in (
+                (1, 1),
+                (2, 1),
+                (2, 2),
+                (2, 3),
+                (2, 4),
+                (2, 5),
+                (2, 6),
+            )
+        )
+        state = CampaignMapState(
+            generation=21,
+            stage_code="12-4",
+            rows=2,
+            columns=6,
+            cells=cells,
+            land_nodes=("B1", "C1", "D1", "E1", "F1"),
+            fleets=(CampaignMapFleetState("alpha", "F2", 5, 5),),
+            enemies=(
+                CampaignMapEnemyState(
+                    row=1,
+                    column=1,
+                    node="A1",
+                    object_id=1001,
+                    sprite="qx1",
+                    scale=1,
+                    genre="Light",
+                    level=10,
+                    fighting=False,
+                ),
+            ),
+            pickups=(),
+            displayed_fleet_index=1,
+            current_fleet_marker="alpha",
+            current_fleet_roster_sprites=("alpha",),
+        )
+        projection = synchronize_alas_campaign_map(campaign, state)
+        decision = replace(
+            preview_alas_campaign_decision(campaign, projection),
+            goto_nodes=("A1",),
+        )
+        admission = prepare_alas_campaign_combat_admission(
+            decision, state, input_generation=state.generation
+        )
+
+        preview = preview_alas_campaign_goto_input(
+            campaign, projection, decision, admission, state
+        )
+
+        self.assertEqual(
+            decision.route_nodes,
+            ("F2", "E2", "D2", "C2", "B2", "A2", "A1"),
+        )
+        self.assertEqual(preview.route_nodes, decision.route_nodes)
+        self.assertEqual(preview.target_node, "A1")
+        self.assertEqual(preview.call_order[-1], "device.click")
+
+    def test_combat_admission_preserves_alas_empty_waypoint_then_target(self):
+        campaign = FakeGotoCampaign()
+        state = replace(
+            make_state(),
+            fleets=(
+                CampaignMapFleetState("alpha", "C2", 5, 5),
+                CampaignMapFleetState("beta", "C1", 4, 5),
+            ),
+            pickups=(),
+        )
+        projection = synchronize_alas_campaign_map(campaign, state)
+        decision = preview_alas_campaign_decision(campaign, projection)
+        decision = replace(decision, goto_nodes=("B2", decision.target_node))
+
+        admission = prepare_alas_campaign_combat_admission(
+            decision, state, input_generation=state.generation
+        )
+
+        self.assertEqual(admission.route_nodes, ("C2", "B2", "A2", "A1"))
+        self.assertEqual(admission.input_nodes, ("B2", "A1"))
+
+    def test_three_step_route_allows_other_fleet_when_alas_avoids_its_cell(self):
         campaign = FakeGotoCampaign()
         state = replace(
             make_state(),
@@ -797,6 +993,66 @@ class AlasCampaignGotoInputPreviewTests(unittest.TestCase):
         decision = replace(
             preview_alas_campaign_decision(campaign, projection),
             goto_nodes=("A1",),
+        )
+
+        admission = prepare_alas_campaign_combat_admission(
+            decision, state, input_generation=state.generation
+        )
+
+        self.assertEqual(admission.route_nodes, ("C2", "B2", "A2", "A1"))
+        self.assertEqual(admission.input_nodes, ("A1",))
+
+    def test_three_step_route_rejects_click_on_other_fleet_cell(self):
+        campaign = FakeGotoCampaign()
+        state = replace(
+            make_state(),
+            fleets=(
+                CampaignMapFleetState("alpha", "C2", 5, 5),
+                CampaignMapFleetState("beta", "B2", 4, 5),
+            ),
+            pickups=(),
+        )
+        projection = synchronize_alas_campaign_map(campaign, state)
+        decision = replace(
+            preview_alas_campaign_decision(campaign, projection),
+            goto_nodes=("B2", "A1"),
+        )
+
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "input targets an occupied fleet cell"
+        ):
+            prepare_alas_campaign_combat_admission(
+                decision, state, input_generation=state.generation
+            )
+
+    def test_three_step_route_still_rejects_enemy_intermediate(self):
+        campaign = FakeGotoCampaign()
+        state = replace(
+            make_state(),
+            fleets=(
+                CampaignMapFleetState("alpha", "C2", 5, 5),
+                CampaignMapFleetState("beta", "C1", 4, 5),
+            ),
+            pickups=(),
+        )
+        projection = synchronize_alas_campaign_map(campaign, state)
+        decision = replace(
+            preview_alas_campaign_decision(campaign, projection),
+            route_nodes=("C2", "B2", "A2", "A1"),
+            goto_nodes=("A1",),
+        )
+        state = replace(
+            state,
+            enemies=(
+                state.enemies[0],
+                replace(
+                    state.enemies[0],
+                    node="B2",
+                    row=2,
+                    column=2,
+                    object_id=1002,
+                ),
+            ),
         )
 
         with self.assertRaisesRegex(SemanticGateClosed, "intermediate is occupied"):

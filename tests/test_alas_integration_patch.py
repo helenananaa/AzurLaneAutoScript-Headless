@@ -58,15 +58,17 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         self.assertLess(refresh, guard)
         self.assertLess(guard, native_loop)
         self.assertIn(
-            "'template-access', 'Device.handle_night_commission'",
+            "if semantic_session is not None:\n+            return False\n"
+            "         if GET_MISSION.match",
             self.patch_text,
         )
 
     def test_campaign_viewport_replaces_only_final_swipe_dispatch(self):
         self.assertIn(
-            "semantic_adapter.begin_campaign_map_swipe_vector(",
+            "else semantic_adapter.begin_campaign_map_swipe_vector",
             self.patch_text,
         )
+        self.assertIn("semantic_intent = begin_swipe(", self.patch_text)
         self.assertIn(
             "p1, p2 = random_rectangle_vector_opted(",
             self.patch_text,
@@ -76,9 +78,10 @@ class AlasIntegrationPatchTests(unittest.TestCase):
             self.patch_text,
         )
         self.assertIn(
-            "semantic_adapter.end_campaign_map_swipe_vector(",
+            "else semantic_adapter.end_campaign_map_swipe_vector",
             self.patch_text,
         )
+        self.assertIn("end_swipe(semantic_intent)", self.patch_text)
         self.assertIn("distance_check=distance_check", self.patch_text)
         self.assertNotIn(
             "+            semantic_adapter.reject_raw_input('swipe')",
@@ -259,7 +262,7 @@ class AlasIntegrationPatchTests(unittest.TestCase):
             self.patch_text,
         )
         self.assertIn(
-            "+                        self.handle_auto_search()",
+            "self.handle_auto_search()",
             self.patch_text,
         )
 
@@ -302,23 +305,30 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         self.assertNotIn("self.campaign.goto(decision", self.patch_text)
         self.assertNotIn("self.campaign._goto(decision", self.patch_text)
 
-    def test_campaign_combat_admission_runs_before_each_native_alas_battle(self):
+    def test_campaign_combat_admission_keeps_native_goto_as_the_input_owner(self):
         self.assertIn(
             "semantic_adapter.authorize_campaign_combat(",
             self.patch_text,
         )
         self.assertIn(
-            "preview_alas_campaign_goto_input,",
+            "raise ScriptEnd('Semantic campaign combat budget is zero')",
             self.patch_text,
         )
         self.assertIn(
-            "goto_input = preview_alas_campaign_goto_input(",
+            "receipt = semantic_adapter.click(button)",
+            self.patch_text,
+        )
+        self.assertNotIn("-            self.device.click(grid)", self.patch_text)
+        self.assertIn("semantic_adapter.campaign_combat_active()", self.patch_text)
+        self.assertIn(
+            "semantic_adapter.recheck_campaign_combat_target_after_camera_view(",
             self.patch_text,
         )
         self.assertIn("self.semantic_prepare_a_battle()", self.patch_text)
         self.assertIn("complete_campaign_combat_round(", self.patch_text)
-        self.assertIn("Semantic ALAS battle ready:", self.patch_text)
         self.assertIn("Already in semantic campaign map, resuming ALAS.", self.patch_text)
+        self.assertNotIn("commit_alas_campaign_goto_input_for_evidence", self.patch_text)
+        self.assertNotIn("Semantic ALAS combat input committed", self.patch_text)
         self.assertNotIn(
             "Semantic ALAS goto input preview validation complete",
             self.patch_text,

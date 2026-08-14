@@ -35,7 +35,7 @@ class AlasAdapterBaselineTests(unittest.TestCase):
             document["upstream_alas_commit"],
             "81ccf63b4540f00241628c82a58c02c7a2bb11af",
         )
-        self.assertEqual(document["integration_patch"]["changed_file_count"], 26)
+        self.assertEqual(document["integration_patch"]["changed_file_count"], 87)
         self.assertGreater(document["integration_patch"]["line_count"], 1_000)
         self.assertGreater(
             document["source_metrics"]["alas_adapter"]["line_count"],
@@ -47,7 +47,7 @@ class AlasAdapterBaselineTests(unittest.TestCase):
         )
         self.assertEqual(
             document["artifact_sha256"]["patch_series_manifest"],
-            "c02d3ddec6b2105ebd4b38f32091477178eca4035e9c7eab0b6464db24f8adc4",
+            "2fe2182fbcff76b7e5a8c73931d9ae03bdd570635367a64342c6b4c8ad3750f7",
         )
         self.assertIn(
             "appear",
@@ -69,11 +69,11 @@ class AlasAdapterBaselineTests(unittest.TestCase):
             document["combat_coverage"],
             {
                 "canonical_resources": 41,
-                "canonical_qualified_resources": 16,
-                "defensive_resources": 54,
-                "defensive_qualified_resources": 18,
-                "actions": 38,
-                "qualified_actions": 12,
+                "canonical_qualified_resources": 18,
+                "defensive_resources": 57,
+                "defensive_qualified_resources": 23,
+                "actions": 39,
+                "qualified_actions": 15,
                 "blockers": 4,
                 "qualified_blockers": 1,
                 "branch_review_complete": False,

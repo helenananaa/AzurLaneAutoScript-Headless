@@ -1,0 +1,125 @@
+diff --git a/module/shop/base.py b/module/shop/base.py
+index cadc42b9..7322cfdd 100644
+--- a/module/shop/base.py
++++ b/module/shop/base.py
+@@ -250,6 +250,34 @@ class ShopBase(UI):
+             logger.warning('Expected type \'ShopItemGrid\' but was None')
+             return []
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            records = semantic_adapter.general_shop_items()
++            synthetic = np.zeros((720, 1280, 3), dtype=np.uint8)
++            items = []
++            for record in records:
++                button = shop_items.grids.buttons[record.index]
++                item = shop_items.item_class(synthetic, button)
++                item.is_valid = True
++                item.name = record.canonical_name
++                item.amount = record.amount
++                item.cost = record.cost
++                item.price = record.price
++                item.semantic_shop_index = record.index
++                item.group, item.sub_genre, item.tier = None, None, None
++                result = re.search(FILTER_REGEX, item.name)
++                if result:
++                    item.group, item.sub_genre, item.tier = [
++                        value.lower() if value is not None else None
++                        for value in result.groups()
++                    ]
++                items.append(item)
++            grids = shop_items.grids
++            min_row = grids[0, 0].area[1]
++            logger.info(f'Shop row 1: {[str(item) for item in items if item.button[1] == min_row]}')
++            logger.info(f'Shop row 2: {[str(item) for item in items if item.button[1] != min_row]}')
++            return items
++
+         # Loop on predict to ensure items
+         # have loaded and can accurately
+         # be read
+diff --git a/module/shop/clerk.py b/module/shop/clerk.py
+index 73130d55..6cdbc443 100644
+--- a/module/shop/clerk.py
++++ b/module/shop/clerk.py
+@@ -341,6 +341,18 @@ class ShopClerk(ShopBase, Retirement):
+                 logger.info('Shop buy finished')
+                 return True
+             else:
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if semantic_adapter is not None:
++                    receipt = semantic_adapter.purchase_shop_item_once(
++                        item.semantic_shop_index,
++                        item.name,
++                        item.cost,
++                        item.price,
++                    )
++                    logger.info(
++                        f'Semantic shop purchase qualified: {receipt.semantic_id}'
++                    )
++                    return True
+                 self.shop_buy_execute(item)
+                 continue
+ 
+diff --git a/module/shop/shop_medal.py b/module/shop/shop_medal.py
+index 0e8c030a..703febb6 100644
+--- a/module/shop/shop_medal.py
++++ b/module/shop/shop_medal.py
+@@ -114,6 +114,10 @@ class MedalShop2_250814(ShopClerk, ShopStatus):
+ 
+     @cached_property
+     def shop_grid(self):
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            return ButtonGrid(
++                origin=(265, 238), delta=(169, 223),
++                button_shape=(64, 64), grid_shape=(5, 2), name='SHOP_GRID')
+         return self.shop_medal_grid()
+ 
+     def shop_medal_grid(self):
+@@ -261,6 +265,12 @@ class MedalShop2_250814(ShopClerk, ShopStatus):
+         # When called, expected to be in
+         # correct Medal Shop interface
+         logger.hr('Medal Shop', level=1)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # The typed shop-card feed already describes the visible two rows
++            # exactly.  Do not re-read a pixel scrollbar in semantic mode.
++            self.shop_buy()
++            return
+         # Execute buy operations
+         MEDAL_SHOP_SCROLL_250814.set_top(main=self)
+         time.sleep(0.5)
+diff --git a/module/shop/ui.py b/module/shop/ui.py
+index 93b011bb..cd28a37f 100644
+--- a/module/shop/ui.py
++++ b/module/shop/ui.py
+@@ -3,7 +3,7 @@ from module.base.decorator import cached_property
+ from module.handler.assets import POPUP_CONFIRM
+ from module.logger import logger
+ from module.shop.assets import *
+-from module.ui.assets import ACADEMY_GOTO_MUNITIONS, SHOP_BACK_ARROW
++from module.ui.assets import ACADEMY_GOTO_MUNITIONS, MUNITIONS_CHECK, SHOP_BACK_ARROW
+ from module.ui.navbar import Navbar
+ from module.ui.page import page_academy, page_munitions
+ from module.ui.switch import Switch
+@@ -77,6 +77,10 @@ class ShopUI(UI):
+             bool: If refreshed
+         """
+         logger.info('Shop refresh')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and not semantic_adapter.shop_refresh_available():
++            logger.info('Refresh not available')
++            return False
+         refreshed = False
+ 
+         # SHOP_REFRESH -> POPUP_CONFIRM
+@@ -126,6 +130,10 @@ class ShopUI(UI):
+             in: Any
+             out: page_munitions
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.appear(MUNITIONS_CHECK):
++            logger.info(f'Already at {page_munitions}')
++            return
+         if self.ui_get_current_page() == page_munitions:
+             logger.info(f'Already at {page_munitions}')
+             return

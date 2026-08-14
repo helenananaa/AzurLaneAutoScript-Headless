@@ -94,7 +94,6 @@ _NODE_PATTERN = re.compile(r"([A-Z])([1-9][0-9]*)$")
 _BLOCKED_METHODS = (
     "_goto",
     "fleet_set",
-    "fleet_ensure",
     "withdraw",
     "combat",
     "map_control_init",
@@ -404,7 +403,33 @@ def preview_alas_campaign_decision(
                 )
             )
 
+        def preview_fleet_ensure(self: Any, index: int) -> bool:
+            if isinstance(index, bool) or index not in (1, 2):
+                raise SemanticGateClosed(
+                    "ALAS decision fleet switch index is invalid"
+                )
+            fleet = next(
+                (
+                    item
+                    for item in projection.fleets
+                    if item.fleet_index == index
+                ),
+                None,
+            )
+            if fleet is None:
+                raise SemanticGateClosed(
+                    "ALAS decision fleet switch is absent from projection"
+                )
+            self.fleet_current_index = index
+            self.fleet_show_index = index
+            for grid in native_map:
+                grid.is_current_fleet = False
+            native_map[_location_tuple(fleet.origin_node)].is_current_fleet = True
+            self.find_path_initial()
+            return True
+
         sandbox.goto = capture_goto
+        sandbox.fleet_ensure = MethodType(preview_fleet_ensure, sandbox)
         with _reject_emotion_sleep(emotion):
             try:
                 sandbox.battle_function()

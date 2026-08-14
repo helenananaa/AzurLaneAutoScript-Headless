@@ -271,6 +271,10 @@ bool EndsWith(std::string_view value, std::string_view suffix) {
 }
 
 bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
+  if (name == "bg" &&
+      EndsWith(path, "Overlay/UIMain/LevelRemasterView(Clone)/bg")) {
+    return true;
+  }
   if (name == "ContractButton" && path == "ContractCanvas/ContractButton") {
     return true;
   }
@@ -1699,6 +1703,17 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         record.screenY = static_cast<float>(screenHeight) - 622.0f;
         record.adbX = record.screenX;
         record.adbY = 622.0f;
+      }
+      if (objectName == "bg" &&
+          EndsWith(path, "Overlay/UIMain/LevelRemasterView(Clone)/bg")) {
+        // ALAS' archive-page link uses the empty left gutter of this full-page
+        // Button as its return control. Publish that reviewed point only when
+        // EventSystem proves the exact bg Button (or one of its children) owns
+        // the raycast there.
+        record.screenX = 40.0f;
+        record.screenY = static_cast<float>(screenHeight) - 390.0f;
+        record.adbX = record.screenX;
+        record.adbY = 390.0f;
       }
       bool raycastEvaluated = false;
       bool raycastMatches =

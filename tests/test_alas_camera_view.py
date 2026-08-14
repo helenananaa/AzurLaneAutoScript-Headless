@@ -16,10 +16,10 @@ from alas_headless.alas_viewport_continuation import (
 )
 
 
-def make_state(*, generation=10, dx=0.0, dy=0.0, deform=False):
+def make_state(*, generation=10, dx=0.0, dy=0.0, deform=False, columns=5):
     cells = []
     for row in range(1, 6):
-        for column in range(1, 6):
+        for column in range(1, columns + 1):
             x = 100.0 * (column - 0.5) + 100.0 + dx
             y = 80.0 * (row - 0.5) + 100.0 + dy
             if deform and row == 2 and column == 4:
@@ -43,7 +43,7 @@ def make_state(*, generation=10, dx=0.0, dy=0.0, deform=False):
         generation=generation,
         stage_code="12-4",
         rows=5,
-        columns=5,
+        columns=columns,
         cells=tuple(cells),
         land_nodes=("A1",),
         fleets=(),
@@ -88,6 +88,17 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
 
         self.assertEqual(before.predict_swipe(after), (1, -1))
 
+    def test_predict_swipe_accepts_edge_clamped_maximum_delta(self):
+        before = build_alas_campaign_camera_view(
+            make_state(generation=10, columns=6), screen_center=(150.0, 300.0)
+        )
+        after = build_alas_campaign_camera_view(
+            make_state(generation=12, dx=-500.0, columns=6),
+            screen_center=(150.0, 300.0),
+        )
+
+        self.assertEqual(before.predict_swipe(after), (5, 0))
+
     def test_rejects_incoherent_projection_and_unqualified_edge(self):
         with self.assertRaisesRegex(SemanticGateClosed, "incoherent"):
             build_alas_campaign_camera_view(
@@ -97,7 +108,7 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "edge"):
             build_alas_campaign_camera_view(
                 make_state(),
-                screen_center=(160.0, 145.0),
+                screen_center=(160.0, 10.0),
             )
 
     def test_install_replaces_only_campaign_view_input(self):

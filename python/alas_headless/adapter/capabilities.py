@@ -33,9 +33,13 @@ ACTION_CAPABILITIES = frozenset(
         "dorm.collect",
         "dorm.feed",
         "mail.mutation",
+        "meta.assist",
+        "minigame.play",
         "mission.claim",
+        "operation_siren.coordinate_checkout",
         "research.reward",
         "research.start",
+        "shop.purchase",
         "tactical.assign",
         "tactical.reward",
     }

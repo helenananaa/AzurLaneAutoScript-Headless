@@ -54,6 +54,50 @@ def _canonical_sha256(value: Mapping[str, Any]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _stable_observer_projection(state: Any) -> tuple[Mapping[str, Any], Mapping[str, Any]]:
+    """Remove only observer clock fields before comparing two atomic states."""
+
+    def without_clock(value: Mapping[str, Any]) -> Mapping[str, Any]:
+        return {
+            key: child
+            for key, child in value.items()
+            if key
+            not in {
+                "generation",
+                "age_ms",
+                "response_monotonic_ns",
+                "snapshot_monotonic_ns",
+            }
+        }
+
+    def stable_button(button: Any) -> Any:
+        if not isinstance(button, Mapping):
+            return button
+        # Unity animations legitimately move an otherwise identical target by
+        # subpixels on every frame.  Identity, visibility and input safety are
+        # the cross-generation proof; the click itself always re-reads a fresh
+        # exact target and never uses these discarded coordinates.
+        return {
+            key: child
+            for key, child in button.items()
+            if key
+            not in {
+                "world_position",
+                "screen_point",
+                "screen_bounds",
+                "adb_point",
+                "adb_bounds",
+            }
+        }
+
+    buttons = without_clock(state.buttons_snapshot)
+    stable_buttons = dict(buttons)
+    raw_buttons = buttons.get("buttons")
+    if isinstance(raw_buttons, list):
+        stable_buttons["buttons"] = [stable_button(button) for button in raw_buttons]
+    return without_clock(state.snapshot), stable_buttons
+
+
 def _integer(value: Any, field: str, *, minimum: int | None = None) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise SemanticGateClosed("semantic frame integer is malformed: {0}".format(field))
@@ -165,7 +209,43 @@ class SemanticFrameClock:
         try:
             fingerprint_before, pid_before = self._runtime_identity()
             state = self._oracle.read_state()
-            ui_state = self._oracle.read_ui_state() if include_ui else None
+            ui_state = None
+            ui_snapshot = None
+            ui_source_generation = None
+            if include_ui:
+                # The observer exposes Button/state atomically, while the full UI
+                # projection is a separate main-thread request.  When those two
+                # requests naturally land on adjacent generations, prove the UI
+                # projection with identical atomic states on both sides before
+                # rebasing its clock metadata onto the closing state.
+                for attempt in range(30):
+                    before = state
+                    candidate_ui = self._oracle.read_ui_state()
+                    if candidate_ui.generation == before.generation:
+                        ui_state = candidate_ui
+                        ui_snapshot = dict(candidate_ui.snapshot)
+                        ui_source_generation = candidate_ui.generation
+                        break
+                    after = self._oracle.read_state()
+                    if (
+                        before.generation <= candidate_ui.generation <= after.generation
+                        and before.scene_handle == after.scene_handle
+                        and _stable_observer_projection(before)
+                        == _stable_observer_projection(after)
+                    ):
+                        state = after
+                        ui_state = candidate_ui
+                        ui_snapshot = dict(candidate_ui.snapshot)
+                        ui_source_generation = candidate_ui.generation
+                        ui_snapshot["generation"] = after.generation
+                        break
+                    state = after
+                    if attempt < 29:
+                        time.sleep(0.05)
+                if ui_state is None:
+                    raise SemanticGateClosed(
+                        "semantic frame mixes UI and state generations"
+                    )
             fingerprint_after, pid_after = self._runtime_identity()
             if (
                 fingerprint_after != fingerprint_before
@@ -182,8 +262,17 @@ class SemanticFrameClock:
                 "button generation",
                 minimum=0,
             )
-            if generation != button_generation or state.generation != generation:
+            if state.generation != button_generation:
                 raise SemanticGateClosed("semantic frame mixes observer generations")
+            snapshot_source_generation = generation
+            if generation != button_generation:
+                # Legacy observers expose snapshot and Button records as two
+                # consecutive main-thread requests. SemanticOracle has already
+                # admitted their <=2-generation coherence; normalize only the
+                # clock field so the immutable replay endpoint remains atomic.
+                snapshot = dict(snapshot)
+                snapshot["generation"] = button_generation
+                generation = button_generation
             scene_handle = _integer(snapshot.get("scene_handle"), "scene_handle")
             ages = [
                 _age(snapshot.get("age_ms"), "snapshot", self._maximum_age_ms),
@@ -195,12 +284,13 @@ class SemanticFrameClock:
             ):
                 raise StaleFrameError()
             raw_payload = {"buttons": buttons, "snapshot": snapshot}
+            if snapshot_source_generation != generation:
+                raw_payload["snapshot_source_generation"] = (
+                    snapshot_source_generation
+                )
             if ui_state is not None:
-                if ui_state.generation != generation:
-                    raise SemanticGateClosed(
-                        "semantic frame mixes UI and state generations"
-                    )
-                ui_snapshot = ui_state.snapshot
+                if ui_snapshot is None or ui_source_generation is None:
+                    raise SemanticGateClosed("semantic frame UI projection is incomplete")
                 if ui_snapshot.get("pid") != pid_after:
                     raise SemanticGateClosed(
                         "semantic frame UI disagrees on PID"
@@ -213,6 +303,7 @@ class SemanticFrameClock:
                     )
                 )
                 raw_payload["ui"] = ui_snapshot
+                raw_payload["ui_source_generation"] = ui_source_generation
             age_ms = max(ages)
             raw_state_sha256 = _canonical_sha256(raw_payload)
             captured = self._monotonic_ns()
@@ -237,7 +328,12 @@ class SemanticFrameClock:
         self._invalidated_generation = None
         return frame
 
-    def borrow(self, frame_id: str | None = None) -> SemanticFrame:
+    def borrow(
+        self,
+        frame_id: str | None = None,
+        *,
+        require_fresh: bool = False,
+    ) -> SemanticFrame:
         if self._closed or self._current is None:
             raise StaleFrameError()
         frame = self._current
@@ -256,7 +352,11 @@ class SemanticFrameClock:
         if elapsed_ns < 0:
             self._current = None
             raise StaleFrameError()
-        if frame.age_ms + elapsed_ns / 1_000_000.0 > self._maximum_age_ms:
+        # ``maximum_age_ms`` admits a fresh observer snapshot at acquisition.
+        # Once frozen, the frame is ALAS's screenshot-equivalent for the whole
+        # current scan.  The input boundary explicitly opts back into the age
+        # check immediately before invalidating the lease and injecting ADB.
+        if require_fresh and elapsed_ns > self._maximum_age_ms * 1_000_000:
             self._current = None
             raise StaleFrameError()
         return frame

@@ -74,6 +74,10 @@ class LoginOracle:
             raise SemanticGateClosed("construction queue root is absent")
         return ()
 
+    def meta_entrance_state(self):
+        self.events.append(("meta_entrance_state",))
+        raise SemanticGateClosed("META entrance page identity is not proven")
+
     def click(self, semantic_id):
         self.events.append(("click", semantic_id))
         return ActionReceipt(
@@ -375,7 +379,6 @@ class LoginFlowFacadeParityTests(unittest.TestCase):
             "AVATAR_EXPIRED",
             "BACK_ARROW",
             "EVENT_LIST_CHECK",
-            "LOGIN_GAME_UPDATE",
             "LOGIN_RETURN_INFO",
             "LOGIN_RETURN_SIGN",
             "MAINTENANCE_ANNOUNCE",
@@ -384,7 +387,6 @@ class LoginFlowFacadeParityTests(unittest.TestCase):
             "GET_ITEMS_1",
             "GET_ITEMS_2",
             "GET_SHIP",
-            "META_CHECK",
             "MONTHLY_PASS_NOTICE",
             "PLAYER_CHECK",
             "SHIPYARD_CHECK",
@@ -590,6 +592,7 @@ class LoginFlowFacadeParityTests(unittest.TestCase):
                 "LOGIN_CHECK",
                 "LOGIN_ANNOUNCE",
                 "LOGIN_ANNOUNCE_2",
+                "LOGIN_GAME_UPDATE",
                 "POPUP_CANCEL",
                 "POPUP_CONFIRM_WHITE",
             ),

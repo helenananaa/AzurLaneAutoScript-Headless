@@ -1,5 +1,5 @@
 diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
-index 15ebf47..8e9d470 100644
+index 15ebf478..7082e26b 100644
 --- a/module/campaign/campaign_base.py
 +++ b/module/campaign/campaign_base.py
 @@ -1,7 +1,7 @@
@@ -11,10 +11,27 @@ index 15ebf47..8e9d470 100644
  from module.logger import logger
  from module.map.map import Map
  from module.map.map_base import CampaignMap
-@@ -11,6 +11,62 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+@@ -11,6 +11,90 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
      FUNCTION_NAME_BASE = 'battle_'
      MAP: CampaignMap
  
++    def semantic_campaign_map_state(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is None:
++            return None
++        campaign_map = self.MAP
++        return semantic_adapter.campaign_map_state(
++            columns=campaign_map.shape[0] + 1,
++            rows=campaign_map.shape[1] + 1,
++            land_cells=tuple(
++                grid.location for grid in campaign_map if grid.is_land
++            ),
++            expected_fleet_count=sum((
++                bool(self.config.Fleet_Fleet1),
++                bool(self.config.Fleet_Fleet2),
++            )),
++        )
++
 +    def semantic_prepare_a_battle(self):
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is None:
@@ -30,51 +47,62 @@ index 15ebf47..8e9d470 100644
 +                f'ammo={previous.ammo_before}->{previous.ammo_after}'
 +            )
 +
-+        campaign_map = self.MAP
-+        state = semantic_adapter.campaign_map_state(
-+            columns=campaign_map.shape[0] + 1,
-+            rows=campaign_map.shape[1] + 1,
-+            land_cells=tuple(
-+                grid.location for grid in campaign_map if grid.is_land
-+            ),
-+            expected_fleet_count=sum((
-+                bool(self.config.Fleet_Fleet1),
-+                bool(self.config.Fleet_Fleet2),
-+            )),
++        state = self.semantic_campaign_map_state()
++        boss_enemies = tuple(
++            enemy for enemy in state.enemies
++            if enemy.genre.lower() == 'boss'
 +        )
++        boss_battle = None
++        if boss_enemies:
++            boss_battles = tuple(
++                item['battle'] for item in self.MAP.spawn_data
++                if item.get('boss', 0) and 'battle' in item
++            )
++            if len(boss_enemies) != 1 or len(boss_battles) != 1:
++                raise ScriptError('Semantic boss progression is ambiguous')
++            boss_battle = boss_battles[0]
 +        from alas_headless import (
 +            preview_alas_campaign_decision,
-+            preview_alas_campaign_goto_input,
 +            synchronize_alas_campaign_map,
 +        )
 +        projection = synchronize_alas_campaign_map(self, state)
++        if boss_battle is not None:
++            # map_data_init() resets ALAS's per-run counter, so restore the
++            # boss spawn index only after the semantic map projection owns it.
++            self.battle_count = boss_battle
++            logger.info(
++                'Semantic ALAS resumed boss progression: '
++                f'battle={self.battle_count}, target={boss_enemies[0].node}'
++            )
++        projection_map = self.map
 +        decision = preview_alas_campaign_decision(self, projection)
 +        admission = semantic_adapter.authorize_campaign_combat(
 +            decision, state
 +        )
 +        if admission is None:
 +            raise ScriptEnd('Semantic campaign combat budget is zero')
-+        goto_input = preview_alas_campaign_goto_input(
-+            self,
-+            projection,
-+            decision,
-+            admission,
-+            state,
-+        )
 +        logger.info(
-+            'Semantic ALAS battle ready: '
++            'Semantic ALAS battle authorized: '
 +            f'battle={decision.battle_count}, '
 +            f'branch={decision.branch_name}, '
 +            f'fleet={decision.fleet_index}:{decision.fleet_marker}, '
 +            f'target={decision.target_kind}:{decision.target_node}, '
-+            f'route={list(decision.route_nodes)}, '
-+            f'input={goto_input.cell_path}'
++            f'route={list(decision.route_nodes)}'
++        )
++        # The preview transaction restores the class-level MAP grid objects.
++        # Keep the already-populated instance map; that is the map the real
++        # ALAS branch must own after authorization.
++        self.map = projection_map
++        self.find_path_initial()
++        logger.info(
++            'Semantic ALAS execution map restored: '
++            f'enemies={self.map.select(is_enemy=True)}'
 +        )
 +
      def battle_default(self):
          if self.clear_enemy():
              return True
-@@ -92,6 +148,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+@@ -92,6 +176,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
          return result
  
      def execute_a_battle(self):
@@ -82,8 +110,16 @@ index 15ebf47..8e9d470 100644
          logger.hr(f'{self.FUNCTION_NAME_BASE}{self.battle_count}', level=2)
          prev = self.battle_count
          result = False
+@@ -127,6 +212,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+         # Map init
+         if not self.map_is_auto_search:
+             self.handle_map_fleet_lock()
++            self.semantic_campaign_map_state()
+             self.map_init(self.MAP)
+         else:
+             self.map = self.MAP
 diff --git a/module/campaign/run.py b/module/campaign/run.py
-index 5703330..c70ee57 100644
+index 57033308..c70ee57c 100644
 --- a/module/campaign/run.py
 +++ b/module/campaign/run.py
 @@ -366,6 +366,16 @@ class CampaignRun(CampaignEvent):
@@ -150,11 +186,421 @@ index 5703330..c70ee57 100644
                  self.campaign.run()
              except ScriptEnd as e:
                  logger.hr('Script end')
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+index fbc5fd3c..1e81a107 100644
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -1,3 +1,5 @@
++import time
++
+ import numpy as np
+ 
+ from module.base.timer import Timer
+@@ -27,6 +29,11 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         Returns:
+             bool: If enter combat.
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            if semantic_adapter.combat_is_loading():
++                return True
++
+         if self.config.Campaign_UseFleetLock and not self.is_in_map():
+             if self.is_combat_loading():
+                 return True
+@@ -67,6 +74,9 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         Returns:
+             bool:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.combat_is_loading()
+         image = self.image_crop((0, 620, 1280, 690), copy=False)
+         # note that CN/EN/TW are the same, but JP character is smaller
+         similarity, button = TEMPLATE_COMBAT_LOADING.match_luma_result(image)
+@@ -82,6 +92,13 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         Returns:
+             Button: PAUSE button that appears
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # Preserve ALAS's native long-wait classification while the
++            # semantic observer replaces PAUSE pixel matching. Boss fights
++            # can legitimately exceed the normal 60-second stuck threshold.
++            self.device.stuck_record_add(PAUSE)
++            return PAUSE if semantic_adapter.combat_is_executing() else False
+         self.device.stuck_record_add(PAUSE)
+         if self.config.SERVER in ['cn', 'en']:
+             if PAUSE.match_luma(self.device.image, offset=(10, 10)):
+@@ -233,6 +250,7 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         self.device.click_record_clear()
+         skip_first_screenshot = True
+         interval_set = False
++        semantic_daily_start_at = 0.0
+ 
+         if emotion_reduce:
+             self.emotion.wait(fleet_index=fleet_index)
+@@ -241,6 +259,28 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+ 
+         for _ in self.loop():
+ 
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None:
++                oracle = semantic_adapter.open().oracle
++                if oracle.daily_precombat_visible():
++                    try:
++                        semantic_adapter.refresh_frame()
++                        semantic_adapter.open().oracle.click_daily_precombat_start()
++                    except Exception as exc:
++                        if exc.__class__.__name__ not in ('SemanticGateClosed', 'StaleFrameError'):
++                            raise
++                    semantic_daily_start_at = time.time()
++                    continue
++                if oracle.daily_combat_visible():
++                    pause = self.is_combat_executing()
++                    if pause:
++                        logger.attr('BattleUI', pause)
++                        if not interval_set:
++                            self.device.screenshot_interval_set('combat')
++                        break
++                if semantic_daily_start_at and time.time() - semantic_daily_start_at < 20:
++                    continue
++
+             if self.appear(BATTLE_PREPARATION, offset=(20, 20)):
+                 if self.handle_combat_automation_set(auto=auto == 'combat_auto'):
+                     continue
+@@ -559,15 +599,60 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         self.device.click_record_clear()
+         battle_status = False
+         exp_info = False  # This is for the white screen bug in game
++        semantic_daily_result = False
+         for _ in self.loop():
+ 
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if (
++                semantic_adapter is not None
++                and not semantic_adapter.open().campaign_combat_committed()
++            ):
++                oracle = semantic_adapter.open().oracle
++                if oracle.daily_battle_result_visible():
++                    oracle.click_daily_battle_result()
++                    battle_status = True
++                    semantic_daily_result = True
++                    continue
++                if semantic_daily_result and oracle.daily_page_visible():
++                    break
++                if semantic_daily_result:
++                    continue
++
+             # Expected end
++            semantic_campaign_result_wait = bool(
++                semantic_adapter is not None
++                and expected_end in ('with_searching', 'no_searching')
++                and battle_status
++                and semantic_adapter.open().campaign_combat_committed()
++            )
++            semantic_campaign_map_stable = bool(
++                semantic_campaign_result_wait
++                and semantic_adapter.open().oracle.campaign_is_in_map()
++            )
++            if semantic_campaign_map_stable:
++                # Typed observer reads can be slower than the brief enemy
++                # searching animation. Once the exact result was clicked and
++                # all result overlays are gone, do not enter the legacy inner
++                # searching loop: the adapter proves target removal and ammo
++                # consumption after combat() returns.
++                logger.info(
++                    'Semantic combat result returned to stable campaign map'
++                )
++                break
+             if isinstance(expected_end, str):
+                 if expected_end == 'in_stage' and self.handle_in_stage():
+                     break
+-                if expected_end == 'with_searching' and self.handle_in_map_with_enemy_searching(drop=drop):
++                if (
++                    not semantic_campaign_result_wait
++                    and expected_end == 'with_searching'
++                    and self.handle_in_map_with_enemy_searching(drop=drop)
++                ):
+                     break
+-                if expected_end == 'no_searching' and self.handle_in_map_no_enemy_searching(drop=drop):
++                if (
++                    not semantic_campaign_result_wait
++                    and expected_end == 'no_searching'
++                    and self.handle_in_map_no_enemy_searching(drop=drop)
++                ):
+                     break
+                 if expected_end == 'in_ui' and self.appear(BACK_ARROW, offset=(30, 30)):
+                     break
+@@ -602,6 +687,12 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+                 if not exp_info and self.handle_battle_status(drop=drop):
+                     battle_status = True
+                     continue
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if (
++                semantic_adapter is not None
++                and semantic_adapter.close_campaign_battle_fail_tip_if_present()
++            ):
++                continue
+             # bunch of popup handlers
+             if self.handle_popup_confirm('COMBAT_STATUS'):
+                 continue
+diff --git a/module/combat/hp_balancer.py b/module/combat/hp_balancer.py
+index a152e88b..9562e066 100644
+--- a/module/combat/hp_balancer.py
++++ b/module/combat/hp_balancer.py
+@@ -92,7 +92,12 @@ class HPBalancer(ModuleBase):
+             logger.info(f'HpControl_HpBalanceWeight {self.config.HpControl_HpBalanceWeight} is revised to {weight}')
+             self.config.HpControl_HpBalanceWeight = weight
+ 
+-        hp = [self._calculate_hp(button.area) for button in self._hp_grid().buttons]
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            hp = list(semantic_session.campaign_fleet_hp())
++        else:
++            hp = [self._calculate_hp(button.area) for button in self._hp_grid().buttons]
+         weight = to_list(weight)
+         scout = np.array(hp[3:]) * np.array(weight) / np.max(weight)
+ 
+diff --git a/module/exercise/combat.py b/module/exercise/combat.py
+index 0ee2c916..754e1be4 100644
+--- a/module/exercise/combat.py
++++ b/module/exercise/combat.py
+@@ -48,6 +48,7 @@ class ExerciseCombat(HpDaemon, OpponentChoose, Combat):
+         success = True
+         end = False
+         battle_status_detected = False  # Track if in post battle screen
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         while 1:
+             self.device.screenshot()
+             # End
+@@ -101,16 +102,21 @@ class ExerciseCombat(HpDaemon, OpponentChoose, Combat):
+                 logger.info("Exercise LOST")
+                 continue
+             # Quit
+-            if self.handle_combat_quit():
+-                pause_interval.reset()
+-                success = False
+-                end = True
+-                continue
+-            if self.handle_combat_quit_reconfirm():
+-                pause_interval.reset()
+-                continue
++            if semantic_adapter is None:
++                if self.handle_combat_quit():
++                    pause_interval.reset()
++                    success = False
++                    end = True
++                    continue
++                if self.handle_combat_quit_reconfirm():
++                    pause_interval.reset()
++                    continue
+             if not end:
+-                if p and self._at_low_hp(image=self.device.image, pause=pause):
++                if (
++                    semantic_adapter is None
++                    and p
++                    and self._at_low_hp(image=self.device.image, pause=pause)
++                ):
+                     logger.info('Exercise quit')
+                     if pause_interval.reached():
+                         self.device.click(p)
+@@ -121,16 +127,17 @@ class ExerciseCombat(HpDaemon, OpponentChoose, Combat):
+                         show_hp_timer.reset()
+                         self._show_hp()
+             # bunch of popup handlers
+-            if self.handle_popup_confirm('EXERCISE_COMBAT_EXECUTE'):
+-                continue
+-            if self.handle_urgent_commission():
+-                continue
+-            if self.handle_guild_popup_cancel():
+-                continue
+-            if self.handle_vote_popup():
+-                continue
+-            if self.handle_mission_popup_ack():
+-                continue
++            if semantic_adapter is None:
++                if self.handle_popup_confirm('EXERCISE_COMBAT_EXECUTE'):
++                    continue
++                if self.handle_urgent_commission():
++                    continue
++                if self.handle_guild_popup_cancel():
++                    continue
++                if self.handle_vote_popup():
++                    continue
++                if self.handle_mission_popup_ack():
++                    continue
+         return success
+ 
+     def _choose_opponent(self, index, skip_first_screenshot=True):
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+index 5b086931..e7b4038b 100644
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -42,6 +42,13 @@ class InfoHandler(ModuleBase):
+         Returns:
+             int:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # The top info bar is an optional legacy pixel signal. Semantic
++            # task flows prove their own destination and mutation
++            # postconditions from typed Unity state, so never inspect guarded
++            # frame pixels merely to count transient notifications.
++            return 0
+         image = self.image_crop(INFO_BAR_AREA, copy=False)
+         line = cv2.reduce(image, 1, cv2.REDUCE_AVG)
+         line = color_similarity_2d(line, color=(107, 158, 255))[:, 0]
+@@ -279,6 +286,12 @@ class InfoHandler(ModuleBase):
+         return False
+ 
+     def handle_guild_popup_cancel(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.campaign_combat_active()
++        ):
++            return False
+         if self.appear(GUILD_POPUP_CONFIRM, offset=self._popup_offset) \
+                 and self.appear(GUILD_POPUP_CANCEL, offset=self._popup_offset, interval=2):
+             self.device.click(GUILD_POPUP_CANCEL)
+@@ -403,6 +416,15 @@ class InfoHandler(ModuleBase):
+         return buttons
+ 
+     def _is_story_black(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            from alas_headless import AlasSemanticUnmapped
++            try:
++                return semantic_adapter.campaign_story_black()
++            except AlasSemanticUnmapped:
++                # A normal page transition is not a story. Exact modern story
++                # overlays are handled before this legacy black-story probe.
++                return False
+         color = get_color(self.device.image, area=STORY_LETTER_BLACK.area)
+         # Story with dark background and a few rows of letters
+         # STORY_LETTER_BLACK.color is (16, 20, 16)
+@@ -419,6 +441,30 @@ class InfoHandler(ModuleBase):
+         2023.09.14 Story options changed with big white options in the middle,
+             Check STORY_SKIP_3 but click the original STORY_SKIP.
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            oracle = semantic_adapter.open().oracle
++            if oracle.event_story_skip_prompt_visible():
++                logger.info('Modern event story skip -> semantic confirm')
++                semantic_adapter.refresh_frame()
++                oracle.click_event_story_skip_confirm()
++                self.story_popup_timeout = Timer(10)
++                return True
++            if oracle.event_story_dialogue_visible():
++                option_count = oracle.event_story_option_count()
++                if option_count:
++                    logger.attr('Story_options', option_count)
++                    semantic_adapter.refresh_frame()
++                    oracle.click_event_story_option(self.config.STORY_OPTION)
++                    self.story_popup_timeout.reset()
++                    return True
++                if self.config.STORY_ALLOW_SKIP:
++                    logger.info('Modern event story -> semantic skip')
++                    semantic_adapter.refresh_frame()
++                    oracle.click_event_story_skip()
++                    self.story_popup_timeout.reset()
++                    return True
++                return False
+         if self.story_popup_timeout.started() and not self.story_popup_timeout.reached():
+             if self.handle_popup_confirm('STORY_SKIP'):
+                 self.story_popup_timeout = Timer(10)
+@@ -485,6 +531,12 @@ class InfoHandler(ModuleBase):
+         self.interval_clear(STORY_LETTERS_ONLY)
+ 
+     def handle_story_skip(self, drop=None):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.campaign_combat_active()
++        ):
++            return False
+         # Rerun events in clear mode but still have stories.
+         # No stories in clear mode
+         # but B3/D3 still have stories til threat safe
+@@ -492,6 +544,12 @@ class InfoHandler(ModuleBase):
+         if self.map_is_threat_safe and self.config.Campaign_Event != 'event_20201012_cn':
+             return False
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and (
++            semantic_adapter.open().oracle.daily_combat_visible()
++            or semantic_adapter.open().oracle.daily_battle_result_visible()
++        ):
++            return False
+         return self.story_skip(drop=drop)
+ 
+     def ensure_no_story(self, skip_first_screenshot=True):
+@@ -524,6 +582,11 @@ class InfoHandler(ModuleBase):
+         Returns:
+             bool: If handled
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # GAME_TIPS is a pixel-only fallback; semantic mode handles only
++            # observer-proven overlays and must not inspect guarded pixels.
++            return False
+         if self.appear(GAME_TIPS, offset=(20, 20), interval=2) and self.image_color_count(
+                 GAME_TIPS.button, color=(40, 40, 40), threshold=240, count=50):
+             self.device.click(GAME_TIPS)
+diff --git a/module/handler/strategy.py b/module/handler/strategy.py
+index e4f1c37e..37ec85fb 100644
+--- a/module/handler/strategy.py
++++ b/module/handler/strategy.py
+@@ -124,6 +124,13 @@ class StrategyHandler(InfoHandler):
+         Returns:
+             int: Formation index.
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            buff = semantic_session.campaign_map_formation()
++            logger.attr('Map_buff', buff)
++            return buff
++
+         image = self.image_crop(MAP_BUFF, copy=False)
+         if TEMPLATE_FORMATION_2.match(image):
+             buff = 'double_line'
 diff --git a/module/map/camera.py b/module/map/camera.py
-index 9fa9cba..f0725b3 100644
+index 9fa9cba2..1f7044a1 100644
 --- a/module/map/camera.py
 +++ b/module/map/camera.py
-@@ -110,6 +110,25 @@ class Camera(MapOperation):
+@@ -78,6 +78,15 @@ class Camera(MapOperation):
+             bool: if camera moved.
+         """
+         logger.info('Map swipe: %s' % str(vector))
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None and not np.any(vector):
++            return False
++        if (
++            semantic_session is not None
++            and semantic_session.recover_campaign_map_network_reconnect()
++        ):
++            logger.warning('Recovered NetworkDown before campaign map swipe')
+         self._prev_view = copy.copy(self.view)
+         self._prev_swipe = vector
+         vector = np.array(vector)
+@@ -94,6 +103,11 @@ class Camera(MapOperation):
+         Returns:
+             bool: Map swiped.
+         """
++        from alas_headless import current_semantic_session
++        if current_semantic_session() is not None:
++            # Semantic View projects the exact live Unity grid geometry; its
++            # target does not need the screenshot pipeline's centering swipe.
++            return False
+         if not tolerance:
+             tolerance = self.config.MAP_GRID_CENTER_TOLERANCE
+         if np.any(np.abs(self.view.center_offset - 0.5) > tolerance):
+@@ -110,6 +124,25 @@ class Camera(MapOperation):
          """
          Update map view
          """
@@ -180,8 +626,54 @@ index 9fa9cba..f0725b3 100644
          self._view_init()
          try:
              if not self.is_in_map() \
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+index 249f61e2..f5fd9595 100644
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -301,7 +301,19 @@ class Fleet(Camera, AmbushHandler):
+ 
+             while 1:
+                 self.device.screenshot()
+-                self.view.update(image=self.device.image)
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if semantic_adapter is not None:
++                    if self.is_in_map():
++                        self.update()
++                        # The typed semantic camera installs a fresh View for
++                        # each exact Unity snapshot. Native image detection
++                        # mutates/reuses its grid objects, but a local grid
++                        # reference from before the tap would otherwise keep
++                        # the old fleet flags forever. Rebind only that local
++                        # observation; ALAS still owns arrival and retry logic.
++                        grid = self.convert_global_to_local(location)
++                else:
++                    self.view.update(image=self.device.image)
+                 if is_portal:
+                     self.update(allow_error=True)
+                     grid = self.view[self.view.center_loca]
+@@ -893,6 +905,20 @@ class Fleet(Camera, AmbushHandler):
+         self.handle_strategy(index=self.fleet_show_index)
+         self.hp_reset()
+         self.hp_get()
++        from alas_headless import (
++            current_semantic_session,
++            synchronize_alas_campaign_map,
++        )
++        if current_semantic_session() is not None:
++            state = self.semantic_campaign_map_state()
++            projection = synchronize_alas_campaign_map(self, state)
++            logger.info(
++                f'Semantic ALAS map initialized: '
++                f'fleet={projection.current_fleet_index}, '
++                f'enemies={list(projection.enemy_nodes)}, '
++                f'pickups={list(projection.pickup_nodes)}'
++            )
++            return
+         self.lv_reset()
+         self.lv_get()
+         self.ensure_edge_insight(preset=self.map.in_map_swipe_preset_data)
 diff --git a/module/map/map_operation.py b/module/map/map_operation.py
-index c44e099..96c9116 100644
+index c44e0996..78c9d812 100644
 --- a/module/map/map_operation.py
 +++ b/module/map/map_operation.py
 @@ -119,6 +119,7 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
@@ -192,7 +684,29 @@ index c44e099..96c9116 100644
  
          with self.stat.new(
                  genre=self.config.campaign_name, method=self.config.DropRecord_CombatRecord
-@@ -150,6 +151,106 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -129,6 +130,21 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                 else:
+                     self.device.screenshot()
+ 
++                # A transient NetworkDown/HostNotFound prompt can interrupt
++                # any pre-sortie state.  In semantic mode the shared popup
++                # assets are accepted only when the observer proves the exact
++                # reconnect text, both button labels, and topmost raycasts.
++                # Recover before asking page-specific campaign questions so a
++                # harmless disconnect does not look like stage identity loss.
++                if (
++                    semantic_adapter is not None
++                    and self.handle_popup_confirm('CAMPAIGN_RECONNECT')
++                ):
++                    campaign_timer.reset()
++                    map_timer.reset()
++                    fleet_timer.reset()
++                    continue
++
+                 # Check errors
+                 if campaign_click > 5:
+                     logger.critical(f"Failed to enter {button}, too many click on {button}")
+@@ -150,6 +166,115 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                  else:
                      checked_in_map = True
  
@@ -202,6 +716,7 @@ index c44e099..96c9116 100644
 +                    semantic_adapter is not None
 +                    and semantic_adapter.campaign_pre_sortie_active()
 +                ):
++                    logger.info('Semantic pre-sortie: scan fleet preparation')
 +                    if semantic_adapter.campaign_sortie_committed():
 +                        if self.is_in_map():
 +                            proof = semantic_adapter.confirm_campaign_sortie()
@@ -216,9 +731,11 @@ index c44e099..96c9116 100644
 +                                f'->{proof.map_generation}, '
 +                                f'root={proof.map_root_path}'
 +                            )
-+                            raise ScriptEnd(
-+                                'Semantic campaign sortie validation complete'
-+                            )
++                            # Sortie qualification used to stop here. The
++                            # top-down adapter now owns the subsequent exact
++                            # map/combat/result states as well, so leave the
++                            # entry loop normally and let CampaignBase run.
++                            break
 +                        continue
 +                    if self.appear(FLEET_PREPARATION, offset=(20, 50)):
 +                        fleet_authorized = False
@@ -239,10 +756,8 @@ index c44e099..96c9116 100644
 +                                self.handle_auto_search_setting()
 +                                self.map_fleet_checked = True
 +                                if semantic_adapter.authorize_campaign_sortie(
-+                                    use_auto_search=(
-+                                        self.config.Campaign_UseAutoSearch
-+                                    ),
-+                                    use_2x_book=self.config.Campaign_Use2xBook,
++                                    use_auto_search=self.map_is_auto_search,
++                                    use_2x_book=self.map_is_2x_book,
 +                                    submarine_mode=self.config.Submarine_Mode,
 +                                    fleet_order=self.config.Fleet_FleetOrder,
 +                                ):
@@ -281,8 +796,16 @@ index c44e099..96c9116 100644
 +                        raise ScriptEnd(
 +                            'Semantic campaign pre-sortie validation complete'
 +                        )
++                    logger.info('Semantic pre-sortie: scan map preparation')
 +                    if self.appear(MAP_PREPARATION, offset=(20, 20)):
-+                        self.handle_auto_search()
++                        logger.info('Semantic pre-sortie: map preparation active')
++                        auto_search_selected = (
++                            semantic_adapter.campaign_auto_search_selected()
++                        )
++                        logger.attr('SemanticAutoSearch', auto_search_selected)
++                        if auto_search_selected != self.map_is_auto_search:
++                            self.handle_auto_search()
++                        logger.info('Semantic pre-sortie: click map preparation')
 +                        self.device.click(MAP_PREPARATION)
 +                        map_click += 1
 +                        map_timer.reset()
@@ -299,3 +822,16 @@ index c44e099..96c9116 100644
                  # Accidental clicks
                  if self.appear(DAILY_CHECK, offset=(20, 20), interval=3):
                      logger.info(f'{DAILY_CHECK} -> {BACK_ARROW}')
+@@ -402,6 +527,12 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+         """
+         Click to skip the animation when cat attacks.
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.campaign_combat_active()
++        ):
++            return False
+         if not self.map_cat_attack_timer.reached():
+             return False
+         if self.image_color_count(MAP_CAT_ATTACK, color=(255, 231, 123), threshold=221, count=100):

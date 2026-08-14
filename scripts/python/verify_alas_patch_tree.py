@@ -32,6 +32,7 @@ UPSTREAM_LOCK_SCHEMA = "alas-headless.alas-upstream-lock/v1"
 COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 PATCH_HEADER_PATTERN = re.compile(r"^diff --git a/(\S+) b/(\S+)$")
 ALLOWED_PATCH_ROOTS = frozenset({"campaign", "module"})
+ALLOWED_NON_PYTHON_PATCH_PATHS = frozenset({"module/config/argument/args.json"})
 CANONICAL_PATCH = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
 SERIES_MANIFEST = ROOT / "integration" / "alas" / "series" / "series.json"
 
@@ -124,7 +125,10 @@ def parse_patch_paths(patch: Path) -> tuple[str, ...]:
             or ".." in normalized.parts
             or not normalized.parts
             or normalized.parts[0] not in ALLOWED_PATCH_ROOTS
-            or normalized.suffix != ".py"
+            or (
+                normalized.suffix != ".py"
+                and normalized.as_posix() not in ALLOWED_NON_PYTHON_PATCH_PATHS
+            )
         ):
             raise AlasPatchVerificationError("integration patch path is not allowlisted")
         paths.append(normalized.as_posix())
@@ -220,12 +224,30 @@ def plan_patch_verification(
 
 
 def _compile_patched_files(worktree: Path, changed_files: Sequence[str]) -> None:
-    targets = [str(worktree.joinpath(*PurePosixPath(path).parts)) for path in changed_files]
-    _run(
-        (sys.executable, "-m", "py_compile", *targets),
-        cwd=worktree,
-        timeout_seconds=120,
-    )
+    python_files = tuple(path for path in changed_files if path.endswith(".py"))
+    if python_files:
+        targets = [
+            str(worktree.joinpath(*PurePosixPath(path).parts))
+            for path in python_files
+        ]
+        _run(
+            (sys.executable, "-m", "py_compile", *targets),
+            cwd=worktree,
+            timeout_seconds=120,
+        )
+    for path in changed_files:
+        if path not in ALLOWED_NON_PYTHON_PATCH_PATHS:
+            continue
+        try:
+            json.loads(
+                worktree.joinpath(*PurePosixPath(path).parts).read_text(
+                    encoding="utf-8"
+                )
+            )
+        except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+            raise AlasPatchVerificationError(
+                "patched non-Python file is not valid JSON"
+            ) from exc
 
 
 def execute_patch_verification(
@@ -275,7 +297,9 @@ def execute_patch_verification(
             changed_files=changed_files,
             plan_only=False,
             patch_applied=True,
-            compiled_python_files=changed_files,
+            compiled_python_files=tuple(
+                path for path in changed_files if path.endswith(".py")
+            ),
         )
     finally:
         if registered:

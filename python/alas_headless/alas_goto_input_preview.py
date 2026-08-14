@@ -331,15 +331,14 @@ def _validate_inputs(
         or decision.origin_node != admission.origin_node
         or decision.target_node != admission.target_node
         or decision.route_nodes != admission.route_nodes
-        or decision.expected != "combat"
+        or decision.expected not in ("combat", "combat_boss", "combat_siren")
         or decision.goto_nodes != (admission.target_node,)
-        or decision.step_optimize
     ):
         raise SemanticGateClosed("ALAS goto decision is outside the admitted slice")
     if not (
         (same_cell and admission.origin_node == admission.target_node)
         or (
-            2 <= len(admission.route_nodes) <= 4
+            2 <= len(admission.route_nodes) <= len(state.cells)
             and admission.origin_node != admission.target_node
         )
     ):
@@ -380,6 +379,7 @@ def _validate_inputs(
         and enemy.sprite == admission.enemy_sprite
         and enemy.level == admission.enemy_level
         and enemy.fighting == same_cell
+        and enemy.is_siren == (decision.expected == "combat_siren")
     )
     cells = tuple(
         cell
@@ -402,8 +402,18 @@ def _validate_inputs(
         raise SemanticGateClosed(
             "ALAS goto target is absent from projected map"
         ) from exc
+    target_is_enemy = bool(getattr(target_grid, "is_enemy", False))
+    target_is_siren = bool(getattr(target_grid, "is_siren", False))
+    target_is_boss = bool(getattr(target_grid, "is_boss", False))
+    expected_target = (
+        target_is_siren
+        if decision.expected == "combat_siren"
+        else target_is_boss
+        if decision.expected == "combat_boss"
+        else target_is_enemy
+    )
     if not (
-        bool(getattr(target_grid, "is_enemy", False))
+        expected_target
         and bool(getattr(target_grid, "is_fleet", False)) == same_cell
         and bool(getattr(target_grid, "is_current_fleet", False)) == same_cell
         and _location_tuple(getattr(campaign, "fleet_current", ()))

@@ -166,6 +166,7 @@ def admission():
         origin_node="D6",
         target_node="D6",
         route_nodes=("D6",),
+        input_nodes=("D6",),
         enemy_object_id=1204090,
         enemy_sprite="hm1",
         enemy_level=113,
@@ -458,9 +459,9 @@ class AlasCombatObserverContractTests(unittest.TestCase):
 
         self.assertEqual(coverage.canonical_resources, 41)
         self.assertEqual(coverage.canonical_qualified_resources, 0)
-        self.assertEqual(coverage.total_resources, 54)
+        self.assertEqual(coverage.total_resources, 57)
         self.assertEqual(coverage.qualified_resources, 0)
-        self.assertEqual(coverage.total_actions, 38)
+        self.assertEqual(coverage.total_actions, 39)
         self.assertEqual(coverage.qualified_actions, 0)
         self.assertFalse(coverage.branch_review_complete)
         self.assertFalse(coverage.production_ready)
@@ -735,7 +736,7 @@ class AlasCombatObserverContractTests(unittest.TestCase):
         manifest = unqualified_alas_combat_observer_manifest(
             driver_revision=DRIVER, game_fingerprint=GAME
         )
-        with self.assertRaisesRegex(SemanticGateClosed, "0/54"):
+        with self.assertRaisesRegex(SemanticGateClosed, "0/57"):
             build_alas_campaign_combat_replay_from_observer(
                 admission(), (), manifest
             )
@@ -1175,11 +1176,11 @@ class AlasCombatObserverContractTests(unittest.TestCase):
         coverage = audit_alas_combat_observer_manifest(manifest)
 
         self.assertEqual(coverage.canonical_resources, 41)
-        self.assertEqual(coverage.canonical_qualified_resources, 16)
-        self.assertEqual(coverage.total_resources, 54)
-        self.assertEqual(coverage.qualified_resources, 18)
-        self.assertEqual(coverage.total_actions, 38)
-        self.assertEqual(coverage.qualified_actions, 12)
+        self.assertEqual(coverage.canonical_qualified_resources, 18)
+        self.assertEqual(coverage.total_resources, 57)
+        self.assertEqual(coverage.qualified_resources, 23)
+        self.assertEqual(coverage.total_actions, 39)
+        self.assertEqual(coverage.qualified_actions, 15)
         self.assertFalse(coverage.branch_review_complete)
         self.assertTrue(coverage.fleet_stats_qualified)
         self.assertEqual(coverage.qualified_blockers, 1)
@@ -1500,7 +1501,7 @@ class AlasCombatObserverContractTests(unittest.TestCase):
         coverage = audit_alas_combat_observer_manifest(promoted)
 
         self.assertEqual(receipt["schema"], ALAS_COMBAT_MAPPING_RECEIPT_SCHEMA)
-        self.assertEqual(coverage.qualified_resources, 54)
+        self.assertEqual(coverage.qualified_resources, 57)
         self.assertEqual(coverage.qualified_blockers, 1)
         self.assertFalse(coverage.blockers_qualified)
         self.assertFalse(coverage.production_ready)

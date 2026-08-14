@@ -40,6 +40,8 @@ key.properties
 # Local research outputs; durable conclusions belong in docs/
 artifacts/
 evidence/
+/log/
+/tmp-fushungame.bundle
 *.apk
 *.aab
 *.apks

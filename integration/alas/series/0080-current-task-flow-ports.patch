@@ -1,0 +1,1632 @@
+diff --git a/campaign/event_20260813_cn/a1.py b/campaign/event_20260813_cn/a1.py
+new file mode 100644
+index 00000000..96b97f89
+--- /dev/null
++++ b/campaign/event_20260813_cn/a1.py
+@@ -0,0 +1,92 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++
++MAP = CampaignMap('A1')
++MAP.shape = 'I7'
++MAP.camera_data = ['D2', 'D5', 'F2', 'F5']
++MAP.camera_data_spawn_point = ['D2']
++MAP.map_data = """
++    ++ SP SP ++ ++ ++ ME -- ME
++    ++ -- -- -- Me -- -- MB --
++    Me -- -- __ -- -- -- -- ME
++    -- MS MS -- ++ -- ++ ++ ++
++    ME -- -- -- Me -- ME ++ --
++    ++ ++ ME -- ++ -- -- ME --
++    ++ ++ -- ME -- -- ME -- --
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 1},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 1},
++    {'battle': 3, 'enemy': 1, 'boss': 1},
++    {'battle': 4, 'enemy': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, \
++    = MAP.flatten()
++
++
++class Config:
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = []
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++    MAP_CHAPTER_SWITCH_20241219 = True
++    STAGE_ENTRANCE = ['half', '20240725']
++    MAP_HAS_MODE_SWITCH = True
++    STAGE_INCREASE_AB = True
++    MAP_SIREN_HAS_BOSS_ICON_SMALL = True
++    INTERNAL_LINES_FIND_PEAKS_PARAMETERS = {
++        'height': (80, 255 - 17),
++        'width': (0.9, 10),
++        'prominence': 10,
++        'distance': 35,
++    }
++    EDGE_LINES_FIND_PEAKS_PARAMETERS = {
++        'height': (255 - 17, 255),
++        'prominence': 10,
++        'distance': 50,
++        'wlen': 1000
++    }
++    MAP_SWIPE_MULTIPLY = (1.207, 1.229)
++    MAP_SWIPE_MULTIPLY_MINITOUCH = (1.167, 1.189)
++    MAP_SWIPE_MULTIPLY_MAATOUCH = (1.133, 1.153)
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_3(self):
++        return self.clear_boss()
+diff --git a/campaign/event_20260813_cn/a2.py b/campaign/event_20260813_cn/a2.py
+new file mode 100644
+index 00000000..93031e56
+--- /dev/null
++++ b/campaign/event_20260813_cn/a2.py
+@@ -0,0 +1,72 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++from .a1 import Config as ConfigBase
++
++MAP = CampaignMap('A2')
++MAP.shape = 'I7'
++MAP.camera_data = ['D2', 'D5', 'F2', 'F5']
++MAP.camera_data_spawn_point = ['F5']
++MAP.map_data = """
++    -- MB -- ++ ++ -- ME ++ --
++    MB -- ME ++ ++ ME -- Me --
++    -- -- -- ME Me -- -- ++ ++
++    -- ++ -- -- __ -- MS -- ++
++    ME ++ -- Me ++ MS -- -- SP
++    -- -- -- -- ++ MS -- -- SP
++    ME -- ME -- Me -- MS -- ++
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 1},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 1},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 1, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, \
++    = MAP.flatten()
++
++
++class Config(ConfigBase):
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = []
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_4(self):
++        return self.clear_boss()
+diff --git a/campaign/event_20260813_cn/a3.py b/campaign/event_20260813_cn/a3.py
+new file mode 100644
+index 00000000..6777b3ad
+--- /dev/null
++++ b/campaign/event_20260813_cn/a3.py
+@@ -0,0 +1,82 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++from .a1 import Config as ConfigBase
++
++MAP = CampaignMap('A3')
++MAP.shape = 'G9'
++MAP.camera_data = ['D2', 'D4', 'D7']
++MAP.camera_data_spawn_point = ['D7']
++MAP.map_data = """
++    -- ME ++ ++ ++ ME --
++    ME -- -- MB -- -- ME
++    -- ME -- -- -- ME --
++    ME -- -- ++ -- -- ME
++    ++ -- ++ ++ ++ -- ++
++    -- -- -- ++ -- -- --
++    Me -- SP -- SP -- Me
++    ++ Me -- __ -- Me ++
++    ++ MS -- MS -- MS ++
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 1},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 1},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 1, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, \
++A2, B2, C2, D2, E2, F2, G2, \
++A3, B3, C3, D3, E3, F3, G3, \
++A4, B4, C4, D4, E4, F4, G4, \
++A5, B5, C5, D5, E5, F5, G5, \
++A6, B6, C6, D6, E6, F6, G6, \
++A7, B7, C7, D7, E7, F7, G7, \
++A8, B8, C8, D8, E8, F8, G8, \
++A9, B9, C9, D9, E9, F9, G9, \
++    = MAP.flatten()
++
++
++class Config(ConfigBase):
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = []
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++    MAP_SWIPE_MULTIPLY = (1.007, 1.026)
++    MAP_SWIPE_MULTIPLY_MINITOUCH = (0.974, 0.992)
++    MAP_SWIPE_MULTIPLY_MAATOUCH = (0.946, 0.963)
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_4(self):
++        return self.clear_boss()
+diff --git a/campaign/event_20260813_cn/b1.py b/campaign/event_20260813_cn/b1.py
+new file mode 100644
+index 00000000..382f0ba9
+--- /dev/null
++++ b/campaign/event_20260813_cn/b1.py
+@@ -0,0 +1,93 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++
++MAP = CampaignMap('B1')
++MAP.shape = 'I7'
++MAP.camera_data = ['D2', 'D5', 'F2', 'F5']
++MAP.camera_data_spawn_point = ['F2', 'D2']
++MAP.map_data = """
++    ME ++ -- SP -- SP -- ++ ++
++    -- -- -- -- -- -- -- ME ++
++    -- ME ++ -- MS -- Me -- Me
++    -- -- Me MS -- MS -- -- ++
++    ++ -- -- ++ __ ++ ME -- ME
++    ME -- Me ++ -- ++ -- ME --
++    -- ++ ++ ++ MB ++ ++ ++ --
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 1},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 2},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 2, 'boss': 1},
++    {'battle': 5, 'enemy': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, \
++    = MAP.flatten()
++
++
++class Config:
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = ['BonhommeRichard_BB', 'BonhommeRichard_CV']
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++    MAP_CHAPTER_SWITCH_20241219 = True
++    STAGE_ENTRANCE = ['half', '20240725']
++    MAP_HAS_MODE_SWITCH = True
++    STAGE_INCREASE_AB = True
++    MAP_WALK_USE_CURRENT_FLEET = True
++    INTERNAL_LINES_FIND_PEAKS_PARAMETERS = {
++        'height': (80, 255 - 17),
++        'width': (0.9, 10),
++        'prominence': 10,
++        'distance': 35,
++    }
++    EDGE_LINES_FIND_PEAKS_PARAMETERS = {
++        'height': (255 - 17, 255),
++        'prominence': 10,
++        'distance': 50,
++        'wlen': 1000
++    }
++    MAP_SWIPE_MULTIPLY = (1.136, 1.158)
++    MAP_SWIPE_MULTIPLY_MINITOUCH = (1.099, 1.119)
++    MAP_SWIPE_MULTIPLY_MAATOUCH = (1.067, 1.086)
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_4(self):
++        return self.clear_boss()
+diff --git a/campaign/event_20260813_cn/b2.py b/campaign/event_20260813_cn/b2.py
+new file mode 100644
+index 00000000..f8df2cec
+--- /dev/null
++++ b/campaign/event_20260813_cn/b2.py
+@@ -0,0 +1,76 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++from .b1 import Config as ConfigBase
++
++MAP = CampaignMap('B2')
++MAP.shape = 'J8'
++MAP.camera_data = ['D3', 'D6', 'G2', 'G5']
++MAP.camera_data_spawn_point = ['D3']
++MAP.map_data = """
++    ++ ++ ++ -- Me ++ Me ++ ME --
++    ++ -- SP -- -- -- -- -- -- ME
++    ++ SP -- -- MS ++ ++ ++ -- --
++    ME -- -- MS -- Me -- ME -- ME
++    ME -- MS -- __ -- -- -- ME ++
++    ++ -- ++ Me Me ++ ++ -- -- --
++    -- -- ++ -- -- ++ ++ ME -- --
++    MB -- ME -- -- -- -- -- -- --
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 1},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 2},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 2},
++    {'battle': 5, 'enemy': 1, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, J1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, J2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, J3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, J4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, J5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, J6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, J7, \
++A8, B8, C8, D8, E8, F8, G8, H8, I8, J8, \
++    = MAP.flatten()
++
++
++class Config(ConfigBase):
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = ['BonhommeRichard_BB', 'BonhommeRichard_CV']
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_5(self):
++        return self.fleet_boss.clear_boss()
+diff --git a/campaign/event_20260813_cn/b3.py b/campaign/event_20260813_cn/b3.py
+new file mode 100644
+index 00000000..5dcf4157
+--- /dev/null
++++ b/campaign/event_20260813_cn/b3.py
+@@ -0,0 +1,79 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++from .b1 import Config as ConfigBase
++
++MAP = CampaignMap('B3')
++MAP.shape = 'I9'
++MAP.camera_data = ['D4', 'D6', 'F4', 'F6']
++MAP.camera_data_spawn_point = ['D4']
++MAP.map_data = """
++    ++ ++ ++ -- ++ -- ++ ++ ++
++    -- ++ -- ++ ++ ++ -- ++ --
++    -- ME -- -- ++ -- -- ME --
++    ME -- -- SP -- SP -- -- ME
++    -- Me -- -- __ -- -- Me --
++    -- -- Me -- MS -- Me -- ++
++    -- ME -- MS -- MS -- ME ++
++    ++ ++ ME -- MB -- ME ++ ++
++    ++ ++ -- ++ -- ++ -- ++ ++
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 2},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 2},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 2},
++    {'battle': 5, 'enemy': 1, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, \
++A8, B8, C8, D8, E8, F8, G8, H8, I8, \
++A9, B9, C9, D9, E9, F9, G9, H9, I9, \
++    = MAP.flatten()
++
++
++class Config(ConfigBase):
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = ['BonhommeRichard_BB', 'BonhommeRichard_CV']
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_5(self):
++        return self.fleet_boss.clear_boss()
+diff --git a/campaign/event_20260813_cn/c1.py b/campaign/event_20260813_cn/c1.py
+new file mode 100644
+index 00000000..ec3cb78c
+--- /dev/null
++++ b/campaign/event_20260813_cn/c1.py
+@@ -0,0 +1,92 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++
++MAP = CampaignMap('C1')
++MAP.shape = 'I7'
++MAP.camera_data = ['D2', 'D5', 'F2', 'F5']
++MAP.camera_data_spawn_point = ['D2']
++MAP.map_data = """
++    ++ SP SP ++ ++ ++ ME -- ME
++    ++ -- -- -- Me -- -- MB --
++    Me -- -- __ -- -- -- -- ME
++    -- MS MS -- ++ -- ++ ++ ++
++    ME -- -- -- Me -- ME ++ --
++    ++ ++ ME -- ++ -- -- ME --
++    ++ ++ -- ME -- -- ME -- --
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 2},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 2},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 1, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, \
++    = MAP.flatten()
++
++
++class Config:
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = []
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++    MAP_CHAPTER_SWITCH_20241219 = True
++    STAGE_ENTRANCE = ['half', '20240725']
++    MAP_HAS_MODE_SWITCH = True
++    STAGE_INCREASE_AB = True
++    MAP_SIREN_HAS_BOSS_ICON_SMALL = True
++    INTERNAL_LINES_FIND_PEAKS_PARAMETERS = {
++        'height': (80, 255 - 17),
++        'width': (0.9, 10),
++        'prominence': 10,
++        'distance': 35,
++    }
++    EDGE_LINES_FIND_PEAKS_PARAMETERS = {
++        'height': (255 - 17, 255),
++        'prominence': 10,
++        'distance': 50,
++        'wlen': 1000
++    }
++    MAP_SWIPE_MULTIPLY = (1.207, 1.229)
++    MAP_SWIPE_MULTIPLY_MINITOUCH = (1.167, 1.189)
++    MAP_SWIPE_MULTIPLY_MAATOUCH = (1.133, 1.153)
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_4(self):
++        return self.clear_boss()
+diff --git a/campaign/event_20260813_cn/c2.py b/campaign/event_20260813_cn/c2.py
+new file mode 100644
+index 00000000..7dcea24b
+--- /dev/null
++++ b/campaign/event_20260813_cn/c2.py
+@@ -0,0 +1,72 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++from .c1 import Config as ConfigBase
++
++MAP = CampaignMap('C2')
++MAP.shape = 'I7'
++MAP.camera_data = ['D2', 'D5', 'F2', 'F5']
++MAP.camera_data_spawn_point = ['F5']
++MAP.map_data = """
++    -- MB -- ++ ++ -- ME ++ --
++    MB -- ME ++ ++ ME -- Me --
++    -- -- -- ME Me -- -- ++ ++
++    -- ++ -- -- __ -- MS -- ++
++    ME ++ -- Me ++ MS -- -- SP
++    -- -- -- -- ++ MS -- -- SP
++    ME -- ME -- Me -- MS -- ++
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 2},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 2},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 1, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, \
++    = MAP.flatten()
++
++
++class Config(ConfigBase):
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = []
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_4(self):
++        return self.clear_boss()
+diff --git a/campaign/event_20260813_cn/c3.py b/campaign/event_20260813_cn/c3.py
+new file mode 100644
+index 00000000..5f7bb477
+--- /dev/null
++++ b/campaign/event_20260813_cn/c3.py
+@@ -0,0 +1,83 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++from .c1 import Config as ConfigBase
++
++MAP = CampaignMap('C3')
++MAP.shape = 'G9'
++MAP.camera_data = ['D2', 'D4', 'D7']
++MAP.camera_data_spawn_point = ['D7']
++MAP.map_data = """
++    -- ME ++ ++ ++ ME --
++    ME -- -- MB -- -- ME
++    -- ME -- -- -- ME --
++    ME -- -- ++ -- -- ME
++    ++ -- ++ ++ ++ -- ++
++    -- -- -- ++ -- -- --
++    Me -- SP -- SP -- Me
++    ++ Me -- __ -- Me ++
++    ++ MS -- MS -- MS ++
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++    50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 2},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 2},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 1},
++    {'battle': 5, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, \
++A2, B2, C2, D2, E2, F2, G2, \
++A3, B3, C3, D3, E3, F3, G3, \
++A4, B4, C4, D4, E4, F4, G4, \
++A5, B5, C5, D5, E5, F5, G5, \
++A6, B6, C6, D6, E6, F6, G6, \
++A7, B7, C7, D7, E7, F7, G7, \
++A8, B8, C8, D8, E8, F8, G8, \
++A9, B9, C9, D9, E9, F9, G9, \
++    = MAP.flatten()
++
++
++class Config(ConfigBase):
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = []
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++    MAP_SWIPE_MULTIPLY = (1.007, 1.026)
++    MAP_SWIPE_MULTIPLY_MINITOUCH = (0.974, 0.992)
++    MAP_SWIPE_MULTIPLY_MAATOUCH = (0.946, 0.963)
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_5(self):
++        return self.fleet_boss.clear_boss()
+diff --git a/campaign/event_20260813_cn/d1.py b/campaign/event_20260813_cn/d1.py
+new file mode 100644
+index 00000000..cca2982a
+--- /dev/null
++++ b/campaign/event_20260813_cn/d1.py
+@@ -0,0 +1,93 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++
++MAP = CampaignMap('D1')
++MAP.shape = 'I7'
++MAP.camera_data = ['D2', 'D5', 'F2', 'F5']
++MAP.camera_data_spawn_point = ['F2', 'D2']
++MAP.map_data = """
++    ME ++ -- SP -- SP -- ++ ++
++    -- -- -- -- -- -- -- ME ++
++    -- ME ++ -- MS -- Me -- Me
++    -- -- Me MS -- MS -- -- ++
++    ++ -- -- ++ __ ++ ME -- ME
++    ME -- Me ++ -- ++ -- ME --
++    -- ++ ++ ++ MB ++ ++ ++ --
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 2},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 2},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 2},
++    {'battle': 5, 'enemy': 1, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, \
++    = MAP.flatten()
++
++
++class Config:
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = ['BonhommeRichard_BB', 'BonhommeRichard_CV']
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++    MAP_CHAPTER_SWITCH_20241219 = True
++    STAGE_ENTRANCE = ['half', '20240725']
++    MAP_HAS_MODE_SWITCH = True
++    STAGE_INCREASE_AB = True
++    MAP_WALK_USE_CURRENT_FLEET = True
++    INTERNAL_LINES_FIND_PEAKS_PARAMETERS = {
++        'height': (80, 255 - 17),
++        'width': (0.9, 10),
++        'prominence': 10,
++        'distance': 35,
++    }
++    EDGE_LINES_FIND_PEAKS_PARAMETERS = {
++        'height': (255 - 17, 255),
++        'prominence': 10,
++        'distance': 50,
++        'wlen': 1000
++    }
++    MAP_SWIPE_MULTIPLY = (1.136, 1.158)
++    MAP_SWIPE_MULTIPLY_MINITOUCH = (1.099, 1.119)
++    MAP_SWIPE_MULTIPLY_MAATOUCH = (1.067, 1.086)
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_5(self):
++        return self.fleet_boss.clear_boss()
+diff --git a/campaign/event_20260813_cn/d2.py b/campaign/event_20260813_cn/d2.py
+new file mode 100644
+index 00000000..18c58eda
+--- /dev/null
++++ b/campaign/event_20260813_cn/d2.py
+@@ -0,0 +1,85 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++from .d1 import Config as ConfigBase
++
++MAP = CampaignMap('D2')
++MAP.shape = 'J8'
++MAP.camera_data = ['D3', 'D6', 'G2', 'G5']
++MAP.camera_data_spawn_point = ['D3']
++MAP.map_data = """
++    ++ ++ ++ -- Me ++ Me ++ ME --
++    ++ -- SP -- -- -- -- -- -- ME
++    ++ SP -- -- MS ++ ++ ++ -- --
++    ME -- -- MS -- Me -- ME -- ME
++    ME -- MS -- __ -- -- -- ME ++
++    ++ -- ++ Me Me ++ ++ -- -- --
++    -- -- ++ -- -- ++ ++ ME -- --
++    MB -- ME -- -- -- -- -- -- --
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 2},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 2, 'siren': 1},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 2},
++    {'battle': 5, 'enemy': 1},
++    {'battle': 6, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, J1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, J2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, J3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, J4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, J5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, J6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, J7, \
++A8, B8, C8, D8, E8, F8, G8, H8, I8, J8, \
++    = MAP.flatten()
++
++
++class Config(ConfigBase):
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = ['BonhommeRichard_BB', 'BonhommeRichard_CV']
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=1):
++            return True
++
++        return self.battle_default()
++
++    def battle_5(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_6(self):
++        return self.fleet_boss.clear_boss()
+diff --git a/campaign/event_20260813_cn/d3.py b/campaign/event_20260813_cn/d3.py
+new file mode 100644
+index 00000000..8cbb15e2
+--- /dev/null
++++ b/campaign/event_20260813_cn/d3.py
+@@ -0,0 +1,88 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++from .d1 import Config as ConfigBase
++
++MAP = CampaignMap('D3')
++MAP.shape = 'I9'
++MAP.camera_data = ['D4', 'D6', 'F4', 'F6']
++MAP.camera_data_spawn_point = ['D4']
++MAP.map_data = """
++    ++ ++ ++ -- ++ -- ++ ++ ++
++    -- ++ -- ++ ++ ++ -- ++ --
++    -- ME -- -- ++ -- -- ME --
++    ME -- -- SP -- SP -- -- ME
++    -- Me -- -- __ -- -- Me --
++    ++ -- Me -- MS -- Me -- ++
++    ++ ME -- MS -- MS -- ME ++
++    ++ ++ ME -- MB -- ME ++ ++
++    ++ ++ -- ++ -- ++ -- ++ ++
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 2, 'siren': 2},
++    {'battle': 1, 'enemy': 1},
++    {'battle': 2, 'enemy': 2, 'siren': 1},
++    {'battle': 3, 'enemy': 1},
++    {'battle': 4, 'enemy': 2},
++    {'battle': 5, 'enemy': 1},
++    {'battle': 6, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, \
++A8, B8, C8, D8, E8, F8, G8, H8, I8, \
++A9, B9, C9, D9, E9, F9, G9, H9, I9, \
++    = MAP.flatten()
++
++
++class Config(ConfigBase):
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = ['BonhommeRichard_BB', 'BonhommeRichard_CV']
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    # ===== End of generated config =====
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=1):
++            return True
++
++        return self.battle_default()
++
++    def battle_5(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_6(self):
++        return self.fleet_boss.clear_boss()
+diff --git a/campaign/event_20260813_cn/sp.py b/campaign/event_20260813_cn/sp.py
+new file mode 100644
+index 00000000..03d3c193
+--- /dev/null
++++ b/campaign/event_20260813_cn/sp.py
+@@ -0,0 +1,112 @@
++from module.campaign.campaign_base import CampaignBase
++from module.map.map_base import CampaignMap
++from module.map.map_grids import SelectedGrids, RoadGrids
++from module.logger import logger
++
++MAP = CampaignMap('SP')
++MAP.shape = 'I9'
++MAP.camera_data = ['D4', 'D6', 'F4', 'F6']
++MAP.camera_data_spawn_point = ['D4', 'F4']
++MAP.map_data = """
++    ++ ++ ++ -- ++ -- ++ ++ ++
++    -- ++ -- ++ ++ ++ -- ++ --
++    -- ME -- -- ++ -- -- ME --
++    ME -- -- SP -- SP -- -- ME
++    -- ME -- -- __ -- -- ME --
++    ++ -- ME -- MS -- ME -- ++
++    ++ ME -- MS -- MS -- ME ++
++    ++ ++ ME -- MB -- ME ++ ++
++    ++ ++ -- ++ -- ++ -- ++ ++
++"""
++MAP.weight_data = """
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++    50 50 50 50 50 50 50 50 50
++"""
++MAP.spawn_data = [
++    {'battle': 0, 'enemy': 12, 'siren': 3},
++    {'battle': 1},
++    {'battle': 2},
++    {'battle': 3},
++    {'battle': 4},
++    {'battle': 5},
++    {'battle': 6},
++    {'battle': 7, 'boss': 1},
++]
++A1, B1, C1, D1, E1, F1, G1, H1, I1, \
++A2, B2, C2, D2, E2, F2, G2, H2, I2, \
++A3, B3, C3, D3, E3, F3, G3, H3, I3, \
++A4, B4, C4, D4, E4, F4, G4, H4, I4, \
++A5, B5, C5, D5, E5, F5, G5, H5, I5, \
++A6, B6, C6, D6, E6, F6, G6, H6, I6, \
++A7, B7, C7, D7, E7, F7, G7, H7, I7, \
++A8, B8, C8, D8, E8, F8, G8, H8, I8, \
++A9, B9, C9, D9, E9, F9, G9, H9, I9, \
++    = MAP.flatten()
++
++
++class Config:
++    # ===== Start of generated config =====
++    MAP_SIREN_TEMPLATE = ['BonhommeRichard_SS']
++    MOVABLE_ENEMY_TURN = (2,)
++    MAP_HAS_SIREN = True
++    MAP_HAS_MOVABLE_ENEMY = True
++    MAP_HAS_MAP_STORY = False
++    MAP_HAS_FLEET_STEP = True
++    MAP_HAS_AMBUSH = False
++    MAP_HAS_MYSTERY = False
++    STAR_REQUIRE_1 = 0
++    STAR_REQUIRE_2 = 0
++    STAR_REQUIRE_3 = 0
++    # ===== End of generated config =====
++
++    MAP_CHAPTER_SWITCH_20241219 = True
++    STAGE_ENTRANCE = ['half', '20240725']
++    STAGE_INCREASE_AB = True
++    INTERNAL_LINES_FIND_PEAKS_PARAMETERS = {
++        'height': (80, 255 - 17),
++        'width': (0.9, 10),
++        'prominence': 10,
++        'distance': 35,
++    }
++    EDGE_LINES_FIND_PEAKS_PARAMETERS = {
++        'height': (255 - 17, 255),
++        'prominence': 10,
++        'distance': 50,
++        'wlen': 1000
++    }
++    MAP_ENSURE_EDGE_INSIGHT_CORNER = 'bottom'
++    MAP_IS_ONE_TIME_STAGE = True
++    MAP_SWIPE_MULTIPLY = (1.149, 1.170)
++    MAP_SWIPE_MULTIPLY_MINITOUCH = (1.111, 1.132)
++    MAP_SWIPE_MULTIPLY_MAATOUCH = (1.079, 1.098)
++
++
++class Campaign(CampaignBase):
++    MAP = MAP
++    ENEMY_FILTER = '1L > 1M > 1E > 1C > 2L > 2M > 2E > 2C > 3L > 3M > 3E > 3C'
++
++    def battle_0(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=2):
++            return True
++
++        return self.battle_default()
++
++    def battle_5(self):
++        if self.clear_siren():
++            return True
++        if self.clear_filter_enemy(self.ENEMY_FILTER, preserve=0):
++            return True
++
++        return self.battle_default()
++
++    def battle_7(self):
++        return self.fleet_boss.clear_boss()
+diff --git a/module/campaign/campaign_ui.py b/module/campaign/campaign_ui.py
+index d5528710..61c2bd1a 100644
+--- a/module/campaign/campaign_ui.py
++++ b/module/campaign/campaign_ui.py
+@@ -65,6 +65,22 @@ class CampaignUI(MapOperation, CampaignEvent, CampaignOcr):
+             chapter (int, str): Chapter. Such as 7, 'd', 'sp'.
+             skip_first_screenshot:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
++            oracle = semantic_adapter.open().oracle
++            preparation = oracle.campaign_preparation_state(
++                self.config.Campaign_Name.lower()
++            )
++            if preparation is not None:
++                self.campaign_chapter = chapter
++                button = self.ENTRANCE
++                button.name = self.config.Campaign_Name.lower()
++                button.semantic_campaign_stage_code = (
++                    self.config.Campaign_Name.lower()
++                )
++                self.stage_entrance = {button.name: button}
++                return
+         index = self._campaign_get_chapter_index(chapter)
+         isdigit = is_digit_chapter(chapter)
+ 
+@@ -164,6 +180,30 @@ class CampaignUI(MapOperation, CampaignEvent, CampaignOcr):
+         Args:
+             chapter: 'part1', 'part2', 'sp', 'ex'
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
++            oracle = semantic_adapter.open().oracle
++            preparation = oracle.campaign_preparation_state(
++                self.config.Campaign_Name.lower()
++            )
++            if preparation is not None:
++                return
++            state = oracle.campaign_page_state()
++            expected = {
++                'part1': {'a', 'c', 't'},
++                'part2': {'b', 'd'},
++                'sp': {'ex_sp', 'sp'},
++                'ex': {'ex_ex', 'ex'},
++            }
++            current = {
++                semantic_adapter.open().oracle._campaign_stage_chapter(
++                    stage.stage_code
++                )
++                for stage in state.stages
++            }
++            if chapter in expected and current & expected[chapter]:
++                return
+         if chapter in ['part1', 'a', 'c', 't']:
+             ASIDE_SWITCH_20241219.set('part1', main=self)
+         elif chapter in ['part2', 'b', 'd']:
+@@ -396,6 +436,7 @@ class CampaignUI(MapOperation, CampaignEvent, CampaignOcr):
+             ScriptEnd: If failed to switch after retries
+         """
+         timeout = Timer(5, count=20).start()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         while 1:
+             if skip_first_screenshot:
+                 skip_first_screenshot = False
+@@ -404,6 +445,12 @@ class CampaignUI(MapOperation, CampaignEvent, CampaignOcr):
+ 
+             if timeout.reached():
+                 break
++            if (
++                semantic_adapter is not None
++                and self.handle_popup_confirm('CAMPAIGN_RECONNECT')
++            ):
++                timeout.reset()
++                continue
+             try:
+                 self.campaign_set_chapter(name, mode)
+                 self.ENTRANCE = self.campaign_get_entrance(name=name)
+diff --git a/module/daily/daily.py b/module/daily/daily.py
+index f9b86c33..e7669afd 100644
+--- a/module/daily/daily.py
++++ b/module/daily/daily.py
+@@ -24,6 +24,11 @@ class Daily(Combat):
+     emergency_module_development = False
+ 
+     def is_active(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            active = semantic_adapter.daily_current_active()
++            logger.attr(f'Daily_{self.daily_current}', 'active' if active else 'inactive')
++            return active
+         color = get_color(image=self.device.image, area=DAILY_ACTIVE.area)
+         color = np.array(color).astype(float)
+         color = (np.max(color) + np.min(color)) / 2
+@@ -265,7 +270,26 @@ class Daily(Combat):
+ 
+     def daily_run_one(self):
+         logger.hr('Daily run one', level=1)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.open().oracle.daily_battle_result_visible()
++        ):
++            semantic_adapter.open().oracle.click_daily_battle_result()
++            self.device.sleep((1, 1.2))
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.daily_precombat_visible()
++        ):
++            semantic_adapter.click_daily_precombat_back()
++            self.device.sleep((1, 1.2))
+         self.ui_ensure(page_daily)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.daily_detail_visible()
++        ):
++            semantic_adapter.click_daily_back()
++            self.device.sleep((1, 1.2))
+         self.device.sleep(0.2)
+         self.device.screenshot()
+         self.daily_current = 1
+@@ -304,7 +328,12 @@ class Daily(Combat):
+                 self.daily_check()
+                 self.next()
+                 continue
+-            remain = OCR_REMAIN.ocr(self.device.image)
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            remain = (
++                semantic_adapter.daily_current_remain()
++                if semantic_adapter is not None
++                else OCR_REMAIN.ocr(self.device.image)
++            )
+             if remain == 0:
+                 self.daily_check()
+                 self.next()
+diff --git a/module/eventstory/eventstory.py b/module/eventstory/eventstory.py
+index 1a941e33..7167383b 100644
+--- a/module/eventstory/eventstory.py
++++ b/module/eventstory/eventstory.py
+@@ -6,6 +6,7 @@ from module.eventstory.assets import *
+ from module.handler.login import LoginHandler
+ from module.logger import logger
+ from module.ui.page import page_event, page_sp
++from alas_headless import SemanticGateClosed
+ 
+ 
+ class EventStory(CampaignUI, Combat, LoginHandler):
+@@ -23,7 +24,16 @@ class EventStory(CampaignUI, Combat, LoginHandler):
+         else:
+             # most events show as page_event
+             self.ui_ensure(page_event)
+-        self.campaign_ensure_mode_20241219('story')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            oracle = semantic_adapter.open().oracle
++            try:
++                oracle.event_story_page_state()
++            except SemanticGateClosed:
++                semantic_adapter.refresh_frame()
++                oracle.click_event_story_mode()
++        else:
++            self.campaign_ensure_mode_20241219('story')
+ 
+         state = 'unknown'
+         for _ in range(3):
+@@ -182,6 +192,18 @@ class EventStory(CampaignUI, Combat, LoginHandler):
+         Returns:
+             str: 'finish', 'story', 'unknown'
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            completed, total, node_id = (
++                semantic_adapter.open().oracle.event_story_page_state()
++            )
++            if completed >= total:
++                return 'finish'
++            if node_id is not None:
++                semantic_adapter.refresh_frame()
++                semantic_adapter.open().oracle.click_event_story_node(node_id)
++                return 'story'
++
+         if self.match_template_color(STORY_FINISHED, offset=(20, 20)):
+             return 'finish'
+         if self.appear(REWARD_GOT, offset=(50, 30)):
+diff --git a/module/freebies/supply_pack.py b/module/freebies/supply_pack.py
+index 66c082eb..ee7709ad 100644
+--- a/module/freebies/supply_pack.py
++++ b/module/freebies/supply_pack.py
+@@ -80,18 +80,25 @@ class SupplyPack(CampaignStatus):
+             in: Any page
+             out: page_supply_pack, supply pack tab
+         """
+-        self.ui_ensure(page_shop)
+-        self.goto_supply_pack()
+-        if self.get_oil() < 21000:
+-            server_today = get_server_weekday()
+-            target = self.config.SupplyPack_DayOfWeek
+-            target_name = day_name[target]
+-            if server_today >= target:
+-                self.supply_pack_buy(FREE_SUPPLY_PACK)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_supply_pack()
++        try:
++            self.ui_ensure(page_shop)
++            self.goto_supply_pack()
++            if self.get_oil() < 21000:
++                server_today = get_server_weekday()
++                target = self.config.SupplyPack_DayOfWeek
++                target_name = day_name[target]
++                if server_today >= target:
++                    self.supply_pack_buy(FREE_SUPPLY_PACK)
++                else:
++                    logger.info(f'Delaying free week supply pack to {target_name}')
+             else:
+-                logger.info(f'Delaying free week supply pack to {target_name}')
+-        else:
+-            logger.info('Oil > 21000, unable to buy free weekly supply pack')
++                logger.info('Oil > 21000, unable to buy free weekly supply pack')
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_supply_pack()
+ 
+ 
+ class SupplyPack_250814(SupplyPack):
+diff --git a/module/handler/ambush.py b/module/handler/ambush.py
+index 1b347a8f..61651fdb 100644
+--- a/module/handler/ambush.py
++++ b/module/handler/ambush.py
+@@ -17,6 +17,8 @@ class AmbushHandler(Combat):
+     MAP_AIR_RAID_CONFIRM_SECOND = 0.5
+ 
+     def ambush_color_initial(self):
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            return
+         MAP_AMBUSH.load_color(self.device.image)
+         MAP_AIR_RAID.load_color(self.device.image)
+ 
+@@ -118,6 +120,8 @@ class AmbushHandler(Combat):
+             return self._handle_ambush_attack()
+ 
+     def handle_ambush(self):
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            return False
+         if not self.config.MAP_HAS_AMBUSH:
+             return False
+ 
+diff --git a/module/handler/enemy_searching.py b/module/handler/enemy_searching.py
+index e3fccd3f..b859a7e7 100644
+--- a/module/handler/enemy_searching.py
++++ b/module/handler/enemy_searching.py
+@@ -20,6 +20,9 @@ class EnemySearchingHandler(InfoHandler):
+         pass
+ 
+     def enemy_searching_appear(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.combat_enemy_searching()
+         if not self.is_in_map():
+             return False
+ 
+@@ -55,6 +58,9 @@ class EnemySearchingHandler(InfoHandler):
+         """
+         Has any stage entrance, which means stage page is fully loaded
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.open().oracle.event_campaign_stage_selector_visible()
+         # campaign_extract_name_image in CampaignOcr.
+         try:
+             if hasattr(self, 'campaign_extract_name_image'):
+diff --git a/module/handler/mystery.py b/module/handler/mystery.py
+index a7351fb8..d0a9b5ec 100644
+--- a/module/handler/mystery.py
++++ b/module/handler/mystery.py
+@@ -17,6 +17,12 @@ class MysteryHandler(StrategyHandler, EnemySearchingHandler):
+             button (optional): Button to click when get_items.
+                 Can be destination grid which makes the bot more like human.
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.campaign_combat_active()
++        ):
++            return False
+         with self.stat.new(
+                 genre=self.config.campaign_name, method=self.config.DropRecord_CombatRecord
+         ) as drop:
+diff --git a/module/hard/hard.py b/module/hard/hard.py
+index 672fa7f5..ba488aa2 100644
+--- a/module/hard/hard.py
++++ b/module/hard/hard.py
+@@ -17,6 +17,17 @@ class CampaignHard(CampaignRun):
+     def run(self):
+         logger.hr('Campaign hard', level=1)
+         name = to_map_file_name(self.config.Hard_HardStage)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_campaign_pre_sortie(
++                self.config.Hard_HardStage, mode='hard')
++        try:
++            return self._run_hard(name)
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_campaign_pre_sortie()
++
++    def _run_hard(self, name):
+         self.config.override(
+             Campaign_Mode='hard',
+             Campaign_UseFleetLock=True,
+@@ -41,7 +52,11 @@ class CampaignHard(CampaignRun):
+         )
+ 
+         # Run
+-        remain = OCR_HARD_REMAIN.ocr(self.device.image)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            remain = semantic_adapter.campaign_hard_remain()
++        else:
++            remain = OCR_HARD_REMAIN.ocr(self.device.image)
+         logger.attr('Remain', remain)
+         for n in range(remain):
+             self.campaign.run()
+diff --git a/module/minigame/minigame.py b/module/minigame/minigame.py
+index 55769f28..3fdad6a9 100644
+--- a/module/minigame/minigame.py
++++ b/module/minigame/minigame.py
+@@ -179,6 +179,16 @@ class Minigame(UI):
+         return coin_collected
+ 
+     def run(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is None:
++            return self._run()
++        semantic_adapter.begin_minigame()
++        try:
++            return self._run()
++        finally:
++            semantic_adapter.end_minigame()
++
++    def _run(self):
+         """
+         Pages:
+             in: Any page
+diff --git a/module/minigame/new_year_challenge.py b/module/minigame/new_year_challenge.py
+index c1397ea4..d77b07fd 100644
+--- a/module/minigame/new_year_challenge.py
++++ b/module/minigame/new_year_challenge.py
+@@ -1,3 +1,5 @@
++import time
++
+ from module.base.timer import Timer
+ from module.logger import logger
+ from module.minigame.assets import *
+@@ -62,6 +64,15 @@ class NewYearChallenge(MinigameRun):
+                 continue
+ 
+     def use_coin(self, skip_first_screenshot=True):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and not semantic_adapter.minigame_play_allowed():
++            logger.info('Minigame play budget is zero, skip spending game tickets')
++            return False
++        if semantic_adapter is not None:
++            coin_cost_after_add = semantic_adapter.minigame_prepare_default_ticket()
++            self.device.screenshot()
++            logger.info(f"coin cost after add : {coin_cost_after_add}")
++            return coin_cost_after_add == 1
+         return self.use_coin_new_year_challenge(count=5)
+ 
+     def play_game(self, skip_first_screenshot=True):
+@@ -70,6 +81,9 @@ class NewYearChallenge(MinigameRun):
+             in: page_game_room new_year_challenge_prepare
+             out: page_game_room new_year_challenge_end/new_year_challenge_prepare
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return self.play_game_semantic()
+         score_ocr_interval = Timer(0.6, count=5).start()
+         started = False
+         while 1:
+@@ -106,7 +120,53 @@ class NewYearChallenge(MinigameRun):
+                     self.device.click(NEW_YEAR_CHALLENGE_START)
+                     continue
+ 
++    def play_game_semantic(self):
++        """Play the current A/B Fushun Adventure II implementation."""
++        semantic_adapter = self.device.semantic_adapter
++        started = False
++        attack_index = 0
++        last_attack = 0.0
++        last_state_error = None
++        while 1:
++            self.device.screenshot()
++            if semantic_adapter.minigame_help_visible():
++                semantic_adapter.minigame_close_help()
++                continue
++            if not started:
++                if self.appear(NEW_YEAR_CHALLENGE_START, offset=(5, 5)):
++                    started = True
++                    self.device.click(NEW_YEAR_CHALLENGE_START)
++                    continue
++                started = True
++            key = 'A' if attack_index % 2 == 0 else 'B'
++            try:
++                result, score, receipts = semantic_adapter.minigame_tick(key)
++            except Exception as exc:
++                state_error = f"{type(exc).__name__}: {exc}"
++                if state_error != last_state_error:
++                    logger.warning(f"New year challenge state unavailable: {state_error}")
++                    last_state_error = state_error
++                continue
++            last_state_error = None
++            if result is not None:
++                logger.info(f"New year challenge result: {result}")
++                break
++            if receipts:
++                combo = ''.join(
++                    receipt.semantic_id.rsplit('-', 1)[-1].upper()
++                    for receipt in receipts
++                )
++                hp = len(receipts)
++                logger.info(f"New year challenge attack: combo={combo}, hp={hp}, score={score}")
++                attack_index += len(receipts)
++                last_attack = time.time()
++
+     def exit_game(self, skip_first_screenshot=True):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            receipts = semantic_adapter.minigame_exit_new_year()
++            logger.info(f"New year challenge exit receipts: {receipts}")
++            return
+         while 1:
+             if skip_first_screenshot:
+                 skip_first_screenshot = False

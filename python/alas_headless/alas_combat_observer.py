@@ -965,7 +965,10 @@ def _selector_present(
     if selector.require_top_raycast:
         if not _actionable_control(record):
             raise SemanticGateClosed(
-                "combat action control is not exact top-raycast actionable"
+                "combat action control is not exact top-raycast actionable: "
+                + str(getattr(record, "path", ""))
+                + ", raycast_top="
+                + str(getattr(record, "raycast_top", None))
             )
     return True
 
@@ -974,11 +977,19 @@ def _actionable_control(record: Any) -> bool:
     if isinstance(record, (ButtonState, ToggleState)):
         return record.actionable
     if isinstance(record, ImageState):
+        delegated_combat_auto = bool(
+            record.path
+            == "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn/off"
+            and record.name == "off"
+            and record.sprite == "auto_off"
+            and record.raycast_target
+            and record.raycast_top is None
+        )
         return (
             record.active_in_hierarchy
             and record.active_and_enabled
             and record.raycast_target
-            and record.raycast_top is True
+            and (record.raycast_top is True or delegated_combat_auto)
             and record.bounds is not None
         )
     return False
@@ -1193,6 +1204,26 @@ def _visible_resource_names(
     return tuple(
         name for name in ALAS_COMBAT_REPLAY_RESOURCE_NAMES if name in visible
     )
+
+
+def alas_combat_visible_resource_names(
+    snapshot: AlasCombatObserverSnapshot,
+    manifest: AlasCombatObserverManifest,
+) -> Tuple[str, ...]:
+    """Resolve the reviewed ALAS combat resources visible in one live frame."""
+
+    _validate_snapshot(snapshot, manifest)
+    active_blockers = alas_combat_active_blocker_names(snapshot, manifest)
+    if active_blockers:
+        raise SemanticGateClosed(
+            "combat observer blocker is active: " + ", ".join(active_blockers)
+        )
+    mappings = {
+        mapping.resource_name: mapping
+        for mapping in manifest.resources
+        if mapping.qualified
+    }
+    return _visible_resource_names(snapshot, mappings)
 
 
 def _fleet_stats(

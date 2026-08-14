@@ -7,7 +7,12 @@ import re
 from dataclasses import dataclass
 from numbers import Real
 from types import MappingProxyType
-from typing import Any, Callable, FrozenSet, Mapping, Protocol, Tuple, runtime_checkable
+from typing import Any, Callable, FrozenSet, Mapping, Tuple
+
+try:
+    from typing import Protocol, runtime_checkable
+except ImportError:  # Python 3.7 in the pinned ALAS runtime
+    from typing_extensions import Protocol, runtime_checkable
 
 from ..semantic_oracle import Bounds, Point
 

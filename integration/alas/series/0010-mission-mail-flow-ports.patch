@@ -1,8 +1,16 @@
 diff --git a/module/freebies/mail_white.py b/module/freebies/mail_white.py
-index 6d9e42f4a4777d63ff1c26a14782f6074892921e..25a9dcc177da8cebcf280ec2864c2e6f24523a17 100644
+index 6d9e42f4..d25882e3 100644
 --- a/module/freebies/mail_white.py
 +++ b/module/freebies/mail_white.py
-@@ -257,23 +257,30 @@ class MailWhite(UI):
+@@ -218,6 +218,7 @@ class MailWhite(UI):
+             out: MAIL_BATCH_CLAIM
+         """
+         if not self._mail_enter():
++            self._mail_quit()
+             return
+ 
+         if merit:
+@@ -257,23 +258,32 @@ class MailWhite(UI):
              logger.warning('Nothing to claim')
              return False
  
@@ -22,7 +30,9 @@ index 6d9e42f4a4777d63ff1c26a14782f6074892921e..25a9dcc177da8cebcf280ec2864c2e6f
 +            semantic_adapter.begin_mail()
 +        try:
 +            # Must using white UI
-+            self.ui_ensure(page_main)
++            self.ui_ensure(
++                page_main_white if semantic_adapter is not None else page_main
++            )
 +            if self.appear(page_main_white.check_button, offset=(30, 30)):
 +                logger.info('At page_main_white')
 +                pass
@@ -53,7 +63,7 @@ index 6d9e42f4a4777d63ff1c26a14782f6074892921e..25a9dcc177da8cebcf280ec2864c2e6f
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_mail()
 diff --git a/module/reward/reward.py b/module/reward/reward.py
-index 50a71717bfbe8be953e8bb2acb0fffb2f718120a..3df61a5a750cfaaab8772c1b843d6d03b5691220 100644
+index 50a71717..3df61a5a 100644
 --- a/module/reward/reward.py
 +++ b/module/reward/reward.py
 @@ -166,6 +166,14 @@ class Reward(UI):

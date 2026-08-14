@@ -1,5 +1,5 @@
 diff --git a/module/campaign/campaign_ocr.py b/module/campaign/campaign_ocr.py
-index f39a29ae80cc1cebe765250bfe63d5933011b10c..9c2d7f433e3ee424d1c342ad3614c078357d6216 100644
+index f39a29ae..14d976dd 100644
 --- a/module/campaign/campaign_ocr.py
 +++ b/module/campaign/campaign_ocr.py
 @@ -2,6 +2,7 @@ import collections
@@ -61,7 +61,7 @@ index f39a29ae80cc1cebe765250bfe63d5933011b10c..9c2d7f433e3ee424d1c342ad3614c078
          digits = []
  
          if 'normal' in self.config.STAGE_ENTRANCE:
-@@ -289,6 +320,34 @@ class CampaignOcr(ModuleBase):
+@@ -289,6 +320,43 @@ class CampaignOcr(ModuleBase):
          Args:
              image (np.ndarray):
          """
@@ -69,7 +69,16 @@ index f39a29ae80cc1cebe765250bfe63d5933011b10c..9c2d7f433e3ee424d1c342ad3614c078
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
 +            state = semantic_session.campaign_page_state()
-+            chapters = {stage.stage_code.split('-', 1)[0] for stage in state.stages}
++            # Semantic stage codes are the canonical ALAS names.  Main stages
++            # contain a dash (``12-4``), while event stages do not (``a1``).
++            # Splitting on a dash therefore turns ``a1`` into a bogus chapter
++            # named ``a1`` and makes campaign_ensure_chapter() retry until it
++            # reports "Campaign name error".  Reuse ALAS' own parser so both
++            # naming schemes resolve to their actual chapter (``12`` / ``a``).
++            chapters = {
++                self._campaign_separate_name(stage.stage_code)[0]
++                for stage in state.stages
++            }
 +            if len(chapters) != 1:
 +                raise CampaignNameError
 +            self.campaign_chapter = chapters.pop()
@@ -97,7 +106,7 @@ index f39a29ae80cc1cebe765250bfe63d5933011b10c..9c2d7f433e3ee424d1c342ad3614c078
          del_cached_property(self, '_stage_image')
          del_cached_property(self, '_stage_image_gray')
 diff --git a/module/campaign/campaign_status.py b/module/campaign/campaign_status.py
-index 45e8179fc13aa9391bf37929735dd3b54c7fa159..55ba834c9b9b1c21a12126f5f0ece2637558652f 100644
+index 45e8179f..55ba834c 100644
 --- a/module/campaign/campaign_status.py
 +++ b/module/campaign/campaign_status.py
 @@ -107,6 +107,11 @@ class CampaignStatus(UI):
@@ -112,8 +121,25 @@ index 45e8179fc13aa9391bf37929735dd3b54c7fa159..55ba834c9b9b1c21a12126f5f0ece263
          amount = 0
          timeout = Timer(1, count=2).start()
          while 1:
+diff --git a/module/handler/auto_search.py b/module/handler/auto_search.py
+index 48e67dfb..307b2d9b 100644
+--- a/module/handler/auto_search.py
++++ b/module/handler/auto_search.py
+@@ -197,6 +197,12 @@ class AutoSearchHandler(EnemySearchingHandler):
+         Returns:
+             bool:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # The total-reward panel exposes one exact typed ButtonExit.  Its
++            # presence proves the auto-search result menu without reading the
++            # framebuffer or authorizing any input.
++            return semantic_adapter.appear(AUTO_SEARCH_MENU_EXIT)
+         return AUTO_SEARCH_MENU_CONTINUE.match_luma(self.device.image, offset=self._auto_search_menu_offset)
+ 
+     def handle_auto_search_continue(self):
 diff --git a/module/map/map_fleet_preparation.py b/module/map/map_fleet_preparation.py
-index 38c9af5c1af621800fcbd1725d0ce151d3deff5b..68fc84e402fb6b626a8250aae34b273e461b8495 100644
+index 38c9af5c..68fc84e4 100644
 --- a/module/map/map_fleet_preparation.py
 +++ b/module/map/map_fleet_preparation.py
 @@ -49,6 +49,20 @@ class FleetOperator:
@@ -204,3 +230,98 @@ index 38c9af5c1af621800fcbd1725d0ce151d3deff5b..68fc84e402fb6b626a8250aae34b273e
          # Check the brightness of the rightest column of the bar area.
          luma = rgb2gray(self.main.image_crop(self._bar.button, copy=False))[:, -1]
          # FLEET_PREPARATION is about 146~155
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+index 92ec1a82..066253bd 100644
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -17,7 +17,7 @@ from module.ocr.ocr import Ocr
+ from module.os_handler.assets import (AUTO_SEARCH_REWARD, EXCHANGE_CHECK, RESET_FLEET_PREPARATION, RESET_TICKET_POPUP)
+ from module.raid.assets import *
+ from module.ui.assets import *
+-from module.ui.page import Page, page_academy, page_campaign, page_event, page_main, page_main_white, page_sp
++from module.ui.page import Page, page_academy, page_campaign, page_event, page_mail, page_main, page_main_white, page_sp
+ from module.ui_white.assets import *
+ 
+ 
+@@ -185,6 +185,15 @@ class UI(InfoHandler):
+                 break
+ 
+             # Known pages
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if (
++                    semantic_adapter is not None
++                    and semantic_adapter.mail_reward_active()
++                    and self.ui_page_appear(page=page_mail)
++            ):
++                logger.attr("UI", page_mail.name)
++                self.ui_current = page_mail
++                return page_mail
+             for page in Page.iter_pages():
+                 if page.check_button is None:
+                     continue
+@@ -253,6 +262,24 @@ class UI(InfoHandler):
+ 
+             # Other pages
+             clicked = False
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if (
++                    semantic_adapter is not None
++                    and semantic_adapter.mail_reward_active()
++                    and self.appear(page_mail.check_button, offset=offset, interval=5)
++            ):
++                logger.info(f'Page switch: {page_mail} -> {page_mail.parent}')
++                # Mail's white HOME control returns to the same live new-main
++                # surface recognized by page_main_white, although upstream's
++                # static graph records its destination as page_main.
++                button = page_mail.links.get(page_mail.parent)
++                if button is None and destination == page_main_white:
++                    button = page_mail.links[page_main]
++                if button is None:
++                    raise GamePageUnknownError('Mail page has no route to destination')
++                self.device.click(button)
++                self.ui_button_interval_reset(button)
++                continue
+             for page in Page.iter_pages():
+                 if page.parent is None or page.check_button is None:
+                     continue
+@@ -465,6 +492,15 @@ class UI(InfoHandler):
+         Args:
+             get_ship:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and semantic_adapter.server_maintenance_visible():
++            logger.warning('Game server is under maintenance')
++            raise GamePageUnknownError
++        if semantic_adapter is not None and semantic_adapter.restart_game_after_update():
++            logger.info('Client-version update prompt requires a cold restart')
++            self.device.stuck_record_clear()
++            self.device.click_record_clear()
++            return True
+         # Popups appear at page_os
+         # Has a popup_confirm variant
+         # so must take precedence
+@@ -481,6 +517,11 @@ class UI(InfoHandler):
+         if self.ui_page_main_popups(get_ship=get_ship):
+             return True
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.appear_then_click(
++                LOGIN_CHECK, offset=(30, 30), interval=3):
++            return True
++
+         # Story
+         if self.handle_story_skip():
+             return True
+@@ -572,6 +613,12 @@ class UI(InfoHandler):
+         #     return True
+ 
+         # Idle page
++        if semantic_adapter is not None:
++            # Semantic mode routes supported pages and overlays through exact
++            # Unity controls. IDLE is only a legacy luma guess and cannot be
++            # evaluated against the guarded semantic frame; treat it as an
++            # absent optional recovery surface for every semantic flow.
++            return False
+         if self.handle_idle_page():
+             return True
+         # Switch on ui_white, no offset just color match
