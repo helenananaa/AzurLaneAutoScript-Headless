@@ -303,9 +303,27 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 95 changed files, all 94 patched Python files compile, and
-  the repository suite passes `866/866` tests, including Daily configuration,
-  EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
+  the repository suite passes `872/872` tests, including Hard configuration,
+  Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
+
+### Hard stage and fleet configuration: offline contract passed
+
+- `Hard.HardStage` is now constrained to the 64 map modules present in pinned
+  upstream, from 1-1 through 16-4. Original `campaign_11_4`, underscore, and
+  whitespace spellings canonicalize before semantic pre-sortie scope; absent,
+  partial, malformed, or non-text stages fail closed before map loading.
+- `Hard.HardFleet` admits exact integer 1 or 2 and preserves the original
+  mutually exclusive fleet-order overrides. Booleans, text, floats, and other
+  integers fail before the original state machine.
+- Pinned replay executes original `CampaignHard.run()` and `_run_hard()` map
+  loading, module import, MAP assignment, UI stage, remaining-run loop,
+  auto-search exit, next-day delay, and Reward scheduling with 68 accepted and
+  17 invalid contract cases.
+- Replay mutation budget is `0`; device, import, OCR, and campaign execution are
+  fixtures, with no map entry, battle, hard attempt consumption, or Android
+  input. Both fields move only to `offline=complete`; the existing 11-4 live
+  boundary is not evidence that all 64 stages or both fleets work live.
 
 ### Daily fourteen-field configuration: offline contract passed
 

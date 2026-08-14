@@ -176,6 +176,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 固定上游回放执行原 `get_daily_stage_and_fleet()`、`daily_enter()`、`daily_run_one()` 和 `run()`，覆盖普通及限时兵装两种 1-7 位排列、快速跳过与普通作战控件选择、破交作战 fleet=0 特例、关闭快速跳过时的安全略过、任务未激活和剩余次数为 0。64 个合法和 80 个非法单字段案例均通过，mutation budget 为 0，没有调用 `daily_execute()` 的真实实现、进入战斗、消耗次数或注入 Android 输入。十四字段只提升 `offline`，原 observation/action/live 证据不外推。
 
+### 1.19 本轮 Hard 关卡与舰队契约
+
+`Hard.HardStage` 现在绑定固定上游实际存在的 64 个主线地图模块，即 1-1 至 16-4，并兼容原转换器接受的 `campaign_11_4`、`11_4` 和空白写法后规范为 `11-4`。不存在的章节/小节、部分匹配、非文本值会在开启语义预出击 scope 或加载地图前 fail-closed。`Hard.HardFleet` 只接受精确整数 1/2，分别保留原 `fleet1_all_fleet2_standby` 与 `fleet1_standby_fleet2_all` 覆盖。
+
+固定上游回放执行原 `CampaignHard.run()` 和 `_run_hard()` 的地图加载、模块导入、MAP 赋值、UI 关卡名、剩余次数循环、自动寻敌退出、次日调度与 Reward 调用顺序。68 个合法和 17 个非法案例通过，mutation budget 为 0；地图导入、设备、OCR 和 campaign run 都由夹具替代，没有进图、战斗、次数消耗或 Android 输入。两字段只提升 `offline`，11-4 当前账号路径仍不能外推到 64 关实机可用。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -212,7 +218,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 28 | Reward | Scheduler, Reward | P | 资源气泡可领取，任务领取部分可用；周常、红点、数字行、空页面和舰船奖励未完整闭环 |
 | 29 | Awaken | Scheduler, Awaken | M | 收藏过滤、120/125 上限及批量觉醒缺适配 |
 | 30 | Daily | Scheduler, Daily | L | 十四字段离线映射与 fail-closed 契约已完成；实机仍只闭环 Tactical Training 第二关默认舰队，其余日常和配置值未闭环 |
-| 31 | Hard | Scheduler, Hard | B | 能进入 11-4；当前账号进度和自动寻敌锁定，尚无战斗/结算证据 |
+| 31 | Hard | Scheduler, Hard | B | 64 关目录与两舰队离线契约已完成；实机仍只到 11-4 进入边界，当前账号进度和自动寻敌锁定，尚无战斗/结算证据 |
 | 32 | Exercise | Scheduler, Exercise | L | 一种策略闭环；不同选敌/时段策略、刷新、试探次数、低血重试和失败恢复未闭环 |
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | 可读页面并安全跳过；购买、过滤、刷新、金币/钻石和皮肤箱均未完成 |
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | 只有勋章商店一次 DR 图纸购买；其他商店、过滤/子选项和刷新未闭环 |
@@ -309,7 +315,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
 | Daily | `EscortMission`, `AdvanceMission`, `TacticalTraining`, `SupplyLineDisruption`, `FierceAssault`=`skip/first/second/third`; `ModuleDevelopment`, `EmergencyModuleDevelopment`=`skip/first/second`; `EscortMissionFleet`, `AdvanceMissionFleet`, `TacticalTrainingFleet`, `FierceAssaultFleet`, `ModuleDevelopmentFleet`, `EmergencyModuleDevelopmentFleet`=1..6；`UseDailySkip` | L | 全值域、两种排列、skip、次数耗尽及 SupplyLine fleet=0 已离线覆盖；仍缺非默认任务/难度/舰队、快速跳过不可用和战斗结算的实机收据 |
-| Hard | `HardStage`; `HardFleet`=1/2 | B | 合法/未解锁/不存在关卡、两舰队、次数耗尽、战斗和结算 |
+| Hard | `HardStage`; `HardFleet`=1/2 | B | 固定上游 64 关目录、两舰队、次数为 0/3 和非法值已离线覆盖；仍缺未解锁页、非默认关卡/舰队、真实战斗和结算收据 |
 | Exercise | `ExerciseStrategy`=`aggressive/fri18/sat0/sat12/sat18/sun0/sun12/sun18`; `OpponentChooseMode`=`max_exp/easiest/leftmost/easiest_else_exp`; `OpponentRefreshValue`; `OpponentRefreshRecord`; `OpponentTrial`; `LowHpThreshold`; `LowHpConfirmWait` | L | 8 时段策略、4 选敌策略、刷新次数/记录、试探次数、低血阈值与等待、失败重开和赛季边界 |
 | GeneralShop | `Filter`; `Refresh`; `UseGems`; `ConsumeCoins`; `BuySkinBox` | B | 过滤命中/无命中/非法值，刷新真假，钻石/金币消费保护，皮肤箱和购买确认 |
 | GuildShop | `Filter`; `Refresh`; `BOOK_T2`; `BOOK_T3`; `BOX_T3`; `BOX_T4`; `PLATE_T2`; `PLATE_T3`; `PLATE_T4`; `RETROFIT_T2`; `RETROFIT_T3`; `PR1`; `PR2`; `PR3` | P | 14 个字段的每个枚举、刷新前后、货币不足、库存为空、商品同名歧义和确认；舰船/阵营/部件选择必须核验 |
@@ -619,8 +625,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `GuildShop.RETROFIT_T2` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `GuildShop.RETROFIT_T3` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `GuildShop.Refresh` | ShopOnce | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `Hard.HardFleet` | Hard | type=select; display=default | options: 1, 2; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Hard.HardStage` | Hard | type=input; display=default | input/default: "11-4" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Hard.HardFleet` | Hard | type=select; display=default | options: 1, 2; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Hard.HardStage` | Hard | type=input; display=default | input/default: "11-4" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Hospital.UseRecommendFleet` | Hospital | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `HpControl.HpBalanceThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.2 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `HpControl.HpBalanceWeight` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: "1000, 1000, 1000" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |

@@ -1520,28 +1520,58 @@ index a7351fb8..d0a9b5ec 100644
                  genre=self.config.campaign_name, method=self.config.DropRecord_CombatRecord
          ) as drop:
 diff --git a/module/hard/hard.py b/module/hard/hard.py
-index 672fa7f5..ba488aa2 100644
+index 672fa7f5..dbf43837 100644
 --- a/module/hard/hard.py
 +++ b/module/hard/hard.py
-@@ -17,6 +17,17 @@ class CampaignHard(CampaignRun):
+@@ -1,5 +1,7 @@
+ import importlib
+ 
++from alas_headless import validate_alas_hard_config
++
+ from campaign.campaign_hard.campaign_hard import Campaign
+ from module.campaign.run import CampaignRun
+ from module.handler.fast_forward import to_map_file_name
+@@ -16,12 +18,31 @@ class CampaignHard(CampaignRun):
+ 
      def run(self):
          logger.hr('Campaign hard', level=1)
-         name = to_map_file_name(self.config.Hard_HardStage)
+-        name = to_map_file_name(self.config.Hard_HardStage)
++        hard_config = validate_alas_hard_config(
++            hard_stage=self.config.Hard_HardStage,
++            hard_fleet=self.config.Hard_HardFleet,
++        )
++        name = to_map_file_name(hard_config.hard_stage)
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
 +            semantic_adapter.begin_campaign_pre_sortie(
-+                self.config.Hard_HardStage, mode='hard')
++                hard_config.hard_stage, mode='hard')
 +        try:
-+            return self._run_hard(name)
++            return self._run_hard(
++                name,
++                hard_stage=hard_config.hard_stage,
++                hard_fleet=hard_config.hard_fleet,
++            )
 +        finally:
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_campaign_pre_sortie()
 +
-+    def _run_hard(self, name):
++    def _run_hard(self, name, *, hard_stage, hard_fleet):
          self.config.override(
              Campaign_Mode='hard',
              Campaign_UseFleetLock=True,
-@@ -41,7 +52,11 @@ class CampaignHard(CampaignRun):
+             Campaign_UseAutoSearch=True,
+-            Fleet_FleetOrder='fleet1_all_fleet2_standby' if self.config.Hard_HardFleet == 1 else 'fleet1_standby_fleet2_all',
++            Fleet_FleetOrder='fleet1_all_fleet2_standby' if hard_fleet == 1 else 'fleet1_standby_fleet2_all',
+             Emotion_Mode='nothing',  # Dont calculate and dont ignore
+         )
+         # Equipment take on
+@@ -36,12 +57,16 @@ class CampaignHard(CampaignRun):
+         self.device.screenshot()
+         self.campaign.device.image = self.device.image
+         self.campaign.ensure_campaign_ui(
+-            name=self.config.Hard_HardStage,
++            name=hard_stage,
+             mode='hard'
          )
  
          # Run

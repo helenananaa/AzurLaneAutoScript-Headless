@@ -3538,9 +3538,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_hard_config.py",
+        "python/alas_headless/alas_hard_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3557,9 +3562,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_hard_config.py",
+        "python/alas_headless/alas_hard_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=input; display=default",
       "panels": [
@@ -8416,6 +8426,32 @@
       ],
       "field": "Daily.UseDailySkip",
       "note": "Both booleans execute the original DAILY_SKIP versus DAILY_NORMAL_RUN choice and the Supply Line disabled-skip bypass; non-booleans fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hard_config.py",
+        "python/alas_headless/alas_hard_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Hard.HardStage",
+      "note": "All 64 pinned 1-1 through 16-4 main-map modules and supported original spellings canonicalize before semantic scope; malformed or absent stages fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hard_config.py",
+        "python/alas_headless/alas_hard_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Hard.HardFleet",
+      "note": "Exact integer fleets 1 and 2 preserve the original mutually exclusive fleet-order overrides; booleans, text, and other integers fail closed before map loading."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8428,8 +8464,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "9c01995f5738fa6f7a5c8ae3ca0ad8d3bc4d112a43a4038615230dd25950040b",
-      "manifest_sha256": "9580930864c2a286fe794d655d3f8599203243ba81a10487d834c9e17dddb1af",
+      "combined_sha256": "23285031567ba225e6ea6b0b25c5b296ff0f3cb0d45c4df27674e53cfb4add25",
+      "manifest_sha256": "d78b989dd92cc3e29a2ef2a3cd86268f695245e289033886c327acbc53e45ad6",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

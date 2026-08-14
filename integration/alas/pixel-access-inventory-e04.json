@@ -1,8 +1,8 @@
 {
   "schema": "alas-headless.pixel-access-inventory/v1",
   "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af",
-  "combined_patch_sha256": "9c01995f5738fa6f7a5c8ae3ca0ad8d3bc4d112a43a4038615230dd25950040b",
-  "patch_series_manifest_sha256": "9580930864c2a286fe794d655d3f8599203243ba81a10487d834c9e17dddb1af",
+  "combined_patch_sha256": "23285031567ba225e6ea6b0b25c5b296ff0f3cb0d45c4df27674e53cfb4add25",
+  "patch_series_manifest_sha256": "d78b989dd92cc3e29a2ef2a3cd86268f695245e289033886c327acbc53e45ad6",
   "replay_surfaces": [
     {
       "id": "login-handler-c04",

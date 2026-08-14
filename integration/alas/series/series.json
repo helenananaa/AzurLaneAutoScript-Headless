@@ -48,7 +48,7 @@
     {
       "order": 10,
       "path": "integration/alas/series/0080-current-task-flow-ports.patch",
-      "sha256": "76e55d1b645cf50bcb2be3ee6789f947697d54ac13154a27ee74b16fa7df39f9"
+      "sha256": "c5c87ab8b854e44debb91deed5739adaa0a0523eea1ee5bdc0c7678581336849"
     },
     {
       "order": 11,
