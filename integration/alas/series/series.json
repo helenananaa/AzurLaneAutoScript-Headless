@@ -33,7 +33,7 @@
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "db05f33c4271d289dd864df88c7be770091c29aa005561a192626ca2e27e21f5"
+      "sha256": "66bf7f2111ad856acae6c39df939781cda9b013a528acf411099af1a7e09e925"
     },
     {
       "order": 8,

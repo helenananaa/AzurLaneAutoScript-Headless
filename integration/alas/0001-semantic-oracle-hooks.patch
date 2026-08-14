@@ -2367,6 +2367,23 @@ index a152e88b..9562e066 100644
          weight = to_list(weight)
          scout = np.array(hp[3:]) * np.array(weight) / np.max(weight)
  
+diff --git a/module/exercise/exercise.py b/module/exercise/exercise.py
+index 77342676..5771e26b 100644
+--- a/module/exercise/exercise.py
++++ b/module/exercise/exercise.py
+@@ -194,6 +194,12 @@ class Exercise(ExerciseCombat):
+         return preserve, admiral_interval
+ 
+     def run(self):
++        from alas_headless import validate_alas_exercise_config
++        validate_alas_exercise_config(
++            strategy=self.config.Exercise_ExerciseStrategy,
++            opponent_mode=self.config.Exercise_OpponentChooseMode,
++            opponent_trial=self.config.Exercise_OpponentTrial,
++        )
+         self.ui_ensure(page_exercise)
+ 
+         self.opponent_change_count = self._get_opponent_change_count()
 diff --git a/module/exercise/combat.py b/module/exercise/combat.py
 index 0ee2c916..754e1be4 100644
 --- a/module/exercise/combat.py

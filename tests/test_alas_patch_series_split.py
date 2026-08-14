@@ -58,6 +58,7 @@ FLOW_PATHS = {
         "module/combat/combat.py",
         "module/combat/hp_balancer.py",
         "module/exercise/combat.py",
+        "module/exercise/exercise.py",
         "module/handler/info_handler.py",
         "module/handler/strategy.py",
         "module/map/camera.py",

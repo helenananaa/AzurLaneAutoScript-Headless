@@ -94,6 +94,12 @@ from .alas_commission_config_contract import (
     parse_alas_commission_custom_filter,
     validate_alas_commission_config,
 )
+from .alas_exercise_config_contract import (
+    AlasExerciseConfigSnapshot,
+    EXERCISE_OPPONENT_MODES,
+    EXERCISE_STRATEGIES,
+    validate_alas_exercise_config,
+)
 from .alas_reward_config_contract import (
     AlasRewardConfigSnapshot,
     validate_alas_reward_config,

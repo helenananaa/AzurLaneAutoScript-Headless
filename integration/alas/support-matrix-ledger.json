@@ -2429,9 +2429,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2486,9 +2491,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2543,9 +2553,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=input; display=default",
       "panels": [
@@ -7058,7 +7073,7 @@
         "Exercise"
       ],
       "name": "Exercise",
-      "note": "一种策略闭环；不同选敌/时段策略、刷新、试探次数、低血重试和失败恢复未闭环",
+      "note": "八种时段策略、四种选敌模式与正整数试探次数已离线等价；真实对手/时段观察、刷新持久化、低血重试、战斗结算和失败恢复未闭环",
       "status": "L"
     },
     {
@@ -8848,6 +8863,45 @@
       ],
       "field": "Commission.DoMajorCommission",
       "note": "Both booleans preserve original valid-pending and major-category admission decisions; invalid values fail before scope entry, rewards, or dispatch."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Exercise.ExerciseStrategy",
+      "note": "All eight declared strategies preserve the original remaining-attempt decision across hours 0 through 60; invalid values fail before Exercise scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Exercise.OpponentChooseMode",
+      "note": "All four declared modes preserve original opponent ordering, fleet-detail inspection, and run-time dispatch; invalid values fail before Exercise scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Exercise.OpponentTrial",
+      "note": "Positive integer trial counts preserve original success and exhaustion boundaries; zero, booleans, non-integers, and malformed values fail before Exercise scope entry."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8860,8 +8914,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "1016fce457d45f8339e31e37e747a281ffe4e9c170f4db6f50d62c0d05418101",
-      "manifest_sha256": "baaf02387c396f45ff4ebc21d4d8b4f45fcd463cf2f39a1726761fae1b559f28",
+      "combined_sha256": "0cbd252461efeef937c82d97a2fe23efe8e05f1b9e642efe7352f6bdc7341c91",
+      "manifest_sha256": "f7b4705762b9f7ffc7162dcc807b14f4f5cbc8a13d07d1f1d80ed759bdc01412",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

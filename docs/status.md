@@ -302,10 +302,31 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 97 changed files, all 96 patched Python files compile, and
-  the repository suite passes `912/912` tests, including Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  patch applies as 98 changed files, all 97 patched Python files compile, and
+  the repository suite passes `917/917` tests, including Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
+
+### Exercise strategy, opponent mode, and trial count: offline contract passed
+
+- `ExerciseStrategy` accepts the eight values declared by pinned ALAS,
+  `OpponentChooseMode` accepts its four declared modes, and `OpponentTrial`
+  accepts exact positive integers. The guard is the first executable statement
+  in `Exercise.run()`, before page entry, opponent inspection, or combat.
+- Pinned replay covers all 488 strategy/hour decisions for hours 0 through 60,
+  including ALAS's hour-zero behavior and every Friday-to-Sunday consumption
+  window. It also preserves each mode's opponent ordering, the `leftmost`
+  detail-scan bypass, normal mode dispatch, and trial success/exhaustion
+  boundaries for 1, 2, and 3 attempts.
+- The contract enumerates 128 representative valid combinations and rejects 19
+  invalid single-field cases. The original zero-trial fallback is recorded as
+  unreachable compatibility evidence because zero now fails closed.
+- Mutation budget is `0`: opponent OCR/state, scheduler, and combat calls are
+  fixtures, with no real Exercise attempt, battle, screenshot/OCR, page input,
+  or Android injection. These three fields move only to `offline=complete`;
+  live opponent power/levels and period observation, refresh persistence,
+  low-HP retry behavior, actual fights, settlement, and failure recovery remain
+  incomplete.
 
 ### Game Manager restart configuration: offline contract passed
 
