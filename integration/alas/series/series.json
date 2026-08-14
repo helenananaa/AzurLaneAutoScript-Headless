@@ -28,7 +28,7 @@
     {
       "order": 6,
       "path": "integration/alas/series/0040-campaign-flow-ports.patch",
-      "sha256": "eb3989865a7ec206d7b5554bc0f2608ff245c2d12fd9b9cce1851f94556e3c37"
+      "sha256": "c48ddd1c1955d30a4685c6a40f732a3c627825f1ab7f06f4ea6703b21a2cca3b"
     },
     {
       "order": 7,

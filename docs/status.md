@@ -302,10 +302,30 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 94 changed files, all 93 patched Python files compile, and
-  the repository suite passes `855/855` tests, including Tactical configuration,
-  Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
+  patch applies as 95 changed files, all 94 patched Python files compile, and
+  the repository suite passes `861/861` tests, including EventDaily rotation,
+  Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
+
+### EventA-D daily stage rotation: offline contract passed
+
+- `EventDaily.StageFilter` is now bound to its actual scheduler command. Every
+  ordered non-empty subset of A1-A3, B1-B3, C1-C3, and D1-D3 is accepted;
+  cross-panel stages, duplicates, empty entries, stage 4, partial matches, and
+  non-text values fail closed before campaign file discovery.
+- `EventDaily.LastStage` admits only numeric `0` or a current-panel stage. The
+  validation deliberately remains after ALAS's original server-day expiry
+  check: a stale invalid cursor is reset to `0`, while a non-stale cross-panel
+  cursor is rejected before any stage run.
+- The pinned `CampaignABCD.run()` executes 76 accepted and 48 invalid contract
+  cases plus priority, resume-after-cursor, filtered cursor, missing script,
+  no-match disable/stop, `TaskEnd`, locked-stage human takeover, and stale
+  cursor reset scenarios. ALAS still owns file filtering, campaign invocation,
+  task-switch handling, persistence, delays, and final server-update schedule.
+- Replay uses temporary configuration, mutation budget `0`, and no Android
+  input. No stage was entered and no oil was consumed. Only both fields'
+  `offline` dimensions move from partial to complete; existing partial
+  observation/action/live evidence is unchanged.
 
 ### Tactical overflow and new-student configuration: offline contract passed
 

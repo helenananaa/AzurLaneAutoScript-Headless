@@ -1795,6 +1795,7 @@ index 92ec1a82..066253bd 100644
              return True
          # Switch on ui_white, no offset just color match
 diff --git a/module/campaign/campaign_event.py b/module/campaign/campaign_event.py
+index 541cb00a55838510a473b5fad5fc6cd0588e17df..c485edad2f5f00b0dd316f77fc6b9b8ed93441cd 100644
 --- a/module/campaign/campaign_event.py
 +++ b/module/campaign/campaign_event.py
 @@ -13,4 +13,15 @@ from module.war_archives.assets import WAR_ARCHIVES_CAMPAIGN_CHECK
@@ -1861,6 +1862,44 @@ diff --git a/module/campaign/campaign_event.py b/module/campaign/campaign_event.
          self.config.task_delay(minute=5)
          next_task = self.config.TaskBalancer_TaskCall
          logger.hr(f'TaskBalancer triggered, switching task to {next_task}')
+diff --git a/module/event/campaign_abcd.py b/module/event/campaign_abcd.py
+index a01cdfb1c1500a858770c1210e91dc0e0303f620..c4cc77efb2e404d71d46bdcaee53e58bd37ab9b0 100644
+--- a/module/event/campaign_abcd.py
++++ b/module/event/campaign_abcd.py
+@@ -9,12 +9,17 @@ from module.logger import logger
+ 
+ class CampaignABCD(EventBase):
+     def run(self, *args, **kwargs):
++        from alas_headless import validate_alas_event_daily_stage_filter
++        stage_filter = validate_alas_event_daily_stage_filter(
++            self.config.EventDaily_StageFilter,
++            task_command=self.config.Scheduler_Command,
++        )
+         # Filter map files
+         stages = [EventStage(file) for file in os.listdir(f'./campaign/{self.config.Campaign_Event}')]
+         stages = self.convert_stages(stages)
+         logger.attr('Stage', [str(stage) for stage in stages])
+-        logger.attr('StageFilter', self.config.EventDaily_StageFilter)
+-        STAGE_FILTER.load(self.config.EventDaily_StageFilter)
++        logger.attr('StageFilter', stage_filter)
++        STAGE_FILTER.load(stage_filter)
+         self.convert_stages(STAGE_FILTER)
+         stages = [str(stage) for stage in STAGE_FILTER.apply(stages)]
+         logger.attr('Filter sort', ' > '.join(stages))
+@@ -30,7 +35,12 @@ class CampaignABCD(EventBase):
+             logger.info('LastStage outdated, reset')
+             self.config.EventDaily_LastStage = 0
+         else:
+-            last = str(self.config.EventDaily_LastStage).lower()
++            from alas_headless import validate_alas_event_daily_last_stage
++            last = validate_alas_event_daily_last_stage(
++                self.config.EventDaily_LastStage,
++                task_command=self.config.Scheduler_Command,
++            )
++            last = str(last).lower()
+             last = self.convert_stages(last)
+             if last in stages:
+                 stages = stages[stages.index(last) + 1:]
 diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
 index 15ebf478..7082e26b 100644
 --- a/module/campaign/campaign_base.py

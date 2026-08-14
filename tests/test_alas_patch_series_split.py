@@ -43,8 +43,10 @@ FLOW_PATHS = {
         "module/research/ui.py",
     },
     "0040-campaign-flow-ports.patch": {
+        "module/campaign/campaign_event.py",
         "module/campaign/campaign_ocr.py",
         "module/campaign/campaign_status.py",
+        "module/event/campaign_abcd.py",
         "module/handler/auto_search.py",
         "module/map/map_fleet_preparation.py",
         "module/ui/ui.py",

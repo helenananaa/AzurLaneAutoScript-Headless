@@ -164,6 +164,12 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 `Tactical.RapidTrainingSlot` 严格限定 `do_not_use/slot_1/slot_2/slot_3/slot_4`。原 `handle_rapid_training()` 回放验证四个精确槽位偏移、按钮不可用返回 false，以及只有命中后才执行的 interval clear。十字段 Tactical 合并回放现有 45 个合法配置和 20 个非法配置，mutation budget 为 0，没有 Android 输入、真实快速学习次数消耗或选书。因此两字段仅从 `offline=partial` 提升为 `complete`，既有 observation/action/live 仍保持 partial。
 
+### 1.17 本轮 EventA-D 每日关卡轮转契约
+
+`EventDaily.StageFilter` 现在与当前 `Scheduler.Command` 严格绑定：A1-A3、B1-B3、C1-C3、D1-D3 各自所有非空有序子集均合法，并保留原过滤优先级；跨分区、重复、空 token、第四关、尾随垃圾和非文本值会在枚举活动脚本前 fail-closed。`LastStage` 只接受数值 `0` 或当前分区 1-3 关。门禁特意保留在原服务器日界判断之后：过期的异常游标仍由 ALAS 先重置为 `0`，未过期的跨分区游标则在运行关卡前拒绝。
+
+固定上游回放直接执行原 `CampaignABCD.run()`，覆盖 76 个合法、48 个非法契约案例，以及四分区优先级、游标后续恢复、游标被过滤时从头开始、缺少脚本、无匹配时禁用并停止、`TaskEnd`、未解锁关卡请求人工接管和过期游标自愈。没有进入关卡、消耗油量或注入 Android 输入；两字段只从 `offline=partial` 提升为 `complete`，既有 observation/action/live 不变。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -185,7 +191,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | 13 | Hospital | Scheduler, Hospital, StopCondition, Emotion | M | 医院专用入口、推荐舰队开关和完整状态机缺适配 |
 | 14 | WarArchives | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | B | 能观察入口/Data Key；48 个档案值的进入、消耗、地图和结算均未形成覆盖台账 |
 | 15 | CoalitionSp | Scheduler, Campaign, Coalition, StopCondition, Emotion | M | SP 共斗专用状态机缺适配 |
-| 16 | EventA | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | A1-A3 默认路径闭环；StageFilter 异常值及全部共用地图配置未完整覆盖 |
+| 16 | EventA | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | A-D StageFilter/LastStage 离线轮转契约已完成；当前仅 A1-A3 默认路径有实机闭环，其余分区和共用地图配置仍未完整覆盖 |
 | 17 | EventB | 同 EventA | O | B1 普通 `GET_SHIP` 已离线适配；因概率掉落停止实跑，B1 尚未完整闭环，B2/B3 未验证，首次获得 `NEW_SHIP` 未适配 |
 | 18 | EventC | 同 EventA | P | C1-C3 地图脚本存在，无实机闭环 |
 | 19 | EventD | 同 EventA | P | D1-D3 地图脚本存在，无实机闭环 |
@@ -271,7 +277,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | Coalition | `Mode`=`easy/normal/hard/sp`; `Fleet`=`single/multi` | M | 四难度、单/多舰队、次数/票券不足、战斗、结算和 SP 特殊入口 |
 | Raid | `Mode`=`easy/normal/hard/ex`; `UseTicket` | M | 四难度、票券真假、无票券、次数耗尽、推荐舰队和结算 |
 | Hospital | `UseRecommendFleet` | M | 开关两值、推荐不可用、手动舰队、活动结束和结算 |
-| EventDaily | `StageFilter`（A/B/C/D 各自 1-3 优先级字符串）；`LastStage` | P | 过滤顺序、无可用关卡、某关未解锁、LastStage 恢复、跨日/活动切换；A-D 不得错误复用上次分区 |
+| EventDaily | `StageFilter`（A/B/C/D 各自 1-3 优先级字符串）；`LastStage` | P | 四分区过滤、缺脚本、无匹配、未解锁、游标恢复及跨日重置已离线覆盖；仍需 B-D 实机轮转和活动切换后的持久化收据 |
 | RaidDaily | `StageFilter`=`hard > normal > easy`（自由优先级字符串） | M | 各难度可用组合、过滤命中/无命中/非法值、次数耗尽和每日重置 |
 
 ### 3.4 委托、战术、科研、宿舍、猫箱、公会与奖励
@@ -548,8 +554,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Error.OnePushConfig` | Alas | type=textarea; display=default | input/default: "provider: null" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `Error.SaveError` | Alas | type=checkbox; display=default | input/default: true | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `Error.ScreenshotLength` | Alas | type=input; display=default | input/default: 1 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `EventDaily.LastStage` | EventA, EventB, EventC, EventD | type=input; display=default | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `EventDaily.StageFilter` | EventA, EventB, EventC, EventD | type=textarea; display=default | input/default: "A1 > A2 > A3", "B1 > B2 > B3", "C1 > C2 > C3", "D1 > D2 > D3" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `EventDaily.LastStage` | EventA, EventB, EventC, EventD | type=input; display=default | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `EventDaily.StageFilter` | EventA, EventB, EventC, EventD | type=textarea; display=default | input/default: "A1 > A2 > A3", "B1 > B2 > B3", "C1 > C2 > C3", "D1 > D2 > D3" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `EventGeneral.PtLimit` | EventGeneral | type=input; display=default | input/default: 0 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EventGeneral.TimeLimit` | EventGeneral | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EventStory.SkipBattle` | EventStory | type=lock; display=default | options: true; default: true | `P`/◐ 实机当前值 | ◐ | ◐ | ◐ | ◐ | ◐ |

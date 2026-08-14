@@ -2168,9 +2168,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_event_daily_config.py",
+        "python/alas_headless/alas_event_daily_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -2190,9 +2195,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_event_daily_config.py",
+        "python/alas_headless/alas_event_daily_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -8128,6 +8138,32 @@
       ],
       "field": "Tactical.TacticalFilter",
       "note": "Original ALAS ordering covers same-color, genre, tier, first fallback, Unicode separators, and no-match cancellation; malformed or partially matched tokens now fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_event_daily_config.py",
+        "python/alas_headless/alas_event_daily_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "EventDaily.StageFilter",
+      "note": "All ordered non-empty subsets of A1-A3 through D1-D3 preserve original filtering while cross-panel, duplicate, empty, partial, and out-of-range stages fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_event_daily_config.py",
+        "python/alas_headless/alas_event_daily_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "EventDaily.LastStage",
+      "note": "Current-panel cursors resume after the recorded stage, filtered-out cursors restart, and stale invalid cursors retain the original server-day reset before validation."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8140,8 +8176,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "3cdba1ad360888ec47f0cb0ced4d438b2c70b78ed7e8b44009bc9eea295eea30",
-      "manifest_sha256": "d3322a5a67442797301825276128c8dc71c259e2774505160325db4575068de0",
+      "combined_sha256": "fd82c7b0d33c7ce1dbecca3df3f655b2fb54eb88c15b08a5dad407a11416eacc",
+      "manifest_sha256": "1adc076cd5004bb78f45ac1f3477ea325038786af59d75ec0843192b5212d4f4",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
