@@ -218,6 +218,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 12 个非法单字段输入都在入口事件前拒绝。测速方法、语义观察和输入均为夹具，mutation budget 为 0，没有真实卸载、页面导航、设备测速或 Android 注入。因此两字段只提升 `offline`；各设备的实测耗时、传输不可用以及真实截图/点击能力仍需 live 证据。
 
+### 1.26 本轮 Dorm 收取、喂食与食物优先级契约
+
+`Dorm.Collect` 与 `Dorm.Feed` 现在只接受精确布尔值，`Dorm.FeedFilter` 接受固定上游六种食物值的任意非空、无重复排列或子集，并保留 ALAS 对空白及 Unicode 大于号分隔符的规范化。空项、重复项、未知食物、前导零、尾随字符和非字符串会在 `RewardDorm.run()` 第一条可执行语句 fail-closed，早于语义 scope、页面导航、收取或喂食。
+
+回放覆盖 1,956 种食物优先级和四种收取/喂食开关组合，共 7,824 个合法配置；原状态机仍拥有“全关则禁用并停止”、其余组合的 `dorm_run` 分派和三舰 417 分钟调度。食物边界保持严格 `fill > food`、首选食物为空时回退以及无可用食物不操作。22 个非法单字段案例均在入口事件前拒绝，mutation budget 为 0，没有领取奖励、消耗食物、导航、截图/OCR 或 Android 输入。三字段只提升 `offline`；空收取、部分库存、喂食后的库存/容量后置条件和失败恢复仍缺 live 证据。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -248,7 +254,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 22 | Commission | Scheduler, Commission | L | 领取和零油开始有证据；非零油、重大委托、全部过滤器、取消和连续循环未闭环 |
 | 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 十个专属配置字段离线契约已完成；真实收藏/等级候选、完整书库存、四槽快速学习实机结果及安全回滚仍未闭环 |
 | 24 | Research | Scheduler, Research | L | 一个金币项目闭环；魔方/零件、延迟、重置、26 个预设和自定义规则未完整覆盖 |
-| 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 默认收取和喂食闭环；食物过滤、买家具、套装/全部和日期状态未闭环 |
+| 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取/喂食四组合与 1,956 种已知食物优先级已离线完成；空收取、部分库存、喂食后置条件、买家具两模式和日期状态仍未闭环 |
 | 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | M | 买箱、金币溢出、训练、增强和保留天赋规则均缺适配 |
 | 27 | Guild | Scheduler, GuildLogistics, GuildOperation | M | 后勤兑换、新任务、作战、Boss 和推荐舰队均缺适配 |
 | 28 | Reward | Scheduler, Reward | P | 五个领取开关及 RaidDaily 共享入口已离线完成；资源气泡可领取，任务领取部分可用，周常、红点、数字行、空页面和舰船奖励仍未完整闭环 |
@@ -337,7 +343,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | P | 离线关闭/启用及各等级 0/配置/最大/越界已覆盖；仍需真实库存、当前技能经验及选书结果闭环 |
 | AddNewStudent | `Enable`; `Favorite`; `MinLevel` | P | 离线开关、收藏传播和等级边界已覆盖；仍需真实收藏候选状态、无/多候选及教学结果验证 |
 | Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 26 预设、自由规则、重置、延迟、三种资源各四策略、资源不足、队列满和跨轮选择 |
-| Dorm | `Collect`; `Feed`; `FeedFilter` | L | 两开关四组合、食物规则命中/回退/无食物、宿舍满、收取为空和喂食结果 |
+| Dorm | `Collect`; `Feed`; `FeedFilter` | L | 两开关四组合、全部已知食物优先级及严格容量边界已离线完成；仍缺空收取、部分库存、真实喂食结果和失败恢复 live 证据 |
 | BuyFurniture | `Enable`; `BuyOption`=`set/all`; `LastRun` | P | 开关、套装/全部、货币不足、已购买、日期去重和购买确认 |
 | Meowfficer | `BuyAmount`; `FortChoreMeowfficer`; `OverflowCoins` | M | 数量 0/边界、保留后勤猫、金币阈值、箱位满和购买确认 |
 | MeowfficerTrain | `Enable`; `Mode`=`seamlessly/once_a_day`; `RetainTalentedGold`; `RetainTalentedPurple`; `MaxFeedLevel`; `EnhanceIndex` | M | 两训练模式、两保留开关组合、等级/索引边界、无材料、错误目标保护和每日去重 |
@@ -559,9 +565,9 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Daily.UseDailySkip` | Daily | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `DataKey.Collect` | Freebies | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `DataKey.ForceCollect` | Freebies | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Dorm.Collect` | Dorm | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Dorm.Feed` | Dorm | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Dorm.FeedFilter` | Dorm | type=textarea; display=default | input/default: "20000 > 10000 > 5000 > 3000 > 2000 > 1000" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Dorm.Collect` | Dorm | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Dorm.Feed` | Dorm | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Dorm.FeedFilter` | Dorm | type=textarea; display=default | input/default: "20000 > 10000 > 5000 > 3000 > 2000 > 1000" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `DropRecord.API` | Alas | type=select; display=default | options: "cn_gz_reverse_proxy", "default"; default: "default" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `DropRecord.AzurStatsID` | Alas | type=input; display=default | input/default: null | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `DropRecord.CombatRecord` | Alas | type=select; display=default | options: "do_not", "save"; default: "do_not" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

@@ -1200,9 +1200,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_dorm_config.py",
+        "python/alas_headless/alas_dorm_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -1219,9 +1224,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_dorm_config.py",
+        "python/alas_headless/alas_dorm_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -1238,9 +1248,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_dorm_config.py",
+        "python/alas_headless/alas_dorm_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -8740,6 +8755,45 @@
       ],
       "field": "Benchmark.TestScene",
       "note": "All three scenes preserve screenshot-only, click-only, or combined selection on normal and semantic paths; invalid values fail before device mutation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_dorm_config.py",
+        "python/alas_headless/alas_dorm_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Dorm.Collect",
+      "note": "Both booleans preserve original collect dispatch and all-disabled task-stop behavior; invalid values fail before Dorm scope entry, navigation, or collection."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_dorm_config.py",
+        "python/alas_headless/alas_dorm_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Dorm.Feed",
+      "note": "Both booleans preserve original feed dispatch and scheduler delay behavior; invalid values fail before Dorm scope entry, navigation, or feeding."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_dorm_config.py",
+        "python/alas_headless/alas_dorm_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Dorm.FeedFilter",
+      "note": "Every non-empty unique ordering of the six known food values preserves original filter priority; unknown, duplicate, malformed, and empty rules fail before Dorm scope entry."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8752,8 +8806,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "c86494854ef2f1fc8de51f431cc713ab78718667fb1d187e1a4c45cef1160a96",
-      "manifest_sha256": "821d59781cb316314d6c896da6512560e66ed657bd0bb57ab5101b9788ee2b7e",
+      "combined_sha256": "8b146a064afd208b8da3d3e0970ab1dbdc0440f23dfbaf40b190f98596a6d1f3",
+      "manifest_sha256": "b7e4c53b706767186fdad68b730d7cc26ca49b93707b2c6ce9bc869198aa782c",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

@@ -303,7 +303,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 97 changed files, all 96 patched Python files compile, and
-  the repository suite passes `902/902` tests, including Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `907/907` tests, including Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
@@ -348,6 +348,28 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - Both fields move only to `offline=complete`. Device-specific timing quality,
   unavailable transports, and live screenshot/click capability remain live
   evidence requirements.
+
+### Dorm collection, feeding, and food filter configuration: offline contract passed
+
+- `Dorm.Collect` and `Dorm.Feed` admit exact booleans, and `Dorm.FeedFilter`
+  admits any non-empty unique ordering or subset of the six food values known
+  by pinned ALAS. The validator preserves ALAS whitespace and Unicode greater-
+  than separator normalization while rejecting empty, duplicate, unknown,
+  malformed, and non-string rules.
+- The guard is the first executable statement of `RewardDorm.run()`, before the
+  semantic Dorm scope begins, navigation occurs, or collection/feeding can use
+  account resources. All-disabled still disables and stops the task; the other
+  three switch combinations preserve original dispatch and the 3-ship 417-
+  minute scheduler delay.
+- Replay covers all 1,956 possible non-empty unique food priority orders and all
+  four switch combinations, or 7,824 admitted configurations. Original feed
+  boundaries retain strict `fill > food`, empty-priority fallback, and no-food
+  behavior. Twenty-two invalid single-field cases fail closed.
+- Dorm methods are deterministic fixtures: mutation budget is `0`; no reward
+  collection, food consumption, navigation, screenshot/OCR, or Android input
+  occurs. The fields move only to `offline=complete`; live empty-collection,
+  partial food inventory, post-feed food/capacity proof, and recovery failures
+  remain open.
 
 ### Data Key collection configuration: offline contract passed
 

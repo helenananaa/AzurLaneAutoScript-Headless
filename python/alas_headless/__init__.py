@@ -82,6 +82,12 @@ from .alas_benchmark_config_contract import (
     BENCHMARK_TEST_SCENES,
     validate_alas_benchmark_config,
 )
+from .alas_dorm_config_contract import (
+    AlasDormConfigSnapshot,
+    DORM_FOOD_VALUES,
+    parse_alas_dorm_feed_filter,
+    validate_alas_dorm_config,
+)
 from .alas_reward_config_contract import (
     AlasRewardConfigSnapshot,
     validate_alas_reward_config,
