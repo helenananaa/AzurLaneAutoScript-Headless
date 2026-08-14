@@ -1,0 +1,67 @@
+diff --git a/module/combat/level.py b/module/combat/level.py
+index fdbcd5f6..0eca7db9 100644
+--- a/module/combat/level.py
++++ b/module/combat/level.py
+@@ -62,8 +62,13 @@ class Level(ModuleBase):
+ 
+         self._lv_before_battle = self.lv if after_battle else [-1] * 6
+ 
+-        ocr = LevelOcr(self._lv_grid().buttons, name='LevelOcr')
+-        self.lv = ocr.ocr(self.device.image)
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            self.lv = list(semantic_session.campaign_fleet_levels())
++        else:
++            ocr = LevelOcr(self._lv_grid().buttons, name='LevelOcr')
++            self.lv = ocr.ocr(self.device.image)
+         logger.attr('LEVEL', ', '.join(str(data) for data in self.lv))
+ 
+         if after_battle:
+diff --git a/module/handler/fast_forward.py b/module/handler/fast_forward.py
+index 747d411c..a1e269bb 100644
+--- a/module/handler/fast_forward.py
++++ b/module/handler/fast_forward.py
+@@ -139,13 +139,25 @@ class FastForwardHandler(AutoSearchHandler):
+         Logs:
+             | INFO | [Map_info] 98%, star_1, star_2, star_3, clear, 3_star, green, fast_forward
+         """
+-        self.map_clear_percentage = self.get_map_clear_percentage()
+-        self.map_achieved_star_1 = self._is_map_star_active(MAP_STAR_1)
+-        self.map_achieved_star_2 = self._is_map_star_active(MAP_STAR_2)
+-        self.map_achieved_star_3 = self._is_map_star_active(MAP_STAR_3)
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            achievement = semantic_session.campaign_map_achievement_state()
++            self.map_clear_percentage = achievement.clear_percentage
++            (
++                self.map_achieved_star_1,
++                self.map_achieved_star_2,
++                self.map_achieved_star_3,
++            ) = achievement.achieved_stars
++            self.map_is_threat_safe = achievement.threat_safe
++        else:
++            self.map_clear_percentage = self.get_map_clear_percentage()
++            self.map_achieved_star_1 = self._is_map_star_active(MAP_STAR_1)
++            self.map_achieved_star_2 = self._is_map_star_active(MAP_STAR_2)
++            self.map_achieved_star_3 = self._is_map_star_active(MAP_STAR_3)
++            self.map_is_threat_safe = self.appear(MAP_GREEN, offset=(20, 20))
+         self.map_is_100_percent_clear = self.map_clear_percentage > 0.95
+         self.map_is_3_stars = self.map_achieved_star_1 and self.map_achieved_star_2 and self.map_achieved_star_3
+-        self.map_is_threat_safe = self.appear(MAP_GREEN, offset=(20, 20))
+         if self.config.Campaign_Name.lower() == 'sp':
+             # Minor issue here
+             # Using auto_search option because clear mode cannot be detected whether on SP
+@@ -351,6 +363,11 @@ class FastForwardHandler(AutoSearchHandler):
+         Pages:
+             in: MAP_PREPARATION
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.campaign_map_achievement_state().clear_percentage
++
+         percent = color_bar_percentage(self.device.image, area=MAP_CLEAR_PERCENTAGE.area, prev_color=(231, 170, 82))
+         if self.config.MAP_CLEAR_PERCENTAGE_SHORT:
+             percent *= 1.4

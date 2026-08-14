@@ -124,6 +124,16 @@ FLOW_PATHS = {
         "module/daemon/os_daemon.py",
         "module/daemon/uncensored.py",
     },
+    "0110-stop-condition-ports.patch": {
+        "module/combat/level.py",
+        "module/handler/fast_forward.py",
+    },
+    "0120-retirement-flow-ports.patch": {
+        "module/retire/retirement.py",
+    },
+    "0130-enhancement-flow-ports.patch": {
+        "module/retire/enhancement.py",
+    },
 }
 
 

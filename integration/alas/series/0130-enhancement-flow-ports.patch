@@ -1,0 +1,28 @@
+diff --git a/module/retire/enhancement.py b/module/retire/enhancement.py
+index a1c9b013..f2e4b6c8 100644
+--- a/module/retire/enhancement.py
++++ b/module/retire/enhancement.py
+@@ -263,6 +263,23 @@ class Enhancement(Dock):
+         Returns:
+             int: total enhanced
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            # ALAS retains task scheduling and the detailed Enhance config.
++            # The semantic port owns Dock filtering, target navigation, the
++            # official recommendation, the single destructive confirmation,
++            # and the observed material count.  Invalid filter tokens fail
++            # closed instead of entering the legacy random-type fallback.
++            ship_to_enhance = self.config.Enhance_ShipToEnhance
++            if favourite is not None:
++                ship_to_enhance = 'favourite' if favourite else 'all'
++            return semantic_session.enhance_ships(
++                ship_to_enhance=ship_to_enhance,
++                check_per_category=self.config.Enhance_CheckPerCategory,
++                filter_expression=self.config.Enhance_Filter,
++            )
++
+         if favourite is None:
+             favourite = self.config.Enhance_ShipToEnhance == 'favourite'
+ 

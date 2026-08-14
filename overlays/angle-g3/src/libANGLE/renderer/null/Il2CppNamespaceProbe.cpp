@@ -241,6 +241,8 @@ struct UiProbeResult {
   uint32_t textRecordTruncated = 0;
   uint32_t imageRecordCount = 0;
   uint32_t imageRecordTruncated = 0;
+  uint32_t imageSourceCount = 0;
+  uint32_t imageSourceCapacity = 0;
   uint32_t uiRecordErrors = 0;
   uint32_t uiRecordSkipped = 0;
   uint32_t uiMethodMask = 0;
@@ -805,14 +807,20 @@ bool ShouldEvaluateImageTopRaycast(std::string_view name,
   return false;
 }
 
-struct LoadedObjectCollector {
+template <size_t Capacity> struct LoadedObjectCollectorBase {
   // FindObjectsOfTypeAll omits destroyed components but can still return
   // inactive objects retained by repeated overlays.  Keep the temporary set
   // bounded independently from the much smaller active typed record set.
-  std::array<void *, 4096> objects = {};
+  std::array<void *, Capacity> objects = {};
   size_t count = 0;
+  size_t sourceCount = 0;
   bool truncated = false;
 };
+
+using LoadedObjectCollector =
+    LoadedObjectCollectorBase<kLoadedObjectCapacity>;
+using LoadedImageObjectCollector =
+    LoadedObjectCollectorBase<kLoadedImageObjectCapacity>;
 
 const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
                                  const void *coreImage, const void *uiImage,
@@ -839,6 +847,8 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   result.textRecordTruncated = 0;
   result.imageRecordCount = 0;
   result.imageRecordTruncated = 0;
+  result.imageSourceCount = 0;
+  result.imageSourceCapacity = 0;
   result.uiRecordErrors = 0;
   result.uiRecordSkipped = 0;
   result.uiMethodMask = 0;
@@ -1460,8 +1470,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   };
   static_assert(sizeof(ManagedArrayHeader) == 4 * sizeof(void *));
 
-  auto collectLoadedInstances = [&](void *klass,
-                                    LoadedObjectCollector *collector) {
+  auto collectLoadedInstances = [&](void *klass, auto *collector) {
     if (klass == nullptr || collector == nullptr || classGetType == nullptr ||
         typeGetObject == nullptr) {
       return false;
@@ -1490,6 +1499,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       collector->objects[index] = ANGLE_UNSAFE_BUFFERS(elements[index]);
     }
     collector->count = copyCount;
+    collector->sourceCount = static_cast<size_t>(length);
     collector->truncated = length > collector->objects.size();
     return true;
   };
@@ -1925,10 +1935,15 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       float blue;
       float alpha;
     };
-    LoadedObjectCollector imageCollector;
+    static thread_local LoadedImageObjectCollector imageCollector;
     if (!collectLoadedInstances(imageClass, &imageCollector)) {
       ++result.uiRecordErrors;
     } else {
+      result.imageSourceCount = static_cast<uint32_t>(
+          std::min(imageCollector.sourceCount,
+                   static_cast<size_t>(UINT32_MAX)));
+      result.imageSourceCapacity = static_cast<uint32_t>(
+          imageCollector.objects.size());
       result.imageRecordTruncated |= imageCollector.truncated ? 1u : 0u;
       for (size_t index = 0; index < imageCollector.count; ++index) {
         void *image = imageCollector.objects[index];
@@ -2221,6 +2236,8 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
     uiSnapshot.errorCount = ui.uiRecordErrors;
     uiSnapshot.skippedCount = ui.uiRecordSkipped;
     uiSnapshot.methodMask = ui.uiMethodMask;
+    uiSnapshot.imageSourceCount = ui.imageSourceCount;
+    uiSnapshot.imageSourceCapacity = ui.imageSourceCapacity;
     uiSnapshot.toggles = ui.toggles;
     uiSnapshot.texts = ui.texts;
     uiSnapshot.images = ui.images;

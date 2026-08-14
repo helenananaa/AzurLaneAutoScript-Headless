@@ -627,7 +627,7 @@ index 9fa9cba2..1f7044a1 100644
          try:
              if not self.is_in_map() \
 diff --git a/module/map/fleet.py b/module/map/fleet.py
-index 249f61e2..f5fd9595 100644
+index 249f61e2..010ae735 100644
 --- a/module/map/fleet.py
 +++ b/module/map/fleet.py
 @@ -301,7 +301,19 @@ class Fleet(Camera, AmbushHandler):
@@ -651,7 +651,7 @@ index 249f61e2..f5fd9595 100644
                  if is_portal:
                      self.update(allow_error=True)
                      grid = self.view[self.view.center_loca]
-@@ -893,6 +905,20 @@ class Fleet(Camera, AmbushHandler):
+@@ -893,6 +905,22 @@ class Fleet(Camera, AmbushHandler):
          self.handle_strategy(index=self.fleet_show_index)
          self.hp_reset()
          self.hp_get()
@@ -660,6 +660,8 @@ index 249f61e2..f5fd9595 100644
 +            synchronize_alas_campaign_map,
 +        )
 +        if current_semantic_session() is not None:
++            self.lv_reset()
++            self.lv_get()
 +            state = self.semantic_campaign_map_state()
 +            projection = synchronize_alas_campaign_map(self, state)
 +            logger.info(

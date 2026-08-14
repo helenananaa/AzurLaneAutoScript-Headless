@@ -21,6 +21,11 @@ constexpr size_t kMaxObserverToggles = 128;
 // Preserve completeness instead of truncating the result overlay at 192.
 constexpr size_t kMaxObserverTexts = 512;
 constexpr size_t kMaxObserverImages = 1024;
+constexpr size_t kLoadedObjectCapacity = 4096;
+// Long-lived game sessions retain well over 4096 inactive Image components.
+// Image enumeration therefore needs a larger, thread-local source pool before
+// active records are filtered into kMaxObserverImages.
+constexpr size_t kLoadedImageObjectCapacity = 16384;
 constexpr size_t kObserverNameBytes = 96;
 constexpr size_t kObserverPathBytes = 384;
 constexpr size_t kObserverTextBytes = 512;
@@ -154,6 +159,8 @@ struct ObserverUiSnapshot {
   uint32_t errorCount = 0;
   uint32_t skippedCount = 0;
   uint32_t methodMask = 0;
+  uint32_t imageSourceCount = 0;
+  uint32_t imageSourceCapacity = 0;
   std::array<ObserverToggleRecord, kMaxObserverToggles> toggles = {};
   std::array<ObserverTextRecord, kMaxObserverTexts> texts = {};
   std::array<ObserverImageRecord, kMaxObserverImages> images = {};

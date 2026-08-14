@@ -290,7 +290,9 @@ std::string SemanticResponseFor(uid_t peerUid, const std::string &package,
 }
 
 std::string SemanticResponse(uid_t peerUid, const std::string &package) {
-  ObserverSemanticSnapshot snapshot;
+  // Keep large fixed-capacity protocol snapshots off the detached server
+  // thread's stack. UiResponse is commonly inlined into ServeObserver.
+  static thread_local ObserverSemanticSnapshot snapshot;
   if (!GetLatestObserverSemanticSnapshot(&snapshot)) {
     char response[512];
     const int count = ANGLE_UNSAFE_TODO(std::snprintf(
@@ -307,7 +309,7 @@ std::string SemanticResponse(uid_t peerUid, const std::string &package) {
 }
 
 std::string UiResponse(uid_t peerUid, const std::string &package) {
-  ObserverUiSnapshot snapshot;
+  static thread_local ObserverUiSnapshot snapshot;
   if (!GetLatestObserverUiSnapshot(&snapshot)) {
     char response[512];
     const int count = ANGLE_UNSAFE_TODO(std::snprintf(
@@ -339,7 +341,8 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       ",\"method_mask\":%u,\"toggle_count\":%u,\"text_count\":%u,"
       "\"image_count\":%u,\"toggle_truncated\":%s,\"text_truncated\":%s,"
       "\"image_truncated\":%s,\"error_count\":%u,"
-      "\"skipped_count\":%u,"
+      "\"skipped_count\":%u,\"image_source_count\":%u,"
+      "\"image_source_capacity\":%u,"
       "\"toggles\":[",
       kProtocolSchema, package.c_str(), getpid(), getuid(), peerUid,
       kDriverRevision, snapshot.schema, snapshot.structSize,
@@ -348,7 +351,8 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
       snapshot.imageCount, snapshot.toggleTruncated != 0 ? "true" : "false",
       snapshot.textTruncated != 0 ? "true" : "false",
       snapshot.imageTruncated != 0 ? "true" : "false", snapshot.errorCount,
-      snapshot.skippedCount));
+      snapshot.skippedCount, snapshot.imageSourceCount,
+      snapshot.imageSourceCapacity));
   if (headerCount <= 0 || static_cast<size_t>(headerCount) >= sizeof(header)) {
     return {};
   }

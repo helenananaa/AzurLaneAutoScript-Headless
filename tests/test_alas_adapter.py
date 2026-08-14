@@ -20,10 +20,14 @@ from alas_headless import (
     CampaignMapState,
     CampaignMapViewportSwipeProof,
     MissionDisposition,
+    EnhancementNoMaterialReceipt,
     PINNED_CN_GAME_FINGERPRINT,
     PinnedPackageGate,
     Point,
     ResearchProjectStatus,
+    RetirementExecutionReceipt,
+    RetirementNoCandidateReceipt,
+    RetirementSettingsState,
     SemanticGateClosed,
 )
 from alas_headless.semantic_oracle import ActionReceipt, AdbObserverBridge
@@ -200,6 +204,30 @@ class FakeOracle:
         self.build_queue_empty_value = True
         self.build_queue_timer_values = ("99:99:99", "99:99:99")
         self.build_queue_visible_value = False
+        self.retirement_keep_limit_break = None
+        self.enhancement_calls = []
+        self.enhancement_candidates = {
+            "dd": [SimpleNamespace(position=0, ship_id=100001, ship_name="A", level=1)],
+            "cl": [SimpleNamespace(position=0, ship_id=100002, ship_name="B", level=1)],
+        }
+        self.enhancement_ship_type = None
+        self.retirement_receipt_value = RetirementExecutionReceipt(
+            retired_count=68,
+            capacity_before=882,
+            capacity_after=814,
+            capacity_total=910,
+            settings=RetirementSettingsState(
+                generation=20,
+                unique_ship_protection=True,
+                priority=("R", "SR", "N"),
+                full_star_policy="keep_none",
+                no_full_star_policy="keep_needed",
+            ),
+            rewards=(("物资", 1026), ("荣誉勋章", 22)),
+            rarity_warning_confirmed=True,
+            equipment_preserved=True,
+            actions=(self.click_receipt("retirement/ships/confirm"),),
+        )
         self.war_archives_visible_value = False
         self.war_archives_collected_value = False
         self.war_archives_key_text_value = "300/300"
@@ -241,6 +269,13 @@ class FakeOracle:
         }
         self.campaign_fleet_dropdown_row = None
         self.campaign_oil_value = 9504
+        self.campaign_achievement_value = SimpleNamespace(
+            generation=31,
+            clear_percentage=1.0,
+            achieved_stars=(True, True, True),
+            threat_safe=True,
+        )
+        self.campaign_fleet_levels_value = (118, 109, 117, 110, 118, 107)
         self.campaign_in_map_value = False
         self.campaign_map_generation = 50
         self.campaign_map_state_calls = []
@@ -396,6 +431,42 @@ class FakeOracle:
         if not self.build_queue_visible_value:
             raise SemanticGateClosed("construction queue is not visible")
         return self.build_queue_timer_values
+
+    def retire_ships_one_click(self, keep_limit_break):
+        self.retirement_keep_limit_break = keep_limit_break
+        return self.retirement_receipt_value
+
+    def set_enhancement_dock_favourite(self, enabled):
+        self.enhancement_calls.append(("favourite", enabled))
+
+    def set_enhancement_dock_filter(self, ship_type):
+        self.enhancement_ship_type = ship_type
+        self.enhancement_calls.append(("filter", ship_type))
+        return ()
+
+    def enhancement_dock_candidates(self):
+        self.enhancement_calls.append(("candidates", self.enhancement_ship_type))
+        return tuple(self.enhancement_candidates.get(self.enhancement_ship_type, ()))
+
+    def open_enhancement_dock_candidate(self, position, ship_id, ship_name, level):
+        self.enhancement_calls.append(("open", ship_id))
+        return self.click_receipt("enhancement/dock/ship/{0}".format(ship_id))
+
+    def enhance_with_official_recommendation(self):
+        self.enhancement_calls.append(("recommend", self.enhancement_ship_type))
+        return EnhancementNoMaterialReceipt(
+            generation=30,
+            target_name="fixture",
+            recommendation=self.click_receipt("enhancement/recommend", 30),
+        )
+
+    def return_to_enhancement_dock(self):
+        self.enhancement_calls.append(("back", self.enhancement_ship_type))
+        return self.click_receipt("enhancement/dock/back", 31)
+
+    def reset_enhancement_dock(self):
+        self.enhancement_calls.append(("reset", None))
+        return ()
 
     def war_archives_page_visible(self):
         return self.war_archives_visible_value
@@ -637,6 +708,12 @@ class FakeOracle:
 
     def campaign_oil(self):
         return self.campaign_oil_value
+
+    def campaign_map_achievement_state(self, stage_code):
+        return self.campaign_achievement_value
+
+    def campaign_fleet_levels(self):
+        return self.campaign_fleet_levels_value
 
     def campaign_stage_actionable(self, stage_code):
         return any(
@@ -1476,6 +1553,102 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with self.assertRaises(SemanticGateClosed):
             insufficient.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER"))
 
+    def test_official_retirement_budget_is_single_use_and_receipted(self):
+        adapter, oracle, gate_calls = self.make_adapter(retirement_budget=1)
+
+        retired = adapter.retire_ships_one_click(True)
+        receipt = adapter.retirement_receipt()
+
+        self.assertEqual(retired, 68)
+        self.assertTrue(oracle.retirement_keep_limit_break)
+        self.assertIsNotNone(receipt)
+        assert receipt is not None
+        self.assertEqual(receipt.capability_id, "retirement.execute")
+        self.assertEqual(len(receipt.policy_sha256), 64)
+        self.assertEqual(adapter._action_ledger.remaining("retirement.execute"), 0)
+        self.assertEqual(len(gate_calls), 1)
+        with self.assertRaises(SemanticGateClosed):
+            adapter.retire_ships_one_click(True)
+
+    def test_official_no_candidate_result_is_receipted_and_not_retried(self):
+        adapter, oracle, gate_calls = self.make_adapter(retirement_budget=1)
+        oracle.retirement_receipt_value = RetirementNoCandidateReceipt(
+            capacity_used=814,
+            capacity_total=910,
+            settings=RetirementSettingsState(
+                generation=24,
+                unique_ship_protection=True,
+                priority=("R", "SR", "N"),
+                full_star_policy="keep_none",
+                no_full_star_policy="keep_needed",
+            ),
+            official_message="<color=white>没找到符合条件的舰船</color>",
+            actions=(
+                ActionReceipt(
+                    semantic_id="retirement/one-click",
+                    generation=23,
+                    point=Point(725, 673),
+                    bounds=Bounds(634, 639, 816, 707),
+                    path="root/blur_panel/select_panel/quick_select",
+                ),
+            ),
+        )
+
+        retired = adapter.retire_ships_one_click(True)
+        receipt = adapter.retirement_receipt()
+
+        self.assertEqual(retired, 0)
+        self.assertIsInstance(receipt, RetirementNoCandidateReceipt)
+        assert isinstance(receipt, RetirementNoCandidateReceipt)
+        self.assertEqual(receipt.capability_id, "retirement.execute")
+        self.assertEqual(len(receipt.policy_sha256), 64)
+        self.assertEqual(adapter._action_ledger.remaining("retirement.execute"), 0)
+        self.assertEqual(len(gate_calls), 1)
+
+    def test_official_retirement_is_default_denied(self):
+        adapter, _, _ = self.make_adapter()
+
+        with self.assertRaisesRegex(SemanticGateClosed, "positive transaction budget"):
+            adapter.retire_ships_one_click(True)
+
+    def test_enhancement_task_honours_favourite_filter_and_check_budget(self):
+        adapter, oracle, gate_calls = self.make_adapter(enhancement_budget=2)
+
+        consumed = adapter.enhance_ships("favourite", 3, "dd > cl")
+        receipts = adapter.enhancement_receipts()
+
+        self.assertEqual(consumed, 0)
+        self.assertEqual(len(receipts), 2)
+        self.assertTrue(all(item.capability_id == "enhancement.execute" for item in receipts))
+        self.assertEqual(
+            oracle.enhancement_calls,
+            [
+                ("favourite", True),
+                ("filter", "dd"),
+                ("candidates", "dd"),
+                ("open", 100001),
+                ("recommend", "dd"),
+                ("back", "dd"),
+                ("candidates", "dd"),
+                ("filter", "cl"),
+                ("candidates", "cl"),
+                ("open", 100002),
+                ("recommend", "cl"),
+                ("back", "cl"),
+                ("reset", None),
+            ],
+        )
+        self.assertEqual(adapter._action_ledger.remaining("enhancement.execute"), 0)
+        self.assertEqual(len(gate_calls), 1)
+
+    def test_enhancement_task_is_default_denied_before_navigation(self):
+        adapter, oracle, _ = self.make_adapter()
+
+        with self.assertRaisesRegex(SemanticGateClosed, "positive transaction budget"):
+            adapter.enhance_ships("all", 5, None)
+
+        self.assertEqual(oracle.enhancement_calls, [])
+
     def test_build_coin_count_falls_back_to_proven_build_resource_panel(self):
         oracle = FakeOracle()
         oracle.build_gold_value = 81908
@@ -1945,6 +2118,22 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.begin_campaign_pre_sortie("12-4")
         self.assertEqual(adapter.campaign_oil(), 9504)
         adapter.end_campaign_pre_sortie()
+
+    def test_campaign_stop_condition_observations_are_stage_bound(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_campaign_pre_sortie("12-4")
+
+        achievement = adapter.campaign_map_achievement_state()
+        levels = adapter.campaign_fleet_levels()
+
+        self.assertIs(achievement, oracle.campaign_achievement_value)
+        self.assertEqual(levels, (118, 109, 117, 110, 118, 107))
+        adapter.end_campaign_pre_sortie()
+
+        with self.assertRaisesRegex(SemanticGateClosed, "outside"):
+            adapter.campaign_map_achievement_state()
+        with self.assertRaisesRegex(SemanticGateClosed, "outside"):
+            adapter.campaign_fleet_levels()
 
     def test_campaign_auto_search_resources_feed_original_alas_switch(self):
         oracle = FakeOracle()

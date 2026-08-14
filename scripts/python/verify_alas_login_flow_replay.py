@@ -27,7 +27,7 @@ PATCH_PATH = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
 SERIES_MANIFEST_PATH = ROOT / "integration" / "alas" / "series" / "series.json"
 SCHEMA = "alas-headless.login-flow-replay/v1"
 PATCHED_LOGIN_SHA256 = (
-    "06008b920efd3804b28cabaf0d74b25b15516be1ecd541e94e9836313bdbd056"
+    "b0b39ab20f3d9e98834cf370b93173e35f6cb133bc09045c192b4847484510fb"
 )
 
 
@@ -210,6 +210,12 @@ class ReplayOracle:
     def server_maintenance_visible(self) -> bool:
         return False
 
+    def login_update_in_progress(self) -> bool:
+        return False
+
+    def restart_game_after_update(self) -> bool:
+        return False
+
     def click(self, semantic_id: str):
         from alas_headless import ActionReceipt, Bounds, Point
 
@@ -388,6 +394,7 @@ def run_scenario(handler_class: Any, scenario: str) -> Mapping[str, Any]:
         frame_observation_oracle=lambda: oracle,
         frame_identity_provider=lambda: frame_identity,
     )
+    adapter.restart_game_after_update = lambda: False
     device = ReplayDevice(adapter)
     config = types.SimpleNamespace(SERVER="cn")
     handler = handler_class(config, device)
@@ -441,6 +448,7 @@ def run_failure_scenario(handler_class: Any) -> Mapping[str, Any]:
         frame_observation_oracle=lambda: oracle,
         frame_identity_provider=lambda: frame_identity,
     )
+    adapter.restart_game_after_update = lambda: False
     device = ReplayDevice(adapter)
     handler = handler_class(types.SimpleNamespace(SERVER="cn"), device)
     handler.fail_in_main = True

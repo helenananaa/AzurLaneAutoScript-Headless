@@ -4,6 +4,133 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-14
 
+### Official one-click retirement: live transaction and typed port passed
+
+- The game-owned quick-retirement settings are now read and enforced from the
+  exact Unity Toggle groups despite unrelated dock-card Toggle/Image caps:
+  unique-ship protection on, priority `R -> SR -> N`, fully-limit-broken
+  duplicates keep none, and non-fully-limit-broken duplicates follow
+  `OneClickRetire.KeepLimitBreak`.
+- A controlled CN 9.7.10/API 32 run retired the official selection of 68 ships.
+  Dock usage changed exactly `882/910 -> 814/910`; the reward dialog reported
+  1026 coins and 22 medals. This exposes and fixes the upstream one-click
+  path's hard-coded `total += 10` assumption in semantic mode.
+- The official elite-or-higher warning was re-proven before confirmation. The
+  following equipment page contained 18 item types / 113 units; all selections
+  were cleared and the exact "all equipment goes to storage" exit was used, so
+  zero equipment was disassembled.
+- `retirement.execute` is default-denied and single-use-budgeted. ALAS still
+  owns when retirement is invoked; the semantic port owns only the official
+  transaction and returns its observed count. `enhance`, `old_retire`, and a
+  destructive `do_not_keep` live run remain unqualified.
+- Durable live evidence is
+  `artifacts/retirement-live-20260814.json`; focused settings, transaction,
+  capacity-delta, equipment-preservation, adapter-ledger, and patch tests pass.
+- The official zero-candidate branch is now live-proven independently: the
+  game returned the exact TipPanel message `没找到符合条件的舰船`, while capacity
+  remained `814/910` and selected count remained zero. No destructive confirm
+  was clicked. Semantic mode records this result, consumes the one transaction
+  grant, and asks ALAS for human takeover instead of entering legacy pixel
+  retries. Evidence: `artifacts/retirement-no-candidate-live-20260814.json`.
+- An exact `NetworkDown` or `HostNotFound` Msgbox can interrupt settings,
+  selection, confirmation, reward, or equipment handling and be reconnected
+  inside the same bounded transaction. Any other popup remains fail-closed;
+  the retirement-specific insertion test passes without broadening the prompt.
+
+### Enhancement: ALAS task route, detailed config, and official transaction passed
+
+- `Enhance.ShipToEnhance`, `Enhance.CheckPerCategory`, and `Enhance.Filter`
+  now have a typed, fail-closed policy parser. It accepts only `all/favourite`,
+  a positive check count, and the eight reviewed ship-type tokens; invalid or
+  duplicate filters no longer fall through to upstream random selection.
+- The official enhancement page exposes a non-destructive typed preview for
+  the exact target name, attribute current/max/EXP/addition values, and every
+  recommended material's slot, level, rarity sprite, and ship sprite.
+- A live CN 9.7.10 run on `那智.改` used the official recommendation button:
+  seven level-1 `bg1` ships were selected and cannon preview changed from
+  `196/197 +0` to `+1 (25/25)`. The typed clear action returned the material
+  count to zero and the preview to `+0 (0/25)`; no ship was consumed.
+- Durable evidence is
+  `artifacts/enhancement-preflight-live-20260814.json`.
+- The observer's retained-object scan no longer truncates Image discovery at
+  4096 before active records are filtered. Image sources now use a separate
+  16384-entry thread-local pool and `/v1/ui` reports both source count and
+  capacity. Large response snapshots are also thread-local, keeping them off
+  the detached server thread's stack.
+- The first rebuilt APK exposed that stack hazard and crashed before any game
+  input; the previous APK was restored immediately and the game recovered.
+  After the response snapshots were moved off-stack, APK SHA-256
+  `e400d4e0ba829aac3498b07df4be957cb9f51457a7ed1e942c30c19c9efe2406`
+  cold-started successfully and returned a complete `4051/16384` Image-source
+  enumeration on the selected enhancement page.
+- A repeated official recommendation selected the same seven Lv.1 `bg1`
+  materials. Every active Image below each material card matched the closed
+  reviewed shape; any unexpected lock, favourite, equipment, or future overlay
+  now makes the protection proof false. The live preview therefore reported
+  `material_protection_proven=true`, then official clear returned material
+  count to zero. No enhancement confirmation was clicked.
+- After explicit destructive-test authorization, the official recommendation
+  and exact `ok_btn` completed one real enhancement on `那智.改`. Seven reviewed
+  Lv.1 `bg1` ships were consumed; dock usage changed `814/910 -> 807/910`, and
+  cannon changed exactly from previewed `196/197 +1` to `197/197 +0` while all
+  other attributes remained unchanged.
+- The official follow-up equipment page contained five item types / 14 units.
+  Its exact all-selection was cleared, disassembly was cancelled, and the
+  exact confirmation that all equipment goes to storage was accepted. No
+  equipment was disassembled. Evidence is
+  `artifacts/enhancement-live-20260814.json`.
+- The execution port now treats an empty official recommendation as a normal
+  skip. A non-empty recommendation requires complete Image enumeration, the
+  closed material-card protection proof, Lv.1/bg1-only materials, and a real
+  positive attribute preview before its single confirmation. It never retries
+  an unobserved destructive input, and the equipment-preservation flow is part
+  of the transaction receipt.
+- The pinned ALAS `enhance_ships()` task now delegates semantic mode before any
+  legacy framebuffer/random-type branch. It passes `ShipToEnhance`,
+  `CheckPerCategory`, and `Filter` unchanged into the strict policy and returns
+  the observed number of consumed ships instead of a hard-coded increment.
+- A separate default-zero `enhancement.execute` budget, translated from
+  `ALAS_SEMANTIC_ENHANCEMENT_BUDGET`, bounds official recommendation attempts.
+  `all`/`favourite` switching, the eight ship-type
+  filter mappings, candidate-card identity, enhancement-tab entry, return, and
+  default Dock reset are semantic-only. A live non-destructive smoke exercised
+  favourite on/off, `dd`, one exact candidate (`格里芬`), enhancement preview
+  with zero selected materials, back, and reset; no recommendation or confirm
+  was clicked in that smoke.
+- The complete ALAS task loop is deterministic-test covered for ordered filters,
+  per-category checking, no-material skips, budget exhaustion, cleanup, invalid
+  configuration, and default denial. A full `favourite` destructive task and a
+  naturally empty-material live branch remain unrun to avoid unnecessary ship
+  consumption; those are evidence gaps, not pixel fallbacks.
+
+### StopCondition priority port: typed map achievement and fleet levels passed
+
+- `MapAchievement` now reads the exact stage-detail percentage, three Unity
+  star Images, and the CN threat-safe label instead of framebuffer colors in
+  semantic mode. The original ALAS five-value stop truth table and
+  `StageIncrease` state transition remain the owners.
+- `ReachLevel` now reads the six reviewed in-map level Texts in ALAS slot order.
+  The original crossing rule still rejects implausible large level gaps; map
+  initialization now captures the semantic pre-battle levels before returning
+  from the typed projection path.
+- The positive node contract is grounded in the existing 12-4 stage-detail
+  snapshot and G25 fleet-stat review. Offline tests also cover partial stars,
+  malformed/out-of-range percentages, incomplete stars, level ordering, and
+  level 126 fail-closed.
+- The actual pinned ALAS methods now run through 77 deterministic assertions,
+  including the 40-row map-achievement truth table, oil boundaries, stage
+  advancement, level crossing, and concurrent stop precedence. Static source
+  proof places finite `RunCount` decrement after `campaign.run()` returns and
+  before the post-run stop check; unlimited count remains guarded.
+- `GetNewShip=true` remains deliberately unqualified: ordinary `GET_SHIP` is
+  not evidence of the narrower first-acquisition `NEW_SHIP` marker. Per the
+  user's direction, no probabilistic ship grind was attempted; this branch is
+  explicitly skipped and remains fail-closed pending a natural sample.
+- The 15-member patch includes the StopCondition, retirement, and formal
+  enhancement-task ports and is validated against pinned upstream `81ccf63b`:
+  it applies as 91 changed files, every patched Python file compiles, and the
+  repository test suite passes `790/790` when scoped to `tests/`.
+
 ### EventB ship-drop closure: implementation passed, natural live proof pending
 
 - The persisted B1 failure proves a generic `NewShipUI(Clone)` acquisition

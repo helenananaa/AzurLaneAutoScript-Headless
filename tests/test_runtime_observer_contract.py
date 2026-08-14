@@ -16,6 +16,26 @@ class RuntimeObserverContractTests(unittest.TestCase):
             / "null"
             / "ObserverServer.cpp"
         ).read_text(encoding="utf-8")
+        cls.probe_header = (
+            root
+            / "overlays"
+            / "angle-g3"
+            / "src"
+            / "libANGLE"
+            / "renderer"
+            / "null"
+            / "Il2CppNamespaceProbe.h"
+        ).read_text(encoding="utf-8")
+        cls.probe_source = (
+            root
+            / "overlays"
+            / "angle-g3"
+            / "src"
+            / "libANGLE"
+            / "renderer"
+            / "null"
+            / "Il2CppNamespaceProbe.cpp"
+        ).read_text(encoding="utf-8")
         cls.build_script = (
             root / "scripts" / "wsl" / "build-angle-null-observer.sh"
         ).read_text(encoding="utf-8")
@@ -27,10 +47,29 @@ class RuntimeObserverContractTests(unittest.TestCase):
             self.server,
         )
         self.assertIn("semanticSnapshot.requestGeneration", self.server)
-        self.assertIn('response.append(",\\\"buttons\\\":")', self.server)
+        self.assertIn('response.append(",\\"buttons\\":")', self.server)
 
     def test_observer_build_fails_when_state_endpoint_is_missing(self):
         self.assertIn("Atomic state observer endpoint is missing", self.build_script)
+
+    def test_image_source_enumeration_has_a_separate_large_capacity(self):
+        self.assertIn("kLoadedImageObjectCapacity = 16384", self.probe_header)
+        self.assertIn(
+            "static thread_local LoadedImageObjectCollector imageCollector",
+            self.probe_source,
+        )
+        self.assertIn("image_source_count", self.server)
+        self.assertIn("image_source_capacity", self.server)
+
+    def test_large_observer_responses_do_not_use_server_thread_stack(self):
+        self.assertIn(
+            "static thread_local ObserverSemanticSnapshot snapshot", self.server
+        )
+        self.assertIn("static thread_local ObserverUiSnapshot snapshot", self.server)
+        self.assertIn(
+            "Stack-safe observer response snapshots are missing",
+            self.build_script,
+        )
 
 
 if __name__ == "__main__":

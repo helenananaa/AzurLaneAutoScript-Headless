@@ -232,8 +232,8 @@ def verify(
         or frame_clock.get("patch_series_manifest_sha256")
         != inventory["patch_series_manifest_sha256"]
         or frame_clock.get("normal_device_source_preserved") is not True
-        or frame_clock.get("classified_pixel_accesses") != 1
-        or frame_clock.get("classified_pixel_operations") != ["template-access"]
+        or frame_clock.get("classified_pixel_accesses") != 0
+        or frame_clock.get("classified_pixel_operations") != []
         or frame_clock.get("unclassified_pixel_accesses") != 0
         or frame_clock.get("android_input_injected") is not False
     ):

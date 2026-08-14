@@ -103,9 +103,16 @@ if ! grep -Fq 'FindObjectsOfTypeAll omits destroyed components' \
   echo "Non-recursive Unity object enumeration is missing" >&2
   exit 1
 fi
-if ! grep -Fq 'std::array<void *, 4096> objects' \
-    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
+if ! grep -Fq 'kLoadedObjectCapacity = 4096' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.h"; then
   echo "Long-session Unity object capacity is missing" >&2
+  exit 1
+fi
+if ! grep -Fq 'kLoadedImageObjectCapacity = 16384' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.h" || \
+   ! grep -Fq 'static thread_local LoadedImageObjectCollector imageCollector' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
+  echo "Complete long-session Image source collector is missing" >&2
   exit 1
 fi
 if ! grep -Fq 'kMaxObserverImages = 1024' \
@@ -121,6 +128,13 @@ fi
 if ! grep -Fq 'static thread_local ObserverUiSnapshot uiSnapshot' \
     "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
   echo "Stack-safe campaign-map snapshot is missing" >&2
+  exit 1
+fi
+if ! grep -Fq 'static thread_local ObserverUiSnapshot snapshot' \
+    "${angle_dir}/src/libANGLE/renderer/null/ObserverServer.cpp" || \
+   ! grep -Fq 'static thread_local ObserverSemanticSnapshot snapshot' \
+    "${angle_dir}/src/libANGLE/renderer/null/ObserverServer.cpp"; then
+  echo "Stack-safe observer response snapshots are missing" >&2
   exit 1
 fi
 if ! grep -Fq 'anchor_world_position' \

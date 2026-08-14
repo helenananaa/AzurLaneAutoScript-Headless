@@ -33,7 +33,7 @@
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "79146e6e3785843b5fc663a950e797b017d165ec4648dc7ba023ef3ef146a4dd"
+      "sha256": "8ff5cfde8b9cf34fd4998d28b39850c4b9492ee0279733ffa92a7a8a9c8b07a3"
     },
     {
       "order": 8,
@@ -59,6 +59,21 @@
       "order": 12,
       "path": "integration/alas/series/0100-tool-flow-ports.patch",
       "sha256": "94b7c4fc55e874bd758483d962f58e45e3a218ac773ade5303fb3ce5e638b2d8"
+    },
+    {
+      "order": 13,
+      "path": "integration/alas/series/0110-stop-condition-ports.patch",
+      "sha256": "83cff693f5a927180f6f7cfc820bae85baa1602c327562fc455eada758f355dd"
+    },
+    {
+      "order": 14,
+      "path": "integration/alas/series/0120-retirement-flow-ports.patch",
+      "sha256": "6e0aacec4c27fc49654fa93ab954589e3c4a24b129d6116e8cf8a6453680cf37"
+    },
+    {
+      "order": 15,
+      "path": "integration/alas/series/0130-enhancement-flow-ports.patch",
+      "sha256": "c009fd4b11d97f493e419e2936ad0405b25b98927a1fcb04df50933cc15db348"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

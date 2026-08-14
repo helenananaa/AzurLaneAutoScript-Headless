@@ -43,6 +43,39 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         ):
             self.assertIn(operation, self.patch_text)
 
+    def test_retirement_keeps_alas_scheduler_and_replaces_official_transaction(self):
+        self.assertIn(
+            "diff --git a/module/retire/retirement.py",
+            self.patch_text,
+        )
+        self.assertIn(
+            "return semantic_session.retire_ships_one_click(",
+            self.patch_text,
+        )
+        self.assertIn(
+            "self.config.OneClickRetire_KeepLimitBreak",
+            self.patch_text,
+        )
+        self.assertIn("logger.hr('Retirement')", self.patch_text)
+        self.assertIn(
+            "Official one-click retirement found no eligible ships",
+            self.patch_text,
+        )
+        self.assertIn("raise RequestHumanTakeover", self.patch_text)
+        self.assertNotIn("-            total += 10", self.patch_text)
+
+    def test_enhancement_keeps_detailed_config_and_replaces_pixel_transaction(self):
+        self.assertIn(
+            "diff --git a/module/retire/enhancement.py",
+            self.patch_text,
+        )
+        self.assertIn("return semantic_session.enhance_ships(", self.patch_text)
+        self.assertIn("self.config.Enhance_ShipToEnhance", self.patch_text)
+        self.assertIn("self.config.Enhance_CheckPerCategory", self.patch_text)
+        self.assertIn("self.config.Enhance_Filter", self.patch_text)
+        self.assertIn("Invalid filter tokens fail", self.patch_text)
+        self.assertNotIn("-        if favourite is None:", self.patch_text)
+
     def test_semantic_screenshot_refreshes_after_alas_interval_ownership(self):
         self.assertIn(
             "diff --git a/module/device/screenshot.py b/module/device/screenshot.py",
@@ -274,6 +307,32 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         self.assertIn("expected_fleet_count=sum((", self.patch_text)
         self.assertIn("semantic_map_resume = True", self.patch_text)
         self.assertIn("logger.info('Already in map, retreating.')", self.patch_text)
+
+    def test_campaign_stop_conditions_use_typed_progress_and_levels(self):
+        self.assertIn(
+            "diff --git a/module/handler/fast_forward.py",
+            self.patch_text,
+        )
+        self.assertIn(
+            "achievement = semantic_session.campaign_map_achievement_state()",
+            self.patch_text,
+        )
+        self.assertIn(
+            "self.map_is_threat_safe = achievement.threat_safe",
+            self.patch_text,
+        )
+        self.assertIn(
+            "diff --git a/module/combat/level.py",
+            self.patch_text,
+        )
+        self.assertIn(
+            "self.lv = list(semantic_session.campaign_fleet_levels())",
+            self.patch_text,
+        )
+        self.assertIn(
+            "+            self.lv_reset()\n+            self.lv_get()\n+            state =",
+            self.patch_text,
+        )
 
     def test_campaign_map_projection_delegates_to_alas_without_movement(self):
         self.assertIn(

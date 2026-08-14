@@ -1,0 +1,40 @@
+diff --git a/module/retire/retirement.py b/module/retire/retirement.py
+index 19e08df2..58436ae4 100644
+--- a/module/retire/retirement.py
++++ b/module/retire/retirement.py
+@@ -204,6 +204,19 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
+                 return True
+ 
+     def retire_ships_one_click(self):
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            # ALAS still owns retirement timing and retry policy.  The semantic
++            # port owns the official one-click transaction so its real selected
++            # count, protection settings, confirmations, and equipment outcome
++            # are proven without framebuffer access or a hard-coded batch size.
++            return semantic_session.retire_ships_one_click(
++                keep_limit_break=(
++                    self.config.OneClickRetire_KeepLimitBreak
++                    == 'keep_limit_break'
++                )
++            )
+         logger.hr('Retirement')
+         logger.info('Using one click retirement.')
+         # No need to wait, one-click-retire doesn't need to check dock
+@@ -457,7 +470,15 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
+             mode = self.config.Retirement_RetireMode
+ 
+         if mode == 'one_click_retire':
++            from alas_headless import current_semantic_session
++            semantic_session = current_semantic_session()
+             total = self.retire_ships_one_click()
++            if semantic_session is not None and not total:
++                logger.critical(
++                    'Official one-click retirement found no eligible ships')
++                logger.critical(
++                    'Semantic mode refuses legacy pixel retries after the exact game-owned no-candidate result')
++                raise RequestHumanTakeover
+             if not total:
+                 logger.warning(
+                     'No ship retired, trying to reset dock filter and disable favourite, then retire again')

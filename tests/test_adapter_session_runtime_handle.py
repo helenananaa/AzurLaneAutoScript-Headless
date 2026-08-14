@@ -367,11 +367,14 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             _minigame_context=None,
         )
 
-        with mock.patch.object(session, "_live_combat_visible") as combat_visible:
+        with mock.patch.object(
+            session, "_live_combat_visible", return_value=()
+        ) as combat_visible:
             self.assertTrue(session.appear("GET_SHIP"))
+            self.assertFalse(session.appear("NEW_SHIP"))
 
         oracle.new_ship_reward_visible.assert_called_once_with()
-        combat_visible.assert_not_called()
+        combat_visible.assert_called_once_with()
 
     def test_new_ship_click_revalidates_current_frame_and_arms_transition(self):
         session = AlasSemanticSession(

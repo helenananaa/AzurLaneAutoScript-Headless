@@ -39,9 +39,11 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_DORM_COLLECT_BUDGET",
         "ALAS_SEMANTIC_DORM_FEED_BUDGET",
         "ALAS_SEMANTIC_DRIVER_REVISION",
+        "ALAS_SEMANTIC_ENHANCEMENT_BUDGET",
         "ALAS_SEMANTIC_MODE",
         "ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET",
         "ALAS_SEMANTIC_RESEARCH_START_BUDGET",
+        "ALAS_SEMANTIC_RETIREMENT_BUDGET",
         "ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET",
         "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET",
     }
@@ -98,7 +100,15 @@ LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
             "dorm collect",
         ),
         "ALAS_SEMANTIC_DORM_FEED_BUDGET": ("dorm.feed", "dorm feed"),
+        "ALAS_SEMANTIC_ENHANCEMENT_BUDGET": (
+            "enhancement.execute",
+            "enhancement",
+        ),
         "ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET": ("build.submit", "build submit"),
+        "ALAS_SEMANTIC_RETIREMENT_BUDGET": (
+            "retirement.execute",
+            "retirement",
+        ),
         "ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET": ("shop.purchase", "shop purchase"),
         "ALAS_SEMANTIC_CAMPAIGN_STAGE_ENTRY_BUDGET": (
             "campaign.stage_entry",
@@ -177,7 +187,9 @@ class LegacyEnvironmentTranslation:
                 "research_start_budget": self.grant("research.start"),
                 "dorm_collect_budget": self.grant("dorm.collect"),
                 "dorm_feed_budget": self.grant("dorm.feed"),
+                "enhancement_budget": self.grant("enhancement.execute"),
                 "build_submit_budget": self.grant("build.submit"),
+                "retirement_budget": self.grant("retirement.execute"),
                 "shop_purchase_budget": self.grant("shop.purchase"),
                 "campaign_stage_entry_budget": self.grant("campaign.stage_entry"),
                 "campaign_fleet_mutation_budget": self.grant("campaign.fleet_mutation"),

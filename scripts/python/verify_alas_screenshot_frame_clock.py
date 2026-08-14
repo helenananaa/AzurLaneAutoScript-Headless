@@ -53,9 +53,7 @@ _DEVICE_SESSION_INSERTION = (
 _DEVICE_PIXEL_INSERTION = (
     "        semantic_session = getattr(self, 'semantic_adapter', None)\n"
     "        if semantic_session is not None:\n"
-    "            semantic_session.reject_pixel_access(\n"
-    "                'template-access', 'Device.handle_night_commission'\n"
-    "            )\n"
+    "            return False\n"
 )
 
 
@@ -412,26 +410,18 @@ def verify(patched_upstream: Path) -> Mapping[str, Any]:
         }
     )
     events.clear()
-    try:
-        device_class.handle_night_commission(device)
-    except UnsupportedPixelRead:
-        pass
-    else:
+    if device_class.handle_night_commission(device) is not False:
         raise ScreenshotFrameClockVerificationError(
-            "direct template access did not fail with UnsupportedPixelRead"
+            "semantic night-commission branch did not stop before pixels"
         )
-    if events != ["session.reject_pixel_access"]:
+    if events:
         raise ScreenshotFrameClockVerificationError(
-            "template rejection changed the ALAS branch boundary"
+            "semantic night-commission branch dispatched an unexpected action"
         )
     pixel_records = session.pixel_access_records()
-    if (
-        len(pixel_records) != 1
-        or pixel_records[0].operation.value != "template-access"
-        or pixel_records[0].consumer != "Device.handle_night_commission"
-    ):
+    if pixel_records:
         raise ScreenshotFrameClockVerificationError(
-            "template access was not exactly classified"
+            "semantic night-commission branch consumed framebuffer pixels"
         )
     request_count = len(handle.requests)
     if not adapter.appear("LOGIN_CHECK") or len(handle.requests) != request_count:

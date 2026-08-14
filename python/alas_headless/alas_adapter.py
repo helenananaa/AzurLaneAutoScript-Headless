@@ -85,6 +85,7 @@ from .semantic_oracle import (
     CampaignFleetRowState,
     CampaignFleetSelectionState,
     CampaignMapEntryState,
+    CampaignMapAchievementState,
     CampaignMapState,
     CampaignMapViewportSwipeIntent,
     CampaignMapViewportSwipeProof,
@@ -97,6 +98,8 @@ from .semantic_oracle import (
     CommissionStartProof,
     DormState,
     DormFeedState,
+    EnhancementExecutionReceipt,
+    EnhancementNoMaterialReceipt,
     GeneralShopItemState,
     MissionPageState,
     MissionDisposition,
@@ -120,10 +123,13 @@ from .semantic_oracle import (
     ResearchProjectStatus,
     ResearchDetailState,
     ResearchQueueState,
+    RetirementExecutionReceipt,
+    RetirementNoCandidateReceipt,
     TacticalSlotState,
     TacticalCandidateShipState,
     TacticalBookState,
     TacticalSkillState,
+    enhancement_config_policy,
 )
 
 
@@ -149,7 +155,9 @@ def _legacy_action_grants(
     research_start_budget: int,
     dorm_collect_budget: int,
     dorm_feed_budget: int,
+    enhancement_budget: int,
     build_submit_budget: int,
+    retirement_budget: int,
     shop_purchase_budget: int,
     campaign_stage_entry_budget: int,
     campaign_fleet_mutation_budget: int,
@@ -177,7 +185,9 @@ def _legacy_action_grants(
             "research.start": research_start_budget,
             "dorm.collect": dorm_collect_budget,
             "dorm.feed": dorm_feed_budget,
+            "enhancement.execute": enhancement_budget,
             "build.submit": build_submit_budget,
+            "retirement.execute": retirement_budget,
             "shop.purchase": shop_purchase_budget,
             "campaign.stage_entry": campaign_stage_entry_budget,
             "campaign.fleet_mutation": campaign_fleet_mutation_budget,
@@ -962,7 +972,9 @@ class AlasSemanticAdapter:
         research_start_budget: int = 0,
         dorm_collect_budget: int = 0,
         dorm_feed_budget: int = 0,
+        enhancement_budget: int = 0,
         build_submit_budget: int = 0,
+        retirement_budget: int = 0,
         shop_purchase_budget: int = 0,
         campaign_stage_entry_budget: int = 0,
         campaign_fleet_mutation_budget: int = 0,
@@ -1001,7 +1013,9 @@ class AlasSemanticAdapter:
             ("research start", research_start_budget),
             ("dorm collect", dorm_collect_budget),
             ("dorm feed", dorm_feed_budget),
+            ("enhancement", enhancement_budget),
             ("build submit", build_submit_budget),
+            ("retirement", retirement_budget),
             ("shop purchase", shop_purchase_budget),
             ("campaign stage entry", campaign_stage_entry_budget),
             ("campaign fleet mutation", campaign_fleet_mutation_budget),
@@ -1040,7 +1054,9 @@ class AlasSemanticAdapter:
                 research_start_budget=research_start_budget,
                 dorm_collect_budget=dorm_collect_budget,
                 dorm_feed_budget=dorm_feed_budget,
+                enhancement_budget=enhancement_budget,
                 build_submit_budget=build_submit_budget,
+                retirement_budget=retirement_budget,
                 shop_purchase_budget=shop_purchase_budget,
                 campaign_stage_entry_budget=campaign_stage_entry_budget,
                 campaign_fleet_mutation_budget=campaign_fleet_mutation_budget,
@@ -1078,6 +1094,12 @@ class AlasSemanticAdapter:
         self._operation_siren_globe_swipe_intent: Optional[
             _OperationSirenGlobeSwipeIntent
         ] = None
+        self._last_retirement_receipt: Optional[
+            Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt]
+        ] = None
+        self._enhancement_receipts: List[
+            Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt]
+        ] = []
         self._observer_stale_since: Optional[float] = None
         self._frame_observation_oracle = frame_observation_oracle
         self._frame_identity_provider = frame_identity_provider
@@ -1103,13 +1125,136 @@ class AlasSemanticAdapter:
         operation: Callable[[], Any],
     ) -> Any:
         dispatch = self._action_ledger.dispatch(capability, operation)
-        if isinstance(dispatch.value, ActionReceipt):
+        if isinstance(
+            dispatch.value,
+            (
+                ActionReceipt,
+                EnhancementExecutionReceipt,
+                EnhancementNoMaterialReceipt,
+                RetirementExecutionReceipt,
+                RetirementNoCandidateReceipt,
+            ),
+        ):
             return replace(
                 dispatch.value,
                 policy_sha256=dispatch.policy_sha256,
                 capability_id=dispatch.capability,
             )
         return dispatch.value
+
+    def retirement_allowed(self) -> bool:
+        return self._action_ledger.allowed("retirement.execute")
+
+    def enhancement_allowed(self) -> bool:
+        return self._action_ledger.allowed("enhancement.execute")
+
+    def enhance_ships(
+        self,
+        ship_to_enhance: str,
+        check_per_category: int,
+        filter_expression: Optional[str],
+    ) -> int:
+        """Run ALAS Enhance settings through exact semantic Dock navigation."""
+
+        policy = enhancement_config_policy(
+            ship_to_enhance, check_per_category, filter_expression
+        )
+        if not self.enhancement_allowed():
+            raise SemanticGateClosed(
+                "enhancement requires a positive transaction budget"
+            )
+        self._package_gate()
+        self._enhancement_receipts = []
+        favourite = policy.target_scope.value == "favourite"
+        ship_types: Tuple[Optional[str], ...] = (
+            tuple(policy.ship_types) if policy.ship_types else (None,)
+        )
+        consumed = 0
+        completed_normally = False
+        try:
+            self.oracle.set_enhancement_dock_favourite(favourite)
+            for ship_type in ship_types:
+                self.oracle.set_enhancement_dock_filter(ship_type)
+                no_material_cards: Set[Tuple[int, int, str, int]] = set()
+                for _ in range(policy.check_per_category):
+                    if not self.enhancement_allowed():
+                        completed_normally = True
+                        break
+                    candidates = tuple(
+                        item
+                        for item in self.oracle.enhancement_dock_candidates()
+                        if (
+                            item.position,
+                            item.ship_id,
+                            item.ship_name,
+                            item.level,
+                        )
+                        not in no_material_cards
+                    )
+                    if not candidates:
+                        break
+                    candidate = candidates[0]
+                    self.oracle.open_enhancement_dock_candidate(
+                        candidate.position,
+                        candidate.ship_id,
+                        candidate.ship_name,
+                        candidate.level,
+                    )
+                    receipt = self._dispatch_mutation(
+                        "enhancement.execute",
+                        self.oracle.enhance_with_official_recommendation,
+                    )
+                    self._enhancement_receipts.append(receipt)
+                    if isinstance(receipt, EnhancementExecutionReceipt):
+                        consumed += receipt.consumed_count
+                    else:
+                        no_material_cards.add(
+                            (
+                                candidate.position,
+                                candidate.ship_id,
+                                candidate.ship_name,
+                                candidate.level,
+                            )
+                        )
+                    self.oracle.return_to_enhancement_dock()
+                if not self.enhancement_allowed():
+                    break
+            completed_normally = True
+        finally:
+            # If confirmation was sent but its postcondition was not observed,
+            # never add another input merely to tidy the page.
+            if completed_normally:
+                self.oracle.reset_enhancement_dock()
+        return consumed
+
+    def enhancement_receipts(
+        self,
+    ) -> Tuple[Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt], ...]:
+        return tuple(self._enhancement_receipts)
+
+    def retire_ships_one_click(self, keep_limit_break: bool) -> int:
+        """Run one official retirement transaction and return its real count."""
+
+        if not isinstance(keep_limit_break, bool):
+            raise TypeError("retirement limit-break policy must be boolean")
+        if not self._action_ledger.allowed("retirement.execute"):
+            raise SemanticGateClosed(
+                "one-click retirement requires a positive transaction budget"
+            )
+        self._package_gate()
+        receipt = self._dispatch_mutation(
+            "retirement.execute",
+            lambda: self.oracle.retire_ships_one_click(keep_limit_break),
+        )
+        self._last_retirement_receipt = receipt
+        if isinstance(receipt, RetirementNoCandidateReceipt):
+            return 0
+        return receipt.retired_count
+
+    def retirement_receipt(
+        self,
+    ) -> Optional[Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt]]:
+        return self._last_retirement_receipt
 
     def purchase_shop_item_once(
         self,
@@ -4384,6 +4529,11 @@ class AlasSemanticAdapter:
         self._package_gate()
         return self.oracle.campaign_oil()
 
+    def campaign_map_achievement_state(self) -> CampaignMapAchievementState:
+        self._package_gate()
+        context = self._require_campaign_context()
+        return self.oracle.campaign_map_achievement_state(context.stage_code)
+
     def campaign_auto_search_selected(self) -> bool:
         self._package_gate()
         self._require_campaign_context()
@@ -4431,6 +4581,11 @@ class AlasSemanticAdapter:
                     time.sleep(0.25)
         self._require_campaign_context()
         return self.oracle.campaign_fleet_hp()
+
+    def campaign_fleet_levels(self) -> Tuple[int, ...]:
+        self._package_gate()
+        self._require_campaign_context()
+        return self.oracle.campaign_fleet_levels()
 
     def operation_siren_need_repair(self) -> Tuple[bool, ...]:
         self._package_gate()
@@ -7735,7 +7890,9 @@ class AlasSemanticSession:
         research_start_budget: int = 0,
         dorm_collect_budget: int = 0,
         dorm_feed_budget: int = 0,
+        enhancement_budget: int = 0,
         build_submit_budget: int = 0,
+        retirement_budget: int = 0,
         shop_purchase_budget: int = 0,
         campaign_stage_entry_budget: int = 0,
         campaign_fleet_mutation_budget: int = 0,
@@ -7812,7 +7969,9 @@ class AlasSemanticSession:
             ("research start", research_start_budget),
             ("dorm collect", dorm_collect_budget),
             ("dorm feed", dorm_feed_budget),
+            ("enhancement", enhancement_budget),
             ("build submit", build_submit_budget),
+            ("retirement", retirement_budget),
             ("shop purchase", shop_purchase_budget),
             ("campaign stage entry", campaign_stage_entry_budget),
             ("campaign fleet mutation", campaign_fleet_mutation_budget),
@@ -7840,7 +7999,9 @@ class AlasSemanticSession:
         self.research_start_budget = research_start_budget
         self.dorm_collect_budget = dorm_collect_budget
         self.dorm_feed_budget = dorm_feed_budget
+        self.enhancement_budget = enhancement_budget
         self.build_submit_budget = build_submit_budget
+        self.retirement_budget = retirement_budget
         self.shop_purchase_budget = shop_purchase_budget
         self.campaign_stage_entry_budget = campaign_stage_entry_budget
         self.campaign_fleet_mutation_budget = campaign_fleet_mutation_budget
@@ -7875,7 +8036,9 @@ class AlasSemanticSession:
             research_start_budget=research_start_budget,
             dorm_collect_budget=dorm_collect_budget,
             dorm_feed_budget=dorm_feed_budget,
+            enhancement_budget=enhancement_budget,
             build_submit_budget=build_submit_budget,
+            retirement_budget=retirement_budget,
             shop_purchase_budget=shop_purchase_budget,
             campaign_stage_entry_budget=campaign_stage_entry_budget,
             campaign_fleet_mutation_budget=campaign_fleet_mutation_budget,
@@ -8139,7 +8302,9 @@ class AlasSemanticSession:
                 research_start_budget=self.research_start_budget,
                 dorm_collect_budget=self.dorm_collect_budget,
                 dorm_feed_budget=self.dorm_feed_budget,
+                enhancement_budget=self.enhancement_budget,
                 build_submit_budget=self.build_submit_budget,
+                retirement_budget=self.retirement_budget,
                 shop_purchase_budget=self.shop_purchase_budget,
                 campaign_stage_entry_budget=self.campaign_stage_entry_budget,
                 campaign_fleet_mutation_budget=(
@@ -8654,6 +8819,35 @@ class AlasSemanticSession:
     def shop_purchase_allowed(self) -> bool:
         return self.open()._action_ledger.allowed("shop.purchase")
 
+    def retirement_allowed(self) -> bool:
+        return self.open().retirement_allowed()
+
+    def enhancement_allowed(self) -> bool:
+        return self.open().enhancement_allowed()
+
+    def enhance_ships(
+        self,
+        ship_to_enhance: str,
+        check_per_category: int,
+        filter_expression: Optional[str],
+    ) -> int:
+        return self.open().enhance_ships(
+            ship_to_enhance, check_per_category, filter_expression
+        )
+
+    def enhancement_receipts(
+        self,
+    ) -> Tuple[Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt], ...]:
+        return self.open().enhancement_receipts()
+
+    def retire_ships_one_click(self, keep_limit_break: bool) -> int:
+        return self.open().retire_ships_one_click(keep_limit_break)
+
+    def retirement_receipt(
+        self,
+    ) -> Optional[Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt]]:
+        return self.open().retirement_receipt()
+
     def purchase_shop_item_once(
         self,
         index: int,
@@ -8789,6 +8983,9 @@ class AlasSemanticSession:
     def campaign_oil(self) -> int:
         return self.open().campaign_oil()
 
+    def campaign_map_achievement_state(self) -> CampaignMapAchievementState:
+        return self.open().campaign_map_achievement_state()
+
     def campaign_auto_search_selected(self) -> bool:
         return self.open().campaign_auto_search_selected()
 
@@ -8797,6 +8994,9 @@ class AlasSemanticSession:
 
     def campaign_fleet_hp(self) -> Tuple[float, ...]:
         return self.open().campaign_fleet_hp()
+
+    def campaign_fleet_levels(self) -> Tuple[int, ...]:
+        return self.open().campaign_fleet_levels()
 
     def operation_siren_need_repair(self) -> Tuple[bool, ...]:
         return self.open().operation_siren_need_repair()
