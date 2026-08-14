@@ -323,8 +323,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 99 changed files, all 98 patched Python files compile, and
-  the repository suite passes `932/932` tests, including Retirement mode configuration, Gacha configuration, Shipyard focus configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  patch applies as 100 changed files, all 99 patched Python files compile, and
+  the repository suite passes `937/937` tests, including BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard focus configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
@@ -461,6 +461,26 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   occurs. The fields move only to `offline=complete`; live empty-collection,
   partial food inventory, post-feed food/capacity proof, and recovery failures
   remain open.
+
+### Dorm furniture configuration: interval and option decisions passed offline
+
+- `BuyFurniture.Enable` admits exact booleans, `BuyOption` admits only the
+  pinned `set/all` values, and `LastRun` is a bounded timezone-naive datetime.
+  Dorm validates the full surface before semantic scope entry; direct
+  `BuyFurniture.run()` also validates before its first datetime operation.
+- Frozen-clock replay preserves the original six-day boundary: one second
+  overdue and exact equality run, while one second early and future records
+  skip. A completed multi-candidate loop restores both pages and records the
+  frozen current time in `BuyFurniture_LastRun`.
+- Both options reach their exact original button mapping. Coin greater than or
+  equal to a positive price remains affordable; insufficient coin and zero
+  price remain failures. Nineteen malformed, wrong-type, timezone, and range
+  cases fail before Dorm scope or furniture handling.
+- Payment entry, OCR, confirmation, page recovery, and Dorm scope are all
+  recorders. Mutation budget is `0`: no navigation, furniture purchase, coin
+  consumption, or Android input occurred. Only the three fields' offline
+  dimension is promoted; live countdown/ownership, balance/price, purchase
+  receipt, and recovery evidence remain incomplete, so Dorm stays `L`.
 
 ### Commission preset, custom filter, and major switch: offline contract passed
 

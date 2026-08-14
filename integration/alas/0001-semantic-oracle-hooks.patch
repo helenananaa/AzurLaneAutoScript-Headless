@@ -1205,8 +1205,25 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..ce2879036976f1a196e59e79c29cd6d1
  
          if self.tactical_finish:
              self.config.task_delay(target=self.tactical_finish)
+diff --git a/module/dorm/buy_furniture.py b/module/dorm/buy_furniture.py
+index 97afbe2d..fa1b652d 100644
+--- a/module/dorm/buy_furniture.py
++++ b/module/dorm/buy_furniture.py
+@@ -218,6 +218,12 @@ class BuyFurniture(UI):
+         """
+         Run Buy Furniture
+         """
++        from alas_headless import validate_alas_buy_furniture_config
++        validate_alas_buy_furniture_config(
++            enable=self.config.BuyFurniture_Enable,
++            buy_option=self.config.BuyFurniture_BuyOption,
++            last_run=self.config.BuyFurniture_LastRun,
++        )
+         logger.attr("BuyFurniture_LastRun", self.config.BuyFurniture_LastRun)
+         logger.attr("CHECK_INTERVAL", CHECK_INTERVAL)
+ 
 diff --git a/module/dorm/dorm.py b/module/dorm/dorm.py
-index c3c95459..f9fb2ef5 100644
+index c3c95459..870f5d96 100644
 --- a/module/dorm/dorm.py
 +++ b/module/dorm/dorm.py
 @@ -240,6 +240,18 @@ class RewardDorm(UI):
@@ -1276,17 +1293,25 @@ index c3c95459..f9fb2ef5 100644
          """
          Pages:
              in: Any page
-@@ -627,3 +657,20 @@ class RewardDorm(UI):
+@@ -627,3 +657,28 @@ class RewardDorm(UI):
          delay = self.cal_dorm_delay(ships)
          logger.info(f'Ships in dorm: {ships}, task to delay: {delay}')
          self.config.task_delay(minute=delay)
 +
 +    def run(self):
-+        from alas_headless import validate_alas_dorm_config
++        from alas_headless import (
++            validate_alas_buy_furniture_config,
++            validate_alas_dorm_config,
++        )
 +        validate_alas_dorm_config(
 +            collect=self.config.Dorm_Collect,
 +            feed=self.config.Dorm_Feed,
 +            feed_filter=self.config.Dorm_FeedFilter,
++        )
++        validate_alas_buy_furniture_config(
++            enable=self.config.BuyFurniture_Enable,
++            buy_option=self.config.BuyFurniture_BuyOption,
++            last_run=self.config.BuyFurniture_LastRun,
 +        )
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:

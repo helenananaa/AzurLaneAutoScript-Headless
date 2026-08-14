@@ -34,6 +34,7 @@ FLOW_PATHS = {
         "module/tactical/tactical_class.py",
     },
     "0030-research-dorm-build-flow-ports.patch": {
+        "module/dorm/buy_furniture.py",
         "module/dorm/dorm.py",
         "module/gacha/gacha_reward.py",
         "module/research/project.py",

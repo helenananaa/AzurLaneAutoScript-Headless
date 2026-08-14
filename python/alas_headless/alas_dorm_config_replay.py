@@ -8,6 +8,7 @@ import importlib
 import itertools
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 from types import MethodType, SimpleNamespace
 from typing import Any
@@ -146,6 +147,8 @@ class _Config(SimpleNamespace):
             Dorm_Feed=feed,
             Dorm_FeedFilter=feed_filter,
             BuyFurniture_Enable=False,
+            BuyFurniture_BuyOption="all",
+            BuyFurniture_LastRun=datetime(2020, 1, 1),
             Scheduler_Enable=True,
             Scheduler_SuccessInterval=278,
         )

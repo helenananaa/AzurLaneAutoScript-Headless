@@ -207,9 +207,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_buy_furniture_config.py",
+        "python/alas_headless/alas_buy_furniture_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -226,9 +231,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_buy_furniture_config.py",
+        "python/alas_headless/alas_buy_furniture_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -245,9 +255,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_buy_furniture_config.py",
+        "python/alas_headless/alas_buy_furniture_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=datetime; display=default; validate=datetime",
       "panels": [
@@ -6999,7 +7014,7 @@
         "BuyFurniture"
       ],
       "name": "Dorm",
-      "note": "默认收取和喂食闭环；食物过滤、买家具、套装/全部和日期状态未闭环",
+      "note": "收取/喂食/食物过滤与买家具三字段已离线分类；实际家具页观察、货币、确认和购买结果仍未闭环",
       "status": "L"
     },
     {
@@ -9108,6 +9123,45 @@
       ],
       "field": "Gacha.UseTicket",
       "note": "Both booleans preserve event-only ticket detection, ticket-first splitting, and cube fallback across the complete configuration matrix; invalid values fail before build scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_buy_furniture_config.py",
+        "python/alas_headless/alas_buy_furniture_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "BuyFurniture.BuyOption",
+      "note": "Both declared options preserve the original exact set/all button mapping and affordability decisions offline; invalid choices fail before Dorm scope or furniture date handling."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_buy_furniture_config.py",
+        "python/alas_headless/alas_buy_furniture_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "BuyFurniture.Enable",
+      "note": "Both booleans preserve original Dorm dispatch while the full furniture surface is validated before Dorm scope entry; no disabled configuration can be mistaken for purchase authority."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_buy_furniture_config.py",
+        "python/alas_headless/alas_buy_furniture_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "BuyFurniture.LastRun",
+      "note": "Bounded naive records preserve the original exact six-day run boundary, early/future skip, loop completion write, and invalid-value refusal before datetime arithmetic."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -9120,8 +9174,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "c48820460c013cc89c275f002a406722e4f1925388eab419790f4d4c4b9fe2d9",
-      "manifest_sha256": "bc7c40c7f4d13e7badc39827956e49bd99765391704a0ee0750301d7a09efed0",
+      "combined_sha256": "6546affc646a6277049f49f3e5297a994bd655349593bb7647cec08ce7dd2ddc",
+      "manifest_sha256": "643d48572e121c784eacac41110807f2e8c76e22f8cea62e727e9dcd3ae44cda",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

@@ -88,6 +88,11 @@ from .alas_dorm_config_contract import (
     parse_alas_dorm_feed_filter,
     validate_alas_dorm_config,
 )
+from .alas_buy_furniture_config_contract import (
+    AlasBuyFurnitureConfigSnapshot,
+    BUY_FURNITURE_OPTIONS,
+    validate_alas_buy_furniture_config,
+)
 from .alas_commission_config_contract import (
     AlasCommissionConfigSnapshot,
     COMMISSION_PRESETS,
