@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import ast
 from contextlib import nullcontext
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 import importlib
 import itertools
@@ -24,8 +24,34 @@ from .semantic_oracle import SemanticGateClosed
 
 SCHEMA = "alas-headless.exercise-config-replay/v1"
 REPRESENTATIVE_TRIALS = (1, 2, 10, 2**31)
+REPRESENTATIVE_THRESHOLDS = (0.0, 0.01, 0.4, 1.0)
+REPRESENTATIVE_REFRESH_VALUES = tuple(range(7))
+REPRESENTATIVE_REFRESH_RECORDS = (
+    datetime(2000, 1, 1),
+    datetime(2026, 8, 15),
+    datetime(2100, 1, 1),
+)
 INVALID_ENUM_VALUES = (None, True, 1, "", "unknown", [])
 INVALID_TRIAL_VALUES = (0, -1, True, 1.0, "1", None, [])
+INVALID_THRESHOLD_VALUES = (
+    -0.01,
+    1.01,
+    True,
+    float("nan"),
+    float("inf"),
+    "0.4",
+    None,
+    [],
+)
+INVALID_REFRESH_VALUES = (-1, 7, True, 1.0, "1", None, [])
+INVALID_RECORD_VALUES = (
+    datetime(1999, 12, 31),
+    datetime(2100, 1, 2),
+    datetime(2026, 8, 15, tzinfo=timezone.utc),
+    "2026-08-15 00:00:00",
+    None,
+    [],
+)
 
 
 def _sha256(path: Path) -> str:
@@ -43,6 +69,14 @@ def _verify_args(alas_root: Path) -> None:
         "OpponentChooseMode": ("select", "max_exp", EXERCISE_OPPONENT_MODES),
         "OpponentTrial": ("input", 1, None),
         "ExerciseStrategy": ("select", "aggressive", EXERCISE_STRATEGIES),
+        "LowHpThreshold": ("input", 0.4, None),
+        "LowHpConfirmWait": ("input", 0.1, None),
+        "OpponentRefreshValue": ("input", 0, None),
+        "OpponentRefreshRecord": (
+            "datetime",
+            "2020-01-01 00:00:00",
+            None,
+        ),
     }
     for field, (kind, default, options) in expected.items():
         declaration = group.get(field)
@@ -78,16 +112,30 @@ def _method_consumers(path: Path, class_name: str, fields: tuple[str, ...]):
     return tree, target, {field: sorted(methods) for field, methods in result.items()}
 
 
-def _source_flags(exercise_path: Path, combat_path: Path):
+def _source_flags(exercise_path: Path, combat_path: Path, hp_path: Path):
+    consumed_fields = (
+        "Exercise_ExerciseStrategy",
+        "Exercise_OpponentChooseMode",
+        "Exercise_OpponentTrial",
+        "Exercise_LowHpThreshold",
+        "Exercise_OpponentRefreshValue",
+        "Exercise_OpponentRefreshRecord",
+        "Exercise_LowHpConfirmWait",
+    )
     _, exercise_class, exercise_consumers = _method_consumers(
         exercise_path,
         "Exercise",
-        ("Exercise_ExerciseStrategy", "Exercise_OpponentChooseMode", "Exercise_OpponentTrial"),
+        consumed_fields,
     )
     _, _, combat_consumers = _method_consumers(
         combat_path,
         "ExerciseCombat",
-        ("Exercise_OpponentTrial",),
+        consumed_fields,
+    )
+    _, _, hp_consumers = _method_consumers(
+        hp_path,
+        "HpDaemon",
+        consumed_fields,
     )
     run = next(
         (node for node in exercise_class.body if isinstance(node, ast.FunctionDef) and node.name == "run"),
@@ -109,16 +157,36 @@ def _source_flags(exercise_path: Path, combat_path: Path):
             "run",
         ],
         "Exercise_OpponentTrial": ["run"] if guard_present else [],
+        "Exercise_LowHpThreshold": ["_exercise_easiest_else_exp"],
+        "Exercise_OpponentRefreshValue": ["_get_opponent_change_count"],
+        "Exercise_OpponentRefreshRecord": ["_get_opponent_change_count"],
+        "Exercise_LowHpConfirmWait": [],
     }
-    combined = dict(exercise_consumers)
-    combined["Exercise_OpponentTrial"] = sorted(
-        combined["Exercise_OpponentTrial"] + combat_consumers["Exercise_OpponentTrial"]
-    )
+    if guard_present:
+        for field in (
+            "Exercise_LowHpThreshold",
+            "Exercise_OpponentRefreshValue",
+            "Exercise_OpponentRefreshRecord",
+        ):
+            expected[field].append("run")
+    combined = {
+        field: sorted(
+            exercise_consumers[field]
+            + combat_consumers[field]
+            + hp_consumers[field]
+        )
+        for field in consumed_fields
+    }
     expected["Exercise_OpponentTrial"] = sorted(
         expected["Exercise_OpponentTrial"] + ["_combat"]
     )
+    expected["Exercise_LowHpThreshold"] = sorted(
+        expected["Exercise_LowHpThreshold"] + ["_at_low_hp"]
+    )
     if combined != expected:
-        raise AssertionError("Exercise configuration consumer surface drifted")
+        raise AssertionError(
+            f"Exercise configuration consumer surface drifted: {combined!r} != {expected!r}"
+        )
     if guard_present:
         executable = [
             statement
@@ -152,11 +220,23 @@ def _load_original(alas_root: Path):
 
 
 class _Config(SimpleNamespace):
-    def __init__(self, *, strategy: object, mode: object, trial: object):
+    def __init__(
+        self,
+        *,
+        strategy: object,
+        mode: object,
+        trial: object,
+        low_hp_threshold: object = 0.4,
+        refresh_value: object = 0,
+        refresh_record: object = datetime(2026, 8, 15),
+    ):
         super().__init__(
             Exercise_ExerciseStrategy=strategy,
             Exercise_OpponentChooseMode=mode,
             Exercise_OpponentTrial=trial,
+            Exercise_LowHpThreshold=low_hp_threshold,
+            Exercise_OpponentRefreshValue=refresh_value,
+            Exercise_OpponentRefreshRecord=refresh_record,
         )
         self.events = []
 
@@ -165,6 +245,13 @@ class _Config(SimpleNamespace):
 
     def set_record(self, **kwargs):
         self.events.append(["set_record", kwargs])
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+    def override(self, **kwargs):
+        self.events.append(["override", kwargs])
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def task_delay(self, **kwargs):
         self.events.append(["task_delay", kwargs])
@@ -178,9 +265,19 @@ def _run_case(
     trial: object,
     period_hours: int,
     remaining: tuple[int, ...] = (0,),
+    low_hp_threshold: object = 0.4,
+    refresh_value: object = 0,
+    refresh_record: object = datetime(2026, 8, 15),
 ) -> dict[str, Any]:
     events = []
-    config = _Config(strategy=strategy, mode=mode, trial=trial)
+    config = _Config(
+        strategy=strategy,
+        mode=mode,
+        trial=trial,
+        low_hp_threshold=low_hp_threshold,
+        refresh_value=refresh_value,
+        refresh_record=refresh_record,
+    )
     host = object.__new__(module.Exercise)
     host.config = config
     host.device = SimpleNamespace(image=object())
@@ -357,6 +454,137 @@ def _verify_trials(combat_module: Any):
     return result
 
 
+def _verify_refresh_state(exercise_module: Any) -> dict[str, Any]:
+    update = datetime(2026, 8, 15)
+    original_update = exercise_module.get_server_last_update
+    exercise_module.get_server_last_update = lambda value: update
+    same_day = {}
+    try:
+        for value in REPRESENTATIVE_REFRESH_VALUES:
+            config = _Config(
+                strategy="aggressive",
+                mode="max_exp",
+                trial=1,
+                refresh_value=value,
+                refresh_record=update,
+            )
+            host = object.__new__(exercise_module.Exercise)
+            host.config = config
+            result = exercise_module.Exercise._get_opponent_change_count(host)
+            if result != value or config.events:
+                raise AssertionError("Exercise same-day refresh restoration drifted")
+            same_day[str(value)] = result
+
+        resets = {}
+        for label, record in (
+            ("previous_day", update - timedelta(days=1)),
+            ("future_day", update + timedelta(days=1)),
+        ):
+            config = _Config(
+                strategy="aggressive",
+                mode="max_exp",
+                trial=1,
+                refresh_value=6,
+                refresh_record=record,
+            )
+            host = object.__new__(exercise_module.Exercise)
+            host.config = config
+            result = exercise_module.Exercise._get_opponent_change_count(host)
+            if (
+                result != 0
+                or config.Exercise_OpponentRefreshValue != 0
+                or config.events
+                != [["set_record", {"Exercise_OpponentRefreshValue": 0}]]
+            ):
+                raise AssertionError("Exercise cross-day refresh reset drifted")
+            resets[label] = config.events
+
+        increments = {}
+        for value in range(5):
+            events = []
+            config = _Config(
+                strategy="aggressive",
+                mode="max_exp",
+                trial=1,
+                refresh_value=value,
+                refresh_record=update,
+            )
+            host = object.__new__(exercise_module.Exercise)
+            host.config = config
+            host.opponent_change_count = value
+            host.appear_then_click = MethodType(
+                lambda self, button: events.append("new_opponent"), host
+            )
+            host.ensure_no_info_bar = MethodType(
+                lambda self, timeout: events.append(["info_bar", timeout]), host
+            )
+            exercise_module.Exercise._new_opponent(host)
+            expected = value + 1
+            if (
+                host.opponent_change_count != expected
+                or config.Exercise_OpponentRefreshValue != expected
+                or events != ["new_opponent", ["info_bar", 3]]
+            ):
+                raise AssertionError("Exercise refresh increment drifted")
+            increments[str(value)] = expected
+    finally:
+        exercise_module.get_server_last_update = original_update
+    return {"same_day": same_day, "cross_day": resets, "increments": increments}
+
+
+class _ConfirmTimer:
+    def __init__(self, *, reached: bool, current: float):
+        self._reached = reached
+        self._current = current
+        self.reset_count = 0
+
+    def reached(self):
+        return self._reached
+
+    def current_time(self):
+        return self._current
+
+    def reset(self):
+        self.reset_count += 1
+        self._reached = False
+
+
+def _verify_low_hp_threshold(combat_module: Any) -> dict[str, Any]:
+    cases = {
+        "confirmed_at_threshold": (0.4, 0.4, 0.5, True, 1.0, True),
+        "confirmation_pending": (0.4, 0.4, 0.5, False, 0.5, False),
+        "above_threshold": (0.4, 0.400001, 0.5, True, 1.0, False),
+        "minimum_excluded": (1.0, 0.01, 0.5, True, 1.0, False),
+        "zero_threshold": (0.0, 0.5, 0.5, True, 1.0, False),
+        "full_threshold": (1.0, 1.0, 0.5, True, 1.0, True),
+        "defender_bar_gone": (0.4, 0.4, 0.0, True, 1.0, False),
+        "stale_confirmation": (0.4, 0.4, 0.5, True, 300.0, False),
+    }
+    result = {}
+    for name, (threshold, attacker, defender, reached, current, expected) in cases.items():
+        host = object.__new__(combat_module.ExerciseCombat)
+        host.config = SimpleNamespace(Exercise_LowHpThreshold=threshold)
+        timer = _ConfirmTimer(reached=reached, current=current)
+        host.low_hp_confirm_timer = timer
+        percentages = iter((attacker, defender))
+        host._calculate_hp = MethodType(
+            lambda self, image, **kwargs: next(percentages), host
+        )
+        host._show_hp = MethodType(lambda self, low_hp_time=0: None, host)
+        decision = combat_module.HpDaemon._at_low_hp(
+            host,
+            image=object(),
+            pause=combat_module.PAUSE,
+        )
+        if bool(decision) is not expected:
+            raise AssertionError("Exercise low-HP threshold decision drifted")
+        result[name] = {
+            "decision": bool(decision),
+            "timer_resets": timer.reset_count,
+        }
+    return result
+
+
 def _verify_mode_dispatch(module: Any):
     result = {}
     for mode in EXERCISE_OPPONENT_MODES:
@@ -376,15 +604,21 @@ def _verify_mode_dispatch(module: Any):
 
 
 def _verify_contract() -> tuple[int, int]:
-    for strategy, mode, trial in itertools.product(
+    for strategy, mode, trial, threshold, refresh_value, refresh_record in itertools.product(
         EXERCISE_STRATEGIES,
         EXERCISE_OPPONENT_MODES,
         REPRESENTATIVE_TRIALS,
+        REPRESENTATIVE_THRESHOLDS,
+        REPRESENTATIVE_REFRESH_VALUES,
+        REPRESENTATIVE_REFRESH_RECORDS,
     ):
         validate_alas_exercise_config(
             strategy=strategy,
             opponent_mode=mode,
             opponent_trial=trial,
+            low_hp_threshold=threshold,
+            opponent_refresh_value=refresh_value,
+            opponent_refresh_record=refresh_record,
         )
     invalid_count = 0
     for field in ("strategy", "opponent_mode"):
@@ -393,6 +627,9 @@ def _verify_contract() -> tuple[int, int]:
                 "strategy": "aggressive",
                 "opponent_mode": "max_exp",
                 "opponent_trial": 1,
+                "low_hp_threshold": 0.4,
+                "opponent_refresh_value": 0,
+                "opponent_refresh_record": datetime(2026, 8, 15),
             }
             case[field] = value
             try:
@@ -407,15 +644,43 @@ def _verify_contract() -> tuple[int, int]:
                 strategy="aggressive",
                 opponent_mode="max_exp",
                 opponent_trial=value,
+                low_hp_threshold=0.4,
+                opponent_refresh_value=0,
+                opponent_refresh_record=datetime(2026, 8, 15),
             )
         except SemanticGateClosed:
             invalid_count += 1
         else:
             raise AssertionError("invalid Exercise.OpponentTrial was admitted")
+    invalid_surfaces = (
+        ("low_hp_threshold", INVALID_THRESHOLD_VALUES),
+        ("opponent_refresh_value", INVALID_REFRESH_VALUES),
+        ("opponent_refresh_record", INVALID_RECORD_VALUES),
+    )
+    for field, values in invalid_surfaces:
+        for value in values:
+            case = {
+                "strategy": "aggressive",
+                "opponent_mode": "max_exp",
+                "opponent_trial": 1,
+                "low_hp_threshold": 0.4,
+                "opponent_refresh_value": 0,
+                "opponent_refresh_record": datetime(2026, 8, 15),
+            }
+            case[field] = value
+            try:
+                validate_alas_exercise_config(**case)
+            except SemanticGateClosed:
+                invalid_count += 1
+            else:
+                raise AssertionError(f"invalid Exercise.{field} was admitted")
     return (
         len(EXERCISE_STRATEGIES)
         * len(EXERCISE_OPPONENT_MODES)
-        * len(REPRESENTATIVE_TRIALS),
+        * len(REPRESENTATIVE_TRIALS)
+        * len(REPRESENTATIVE_THRESHOLDS)
+        * len(REPRESENTATIVE_REFRESH_VALUES)
+        * len(REPRESENTATIVE_REFRESH_RECORDS),
         invalid_count,
     )
 
@@ -425,19 +690,28 @@ def _verify_invalid_entry(module: Any, guard_present: bool):
         return {}
     result = {}
     cases = {
-        "Exercise_ExerciseStrategy": (None, "max_exp", 1),
-        "Exercise_OpponentChooseMode": ("aggressive", None, 1),
-        "Exercise_OpponentTrial": ("aggressive", "max_exp", 0),
+        "Exercise_ExerciseStrategy": {"strategy": None},
+        "Exercise_OpponentChooseMode": {"mode": None},
+        "Exercise_OpponentTrial": {"trial": 0},
+        "Exercise_LowHpThreshold": {"low_hp_threshold": -0.01},
+        "Exercise_OpponentRefreshValue": {"refresh_value": 7},
+        "Exercise_OpponentRefreshRecord": {
+            "refresh_record": datetime(1999, 12, 31)
+        },
     }
-    for field, (strategy, mode, trial) in cases.items():
+    for field, override in cases.items():
+        arguments = {
+            "strategy": "aggressive",
+            "mode": "max_exp",
+            "trial": 1,
+            "period_hours": 60,
+            "low_hp_threshold": 0.4,
+            "refresh_value": 0,
+            "refresh_record": datetime(2026, 8, 15),
+        }
+        arguments.update(override)
         try:
-            _run_case(
-                module,
-                strategy=strategy,
-                mode=mode,
-                trial=trial,
-                period_hours=60,
-            )
+            _run_case(module, **arguments)
         except SemanticGateClosed:
             result[field] = []
         else:
@@ -450,18 +724,22 @@ def verify_exercise_config(alas_root: Path) -> dict[str, Any]:
     _verify_args(alas_root)
     exercise_path = alas_root / "module/exercise/exercise.py"
     combat_path = alas_root / "module/exercise/combat.py"
-    consumers, guard_present = _source_flags(exercise_path, combat_path)
+    hp_path = alas_root / "module/exercise/hp_daemon.py"
+    consumers, guard_present = _source_flags(exercise_path, combat_path, hp_path)
     exercise_module, combat_module, opponent_module = _load_original(alas_root)
     strategy_windows = _verify_strategy_windows(exercise_module)
     opponent_modes = _verify_opponent_modes(exercise_module, opponent_module)
     trial_decisions = _verify_trials(combat_module)
+    refresh_state = _verify_refresh_state(exercise_module)
+    low_hp_threshold = _verify_low_hp_threshold(combat_module)
     mode_dispatch = _verify_mode_dispatch(exercise_module)
     accepted_count, invalid_count = _verify_contract()
     invalid_entry = _verify_invalid_entry(exercise_module, guard_present)
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 3,
+        "field_count": 6,
+        "declared_unused_fields": ["Exercise_LowHpConfirmWait"],
         "accepted_case_count": accepted_count,
         "strategy_hour_case_count": len(EXERCISE_STRATEGIES) * 61,
         "invalid_case_count": invalid_count,
@@ -471,6 +749,8 @@ def verify_exercise_config(alas_root: Path) -> dict[str, Any]:
         "original_strategy_windows": strategy_windows,
         "original_opponent_modes": opponent_modes,
         "original_trial_decisions": trial_decisions,
+        "original_refresh_state": refresh_state,
+        "original_low_hp_threshold": low_hp_threshold,
         "original_mode_dispatch": mode_dispatch,
         "invalid_entry_events": invalid_entry,
         "temporary_config_only": True,
@@ -482,6 +762,7 @@ def verify_exercise_config(alas_root: Path) -> dict[str, Any]:
             "args": _sha256(alas_root / "module/config/argument/args.json"),
             "exercise": _sha256(exercise_path),
             "combat": _sha256(combat_path),
+            "hp_daemon": _sha256(hp_path),
             "opponent": _sha256(alas_root / "module/exercise/opponent.py"),
         },
     }

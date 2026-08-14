@@ -2449,21 +2449,25 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "unsupported",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
-        "offline": "missing"
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "docs/alas-config-support-matrix.md"
+      ],
       "group_code": "L",
       "metadata": "type=input; display=default",
       "panels": [
         "Exercise"
       ],
       "path": "Exercise.LowHpConfirmWait",
-      "status_label": "☐ 未逐值",
-      "support": "supported",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
       "values": "input/default: 0.1"
     },
     {
@@ -2472,9 +2476,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=input; display=default",
       "panels": [
@@ -2515,9 +2524,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=datetime; display=default; validate=datetime",
       "panels": [
@@ -2534,9 +2548,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=input; display=default",
       "panels": [
@@ -7073,7 +7092,7 @@
         "Exercise"
       ],
       "name": "Exercise",
-      "note": "八种时段策略、四种选敌模式与正整数试探次数已离线等价；真实对手/时段观察、刷新持久化、低血重试、战斗结算和失败恢复未闭环",
+      "note": "六个实际消费字段已离线等价；LowHpConfirmWait 上游零读取，真实对手/时段/血量观察、刷新持久化、战斗结算和失败恢复未闭环",
       "status": "L"
     },
     {
@@ -8902,6 +8921,45 @@
       ],
       "field": "Exercise.OpponentTrial",
       "note": "Positive integer trial counts preserve original success and exhaustion boundaries; zero, booleans, non-integers, and malformed values fail before Exercise scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Exercise.LowHpThreshold",
+      "note": "Thresholds from 0 through 1 preserve the original strict lower HP boundary, inclusive configured boundary, confirmation timer, defender-bar reset, and stale-confirmation decisions; invalid values fail before Exercise scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Exercise.OpponentRefreshRecord",
+      "note": "Bounded naive records preserve original same-day restoration and previous- or future-day reset decisions against a frozen server update; invalid records fail before Exercise scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_exercise_config.py",
+        "python/alas_headless/alas_exercise_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Exercise.OpponentRefreshValue",
+      "note": "Integer values 0 through 6 preserve original same-day restoration, cross-day zeroing, and five in-task refresh increments; invalid values fail before Exercise scope entry."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8914,8 +8972,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "0cbd252461efeef937c82d97a2fe23efe8e05f1b9e642efe7352f6bdc7341c91",
-      "manifest_sha256": "f7b4705762b9f7ffc7162dcc807b14f4f5cbc8a13d07d1f1d80ed759bdc01412",
+      "combined_sha256": "0918a1a45e2c04f9e9a5e3e34dafbc6f968e2ab80872008ae5f979ed2c8d9b62",
+      "manifest_sha256": "e6066051fc3349009314b80ad22803f2d5753c3d43b23b0e2e749e2d911dafa9",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

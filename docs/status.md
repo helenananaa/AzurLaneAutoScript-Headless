@@ -307,26 +307,37 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
-### Exercise strategy, opponent mode, and trial count: offline contract passed
+### Exercise consumed configuration: offline contract passed
 
 - `ExerciseStrategy` accepts the eight values declared by pinned ALAS,
   `OpponentChooseMode` accepts its four declared modes, and `OpponentTrial`
-  accepts exact positive integers. The guard is the first executable statement
-  in `Exercise.run()`, before page entry, opponent inspection, or combat.
+  accepts exact positive integers. `LowHpThreshold` is bounded to `0..1`,
+  `OpponentRefreshValue` to integer `0..6`, and `OpponentRefreshRecord` to a
+  bounded naive datetime. The guard is the first executable statement in
+  `Exercise.run()`, before page entry, opponent inspection, or combat.
 - Pinned replay covers all 488 strategy/hour decisions for hours 0 through 60,
   including ALAS's hour-zero behavior and every Friday-to-Sunday consumption
   window. It also preserves each mode's opponent ordering, the `leftmost`
   detail-scan bypass, normal mode dispatch, and trial success/exhaustion
-  boundaries for 1, 2, and 3 attempts.
-- The contract enumerates 128 representative valid combinations and rejects 19
-  invalid single-field cases. The original zero-trial fallback is recorded as
-  unreachable compatibility evidence because zero now fails closed.
+  boundaries for 1, 2, and 3 attempts. Frozen-server-time replay additionally
+  covers all seven same-day refresh values, previous/future-day zeroing, and
+  five in-task increments; low-HP replay covers strict `0.01`, inclusive
+  configured thresholds, confirmation pending/reached/stale, and defender-bar
+  disappearance.
+- The contract enumerates 10,752 representative valid combinations and rejects
+  40 invalid single-field cases. The original zero-trial fallback is recorded
+  as unreachable compatibility evidence because zero now fails closed.
 - Mutation budget is `0`: opponent OCR/state, scheduler, and combat calls are
   fixtures, with no real Exercise attempt, battle, screenshot/OCR, page input,
-  or Android injection. These three fields move only to `offline=complete`;
+  or Android injection. These six consumed fields are `offline=complete` only;
   live opponent power/levels and period observation, refresh persistence,
-  low-HP retry behavior, actual fights, settlement, and failure recovery remain
-  incomplete.
+  semantic HP observation, actual retries/fights, settlement, and failure
+  recovery remain incomplete.
+- `LowHpConfirmWait` is explicitly unsupported in pinned upstream: it is
+  declared and documented, but no runtime method reads it, while combat creates
+  `Timer(1.5, count=2)` unconditionally. Re-enter only with an upstream-owned or
+  separately reviewed mapping from the field to that timer plus deterministic
+  elapsed-time and live semantic-HP evidence; this patch does not invent one.
 
 ### Game Manager restart configuration: offline contract passed
 

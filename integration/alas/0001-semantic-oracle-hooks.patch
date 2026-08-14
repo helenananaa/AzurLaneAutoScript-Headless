@@ -2368,10 +2368,10 @@ index a152e88b..9562e066 100644
          scout = np.array(hp[3:]) * np.array(weight) / np.max(weight)
  
 diff --git a/module/exercise/exercise.py b/module/exercise/exercise.py
-index 77342676..5771e26b 100644
+index 77342676..0be2bab6 100644
 --- a/module/exercise/exercise.py
 +++ b/module/exercise/exercise.py
-@@ -194,6 +194,12 @@ class Exercise(ExerciseCombat):
+@@ -194,6 +194,15 @@ class Exercise(ExerciseCombat):
          return preserve, admiral_interval
  
      def run(self):
@@ -2380,6 +2380,9 @@ index 77342676..5771e26b 100644
 +            strategy=self.config.Exercise_ExerciseStrategy,
 +            opponent_mode=self.config.Exercise_OpponentChooseMode,
 +            opponent_trial=self.config.Exercise_OpponentTrial,
++            low_hp_threshold=self.config.Exercise_LowHpThreshold,
++            opponent_refresh_value=self.config.Exercise_OpponentRefreshValue,
++            opponent_refresh_record=self.config.Exercise_OpponentRefreshRecord,
 +        )
          self.ui_ensure(page_exercise)
  
