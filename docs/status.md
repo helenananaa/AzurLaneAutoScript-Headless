@@ -303,7 +303,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 99 changed files, all 98 patched Python files compile, and
-  the repository suite passes `922/922` tests, including Shipyard focus configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `927/927` tests, including Gacha configuration, Shipyard focus configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
@@ -356,6 +356,26 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `BuyAmount`, `LastRun`, daily deduplication, actual PR/DR page identity,
   blueprint sufficiency, strengthen limits, purchase confirmation, and receipts
   remain incomplete and the Shipyard panel stays at its account boundary.
+
+### Gacha pool, amount, ticket, and drill: offline contract passed
+
+- `Pool` accepts the five pinned values, `Amount` exact integers `1..10`, and
+  `UseTicket/UseDrill` exact booleans. The guard runs before semantic build scope
+  entry, resource reads, queue handling, or any submit path.
+- The 200-value configuration matrix preserves original pool cost classes,
+  event-only ticket detection, ticket-first/cube remainder splitting, and
+  post-submit drill flushing. Original pool routing also covers unavailable
+  event/wishing-well fallback and configured wishing-well refusal; four
+  affordability cases preserve exact coin/cube reductions. Twenty-five invalid
+  single-field cases fail before scope entry.
+- All navigation, OCR, ticket inventory, preparation, submit, queue flush, and
+  semantic scope operations are fixtures. Mutation budget is `0`; no build is
+  submitted and no ticket, cube, coin, or drill is consumed.
+- These four fields move only to `offline=complete`. Existing live evidence is
+  still limited to one Light order. Multi-order submits, every other pool,
+  ticket consumption, drill acceleration, queue collection/full recovery,
+  resource-shortfall UI, and post-submit receipts remain incomplete; no further
+  destructive replay was authorized or attempted.
 
 ### Game Manager restart configuration: offline contract passed
 

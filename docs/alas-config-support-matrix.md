@@ -244,6 +244,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 固定上游回放覆盖全部 1,176 个声明组合并拒绝 28 个非法单字段案例。原 `shipyard_set_focus()` 的 42 个 PR 系列/舰位组合保持 32 个可选、6 个 index 0 “不购买”分支和 4 个三期以后 index 6 限制；普通、禁用舰位和受限舰位样本均保持 DR 先于 PR 的原任务分派。页面导航、系列/舰船选择、金币读取、蓝图使用和购买均为夹具，mutation budget 为 0，没有消费金币/蓝图或注入 Android 输入。四字段只提升 `offline`；`BuyAmount/LastRun`、每日去重、真实 PR/DR 页面不串页、蓝图不足、强化上限、购买确认和结果收据仍未闭环，Shipyard 面板继续停留在账号边界。
 
+### 1.30 本轮 Gacha 卡池、数量、票券与快速完成契约
+
+`Gacha.Pool` 只接受 `light/heavy/special/event/wishing_well`，`Amount` 只接受精确整数 `1..10`，`UseTicket/UseDrill` 只接受精确布尔值。四字段在 `RewardGacha.run()` 第一条可执行语句统一校验，早于语义 build scope、资源读取、队列处理或提交；布尔伪装整数、浮点、字符串、越界和空值均 fail-closed。
+
+200 个配置组合保持原卡池成本分类、仅活动池检查票券、票券优先与魔方余量拆分、提交后快速完成队列刷新。原 `gacha_goto_pool()` 另覆盖五卡池可用路由、活动/祈愿池不可用回退 light、已配置祈愿池拒绝；四个资源案例保持金币/魔方逐次缩减和不足归零。25 个非法单字段案例在 scope 前拒绝。导航、OCR、票券库存、准备、提交、队列刷新和 scope 均为夹具，mutation budget 为 0，没有提交建造或消耗票券、魔方、金币、快速完成工具。四字段只提升 `offline`；现有实机仅有一次轻型建造，多单、其他卡池、票券、快速完成、队列领取/满队列恢复、资源不足 UI 和提交后收据仍未闭环，本轮没有请求或执行新的破坏性验证。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -285,7 +291,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | 可读页面并安全跳过；购买、过滤、刷新、金币/钻石和皮肤箱均未完成 |
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | 只有勋章商店一次 DR 图纸购买；其他商店、过滤/子选项和刷新未闭环 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | PR/DR 系列与舰位已离线等价；BuyAmount/LastRun、页面不串页、蓝图/金币边界、确认和实际结果未闭环 |
-| 36 | Gacha | Scheduler, Gacha | L | 一次轻型建造闭环；其他卡池、1-10 次、快速完成、票券及队列领取未闭环 |
+| 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；实机仍仅一次轻型建造，其他卡池、多单、票券、快速完成及队列领取未闭环 |
 | 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；Data Key 实机仅有 300/300 观察，BattlePass 不可用，补给包当前无免费项且未执行领取 |
 | 38 | Minigame | Scheduler | L | 当前抚顺小游戏路径可用；没有字段配置，但其他轮换小游戏仍属于该任务支持范围 |
 | 39 | PrivateQuarters | Scheduler, PrivateQuarters | M | 蛋糕、玫瑰、互动和 7 个舰船选项均缺适配 |
@@ -386,7 +392,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | CoreShop | `Filter` | M | 规则命中/无命中、核心不足、月限购和确认 |
 | ShipyardDr | `ResearchSeries`=2..5; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；数量边界、每日去重、蓝图不足、达到上限和实际购买仍需闭环 |
 | Shipyard | `ResearchSeries`=1..6; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；其余同上，且 PR/DR 页面切换不能串页 |
-| Gacha | `Amount`=1..10; `Pool`=`light/heavy/special/event/wishing_well`; `UseDrill`; `UseTicket` | L | 50 个数量/卡池组合可按等价类压缩；票券、快速完成、队列满、活动池不存在、资源不足和领取 |
+| Gacha | `Amount`=1..10; `Pool`=`light/heavy/special/event/wishing_well`; `UseDrill`; `UseTicket` | L | 200 个配置组合已离线等价；实机仍缺其他卡池、多单、票券、快速完成、队列满、资源不足和领取 |
 | BattlePass | `Collect` | B | 开关两值、入口不可用、免费/付费奖励区别、无奖励和领取结果 |
 | DataKey | `Collect`; `ForceCollect` | L | 四组合、非法值和已领取/满容量/强制/有余量边界已离线完成；仍缺真实普通/强制领取、上限弹窗和库存后置条件 |
 | Mail | `ClaimMerit`; `ClaimMaintenance`; `ClaimTradeLicense`; `DeleteCollected` | P | 16 组合、不同邮件类型、附件为空、容量上限、只删除已领取和误删保护 |
@@ -649,10 +655,10 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Fleet.Fleet2Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "combat_auto", "combat_manual", "hide_in_bottom_left", "hide_in_upper_left", "stand_still_in_the_middle"; default: "combat_auto" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Fleet.Fleet2Step` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 2, 3, 4, 5; default: 2 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Fleet.FleetOrder` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/display | options: "fleet1_all_fleet2_standby", "fleet1_boss_fleet2_mob", "fleet1_mob_fleet2_boss", "fleet1_standby_fleet2_all"; default: "fleet1_all_fleet2_standby", "fleet1_mob_fleet2_boss" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Gacha.Amount` | Gacha | type=select; display=default | options: 1, 10, 2, 3, 4, 5, 6, 7, 8, 9; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Gacha.Pool` | Gacha | type=select; display=default | options: "event", "heavy", "light", "special", "wishing_well"; default: "light" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Gacha.UseDrill` | Gacha | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Gacha.UseTicket` | Gacha | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
+| `Gacha.Amount` | Gacha | type=select; display=default | options: 1, 10, 2, 3, 4, 5, 6, 7, 8, 9; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Gacha.Pool` | Gacha | type=select; display=default | options: "event", "heavy", "light", "special", "wishing_well"; default: "light" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Gacha.UseDrill` | Gacha | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Gacha.UseTicket` | Gacha | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GameManager.AutoRestart` | GameManager | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `GemsFarming.ChangeFlagship` | GemsFarming | type=select; display=default | options: "ship_equip", "ship"; default: "ship" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `GemsFarming.ChangeVanguard` | GemsFarming | type=select; display=default | options: "disabled", "ship_equip", "ship"; default: "ship" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

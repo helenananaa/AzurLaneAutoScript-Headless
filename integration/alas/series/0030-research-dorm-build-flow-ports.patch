@@ -91,7 +91,7 @@ index c3c95459..f9fb2ef5 100644
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_dorm()
 diff --git a/module/gacha/gacha_reward.py b/module/gacha/gacha_reward.py
-index 08c93073..9fcf6e06 100644
+index 08c93073..7a28c725 100644
 --- a/module/gacha/gacha_reward.py
 +++ b/module/gacha/gacha_reward.py
 @@ -85,6 +85,14 @@ class RewardGacha(GachaUI, Retirement):
@@ -137,12 +137,19 @@ index 08c93073..9fcf6e06 100644
          """
          Handle gacha operations if configured to do so.
  
-@@ -351,3 +365,14 @@ class RewardGacha(GachaUI, Retirement):
+@@ -351,3 +365,21 @@ class RewardGacha(GachaUI, Retirement):
          """
          self.gacha_run()
          self.config.task_delay(server_update=True)
 +
 +    def run(self):
++        from alas_headless import validate_alas_gacha_config
++        validate_alas_gacha_config(
++            pool=self.config.Gacha_Pool,
++            amount=self.config.Gacha_Amount,
++            use_ticket=self.config.Gacha_UseTicket,
++            use_drill=self.config.Gacha_UseDrill,
++        )
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
 +            semantic_adapter.begin_build()

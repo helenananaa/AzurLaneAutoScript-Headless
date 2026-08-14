@@ -2920,9 +2920,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_gacha_config.py",
+        "python/alas_headless/alas_gacha_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2939,9 +2944,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_gacha_config.py",
+        "python/alas_headless/alas_gacha_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2958,9 +2968,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_gacha_config.py",
+        "python/alas_headless/alas_gacha_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -2977,9 +2992,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_gacha_config.py",
+        "python/alas_headless/alas_gacha_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -7133,7 +7153,7 @@
         "Gacha"
       ],
       "name": "Gacha",
-      "note": "一次轻型建造闭环；其他卡池、1-10 次、快速完成、票券及队列领取未闭环",
+      "note": "四配置字段已离线等价；实机仍仅一次轻型建造，其他卡池、多单、票券、快速完成及队列领取未闭环",
       "status": "L"
     },
     {
@@ -9032,6 +9052,58 @@
       ],
       "field": "ShipyardDr.ShipIndex",
       "note": "Disabled zero and indices one through six preserve original DR focus decisions and restricted combinations; invalid values fail before navigation or blueprint use."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_gacha_config.py",
+        "python/alas_headless/alas_gacha_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Gacha.Amount",
+      "note": "All amounts one through ten preserve original ticket and cube split plus affordability decisions; invalid values fail before build scope entry or resource reads."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_gacha_config.py",
+        "python/alas_headless/alas_gacha_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Gacha.Pool",
+      "note": "All five declared pools preserve original navigation and cost class decisions, including unavailable event or wishing-well fallback and configured wishing-well refusal; invalid values fail before build scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_gacha_config.py",
+        "python/alas_headless/alas_gacha_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Gacha.UseDrill",
+      "note": "Both booleans preserve original post-submit queue flush decisions across the complete configuration matrix; invalid values fail before build scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_gacha_config.py",
+        "python/alas_headless/alas_gacha_config_replay.py",
+        "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Gacha.UseTicket",
+      "note": "Both booleans preserve event-only ticket detection, ticket-first splitting, and cube fallback across the complete configuration matrix; invalid values fail before build scope entry."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -9044,8 +9116,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "a1d6d8bb26b5b2d8670baa100a9afd7cfa31a8be2404cda5b1ca8b23cac86a8b",
-      "manifest_sha256": "e5ac6abbbb5f601fd6bd929fd648180075314ce7da69b53057c8e66d38e1a514",
+      "combined_sha256": "0bd9389a35cdca54cb12b99a2d4a76f53e894bebad8d03c64797e539faeeb3f1",
+      "manifest_sha256": "9dd2c5a359e0d0c5b5ffea857b72059dbe94e57187d125a9ef7ce99cbe27077e",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

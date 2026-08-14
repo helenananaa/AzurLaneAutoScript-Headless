@@ -107,6 +107,12 @@ from .alas_shipyard_config_contract import (
     SHIPYARD_PR_SERIES,
     validate_alas_shipyard_config,
 )
+from .alas_gacha_config_contract import (
+    AlasGachaConfigSnapshot,
+    GACHA_AMOUNTS,
+    GACHA_POOLS,
+    validate_alas_gacha_config,
+)
 from .alas_reward_config_contract import (
     AlasRewardConfigSnapshot,
     validate_alas_reward_config,
