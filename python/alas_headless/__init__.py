@@ -64,6 +64,10 @@ from .alas_supply_pack_config_contract import (
     AlasSupplyPackConfigSnapshot,
     validate_alas_supply_pack_config,
 )
+from .alas_reward_config_contract import (
+    AlasRewardConfigSnapshot,
+    validate_alas_reward_config,
+)
 
 from .alas_map_sync import (
     AlasCampaignFleetPlan,

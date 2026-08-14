@@ -188,6 +188,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 固定上游回放执行原 `Freebies.run()` 和 `SupplyPack.run()`，覆盖开关两值、七个目标星期、星期三前后边界及油量恰好 21000 的保护分支，共 14 个合法和 10 个非法配置案例。真实 `supply_pack_buy()` 从未调用，只记录原状态机是否会产生免费包候选；mutation budget 为 0，没有领取物品、页面输入或 Android 注入。因此两字段只提升 `offline`，当前页面无免费项的实机记录不能称为成功领取闭环。
 
+### 1.21 本轮 Reward 五开关契约
+
+`Reward.CollectOil`、`CollectCoin`、`CollectExp`、`CollectMission` 和 `CollectWeeklyMission` 现在只接受精确布尔值。原 `Reward.run()` 在页面导航和领取前验证全部五字段；共享这些配置的 `RaidDaily.run()` 也在 EX 奖励路径前验证同一字段面，避免只守住普通 Reward 入口。
+
+固定上游回放覆盖全部 32 种合法开关组合和 20 个非法单字段案例，执行原 Reward 参数转发与调度尾部、RaidDaily EX 下 `CollectMission` 的真假转发，以及非 EX 绕过。真实资源、任务和周常领取方法均未调用，mutation budget 为 0，没有页面输入或 Android 注入。因此五字段只提升 `offline`；资源上限、日常/周常领取后置条件、红点、数字行、空页和特殊舰船奖励仍需实机闭环。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -221,7 +227,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 默认收取和喂食闭环；食物过滤、买家具、套装/全部和日期状态未闭环 |
 | 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | M | 买箱、金币溢出、训练、增强和保留天赋规则均缺适配 |
 | 27 | Guild | Scheduler, GuildLogistics, GuildOperation | M | 后勤兑换、新任务、作战、Boss 和推荐舰队均缺适配 |
-| 28 | Reward | Scheduler, Reward | P | 资源气泡可领取，任务领取部分可用；周常、红点、数字行、空页面和舰船奖励未完整闭环 |
+| 28 | Reward | Scheduler, Reward | P | 五个领取开关及 RaidDaily 共享入口已离线完成；资源气泡可领取，任务领取部分可用，周常、红点、数字行、空页面和舰船奖励仍未完整闭环 |
 | 29 | Awaken | Scheduler, Awaken | M | 收藏过滤、120/125 上限及批量觉醒缺适配 |
 | 30 | Daily | Scheduler, Daily | L | 十四字段离线映射与 fail-closed 契约已完成；实机仍只闭环 Tactical Training 第二关默认舰队，其余日常和配置值未闭环 |
 | 31 | Hard | Scheduler, Hard | B | 64 关目录与两舰队离线契约已完成；实机仍只到 11-4 进入边界，当前账号进度和自动寻敌锁定，尚无战斗/结算证据 |
@@ -313,7 +319,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | MeowfficerTrain | `Enable`; `Mode`=`seamlessly/once_a_day`; `RetainTalentedGold`; `RetainTalentedPurple`; `MaxFeedLevel`; `EnhanceIndex` | M | 两训练模式、两保留开关组合、等级/索引边界、无材料、错误目标保护和每日去重 |
 | GuildLogistics | `Enable`; `ExchangeFilter`; `SelectNewMission` | M | 开关、兑换规则、新任务选择、贡献不足、无奖励和重复领取 |
 | GuildOperation | `Enable`; `JoinThreshold`; `SelectNewOperation`; `NewOperationMaxDate`; `AttackBoss`; `BossFleetRecommend` | M | 阈值/日期边界、加入/选择、Boss 与非 Boss、推荐舰队开关、次数不足和奖励 |
-| Reward | `CollectOil`; `CollectCoin`; `CollectExp`; `CollectMission`; `CollectWeeklyMission` | P | 32 种开关组合可按等价类证明；资源上限、日常/周常、数字行、空页、红点和特殊奖励 |
+| Reward | `CollectOil`; `CollectCoin`; `CollectExp`; `CollectMission`; `CollectWeeklyMission` | P | 32 种开关组合、20 个非法单字段案例及 Reward/RaidDaily 双入口 fail-closed 已离线完成；仍缺资源上限、日常/周常领取后置条件、数字行、空页、红点和特殊奖励实机闭环 |
 | Awaken | `Favourite`; `LevelCap`=`level120/level125` | M | 收藏真假、两个上限、资源不足、无候选、批量选择和确认结果 |
 
 ### 3.5 每日、演习、商店、船坞、建造与免费领取
@@ -723,11 +729,11 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Research.UseCube` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "only_05_hour" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Research.UsePart` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Retirement.RetireMode` | General | type=select; display=default | options: "enhance", "old_retire", "one_click_retire"; default: "one_click_retire" | `P`/◐ 一键与强化已接入；旧退役未适配 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Reward.CollectCoin` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Reward.CollectExp` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Reward.CollectMission` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Reward.CollectOil` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Reward.CollectWeeklyMission` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
+| `Reward.CollectCoin` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Reward.CollectExp` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Reward.CollectMission` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Reward.CollectOil` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Reward.CollectWeeklyMission` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Scheduler.Command` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=input; display=hide | input/default: "Awaken", "Coalition", "CoalitionSp", "Commission", "Daily", "Dorm", "Event", "Event2", "EventA", "EventB", "EventC", "EventD", "EventSp", "Exercise", "Freebies", "Gacha", "GemsFarming", "Guild", "Hard", "Hospital", "Main", "Main2", "Main3", "Meowfficer", "Minigame", "OpsiAbyssal", "OpsiArchive", "OpsiAshAssist", "OpsiAshBeacon", "OpsiCrossMonth", "OpsiDaily", "OpsiExplore", "OpsiHazard1Leveling", "OpsiMeowfficerFarming", "OpsiMonthBoss", "OpsiObscure", "OpsiShop", "OpsiStronghold", "OpsiVoucher", "PrivateQuarters", "Raid", "RaidDaily", "Research", "Restart", "Reward", "Shipyard", "ShopFrequent", "ShopOnce", "Tactical", "WarArchives" | `R`/◐ 调度路径 | ☑ | — | — | ☑ | ◐ |
 | `Scheduler.Enable` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=checkbox/lock/state; display=default | options: false, true; default: false, true | `R`/◐ 调度路径 | ☑ | — | — | ☑ | ◐ |
 | `Scheduler.FailureInterval` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=input; display=hide | input/default: "120-240", "30-60", 0, 120, 278, 30, 60 | `R`/◐ 调度路径 | ☑ | — | — | ☑ | ◐ |

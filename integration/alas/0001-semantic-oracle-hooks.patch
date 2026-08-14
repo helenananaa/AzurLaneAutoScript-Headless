@@ -466,10 +466,51 @@ index 6d9e42f4..d25882e3 100644
 +        finally:
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_mail()
+diff --git a/module/raid/daily.py b/module/raid/daily.py
+index 8dda1bdf..3753c960 100644
+--- a/module/raid/daily.py
++++ b/module/raid/daily.py
+@@ -1,5 +1,7 @@
+ import re
+ 
++from alas_headless import validate_alas_reward_config
++
+ from module.base.filter import Filter
+ from module.logger import logger
+ from module.raid.run import RaidRun
+@@ -25,6 +27,13 @@ class RaidDaily(RaidRun):
+         Args:
+             name (str): Raid name, such as 'raid_20200624'
+         """
++        reward_config = validate_alas_reward_config(
++            collect_oil=self.config.Reward_CollectOil,
++            collect_coin=self.config.Reward_CollectCoin,
++            collect_exp=self.config.Reward_CollectExp,
++            collect_mission=self.config.Reward_CollectMission,
++            collect_weekly_mission=self.config.Reward_CollectWeeklyMission,
++        )
+         if self.is_raid_rpg():
+             logger.info('RPG raid has no dailies')
+             self.config.Scheduler_Enable = False
+@@ -56,7 +65,7 @@ class RaidDaily(RaidRun):
+             # any difficulty 5+ and 10+ times
+             self.ui_goto_main()
+             Reward(self.config, self.device).reward_mission(
+-                   daily=self.config.Reward_CollectMission,
++                   daily=reward_config.collect_mission,
+                    weekly=False)
+             self.ui_ensure(page_raid)
+ 
 diff --git a/module/reward/reward.py b/module/reward/reward.py
-index 50a71717..3df61a5a 100644
+index 50a71717..2192b56c 100644
 --- a/module/reward/reward.py
 +++ b/module/reward/reward.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_reward_config
++
+ from module.base.button import ButtonGrid
+ from module.base.decorator import cached_property
+ from module.base.timer import Timer
 @@ -166,6 +166,14 @@ class Reward(UI):
                  logger.info('Mission collect finished')
                  break
@@ -523,7 +564,7 @@ index 50a71717..3df61a5a 100644
  
      @cached_property
      def _reward_side_navbar(self):
-@@ -300,12 +319,21 @@ class Reward(UI):
+@@ -300,12 +321,28 @@ class Reward(UI):
              in: Any page
              out: page_main or page_mission, may have info_bar
          """
@@ -536,20 +577,27 @@ index 50a71717..3df61a5a 100644
 -        self.reward_mission(daily=self.config.Reward_CollectMission,
 -                            weekly=self.config.Reward_CollectWeeklyMission)
 -        self.config.task_delay(success=True)
++        reward_config = validate_alas_reward_config(
++            collect_oil=self.config.Reward_CollectOil,
++            collect_coin=self.config.Reward_CollectCoin,
++            collect_exp=self.config.Reward_CollectExp,
++            collect_mission=self.config.Reward_CollectMission,
++            collect_weekly_mission=self.config.Reward_CollectWeeklyMission,
++        )
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
 +            semantic_adapter.begin_mission_reward(
-+                daily=self.config.Reward_CollectMission,
-+                weekly=self.config.Reward_CollectWeeklyMission)
++                daily=reward_config.collect_mission,
++                weekly=reward_config.collect_weekly_mission)
 +        try:
 +            self.ui_ensure(page_reward)
 +            self.reward_receive(
-+                oil=self.config.Reward_CollectOil,
-+                coin=self.config.Reward_CollectCoin,
-+                exp=self.config.Reward_CollectExp)
++                oil=reward_config.collect_oil,
++                coin=reward_config.collect_coin,
++                exp=reward_config.collect_exp)
 +            self.ui_goto(page_main)
-+            self.reward_mission(daily=self.config.Reward_CollectMission,
-+                                weekly=self.config.Reward_CollectWeeklyMission)
++            self.reward_mission(daily=reward_config.collect_mission,
++                                weekly=reward_config.collect_weekly_mission)
 +            self.config.task_delay(success=True)
 +        finally:
 +            if semantic_adapter is not None:

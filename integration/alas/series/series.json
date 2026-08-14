@@ -13,7 +13,7 @@
     {
       "order": 3,
       "path": "integration/alas/series/0010-mission-mail-flow-ports.patch",
-      "sha256": "da70a1dd444da681278428c02022e47c44ca8a5b6b0e2af730075b745b9ab397"
+      "sha256": "1dbfca0a25e08564a130fbd68cf71f65acf87008c63d64915156bb008717cf5a"
     },
     {
       "order": 4,

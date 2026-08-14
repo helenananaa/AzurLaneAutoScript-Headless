@@ -25,6 +25,7 @@ LIFECYCLE_PATHS = {
 FLOW_PATHS = {
     "0010-mission-mail-flow-ports.patch": {
         "module/freebies/mail_white.py",
+        "module/raid/daily.py",
         "module/reward/reward.py",
     },
     "0020-commission-tactical-flow-ports.patch": {

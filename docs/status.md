@@ -302,10 +302,27 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 96 changed files, all 95 patched Python files compile, and
-  the repository suite passes `877/877` tests, including SupplyPack configuration, Hard configuration,
+  patch applies as 97 changed files, all 96 patched Python files compile, and
+  the repository suite passes `882/882` tests, including Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
+
+### Reward collection configuration: offline contract passed
+
+- `Reward.CollectOil`, `CollectCoin`, `CollectExp`, `CollectMission`, and
+  `CollectWeeklyMission` admit exact booleans at the start of original
+  `Reward.run()`, before page navigation or any claim attempt. The shared
+  `RaidDaily.run()` entry validates the same five-field surface before its EX
+  reward path can inspect `CollectMission`.
+- Pinned replay covers all 32 boolean combinations plus 20 invalid single-field
+  cases. It executes original Reward forwarding and scheduler tails, RaidDaily
+  EX mission forwarding for both values, and the non-EX bypass.
+- No real reward, mission, or weekly claim method is called. Mutation budget is
+  `0`, with no page input or Android injection; invalid values fail before both
+  runtime entries can navigate.
+- These five fields move only to `offline=complete`. Resource caps, daily and
+  weekly claim postconditions, red dots, number rows, empty pages, and special
+  ship rewards remain live gaps and are not inferred from replay.
 
 ### SupplyPack collect and weekday configuration: offline contract passed
 
