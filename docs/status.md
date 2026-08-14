@@ -4,6 +4,24 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-14
 
+### Submarine shared configuration: inactive surface complete, active input refused
+
+- The four `Submarine` fields shared by 12 map panels now validate before
+  campaign navigation. With `Fleet=0`, all 40 combinations of five modes, two
+  auto-search roles, and four boss distances retain pinned ALAS's inactive
+  semantics. Fleet indices 1 and 2 are both classified but fail before legacy
+  fleet-selection, strategy, movement, or combat-call input.
+- The replay directly executes original combat-call decisions, boss-only mode
+  mapping, both auto-search setting values, and all four boss-distance plans.
+  The three movement distances select `(5,5)/(4,5)/(3,5)` on one comparable
+  native grid fixture; open-ocean support correctly skips movement. Two active
+  combat-call final-input boundaries are captured without delegation.
+- Six malformed values and ten active fleet/mode cases fail closed. The
+  GemsFarming panel's narrower two-mode UI is recorded separately from the
+  other 11 panels' five-mode surface. No fleet was selected, submarine moved,
+  combat support called, device connected, or Android input injected; only the
+  four fields' offline dimensions are promoted.
+
 ### Emotion shared configuration: all 11 bookkeeping fields classified
 
 - All 11 `Emotion` fields shared by 17 campaign, raid, coalition, and hospital
@@ -248,8 +266,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 93 changed files, all 92 patched Python files compile, and
-  the repository suite passes `834/834` tests, including the HpControl,
-  task-hoarding, EnemyPriority, and Emotion replay additions.
+  the repository suite passes `839/839` tests, including the HpControl,
+  task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
 ### EventB ship-drop closure: implementation passed, natural live proof pending
 

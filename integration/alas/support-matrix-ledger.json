@@ -6280,9 +6280,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_submarine_config.py",
+        "python/alas_headless/alas_submarine_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
       "panels": [
@@ -6310,9 +6315,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_submarine_config.py",
+        "python/alas_headless/alas_submarine_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
       "panels": [
@@ -6340,9 +6350,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_submarine_config.py",
+        "python/alas_headless/alas_submarine_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -6370,9 +6385,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_submarine_config.py",
+        "python/alas_headless/alas_submarine_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/display",
       "panels": [
@@ -7768,6 +7788,58 @@
       ],
       "field": "Emotion.Mode",
       "note": "All three public modes plus pinned Hard's internal nothing override preserve original calculate and ignore truth semantics."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_submarine_config.py",
+        "python/alas_headless/alas_submarine_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Submarine.AutoSearchMode",
+      "note": "Both values preserve original auto-search setting selection offline; active submarine fleet input remains refused."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_submarine_config.py",
+        "python/alas_headless/alas_submarine_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Submarine.DistanceToBoss",
+      "note": "All four distance values execute pinned target planning; three movement targets and the open-ocean no-move branch are captured without input."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_submarine_config.py",
+        "python/alas_headless/alas_submarine_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Submarine.Fleet",
+      "note": "Fleet 0 admits the complete inactive enum product; fleets 1 and 2 fail before unqualified selection, movement, strategy, or combat input."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_submarine_config.py",
+        "python/alas_headless/alas_submarine_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Submarine.Mode",
+      "note": "All five modes preserve original combat-call and boss mapping decisions; active submarine fleet input remains refused."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -7780,8 +7852,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "eaca4480aa702901687362917a9d74d9c2a36a062bbe294716359aa322c2628f",
-      "manifest_sha256": "5329f7c272b49cfb0166e7b0368df1bef67e082364f1696149a9906bf1753793",
+      "combined_sha256": "8ebe27b8a8db58c54e33d5ce7e877d709ff9b99dbf3bc836c847344f2a37762b",
+      "manifest_sha256": "0a7e63612cc9176915d1011694d69a0661871a8d506933e41219a6e6a4115176",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

@@ -134,6 +134,12 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 离线回放直接执行原 `FleetEmotion`/`Emotion`：48 组速度/阈值/上限映射、已过与未来记录时间、四种 FleetOrder 的预计消耗向量、进入前双倍书、无需睡眠的已恢复等待，以及战后扣减记录。`keep_exp_bonus + not_in_dormitory` 会在原版稍后请求人工接管，现提前 fail-closed；另有九类非法值被拒绝。记录与任务延迟只写入内存桩，没有真实 sleep、调度持久化、宿舍操作、账号资源变化或 Android 输入，因此只提升 11 字段的 `offline`，不扩大 observation/action/live。
 
+### 1.12 本轮 Submarine 四字段非活动面契约
+
+12 个普通/活动地图面板共享的 `Fleet/Mode/AutoSearchMode/DistanceToBoss` 已进入出击导航前门禁。`Fleet=0` 时，五种模式、两种自动寻敌角色与四种 Boss 距离的 40 个组合保留原 ALAS 惰性语义；`Fleet=1/2` 会进入尚未接管的潜艇编队选择、策略栏、地图移动或战斗呼叫，因此两者均在导航前明确拒绝。GemsFarming 的 UI 只暴露 `do_not_use/hunt_only`，其余 11 面板暴露完整五模式，不能互相外推。
+
+回放直接执行原战斗呼叫判断、Boss 专用模式映射、两种自动寻敌设置及四种距离规划。同一原生地图夹具上，贴 Boss、1 格、2 格分别选择 `(5,5)/(4,5)/(3,5)`，开放海域支援不移动；两个活动战斗呼叫只捕获最终输入边界，没有点击。另覆盖六类非法值与十个活动舰队/模式拒绝案例。因此四字段只提升 `offline`；没有潜艇编队、策略栏、移动、呼叫按钮或实机结果闭环，不能称为活动潜艇支持。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -225,7 +231,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | Campaign | `Name`; `Event`; `Mode`=`normal/hard`; `UseClearMode`; `UseFleetLock`; `UseAutoSearch`; `Use2xBook`; `AmbushEvade` | P | 每个面板允许的关卡/活动值可进入；normal/hard、5 个开关的真假分支、不可用/未解锁/关卡变更均需识别；`Event` 当前还包含 48 个档案活动值，必须逐项登记支持或显式拒绝 |
 | StopCondition | `OilLimit`; `RunCount`; `MapAchievement`=`non_stop/100_percent_clear/map_3_stars/threat_safe/threat_safe_without_3_stars`; `StageIncrease`; `GetNewShip`; `ReachLevel` | P | 每个停止条件分别触发并停止在正确页面；0/边界/达到/未达到、条件同时满足、普通掉落与首次获得必须可区分 |
 | Fleet | `Fleet1`=1..6; `Fleet1Formation`=`line_ahead/double_line/diamond`; `Fleet1Mode`=`combat_auto/combat_manual/stand_still_in_the_middle/hide_in_bottom_left/hide_in_upper_left`; `Fleet1Step`=2..5; `Fleet2`=0..6; `Fleet2Formation` 同三阵型；`Fleet2Mode` 同五模式；`Fleet2Step`=2..5; `FleetOrder` 四种主力/Boss/待机组合 | P | 九字段全部值已离线分类；索引和步数保留原 ALAS 路由。固定上游不消费 Formation，非默认值提前拒绝；手动战斗模式缺 typed 方向/武器输入，非默认 FleetOrder 缺实机语义出击证据，故观察、动作和实机仍不完整 |
-| Submarine | `Fleet`=0/1/2; `Mode`=`do_not_use/hunt_only/boss_only/hunt_and_boss/every_combat`; `AutoSearchMode`=`sub_standby/sub_auto_call`; `DistanceToBoss`=`to_boss_position/1_grid_to_boss/2_grid_to_boss/use_open_ocean_support` | P | 无潜艇、未解锁、所有召唤策略、Boss 距离和自动寻敌组合；不能把不出现潜艇按钮当作成功调用 |
+| Submarine | `Fleet`=0/1/2; `Mode`=`do_not_use/hunt_only/boss_only/hunt_and_boss/every_combat`; `AutoSearchMode`=`sub_standby/sub_auto_call`; `DistanceToBoss`=`to_boss_position/1_grid_to_boss/2_grid_to_boss/use_open_ocean_support` | P | 四字段已完成原决策离线回放；`Fleet=0` 的 40 个惰性组合可用，`Fleet=1/2` 因编队、策略、移动和呼叫输入未接管而在导航前拒绝 |
 | Emotion | `Mode`=`calculate/ignore/calculate_ignore`; `Fleet1Value`; `Fleet1Record`; `Fleet1Control`; `Fleet1Recover`; `Fleet1Oath`; `Fleet2Value`; `Fleet2Record`; `Fleet2Control`; `Fleet2Recover`; `Fleet2Oath`; 两个 `Control` 均为 `keep_exp_bonus/prevent_green_face/prevent_yellow_face/prevent_red_face`，两个 `Recover` 均为 `not_in_dormitory/dormitory_floor_1/dormitory_floor_2` | P | 11 字段已完成原时间账本离线回放与中心 fail-closed；真实低心情等待、持久化调度、誓约/宿舍事实观察和跨任务恢复仍未扩证 |
 | HpControl | `UseHpBalance`; `UseEmergencyRepair`; `UseLowHpRetreat`; `HpBalanceThreshold`; `HpBalanceWeight`; `RepairUseSingleThreshold`; `RepairUseMultiThreshold`; `LowHpRetreatThreshold` | P | 八字段已离线分类并在出击前 fail-closed；三个启用态仍分别缺 typed 编队拖拽、紧急维修模板/输入和完整撤退循环，故动作与实机完整性不提升 |
 | EnemyPriority | `EnemyScaleBalanceWeight`=`default_mode/S3_enemy_first/S1_enemy_first` | P | 三值已完成原方法离线回放与导航前 fail-closed；相同地图夹具覆盖过滤覆盖、无敌人和同星级多目标，实机/动作维度未扩大 |
@@ -421,9 +427,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **151 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **6 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **8 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **55 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **66 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **64 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -694,10 +700,10 @@ python scripts/python/verify_alas_support_matrix.py `
 | `StopCondition.ReachLevel` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: 0 | `P`/◐ typed 六舰等级 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `StopCondition.RunCount` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `StopCondition.StageIncrease` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Submarine.AutoSearchMode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/hide | options: "sub_auto_call", "sub_standby"; default: "sub_standby" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Submarine.DistanceToBoss` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/hide | options: "1_grid_to_boss", "2_grid_to_boss", "to_boss_position", "use_open_ocean_support"; default: "2_grid_to_boss", "use_open_ocean_support" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Submarine.Fleet` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 0, 1, 2; default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Submarine.Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/display | options: "boss_only", "do_not_use", "every_combat", "hunt_and_boss", "hunt_only"; default: "do_not_use" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
+| `Submarine.AutoSearchMode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/hide | options: "sub_auto_call", "sub_standby"; default: "sub_standby" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Submarine.DistanceToBoss` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/hide | options: "1_grid_to_boss", "2_grid_to_boss", "to_boss_position", "use_open_ocean_support"; default: "2_grid_to_boss", "use_open_ocean_support" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Submarine.Fleet` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 0, 1, 2; default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Submarine.Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/display | options: "boss_only", "do_not_use", "every_combat", "hunt_and_boss", "hunt_only"; default: "do_not_use" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `SupplyPack.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `SupplyPack.DayOfWeek` | Freebies | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `Tactical.RapidTrainingSlot` | Tactical | type=select; display=default | options: "do_not_use", "slot_1", "slot_2", "slot_3", "slot_4"; default: "do_not_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |

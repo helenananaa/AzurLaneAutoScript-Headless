@@ -32,6 +32,10 @@ from .alas_emotion_config_contract import (
     AlasFleetEmotionConfigSnapshot,
     validate_alas_emotion_config,
 )
+from .alas_submarine_config_contract import (
+    AlasSubmarineConfigSnapshot,
+    validate_alas_submarine_config,
+)
 
 from .alas_map_sync import (
     AlasCampaignFleetPlan,
