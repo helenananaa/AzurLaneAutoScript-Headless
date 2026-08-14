@@ -186,6 +186,8 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         self.assertIn("semantic_session.research_finished_index()", self.patch_text)
         self.assertIn("semantic_session.research_series()", self.patch_text)
         self.assertIn("semantic_session.research_statuses()", self.patch_text)
+        self.assertIn("semantic_session.research_projects_for_alas", self.patch_text)
+        self.assertIn("semantic_session.validate_research_filter", self.patch_text)
 
     def test_tactical_state_machine_uses_typed_countdowns_and_safe_cancel(self):
         self.assertIn("diff --git a/module/tactical/tactical_class.py", self.patch_text)
@@ -216,7 +218,7 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         )
         self.assertIn("return self._run_alas_state_machine()", self.patch_text)
         self.assertIn("self.tactical_class_receive()", self.patch_text)
-        self.assertIn("semantic_session.research_projects()", self.patch_text)
+        self.assertIn("semantic_session.research_projects_for_alas", self.patch_text)
         self.assertIn("semantic_session.research_detail_available()", self.patch_text)
         self.assertIn("semantic_session.research_detail_can_queue()", self.patch_text)
         self.assertIn("semantic_session.research_queue_fill_slots()", self.patch_text)

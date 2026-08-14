@@ -1305,6 +1305,40 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(adapter.dorm_state().occupied_slots, 2)
         self.assertEqual(oracle.click_calls, [])
 
+    def test_research_decision_input_requires_complete_known_five_cards(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=slot,
+                unity_index=slot,
+                code="Q-{0:03d}".format(slot),
+                series=9,
+                duration_seconds=1800,
+            )
+            for slot in range(1, 6)
+        ]
+
+        class Project:
+            def __init__(self, name, series):
+                self.name = name
+                self.series = series
+                self.valid = name != "Q-003"
+
+        with self.assertRaisesRegex(SemanticGateClosed, "unknown to pinned ALAS"):
+            adapter.research_projects_for_alas(Project)
+        self.assertEqual(oracle.click_calls, [])
+
+        oracle.research_project_values[2].code = "Q-103"
+        projects = adapter.research_projects_for_alas(Project)
+        self.assertEqual([project.name for project in projects], [
+            "Q-001", "Q-002", "Q-103", "Q-004", "Q-005"
+        ])
+        oracle.research_project_values[4].slot = 4
+        with self.assertRaisesRegex(SemanticGateClosed, "slots are incomplete"):
+            adapter.research_projects_for_alas(Project)
+        self.assertEqual(oracle.click_calls, [])
+
     def test_research_start_budget_is_spent_only_on_matching_final_confirm(self):
         oracle = FakeOracle()
         project = SimpleNamespace(

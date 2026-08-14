@@ -5001,9 +5001,13 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_replay.py",
+        "tests/test_alas_adapter.py"
+      ],
       "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -5020,9 +5024,13 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_replay.py",
+        "tests/test_alas_adapter.py"
+      ],
       "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -5039,9 +5047,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_replay.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_alas_integration_patch.py"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -5058,9 +5071,13 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_replay.py",
+        "tests/test_alas_adapter.py"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -5077,9 +5094,13 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_replay.py",
+        "tests/test_alas_adapter.py"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -5096,9 +5117,13 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_replay.py",
+        "tests/test_alas_adapter.py"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -7109,8 +7134,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "f8a5a8cda9b68acfe3e812f5752cf8d9460659ba431cdd639e056115e8452eab",
-      "manifest_sha256": "aeee61a44820accfac5f9bc1eec7a4fc5a8d4101de201117bc05061531814be7",
+      "combined_sha256": "2d6521f5d357395be5433df4ab25d1b78a0b3b2ea05f2322d13f13deb6b35a94",
+      "manifest_sha256": "7f05d36b4e4902a519538105cc2848db8e367a1abf846853e78787918cbb8df9",
       "member_count": 15
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

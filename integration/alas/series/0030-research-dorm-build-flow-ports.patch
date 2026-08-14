@@ -254,7 +254,7 @@ diff --git a/module/research/selector.py b/module/research/selector.py
 index 05146c33..5ff693db 100644
 --- a/module/research/selector.py
 +++ b/module/research/selector.py
-@@ -123,6 +123,17 @@ class ResearchSelector(ResearchUI):
+@@ -123,6 +123,15 @@ class ResearchSelector(ResearchUI):
  
      @Config.when(SERVER=None)
      def research_detect(self):
@@ -262,16 +262,26 @@ index 05146c33..5ff693db 100644
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
 +            from module.research.project import ResearchProject
-+            states = semantic_session.research_projects()
-+            self.projects = [
-+                ResearchProject(name=state.code, series=state.series)
-+                for state in states
-+            ]
++            self.projects = list(
++                semantic_session.research_projects_for_alas(ResearchProject)
++            )
 +            logger.info(f'Research projects: {[str(project) for project in self.projects]}')
 +            return
          timeout = Timer(5, count=5).start()
          while 1:
              projects = research_detect(self.device.image)
+@@ -181,6 +190,11 @@ class ResearchSelector(ResearchUI):
+         # Allow both `PR` and `PRY`
+         string = re.sub(r'pr([\d\- >])', r'pry\1', string)
+ 
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.validate_research_filter(FILTER, string)
++
+         FILTER.load(string)
+         priority = FILTER.apply(self.projects, func=partial(self._research_check, enforce=enforce))
+ 
 diff --git a/module/research/series.py b/module/research/series.py
 index 89e534c4..d399d423 100644
 --- a/module/research/series.py

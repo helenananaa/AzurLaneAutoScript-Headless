@@ -86,6 +86,12 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 因此 `General` 面板保持 `P`，不能升为 `L/F`：强化主路径已接入，但 `old_retire`、`do_not_keep` 的实际退役、完整 `favourite` 破坏性任务和自然无素材分支仍未全部闭环。实机收据见 `artifacts/retirement-live-20260814.json` 与 `artifacts/enhancement-live-20260814.json`。
 
+### 1.4 本轮 Research 全配置确定性适配
+
+本轮直接从固定/已打补丁的 ALAS 源树抽取并执行原 `Filter`、`FILTER_REGEX`、`research_sort_filter`、`_research_check`、`research_select` 和 `research_delay_check`，Headless 不另写科研选择或调度状态机。共 **83 条确定性断言**，覆盖 `PresetFilter` 的 26 个公开值、`CustomFilter`、`AllowDelay=true/false`，以及 Coin/Cube/Part 各四种资源策略（36 个策略组合）；同时覆盖首项/中间项命中、无命中、默认回退、非法 token、同权卡片顺序、资源充足/不足、队列满、延迟、重置前后和跨轮幂等。
+
+语义模式新增两道动作前门禁：五张 typed 科研卡必须具有完整且唯一的槽位/Unity 身份，并且每张卡都能由固定上游 `ResearchProject` 解析；自定义过滤器中任何空 token、非法 token 或仅被上游宽松 `re.search` 部分匹配的 token 都会 fail-closed。回放 mutation budget 为 **0**，没有启动科研、重置、资源消费或 Android 输入。因此六个 Research 配置字段的 `offline` 维度提升为 `complete`，既有 observation/action/live 维度不因离线证据而提升，Research 面板仍保持 `L` 而不是 `F`。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -373,9 +379,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **151 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **1 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **2 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **55 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **71 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **70 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -614,12 +620,12 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Raid.Mode` | Raid | type=select; display=default | options: "easy", "ex", "hard", "normal"; default: "hard" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Raid.UseTicket` | Raid | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `RaidDaily.StageFilter` | RaidDaily | type=textarea; display=default | input/default: "hard > normal > easy" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `Research.AllowDelay` | Research | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Research.CustomFilter` | Research | type=textarea; display=default | input/default: <long default in args.json> | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Research.PresetFilter` | Research | type=select; display=default | options: "custom", "series_2_457_only", "series_2_blueprint_457", "series_2_blueprint_only", "series_2_than_3_457_234", "series_3_234_only", "series_3_blueprint_234", "series_3_blueprint_only", "series_4_blueprint_only", "series_4_blueprint_tenrai", "series_4_tenrai_only", "series_5_152_only", "series_5_blueprint_152", "series_5_blueprint_only", "series_6_203_only", "series_6_blueprint_203", "series_6_blueprint_only", "series_7_blueprint_la9", "series_7_blueprint_only", "series_7_la9_only", "series_8_305_only", "series_8_blueprint_305", "series_8_blueprint_only", "series_9_blueprint_only", "series_9_blueprint_ta152", "series_9_ta152_only"; default: "series_9_blueprint_ta152" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Research.UseCoin` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Research.UseCube` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "only_05_hour" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Research.UsePart` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Research.AllowDelay` | Research | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Research.CustomFilter` | Research | type=textarea; display=default | input/default: <long default in args.json> | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Research.PresetFilter` | Research | type=select; display=default | options: "custom", "series_2_457_only", "series_2_blueprint_457", "series_2_blueprint_only", "series_2_than_3_457_234", "series_3_234_only", "series_3_blueprint_234", "series_3_blueprint_only", "series_4_blueprint_only", "series_4_blueprint_tenrai", "series_4_tenrai_only", "series_5_152_only", "series_5_blueprint_152", "series_5_blueprint_only", "series_6_203_only", "series_6_blueprint_203", "series_6_blueprint_only", "series_7_blueprint_la9", "series_7_blueprint_only", "series_7_la9_only", "series_8_305_only", "series_8_blueprint_305", "series_8_blueprint_only", "series_9_blueprint_only", "series_9_blueprint_ta152", "series_9_ta152_only"; default: "series_9_blueprint_ta152" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Research.UseCoin` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Research.UseCube` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "only_05_hour" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Research.UsePart` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Retirement.RetireMode` | General | type=select; display=default | options: "enhance", "old_retire", "one_click_retire"; default: "one_click_retire" | `P`/◐ 一键与强化已接入；旧退役未适配 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Reward.CollectCoin` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Reward.CollectExp` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |

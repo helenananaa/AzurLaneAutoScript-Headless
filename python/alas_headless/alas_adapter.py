@@ -4206,6 +4206,67 @@ class AlasSemanticAdapter:
         self._research_context.last_projects_observed_at = time.monotonic()
         return projects
 
+    def research_projects_for_alas(
+        self, project_factory: Callable[..., object]
+    ) -> Tuple[object, ...]:
+        """Convert one complete typed five-card snapshot into ALAS projects.
+
+        The upstream ``ResearchProject`` remains the owner of project metadata
+        and consumption flags.  This boundary only rejects incomplete typed
+        snapshots and project codes which the pinned upstream cannot resolve.
+        """
+
+        states = self.research_projects()
+        if len(states) != 5:
+            raise SemanticGateClosed("research decision requires exactly five cards")
+        if {state.slot for state in states} != set(range(1, 6)):
+            raise SemanticGateClosed("research card slots are incomplete or ambiguous")
+        if {state.unity_index for state in states} != set(range(1, 6)):
+            raise SemanticGateClosed("research Unity card identities are ambiguous")
+
+        projects = []
+        for state in states:
+            if (
+                not isinstance(state.code, str)
+                or not state.code.strip()
+                or not isinstance(state.series, int)
+                or state.series < 1
+                or not isinstance(state.duration_seconds, int)
+                or state.duration_seconds < 0
+            ):
+                raise SemanticGateClosed("research card decision input is malformed")
+            project = project_factory(name=state.code, series=state.series)
+            if getattr(project, "valid", None) is not True:
+                raise SemanticGateClosed(
+                    "research project is unknown to pinned ALAS: " + state.code
+                )
+            projects.append(project)
+        return tuple(projects)
+
+    def validate_research_filter(self, filter_: object, value: str) -> None:
+        """Fail closed on tokens that upstream's permissive parser would ignore."""
+
+        if not isinstance(value, str):
+            raise SemanticGateClosed("research filter must be text")
+        normalized = re.sub(r"[ \t\r\n]", "", value)
+        normalized = re.sub(r"[＞﹥›˃ᐳ❯]", ">", normalized)
+        normalized = re.sub(r"[‐‑‒–—―−－﹣﹘⁃]", "-", normalized)
+        tokens = normalized.split(">")
+        regex = getattr(filter_, "regex", None)
+        is_preset = getattr(filter_, "is_preset", None)
+        if not hasattr(regex, "fullmatch") or not callable(is_preset):
+            raise SemanticGateClosed("research filter contract is unavailable")
+        invalid = tuple(
+            token
+            for token in tokens
+            if not token
+            or (not is_preset(token) and regex.fullmatch(token.lower()) is None)
+        )
+        if invalid:
+            raise SemanticGateClosed(
+                "research filter contains invalid token(s): " + ", ".join(invalid)
+            )
+
     def shipyard_select_series(self, series: int) -> ActionReceipt:
         self._package_gate()
         if not 1 <= series <= 9:
@@ -8865,6 +8926,14 @@ class AlasSemanticSession:
 
     def research_projects(self) -> Tuple[ResearchProjectState, ...]:
         return self.open().research_projects()
+
+    def research_projects_for_alas(
+        self, project_factory: Callable[..., object]
+    ) -> Tuple[object, ...]:
+        return self.open().research_projects_for_alas(project_factory)
+
+    def validate_research_filter(self, filter_: object, value: str) -> None:
+        self.open().validate_research_filter(filter_, value)
 
     def shipyard_select_series(self, series: int) -> ActionReceipt:
         return self.open().shipyard_select_series(series)
