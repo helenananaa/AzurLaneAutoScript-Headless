@@ -324,7 +324,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 100 changed files, all 99 patched Python files compile, and
-  the repository suite passes `937/937` tests, including BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard focus configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `938/938` tests, including BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard task configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
@@ -360,23 +360,35 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   separately reviewed mapping from the field to that timer plus deterministic
   elapsed-time and live semantic-HP evidence; this patch does not invent one.
 
-### Shipyard PR/DR series and ship index: offline contract passed
+### Shipyard PR/DR configuration: eight-field entry contract and safe purchase subset
 
 - PR series accepts exact integers `1..6`, DR series `2..5`, and both ship
-  indices exact integers `0..6`. All four fields are validated at the first
+  indices exact integers `0..6`. Both `LastRun` values require bounded,
+  timezone-naive datetimes. `BuyAmount` accepts exact integers `0..15`, the
+  range for which pinned ALAS has an explicit per-item price table. All eight
+  fields are validated at the first
   executable statement of `RewardShipyard.run()`, before scheduler mutation,
   page navigation, coin reads, or blueprint use.
-- Pinned replay covers all 1,176 declared PR/DR focus combinations and rejects
-  28 invalid single-field cases. The unchanged focus method yields 32 selectable
+- Pinned replay covers 1,437 accepted contract cases and rejects 58 invalid
+  single-field cases. The unchanged focus method yields 32 selectable
   PR series/index pairs, six index-zero disabled branches, and four series-after-
-  two/index-six restrictions. Original DR-before-PR dispatch is preserved for
-  normal, disabled-index, and restricted-index samples.
+  two/index-six restrictions. Original DR-before-PR dispatch is preserved,
+  including independent amounts, both-zero stop, exact 04:00 run boundary,
+  DR-only skip, and PR already-run delay/stop behavior.
+- Original PR/DR prices are replayed for purchases 1 through 16. The verified
+  1..15 totals are 8,250 PR coins and 22,200 DR coins; equality buys all 15 and
+  one coin short buys 14. Successful `BP_BUY` paths write the frozen current
+  time to the rarity-specific `LastRun`; confirmation is an input-free stub.
 - Navigation, series/ship selection, coin reads, blueprint use, and purchase are
   fixtures. Mutation budget is `0`; no coin or blueprint is consumed and no
-  Android input occurs. These four fields move only to `offline=complete`.
-  `BuyAmount`, `LastRun`, daily deduplication, actual PR/DR page identity,
-  blueprint sufficiency, strengthen limits, purchase confirmation, and receipts
-  remain incomplete and the Shipyard panel stays at its account boundary.
+  Android input occurs. Both `LastRun` fields move to `offline=complete`; both
+  `BuyAmount` fields move only to `offline=partial`. Pinned ALAS assigns a
+  fallback price above 15, but the current observer cannot prove the displayed
+  quantity or total price, so those values are explicitly rejected before
+  navigation rather than being silently accepted or spent. Re-entry above 15 requires typed quantity,
+  unit/total price, balance, confirm, and post-purchase receipts. Actual PR/DR
+  page identity, blueprint sufficiency, strengthen limits, purchase confirmation,
+  and recovery remain incomplete; Shipyard stays at its account boundary.
 
 ### Gacha pool, amount, ticket, and drill: offline contract passed
 

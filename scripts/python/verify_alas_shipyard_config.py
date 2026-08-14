@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write deterministic Shipyard focus configuration evidence."""
+"""Write deterministic Shipyard task configuration evidence."""
 
 from __future__ import annotations
 

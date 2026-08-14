@@ -1,9 +1,9 @@
-"""Deterministic replay of pinned ALAS Shipyard focus configuration."""
+"""Deterministic replay of pinned ALAS Shipyard task configuration."""
 
 from __future__ import annotations
 
 import ast
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import hashlib
 import importlib
 import itertools
@@ -17,6 +17,7 @@ from .alas_shipyard_config_contract import (
     SHIPYARD_DR_SERIES,
     SHIPYARD_INDICES,
     SHIPYARD_PR_SERIES,
+    SHIPYARD_VERIFIED_BUY_AMOUNTS,
     validate_alas_shipyard_config,
 )
 from .semantic_oracle import SemanticGateClosed
@@ -26,6 +27,19 @@ SCHEMA = "alas-headless.shipyard-config-replay/v1"
 INVALID_PR_SERIES = (0, 7, True, 1.0, "1", None, [])
 INVALID_DR_SERIES = (1, 6, True, 2.0, "2", None, [])
 INVALID_INDICES = (-1, 7, True, 1.0, "1", None, [])
+INVALID_BUY_AMOUNTS = (-1, 16, True, 1.0, "2", None, [], {})
+INVALID_LAST_RUNS = (
+    None,
+    "2020-01-01 00:00:00",
+    0,
+    True,
+    datetime(1999, 12, 31, 23, 59, 59),
+    datetime(2100, 1, 1, 0, 0, 1),
+    datetime(2026, 8, 15, tzinfo=timezone.utc),
+)
+DEFAULT_LAST_RUN = datetime(2020, 1, 1)
+SERVER_UPDATE = datetime(2026, 8, 15, 4, 0, 0)
+FROZEN_NOW = datetime(2026, 8, 15, 7, 0, 0)
 
 
 def _sha256(path: Path) -> str:
@@ -40,10 +54,14 @@ def _verify_args(alas_root: Path) -> None:
         "Shipyard": {
             "ResearchSeries": (1, SHIPYARD_PR_SERIES),
             "ShipIndex": (0, SHIPYARD_INDICES),
+            "BuyAmount": (2, None),
+            "LastRun": ("2020-01-01 00:00:00", None),
         },
         "ShipyardDr": {
             "ResearchSeries": (2, SHIPYARD_DR_SERIES),
             "ShipIndex": (0, SHIPYARD_INDICES),
+            "BuyAmount": (2, None),
+            "LastRun": ("2020-01-01 00:00:00", None),
         },
     }
     for group_name, fields in expected.items():
@@ -52,12 +70,22 @@ def _verify_args(alas_root: Path) -> None:
             raise AssertionError(f"{group_name} field surface is missing")
         for field, (default, options) in fields.items():
             declaration = group.get(field)
-            if (
-                not isinstance(declaration, dict)
-                or declaration.get("type") != "select"
-                or declaration.get("value") != default
-                or tuple(declaration.get("option", ())) != options
-            ):
+            valid = isinstance(declaration, dict) and declaration.get("value") == default
+            if field in ("ResearchSeries", "ShipIndex"):
+                valid = bool(
+                    valid
+                    and declaration.get("type") == "select"
+                    and tuple(declaration.get("option", ())) == options
+                )
+            elif field == "BuyAmount":
+                valid = bool(valid and declaration.get("type") == "input")
+            else:
+                valid = bool(
+                    valid
+                    and declaration.get("type") == "datetime"
+                    and declaration.get("validate") == "datetime"
+                )
+            if not valid:
                 raise AssertionError(f"{group_name}.{field} declaration drifted")
 
 
@@ -86,8 +114,12 @@ def _source_flags(reward_path: Path) -> tuple[dict[str, list[str]], bool]:
     mapping = {
         "Shipyard_ResearchSeries": [],
         "Shipyard_ShipIndex": [],
+        "Shipyard_BuyAmount": [],
+        "Shipyard_LastRun": [],
         "ShipyardDr_ResearchSeries": [],
         "ShipyardDr_ShipIndex": [],
+        "ShipyardDr_BuyAmount": [],
+        "ShipyardDr_LastRun": [],
     }
     for field in mapping:
         if any(
@@ -190,21 +222,26 @@ class _Config(SimpleNamespace):
         *,
         pr_series: object,
         pr_index: object,
+        pr_buy_amount: object = 2,
+        pr_last_run: object = DEFAULT_LAST_RUN,
         dr_series: object,
         dr_index: object,
+        dr_buy_amount: object = 2,
+        dr_last_run: object = DEFAULT_LAST_RUN,
+        events: list[Any] | None = None,
     ):
         super().__init__(
             Shipyard_ResearchSeries=pr_series,
             Shipyard_ShipIndex=pr_index,
+            Shipyard_BuyAmount=pr_buy_amount,
+            Shipyard_LastRun=pr_last_run,
             ShipyardDr_ResearchSeries=dr_series,
             ShipyardDr_ShipIndex=dr_index,
-            Shipyard_BuyAmount=1,
-            ShipyardDr_BuyAmount=1,
-            Shipyard_LastRun=datetime(2020, 1, 1),
-            ShipyardDr_LastRun=datetime(2020, 1, 1),
+            ShipyardDr_BuyAmount=dr_buy_amount,
+            ShipyardDr_LastRun=dr_last_run,
             Scheduler_Enable=True,
         )
-        self.events = []
+        self.events = events if events is not None else []
 
     def task_delay(self, **kwargs):
         self.events.append(["task_delay", kwargs])
@@ -218,16 +255,25 @@ def _run_case(
     *,
     pr_series: object,
     pr_index: object,
+    pr_buy_amount: object = 2,
+    pr_last_run: object = DEFAULT_LAST_RUN,
     dr_series: object,
     dr_index: object,
+    dr_buy_amount: object = 2,
+    dr_last_run: object = DEFAULT_LAST_RUN,
 ) -> list[Any]:
     events = []
     host = object.__new__(reward_module.RewardShipyard)
     host.config = _Config(
         pr_series=pr_series,
         pr_index=pr_index,
+        pr_buy_amount=pr_buy_amount,
+        pr_last_run=pr_last_run,
         dr_series=dr_series,
         dr_index=dr_index,
+        dr_buy_amount=dr_buy_amount,
+        dr_last_run=dr_last_run,
+        events=events,
     )
     host.shipyard_run = MethodType(
         lambda self, series, index, count: events.append(
@@ -237,19 +283,64 @@ def _run_case(
         host,
     )
     original_update = reward_module.get_server_last_update
-    reward_module.get_server_last_update = lambda value: datetime(2026, 8, 15)
+    reward_module.get_server_last_update = lambda value: SERVER_UPDATE
     try:
         reward_module.RewardShipyard.run(host)
     finally:
         reward_module.get_server_last_update = original_update
-    return events + host.config.events
+    return events
 
 
 def _verify_dispatch(reward_module: Any) -> dict[str, Any]:
     samples = {
-        "normal": (1, 1, 2, 1),
-        "disabled_indices": (6, 0, 5, 0),
-        "restricted_indices": (3, 6, 3, 6),
+        "normal": {
+            "expected": [
+                ["DR", 2, 1, 2],
+                ["PR", 1, 1, 2],
+                ["task_delay", {"server_update": True}],
+            ],
+        },
+        "exact_boundary_runs": {
+            "pr_last_run": SERVER_UPDATE,
+            "dr_last_run": SERVER_UPDATE,
+            "expected": [
+                ["DR", 2, 1, 2],
+                ["PR", 1, 1, 2],
+                ["task_delay", {"server_update": True}],
+            ],
+        },
+        "dr_already_run": {
+            "dr_last_run": SERVER_UPDATE + timedelta(seconds=1),
+            "expected": [["PR", 1, 1, 2], ["task_delay", {"server_update": True}]],
+        },
+        "pr_already_run": {
+            "pr_last_run": SERVER_UPDATE + timedelta(seconds=1),
+            "expected": [
+                ["DR", 2, 1, 2],
+                ["task_delay", {"server_update": True}],
+                "task_stop",
+                ["task_delay", {"server_update": True}],
+            ],
+        },
+        "both_disabled": {
+            "pr_buy_amount": 0,
+            "dr_buy_amount": 0,
+            "expected": [
+                "task_stop",
+                ["DR", 2, 1, 0],
+                ["PR", 1, 1, 0],
+                ["task_delay", {"server_update": True}],
+            ],
+        },
+        "independent_amounts": {
+            "pr_buy_amount": 15,
+            "dr_buy_amount": 1,
+            "expected": [
+                ["DR", 2, 1, 1],
+                ["PR", 1, 1, 15],
+                ["task_delay", {"server_update": True}],
+            ],
+        },
     }
     result = {}
     logger_methods = {
@@ -258,26 +349,38 @@ def _verify_dispatch(reward_module: Any) -> dict[str, Any]:
     for name in logger_methods:
         setattr(reward_module.logger, name, lambda *args, **kwargs: None)
     try:
-        for name, (pr_series, pr_index, dr_series, dr_index) in samples.items():
+        for name, sample in samples.items():
+            overrides = {
+                key: value for key, value in sample.items() if key != "expected"
+            }
             events = _run_case(
                 reward_module,
-                pr_series=pr_series,
-                pr_index=pr_index,
-                dr_series=dr_series,
-                dr_index=dr_index,
+                pr_series=1,
+                pr_index=1,
+                dr_series=2,
+                dr_index=1,
+                **overrides,
             )
-            expected = [
-                ["DR", dr_series, dr_index, 1],
-                ["PR", pr_series, pr_index, 1],
-                ["task_delay", {"server_update": True}],
-            ]
-            if events != expected:
+            if events != sample["expected"]:
                 raise AssertionError("original Shipyard run dispatch drifted")
             result[name] = events
     finally:
         for name, value in logger_methods.items():
             setattr(reward_module.logger, name, value)
     return result
+
+
+def _base_contract_case() -> dict[str, object]:
+    return {
+        "pr_series": 1,
+        "pr_index": 1,
+        "pr_buy_amount": 2,
+        "pr_last_run": DEFAULT_LAST_RUN,
+        "dr_series": 2,
+        "dr_index": 1,
+        "dr_buy_amount": 2,
+        "dr_last_run": DEFAULT_LAST_RUN,
+    }
 
 
 def _verify_contract() -> tuple[int, int]:
@@ -291,20 +394,49 @@ def _verify_contract() -> tuple[int, int]:
         validate_alas_shipyard_config(
             pr_series=pr_series,
             pr_index=pr_index,
+            pr_buy_amount=2,
+            pr_last_run=DEFAULT_LAST_RUN,
             dr_series=dr_series,
             dr_index=dr_index,
+            dr_buy_amount=2,
+            dr_last_run=DEFAULT_LAST_RUN,
         )
+        accepted += 1
+    for pr_buy_amount, dr_buy_amount in itertools.product(
+        SHIPYARD_VERIFIED_BUY_AMOUNTS, repeat=2
+    ):
+        case = _base_contract_case()
+        case.update(
+            pr_buy_amount=pr_buy_amount,
+            dr_buy_amount=dr_buy_amount,
+        )
+        validate_alas_shipyard_config(**case)
+        accepted += 1
+    for value in (
+        datetime(2000, 1, 1),
+        SERVER_UPDATE,
+        SERVER_UPDATE + timedelta(seconds=1),
+        FROZEN_NOW,
+        datetime(2100, 1, 1),
+    ):
+        case = _base_contract_case()
+        case.update(pr_last_run=value, dr_last_run=value)
+        validate_alas_shipyard_config(**case)
         accepted += 1
     invalid_count = 0
     invalid = {
         "pr_series": INVALID_PR_SERIES,
         "pr_index": INVALID_INDICES,
+        "pr_buy_amount": INVALID_BUY_AMOUNTS,
+        "pr_last_run": INVALID_LAST_RUNS,
         "dr_series": INVALID_DR_SERIES,
         "dr_index": INVALID_INDICES,
+        "dr_buy_amount": INVALID_BUY_AMOUNTS,
+        "dr_last_run": INVALID_LAST_RUNS,
     }
     for field, values in invalid.items():
         for value in values:
-            case = {"pr_series": 1, "pr_index": 1, "dr_series": 2, "dr_index": 1}
+            case = _base_contract_case()
             case[field] = value
             try:
                 validate_alas_shipyard_config(**case)
@@ -315,18 +447,94 @@ def _verify_contract() -> tuple[int, int]:
     return accepted, invalid_count
 
 
+def _verify_price_calculation(reward_module: Any) -> dict[str, Any]:
+    host = object.__new__(reward_module.RewardShipyard)
+    expected = {
+        "PR": (
+            0, 0, 150, 150, 300, 300, 300, 600, 600, 600,
+            1050, 1050, 1050, 1050, 1050, 1500,
+        ),
+        "DR": (
+            0, 0, 600, 600, 600, 600, 1200, 1200, 1200, 1200,
+            3000, 3000, 3000, 3000, 3000, 6000,
+        ),
+    }
+    result = {}
+    for rarity, prices in expected.items():
+        host._shipyard_bp_rarity = rarity
+        actual = tuple(host._shipyard_get_cost(index) for index in range(1, 17))
+        if actual != prices:
+            raise AssertionError(f"original {rarity} Shipyard price schedule drifted")
+        total = sum(prices[:15])
+        host._coin_count = total
+        if host._shipyard_buy_calc(1, 15) != (16, 15):
+            raise AssertionError(f"original {rarity} exact-coin boundary drifted")
+        host._coin_count = total - 1
+        if host._shipyard_buy_calc(1, 15) != (15, 14):
+            raise AssertionError(f"original {rarity} insufficient-coin boundary drifted")
+        host._coin_count = total
+        if host._shipyard_pay_calc(1, 15) != (16, 15) or host._coin_count != 0:
+            raise AssertionError(f"original {rarity} payment accounting drifted")
+        result[rarity] = {"prices_1_to_16": prices, "total_1_to_15": total}
+    return result
+
+
+class _FrozenDateTime(datetime):
+    @classmethod
+    def now(cls, tz=None):
+        if tz is None:
+            return cls(*FROZEN_NOW.timetuple()[:6])
+        return cls(*FROZEN_NOW.timetuple()[:6], tzinfo=tz)
+
+
+def _verify_last_run_write(reward_module: Any) -> dict[str, Any]:
+    original_datetime = reward_module.datetime
+    reward_module.datetime = _FrozenDateTime
+    result = {}
+    try:
+        for rarity, field in (
+            ("DR", "ShipyardDr_LastRun"),
+            ("PR", "Shipyard_LastRun"),
+        ):
+            events = []
+            host = object.__new__(reward_module.RewardShipyard)
+            host.config = _Config(pr_series=1, pr_index=1, dr_series=2, dr_index=1)
+            host._shipyard_bp_rarity = rarity
+            host._coin_count = 0
+            host._shipyard_buy_enter = MethodType(lambda self: True, host)
+            host._shipyard_cannot_strengthen = MethodType(lambda self: False, host)
+            host._shipyard_ensure_index = MethodType(lambda self, count: 0, host)
+            host._shipyard_buy_confirm = MethodType(
+                lambda self, mode: events.append(["confirm_stub", mode]), host
+            )
+            reward_module.RewardShipyard._shipyard_buy(host, 2)
+            recorded = getattr(host.config, field)
+            if recorded != FROZEN_NOW or events != [["confirm_stub", "BP_BUY"]]:
+                raise AssertionError(f"original {rarity} LastRun write drifted")
+            result[rarity] = {"last_run": recorded.isoformat(), "events": events}
+    finally:
+        reward_module.datetime = original_datetime
+    return result
+
+
 def _verify_invalid_entry(reward_module: Any, guard_present: bool) -> dict[str, Any]:
     if not guard_present:
         return {}
     invalid = {
         "Shipyard_ResearchSeries": {"pr_series": 0},
         "Shipyard_ShipIndex": {"pr_index": 7},
+        "Shipyard_BuyAmount": {"pr_buy_amount": 16},
+        "Shipyard_LastRun": {"pr_last_run": None},
         "ShipyardDr_ResearchSeries": {"dr_series": 1},
         "ShipyardDr_ShipIndex": {"dr_index": -1},
+        "ShipyardDr_BuyAmount": {"dr_buy_amount": -1},
+        "ShipyardDr_LastRun": {
+            "dr_last_run": datetime(2026, 8, 15, tzinfo=timezone.utc)
+        },
     }
     result = {}
     for field, override in invalid.items():
-        case = {"pr_series": 1, "pr_index": 1, "dr_series": 2, "dr_index": 1}
+        case = _base_contract_case()
         case.update(override)
         try:
             _run_case(reward_module, **case)
@@ -347,15 +555,19 @@ def verify_shipyard_config(alas_root: Path) -> dict[str, Any]:
     focus = _verify_focus_matrix(ui_module)
     dispatch = _verify_dispatch(reward_module)
     accepted, invalid = _verify_contract()
+    price_calculation = _verify_price_calculation(reward_module)
+    last_run_write = _verify_last_run_write(reward_module)
     invalid_entry = _verify_invalid_entry(reward_module, guard_present)
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 4,
+        "field_count": 8,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "focus_matrix": focus,
         "original_dispatch": dispatch,
+        "price_calculation": price_calculation,
+        "last_run_write": last_run_write,
         "runtime_consumers": consumers,
         "patched_guard_present": guard_present,
         "invalid_entry_events": invalid_entry,
@@ -364,6 +576,7 @@ def verify_shipyard_config(alas_root: Path) -> dict[str, Any]:
         "real_blueprints_consumed": False,
         "real_coin_consumed": False,
         "real_navigation_performed": False,
+        "purchase_confirms_stubbed": True,
         "android_input_injected": False,
         "source_sha256": {
             "args": _sha256(alas_root / "module/config/argument/args.json"),

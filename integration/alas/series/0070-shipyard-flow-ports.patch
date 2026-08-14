@@ -2,7 +2,7 @@ diff --git a/module/shipyard/shipyard_reward.py b/module/shipyard/shipyard_rewar
 index 9cb098b8..8f5fb97a 100644
 --- a/module/shipyard/shipyard_reward.py
 +++ b/module/shipyard/shipyard_reward.py
-@@ -218,7 +218,14 @@ class RewardShipyard(ShipyardUI):
+@@ -218,7 +218,18 @@ class RewardShipyard(ShipyardUI):
          Pages:
              in: Any page
              out: page_shipyard
@@ -11,8 +11,12 @@ index 9cb098b8..8f5fb97a 100644
 +        validate_alas_shipyard_config(
 +            pr_series=self.config.Shipyard_ResearchSeries,
 +            pr_index=self.config.Shipyard_ShipIndex,
++            pr_buy_amount=self.config.Shipyard_BuyAmount,
++            pr_last_run=self.config.Shipyard_LastRun,
 +            dr_series=self.config.ShipyardDr_ResearchSeries,
 +            dr_index=self.config.ShipyardDr_ShipIndex,
++            dr_buy_amount=self.config.ShipyardDr_BuyAmount,
++            dr_last_run=self.config.ShipyardDr_LastRun,
 +        )
          if self.config.Shipyard_BuyAmount <= 0 and self.config.ShipyardDr_BuyAmount <= 0:
              self.config.Scheduler_Enable = False

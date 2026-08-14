@@ -238,11 +238,13 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `LowHpConfirmWait` 本轮明确判为当前无效/未适配，而不是离线完成：固定上游虽然声明并描述该字段，但 Python 运行时零读取，`_combat_execute()` 无条件创建 `Timer(1.5, count=2)`。现在接线会改变上游现有时序且缺少字段到 Timer 参数的权威映射，因此不划算也不可信。重新进入条件是上游提供业务语义，或单独评审该映射，并补冻结时钟决策回放与可信语义血量实机证据。
 
-### 1.29 本轮 Shipyard PR/DR 系列与舰位契约
+### 1.29 本轮 Shipyard PR/DR 八字段与安全购买子域契约
 
-`Shipyard.ResearchSeries` 只接受精确整数 `1..6`，`ShipyardDr.ResearchSeries` 只接受 `2..5`，两组 `ShipIndex` 只接受 `0..6`；四字段在原 `RewardShipyard.run()` 文档字符串后的第一条可执行语句统一校验，早于调度状态写入、页面导航、金币读取或蓝图使用。布尔伪装整数、浮点、字符串、越界和空值均 fail-closed。
+`Shipyard.ResearchSeries` 只接受精确整数 `1..6`，`ShipyardDr.ResearchSeries` 只接受 `2..5`，两组 `ShipIndex` 只接受 `0..6`。两组 `LastRun` 必须是 2000-01-01 至 2100-01-01 的 naive datetime。两组 `BuyAmount` 当前只放行固定上游具有逐张价格表的精确整数 `0..15`；八字段在原 `RewardShipyard.run()` 文档字符串后的第一条可执行语句统一校验，早于调度状态写入、日期比较、页面导航、金币读取或蓝图使用。
 
-固定上游回放覆盖全部 1,176 个声明组合并拒绝 28 个非法单字段案例。原 `shipyard_set_focus()` 的 42 个 PR 系列/舰位组合保持 32 个可选、6 个 index 0 “不购买”分支和 4 个三期以后 index 6 限制；普通、禁用舰位和受限舰位样本均保持 DR 先于 PR 的原任务分派。页面导航、系列/舰船选择、金币读取、蓝图使用和购买均为夹具，mutation budget 为 0，没有消费金币/蓝图或注入 Android 输入。四字段只提升 `offline`；`BuyAmount/LastRun`、每日去重、真实 PR/DR 页面不串页、蓝图不足、强化上限、购买确认和结果收据仍未闭环，Shipyard 面板继续停留在账号边界。
+固定上游回放覆盖 1,437 个合法案例并拒绝 58 个非法单字段案例。原 `shipyard_set_focus()` 保持 32 个可选、6 个 index 0 分支和 4 个三期以后 index 6 限制；DR 先于 PR、两组数量独立、双零停止、04:00 精确边界、DR 单独跳过和 PR 已运行的 delay/stop 均保持原分派。PR/DR 第 1..16 张价格也直接执行原算法：前 15 张合计分别为 8,250/22,200 金币，余额相等买满，少一金币只买 14；成功分支只在内存桩把对应 `LastRun` 写成冻结时间，最终 `BP_BUY` 确认不触发真实输入。
+
+因此两组 `LastRun` 提升为 `offline=complete`，两组 `BuyAmount` 只提升为 `offline=partial`。固定上游对第 16 张以后定义了兜底单价，但当前语义观察尚不能证明购买面板显示数量、单价/总价和确认后余额，故 >15 明确 fail-closed，而不是假称完整或执行高额消费。页面不串页、蓝图不足、强化上限、真实确认、余额/蓝图 postcondition 和恢复收据仍未闭环，Shipyard 面板继续停留在账号边界。
 
 ### 1.30 本轮 Gacha 卡池、数量、票券与快速完成契约
 
@@ -302,7 +304,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 32 | Exercise | Scheduler, Exercise | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 上游零读取，真实对手/时段/血量观察、刷新持久化、战斗结算和失败恢复未闭环 |
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | 可读页面并安全跳过；购买、过滤、刷新、金币/钻石和皮肤箱均未完成 |
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | 只有勋章商店一次 DR 图纸购买；其他商店、过滤/子选项和刷新未闭环 |
-| 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | PR/DR 系列与舰位已离线等价；BuyAmount/LastRun、页面不串页、蓝图/金币边界、确认和实际结果未闭环 |
+| 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝 |
 | 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；实机仍仅一次轻型建造，其他卡池、多单、票券、快速完成及队列领取未闭环 |
 | 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；Data Key 实机仅有 300/300 观察，BattlePass 不可用，补给包当前无免费项且未执行领取 |
 | 38 | Minigame | Scheduler | L | 当前抚顺小游戏路径可用；没有字段配置，但其他轮换小游戏仍属于该任务支持范围 |
@@ -549,9 +551,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **151 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **34 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **38 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **56 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **37 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **33 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -808,12 +810,12 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Scheduler.NextRun` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `R`/◐ 调度路径 | ☑ | — | — | ☑ | ◐ |
 | `Scheduler.ServerUpdate` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=input; display=hide | input/default: "00:00, 06:00, 12:00, 18:00, 21:00", "00:00, 12:00, 18:00", "00:00, 12:00", "00:00", "04:00" | `R`/◐ 调度路径 | ☑ | — | — | ☑ | ◐ |
 | `Scheduler.SuccessInterval` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=input; display=hide | input/default: "120-240", "30-60", 0, 278, 30, 60 | `R`/◐ 调度路径 | ☑ | — | — | ☑ | ◐ |
-| `Shipyard.BuyAmount` | Shipyard | type=input; display=default | input/default: 2 | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Shipyard.LastRun` | Shipyard | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `Shipyard.BuyAmount` | Shipyard | type=input; display=default | input/default: 2 | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ◐ | ☐ |
+| `Shipyard.LastRun` | Shipyard | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Shipyard.ResearchSeries` | Shipyard | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Shipyard.ShipIndex` | Shipyard | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `ShipyardDr.BuyAmount` | Shipyard | type=input; display=default | input/default: 2 | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `ShipyardDr.LastRun` | Shipyard | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `ShipyardDr.BuyAmount` | Shipyard | type=input; display=default | input/default: 2 | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ◐ | ☐ |
+| `ShipyardDr.LastRun` | Shipyard | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `ShipyardDr.ResearchSeries` | Shipyard | type=select; display=default | options: 2, 3, 4, 5; default: 2 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `ShipyardDr.ShipIndex` | Shipyard | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `StopCondition.GetNewShip` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false | `P`/🧱 首次获得跳过 | ☑ | ◐ | ☐ | ◐ | ◐ |

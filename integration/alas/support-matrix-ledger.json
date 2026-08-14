@@ -6205,9 +6205,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "partial"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=input; display=default",
       "panels": [
@@ -6224,9 +6229,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=datetime; display=default; validate=datetime",
       "panels": [
@@ -6291,9 +6301,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "partial"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=input; display=default",
       "panels": [
@@ -6310,9 +6325,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=datetime; display=default; validate=datetime",
       "panels": [
@@ -7515,7 +7535,7 @@
         "Shipyard"
       ],
       "name": "Shipyard",
-      "note": "PR/DR 系列与舰位已离线等价；BuyAmount/LastRun、页面不串页、蓝图/金币边界、确认和实际结果未闭环",
+      "note": "八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝",
       "status": "B"
     },
     {
@@ -9162,6 +9182,58 @@
       ],
       "field": "BuyFurniture.LastRun",
       "note": "Bounded naive records preserve the original exact six-day run boundary, early/future skip, loop completion write, and invalid-value refusal before datetime arithmetic."
+    },
+    {
+      "dimensions": {
+        "offline": "partial"
+      },
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Shipyard.BuyAmount",
+      "note": "Exact integers 0 through 15 preserve the pinned PR price schedule, coin equality and shortfall boundaries, and original dispatch; values above 15 remain fail-closed until the live quantity and total-price panel has a typed receipt."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Shipyard.LastRun",
+      "note": "Bounded naive records preserve the exact 04:00 boundary, already-run stop and delay behavior, and frozen successful-purchase write before any real blueprint or coin mutation."
+    },
+    {
+      "dimensions": {
+        "offline": "partial"
+      },
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "ShipyardDr.BuyAmount",
+      "note": "Exact integers 0 through 15 preserve the pinned DR price schedule, coin equality and shortfall boundaries, and DR-before-PR dispatch; values above 15 remain fail-closed until the live quantity and total-price panel has a typed receipt."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "ShipyardDr.LastRun",
+      "note": "Bounded naive records preserve the exact 04:00 DR skip boundary and frozen successful-purchase write while PR continues independently, with all purchase confirmation stubbed."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -9174,8 +9246,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "6546affc646a6277049f49f3e5297a994bd655349593bb7647cec08ce7dd2ddc",
-      "manifest_sha256": "643d48572e121c784eacac41110807f2e8c76e22f8cea62e727e9dcd3ae44cda",
+      "combined_sha256": "69ee6206a6b55ed51ce8339daddf349cdbcb3c2e8c55ac58b7c8168c3e4bbfbb",
+      "manifest_sha256": "a80a815d5ceef1c405ca0efbd572e4e6027acb11e03424bcd91af51fef097555",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

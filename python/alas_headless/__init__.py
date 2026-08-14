@@ -110,6 +110,7 @@ from .alas_shipyard_config_contract import (
     SHIPYARD_DR_SERIES,
     SHIPYARD_INDICES,
     SHIPYARD_PR_SERIES,
+    SHIPYARD_VERIFIED_BUY_AMOUNTS,
     validate_alas_shipyard_config,
 )
 from .alas_gacha_config_contract import (
