@@ -78,6 +78,10 @@ from .alas_fleet_config_contract import (
     AlasFleetConfigSnapshot,
     validate_alas_fleet_config,
 )
+from .alas_enemy_priority_config_contract import (
+    AlasEnemyPriorityConfigSnapshot,
+    validate_alas_enemy_priority_config,
+)
 from .alas_hp_control_config_contract import (
     AlasHpControlConfigSnapshot,
     validate_alas_hp_control_config,
@@ -1775,6 +1779,11 @@ class AlasSemanticAdapter:
         self, **values: object
     ) -> AlasHpControlConfigSnapshot:
         return validate_alas_hp_control_config(**values)
+
+    def validate_campaign_enemy_priority_config(
+        self, **values: object
+    ) -> AlasEnemyPriorityConfigSnapshot:
+        return validate_alas_enemy_priority_config(**values)
 
     def campaign_stage_entry_allowed(self) -> bool:
         context = self._require_campaign_context()
@@ -9820,6 +9829,11 @@ class AlasSemanticSession:
         self, **values: object
     ) -> AlasHpControlConfigSnapshot:
         return self.open().validate_campaign_hp_control_config(**values)
+
+    def validate_campaign_enemy_priority_config(
+        self, **values: object
+    ) -> AlasEnemyPriorityConfigSnapshot:
+        return self.open().validate_campaign_enemy_priority_config(**values)
 
     def campaign_hard_remain(self) -> int:
         return self.open().campaign_hard_remain()

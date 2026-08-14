@@ -122,6 +122,12 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 其余三个 Optimization 字段明确跳过：两个截图间隔在 `Device` 初始化时即被钳位和消费，当前门禁位置太晚，且尚无跨截图后端的语义帧新鲜度证据；`WhenTaskQueueEmpty=close_game` 仍会进入没有包进程租约证明的旧 `app_stop()`，而 `goto_main/stay_there` 也缺空队列恢复回放。重新进入需要初始化期纯配置门禁、各后端 frame-clock 证据，以及 `close_game` 的租约化语义进程停止端口。
 
+### 1.10 本轮 EnemyPriority 三值目标排序契约
+
+`EnemyPriority.EnemyScaleBalanceWeight` 的三个公开值现已在 11 个共享地图面板进入导航前门禁。回放直接执行固定上游 `Map.clear_enemy()` 与 `Map.clear_filter_enemy()`：同一组原生 `GridInfo` 敌人格中，`default_mode/S1_enemy_first/S3_enemy_first` 分别选择 C1/B1/A1；两种显式优先级会按原实现覆盖活动过滤字符串。另覆盖同星级多目标按 weight/cost 排序、无敌人格返回 false，以及空值、大小写错误、未知值、非字符串和布尔值拒绝。
+
+源码审计固定了 `clear_chosen_enemy`、普通选敌、道路阻挡、潜在道路阻挡及过滤选敌五个运行时消费点。七次目标选择仅在原 `clear_chosen_enemy()` 最终输入边界记录，不连接设备或点击地图。后续真实输入仍必须通过现有格子身份、raycast、快照新鲜度、动作预算及后状态证明，因此本轮只把该字段的 `offline` 维度提升为 `complete`，不能据此扩大 action/live 或把相关面板称为完整支持。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -216,7 +222,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | Submarine | `Fleet`=0/1/2; `Mode`=`do_not_use/hunt_only/boss_only/hunt_and_boss/every_combat`; `AutoSearchMode`=`sub_standby/sub_auto_call`; `DistanceToBoss`=`to_boss_position/1_grid_to_boss/2_grid_to_boss/use_open_ocean_support` | P | 无潜艇、未解锁、所有召唤策略、Boss 距离和自动寻敌组合；不能把不出现潜艇按钮当作成功调用 |
 | Emotion | `Mode`=`calculate/ignore/calculate_ignore`; `Fleet1Value`; `Fleet1Record`; `Fleet1Control`; `Fleet1Recover`; `Fleet1Oath`; `Fleet2Value`; `Fleet2Record`; `Fleet2Control`; `Fleet2Recover`; `Fleet2Oath`; 两个 `Control` 均为 `keep_exp_bonus/prevent_green_face/prevent_yellow_face/prevent_red_face`，两个 `Recover` 均为 `not_in_dormitory/dormitory_floor_1/dormitory_floor_2` | P | 三模式、两舰队、四阈值策略、两层宿舍、誓约与非誓约、记录时间恢复、低心情等待/切换均需确定性测试 |
 | HpControl | `UseHpBalance`; `UseEmergencyRepair`; `UseLowHpRetreat`; `HpBalanceThreshold`; `HpBalanceWeight`; `RepairUseSingleThreshold`; `RepairUseMultiThreshold`; `LowHpRetreatThreshold` | P | 八字段已离线分类并在出击前 fail-closed；三个启用态仍分别缺 typed 编队拖拽、紧急维修模板/输入和完整撤退循环，故动作与实机完整性不提升 |
-| EnemyPriority | `EnemyScaleBalanceWeight`=`default_mode/S3_enemy_first/S1_enemy_first` | P | 三种优先级在相同地图夹具中给出可比较决策，并验证无匹配敌人和多目标同权 |
+| EnemyPriority | `EnemyScaleBalanceWeight`=`default_mode/S3_enemy_first/S1_enemy_first` | P | 三值已完成原方法离线回放与导航前 fail-closed；相同地图夹具覆盖过滤覆盖、无敌人和同星级多目标，实机/动作维度未扩大 |
 | GemsFarming | `ChangeFlagship`=`ship/ship_equip`; `ChangeVanguard`=`disabled/ship/ship_equip`; `CommissionLimit`; `CommonCV`=`any/langley/bogue/ranger/hermes`; `CommonDD`=`any/favourite/aulick_or_foote/cassin_or_downes/z20_or_z21` | M | 每个候选舰/换装模式、收藏过滤、无候选舰、船坞满、委托占用和换船后继续刷图 |
 | EquipmentCode | `Config`（DD 与四艘 CV 的装备代码）；`ExportToConfig` | M | 合法/缺失/错误装备代码、导出开关、装备不足、被占用装备和回滚；不得装备到错误舰船 |
 
@@ -496,7 +502,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `EmulatorInfo.Emulator` | Alas | type=select; display=default | options: "auto", "BlueStacks4", "BlueStacks4HyperV", "BlueStacks5", "BlueStacks5HyperV", "LDPlayer14", "LDPlayer3", "LDPlayer4", "LDPlayer9", "MEmuPlayer", "MuMuPlayer", "MuMuPlayer12", "MuMuPlayerX", "NoxPlayer", "NoxPlayer64"; default: "auto" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `EmulatorInfo.name` | Alas | type=textarea; display=default | input/default: null | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `EmulatorInfo.path` | Alas | type=textarea; display=default | input/default: null | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `EnemyPriority.EnemyScaleBalanceWeight` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "default_mode", "S1_enemy_first", "S3_enemy_first"; default: "default_mode" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `EnemyPriority.EnemyScaleBalanceWeight` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "default_mode", "S1_enemy_first", "S3_enemy_first"; default: "default_mode" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Enhance.CheckPerCategory` | General | type=input; display=default | input/default: 5 | `P`/◐ 正式任务循环已接入 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `Enhance.Filter` | General | type=textarea; display=default | input/default: null | `P`/◐ 8 类型任务筛选已接入 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `Enhance.ShipToEnhance` | General | type=select; display=default | options: "all", "favourite"; default: "all" | `P`/◐ all/favourite typed 控件已实机 | ☑ | ☑ | ☑ | ☑ | ◐ |

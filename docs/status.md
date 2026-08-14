@@ -4,6 +4,25 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-14
 
+### EnemyPriority shared configuration: original target ordering replayed
+
+- `EnemyPriority.EnemyScaleBalanceWeight` now validates the complete pinned
+  three-value enum before campaign navigation across its 11 shared panels.
+  Unknown, case-changed, empty, non-text, and boolean values fail closed.
+- The input-free replay directly executes original ALAS `clear_enemy()` and
+  `clear_filter_enemy()` against one comparable native `GridInfo` fixture.
+  `default_mode`, `S1_enemy_first`, and `S3_enemy_first` select `C1`, `B1`,
+  and `A1` respectively; the filter path proves that the two explicit modes
+  replace the campaign filter exactly as upstream specifies. Same-scale ties
+  retain original weight/cost ordering, and an empty enemy set returns without
+  a target.
+- Static source evidence pins all five runtime consumers. Seven chosen targets
+  are captured at the original `clear_chosen_enemy()` final-input boundary;
+  no device connection, map click, mutation, or Android input occurs. Actual
+  clicks remain governed by the existing semantic grid identity, raycast,
+  freshness, budget, and post-state gates, so only the field's offline
+  dimension is promoted and its existing live/action dimensions are unchanged.
+
 ### HpControl shared configuration: deterministic decisions and early refusal
 
 - All eight `HpControl` fields shared by 11 normal/event campaign panels now
@@ -208,8 +227,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 92 changed files, every patched Python file compiles, and
-  the repository suite passes `824/824` tests, including the HpControl and
-  task-hoarding replay additions.
+  the repository suite passes `829/829` tests, including the HpControl,
+  task-hoarding, and EnemyPriority replay additions.
 
 ### EventB ship-drop closure: implementation passed, natural live proof pending
 

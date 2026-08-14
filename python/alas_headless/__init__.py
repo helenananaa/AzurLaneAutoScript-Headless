@@ -23,6 +23,10 @@ from .alas_hp_control_config_contract import (
     AlasHpControlConfigSnapshot,
     validate_alas_hp_control_config,
 )
+from .alas_enemy_priority_config_contract import (
+    AlasEnemyPriorityConfigSnapshot,
+    validate_alas_enemy_priority_config,
+)
 
 from .alas_map_sync import (
     AlasCampaignFleetPlan,

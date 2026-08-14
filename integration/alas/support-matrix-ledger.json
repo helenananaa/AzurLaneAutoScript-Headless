@@ -1848,9 +1848,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_enemy_priority_config.py",
+        "python/alas_headless/alas_enemy_priority_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -7552,6 +7557,19 @@
       ],
       "field": "StopCondition.StageIncrease",
       "note": "Main, custom, A/B boundary, terminal, disabled, and recovery classes reuse pinned ALAS progression."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_enemy_priority_config.py",
+        "python/alas_headless/alas_enemy_priority_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "EnemyPriority.EnemyScaleBalanceWeight",
+      "note": "All three modes execute pinned ALAS target ordering and filter override decisions; invalid values fail before campaign navigation."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -7564,8 +7582,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "c05aea72dd35aaf855989b0724f4b0a942a5d1a21d5b7220326e03509490068b",
-      "manifest_sha256": "8e7f29d21b1f0d75d838d772a6cac5e38eb35cbac6caa5d0dda8257c175e6d9f",
+      "combined_sha256": "6e309458429ffd574a7854ab65322bf62ca8152baf3dfcae40b147f1672c629a",
+      "manifest_sha256": "f45c190c610741c0d0a34cd74f001c74663d47d1cc0fa6aa6f13577ca4532b19",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
