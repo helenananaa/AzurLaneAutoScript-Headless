@@ -1275,12 +1275,39 @@ index d5528710..61c2bd1a 100644
                  self.campaign_set_chapter(name, mode)
                  self.ENTRANCE = self.campaign_get_entrance(name=name)
 diff --git a/module/daily/daily.py b/module/daily/daily.py
-index f9b86c33..e7669afd 100644
+index f9b86c33..a9434987 100644
 --- a/module/daily/daily.py
 +++ b/module/daily/daily.py
-@@ -24,6 +24,11 @@ class Daily(Combat):
+@@ -1,5 +1,7 @@
+ import numpy as np
+ 
++from alas_headless import validate_alas_daily_config
++
+ import module.config.server as server
+ from module.base.utils import get_color
+ from module.combat.assets import BATTLE_PREPARATION
+@@ -23,7 +25,30 @@ class Daily(Combat):
+     daily_checked: list
      emergency_module_development = False
  
++    def _validate_daily_config(self):
++        return validate_alas_daily_config(
++            use_daily_skip=self.config.Daily_UseDailySkip,
++            escort_mission=self.config.Daily_EscortMission,
++            escort_mission_fleet=self.config.Daily_EscortMissionFleet,
++            advance_mission=self.config.Daily_AdvanceMission,
++            advance_mission_fleet=self.config.Daily_AdvanceMissionFleet,
++            fierce_assault=self.config.Daily_FierceAssault,
++            fierce_assault_fleet=self.config.Daily_FierceAssaultFleet,
++            tactical_training=self.config.Daily_TacticalTraining,
++            tactical_training_fleet=self.config.Daily_TacticalTrainingFleet,
++            supply_line_disruption=self.config.Daily_SupplyLineDisruption,
++            module_development=self.config.Daily_ModuleDevelopment,
++            module_development_fleet=self.config.Daily_ModuleDevelopmentFleet,
++            emergency_module_development=self.config.Daily_EmergencyModuleDevelopment,
++            emergency_module_development_fleet=self.config.Daily_EmergencyModuleDevelopmentFleet,
++        )
++
      def is_active(self):
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
@@ -1290,7 +1317,7 @@ index f9b86c33..e7669afd 100644
          color = get_color(image=self.device.image, area=DAILY_ACTIVE.area)
          color = np.array(color).astype(float)
          color = (np.max(color) + np.min(color)) / 2
-@@ -265,7 +270,26 @@ class Daily(Combat):
+@@ -265,7 +290,26 @@ class Daily(Combat):
  
      def daily_run_one(self):
          logger.hr('Daily run one', level=1)
@@ -1317,7 +1344,7 @@ index f9b86c33..e7669afd 100644
          self.device.sleep(0.2)
          self.device.screenshot()
          self.daily_current = 1
-@@ -304,7 +328,12 @@ class Daily(Combat):
+@@ -304,7 +348,12 @@ class Daily(Combat):
                  self.daily_check()
                  self.next()
                  continue
@@ -1331,6 +1358,14 @@ index f9b86c33..e7669afd 100644
              if remain == 0:
                  self.daily_check()
                  self.next()
+@@ -336,6 +385,7 @@ class Daily(Combat):
+             in: Any page
+             out: page_daily
+         """
++        self._validate_daily_config()
+         self.daily_run()
+ 
+         # Cannot stay in page_daily, because order is disordered.
 diff --git a/module/eventstory/eventstory.py b/module/eventstory/eventstory.py
 index 1a941e33..7167383b 100644
 --- a/module/eventstory/eventstory.py

@@ -52,6 +52,10 @@ from .alas_event_daily_config_contract import (
     validate_alas_event_daily_last_stage,
     validate_alas_event_daily_stage_filter,
 )
+from .alas_daily_config_contract import (
+    AlasDailyConfigSnapshot,
+    validate_alas_daily_config,
+)
 
 from .alas_map_sync import (
     AlasCampaignFleetPlan,

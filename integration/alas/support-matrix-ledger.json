@@ -786,9 +786,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -805,9 +810,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -824,9 +834,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -843,9 +858,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -862,9 +882,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -881,9 +906,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -900,9 +930,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -919,9 +954,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -938,9 +978,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -957,9 +1002,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -976,9 +1026,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -995,9 +1050,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -1014,9 +1074,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -1033,9 +1098,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -8164,6 +8234,188 @@
       ],
       "field": "EventDaily.LastStage",
       "note": "Current-panel cursors resume after the recorded stage, filtered-out cursors restart, and stale invalid cursors retain the original server-day reset before validation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.AdvanceMission",
+      "note": "All declared stage choices preserve the original standard and emergency Daily slot mapping; malformed choices fail before daily_run."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.AdvanceMissionFleet",
+      "note": "Fleet indices 1 through 6 are admitted exactly and preserve the original Advance Mission mapping; booleans, text, and out-of-range values fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.EmergencyModuleDevelopment",
+      "note": "Skip, first, and second preserve the original limited-time slot semantics; unsupported third and malformed choices fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.EmergencyModuleDevelopmentFleet",
+      "note": "Fleet indices 1 through 6 are admitted exactly for the emergency first slot and invalid scalar types or bounds fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.EscortMission",
+      "note": "All four declared choices preserve the original standard and emergency Escort Mission positions without entering a battle."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.EscortMissionFleet",
+      "note": "Fleet indices 1 through 6 preserve the original Escort Mission mapping and invalid values fail before the Daily state machine."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.FierceAssault",
+      "note": "All four declared choices preserve the original standard and emergency Fierce Assault positions without resource consumption."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.FierceAssaultFleet",
+      "note": "Fleet indices 1 through 6 preserve the original Fierce Assault mapping and wrong types or bounds fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.ModuleDevelopment",
+      "note": "Skip, first, and second preserve the original standard and emergency module-development slots; unsupported third fails closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.ModuleDevelopmentFleet",
+      "note": "Fleet indices 1 through 6 preserve the original Module Development mapping and invalid scalar values fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.SupplyLineDisruption",
+      "note": "All four stage choices preserve fleet-zero submarine semantics and the original disabled-skip bypass without entering combat."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.TacticalTraining",
+      "note": "Skip and all three stage choices preserve original Tactical Training mapping; the actionable fixture forwards stage two unchanged."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.TacticalTrainingFleet",
+      "note": "Fleet indices 1 through 6 preserve original Tactical Training selection; the actionable fixture forwards fleet four unchanged."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daily_config.py",
+        "python/alas_headless/alas_daily_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daily.UseDailySkip",
+      "note": "Both booleans execute the original DAILY_SKIP versus DAILY_NORMAL_RUN choice and the Supply Line disabled-skip bypass; non-booleans fail closed."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8176,8 +8428,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "fd82c7b0d33c7ce1dbecca3df3f655b2fb54eb88c15b08a5dad407a11416eacc",
-      "manifest_sha256": "1adc076cd5004bb78f45ac1f3477ea325038786af59d75ec0843192b5212d4f4",
+      "combined_sha256": "9c01995f5738fa6f7a5c8ae3ca0ad8d3bc4d112a43a4038615230dd25950040b",
+      "manifest_sha256": "9580930864c2a286fe794d655d3f8599203243ba81a10487d834c9e17dddb1af",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

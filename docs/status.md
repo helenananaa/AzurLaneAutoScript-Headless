@@ -303,9 +303,28 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 95 changed files, all 94 patched Python files compile, and
-  the repository suite passes `861/861` tests, including EventDaily rotation,
-  Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
+  the repository suite passes `866/866` tests, including Daily configuration,
+  EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
+
+### Daily fourteen-field configuration: offline contract passed
+
+- The shared Daily group now validates all seven stage selectors, six fleet
+  selectors, and `UseDailySkip` before the original `daily_run()` state
+  machine. Five regular selectors admit exactly skip/first/second/third; both
+  module-development selectors admit exactly skip/first/second; fleets admit
+  exact integers 1-6; and the skip switch admits only booleans.
+- Pinned replay executes original `get_daily_stage_and_fleet()`, `daily_enter()`,
+  `daily_run_one()`, and `run()` decisions for standard and emergency-module
+  layouts, skip versus normal controls, the Supply Line fleet-zero exception,
+  disabled skip, inactive cards, and zero remaining attempts.
+- The contract covers 64 accepted and 80 invalid single-field cases. Invalid
+  values fail before `daily_run`; valid replay never invokes the real
+  `daily_execute()`, enters combat, consumes an attempt, or injects Android
+  input. Mutation budget remains `0`.
+- All fourteen fields move only to `offline=complete`. Existing observation,
+  action, and live statuses remain unchanged; only Tactical Training stage two
+  with its current fleet has prior live closure.
 
 ### EventA-D daily stage rotation: offline contract passed
 

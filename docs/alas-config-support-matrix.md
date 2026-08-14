@@ -170,6 +170,12 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 固定上游回放直接执行原 `CampaignABCD.run()`，覆盖 76 个合法、48 个非法契约案例，以及四分区优先级、游标后续恢复、游标被过滤时从头开始、缺少脚本、无匹配时禁用并停止、`TaskEnd`、未解锁关卡请求人工接管和过期游标自愈。没有进入关卡、消耗油量或注入 Android 输入；两字段只从 `offline=partial` 提升为 `complete`，既有 observation/action/live 不变。
 
+### 1.18 本轮 Daily 十四字段配置契约
+
+Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会在原 `daily_run()` 前整组 fail-closed。五类普通日常严格接受 `skip/first/second/third`，普通与限时兵装开发只接受 `skip/first/second`，舰队只接受精确整数 1-6，快速跳过只接受布尔值。文本数字、布尔舰队、越界舰队、大小写或带空白的近似枚举都不会进入原状态机。
+
+固定上游回放执行原 `get_daily_stage_and_fleet()`、`daily_enter()`、`daily_run_one()` 和 `run()`，覆盖普通及限时兵装两种 1-7 位排列、快速跳过与普通作战控件选择、破交作战 fleet=0 特例、关闭快速跳过时的安全略过、任务未激活和剩余次数为 0。64 个合法和 80 个非法单字段案例均通过，mutation budget 为 0，没有调用 `daily_execute()` 的真实实现、进入战斗、消耗次数或注入 Android 输入。十四字段只提升 `offline`，原 observation/action/live 证据不外推。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -205,7 +211,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | 27 | Guild | Scheduler, GuildLogistics, GuildOperation | M | 后勤兑换、新任务、作战、Boss 和推荐舰队均缺适配 |
 | 28 | Reward | Scheduler, Reward | P | 资源气泡可领取，任务领取部分可用；周常、红点、数字行、空页面和舰船奖励未完整闭环 |
 | 29 | Awaken | Scheduler, Awaken | M | 收藏过滤、120/125 上限及批量觉醒缺适配 |
-| 30 | Daily | Scheduler, Daily | L | 只闭环 Tactical Training 第二关；其余日常类型、难度、舰队和 `UseDailySkip` 未覆盖 |
+| 30 | Daily | Scheduler, Daily | L | 十四字段离线映射与 fail-closed 契约已完成；实机仍只闭环 Tactical Training 第二关默认舰队，其余日常和配置值未闭环 |
 | 31 | Hard | Scheduler, Hard | B | 能进入 11-4；当前账号进度和自动寻敌锁定，尚无战斗/结算证据 |
 | 32 | Exercise | Scheduler, Exercise | L | 一种策略闭环；不同选敌/时段策略、刷新、试探次数、低血重试和失败恢复未闭环 |
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | 可读页面并安全跳过；购买、过滤、刷新、金币/钻石和皮肤箱均未完成 |
@@ -302,7 +308,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| Daily | `EscortMission`, `AdvanceMission`, `TacticalTraining`, `SupplyLineDisruption`, `FierceAssault`=`skip/first/second/third`; `ModuleDevelopment`, `EmergencyModuleDevelopment`=`skip/first/second`; `EscortMissionFleet`, `AdvanceMissionFleet`, `TacticalTrainingFleet`, `FierceAssaultFleet`, `ModuleDevelopmentFleet`, `EmergencyModuleDevelopmentFleet`=1..6；`UseDailySkip` | L | 每种任务/难度/舰队、skip、快速跳过可用/不可用、次数耗尽和战斗结算；SupplyLine 没有独立舰队字段需保持上游语义 |
+| Daily | `EscortMission`, `AdvanceMission`, `TacticalTraining`, `SupplyLineDisruption`, `FierceAssault`=`skip/first/second/third`; `ModuleDevelopment`, `EmergencyModuleDevelopment`=`skip/first/second`; `EscortMissionFleet`, `AdvanceMissionFleet`, `TacticalTrainingFleet`, `FierceAssaultFleet`, `ModuleDevelopmentFleet`, `EmergencyModuleDevelopmentFleet`=1..6；`UseDailySkip` | L | 全值域、两种排列、skip、次数耗尽及 SupplyLine fleet=0 已离线覆盖；仍缺非默认任务/难度/舰队、快速跳过不可用和战斗结算的实机收据 |
 | Hard | `HardStage`; `HardFleet`=1/2 | B | 合法/未解锁/不存在关卡、两舰队、次数耗尽、战斗和结算 |
 | Exercise | `ExerciseStrategy`=`aggressive/fri18/sat0/sat12/sat18/sun0/sun12/sun18`; `OpponentChooseMode`=`max_exp/easiest/leftmost/easiest_else_exp`; `OpponentRefreshValue`; `OpponentRefreshRecord`; `OpponentTrial`; `LowHpThreshold`; `LowHpConfirmWait` | L | 8 时段策略、4 选敌策略、刷新次数/记录、试探次数、低血阈值与等待、失败重开和赛季边界 |
 | GeneralShop | `Filter`; `Refresh`; `UseGems`; `ConsumeCoins`; `BuySkinBox` | B | 过滤命中/无命中/非法值，刷新真假，钻石/金币消费保护，皮肤箱和购买确认 |
@@ -457,9 +463,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **151 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **19 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **30 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **55 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **53 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **42 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -495,20 +501,20 @@ python scripts/python/verify_alas_support_matrix.py `
 | `ControlExpOverflow.T4Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `CoreShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Array" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Daemon.EnterMap` | Daemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `Daily.AdvanceMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.AdvanceMissionFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.EmergencyModuleDevelopment` | Daily | type=select; display=default | options: "first", "second", "skip"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.EmergencyModuleDevelopmentFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.EscortMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.EscortMissionFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.FierceAssault` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.FierceAssaultFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.ModuleDevelopment` | Daily | type=select; display=default | options: "first", "second", "skip"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.ModuleDevelopmentFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.SupplyLineDisruption` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "second" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Daily.TacticalTraining` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "second" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Daily.TacticalTrainingFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Daily.UseDailySkip` | Daily | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
+| `Daily.AdvanceMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.AdvanceMissionFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.EmergencyModuleDevelopment` | Daily | type=select; display=default | options: "first", "second", "skip"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.EmergencyModuleDevelopmentFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.EscortMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.EscortMissionFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.FierceAssault` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.FierceAssaultFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.ModuleDevelopment` | Daily | type=select; display=default | options: "first", "second", "skip"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.ModuleDevelopmentFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.SupplyLineDisruption` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "second" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.TacticalTraining` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "second" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Daily.TacticalTrainingFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Daily.UseDailySkip` | Daily | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `DataKey.Collect` | Freebies | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `DataKey.ForceCollect` | Freebies | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `Dorm.Collect` | Dorm | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
