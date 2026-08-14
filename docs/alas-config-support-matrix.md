@@ -152,6 +152,12 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 内存回放直接执行原方法的无 Clear Mode、显式关闭、开启、`MAP_CLEAR_ALL_THIS_TIME`、开关未变化和开关变化六类路径，并核对十个地图特性关闭、自动寻敌与 2x 书传播、`on/off` 请求和动画等待。没有调用真实 `FAST_FORWARD` 控件或 Android 输入；因此只把该字段的 offline 提升为 complete。缺少的仍是 Clear Mode 开关自身的 typed 状态/输入端口、切换后稳定 postcondition，以及不可用关卡上的实机拒绝证据。
 
+### 1.15 本轮 Tactical 经验溢出与新学员八字段契约
+
+`ControlExpOverflow.Enable/T1Allow/T2Allow/T3Allow/T4Allow` 与 `AddNewStudent.Enable/Favorite/MinLevel` 现在会在原 ALAS 的经验书过滤、领取循环和学员选择方法入口 fail-closed。离线契约覆盖 34 个合法配置和 12 个非法值：四档允许溢出量必须是 `0..5800` 的精确整数，学员等级接受 `1..125` 及可规范化的十进制文本；布尔值、非十进制文本及越界值均拒绝。
+
+回放直接执行原 `_tactical_books_filter_exp()` 的等级 10 边界：关闭时只保留特殊 100 经验书，开启时逐档保留配置边界并排除越界书，技能未满时九本夹具全部保留。`Favorite` 原先未传入语义候选选择，本轮会在读取候选前调用既有的精确共享 Dock 收藏切换。整个回放的 mutation budget 为 0，且没有 Android 输入、真实选舰或书本消耗；仍缺 Tactical 场景下收藏状态与候选的实机 typed 观察、真实书库存/技能经验、教学结果 postcondition 和安全回滚。因此八字段只提升 `offline`，不提升 observation/action/live。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -180,7 +186,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | P | SP 地图脚本存在，无实机闭环 |
 | 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | M | 难度过滤、每日次数、战斗和领奖缺适配 |
 | 22 | Commission | Scheduler, Commission | L | 领取和零油开始有证据；非零油、重大委托、全部过滤器、取消和连续循环未闭环 |
-| 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 一个学员/技能/T4 书路径闭环；快速槽、新学员、收藏/等级、经验溢出和过滤器分支未闭环 |
+| 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 一个学员/技能/T4 书路径闭环；经验溢出与新学员八字段离线契约已完成，快速槽、真实收藏/等级候选观察、完整书库存及结果回滚仍未闭环 |
 | 24 | Research | Scheduler, Research | L | 一个金币项目闭环；魔方/零件、延迟、重置、26 个预设和自定义规则未完整覆盖 |
 | 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 默认收取和喂食闭环；食物过滤、买家具、套装/全部和日期状态未闭环 |
 | 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | M | 买箱、金币溢出、训练、增强和保留天赋规则均缺适配 |
@@ -268,8 +274,8 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 |---|---|:---:|---|
 | Commission | `PresetFilter`=`cube/cube_24h/chip/chip_24h/oil/custom`; `CustomFilter`; `DoMajorCommission` | L | 6 预设、规则命中/无命中/非法值、日常委托/紧急委托、0/非 0 油、重大委托、取消和连续派遣 |
 | Tactical | `RapidTrainingSlot`=`do_not_use/slot_1/slot_2/slot_3/slot_4`; `TacticalFilter` | L | 五槽位策略、同色/同技能与 T1-T4 书、无书、无空位、规则回退和快速完成 |
-| ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | P | 关闭/启用、各等级 0/边界/库存上下界、溢出后仍能选择合法书 |
-| AddNewStudent | `Enable`; `Favorite`; `MinLevel` | P | 开关、收藏过滤、等级边界、无候选、多个候选和选择结果验证 |
+| ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | P | 离线关闭/启用及各等级 0/配置/最大/越界已覆盖；仍需真实库存、当前技能经验及选书结果闭环 |
+| AddNewStudent | `Enable`; `Favorite`; `MinLevel` | P | 离线开关、收藏传播和等级边界已覆盖；仍需真实收藏候选状态、无/多候选及教学结果验证 |
 | Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 26 预设、自由规则、重置、延迟、三种资源各四策略、资源不足、队列满和跨轮选择 |
 | Dorm | `Collect`; `Feed`; `FeedFilter` | L | 两开关四组合、食物规则命中/回退/无食物、宿舍满、收取为空和喂食结果 |
 | BuyFurniture | `Enable`; `BuyOption`=`set/all`; `LastRun` | P | 开关、套装/全部、货币不足、已购买、日期去重和购买确认 |
@@ -439,15 +445,15 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **151 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **13 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **19 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **55 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **59 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **53 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| `AddNewStudent.Enable` | Tactical | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `AddNewStudent.Favorite` | Tactical | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `AddNewStudent.MinLevel` | Tactical | type=input; display=default | input/default: 50 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `AddNewStudent.Enable` | Tactical | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `AddNewStudent.Favorite` | Tactical | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `AddNewStudent.MinLevel` | Tactical | type=input; display=default | input/default: 50 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Awaken.Favourite` | Awaken | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Awaken.LevelCap` | Awaken | type=select; display=default | options: "level120", "level125"; default: "level120" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `AzurLaneUncensored.Repository` | AzurLaneUncensored | type=input; display=disabled | input/default: "https://gitee.com/LmeSzinc/AzurLaneUncensored" | `P`/⊘ 当前无效 | ⊘ | ⊘ | ⊘ | ⊘ | ⊘ |
@@ -470,11 +476,11 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Commission.CustomFilter` | Commission | type=textarea; display=default | input/default: <long default in args.json> | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `Commission.DoMajorCommission` | Commission | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `Commission.PresetFilter` | Commission | type=select; display=default | options: "chip_24h", "chip", "cube_24h", "cube", "custom", "oil"; default: "cube" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `ControlExpOverflow.Enable` | Tactical | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `ControlExpOverflow.T1Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `ControlExpOverflow.T2Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `ControlExpOverflow.T3Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `ControlExpOverflow.T4Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `ControlExpOverflow.Enable` | Tactical | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `ControlExpOverflow.T1Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `ControlExpOverflow.T2Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `ControlExpOverflow.T3Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `ControlExpOverflow.T4Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `CoreShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Array" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Daemon.EnterMap` | Daemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `Daily.AdvanceMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |

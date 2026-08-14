@@ -11,9 +11,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -30,9 +35,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -49,9 +59,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -613,9 +628,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -632,9 +652,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -651,9 +676,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -670,9 +700,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -689,9 +724,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -7948,6 +7988,110 @@
       ],
       "field": "Campaign.UseClearMode",
       "note": "Both boolean values preserve original clear-mode, auto-search, two-times-book, map-flag, switch, and wait decisions across all 16 shared panels."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "AddNewStudent.Enable",
+      "note": "Both boolean values are validated before the original tactical receive loop; no live student assignment is implied."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "AddNewStudent.Favorite",
+      "note": "The value is now forwarded to the exact shared Dock favourite toggle before semantic candidate selection."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "AddNewStudent.MinLevel",
+      "note": "Levels 1 through 125 and decimal text are normalized; invalid values now fail closed instead of silently becoming level 1."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "ControlExpOverflow.Enable",
+      "note": "Enabled and disabled original book-filter branches execute at the level-10 threshold with no input."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "ControlExpOverflow.T1Allow",
+      "note": "Zero, configured boundary, maximum, and over-boundary T1 decisions are covered by contract and original filtering replay."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "ControlExpOverflow.T2Allow",
+      "note": "Zero, configured boundary, maximum, and over-boundary T2 decisions are covered by contract and original filtering replay."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "ControlExpOverflow.T3Allow",
+      "note": "Zero, configured boundary, maximum, and over-boundary T3 decisions are covered by contract and original filtering replay."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_tactical_config.py",
+        "python/alas_headless/alas_tactical_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "ControlExpOverflow.T4Allow",
+      "note": "Zero, configured boundary, maximum, and over-boundary T4 decisions are covered by contract and original filtering replay."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -7960,8 +8104,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "9273b3415e9d2943cfa475f6b8bd9dd8e891b9b70380042e40750bf4ebe19488",
-      "manifest_sha256": "1377352e2cc97fb480ac19bc13a9ba34c433cb23fd12dd8748bbd85eefdbcf8e",
+      "combined_sha256": "2f33dd71f97b1921fcddd78beaace313098e388e290951d0e7da17533c6978dc",
+      "manifest_sha256": "98273f76bf4cb19b9a778a0daa4fb2dea9dddf947267605a2d6ed0c20ab8497e",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

@@ -5935,7 +5935,7 @@ class AlasSemanticAdapter:
         return self.oracle.tactical_skills()
 
     def tactical_select_suitable_ship(
-        self, min_level: int, start_index: int
+        self, favourite: bool, min_level: int, start_index: int
     ) -> bool:
         context = self._require_commission_context()
         if (
@@ -5943,8 +5943,16 @@ class AlasSemanticAdapter:
             or not self._action_ledger.allowed("tactical.assign")
         ):
             raise SemanticGateClosed("tactical assignment requires a positive budget")
-        if min_level < 1 or start_index < 0:
+        if (
+            type(favourite) is not bool
+            or type(min_level) is not int
+            or not 1 <= min_level <= 125
+            or type(start_index) is not int
+            or start_index < 0
+        ):
             raise ValueError("tactical ship selection bounds are invalid")
+        # Tactical and enhancement share the exact Dock favourite toggle.
+        self.oracle.set_enhancement_dock_favourite(favourite)
         candidates = self.oracle.tactical_candidate_ships()
         selected = next(
             (
@@ -9342,8 +9350,12 @@ class AlasSemanticSession:
     def tactical_book_selected(self, position: int) -> bool:
         return self.open().tactical_book_selected(position)
 
-    def tactical_select_suitable_ship(self, min_level: int, start_index: int) -> bool:
-        return self.open().tactical_select_suitable_ship(min_level, start_index)
+    def tactical_select_suitable_ship(
+        self, favourite: bool, min_level: int, start_index: int
+    ) -> bool:
+        return self.open().tactical_select_suitable_ship(
+            favourite, min_level, start_index
+        )
 
     def tactical_select_first_trainable_skill(self) -> bool:
         return self.open().tactical_select_first_trainable_skill()

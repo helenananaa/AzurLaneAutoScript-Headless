@@ -1,5 +1,5 @@
 diff --git a/module/commission/commission.py b/module/commission/commission.py
-index 195d84a1..fda74c41 100644
+index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0ce64b07b 100644
 --- a/module/commission/commission.py
 +++ b/module/commission/commission.py
 @@ -89,6 +89,21 @@ class RewardCommission(UI, InfoHandler):
@@ -260,7 +260,7 @@ index 195d84a1..fda74c41 100644
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_commission()
 diff --git a/module/commission/project.py b/module/commission/project.py
-index cd88c162..efa9500e 100644
+index cd88c16282b4f6c8bcf9eac2202e836797869e3c..efa9500e8b5c759653038f4867dbf2f365269384 100644
 --- a/module/commission/project.py
 +++ b/module/commission/project.py
 @@ -106,6 +106,58 @@ class Commission:
@@ -347,7 +347,7 @@ index cd88c162..efa9500e 100644
          # area = area_offset((5, 5, 30, 30), self.area[0:2])
          # return color_similar(color1=get_color(self.image, area), color2=(239, 166, 231))
 diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
-index 0e518a49..d794d42c 100644
+index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d0fd105fc 100644
 --- a/module/tactical/tactical_class.py
 +++ b/module/tactical/tactical_class.py
 @@ -1,4 +1,4 @@
@@ -388,7 +388,28 @@ index 0e518a49..d794d42c 100644
          area = self.button.area
          check_area = tuple([area[0], area[3] + 2, area[2], area[3] + 4])
          im = rgb2gray(crop(image, check_area, copy=False))
-@@ -225,7 +245,15 @@ class RewardTacticalClass(Dock):
+@@ -200,6 +220,20 @@ class RewardTacticalClass(Dock):
+     tactical_finish = []
+     dock_select_index = 0
+ 
++    def _validate_tactical_config(self):
++        from alas_headless import validate_alas_tactical_config
++
++        return validate_alas_tactical_config(
++            control_exp_overflow_enable=self.config.ControlExpOverflow_Enable,
++            t1_allow=self.config.ControlExpOverflow_T1Allow,
++            t2_allow=self.config.ControlExpOverflow_T2Allow,
++            t3_allow=self.config.ControlExpOverflow_T3Allow,
++            t4_allow=self.config.ControlExpOverflow_T4Allow,
++            add_new_student_enable=self.config.AddNewStudent_Enable,
++            add_new_student_favorite=self.config.AddNewStudent_Favorite,
++            add_new_student_min_level=self.config.AddNewStudent_MinLevel,
++        )
++
+     def _tactical_books_get(self, skip_first_screenshot=True):
+         """
+         Get books. Handle loadings, wait 10 times at max.
+@@ -225,7 +259,15 @@ class RewardTacticalClass(Dock):
                  logger.info('Not in TACTICAL_CLASS_START anymore, exit')
                  return False
  
@@ -405,7 +426,7 @@ index 0e518a49..d794d42c 100644
              self.books = books
              logger.attr('Book_count', books.count)
              logger.attr('Books', str(books))
-@@ -264,7 +292,12 @@ class RewardTacticalClass(Dock):
+@@ -264,7 +306,12 @@ class RewardTacticalClass(Dock):
                  break
  
              if interval.reached():
@@ -419,7 +440,27 @@ index 0e518a49..d794d42c 100644
                  interval.reset()
                  continue
  
-@@ -383,6 +416,17 @@ class RewardTacticalClass(Dock):
+@@ -274,6 +321,8 @@ class RewardTacticalClass(Dock):
+         books from self.books based on current
+         progress of the tactical skill.
+         """
++        tactical_config = self._validate_tactical_config()
++
+         # Read 'current' and 'remain' will be inaccurate
+         # since first exp_value is factored into it
+         current, remain, total = SKILL_EXP.ocr(self.device.image)
+@@ -292,8 +341,8 @@ class RewardTacticalClass(Dock):
+ 
+                 # Acquire 'overflow' for respective tier book if enabled
+                 overflow = 0
+-                if self.config.ControlExpOverflow_Enable:
+-                    overflow = getattr(self.config, f'ControlExpOverflow_T{book.tier}Allow')
++                if tactical_config.control_exp_overflow_enable:
++                    overflow = getattr(tactical_config, f't{book.tier}_allow')
+ 
+                 # Remove book if sum to be gained exceeds total (+ overflow)
+                 if (current + book.exp_value) > (total + overflow):
+@@ -383,6 +432,17 @@ class RewardTacticalClass(Dock):
          Get the future finish time.
          """
          logger.hr('Tactical get finish')
@@ -437,7 +478,15 @@ index 0e518a49..d794d42c 100644
          grids = ButtonGrid(
              origin=(421, 596), delta=(223, 0), button_shape=(139, 27), grid_shape=(4, 1), name='TACTICAL_REMAIN')
  
-@@ -482,6 +526,10 @@ class RewardTacticalClass(Dock):
+@@ -413,6 +473,7 @@ class RewardTacticalClass(Dock):
+             in: page_reward, TACTICAL_CLASS_START
+             out: page_reward
+         """
++        self._validate_tactical_config()
+         logger.hr('Tactical class receive', level=1)
+         received = False
+         study_finished = not self.config.AddNewStudent_Enable
+@@ -482,6 +543,10 @@ class RewardTacticalClass(Dock):
                  continue
              if self.ui_main_appear_then_click(page_reward, interval=3):
                  continue
@@ -448,7 +497,7 @@ index 0e518a49..d794d42c 100644
              if self.handle_popup_confirm('TACTICAL'):
                  self.interval_reset([BOOK_EMPTY_POPUP])
                  continue
-@@ -609,6 +657,10 @@ class RewardTacticalClass(Dock):
+@@ -609,6 +674,10 @@ class RewardTacticalClass(Dock):
              out: Unknown, may TACTICAL_CLASS_START, page_tactical
          """
          logger.hr('Tactical skill choose')
@@ -459,30 +508,46 @@ index 0e518a49..d794d42c 100644
          selected_skill = self.find_not_full_level_skill()
  
          # If can't select a skill, think this ship no need study
-@@ -625,6 +677,22 @@ class RewardTacticalClass(Dock):
+@@ -625,9 +694,22 @@ class RewardTacticalClass(Dock):
  
      def select_suitable_ship(self):
          logger.hr(f'Select suitable ship')
++        tactical_config = self._validate_tactical_config()
 +        from alas_headless import current_semantic_session
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
-+            try:
-+                min_level = int(self.config.AddNewStudent_MinLevel)
-+                if min_level < 1:
-+                    min_level = 1
-+            except (ValueError, TypeError) as e:
-+                logger.warning(
-+                    f'Invalid AddNewStudent_MinLevel: '
-+                    f'{self.config.AddNewStudent_MinLevel}, {e}')
-+                min_level = 1
-+            logger.attr('AddNewStudent_MinLevel', min_level)
++            logger.attr(
++                'AddNewStudent_MinLevel',
++                tactical_config.add_new_student_min_level)
 +            return semantic_session.tactical_select_suitable_ship(
-+                min_level, self.dock_select_index)
-+
++                tactical_config.add_new_student_favorite,
++                tactical_config.add_new_student_min_level,
++                self.dock_select_index)
  
          # Set if favorite from config
-         self.dock_favourite_set(enable=self.config.AddNewStudent_Favorite, wait_loading=False)
-@@ -737,9 +805,15 @@ class RewardTacticalClass(Dock):
+-        self.dock_favourite_set(enable=self.config.AddNewStudent_Favorite, wait_loading=False)
++        self.dock_favourite_set(
++            enable=tactical_config.add_new_student_favorite,
++            wait_loading=False)
+ 
+         # reset filter; naturally skip meta ships this way
+         self.dock_filter_set(
+@@ -655,13 +737,7 @@ class RewardTacticalClass(Dock):
+         else:
+             logger.warning('Wait ship cards timeout')
+ 
+-        try:
+-            min_level = int(self.config.AddNewStudent_MinLevel)
+-            if min_level < 1:
+-                min_level = 1
+-        except (ValueError, TypeError) as e:
+-            logger.warning(f'Invalid AddNewStudent_MinLevel: {self.config.AddNewStudent_MinLevel}, {e}')
+-            min_level = 1
++        min_level = tactical_config.add_new_student_min_level
+         logger.attr('AddNewStudent_MinLevel', min_level)
+ 
+         should_select_button = None
+@@ -737,9 +813,15 @@ class RewardTacticalClass(Dock):
              in: Any
              out: page_tactical
          """

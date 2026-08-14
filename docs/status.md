@@ -303,9 +303,32 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 94 changed files, all 93 patched Python files compile, and
-  the repository suite passes `849/849` tests, including Campaign clear mode,
-  EventGeneral, TaskBalancer, HpControl,
+  the repository suite passes `855/855` tests, including Tactical configuration,
+  Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
+
+### Tactical overflow and new-student configuration: offline contract passed
+
+- Eight Tactical fields now fail closed before the original ALAS decision
+  methods: `ControlExpOverflow.Enable/T1Allow/T2Allow/T3Allow/T4Allow` and
+  `AddNewStudent.Enable/Favorite/MinLevel`. The replay covers 34 accepted
+  configurations and 12 invalid values; overflow limits are exact integers in
+  `0..5800`, while student level accepts `1..125` and normalized decimal text.
+- The original `_tactical_books_filter_exp()` runs against boundary book
+  fixtures. Disabled overflow retains only the special 100-exp book at a
+  level-10 threshold, enabled overflow preserves each configured T1-T4
+  boundary and rejects the over-boundary book, and a non-maxed skill preserves
+  all nine fixtures.
+- `Favorite` had not reached semantic candidate selection before this batch.
+  It is now forwarded to the existing exact shared Dock favourite toggle
+  before candidates are read; the patched replay proves the call order and
+  preserves the selected ship and original confirmation waits.
+- These results use mutation budget `0` and no Android input. No live student
+  assignment or book consumption was attempted. Remaining evidence includes a
+  Tactical-context live proof of the typed favourite control and candidate
+  state, real book inventory/current-skill-exp observation, and a stable exact
+  assignment postcondition with a safe rollback. Therefore only `offline` is
+  complete for these eight fields; live/action status is unchanged.
 
 ### EventB ship-drop closure: implementation passed, natural live proof pending
 
