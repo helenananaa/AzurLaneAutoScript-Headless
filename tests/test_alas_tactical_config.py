@@ -9,14 +9,18 @@ from alas_headless.alas_tactical_config_contract import (
 )
 from alas_headless.alas_tactical_config_replay import verify_tactical_config
 from alas_headless.semantic_oracle import ActionReceipt, SemanticGateClosed
+from scripts.python.verify_alas_tactical_config import verify_clean_upstream
 
 
 ROOT = Path(__file__).resolve().parents[1]
 LIVE_ALAS = Path(r"H:\program\AzurLaneAutoScript-alas-topdown-live")
+PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
 
 
 def defaults():
     return {
+        "tactical_filter": "SameT4 > BlueT2 > first",
+        "rapid_training_slot": "do_not_use",
         "control_exp_overflow_enable": True,
         "t1_allow": 200,
         "t2_allow": 200,
@@ -66,12 +70,19 @@ class TacticalOracle:
 
 class AlasTacticalConfigTests(unittest.TestCase):
     def test_exact_live_tree_replay_when_available(self):
-        if not LIVE_ALAS.joinpath("module/tactical/tactical_class.py").is_file():
-            self.skipTest("local pinned/patched ALAS verification tree is unavailable")
-        result = verify_tactical_config(LIVE_ALAS)
+        source = LIVE_ALAS.joinpath("module/tactical/tactical_class.py")
+        if source.is_file() and "rapid_training_slot=self.config" in source.read_text(
+            encoding="utf-8"
+        ):
+            result = verify_tactical_config(LIVE_ALAS)
+        elif PINNED_UPSTREAM.joinpath("module/tactical/tactical_class.py").is_file():
+            result = verify_clean_upstream(PINNED_UPSTREAM)
+        else:
+            self.skipTest("local pinned ALAS verification tree is unavailable")
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 8)
-        self.assertEqual(result["accepted_case_count"], 34)
+        self.assertEqual(result["field_count"], 10)
+        self.assertEqual(result["accepted_case_count"], 45)
+        self.assertEqual(result["invalid_case_count"], 20)
         self.assertEqual(result["mutation_budget"], 0)
         self.assertFalse(result["android_input_injected"])
 
@@ -86,6 +97,19 @@ class AlasTacticalConfigTests(unittest.TestCase):
                 values = defaults()
                 values[field] = value
                 self.assertEqual(getattr(validate_alas_tactical_config(**values), field), value)
+        for slot in ("do_not_use", "slot_1", "slot_2", "slot_3", "slot_4"):
+            values = defaults()
+            values["rapid_training_slot"] = slot
+            self.assertEqual(
+                validate_alas_tactical_config(**values).rapid_training_slot,
+                slot,
+            )
+        values = defaults()
+        values["tactical_filter"] = " SameBlue‑T4 ＞ BlueT2 > first "
+        self.assertEqual(
+            validate_alas_tactical_config(**values).tactical_filter,
+            "SameBlue-T4 > BlueT2 > first",
+        )
 
     def test_invalid_values_fail_closed(self):
         for field, value in (
@@ -99,6 +123,12 @@ class AlasTacticalConfigTests(unittest.TestCase):
             ("add_new_student_min_level", 0),
             ("add_new_student_min_level", 126),
             ("add_new_student_min_level", "1e2"),
+            ("rapid_training_slot", "slot_5"),
+            ("rapid_training_slot", 1),
+            ("tactical_filter", ""),
+            ("tactical_filter", "BlueT2 >> first"),
+            ("tactical_filter", "BlueT2junk"),
+            ("tactical_filter", None),
         ):
             values = defaults()
             values[field] = value
@@ -143,8 +173,10 @@ class AlasTacticalConfigTests(unittest.TestCase):
         patch = ROOT.joinpath(
             "integration/alas/series/0020-commission-tactical-flow-ports.patch"
         ).read_text(encoding="utf-8")
-        self.assertEqual(patch.count("self._validate_tactical_config()"), 3)
+        self.assertEqual(patch.count("self._validate_tactical_config()"), 5)
         self.assertIn("tactical_config.add_new_student_favorite", patch)
+        self.assertIn("BOOK_FILTER.load(tactical_config.tactical_filter)", patch)
+        self.assertIn("slot = tactical_config.rapid_training_slot", patch)
 
     def test_sources_compile(self):
         for relative in (

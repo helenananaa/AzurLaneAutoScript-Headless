@@ -12,10 +12,12 @@ import sys
 import tempfile
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "python"))
+
 from alas_headless.alas_tactical_config_replay import verify_tactical_config
 
 
-ROOT = Path(__file__).resolve().parents[2]
 PATCH = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
 LOCK = ROOT / "integration" / "alas" / "upstream-lock.json"
 
@@ -84,7 +86,7 @@ def main() -> int:
         if args.upstream is not None
         else verify_tactical_config(args.alas_root)
     )
-    text = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
+    text = json.dumps(result, ensure_ascii=True, indent=2) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(text, encoding="utf-8")

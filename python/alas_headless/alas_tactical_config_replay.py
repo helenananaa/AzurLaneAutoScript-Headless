@@ -17,6 +17,8 @@ from .semantic_oracle import SemanticGateClosed
 
 SCHEMA = "alas-headless.tactical-config-replay/v1"
 EXPECTED_CONSUMERS = {
+    "Tactical.TacticalFilter": {"_tactical_books_choose"},
+    "Tactical.RapidTrainingSlot": {"handle_rapid_training"},
     "ControlExpOverflow": {"_tactical_books_filter_exp"},
     "AddNewStudent.Enable": {"tactical_class_receive"},
     "AddNewStudent.Favorite": {"select_suitable_ship"},
@@ -30,6 +32,8 @@ def _sha256(path: Path) -> str:
 
 def _defaults() -> dict[str, object]:
     return {
+        "tactical_filter": "SameT4 > SameT3 > SameT2 > SameT1 > first",
+        "rapid_training_slot": "do_not_use",
         "control_exp_overflow_enable": True,
         "t1_allow": 200,
         "t2_allow": 200,
@@ -43,6 +47,8 @@ def _defaults() -> dict[str, object]:
 
 def _config(**overrides: object) -> SimpleNamespace:
     values = {
+        "Tactical_TacticalFilter": "SameT4 > SameT3 > SameT2 > SameT1 > first",
+        "Tactical_RapidTrainingSlot": "do_not_use",
         "ControlExpOverflow_Enable": True,
         "ControlExpOverflow_T1Allow": 200,
         "ControlExpOverflow_T2Allow": 200,
@@ -62,6 +68,11 @@ def _verify_args(alas_root: Path) -> None:
     panel = document.get("Tactical")
     if not isinstance(panel, dict):
         raise AssertionError("Tactical panel is absent")
+    tactical = panel.get("Tactical")
+    if not isinstance(tactical, dict):
+        raise AssertionError("Tactical configuration group is absent")
+    tactical_filter = tactical.get("TacticalFilter")
+    rapid_slot = tactical.get("RapidTrainingSlot")
     overflow = panel.get("ControlExpOverflow")
     student = panel.get("AddNewStudent")
     if not isinstance(overflow, dict) or set(overflow) != {
@@ -84,6 +95,15 @@ def _verify_args(alas_root: Path) -> None:
         "type"
     ) != "checkbox":
         raise AssertionError("AddNewStudent boolean surface drifted")
+    if not isinstance(tactical_filter, dict) or tactical_filter.get("type") != "textarea":
+        raise AssertionError("TacticalFilter surface drifted")
+    expected_slots = ["do_not_use", "slot_1", "slot_2", "slot_3", "slot_4"]
+    if (
+        not isinstance(rapid_slot, dict)
+        or rapid_slot.get("type") != "select"
+        or rapid_slot.get("option") != expected_slots
+    ):
+        raise AssertionError("RapidTrainingSlot surface drifted")
 
 
 def _verify_consumers(path: Path) -> dict[str, list[str]]:
@@ -104,6 +124,13 @@ def _verify_consumers(path: Path) -> dict[str, list[str]]:
             for child in ast.walk(node)
             if isinstance(child, ast.Attribute) and isinstance(child.ctx, ast.Load)
         }
+        if "Tactical_TacticalFilter" in attributes or "tactical_filter" in attributes:
+            found["Tactical.TacticalFilter"].add(node.name)
+        if (
+            "Tactical_RapidTrainingSlot" in attributes
+            or "rapid_training_slot" in attributes
+        ):
+            found["Tactical.RapidTrainingSlot"].add(node.name)
         if (
             "ControlExpOverflow_Enable" in attributes
             or "control_exp_overflow_enable" in attributes
@@ -214,6 +241,83 @@ def _semantic_student_case(module: Any, tactical_type: type[Any]) -> dict[str, A
     }
 
 
+class ReplayBook:
+    def __init__(self, identifier: str, *, same: bool, genre: str, tier: int):
+        self.identifier = identifier
+        self.same_str = "same" if same else "unknown"
+        self.genre_str = genre
+        self.tier_str = f"T{tier}"
+
+    def __str__(self) -> str:
+        prefix = "Same" if self.same_str == "same" else ""
+        return f"{prefix}{self.genre_str}{self.tier_str}"
+
+
+def _book_filter_fixtures() -> list[ReplayBook]:
+    return [
+        ReplayBook("first-red-t1", same=False, genre="Red", tier=1),
+        ReplayBook("same-blue-t4", same=True, genre="Blue", tier=4),
+        ReplayBook("same-red-t3", same=True, genre="Red", tier=3),
+        ReplayBook("blue-t2", same=False, genre="Blue", tier=2),
+        ReplayBook("yellow-t2", same=False, genre="Yellow", tier=2),
+        ReplayBook("red-t2", same=False, genre="Red", tier=2),
+    ]
+
+
+def _book_choose_case(
+    module: Any, tactical_type: type[Any], expression: str
+) -> dict[str, Any]:
+    events: list[tuple[object, ...]] = []
+    host = object.__new__(tactical_type)
+    host.config = _config(Tactical_TacticalFilter=expression)
+    host.books = module.SelectedGrids(_book_filter_fixtures())
+    host._tactical_books_get = lambda: host.books
+    host._tactical_books_filter_exp = lambda: None
+    host._tactical_book_select = lambda book: events.append(
+        ("select", getattr(book, "identifier", str(book)))
+    )
+
+    class Device:
+        @staticmethod
+        def click_record_clear() -> None:
+            events.append(("clear",))
+
+        @staticmethod
+        def click(button: object) -> None:
+            events.append(("click", getattr(button, "name", str(button))))
+
+    host.device = Device()
+    if tactical_type._tactical_books_choose(host) is not True:
+        raise AssertionError("original tactical book chooser did not finish")
+    selected = [event[1] for event in events if event[0] == "select"]
+    final_click = events[-1][1]
+    return {"selected": selected, "final_click": final_click}
+
+
+def _rapid_training_case(
+    tactical_type: type[Any], slot: str, *, available: bool
+) -> dict[str, Any]:
+    events: list[tuple[object, ...]] = []
+    host = object.__new__(tactical_type)
+    host.config = _config(Tactical_RapidTrainingSlot=slot)
+
+    def appear(button: object, **kwargs: object) -> bool:
+        events.append(("appear", kwargs.get("offset"), kwargs.get("interval")))
+        return available
+
+    host.appear = appear
+    host.interval_clear = lambda button, **kwargs: events.append(
+        ("interval_clear", getattr(button, "name", str(button)), kwargs.get("interval"))
+    )
+    host.device = SimpleNamespace(
+        click=lambda button: events.append(
+            ("click", getattr(button, "name", str(button)))
+        )
+    )
+    result = tactical_type.handle_rapid_training(host)
+    return {"result": result, "events": events}
+
+
 def _verify_original(module: Any, tactical_type: type[Any]) -> dict[str, Any]:
     disabled = _book_filter_case(module, tactical_type, enabled=False)
     enabled = _book_filter_case(module, tactical_type, enabled=True)
@@ -229,6 +333,55 @@ def _verify_original(module: Any, tactical_type: type[Any]) -> dict[str, Any]:
         raise AssertionError("non-max tactical book list was filtered")
 
     student = _semantic_student_case(module, tactical_type)
+    filter_cases = {
+        expression: _book_choose_case(module, tactical_type, expression)
+        for expression in (
+            "SameT4 > first",
+            "BlueT2 > first",
+            "Yellow > first",
+            "T1 > first",
+            "first",
+            "RedT4",
+            "Blue‑T2 ＞ first",
+        )
+    }
+    expected_filter_targets = {
+        "SameT4 > first": "same-blue-t4",
+        "BlueT2 > first": "blue-t2",
+        "Yellow > first": "yellow-t2",
+        "T1 > first": "first-red-t1",
+        "first": "first-red-t1",
+        "Blue‑T2 ＞ first": "blue-t2",
+    }
+    for expression, target in expected_filter_targets.items():
+        if filter_cases[expression]["selected"][-1] != target:
+            raise AssertionError("original tactical filter priority drifted")
+    if "TACTICAL_CLASS_CANCEL" not in filter_cases["RedT4"]["final_click"]:
+        raise AssertionError("original tactical no-match cancellation drifted")
+
+    rapid_cases = {
+        slot: _rapid_training_case(tactical_type, slot, available=True)
+        for slot in ("do_not_use", "slot_1", "slot_2", "slot_3", "slot_4")
+    }
+    expected_offsets = {
+        "slot_1": (-20, -20, 20, 20),
+        "slot_2": (200, -20, 240, 20),
+        "slot_3": (420, -20, 460, 20),
+        "slot_4": (640, -20, 680, 20),
+    }
+    if rapid_cases["do_not_use"] != {"result": False, "events": []}:
+        raise AssertionError("do-not-use rapid training drifted")
+    for slot, offset in expected_offsets.items():
+        case = rapid_cases[slot]
+        if case["result"] is not True or case["events"][0] != (
+            "appear",
+            offset,
+            1,
+        ):
+            raise AssertionError("rapid training slot mapping drifted")
+    unavailable = _rapid_training_case(tactical_type, "slot_3", available=False)
+    if unavailable["result"] is not False or len(unavailable["events"]) != 1:
+        raise AssertionError("unavailable rapid training branch drifted")
     guard_present = hasattr(tactical_type, "_validate_tactical_config")
     if guard_present:
         host = object.__new__(tactical_type)
@@ -239,11 +392,36 @@ def _verify_original(module: Any, tactical_type: type[Any]) -> dict[str, Any]:
             pass
         else:
             raise AssertionError("patched tactical receive admitted invalid config")
+        host = object.__new__(tactical_type)
+        host.config = _config(Tactical_RapidTrainingSlot="slot_5")
+        host.appear = lambda *args, **kwargs: (_ for _ in ()).throw(
+            AssertionError("invalid rapid slot reached observation")
+        )
+        try:
+            tactical_type.handle_rapid_training(host)
+        except SemanticGateClosed:
+            pass
+        else:
+            raise AssertionError("patched rapid training admitted invalid config")
+        host = object.__new__(tactical_type)
+        host.config = _config(Tactical_TacticalFilter="BlueT2junk")
+        host._tactical_books_get = lambda: (_ for _ in ()).throw(
+            AssertionError("invalid tactical filter reached book observation")
+        )
+        try:
+            tactical_type._tactical_books_choose(host)
+        except SemanticGateClosed:
+            pass
+        else:
+            raise AssertionError("patched tactical chooser admitted invalid config")
     return {
         "overflow_disabled": disabled,
         "overflow_enabled": enabled,
         "non_max_count": len(not_max),
         "student": student,
+        "filters": filter_cases,
+        "rapid_training": rapid_cases,
+        "rapid_training_unavailable": unavailable,
         "patched_guard_present": guard_present,
     }
 
@@ -281,6 +459,23 @@ def verify_tactical_config(alas_root: Path) -> dict[str, Any]:
         values["add_new_student_min_level"] = value
         validate_alas_tactical_config(**values)
         accepted += 1
+    for value in ("do_not_use", "slot_1", "slot_2", "slot_3", "slot_4"):
+        values = _defaults()
+        values["rapid_training_slot"] = value
+        validate_alas_tactical_config(**values)
+        accepted += 1
+    for value in (
+        "first",
+        "SameT4 > BlueT2 > first",
+        "sameblue-t4 ＞ first",
+        "Red",
+        "T1",
+        "Same",
+    ):
+        values = _defaults()
+        values["tactical_filter"] = value
+        validate_alas_tactical_config(**values)
+        accepted += 1
 
     invalid_count = 0
     invalids = (
@@ -296,6 +491,14 @@ def verify_tactical_config(alas_root: Path) -> dict[str, Any]:
         ("add_new_student_min_level", True),
         ("add_new_student_min_level", "1e2"),
         ("add_new_student_min_level", None),
+        ("rapid_training_slot", "slot_5"),
+        ("rapid_training_slot", 1),
+        ("rapid_training_slot", None),
+        ("tactical_filter", ""),
+        ("tactical_filter", "BlueT2 >> first"),
+        ("tactical_filter", "BlueT2junk"),
+        ("tactical_filter", "-"),
+        ("tactical_filter", None),
     )
     for field, value in invalids:
         values = _defaults()
@@ -310,7 +513,7 @@ def verify_tactical_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 8,
+        "field_count": 10,
         "panel_count": 1,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid_count,

@@ -158,6 +158,12 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 回放直接执行原 `_tactical_books_filter_exp()` 的等级 10 边界：关闭时只保留特殊 100 经验书，开启时逐档保留配置边界并排除越界书，技能未满时九本夹具全部保留。`Favorite` 原先未传入语义候选选择，本轮会在读取候选前调用既有的精确共享 Dock 收藏切换。整个回放的 mutation budget 为 0，且没有 Android 输入、真实选舰或书本消耗；仍缺 Tactical 场景下收藏状态与候选的实机 typed 观察、真实书库存/技能经验、教学结果 postcondition 和安全回滚。因此八字段只提升 `offline`，不提升 observation/action/live。
 
+### 1.16 本轮 Tactical 选书优先级与快速学习槽位契约
+
+`Tactical.TacticalFilter` 现在只接受原 ALAS 的完整 token 语法：可选 `Same`、颜色、T1-T4，以及 `first` 回退；兼容原过滤器支持的 Unicode 分隔符和连字符。空 token、尾随垃圾、只被非锚定正则部分匹配的值、空过滤器和非文本值会在读取书本前 fail-closed。固定上游回放直接执行原 `_tactical_books_choose()`，覆盖同色、颜色+等级、仅颜色、仅等级、`first`、无匹配取消及 Unicode 规范化七类排序，保留 ALAS 的首本聚焦、最终开始/取消和状态机所有权。
+
+`Tactical.RapidTrainingSlot` 严格限定 `do_not_use/slot_1/slot_2/slot_3/slot_4`。原 `handle_rapid_training()` 回放验证四个精确槽位偏移、按钮不可用返回 false，以及只有命中后才执行的 interval clear。十字段 Tactical 合并回放现有 45 个合法配置和 20 个非法配置，mutation budget 为 0，没有 Android 输入、真实快速学习次数消耗或选书。因此两字段仅从 `offline=partial` 提升为 `complete`，既有 observation/action/live 仍保持 partial。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -186,7 +192,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | P | SP 地图脚本存在，无实机闭环 |
 | 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | M | 难度过滤、每日次数、战斗和领奖缺适配 |
 | 22 | Commission | Scheduler, Commission | L | 领取和零油开始有证据；非零油、重大委托、全部过滤器、取消和连续循环未闭环 |
-| 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 一个学员/技能/T4 书路径闭环；经验溢出与新学员八字段离线契约已完成，快速槽、真实收藏/等级候选观察、完整书库存及结果回滚仍未闭环 |
+| 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 十个专属配置字段离线契约已完成；真实收藏/等级候选、完整书库存、四槽快速学习实机结果及安全回滚仍未闭环 |
 | 24 | Research | Scheduler, Research | L | 一个金币项目闭环；魔方/零件、延迟、重置、26 个预设和自定义规则未完整覆盖 |
 | 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 默认收取和喂食闭环；食物过滤、买家具、套装/全部和日期状态未闭环 |
 | 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | M | 买箱、金币溢出、训练、增强和保留天赋规则均缺适配 |
@@ -273,7 +279,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
 | Commission | `PresetFilter`=`cube/cube_24h/chip/chip_24h/oil/custom`; `CustomFilter`; `DoMajorCommission` | L | 6 预设、规则命中/无命中/非法值、日常委托/紧急委托、0/非 0 油、重大委托、取消和连续派遣 |
-| Tactical | `RapidTrainingSlot`=`do_not_use/slot_1/slot_2/slot_3/slot_4`; `TacticalFilter` | L | 五槽位策略、同色/同技能与 T1-T4 书、无书、无空位、规则回退和快速完成 |
+| Tactical | `RapidTrainingSlot`=`do_not_use/slot_1/slot_2/slot_3/slot_4`; `TacticalFilter` | L | 五值槽位与完整过滤语法已离线覆盖；仍需真实快速学习可用性/次数、完整书库存、无书/无空位及教学结果闭环 |
 | ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | P | 离线关闭/启用及各等级 0/配置/最大/越界已覆盖；仍需真实库存、当前技能经验及选书结果闭环 |
 | AddNewStudent | `Enable`; `Favorite`; `MinLevel` | P | 离线开关、收藏传播和等级边界已覆盖；仍需真实收藏候选状态、无/多候选及教学结果验证 |
 | Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 26 预设、自由规则、重置、延迟、三种资源各四策略、资源不足、队列满和跨轮选择 |
@@ -724,8 +730,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Submarine.Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/display | options: "boss_only", "do_not_use", "every_combat", "hunt_and_boss", "hunt_only"; default: "do_not_use" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `SupplyPack.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `SupplyPack.DayOfWeek` | Freebies | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Tactical.RapidTrainingSlot` | Tactical | type=select; display=default | options: "do_not_use", "slot_1", "slot_2", "slot_3", "slot_4"; default: "do_not_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Tactical.TacticalFilter` | Tactical | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Tactical.RapidTrainingSlot` | Tactical | type=select; display=default | options: "do_not_use", "slot_1", "slot_2", "slot_3", "slot_4"; default: "do_not_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Tactical.TacticalFilter` | Tactical | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `TaskBalancer.CoinLimit` | EventGeneral | type=input; display=default | input/default: 10000 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `TaskBalancer.Enable` | EventGeneral | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `TaskBalancer.TaskCall` | EventGeneral | type=select; display=default | options: "Main", "Main2", "Main3"; default: "Main" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |

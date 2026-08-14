@@ -47,7 +47,7 @@ class AlasAdapterBaselineTests(unittest.TestCase):
         )
         self.assertEqual(
             document["artifact_sha256"]["patch_series_manifest"],
-            "98273f76bf4cb19b9a778a0daa4fb2dea9dddf947267605a2d6ed0c20ab8497e",
+            "d3322a5a67442797301825276128c8dc71c259e2774505160325db4575068de0",
         )
         self.assertIn(
             "appear",

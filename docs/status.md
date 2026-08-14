@@ -330,6 +330,27 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   assignment postcondition with a safe rollback. Therefore only `offline` is
   complete for these eight fields; live/action status is unchanged.
 
+### Tactical book priority and rapid-training slots: offline contract passed
+
+- `Tactical.TacticalFilter` now accepts only complete original-ALAS grammar
+  tokens: optional `Same`, colour, T1-T4, and the `first` fallback. Original
+  Unicode separators and hyphens are normalized, while blank entries, trailing
+  garbage, partially matched tokens, non-text values, and ambiguous empty
+  filters fail closed before book observation or selection.
+- The pinned `_tactical_books_choose()` method executes seven deterministic
+  orderings: same-colour, colour+tier, colour-only, tier-only, `first`, no-match
+  cancellation, and Unicode-normalized input. ALAS still owns the sorter,
+  initial focus, final start/cancel branch, and all retry/state-machine logic.
+- `Tactical.RapidTrainingSlot` strictly admits `do_not_use` and slots 1-4. The
+  original `handle_rapid_training()` maps them to the exact four offsets,
+  preserves the unavailable-button false result, and clears the original
+  class-start interval only after the modeled rapid-training input boundary.
+- The combined ten-field Tactical replay now covers 45 accepted and 20 invalid
+  configurations with mutation budget `0` and no Android input. No rapid-use
+  count was consumed and no book was selected on an account. Both fields move
+  only from `offline=partial` to `offline=complete`; their existing partial
+  observation/action/live evidence is not promoted.
+
 ### EventB ship-drop closure: implementation passed, natural live proof pending
 
 - The persisted B1 failure proves a generic `NewShipUI(Clone)` acquisition

@@ -903,7 +903,7 @@ index cd88c16282b4f6c8bcf9eac2202e836797869e3c..efa9500e8b5c759653038f4867dbf2f3
          # area = area_offset((5, 5, 30, 30), self.area[0:2])
          # return color_similar(color1=get_color(self.image, area), color2=(239, 166, 231))
 diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
-index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d0fd105fc 100644
+index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..ce2879036976f1a196e59e79c29cd6d14f24f4df 100644
 --- a/module/tactical/tactical_class.py
 +++ b/module/tactical/tactical_class.py
 @@ -1,4 +1,4 @@
@@ -944,7 +944,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
          area = self.button.area
          check_area = tuple([area[0], area[3] + 2, area[2], area[3] + 4])
          im = rgb2gray(crop(image, check_area, copy=False))
-@@ -200,6 +220,20 @@ class RewardTacticalClass(Dock):
+@@ -200,6 +220,22 @@ class RewardTacticalClass(Dock):
      tactical_finish = []
      dock_select_index = 0
  
@@ -952,6 +952,8 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
 +        from alas_headless import validate_alas_tactical_config
 +
 +        return validate_alas_tactical_config(
++            tactical_filter=self.config.Tactical_TacticalFilter,
++            rapid_training_slot=self.config.Tactical_RapidTrainingSlot,
 +            control_exp_overflow_enable=self.config.ControlExpOverflow_Enable,
 +            t1_allow=self.config.ControlExpOverflow_T1Allow,
 +            t2_allow=self.config.ControlExpOverflow_T2Allow,
@@ -965,7 +967,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
      def _tactical_books_get(self, skip_first_screenshot=True):
          """
          Get books. Handle loadings, wait 10 times at max.
-@@ -225,7 +259,15 @@ class RewardTacticalClass(Dock):
+@@ -225,7 +261,15 @@ class RewardTacticalClass(Dock):
                  logger.info('Not in TACTICAL_CLASS_START anymore, exit')
                  return False
  
@@ -982,7 +984,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
              self.books = books
              logger.attr('Book_count', books.count)
              logger.attr('Books', str(books))
-@@ -264,7 +306,12 @@ class RewardTacticalClass(Dock):
+@@ -264,7 +308,12 @@ class RewardTacticalClass(Dock):
                  break
  
              if interval.reached():
@@ -996,7 +998,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
                  interval.reset()
                  continue
  
-@@ -274,6 +321,8 @@ class RewardTacticalClass(Dock):
+@@ -274,6 +323,8 @@ class RewardTacticalClass(Dock):
          books from self.books based on current
          progress of the tactical skill.
          """
@@ -1005,7 +1007,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
          # Read 'current' and 'remain' will be inaccurate
          # since first exp_value is factored into it
          current, remain, total = SKILL_EXP.ocr(self.device.image)
-@@ -292,8 +341,8 @@ class RewardTacticalClass(Dock):
+@@ -292,8 +343,8 @@ class RewardTacticalClass(Dock):
  
                  # Acquire 'overflow' for respective tier book if enabled
                  overflow = 0
@@ -1016,7 +1018,34 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
  
                  # Remove book if sum to be gained exceeds total (+ overflow)
                  if (current + book.exp_value) > (total + overflow):
-@@ -383,6 +432,17 @@ class RewardTacticalClass(Dock):
+@@ -316,6 +367,7 @@ class RewardTacticalClass(Dock):
+             in: TACTICAL_CLASS_START
+             out: Unknown, may TACTICAL_CLASS_START, page_tactical, or _tactical_animation_running
+         """
++        tactical_config = self._validate_tactical_config()
+         logger.hr('Tactical books choose', level=2)
+         if not self._tactical_books_get():
+             return False
+@@ -330,7 +382,7 @@ class RewardTacticalClass(Dock):
+         self._tactical_books_filter_exp()
+ 
+         # Apply configuration filter, does not modify self.books
+-        BOOK_FILTER.load(self.config.Tactical_TacticalFilter)
++        BOOK_FILTER.load(tactical_config.tactical_filter)
+         books = BOOK_FILTER.apply(self.books.grids)
+         logger.attr('Book_sort', ' > '.join([str(book) for book in books]))
+ 
+@@ -356,7 +408,8 @@ class RewardTacticalClass(Dock):
+         Returns:
+             bool: If handled
+         """
+-        slot = self.config.Tactical_RapidTrainingSlot
++        tactical_config = self._validate_tactical_config()
++        slot = tactical_config.rapid_training_slot
+         if slot == 'slot_1':
+             slot = 0
+         elif slot == 'slot_2':
+@@ -383,6 +436,17 @@ class RewardTacticalClass(Dock):
          Get the future finish time.
          """
          logger.hr('Tactical get finish')
@@ -1034,7 +1063,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
          grids = ButtonGrid(
              origin=(421, 596), delta=(223, 0), button_shape=(139, 27), grid_shape=(4, 1), name='TACTICAL_REMAIN')
  
-@@ -413,6 +473,7 @@ class RewardTacticalClass(Dock):
+@@ -413,6 +477,7 @@ class RewardTacticalClass(Dock):
              in: page_reward, TACTICAL_CLASS_START
              out: page_reward
          """
@@ -1042,7 +1071,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
          logger.hr('Tactical class receive', level=1)
          received = False
          study_finished = not self.config.AddNewStudent_Enable
-@@ -482,6 +543,10 @@ class RewardTacticalClass(Dock):
+@@ -482,6 +547,10 @@ class RewardTacticalClass(Dock):
                  continue
              if self.ui_main_appear_then_click(page_reward, interval=3):
                  continue
@@ -1053,7 +1082,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
              if self.handle_popup_confirm('TACTICAL'):
                  self.interval_reset([BOOK_EMPTY_POPUP])
                  continue
-@@ -609,6 +674,10 @@ class RewardTacticalClass(Dock):
+@@ -609,6 +678,10 @@ class RewardTacticalClass(Dock):
              out: Unknown, may TACTICAL_CLASS_START, page_tactical
          """
          logger.hr('Tactical skill choose')
@@ -1064,7 +1093,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
          selected_skill = self.find_not_full_level_skill()
  
          # If can't select a skill, think this ship no need study
-@@ -625,9 +694,22 @@ class RewardTacticalClass(Dock):
+@@ -625,9 +698,22 @@ class RewardTacticalClass(Dock):
  
      def select_suitable_ship(self):
          logger.hr(f'Select suitable ship')
@@ -1088,7 +1117,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
  
          # reset filter; naturally skip meta ships this way
          self.dock_filter_set(
-@@ -655,13 +737,7 @@ class RewardTacticalClass(Dock):
+@@ -655,13 +741,7 @@ class RewardTacticalClass(Dock):
          else:
              logger.warning('Wait ship cards timeout')
  
@@ -1103,7 +1132,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..60fb68ce6bd9a87f69ebbd2160ef1b9d
          logger.attr('AddNewStudent_MinLevel', min_level)
  
          should_select_button = None
-@@ -737,9 +813,15 @@ class RewardTacticalClass(Dock):
+@@ -737,9 +817,15 @@ class RewardTacticalClass(Dock):
              in: Any
              out: page_tactical
          """

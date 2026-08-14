@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from .semantic_oracle import SemanticGateClosed
@@ -9,10 +10,25 @@ from .semantic_oracle import SemanticGateClosed
 
 MAX_TACTICAL_LEVEL = 125
 MAX_TACTICAL_OVERFLOW = 5_800
+TACTICAL_RAPID_TRAINING_SLOTS = (
+    "do_not_use",
+    "slot_1",
+    "slot_2",
+    "slot_3",
+    "slot_4",
+)
+_TACTICAL_FILTER_TOKEN = re.compile(
+    r"(same)?(red|blue|yellow)?-?(t[1234])?",
+    flags=re.IGNORECASE,
+)
+_FILTER_SEPARATOR_TRANSLATION = str.maketrans("＞﹥›˃ᐳ❯", ">>>>>>")
+_FILTER_HYPHEN_TRANSLATION = str.maketrans("‐‑‒–—―−－﹣﹘⁃", "-----------")
 
 
 @dataclass(frozen=True)
 class AlasTacticalConfigSnapshot:
+    tactical_filter: str
+    rapid_training_slot: str
     control_exp_overflow_enable: bool
     t1_allow: int
     t2_allow: int
@@ -48,8 +64,36 @@ def _bounded_integer(
     return parsed
 
 
+def _rapid_training_slot(value: object) -> str:
+    if type(value) is not str or value not in TACTICAL_RAPID_TRAINING_SLOTS:
+        raise SemanticGateClosed("Tactical.RapidTrainingSlot is unsupported")
+    return value
+
+
+def _tactical_filter(value: object) -> str:
+    if type(value) is not str:
+        raise SemanticGateClosed("Tactical.TacticalFilter must be text")
+    normalized = re.sub(r"[ \t\r\n]", "", value)
+    normalized = normalized.translate(_FILTER_SEPARATOR_TRANSLATION)
+    normalized = normalized.translate(_FILTER_HYPHEN_TRANSLATION)
+    tokens = normalized.split(">")
+    if not tokens or any(not token for token in tokens):
+        raise SemanticGateClosed("Tactical.TacticalFilter contains an empty token")
+    for token in tokens:
+        if token.lower() == "first":
+            continue
+        match = _TACTICAL_FILTER_TOKEN.fullmatch(token)
+        if match is None or not any(match.groups()):
+            raise SemanticGateClosed(
+                f'Tactical.TacticalFilter contains an invalid token: "{token}"'
+            )
+    return " > ".join(tokens)
+
+
 def validate_alas_tactical_config(
     *,
+    tactical_filter: object,
+    rapid_training_slot: object,
     control_exp_overflow_enable: object,
     t1_allow: object,
     t2_allow: object,
@@ -59,9 +103,11 @@ def validate_alas_tactical_config(
     add_new_student_favorite: object,
     add_new_student_min_level: object,
 ) -> AlasTacticalConfigSnapshot:
-    """Validate all eight shared tactical settings before original decisions."""
+    """Validate all ten shared tactical settings before original decisions."""
 
     return AlasTacticalConfigSnapshot(
+        tactical_filter=_tactical_filter(tactical_filter),
+        rapid_training_slot=_rapid_training_slot(rapid_training_slot),
         control_exp_overflow_enable=_bool(
             control_exp_overflow_enable, field="ControlExpOverflow.Enable"
         ),
