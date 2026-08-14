@@ -2167,9 +2167,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_event_general_config.py",
+        "python/alas_headless/alas_event_general_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -2186,9 +2191,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_event_general_config.py",
+        "python/alas_headless/alas_event_general_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=datetime; display=default; validate=datetime",
       "panels": [
@@ -6496,9 +6506,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_event_general_config.py",
+        "python/alas_headless/alas_event_general_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -6515,9 +6530,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_event_general_config.py",
+        "python/alas_headless/alas_event_general_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -6534,9 +6554,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_event_general_config.py",
+        "python/alas_headless/alas_event_general_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -7840,6 +7865,71 @@
       ],
       "field": "Submarine.Mode",
       "note": "All five modes preserve original combat-call and boss mapping decisions; active submarine fleet input remains refused."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_event_general_config.py",
+        "python/alas_headless/alas_event_general_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "EventGeneral.PtLimit",
+      "note": "Zero, integer, and pinned punctuation formats execute original PT comparisons and event-disable result handling offline."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_event_general_config.py",
+        "python/alas_headless/alas_event_general_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "EventGeneral.TimeLimit",
+      "note": "Default, future, expired, non-event, and GemsFarming main-stage classes execute with a frozen clock."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_event_general_config.py",
+        "python/alas_headless/alas_event_general_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "TaskBalancer.CoinLimit",
+      "note": "Zero-observation, below, equality, above, and non-balancer task decisions execute pinned ALAS logic offline."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_event_general_config.py",
+        "python/alas_headless/alas_event_general_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "TaskBalancer.Enable",
+      "note": "Both boolean values are validated before every pinned PT, time, coin, and task-switch method; caller consumption is source-pinned."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_event_general_config.py",
+        "python/alas_headless/alas_event_general_config_replay.py",
+        "integration/alas/series/0040-campaign-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "TaskBalancer.TaskCall",
+      "note": "Main, Main2, and Main3 preserve original five-minute delay, task call, and stop ordering in memory-only replay."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -7852,8 +7942,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "8ebe27b8a8db58c54e33d5ce7e877d709ff9b99dbf3bc836c847344f2a37762b",
-      "manifest_sha256": "0a7e63612cc9176915d1011694d69a0661871a8d506933e41219a6e6a4115176",
+      "combined_sha256": "b2af628eed6adc7a00305c9b0c5e17d8e5e6d92fdf490c7d14bc6464bf8c13e6",
+      "manifest_sha256": "e953b529cd9e5f8eb9bec5b16cec4da8aa9eaa9e3a59f27666a7e5a05318a706",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

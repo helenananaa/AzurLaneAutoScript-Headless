@@ -1700,6 +1700,73 @@ index 92ec1a82..066253bd 100644
          if self.handle_idle_page():
              return True
          # Switch on ui_white, no offset just color match
+diff --git a/module/campaign/campaign_event.py b/module/campaign/campaign_event.py
+--- a/module/campaign/campaign_event.py
++++ b/module/campaign/campaign_event.py
+@@ -13,4 +13,15 @@ from module.war_archives.assets import WAR_ARCHIVES_CAMPAIGN_CHECK
+ class CampaignEvent(CampaignStatus):
++    def _validate_event_general_config(self):
++        from alas_headless import validate_alas_event_general_config
++
++        return validate_alas_event_general_config(
++            pt_limit=self.config.EventGeneral_PtLimit,
++            time_limit=self.config.EventGeneral_TimeLimit,
++            task_balancer_enable=self.config.TaskBalancer_Enable,
++            task_balancer_coin_limit=self.config.TaskBalancer_CoinLimit,
++            task_balancer_task_call=self.config.TaskBalancer_TaskCall,
++        )
++
+     def _reset_gems_farming(self, tasks):
+         """
+         Reset GemsFarming to 2-4 when event is over
+@@ -50,11 +61,13 @@ class CampaignEvent(CampaignStatus):
+     def event_pt_limit_triggered(self):
+         """
+         Returns:
+             bool:
+ 
+         Pages:
+             in: page_event or page_sp
+         """
++        self._validate_event_general_config()
++
+         # Some may use "100,000"
+         limit = int(
+             re.sub(r'[,.\'"，。]', '', str(self.config.EventGeneral_PtLimit))
+@@ -78,11 +91,13 @@ class CampaignEvent(CampaignStatus):
+     def event_time_limit_triggered(self):
+         """
+         Returns:
+             bool:
+ 
+         Pages:
+             in: page_event or page_sp
+         """
++        self._validate_event_general_config()
++
+         limit = self.config.EventGeneral_TimeLimit
+         tasks = EVENTS + RAIDS + COALITIONS + GEMS_FARMINGS + MARITIME_ESCORTS + HOSPITAL
+         command = self.config.Scheduler_Command
+@@ -103,10 +118,12 @@ class CampaignEvent(CampaignStatus):
+     def triggered_task_balancer(self):
+         """
+         Returns:
+             bool: If triggered task_call
+         Pages:
+             in: page_event or page_sp
+         """
++        self._validate_event_general_config()
++
+         limit = self.config.TaskBalancer_CoinLimit
+         coin = self.get_coin()
+         # Check Coin
+@@ -127,4 +144,6 @@ class CampaignEvent(CampaignStatus):
+     def handle_task_balancer(self):
++        self._validate_event_general_config()
++
+         self.config.task_delay(minute=5)
+         next_task = self.config.TaskBalancer_TaskCall
+         logger.hr(f'TaskBalancer triggered, switching task to {next_task}')
 diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
 index 15ebf478..7082e26b 100644
 --- a/module/campaign/campaign_base.py

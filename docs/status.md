@@ -4,6 +4,26 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-14
 
+### EventGeneral and TaskBalancer: five original stop/switch decisions replayed
+
+- `EventGeneral.PtLimit/TimeLimit` and `TaskBalancer.Enable/CoinLimit/TaskCall`
+  now pass one complete contract before each original PT, time, coin, and task
+  switch method. PT accepts non-negative integers and the punctuation formats
+  pinned ALAS normalizes; time values are bounded naive datetimes, and task
+  calls are restricted to Main/Main2/Main3.
+- Frozen-clock and memory-only replay executes original PT decisions at zero,
+  below, and equality; default/future/expired time limits; zero/below/equality
+  coin observations; event-task disable/reset writes; and all three exact
+  `task_delay(5) -> task_call() -> task_stop()` sequences. Static evidence pins
+  every runtime consumer across campaign, coalition, raid, hospital, and
+  auto-search combat modules.
+- Nine malformed/bounds cases fail closed. No event PT or coin was read from a
+  live account, no task was actually disabled, called, delayed, or stopped, and
+  no Android input occurred. Live promotion still requires typed page-specific
+  PT/coin observations, server/local-time correlation, and scheduler recovery
+  receipts proving the target task starts without a loop; only offline
+  dimensions are promoted here.
+
 ### Submarine shared configuration: inactive surface complete, active input refused
 
 - The four `Submarine` fields shared by 12 map panels now validate before
@@ -265,8 +285,9 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 93 changed files, all 92 patched Python files compile, and
-  the repository suite passes `839/839` tests, including the HpControl,
+  patch applies as 94 changed files, all 93 patched Python files compile, and
+  the repository suite passes `844/844` tests, including the EventGeneral,
+  TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
 ### EventB ship-drop closure: implementation passed, natural live proof pending

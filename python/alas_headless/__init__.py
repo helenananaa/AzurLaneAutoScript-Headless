@@ -36,6 +36,10 @@ from .alas_submarine_config_contract import (
     AlasSubmarineConfigSnapshot,
     validate_alas_submarine_config,
 )
+from .alas_event_general_config_contract import (
+    AlasEventGeneralConfigSnapshot,
+    validate_alas_event_general_config,
+)
 
 from .alas_map_sync import (
     AlasCampaignFleetPlan,

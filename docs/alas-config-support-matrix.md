@@ -140,6 +140,12 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 回放直接执行原战斗呼叫判断、Boss 专用模式映射、两种自动寻敌设置及四种距离规划。同一原生地图夹具上，贴 Boss、1 格、2 格分别选择 `(5,5)/(4,5)/(3,5)`，开放海域支援不移动；两个活动战斗呼叫只捕获最终输入边界，没有点击。另覆盖六类非法值与十个活动舰队/模式拒绝案例。因此四字段只提升 `offline`；没有潜艇编队、策略栏、移动、呼叫按钮或实机结果闭环，不能称为活动潜艇支持。
 
+### 1.13 本轮 EventGeneral 与 TaskBalancer 五字段契约
+
+`EventGeneral.PtLimit/TimeLimit` 与 `TaskBalancer.Enable/CoinLimit/TaskCall` 已在原 `CampaignEvent` 的 PT、时间、金币判断和任务切换方法入口统一校验。PT 支持非负整数及固定上游会归一化的中英文标点格式；时间只接受 2000..2100 的无时区 datetime；金币阈值有明确非负上限；目标任务严格为 Main/Main2/Main3。冻结时钟回放覆盖 PT 的 0/未达/等于、默认/未来/过期时间、非活动任务与 GemsFarming 主线豁免，以及金币 OCR 为 0、低于、等于、非 balancer 任务。
+
+回放还执行原活动任务禁用、GemsFarming 重置、TimeLimit 重置，以及三个目标任务严格的 `task_delay(5) -> task_call -> task_stop` 顺序；所有写入只落到内存桩。静态审计固定 campaign、coalition、raid、hospital 和 auto-search combat 的消费文件。当前缺口是页面特定的 typed PT/金币观察、服务器时间与本机 naive datetime 的实机相关性、任务切换后的恢复收据和防调度环证据；在取得这些条件前 observation/action/live 保持 missing，EventGeneral 面板仍为 P。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -153,7 +159,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | 5 | Main2 | 同 Main | P | 共用实现，没有独立配置实例验收；不能沿用 Main 的运行记录直接判定完整 |
 | 6 | Main3 | 同 Main | P | 共用实现，没有独立配置实例验收；不能沿用 Main 的运行记录直接判定完整 |
 | 7 | GemsFarming | Scheduler, GemsFarming, EquipmentCode, Campaign, StopCondition, Fleet, Submarine, Emotion | M | 换旗舰/前排、常用舰选择、装备导入导出和换船后的强化衔接缺失；只有委托限制可复用 |
-| 8 | EventGeneral | EventGeneral, TaskBalancer | P | `PtLimit`、`TimeLimit`、任务切换和金币阈值没有完整调度证据 |
+| 8 | EventGeneral | EventGeneral, TaskBalancer | P | 五字段离线决策已完整；仍缺 typed PT/金币实机观察、时间相关性、真实任务切换恢复和防调度环证据 |
 | 9 | Coalition | Scheduler, Campaign, Coalition, StopCondition, Emotion | M | 共斗入口、难度、单/多舰队、战斗和结算缺适配 |
 | 10 | Event | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | 当前 A1 默认路径闭环；其他关卡和全部共用地图配置仍按字段验收 |
 | 11 | Event2 | 同 Event | P | 与 Event 共用逻辑，但第二活动配置实例没有独立验收 |
@@ -242,8 +248,8 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| EventGeneral | `PtLimit`; `TimeLimit` | P | 0/未达到/达到 PT，上限时间前后、服务器时区和两个条件同时触发 |
-| TaskBalancer | `Enable`; `CoinLimit`; `TaskCall`=`Main/Main2/Main3` | P | 开关、金币上下界、三个目标任务、目标禁用/失败和避免调度环 |
+| EventGeneral | `PtLimit`; `TimeLimit` | P | PT 与冻结时间边界、非活动任务和 GemsFarming 主线豁免已离线完成；typed 实机观察、服务器时间相关性和真实禁用恢复仍缺 |
+| TaskBalancer | `Enable`; `CoinLimit`; `TaskCall`=`Main/Main2/Main3` | P | 开关、金币边界和三个目标任务切换顺序已离线完成；真实任务调用、失败恢复及防调度环仍缺 |
 | Coalition | `Mode`=`easy/normal/hard/sp`; `Fleet`=`single/multi` | M | 四难度、单/多舰队、次数/票券不足、战斗、结算和 SP 特殊入口 |
 | Raid | `Mode`=`easy/normal/hard/ex`; `UseTicket` | M | 四难度、票券真假、无票券、次数耗尽、推荐舰队和结算 |
 | Hospital | `UseRecommendFleet` | M | 开关两值、推荐不可用、手动舰队、活动结束和结算 |
@@ -427,9 +433,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **151 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **8 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **13 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **55 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **64 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **59 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -526,8 +532,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Error.ScreenshotLength` | Alas | type=input; display=default | input/default: 1 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `EventDaily.LastStage` | EventA, EventB, EventC, EventD | type=input; display=default | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `EventDaily.StageFilter` | EventA, EventB, EventC, EventD | type=textarea; display=default | input/default: "A1 > A2 > A3", "B1 > B2 > B3", "C1 > C2 > C3", "D1 > D2 > D3" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `EventGeneral.PtLimit` | EventGeneral | type=input; display=default | input/default: 0 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `EventGeneral.TimeLimit` | EventGeneral | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `EventGeneral.PtLimit` | EventGeneral | type=input; display=default | input/default: 0 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `EventGeneral.TimeLimit` | EventGeneral | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EventStory.SkipBattle` | EventStory | type=lock; display=default | options: true; default: true | `P`/◐ 实机当前值 | ◐ | ◐ | ◐ | ◐ | ◐ |
 | `Exercise.ExerciseStrategy` | Exercise | type=select; display=default | options: "aggressive", "fri18", "sat0", "sat12", "sat18", "sun0", "sun12", "sun18"; default: "aggressive" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Exercise.LowHpConfirmWait` | Exercise | type=input; display=default | input/default: 0.1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
@@ -708,6 +714,6 @@ python scripts/python/verify_alas_support_matrix.py `
 | `SupplyPack.DayOfWeek` | Freebies | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `Tactical.RapidTrainingSlot` | Tactical | type=select; display=default | options: "do_not_use", "slot_1", "slot_2", "slot_3", "slot_4"; default: "do_not_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `Tactical.TacticalFilter` | Tactical | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `TaskBalancer.CoinLimit` | EventGeneral | type=input; display=default | input/default: 10000 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `TaskBalancer.Enable` | EventGeneral | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `TaskBalancer.TaskCall` | EventGeneral | type=select; display=default | options: "Main", "Main2", "Main3"; default: "Main" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `TaskBalancer.CoinLimit` | EventGeneral | type=input; display=default | input/default: 10000 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `TaskBalancer.Enable` | EventGeneral | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `TaskBalancer.TaskCall` | EventGeneral | type=select; display=default | options: "Main", "Main2", "Main3"; default: "Main" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
