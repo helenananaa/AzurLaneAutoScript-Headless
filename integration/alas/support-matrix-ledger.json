@@ -6206,9 +6206,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
@@ -6225,9 +6230,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
@@ -6282,9 +6292,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
@@ -6301,9 +6316,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
@@ -7458,7 +7478,7 @@
         "Shipyard"
       ],
       "name": "Shipyard",
-      "note": "可识别 30/30 并停止；系列、舰船、数量和实际蓝图消耗未验证",
+      "note": "PR/DR 系列与舰位已离线等价；BuyAmount/LastRun、页面不串页、蓝图/金币边界、确认和实际结果未闭环",
       "status": "B"
     },
     {
@@ -8960,6 +8980,58 @@
       ],
       "field": "Exercise.OpponentRefreshValue",
       "note": "Integer values 0 through 6 preserve original same-day restoration, cross-day zeroing, and five in-task refresh increments; invalid values fail before Exercise scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Shipyard.ResearchSeries",
+      "note": "All six declared PR series preserve original run dispatch and focus restrictions; invalid values fail before navigation or blueprint use."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Shipyard.ShipIndex",
+      "note": "Disabled zero and indices one through six preserve original navigation decisions, including the five-position restriction after series two; invalid values fail before navigation or blueprint use."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "ShipyardDr.ResearchSeries",
+      "note": "All four declared DR series preserve original DR-before-PR dispatch and focus restrictions; invalid values fail before navigation or blueprint use."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_shipyard_config.py",
+        "python/alas_headless/alas_shipyard_config_replay.py",
+        "integration/alas/series/0070-shipyard-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "ShipyardDr.ShipIndex",
+      "note": "Disabled zero and indices one through six preserve original DR focus decisions and restricted combinations; invalid values fail before navigation or blueprint use."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8972,8 +9044,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "0918a1a45e2c04f9e9a5e3e34dafbc6f968e2ab80872008ae5f979ed2c8d9b62",
-      "manifest_sha256": "e6066051fc3349009314b80ad22803f2d5753c3d43b23b0e2e749e2d911dafa9",
+      "combined_sha256": "a1d6d8bb26b5b2d8670baa100a9afd7cfa31a8be2404cda5b1ca8b23cac86a8b",
+      "manifest_sha256": "e5ac6abbbb5f601fd6bd929fd648180075314ce7da69b53057c8e66d38e1a514",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

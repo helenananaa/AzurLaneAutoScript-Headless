@@ -72,6 +72,7 @@ FLOW_PATHS = {
         "module/shop/ui.py",
     },
     "0070-shipyard-flow-ports.patch": {
+        "module/shipyard/shipyard_reward.py",
         "module/shipyard/ui.py",
     },
     "0080-current-task-flow-ports.patch": {

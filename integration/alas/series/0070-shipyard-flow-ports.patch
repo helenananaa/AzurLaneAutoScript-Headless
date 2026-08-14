@@ -1,3 +1,22 @@
+diff --git a/module/shipyard/shipyard_reward.py b/module/shipyard/shipyard_reward.py
+index 9cb098b8..8f5fb97a 100644
+--- a/module/shipyard/shipyard_reward.py
++++ b/module/shipyard/shipyard_reward.py
+@@ -218,7 +218,14 @@ class RewardShipyard(ShipyardUI):
+         Pages:
+             in: Any page
+             out: page_shipyard
+         """
++        from alas_headless import validate_alas_shipyard_config
++        validate_alas_shipyard_config(
++            pr_series=self.config.Shipyard_ResearchSeries,
++            pr_index=self.config.Shipyard_ShipIndex,
++            dr_series=self.config.ShipyardDr_ResearchSeries,
++            dr_index=self.config.ShipyardDr_ShipIndex,
++        )
+         if self.config.Shipyard_BuyAmount <= 0 and self.config.ShipyardDr_BuyAmount <= 0:
+             self.config.Scheduler_Enable = False
+             self.config.task_stop()
 diff --git a/module/shipyard/ui.py b/module/shipyard/ui.py
 index abb6c787..0978105f 100644
 --- a/module/shipyard/ui.py

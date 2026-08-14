@@ -238,6 +238,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `LowHpConfirmWait` 本轮明确判为当前无效/未适配，而不是离线完成：固定上游虽然声明并描述该字段，但 Python 运行时零读取，`_combat_execute()` 无条件创建 `Timer(1.5, count=2)`。现在接线会改变上游现有时序且缺少字段到 Timer 参数的权威映射，因此不划算也不可信。重新进入条件是上游提供业务语义，或单独评审该映射，并补冻结时钟决策回放与可信语义血量实机证据。
 
+### 1.29 本轮 Shipyard PR/DR 系列与舰位契约
+
+`Shipyard.ResearchSeries` 只接受精确整数 `1..6`，`ShipyardDr.ResearchSeries` 只接受 `2..5`，两组 `ShipIndex` 只接受 `0..6`；四字段在原 `RewardShipyard.run()` 文档字符串后的第一条可执行语句统一校验，早于调度状态写入、页面导航、金币读取或蓝图使用。布尔伪装整数、浮点、字符串、越界和空值均 fail-closed。
+
+固定上游回放覆盖全部 1,176 个声明组合并拒绝 28 个非法单字段案例。原 `shipyard_set_focus()` 的 42 个 PR 系列/舰位组合保持 32 个可选、6 个 index 0 “不购买”分支和 4 个三期以后 index 6 限制；普通、禁用舰位和受限舰位样本均保持 DR 先于 PR 的原任务分派。页面导航、系列/舰船选择、金币读取、蓝图使用和购买均为夹具，mutation budget 为 0，没有消费金币/蓝图或注入 Android 输入。四字段只提升 `offline`；`BuyAmount/LastRun`、每日去重、真实 PR/DR 页面不串页、蓝图不足、强化上限、购买确认和结果收据仍未闭环，Shipyard 面板继续停留在账号边界。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -278,7 +284,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 32 | Exercise | Scheduler, Exercise | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 上游零读取，真实对手/时段/血量观察、刷新持久化、战斗结算和失败恢复未闭环 |
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | 可读页面并安全跳过；购买、过滤、刷新、金币/钻石和皮肤箱均未完成 |
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | 只有勋章商店一次 DR 图纸购买；其他商店、过滤/子选项和刷新未闭环 |
-| 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 可识别 30/30 并停止；系列、舰船、数量和实际蓝图消耗未验证 |
+| 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | PR/DR 系列与舰位已离线等价；BuyAmount/LastRun、页面不串页、蓝图/金币边界、确认和实际结果未闭环 |
 | 36 | Gacha | Scheduler, Gacha | L | 一次轻型建造闭环；其他卡池、1-10 次、快速完成、票券及队列领取未闭环 |
 | 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；Data Key 实机仅有 300/300 观察，BattlePass 不可用，补给包当前无免费项且未执行领取 |
 | 38 | Minigame | Scheduler | L | 当前抚顺小游戏路径可用；没有字段配置，但其他轮换小游戏仍属于该任务支持范围 |
@@ -378,8 +384,8 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | MedalShop2 | `Filter`; `PLATE_T1`; `PLATE_T2`; `PLATE_T3`; `RETROFIT_T1`; `RETROFIT_T2`; `RETROFIT_T3` | L | 当前只有一次 DR 图纸；7 字段的所有选择、商品轮换、库存/勋章不足和确认未闭环 |
 | MeritShop | `Filter`; `Refresh` | M | 规则命中、刷新真假、功勋不足和购买确认 |
 | CoreShop | `Filter` | M | 规则命中/无命中、核心不足、月限购和确认 |
-| ShipyardDr | `ResearchSeries`=2..5; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 每系列/舰船、自动索引 0、数量边界、每日去重、蓝图不足、达到上限和实际购买 |
-| Shipyard | `ResearchSeries`=1..6; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 同上，且 PR/DR 页面切换不能串页 |
+| ShipyardDr | `ResearchSeries`=2..5; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；数量边界、每日去重、蓝图不足、达到上限和实际购买仍需闭环 |
+| Shipyard | `ResearchSeries`=1..6; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；其余同上，且 PR/DR 页面切换不能串页 |
 | Gacha | `Amount`=1..10; `Pool`=`light/heavy/special/event/wishing_well`; `UseDrill`; `UseTicket` | L | 50 个数量/卡池组合可按等价类压缩；票券、快速完成、队列满、活动池不存在、资源不足和领取 |
 | BattlePass | `Collect` | B | 开关两值、入口不可用、免费/付费奖励区别、无奖励和领取结果 |
 | DataKey | `Collect`; `ForceCollect` | L | 四组合、非法值和已领取/满容量/强制/有余量边界已离线完成；仍缺真实普通/强制领取、上限弹窗和库存后置条件 |
@@ -786,12 +792,12 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Scheduler.SuccessInterval` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=input; display=hide | input/default: "120-240", "30-60", 0, 278, 30, 60 | `R`/◐ 调度路径 | ☑ | — | — | ☑ | ◐ |
 | `Shipyard.BuyAmount` | Shipyard | type=input; display=default | input/default: 2 | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `Shipyard.LastRun` | Shipyard | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Shipyard.ResearchSeries` | Shipyard | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Shipyard.ShipIndex` | Shipyard | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Shipyard.ResearchSeries` | Shipyard | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Shipyard.ShipIndex` | Shipyard | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `ShipyardDr.BuyAmount` | Shipyard | type=input; display=default | input/default: 2 | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `ShipyardDr.LastRun` | Shipyard | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `ShipyardDr.ResearchSeries` | Shipyard | type=select; display=default | options: 2, 3, 4, 5; default: 2 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `ShipyardDr.ShipIndex` | Shipyard | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `ShipyardDr.ResearchSeries` | Shipyard | type=select; display=default | options: 2, 3, 4, 5; default: 2 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `ShipyardDr.ShipIndex` | Shipyard | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `StopCondition.GetNewShip` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false | `P`/🧱 首次获得跳过 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `StopCondition.MapAchievement` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "100_percent_clear", "map_3_stars", "non_stop", "threat_safe_without_3_stars", "threat_safe"; default: "non_stop" | `P`/◐ typed 主线夹具 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `StopCondition.OilLimit` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default | input/default: 1000 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |

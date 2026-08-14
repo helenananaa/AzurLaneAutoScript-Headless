@@ -43,7 +43,7 @@
     {
       "order": 9,
       "path": "integration/alas/series/0070-shipyard-flow-ports.patch",
-      "sha256": "b0967a127eb33074dd62836b19cf4edfaaa432898e3eea39e709789b9cda6022"
+      "sha256": "1c81495d40e98a3221769f162adf1b7026aba557f8bdd058db03fd0b09bf8a8f"
     },
     {
       "order": 10,

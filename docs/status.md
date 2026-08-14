@@ -302,8 +302,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 98 changed files, all 97 patched Python files compile, and
-  the repository suite passes `917/917` tests, including Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  patch applies as 99 changed files, all 98 patched Python files compile, and
+  the repository suite passes `922/922` tests, including Shipyard focus configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
@@ -338,6 +338,24 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `Timer(1.5, count=2)` unconditionally. Re-enter only with an upstream-owned or
   separately reviewed mapping from the field to that timer plus deterministic
   elapsed-time and live semantic-HP evidence; this patch does not invent one.
+
+### Shipyard PR/DR series and ship index: offline contract passed
+
+- PR series accepts exact integers `1..6`, DR series `2..5`, and both ship
+  indices exact integers `0..6`. All four fields are validated at the first
+  executable statement of `RewardShipyard.run()`, before scheduler mutation,
+  page navigation, coin reads, or blueprint use.
+- Pinned replay covers all 1,176 declared PR/DR focus combinations and rejects
+  28 invalid single-field cases. The unchanged focus method yields 32 selectable
+  PR series/index pairs, six index-zero disabled branches, and four series-after-
+  two/index-six restrictions. Original DR-before-PR dispatch is preserved for
+  normal, disabled-index, and restricted-index samples.
+- Navigation, series/ship selection, coin reads, blueprint use, and purchase are
+  fixtures. Mutation budget is `0`; no coin or blueprint is consumed and no
+  Android input occurs. These four fields move only to `offline=complete`.
+  `BuyAmount`, `LastRun`, daily deduplication, actual PR/DR page identity,
+  blueprint sufficiency, strengthen limits, purchase confirmation, and receipts
+  remain incomplete and the Shipyard panel stays at its account boundary.
 
 ### Game Manager restart configuration: offline contract passed
 

@@ -100,6 +100,13 @@ from .alas_exercise_config_contract import (
     EXERCISE_STRATEGIES,
     validate_alas_exercise_config,
 )
+from .alas_shipyard_config_contract import (
+    AlasShipyardConfigSnapshot,
+    SHIPYARD_DR_SERIES,
+    SHIPYARD_INDICES,
+    SHIPYARD_PR_SERIES,
+    validate_alas_shipyard_config,
+)
 from .alas_reward_config_contract import (
     AlasRewardConfigSnapshot,
     validate_alas_reward_config,
