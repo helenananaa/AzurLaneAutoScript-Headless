@@ -2,6 +2,29 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-14
+
+### EventB ship-drop closure: implementation passed, natural live proof pending
+
+- The persisted B1 failure proves a generic `NewShipUI(Clone)` acquisition
+  hierarchy for `西弗吉尼亚`: one full-screen `shake_panel/click` Button plus
+  coherent display-name, dialogue-name, ship-type, and dialogue Text records.
+- `GET_SHIP` now exposes that typed page to the original ALAS
+  `handle_get_ship()` state machine and revalidates the same current-frame
+  identity before one continue input. The contract is stage- and ship-agnostic;
+  a topmost Msgbox or non-top raycast refuses the underlying input.
+- The exact network reconnect prompt is rechecked if `network_down` mounts
+  between the session's first popup probe and its combat-observer read. Only the
+  reviewed reconnect pair is exposed; all other combat blockers still raise.
+- At the user's direction, no further B1 run was made because the ship drop is
+  probabilistic. The saved failure had the reconnect Msgbox above NewShipUI, so
+  it does not provide an uncovered top-raycast live action frame. Consequently
+  the combat manifest's `GET_SHIP` selector/action variants remain blank and
+  `NEW_SHIP` (the first-acquisition marker) remains unqualified.
+- Focused tests pass `189/189`; the repository test suite passes `761/761`.
+  This is an offline implementation closure, not a claim that B1 or the natural
+  ship-drop input has now been live-qualified.
+
 ## 2026-08-12
 
 ### I02 controlled G36 mutation arming: implementation passed

@@ -1807,6 +1807,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "ShipExpUI(Clone)/skipLayer",
     ),
     SemanticTarget(
+        "reward/new-ship/continue",
+        "click",
+        "NewShipUI(Clone)/shake_panel/click",
+    ),
+    SemanticTarget(
         "reward/campaign-total/exit",
         "ButtonExit",
         "LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
@@ -9499,6 +9504,73 @@ class SemanticOracle:
             for text in ui_state.texts
         )
 
+    def _new_ship_reward_visible_in_state(self, state: OracleState) -> bool:
+        """Prove the typed, topmost NewShipUI acquisition page."""
+
+        matches = self._matches(state, "reward/new-ship/continue")
+        if len(matches) > 1:
+            raise SemanticGateClosed("new-ship continue target is ambiguous")
+        if not matches:
+            return False
+        target = matches[0]
+        bounds = target.bounds
+        if (
+            not target.actionable
+            or bounds is None
+            or not math.isclose(bounds.left, 0.0, abs_tol=0.01)
+            or not math.isclose(bounds.top, 0.0, abs_tol=0.01)
+            or not math.isclose(
+                bounds.right, float(self.fingerprint.width), abs_tol=0.01
+            )
+            or not math.isclose(
+                bounds.bottom, float(self.fingerprint.height), abs_tol=0.01
+            )
+            or self._blocking_rules(state, "reward/new-ship/continue")
+        ):
+            return False
+
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < state.generation
+            or ui_state.generation > state.generation + 2
+        ):
+            raise SemanticGateClosed("new-ship snapshots are not coherent")
+
+        root = "NewShipUI(Clone)/shake_panel/"
+
+        def exact_text(suffix: str) -> Optional[str]:
+            candidates = tuple(
+                text
+                for text in ui_state.texts
+                if text.path.endswith(root + suffix)
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+            )
+            if len(candidates) > 1:
+                raise SemanticGateClosed("new-ship text identity is ambiguous")
+            if not candidates:
+                return None
+            value = candidates[0].text.strip()
+            return value or None
+
+        display_name = exact_text("ship_type/name_bg/mask/Text")
+        dialogue_name = exact_text("dialogue/bg/name")
+        ship_type = exact_text("dialogue/bg/type")
+        dialogue = exact_text("dialogue/Text")
+        return bool(
+            display_name
+            and dialogue_name
+            and display_name == dialogue_name
+            and ship_type
+            and dialogue
+        )
+
+    def new_ship_reward_visible(self) -> bool:
+        """Return whether a safely actionable ship-acquisition page is present."""
+
+        return self._new_ship_reward_visible_in_state(self.read_state())
+
     def click_daily_battle_result(self) -> ActionReceipt:
         state = self.read_state()
         target = next(
@@ -15708,6 +15780,8 @@ class SemanticOracle:
 
     def _enabled_once(self, semantic_id: str) -> bool:
         state = self.read_state()
+        if semantic_id == "reward/new-ship/continue":
+            return self._new_ship_reward_visible_in_state(state)
         if semantic_id == "academy/munitions":
             return self.academy_munitions_available()
         if semantic_id == "shipyard/series/open":
@@ -15978,6 +16052,11 @@ class SemanticOracle:
 
     def click(self, semantic_id: str) -> ActionReceipt:
         state = self.read_state()
+        if (
+            semantic_id == "reward/new-ship/continue"
+            and not self._new_ship_reward_visible_in_state(state)
+        ):
+            raise SemanticGateClosed("new-ship reward identity is not proven")
         delegated_login_update = (
             semantic_id == "login/update/download"
             and self._login_update_download_prompt_matches(state)

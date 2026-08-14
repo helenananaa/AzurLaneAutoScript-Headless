@@ -346,6 +346,114 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             adapter._require_frame_observation_oracle.call_count, 2
         )
 
+    def test_new_ship_probe_uses_generic_typed_reward_identity(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        oracle = SimpleNamespace(
+            enabled=lambda _semantic_id: False,
+            new_ship_reward_visible=mock.Mock(return_value=True),
+            daily_battle_result_visible=lambda: False,
+            daily_combat_visible=lambda: False,
+        )
+        context = SimpleNamespace(passive_transition_until=0.0)
+        session.adapter = SimpleNamespace(
+            oracle=oracle,
+            campaign_combat_committed=lambda: True,
+            _campaign_context=context,
+            _login_flow=SimpleNamespace(active=False),
+            _mail_context=None,
+            _minigame_context=None,
+        )
+
+        with mock.patch.object(session, "_live_combat_visible") as combat_visible:
+            self.assertTrue(session.appear("GET_SHIP"))
+
+        oracle.new_ship_reward_visible.assert_called_once_with()
+        combat_visible.assert_not_called()
+
+    def test_new_ship_click_revalidates_current_frame_and_arms_transition(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        receipt = ActionReceipt(
+            semantic_id="reward/new-ship/continue",
+            generation=84,
+            point=Point(640, 360),
+            bounds=Bounds(0, 0, 1280, 720),
+            path="UICamera/Canvas/UIOrigin/NewShipUI(Clone)/shake_panel/click",
+        )
+        result_oracle = SimpleNamespace(
+            new_ship_reward_visible=mock.Mock(return_value=True),
+            click=mock.Mock(return_value=receipt),
+        )
+        adapter = mock.Mock(spec=AlasSemanticAdapter)
+        adapter._require_frame_observation_oracle.return_value = result_oracle
+        adapter.campaign_combat_committed.return_value = True
+        adapter._campaign_context = SimpleNamespace(passive_transition_until=0.0)
+        session.adapter = adapter
+
+        with mock.patch.object(session, "open", return_value=adapter), mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=100.0,
+        ):
+            actual = session.click("GET_SHIP")
+
+        self.assertIs(actual, receipt)
+        result_oracle.new_ship_reward_visible.assert_called_once_with()
+        result_oracle.click.assert_called_once_with("reward/new-ship/continue")
+        self.assertEqual(session._combat_result_transition_until, 112.0)
+
+    def test_combat_blocker_race_yields_to_exact_network_prompt_only(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        network_checks = iter((False, True))
+        oracle = SimpleNamespace(
+            enabled=lambda semantic_id: (
+                next(network_checks)
+                if semantic_id == "overlay/network-reconnect/confirm"
+                else False
+            ),
+            daily_battle_result_visible=lambda: False,
+            daily_combat_visible=lambda: False,
+        )
+        session.adapter = SimpleNamespace(
+            oracle=oracle,
+            campaign_combat_committed=lambda: True,
+            _campaign_context=SimpleNamespace(passive_transition_until=0.0),
+            _login_flow=SimpleNamespace(active=False),
+            _mail_context=None,
+            _minigame_context=None,
+        )
+
+        with mock.patch.object(
+            session,
+            "_live_combat_visible",
+            side_effect=SemanticGateClosed(
+                "combat observer blocker is active: network_down"
+            ),
+        ):
+            self.assertTrue(session.appear("POPUP_CONFIRM"))
+
+        network_checks = iter((False, False))
+        oracle.enabled = lambda semantic_id: (
+            next(network_checks)
+            if semantic_id == "overlay/network-reconnect/confirm"
+            else False
+        )
+        with mock.patch.object(
+            session,
+            "_live_combat_visible",
+            side_effect=SemanticGateClosed(
+                "combat observer blocker is active: network_down"
+            ),
+        ), self.assertRaisesRegex(SemanticGateClosed, "network_down"):
+            session.appear("POPUP_CONFIRM")
+
     def test_result_chain_reacquires_present_but_expired_frame(self):
         session = AlasSemanticSession(
             driver_revision=REVISION,

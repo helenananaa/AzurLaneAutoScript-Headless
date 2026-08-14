@@ -8523,6 +8523,17 @@ class AlasSemanticSession:
                     "overlay/network-reconnect/cancel"
                 )
             return False
+        if (
+            name == "GET_SHIP"
+            and adapter._campaign_context is not None
+            and adapter.campaign_combat_committed()
+        ):
+            # NewShipUI is a generic acquisition page; its identity and input
+            # do not depend on which event stage produced the drop.  Keep the
+            # original ALAS handler in charge and expose only its GET_SHIP
+            # observation when the typed full-screen continue layer is the
+            # exact top raycast above coherent ship-name/type/dialogue text.
+            return adapter.oracle.new_ship_reward_visible()
         if adapter.oracle.daily_battle_result_visible():
             if name == "BATTLE_STATUS_S":
                 self._combat_result_observation = (name, time.monotonic())
@@ -8550,6 +8561,24 @@ class AlasSemanticSession:
                     self._combat_result_observation = (name, time.monotonic())
                 return visible
             except SemanticGateClosed as exc:
+                if (
+                    str(exc)
+                    == "combat observer blocker is active: network_down"
+                    and adapter.oracle.enabled(
+                        "overlay/network-reconnect/confirm"
+                    )
+                ):
+                    # NetworkDown can mount after the first prompt probe but
+                    # before the combat observer read.  Reclassify only the
+                    # independently proven exact reconnect prompt; every other
+                    # blocker remains fail-closed.
+                    if name == "POPUP_CONFIRM":
+                        return True
+                    if name == "POPUP_CANCEL":
+                        return adapter.oracle.enabled(
+                            "overlay/network-reconnect/cancel"
+                        )
+                    return False
                 if self._campaign_combat_transition_error(exc):
                     # ChapterPreCombatUI mounts its Button before the same
                     # control becomes the exact top raycast.  This is a
@@ -9163,6 +9192,19 @@ class AlasSemanticSession:
                 self._combat_last_result_receipt = receipt
                 self._arm_combat_result_transition(adapter)
                 return receipt
+        if (
+            name == "GET_SHIP"
+            and self.adapter is not None
+            and self.adapter.campaign_combat_committed()
+        ):
+            adapter = self.open()
+            result_oracle = self._combat_result_action_oracle(adapter)
+            if not result_oracle.new_ship_reward_visible():
+                raise SemanticTargetMissing("new-ship reward page is absent")
+            receipt = result_oracle.click("reward/new-ship/continue")
+            self._combat_last_result_receipt = receipt
+            self._arm_combat_result_transition(adapter)
+            return receipt
         if (
             name == "CLICK_SAFE_AREA"
             and self.open().oracle.enabled("reward/award-info/close")

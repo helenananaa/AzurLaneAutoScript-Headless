@@ -3629,6 +3629,83 @@ class SemanticOracleTests(unittest.TestCase):
         backend.ui["texts"][0]["text"] = "是否购买资源？"
         self.assertFalse(oracle.enabled("tactical/continue/cancel"))
 
+    def test_new_ship_reward_requires_coherent_typed_identity_and_clicks(self):
+        root = "root/UICamera/Canvas/UIOrigin/NewShipUI(Clone)/shake_panel/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "click",
+                    root + "click",
+                    bounds={
+                        "left": 0.0,
+                        "top": 0.0,
+                        "right": 1280.0,
+                        "bottom": 720.0,
+                    },
+                ),
+                make_button("property_btn", root + "property_btn", x=1096, y=620),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("西弗吉尼亚", root + "ship_type/name_bg/mask/Text"),
+                make_text("USS West Virginia", root + "ship_type/english_name"),
+                make_text("终于到我展现力量的时候了吗", root + "dialogue/Text"),
+                make_text("战列", root + "dialogue/bg/type"),
+                make_text("西弗吉尼亚", root + "dialogue/bg/name"),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.new_ship_reward_visible())
+        self.assertTrue(oracle.enabled("reward/new-ship/continue"))
+        receipt = oracle.click("reward/new-ship/continue")
+
+        self.assertEqual(receipt.semantic_id, "reward/new-ship/continue")
+        self.assertEqual(backend.taps, [(640, 360)])
+
+    def test_new_ship_reward_fails_closed_on_name_overlay_or_raycast_mismatch(self):
+        root = "root/UICamera/Canvas/UIOrigin/NewShipUI(Clone)/shake_panel/"
+        full_screen = {
+            "left": 0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0,
+        }
+        button = make_button("click", root + "click", bounds=full_screen)
+        texts = [
+            make_text("舰船甲", root + "ship_type/name_bg/mask/Text"),
+            make_text("Ship A", root + "ship_type/english_name"),
+            make_text("对白", root + "dialogue/Text"),
+            make_text("驱逐", root + "dialogue/bg/type"),
+            make_text("舰船乙", root + "dialogue/bg/name"),
+        ]
+        backend = FakeBackend([button])
+        backend.ui = make_ui(texts)
+        oracle = make_oracle(backend)
+        self.assertFalse(oracle.enabled("reward/new-ship/continue"))
+
+        backend.ui["texts"][-1]["text"] = "舰船甲"
+        backend.buttons = make_buttons(
+            [
+                button,
+                make_button(
+                    "custom_button_1(Clone)",
+                    "root/Overlay/UIMain/Msgbox(Clone)/window/button_container/"
+                    "custom_button_1(Clone)",
+                ),
+            ]
+        )
+        self.assertFalse(oracle.enabled("reward/new-ship/continue"))
+
+        covered = copy.deepcopy(button)
+        covered["raycast_top"] = None
+        backend.buttons = make_buttons([covered])
+        self.assertFalse(oracle.enabled("reward/new-ship/continue"))
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is not proven"):
+            oracle.click("reward/new-ship/continue")
+        self.assertEqual(backend.taps, [])
+
     def test_network_reconnect_confirm_requires_exact_reviewed_prompt(self):
         popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
         backend = FakeBackend(

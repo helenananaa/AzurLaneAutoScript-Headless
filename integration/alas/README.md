@@ -56,6 +56,16 @@ when the typed Msgbox content exactly matches the pinned Chinese
 the reviewed cancel/confirm pair, and the chosen confirm Button is the top
 EventSystem raycast target. Other confirmation dialogs remain closed.
 
+Campaign combat `GET_SHIP` is translated separately from the incomplete combat
+manifest. The adapter requires one topmost full-screen
+`NewShipUI(Clone)/shake_panel/click` Button and coherent non-empty display name,
+dialogue name, ship type, and dialogue; both name fields must agree. This lets
+the original ALAS `handle_get_ship()` close ordinary acquisition pages without
+depending on the event stage or ship identity. A covered page is absent, not
+clickable. `NEW_SHIP`, which means the narrower first-acquisition marker, remains
+unqualified, and the blank manifest entries are intentionally not promoted
+without a complete uncovered raw live frame.
+
 The mission input provider is narrower than normal ALAS reward handling. It
 translates ALAS's `MISSION_MULTI`, `MISSION_SINGLE`, `MISSION_UNFINISH`, page,
 reward-popup, and default-navbar observations from typed Unity snapshots. It
