@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -305,9 +307,51 @@ def verify(
     }
 
 
+def verify_from_clean_upstream(
+    upstream: Path,
+    login_replay_path: Path,
+    frame_clock_path: Path,
+) -> Mapping[str, Any]:
+    """Apply the canonical patch in a disposable worktree before verification."""
+
+    inventory = _read_json(INVENTORY_PATH)
+    upstream = upstream.resolve()
+    if _git(upstream, "rev-parse", "HEAD").lower() != inventory["upstream_commit"]:
+        raise PixelInventoryVerificationError("pixel upstream commit drifted")
+    if _git(upstream, "status", "--porcelain", "--untracked-files=all"):
+        raise PixelInventoryVerificationError("pixel upstream must be clean")
+    temporary_parent = Path(
+        tempfile.mkdtemp(prefix="alas-pixel-verify-", dir=str(upstream.parent))
+    )
+    disposable = temporary_parent / "worktree"
+    registered = False
+    try:
+        _git(
+            upstream,
+            "worktree",
+            "add",
+            "--detach",
+            str(disposable),
+            inventory["upstream_commit"],
+        )
+        registered = True
+        _git(disposable, "apply", "--", str(PATCH_PATH.resolve()))
+        return verify(disposable, login_replay_path, frame_clock_path)
+    finally:
+        if registered:
+            try:
+                _git(upstream, "worktree", "remove", "--force", str(disposable))
+            except PixelInventoryVerificationError:
+                _git(upstream, "worktree", "prune")
+                raise
+        shutil.rmtree(temporary_parent, ignore_errors=True)
+
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--patched-upstream", required=True, type=Path)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--patched-upstream", type=Path)
+    source.add_argument("--upstream", type=Path)
     parser.add_argument("--login-replay", required=True, type=Path)
     parser.add_argument("--frame-clock-replay", required=True, type=Path)
     parser.add_argument("--output", type=Path)
@@ -316,11 +360,18 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    result = verify(
-        args.patched_upstream,
-        args.login_replay,
-        args.frame_clock_replay,
-    )
+    if args.upstream is not None:
+        result = verify_from_clean_upstream(
+            args.upstream,
+            args.login_replay,
+            args.frame_clock_replay,
+        )
+    else:
+        result = verify(
+            args.patched_upstream,
+            args.login_replay,
+            args.frame_clock_replay,
+        )
     text = json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)

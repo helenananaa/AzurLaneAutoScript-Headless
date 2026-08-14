@@ -1,0 +1,7118 @@
+{
+  "expected": {
+    "field_count": 278,
+    "panel_count": 60,
+    "panel_field_instance_count": 1217
+  },
+  "fields": [
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Tactical"
+      ],
+      "path": "AddNewStudent.Enable",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Tactical"
+      ],
+      "path": "AddNewStudent.Favorite",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Tactical"
+      ],
+      "path": "AddNewStudent.MinLevel",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 50"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Awaken"
+      ],
+      "path": "Awaken.Favourite",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Awaken"
+      ],
+      "path": "Awaken.LevelCap",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"level120\", \"level125\"; default: \"level120\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "unsupported",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=disabled",
+      "panels": [
+        "AzurLaneUncensored"
+      ],
+      "path": "AzurLaneUncensored.Repository",
+      "status_label": "⊘ 当前无效",
+      "support": "unsupported",
+      "values": "input/default: \"https://gitee.com/LmeSzinc/AzurLaneUncensored\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Freebies"
+      ],
+      "path": "BattlePass.Collect",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Benchmark"
+      ],
+      "path": "Benchmark.DeviceType",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"android_phone_vmos\", \"android_phone\", \"emulator\", \"phone_cloud_without_adb\", \"plone_cloud_with_adb\"; default: \"emulator\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Benchmark"
+      ],
+      "path": "Benchmark.TestScene",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"click\", \"screenshot_click\", \"screenshot\"; default: \"screenshot_click\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Dorm"
+      ],
+      "path": "BuyFurniture.BuyOption",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"all\", \"set\"; default: \"all\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Dorm"
+      ],
+      "path": "BuyFurniture.Enable",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=datetime; display=default; validate=datetime",
+      "panels": [
+        "Dorm"
+      ],
+      "path": "BuyFurniture.LastRun",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: \"2020-01-01 00:00:00\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Campaign.AmbushEvade",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Campaign.Event",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"campaign_main\", \"coalition_20260723\", \"event_20260625_cn\", \"event_20260813_cn\", \"raid_20260212\", \"war_archives_20180607_cn\", \"war_archives_20180726_cn\", \"war_archives_20181020_en\", \"war_archives_20181026_en\", \"war_archives_20181227_cn\", \"war_archives_20190221_en\", \"war_archives_20190314_en\", \"war_archives_20190321_en\", \"war_archives_20190620_en\", \"war_archives_20190911_cn\", \"war_archives_20191010_en\", \"war_archives_20191031_en\", \"war_archives_20200312_cn\", \"war_archives_20200507_cn\", \"war_archives_20200603_cn\", \"war_archives_20200806_cn\", \"war_archives_20200820_cn\", \"war_archives_20200903_cn\", \"war_archives_20200917_cn\", \"war_archives_20201012_cn\", \"war_archives_20201029_cn\", \"war_archives_20201229_cn\", \"war_archives_20210225_cn\", \"war_archives_20210325_cn\", \"war_archives_20210422_cn\", \"war_archives_20210527_cn\", \"war_archives_20210624_cn\", \"war_archives_20210819_cn\", \"war_archives_20210916_cn\", \"war_archives_20211014_cn\", \"war_archives_20211028_cn\", \"war_archives_20211111_cn\", \"war_archives_20211229_cn\", \"war_archives_20220210_cn\", \"war_archives_20220224_cn\", \"war_archives_20220324_cn\", \"war_archives_20220414_cn\", \"war_archives_20220428_cn\", \"war_archives_20220526_cn\", \"war_archives_20220728_cn\", \"war_archives_20220818_cn\", \"war_archives_20220915_cn\", \"war_archives_20221222_cn\", \"war_archives_20230223_cn\", \"war_archives_20230525_cn\", \"war_archives_20230803_cn\", \"war_archives_20231026_cn\", \"war_archives_20240725_cn\"; default: \"campaign_main\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Campaign.Mode",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"hard\", \"normal\"; default: \"normal\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Campaign.Name",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"12-4\", \"dynamic\", \"sp\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Campaign.Use2xBook",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Campaign.UseAutoSearch",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false, true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Campaign.UseClearMode",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Campaign.UseFleetLock",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Coalition",
+        "CoalitionSp"
+      ],
+      "path": "Coalition.Fleet",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"multi\", \"single\"; default: \"single\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Coalition",
+        "CoalitionSp"
+      ],
+      "path": "Coalition.Mode",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"easy\", \"hard\", \"normal\", \"sp\"; default: \"hard\", \"sp\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "Commission"
+      ],
+      "path": "Commission.CustomFilter",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: <long default in args.json>"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Commission"
+      ],
+      "path": "Commission.DoMajorCommission",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Commission"
+      ],
+      "path": "Commission.PresetFilter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"chip_24h\", \"chip\", \"cube_24h\", \"cube\", \"custom\", \"oil\"; default: \"cube\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Tactical"
+      ],
+      "path": "ControlExpOverflow.Enable",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Tactical"
+      ],
+      "path": "ControlExpOverflow.T1Allow",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 200"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Tactical"
+      ],
+      "path": "ControlExpOverflow.T2Allow",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 200"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Tactical"
+      ],
+      "path": "ControlExpOverflow.T3Allow",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 100"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Tactical"
+      ],
+      "path": "ControlExpOverflow.T4Allow",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 100"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "CoreShop.Filter",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: \"Array\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Daemon"
+      ],
+      "path": "Daemon.EnterMap",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.AdvanceMission",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"first\", \"second\", \"skip\", \"third\"; default: \"first\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.AdvanceMissionFleet",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: 1, 2, 3, 4, 5, 6; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.EmergencyModuleDevelopment",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"first\", \"second\", \"skip\"; default: \"first\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.EmergencyModuleDevelopmentFleet",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: 1, 2, 3, 4, 5, 6; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.EscortMission",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"first\", \"second\", \"skip\", \"third\"; default: \"first\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.EscortMissionFleet",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: 1, 2, 3, 4, 5, 6; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.FierceAssault",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"first\", \"second\", \"skip\", \"third\"; default: \"first\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.FierceAssaultFleet",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: 1, 2, 3, 4, 5, 6; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.ModuleDevelopment",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"first\", \"second\", \"skip\"; default: \"first\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.ModuleDevelopmentFleet",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: 1, 2, 3, 4, 5, 6; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.SupplyLineDisruption",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"first\", \"second\", \"skip\", \"third\"; default: \"second\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.TacticalTraining",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"first\", \"second\", \"skip\", \"third\"; default: \"second\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.TacticalTrainingFleet",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 1, 2, 3, 4, 5, 6; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Daily"
+      ],
+      "path": "Daily.UseDailySkip",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Freebies"
+      ],
+      "path": "DataKey.Collect",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Freebies"
+      ],
+      "path": "DataKey.ForceCollect",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Dorm"
+      ],
+      "path": "Dorm.Collect",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Dorm"
+      ],
+      "path": "Dorm.Feed",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "Dorm"
+      ],
+      "path": "Dorm.FeedFilter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"20000 > 10000 > 5000 > 3000 > 2000 > 1000\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "DropRecord.API",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"cn_gz_reverse_proxy\", \"default\"; default: \"default\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "DropRecord.AzurStatsID",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: null"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "DropRecord.CombatRecord",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"do_not\", \"save\"; default: \"do_not\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "DropRecord.CommissionRecord",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"do_not\", \"save_and_upload\", \"save\", \"upload\"; default: \"do_not\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "DropRecord.MeowfficerBuy",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"do_not\", \"save\"; default: \"do_not\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "DropRecord.MeowfficerTalent",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"do_not\", \"save_and_upload\", \"save\", \"upload\"; default: \"do_not\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "DropRecord.OpsiRecord",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"do_not\", \"save_and_upload\", \"save\", \"upload\"; default: \"do_not\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "DropRecord.ResearchRecord",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"do_not\", \"save_and_upload\", \"save\", \"upload\"; default: \"do_not\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "DropRecord.SaveFolder",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: \"./screenshots\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Fleet1Control",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"keep_exp_bonus\", \"prevent_green_face\", \"prevent_red_face\", \"prevent_yellow_face\"; default: \"prevent_green_face\", \"prevent_red_face\", \"prevent_yellow_face\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Fleet1Oath",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=datetime; display=disabled; validate=datetime",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Fleet1Record",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"2020-01-01 00:00:00\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Fleet1Recover",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"dormitory_floor_1\", \"dormitory_floor_2\", \"not_in_dormitory\"; default: \"not_in_dormitory\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Fleet1Value",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 119"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Fleet2Control",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"keep_exp_bonus\", \"prevent_green_face\", \"prevent_red_face\", \"prevent_yellow_face\"; default: \"prevent_green_face\", \"prevent_red_face\", \"prevent_yellow_face\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Fleet2Oath",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=datetime; display=disabled/hide; validate=datetime",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Fleet2Record",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"2020-01-01 00:00:00\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Fleet2Recover",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"dormitory_floor_1\", \"dormitory_floor_2\", \"not_in_dormitory\"; default: \"not_in_dormitory\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Fleet2Value",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 119"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "Emotion.Mode",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"calculate_ignore\", \"calculate\", \"ignore\"; default: \"calculate_ignore\", \"calculate\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Emulator.AdbRestart",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Emulator.ControlMethod",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"ADB\", \"Hermit\", \"MaaTouch\", \"minitouch\", \"uiautomator2\"; default: \"MaaTouch\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Emulator.PackageName",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"auto\", \"com.bilibili.azurlane\", \"com.bilibili.blhx.baidu\", \"com.bilibili.blhx.bilibiliMove\", \"com.bilibili.blhx.dl\", \"com.bilibili.blhx.honor\", \"com.bilibili.blhx.huawei\", \"com.bilibili.blhx.lenovo\", \"com.bilibili.blhx.m4399\", \"com.bilibili.blhx.mi\", \"com.bilibili.blhx.mz\", \"com.bilibili.blhx.mzw\", \"com.bilibili.blhx.nearme.gamecenter\", \"com.bilibili.blhx.qihoo\", \"com.bilibili.blhx.uc\", \"com.bilibili.blhx.vivo\", \"com.hkmanjuu.azurlane.gp.mc\", \"com.hkmanjuu.azurlane.gp\", \"com.tencent.tmgp.bilibili.blhx\", \"com.yiwu.blhx.yx15\", \"com.YoStarEN.AzurLane\", \"com.YoStarJP.AzurLane\"; default: \"auto\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Emulator.ScreenshotDedithering",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Emulator.ScreenshotMethod",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"ADB_nc\", \"ADB\", \"aScreenCap_nc\", \"aScreenCap\", \"auto\", \"DroidCast_raw\", \"DroidCast\", \"ldopengl\", \"nemu_ipc\", \"uiautomator2\"; default: \"auto\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Emulator.Serial",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"auto\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Emulator.ServerName",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"cn_android-0\", \"cn_android-1\", \"cn_android-10\", \"cn_android-11\", \"cn_android-12\", \"cn_android-13\", \"cn_android-14\", \"cn_android-15\", \"cn_android-16\", \"cn_android-17\", \"cn_android-18\", \"cn_android-19\", \"cn_android-2\", \"cn_android-20\", \"cn_android-21\", \"cn_android-22\", \"cn_android-23\", \"cn_android-24\", \"cn_android-25\", \"cn_android-26\", \"cn_android-27\", \"cn_android-28\", \"cn_android-29\", \"cn_android-3\", \"cn_android-4\", \"cn_android-5\", \"cn_android-6\", \"cn_android-7\", \"cn_android-8\", \"cn_android-9\", \"cn_channel-0\", \"cn_channel-1\", \"cn_channel-2\", \"cn_channel-3\", \"cn_channel-4\", \"cn_channel-5\", \"cn_ios-0\", \"cn_ios-1\", \"cn_ios-10\", \"cn_ios-2\", \"cn_ios-3\", \"cn_ios-4\", \"cn_ios-5\", \"cn_ios-6\", \"cn_ios-7\", \"cn_ios-8\", \"cn_ios-9\", \"disabled\", \"en-0\", \"en-1\", \"en-2\", \"en-3\", \"en-4\", \"en-5\", \"jp-0\", \"jp-1\", \"jp-10\", \"jp-11\", \"jp-12\", \"jp-13\", \"jp-14\", \"jp-15\", \"jp-16\", \"jp-17\", \"jp-2\", \"jp-3\", \"jp-4\", \"jp-5\", \"jp-6\", \"jp-7\", \"jp-8\", \"jp-9\"; default: \"disabled\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "EmulatorInfo.Emulator",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"auto\", \"BlueStacks4\", \"BlueStacks4HyperV\", \"BlueStacks5\", \"BlueStacks5HyperV\", \"LDPlayer14\", \"LDPlayer3\", \"LDPlayer4\", \"LDPlayer9\", \"MEmuPlayer\", \"MuMuPlayer\", \"MuMuPlayer12\", \"MuMuPlayerX\", \"NoxPlayer\", \"NoxPlayer64\"; default: \"auto\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "EmulatorInfo.name",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: null"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "EmulatorInfo.path",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: null"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "EnemyPriority.EnemyScaleBalanceWeight",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"default_mode\", \"S1_enemy_first\", \"S3_enemy_first\"; default: \"default_mode\""
+    },
+    {
+      "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "complete",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "General"
+      ],
+      "path": "Enhance.CheckPerCategory",
+      "status_label": "◐ 正式任务循环已接入",
+      "support": "supported",
+      "values": "input/default: 5"
+    },
+    {
+      "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "complete",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "General"
+      ],
+      "path": "Enhance.Filter",
+      "status_label": "◐ 8 类型任务筛选已接入",
+      "support": "supported",
+      "values": "input/default: null"
+    },
+    {
+      "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "complete",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "General"
+      ],
+      "path": "Enhance.ShipToEnhance",
+      "status_label": "◐ all/favourite typed 控件已实机",
+      "support": "supported",
+      "values": "options: \"all\", \"favourite\"; default: \"all\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "GemsFarming"
+      ],
+      "path": "EquipmentCode.Config",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default:…4672 tokens truncated…t\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "GemsFarming"
+      ],
+      "path": "EquipmentCode.ExportToConfig",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Error.HandleError",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Error.OnePushConfig",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: \"provider: null\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Error.SaveError",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Error.ScreenshotLength",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD"
+      ],
+      "path": "EventDaily.LastStage",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD"
+      ],
+      "path": "EventDaily.StageFilter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"A1 > A2 > A3\", \"B1 > B2 > B3\", \"C1 > C2 > C3\", \"D1 > D2 > D3\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "EventGeneral"
+      ],
+      "path": "EventGeneral.PtLimit",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=datetime; display=default; validate=datetime",
+      "panels": [
+        "EventGeneral"
+      ],
+      "path": "EventGeneral.TimeLimit",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: \"2020-01-01 00:00:00\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "partial",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=lock; display=default",
+      "panels": [
+        "EventStory"
+      ],
+      "path": "EventStory.SkipBattle",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: true; default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Exercise"
+      ],
+      "path": "Exercise.ExerciseStrategy",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"aggressive\", \"fri18\", \"sat0\", \"sat12\", \"sat18\", \"sun0\", \"sun12\", \"sun18\"; default: \"aggressive\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Exercise"
+      ],
+      "path": "Exercise.LowHpConfirmWait",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 0.1"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Exercise"
+      ],
+      "path": "Exercise.LowHpThreshold",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 0.4"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Exercise"
+      ],
+      "path": "Exercise.OpponentChooseMode",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"easiest_else_exp\", \"easiest\", \"leftmost\", \"max_exp\"; default: \"max_exp\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=datetime; display=default; validate=datetime",
+      "panels": [
+        "Exercise"
+      ],
+      "path": "Exercise.OpponentRefreshRecord",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"2020-01-01 00:00:00\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Exercise"
+      ],
+      "path": "Exercise.OpponentRefreshValue",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Exercise"
+      ],
+      "path": "Exercise.OpponentTrial",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Fleet.Fleet1",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 1, 2, 3, 4, 5, 6; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Fleet.Fleet1Formation",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"diamond\", \"double_line\", \"line_ahead\"; default: \"double_line\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Fleet.Fleet1Mode",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"combat_auto\", \"combat_manual\", \"hide_in_bottom_left\", \"hide_in_upper_left\", \"stand_still_in_the_middle\"; default: \"combat_auto\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Fleet.Fleet1Step",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 2, 3, 4, 5; default: 3"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Fleet.Fleet2",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 0, 1, 2, 3, 4, 5, 6; default: 2"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Fleet.Fleet2Formation",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"diamond\", \"double_line\", \"line_ahead\"; default: \"double_line\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Fleet.Fleet2Mode",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"combat_auto\", \"combat_manual\", \"hide_in_bottom_left\", \"hide_in_upper_left\", \"stand_still_in_the_middle\"; default: \"combat_auto\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Fleet.Fleet2Step",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 2, 3, 4, 5; default: 2"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/display",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Fleet.FleetOrder",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"fleet1_all_fleet2_standby\", \"fleet1_boss_fleet2_mob\", \"fleet1_mob_fleet2_boss\", \"fleet1_standby_fleet2_all\"; default: \"fleet1_all_fleet2_standby\", \"fleet1_mob_fleet2_boss\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Gacha"
+      ],
+      "path": "Gacha.Amount",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 1, 10, 2, 3, 4, 5, 6, 7, 8, 9; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Gacha"
+      ],
+      "path": "Gacha.Pool",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"event\", \"heavy\", \"light\", \"special\", \"wishing_well\"; default: \"light\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Gacha"
+      ],
+      "path": "Gacha.UseDrill",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Gacha"
+      ],
+      "path": "Gacha.UseTicket",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "GameManager"
+      ],
+      "path": "GameManager.AutoRestart",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "GemsFarming"
+      ],
+      "path": "GemsFarming.ChangeFlagship",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"ship_equip\", \"ship\"; default: \"ship\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "GemsFarming"
+      ],
+      "path": "GemsFarming.ChangeVanguard",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"disabled\", \"ship_equip\", \"ship\"; default: \"ship\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "GemsFarming"
+      ],
+      "path": "GemsFarming.CommissionLimit",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "GemsFarming"
+      ],
+      "path": "GemsFarming.CommonCV",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"any\", \"bogue\", \"hermes\", \"langley\", \"ranger\"; default: \"any\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "GemsFarming"
+      ],
+      "path": "GemsFarming.CommonDD",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"any\", \"aulick_or_foote\", \"cassin_or_downes\", \"favourite\", \"z20_or_z21\"; default: \"any\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "ShopFrequent"
+      ],
+      "path": "GeneralShop.BuySkinBox",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "ShopFrequent"
+      ],
+      "path": "GeneralShop.ConsumeCoins",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "ShopFrequent"
+      ],
+      "path": "GeneralShop.Filter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"BookRedT3 > BookYellowT3 > BookBlueT3 > BookRedT2\\n> Cube\\n> FoodT6 > FoodT5\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "ShopFrequent"
+      ],
+      "path": "GeneralShop.Refresh",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "ShopFrequent"
+      ],
+      "path": "GeneralShop.UseGems",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Guild"
+      ],
+      "path": "GuildLogistics.Enable",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "Guild"
+      ],
+      "path": "GuildLogistics.ExchangeFilter",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: <long default in args.json>"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Guild"
+      ],
+      "path": "GuildLogistics.SelectNewMission",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Guild"
+      ],
+      "path": "GuildOperation.AttackBoss",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Guild"
+      ],
+      "path": "GuildOperation.BossFleetRecommend",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Guild"
+      ],
+      "path": "GuildOperation.Enable",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Guild"
+      ],
+      "path": "GuildOperation.JoinThreshold",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Guild"
+      ],
+      "path": "GuildOperation.NewOperationMaxDate",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: 15"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Guild"
+      ],
+      "path": "GuildOperation.SelectNewOperation",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.BOOK_T2",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"blue\", \"red\", \"yellow\"; default: \"red\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.BOOK_T3",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"blue\", \"red\", \"yellow\"; default: \"red\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.BOX_T3",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"eagle\", \"ironblood\", \"royal\", \"sakura\"; default: \"ironblood\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.BOX_T4",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"eagle\", \"ironblood\", \"royal\", \"sakura\"; default: \"ironblood\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.Filter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: <long default in args.json>"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.PLATE_T2",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"antiair\", \"general\", \"gun\", \"plane\", \"torpedo\"; default: \"general\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.PLATE_T3",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"antiair\", \"general\", \"gun\", \"plane\", \"torpedo\"; default: \"general\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.PLATE_T4",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"antiair\", \"general\", \"gun\", \"plane\", \"torpedo\"; default: \"gun\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.PR1",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"ibuki\", \"izumo\", \"monarch\", \"neptune\", \"roon\", \"saintlouis\"; default: \"neptune\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.PR2",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"gascogne\", \"georgia\", \"kitakaze\", \"seattle\"; default: \"seattle\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.PR3",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"champagne\", \"cheshire\", \"mainz\", \"odin\"; default: \"cheshire\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.RETROFIT_T2",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"bb\", \"cl\", \"cv\", \"dd\"; default: \"cl\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.RETROFIT_T3",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"bb\", \"cl\", \"cv\", \"dd\"; default: \"cl\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "GuildShop.Refresh",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Hard"
+      ],
+      "path": "Hard.HardFleet",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 1, 2; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Hard"
+      ],
+      "path": "Hard.HardStage",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"11-4\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Hospital"
+      ],
+      "path": "Hospital.UseRecommendFleet",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "HpControl.HpBalanceThreshold",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 0.2"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "HpControl.HpBalanceWeight",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: \"1000, 1000, 1000\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "HpControl.LowHpRetreatThreshold",
+      "status_label": "🧪 离线路径",
+      "support": "supported",
+      "values": "input/default: 0.3"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "HpControl.RepairUseMultiThreshold",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 0.6"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "HpControl.RepairUseSingleThreshold",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 0.3"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "HpControl.UseEmergencyRepair",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "HpControl.UseHpBalance",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "HpControl.UseLowHpRetreat",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Freebies"
+      ],
+      "path": "Mail.ClaimMaintenance",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Freebies"
+      ],
+      "path": "Mail.ClaimMerit",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Freebies"
+      ],
+      "path": "Mail.ClaimTradeLicense",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Freebies"
+      ],
+      "path": "Mail.DeleteCollected",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "MedalShop2.Filter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: <long default in args.json>"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "MedalShop2.PLATE_T1",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"antiair\", \"general\", \"gun\", \"plane\", \"torpedo\"; default: \"general\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "MedalShop2.PLATE_T2",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"antiair\", \"general\", \"gun\", \"plane\", \"torpedo\"; default: \"general\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "MedalShop2.PLATE_T3",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"antiair\", \"general\", \"gun\", \"plane\", \"torpedo\"; default: \"general\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "MedalShop2.RETROFIT_T1",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"bb\", \"cl\", \"cv\", \"dd\"; default: \"cl\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "MedalShop2.RETROFIT_T2",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"bb\", \"cl\", \"cv\", \"dd\"; default: \"cl\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "MedalShop2.RETROFIT_T3",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"bb\", \"cl\", \"cv\", \"dd\"; default: \"cl\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Meowfficer"
+      ],
+      "path": "Meowfficer.BuyAmount",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Meowfficer"
+      ],
+      "path": "Meowfficer.FortChoreMeowfficer",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Meowfficer"
+      ],
+      "path": "Meowfficer.OverflowCoins",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: -1"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Meowfficer"
+      ],
+      "path": "MeowfficerTrain.Enable",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Meowfficer"
+      ],
+      "path": "MeowfficerTrain.EnhanceIndex",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Meowfficer"
+      ],
+      "path": "MeowfficerTrain.MaxFeedLevel",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: 5"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Meowfficer"
+      ],
+      "path": "MeowfficerTrain.Mode",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"once_a_day\", \"seamlessly\"; default: \"seamlessly\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Meowfficer"
+      ],
+      "path": "MeowfficerTrain.RetainTalentedGold",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Meowfficer"
+      ],
+      "path": "MeowfficerTrain.RetainTalentedPurple",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "MeritShop.Filter",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: \"Cube\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "ShopOnce"
+      ],
+      "path": "MeritShop.Refresh",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "General"
+      ],
+      "path": "OldRetire.N",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "General"
+      ],
+      "path": "OldRetire.R",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "General"
+      ],
+      "path": "OldRetire.RetireAmount",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"retire_10\", \"retire_all\"; default: \"retire_all\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "General"
+      ],
+      "path": "OldRetire.SR",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "General"
+      ],
+      "path": "OldRetire.SSR",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "complete",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "General"
+      ],
+      "path": "OneClickRetire.KeepLimitBreak",
+      "status_label": "◐ 两设置 typed；keep_limit_break 已实机",
+      "support": "supported",
+      "values": "options: \"do_not_keep\", \"keep_limit_break\"; default: \"keep_limit_break\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiAbyssal"
+      ],
+      "path": "OpsiAbyssal.ForceRun",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "OpsiAshAssist"
+      ],
+      "path": "OpsiAshAssist.Tier",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 15"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "OpsiAshBeacon"
+      ],
+      "path": "OpsiAshBeacon.AttackMode",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"current_dossier\", \"current\"; default: \"current\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiAshBeacon"
+      ],
+      "path": "OpsiAshBeacon.DossierAutoAttackMode",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiAshBeacon"
+      ],
+      "path": "OpsiAshBeacon.EnsureFullyCollected",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiAshBeacon"
+      ],
+      "path": "OpsiAshBeacon.OneHitMode",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiAshBeacon"
+      ],
+      "path": "OpsiAshBeacon.RequestAssist",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiDaemon"
+      ],
+      "path": "OpsiDaemon.RepairShip",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiDaemon"
+      ],
+      "path": "OpsiDaemon.SelectEnemy",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiDaily"
+      ],
+      "path": "OpsiDaily.DoMission",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiDaily"
+      ],
+      "path": "OpsiDaily.UseTuningSample",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiExplore"
+      ],
+      "path": "OpsiExplore.ForceRun",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "OpsiExplore"
+      ],
+      "path": "OpsiExplore.LastZone",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiExplore"
+      ],
+      "path": "OpsiExplore.SpecialRadar",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "OpsiExplore",
+        "OpsiDaily",
+        "OpsiObscure",
+        "OpsiArchive",
+        "OpsiMeowfficerFarming",
+        "OpsiHazard1Leveling"
+      ],
+      "path": "OpsiFleet.Fleet",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 1, 2, 3, 4; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default/hide",
+      "panels": [
+        "OpsiExplore",
+        "OpsiDaily",
+        "OpsiObscure",
+        "OpsiArchive",
+        "OpsiMeowfficerFarming",
+        "OpsiHazard1Leveling"
+      ],
+      "path": "OpsiFleet.Submarine",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "OpsiAbyssal",
+        "OpsiStronghold",
+        "OpsiMonthBoss"
+      ],
+      "path": "OpsiFleetFilter.Filter",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: \"Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "OpsiGeneral"
+      ],
+      "path": "OpsiGeneral.AkashiShopFilter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"ActionPoint > PurpleCoins\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "OpsiGeneral"
+      ],
+      "path": "OpsiGeneral.BuyActionPointLimit",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 0, 1, 2, 3, 4, 5; default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiGeneral"
+      ],
+      "path": "OpsiGeneral.DoRandomMapEvent",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "OpsiGeneral"
+      ],
+      "path": "OpsiGeneral.OilLimit",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 1000"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "OpsiGeneral"
+      ],
+      "path": "OpsiGeneral.RepairThreshold",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 0.4"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiGeneral"
+      ],
+      "path": "OpsiGeneral.UseLogger",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "OpsiHazard1Leveling"
+      ],
+      "path": "OpsiHazard1Leveling.TargetZone",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 0, 22, 44; default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "OpsiMeowfficerFarming"
+      ],
+      "path": "OpsiMeowfficerFarming.ActionPointPreserve",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 1000"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "OpsiMeowfficerFarming"
+      ],
+      "path": "OpsiMeowfficerFarming.HazardLevel",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 10, 3, 4, 5, 6; default: 5"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "OpsiMeowfficerFarming"
+      ],
+      "path": "OpsiMeowfficerFarming.TargetZone",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiMonthBoss"
+      ],
+      "path": "OpsiMonthBoss.CheckAdaptability",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiMonthBoss"
+      ],
+      "path": "OpsiMonthBoss.ForceRun",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "OpsiMonthBoss"
+      ],
+      "path": "OpsiMonthBoss.Mode",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"normal_hard\", \"normal\"; default: \"normal\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiObscure"
+      ],
+      "path": "OpsiObscure.ForceRun",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "OpsiShop"
+      ],
+      "path": "OpsiShop.CustomFilter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: <long default in args.json>"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "OpsiShop"
+      ],
+      "path": "OpsiShop.PresetFilter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"all\", \"custom\", \"max_benefit_meta\", \"max_benefit\", \"no_meta\"; default: \"max_benefit_meta\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiStronghold"
+      ],
+      "path": "OpsiStronghold.ForceRun",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "OpsiVoucher"
+      ],
+      "path": "OpsiVoucher.Filter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: \"LoggerAbyssal > LoggerObscure > Book > Coin > Fragment\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Optimization.CombatScreenshotInterval",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 1.0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Optimization.ScreenshotInterval",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 0.3"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Optimization.TaskHoardingDuration",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Alas"
+      ],
+      "path": "Optimization.WhenTaskQueueEmpty",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"close_game\", \"goto_main\", \"stay_there\"; default: \"goto_main\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "PrivateQuarters"
+      ],
+      "path": "PrivateQuarters.BuyCake",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "PrivateQuarters"
+      ],
+      "path": "PrivateQuarters.BuyRoses",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "PrivateQuarters"
+      ],
+      "path": "PrivateQuarters.TargetInteract",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "PrivateQuarters"
+      ],
+      "path": "PrivateQuarters.TargetShip",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"aegir\", \"anchorage\", \"nakhimov\", \"new_jersey\", \"noshiro\", \"sirius\", \"taihou\"; default: \"anchorage\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Raid"
+      ],
+      "path": "Raid.Mode",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "options: \"easy\", \"ex\", \"hard\", \"normal\"; default: \"hard\""
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Raid"
+      ],
+      "path": "Raid.UseTicket",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "unsupported",
+        "configuration": "complete",
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
+      },
+      "evidence": [],
+      "group_code": "M",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "RaidDaily"
+      ],
+      "path": "RaidDaily.StageFilter",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
+      "values": "input/default: \"hard > normal > easy\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Research"
+      ],
+      "path": "Research.AllowDelay",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "Research"
+      ],
+      "path": "Research.CustomFilter",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: <long default in args.json>"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Research"
+      ],
+      "path": "Research.PresetFilter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"custom\", \"series_2_457_only\", \"series_2_blueprint_457\", \"series_2_blueprint_only\", \"series_2_than_3_457_234\", \"series_3_234_only\", \"series_3_blueprint_234\", \"series_3_blueprint_only\", \"series_4_blueprint_only\", \"series_4_blueprint_tenrai\", \"series_4_tenrai_only\", \"series_5_152_only\", \"series_5_blueprint_152\", \"series_5_blueprint_only\", \"series_6_203_only\", \"series_6_blueprint_203\", \"series_6_blueprint_only\", \"series_7_blueprint_la9\", \"series_7_blueprint_only\", \"series_7_la9_only\", \"series_8_305_only\", \"series_8_blueprint_305\", \"series_8_blueprint_only\", \"series_9_blueprint_only\", \"series_9_blueprint_ta152\", \"series_9_ta152_only\"; default: \"series_9_blueprint_ta152\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Research"
+      ],
+      "path": "Research.UseCoin",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"always_use\", \"do_not_use\", \"only_05_hour\", \"only_no_project\"; default: \"always_use\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Research"
+      ],
+      "path": "Research.UseCube",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"always_use\", \"do_not_use\", \"only_05_hour\", \"only_no_project\"; default: \"only_05_hour\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Research"
+      ],
+      "path": "Research.UsePart",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"always_use\", \"do_not_use\", \"only_05_hour\", \"only_no_project\"; default: \"always_use\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [
+        "tests/test_alas_integration_patch.py",
+        "integration/alas/series/0120-retirement-flow-ports.patch",
+        "integration/alas/series/0130-enhancement-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "General"
+      ],
+      "path": "Retirement.RetireMode",
+      "status_label": "◐ 一键与强化已接入；旧退役未适配",
+      "support": "supported",
+      "values": "options: \"enhance\", \"old_retire\", \"one_click_retire\"; default: \"one_click_retire\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Reward"
+      ],
+      "path": "Reward.CollectCoin",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Reward"
+      ],
+      "path": "Reward.CollectExp",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Reward"
+      ],
+      "path": "Reward.CollectMission",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Reward"
+      ],
+      "path": "Reward.CollectOil",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Reward"
+      ],
+      "path": "Reward.CollectWeeklyMission",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "not_applicable",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "not_applicable",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "R",
+      "metadata": "type=input; display=hide",
+      "panels": [
+        "Restart",
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily",
+        "Commission",
+        "Tactical",
+        "Research",
+        "Dorm",
+        "Meowfficer",
+        "Guild",
+        "Reward",
+        "Awaken",
+        "Daily",
+        "Hard",
+        "Exercise",
+        "ShopFrequent",
+        "ShopOnce",
+        "Shipyard",
+        "Gacha",
+        "Freebies",
+        "Minigame",
+        "PrivateQuarters",
+        "OpsiAshBeacon",
+        "OpsiAshAssist",
+        "OpsiExplore",
+        "OpsiShop",
+        "OpsiVoucher",
+        "OpsiDaily",
+        "OpsiObscure",
+        "OpsiAbyssal",
+        "OpsiArchive",
+        "OpsiStronghold",
+        "OpsiMonthBoss",
+        "OpsiMeowfficerFarming",
+        "OpsiHazard1Leveling",
+        "OpsiCrossMonth"
+      ],
+      "path": "Scheduler.Command",
+      "status_label": "◐ 调度路径",
+      "support": "supported",
+      "values": "input/default: \"Awaken\", \"Coalition\", \"CoalitionSp\", \"Commission\", \"Daily\", \"Dorm\", \"Event\", \"Event2\", \"EventA\", \"EventB\", \"EventC\", \"EventD\", \"EventSp\", \"Exercise\", \"Freebies\", \"Gacha\", \"GemsFarming\", \"Guild\", \"Hard\", \"Hospital\", \"Main\", \"Main2\", \"Main3\", \"Meowfficer\", \"Minigame\", \"OpsiAbyssal\", \"OpsiArchive\", \"OpsiAshAssist\", \"OpsiAshBeacon\", \"OpsiCrossMonth\", \"OpsiDaily\", \"OpsiExplore\", \"OpsiHazard1Leveling\", \"OpsiMeowfficerFarming\", \"OpsiMonthBoss\", \"OpsiObscure\", \"OpsiShop\", \"OpsiStronghold\", \"OpsiVoucher\", \"PrivateQuarters\", \"Raid\", \"RaidDaily\", \"Research\", \"Restart\", \"Reward\", \"Shipyard\", \"ShopFrequent\", \"ShopOnce\", \"Tactical\", \"WarArchives\""
+    },
+    {
+      "dimensions": {
+        "action": "not_applicable",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "not_applicable",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "R",
+      "metadata": "type=checkbox/lock/state; display=default",
+      "panels": [
+        "Restart",
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily",
+        "Commission",
+        "Tactical",
+        "Research",
+        "Dorm",
+        "Meowfficer",
+        "Guild",
+        "Reward",
+        "Awaken",
+        "Daily",
+        "Hard",
+        "Exercise",
+        "ShopFrequent",
+        "ShopOnce",
+        "Shipyard",
+        "Gacha",
+        "Freebies",
+        "Minigame",
+        "PrivateQuarters",
+        "OpsiAshBeacon",
+        "OpsiAshAssist",
+        "OpsiExplore",
+        "OpsiShop",
+        "OpsiVoucher",
+        "OpsiDaily",
+        "OpsiObscure",
+        "OpsiAbyssal",
+        "OpsiArchive",
+        "OpsiStronghold",
+        "OpsiMonthBoss",
+        "OpsiMeowfficerFarming",
+        "OpsiHazard1Leveling",
+        "OpsiCrossMonth"
+      ],
+      "path": "Scheduler.Enable",
+      "status_label": "◐ 调度路径",
+      "support": "supported",
+      "values": "options: false, true; default: false, true"
+    },
+    {
+      "dimensions": {
+        "action": "not_applicable",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "not_applicable",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "R",
+      "metadata": "type=input; display=hide",
+      "panels": [
+        "Restart",
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily",
+        "Commission",
+        "Tactical",
+        "Research",
+        "Dorm",
+        "Meowfficer",
+        "Guild",
+        "Reward",
+        "Awaken",
+        "Daily",
+        "Hard",
+        "Exercise",
+        "ShopFrequent",
+        "ShopOnce",
+        "Shipyard",
+        "Gacha",
+        "Freebies",
+        "Minigame",
+        "PrivateQuarters",
+        "OpsiAshBeacon",
+        "OpsiAshAssist",
+        "OpsiExplore",
+        "OpsiShop",
+        "OpsiVoucher",
+        "OpsiDaily",
+        "OpsiObscure",
+        "OpsiAbyssal",
+        "OpsiArchive",
+        "OpsiStronghold",
+        "OpsiMonthBoss",
+        "OpsiMeowfficerFarming",
+        "OpsiHazard1Leveling",
+        "OpsiCrossMonth"
+      ],
+      "path": "Scheduler.FailureInterval",
+      "status_label": "◐ 调度路径",
+      "support": "supported",
+      "values": "input/default: \"120-240\", \"30-60\", 0, 120, 278, 30, 60"
+    },
+    {
+      "dimensions": {
+        "action": "not_applicable",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "not_applicable",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "R",
+      "metadata": "type=datetime; display=default; validate=datetime",
+      "panels": [
+        "Restart",
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily",
+        "Commission",
+        "Tactical",
+        "Research",
+        "Dorm",
+        "Meowfficer",
+        "Guild",
+        "Reward",
+        "Awaken",
+        "Daily",
+        "Hard",
+        "Exercise",
+        "ShopFrequent",
+        "ShopOnce",
+        "Shipyard",
+        "Gacha",
+        "Freebies",
+        "Minigame",
+        "PrivateQuarters",
+        "OpsiAshBeacon",
+        "OpsiAshAssist",
+        "OpsiExplore",
+        "OpsiShop",
+        "OpsiVoucher",
+        "OpsiDaily",
+        "OpsiObscure",
+        "OpsiAbyssal",
+        "OpsiArchive",
+        "OpsiStronghold",
+        "OpsiMonthBoss",
+        "OpsiMeowfficerFarming",
+        "OpsiHazard1Leveling",
+        "OpsiCrossMonth"
+      ],
+      "path": "Scheduler.NextRun",
+      "status_label": "◐ 调度路径",
+      "support": "supported",
+      "values": "input/default: \"2020-01-01 00:00:00\""
+    },
+    {
+      "dimensions": {
+        "action": "not_applicable",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "not_applicable",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "R",
+      "metadata": "type=input; display=hide",
+      "panels": [
+        "Restart",
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily",
+        "Commission",
+        "Tactical",
+        "Research",
+        "Dorm",
+        "Meowfficer",
+        "Guild",
+        "Reward",
+        "Awaken",
+        "Daily",
+        "Hard",
+        "Exercise",
+        "ShopFrequent",
+        "ShopOnce",
+        "Shipyard",
+        "Gacha",
+        "Freebies",
+        "Minigame",
+        "PrivateQuarters",
+        "OpsiAshBeacon",
+        "OpsiAshAssist",
+        "OpsiExplore",
+        "OpsiShop",
+        "OpsiVoucher",
+        "OpsiDaily",
+        "OpsiObscure",
+        "OpsiAbyssal",
+        "OpsiArchive",
+        "OpsiStronghold",
+        "OpsiMonthBoss",
+        "OpsiMeowfficerFarming",
+        "OpsiHazard1Leveling",
+        "OpsiCrossMonth"
+      ],
+      "path": "Scheduler.ServerUpdate",
+      "status_label": "◐ 调度路径",
+      "support": "supported",
+      "values": "input/default: \"00:00, 06:00, 12:00, 18:00, 21:00\", \"00:00, 12:00, 18:00\", \"00:00, 12:00\", \"00:00\", \"04:00\""
+    },
+    {
+      "dimensions": {
+        "action": "not_applicable",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "not_applicable",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "R",
+      "metadata": "type=input; display=hide",
+      "panels": [
+        "Restart",
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily",
+        "Commission",
+        "Tactical",
+        "Research",
+        "Dorm",
+        "Meowfficer",
+        "Guild",
+        "Reward",
+        "Awaken",
+        "Daily",
+        "Hard",
+        "Exercise",
+        "ShopFrequent",
+        "ShopOnce",
+        "Shipyard",
+        "Gacha",
+        "Freebies",
+        "Minigame",
+        "PrivateQuarters",
+        "OpsiAshBeacon",
+        "OpsiAshAssist",
+        "OpsiExplore",
+        "OpsiShop",
+        "OpsiVoucher",
+        "OpsiDaily",
+        "OpsiObscure",
+        "OpsiAbyssal",
+        "OpsiArchive",
+        "OpsiStronghold",
+        "OpsiMonthBoss",
+        "OpsiMeowfficerFarming",
+        "OpsiHazard1Leveling",
+        "OpsiCrossMonth"
+      ],
+      "path": "Scheduler.SuccessInterval",
+      "status_label": "◐ 调度路径",
+      "support": "supported",
+      "values": "input/default: \"120-240\", \"30-60\", 0, 278, 30, 60"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Shipyard"
+      ],
+      "path": "Shipyard.BuyAmount",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 2"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=datetime; display=default; validate=datetime",
+      "panels": [
+        "Shipyard"
+      ],
+      "path": "Shipyard.LastRun",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: \"2020-01-01 00:00:00\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Shipyard"
+      ],
+      "path": "Shipyard.ResearchSeries",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 1, 2, 3, 4, 5, 6; default: 1"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Shipyard"
+      ],
+      "path": "Shipyard.ShipIndex",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 0, 1, 2, 3, 4, 5, 6; default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Shipyard"
+      ],
+      "path": "ShipyardDr.BuyAmount",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 2"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=datetime; display=default; validate=datetime",
+      "panels": [
+        "Shipyard"
+      ],
+      "path": "ShipyardDr.LastRun",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: \"2020-01-01 00:00:00\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Shipyard"
+      ],
+      "path": "ShipyardDr.ResearchSeries",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 2, 3, 4, 5; default: 2"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Shipyard"
+      ],
+      "path": "ShipyardDr.ShipIndex",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 0, 1, 2, 3, 4, 5, 6; default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "StopCondition.GetNewShip",
+      "status_label": "🧱 首次获得跳过",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "StopCondition.MapAchievement",
+      "status_label": "◐ typed 主线夹具",
+      "support": "supported",
+      "values": "options: \"100_percent_clear\", \"map_3_stars\", \"non_stop\", \"threat_safe_without_3_stars\", \"threat_safe\"; default: \"non_stop\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "StopCondition.OilLimit",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 1000"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=input; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "StopCondition.ReachLevel",
+      "status_label": "◐ typed 六舰等级",
+      "support": "supported",
+      "values": "input/default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=input; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "StopCondition.RunCount",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Coalition",
+        "Event",
+        "Event2",
+        "Raid",
+        "Hospital",
+        "WarArchives",
+        "CoalitionSp",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp",
+        "RaidDaily"
+      ],
+      "path": "StopCondition.StageIncrease",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Submarine.AutoSearchMode",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"sub_auto_call\", \"sub_standby\"; default: \"sub_standby\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/hide",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Submarine.DistanceToBoss",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"1_grid_to_boss\", \"2_grid_to_boss\", \"to_boss_position\", \"use_open_ocean_support\"; default: \"2_grid_to_boss\", \"use_open_ocean_support\""
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Submarine.Fleet",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 0, 1, 2; default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default/display",
+      "panels": [
+        "Main",
+        "Main2",
+        "Main3",
+        "GemsFarming",
+        "Event",
+        "Event2",
+        "WarArchives",
+        "EventA",
+        "EventB",
+        "EventC",
+        "EventD",
+        "EventSp"
+      ],
+      "path": "Submarine.Mode",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"boss_only\", \"do_not_use\", \"every_combat\", \"hunt_and_boss\", \"hunt_only\"; default: \"do_not_use\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Freebies"
+      ],
+      "path": "SupplyPack.Collect",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "B",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Freebies"
+      ],
+      "path": "SupplyPack.DayOfWeek",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: 0, 1, 2, 3, 4, 5, 6; default: 0"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Tactical"
+      ],
+      "path": "Tactical.RapidTrainingSlot",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "options: \"do_not_use\", \"slot_1\", \"slot_2\", \"slot_3\", \"slot_4\"; default: \"do_not_use\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [],
+      "group_code": "L",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "Tactical"
+      ],
+      "path": "Tactical.TacticalFilter",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: <long default in args.json>"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=input; display=default",
+      "panels": [
+        "EventGeneral"
+      ],
+      "path": "TaskBalancer.CoinLimit",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: 10000"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "EventGeneral"
+      ],
+      "path": "TaskBalancer.Enable",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "missing",
+        "configuration": "complete",
+        "live": "missing",
+        "observation": "missing",
+        "offline": "missing"
+      },
+      "evidence": [],
+      "group_code": "P",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "EventGeneral"
+      ],
+      "path": "TaskBalancer.TaskCall",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
+      "values": "options: \"Main\", \"Main2\", \"Main3\"; default: \"Main\""
+    }
+  ],
+  "panels": [
+    {
+      "groups": [
+        "Emulator",
+        "EmulatorInfo",
+        "Error",
+        "Optimization",
+        "DropRecord"
+      ],
+      "name": "Alas",
+      "note": "当前语义观察/输入路径可运行；传统截图/控制方法矩阵、包名/服务器矩阵、错误截图、掉落记录与上传、通知均未完整验收",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Awaken"
+      ],
+      "name": "Awaken",
+      "note": "收藏过滤、120/125 上限及批量觉醒缺适配",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "AzurLaneUncensored"
+      ],
+      "name": "AzurLaneUncensored",
+      "note": "本地 localization 路径可用；`Repository` 对应的远端同步在上游被注释，配置与能力不一致",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Benchmark"
+      ],
+      "name": "Benchmark",
+      "note": "当前设备默认 `screenshot_click` 跑过；设备类型和测试场景矩阵未覆盖",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Campaign",
+        "Coalition",
+        "StopCondition",
+        "Emotion"
+      ],
+      "name": "Coalition",
+      "note": "共斗入口、难度、单/多舰队、战斗和结算缺适配",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Campaign",
+        "Coalition",
+        "StopCondition",
+        "Emotion"
+      ],
+      "name": "CoalitionSp",
+      "note": "SP 共斗专用状态机缺适配",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Commission"
+      ],
+      "name": "Commission",
+      "note": "领取和零油开始有证据；非零油、重大委托、全部过滤器、取消和连续循环未闭环",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Daemon"
+      ],
+      "name": "Daemon",
+      "note": "单轮条件路径可用；进入地图开关、长期值守和稀有恢复分支未闭环",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Daily"
+      ],
+      "name": "Daily",
+      "note": "只闭环 Tactical Training 第二关；其余日常类型、难度、舰队和 `UseDailySkip` 未覆盖",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Dorm",
+        "BuyFurniture"
+      ],
+      "name": "Dorm",
+      "note": "默认收取和喂食闭环；食物过滤、买家具、套装/全部和日期状态未闭环",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "Event",
+      "note": "当前 A1 默认路径闭环；其他关卡和全部共用地图配置仍按字段验收",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "Event2",
+      "note": "与 Event 共用逻辑，但第二活动配置实例没有独立验收",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "EventDaily",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "EventA",
+      "note": "A1-A3 默认路径闭环；StageFilter 异常值及全部共用地图配置未完整覆盖",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "EventDaily",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "EventB",
+      "note": "B1 普通 `GET_SHIP` 已离线适配；因概率掉落停止实跑，B1 尚未完整闭环，B2/B3 未验证，首次获得 `NEW_SHIP` 未适配",
+      "status": "O"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "EventDaily",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "EventC",
+      "note": "C1-C3 地图脚本存在，无实机闭环",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "EventDaily",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "EventD",
+      "note": "D1-D3 地图脚本存在，无实机闭环",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "EventGeneral",
+        "TaskBalancer"
+      ],
+      "name": "EventGeneral",
+      "note": "`PtLimit`、`TimeLimit`、任务切换和金币阈值没有完整调度证据",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "EventSp",
+      "note": "SP 地图脚本存在，无实机闭环",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "EventStory"
+      ],
+      "name": "EventStory",
+      "note": "46 个故事中只跑过一条入口路径；战斗转场、跳过战斗及其他故事结构未闭环",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Exercise"
+      ],
+      "name": "Exercise",
+      "note": "一种策略闭环；不同选敌/时段策略、刷新、试探次数、低血重试和失败恢复未闭环",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "BattlePass",
+        "DataKey",
+        "Mail",
+        "SupplyPack"
+      ],
+      "name": "Freebies",
+      "note": "Data Key 和部分邮件有证据；BattlePass 不可用，补给包无免费项，其余开关组合未闭环",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Gacha"
+      ],
+      "name": "Gacha",
+      "note": "一次轻型建造闭环；其他卡池、1-10 次、快速完成、票券及队列领取未闭环",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "GameManager"
+      ],
+      "name": "GameManager",
+      "note": "`AutoRestart=true` 跑过；`false`、只停不启和异常生命周期未覆盖",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "GemsFarming",
+        "EquipmentCode",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion"
+      ],
+      "name": "GemsFarming",
+      "note": "换旗舰/前排、常用舰选择、装备导入导出和换船后的强化衔接缺失；只有委托限制可复用",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "Retirement",
+        "OneClickRetire",
+        "Enhance",
+        "OldRetire"
+      ],
+      "name": "General",
+      "note": "官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级适配",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "GuildLogistics",
+        "GuildOperation"
+      ],
+      "name": "Guild",
+      "note": "后勤兑换、新任务、作战、Boss 和推荐舰队均缺适配",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Hard"
+      ],
+      "name": "Hard",
+      "note": "能进入 11-4；当前账号进度和自动寻敌锁定，尚无战斗/结算证据",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Hospital",
+        "StopCondition",
+        "Emotion"
+      ],
+      "name": "Hospital",
+      "note": "医院专用入口、推荐舰队开关和完整状态机缺适配",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "Main",
+      "note": "12-4 能到账号战斗边界；全部共用地图配置分支见 3.2",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "Main2",
+      "note": "共用实现，没有独立配置实例验收；不能沿用 Main 的运行记录直接判定完整",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "Main3",
+      "note": "共用实现，没有独立配置实例验收；不能沿用 Main 的运行记录直接判定完整",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Meowfficer",
+        "MeowfficerTrain"
+      ],
+      "name": "Meowfficer",
+      "note": "买箱、金币溢出、训练、增强和保留天赋规则均缺适配",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "Scheduler"
+      ],
+      "name": "Minigame",
+      "note": "当前抚顺小游戏路径可用；没有字段配置，但其他轮换小游戏仍属于该任务支持范围",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiAbyssal",
+        "OpsiFleetFilter"
+      ],
+      "name": "OpsiAbyssal",
+      "note": "可读仓库/详情；强制运行、过滤器、坐标消耗、Boss 和结算未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiFleet"
+      ],
+      "name": "OpsiArchive",
+      "note": "可读档案商店；舰队/潜艇、购买、使用坐标、进入和清图未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiAshAssist"
+      ],
+      "name": "OpsiAshAssist",
+      "note": "可到列表/开始提示；受舰队条件限制，Tier、出击、战斗和领奖未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiAshBeacon"
+      ],
+      "name": "OpsiAshBeacon",
+      "note": "入口/状态可读；受点数限制，当前/档案、自动攻击、一击、求助和完整领取未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler"
+      ],
+      "name": "OpsiCrossMonth",
+      "note": "非月末安全跳过；月末执行、重置和跨月恢复未验证",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "OpsiDaemon"
+      ],
+      "name": "OpsiDaemon",
+      "note": "单轮条件路径可用；修船/选敌各开关组合及长期恢复未闭环",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiDaily",
+        "OpsiFleet"
+      ],
+      "name": "OpsiDaily",
+      "note": "可接任务并进入目标海域；任务开关、调律样本、舰队/潜艇和清图未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiExplore",
+        "OpsiFleet"
+      ],
+      "name": "OpsiExplore",
+      "note": "到自动寻敌锁定边界；强制运行、续跑区、特殊雷达、舰队/潜艇和清区未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "OpsiGeneral"
+      ],
+      "name": "OpsiGeneral",
+      "note": "共享页面可读；随机事件、明石过滤、行动力购买、维修阈值、油量和 Logger 未完整覆盖",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiHazard1Leveling",
+        "OpsiFleet"
+      ],
+      "name": "OpsiHazard1Leveling",
+      "note": "到自动寻敌锁定边界；目标区、舰队/潜艇和循环未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiMeowfficerFarming",
+        "OpsiFleet"
+      ],
+      "name": "OpsiMeowfficerFarming",
+      "note": "到自动寻敌锁定边界；危险等级、行动力保留、选区、舰队/潜艇和循环未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiMonthBoss",
+        "OpsiFleetFilter"
+      ],
+      "name": "OpsiMonthBoss",
+      "note": "能在适应性不足时安全停止；模式、强制运行、过滤器和普通/困难 Boss 未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiObscure",
+        "OpsiFleet"
+      ],
+      "name": "OpsiObscure",
+      "note": "可读仓库/详情；强制运行、坐标消耗、进入和清图未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiShop"
+      ],
+      "name": "OpsiShop",
+      "note": "可读取并零购买停止；5 个预设、自定义过滤、购买/刷新/货币链路未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiStronghold",
+        "OpsiFleetFilter"
+      ],
+      "name": "OpsiStronghold",
+      "note": "3D 漩涡当前无法由 UI 树可靠观察；存在检测、过滤、进入、战斗和结算均未闭环",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "OpsiVoucher"
+      ],
+      "name": "OpsiVoucher",
+      "note": "可读取并零购买停止；过滤器命中和实际兑换未闭环",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "PrivateQuarters"
+      ],
+      "name": "PrivateQuarters",
+      "note": "蛋糕、玫瑰、互动和 7 个舰船选项均缺适配",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Raid",
+        "Campaign",
+        "StopCondition",
+        "Emotion"
+      ],
+      "name": "Raid",
+      "note": "难度、票券、活动入口、次数和结算缺适配",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "RaidDaily",
+        "Campaign",
+        "StopCondition",
+        "Emotion"
+      ],
+      "name": "RaidDaily",
+      "note": "难度过滤、每日次数、战斗和领奖缺适配",
+      "status": "M"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Research"
+      ],
+      "name": "Research",
+      "note": "一个金币项目闭环；魔方/零件、延迟、重置、26 个预设和自定义规则未完整覆盖",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler"
+      ],
+      "name": "Restart",
+      "note": "当前冷重启闭环；`AdbRestart`、其他模拟器生命周期、失败重试与只恢复不重启仍需覆盖",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Reward"
+      ],
+      "name": "Reward",
+      "note": "资源气泡可领取，任务领取部分可用；周常、红点、数字行、空页面和舰船奖励未完整闭环",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "ShipyardDr",
+        "Shipyard"
+      ],
+      "name": "Shipyard",
+      "note": "可识别 30/30 并停止；系列、舰船、数量和实际蓝图消耗未验证",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "GeneralShop"
+      ],
+      "name": "ShopFrequent",
+      "note": "可读页面并安全跳过；购买、过滤、刷新、金币/钻石和皮肤箱均未完成",
+      "status": "B"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "GuildShop",
+        "MedalShop2",
+        "MeritShop",
+        "CoreShop"
+      ],
+      "name": "ShopOnce",
+      "note": "只有勋章商店一次 DR 图纸购买；其他商店、过滤/子选项和刷新未闭环",
+      "status": "P"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Tactical",
+        "ControlExpOverflow",
+        "AddNewStudent"
+      ],
+      "name": "Tactical",
+      "note": "一个学员/技能/T4 书路径闭环；快速槽、新学员、收藏/等级、经验溢出和过滤器分支未闭环",
+      "status": "L"
+    },
+    {
+      "groups": [
+        "Scheduler",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority"
+      ],
+      "name": "WarArchives",
+      "note": "能观察入口/Data Key；48 个档案值的进入、消耗、地图和结算均未形成覆盖台账",
+      "status": "B"
+    }
+  ],
+  "promotions": [
+    {
+      "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "observation": "complete",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "field": "Enhance.CheckPerCategory",
+      "note": "Positive loop counts share the original ALAS loop and zero is rejected before navigation."
+    },
+    {
+      "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "observation": "complete",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "field": "Enhance.Filter",
+      "note": "All allowed ship types use one strict parsed typed filter; invalid and duplicate tokens fail before navigation."
+    },
+    {
+      "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "observation": "complete",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "field": "Enhance.ShipToEnhance",
+      "note": "The two public values map to one exact favourite toggle with both branches covered offline."
+    },
+    {
+      "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "observation": "complete",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "field": "OneClickRetire.KeepLimitBreak",
+      "note": "Both setting values share one exact typed toggle contract; only keep_limit_break has destructive live execution evidence."
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [
+        "tests/test_alas_integration_patch.py",
+        "integration/alas/series/0120-retirement-flow-ports.patch",
+        "integration/alas/series/0130-enhancement-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Retirement.RetireMode",
+      "note": "The original ALAS enum remains authoritative; one-click and enhancement are typed while old_retire remains explicitly unsupported."
+    },
+    {
+      "dimensions": {
+        "configuration": "complete",
+        "observation": "partial",
+        "offline": "partial"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "docs/status.md"
+      ],
+      "field": "StopCondition.GetNewShip",
+      "note": "Only ordinary GET_SHIP continuation is replayed; NEW_SHIP remains partial and cannot be promoted live."
+    },
+    {
+      "dimensions": {
+        "configuration": "complete",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "field": "StopCondition.MapAchievement",
+      "note": "All five public values share a 40-case truth table over typed progress, stars, and threat state."
+    },
+    {
+      "dimensions": {
+        "configuration": "complete",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "field": "StopCondition.OilLimit",
+      "note": "Boundary classes cover the hard 500 floor and strict comparison in the pinned ALAS method."
+    },
+    {
+      "dimensions": {
+        "configuration": "complete",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "field": "StopCondition.ReachLevel",
+      "note": "Sorted six-ship levels, threshold crossings, invalid levels, and implausible gaps fail closed."
+    },
+    {
+      "dimensions": {
+        "configuration": "complete",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "field": "StopCondition.RunCount",
+      "note": "Zero, positive, negative clamp, decrement ordering, and interruption boundaries are deterministic."
+    },
+    {
+      "dimensions": {
+        "configuration": "complete",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_stop_condition_replay.py",
+        "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_integration_patch.py",
+        "docs/status.md"
+      ],
+      "field": "StopCondition.StageIncrease",
+      "note": "Main, custom, A/B boundary, terminal, disabled, and recovery classes reuse pinned ALAS progression."
+    }
+  ],
+  "schema": "alas-headless.support-matrix-ledger/v1",
+  "source": {
+    "adapter_evidence_commit": "3d0f60ce1c89c54fd8a2519c260f6e19018ef93d",
+    "config_sha256": {
+      "config/template.json": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+      "module/config/argument/args.json": "94a4e553e857e7e3bada215e08b8963f46d287ac530f32a02b7daf6b7533ad90",
+      "module/config/argument/task.yaml": "19e6464aaa1e92913ba9f31de590096a09b101638969c41e14c70dd1a4eb6c5a"
+    },
+    "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
+    "patch_series": {
+      "combined_sha256": "f8a5a8cda9b68acfe3e812f5752cf8d9460659ba431cdd639e056115e8452eab",
+      "manifest_sha256": "aeee61a44820accfac5f9bc1eec7a4fc5a8d4101de201117bc05061531814be7",
+      "member_count": 15
+    },
+    "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+  }
+}

@@ -6,6 +6,7 @@ from pathlib import Path
 from scripts.python.verify_alas_pixel_inventory import (
     INVENTORY_PATH,
     PixelInventoryVerificationError,
+    parse_args,
     validate_inventory,
 )
 
@@ -74,6 +75,29 @@ class AlasPixelInventoryTests(unittest.TestCase):
             "outcome",
         ):
             validate_inventory(excluded)
+
+    def test_cli_requires_exactly_one_upstream_mode(self):
+        common = (
+            "--login-replay",
+            "login.json",
+            "--frame-clock-replay",
+            "frame.json",
+        )
+        arguments = parse_args(("--upstream", "upstream", *common))
+        self.assertEqual(arguments.upstream, Path("upstream"))
+        self.assertIsNone(arguments.patched_upstream)
+        with self.assertRaises(SystemExit):
+            parse_args(common)
+        with self.assertRaises(SystemExit):
+            parse_args(
+                (
+                    "--upstream",
+                    "upstream",
+                    "--patched-upstream",
+                    "patched",
+                    *common,
+                )
+            )
 
 
 if __name__ == "__main__":
