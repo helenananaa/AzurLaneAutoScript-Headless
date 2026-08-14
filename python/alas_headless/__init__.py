@@ -40,6 +40,10 @@ from .alas_event_general_config_contract import (
     AlasEventGeneralConfigSnapshot,
     validate_alas_event_general_config,
 )
+from .alas_campaign_clear_mode_config_contract import (
+    AlasCampaignClearModeConfigSnapshot,
+    validate_alas_campaign_clear_mode_config,
+)
 
 from .alas_map_sync import (
     AlasCampaignFleetPlan,

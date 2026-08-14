@@ -443,9 +443,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_campaign_clear_mode_config.py",
+        "python/alas_headless/alas_campaign_clear_mode_config_replay.py",
+        "integration/alas/series/0110-stop-condition-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
       "panels": [
@@ -7930,6 +7935,19 @@
       ],
       "field": "TaskBalancer.TaskCall",
       "note": "Main, Main2, and Main3 preserve original five-minute delay, task call, and stop ordering in memory-only replay."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_campaign_clear_mode_config.py",
+        "python/alas_headless/alas_campaign_clear_mode_config_replay.py",
+        "integration/alas/series/0110-stop-condition-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Campaign.UseClearMode",
+      "note": "Both boolean values preserve original clear-mode, auto-search, two-times-book, map-flag, switch, and wait decisions across all 16 shared panels."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -7942,8 +7960,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "b2af628eed6adc7a00305c9b0c5e17d8e5e6d92fdf490c7d14bc6464bf8c13e6",
-      "manifest_sha256": "e953b529cd9e5f8eb9bec5b16cec4da8aa9eaa9e3a59f27666a7e5a05318a706",
+      "combined_sha256": "9273b3415e9d2943cfa475f6b8bd9dd8e891b9b70380042e40750bf4ebe19488",
+      "manifest_sha256": "1377352e2cc97fb480ac19bc13a9ba34c433cb23fd12dd8748bbd85eefdbcf8e",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

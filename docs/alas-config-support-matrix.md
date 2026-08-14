@@ -146,6 +146,12 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 回放还执行原活动任务禁用、GemsFarming 重置、TimeLimit 重置，以及三个目标任务严格的 `task_delay(5) -> task_call -> task_stop` 顺序；所有写入只落到内存桩。静态审计固定 campaign、coalition、raid、hospital 和 auto-search combat 的消费文件。当前缺口是页面特定的 typed PT/金币观察、服务器时间与本机 naive datetime 的实机相关性、任务切换后的恢复收据和防调度环证据；在取得这些条件前 observation/action/live 保持 missing，EventGeneral 面板仍为 P。
 
+### 1.14 本轮 Campaign Clear Mode 共用开关契约
+
+`Campaign.UseClearMode` 在 16 个普通、活动、共斗、突袭、档案和每日地图面板共用同一声明。现在原 `FastForwardHandler.handle_fast_forward()` 在修改地图能力标志前先执行严格布尔校验；`0/1`、字符串和空值均不会被当作布尔值放行。
+
+内存回放直接执行原方法的无 Clear Mode、显式关闭、开启、`MAP_CLEAR_ALL_THIS_TIME`、开关未变化和开关变化六类路径，并核对十个地图特性关闭、自动寻敌与 2x 书传播、`on/off` 请求和动画等待。没有调用真实 `FAST_FORWARD` 控件或 Android 输入；因此只把该字段的 offline 提升为 complete。缺少的仍是 Clear Mode 开关自身的 typed 状态/输入端口、切换后稳定 postcondition，以及不可用关卡上的实机拒绝证据。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -234,7 +240,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| Campaign | `Name`; `Event`; `Mode`=`normal/hard`; `UseClearMode`; `UseFleetLock`; `UseAutoSearch`; `Use2xBook`; `AmbushEvade` | P | 每个面板允许的关卡/活动值可进入；normal/hard、5 个开关的真假分支、不可用/未解锁/关卡变更均需识别；`Event` 当前还包含 48 个档案活动值，必须逐项登记支持或显式拒绝 |
+| Campaign | `Name`; `Event`; `Mode`=`normal/hard`; `UseClearMode`; `UseFleetLock`; `UseAutoSearch`; `Use2xBook`; `AmbushEvade` | P | `UseClearMode` 两值及原地图标志/自动寻敌/2x 书决策已离线完成；仍缺 typed 开关输入与 postcondition。其他字段仍需逐值闭环，`Event` 的 48 个档案活动值必须逐项登记支持或显式拒绝 |
 | StopCondition | `OilLimit`; `RunCount`; `MapAchievement`=`non_stop/100_percent_clear/map_3_stars/threat_safe/threat_safe_without_3_stars`; `StageIncrease`; `GetNewShip`; `ReachLevel` | P | 每个停止条件分别触发并停止在正确页面；0/边界/达到/未达到、条件同时满足、普通掉落与首次获得必须可区分 |
 | Fleet | `Fleet1`=1..6; `Fleet1Formation`=`line_ahead/double_line/diamond`; `Fleet1Mode`=`combat_auto/combat_manual/stand_still_in_the_middle/hide_in_bottom_left/hide_in_upper_left`; `Fleet1Step`=2..5; `Fleet2`=0..6; `Fleet2Formation` 同三阵型；`Fleet2Mode` 同五模式；`Fleet2Step`=2..5; `FleetOrder` 四种主力/Boss/待机组合 | P | 九字段全部值已离线分类；索引和步数保留原 ALAS 路由。固定上游不消费 Formation，非默认值提前拒绝；手动战斗模式缺 typed 方向/武器输入，非默认 FleetOrder 缺实机语义出击证据，故观察、动作和实机仍不完整 |
 | Submarine | `Fleet`=0/1/2; `Mode`=`do_not_use/hunt_only/boss_only/hunt_and_boss/every_combat`; `AutoSearchMode`=`sub_standby/sub_auto_call`; `DistanceToBoss`=`to_boss_position/1_grid_to_boss/2_grid_to_boss/use_open_ocean_support` | P | 四字段已完成原决策离线回放；`Fleet=0` 的 40 个惰性组合可用，`Fleet=1/2` 因编队、策略、移动和呼叫输入未接管而在导航前拒绝 |
@@ -457,7 +463,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Campaign.Name` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: "12-4", "dynamic", "sp" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Use2xBook` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `Campaign.UseAutoSearch` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false, true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Campaign.UseClearMode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `Campaign.UseClearMode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Campaign.UseFleetLock` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Coalition.Fleet` | Coalition, CoalitionSp | type=select; display=default | options: "multi", "single"; default: "single" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Coalition.Mode` | Coalition, CoalitionSp | type=select; display=default/hide | options: "easy", "hard", "normal", "sp"; default: "hard", "sp" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

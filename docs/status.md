@@ -4,6 +4,23 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-14
 
+### Campaign clear mode: shared boolean decision replayed across 16 panels
+
+- `Campaign.UseClearMode` now passes an exact-boolean contract before the
+  original `FastForwardHandler.handle_fast_forward()` method mutates any map
+  capability flags. The same declaration surface is pinned across Main,
+  GemsFarming, event, raid, coalition, War Archives, and daily variants.
+- Memory-only replay executes the original unavailable, disabled, enabled,
+  clear-all, unchanged-switch, and changed-switch paths. It verifies all ten
+  original map-feature suppressions, auto-search and 2x-book propagation,
+  exact `on/off` switch requests, and the conditional animation wait.
+- Six non-boolean values fail closed, including integer lookalikes. No
+  `FAST_FORWARD` control was observed or clicked on a live account and no
+  Android input occurred. Offline is complete for this field, while action
+  remains missing and live/observation remain partial until a typed clear-mode
+  toggle plus postcondition is qualified on both available and unavailable
+  stages.
+
 ### EventGeneral and TaskBalancer: five original stop/switch decisions replayed
 
 - `EventGeneral.PtLimit/TimeLimit` and `TaskBalancer.Enable/CoinLimit/TaskCall`
@@ -286,8 +303,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 94 changed files, all 93 patched Python files compile, and
-  the repository suite passes `844/844` tests, including the EventGeneral,
-  TaskBalancer, HpControl,
+  the repository suite passes `849/849` tests, including Campaign clear mode,
+  EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
 ### EventB ship-drop closure: implementation passed, natural live proof pending
