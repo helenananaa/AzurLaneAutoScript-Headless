@@ -861,3 +861,32 @@ index c44e0996..78c9d812 100644
          if not self.map_cat_attack_timer.reached():
              return False
          if self.image_color_count(MAP_CAT_ATTACK, color=(255, 231, 123), threshold=221, count=100):
+diff --git a/module/combat/emotion.py b/module/combat/emotion.py
+--- a/module/combat/emotion.py
++++ b/module/combat/emotion.py
+@@ -152,9 +152,25 @@ class Emotion:
+     def __init__(self, config):
+         """
+         Args:
+             config (AzurLaneConfig):
+         """
++        from alas_headless import validate_alas_emotion_config
++
++        validate_alas_emotion_config(
++            mode=config.Emotion_Mode,
++            fleet1_value=config.Emotion_Fleet1Value,
++            fleet1_record=config.Emotion_Fleet1Record,
++            fleet1_control=config.Emotion_Fleet1Control,
++            fleet1_recover=config.Emotion_Fleet1Recover,
++            fleet1_oath=config.Emotion_Fleet1Oath,
++            fleet2_value=config.Emotion_Fleet2Value,
++            fleet2_record=config.Emotion_Fleet2Record,
++            fleet2_control=config.Emotion_Fleet2Control,
++            fleet2_recover=config.Emotion_Fleet2Recover,
++            fleet2_oath=config.Emotion_Fleet2Oath,
++        )
++
+         self.config = config
+         self.fleet_1 = FleetEmotion(self.config, fleet=1)
+         self.fleet_2 = FleetEmotion(self.config, fleet=2)
+         self.fleets = [self.fleet_1, self.fleet_2]

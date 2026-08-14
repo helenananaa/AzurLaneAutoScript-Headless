@@ -27,6 +27,11 @@ from .alas_enemy_priority_config_contract import (
     AlasEnemyPriorityConfigSnapshot,
     validate_alas_enemy_priority_config,
 )
+from .alas_emotion_config_contract import (
+    AlasEmotionConfigSnapshot,
+    AlasFleetEmotionConfigSnapshot,
+    validate_alas_emotion_config,
+)
 
 from .alas_map_sync import (
     AlasCampaignFleetPlan,

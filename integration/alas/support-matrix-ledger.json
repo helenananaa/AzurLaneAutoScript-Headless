@@ -1273,9 +1273,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
       "panels": [
@@ -1308,9 +1313,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
       "panels": [
@@ -1343,9 +1353,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=datetime; display=disabled; validate=datetime",
       "panels": [
@@ -1378,9 +1393,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
       "panels": [
@@ -1413,9 +1433,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -1448,9 +1473,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
       "panels": [
@@ -1483,9 +1513,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
       "panels": [
@@ -1518,9 +1553,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=datetime; display=disabled/hide; validate=datetime",
       "panels": [
@@ -1553,9 +1593,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
       "panels": [
@@ -1588,9 +1633,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default/hide",
       "panels": [
@@ -1623,9 +1673,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
       "panels": [
@@ -7570,6 +7625,149 @@
       ],
       "field": "EnemyPriority.EnemyScaleBalanceWeight",
       "note": "All three modes execute pinned ALAS target ordering and filter override decisions; invalid values fail before campaign navigation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Fleet1Control",
+      "note": "All four control thresholds execute pinned ALAS property and reduction decisions; the incompatible experience-bonus and docks pair fails early."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Fleet1Oath",
+      "note": "Both boolean values preserve the original recovery-speed arithmetic; the user-declared oath state is not promoted as live-observed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Fleet1Record",
+      "note": "Bounded naive datetimes cover elapsed and future-record recovery calculations before persistent scheduler use."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Fleet1Recover",
+      "note": "All three recovery locations preserve pinned speed and maximum mappings without performing dormitory input."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Fleet1Value",
+      "note": "The complete 0 through 150 persisted range is bounded before original recovery, wait, and reduction arithmetic."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Fleet2Control",
+      "note": "All four control thresholds execute pinned ALAS property and reduction decisions; the incompatible experience-bonus and docks pair fails early."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Fleet2Oath",
+      "note": "Both boolean values preserve the original recovery-speed arithmetic; the user-declared oath state is not promoted as live-observed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Fleet2Record",
+      "note": "Bounded naive datetimes cover elapsed and future-record recovery calculations before persistent scheduler use."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Fleet2Recover",
+      "note": "All three recovery locations preserve pinned speed and maximum mappings without performing dormitory input."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Fleet2Value",
+      "note": "The complete 0 through 150 persisted range is bounded before original recovery, wait, and reduction arithmetic."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_emotion_config.py",
+        "python/alas_headless/alas_emotion_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Emotion.Mode",
+      "note": "All three public modes plus pinned Hard's internal nothing override preserve original calculate and ignore truth semantics."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -7582,8 +7780,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "6e309458429ffd574a7854ab65322bf62ca8152baf3dfcae40b147f1672c629a",
-      "manifest_sha256": "f45c190c610741c0d0a34cd74f001c74663d47d1cc0fa6aa6f13577ca4532b19",
+      "combined_sha256": "eaca4480aa702901687362917a9d74d9c2a36a062bbe294716359aa322c2628f",
+      "manifest_sha256": "5329f7c272b49cfb0166e7b0368df1bef67e082364f1696149a9906bf1753793",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

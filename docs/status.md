@@ -4,6 +4,27 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-14
 
+### Emotion shared configuration: all 11 bookkeeping fields classified
+
+- All 11 `Emotion` fields shared by 17 campaign, raid, coalition, and hospital
+  panels now pass a central contract when original ALAS constructs `Emotion`.
+  The three public modes preserve exact calculate/ignore truth behavior; the
+  pinned Hard task's internal `nothing` override is explicitly admitted but is
+  not presented as a fourth public option.
+- Both fleet surfaces cover values `0..150`, bounded naive record datetimes,
+  all four control thresholds, all three recovery locations, and both oath
+  values. The original mapping replay executes 48 fleet property combinations,
+  elapsed and future record updates, all four FleetOrder reduction vectors,
+  the pre-entry 2x-book multiplier, an already-recovered wait, and a post-battle
+  record update.
+- `keep_exp_bonus + not_in_dormitory`, which pinned ALAS otherwise discovers
+  later as `RequestHumanTakeover`, now fails before the original emotion object
+  takes ownership. Nine malformed/bounds cases and both fleets' incompatible
+  pair are refused. Replay scheduler writes are temporary in-memory captures;
+  no real task delay, sleep, account mutation, dormitory action, or Android
+  input occurs. Only offline dimensions are promoted, not live observation or
+  action completeness.
+
 ### EnemyPriority shared configuration: original target ordering replayed
 
 - `EnemyPriority.EnemyScaleBalanceWeight` now validates the complete pinned
@@ -226,9 +247,9 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 92 changed files, every patched Python file compiles, and
-  the repository suite passes `829/829` tests, including the HpControl,
-  task-hoarding, and EnemyPriority replay additions.
+  patch applies as 93 changed files, all 92 patched Python files compile, and
+  the repository suite passes `834/834` tests, including the HpControl,
+  task-hoarding, EnemyPriority, and Emotion replay additions.
 
 ### EventB ship-drop closure: implementation passed, natural live proof pending
 
