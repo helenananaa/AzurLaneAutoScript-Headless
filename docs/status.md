@@ -303,7 +303,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 97 changed files, all 96 patched Python files compile, and
-  the repository suite passes `897/897` tests, including Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `902/902` tests, including Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
@@ -331,6 +331,23 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   continuation state machine, deterministic observation across representative
   event layouts, and battle/settlement fixtures. Until then the field remains
   partial and unknown story/battle states remain fail-closed.
+
+### Benchmark device and scene configuration: offline contract passed
+
+- `Benchmark.DeviceType` admits exactly the five values declared by pinned
+  ALAS, while `Benchmark.TestScene` admits screenshot, click, or their combined
+  scene. Both fields are validated before the original task can uninstall an
+  app, navigate, benchmark a device method, or enter the semantic branch.
+- Pinned normal-backend replay covers the complete 5 x 3 matrix and preserves
+  original SDK-30 candidate filtering, including Plone and VMOS differences.
+  Semantic replay preserves screenshot-only, click-only, and combined observer
+  selection without pretending the legacy device type changes semantic timing.
+- Twelve invalid single-field cases fail before any entry event. All benchmark,
+  observer, and input operations are fixtures: mutation budget is `0`, no real
+  uninstall/navigation/benchmark or Android input occurs.
+- Both fields move only to `offline=complete`. Device-specific timing quality,
+  unavailable transports, and live screenshot/click capability remain live
+  evidence requirements.
 
 ### Data Key collection configuration: offline contract passed
 

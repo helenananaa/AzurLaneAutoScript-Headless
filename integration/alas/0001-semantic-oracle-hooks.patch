@@ -5854,10 +5854,15 @@ index 19fcf7f0..01301dfe 100644
      def get_test_methods(self) -> t.Tuple[t.Tuple[str], t.Tuple[str]]:
          device = self.config.Benchmark_DeviceType
          # device == 'emulator'
-@@ -214,6 +299,8 @@ class Benchmark(DaemonBase, CampaignUI):
+@@ -214,6 +299,13 @@ class Benchmark(DaemonBase, CampaignUI):
          return tuple(screenshot), tuple(click)
  
      def run(self):
++        from alas_headless import validate_alas_benchmark_config
++        validate_alas_benchmark_config(
++            device_type=self.config.Benchmark_DeviceType,
++            test_scene=self.config.Benchmark_TestScene,
++        )
 +        if getattr(self.device, 'semantic_adapter', None) is not None:
 +            return self.run_semantic()
          self.config.override(Emulator_ScreenshotMethod='ADB')

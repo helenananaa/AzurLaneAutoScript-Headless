@@ -159,9 +159,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_benchmark_config.py",
+        "python/alas_headless/alas_benchmark_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -178,9 +183,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_benchmark_config.py",
+        "python/alas_headless/alas_benchmark_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -8704,6 +8714,32 @@
       ],
       "field": "GameManager.AutoRestart",
       "note": "Both booleans preserve stop-only versus restart-and-login behavior across normal and semantic backends; invalid values fail before any app lifecycle call."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_benchmark_config.py",
+        "python/alas_headless/alas_benchmark_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Benchmark.DeviceType",
+      "note": "All five declared values preserve original candidate-method filtering on the normal backend; the semantic backend validates them but deliberately benchmarks its observer instead, and invalid values fail before device mutation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_benchmark_config.py",
+        "python/alas_headless/alas_benchmark_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Benchmark.TestScene",
+      "note": "All three scenes preserve screenshot-only, click-only, or combined selection on normal and semantic paths; invalid values fail before device mutation."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8716,8 +8752,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "49682b2c2f149e41c9ceaf729c576adcfedfaf55688feb3ac579e0f1d25c2fc5",
-      "manifest_sha256": "3b85ed1d38d6b4dbc1d68e4f3bd655dbe62bc46b28cbe95956627bb0a73c3197",
+      "combined_sha256": "c86494854ef2f1fc8de51f431cc713ab78718667fb1d187e1a4c45cef1160a96",
+      "manifest_sha256": "821d59781cb316314d6c896da6512560e66ed657bd0bb57ab5101b9788ee2b7e",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

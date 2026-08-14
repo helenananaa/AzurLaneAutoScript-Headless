@@ -212,6 +212,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `EventStory.SkipBattle` 本轮明确跳过而不提升：固定上游最终配置把它锁为 true，但运行时代码完全不读取该字段，并在剧情战斗处无条件重启应用。支持 false 需要上游提供或单独评审一套继续战斗状态机，以及覆盖代表性活动布局的确定性战斗/结算观察；当前只有故事节点语义适配，强行补分支会重写业务状态机。重新进入条件是获得该原始行为和可回放的战斗、结算夹具。
 
+### 1.25 本轮 Benchmark 设备类型与测试场景契约
+
+`Benchmark.DeviceType` 现在只接受固定上游声明的五种设备类型，`Benchmark.TestScene` 只接受 `screenshot_click/screenshot/click`，并在原任务卸载应用、导航或调用任一测速方法前 fail-closed。普通后端回放完整覆盖 5 x 3 组合并执行原 `get_test_methods()` 的 SDK 30 候选过滤，包括 Plone 去除 `ADB_nc` 与 VMOS 改用 aScreenCap/Hermit 的差异；语义后端保留观察、输入或二者组合的原场景选择，但明确不把旧设备类型伪装成语义测速差异。
+
+12 个非法单字段输入都在入口事件前拒绝。测速方法、语义观察和输入均为夹具，mutation budget 为 0，没有真实卸载、页面导航、设备测速或 Android 注入。因此两字段只提升 `offline`；各设备的实测耗时、传输不可用以及真实截图/点击能力仍需 live 证据。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -275,7 +281,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 55 | Daemon | Daemon | P | 单轮条件路径可用；进入地图开关、长期值守和稀有恢复分支未闭环 |
 | 56 | OpsiDaemon | OpsiDaemon | P | 单轮条件路径可用；修船/选敌各开关组合及长期恢复未闭环 |
 | 57 | EventStory | EventStory | P | `SkipBattle` 在固定上游锁为 true 且无运行时消费者；false 需要新的剧情战斗状态机和多活动观察，当前仅一条入口路径，战斗转场及其他故事结构未闭环 |
-| 58 | Benchmark | Benchmark | L | 当前设备默认 `screenshot_click` 跑过；设备类型和测试场景矩阵未覆盖 |
+| 58 | Benchmark | Benchmark | L | 五种设备类型 x 三种测试场景的原始方法筛选与语义场景选择已离线完成；各设备真实耗时、传输不可用及截图/点击能力仍缺 live 证据 |
 | 59 | AzurLaneUncensored | AzurLaneUncensored | P | 本地 localization 路径可用；`Repository` 对应的远端同步在上游被注释，配置与能力不一致 |
 | 60 | GameManager | GameManager | L | `AutoRestart` 两值及普通/语义生命周期决策已离线完成，true 有一次实机冷重启；已停止、启动/停止/登录失败和重试上限仍未覆盖 |
 
@@ -391,7 +397,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Daemon | `EnterMap` | P | 开关两值、主界面/地图内启动、恢复循环和未知弹窗 |
 | OpsiDaemon | `RepairShip`; `SelectEnemy` | P | 四组合、无需维修/需要维修、无敌人/有敌人、长期循环和异常恢复 |
 | EventStory | `SkipBattle`（当前只允许 true） | P | 固定上游锁 true 且无字段消费者，实际始终重启跳过战斗；false 需上游/评审后的继续战斗状态机及多活动战斗、结算夹具，当前不外推完成 |
-| Benchmark | `DeviceType`=`emulator/plone_cloud_with_adb/phone_cloud_without_adb/android_phone/android_phone_vmos`; `TestScene`=`screenshot_click/screenshot/click` | L | 5×3 矩阵或等价性证明；无截图设备、无 ADB 设备和纯点击场景必须报告真实能力 |
+| Benchmark | `DeviceType`=`emulator/plone_cloud_with_adb/phone_cloud_without_adb/android_phone/android_phone_vmos`; `TestScene`=`screenshot_click/screenshot/click` | L | 5 x 3 原始方法筛选及普通/语义场景决策已离线完成；仍缺各设备真实测速、不可用传输和截图/点击能力 live 证据 |
 | AzurLaneUncensored | `Repository` | P | 先决定恢复远端同步还是删除/禁用该配置；网络失败、仓库不可达、本地文件和回滚必须有明确契约 |
 | GameManager | `AutoRestart` | L | true/false 与普通/语义后端决策已离线完成；仍缺游戏已关/卡死、启动失败、停止失败、登录失败和重试上限实机闭环 |
 
@@ -512,8 +518,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Awaken.LevelCap` | Awaken | type=select; display=default | options: "level120", "level125"; default: "level120" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `AzurLaneUncensored.Repository` | AzurLaneUncensored | type=input; display=disabled | input/default: "https://gitee.com/LmeSzinc/AzurLaneUncensored" | `P`/⊘ 当前无效 | ⊘ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `BattlePass.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `Benchmark.DeviceType` | Benchmark | type=select; display=default | options: "android_phone_vmos", "android_phone", "emulator", "phone_cloud_without_adb", "plone_cloud_with_adb"; default: "emulator" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Benchmark.TestScene` | Benchmark | type=select; display=default | options: "click", "screenshot_click", "screenshot"; default: "screenshot_click" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Benchmark.DeviceType` | Benchmark | type=select; display=default | options: "android_phone_vmos", "android_phone", "emulator", "phone_cloud_without_adb", "plone_cloud_with_adb"; default: "emulator" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Benchmark.TestScene` | Benchmark | type=select; display=default | options: "click", "screenshot_click", "screenshot"; default: "screenshot_click" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `BuyFurniture.BuyOption` | Dorm | type=select; display=default | options: "all", "set"; default: "all" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `BuyFurniture.Enable` | Dorm | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `BuyFurniture.LastRun` | Dorm | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
