@@ -89,6 +89,7 @@ FLOW_PATHS = {
         "module/campaign/campaign_ui.py",
         "module/daily/daily.py",
         "module/eventstory/eventstory.py",
+        "module/freebies/freebies.py",
         "module/freebies/supply_pack.py",
         "module/handler/ambush.py",
         "module/handler/enemy_searching.py",

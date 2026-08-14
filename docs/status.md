@@ -302,10 +302,27 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 95 changed files, all 94 patched Python files compile, and
-  the repository suite passes `872/872` tests, including Hard configuration,
+  patch applies as 96 changed files, all 95 patched Python files compile, and
+  the repository suite passes `877/877` tests, including SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
+
+### SupplyPack collect and weekday configuration: offline contract passed
+
+- `SupplyPack.Collect` admits only booleans at the beginning of original
+  `Freebies.run()`, before BattlePass, DataKey, Mail, or SupplyPack can run.
+  Disabled preserves Mail and next-server-update scheduling; enabled alone
+  dispatches the original SupplyPack module.
+- `SupplyPack.DayOfWeek` admits exact integers 0-6 and preserves ALAS's
+  Monday-zero `server_today >= target` comparison. Invalid bounds, booleans,
+  floats, text numbers, and missing values fail before page navigation.
+- Pinned replay executes original `Freebies.run()` and `SupplyPack.run()` for
+  both collect values, all seven target weekdays against Wednesday, and the
+  exact 21000-oil guard: 14 accepted and 10 invalid cases.
+- The real `supply_pack_buy()` method is never called; replay records only
+  whether ALAS would produce a free-pack candidate. Mutation budget is `0`,
+  with no claim, item change, page input, or Android injection. Both fields
+  move only to `offline=complete`; current live absence is not a claim receipt.
 
 ### Hard stage and fleet configuration: offline contract passed
 

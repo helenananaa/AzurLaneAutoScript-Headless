@@ -60,6 +60,10 @@ from .alas_hard_config_contract import (
     AlasHardConfigSnapshot,
     validate_alas_hard_config,
 )
+from .alas_supply_pack_config_contract import (
+    AlasSupplyPackConfigSnapshot,
+    validate_alas_supply_pack_config,
+)
 
 from .alas_map_sync import (
     AlasCampaignFleetPlan,

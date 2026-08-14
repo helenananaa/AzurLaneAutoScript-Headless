@@ -1415,11 +1415,49 @@ index 1a941e33..7167383b 100644
          if self.match_template_color(STORY_FINISHED, offset=(20, 20)):
              return 'finish'
          if self.appear(REWARD_GOT, offset=(50, 30)):
+diff --git a/module/freebies/freebies.py b/module/freebies/freebies.py
+index 8694e307..0760d9c5 100644
+--- a/module/freebies/freebies.py
++++ b/module/freebies/freebies.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_supply_pack_config
++
+ from module.base.base import ModuleBase
+ from module.freebies.battle_pass import BattlePass
+ from module.freebies.data_key import DataKey
+@@ -11,6 +13,10 @@ class Freebies(ModuleBase):
+         """
+         Run all freebie related modules
+         """
++        supply_pack_config = validate_alas_supply_pack_config(
++            collect=self.config.SupplyPack_Collect,
++            day_of_week=self.config.SupplyPack_DayOfWeek,
++        )
+         if self.config.BattlePass_Collect:
+             logger.hr('Battle pass', level=1)
+             BattlePass(self.config, self.device).run()
+@@ -22,7 +28,7 @@ class Freebies(ModuleBase):
+         logger.hr('Mail', level=1)
+         MailWhite(self.config, self.device).run()
+ 
+-        if self.config.SupplyPack_Collect:
++        if supply_pack_config.collect:
+             logger.hr('Supply pack', level=1)
+             SupplyPack_250814(self.config, self.device).run()
+ 
 diff --git a/module/freebies/supply_pack.py b/module/freebies/supply_pack.py
-index 66c082eb..ee7709ad 100644
+index 66c082eb..a5959b84 100644
 --- a/module/freebies/supply_pack.py
 +++ b/module/freebies/supply_pack.py
-@@ -80,18 +80,25 @@ class SupplyPack(CampaignStatus):
+@@ -1,5 +1,7 @@
+ from calendar import day_name
+ 
++from alas_headless import validate_alas_supply_pack_config
++
+ from module.base.timer import Timer
+ from module.campaign.campaign_status import CampaignStatus
+ from module.combat.assets import GET_ITEMS_1, GET_ITEMS_2
+@@ -80,18 +82,29 @@ class SupplyPack(CampaignStatus):
              in: Any page
              out: page_supply_pack, supply pack tab
          """
@@ -1431,6 +1469,10 @@ index 66c082eb..ee7709ad 100644
 -            target_name = day_name[target]
 -            if server_today >= target:
 -                self.supply_pack_buy(FREE_SUPPLY_PACK)
++        supply_pack_config = validate_alas_supply_pack_config(
++            collect=self.config.SupplyPack_Collect,
++            day_of_week=self.config.SupplyPack_DayOfWeek,
++        )
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
 +            semantic_adapter.begin_supply_pack()
@@ -1439,7 +1481,7 @@ index 66c082eb..ee7709ad 100644
 +            self.goto_supply_pack()
 +            if self.get_oil() < 21000:
 +                server_today = get_server_weekday()
-+                target = self.config.SupplyPack_DayOfWeek
++                target = supply_pack_config.day_of_week
 +                target_name = day_name[target]
 +                if server_today >= target:
 +                    self.supply_pack_buy(FREE_SUPPLY_PACK)
