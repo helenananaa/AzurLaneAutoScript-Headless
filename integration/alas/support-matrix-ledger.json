@@ -601,9 +601,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_commission_config.py",
+        "python/alas_headless/alas_commission_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -620,9 +625,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_commission_config.py",
+        "python/alas_headless/alas_commission_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -639,9 +649,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_commission_config.py",
+        "python/alas_headless/alas_commission_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -8794,6 +8809,45 @@
       ],
       "field": "Dorm.FeedFilter",
       "note": "Every non-empty unique ordering of the six known food values preserves original filter priority; unknown, duplicate, malformed, and empty rules fail before Dorm scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_commission_config.py",
+        "python/alas_headless/alas_commission_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Commission.PresetFilter",
+      "note": "All six declared presets preserve original day and night resolution, including 24-hour and custom behavior; invalid values fail before scope entry, rewards, or dispatch."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_commission_config.py",
+        "python/alas_headless/alas_commission_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Commission.CustomFilter",
+      "note": "Pinned custom and built-in expressions plus representative priority and Unicode normalization preserve the original Filter grammar; empty, malformed, and unsupported entries fail before scope entry."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_commission_config.py",
+        "python/alas_headless/alas_commission_config_replay.py",
+        "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Commission.DoMajorCommission",
+      "note": "Both booleans preserve original valid-pending and major-category admission decisions; invalid values fail before scope entry, rewards, or dispatch."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -8806,8 +8860,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "8b146a064afd208b8da3d3e0970ab1dbdc0440f23dfbaf40b190f98596a6d1f3",
-      "manifest_sha256": "b7e4c53b706767186fdad68b730d7cc26ca49b93707b2c6ce9bc869198aa782c",
+      "combined_sha256": "1016fce457d45f8339e31e37e747a281ffe4e9c170f4db6f50d62c0d05418101",
+      "manifest_sha256": "baaf02387c396f45ff4ebc21d4d8b4f45fcd463cf2f39a1726761fae1b559f28",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

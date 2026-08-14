@@ -303,7 +303,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 97 changed files, all 96 patched Python files compile, and
-  the repository suite passes `907/907` tests, including Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `912/912` tests, including Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
@@ -370,6 +370,30 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   occurs. The fields move only to `offline=complete`; live empty-collection,
   partial food inventory, post-feed food/capacity proof, and recovery failures
   remain open.
+
+### Commission preset, custom filter, and major switch: offline contract passed
+
+- `Commission.PresetFilter` admits exactly the six declared values,
+  `DoMajorCommission` admits exact booleans, and `CustomFilter` admits the
+  original category/genre/duration/`shortest` grammar with ALAS whitespace,
+  Unicode separator, and Unicode hyphen normalization.
+- The first executable statement after the original `run()` docstring validates
+  all three fields before semantic Commission scope entry, reward handling, or
+  dispatch. Empty, malformed, unsupported, and wrong-typed values fail closed;
+  the original silent unknown-preset fallback is retained only as replay
+  evidence and is unreachable through the guarded entry.
+- Replay preserves all six presets in day and night contexts: cube/chip/oil use
+  their night variants, 24-hour presets remain unchanged, and custom remains
+  custom. All nine pinned filter sources parse through the original Filter,
+  covering 53 unique tokens, representative priority ordering, and Unicode
+  normalization. Sixteen validity/status/category cases preserve major-off and
+  major-on admission behavior.
+- Twelve preset/major combinations and 22 invalid single-field cases run with
+  mutation budget `0`. Reward, start, UI, scheduler, and semantic-scope methods
+  are fixtures; no reward is claimed, no commission is started, and no
+  screenshot/OCR or Android input occurs. The fields move only to
+  `offline=complete`; live nonzero-oil starts, each preset against changing
+  rows, major dispatch, cancellation, and consecutive scheduling remain open.
 
 ### Data Key collection configuration: offline contract passed
 

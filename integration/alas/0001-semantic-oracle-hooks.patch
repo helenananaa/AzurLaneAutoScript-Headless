@@ -768,7 +768,7 @@ index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0
                  self._commission_mode_reset()
          if not self.daily_choose and not self.urgent_choose:
              logger.info('No commission chose')
-@@ -606,34 +681,63 @@ class RewardCommission(UI, InfoHandler):
+@@ -606,34 +681,69 @@ class RewardCommission(UI, InfoHandler):
              in: Any
              out: page_commission
          """
@@ -803,6 +803,12 @@ index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0
 -                logger.info('Having too many urgent commissions, delay task `GemsFarming`')
 -                self.config.task_delay(
 -                    minute=120, target=future_finish if len(future_finish) else None, task='GemsFarming')
++        from alas_headless import validate_alas_commission_config
++        validate_alas_commission_config(
++            preset_filter=self.config.Commission_PresetFilter,
++            custom_filter=self.config.Commission_CustomFilter,
++            do_major_commission=self.config.Commission_DoMajorCommission,
++        )
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
 +            semantic_adapter.begin_commission()

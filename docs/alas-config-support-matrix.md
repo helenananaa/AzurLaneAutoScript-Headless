@@ -224,6 +224,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 回放覆盖 1,956 种食物优先级和四种收取/喂食开关组合，共 7,824 个合法配置；原状态机仍拥有“全关则禁用并停止”、其余组合的 `dorm_run` 分派和三舰 417 分钟调度。食物边界保持严格 `fill > food`、首选食物为空时回退以及无可用食物不操作。22 个非法单字段案例均在入口事件前拒绝，mutation budget 为 0，没有领取奖励、消耗食物、导航、截图/OCR 或 Android 输入。三字段只提升 `offline`；空收取、部分库存、喂食后的库存/容量后置条件和失败恢复仍缺 live 证据。
 
+### 1.27 本轮 Commission 预设、自定义规则与重大委托契约
+
+`Commission.PresetFilter` 现在只接受六个声明值，`DoMajorCommission` 只接受精确布尔值，`CustomFilter` 接受原 ALAS 的类别、类型、时长与 `shortest` 语法，并保留空白、Unicode 大于号和 Unicode 连字符规范化。三字段在原 `run()` 文档字符串后的第一条可执行语句统一校验，空项、畸形项、未知项和错误类型会在语义 scope、奖励处理或委托派遣前 fail-closed；原代码对未知预设静默回退 cube 的行为只作为回放证据保留，无法通过受保护入口。
+
+离线回放覆盖六预设的日/夜 12 种解析：cube/chip/oil 夜间切换对应 night 规则，两个 24h 预设不切换，custom 始终使用自定义规则。固定上游九个规则源全部通过原 `Filter`，覆盖 53 个唯一 token、代表性优先级和 Unicode 规范化；16 个有效性、状态、类别和重大委托开关组合保留原 `_commission_check` 决策。12 个预设/重大开关组合与 22 个非法单字段案例 mutation budget 为 0，没有领取奖励、启动委托、截图/OCR 或 Android 输入。三字段只提升 `offline`；非零油、各预设面对动态委托列表、重大委托真实派遣、取消及连续调度仍缺 live 证据。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -251,7 +257,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 19 | EventD | 同 EventA | P | D1-D3 地图脚本存在，无实机闭环 |
 | 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | P | SP 地图脚本存在，无实机闭环 |
 | 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | M | 难度过滤、每日次数、战斗和领奖缺适配 |
-| 22 | Commission | Scheduler, Commission | L | 领取和零油开始有证据；非零油、重大委托、全部过滤器、取消和连续循环未闭环 |
+| 22 | Commission | Scheduler, Commission | L | 六预设日夜解析、自定义规则语法与重大委托过滤已离线完成；领取和零油开始有实机证据，非零油、动态列表逐预设、重大委托派遣、取消和连续循环仍未闭环 |
 | 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 十个专属配置字段离线契约已完成；真实收藏/等级候选、完整书库存、四槽快速学习实机结果及安全回滚仍未闭环 |
 | 24 | Research | Scheduler, Research | L | 一个金币项目闭环；魔方/零件、延迟、重置、26 个预设和自定义规则未完整覆盖 |
 | 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取/喂食四组合与 1,956 种已知食物优先级已离线完成；空收取、部分库存、喂食后置条件、买家具两模式和日期状态仍未闭环 |
@@ -338,7 +344,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| Commission | `PresetFilter`=`cube/cube_24h/chip/chip_24h/oil/custom`; `CustomFilter`; `DoMajorCommission` | L | 6 预设、规则命中/无命中/非法值、日常委托/紧急委托、0/非 0 油、重大委托、取消和连续派遣 |
+| Commission | `PresetFilter`=`cube/cube_24h/chip/chip_24h/oil/custom`; `CustomFilter`; `DoMajorCommission` | L | 六预设日夜解析、九个固定规则源、custom 语法及重大委托过滤已离线完成；仍缺动态日常/紧急列表逐预设、非零油、重大委托真实派遣、取消和连续调度 live 证据 |
 | Tactical | `RapidTrainingSlot`=`do_not_use/slot_1/slot_2/slot_3/slot_4`; `TacticalFilter` | L | 五值槽位与完整过滤语法已离线覆盖；仍需真实快速学习可用性/次数、完整书库存、无书/无空位及教学结果闭环 |
 | ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | P | 离线关闭/启用及各等级 0/配置/最大/越界已覆盖；仍需真实库存、当前技能经验及选书结果闭环 |
 | AddNewStudent | `Enable`; `Favorite`; `MinLevel` | P | 离线开关、收藏传播和等级边界已覆盖；仍需真实收藏候选状态、无/多候选及教学结果验证 |
@@ -511,9 +517,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **151 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **30 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **31 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **55 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **42 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **41 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -539,9 +545,9 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Campaign.UseFleetLock` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Coalition.Fleet` | Coalition, CoalitionSp | type=select; display=default | options: "multi", "single"; default: "single" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Coalition.Mode` | Coalition, CoalitionSp | type=select; display=default/hide | options: "easy", "hard", "normal", "sp"; default: "hard", "sp" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `Commission.CustomFilter` | Commission | type=textarea; display=default | input/default: <long default in args.json> | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `Commission.DoMajorCommission` | Commission | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Commission.PresetFilter` | Commission | type=select; display=default | options: "chip_24h", "chip", "cube_24h", "cube", "custom", "oil"; default: "cube" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Commission.CustomFilter` | Commission | type=textarea; display=default | input/default: <long default in args.json> | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Commission.DoMajorCommission` | Commission | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Commission.PresetFilter` | Commission | type=select; display=default | options: "chip_24h", "chip", "cube_24h", "cube", "custom", "oil"; default: "cube" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `ControlExpOverflow.Enable` | Tactical | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `ControlExpOverflow.T1Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `ControlExpOverflow.T2Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
