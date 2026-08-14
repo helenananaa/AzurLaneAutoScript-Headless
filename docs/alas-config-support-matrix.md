@@ -75,7 +75,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 |---|:---:|---|---|
 | `Retirement.RetireMode=one_click_retire` | 🟢 | 官方选择、稀有角色二次确认、奖励、装备入仓库、返回和容量差全部闭环；返回实际 68，不再硬编码 10；无候选官方提示也已实机闭环 | 未知弹窗和重连后页面不一致仍拒绝继续 |
 | `Retirement.RetireMode=enhance` | 🟡 | 已接入 ALAS 正式任务入口；三项详细配置、语义筛选/选舰/强化页导航、官方推荐、单次确认、真实素材数和装备入仓均有闭环证据 | 未为补证据额外执行完整 `favourite` 破坏性任务；自然无素材实机分支仍待遇到 |
-| `Retirement.RetireMode=old_retire` | 🔴 | 保留原 ALAS 分支，没有伪装成已支持 | 任务级语义观察、选择、确认和结果校验均未适配 |
+| `Retirement.RetireMode=old_retire` | 🔴 | 保留原 ALAS 分支及离线分派证据；Headless 在任何页面事件前明确拒绝，没有伪装成已支持 | 任务级语义观察、选择、确认和结果校验均未适配 |
 | `OneClickRetire.KeepLimitBreak=keep_limit_break` | 🟢 | 官方设置读回 `keep_needed`，本次 68 艘实退使用该值 | 其他服务器和上游版本仍需重验 |
 | `OneClickRetire.KeepLimitBreak=do_not_keep` | 🧪 | 官方 `keep_none` 选项和离线设置动作已识别 | 该值会扩大退役集合，本轮未做第二次破坏性实退 |
 | 唯一舰船保护 | 🟢 强制 | 每次事务要求官方 `唯一舰船退役保护=on`，缺失或无法设置即拒绝 | ALAS 当前无独立用户配置；Headless 不允许关闭此保护 |
@@ -250,6 +250,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 200 个配置组合保持原卡池成本分类、仅活动池检查票券、票券优先与魔方余量拆分、提交后快速完成队列刷新。原 `gacha_goto_pool()` 另覆盖五卡池可用路由、活动/祈愿池不可用回退 light、已配置祈愿池拒绝；四个资源案例保持金币/魔方逐次缩减和不足归零。25 个非法单字段案例在 scope 前拒绝。导航、OCR、票券库存、准备、提交、队列刷新和 scope 均为夹具，mutation budget 为 0，没有提交建造或消耗票券、魔方、金币、快速完成工具。四字段只提升 `offline`；现有实机仅有一次轻型建造，多单、其他卡池、票券、快速完成、队列领取/满队列恢复、资源不足 UI 和提交后收据仍未闭环，本轮没有请求或执行新的破坏性验证。
 
+### 1.31 本轮 Retirement 模式入口与旧退役拒绝契约
+
+`Retirement.RetireMode` 只接受固定上游声明的 `one_click_retire/enhance/old_retire`。入口门禁位于原 `handle_retirement()` 文档字符串后的第一条业务语句，早于游戏提示、退役页/船坞识别、筛选、选择或确认。空值、布尔、整数、未知枚举和容器类型均 fail-closed；语义模式下的 `old_retire` 虽是合法 ALAS 配置，也会在任何页面事件前明确拒绝，因为该分支仍依赖未审阅的 framebuffer、卡片选择和坐标确认链。
+
+固定上游回放逐值执行原 `_retire_amount` 映射，保持一键/强化的 3000 扫描上限、旧退役 `retire_all=3000` 与 `retire_10=10`；原 `_retire_handler()` 的一键和旧退役分派、宝石队旗舰衔接、退出及 `DOCK_FULL_TRIGGERED` 写入也由纯桩验证。入口回放保留一键、强化和非 Headless 旧退役的原状态机分派，同时证明 Headless 旧退役及非法配置均在零事件处拒绝。mutation budget 为 0，没有退役、强化、设备连接或 Android 输入，因此只把该字段的 `offline` 从 partial 提升为 complete；`old_retire` 的 observation/action/live 仍未适配，General 面板继续为 P，绝不能称为三模式完整支持。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -257,7 +263,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | # | 面板 | 配置组 | 当前 | 尚未闭环的配置范围与验收重点 |
 |---:|---|---|:---:|---|
 | 1 | Alas | Emulator, EmulatorInfo, Error, Optimization, DropRecord | P | 当前语义观察/输入路径可运行；传统截图/控制方法矩阵、包名/服务器矩阵、错误截图、掉落记录与上传、通知均未完整验收 |
-| 2 | General | Retirement, OneClickRetire, Enhance, OldRetire | P | 官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级适配 |
+| 2 | General | Retirement, OneClickRetire, Enhance, OldRetire | P | 三种 `RetireMode` 已离线分类，旧退役在 Headless 页面事件前拒绝；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级语义事务 |
 | 3 | Restart | Scheduler | L | 当前冷重启闭环；`AdbRestart`、其他模拟器生命周期、失败重试与只恢复不重启仍需覆盖 |
 | 4 | Main | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | B | 12-4 能到账号战斗边界；全部共用地图配置分支见 3.2 |
 | 5 | Main2 | 同 Main | P | 共用实现，没有独立配置实例验收；不能沿用 Main 的运行记录直接判定完整 |
@@ -329,7 +335,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Error | `HandleError`; `SaveError`; `OnePushConfig`; `ScreenshotLength` | P | 两个布尔值组合、错误证据可用性、截图长度边界、通知成功/失败/未配置，以及不泄漏敏感信息 |
 | Optimization | `ScreenshotInterval`; `CombatScreenshotInterval`; `TaskHoardingDuration`; `WhenTaskQueueEmpty`=`stay_there/goto_main/close_game` | P | `TaskHoardingDuration` 已完成 0..1440 分钟离线契约并保留原调度器；截图间隔缺初始化期门禁/跨后端帧时钟证据，`close_game` 缺包进程租约，空队列恢复仍未闭环 |
 | DropRecord | `ResearchRecord`, `CommissionRecord`, `CombatRecord`, `OpsiRecord`, `MeowfficerBuy`, `MeowfficerTalent`; `API`; `AzurStatsID`; `SaveFolder` | M | `do_not/save/upload/save_and_upload` 各模式、默认/反代 API、无 ID、无权限目录、网络失败、脱敏和重试；没有有效画面时不得生成伪证据 |
-| Retirement | `RetireMode`=`one_click_retire/enhance/old_retire` | P | `one_click_retire` 已走游戏官方事务并用容量差验证真实数量；`enhance` 已接 ALAS 正式任务并走官方推荐事务；仍需补 `old_retire`、完整收藏破坏性任务、自然无素材和非网络中断实机证据 |
+| Retirement | `RetireMode`=`one_click_retire/enhance/old_retire` | P | 三枚举已离线逐值分类且非法值提前拒绝；`one_click_retire` 已走游戏官方事务并用容量差验证真实数量，`enhance` 已接 ALAS 正式任务并走官方推荐事务；`old_retire` 在 Headless 页面事件前 fail-closed，仍缺其任务级语义事务、完整收藏破坏性任务、自然无素材和非网络中断实机证据 |
 | OneClickRetire | `KeepLimitBreak`=`keep_limit_break/do_not_keep` | P | `keep_limit_break` 已实退；`do_not_keep` 仅验证官方设置值，未做扩大集合后的破坏性实退；唯一舰船保护始终强制开启 |
 | Enhance | `ShipToEnhance`=`all/favourite`; `CheckPerCategory`; `Filter` | P | 三字段已接 ALAS 正式任务并严格解析，非法/重复类型 fail-closed；`all/favourite` 控件、8 类筛选、候选卡、强化页、返回与恢复默认均为 typed 导航，默认 5 次及有序分类循环有确定性测试；官方推荐、7 艘 Lv.1/bg1 素材、真实强化 `196→197`、容量 `814→807` 及 14 件装备入仓已实机验证；完整收藏破坏性任务和自然无素材实机分支按避免额外消耗原则未跑 |
 | OldRetire | `N`, `R`, `SR`, `SSR`; `RetireAmount`=`retire_all/retire_10` | M | 16 种稀有度开关组合与两种数量策略；锁定/收藏/满破保护和最终列表必须可核验 |
@@ -784,7 +790,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Research.UseCoin` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Research.UseCube` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "only_05_hour" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Research.UsePart` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Retirement.RetireMode` | General | type=select; display=default | options: "enhance", "old_retire", "one_click_retire"; default: "one_click_retire" | `P`/◐ 一键与强化已接入；旧退役未适配 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Retirement.RetireMode` | General | type=select; display=default | options: "enhance", "old_retire", "one_click_retire"; default: "one_click_retire" | `P`/◐ 一键与强化已接入；旧退役未适配 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Reward.CollectCoin` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Reward.CollectExp` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Reward.CollectMission` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |

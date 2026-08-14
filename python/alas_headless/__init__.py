@@ -113,6 +113,11 @@ from .alas_gacha_config_contract import (
     GACHA_POOLS,
     validate_alas_gacha_config,
 )
+from .alas_retirement_config_contract import (
+    AlasRetirementConfigSnapshot,
+    RETIREMENT_MODES,
+    validate_alas_retirement_config,
+)
 from .alas_reward_config_contract import (
     AlasRewardConfigSnapshot,
     validate_alas_reward_config,

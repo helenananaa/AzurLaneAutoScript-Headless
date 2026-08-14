@@ -5606,10 +5606,12 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_integration_patch.py",
+        "tests/test_alas_retirement_config.py",
+        "python/alas_headless/alas_retirement_config_replay.py",
         "integration/alas/series/0120-retirement-flow-ports.patch",
         "integration/alas/series/0130-enhancement-flow-ports.patch",
         "docs/status.md"
@@ -7887,16 +7889,18 @@
         "action": "partial",
         "configuration": "complete",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_integration_patch.py",
+        "tests/test_alas_retirement_config.py",
+        "python/alas_headless/alas_retirement_config_replay.py",
         "integration/alas/series/0120-retirement-flow-ports.patch",
         "integration/alas/series/0130-enhancement-flow-ports.patch",
         "docs/status.md"
       ],
       "field": "Retirement.RetireMode",
-      "note": "The original ALAS enum remains authoritative; one-click and enhancement are typed while old_retire remains explicitly unsupported."
+      "note": "All three pinned modes preserve original amount and task dispatch decisions offline; one-click and enhancement remain admitted, while semantic old_retire and invalid values fail before page events because the legacy transaction is still unsupported."
     },
     {
       "dimensions": {
@@ -9116,8 +9120,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "0bd9389a35cdca54cb12b99a2d4a76f53e894bebad8d03c64797e539faeeb3f1",
-      "manifest_sha256": "9dd2c5a359e0d0c5b5ffea857b72059dbe94e57187d125a9ef7ce99cbe27077e",
+      "combined_sha256": "c48820460c013cc89c275f002a406722e4f1925388eab419790f4d4c4b9fe2d9",
+      "manifest_sha256": "bc7c40c7f4d13e7badc39827956e49bd99765391704a0ee0750301d7a09efed0",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

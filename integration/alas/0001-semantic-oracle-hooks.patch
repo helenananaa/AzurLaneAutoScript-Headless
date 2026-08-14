@@ -6420,7 +6420,7 @@ index 747d411c..a1e269bb 100644
          if self.config.MAP_CLEAR_PERCENTAGE_SHORT:
              percent *= 1.4
 diff --git a/module/retire/retirement.py b/module/retire/retirement.py
-index 19e08df2..58436ae4 100644
+index 19e08df2..9ea66349 100644
 --- a/module/retire/retirement.py
 +++ b/module/retire/retirement.py
 @@ -204,6 +204,19 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
@@ -6443,7 +6443,27 @@ index 19e08df2..58436ae4 100644
          logger.hr('Retirement')
          logger.info('Using one click retirement.')
          # No need to wait, one-click-retire doesn't need to check dock
-@@ -457,7 +470,15 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
+@@ -391,6 +404,19 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
+         Returns:
+             bool: If retired.
+         """
++        from alas_headless import (
++            current_semantic_session,
++            validate_alas_retirement_config,
++        )
++        retirement_config = validate_alas_retirement_config(
++            mode=self.config.Retirement_RetireMode
++        )
++        if current_semantic_session() is not None:
++            # The legacy old-retire path still owns framebuffer matching and
++            # coordinate input.  Refuse it before page detection or mutation;
++            # the two reviewed semantic transactions remain ALAS-owned below.
++            retirement_config.require_semantic_entry()
++
+         # 2025.05.29 game tips that infos skin feature when you enter dock
+         if self.handle_game_tips():
+             return True
+@@ -457,7 +483,15 @@ class Retirement(Enhancement, QuickRetireSettingHandler):
              mode = self.config.Retirement_RetireMode
  
          if mode == 'one_click_retire':

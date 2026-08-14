@@ -68,7 +68,7 @@
     {
       "order": 14,
       "path": "integration/alas/series/0120-retirement-flow-ports.patch",
-      "sha256": "6e0aacec4c27fc49654fa93ab954589e3c4a24b129d6116e8cf8a6453680cf37"
+      "sha256": "be2c7f57ca3ce3b6edf5e8468b0e675708138a3ca99bf1cc33ab4d3e7b7bc3a6"
     },
     {
       "order": 15,

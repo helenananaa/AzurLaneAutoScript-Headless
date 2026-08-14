@@ -208,6 +208,27 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   inside the same bounded transaction. Any other popup remains fail-closed;
   the retirement-specific insertion test passes without broadening the prompt.
 
+### Retirement mode entry: complete offline classification, legacy mode refused
+
+- `Retirement.RetireMode` now accepts exactly the pinned ALAS declaration:
+  `one_click_retire`, `enhance`, and `old_retire`. Seven malformed, wrong-type,
+  or unknown values fail before game-tip handling or any retirement page event.
+- Input-free replay executes the original `_retire_amount` mapping, preserving
+  the 3000 one-click/enhancement scan ceiling plus old-retire `retire_all=3000`
+  and `retire_10=10`. It also executes the original one-click and old-retire
+  handlers through gems-farming flagship handling, quit, and
+  `DOCK_FULL_TRIGGERED`, with every destructive method replaced by a recorder.
+- The original `handle_retirement()` dispatch remains authoritative for the
+  reviewed one-click and enhancement transactions. In Headless semantic mode,
+  valid `old_retire` now fails before game tips, Dock/retirement detection,
+  selection, or confirmation because that legacy path still depends on
+  unreviewed framebuffer and coordinate input. Non-Headless ALAS keeps its
+  original old-retire route.
+- The replay mutation budget is `0`: no ship was retired or enhanced and no
+  Android input occurred. This promotes only `Retirement.RetireMode.offline`
+  to complete; old-retire observation/action/live remain incomplete, and the
+  General panel remains `P` rather than `F` or `L`.
+
 ### Enhancement: ALAS task route, detailed config, and official transaction passed
 
 - `Enhance.ShipToEnhance`, `Enhance.CheckPerCategory`, and `Enhance.Filter`
@@ -303,7 +324,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 99 changed files, all 98 patched Python files compile, and
-  the repository suite passes `927/927` tests, including Gacha configuration, Shipyard focus configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `932/932` tests, including Retirement mode configuration, Gacha configuration, Shipyard focus configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
