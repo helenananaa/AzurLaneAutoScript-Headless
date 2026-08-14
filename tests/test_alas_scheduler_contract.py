@@ -4,7 +4,10 @@ import unittest
 from datetime import datetime
 from pathlib import Path
 
-from alas_headless.alas_scheduler_contract import validate_alas_scheduler_config
+from alas_headless.alas_scheduler_contract import (
+    validate_alas_scheduler_config,
+    validate_alas_task_hoarding_config,
+)
 from alas_headless.alas_scheduler_replay import verify_scheduler_contract
 from alas_headless.semantic_oracle import SemanticGateClosed
 
@@ -80,6 +83,23 @@ class AlasSchedulerContractTests(unittest.TestCase):
             patch.index("validate_alas_scheduler_config(self.data)"),
             patch.index("pending = []"),
         )
+        self.assertLess(
+            patch.index("validate_alas_task_hoarding_config(self.data)"),
+            patch.index("pending = []"),
+        )
+
+    def test_task_hoarding_is_bounded_before_scheduler_time_math(self):
+        for minutes in (0, 1, 15, 1440):
+            snapshot = validate_alas_task_hoarding_config(
+                {"Alas": {"Optimization": {"TaskHoardingDuration": minutes}}}
+            )
+            self.assertEqual(snapshot.minutes, minutes)
+            self.assertEqual(snapshot.duration.total_seconds(), minutes * 60)
+        for value in (-1, 1441, True, 1.5, "15", None):
+            with self.subTest(value=value), self.assertRaises(SemanticGateClosed):
+                validate_alas_task_hoarding_config(
+                    {"Alas": {"Optimization": {"TaskHoardingDuration": value}}}
+                )
 
     def test_replay_source_compiles(self):
         source = ROOT.joinpath(

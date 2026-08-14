@@ -4,6 +4,44 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-14
 
+### HpControl shared configuration: deterministic decisions and early refusal
+
+- All eight `HpControl` fields shared by 11 normal/event campaign panels now
+  have an input-free contract against the pinned, patched ALAS tree. Ratio
+  inputs cover zero, defaults, one, out-of-range, non-finite, wrong-type, and
+  boolean cases. Fleet weights require exactly three positive integers and
+  preserve ALAS's Chinese-comma normalization.
+- The replay directly executes original `hp_get()`, `_expected_scout_order()`,
+  `hp_retreat_triggered()`, and `handle_emergency_repair_use()`. It proves
+  weighted HP `0.9/0.8/0.7 -> 0.9/0.4/0.175`, scout-order classes, the strict
+  low-HP `< threshold` boundary, and one emergency-repair final-input boundary.
+- The three enabled branches remain explicitly refused before campaign
+  navigation: HP balancing still ends in a coordinate drag, emergency repair
+  still uses unqualified combat templates/input, and low-HP retreat still
+  enters the legacy withdrawal loop. Defaults with all three toggles disabled
+  are admitted; no device connection, mutation, or Android input occurs.
+- This promotes only the eight fields' offline dimension. Observation and live
+  values already recorded elsewhere are not broadened, actions remain missing,
+  and the 11 panels stay below full support.
+
+### Task hoarding: bounded original scheduler time path
+
+- `Optimization.TaskHoardingDuration` now passes the original ALAS `hoarding`
+  property and the existing scheduler replay for `0`, `1`, `15`, and `1440`
+  whole minutes. Negative, larger-than-one-day, fractional, textual, boolean,
+  missing, and malformed values fail before `get_next_task()` time arithmetic.
+- The one-day ceiling is an explicit Headless safety bound against accidental
+  unbounded task deferral. ALAS still owns pending/waiting classification,
+  priority, `is_hoarding_task`, `NextRun` adjustment, persistence, and loops.
+- The other Optimization fields are deliberately not promoted. Screenshot
+  intervals are clamped and consumed during `Device` initialization, before
+  the current scheduler gate, and have not been correlated with semantic frame
+  freshness across backends. `WhenTaskQueueEmpty=close_game` still reaches the
+  legacy `app_stop()` path without a verified package-process lease; `goto_main`
+  and `stay_there` still need queue-empty recovery replays. Re-entry requires an
+  initialization-time pure gate plus frame-clock/backend evidence, and a leased
+  semantic process-stop port for `close_game`.
+
 ### Mail shared configuration: all boolean combinations classified offline
 
 - The four `Mail` toggles now pass all 16 boolean combinations through the
@@ -170,7 +208,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 92 changed files, every patched Python file compiles, and
-  the repository suite passes `818/818` tests.
+  the repository suite passes `824/824` tests, including the HpControl and
+  task-hoarding replay additions.
 
 ### EventB ship-drop closure: implementation passed, natural live proof pending
 

@@ -110,6 +110,18 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 本轮 mutation budget 为 `0`，没有连接设备、领取邮件、删除邮件、确认弹窗或注入 Android 输入。四字段只将 `offline` 提升为 `complete`；既有邮件动作仍需显式、有限预算，观察、动作和实机维度保持 `partial`，`Freebies` 面板仍为 `P`。
 
+### 1.8 本轮 HpControl 八字段确定性分类
+
+11 个普通/活动地图面板共享的八个 `HpControl` 字段现已完成离线逐类验证。四个阈值只接受有限的 `0..1` 比率，并覆盖 0、默认值、1、越界、非有限数、错误类型与布尔混入；`HpBalanceWeight` 精确要求三个正整数，同时直接执行原 `hp_get()` 证明中文逗号归一化和 `0.9/0.8/0.7 -> 0.9/0.4/0.175` 的权重结果。回放还直接执行原 `_expected_scout_order()`、`hp_retreat_triggered()` 与 `handle_emergency_repair_use()`，覆盖编队顺序、严格小于阈值及最终维修输入边界。
+
+三个启用值均被分类但不会放行：`UseHpBalance=true` 最终仍是坐标拖拽，`UseEmergencyRepair=true` 仍依赖未审阅战斗模板/输入，`UseLowHpRetreat=true` 会进入尚未接管的撤退循环。门禁在 `begin_campaign_pre_sortie()` 前运行；默认三个开关均为 false 时继续使用原 ALAS 状态机。mutation budget 为 `0`，没有设备连接或 Android 输入。因此八字段只把 `offline` 提升为 `complete`，已有 observation/live 记录不扩张，action 仍缺失，相关面板不能升为 `F`。
+
+### 1.9 本轮 TaskHoardingDuration 调度时间契约
+
+`Optimization.TaskHoardingDuration` 现直接对照原 ALAS `hoarding` 属性与既有 Scheduler 回放，覆盖 `0/1/15/1440` 整分钟；负数、超过一天、小数、字符串、布尔、缺失及畸形结构在 `get_next_task()` 时间运算前 fail-closed。一天上限是 Headless 为避免误配置造成长期任务推迟而设置的明确安全边界。原 ALAS 继续拥有 pending/waiting 分类、优先级、`is_hoarding_task` 状态、`NextRun` 调整、持久化和循环；本轮没有运行真实账号队列或注入 Android 输入，因此只提升该字段的 `offline` 维度。
+
+其余三个 Optimization 字段明确跳过：两个截图间隔在 `Device` 初始化时即被钳位和消费，当前门禁位置太晚，且尚无跨截图后端的语义帧新鲜度证据；`WhenTaskQueueEmpty=close_game` 仍会进入没有包进程租约证明的旧 `app_stop()`，而 `goto_main/stay_there` 也缺空队列恢复回放。重新进入需要初始化期纯配置门禁、各后端 frame-clock 证据，以及 `close_game` 的租约化语义进程停止端口。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -187,7 +199,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | Emulator | `Serial`; `PackageName`（22 值）; `ServerName`（72 值）; `ScreenshotMethod`=`auto/ADB/ADB_nc/uiautomator2/aScreenCap/aScreenCap_nc/DroidCast/DroidCast_raw/nemu_ipc/ldopengl`; `ControlMethod`=`ADB/uiautomator2/minitouch/Hermit/MaaTouch`; `ScreenshotDedithering`; `AdbRestart` | P | Headless 明确支持/拒绝每种方法；至少覆盖当前包/服务器、自动发现失败、设备断连、重连和方法不兼容；不能静默回退到未经授权的像素路径 |
 | EmulatorInfo | `Emulator`=`auto/NoxPlayer/NoxPlayer64/BlueStacks4/BlueStacks5/BlueStacks4HyperV/BlueStacks5HyperV/LDPlayer3/LDPlayer4/LDPlayer9/LDPlayer14/MuMuPlayer/MuMuPlayerX/MuMuPlayer12/MEmuPlayer`; `name`; `path` | P | 自动与显式模拟器发现、找不到安装、多个实例和自定义路径均需 fail-closed |
 | Error | `HandleError`; `SaveError`; `OnePushConfig`; `ScreenshotLength` | P | 两个布尔值组合、错误证据可用性、截图长度边界、通知成功/失败/未配置，以及不泄漏敏感信息 |
-| Optimization | `ScreenshotInterval`; `CombatScreenshotInterval`; `TaskHoardingDuration`; `WhenTaskQueueEmpty`=`stay_there/goto_main/close_game` | P | 数值 0/正常/过小/过大，三种空队列动作，任务囤积后的顺序和恢复；Headless 下截图间隔的语义必须明确 |
+| Optimization | `ScreenshotInterval`; `CombatScreenshotInterval`; `TaskHoardingDuration`; `WhenTaskQueueEmpty`=`stay_there/goto_main/close_game` | P | `TaskHoardingDuration` 已完成 0..1440 分钟离线契约并保留原调度器；截图间隔缺初始化期门禁/跨后端帧时钟证据，`close_game` 缺包进程租约，空队列恢复仍未闭环 |
 | DropRecord | `ResearchRecord`, `CommissionRecord`, `CombatRecord`, `OpsiRecord`, `MeowfficerBuy`, `MeowfficerTalent`; `API`; `AzurStatsID`; `SaveFolder` | M | `do_not/save/upload/save_and_upload` 各模式、默认/反代 API、无 ID、无权限目录、网络失败、脱敏和重试；没有有效画面时不得生成伪证据 |
 | Retirement | `RetireMode`=`one_click_retire/enhance/old_retire` | P | `one_click_retire` 已走游戏官方事务并用容量差验证真实数量；`enhance` 已接 ALAS 正式任务并走官方推荐事务；仍需补 `old_retire`、完整收藏破坏性任务、自然无素材和非网络中断实机证据 |
 | OneClickRetire | `KeepLimitBreak`=`keep_limit_break/do_not_keep` | P | `keep_limit_break` 已实退；`do_not_keep` 仅验证官方设置值，未做扩大集合后的破坏性实退；唯一舰船保护始终强制开启 |
@@ -203,7 +215,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 | Fleet | `Fleet1`=1..6; `Fleet1Formation`=`line_ahead/double_line/diamond`; `Fleet1Mode`=`combat_auto/combat_manual/stand_still_in_the_middle/hide_in_bottom_left/hide_in_upper_left`; `Fleet1Step`=2..5; `Fleet2`=0..6; `Fleet2Formation` 同三阵型；`Fleet2Mode` 同五模式；`Fleet2Step`=2..5; `FleetOrder` 四种主力/Boss/待机组合 | P | 九字段全部值已离线分类；索引和步数保留原 ALAS 路由。固定上游不消费 Formation，非默认值提前拒绝；手动战斗模式缺 typed 方向/武器输入，非默认 FleetOrder 缺实机语义出击证据，故观察、动作和实机仍不完整 |
 | Submarine | `Fleet`=0/1/2; `Mode`=`do_not_use/hunt_only/boss_only/hunt_and_boss/every_combat`; `AutoSearchMode`=`sub_standby/sub_auto_call`; `DistanceToBoss`=`to_boss_position/1_grid_to_boss/2_grid_to_boss/use_open_ocean_support` | P | 无潜艇、未解锁、所有召唤策略、Boss 距离和自动寻敌组合；不能把不出现潜艇按钮当作成功调用 |
 | Emotion | `Mode`=`calculate/ignore/calculate_ignore`; `Fleet1Value`; `Fleet1Record`; `Fleet1Control`; `Fleet1Recover`; `Fleet1Oath`; `Fleet2Value`; `Fleet2Record`; `Fleet2Control`; `Fleet2Recover`; `Fleet2Oath`; 两个 `Control` 均为 `keep_exp_bonus/prevent_green_face/prevent_yellow_face/prevent_red_face`，两个 `Recover` 均为 `not_in_dormitory/dormitory_floor_1/dormitory_floor_2` | P | 三模式、两舰队、四阈值策略、两层宿舍、誓约与非誓约、记录时间恢复、低心情等待/切换均需确定性测试 |
-| HpControl | `UseHpBalance`; `UseEmergencyRepair`; `UseLowHpRetreat`; `HpBalanceThreshold`; `HpBalanceWeight`; `RepairUseSingleThreshold`; `RepairUseMultiThreshold`; `LowHpRetreatThreshold` | P | 三开关全部组合、阈值边界、权重解析、单体/群体维修、无维修道具、低血撤退与战败恢复 |
+| HpControl | `UseHpBalance`; `UseEmergencyRepair`; `UseLowHpRetreat`; `HpBalanceThreshold`; `HpBalanceWeight`; `RepairUseSingleThreshold`; `RepairUseMultiThreshold`; `LowHpRetreatThreshold` | P | 八字段已离线分类并在出击前 fail-closed；三个启用态仍分别缺 typed 编队拖拽、紧急维修模板/输入和完整撤退循环，故动作与实机完整性不提升 |
 | EnemyPriority | `EnemyScaleBalanceWeight`=`default_mode/S3_enemy_first/S1_enemy_first` | P | 三种优先级在相同地图夹具中给出可比较决策，并验证无匹配敌人和多目标同权 |
 | GemsFarming | `ChangeFlagship`=`ship/ship_equip`; `ChangeVanguard`=`disabled/ship/ship_equip`; `CommissionLimit`; `CommonCV`=`any/langley/bogue/ranger/hermes`; `CommonDD`=`any/favourite/aulick_or_foote/cassin_or_downes/z20_or_z21` | M | 每个候选舰/换装模式、收藏过滤、无候选舰、船坞满、委托占用和换船后继续刷图 |
 | EquipmentCode | `Config`（DD 与四艘 CV 的装备代码）；`ExportToConfig` | M | 合法/缺失/错误装备代码、导出开关、装备不足、被占用装备和回滚；不得装备到错误舰船 |
@@ -397,9 +409,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **151 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **2 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **6 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **55 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **70 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **66 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -556,14 +568,14 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Hard.HardFleet` | Hard | type=select; display=default | options: 1, 2; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Hard.HardStage` | Hard | type=input; display=default | input/default: "11-4" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Hospital.UseRecommendFleet` | Hospital | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `HpControl.HpBalanceThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.2 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `HpControl.HpBalanceWeight` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: "1000, 1000, 1000" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `HpControl.LowHpRetreatThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.3 | `P`/🧪 离线路径 | ☑ | ◐ | ☐ | ◐ | ☐ |
-| `HpControl.RepairUseMultiThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.6 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `HpControl.RepairUseSingleThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.3 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `HpControl.UseEmergencyRepair` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `HpControl.UseHpBalance` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `HpControl.UseLowHpRetreat` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
+| `HpControl.HpBalanceThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.2 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `HpControl.HpBalanceWeight` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: "1000, 1000, 1000" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `HpControl.LowHpRetreatThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.3 | `P`/🧪 离线路径 | ☑ | ◐ | ☐ | ☑ | ☐ |
+| `HpControl.RepairUseMultiThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.6 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `HpControl.RepairUseSingleThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.3 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `HpControl.UseEmergencyRepair` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `HpControl.UseHpBalance` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `HpControl.UseLowHpRetreat` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Mail.ClaimMaintenance` | Freebies | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Mail.ClaimMerit` | Freebies | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Mail.ClaimTradeLicense` | Freebies | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
@@ -629,7 +641,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiVoucher.Filter` | OpsiVoucher | type=textarea; display=default | input/default: "LoggerAbyssal > LoggerObscure > Book > Coin > Fragment" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `Optimization.CombatScreenshotInterval` | Alas | type=input; display=default | input/default: 1.0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `Optimization.ScreenshotInterval` | Alas | type=input; display=default | input/default: 0.3 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `Optimization.TaskHoardingDuration` | Alas | type=input; display=default | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `Optimization.TaskHoardingDuration` | Alas | type=input; display=default | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Optimization.WhenTaskQueueEmpty` | Alas | type=select; display=default | options: "close_game", "goto_main", "stay_there"; default: "goto_main" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `PrivateQuarters.BuyCake` | PrivateQuarters | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `PrivateQuarters.BuyRoses` | PrivateQuarters | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

@@ -2,8 +2,10 @@
 
 from .alas_scheduler_contract import (
     AlasSchedulerTaskSnapshot,
+    AlasTaskHoardingSnapshot,
     SCHEDULER_FIELDS,
     validate_alas_scheduler_config,
+    validate_alas_task_hoarding_config,
 )
 from .alas_fleet_config_contract import (
     AlasFleetConfigSnapshot,
@@ -16,6 +18,10 @@ from .alas_fleet_config_contract import (
 from .alas_mail_config_contract import (
     AlasMailConfigSnapshot,
     validate_alas_mail_config,
+)
+from .alas_hp_control_config_contract import (
+    AlasHpControlConfigSnapshot,
+    validate_alas_hp_control_config,
 )
 
 from .alas_map_sync import (

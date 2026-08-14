@@ -3400,9 +3400,15 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_contract.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -3429,9 +3435,15 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_contract.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -3458,9 +3470,15 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_contract.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -3487,9 +3505,15 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_contract.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -3516,9 +3540,15 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_contract.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -3545,9 +3575,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_contract.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -3574,9 +3610,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_contract.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -3603,9 +3645,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "partial"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_contract.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -4908,9 +4956,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "python/alas_headless/alas_scheduler_contract.py",
+        "python/alas_headless/alas_scheduler_replay.py",
+        "integration/alas/series/0140-scheduler-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -7067,6 +7121,114 @@
         "offline": "complete"
       },
       "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "python/alas_headless/alas_scheduler_replay.py",
+        "docs/status.md"
+      ],
+      "field": "Optimization.TaskHoardingDuration",
+      "note": "Whole-minute values from zero through one day match the original timedelta property; negative, oversized, fractional, textual, boolean, and missing values fail before scheduler time math."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "HpControl.HpBalanceThreshold",
+      "note": "Zero, default, one, invalid, and original scout-order decision classes are covered; enabling HP balance remains refused before navigation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "HpControl.HpBalanceWeight",
+      "note": "Exactly three positive integer weights, including the original Chinese-comma normalization, are replayed; malformed weights fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "HpControl.LowHpRetreatThreshold",
+      "note": "Normalized ratio boundaries and the original strict less-than trigger are replayed without entering the unqualified withdrawal loop."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "HpControl.RepairUseMultiThreshold",
+      "note": "Normalized ratio boundaries and original emergency-repair decision reach the recorded final-input boundary with no device input."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "HpControl.RepairUseSingleThreshold",
+      "note": "Normalized ratio boundaries and the original minimum-HP repair branch are replayed; out-of-range and non-finite values fail closed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "HpControl.UseEmergencyRepair",
+      "note": "False is admitted; true is classified but refused because the pinned branch still depends on unqualified combat templates and input."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "HpControl.UseHpBalance",
+      "note": "False is admitted; true is classified but refused because the final scout-position action is still a coordinate drag."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hp_control_config.py",
+        "python/alas_headless/alas_hp_control_config_replay.py",
+        "docs/status.md"
+      ],
+      "field": "HpControl.UseLowHpRetreat",
+      "note": "False is admitted; true and its threshold behavior are classified but refused before the unqualified campaign withdrawal loop."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
         "tests/test_alas_mail_config.py",
         "python/alas_headless/alas_mail_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
@@ -7402,8 +7564,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "58fda5dcccd5c01a57d0d0d2eb4b982b5b111ffadf3789e39ac17698fe8f44d2",
-      "manifest_sha256": "edd91e50e46fabcba255a5b0e3a8caa3f4012a09f38e76fafdffdb0bc2cb8158",
+      "combined_sha256": "c05aea72dd35aaf855989b0724f4b0a942a5d1a21d5b7220326e03509490068b",
+      "manifest_sha256": "8e7f29d21b1f0d75d838d772a6cac5e38eb35cbac6caa5d0dda8257c175e6d9f",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

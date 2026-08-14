@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Mapping, Tuple
 
 from .semantic_oracle import SemanticGateClosed
@@ -31,6 +31,35 @@ class AlasSchedulerTaskSnapshot:
     success_interval: Any
     failure_interval: Any
     server_updates: Tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class AlasTaskHoardingSnapshot:
+    minutes: int
+    duration: timedelta
+
+
+def validate_alas_task_hoarding_config(
+    data: Mapping[str, Any],
+) -> AlasTaskHoardingSnapshot:
+    """Bound the global queue-hoarding offset before ALAS applies it."""
+
+    try:
+        value = data["Alas"]["Optimization"]["TaskHoardingDuration"]
+    except (KeyError, TypeError) as exc:
+        raise SemanticGateClosed(
+            "Alas.Optimization.TaskHoardingDuration is missing"
+        ) from exc
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise SemanticGateClosed("TaskHoardingDuration must be whole minutes")
+    if not 0 <= value <= 1440:
+        raise SemanticGateClosed(
+            "TaskHoardingDuration must be between zero and 1440 minutes"
+        )
+    return AlasTaskHoardingSnapshot(
+        minutes=value,
+        duration=timedelta(minutes=value),
+    )
 
 
 def _validate_interval(value: Any, *, field: str) -> None:

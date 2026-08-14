@@ -78,6 +78,10 @@ from .alas_fleet_config_contract import (
     AlasFleetConfigSnapshot,
     validate_alas_fleet_config,
 )
+from .alas_hp_control_config_contract import (
+    AlasHpControlConfigSnapshot,
+    validate_alas_hp_control_config,
+)
 from .alas_mail_config_contract import (
     AlasMailConfigSnapshot,
     validate_alas_mail_config,
@@ -1766,6 +1770,11 @@ class AlasSemanticAdapter:
         self, **values: object
     ) -> AlasFleetConfigSnapshot:
         return validate_alas_fleet_config(**values)
+
+    def validate_campaign_hp_control_config(
+        self, **values: object
+    ) -> AlasHpControlConfigSnapshot:
+        return validate_alas_hp_control_config(**values)
 
     def campaign_stage_entry_allowed(self) -> bool:
         context = self._require_campaign_context()
@@ -9806,6 +9815,11 @@ class AlasSemanticSession:
         self, **values: object
     ) -> AlasFleetConfigSnapshot:
         return self.open().validate_campaign_fleet_config(**values)
+
+    def validate_campaign_hp_control_config(
+        self, **values: object
+    ) -> AlasHpControlConfigSnapshot:
+        return self.open().validate_campaign_hp_control_config(**values)
 
     def campaign_hard_remain(self) -> int:
         return self.open().campaign_hard_remain()

@@ -14,7 +14,11 @@ from pathlib import Path
 from types import MethodType, SimpleNamespace
 from typing import Any, Callable, Dict, Mapping, MutableMapping, Sequence
 
-from .alas_scheduler_contract import SCHEDULER_FIELDS, validate_alas_scheduler_config
+from .alas_scheduler_contract import (
+    SCHEDULER_FIELDS,
+    validate_alas_scheduler_config,
+    validate_alas_task_hoarding_config,
+)
 
 
 class _Logger:
@@ -173,6 +177,14 @@ def verify_scheduler_contract(alas_root: Path) -> Mapping[str, object]:
     )
     deep_get = deep["deep_get"]
     deep_set = deep["deep_set"]
+    hoarding_node = copy.deepcopy(
+        _method(trees["config"], "AzurLaneConfig", "hoarding")
+    )
+    hoarding_node.decorator_list = []
+    original_hoarding = _compile(
+        [hoarding_node],
+        {"deep_get": deep_get, "timedelta": timedelta},
+    )["hoarding"]
     filter_type = _compile([_class(trees["filter"], "Filter")], {"re": re, "logger": logger})[
         "Filter"
     ]
@@ -288,7 +300,25 @@ def verify_scheduler_contract(alas_root: Path) -> Mapping[str, object]:
             raise AssertionError(name)
         cases.append(name)
 
+    for minutes in (0, 1, 15, 1440):
+        data = {"Alas": {"Optimization": {"TaskHoardingDuration": minutes}}}
+        snapshot = validate_alas_task_hoarding_config(data)
+        original = original_hoarding(SimpleNamespace(data=data))
+        check(
+            f"task-hoarding-{minutes}",
+            snapshot.duration == original == timedelta(minutes=minutes),
+        )
+    for value in (-1, 1441, True, 1.5, "15", None):
+        data = {"Alas": {"Optimization": {"TaskHoardingDuration": value}}}
+        try:
+            validate_alas_task_hoarding_config(data)
+        except Exception:
+            continue
+        raise AssertionError("invalid task-hoarding duration was admitted")
+    cases.append("task-hoarding-invalid-values-fail-closed")
+
     def queue(data: MutableMapping[str, object], priority: str) -> SimpleNamespace:
+        data.setdefault("Alas", {"Optimization": {"TaskHoardingDuration": 0}})
         target = SimpleNamespace(
             data=data,
             hoarding=timedelta(0),

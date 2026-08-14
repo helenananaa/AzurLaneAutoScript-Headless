@@ -33,7 +33,7 @@
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "ee5b4defa41ca9b328415d6c79dc70843ca5e0fcc6b903791bd18217445f3049"
+      "sha256": "42d96778662d0e42a471f03f674a807ad3f255e1473d4719675705b29b6197e1"
     },
     {
       "order": 8,
@@ -78,7 +78,7 @@
     {
       "order": 16,
       "path": "integration/alas/series/0140-scheduler-contract.patch",
-      "sha256": "95077d5a2febf95567d141dc1a9f559839c7e8a4200b1b3aff56d40a4502a125"
+      "sha256": "2cfcc7595708c04b3e6b38a069ef763170c5a05fc37c09eac685f0cd53c3419d"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",
