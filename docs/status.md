@@ -674,6 +674,19 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     refresh, currency mutation, confirmation, receipt, or Android input occurs.
     These five fields move only to `offline=complete`; real item/balance
     observation, purchase/refresh confirmation, and receipts remain unverified.
+
+### GuildShop entry choices: offline predicate contract passed
+
+  - `GuildShop.Refresh` is gated before the original loop. Recorder replay
+    retains the empty-filter exit, disabled refresh, 110-coin threshold,
+    successful second pass, and unavailable-refresh stop.
+  - `GuildShop.Filter` is checked against the pinned upstream shop selector
+    grammar before trimming. The default, Unicode separator, and intentional
+    blank-filter skip remain equivalent; unknown/trailing tokens and non-text
+    input fail before filtering.
+  - `shop_buy` and `shop_refresh` are recorders only. No real item choice,
+    purchase, refresh, currency mutation, confirmation, receipt, or Android
+    input occurs; all GuildShop secondary choice fields remain unverified.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

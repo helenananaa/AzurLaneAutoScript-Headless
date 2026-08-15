@@ -3080,6 +3080,53 @@ index 93b011bb..cd28a37f 100644
          if self.ui_get_current_page() == page_munitions:
              logger.info(f'Already at {page_munitions}')
              return
+diff --git a/module/shop/shop_guild.py b/module/shop/shop_guild.py
+index 12e289f1..ef1e2d02 100644
+--- a/module/shop/shop_guild.py
++++ b/module/shop/shop_guild.py
+@@ -1,7 +1,7 @@
+ from module.base.decorator import cached_property
+ from module.logger import logger
+ from module.shop.assets import *
+-from module.shop.base import ShopItemGrid, ShopItemGrid_250814
++from module.shop.base import FILTER, ShopItemGrid, ShopItemGrid_250814
+ from module.shop.clerk import ShopClerk
+ from module.shop.shop_status import ShopStatus
+ from module.shop.ui import ShopUI
+@@ -16,7 +16,12 @@ class GuildShop_250814(ShopClerk, ShopUI, ShopStatus):
+         Returns:
+             str:
+         """
+-        return self.config.GuildShop_Filter.strip()
++        from alas_headless import validate_alas_guild_shop_filter
++
++        return validate_alas_guild_shop_filter(
++            filter_=FILTER,
++            value=self.config.GuildShop_Filter,
++        ).strip()
+ 
+     # New UI in 2025-08-14
+     @cached_property
+@@ -91,6 +96,11 @@ class GuildShop_250814(ShopClerk, ShopUI, ShopStatus):
+         """
+         Run Guild Shop
+         """
++        from alas_headless import validate_alas_guild_shop_refresh
++
++        refresh = validate_alas_guild_shop_refresh(
++            refresh=self.config.GuildShop_Refresh,
++        )
+         # Base case; exit run if filter empty
+         if not self.shop_filter:
+             return
+@@ -101,7 +111,6 @@ class GuildShop_250814(ShopClerk, ShopUI, ShopStatus):
+ 
+         # Execute buy operations
+         # Refresh if enabled and available
+-        refresh = self.config.GuildShop_Refresh
+         for _ in range(2):
+             success = self.shop_buy()
+             if not success:
 diff --git a/module/shop/shop_general.py b/module/shop/shop_general.py
 index 48dff114..fe245758 100644
 --- a/module/shop/shop_general.py

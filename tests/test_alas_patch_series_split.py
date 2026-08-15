@@ -70,6 +70,7 @@ FLOW_PATHS = {
         "module/shop/base.py",
         "module/shop/clerk.py",
         "module/shop/shop_general.py",
+        "module/shop/shop_guild.py",
         "module/shop/shop_medal.py",
         "module/shop/ui.py",
     },

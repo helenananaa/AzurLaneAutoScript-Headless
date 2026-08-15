@@ -75,6 +75,10 @@ from .alas_general_shop_config_contract import (
     validate_alas_general_shop_refresh,
     validate_alas_general_shop_use_gems,
 )
+from .alas_guild_shop_config_contract import (
+    validate_alas_guild_shop_filter,
+    validate_alas_guild_shop_refresh,
+)
 from .alas_data_key_config_contract import (
     AlasDataKeyConfigSnapshot,
     validate_alas_data_key_config,
