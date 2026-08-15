@@ -124,6 +124,11 @@
       "order": 25,
       "path": "integration/alas/series/0195-gems-farming-config-contract.patch",
       "sha256": "9728e8901318ed578d0e4179f56d6f300f7f7e7e9ec57e5a89c219219c42d58e"
+    },
+    {
+      "order": 26,
+      "path": "integration/alas/series/0200-opsi-stronghold-source-only-gate.patch",
+      "sha256": "6296ebb0196a40d2092337cef97d0413406f5c03be2306ef99e77af798b83e4a"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

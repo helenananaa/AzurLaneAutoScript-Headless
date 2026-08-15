@@ -1,0 +1,24 @@
+{
+  "android_input_injected": false,
+  "headless_execution": "blocked_before_campaign_load",
+  "mutation_budget": 0,
+  "outcome": "source-only-audit; headless-fail-closed-skip",
+  "qualified_scope": "OpsiStronghold.ForceRun only preserves scheduler delay exclusions; it does not admit Stronghold task execution",
+  "schema": "alas-headless.opsi-stronghold-source-only-audit/v1",
+  "source_sha256": {
+    "module/campaign/os_run.py": "c84420c441e6726f72e932a314d2c5044b1253f9f20d0a1b0d0853b35c6bc334",
+    "module/config/argument/args.json": "722bbac03fa73f7395e8a674d337180a6ccdb0bd561c5bb26241f968009b7037",
+    "module/config/config.py": "fdaba7e77c5ffdca9e71a2ded80095a9ce061335d44a30861df9f9cd1963b854",
+    "module/os/assets.py": "682a2aa578cbfbfe02df22a464047827cf656d347aff5e0e2691e4c324540baf",
+    "module/os/globe_camera.py": "e054bb5c5f377e8cd0237ad6dbde82dd9b6a9f7e4e51f8bc79c41409e55ff55b",
+    "module/os/tasks/stronghold.py": "b91d677e9f31d79f79d9cfdd90c2fbb6cfa8da8ecd01aa7f434f7b3aa5f677e5"
+  },
+  "unqualified_observations": [
+    "3d-vortex-stronghold-presence",
+    "stronghold-entry-postcondition",
+    "real-fleet-selection",
+    "combat-and-retreat-state",
+    "settlement-postcondition"
+  ],
+  "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+}

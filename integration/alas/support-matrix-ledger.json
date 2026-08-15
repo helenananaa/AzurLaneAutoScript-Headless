@@ -5742,6 +5742,10 @@
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0140-scheduler-contract.patch",
+        "tests/test_alas_opsi_stronghold_source_only.py",
+        "python/alas_headless/alas_opsi_stronghold_source_audit.py",
+        "integration/alas/opsi-stronghold-source-only-audit.json",
+        "integration/alas/series/0200-opsi-stronghold-source-only-gate.patch",
         "docs/status.md"
       ],
       "group_code": "M",
@@ -5750,7 +5754,7 @@
         "OpsiStronghold"
       ],
       "path": "OpsiStronghold.ForceRun",
-      "status_label": "☐ 未逐值",
+      "status_label": "⛔ Headless 跳过",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -8024,7 +8028,7 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiStronghold",
-      "note": "ForceRun 的侦察/潜艇延迟排除已离线等价；3D 漩涡当前无法由 UI 树可靠观察，存在检测、过滤、进入、战斗和结算均未闭环",
+      "note": "ForceRun 的侦察/潜艇延迟排除已离线等价；原版要塞会进入真实舰队/战斗路径，但 3D 漩涡无可靠语义观察，Headless 在 campaign 创建前 fail-closed 跳过，存在检测、进入、战斗和结算均未闭环",
       "status": "M"
     },
     {
@@ -10401,9 +10405,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "6018f8f7142cdf2e5d27e88b89e7def2a449cc502dc5f502c749a236d075205b",
-      "manifest_sha256": "2b97a9d4e1065303813f76f8ff56318192656f120a91e9244f6ee224ce190654",
-      "member_count": 25
+      "combined_sha256": "9baa1268c6a366a51f43af04fcb98f9e95e9c87a8364b6d5847455718ecb03d0",
+      "manifest_sha256": "d879c705943f5161e839241e5e3cb897aecc7606b2c75ae1d7e18c012153810f",
+      "member_count": 26
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }
