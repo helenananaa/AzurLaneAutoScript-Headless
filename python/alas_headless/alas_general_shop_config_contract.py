@@ -25,3 +25,10 @@ def validate_alas_general_shop_custom_items_config(
         consume_coins=consume_coins,
         buy_skin_box=buy_skin_box,
     )
+
+
+def validate_alas_general_shop_use_gems(*, use_gems: object) -> bool:
+    """Validate the gem-purchase screening switch before item inspection."""
+    if type(use_gems) is not bool:
+        raise SemanticGateClosed("GeneralShop.UseGems must be a bool")
+    return use_gems

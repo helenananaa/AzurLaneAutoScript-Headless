@@ -3081,10 +3081,29 @@ index 93b011bb..cd28a37f 100644
              logger.info(f'Already at {page_munitions}')
              return
 diff --git a/module/shop/shop_general.py b/module/shop/shop_general.py
-index 48dff114..b46cb1a4 100644
+index 48dff114..105a030c 100644
 --- a/module/shop/shop_general.py
 +++ b/module/shop/shop_general.py
-@@ -121,11 +121,17 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
+@@ -98,12 +98,17 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
+         Returns:
+             bool: whether item can be bought
+         """
++        from alas_headless import validate_alas_general_shop_use_gems
++
++        use_gems = validate_alas_general_shop_use_gems(
++            use_gems=self.config.GeneralShop_UseGems,
++        )
+         if item.cost == 'Coins':
+             if item.price > self._currency:
+                 return False
+             return True
+ 
+-        if self.config.GeneralShop_UseGems:
++        if use_gems:
+             if item.cost == 'Gems':
+                 if item.price > self.gems:
+                     return False
+@@ -121,11 +126,17 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
          Returns:
              bool: whether item is custom
          """

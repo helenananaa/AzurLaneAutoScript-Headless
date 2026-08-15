@@ -10,6 +10,7 @@ from typing import Any
 
 from .alas_general_shop_config_contract import (
     validate_alas_general_shop_custom_items_config,
+    validate_alas_general_shop_use_gems,
 )
 from .semantic_oracle import SemanticGateClosed
 
@@ -55,6 +56,7 @@ def _verify_generated_config(config_path: Path) -> dict[str, bool]:
     expected = {
         "GeneralShop_ConsumeCoins": False,
         "GeneralShop_BuySkinBox": False,
+        "GeneralShop_UseGems": False,
     }
     for node in ast.walk(tree):
         if not isinstance(node, ast.Assign):
@@ -70,6 +72,7 @@ def _verify_generated_config(config_path: Path) -> dict[str, bool]:
     return {
         "ConsumeCoins": values["GeneralShop_ConsumeCoins"],
         "BuySkinBox": values["GeneralShop_BuySkinBox"],
+        "UseGems": values["GeneralShop_UseGems"],
     }
 
 
@@ -88,6 +91,10 @@ def _verify_contract() -> tuple[int, int]:
             ):
                 raise AssertionError("GeneralShop custom-item canonical values drifted")
             accepted += 1
+    for use_gems in (False, True):
+        if validate_alas_general_shop_use_gems(use_gems=use_gems) is not use_gems:
+            raise AssertionError("GeneralShop.UseGems canonical value drifted")
+        accepted += 1
     for field in ("consume_coins", "buy_skin_box"):
         for value in ("true", None, 0, 1, [], {}):
             values = {"consume_coins": False, "buy_skin_box": False}
@@ -98,6 +105,13 @@ def _verify_contract() -> tuple[int, int]:
                 invalid += 1
             else:
                 raise AssertionError(f"invalid GeneralShop.{field} was admitted")
+    for value in ("true", None, 0, 1, [], {}):
+        try:
+            validate_alas_general_shop_use_gems(use_gems=value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid GeneralShop.UseGems was admitted")
     return accepted, invalid
 
 
@@ -221,6 +235,103 @@ def _verify_original(method) -> dict[str, object]:
     return {"cases": cases, "invalid_entries": invalid}
 
 
+def _item_check_case(
+    method,
+    *,
+    use_gems: object,
+    currency: int,
+    gems: int,
+    cost: str,
+    price: int,
+) -> dict[str, object]:
+    events: list[str] = []
+
+    class Item:
+        def __init__(self) -> None:
+            self.cost = cost
+            self.price = price
+
+        def __getattribute__(self, name: str):
+            if name in {"cost", "price"}:
+                events.append(f"item.{name}")
+            return object.__getattribute__(self, name)
+
+    item = Item()
+    host = SimpleNamespace(
+        config=SimpleNamespace(GeneralShop_UseGems=use_gems),
+        _currency=currency,
+        gems=gems,
+    )
+    try:
+        result = method(host, item)
+    except SemanticGateClosed:
+        rejected = True
+        result = None
+    else:
+        rejected = False
+    return {"rejected": rejected, "result": result, "events": events}
+
+
+def _verify_item_check(method) -> dict[str, object]:
+    cases = {
+        "coins": _item_check_case(
+            method,
+            use_gems=False,
+            currency=100,
+            gems=0,
+            cost="Coins",
+            price=100,
+        ),
+        "gems_disabled": _item_check_case(
+            method,
+            use_gems=False,
+            currency=0,
+            gems=100,
+            cost="Gems",
+            price=1,
+        ),
+        "gems_affordable": _item_check_case(
+            method,
+            use_gems=True,
+            currency=0,
+            gems=100,
+            cost="Gems",
+            price=100,
+        ),
+        "gems_insufficient": _item_check_case(
+            method,
+            use_gems=True,
+            currency=0,
+            gems=99,
+            cost="Gems",
+            price=100,
+        ),
+    }
+    if any(case["rejected"] for case in cases.values()):
+        raise AssertionError("valid GeneralShop.UseGems was rejected")
+    if (
+        cases["coins"]["result"] is not True
+        or cases["gems_disabled"]["result"] is not False
+        or cases["gems_affordable"]["result"] is not True
+        or cases["gems_insufficient"]["result"] is not False
+    ):
+        raise AssertionError("GeneralShop.UseGems price branches drifted")
+    invalid = {
+        repr(value): _item_check_case(
+            method,
+            use_gems=value,
+            currency=0,
+            gems=100,
+            cost="Gems",
+            price=1,
+        )
+        for value in ("true", None, 0, 1, [], {})
+    }
+    if any(not case["rejected"] or case["events"] for case in invalid.values()):
+        raise AssertionError("invalid GeneralShop.UseGems reached item inspection")
+    return {"cases": cases, "invalid_entries": invalid}
+
+
 def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
     alas_root = alas_root.resolve()
     source_path = alas_root / "module" / "shop" / "shop_general.py"
@@ -229,6 +340,7 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
         raise FileNotFoundError("ALAS GeneralShop source is incomplete")
     generated = _verify_generated_config(config_path)
     method = _method(source_path, "GeneralShop_250814", "shop_check_custom_item")
+    item_check_method = _method(source_path, "GeneralShop_250814", "shop_check_item")
     attributes = {
         node.attr for node in ast.walk(method) if isinstance(node, ast.Attribute)
     }
@@ -245,6 +357,20 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
     }
     if "validate_alas_general_shop_custom_items_config" not in guards:
         raise AssertionError("GeneralShop custom-item fail-closed guard is absent")
+    item_check_attributes = {
+        node.attr
+        for node in ast.walk(item_check_method)
+        if isinstance(node, ast.Attribute)
+    }
+    if "GeneralShop_UseGems" not in item_check_attributes:
+        raise AssertionError("GeneralShop.UseGems consumer surface drifted")
+    item_check_guards = {
+        node.func.id
+        for node in ast.walk(item_check_method)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    }
+    if "validate_alas_general_shop_use_gems" not in item_check_guards:
+        raise AssertionError("GeneralShop.UseGems fail-closed guard is absent")
     accepted, invalid = _verify_contract()
     original = _verify_original(
         _compile(
@@ -257,19 +383,33 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
             },
         )
     )
+    item_decisions = _verify_item_check(
+        _compile(
+            item_check_method,
+            {
+                "validate_alas_general_shop_use_gems": (
+                    validate_alas_general_shop_use_gems
+                ),
+            },
+        )
+    )
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 2,
+        "field_count": 3,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "generated_defaults": generated,
         "runtime_consumers": {
             "GeneralShop.ConsumeCoins": "GeneralShop_250814.shop_check_custom_item",
             "GeneralShop.BuySkinBox": "GeneralShop_250814.shop_check_custom_item",
+            "GeneralShop.UseGems": "GeneralShop_250814.shop_check_item",
         },
         "patched_guard_present": True,
-        "original_decisions": original,
+        "original_decisions": {
+            "custom_items": original,
+            "item_check": item_decisions,
+        },
         "mutation_budget": 0,
         "real_purchase_performed": False,
         "real_refresh_performed": False,

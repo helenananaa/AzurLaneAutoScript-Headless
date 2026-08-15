@@ -4,6 +4,7 @@ from pathlib import Path
 
 from alas_headless.alas_general_shop_config_contract import (
     validate_alas_general_shop_custom_items_config,
+    validate_alas_general_shop_use_gems,
 )
 from alas_headless.semantic_oracle import SemanticGateClosed
 from scripts.python.verify_alas_general_shop_config import verify_clean_upstream
@@ -19,9 +20,9 @@ class AlasGeneralShopConfigTests(unittest.TestCase):
             self.skipTest("local pinned ALAS verification tree is unavailable")
         result = verify_clean_upstream(PINNED_UPSTREAM)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 2)
-        self.assertEqual(result["accepted_case_count"], 4)
-        self.assertEqual(result["invalid_case_count"], 12)
+        self.assertEqual(result["field_count"], 3)
+        self.assertEqual(result["accepted_case_count"], 6)
+        self.assertEqual(result["invalid_case_count"], 18)
         self.assertEqual(result["mutation_budget"], 0)
         self.assertFalse(result["real_purchase_performed"])
         self.assertFalse(result["android_input_injected"])
@@ -39,6 +40,11 @@ class AlasGeneralShopConfigTests(unittest.TestCase):
                     )
                     self.assertIs(snapshot.consume_coins, consume_coins)
                     self.assertIs(snapshot.buy_skin_box, buy_skin_box)
+        for use_gems in (False, True):
+            self.assertIs(
+                validate_alas_general_shop_use_gems(use_gems=use_gems),
+                use_gems,
+            )
 
     def test_invalid_values_fail_closed(self):
         for field in ("consume_coins", "buy_skin_box"):
@@ -50,6 +56,11 @@ class AlasGeneralShopConfigTests(unittest.TestCase):
                         consume_coins=value if field == "consume_coins" else False,
                         buy_skin_box=value if field == "buy_skin_box" else False,
                     )
+        for value in ("true", None, 0, 1, [], {}):
+            with self.subTest(field="use_gems", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_general_shop_use_gems(use_gems=value)
 
     def test_patch_gates_custom_item_predicate(self):
         patch = ROOT.joinpath(
@@ -60,6 +71,7 @@ class AlasGeneralShopConfigTests(unittest.TestCase):
             patch.count("validate_alas_general_shop_custom_items_config("),
             1,
         )
+        self.assertEqual(patch.count("validate_alas_general_shop_use_gems("), 1)
 
     def test_sources_compile(self):
         for relative in (
