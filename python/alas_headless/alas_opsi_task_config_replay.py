@@ -22,6 +22,7 @@ from .alas_opsi_task_config_contract import (
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
+    validate_alas_opsi_ash_assist_tier,
     validate_alas_opsi_akashi_filter,
     validate_alas_opsi_shop_custom_filter,
     validate_alas_opsi_shop_filter,
@@ -83,6 +84,23 @@ class _HumanTakeover(RuntimeError):
 
 class _ResolverZone(SimpleNamespace):
     pass
+
+
+class _SequenceOcr:
+    def __init__(self):
+        self.values: list[int] = []
+        self.events: list[Any] = []
+
+    def reset(self, values: tuple[int, ...], events: list[Any]) -> None:
+        self.values = list(values)
+        self.events = events
+
+    def ocr(self, _image) -> int:
+        if not self.values:
+            raise AssertionError("OpsiAshAssist OCR fixture was exhausted")
+        value = self.values.pop(0)
+        self.events.append(("ocr", value))
+        return value
 
 
 class _ResolverZones:
@@ -293,6 +311,15 @@ def _verify_args(args_path: Path) -> None:
     last_zone = explore["LastZone"]
     if last_zone.get("type") != "input" or last_zone.get("value") != 0:
         raise AssertionError("OpsiExplore.LastZone declaration drifted")
+    ash_assist = document.get("OpsiAshAssist", {}).get("OpsiAshAssist", {}).get(
+        "Tier"
+    )
+    if (
+        not isinstance(ash_assist, dict)
+        or ash_assist.get("type") != "input"
+        or ash_assist.get("value") != 15
+    ):
+        raise AssertionError("OpsiAshAssist.Tier declaration drifted")
     for task in ("OpsiAbyssal", "OpsiStronghold"):
         declaration = document.get(task, {}).get(task, {}).get("ForceRun")
         if (
@@ -1895,6 +1922,103 @@ def _verify_voucher_filter(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entries": invalid}
 
 
+def _ash_assist_case(
+    method,
+    *,
+    tier: object,
+    ocr_values: tuple[int, ...],
+    ready_values: tuple[bool, ...] = (True,),
+) -> dict[str, Any]:
+    events: list[Any] = []
+    readiness = list(ready_values)
+    ocr = method.__globals__["OCR_BEACON_TIER"]
+    ocr.reset(ocr_values, events)
+
+    class Device:
+        image = object()
+
+        @staticmethod
+        def screenshot():
+            events.append("screenshot")
+
+        @staticmethod
+        def click(target):
+            events.append(("click", target))
+
+        @staticmethod
+        def sleep(duration):
+            events.append(("sleep", duration))
+
+    def image_color_count(*_args, **_kwargs):
+        visible = readiness.pop(0) if readiness else True
+        events.append(("tier_visible", visible))
+        return visible
+
+    instance = SimpleNamespace(
+        config=SimpleNamespace(OpsiAshAssist_Tier=tier),
+        device=Device(),
+        image_color_count=image_color_count,
+    )
+    try:
+        method(instance)
+    except SemanticGateClosed:
+        rejected = True
+    else:
+        rejected = False
+    return {"rejected": rejected, "events": events}
+
+
+def _verify_ash_assist(method) -> dict[str, Any]:
+    cases = {
+        "negative": _ash_assist_case(method, tier=-1, ocr_values=(0,)),
+        "zero": _ash_assist_case(method, tier=0, ocr_values=(0,)),
+        "threshold": _ash_assist_case(
+            method,
+            tier=15,
+            ocr_values=(10, 12, 15),
+        ),
+        "fallback": _ash_assist_case(
+            method,
+            tier=15,
+            ocr_values=(1, 2, 3, 4, 5),
+        ),
+        "above_current_max": _ash_assist_case(
+            method,
+            tier=16,
+            ocr_values=(15, 15, 15, 15, 15),
+        ),
+        "wait_for_tier": _ash_assist_case(
+            method,
+            tier=15,
+            ocr_values=(15,),
+            ready_values=(False, False, True),
+        ),
+    }
+    if any(case["rejected"] for case in cases.values()):
+        raise AssertionError("valid OpsiAshAssist.Tier was rejected")
+    if cases["threshold"]["events"].count(("click", "beacon-next")) != 2:
+        raise AssertionError("OpsiAshAssist threshold rotation drifted")
+    if cases["fallback"]["events"].count(("click", "beacon-next")) != 5:
+        raise AssertionError("OpsiAshAssist five-trial fallback drifted")
+    if cases["zero"]["events"] != [("tier_visible", True), ("ocr", 0)]:
+        raise AssertionError("OpsiAshAssist zero threshold drifted")
+    if cases["wait_for_tier"]["events"][:5] != [
+        ("tier_visible", False),
+        "screenshot",
+        ("tier_visible", False),
+        "screenshot",
+        ("tier_visible", True),
+    ]:
+        raise AssertionError("OpsiAshAssist tier visibility wait drifted")
+    invalid = {
+        repr(value): _ash_assist_case(method, tier=value, ocr_values=(15,))
+        for value in (None, True, False, "15", 15.0, [], {})
+    }
+    if any(not case["rejected"] or case["events"] for case in invalid.values()):
+        raise AssertionError("invalid OpsiAshAssist.Tier reached page observation")
+    return {"cases": cases, "invalid_entries": invalid}
+
+
 def _verify_contract(
     akashi_filter,
     opsi_shop_presets,
@@ -1902,6 +2026,9 @@ def _verify_contract(
     explore_resolver,
 ) -> tuple[int, int]:
     accepted = 0
+    for tier in (-1, 0, 1, 15, 16):
+        validate_alas_opsi_ash_assist_tier(tier=tier)
+        accepted += 1
     for mode in OPSI_MONTH_BOSS_MODES:
         for check in (False, True):
             validate_alas_opsi_month_boss_config(
@@ -2018,6 +2145,13 @@ def _verify_contract(
         )
         accepted += 1
     invalid = 0
+    for value in (None, True, False, "15", 15.0, [], {}):
+        try:
+            validate_alas_opsi_ash_assist_tier(tier=value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiAshAssist.Tier was admitted")
     for value in INVALID_MODES:
         try:
             validate_alas_opsi_month_boss_config(
@@ -2236,6 +2370,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     daily_path = alas_root / "module/os/tasks/daily.py"
     hazard_path = alas_root / "module/os/tasks/hazard_leveling.py"
     meowfficer_path = alas_root / "module/os/tasks/meowfficer_farming.py"
+    ash_assist_path = alas_root / "module/os_ash/meta.py"
     _verify_args(args_path)
     explore_consumers = _consumer_methods(
         explore_path,
@@ -2279,6 +2414,13 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         **hazard_consumers,
         **meowfficer_consumers,
     }
+    consumers.update(
+        _consumer_methods(
+            ash_assist_path,
+            "AshBeaconAssist",
+            ("OpsiAshAssist_Tier",),
+        )
+    )
     consumers["OpsiGeneral_UseLogger"] = [
         *_consumer_methods(
             obscure_path,
@@ -2367,6 +2509,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiShop_PresetFilter": ["items_filter_in_os_shop"],
         "OpsiShop_CustomFilter": ["items_filter_in_os_shop"],
         "OpsiVoucher_Filter": ["shop_filter"],
+        "OpsiAshAssist_Tier": ["_ensure_meta_level"],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -2385,6 +2528,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "validate_alas_opsi_action_point_purchase": (
             validate_alas_opsi_action_point_purchase
         ),
+        "validate_alas_opsi_ash_assist_tier": validate_alas_opsi_ash_assist_tier,
         "validate_alas_opsi_akashi_filter": validate_alas_opsi_akashi_filter,
         "validate_alas_opsi_shop_custom_filter": (
             validate_alas_opsi_shop_custom_filter
@@ -2414,6 +2558,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "ScriptError": _ScriptError,
         "Zone": _ResolverZone,
         "ACTION_POINTS_BUY": {1: 4000, 2: 2000, 3: 2000, 4: 1000, 5: 1000},
+        "BEACON_TIER": "beacon-tier",
+        "BEACON_NEXT": "beacon-next",
+        "OCR_BEACON_TIER": _SequenceOcr(),
     }
     fleet_node = _method(fleet_path, "OSFleet", "fleet_set")
     resolver_node = _method(globe_zone_path, "ZoneManager", "name_to_zone")
@@ -2474,6 +2621,11 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiMeowfficerFarming",
         "os_meowfficer_farming",
     )
+    ash_assist_node = _method(
+        ash_assist_path,
+        "AshBeaconAssist",
+        "_ensure_meta_level",
+    )
     explore_guard = any(
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
@@ -2533,6 +2685,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and isinstance(node.func, ast.Name)
         and node.func.id == "validate_alas_opsi_meowfficer_config"
         for node in ast.walk(meowfficer_node)
+    )
+    ash_assist_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_ash_assist_tier"
+        for node in ast.walk(ash_assist_node)
     )
     storage_guard = any(
         isinstance(node, ast.Call)
@@ -2677,6 +2835,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             },
         )
     )
+    ash_assist = _verify_ash_assist(_compile(ash_assist_node, globals_))
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -2698,7 +2857,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 24,
+        "field_count": 25,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -2721,6 +2880,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and akashi_guard
             and all(opsi_shop_guards.values())
             and voucher_guard
+            and ash_assist_guard
         ),
         "validated_runtime_boundaries": {
             "OpsiFleet.Fleet": "OSFleet.fleet_set",
@@ -2746,6 +2906,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "OpsiShop.CustomFilter": "Selector.items_filter_in_os_shop",
             "OpsiVoucher.Filter": "VoucherShop.shop_filter",
             "OpsiExplore.LastZone": "OpsiExplore._os_explore",
+            "OpsiAshAssist.Tier": "AshBeaconAssist._ensure_meta_level",
         },
         "fleet_selection": fleet_selection,
         "order": order,
@@ -2756,6 +2917,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "akashi_shop_filter": akashi,
         "opsi_shop_filter": opsi_shop,
         "opsi_voucher_filter": voucher,
+        "opsi_ash_assist": ash_assist,
         "explore": explore,
         "task_delay": delay,
         "month_boss": month,
@@ -2790,5 +2952,6 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "daily": _sha256(daily_path),
             "hazard1_leveling": _sha256(hazard_path),
             "meowfficer_farming": _sha256(meowfficer_path),
+            "ash_assist": _sha256(ash_assist_path),
         },
     }

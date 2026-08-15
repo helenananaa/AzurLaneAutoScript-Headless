@@ -693,6 +693,25 @@ index 0d54085a..60f5a7f6 100644
          if self.image_color_count(ASH_COLLECT_STATUS, color=(235, 235, 235), threshold=221, count=20):
              logger.info('Ash beacon status: light')
              ocr_collect = DigitCounter(
+diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
+index c11023ff..cad52d51 100644
+--- a/module/os_ash/meta.py
++++ b/module/os_ash/meta.py
+@@ -566,9 +566,13 @@ class AshBeaconAssist(Meta):
+         """
+         Select an meta whose level satisfies
+         """
++        from alas_headless import validate_alas_opsi_ash_assist_tier
++
+         # Ensure BEACON_TIER shown up
+         # When entering beacon list, tier number wasn't shown immediately.
+-        tier = self.config.OpsiAshAssist_Tier
++        tier = validate_alas_opsi_ash_assist_tier(
++            tier=self.config.OpsiAshAssist_Tier,
++        )
+         logger.info('Begin find a level ' + str(tier) + ' meta')
+         for n in range(10):
+             if self.image_color_count(BEACON_TIER, color=(0, 0, 0), threshold=221, count=50):
 diff --git a/module/os_handler/enemy_searching.py b/module/os_handler/enemy_searching.py
 index e8e07363..62f4cd1e 100644
 --- a/module/os_handler/enemy_searching.py

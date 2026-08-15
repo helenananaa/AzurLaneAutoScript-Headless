@@ -602,6 +602,11 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   grammar, preserving Logger expansion, tier expansion, archive-token removal,
   Unicode separators, and intentional empty skip. Invalid tokens and types fail
   before voucher-page work; no exchange, scrolling, or Android input occurs.
+- `OpsiAshAssist.Tier` preserves the original tier-visibility wait, OCR
+  comparison, up to five beacon rotations, and current-beacon fallback for
+  exact integer thresholds. Malformed values fail before the first page
+  observation or click. No artificial level range is imposed because pinned
+  ALAS declares none.
 - `OpsiExplore.SpecialRadar` preserves the original tuning-sample use and
   `recon_scan` decisions in `_os_explore()`. The same value, together with
   `OpsiExplore.ForceRun`, `OpsiObscure.ForceRun`,
@@ -617,10 +622,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `OSFleet.fleet_set()` selector boundary. `OpsiFleet.Submarine` validates both
   booleans at `MapOrderHandler.os_order_execute()`, preserving scan/submarine
   dispatch, the submarine completion wait, and scheduler-delay arguments.
-- One hundred fifteen valid classes pass and 188 malformed values fail before task,
+- One hundred twenty valid classes pass and 195 malformed values fail before task,
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
-  or Android input. Twenty-four fields now have complete offline classification.
+  or Android input. Twenty-five fields now have complete offline classification.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

@@ -104,6 +104,7 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
     validate_alas_opsi_explore_last_zone,
+    validate_alas_opsi_ash_assist_tier,
     validate_alas_opsi_fleet_selection,
     validate_alas_opsi_hazard1_config,
     validate_alas_opsi_meowfficer_config,

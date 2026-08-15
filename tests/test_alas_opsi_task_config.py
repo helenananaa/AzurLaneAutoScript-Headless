@@ -11,6 +11,7 @@ from alas_headless.alas_opsi_task_config_contract import (
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
+    validate_alas_opsi_ash_assist_tier,
     validate_alas_opsi_akashi_filter,
     validate_alas_opsi_shop_custom_filter,
     validate_alas_opsi_shop_filter,
@@ -43,9 +44,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 24)
-        self.assertEqual(result["accepted_case_count"], 115)
-        self.assertEqual(result["invalid_case_count"], 188)
+        self.assertEqual(result["field_count"], 25)
+        self.assertEqual(result["accepted_case_count"], 120)
+        self.assertEqual(result["invalid_case_count"], 195)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -81,10 +82,16 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 "OpsiShop.CustomFilter": "Selector.items_filter_in_os_shop",
                 "OpsiVoucher.Filter": "VoucherShop.shop_filter",
                 "OpsiExplore.LastZone": "OpsiExplore._os_explore",
+                "OpsiAshAssist.Tier": "AshBeaconAssist._ensure_meta_level",
             },
         )
 
     def test_valid_values_are_classified(self):
+        for tier in (-1, 0, 1, 15, 16):
+            self.assertEqual(
+                validate_alas_opsi_ash_assist_tier(tier=tier),
+                tier,
+            )
         for mode in OPSI_MONTH_BOSS_MODES:
             for check in (False, True):
                 snapshot = validate_alas_opsi_month_boss_config(
@@ -288,6 +295,11 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             )
 
     def test_invalid_values_fail_closed(self):
+        for value in (None, True, False, "15", 15.0, [], {}):
+            with self.subTest(field="opsi_ash_assist_tier", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_ash_assist_tier(tier=value)
         for mode in ("", "hard", None, 0, True, [], {}):
             with self.subTest(mode=mode), self.assertRaises(SemanticGateClosed):
                 validate_alas_opsi_month_boss_config(
@@ -469,6 +481,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_shop_preset("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_voucher_filter("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_explore_last_zone("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_ash_assist_tier("), 1)
         scheduler_patch = ROOT.joinpath(
             "integration/alas/series/0140-scheduler-contract.patch"
         ).read_text(encoding="utf-8")

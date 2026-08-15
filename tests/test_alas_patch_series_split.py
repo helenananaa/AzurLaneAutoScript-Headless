@@ -117,6 +117,7 @@ FLOW_PATHS = {
         "module/os/tasks/obscure.py",
         "module/os/tasks/voucher.py",
         "module/os_ash/ash.py",
+        "module/os_ash/meta.py",
         "module/os_handler/enemy_searching.py",
         "module/os_handler/map_event.py",
         "module/os_handler/mission.py",

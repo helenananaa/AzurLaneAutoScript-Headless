@@ -370,3 +370,10 @@ def validate_alas_opsi_explore_last_zone(
     if type(zone_id) is not int or (zone_id != 0 and zone_id not in order):
         raise SemanticGateClosed("OpsiExplore.LastZone is outside the explore order")
     return zone_id
+
+
+def validate_alas_opsi_ash_assist_tier(*, tier: object) -> int:
+    """Validate the integer threshold consumed by the original assist selector."""
+    if type(tier) is not int:
+        raise SemanticGateClosed("OpsiAshAssist.Tier must be an int")
+    return tier
