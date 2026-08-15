@@ -1,0 +1,23 @@
+diff --git a/module/campaign/gems_farming.py b/module/campaign/gems_farming.py
+--- a/module/campaign/gems_farming.py
++++ b/module/campaign/gems_farming.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_gems_farming_config
++
+ from datetime import datetime
+ 
+ from module.base.decorator import Config, cached_property
+@@ -645,6 +647,13 @@ class GemsFarming(CampaignRun, Dock):
+             mode (str): `normal` or `hard`
+             total (int):
+         """
++        validate_alas_gems_farming_config(
++            change_flagship=self.config.GemsFarming_ChangeFlagship,
++            common_cv=self.config.GemsFarming_CommonCV,
++            change_vanguard=self.config.GemsFarming_ChangeVanguard,
++            common_dd=self.config.GemsFarming_CommonDD,
++            commission_limit=self.config.GemsFarming_CommissionLimit,
++        )
+         self.config.override(STOP_IF_REACH_LV32=True)
+ 
+         while 1:

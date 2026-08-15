@@ -3142,97 +3142,122 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_gems_farming_config.py",
+        "python/alas_headless/alas_gems_farming_config_replay.py",
+        "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=select; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "GemsFarming.ChangeFlagship",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "options: \"ship_equip\", \"ship\"; default: \"ship\""
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_gems_farming_config.py",
+        "python/alas_headless/alas_gems_farming_config_replay.py",
+        "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=select; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "GemsFarming.ChangeVanguard",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "options: \"disabled\", \"ship_equip\", \"ship\"; default: \"ship\""
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_gems_farming_config.py",
+        "python/alas_headless/alas_gems_farming_config_replay.py",
+        "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "GemsFarming.CommissionLimit",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_gems_farming_config.py",
+        "python/alas_headless/alas_gems_farming_config_replay.py",
+        "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=select; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "GemsFarming.CommonCV",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "options: \"any\", \"bogue\", \"hermes\", \"langley\", \"ranger\"; default: \"any\""
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_gems_farming_config.py",
+        "python/alas_headless/alas_gems_farming_config_replay.py",
+        "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=select; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "GemsFarming.CommonDD",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "options: \"any\", \"aulick_or_foote\", \"cassin_or_downes\", \"favourite\", \"z20_or_z21\"; default: \"any\""
     },
     {
@@ -10376,9 +10401,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "cc7a47dd6067b205b14afd80472374f6e0af83c0da61732b263698e118caef31",
-      "manifest_sha256": "3ab2b684f3d1cdf3c2be9d2eb7f7bb091dd9c7f66be9ca90d111b3fd6baf0415",
-      "member_count": 24
+      "combined_sha256": "6018f8f7142cdf2e5d27e88b89e7def2a449cc502dc5f502c749a236d075205b",
+      "manifest_sha256": "2b97a9d4e1065303813f76f8ff56318192656f120a91e9244f6ee224ce190654",
+      "member_count": 25
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

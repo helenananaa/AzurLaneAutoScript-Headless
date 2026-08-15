@@ -119,6 +119,11 @@
       "order": 24,
       "path": "integration/alas/series/0190-meowfficer-config-contract.patch",
       "sha256": "0b1eef685775f49d2ed300325f1576f4626000475ccb16c0a09058db360f5786"
+    },
+    {
+      "order": 25,
+      "path": "integration/alas/series/0195-gems-farming-config-contract.patch",
+      "sha256": "9728e8901318ed578d0e4179f56d6f300f7f7e7e9ec57e5a89c219219c42d58e"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

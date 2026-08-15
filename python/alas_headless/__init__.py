@@ -73,6 +73,14 @@ from .alas_meowfficer_config_contract import (
     MEOWFFICER_TRAIN_MODES,
     validate_alas_meowfficer_config,
 )
+from .alas_gems_farming_config_contract import (
+    AlasGemsFarmingConfigSnapshot,
+    GEMS_FARMING_CHANGE_FLAGSHIPS,
+    GEMS_FARMING_CHANGE_VANGUARDS,
+    GEMS_FARMING_COMMON_CVS,
+    GEMS_FARMING_COMMON_DDS,
+    validate_alas_gems_farming_config,
+)
 from .alas_private_quarters_config_contract import (
     AlasPrivateQuartersConfigSnapshot,
     PRIVATE_QUARTERS_SHIPS,
@@ -882,6 +890,12 @@ __all__ = (
     "AlasMeowfficerConfigSnapshot",
     "MEOWFFICER_TRAIN_MODES",
     "validate_alas_meowfficer_config",
+    "AlasGemsFarmingConfigSnapshot",
+    "GEMS_FARMING_CHANGE_FLAGSHIPS",
+    "GEMS_FARMING_CHANGE_VANGUARDS",
+    "GEMS_FARMING_COMMON_CVS",
+    "GEMS_FARMING_COMMON_DDS",
+    "validate_alas_gems_farming_config",
     "AlasGuildConfigSnapshot",
     "validate_alas_guild_config",
     "AlasPrivateQuartersConfigSnapshot",
