@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from math import isfinite
 
@@ -265,3 +266,26 @@ def validate_alas_opsi_rescan_config(
     return AlasOpsiRescanConfigSnapshot(
         do_random_map_event=do_random_map_event,
     )
+
+
+def validate_alas_opsi_akashi_filter(filter_: object, value: object) -> str:
+    """Validate tokens with the pinned ALAS selector grammar, not a copied one."""
+
+    if not isinstance(value, str):
+        raise SemanticGateClosed("OpsiGeneral.AkashiShopFilter must be text")
+    normalized = re.sub(r"[ \t\r\n]", "", value)
+    normalized = re.sub(r"[＞﹥›˃ᐳ❯]", ">", normalized)
+    normalized = re.sub(r"[‐‑‒–—―−－﹣﹘⁃]", "-", normalized)
+    tokens = normalized.split(">")
+    regex = getattr(filter_, "regex", None)
+    if not hasattr(regex, "fullmatch"):
+        raise SemanticGateClosed("pinned ALAS Akashi filter grammar is unavailable")
+    invalid = tuple(
+        token for token in tokens if not token or regex.fullmatch(token) is None
+    )
+    if invalid:
+        raise SemanticGateClosed(
+            "OpsiGeneral.AkashiShopFilter contains invalid token(s): "
+            + ", ".join(invalid)
+        )
+    return value

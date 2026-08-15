@@ -124,6 +124,7 @@ FLOW_PATHS = {
         "module/os_handler/port.py",
         "module/os_handler/storage.py",
         "module/os_shop/port_shop.py",
+        "module/os_shop/selector.py",
         "module/os_shop/shop.py",
         "module/shop/shop_voucher.py",
         "module/ui/scroll.py",

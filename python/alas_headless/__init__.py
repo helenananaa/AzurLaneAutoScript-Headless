@@ -110,6 +110,7 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_order,
     validate_alas_opsi_obscure_config,
     validate_alas_opsi_action_point_purchase,
+    validate_alas_opsi_akashi_filter,
     validate_alas_opsi_repair_config,
     validate_alas_opsi_rescan_config,
     validate_alas_opsi_storage_config,

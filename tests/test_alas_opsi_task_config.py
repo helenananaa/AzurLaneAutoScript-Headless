@@ -1,4 +1,5 @@
 import ast
+import re
 import unittest
 from itertools import product
 from pathlib import Path
@@ -10,6 +11,7 @@ from alas_headless.alas_opsi_task_config_contract import (
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
+    validate_alas_opsi_akashi_filter,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
     validate_alas_opsi_fleet_selection,
@@ -36,9 +38,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 19)
-        self.assertEqual(result["accepted_case_count"], 92)
-        self.assertEqual(result["invalid_case_count"], 155)
+        self.assertEqual(result["field_count"], 20)
+        self.assertEqual(result["accepted_case_count"], 97)
+        self.assertEqual(result["invalid_case_count"], 162)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -67,6 +69,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 "OpsiGeneral.OilLimit": "ActionPointHandler.action_point_buy",
                 "OpsiGeneral.RepairThreshold": "OSMap.handle_fleet_repair",
                 "OpsiGeneral.DoRandomMapEvent": "OSMap.run_auto_search",
+                "OpsiGeneral.AkashiShopFilter": (
+                    "Selector.items_filter_in_akashi_shop"
+                ),
             },
         )
 
@@ -193,6 +198,26 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 ).do_random_map_event,
                 do_random_map_event,
             )
+        filter_contract = type(
+            "FilterContract",
+            (),
+            {
+                "regex": re.compile(
+                    r"^(actionpoint|purplecoins|logger)(abyssal)?(t[1-6])?$",
+                    re.IGNORECASE,
+                )
+            },
+        )()
+        for parser in (
+            "ActionPoint",
+            "ActionPoint > PurpleCoins",
+            "ActionPoint ＞ PurpleCoins",
+            "LoggerAbyssalT6",
+        ):
+            self.assertEqual(
+                validate_alas_opsi_akashi_filter(filter_contract, parser),
+                parser,
+            )
 
     def test_invalid_values_fail_closed(self):
         for mode in ("", "hard", None, 0, True, [], {}):
@@ -305,6 +330,16 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_opsi_rescan_config(do_random_map_event=value)
+        filter_contract = type(
+            "FilterContract",
+            (),
+            {"regex": re.compile(r"^actionpoint$", re.IGNORECASE)},
+        )()
+        for value in ("ActionPoint > invalid", "ActionPoint >", None, True, 1, [], {}):
+            with self.subTest(field="akashi_filter", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_akashi_filter(filter_contract, value)
 
     def test_patch_gates_original_task_entries(self):
         patch = ROOT.joinpath(
@@ -324,6 +359,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         )
         self.assertEqual(patch.count("validate_alas_opsi_repair_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_rescan_config("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_akashi_filter("), 1)
         scheduler_patch = ROOT.joinpath(
             "integration/alas/series/0140-scheduler-contract.patch"
         ).read_text(encoding="utf-8")

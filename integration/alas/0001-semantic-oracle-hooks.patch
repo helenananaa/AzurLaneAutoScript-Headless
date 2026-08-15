@@ -6021,6 +6021,31 @@ index 56e0554e..9cebc1c1 100644
          items = []
          self.device.click_record.clear()
  
+diff --git a/module/os_shop/selector.py b/module/os_shop/selector.py
+index f3821a36..439ad01d 100644
+--- a/module/os_shop/selector.py
++++ b/module/os_shop/selector.py
+@@ -1,5 +1,6 @@
+ import re
+ from typing import List
++from alas_headless import validate_alas_opsi_akashi_filter
+ from module.config.config_generated import GeneratedConfig
+ from module.os_shop.preset import *
+ from module.os_shop.item import OSShopItem as Item
+@@ -97,10 +98,11 @@ class Selector():
+         Returns:
+             list[Item]:
+         """
+-        items = self.pretreatment(items)
+         parser = self.config.OpsiGeneral_AkashiShopFilter
+-        if not parser.strip():
++        if isinstance(parser, str) and not parser.strip():
+             parser = GeneratedConfig.OpsiGeneral_AkashiShopFilter
++        parser = validate_alas_opsi_akashi_filter(FILTER, parser)
++        items = self.pretreatment(items)
+         FILTER.load(parser)
+         return FILTER.applys(items, funcs=[self.check_cl1_purple_coins, self.enough_coins_in_akashi])
+ 
 diff --git a/module/os_shop/shop.py b/module/os_shop/shop.py
 index b97f0c0d..c7bf38d3 100644
 --- a/module/os_shop/shop.py

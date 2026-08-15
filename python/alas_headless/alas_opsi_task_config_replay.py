@@ -5,7 +5,9 @@ from __future__ import annotations
 import ast
 import hashlib
 import json
+import re
 from datetime import datetime, timedelta
+from functools import reduce
 from itertools import product
 from pathlib import Path
 from types import MethodType, SimpleNamespace
@@ -20,6 +22,7 @@ from .alas_opsi_task_config_contract import (
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
+    validate_alas_opsi_akashi_filter,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
     validate_alas_opsi_fleet_selection,
@@ -171,6 +174,27 @@ def _method(path: Path, owner: str, name: str) -> ast.FunctionDef:
     raise AssertionError(f"missing {owner}.{name} in {path.name}")
 
 
+def _class(path: Path, name: str) -> ast.ClassDef:
+    for node in _tree(path).body:
+        if isinstance(node, ast.ClassDef) and node.name == name:
+            return node
+    raise AssertionError(f"missing class {name} in {path.name}")
+
+
+def _assignment(path: Path, name: str, globals_: dict[str, Any]):
+    for node in _tree(path).body:
+        if (
+            isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == name
+                for target in node.targets
+            )
+        ):
+            expression = ast.fix_missing_locations(ast.Expression(node.value))
+            return eval(compile(expression, str(path), "eval"), dict(globals_))
+    raise AssertionError(f"missing assignment {name} in {path.name}")
+
+
 def _zone_fixtures(map_data_path: Path) -> _ResolverZones:
     for node in _tree(map_data_path).body:
         if (
@@ -190,6 +214,13 @@ def _zone_fixtures(map_data_path: Path) -> _ResolverZones:
 
 
 def _compile(node: ast.FunctionDef, globals_: dict[str, Any]):
+    namespace = dict(globals_)
+    module = ast.fix_missing_locations(ast.Module(body=[node], type_ignores=[]))
+    exec(compile(module, "<alas-opsi-task-config-replay>", "exec"), namespace)
+    return namespace[node.name]
+
+
+def _compile_class(node: ast.ClassDef, globals_: dict[str, Any]):
     namespace = dict(globals_)
     module = ast.fix_missing_locations(ast.Module(body=[node], type_ignores=[]))
     exec(compile(module, "<alas-opsi-task-config-replay>", "exec"), namespace)
@@ -1418,7 +1449,161 @@ def _verify_rescan(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry": invalid, "explicit_rescan": explicit}
 
 
-def _verify_contract() -> tuple[int, int]:
+def _akashi_items():
+    return [
+        SimpleNamespace(
+            name="ActionPoint",
+            cost="YellowCoins",
+            price=50,
+            count=1,
+            total_count=1,
+        ),
+        SimpleNamespace(
+            name="PurpleCoins",
+            cost="PurpleCoins",
+            price=100,
+            count=1,
+            total_count=1,
+        ),
+        SimpleNamespace(
+            name="LoggerAbyssalT6",
+            cost="YellowCoins",
+            price=500,
+            count=1,
+            total_count=1,
+        ),
+        SimpleNamespace(
+            name="UnknownItem",
+            cost="YellowCoins",
+            price=1,
+            count=1,
+            total_count=1,
+        ),
+    ]
+
+
+def _akashi_case(
+    method,
+    pretreatment,
+    enough_coins,
+    check_cl1,
+    *,
+    parser: object,
+    yellow_coins: int = 100,
+    purple_coins: int = 100,
+    cl1_enabled: bool = False,
+) -> dict[str, Any]:
+    events: list[str] = []
+    host = SimpleNamespace(
+        config=SimpleNamespace(OpsiGeneral_AkashiShopFilter=parser),
+        _shop_yellow_coins=yellow_coins,
+        _shop_purple_coins=purple_coins,
+        is_cl1_enabled=cl1_enabled,
+    )
+    bound_pretreatment = MethodType(pretreatment, host)
+    host.pretreatment = lambda items: (
+        events.append("pretreatment") or bound_pretreatment(items)
+    )
+    host.enough_coins_in_akashi = MethodType(enough_coins, host)
+    host.check_cl1_purple_coins = MethodType(check_cl1, host)
+    rejected = False
+    try:
+        result = MethodType(method, host)(_akashi_items())
+    except SemanticGateClosed:
+        rejected = True
+        result = []
+    return {
+        "rejected": rejected,
+        "items": [item.name for item in result],
+        "events": events,
+    }
+
+
+def _verify_akashi_filter(
+    method,
+    pretreatment,
+    enough_coins,
+    check_cl1,
+) -> dict[str, Any]:
+    cases = {
+        "default": _akashi_case(
+            method,
+            pretreatment,
+            enough_coins,
+            check_cl1,
+            parser="ActionPoint > PurpleCoins",
+        ),
+        "fallback": _akashi_case(
+            method,
+            pretreatment,
+            enough_coins,
+            check_cl1,
+            parser="  \n ",
+        ),
+        "unicode_separator": _akashi_case(
+            method,
+            pretreatment,
+            enough_coins,
+            check_cl1,
+            parser="ActionPoint ＞ PurpleCoins",
+        ),
+        "cl1": _akashi_case(
+            method,
+            pretreatment,
+            enough_coins,
+            check_cl1,
+            parser="ActionPoint > PurpleCoins",
+            cl1_enabled=True,
+        ),
+        "insufficient": _akashi_case(
+            method,
+            pretreatment,
+            enough_coins,
+            check_cl1,
+            parser="ActionPoint > PurpleCoins",
+            yellow_coins=49,
+            purple_coins=99,
+        ),
+        "tiered": _akashi_case(
+            method,
+            pretreatment,
+            enough_coins,
+            check_cl1,
+            parser="LoggerAbyssalT6",
+            yellow_coins=500,
+        ),
+    }
+    expected = {
+        "default": ["ActionPoint", "PurpleCoins"],
+        "fallback": ["ActionPoint", "PurpleCoins"],
+        "unicode_separator": ["ActionPoint", "PurpleCoins"],
+        "cl1": ["ActionPoint"],
+        "insufficient": [],
+        "tiered": ["LoggerAbyssalT6"],
+    }
+    for name, item_names in expected.items():
+        case = cases[name]
+        if case["rejected"] or case["items"] != item_names:
+            raise AssertionError(f"Akashi filter case drifted: {name}")
+    invalid = {
+        repr(value): _akashi_case(
+            method,
+            pretreatment,
+            enough_coins,
+            check_cl1,
+            parser=value,
+        )
+        for value in ("ActionPoint > invalid", "ActionPoint >", None, True, 1, [], {})
+    }
+    if any(
+        not case["rejected"] or case["events"]
+        for case in invalid.values()
+    ):
+        raise AssertionError("invalid Akashi filter touched shop item state")
+    return {"cases": cases, "invalid_entries": invalid}
+
+
+def _verify_contract(akashi_filter) -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
         for check in (False, True):
@@ -1458,6 +1643,15 @@ def _verify_contract() -> tuple[int, int]:
         validate_alas_opsi_rescan_config(
             do_random_map_event=do_random_map_event,
         )
+        accepted += 1
+    for parser in (
+        "ActionPoint",
+        "ActionPoint > PurpleCoins",
+        "ActionPoint ＞ PurpleCoins",
+        "LoggerAbyssalT6",
+        "RepairPack",
+    ):
+        validate_alas_opsi_akashi_filter(akashi_filter, parser)
         accepted += 1
     for action_point_preserve in (0, 1000, 2500):
         validate_alas_opsi_meowfficer_config(
@@ -1644,6 +1838,13 @@ def _verify_contract() -> tuple[int, int]:
             invalid += 1
         else:
             raise AssertionError("invalid OpsiGeneral.DoRandomMapEvent was admitted")
+    for value in ("ActionPoint > invalid", "ActionPoint >", None, True, 1, [], {}):
+        try:
+            validate_alas_opsi_akashi_filter(akashi_filter, value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiGeneral.AkashiShopFilter was admitted")
     return accepted, invalid
 
 
@@ -1655,6 +1856,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     globe_zone_path = alas_root / "module/os/globe_zone.py"
     map_data_path = alas_root / "module/os/map_data.py"
     os_map_path = alas_root / "module/os/map.py"
+    selector_path = alas_root / "module/os_shop/selector.py"
+    filter_path = alas_root / "module/base/filter.py"
     action_point_path = alas_root / "module/os_handler/action_point.py"
     storage_path = alas_root / "module/os_handler/storage.py"
     explore_path = alas_root / "module/os/tasks/explore.py"
@@ -1732,6 +1935,13 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     )
     consumers.update(
         _consumer_methods(
+            selector_path,
+            "Selector",
+            ("OpsiGeneral_AkashiShopFilter",),
+        )
+    )
+    consumers.update(
+        _consumer_methods(
             os_map_path,
             "OSMap",
             (
@@ -1770,6 +1980,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiGeneral_OilLimit": ["handle_action_point"],
         "OpsiGeneral_RepairThreshold": ["handle_fleet_repair"],
         "OpsiGeneral_DoRandomMapEvent": ["run_auto_search"],
+        "OpsiGeneral_AkashiShopFilter": ["items_filter_in_akashi_shop"],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -1788,6 +1999,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "validate_alas_opsi_action_point_purchase": (
             validate_alas_opsi_action_point_purchase
         ),
+        "validate_alas_opsi_akashi_filter": validate_alas_opsi_akashi_filter,
         "validate_alas_opsi_hazard1_config": validate_alas_opsi_hazard1_config,
         "validate_alas_opsi_meowfficer_config": validate_alas_opsi_meowfficer_config,
         "validate_alas_opsi_repair_config": validate_alas_opsi_repair_config,
@@ -1814,6 +2026,26 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     purchase_node = _method(action_point_path, "ActionPointHandler", "action_point_buy")
     repair_node = _method(os_map_path, "OSMap", "handle_fleet_repair")
     rescan_node = _method(os_map_path, "OSMap", "run_auto_search")
+    akashi_node = _method(
+        selector_path,
+        "Selector",
+        "items_filter_in_akashi_shop",
+    )
+    akashi_pretreatment_node = _method(
+        selector_path,
+        "Selector",
+        "pretreatment",
+    )
+    akashi_coins_node = _method(
+        selector_path,
+        "Selector",
+        "enough_coins_in_akashi",
+    )
+    akashi_cl1_node = _method(
+        selector_path,
+        "Selector",
+        "check_cl1_purple_coins",
+    )
     explore_node = _method(explore_path, "OpsiExplore", "_os_explore")
     order_node = _method(order_path, "MapOrderHandler", "os_order_execute")
     delay_task_node = _method(config_path, "AzurLaneConfig", "opsi_task_delay")
@@ -1910,6 +2142,32 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and node.func.id == "validate_alas_opsi_rescan_config"
         for node in ast.walk(rescan_node)
     )
+    akashi_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_akashi_filter"
+        for node in ast.walk(akashi_node)
+    )
+    filter_type = _compile_class(
+        _class(filter_path, "Filter"),
+        {"reduce": reduce, "re": re, "logger": _Logger()},
+    )
+    akashi_regex = _assignment(selector_path, "FILTER_REGEX", {"re": re})
+    akashi_filter = filter_type(
+        akashi_regex,
+        ("group", "sub_genre", "tier"),
+    )
+    akashi_globals = {
+        **globals_,
+        "FILTER": akashi_filter,
+        "FILTER_REGEX": akashi_regex,
+        "GeneratedConfig": SimpleNamespace(
+            OpsiGeneral_AkashiShopFilter="ActionPoint > PurpleCoins"
+        ),
+        "re": re,
+        "List": list,
+        "Item": SimpleNamespace,
+    }
     month = _verify_month(
         _compile(month_node, globals_),
         _compile(delay_node, globals_),
@@ -1934,6 +2192,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     purchase = _verify_purchase(_compile(purchase_node, globals_))
     repair = _verify_repair(_compile(repair_node, globals_))
     rescan = _verify_rescan(_compile(rescan_node, globals_))
+    akashi = _verify_akashi_filter(
+        _compile(akashi_node, akashi_globals),
+        _compile(akashi_pretreatment_node, akashi_globals),
+        _compile(akashi_coins_node, akashi_globals),
+        _compile(akashi_cl1_node, akashi_globals),
+    )
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -1946,11 +2210,11 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         if invalid["events"]:
             raise AssertionError("invalid month boss config touched task state")
         invalid_month_events = invalid
-    accepted, invalid = _verify_contract()
+    accepted, invalid = _verify_contract(akashi_filter)
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 19,
+        "field_count": 20,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -1969,6 +2233,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and purchase_guard
             and repair_guard
             and rescan_guard
+            and akashi_guard
         ),
         "validated_runtime_boundaries": {
             "OpsiFleet.Fleet": "OSFleet.fleet_set",
@@ -1987,6 +2252,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "OpsiGeneral.OilLimit": "ActionPointHandler.action_point_buy",
             "OpsiGeneral.RepairThreshold": "OSMap.handle_fleet_repair",
             "OpsiGeneral.DoRandomMapEvent": "OSMap.run_auto_search",
+            "OpsiGeneral.AkashiShopFilter": (
+                "Selector.items_filter_in_akashi_shop"
+            ),
         },
         "fleet_selection": fleet_selection,
         "order": order,
@@ -1994,6 +2262,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "action_point_purchase": purchase,
         "fleet_repair": repair,
         "random_map_event": rescan,
+        "akashi_shop_filter": akashi,
         "explore": explore,
         "task_delay": delay,
         "month_boss": month,
@@ -2013,6 +2282,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "globe_zone": _sha256(globe_zone_path),
             "map_data": _sha256(map_data_path),
             "os_map": _sha256(os_map_path),
+            "os_shop_selector": _sha256(selector_path),
+            "base_filter": _sha256(filter_path),
             "action_point": _sha256(action_point_path),
             "storage": _sha256(storage_path),
             "explore": _sha256(explore_path),

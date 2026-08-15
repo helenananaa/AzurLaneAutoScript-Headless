@@ -4980,9 +4980,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -7737,6 +7742,19 @@
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
         "docs/status.md"
       ],
+      "field": "OpsiGeneral.AkashiShopFilter",
+      "note": "Pinned upstream filter grammar preserves default fallback, Unicode separators, priority, CL1 PurpleCoins exclusion, and exact coin sufficiency; malformed rules fail before item pretreatment and no purchase input occurs."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "field": "OpsiGeneral.DoRandomMapEvent",
       "note": "Both booleans preserve no-rescan and full-rescan branches while explicit current/full API arguments remain independent; invalid config fails before ash, combat, drop, HP, or map state."
     },
@@ -9726,8 +9744,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "c14d68f818d3ac9b5dca1eecf0ddc935365e94f92099a44728c4e551b79d2dfe",
-      "manifest_sha256": "856f2ee6430f69f8087fc8d328e235c34cb48ca97c272315409ed4f897448a92",
+      "combined_sha256": "c58f6f2d0ce5b2b68ff7ade319be44a14652a906ba8b09c84aaf1c2cbfd06f7b",
+      "manifest_sha256": "bc5594ee99fe2ef274cc96136550fa52a9d593257305b441b796cae5e7d94759",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
