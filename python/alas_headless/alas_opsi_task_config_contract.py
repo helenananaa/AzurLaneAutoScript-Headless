@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from math import isfinite
-from typing import Mapping
+from typing import Callable, Mapping
 
 from .semantic_oracle import SemanticGateClosed
 
@@ -344,3 +344,29 @@ def validate_alas_opsi_voucher_filter(filter_: object, value: object) -> str:
         value,
         field="OpsiVoucher.Filter",
     )
+
+
+def validate_alas_opsi_explore_last_zone(
+    *,
+    value: object,
+    order: object,
+    resolver: Callable[[object], object],
+) -> int:
+    if type(value) is not int and (
+        not isinstance(value, str) or not value.strip()
+    ):
+        raise SemanticGateClosed("OpsiExplore.LastZone must be an id or name")
+    if (
+        not isinstance(order, (list, tuple))
+        or not order
+        or any(type(zone) is not int or zone <= 0 for zone in order)
+    ):
+        raise SemanticGateClosed("pinned ALAS OpsiExplore order is unavailable")
+    try:
+        zone = resolver(value)
+        zone_id = zone.zone_id
+    except Exception as exc:
+        raise SemanticGateClosed("OpsiExplore.LastZone cannot be resolved") from exc
+    if type(zone_id) is not int or (zone_id != 0 and zone_id not in order):
+        raise SemanticGateClosed("OpsiExplore.LastZone is outside the explore order")
+    return zone_id

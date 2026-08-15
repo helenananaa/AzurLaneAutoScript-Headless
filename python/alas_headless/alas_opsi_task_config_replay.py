@@ -29,6 +29,7 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_voucher_filter,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
+    validate_alas_opsi_explore_last_zone,
     validate_alas_opsi_fleet_selection,
     validate_alas_opsi_hazard1_config,
     validate_alas_opsi_meowfficer_config,
@@ -1052,16 +1053,28 @@ def _verify_delay(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entries": invalid_cases}
 
 
-def _explore_case(method, *, special_radar: object) -> dict[str, Any]:
+def _explore_case(
+    method,
+    resolver_method,
+    zone_fixtures,
+    *,
+    special_radar: object,
+    last_zone: object = 0,
+    order: str = "22",
+) -> dict[str, Any]:
     config = _Config(mode="normal", check=False, special_radar=special_radar)
+    config.OpsiExplore_LastZone = last_zone
+    config.OS_EXPLORE_FILTER = order
     events = config.events
     host = SimpleNamespace(
         config=config,
         _solved_map_event=set(),
         _os_explore_failed_zone=[],
     )
-    host.name_to_zone = lambda zone: events.append(["name_to_zone", zone]) or SimpleNamespace(
-        zone_id=int(zone)
+    resolver_host = SimpleNamespace(zones=zone_fixtures)
+    resolver = MethodType(resolver_method, resolver_host)
+    host.name_to_zone = lambda zone: (
+        events.append(["name_to_zone", zone]) or resolver(zone)
     )
     host.globe_goto = lambda zone, **kwargs: events.append(
         ["globe_goto", zone, kwargs]
@@ -1076,18 +1089,31 @@ def _explore_case(method, *, special_radar: object) -> dict[str, Any]:
     host.handle_after_auto_search = lambda: events.append("after_auto_search")
     rejected = False
     switched = False
+    stopped = False
     try:
         MethodType(method, host)()
     except SemanticGateClosed:
         rejected = True
     except _Switch:
         switched = True
-    return {"rejected": rejected, "switched": switched, "events": events}
+    except _TaskStop:
+        stopped = True
+    return {
+        "rejected": rejected,
+        "switched": switched,
+        "stopped": stopped,
+        "events": events,
+    }
 
 
-def _verify_explore(method) -> dict[str, Any]:
+def _verify_explore(method, resolver_method, zone_fixtures) -> dict[str, Any]:
     cases = {
-        str(value).lower(): _explore_case(method, special_radar=value)
+        str(value).lower(): _explore_case(
+            method,
+            resolver_method,
+            zone_fixtures,
+            special_radar=value,
+        )
         for value in (False, True)
     }
     for value, recon_scan in ((False, True), (True, False)):
@@ -1100,10 +1126,77 @@ def _verify_explore(method) -> dict[str, Any]:
         used_tuning = "tuning_sample_use" in case["events"]
         if used_tuning is not (not value):
             raise AssertionError("OpsiExplore.SpecialRadar tuning decision drifted")
-    invalid = _explore_case(method, special_radar=None)
-    if invalid != {"rejected": True, "switched": False, "events": []}:
+    invalid = _explore_case(
+        method,
+        resolver_method,
+        zone_fixtures,
+        special_radar=None,
+    )
+    if invalid != {
+        "rejected": True,
+        "switched": False,
+        "stopped": False,
+        "events": [],
+    }:
         raise AssertionError("invalid OpsiExplore.SpecialRadar touched task state")
-    return {"cases": cases, "invalid_entry": invalid}
+    resume = _explore_case(
+        method,
+        resolver_method,
+        zone_fixtures,
+        special_radar=False,
+        last_zone=22,
+        order="22 > 51",
+    )
+    resumed_globe = [
+        event for event in resume["events"] if event[0] == "globe_goto"
+    ]
+    if resume["rejected"] or not resume["switched"] or resumed_globe[:1] != [
+        ["globe_goto", 51, {"stop_if_safe": True}]
+    ]:
+        raise AssertionError("OpsiExplore.LastZone resume boundary drifted")
+    named_resume = _explore_case(
+        method,
+        resolver_method,
+        zone_fixtures,
+        special_radar=False,
+        last_zone="NA Ocean SW Sector B",
+        order="22 > 51",
+    )
+    named_globe = [
+        event for event in named_resume["events"] if event[0] == "globe_goto"
+    ]
+    if (
+        named_resume["rejected"]
+        or not named_resume["switched"]
+        or named_globe[:1] != [["globe_goto", 51, {"stop_if_safe": True}]]
+    ):
+        raise AssertionError("named OpsiExplore.LastZone resolution drifted")
+    invalid_last_zone = {
+        repr(value): _explore_case(
+            method,
+            resolver_method,
+            zone_fixtures,
+            special_radar=False,
+            last_zone=value,
+            order="22 > 51",
+        )
+        for value in (None, True, "missing zone", 44)
+    }
+    if any(
+        not case["rejected"]
+        or case["switched"]
+        or case["stopped"]
+        or any(event[0] == "globe_goto" for event in case["events"])
+        for case in invalid_last_zone.values()
+    ):
+        raise AssertionError("invalid OpsiExplore.LastZone reached map state")
+    return {
+        "cases": cases,
+        "invalid_entry": invalid,
+        "last_zone_resume": resume,
+        "last_zone_named_resume": named_resume,
+        "invalid_last_zone": invalid_last_zone,
+    }
 
 
 def _fleet_selection_case(method, *, fleet: object) -> dict[str, Any]:
@@ -1806,6 +1899,7 @@ def _verify_contract(
     akashi_filter,
     opsi_shop_presets,
     voucher_filter,
+    explore_resolver,
 ) -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
@@ -1873,6 +1967,14 @@ def _verify_contract(
         "Coin ＞ Fragment",
     ):
         validate_alas_opsi_voucher_filter(voucher_filter, parser)
+        accepted += 1
+    explore_order = (22, 51)
+    for value in (0, 22, "22", "Southeast Ocean Ridge A"):
+        validate_alas_opsi_explore_last_zone(
+            value=value,
+            order=explore_order,
+            resolver=explore_resolver,
+        )
         accepted += 1
     for action_point_preserve in (0, 1000, 2500):
         validate_alas_opsi_meowfficer_config(
@@ -2094,6 +2196,17 @@ def _verify_contract(
             invalid += 1
         else:
             raise AssertionError("invalid OpsiVoucher.Filter was admitted")
+    for value in (None, True, "", "missing zone", 44):
+        try:
+            validate_alas_opsi_explore_last_zone(
+                value=value,
+                order=explore_order,
+                resolver=explore_resolver,
+            )
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiExplore.LastZone was admitted")
     return accepted, invalid
 
 
@@ -2127,7 +2240,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     explore_consumers = _consumer_methods(
         explore_path,
         "OpsiExplore",
-        ("OpsiExplore_SpecialRadar",),
+        ("OpsiExplore_SpecialRadar", "OpsiExplore_LastZone"),
     )
     month_consumers = _consumer_methods(
         month_path,
@@ -2226,6 +2339,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "_os_explore",
             "AzurLaneConfig.opsi_task_delay",
         ],
+        "OpsiExplore_LastZone": ["_os_explore"],
         "OpsiExplore_ForceRun": ["AzurLaneConfig.opsi_task_delay"],
         "OpsiMonthBoss_Mode": ["clear_month_boss", "month_boss_delay"],
         "OpsiMonthBoss_CheckAdaptability": ["clear_month_boss", "month_boss_delay"],
@@ -2278,6 +2392,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "validate_alas_opsi_shop_filter": validate_alas_opsi_shop_filter,
         "validate_alas_opsi_shop_preset": validate_alas_opsi_shop_preset,
         "validate_alas_opsi_voucher_filter": validate_alas_opsi_voucher_filter,
+        "validate_alas_opsi_explore_last_zone": (
+            validate_alas_opsi_explore_last_zone
+        ),
         "validate_alas_opsi_hazard1_config": validate_alas_opsi_hazard1_config,
         "validate_alas_opsi_meowfficer_config": validate_alas_opsi_meowfficer_config,
         "validate_alas_opsi_repair_config": validate_alas_opsi_repair_config,
@@ -2361,6 +2478,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
         and node.func.id == "validate_alas_opsi_explore_config"
+        for node in ast.walk(explore_node)
+    )
+    explore_last_zone_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_explore_last_zone"
         for node in ast.walk(explore_node)
     )
     delay_task_guard = any(
@@ -2511,13 +2634,19 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     )
     daily = _verify_daily(_compile(daily_node, globals_))
     hazard = _verify_hazard(_compile(hazard_node, globals_))
+    resolver_method = _compile(resolver_node, globals_)
+    zone_fixtures = _zone_fixtures(map_data_path)
     meowfficer = _verify_meowfficer(
         _compile(meowfficer_node, globals_),
-        _compile(resolver_node, globals_),
-        _zone_fixtures(map_data_path),
+        resolver_method,
+        zone_fixtures,
     )
-    explore_globals = {**globals_, "ScriptError": RuntimeError}
-    explore = _verify_explore(_compile(explore_node, explore_globals))
+    explore_globals = {**globals_, "ScriptError": _ScriptError}
+    explore = _verify_explore(
+        _compile(explore_node, explore_globals),
+        resolver_method,
+        zone_fixtures,
+    )
     delay = _verify_delay(_compile(delay_task_node, globals_))
     fleet_selection = _verify_fleet_selection(_compile(fleet_node, globals_))
     order = _verify_order(_compile(order_node, globals_))
@@ -2564,11 +2693,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         akashi_filter,
         opsi_shop_presets,
         voucher_filter,
+        MethodType(resolver_method, SimpleNamespace(zones=zone_fixtures)),
     )
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 23,
+        "field_count": 24,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -2580,6 +2710,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and hazard_guard
             and meowfficer_guard
             and explore_guard
+            and explore_last_zone_guard
             and delay_task_guard
             and fleet_guard
             and order_guard
@@ -2614,6 +2745,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "OpsiShop.PresetFilter": "Selector.items_filter_in_os_shop",
             "OpsiShop.CustomFilter": "Selector.items_filter_in_os_shop",
             "OpsiVoucher.Filter": "VoucherShop.shop_filter",
+            "OpsiExplore.LastZone": "OpsiExplore._os_explore",
         },
         "fleet_selection": fleet_selection,
         "order": order,

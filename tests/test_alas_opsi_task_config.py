@@ -18,6 +18,7 @@ from alas_headless.alas_opsi_task_config_contract import (
     validate_alas_opsi_voucher_filter,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
+    validate_alas_opsi_explore_last_zone,
     validate_alas_opsi_fleet_selection,
     validate_alas_opsi_hazard1_config,
     validate_alas_opsi_meowfficer_config,
@@ -42,9 +43,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 23)
-        self.assertEqual(result["accepted_case_count"], 111)
-        self.assertEqual(result["invalid_case_count"], 183)
+        self.assertEqual(result["field_count"], 24)
+        self.assertEqual(result["accepted_case_count"], 115)
+        self.assertEqual(result["invalid_case_count"], 188)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -79,6 +80,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 "OpsiShop.PresetFilter": "Selector.items_filter_in_os_shop",
                 "OpsiShop.CustomFilter": "Selector.items_filter_in_os_shop",
                 "OpsiVoucher.Filter": "VoucherShop.shop_filter",
+                "OpsiExplore.LastZone": "OpsiExplore._os_explore",
             },
         )
 
@@ -224,6 +226,26 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.assertEqual(
                 validate_alas_opsi_akashi_filter(filter_contract, parser),
                 parser,
+            )
+        explore_zones = {
+            0: 0,
+            22: 22,
+            "22": 22,
+            "NA Ocean SW Sector B": 22,
+        }
+        resolver = lambda value: type(
+            "Zone",
+            (),
+            {"zone_id": explore_zones[value]},
+        )()
+        for value in explore_zones:
+            self.assertEqual(
+                validate_alas_opsi_explore_last_zone(
+                    value=value,
+                    order=(22, 51),
+                    resolver=resolver,
+                ),
+                explore_zones[value],
             )
         presets = {
             name: "ActionPoint > PurpleCoins"
@@ -412,6 +434,16 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_opsi_voucher_filter(voucher_contract, value)
+        resolver = lambda value: type("Zone", (), {"zone_id": int(value)})()
+        for value in (None, True, "", "missing zone", 44):
+            with self.subTest(field="opsi_explore_last_zone", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_explore_last_zone(
+                    value=value,
+                    order=(22, 51),
+                    resolver=resolver,
+                )
 
     def test_patch_gates_original_task_entries(self):
         patch = ROOT.joinpath(
@@ -436,6 +468,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_shop_filter("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_shop_preset("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_voucher_filter("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_explore_last_zone("), 1)
         scheduler_patch = ROOT.joinpath(
             "integration/alas/series/0140-scheduler-contract.patch"
         ).read_text(encoding="utf-8")

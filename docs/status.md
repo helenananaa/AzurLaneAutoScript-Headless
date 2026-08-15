@@ -608,14 +608,19 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `OpsiAbyssal.ForceRun`, and `OpsiStronghold.ForceRun`, preserves the
   original recon/submarine task-delay exclusions in
   `AzurLaneConfig.opsi_task_delay()`.
+- `OpsiExplore.LastZone` preserves the original resume cursor for zero,
+  ordered zone IDs, numeric text, and pinned multilingual zone names. A saved
+  zone resumes at the following configured zone; malformed, unknown, or
+  out-of-order values fail before map navigation instead of silently restarting
+  exploration from the beginning.
 - `OpsiFleet.Fleet` now validates all four declared indexes at the original
   `OSFleet.fleet_set()` selector boundary. `OpsiFleet.Submarine` validates both
   booleans at `MapOrderHandler.os_order_execute()`, preserving scan/submarine
   dispatch, the submarine completion wait, and scheduler-delay arguments.
-- One hundred eleven valid classes pass and 183 malformed values fail before task,
+- One hundred fifteen valid classes pass and 188 malformed values fail before task,
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
-  or Android input. Twenty-three fields now have complete offline classification.
+  or Android input. Twenty-four fields now have complete offline classification.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

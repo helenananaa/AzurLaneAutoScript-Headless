@@ -6253,14 +6253,17 @@ index 5b86d7bb..88f549ff 100644
          self.drag_interval.clear()
          self.drag_timeout.reset()
 diff --git a/module/os/tasks/explore.py b/module/os/tasks/explore.py
-index 9c4466bc..9ea65776 100644
+index 9c4466bc..91579e32 100644
 --- a/module/os/tasks/explore.py
 +++ b/module/os/tasks/explore.py
-@@ -32,6 +32,11 @@ class OpsiExplore(OSMap):
+@@ -32,6 +32,14 @@ class OpsiExplore(OSMap):
          Explore all dangerous zones at the beginning of month.
          Failed zone id will be set to _os_explore_failed_zone
          """
-+        from alas_headless import validate_alas_opsi_explore_config
++        from alas_headless import (
++            validate_alas_opsi_explore_config,
++            validate_alas_opsi_explore_last_zone,
++        )
 +
 +        explore_config = validate_alas_opsi_explore_config(
 +            special_radar=self.config.OpsiExplore_SpecialRadar,
@@ -6268,7 +6271,24 @@ index 9c4466bc..9ea65776 100644
  
          def end():
              logger.info('OS explore finished, delay to next reset')
-@@ -77,13 +82,13 @@ class OpsiExplore(OSMap):
+@@ -50,11 +58,11 @@ class OpsiExplore(OSMap):
+         logger.hr('OS explore', level=1)
+         order = [int(f.strip(' \t\r\n')) for f in self.config.OS_EXPLORE_FILTER.split('>')]
+         # Convert user input
+-        try:
+-            last_zone = self.name_to_zone(self.config.OpsiExplore_LastZone).zone_id
+-        except ScriptError:
+-            logger.warning(f'Invalid OpsiExplore_LastZone={self.config.OpsiExplore_LastZone}, re-explore')
+-            last_zone = 0
++        last_zone = validate_alas_opsi_explore_last_zone(
++            value=self.config.OpsiExplore_LastZone,
++            order=order,
++            resolver=self.name_to_zone,
++        )
+         # Start from last zone
+         if last_zone in order:
+             order = order[order.index(last_zone) + 1:]
+@@ -77,13 +85,13 @@ class OpsiExplore(OSMap):
  
              # Run zone
              logger.hr(f'OS explore {zone}', level=1)
