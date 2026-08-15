@@ -613,6 +613,12 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   reserve and `true` temporarily selects zero; malformed values fail before
   config overrides, scheduler actions, or map input. It does not create,
   attack, request help for, or collect a beacon.
+- `OpsiAshBeacon.AttackMode` accepts exactly `current` and
+  `current_dossier`, then replays the original `_begin_meta()` selection
+  branches with recorder-only input: beacon priority, dossier skip, dossier
+  entrance, and dossier-page exit. Malformed values fail before the first page
+  observation; no combat, help request, reward collection, or Android input
+  occurs.
 - `OpsiExplore.SpecialRadar` preserves the original tuning-sample use and
   `recon_scan` decisions in `_os_explore()`. The same value, together with
   `OpsiExplore.ForceRun`, `OpsiObscure.ForceRun`,
@@ -633,10 +639,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   duplicate suppression, standby positions, unavailable-fleet empty results,
   and scheduler submarine delays. Invalid rules fail before parser state,
   scheduler mutation, fleet selection, or task input.
-- One hundred twenty-eight valid classes pass and 209 malformed values fail before task,
+- One hundred thirty valid classes pass and 216 malformed values fail before task,
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
-  or Android input. Twenty-seven fields now have complete offline classification.
+  or Android input. Twenty-eight fields now have complete offline classification.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

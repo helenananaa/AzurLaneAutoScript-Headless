@@ -4648,9 +4648,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
@@ -9859,8 +9864,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "d7410fdb1390994ae85437770d136a595fe22f47cb0976caef8ee53a7ce48c4a",
-      "manifest_sha256": "1cc64f956dcb51c38a389976c0245f4d05d88c1bd60d949a0a416771cbb1573b",
+      "combined_sha256": "84b31d9cf77ad6f2b4a9868ab75c1925364914bf4cd2fca840687ac2d9b5a720",
+      "manifest_sha256": "f6f75f3ab0f32cdaa8ba6717d3b2bd68a1bc9b99ce8fa4e52d81734718b18045",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

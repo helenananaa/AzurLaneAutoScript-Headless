@@ -11,6 +11,7 @@ from .semantic_oracle import SemanticGateClosed
 
 
 OPSI_MONTH_BOSS_MODES = ("normal", "normal_hard")
+OPSI_ASH_BEACON_ATTACK_MODES = ("current", "current_dossier")
 OPSI_HAZARD1_TARGET_ZONES = (0, 44, 22)
 OPSI_MEOWFFICER_HAZARD_LEVELS = (3, 4, 5, 6, 10)
 OPSI_FLEET_INDEXES = (1, 2, 3, 4)
@@ -114,6 +115,15 @@ def validate_alas_opsi_month_boss_config(
         mode=mode,
         check_adaptability=check_adaptability,
     )
+
+
+def validate_alas_opsi_ash_beacon_attack_mode(*, attack_mode: object) -> str:
+    """Validate the original beacon-versus-dossier selection mode."""
+    if type(attack_mode) is not str or attack_mode not in OPSI_ASH_BEACON_ATTACK_MODES:
+        raise SemanticGateClosed(
+            "OpsiAshBeacon.AttackMode must be current or current_dossier"
+        )
+    return attack_mode
 
 
 def validate_alas_opsi_obscure_config(

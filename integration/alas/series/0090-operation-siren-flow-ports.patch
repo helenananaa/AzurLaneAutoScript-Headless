@@ -745,10 +745,40 @@ index 0d54085a..60f5a7f6 100644
              logger.info('Ash beacon status: light')
              ocr_collect = DigitCounter(
 diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
-index c11023ff..cad52d51 100644
+index c11023ff..73d4cee0 100644
 --- a/module/os_ash/meta.py
 +++ b/module/os_ash/meta.py
-@@ -566,9 +566,13 @@ class AshBeaconAssist(Meta):
+@@ -378,6 +378,11 @@ class OpsiAshBeacon(Meta):
+         In beacon or dossier:
+             begin a new meta if needed, or back to meta main page
+         """
++        from alas_headless import validate_alas_opsi_ash_beacon_attack_mode
++
++        attack_mode = validate_alas_opsi_ash_beacon_attack_mode(
++            attack_mode=self.config.OpsiAshBeacon_AttackMode,
++        )
+         # Page meta main
+         if self.appear(ASH_SHOWDOWN, offset=(30, 30), interval=2):
+             # Beacon
+@@ -387,7 +392,7 @@ class OpsiAshBeacon(Meta):
+                 return True
+             # Dossier
+             if _server_support() \
+-                    and self.config.OpsiAshBeacon_AttackMode == 'current_dossier' \
++                    and attack_mode == 'current_dossier' \
+                     and self._check_dossier_point():
+                 if self.appear_then_click(META_MAIN_DOSSIER_ENTRANCE, offset=(20, 20), interval=2):
+                     logger.info('Select dossier entrance into')
+@@ -404,7 +409,7 @@ class OpsiAshBeacon(Meta):
+         # Page dossier
+         elif _server_support() \
+                 and self.appear(DOSSIER_LIST, offset=(20, 20), interval=2):
+-            if self.config.OpsiAshBeacon_AttackMode == 'current_dossier' \
++            if attack_mode == 'current_dossier' \
+                     and self._check_dossier_point():
+                 if self.appear_then_click(META_BEGIN_ENTRANCE, offset=(20, 20), interval=2):
+                     logger.info('Begin a dossier')
+@@ -566,9 +571,13 @@ class AshBeaconAssist(Meta):
          """
          Select an meta whose level satisfies
          """

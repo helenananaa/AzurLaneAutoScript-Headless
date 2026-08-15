@@ -5,12 +5,14 @@ from itertools import product
 from pathlib import Path
 
 from alas_headless.alas_opsi_task_config_contract import (
+    OPSI_ASH_BEACON_ATTACK_MODES,
     OPSI_HAZARD1_TARGET_ZONES,
     OPSI_FLEET_INDEXES,
     OPSI_MEOWFFICER_HAZARD_LEVELS,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
+    validate_alas_opsi_ash_beacon_attack_mode,
     validate_alas_opsi_ash_assist_tier,
     validate_alas_opsi_ash_beacon_ensure_fully_collected,
     validate_alas_opsi_akashi_filter,
@@ -46,9 +48,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 27)
-        self.assertEqual(result["accepted_case_count"], 128)
-        self.assertEqual(result["invalid_case_count"], 209)
+        self.assertEqual(result["field_count"], 28)
+        self.assertEqual(result["accepted_case_count"], 130)
+        self.assertEqual(result["invalid_case_count"], 216)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -85,6 +87,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 "OpsiVoucher.Filter": "VoucherShop.shop_filter",
                 "OpsiExplore.LastZone": "OpsiExplore._os_explore",
                 "OpsiAshAssist.Tier": "AshBeaconAssist._ensure_meta_level",
+                "OpsiAshBeacon.AttackMode": "OpsiAshBeacon._begin_meta",
                 "OpsiFleetFilter.Filter": (
                     "OSFleet.parse_fleet_filter + AzurLaneConfig.opsi_task_delay"
                 ),
@@ -96,6 +99,13 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         )
 
     def test_valid_values_are_classified(self):
+        for attack_mode in OPSI_ASH_BEACON_ATTACK_MODES:
+            self.assertEqual(
+                validate_alas_opsi_ash_beacon_attack_mode(
+                    attack_mode=attack_mode,
+                ),
+                attack_mode,
+            )
         for value in (False, True):
             self.assertEqual(
                 validate_alas_opsi_ash_beacon_ensure_fully_collected(
@@ -324,6 +334,11 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             )
 
     def test_invalid_values_fail_closed(self):
+        for value in ("", "dossier", None, True, 0, [], {}):
+            with self.subTest(field="opsi_ash_beacon_attack_mode", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_ash_beacon_attack_mode(attack_mode=value)
         for value in (0, 1, "true", None, [], {}):
             with self.subTest(field="opsi_ash_beacon_ensure", value=value), self.assertRaises(
                 SemanticGateClosed
@@ -523,6 +538,10 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_voucher_filter("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_explore_last_zone("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_ash_assist_tier("), 1)
+        self.assertEqual(
+            patch.count("validate_alas_opsi_ash_beacon_attack_mode("),
+            1,
+        )
         self.assertEqual(patch.count("validate_alas_opsi_fleet_filter("), 1)
         self.assertEqual(
             patch.count("validate_alas_opsi_ash_beacon_ensure_fully_collected("),

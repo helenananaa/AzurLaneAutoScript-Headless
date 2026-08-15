@@ -306,9 +306,11 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiAshBeacon.EnsureFullyCollected` 只回放两个既有刷图循环的行动力保留分支：在任务已启用且存在未完整领取的信标时，`false` 保留原 200/1,000 点限制，`true` 临时置零；其他条件仍保留正常限制。错误类型在配置 override、调度调用或地图输入前 fail-closed。该字段不生成、攻击、求助或领取信标，因此没有把高风险信标动作外推为已适配。
 
+`OpsiAshBeacon.AttackMode` 精确接受 `current/current_dossier`，直接回放 `_begin_meta()` 的原选择逻辑：信标优先、`current` 跳过档案、`current_dossier` 进入档案，以及档案页的开始或退出分支。错误类型在首次页面观察前 fail-closed；输入均为记录桩，不启动战斗、求助、领奖或 Android 输入。
+
 `OpsiFleetFilter.Filter` 直接使用固定上游 `FLEET_FILTER/Filter` 并回放原 `OSFleet.parse_fleet_filter()` 与 `AzurLaneConfig.opsi_task_delay()`。舰队顺序、`CallSubmarine`、Unicode 分隔符和连字符、重复去重、前三舰队待机位、不可用舰队形成空选择，以及潜艇任务延迟均保持原语义；未知或空 token、错误类型在过滤器状态、调度写入、舰队选择或任务输入前 fail-closed。调度器对没有该配置组的任务继续把缺省空值解释为“不调用潜艇”，不把缺省字段误判为非法用户配置。
 
-共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 27 个字段、128 个合法类并拒绝 209 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗、兑换或 Android 输入，因此只提升 `offline=complete`。
+共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 28 个字段、130 个合法类并拒绝 216 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗、兑换或 Android 输入，因此只提升 `offline=complete`。
 
 此前只检查属性加载的 AST 审计漏掉了动态拼接的 `deep_get()` 字符串路径，因而错误地把 Explore/Abyssal/Stronghold 的 `ForceRun` 记为零读取；本轮已用源码绑定回放纠正。固定上游真正没有运行时消费者的仍只有 `OpsiMonthBoss.ForceRun` 与 `OpsiDaily.DoMission`，两者继续明确标为 `unsupported`。导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板不会因此提升为完整支持。
 
@@ -358,7 +360,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 38 | Minigame | Scheduler | L | 当前抚顺小游戏路径可用；没有字段配置，但其他轮换小游戏仍属于该任务支持范围 |
 | 39 | PrivateQuarters | Scheduler, PrivateQuarters | M | 蛋糕、玫瑰、互动和 7 个舰船选项均缺适配 |
 | 40 | OpsiGeneral | OpsiGeneral | P | 六字段均已离线等价；真实购买/维修结果、资源 postcondition 和异常恢复仍未闭环 |
-| 41 | OpsiAshBeacon | Scheduler, OpsiAshBeacon | B | EnsureFullyCollected 的两条行动力保留分支已离线等价；当前/档案、自动攻击、一击、求助和完整领取仍未闭环 |
+| 41 | OpsiAshBeacon | Scheduler, OpsiAshBeacon | B | EnsureFullyCollected 行动力保留与 AttackMode 当前/档案选择已离线等价；自动攻击、一击、求助和完整领取仍未闭环 |
 | 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | Tier 等级选择已离线等价；真实目标列表、出击、战斗和领奖仍受舰队条件限制 |
 | 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | B | ForceRun、LastZone、SpecialRadar、Fleet/Submarine 已离线等价；真实地图导航、舰队/潜艇动作和清区未闭环 |
 | 44 | OpsiShop | Scheduler, OpsiShop | B | 5 个预设和自定义过滤已离线等价；真实购买、刷新、货币 postcondition 与异常恢复仍未闭环 |
@@ -467,7 +469,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
 | OpsiGeneral | `DoRandomMapEvent`; `AkashiShopFilter`; `BuyActionPointLimit`=0..5; `OilLimit`; `RepairThreshold`; `UseLogger` | P | 六字段均已离线等价；真实维修/购买确认、资源 postcondition 与异常恢复仍缺 |
-| OpsiAshBeacon | `AttackMode`=`current/current_dossier`; `DossierAutoAttackMode`; `EnsureFullyCollected`; `OneHitMode`; `RequestAssist` | B | EnsureFullyCollected 的两条行动力保留分支已离线等价；当前/档案、其余三个布尔开关、点数不足/满、生成、攻击、求助、领取和 Boss 结束仍缺 |
+| OpsiAshBeacon | `AttackMode`=`current/current_dossier`; `DossierAutoAttackMode`; `EnsureFullyCollected`; `OneHitMode`; `RequestAssist` | B | EnsureFullyCollected 行动力保留与 AttackMode 当前/档案选择已离线等价；其余三个布尔开关、点数不足/满、生成、攻击、求助、领取和 Boss 结束仍缺 |
 | OpsiAshAssist | `Tier` | B | 整数阈值、五次轮换和兜底已离线等价；真实无目标、舰队不可用、出击、战斗和奖励仍缺 |
 | OpsiExplore | `ForceRun`; `LastZone`; `SpecialRadar` | B | 三字段已离线等价；真实地图重置、导航、舰队动作和清区仍缺 |
 | OpsiFleet | `Fleet`=1..4; `Submarine` | B | 四舰队和潜艇真假已在原最终边界离线等价；舰队不可用、真实选中结果、潜艇调用结果及隐藏字段 override 仍需实机闭环 |
@@ -796,7 +798,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OneClickRetire.KeepLimitBreak` | General | type=select; display=default | options: "do_not_keep", "keep_limit_break"; default: "keep_limit_break" | `P`/◐ 两设置 typed；keep_limit_break 已实机 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `OpsiAbyssal.ForceRun` | OpsiAbyssal | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiAshAssist.Tier` | OpsiAshAssist | type=input; display=default | input/default: 15 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `OpsiAshBeacon.AttackMode` | OpsiAshBeacon | type=select; display=default | options: "current_dossier", "current"; default: "current" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiAshBeacon.AttackMode` | OpsiAshBeacon | type=select; display=default | options: "current_dossier", "current"; default: "current" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiAshBeacon.DossierAutoAttackMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: false | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `OpsiAshBeacon.EnsureFullyCollected` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `OpsiAshBeacon.OneHitMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
