@@ -38,6 +38,29 @@ class AlasOpsiMeowfficerConfigSnapshot:
     hazard_level: int
 
 
+@dataclass(frozen=True)
+class AlasOpsiExploreConfigSnapshot:
+    special_radar: bool
+
+
+@dataclass(frozen=True)
+class AlasOpsiDelayTaskConfigSnapshot:
+    explore_force_run: bool
+    obscure_force_run: bool
+    abyssal_force_run: bool
+    stronghold_force_run: bool
+    special_radar: bool
+
+    @property
+    def force_run(self) -> bool:
+        return (
+            self.explore_force_run
+            or self.obscure_force_run
+            or self.abyssal_force_run
+            or self.stronghold_force_run
+        )
+
+
 def validate_alas_opsi_month_boss_config(
     *, mode: object, check_adaptability: object
 ) -> AlasOpsiMonthBossConfigSnapshot:
@@ -85,3 +108,38 @@ def validate_alas_opsi_meowfficer_config(
             "OpsiMeowfficerFarming.HazardLevel must be 3, 4, 5, 6, or 10"
         )
     return AlasOpsiMeowfficerConfigSnapshot(hazard_level=hazard_level)
+
+
+def validate_alas_opsi_explore_config(
+    *, special_radar: object
+) -> AlasOpsiExploreConfigSnapshot:
+    if type(special_radar) is not bool:
+        raise SemanticGateClosed("OpsiExplore.SpecialRadar must be a bool")
+    return AlasOpsiExploreConfigSnapshot(special_radar=special_radar)
+
+
+def validate_alas_opsi_delay_task_config(
+    *,
+    explore_force_run: object,
+    obscure_force_run: object,
+    abyssal_force_run: object,
+    stronghold_force_run: object,
+    special_radar: object,
+) -> AlasOpsiDelayTaskConfigSnapshot:
+    fields = {
+        "OpsiExplore.ForceRun": explore_force_run,
+        "OpsiObscure.ForceRun": obscure_force_run,
+        "OpsiAbyssal.ForceRun": abyssal_force_run,
+        "OpsiStronghold.ForceRun": stronghold_force_run,
+        "OpsiExplore.SpecialRadar": special_radar,
+    }
+    for field, value in fields.items():
+        if type(value) is not bool:
+            raise SemanticGateClosed(f"{field} must be a bool")
+    return AlasOpsiDelayTaskConfigSnapshot(
+        explore_force_run=explore_force_run,
+        obscure_force_run=obscure_force_run,
+        abyssal_force_run=abyssal_force_run,
+        stronghold_force_run=stronghold_force_run,
+        special_radar=special_radar,
+    )

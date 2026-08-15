@@ -1081,3 +1081,35 @@ index 5b86d7bb..88f549ff 100644
          logger.info(f'{self.name} set to {position}')
          self.drag_interval.clear()
          self.drag_timeout.reset()
+diff --git a/module/os/tasks/explore.py b/module/os/tasks/explore.py
+index 9c4466bc..9ea65776 100644
+--- a/module/os/tasks/explore.py
++++ b/module/os/tasks/explore.py
+@@ -32,6 +32,11 @@ class OpsiExplore(OSMap):
+         Explore all dangerous zones at the beginning of month.
+         Failed zone id will be set to _os_explore_failed_zone
+         """
++        from alas_headless import validate_alas_opsi_explore_config
++
++        explore_config = validate_alas_opsi_explore_config(
++            special_radar=self.config.OpsiExplore_SpecialRadar,
++        )
+ 
+         def end():
+             logger.info('OS explore finished, delay to next reset')
+@@ -77,13 +82,13 @@ class OpsiExplore(OSMap):
+ 
+             # Run zone
+             logger.hr(f'OS explore {zone}', level=1)
+-            if not self.config.OpsiExplore_SpecialRadar:
++            if not explore_config.special_radar:
+                 # Special radar gives 90 turning samples,
+                 # If no special radar, use the turning samples in storage to acquire stronger fleets.
+                 self.tuning_sample_use()
+             self.fleet_set(self.config.OpsiFleet_Fleet)
+             self.os_order_execute(
+-                recon_scan=not self.config.OpsiExplore_SpecialRadar,
++                recon_scan=not explore_config.special_radar,
+                 submarine_call=self.config.OpsiFleet_Submarine)
+             self._os_explore_task_delay()
+ 

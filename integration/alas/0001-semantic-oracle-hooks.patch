@@ -6014,6 +6014,38 @@ index 5b86d7bb..88f549ff 100644
          logger.info(f'{self.name} set to {position}')
          self.drag_interval.clear()
          self.drag_timeout.reset()
+diff --git a/module/os/tasks/explore.py b/module/os/tasks/explore.py
+index 9c4466bc..9ea65776 100644
+--- a/module/os/tasks/explore.py
++++ b/module/os/tasks/explore.py
+@@ -32,6 +32,11 @@ class OpsiExplore(OSMap):
+         Explore all dangerous zones at the beginning of month.
+         Failed zone id will be set to _os_explore_failed_zone
+         """
++        from alas_headless import validate_alas_opsi_explore_config
++
++        explore_config = validate_alas_opsi_explore_config(
++            special_radar=self.config.OpsiExplore_SpecialRadar,
++        )
+ 
+         def end():
+             logger.info('OS explore finished, delay to next reset')
+@@ -77,13 +82,13 @@ class OpsiExplore(OSMap):
+ 
+             # Run zone
+             logger.hr(f'OS explore {zone}', level=1)
+-            if not self.config.OpsiExplore_SpecialRadar:
++            if not explore_config.special_radar:
+                 # Special radar gives 90 turning samples,
+                 # If no special radar, use the turning samples in storage to acquire stronger fleets.
+                 self.tuning_sample_use()
+             self.fleet_set(self.config.OpsiFleet_Fleet)
+             self.os_order_execute(
+-                recon_scan=not self.config.OpsiExplore_SpecialRadar,
++                recon_scan=not explore_config.special_radar,
+                 submarine_call=self.config.OpsiFleet_Submarine)
+             self._os_explore_task_delay()
+ 
 diff --git a/module/config/argument/args.json b/module/config/argument/args.json
 index 0c46c9dd..a553286f 100644
 --- a/module/config/argument/args.json
@@ -6763,10 +6795,10 @@ index a1c9b013..f2e4b6c8 100644
              favourite = self.config.Enhance_ShipToEnhance == 'favourite'
  
 diff --git a/module/config/config.py b/module/config/config.py
-index eb5a5dca..4a170071 100644
+index 97631fca..43a21595 100644
 --- a/module/config/config.py
 +++ b/module/config/config.py
-@@ -202,6 +202,14 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+@@ -203,6 +203,14 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
          """
          Calculate tasks, set pending_task and waiting_task
          """
@@ -6781,6 +6813,58 @@ index eb5a5dca..4a170071 100644
          pending = []
          waiting = []
          error = []
+@@ -452,6 +460,8 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+         """
+         if not recon_scan and not submarine_call and not ap_limit and not cl1_preserve:
+             return None
++        from alas_headless import validate_alas_opsi_delay_task_config
++
+         kv = dict_to_kv(
+             {
+                 "recon_scan": recon_scan,
+@@ -481,24 +491,30 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+                 ).lower()
+             )
+ 
+-        def is_force_run(task):
+-            return (
+-                deep_get(self.data, keys=f"{task}.OpsiExplore.ForceRun", default=False)
+-                or deep_get(
++        def task_delay_config(task):
++            return validate_alas_opsi_delay_task_config(
++                explore_force_run=deep_get(
++                    self.data, keys=f"{task}.OpsiExplore.ForceRun", default=False
++                ),
++                obscure_force_run=deep_get(
+                     self.data, keys=f"{task}.OpsiObscure.ForceRun", default=False
+-                )
+-                or deep_get(
++                ),
++                abyssal_force_run=deep_get(
+                     self.data, keys=f"{task}.OpsiAbyssal.ForceRun", default=False
+-                )
+-                or deep_get(
++                ),
++                stronghold_force_run=deep_get(
+                     self.data, keys=f"{task}.OpsiStronghold.ForceRun", default=False
+-                )
++                ),
++                special_radar=deep_get(
++                    self.data, keys=f"{task}.OpsiExplore.SpecialRadar", default=False
++                ),
+             )
+ 
++        def is_force_run(task):
++            return task_delay_config(task).force_run
++
+         def is_special_radar(task):
+-            return deep_get(
+-                self.data, keys=f"{task}.OpsiExplore.SpecialRadar", default=False
+-            )
++            return task_delay_config(task).special_radar
+ 
+         if recon_scan:
+             tasks = SelectedGrids(["OpsiExplore", "OpsiObscure", "OpsiStronghold"])
 diff --git a/alas.py b/alas.py
 index e0d4cf90..b6e7b782 100644
 --- a/alas.py

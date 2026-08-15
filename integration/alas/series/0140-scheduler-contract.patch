@@ -1,8 +1,8 @@
 diff --git a/module/config/config.py b/module/config/config.py
-index eb5a5dca..4a170071 100644
+index 97631fca..43a21595 100644
 --- a/module/config/config.py
 +++ b/module/config/config.py
-@@ -202,6 +202,14 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+@@ -203,6 +203,14 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
          """
          Calculate tasks, set pending_task and waiting_task
          """
@@ -17,3 +17,55 @@ index eb5a5dca..4a170071 100644
          pending = []
          waiting = []
          error = []
+@@ -452,6 +460,8 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+         """
+         if not recon_scan and not submarine_call and not ap_limit and not cl1_preserve:
+             return None
++        from alas_headless import validate_alas_opsi_delay_task_config
++
+         kv = dict_to_kv(
+             {
+                 "recon_scan": recon_scan,
+@@ -481,24 +491,30 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+                 ).lower()
+             )
+ 
+-        def is_force_run(task):
+-            return (
+-                deep_get(self.data, keys=f"{task}.OpsiExplore.ForceRun", default=False)
+-                or deep_get(
++        def task_delay_config(task):
++            return validate_alas_opsi_delay_task_config(
++                explore_force_run=deep_get(
++                    self.data, keys=f"{task}.OpsiExplore.ForceRun", default=False
++                ),
++                obscure_force_run=deep_get(
+                     self.data, keys=f"{task}.OpsiObscure.ForceRun", default=False
+-                )
+-                or deep_get(
++                ),
++                abyssal_force_run=deep_get(
+                     self.data, keys=f"{task}.OpsiAbyssal.ForceRun", default=False
+-                )
+-                or deep_get(
++                ),
++                stronghold_force_run=deep_get(
+                     self.data, keys=f"{task}.OpsiStronghold.ForceRun", default=False
+-                )
++                ),
++                special_radar=deep_get(
++                    self.data, keys=f"{task}.OpsiExplore.SpecialRadar", default=False
++                ),
+             )
+ 
++        def is_force_run(task):
++            return task_delay_config(task).force_run
++
+         def is_special_radar(task):
+-            return deep_get(
+-                self.data, keys=f"{task}.OpsiExplore.SpecialRadar", default=False
+-            )
++            return task_delay_config(task).special_radar
+ 
+         if recon_scan:
+             tasks = SelectedGrids(["OpsiExplore", "OpsiObscure", "OpsiStronghold"])

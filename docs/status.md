@@ -323,7 +323,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 103 changed files, all 102 patched Python files compile, and
+  patch applies as 104 changed files, all 103 patched Python files compile, and
   the repository suite passes `959/959` tests, including Operation Siren task configuration, Optimization configuration, BattlePass configuration, Daemon configuration, OpsiDaemon configuration, BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard task configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
@@ -568,16 +568,21 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - `OpsiMeowfficerFarming.HazardLevel` admits exactly `3`, `4`, `5`, `6`, and
   `10`; each value reaches the original `zone_select()` argument and preserves
   fleet, order, auto-search, postprocessing, and task-switch ordering.
-- Sixteen valid classes pass and 47 malformed values fail before task, map, combat,
-  coordinate, or inventory state changes. Mutation budget is `0`; all effects
-  are recorders, with no combat, item consumption, or Android input. Only the
-  six fields' `offline` dimension becomes complete.
-- Whole-tree AST inspection finds no runtime loads of
-  `OpsiExplore.ForceRun`, `OpsiAbyssal.ForceRun`, or
-  `OpsiMonthBoss.ForceRun`, and also no runtime load of
-  `OpsiDaily.DoMission`, in pinned upstream. They are now explicitly
-  unsupported instead of being presented as partially working. Re-entry
-  requires a reviewed upstream consumer; Headless does not invent one.
+- `OpsiExplore.SpecialRadar` preserves the original tuning-sample use and
+  `recon_scan` decisions in `_os_explore()`. The same value, together with
+  `OpsiExplore.ForceRun`, `OpsiObscure.ForceRun`,
+  `OpsiAbyssal.ForceRun`, and `OpsiStronghold.ForceRun`, preserves the
+  original recon/submarine task-delay exclusions in
+  `AzurLaneConfig.opsi_task_delay()`.
+- Forty-eight valid classes pass and 77 malformed values fail before task,
+  scheduler, map, combat, coordinate, or inventory state changes. Mutation
+  budget is `0`; all effects are recorders, with no combat, item consumption,
+  or Android input. Ten fields now have complete offline classification.
+- The previous AST-only audit incorrectly treated dynamically constructed
+  `deep_get()` paths as absent consumers. Source-bound replay now verifies
+  those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and
+  `OpsiDaily.DoMission` remain zero-read in pinned upstream and explicitly
+  unsupported; Headless does not invent behavior for them.
 - Real coordinate use, navigation, fleet filtering, combat, rewards, and
   postconditions remain incomplete, so OpsiMonthBoss and OpsiObscure stay `B`.
 

@@ -4596,25 +4596,26 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0140-scheduler-contract.patch",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiAbyssal"
       ],
       "path": "OpsiAbyssal.ForceRun",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
@@ -4828,25 +4829,26 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0140-scheduler-contract.patch",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiExplore"
       ],
       "path": "OpsiExplore.ForceRun",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
@@ -4874,9 +4876,15 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0140-scheduler-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -5239,6 +5247,7 @@
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0140-scheduler-contract.patch",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -5291,21 +5300,26 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0140-scheduler-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiStronghold"
       ],
       "path": "OpsiStronghold.ForceRun",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "☐ 未逐值",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
@@ -7408,7 +7422,7 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiAbyssal",
-      "note": "可读仓库/详情；ForceRun 在固定上游零读取，明确不支持；过滤器、坐标消耗、Boss 和结算未闭环",
+      "note": "ForceRun 的潜艇调用延迟排除已离线等价；可读仓库/详情，但过滤器、坐标消耗、Boss 和结算未闭环",
       "status": "B"
     },
     {
@@ -7471,7 +7485,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiExplore",
-      "note": "到自动寻敌锁定边界；ForceRun 在固定上游零读取，明确不支持；续跑区、特殊雷达、舰队/潜艇和清区未闭环",
+      "note": "ForceRun 延迟排除及 SpecialRadar 的调谐样本、侦察决策已离线等价；到自动寻敌锁定边界，续跑区、舰队/潜艇和清区仍未闭环",
       "status": "B"
     },
     {
@@ -7519,7 +7533,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiObscure",
-      "note": "ForceRun 开关已离线等价；坐标消耗、进入和清图未闭环",
+      "note": "ForceRun 的任务继续及侦察/潜艇延迟排除已离线等价；坐标消耗、进入和清图未闭环",
       "status": "B"
     },
     {
@@ -7538,7 +7552,7 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiStronghold",
-      "note": "3D 漩涡当前无法由 UI 树可靠观察；存在检测、过滤、进入、战斗和结算均未闭环",
+      "note": "ForceRun 的侦察/潜艇延迟排除已离线等价；3D 漩涡当前无法由 UI 树可靠观察，存在检测、过滤、进入、战斗和结算均未闭环",
       "status": "M"
     },
     {
@@ -9402,10 +9416,64 @@
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0140-scheduler-contract.patch",
         "docs/status.md"
       ],
       "field": "OpsiObscure.ForceRun",
-      "note": "Both exact booleans preserve the original stop versus task-switch continuation boundary; invalid values fail before coordinate or task state is touched."
+      "note": "Both exact booleans preserve the original stop versus task-switch continuation boundary and recon/submarine delay exclusion; invalid values fail before coordinate, scheduler, or task state is touched."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0140-scheduler-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiExplore.ForceRun",
+      "note": "Both exact booleans preserve the original recon and submarine delay exclusion decision; invalid values fail before scheduler mutation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0140-scheduler-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiAbyssal.ForceRun",
+      "note": "Both exact booleans preserve the original submarine-call delay exclusion decision; invalid values fail before scheduler mutation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0140-scheduler-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiStronghold.ForceRun",
+      "note": "Both exact booleans preserve the original recon and submarine delay exclusion decision; invalid values fail before scheduler mutation while the Stronghold task itself remains unsupported."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0140-scheduler-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiExplore.SpecialRadar",
+      "note": "Both exact booleans preserve the original tuning-sample and recon-scan decisions plus recon delay exclusion; invalid values fail before task or scheduler mutation."
     },
     {
       "dimensions": {
@@ -9496,8 +9564,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "a3afb73890817dcc5896c25723f85b9107d55f0d6e28c8180398e854c819d6f3",
-      "manifest_sha256": "698510d00f11b925ade37a7a30d2f470eebdeee45a0c2a3a764266b35c23f660",
+      "combined_sha256": "65e3bcc2eca0d62ef74dba909ad1338dda2257dd38b0e650d6a08ddc36cf8d7b",
+      "manifest_sha256": "86725c63d0738e7a1811b131f4174c78b21debc164f7270a4b1af3c26d305f07",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

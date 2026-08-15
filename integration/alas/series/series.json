@@ -53,7 +53,7 @@
     {
       "order": 11,
       "path": "integration/alas/series/0090-operation-siren-flow-ports.patch",
-      "sha256": "803a8a6bb611ea32445a2af80342c70b05c75bf9e9542c254215335ca85b4b9b"
+      "sha256": "fed529f248c3dd19c711bbbd42555423819071467c60497ddd791633b1292dde"
     },
     {
       "order": 12,
@@ -78,7 +78,7 @@
     {
       "order": 16,
       "path": "integration/alas/series/0140-scheduler-contract.patch",
-      "sha256": "2cfcc7595708c04b3e6b38a069ef763170c5a05fc37c09eac685f0cd53c3419d"
+      "sha256": "4398fce5cbaf11d2fe862c6357187c119570a02d10bbec2c580dbc8547e6e373"
     },
     {
       "order": 17,

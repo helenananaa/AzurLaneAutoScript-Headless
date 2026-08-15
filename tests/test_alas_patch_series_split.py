@@ -109,6 +109,7 @@ FLOW_PATHS = {
         "module/os/map.py",
         "module/os/tasks/archive.py",
         "module/os/tasks/daily.py",
+        "module/os/tasks/explore.py",
         "module/os/tasks/hazard_leveling.py",
         "module/os/tasks/meowfficer_farming.py",
         "module/os/tasks/month_boss.py",

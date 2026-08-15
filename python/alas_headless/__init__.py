@@ -84,6 +84,8 @@ from .alas_optimization_config_contract import (
 )
 from .alas_opsi_task_config_contract import (
     AlasOpsiDailyConfigSnapshot,
+    AlasOpsiDelayTaskConfigSnapshot,
+    AlasOpsiExploreConfigSnapshot,
     AlasOpsiHazard1ConfigSnapshot,
     AlasOpsiMeowfficerConfigSnapshot,
     AlasOpsiMonthBossConfigSnapshot,
@@ -92,6 +94,8 @@ from .alas_opsi_task_config_contract import (
     OPSI_HAZARD1_TARGET_ZONES,
     OPSI_MEOWFFICER_HAZARD_LEVELS,
     validate_alas_opsi_daily_config,
+    validate_alas_opsi_delay_task_config,
+    validate_alas_opsi_explore_config,
     validate_alas_opsi_hazard1_config,
     validate_alas_opsi_meowfficer_config,
     validate_alas_opsi_month_boss_config,

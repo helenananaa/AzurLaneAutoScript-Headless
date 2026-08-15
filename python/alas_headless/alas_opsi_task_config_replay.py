@@ -5,6 +5,8 @@ from __future__ import annotations
 import ast
 import hashlib
 import json
+from datetime import datetime, timedelta
+from itertools import product
 from pathlib import Path
 from types import MethodType, SimpleNamespace
 from typing import Any, Callable
@@ -16,6 +18,8 @@ from .alas_opsi_task_config_contract import (
     OPSI_MEOWFFICER_HAZARD_LEVELS,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
+    validate_alas_opsi_delay_task_config,
+    validate_alas_opsi_explore_config,
     validate_alas_opsi_hazard1_config,
     validate_alas_opsi_meowfficer_config,
     validate_alas_opsi_month_boss_config,
@@ -28,10 +32,16 @@ SCHEMA = "alas-headless.opsi-task-config-replay/v1"
 INVALID_BOOLEANS = (0, 1, "true", None, [], {})
 INVALID_MODES = ("", "hard", None, 0, True, [], {})
 DEAD_FIELDS = (
-    "OpsiExplore_ForceRun",
-    "OpsiAbyssal_ForceRun",
     "OpsiMonthBoss_ForceRun",
     "OpsiDaily_DoMission",
+)
+
+DYNAMIC_DELAY_FIELDS = (
+    "OpsiExplore_ForceRun",
+    "OpsiObscure_ForceRun",
+    "OpsiAbyssal_ForceRun",
+    "OpsiStronghold_ForceRun",
+    "OpsiExplore_SpecialRadar",
 )
 
 
@@ -64,6 +74,30 @@ class _ZoneList:
         return self.zone
 
 
+class _TaskList:
+    def __init__(self, values):
+        self.values = list(values)
+
+    def __iter__(self):
+        return iter(self.values)
+
+    def filter(self, predicate):
+        return _TaskList(value for value in self.values if predicate(value))
+
+    def delete(self, other):
+        removed = set(other.values)
+        return _TaskList(value for value in self.values if value not in removed)
+
+
+def _deep_get(data: dict[str, Any], *, keys: str, default=None):
+    value: Any = data
+    for key in keys.split("."):
+        if not isinstance(value, dict) or key not in value:
+            return default
+        value = value[key]
+    return value
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -90,6 +124,28 @@ def _compile(node: ast.FunctionDef, globals_: dict[str, Any]):
 
 def _verify_args(args_path: Path) -> None:
     document = json.loads(args_path.read_text(encoding="utf-8"))
+    explore = document.get("OpsiExplore", {}).get("OpsiExplore")
+    if not isinstance(explore, dict) or set(explore) != {
+        "SpecialRadar",
+        "ForceRun",
+        "LastZone",
+    }:
+        raise AssertionError("OpsiExplore field surface drifted")
+    for field in ("SpecialRadar", "ForceRun"):
+        declaration = explore[field]
+        if declaration.get("type") != "checkbox" or declaration.get("value") is not False:
+            raise AssertionError(f"OpsiExplore.{field} declaration drifted")
+    last_zone = explore["LastZone"]
+    if last_zone.get("type") != "input" or last_zone.get("value") != 0:
+        raise AssertionError("OpsiExplore.LastZone declaration drifted")
+    for task in ("OpsiAbyssal", "OpsiStronghold"):
+        declaration = document.get(task, {}).get(task, {}).get("ForceRun")
+        if (
+            not isinstance(declaration, dict)
+            or declaration.get("type") != "checkbox"
+            or declaration.get("value") is not False
+        ):
+            raise AssertionError(f"{task}.ForceRun declaration drifted")
     month = document.get("OpsiMonthBoss", {}).get("OpsiMonthBoss")
     expected_month = {
         "Mode": ("select", "normal", list(OPSI_MONTH_BOSS_MODES)),
@@ -193,6 +249,18 @@ def _dead_field_loads(alas_root: Path) -> dict[str, list[str]]:
     return result
 
 
+def _dynamic_delay_consumers(config_path: Path) -> dict[str, list[str]]:
+    method = _method(config_path, "AzurLaneConfig", "opsi_task_delay")
+    source = ast.unparse(method)
+    result = {}
+    for field in DYNAMIC_DELAY_FIELDS:
+        dotted = field.replace("_", ".", 1)
+        result[field] = (
+            ["AzurLaneConfig.opsi_task_delay"] if dotted in source else []
+        )
+    return result
+
+
 class _Config(SimpleNamespace):
     def __init__(
         self,
@@ -203,6 +271,7 @@ class _Config(SimpleNamespace):
         use_tuning_sample: object = True,
         hazard_target_zone: object = 0,
         meowfficer_hazard_level: object = 5,
+        special_radar: object = False,
     ):
         super().__init__(
             OpsiMonthBoss_Mode=mode,
@@ -212,6 +281,9 @@ class _Config(SimpleNamespace):
             OpsiDaily_UseTuningSample=use_tuning_sample,
             OpsiHazard1Leveling_TargetZone=hazard_target_zone,
             OpsiMeowfficerFarming_HazardLevel=meowfficer_hazard_level,
+            OpsiExplore_SpecialRadar=special_radar,
+            OpsiExplore_LastZone=0,
+            OS_EXPLORE_FILTER="22",
             OpsiMeowfficerFarming_ActionPointPreserve=1000,
             OpsiMeowfficerFarming_TargetZone=0,
             OpsiGeneral_UseLogger=False,
@@ -541,6 +613,197 @@ def _verify_meowfficer(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry": invalid}
 
 
+_DELAY_TASKS = (
+    "OpsiExplore",
+    "OpsiDaily",
+    "OpsiObscure",
+    "OpsiAbyssal",
+    "OpsiArchive",
+    "OpsiStronghold",
+    "OpsiMeowfficerFarming",
+    "OpsiMonthBoss",
+)
+
+
+def _delay_data(overrides: dict[str, object] | None = None) -> dict[str, Any]:
+    data = {
+        task: {
+            "Scheduler": {"NextRun": datetime(1970, 1, 1)},
+            "OpsiExplore": {"ForceRun": False, "SpecialRadar": False},
+            "OpsiObscure": {"ForceRun": False},
+            "OpsiAbyssal": {"ForceRun": False},
+            "OpsiStronghold": {"ForceRun": False},
+            "OpsiFleet": {"Submarine": False},
+            "OpsiFleetFilter": {"Filter": ""},
+        }
+        for task in _DELAY_TASKS
+    }
+    for path, value in (overrides or {}).items():
+        task, group, field = path.split(".")
+        data[task][group][field] = value
+    return data
+
+
+def _delay_case(method, *, overrides=None, recon_scan=False, submarine_call=False):
+    data = _delay_data(overrides)
+    modified: dict[str, Any] = {}
+    updates: list[str] = []
+    host = SimpleNamespace(
+        data=data,
+        modified=modified,
+        update=lambda: updates.append("update"),
+    )
+    rejected = False
+    try:
+        MethodType(method, host)(
+            recon_scan=recon_scan,
+            submarine_call=submarine_call,
+        )
+    except SemanticGateClosed:
+        rejected = True
+    return {
+        "rejected": rejected,
+        "modified": sorted(modified),
+        "updates": updates,
+    }
+
+
+def _verify_delay(method) -> dict[str, Any]:
+    expected_recon = [
+        "OpsiExplore.Scheduler.NextRun",
+        "OpsiObscure.Scheduler.NextRun",
+        "OpsiStronghold.Scheduler.NextRun",
+    ]
+    cases = {"recon_default": _delay_case(method, recon_scan=True)}
+    if cases["recon_default"] != {
+        "rejected": False,
+        "modified": expected_recon,
+        "updates": ["update"],
+    }:
+        raise AssertionError("default recon-scan delay drifted")
+    for task, group in (
+        ("OpsiExplore", "OpsiExplore"),
+        ("OpsiObscure", "OpsiObscure"),
+        ("OpsiStronghold", "OpsiStronghold"),
+    ):
+        name = f"{task}_force"
+        cases[name] = _delay_case(
+            method,
+            recon_scan=True,
+            overrides={f"{task}.{group}.ForceRun": True},
+        )
+        expected = [key for key in expected_recon if not key.startswith(task + ".")]
+        if cases[name]["modified"] != expected or cases[name]["rejected"]:
+            raise AssertionError(f"{task}.ForceRun delay exclusion drifted")
+    cases["explore_special_radar"] = _delay_case(
+        method,
+        recon_scan=True,
+        overrides={"OpsiExplore.OpsiExplore.SpecialRadar": True},
+    )
+    if (
+        cases["explore_special_radar"]["modified"]
+        != expected_recon[1:]
+        or cases["explore_special_radar"]["rejected"]
+    ):
+        raise AssertionError("OpsiExplore.SpecialRadar delay exclusion drifted")
+    cases["abyssal_submarine"] = _delay_case(
+        method,
+        submarine_call=True,
+        overrides={"OpsiAbyssal.OpsiFleet.Submarine": True},
+    )
+    if cases["abyssal_submarine"]["modified"] != [
+        "OpsiAbyssal.Scheduler.NextRun"
+    ]:
+        raise AssertionError("Abyssal submarine delay drifted")
+    cases["abyssal_force"] = _delay_case(
+        method,
+        submarine_call=True,
+        overrides={
+            "OpsiAbyssal.OpsiFleet.Submarine": True,
+            "OpsiAbyssal.OpsiAbyssal.ForceRun": True,
+        },
+    )
+    if cases["abyssal_force"]["modified"] or cases["abyssal_force"]["rejected"]:
+        raise AssertionError("OpsiAbyssal.ForceRun delay exclusion drifted")
+
+    invalid_cases = {}
+    invalid_paths = (
+        ("OpsiExplore.OpsiExplore.ForceRun", True, False),
+        ("OpsiObscure.OpsiObscure.ForceRun", True, False),
+        ("OpsiAbyssal.OpsiAbyssal.ForceRun", False, True),
+        ("OpsiStronghold.OpsiStronghold.ForceRun", True, False),
+        ("OpsiExplore.OpsiExplore.SpecialRadar", True, False),
+    )
+    for path, recon, submarine in invalid_paths:
+        overrides = {path: None}
+        if submarine:
+            overrides["OpsiAbyssal.OpsiFleet.Submarine"] = True
+        case = _delay_case(
+            method,
+            overrides=overrides,
+            recon_scan=recon,
+            submarine_call=submarine,
+        )
+        if case != {"rejected": True, "modified": [], "updates": []}:
+            raise AssertionError(f"invalid {path} touched scheduler state")
+        invalid_cases[path] = case
+    return {"cases": cases, "invalid_entries": invalid_cases}
+
+
+def _explore_case(method, *, special_radar: object) -> dict[str, Any]:
+    config = _Config(mode="normal", check=False, special_radar=special_radar)
+    events = config.events
+    host = SimpleNamespace(
+        config=config,
+        _solved_map_event=set(),
+        _os_explore_failed_zone=[],
+    )
+    host.name_to_zone = lambda zone: events.append(["name_to_zone", zone]) or SimpleNamespace(
+        zone_id=int(zone)
+    )
+    host.globe_goto = lambda zone, **kwargs: events.append(
+        ["globe_goto", zone, kwargs]
+    ) or True
+    host.tuning_sample_use = lambda: events.append("tuning_sample_use")
+    host.fleet_set = lambda fleet: events.append(["fleet_set", fleet])
+    host.os_order_execute = lambda **kwargs: events.append(
+        ["os_order_execute", kwargs]
+    )
+    host._os_explore_task_delay = lambda: events.append("explore_task_delay")
+    host.run_auto_search = lambda: events.append("auto_search") or 1
+    host.handle_after_auto_search = lambda: events.append("after_auto_search")
+    rejected = False
+    switched = False
+    try:
+        MethodType(method, host)()
+    except SemanticGateClosed:
+        rejected = True
+    except _Switch:
+        switched = True
+    return {"rejected": rejected, "switched": switched, "events": events}
+
+
+def _verify_explore(method) -> dict[str, Any]:
+    cases = {
+        str(value).lower(): _explore_case(method, special_radar=value)
+        for value in (False, True)
+    }
+    for value, recon_scan in ((False, True), (True, False)):
+        case = cases[str(value).lower()]
+        if case["rejected"] or not case["switched"]:
+            raise AssertionError("OpsiExplore.SpecialRadar task boundary drifted")
+        orders = [event for event in case["events"] if event[0] == "os_order_execute"]
+        if orders != [["os_order_execute", {"recon_scan": recon_scan, "submarine_call": False}]]:
+            raise AssertionError("OpsiExplore.SpecialRadar recon decision drifted")
+        used_tuning = "tuning_sample_use" in case["events"]
+        if used_tuning is not (not value):
+            raise AssertionError("OpsiExplore.SpecialRadar tuning decision drifted")
+    invalid = _explore_case(method, special_radar=None)
+    if invalid != {"rejected": True, "switched": False, "events": []}:
+        raise AssertionError("invalid OpsiExplore.SpecialRadar touched task state")
+    return {"cases": cases, "invalid_entry": invalid}
+
+
 def _verify_contract() -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
@@ -560,6 +823,16 @@ def _verify_contract() -> tuple[int, int]:
         accepted += 1
     for hazard_level in OPSI_MEOWFFICER_HAZARD_LEVELS:
         validate_alas_opsi_meowfficer_config(hazard_level=hazard_level)
+        accepted += 1
+    for values in product((False, True), repeat=5):
+        validate_alas_opsi_delay_task_config(
+            explore_force_run=values[0],
+            obscure_force_run=values[1],
+            abyssal_force_run=values[2],
+            stronghold_force_run=values[3],
+            special_radar=values[4],
+        )
+        validate_alas_opsi_explore_config(special_radar=values[4])
         accepted += 1
     invalid = 0
     for value in INVALID_MODES:
@@ -600,18 +873,42 @@ def _verify_contract() -> tuple[int, int]:
             invalid += 1
         else:
             raise AssertionError("invalid OpsiMeowfficerFarming.HazardLevel was admitted")
+    delay_fields = (
+        "explore_force_run",
+        "obscure_force_run",
+        "abyssal_force_run",
+        "stronghold_force_run",
+        "special_radar",
+    )
+    for value in INVALID_BOOLEANS:
+        for field in delay_fields:
+            kwargs = {name: False for name in delay_fields}
+            kwargs[field] = value
+            try:
+                validate_alas_opsi_delay_task_config(**kwargs)
+            except SemanticGateClosed:
+                invalid += 1
+            else:
+                raise AssertionError(f"invalid delay boolean {field} was admitted")
     return accepted, invalid
 
 
 def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     alas_root = alas_root.resolve()
     args_path = alas_root / "module/config/argument/args.json"
+    config_path = alas_root / "module/config/config.py"
+    explore_path = alas_root / "module/os/tasks/explore.py"
     month_path = alas_root / "module/os/tasks/month_boss.py"
     obscure_path = alas_root / "module/os/tasks/obscure.py"
     daily_path = alas_root / "module/os/tasks/daily.py"
     hazard_path = alas_root / "module/os/tasks/hazard_leveling.py"
     meowfficer_path = alas_root / "module/os/tasks/meowfficer_farming.py"
     _verify_args(args_path)
+    explore_consumers = _consumer_methods(
+        explore_path,
+        "OpsiExplore",
+        ("OpsiExplore_SpecialRadar",),
+    )
     month_consumers = _consumer_methods(
         month_path,
         "OpsiMonthBoss",
@@ -638,16 +935,30 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         ("OpsiMeowfficerFarming_HazardLevel",),
     )
     consumers = {
+        **explore_consumers,
         **month_consumers,
         **obscure_consumers,
         **daily_consumers,
         **hazard_consumers,
         **meowfficer_consumers,
     }
+    for field, methods in _dynamic_delay_consumers(config_path).items():
+        consumers.setdefault(field, []).extend(methods)
     expected = {
+        "OpsiExplore_SpecialRadar": [
+            "_os_explore",
+            "AzurLaneConfig.opsi_task_delay",
+        ],
+        "OpsiExplore_ForceRun": ["AzurLaneConfig.opsi_task_delay"],
         "OpsiMonthBoss_Mode": ["clear_month_boss", "month_boss_delay"],
         "OpsiMonthBoss_CheckAdaptability": ["clear_month_boss", "month_boss_delay"],
-        "OpsiObscure_ForceRun": ["clear_obscure", "os_obscure"],
+        "OpsiObscure_ForceRun": [
+            "clear_obscure",
+            "os_obscure",
+            "AzurLaneConfig.opsi_task_delay",
+        ],
+        "OpsiAbyssal_ForceRun": ["AzurLaneConfig.opsi_task_delay"],
+        "OpsiStronghold_ForceRun": ["AzurLaneConfig.opsi_task_delay"],
         "OpsiDaily_UseTuningSample": ["os_daily"],
         "OpsiHazard1Leveling_TargetZone": ["os_hazard1_leveling"],
         "OpsiMeowfficerFarming_HazardLevel": ["os_meowfficer_farming"],
@@ -656,7 +967,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         raise AssertionError("selected Opsi task consumer surface drifted")
     dead_loads = _dead_field_loads(alas_root)
     if any(dead_loads.values()):
-        raise AssertionError("declared zero-read ForceRun field gained a consumer")
+        raise AssertionError("declared zero-read Opsi field gained a consumer")
     globals_ = {
         "np": np,
         "logger": _Logger(),
@@ -668,9 +979,16 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "validate_alas_opsi_daily_config": validate_alas_opsi_daily_config,
         "validate_alas_opsi_hazard1_config": validate_alas_opsi_hazard1_config,
         "validate_alas_opsi_meowfficer_config": validate_alas_opsi_meowfficer_config,
-        "SelectedGrids": lambda value: value,
+        "SelectedGrids": _TaskList,
         "get_os_reset_remain": lambda: 1,
+        "datetime": datetime,
+        "timedelta": timedelta,
+        "DEFAULT_TIME": datetime(1970, 1, 1),
+        "dict_to_kv": lambda values: str(values),
+        "deep_get": _deep_get,
     }
+    explore_node = _method(explore_path, "OpsiExplore", "_os_explore")
+    delay_task_node = _method(config_path, "AzurLaneConfig", "opsi_task_delay")
     month_node = _method(month_path, "OpsiMonthBoss", "clear_month_boss")
     delay_node = _method(month_path, "OpsiMonthBoss", "month_boss_delay")
     obscure_clear_node = _method(obscure_path, "OpsiObscure", "clear_obscure")
@@ -685,6 +1003,18 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         meowfficer_path,
         "OpsiMeowfficerFarming",
         "os_meowfficer_farming",
+    )
+    explore_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_explore_config"
+        for node in ast.walk(explore_node)
+    )
+    delay_task_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_delay_task_config"
+        for node in ast.walk(delay_task_node)
     )
     month_guard = any(
         isinstance(node, ast.Call)
@@ -727,6 +1057,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     daily = _verify_daily(_compile(daily_node, globals_))
     hazard = _verify_hazard(_compile(hazard_node, globals_))
     meowfficer = _verify_meowfficer(_compile(meowfficer_node, globals_))
+    explore_globals = {**globals_, "ScriptError": RuntimeError}
+    explore = _verify_explore(_compile(explore_node, explore_globals))
+    delay = _verify_delay(_compile(delay_task_node, globals_))
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -743,7 +1076,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 6,
+        "field_count": 10,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -754,7 +1087,11 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and daily_guard
             and hazard_guard
             and meowfficer_guard
+            and explore_guard
+            and delay_task_guard
         ),
+        "explore": explore,
+        "task_delay": delay,
         "month_boss": month,
         "obscure": obscure,
         "daily": daily,
@@ -767,6 +1104,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "android_input_injected": False,
         "source_sha256": {
             "args": _sha256(args_path),
+            "config": _sha256(config_path),
+            "explore": _sha256(explore_path),
             "month_boss": _sha256(month_path),
             "obscure": _sha256(obscure_path),
             "daily": _sha256(daily_path),
