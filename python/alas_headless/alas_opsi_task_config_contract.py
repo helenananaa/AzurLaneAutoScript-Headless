@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from math import isfinite
+from typing import Mapping
 
 from .semantic_oracle import SemanticGateClosed
 
@@ -268,24 +269,64 @@ def validate_alas_opsi_rescan_config(
     )
 
 
-def validate_alas_opsi_akashi_filter(filter_: object, value: object) -> str:
-    """Validate tokens with the pinned ALAS selector grammar, not a copied one."""
-
+def _validate_alas_opsi_filter_tokens(
+    filter_: object,
+    value: object,
+    *,
+    field: str,
+) -> str:
     if not isinstance(value, str):
-        raise SemanticGateClosed("OpsiGeneral.AkashiShopFilter must be text")
+        raise SemanticGateClosed(f"{field} must be text")
     normalized = re.sub(r"[ \t\r\n]", "", value)
     normalized = re.sub(r"[＞﹥›˃ᐳ❯]", ">", normalized)
     normalized = re.sub(r"[‐‑‒–—―−－﹣﹘⁃]", "-", normalized)
     tokens = normalized.split(">")
     regex = getattr(filter_, "regex", None)
     if not hasattr(regex, "fullmatch"):
-        raise SemanticGateClosed("pinned ALAS Akashi filter grammar is unavailable")
+        raise SemanticGateClosed("pinned ALAS Operation Siren filter grammar is unavailable")
     invalid = tuple(
         token for token in tokens if not token or regex.fullmatch(token) is None
     )
     if invalid:
         raise SemanticGateClosed(
-            "OpsiGeneral.AkashiShopFilter contains invalid token(s): "
+            f"{field} contains invalid token(s): "
             + ", ".join(invalid)
         )
     return value
+
+
+def validate_alas_opsi_akashi_filter(filter_: object, value: object) -> str:
+    """Validate Akashi tokens with the pinned ALAS selector grammar."""
+
+    return _validate_alas_opsi_filter_tokens(
+        filter_,
+        value,
+        field="OpsiGeneral.AkashiShopFilter",
+    )
+
+
+def validate_alas_opsi_shop_preset(
+    presets: object,
+    preset: object,
+) -> str:
+    if not isinstance(presets, Mapping) or not presets:
+        raise SemanticGateClosed("pinned ALAS OpsiShop presets are unavailable")
+    if not isinstance(preset, str) or preset not in (*presets.keys(), "custom"):
+        raise SemanticGateClosed("OpsiShop.PresetFilter is unknown")
+    return preset
+
+
+def validate_alas_opsi_shop_custom_filter(value: object) -> str:
+    if not isinstance(value, str):
+        raise SemanticGateClosed("OpsiShop.CustomFilter must be text")
+    return value
+
+
+def validate_alas_opsi_shop_filter(filter_: object, value: object) -> str:
+    """Validate the selected OpsiShop parser with the pinned grammar."""
+
+    return _validate_alas_opsi_filter_tokens(
+        filter_,
+        value,
+        field="OpsiShop.CustomFilter",
+    )

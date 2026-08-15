@@ -12,6 +12,9 @@ from alas_headless.alas_opsi_task_config_contract import (
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
     validate_alas_opsi_akashi_filter,
+    validate_alas_opsi_shop_custom_filter,
+    validate_alas_opsi_shop_filter,
+    validate_alas_opsi_shop_preset,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
     validate_alas_opsi_fleet_selection,
@@ -38,9 +41,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 20)
-        self.assertEqual(result["accepted_case_count"], 97)
-        self.assertEqual(result["invalid_case_count"], 162)
+        self.assertEqual(result["field_count"], 22)
+        self.assertEqual(result["accepted_case_count"], 106)
+        self.assertEqual(result["invalid_case_count"], 176)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -72,6 +75,8 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 "OpsiGeneral.AkashiShopFilter": (
                     "Selector.items_filter_in_akashi_shop"
                 ),
+                "OpsiShop.PresetFilter": "Selector.items_filter_in_os_shop",
+                "OpsiShop.CustomFilter": "Selector.items_filter_in_os_shop",
             },
         )
 
@@ -218,6 +223,24 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 validate_alas_opsi_akashi_filter(filter_contract, parser),
                 parser,
             )
+        presets = {
+            name: "ActionPoint > PurpleCoins"
+            for name in ("max_benefit", "max_benefit_meta", "no_meta", "all")
+        }
+        for preset in (*presets, "custom"):
+            self.assertEqual(
+                validate_alas_opsi_shop_preset(presets, preset),
+                preset,
+            )
+        for custom_filter in ("", "ActionPoint > PurpleCoins"):
+            self.assertEqual(
+                validate_alas_opsi_shop_custom_filter(custom_filter),
+                custom_filter,
+            )
+        self.assertEqual(
+            validate_alas_opsi_shop_filter(filter_contract, "ActionPoint"),
+            "ActionPoint",
+        )
 
     def test_invalid_values_fail_closed(self):
         for mode in ("", "hard", None, 0, True, [], {}):
@@ -340,6 +363,22 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_opsi_akashi_filter(filter_contract, value)
+        presets = {"max_benefit": "ActionPoint"}
+        for value in ("", "unknown", None, 0, True, [], {}):
+            with self.subTest(field="opsi_shop_preset", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_shop_preset(presets, value)
+        for value in (None, 0, True, [], {}):
+            with self.subTest(field="opsi_shop_custom", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_shop_custom_filter(value)
+        for value in ("ActionPoint >", "unknown"):
+            with self.subTest(field="opsi_shop_filter", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_shop_filter(filter_contract, value)
 
     def test_patch_gates_original_task_entries(self):
         patch = ROOT.joinpath(
@@ -360,6 +399,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_repair_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_rescan_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_akashi_filter("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_shop_custom_filter("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_shop_filter("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_shop_preset("), 1)
         scheduler_patch = ROOT.joinpath(
             "integration/alas/series/0140-scheduler-contract.patch"
         ).read_text(encoding="utf-8")

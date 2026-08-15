@@ -1089,17 +1089,22 @@ index 56e0554e..9cebc1c1 100644
          self.device.click_record.clear()
  
 diff --git a/module/os_shop/selector.py b/module/os_shop/selector.py
-index f3821a36..439ad01d 100644
+index f3821a36..c3925742 100644
 --- a/module/os_shop/selector.py
 +++ b/module/os_shop/selector.py
-@@ -1,5 +1,6 @@
+@@ -1,5 +1,11 @@
  import re
  from typing import List
-+from alas_headless import validate_alas_opsi_akashi_filter
++from alas_headless import (
++    validate_alas_opsi_akashi_filter,
++    validate_alas_opsi_shop_custom_filter,
++    validate_alas_opsi_shop_filter,
++    validate_alas_opsi_shop_preset,
++)
  from module.config.config_generated import GeneratedConfig
  from module.os_shop.preset import *
  from module.os_shop.item import OSShopItem as Item
-@@ -97,10 +98,11 @@ class Selector():
+@@ -97,10 +103,11 @@ class Selector():
          Returns:
              list[Item]:
          """
@@ -1112,6 +1117,31 @@ index f3821a36..439ad01d 100644
 +        items = self.pretreatment(items)
          FILTER.load(parser)
          return FILTER.applys(items, funcs=[self.check_cl1_purple_coins, self.enough_coins_in_akashi])
+ 
+@@ -114,14 +121,20 @@ class Selector():
+         Returns:
+             list[Item]:
+         """
+-        items = self.pretreatment(items)
+-        preset = self.config.OpsiShop_PresetFilter
++        preset = validate_alas_opsi_shop_preset(
++            OS_SHOP,
++            self.config.OpsiShop_PresetFilter,
++        )
+         parser = ''
+         if preset == 'custom':
+-            parser = self.config.OpsiShop_CustomFilter
++            parser = validate_alas_opsi_shop_custom_filter(
++                self.config.OpsiShop_CustomFilter,
++            )
+             if not parser.strip():
+                 parser = OS_SHOP[GeneratedConfig.OpsiShop_PresetFilter]
+         else:
+             parser = OS_SHOP[preset]
++        parser = validate_alas_opsi_shop_filter(FILTER, parser)
++        items = self.pretreatment(items)
+         FILTER.load(parser)
+         return FILTER.applys(items, funcs=[self.check_cl1_purple_coins, self.check_item_count])
  
 diff --git a/module/os_shop/shop.py b/module/os_shop/shop.py
 index b97f0c0d..c7bf38d3 100644

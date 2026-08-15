@@ -23,6 +23,9 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
     validate_alas_opsi_akashi_filter,
+    validate_alas_opsi_shop_custom_filter,
+    validate_alas_opsi_shop_filter,
+    validate_alas_opsi_shop_preset,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
     validate_alas_opsi_fleet_selection,
@@ -1603,7 +1606,151 @@ def _verify_akashi_filter(
     return {"cases": cases, "invalid_entries": invalid}
 
 
-def _verify_contract(akashi_filter) -> tuple[int, int]:
+def _opsi_shop_filter_case(
+    method,
+    pretreatment,
+    check_cl1,
+    check_count,
+    *,
+    preset: object,
+    custom_filter: object = "ActionPoint > PurpleCoins",
+    cl1_enabled: bool = False,
+    logger_count: int = 1,
+) -> dict[str, Any]:
+    events: list[str] = []
+    items = _akashi_items()
+    items[2].count = logger_count
+    host = SimpleNamespace(
+        config=SimpleNamespace(
+            OpsiShop_PresetFilter=preset,
+            OpsiShop_CustomFilter=custom_filter,
+        ),
+        is_cl1_enabled=cl1_enabled,
+    )
+    bound_pretreatment = MethodType(pretreatment, host)
+    host.pretreatment = lambda values: (
+        events.append("pretreatment") or bound_pretreatment(values)
+    )
+    host.check_cl1_purple_coins = MethodType(check_cl1, host)
+    host.check_item_count = MethodType(check_count, host)
+    rejected = False
+    try:
+        result = MethodType(method, host)(items)
+    except SemanticGateClosed:
+        rejected = True
+        result = []
+    return {
+        "rejected": rejected,
+        "items": [item.name for item in result],
+        "events": events,
+    }
+
+
+def _verify_opsi_shop_filter(
+    method,
+    pretreatment,
+    check_cl1,
+    check_count,
+) -> dict[str, Any]:
+    presets = {
+        preset: _opsi_shop_filter_case(
+            method,
+            pretreatment,
+            check_cl1,
+            check_count,
+            preset=preset,
+        )
+        for preset in ("max_benefit", "max_benefit_meta", "no_meta", "all")
+    }
+    for preset, case in presets.items():
+        if case["rejected"] or case["items"] != [
+            "LoggerAbyssalT6",
+            "ActionPoint",
+            "PurpleCoins",
+        ]:
+            raise AssertionError(f"OpsiShop preset drifted: {preset}")
+    custom = _opsi_shop_filter_case(
+        method,
+        pretreatment,
+        check_cl1,
+        check_count,
+        preset="custom",
+        custom_filter="PurpleCoins > ActionPoint",
+    )
+    if custom["rejected"] or custom["items"] != ["PurpleCoins", "ActionPoint"]:
+        raise AssertionError("OpsiShop custom priority drifted")
+    fallback = _opsi_shop_filter_case(
+        method,
+        pretreatment,
+        check_cl1,
+        check_count,
+        preset="custom",
+        custom_filter=" \n ",
+    )
+    if fallback["rejected"] or fallback["items"] != [
+        "LoggerAbyssalT6",
+        "ActionPoint",
+        "PurpleCoins",
+    ]:
+        raise AssertionError("OpsiShop custom fallback drifted")
+    cl1 = _opsi_shop_filter_case(
+        method,
+        pretreatment,
+        check_cl1,
+        check_count,
+        preset="custom",
+        custom_filter="PurpleCoins > ActionPoint",
+        cl1_enabled=True,
+    )
+    if cl1["rejected"] or cl1["items"] != ["ActionPoint"]:
+        raise AssertionError("OpsiShop CL1 exclusion drifted")
+    exhausted = _opsi_shop_filter_case(
+        method,
+        pretreatment,
+        check_cl1,
+        check_count,
+        preset="max_benefit_meta",
+        logger_count=0,
+    )
+    if exhausted["rejected"] or exhausted["items"] != [
+        "ActionPoint",
+        "PurpleCoins",
+    ]:
+        raise AssertionError("OpsiShop item-count exclusion drifted")
+    invalid_values = (
+        ("unknown", "ActionPoint"),
+        (None, "ActionPoint"),
+        ("custom", None),
+        ("custom", "ActionPoint > invalid"),
+        ("custom", "ActionPoint >"),
+    )
+    invalid = {
+        f"{preset!r}:{custom_filter!r}": _opsi_shop_filter_case(
+            method,
+            pretreatment,
+            check_cl1,
+            check_count,
+            preset=preset,
+            custom_filter=custom_filter,
+        )
+        for preset, custom_filter in invalid_values
+    }
+    if any(
+        not case["rejected"] or case["events"]
+        for case in invalid.values()
+    ):
+        raise AssertionError("invalid OpsiShop filter touched shop item state")
+    return {
+        "presets": presets,
+        "custom": custom,
+        "fallback": fallback,
+        "cl1": cl1,
+        "exhausted": exhausted,
+        "invalid_entries": invalid,
+    }
+
+
+def _verify_contract(akashi_filter, opsi_shop_presets) -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
         for check in (False, True):
@@ -1652,6 +1799,15 @@ def _verify_contract(akashi_filter) -> tuple[int, int]:
         "RepairPack",
     ):
         validate_alas_opsi_akashi_filter(akashi_filter, parser)
+        accepted += 1
+    for preset in ("max_benefit", "max_benefit_meta", "no_meta", "all", "custom"):
+        validate_alas_opsi_shop_preset(opsi_shop_presets, preset)
+        accepted += 1
+    for custom_filter in ("", "ActionPoint > PurpleCoins"):
+        validate_alas_opsi_shop_custom_filter(custom_filter)
+        accepted += 1
+    for parser in ("ActionPoint", "LoggerAbyssalT6"):
+        validate_alas_opsi_shop_filter(akashi_filter, parser)
         accepted += 1
     for action_point_preserve in (0, 1000, 2500):
         validate_alas_opsi_meowfficer_config(
@@ -1845,6 +2001,27 @@ def _verify_contract(akashi_filter) -> tuple[int, int]:
             invalid += 1
         else:
             raise AssertionError("invalid OpsiGeneral.AkashiShopFilter was admitted")
+    for value in ("", "unknown", None, 0, True, [], {}):
+        try:
+            validate_alas_opsi_shop_preset(opsi_shop_presets, value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiShop.PresetFilter was admitted")
+    for value in (None, 0, True, [], {}):
+        try:
+            validate_alas_opsi_shop_custom_filter(value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiShop.CustomFilter type was admitted")
+    for value in ("ActionPoint >", "unknown"):
+        try:
+            validate_alas_opsi_shop_filter(akashi_filter, value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiShop.CustomFilter token was admitted")
     return accepted, invalid
 
 
@@ -1857,6 +2034,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     map_data_path = alas_root / "module/os/map_data.py"
     os_map_path = alas_root / "module/os/map.py"
     selector_path = alas_root / "module/os_shop/selector.py"
+    os_shop_preset_path = alas_root / "module/os_shop/preset.py"
     filter_path = alas_root / "module/base/filter.py"
     action_point_path = alas_root / "module/os_handler/action_point.py"
     storage_path = alas_root / "module/os_handler/storage.py"
@@ -1942,6 +2120,13 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     )
     consumers.update(
         _consumer_methods(
+            selector_path,
+            "Selector",
+            ("OpsiShop_PresetFilter", "OpsiShop_CustomFilter"),
+        )
+    )
+    consumers.update(
+        _consumer_methods(
             os_map_path,
             "OSMap",
             (
@@ -1981,6 +2166,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiGeneral_RepairThreshold": ["handle_fleet_repair"],
         "OpsiGeneral_DoRandomMapEvent": ["run_auto_search"],
         "OpsiGeneral_AkashiShopFilter": ["items_filter_in_akashi_shop"],
+        "OpsiShop_PresetFilter": ["items_filter_in_os_shop"],
+        "OpsiShop_CustomFilter": ["items_filter_in_os_shop"],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -2000,6 +2187,11 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             validate_alas_opsi_action_point_purchase
         ),
         "validate_alas_opsi_akashi_filter": validate_alas_opsi_akashi_filter,
+        "validate_alas_opsi_shop_custom_filter": (
+            validate_alas_opsi_shop_custom_filter
+        ),
+        "validate_alas_opsi_shop_filter": validate_alas_opsi_shop_filter,
+        "validate_alas_opsi_shop_preset": validate_alas_opsi_shop_preset,
         "validate_alas_opsi_hazard1_config": validate_alas_opsi_hazard1_config,
         "validate_alas_opsi_meowfficer_config": validate_alas_opsi_meowfficer_config,
         "validate_alas_opsi_repair_config": validate_alas_opsi_repair_config,
@@ -2045,6 +2237,16 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         selector_path,
         "Selector",
         "check_cl1_purple_coins",
+    )
+    opsi_shop_node = _method(
+        selector_path,
+        "Selector",
+        "items_filter_in_os_shop",
+    )
+    opsi_shop_count_node = _method(
+        selector_path,
+        "Selector",
+        "check_item_count",
     )
     explore_node = _method(explore_path, "OpsiExplore", "_os_explore")
     order_node = _method(order_path, "MapOrderHandler", "os_order_execute")
@@ -2148,6 +2350,19 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and node.func.id == "validate_alas_opsi_akashi_filter"
         for node in ast.walk(akashi_node)
     )
+    opsi_shop_guards = {
+        name: any(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == name
+            for node in ast.walk(opsi_shop_node)
+        )
+        for name in (
+            "validate_alas_opsi_shop_custom_filter",
+            "validate_alas_opsi_shop_filter",
+            "validate_alas_opsi_shop_preset",
+        )
+    }
     filter_type = _compile_class(
         _class(filter_path, "Filter"),
         {"reduce": reduce, "re": re, "logger": _Logger()},
@@ -2157,12 +2372,19 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         akashi_regex,
         ("group", "sub_genre", "tier"),
     )
+    opsi_shop_presets = _assignment(
+        os_shop_preset_path,
+        "OS_SHOP",
+        {},
+    )
     akashi_globals = {
         **globals_,
         "FILTER": akashi_filter,
         "FILTER_REGEX": akashi_regex,
+        "OS_SHOP": opsi_shop_presets,
         "GeneratedConfig": SimpleNamespace(
-            OpsiGeneral_AkashiShopFilter="ActionPoint > PurpleCoins"
+            OpsiGeneral_AkashiShopFilter="ActionPoint > PurpleCoins",
+            OpsiShop_PresetFilter="max_benefit_meta",
         ),
         "re": re,
         "List": list,
@@ -2198,6 +2420,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         _compile(akashi_coins_node, akashi_globals),
         _compile(akashi_cl1_node, akashi_globals),
     )
+    opsi_shop = _verify_opsi_shop_filter(
+        _compile(opsi_shop_node, akashi_globals),
+        _compile(akashi_pretreatment_node, akashi_globals),
+        _compile(akashi_cl1_node, akashi_globals),
+        _compile(opsi_shop_count_node, akashi_globals),
+    )
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -2210,11 +2438,11 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         if invalid["events"]:
             raise AssertionError("invalid month boss config touched task state")
         invalid_month_events = invalid
-    accepted, invalid = _verify_contract(akashi_filter)
+    accepted, invalid = _verify_contract(akashi_filter, opsi_shop_presets)
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 20,
+        "field_count": 22,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -2234,6 +2462,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and repair_guard
             and rescan_guard
             and akashi_guard
+            and all(opsi_shop_guards.values())
         ),
         "validated_runtime_boundaries": {
             "OpsiFleet.Fleet": "OSFleet.fleet_set",
@@ -2255,6 +2484,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "OpsiGeneral.AkashiShopFilter": (
                 "Selector.items_filter_in_akashi_shop"
             ),
+            "OpsiShop.PresetFilter": "Selector.items_filter_in_os_shop",
+            "OpsiShop.CustomFilter": "Selector.items_filter_in_os_shop",
         },
         "fleet_selection": fleet_selection,
         "order": order,
@@ -2263,6 +2494,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "fleet_repair": repair,
         "random_map_event": rescan,
         "akashi_shop_filter": akashi,
+        "opsi_shop_filter": opsi_shop,
         "explore": explore,
         "task_delay": delay,
         "month_boss": month,
@@ -2283,6 +2515,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "map_data": _sha256(map_data_path),
             "os_map": _sha256(os_map_path),
             "os_shop_selector": _sha256(selector_path),
+            "os_shop_preset": _sha256(os_shop_preset_path),
             "base_filter": _sha256(filter_path),
             "action_point": _sha256(action_point_path),
             "storage": _sha256(storage_path),

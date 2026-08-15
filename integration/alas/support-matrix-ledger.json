@@ -5316,9 +5316,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -5335,9 +5340,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
@@ -7742,6 +7752,32 @@
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
         "docs/status.md"
       ],
+      "field": "OpsiShop.CustomFilter",
+      "note": "Custom priority and blank fallback execute the pinned selector and grammar; malformed types and tokens fail before item pretreatment, while CL1 and exhausted-count exclusions remain original and no purchase occurs."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiShop.PresetFilter",
+      "note": "All five declared presets are source-bound to pinned OS_SHOP definitions and preserve original candidate ordering and count filters; unknown presets fail before item pretreatment and no purchase occurs."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "field": "OpsiGeneral.AkashiShopFilter",
       "note": "Pinned upstream filter grammar preserves default fallback, Unicode separators, priority, CL1 PurpleCoins exclusion, and exact coin sufficiency; malformed rules fail before item pretreatment and no purchase input occurs."
     },
@@ -9744,8 +9780,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "c58f6f2d0ce5b2b68ff7ade319be44a14652a906ba8b09c84aaf1c2cbfd06f7b",
-      "manifest_sha256": "bc5594ee99fe2ef274cc96136550fa52a9d593257305b441b796cae5e7d94759",
+      "combined_sha256": "a2c195d53391ae6a9ec701130714b485bcbc0b17899fb35b1d02f6fbd67812a6",
+      "manifest_sha256": "eafee77936416c932e20a45c184e9c4659cd223017e9af691cc133874b60bbaa",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
