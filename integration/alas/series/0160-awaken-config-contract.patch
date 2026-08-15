@@ -1,0 +1,38 @@
+diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
+--- a/module/awaken/awaken.py
++++ b/module/awaken/awaken.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_awaken_config
++
+ from module.awaken.assets import *
+ from module.base.timer import Timer
+ from module.exception import ScriptError
+@@ -371,19 +373,24 @@ class Awaken(Dock):
+         return result
+ 
+     def run(self):
++        awaken_config = validate_alas_awaken_config(
++            level_cap=self.config.Awaken_LevelCap,
++            favourite=self.config.Awaken_Favourite,
++        )
++
+         # Run Awakening+ first
+-        favourite = self.config.Awaken_Favourite
+-        if self.config.Awaken_LevelCap == 'level125':
++        favourite = awaken_config.favourite
++        if awaken_config.level_cap == 'level125':
+             # Use Cognitive Arrays
+             result = self.awaken_run(use_array=True, favourite=favourite)
+             # Use Cognitive Chips
+             if result != 'timeout':
+                 self.awaken_run(favourite=favourite)
+-        elif self.config.Awaken_LevelCap == 'level120':
++        elif awaken_config.level_cap == 'level120':
+             # Use Cognitive Chips
+             self.awaken_run(favourite=favourite)
+         else:
+-            raise ScriptError(f'Unknown Awaken_LevelCap={self.config.Awaken_LevelCap}')
++            raise ScriptError(f'Unknown Awaken_LevelCap={awaken_config.level_cap}')
+ 
+         # Reset dock filters
+         logger.hr('Awaken run exit', level=1)

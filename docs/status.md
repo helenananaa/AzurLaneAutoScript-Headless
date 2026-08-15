@@ -4,6 +4,22 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-15
 
+### Awaken: source-bound two-setting dispatcher replay
+
+- `Awaken.LevelCap` and `Awaken.Favourite` now have an exact, fail-closed
+  contract at the first executable statement of pinned upstream `Awaken.run()`.
+  Only `level120`/`level125` and real booleans are admitted; enum aliases,
+  casing changes, integer booleans, and wrong types stop before any
+  `awaken_run` call.
+- Recorder-only replay executes the original level-120 path, both favourite
+  reset variants, the level-125 array timeout path, and the array-to-chip
+  fallback. It preserves the original `task_delay(server_update=True)` and
+  dock-filter reset order while making no device, account, resource, or Android
+  input request.
+- This is an offline-only promotion for the two settings. Dock candidates,
+  resource checks, batch selection, confirmation, postconditions, observation,
+  and all real input remain unadapted; no live or action dimension is promoted.
+
 ### Configuration interaction attack matrix: pinned-source, fixed-seed, zero-input pass
 
 - `verify_alas_configuration_attack_matrix.py` now composes the existing

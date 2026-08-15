@@ -108,6 +108,10 @@ from .alas_battle_pass_config_contract import (
     AlasBattlePassConfigSnapshot,
     validate_alas_battle_pass_config,
 )
+from .alas_awaken_config_contract import (
+    AlasAwakenConfigSnapshot,
+    validate_alas_awaken_config,
+)
 from .alas_optimization_config_contract import (
     AlasScreenshotIntervalConfigSnapshot,
     WHEN_TASK_QUEUE_EMPTY,
@@ -608,6 +612,7 @@ __all__ = (
     "AlasCampaignCameraViewObservation",
     "AlasCampaignCameraPositioning",
     "AlasCampaignFleetPlan",
+    "AlasAwakenConfigSnapshot",
     "AlasCampaignCombatAdmission",
     "AlasCampaignCombatProof",
     "AlasCampaignCombatReplay",
@@ -838,6 +843,7 @@ __all__ = (
     "select_alas_combat_observer_trace_samples",
     "unqualified_alas_combat_observer_manifest",
     "validate_alas_combat_observer_snapshot",
+    "validate_alas_awaken_config",
     "verify_alas_combat_mapping_receipt",
     "verify_alas_combat_rare_surface_evidence",
     "verify_alas_combat_result_control_evidence",

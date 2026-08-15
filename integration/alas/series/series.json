@@ -84,6 +84,11 @@
       "order": 17,
       "path": "integration/alas/series/0150-runtime-optimization-contract.patch",
       "sha256": "de7cac06cbaf47a5addf38b3488274a18834cb6088628023696e6ac7f3356015"
+    },
+    {
+      "order": 18,
+      "path": "integration/alas/series/0160-awaken-config-contract.patch",
+      "sha256": "62a788b75d7c0c4b62676e0a7d95171945624623e22acf9e7bacf4ce56664d7a"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -79,40 +79,50 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_awaken_config.py",
+        "python/alas_headless/alas_awaken_config_replay.py",
+        "integration/alas/series/0160-awaken-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Awaken"
       ],
       "path": "Awaken.Favourite",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 离线回放",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_awaken_config.py",
+        "python/alas_headless/alas_awaken_config_replay.py",
+        "integration/alas/series/0160-awaken-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=select; display=default",
       "panels": [
         "Awaken"
       ],
       "path": "Awaken.LevelCap",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 离线回放",
+      "support": "supported",
       "values": "options: \"level120\", \"level125\"; default: \"level120\""
     },
     {
@@ -7350,8 +7360,8 @@
         "Awaken"
       ],
       "name": "Awaken",
-      "note": "收藏过滤、120/125 上限及批量觉醒缺适配",
-      "status": "M"
+      "note": "Favourite 与 120/125 上限已在原分派入口离线回放并提前 fail-closed；资源、候选、批量选择、确认和结果观察/输入仍缺适配",
+      "status": "O"
     },
     {
       "groups": [
@@ -10058,6 +10068,32 @@
       ],
       "field": "Optimization.WhenTaskQueueEmpty",
       "note": "All three declared idle modes preserve the original scheduler branches and due-task bypass; invalid values now fail before task dequeue instead of falling back silently."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_awaken_config.py",
+        "python/alas_headless/alas_awaken_config_replay.py",
+        "integration/alas/series/0160-awaken-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "Awaken.Favourite",
+      "note": "Both exact boolean values preserve the original Awaken dispatcher and dock-filter reset order; malformed values fail before any awaken-run intent is reached."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_awaken_config.py",
+        "python/alas_headless/alas_awaken_config_replay.py",
+        "integration/alas/series/0160-awaken-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "Awaken.LevelCap",
+      "note": "Both pinned level caps preserve the original array-first timeout split and chip fallback; malformed values fail before any awaken-run intent is reached."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -10070,9 +10106,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "0a2565e0478a1914d3a46044b72c0e6af1b63555d5f816e96d589cc1927bb55a",
-      "manifest_sha256": "76f7b2584147bce460720ad0060481ed4eab671e87bbf38eac529ec1b6bcdd0e",
-      "member_count": 17
+      "combined_sha256": "f67557295812717917e0c011f1f50748e0a691484d7e5200eb2c27888fe39dc6",
+      "manifest_sha256": "5029eaad342fffb5a3b6c9f1c542e987e32c8e2bc3d1c4c3f1aed9664e7463af",
+      "member_count": 18
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }
