@@ -92,6 +92,9 @@ from .alas_opsi_task_config_contract import (
     AlasOpsiMonthBossConfigSnapshot,
     AlasOpsiOrderSnapshot,
     AlasOpsiObscureConfigSnapshot,
+    AlasOpsiActionPointPurchaseSnapshot,
+    AlasOpsiRepairConfigSnapshot,
+    AlasOpsiStorageConfigSnapshot,
     OPSI_MONTH_BOSS_MODES,
     OPSI_HAZARD1_TARGET_ZONES,
     OPSI_FLEET_INDEXES,
@@ -105,6 +108,9 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_month_boss_config,
     validate_alas_opsi_order,
     validate_alas_opsi_obscure_config,
+    validate_alas_opsi_action_point_purchase,
+    validate_alas_opsi_repair_config,
+    validate_alas_opsi_storage_config,
 )
 from .alas_game_manager_config_contract import (
     AlasGameManagerConfigSnapshot,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 
 from .semantic_oracle import SemanticGateClosed
 
@@ -73,6 +74,22 @@ class AlasOpsiFleetSelectionSnapshot:
 class AlasOpsiOrderSnapshot:
     recon_scan: bool
     submarine_call: bool
+
+
+@dataclass(frozen=True)
+class AlasOpsiStorageConfigSnapshot:
+    use_logger: bool
+
+
+@dataclass(frozen=True)
+class AlasOpsiActionPointPurchaseSnapshot:
+    buy_limit: int
+    oil_limit: int
+
+
+@dataclass(frozen=True)
+class AlasOpsiRepairConfigSnapshot:
+    threshold: float
 
 
 def validate_alas_opsi_month_boss_config(
@@ -200,3 +217,36 @@ def validate_alas_opsi_order(
         recon_scan=recon_scan,
         submarine_call=submarine_call,
     )
+
+
+def validate_alas_opsi_storage_config(
+    *, use_logger: object
+) -> AlasOpsiStorageConfigSnapshot:
+    if type(use_logger) is not bool:
+        raise SemanticGateClosed("OpsiGeneral.UseLogger must be a bool")
+    return AlasOpsiStorageConfigSnapshot(use_logger=use_logger)
+
+
+def validate_alas_opsi_action_point_purchase(
+    *, buy_limit: object, oil_limit: object
+) -> AlasOpsiActionPointPurchaseSnapshot:
+    if type(buy_limit) is not int or buy_limit not in range(6):
+        raise SemanticGateClosed(
+            "OpsiGeneral.BuyActionPointLimit must be 0, 1, 2, 3, 4, or 5"
+        )
+    if type(oil_limit) is not int or oil_limit < 0:
+        raise SemanticGateClosed("OpsiGeneral.OilLimit must be a non-negative int")
+    return AlasOpsiActionPointPurchaseSnapshot(
+        buy_limit=buy_limit,
+        oil_limit=oil_limit,
+    )
+
+
+def validate_alas_opsi_repair_config(
+    *, threshold: object
+) -> AlasOpsiRepairConfigSnapshot:
+    if type(threshold) not in (int, float) or not isfinite(threshold):
+        raise SemanticGateClosed("OpsiGeneral.RepairThreshold must be finite")
+    if threshold > 1:
+        raise SemanticGateClosed("OpsiGeneral.RepairThreshold must not exceed 1")
+    return AlasOpsiRepairConfigSnapshot(threshold=float(threshold))

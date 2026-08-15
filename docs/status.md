@@ -323,7 +323,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 105 changed files, all 104 patched Python files compile, and
+  patch applies as 106 changed files, all 105 patched Python files compile, and
   the repository suite passes `959/959` tests, including Operation Siren task configuration, Optimization configuration, BattlePass configuration, Daemon configuration, OpsiDaemon configuration, BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard task configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
@@ -577,6 +577,15 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   now occurs before action-point checks: malformed types fail closed and an
   unknown name preserves the original human-takeover result without task or
   device mutation.
+- `OpsiGeneral.UseLogger` preserves storage entry, optional coordinate-logger
+  use, and checkout ordering for both booleans. Invalid values fail before
+  storage navigation.
+- `OpsiGeneral.BuyActionPointLimit` covers all six declared weekly limits and
+  `OilLimit` preserves the exact `oil >= cost + reserve` boundary. Purchase
+  input is a recorder only; malformed limits fail before the purchase button.
+- `OpsiGeneral.RepairThreshold` preserves negative disable, exact rounded-HP
+  boundary repair, and no-repair branches. Non-finite and above-one values fail
+  before HP observation or port navigation.
 - `OpsiExplore.SpecialRadar` preserves the original tuning-sample use and
   `recon_scan` decisions in `_os_explore()`. The same value, together with
   `OpsiExplore.ForceRun`, `OpsiObscure.ForceRun`,
@@ -587,10 +596,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `OSFleet.fleet_set()` selector boundary. `OpsiFleet.Submarine` validates both
   booleans at `MapOrderHandler.os_order_execute()`, preserving scan/submarine
   dispatch, the submarine completion wait, and scheduler-delay arguments.
-- Sixty-six valid classes pass and 116 malformed values fail before task,
+- Ninety valid classes pass and 149 malformed values fail before task,
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
-  or Android input. Fourteen fields now have complete offline classification.
+  or Android input. Eighteen fields now have complete offline classification.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

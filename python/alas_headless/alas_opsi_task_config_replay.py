@@ -19,6 +19,7 @@ from .alas_opsi_task_config_contract import (
     OPSI_MEOWFFICER_HAZARD_LEVELS,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
+    validate_alas_opsi_action_point_purchase,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
     validate_alas_opsi_fleet_selection,
@@ -27,6 +28,8 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_month_boss_config,
     validate_alas_opsi_order,
     validate_alas_opsi_obscure_config,
+    validate_alas_opsi_repair_config,
+    validate_alas_opsi_storage_config,
 )
 from .semantic_oracle import SemanticGateClosed
 
@@ -196,6 +199,23 @@ def _verify_args(args_path: Path) -> None:
         submarine = fleet["Submarine"]
         if submarine.get("type") != "checkbox" or submarine.get("value") is not False:
             raise AssertionError(f"{panel}.OpsiFleet.Submarine declaration drifted")
+    general = document.get("OpsiGeneral", {}).get("OpsiGeneral")
+    expected_general = {
+        "UseLogger": ("checkbox", True, None),
+        "BuyActionPointLimit": ("select", 0, list(range(6))),
+        "OilLimit": ("input", 1000, None),
+        "RepairThreshold": ("input", 0.4, None),
+        "DoRandomMapEvent": ("checkbox", True, None),
+        "AkashiShopFilter": ("textarea", "ActionPoint > PurpleCoins", None),
+    }
+    if not isinstance(general, dict) or set(general) != set(expected_general):
+        raise AssertionError("OpsiGeneral field surface drifted")
+    for field, (type_, default, options) in expected_general.items():
+        declaration = general[field]
+        if declaration.get("type") != type_ or declaration.get("value") != default:
+            raise AssertionError(f"OpsiGeneral.{field} declaration drifted")
+        if options is not None and declaration.get("option") != options:
+            raise AssertionError(f"OpsiGeneral.{field} options drifted")
     explore = document.get("OpsiExplore", {}).get("OpsiExplore")
     if not isinstance(explore, dict) or set(explore) != {
         "SpecialRadar",
@@ -353,6 +373,9 @@ class _Config(SimpleNamespace):
         meowfficer_action_point_preserve: object = 1000,
         meowfficer_hazard_level: object = 5,
         meowfficer_target_zone: object = 0,
+        opsi_buy_limit: object = 0,
+        opsi_oil_limit: object = 1000,
+        opsi_repair_threshold: object = 0.4,
         special_radar: object = False,
     ):
         super().__init__(
@@ -369,7 +392,9 @@ class _Config(SimpleNamespace):
             OpsiMeowfficerFarming_ActionPointPreserve=meowfficer_action_point_preserve,
             OpsiMeowfficerFarming_TargetZone=meowfficer_target_zone,
             OpsiGeneral_UseLogger=False,
-            OpsiGeneral_BuyActionPointLimit=0,
+            OpsiGeneral_BuyActionPointLimit=opsi_buy_limit,
+            OpsiGeneral_OilLimit=opsi_oil_limit,
+            OpsiGeneral_RepairThreshold=opsi_repair_threshold,
             OpsiAshBeacon_EnsureFullyCollected=False,
             OpsiFleet_Fleet=1,
             OpsiFleet_Submarine=False,
@@ -1104,6 +1129,199 @@ def _verify_order(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry": invalid}
 
 
+def _storage_case(method, *, use_logger: object) -> dict[str, Any]:
+    events: list[Any] = []
+    host = SimpleNamespace()
+    host.storage_enter = lambda: events.append("storage_enter")
+    host.storage_logger_use_all = lambda: events.append("storage_logger_use_all")
+    host.storage_checkout_item = lambda item: events.append(
+        ["storage_checkout_item", item]
+    ) or True
+    rejected = False
+    try:
+        result = MethodType(method, host)("OBSCURE", use_logger=use_logger)
+    except SemanticGateClosed:
+        rejected = True
+        result = None
+    return {"rejected": rejected, "result": result, "events": events}
+
+
+def _verify_storage(method) -> dict[str, Any]:
+    cases = {
+        str(value).lower(): _storage_case(method, use_logger=value)
+        for value in (False, True)
+    }
+    if cases["false"] != {
+        "rejected": False,
+        "result": True,
+        "events": ["storage_enter", ["storage_checkout_item", "OBSCURE"]],
+    }:
+        raise AssertionError("disabled OpsiGeneral.UseLogger branch drifted")
+    if cases["true"] != {
+        "rejected": False,
+        "result": True,
+        "events": [
+            "storage_enter",
+            "storage_logger_use_all",
+            ["storage_checkout_item", "OBSCURE"],
+        ],
+    }:
+        raise AssertionError("enabled OpsiGeneral.UseLogger branch drifted")
+    invalid = _storage_case(method, use_logger=None)
+    if invalid != {"rejected": True, "result": None, "events": []}:
+        raise AssertionError("invalid OpsiGeneral.UseLogger touched storage state")
+    return {"cases": cases, "invalid_entry": invalid}
+
+
+def _purchase_case(
+    method,
+    *,
+    buy_limit: object,
+    oil_limit: object,
+    current: int = 5,
+    oil: int = 100_000,
+) -> dict[str, Any]:
+    config = _Config(
+        mode="normal",
+        check=False,
+        opsi_buy_limit=buy_limit,
+        opsi_oil_limit=oil_limit,
+    )
+    events = config.events
+    host = SimpleNamespace(config=config, _action_point_box=[oil, 0, 0, 0])
+    host.action_point_set_button = lambda index: events.append(
+        ["action_point_set_button", index]
+    )
+    host.action_point_get_buy_remain = lambda: events.append(
+        "action_point_get_buy_remain"
+    ) or current
+    host.action_point_use = lambda: events.append("action_point_use")
+    rejected = False
+    try:
+        result = MethodType(method, host)(preserve=oil_limit)
+    except SemanticGateClosed:
+        rejected = True
+        result = None
+    return {"rejected": rejected, "result": result, "events": events}
+
+
+def _verify_purchase(method) -> dict[str, Any]:
+    limit_cases = {}
+    for buy_limit in range(6):
+        reached = _purchase_case(
+            method,
+            buy_limit=buy_limit,
+            oil_limit=1000,
+            current=5 - buy_limit,
+        )
+        if reached["rejected"] or reached["result"] is not False:
+            raise AssertionError("OpsiGeneral buy-limit boundary drifted")
+        if "action_point_use" in reached["events"]:
+            raise AssertionError("reached OpsiGeneral buy limit purchased AP")
+        limit_cases[f"reached:{buy_limit}"] = reached
+        if buy_limit:
+            allowed = _purchase_case(
+                method,
+                buy_limit=buy_limit,
+                oil_limit=1000,
+                current=6 - buy_limit,
+            )
+            if allowed["rejected"] or allowed["result"] is not True:
+                raise AssertionError("allowed OpsiGeneral AP purchase drifted")
+            if allowed["events"][-1] != "action_point_use":
+                raise AssertionError("allowed OpsiGeneral AP purchase skipped input boundary")
+            limit_cases[f"allowed:{buy_limit}"] = allowed
+    oil_cases = {
+        "exact": _purchase_case(
+            method,
+            buy_limit=1,
+            oil_limit=1000,
+            current=5,
+            oil=2000,
+        ),
+        "below": _purchase_case(
+            method,
+            buy_limit=1,
+            oil_limit=1000,
+            current=5,
+            oil=1999,
+        ),
+    }
+    if oil_cases["exact"]["result"] is not True:
+        raise AssertionError("exact OpsiGeneral oil preserve boundary drifted")
+    if oil_cases["below"]["result"] is not False:
+        raise AssertionError("below OpsiGeneral oil preserve boundary purchased AP")
+    invalid_limit = _purchase_case(
+        method,
+        buy_limit=6,
+        oil_limit=1000,
+    )
+    invalid_oil = _purchase_case(
+        method,
+        buy_limit=1,
+        oil_limit=-1,
+    )
+    for invalid in (invalid_limit, invalid_oil):
+        if invalid != {"rejected": True, "result": None, "events": []}:
+            raise AssertionError("invalid OpsiGeneral purchase config touched input state")
+    return {
+        "limit_cases": limit_cases,
+        "oil_cases": oil_cases,
+        "invalid_limit": invalid_limit,
+        "invalid_oil": invalid_oil,
+    }
+
+
+def _repair_case(method, *, threshold: object, hp: float = 0.4) -> dict[str, Any]:
+    config = _Config(
+        mode="normal",
+        check=False,
+        opsi_repair_threshold=threshold,
+    )
+    events = config.events
+    host = SimpleNamespace(
+        config=config,
+        hp=[hp],
+        hp_has_ship=[True],
+    )
+    host.is_in_special_zone = lambda: events.append("special_zone") or False
+    host.hp_get = lambda: events.append("hp_get")
+    host.fleet_repair = lambda **kwargs: events.append(["fleet_repair", kwargs])
+    host.hp_reset = lambda: events.append("hp_reset")
+    rejected = False
+    try:
+        result = MethodType(method, host)()
+    except SemanticGateClosed:
+        rejected = True
+        result = None
+    return {"rejected": rejected, "result": result, "events": events}
+
+
+def _verify_repair(method) -> dict[str, Any]:
+    cases = {
+        "disabled": _repair_case(method, threshold=-1),
+        "zero": _repair_case(method, threshold=0, hp=0),
+        "above": _repair_case(method, threshold=0.4, hp=0.41),
+        "boundary": _repair_case(method, threshold=0.4, hp=0.4),
+        "one": _repair_case(method, threshold=1, hp=1),
+    }
+    if cases["disabled"] != {"rejected": False, "result": False, "events": []}:
+        raise AssertionError("disabled OpsiGeneral repair threshold drifted")
+    if cases["above"]["result"] is not False or any(
+        event[0] == "fleet_repair" for event in cases["above"]["events"]
+    ):
+        raise AssertionError("above-threshold OpsiGeneral repair branch drifted")
+    for name in ("zero", "boundary", "one"):
+        if cases[name]["result"] is not True or not any(
+            event[0] == "fleet_repair" for event in cases[name]["events"]
+        ):
+            raise AssertionError("triggered OpsiGeneral repair branch drifted")
+    invalid = _repair_case(method, threshold=1.1)
+    if invalid != {"rejected": True, "result": None, "events": []}:
+        raise AssertionError("invalid OpsiGeneral repair config touched map state")
+    return {"cases": cases, "invalid_entry": invalid}
+
+
 def _verify_contract() -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
@@ -1127,6 +1345,18 @@ def _verify_contract() -> tuple[int, int]:
             hazard_level=hazard_level,
             target_zone=0,
         )
+        accepted += 1
+    for use_logger in (False, True):
+        validate_alas_opsi_storage_config(use_logger=use_logger)
+        accepted += 1
+    for buy_limit, oil_limit in product(range(6), (0, 1000, 50_000)):
+        validate_alas_opsi_action_point_purchase(
+            buy_limit=buy_limit,
+            oil_limit=oil_limit,
+        )
+        accepted += 1
+    for threshold in (-1, 0, 0.4, 1):
+        validate_alas_opsi_repair_config(threshold=threshold)
         accepted += 1
     for action_point_preserve in (0, 1000, 2500):
         validate_alas_opsi_meowfficer_config(
@@ -1272,6 +1502,40 @@ def _verify_contract() -> tuple[int, int]:
                 invalid += 1
             else:
                 raise AssertionError(f"invalid Opsi order boolean {field} was admitted")
+    for value in INVALID_BOOLEANS:
+        try:
+            validate_alas_opsi_storage_config(use_logger=value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiGeneral.UseLogger was admitted")
+    for value in (-1, 6, None, True, False, "1", 1.0, [], {}):
+        try:
+            validate_alas_opsi_action_point_purchase(
+                buy_limit=value,
+                oil_limit=1000,
+            )
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiGeneral.BuyActionPointLimit was admitted")
+    for value in (-1, None, True, False, "1000", 1000.0, [], {}):
+        try:
+            validate_alas_opsi_action_point_purchase(
+                buy_limit=0,
+                oil_limit=value,
+            )
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiGeneral.OilLimit was admitted")
+    for value in (1.1, float("nan"), float("inf"), float("-inf"), None, True, False, "0.4", [], {}):
+        try:
+            validate_alas_opsi_repair_config(threshold=value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiGeneral.RepairThreshold was admitted")
     return accepted, invalid
 
 
@@ -1282,9 +1546,13 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     fleet_path = alas_root / "module/os/fleet.py"
     globe_zone_path = alas_root / "module/os/globe_zone.py"
     map_data_path = alas_root / "module/os/map_data.py"
+    os_map_path = alas_root / "module/os/map.py"
+    action_point_path = alas_root / "module/os_handler/action_point.py"
+    storage_path = alas_root / "module/os_handler/storage.py"
     explore_path = alas_root / "module/os/tasks/explore.py"
     order_path = alas_root / "module/os_handler/map_order.py"
     month_path = alas_root / "module/os/tasks/month_boss.py"
+    abyssal_path = alas_root / "module/os/tasks/abyssal.py"
     obscure_path = alas_root / "module/os/tasks/obscure.py"
     daily_path = alas_root / "module/os/tasks/daily.py"
     hazard_path = alas_root / "module/os/tasks/hazard_leveling.py"
@@ -1332,6 +1600,35 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         **hazard_consumers,
         **meowfficer_consumers,
     }
+    consumers["OpsiGeneral_UseLogger"] = [
+        *_consumer_methods(
+            obscure_path,
+            "OpsiObscure",
+            ("OpsiGeneral_UseLogger",),
+        )["OpsiGeneral_UseLogger"],
+        *_consumer_methods(
+            abyssal_path,
+            "OpsiAbyssal",
+            ("OpsiGeneral_UseLogger",),
+        )["OpsiGeneral_UseLogger"],
+    ]
+    consumers.update(
+        _consumer_methods(
+            action_point_path,
+            "ActionPointHandler",
+            (
+                "OpsiGeneral_BuyActionPointLimit",
+                "OpsiGeneral_OilLimit",
+            ),
+        )
+    )
+    consumers.update(
+        _consumer_methods(
+            os_map_path,
+            "OSMap",
+            ("OpsiGeneral_RepairThreshold",),
+        )
+    )
     for field, methods in _dynamic_delay_consumers(config_path).items():
         consumers.setdefault(field, []).extend(methods)
     expected = {
@@ -1354,6 +1651,13 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiMeowfficerFarming_ActionPointPreserve": ["os_meowfficer_farming"],
         "OpsiMeowfficerFarming_HazardLevel": ["os_meowfficer_farming"],
         "OpsiMeowfficerFarming_TargetZone": ["os_meowfficer_farming"],
+        "OpsiGeneral_UseLogger": ["clear_obscure", "clear_abyssal"],
+        "OpsiGeneral_BuyActionPointLimit": [
+            "action_point_buy",
+            "handle_action_point",
+        ],
+        "OpsiGeneral_OilLimit": ["handle_action_point"],
+        "OpsiGeneral_RepairThreshold": ["handle_fleet_repair"],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -1369,8 +1673,13 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "validate_alas_opsi_month_boss_config": validate_alas_opsi_month_boss_config,
         "validate_alas_opsi_obscure_config": validate_alas_opsi_obscure_config,
         "validate_alas_opsi_daily_config": validate_alas_opsi_daily_config,
+        "validate_alas_opsi_action_point_purchase": (
+            validate_alas_opsi_action_point_purchase
+        ),
         "validate_alas_opsi_hazard1_config": validate_alas_opsi_hazard1_config,
         "validate_alas_opsi_meowfficer_config": validate_alas_opsi_meowfficer_config,
+        "validate_alas_opsi_repair_config": validate_alas_opsi_repair_config,
+        "validate_alas_opsi_storage_config": validate_alas_opsi_storage_config,
         "SelectedGrids": _TaskList,
         "get_os_reset_remain": lambda: 1,
         "datetime": datetime,
@@ -1383,9 +1692,13 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "RequestHumanTakeover": _HumanTakeover,
         "ScriptError": _ScriptError,
         "Zone": _ResolverZone,
+        "ACTION_POINTS_BUY": {1: 4000, 2: 2000, 3: 2000, 4: 1000, 5: 1000},
     }
     fleet_node = _method(fleet_path, "OSFleet", "fleet_set")
     resolver_node = _method(globe_zone_path, "ZoneManager", "name_to_zone")
+    storage_node = _method(storage_path, "StorageHandler", "storage_get_next_item")
+    purchase_node = _method(action_point_path, "ActionPointHandler", "action_point_buy")
+    repair_node = _method(os_map_path, "OSMap", "handle_fleet_repair")
     explore_node = _method(explore_path, "OpsiExplore", "_os_explore")
     order_node = _method(order_path, "MapOrderHandler", "os_order_execute")
     delay_task_node = _method(config_path, "AzurLaneConfig", "opsi_task_delay")
@@ -1458,6 +1771,24 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and node.func.id == "validate_alas_opsi_meowfficer_config"
         for node in ast.walk(meowfficer_node)
     )
+    storage_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_storage_config"
+        for node in ast.walk(storage_node)
+    )
+    purchase_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_action_point_purchase"
+        for node in ast.walk(purchase_node)
+    )
+    repair_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_repair_config"
+        for node in ast.walk(repair_node)
+    )
     month = _verify_month(
         _compile(month_node, globals_),
         _compile(delay_node, globals_),
@@ -1478,6 +1809,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     delay = _verify_delay(_compile(delay_task_node, globals_))
     fleet_selection = _verify_fleet_selection(_compile(fleet_node, globals_))
     order = _verify_order(_compile(order_node, globals_))
+    storage = _verify_storage(_compile(storage_node, globals_))
+    purchase = _verify_purchase(_compile(purchase_node, globals_))
+    repair = _verify_repair(_compile(repair_node, globals_))
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -1494,7 +1828,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 14,
+        "field_count": 18,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -1509,6 +1843,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and delay_task_guard
             and fleet_guard
             and order_guard
+            and storage_guard
+            and purchase_guard
+            and repair_guard
         ),
         "validated_runtime_boundaries": {
             "OpsiFleet.Fleet": "OSFleet.fleet_set",
@@ -1520,9 +1857,18 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
                 "ZoneManager.name_to_zone -> "
                 "OpsiMeowfficerFarming.os_meowfficer_farming"
             ),
+            "OpsiGeneral.UseLogger": "StorageHandler.storage_get_next_item",
+            "OpsiGeneral.BuyActionPointLimit": (
+                "ActionPointHandler.action_point_buy"
+            ),
+            "OpsiGeneral.OilLimit": "ActionPointHandler.action_point_buy",
+            "OpsiGeneral.RepairThreshold": "OSMap.handle_fleet_repair",
         },
         "fleet_selection": fleet_selection,
         "order": order,
+        "storage": storage,
+        "action_point_purchase": purchase,
+        "fleet_repair": repair,
         "explore": explore,
         "task_delay": delay,
         "month_boss": month,
@@ -1541,6 +1887,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "fleet": _sha256(fleet_path),
             "globe_zone": _sha256(globe_zone_path),
             "map_data": _sha256(map_data_path),
+            "os_map": _sha256(os_map_path),
+            "action_point": _sha256(action_point_path),
+            "storage": _sha256(storage_path),
             "explore": _sha256(explore_path),
             "map_order": _sha256(order_path),
             "month_boss": _sha256(month_path),

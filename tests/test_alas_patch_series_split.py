@@ -104,6 +104,7 @@ FLOW_PATHS = {
     },
     "0090-operation-siren-flow-ports.patch": {
         "module/os/fleet.py",
+        "module/os_handler/action_point.py",
         "module/os/globe_camera.py",
         "module/os/globe_operation.py",
         "module/os/map.py",

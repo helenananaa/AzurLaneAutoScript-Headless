@@ -5106,10 +5106,19 @@ index 1a9a7895..fe133663 100644
          unpinned = 0
          for _ in self.loop():
 diff --git a/module/os/map.py b/module/os/map.py
-index 9a900aa3..4e68d397 100644
+index 9a900aa3..bca7ce8a 100644
 --- a/module/os/map.py
 +++ b/module/os/map.py
-@@ -13,7 +13,7 @@ from module.os.fleet import OSFleet
+@@ -2,6 +2,8 @@ import time
+ 
+ import inflection
+ 
++from alas_headless import validate_alas_opsi_repair_config
++
+ from module.base.timer import Timer
+ from module.config.utils import get_os_reset_remain
+ from module.exception import CampaignEnd, GameTooManyClickError, MapWalkError, RequestHumanTakeover, ScriptError
+@@ -13,7 +15,7 @@ from module.os.fleet import OSFleet
  from module.os.globe_camera import GlobeCamera
  from module.os.globe_operation import RewardUncollectedError
  from module.os_handler.assets import AUTO_SEARCH_OS_MAP_OPTION_OFF, AUTO_SEARCH_OS_MAP_OPTION_OFF_DISABLED, \
@@ -5118,7 +5127,7 @@ index 9a900aa3..4e68d397 100644
  from module.os_handler.strategic import StrategicSearchHandler
  from module.ui.assets import GOTO_MAIN
  from module.ui.page import page_os
-@@ -51,6 +51,36 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+@@ -51,6 +53,36 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
          )
  
          # UI switching
@@ -5155,7 +5164,7 @@ index 9a900aa3..4e68d397 100644
          if self.is_in_map():
              logger.info('Already in os map')
          elif self.is_in_globe():
-@@ -65,8 +95,21 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+@@ -65,8 +97,21 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
  
          # self.map_init()
          self.hp_reset()
@@ -5179,7 +5188,7 @@ index 9a900aa3..4e68d397 100644
  
          # Exit from special zones types, only SAFE and DANGEROUS are acceptable.
          if self.is_in_special_zone():
-@@ -78,8 +121,20 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+@@ -78,8 +123,20 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
              logger.info('In zone 22, 44, 154, skip running first auto search')
              self.handle_ash_beacon_attack()
          else:
@@ -5202,6 +5211,39 @@ index 9a900aa3..4e68d397 100644
  
      def get_current_zone_from_globe(self):
          """
+@@ -225,25 +282,28 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+         Returns:
+             bool: If repaired.
+         """
+-        if self.config.OpsiGeneral_RepairThreshold < 0:
++        repair_config = validate_alas_opsi_repair_config(
++            threshold=self.config.OpsiGeneral_RepairThreshold,
++        )
++        if repair_config.threshold < 0:
+             return False
+         if self.is_in_special_zone():
+             logger.info('OS is in a special zone type, skip fleet repair')
+             return False
+ 
+         self.hp_get()
+-        check = [round(data, 2) <= self.config.OpsiGeneral_RepairThreshold if use else False
++        check = [round(data, 2) <= repair_config.threshold if use else False
+                  for data, use in zip(self.hp, self.hp_has_ship)]
+         if any(check):
+             logger.info('At least one ship is below threshold '
+-                        f'{str(int(self.config.OpsiGeneral_RepairThreshold * 100))}%, '
++                        f'{str(int(repair_config.threshold * 100))}%, '
+                         'retreating to nearest azur port for repairs')
+             self.fleet_repair(revert=revert)
+             self.hp_reset()
+             return True
+         else:
+             logger.info('No ship found to be below threshold '
+-                        f'{str(int(self.config.OpsiGeneral_RepairThreshold * 100))}%, '
++                        f'{str(int(repair_config.threshold * 100))}%, '
+                         'continue OS exploration')
+             self.hp_reset()
+             return False
 diff --git a/module/os/tasks/archive.py b/module/os/tasks/archive.py
 index 0a7d8dcc..7769f5a0 100644
 --- a/module/os/tasks/archive.py
@@ -5777,11 +5819,55 @@ index fac02df5..ff27df84 100644
          self.ui_back(appear_button=PORT_SUPPLY_CHECK, check_button=PORT_CHECK, skip_first_screenshot=True)
  
      def port_dock_repair(self):
+diff --git a/module/os_handler/action_point.py b/module/os_handler/action_point.py
+index 3f3eb643..0851cf50 100644
+--- a/module/os_handler/action_point.py
++++ b/module/os_handler/action_point.py
+@@ -1,5 +1,7 @@
+ from datetime import datetime
+ 
++from alas_headless import validate_alas_opsi_action_point_purchase
++
+ import module.config.server as server
+ from module.base.button import ButtonGrid
+ from module.base.timer import Timer
+@@ -294,18 +296,22 @@ class ActionPointHandler(UI, MapEventHandler):
+         Pages:
+             in: ACTION_POINT_USE
+         """
++        purchase_config = validate_alas_opsi_action_point_purchase(
++            buy_limit=self.config.OpsiGeneral_BuyActionPointLimit,
++            oil_limit=preserve,
++        )
+         self.action_point_set_button(0)
+         current = self.action_point_get_buy_remain()
+         buy_max = 5  # In current version of AL, players can buy 5 times of AP in a week.
+         buy_count = buy_max - current
+-        buy_limit = self.config.OpsiGeneral_BuyActionPointLimit
++        buy_limit = purchase_config.buy_limit
+         if buy_count >= buy_limit:
+             logger.info('Reach the limit to buy action points this week')
+             return False
+         cost = ACTION_POINTS_BUY[current]
+         oil = self._action_point_box[0]
+-        logger.info(f'Buy action points will cost {cost}, current oil: {oil}, preserve: {preserve}')
+-        if oil >= cost + preserve:
++        logger.info(f'Buy action points will cost {cost}, current oil: {oil}, preserve: {purchase_config.oil_limit}')
++        if oil >= cost + purchase_config.oil_limit:
+             self.action_point_use()
+             return True
+         else:
 diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
-index b0b0453d..b5520ff5 100644
+index b0b0453d..8d3868e3 100644
 --- a/module/os_handler/storage.py
 +++ b/module/os_handler/storage.py
-@@ -15,6 +15,9 @@ SCROLL_STORAGE = Scroll(STORATE_SCROLL, color=(247, 211, 66))
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_opsi_storage_config
++
+ from module.base.timer import Timer
+ from module.base.utils import rgb2gray
+ from module.combat.assets import GET_ITEMS_1, GET_ITEMS_2
+@@ -15,6 +17,9 @@ SCROLL_STORAGE = Scroll(STORATE_SCROLL, color=(247, 211, 66))
  
  class StorageHandler(GlobeOperation, ZoneManager):
      def is_in_storage(self):
@@ -5791,7 +5877,7 @@ index b0b0453d..b5520ff5 100644
          return self.appear(STORAGE_CHECK, offset=(20, 20))
  
      def storage_enter(self):
-@@ -46,6 +49,14 @@ class StorageHandler(GlobeOperation, ZoneManager):
+@@ -46,6 +51,14 @@ class StorageHandler(GlobeOperation, ZoneManager):
              out: is_in_map
          """
          logger.info('Storage quit')
@@ -5806,7 +5892,7 @@ index b0b0453d..b5520ff5 100644
          self.ui_back(STORAGE_ENTER, offset=(200, 5), skip_first_screenshot=True)
  
      def _storage_item_use(self, button):
-@@ -228,6 +239,44 @@ class StorageHandler(GlobeOperation, ZoneManager):
+@@ -228,6 +241,44 @@ class StorageHandler(GlobeOperation, ZoneManager):
                   is_in_map, in previous zone if no more obscure/abyssal coordinates.
          """
          logger.hr(f'Storage checkout item {item}')
@@ -5851,6 +5937,18 @@ index b0b0453d..b5520ff5 100644
          if SCROLL_STORAGE.appear(main=self):
              SCROLL_STORAGE.set_top(main=self)
  
+@@ -259,9 +310,10 @@ class StorageHandler(GlobeOperation, ZoneManager):
+             out: is_in_map, in an obscure/abyssal zone if checkout.
+                  is_in_map, in previous zone if no more obscure/abyssal coordinates.
+         """
++        storage_config = validate_alas_opsi_storage_config(use_logger=use_logger)
+         logger.hr('OS get next obscure')
+         self.storage_enter()
+-        if use_logger:
++        if storage_config.use_logger:
+             self.storage_logger_use_all()
+ 
+         result = self.storage_checkout_item(item)
 diff --git a/module/os_shop/port_shop.py b/module/os_shop/port_shop.py
 index 56e0554e..9cebc1c1 100644
 --- a/module/os_shop/port_shop.py

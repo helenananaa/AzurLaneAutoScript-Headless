@@ -9,6 +9,7 @@ from alas_headless.alas_opsi_task_config_contract import (
     OPSI_MEOWFFICER_HAZARD_LEVELS,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
+    validate_alas_opsi_action_point_purchase,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
     validate_alas_opsi_fleet_selection,
@@ -17,6 +18,8 @@ from alas_headless.alas_opsi_task_config_contract import (
     validate_alas_opsi_month_boss_config,
     validate_alas_opsi_order,
     validate_alas_opsi_obscure_config,
+    validate_alas_opsi_repair_config,
+    validate_alas_opsi_storage_config,
 )
 from alas_headless.alas_opsi_task_config_replay import verify_opsi_task_config
 from alas_headless.semantic_oracle import SemanticGateClosed
@@ -32,9 +35,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 14)
-        self.assertEqual(result["accepted_case_count"], 66)
-        self.assertEqual(result["invalid_case_count"], 116)
+        self.assertEqual(result["field_count"], 18)
+        self.assertEqual(result["accepted_case_count"], 90)
+        self.assertEqual(result["invalid_case_count"], 149)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -56,6 +59,12 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                     "ZoneManager.name_to_zone -> "
                     "OpsiMeowfficerFarming.os_meowfficer_farming"
                 ),
+                "OpsiGeneral.UseLogger": "StorageHandler.storage_get_next_item",
+                "OpsiGeneral.BuyActionPointLimit": (
+                    "ActionPointHandler.action_point_buy"
+                ),
+                "OpsiGeneral.OilLimit": "ActionPointHandler.action_point_buy",
+                "OpsiGeneral.RepairThreshold": "OSMap.handle_fleet_repair",
             },
         )
 
@@ -155,6 +164,26 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 (snapshot.recon_scan, snapshot.submarine_call),
                 (recon_scan, submarine_call),
             )
+        for use_logger in (False, True):
+            self.assertEqual(
+                validate_alas_opsi_storage_config(
+                    use_logger=use_logger
+                ).use_logger,
+                use_logger,
+            )
+        for buy_limit, oil_limit in product(range(6), (0, 1000, 50_000)):
+            snapshot = validate_alas_opsi_action_point_purchase(
+                buy_limit=buy_limit,
+                oil_limit=oil_limit,
+            )
+            self.assertEqual((snapshot.buy_limit, snapshot.oil_limit), (buy_limit, oil_limit))
+        for threshold in (-1, 0, 0.4, 1):
+            self.assertEqual(
+                validate_alas_opsi_repair_config(
+                    threshold=threshold
+                ).threshold,
+                float(threshold),
+            )
 
     def test_invalid_values_fail_closed(self):
         for mode in ("", "hard", None, 0, True, [], {}):
@@ -237,6 +266,31 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                     SemanticGateClosed
                 ):
                     validate_alas_opsi_order(**kwargs)
+            with self.subTest(field="use_logger", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_storage_config(use_logger=value)
+        for value in (-1, 6, None, True, False, "1", 1.0, [], {}):
+            with self.subTest(field="buy_limit", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_action_point_purchase(
+                    buy_limit=value,
+                    oil_limit=1000,
+                )
+        for value in (-1, None, True, False, "1000", 1000.0, [], {}):
+            with self.subTest(field="oil_limit", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_action_point_purchase(
+                    buy_limit=0,
+                    oil_limit=value,
+                )
+        for value in (1.1, float("nan"), float("inf"), float("-inf"), None, True, False, "0.4", [], {}):
+            with self.subTest(field="repair_threshold", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_repair_config(threshold=value)
 
     def test_patch_gates_original_task_entries(self):
         patch = ROOT.joinpath(
@@ -250,6 +304,11 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_explore_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_fleet_selection("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_order("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_storage_config("), 1)
+        self.assertEqual(
+            patch.count("validate_alas_opsi_action_point_purchase("), 1
+        )
+        self.assertEqual(patch.count("validate_alas_opsi_repair_config("), 1)
         scheduler_patch = ROOT.joinpath(
             "integration/alas/series/0140-scheduler-contract.patch"
         ).read_text(encoding="utf-8")
