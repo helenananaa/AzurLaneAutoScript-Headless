@@ -312,12 +312,21 @@ index 51f17b9a..8fac8f34 100644
  
          while True:
 diff --git a/module/os/tasks/hazard_leveling.py b/module/os/tasks/hazard_leveling.py
-index 03501dc8..866f4c51 100644
+index 03501dc8..2d224fc9 100644
 --- a/module/os/tasks/hazard_leveling.py
 +++ b/module/os/tasks/hazard_leveling.py
-@@ -5,6 +5,17 @@ from module.os.map import OSMap
+@@ -1,10 +1,26 @@
++from alas_headless import validate_alas_opsi_hazard1_config
++
+ from module.logger import logger
+ from module.os.map import OSMap
+ 
+ 
  class OpsiHazard1Leveling(OSMap):
      def os_hazard1_leveling(self):
++        hazard_config = validate_alas_opsi_hazard1_config(
++            target_zone=self.config.OpsiHazard1Leveling_TargetZone,
++        )
          logger.hr('OS hazard 1 leveling', level=1)
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if (
@@ -333,6 +342,17 @@ index 03501dc8..866f4c51 100644
          # Without these enabled, CL1 gains 0 profits
          self.config.override(
              OpsiGeneral_DoRandomMapEvent=True,
+@@ -45,8 +61,8 @@ class OpsiHazard1Leveling(OSMap):
+                         self.config.task_call('OpsiMeowfficerFarming')
+                 self.config.task_stop()
+ 
+-            if self.config.OpsiHazard1Leveling_TargetZone != 0:
+-                zone = self.config.OpsiHazard1Leveling_TargetZone
++            if hazard_config.target_zone != 0:
++                zone = hazard_config.target_zone
+             else:
+                 zone = 22
+             logger.hr(f'OS hazard 1 leveling, zone_id={zone}', level=1)
 diff --git a/module/os/tasks/meowfficer_farming.py b/module/os/tasks/meowfficer_farming.py
 index 43d629c5..513b70ad 100644
 --- a/module/os/tasks/meowfficer_farming.py

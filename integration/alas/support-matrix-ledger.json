@@ -5076,9 +5076,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
@@ -7479,7 +7484,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiHazard1Leveling",
-      "note": "到自动寻敌锁定边界；目标区、舰队/潜艇和循环未闭环",
+      "note": "TargetZone 三值已离线等价；舰队/潜艇、真实选区与循环未闭环",
       "status": "B"
     },
     {
@@ -9415,6 +9420,19 @@
         "offline": "complete"
       },
       "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiHazard1Leveling.TargetZone",
+      "note": "All three declared values preserve the original default-to-zone-22 and explicit zone 22 or 44 selection before the strategic-search boundary; invalid values fail before semantic observation or task state mutation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
         "tests/test_alas_optimization_config.py",
         "python/alas_headless/alas_optimization_config_replay.py",
         "integration/alas/series/0150-runtime-optimization-contract.patch",
@@ -9460,8 +9478,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "5a8c6dafb2f6b696e30e437ed455553a08f8d17bc774d4d0c3fdba91992cd41a",
-      "manifest_sha256": "8eade77b57242e9b0cebbe914db656ec6724e7ff482020d4212a67597f7f4d6a",
+      "combined_sha256": "8449ccf2d174764c51c82c0d1a539a45721c2dbfa8e455801aef157e52314b6b",
+      "manifest_sha256": "eb4144fa95489cda783309affd4292df7bb2674388b308cf551d671e7bed0828",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

@@ -562,10 +562,13 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - `OpsiDaily.UseTuningSample` preserves the original use versus skip branch
   through `os_daily()` without changing mission acceptance, zone reset, daily
   mission completion, or next-update delay ordering.
-- Eight valid classes pass and 25 malformed values fail before task, map, combat,
+- `OpsiHazard1Leveling.TargetZone` admits exactly `0`, `22`, and `44`.
+  Original-method replay preserves the default `0 -> 22` mapping and both
+  explicit safe-zone choices through the strategic-search boundary.
+- Eleven valid classes pass and 35 malformed values fail before task, map, combat,
   coordinate, or inventory state changes. Mutation budget is `0`; all effects
   are recorders, with no combat, item consumption, or Android input. Only the
-  four fields' `offline` dimension becomes complete.
+  five fields' `offline` dimension becomes complete.
 - Whole-tree AST inspection finds no runtime loads of
   `OpsiExplore.ForceRun`, `OpsiAbyssal.ForceRun`, or
   `OpsiMonthBoss.ForceRun`, and also no runtime load of

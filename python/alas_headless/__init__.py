@@ -84,10 +84,13 @@ from .alas_optimization_config_contract import (
 )
 from .alas_opsi_task_config_contract import (
     AlasOpsiDailyConfigSnapshot,
+    AlasOpsiHazard1ConfigSnapshot,
     AlasOpsiMonthBossConfigSnapshot,
     AlasOpsiObscureConfigSnapshot,
     OPSI_MONTH_BOSS_MODES,
+    OPSI_HAZARD1_TARGET_ZONES,
     validate_alas_opsi_daily_config,
+    validate_alas_opsi_hazard1_config,
     validate_alas_opsi_month_boss_config,
     validate_alas_opsi_obscure_config,
 )

@@ -12,8 +12,10 @@ from typing import Any, Callable
 import numpy as np
 
 from .alas_opsi_task_config_contract import (
+    OPSI_HAZARD1_TARGET_ZONES,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
+    validate_alas_opsi_hazard1_config,
     validate_alas_opsi_month_boss_config,
     validate_alas_opsi_obscure_config,
 )
@@ -101,6 +103,16 @@ def _verify_args(args_path: Path) -> None:
         declaration = daily[field]
         if declaration.get("type") != "checkbox" or declaration.get("value") is not default:
             raise AssertionError(f"OpsiDaily.{field} declaration drifted")
+    hazard = document.get("OpsiHazard1Leveling", {}).get(
+        "OpsiHazard1Leveling", {}
+    ).get("TargetZone")
+    if (
+        not isinstance(hazard, dict)
+        or hazard.get("type") != "select"
+        or hazard.get("value") != 0
+        or hazard.get("option") != list(OPSI_HAZARD1_TARGET_ZONES)
+    ):
+        raise AssertionError("OpsiHazard1Leveling.TargetZone declaration drifted")
 
 
 def _consumer_methods(path: Path, owner: str, fields: tuple[str, ...]):
@@ -155,6 +167,7 @@ class _Config(SimpleNamespace):
         check: object,
         force: object = False,
         use_tuning_sample: object = True,
+        hazard_target_zone: object = 0,
     ):
         super().__init__(
             OpsiMonthBoss_Mode=mode,
@@ -162,9 +175,13 @@ class _Config(SimpleNamespace):
             OpsiMonthBoss_ForceRun=False,
             OpsiObscure_ForceRun=force,
             OpsiDaily_UseTuningSample=use_tuning_sample,
+            OpsiHazard1Leveling_TargetZone=hazard_target_zone,
             OpsiGeneral_UseLogger=False,
+            OpsiGeneral_BuyActionPointLimit=0,
+            OpsiAshBeacon_EnsureFullyCollected=False,
             OpsiFleet_Fleet=1,
             OpsiFleet_Submarine=False,
+            OS_CL1_YELLOW_COINS_PRESERVE=100,
         )
         self.events: list[Any] = []
 
@@ -181,6 +198,16 @@ class _Config(SimpleNamespace):
     def check_task_switch(self):
         self.events.append("check_task_switch")
         raise _Switch
+
+    def override(self, **kwargs):
+        self.events.append(["override", kwargs])
+
+    def is_task_enabled(self, task):
+        self.events.append(["is_task_enabled", task])
+        return False
+
+    def cross_set(self, **kwargs):
+        self.events.append(["cross_set", kwargs])
 
 
 def _month_clear_case(
@@ -365,6 +392,61 @@ def _verify_daily(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry": invalid}
 
 
+def _hazard_case(method, *, target_zone: object) -> dict[str, Any]:
+    config = _Config(
+        mode="normal",
+        check=False,
+        hazard_target_zone=target_zone,
+    )
+    events = config.events
+    host = SimpleNamespace(
+        config=config,
+        device=SimpleNamespace(semantic_adapter=None),
+        _ash_fully_collected=True,
+        _action_point_total=0,
+        zone=SimpleNamespace(zone_id=99),
+        is_zone_name_hidden=True,
+    )
+    host.get_yellow_coins = lambda: events.append("yellow_coins") or 9999
+    host.get_current_zone = lambda: events.append("current_zone")
+    host.action_point_set = lambda **kwargs: events.append(["action_point_set", kwargs])
+    host.name_to_zone = lambda zone: SimpleNamespace(zone_id=zone)
+    host.globe_goto = lambda zone, **kwargs: events.append(
+        ["globe_goto", zone.zone_id, kwargs]
+    )
+    host.fleet_set = lambda fleet: events.append(["fleet_set", fleet])
+    host.run_strategic_search = lambda: events.append("strategic_search")
+    host.handle_after_auto_search = lambda: events.append("after_auto_search")
+    rejected = False
+    switched = False
+    try:
+        MethodType(method, host)()
+    except SemanticGateClosed:
+        rejected = True
+    except _Switch:
+        switched = True
+    return {"rejected": rejected, "switched": switched, "events": events}
+
+
+def _verify_hazard(method) -> dict[str, Any]:
+    cases = {
+        str(target): _hazard_case(method, target_zone=target)
+        for target in OPSI_HAZARD1_TARGET_ZONES
+    }
+    expected_zone = {"0": 22, "44": 44, "22": 22}
+    for target, zone in expected_zone.items():
+        case = cases[target]
+        if case["rejected"] or not case["switched"]:
+            raise AssertionError("hazard target-zone task boundary drifted")
+        globe_events = [event for event in case["events"] if event[0] == "globe_goto"]
+        if globe_events != [["globe_goto", zone, {"types": "SAFE", "refresh": True}]]:
+            raise AssertionError("hazard target-zone selection drifted")
+    invalid = _hazard_case(method, target_zone=23)
+    if invalid != {"rejected": True, "switched": False, "events": []}:
+        raise AssertionError("invalid hazard target zone touched task state")
+    return {"cases": cases, "invalid_entry": invalid}
+
+
 def _verify_contract() -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
@@ -378,6 +460,9 @@ def _verify_contract() -> tuple[int, int]:
         accepted += 1
     for use_tuning_sample in (False, True):
         validate_alas_opsi_daily_config(use_tuning_sample=use_tuning_sample)
+        accepted += 1
+    for target_zone in OPSI_HAZARD1_TARGET_ZONES:
+        validate_alas_opsi_hazard1_config(target_zone=target_zone)
         accepted += 1
     invalid = 0
     for value in INVALID_MODES:
@@ -404,6 +489,13 @@ def _verify_contract() -> tuple[int, int]:
                 invalid += 1
             else:
                 raise AssertionError(f"invalid {field} boolean was admitted")
+    for value in (-1, 1, 23, 45, None, True, "22", 22.0, [], {}):
+        try:
+            validate_alas_opsi_hazard1_config(target_zone=value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiHazard1Leveling.TargetZone was admitted")
     return accepted, invalid
 
 
@@ -413,6 +505,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     month_path = alas_root / "module/os/tasks/month_boss.py"
     obscure_path = alas_root / "module/os/tasks/obscure.py"
     daily_path = alas_root / "module/os/tasks/daily.py"
+    hazard_path = alas_root / "module/os/tasks/hazard_leveling.py"
     _verify_args(args_path)
     month_consumers = _consumer_methods(
         month_path,
@@ -429,12 +522,23 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiDaily",
         ("OpsiDaily_UseTuningSample",),
     )
-    consumers = {**month_consumers, **obscure_consumers, **daily_consumers}
+    hazard_consumers = _consumer_methods(
+        hazard_path,
+        "OpsiHazard1Leveling",
+        ("OpsiHazard1Leveling_TargetZone",),
+    )
+    consumers = {
+        **month_consumers,
+        **obscure_consumers,
+        **daily_consumers,
+        **hazard_consumers,
+    }
     expected = {
         "OpsiMonthBoss_Mode": ["clear_month_boss", "month_boss_delay"],
         "OpsiMonthBoss_CheckAdaptability": ["clear_month_boss", "month_boss_delay"],
         "OpsiObscure_ForceRun": ["clear_obscure", "os_obscure"],
         "OpsiDaily_UseTuningSample": ["os_daily"],
+        "OpsiHazard1Leveling_TargetZone": ["os_hazard1_leveling"],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -450,12 +554,18 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "validate_alas_opsi_month_boss_config": validate_alas_opsi_month_boss_config,
         "validate_alas_opsi_obscure_config": validate_alas_opsi_obscure_config,
         "validate_alas_opsi_daily_config": validate_alas_opsi_daily_config,
+        "validate_alas_opsi_hazard1_config": validate_alas_opsi_hazard1_config,
     }
     month_node = _method(month_path, "OpsiMonthBoss", "clear_month_boss")
     delay_node = _method(month_path, "OpsiMonthBoss", "month_boss_delay")
     obscure_clear_node = _method(obscure_path, "OpsiObscure", "clear_obscure")
     obscure_run_node = _method(obscure_path, "OpsiObscure", "os_obscure")
     daily_node = _method(daily_path, "OpsiDaily", "os_daily")
+    hazard_node = _method(
+        hazard_path,
+        "OpsiHazard1Leveling",
+        "os_hazard1_leveling",
+    )
     month_guard = any(
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
@@ -474,6 +584,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and node.func.id == "validate_alas_opsi_daily_config"
         for node in ast.walk(daily_node)
     )
+    hazard_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_hazard1_config"
+        for node in ast.walk(hazard_node)
+    )
     month = _verify_month(
         _compile(month_node, globals_),
         _compile(delay_node, globals_),
@@ -483,6 +599,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         _compile(obscure_run_node, globals_),
     )
     daily = _verify_daily(_compile(daily_node, globals_))
+    hazard = _verify_hazard(_compile(hazard_node, globals_))
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -499,15 +616,18 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 4,
+        "field_count": 5,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
         "zero_runtime_consumers": dead_loads,
-        "patched_guards_present": month_guard and obscure_guard and daily_guard,
+        "patched_guards_present": (
+            month_guard and obscure_guard and daily_guard and hazard_guard
+        ),
         "month_boss": month,
         "obscure": obscure,
         "daily": daily,
+        "hazard1_leveling": hazard,
         "invalid_month_entry": invalid_month_events,
         "mutation_budget": 0,
         "real_combat_performed": False,
@@ -518,5 +638,6 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "month_boss": _sha256(month_path),
             "obscure": _sha256(obscure_path),
             "daily": _sha256(daily_path),
+            "hazard1_leveling": _sha256(hazard_path),
         },
     }

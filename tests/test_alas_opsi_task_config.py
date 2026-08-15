@@ -3,8 +3,10 @@ import unittest
 from pathlib import Path
 
 from alas_headless.alas_opsi_task_config_contract import (
+    OPSI_HAZARD1_TARGET_ZONES,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
+    validate_alas_opsi_hazard1_config,
     validate_alas_opsi_month_boss_config,
     validate_alas_opsi_obscure_config,
 )
@@ -22,9 +24,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 4)
-        self.assertEqual(result["accepted_case_count"], 8)
-        self.assertEqual(result["invalid_case_count"], 25)
+        self.assertEqual(result["field_count"], 5)
+        self.assertEqual(result["accepted_case_count"], 11)
+        self.assertEqual(result["invalid_case_count"], 35)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -56,6 +58,13 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 ).use_tuning_sample,
                 use_tuning_sample,
             )
+        for target_zone in OPSI_HAZARD1_TARGET_ZONES:
+            self.assertEqual(
+                validate_alas_opsi_hazard1_config(
+                    target_zone=target_zone
+                ).target_zone,
+                target_zone,
+            )
 
     def test_invalid_values_fail_closed(self):
         for mode in ("", "hard", None, 0, True, [], {}):
@@ -78,6 +87,11 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_opsi_daily_config(use_tuning_sample=value)
+        for value in (-1, 1, 23, 45, None, True, "22", 22.0, [], {}):
+            with self.subTest(field="hazard_target", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_hazard1_config(target_zone=value)
 
     def test_patch_gates_original_task_entries(self):
         patch = ROOT.joinpath(
@@ -86,6 +100,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_month_boss_config("), 2)
         self.assertEqual(patch.count("validate_alas_opsi_obscure_config("), 2)
         self.assertEqual(patch.count("validate_alas_opsi_daily_config("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_hazard1_config("), 1)
 
     def test_sources_compile(self):
         for relative in (

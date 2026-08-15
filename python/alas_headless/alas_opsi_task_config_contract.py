@@ -8,6 +8,7 @@ from .semantic_oracle import SemanticGateClosed
 
 
 OPSI_MONTH_BOSS_MODES = ("normal", "normal_hard")
+OPSI_HAZARD1_TARGET_ZONES = (0, 44, 22)
 
 
 @dataclass(frozen=True)
@@ -24,6 +25,11 @@ class AlasOpsiObscureConfigSnapshot:
 @dataclass(frozen=True)
 class AlasOpsiDailyConfigSnapshot:
     use_tuning_sample: bool
+
+
+@dataclass(frozen=True)
+class AlasOpsiHazard1ConfigSnapshot:
+    target_zone: int
 
 
 def validate_alas_opsi_month_boss_config(
@@ -55,3 +61,11 @@ def validate_alas_opsi_daily_config(
     if type(use_tuning_sample) is not bool:
         raise SemanticGateClosed("OpsiDaily.UseTuningSample must be a bool")
     return AlasOpsiDailyConfigSnapshot(use_tuning_sample=use_tuning_sample)
+
+
+def validate_alas_opsi_hazard1_config(
+    *, target_zone: object
+) -> AlasOpsiHazard1ConfigSnapshot:
+    if type(target_zone) is not int or target_zone not in OPSI_HAZARD1_TARGET_ZONES:
+        raise SemanticGateClosed("OpsiHazard1Leveling.TargetZone must be 0, 22, or 44")
+    return AlasOpsiHazard1ConfigSnapshot(target_zone=target_zone)
