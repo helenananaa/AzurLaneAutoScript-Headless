@@ -619,6 +619,13 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   entrance, and dossier-page exit. Malformed values fail before the first page
   observation; no combat, help request, reward collection, or Android input
   occurs.
+- `OpsiAshBeacon.OneHitMode`, `RequestAssist`, and
+  `DossierAutoAttackMode` accept exact booleans and replay the original
+  `_satisfy_attack_condition()` / `_pre_attack()` choices with recorders:
+  inspect-and-delay, help-request selection, and dossier auto-attack
+  selection. Malformed values fail before page observation; recorder stubs do
+  not send help requests, start auto attack, enter combat, collect rewards, or
+  inject Android input.
 - `OpsiExplore.SpecialRadar` preserves the original tuning-sample use and
   `recon_scan` decisions in `_os_explore()`. The same value, together with
   `OpsiExplore.ForceRun`, `OpsiObscure.ForceRun`,
@@ -639,10 +646,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   duplicate suppression, standby positions, unavailable-fleet empty results,
   and scheduler submarine delays. Invalid rules fail before parser state,
   scheduler mutation, fleet selection, or task input.
-- One hundred thirty valid classes pass and 216 malformed values fail before task,
+- One hundred thirty-six valid classes pass and 234 malformed values fail before task,
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
-  or Android input. Twenty-eight fields now have complete offline classification.
+  or Android input. Thirty-one fields now have complete offline classification.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

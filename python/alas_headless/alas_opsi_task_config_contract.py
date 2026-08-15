@@ -126,6 +126,31 @@ def validate_alas_opsi_ash_beacon_attack_mode(*, attack_mode: object) -> str:
     return attack_mode
 
 
+def validate_alas_opsi_ash_beacon_one_hit_mode(*, one_hit_mode: object) -> bool:
+    """Validate the one-hit beacon switch at its original decision points."""
+    if type(one_hit_mode) is not bool:
+        raise SemanticGateClosed("OpsiAshBeacon.OneHitMode must be a bool")
+    return one_hit_mode
+
+
+def validate_alas_opsi_ash_beacon_request_assist(*, request_assist: object) -> bool:
+    """Validate the beacon help-request switch before the original branch."""
+    if type(request_assist) is not bool:
+        raise SemanticGateClosed("OpsiAshBeacon.RequestAssist must be a bool")
+    return request_assist
+
+
+def validate_alas_opsi_ash_beacon_dossier_auto_attack(
+    *, dossier_auto_attack: object
+) -> bool:
+    """Validate the dossier auto-attack switch before the original branch."""
+    if type(dossier_auto_attack) is not bool:
+        raise SemanticGateClosed(
+            "OpsiAshBeacon.DossierAutoAttackMode must be a bool"
+        )
+    return dossier_auto_attack
+
+
 def validate_alas_opsi_obscure_config(
     *, force_run: object
 ) -> AlasOpsiObscureConfigSnapshot:

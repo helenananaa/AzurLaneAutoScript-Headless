@@ -13,6 +13,9 @@ from alas_headless.alas_opsi_task_config_contract import (
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
     validate_alas_opsi_ash_beacon_attack_mode,
+    validate_alas_opsi_ash_beacon_dossier_auto_attack,
+    validate_alas_opsi_ash_beacon_one_hit_mode,
+    validate_alas_opsi_ash_beacon_request_assist,
     validate_alas_opsi_ash_assist_tier,
     validate_alas_opsi_ash_beacon_ensure_fully_collected,
     validate_alas_opsi_akashi_filter,
@@ -48,9 +51,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 28)
-        self.assertEqual(result["accepted_case_count"], 130)
-        self.assertEqual(result["invalid_case_count"], 216)
+        self.assertEqual(result["field_count"], 31)
+        self.assertEqual(result["accepted_case_count"], 136)
+        self.assertEqual(result["invalid_case_count"], 234)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -88,6 +91,14 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 "OpsiExplore.LastZone": "OpsiExplore._os_explore",
                 "OpsiAshAssist.Tier": "AshBeaconAssist._ensure_meta_level",
                 "OpsiAshBeacon.AttackMode": "OpsiAshBeacon._begin_meta",
+                "OpsiAshBeacon.OneHitMode": (
+                    "OpsiAshBeacon._satisfy_attack_condition + "
+                    "OpsiAshBeacon._pre_attack"
+                ),
+                "OpsiAshBeacon.RequestAssist": "OpsiAshBeacon._pre_attack",
+                "OpsiAshBeacon.DossierAutoAttackMode": (
+                    "OpsiAshBeacon._pre_attack"
+                ),
                 "OpsiFleetFilter.Filter": (
                     "OSFleet.parse_fleet_filter + AzurLaneConfig.opsi_task_delay"
                 ),
@@ -106,6 +117,16 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 ),
                 attack_mode,
             )
+        for validator, keyword in (
+            (validate_alas_opsi_ash_beacon_one_hit_mode, "one_hit_mode"),
+            (validate_alas_opsi_ash_beacon_request_assist, "request_assist"),
+            (
+                validate_alas_opsi_ash_beacon_dossier_auto_attack,
+                "dossier_auto_attack",
+            ),
+        ):
+            for value in (False, True):
+                self.assertEqual(validator(**{keyword: value}), value)
         for value in (False, True):
             self.assertEqual(
                 validate_alas_opsi_ash_beacon_ensure_fully_collected(
@@ -339,6 +360,28 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_opsi_ash_beacon_attack_mode(attack_mode=value)
+        for validator, keyword, field in (
+            (
+                validate_alas_opsi_ash_beacon_one_hit_mode,
+                "one_hit_mode",
+                "opsi_ash_beacon_one_hit",
+            ),
+            (
+                validate_alas_opsi_ash_beacon_request_assist,
+                "request_assist",
+                "opsi_ash_beacon_request_assist",
+            ),
+            (
+                validate_alas_opsi_ash_beacon_dossier_auto_attack,
+                "dossier_auto_attack",
+                "opsi_ash_beacon_dossier_auto_attack",
+            ),
+        ):
+            for value in ("true", None, 0, 1, [], {}):
+                with self.subTest(field=field, value=value), self.assertRaises(
+                    SemanticGateClosed
+                ):
+                    validator(**{keyword: value})
         for value in (0, 1, "true", None, [], {}):
             with self.subTest(field="opsi_ash_beacon_ensure", value=value), self.assertRaises(
                 SemanticGateClosed
@@ -540,6 +583,18 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_ash_assist_tier("), 1)
         self.assertEqual(
             patch.count("validate_alas_opsi_ash_beacon_attack_mode("),
+            1,
+        )
+        self.assertEqual(
+            patch.count("validate_alas_opsi_ash_beacon_one_hit_mode("),
+            2,
+        )
+        self.assertEqual(
+            patch.count("validate_alas_opsi_ash_beacon_request_assist("),
+            1,
+        )
+        self.assertEqual(
+            patch.count("validate_alas_opsi_ash_beacon_dossier_auto_attack("),
             1,
         )
         self.assertEqual(patch.count("validate_alas_opsi_fleet_filter("), 1)

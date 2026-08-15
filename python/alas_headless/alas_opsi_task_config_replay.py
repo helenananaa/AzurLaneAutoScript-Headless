@@ -25,6 +25,9 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
     validate_alas_opsi_ash_beacon_attack_mode,
+    validate_alas_opsi_ash_beacon_dossier_auto_attack,
+    validate_alas_opsi_ash_beacon_one_hit_mode,
+    validate_alas_opsi_ash_beacon_request_assist,
     validate_alas_opsi_ash_assist_tier,
     validate_alas_opsi_ash_beacon_ensure_fully_collected,
     validate_alas_opsi_akashi_filter,
@@ -2354,6 +2357,211 @@ def _verify_ash_beacon_attack_mode(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entries": invalid}
 
 
+def _ash_beacon_one_hit_case(
+    method,
+    *,
+    one_hit_mode: object,
+    page: str,
+    damage: int,
+) -> dict[str, Any]:
+    """Replay the original one-hit decision without scheduler side effects."""
+    events: list[Any] = []
+
+    def appear(target, *_args, **_kwargs):
+        events.append(("appear", target))
+        return target == page
+
+    def get_meta_damage():
+        events.append(("get_meta_damage", damage))
+        return damage
+
+    config = SimpleNamespace(OpsiAshBeacon_OneHitMode=one_hit_mode)
+    config.task_delay = lambda **kwargs: events.append(("task_delay", kwargs))
+    config.task_stop = lambda: events.append("task_stop")
+    instance = SimpleNamespace(
+        config=config,
+        appear=appear,
+        _get_meta_damage=get_meta_damage,
+    )
+    try:
+        result = method(instance)
+    except SemanticGateClosed:
+        rejected = True
+        result = None
+    else:
+        rejected = False
+    return {"rejected": rejected, "result": result, "events": events}
+
+
+def _verify_ash_beacon_one_hit_mode(method) -> dict[str, Any]:
+    cases = {
+        "disabled": _ash_beacon_one_hit_case(
+            method,
+            one_hit_mode=False,
+            page="beacon-list",
+            damage=7,
+        ),
+        "no_damage": _ash_beacon_one_hit_case(
+            method,
+            one_hit_mode=True,
+            page="beacon-list",
+            damage=0,
+        ),
+        "damaged": _ash_beacon_one_hit_case(
+            method,
+            one_hit_mode=True,
+            page="beacon-list",
+            damage=7,
+        ),
+    }
+    if any(case["rejected"] for case in cases.values()):
+        raise AssertionError("valid OpsiAshBeacon.OneHitMode was rejected")
+    if any(event[0] == "get_meta_damage" for event in cases["disabled"]["events"]):
+        raise AssertionError("disabled OneHitMode reached damage inspection")
+    if cases["no_damage"]["events"][-1] != ("appear", "dossier-list"):
+        raise AssertionError("OneHitMode zero-damage branch drifted")
+    if cases["damaged"]["events"][-3:] != [
+        ("task_delay", {"minute": 30}),
+        "task_stop",
+        ("appear", "dossier-list"),
+    ]:
+        raise AssertionError("OneHitMode delayed-stop branch drifted")
+    invalid = {
+        repr(value): _ash_beacon_one_hit_case(
+            method,
+            one_hit_mode=value,
+            page="beacon-list",
+            damage=7,
+        )
+        for value in ("true", None, 0, 1, [], {})
+    }
+    if any(not case["rejected"] or case["events"] for case in invalid.values()):
+        raise AssertionError("invalid OpsiAshBeacon.OneHitMode reached page observation")
+    return {"cases": cases, "invalid_entries": invalid}
+
+
+def _ash_beacon_pre_attack_case(
+    method,
+    *,
+    one_hit_mode: object,
+    request_assist: object,
+    dossier_auto_attack: object,
+    page: str,
+    auto_attack_ready: bool = True,
+    ask_for_help_result: bool = True,
+    dossier_auto_attack_result: bool = True,
+) -> dict[str, Any]:
+    """Record original pre-attack choices without calling their real actions."""
+    events: list[Any] = []
+
+    def appear(target, *_args, **_kwargs):
+        events.append(("appear", target))
+        if target in {"beacon-list", "dossier-list"}:
+            return target == page
+        return target == "meta-auto-attack-start" and auto_attack_ready
+
+    def ask_for_help():
+        events.append("ask_for_help")
+        return ask_for_help_result
+
+    def trigger_dossier_auto_attack():
+        events.append("dossier_auto_attack")
+        return dossier_auto_attack_result
+
+    instance = SimpleNamespace(
+        config=SimpleNamespace(
+            OpsiAshBeacon_OneHitMode=one_hit_mode,
+            OpsiAshBeacon_RequestAssist=request_assist,
+            OpsiAshBeacon_DossierAutoAttackMode=dossier_auto_attack,
+        ),
+        appear=appear,
+        _ask_for_help=ask_for_help,
+        _dossier_auto_attack=trigger_dossier_auto_attack,
+    )
+    try:
+        result = method(instance)
+    except SemanticGateClosed:
+        rejected = True
+        result = None
+    else:
+        rejected = False
+    return {"rejected": rejected, "result": result, "events": events}
+
+
+def _verify_ash_beacon_pre_attack(method) -> dict[str, Any]:
+    cases = {
+        "beacon_disabled": _ash_beacon_pre_attack_case(
+            method,
+            one_hit_mode=False,
+            request_assist=False,
+            dossier_auto_attack=False,
+            page="beacon-list",
+        ),
+        "beacon_one_hit": _ash_beacon_pre_attack_case(
+            method,
+            one_hit_mode=True,
+            request_assist=False,
+            dossier_auto_attack=False,
+            page="beacon-list",
+        ),
+        "beacon_request_assist": _ash_beacon_pre_attack_case(
+            method,
+            one_hit_mode=False,
+            request_assist=True,
+            dossier_auto_attack=False,
+            page="beacon-list",
+        ),
+        "dossier_disabled": _ash_beacon_pre_attack_case(
+            method,
+            one_hit_mode=False,
+            request_assist=False,
+            dossier_auto_attack=False,
+            page="dossier-list",
+        ),
+        "dossier_enabled": _ash_beacon_pre_attack_case(
+            method,
+            one_hit_mode=False,
+            request_assist=False,
+            dossier_auto_attack=True,
+            page="dossier-list",
+        ),
+    }
+    if any(case["rejected"] for case in cases.values()):
+        raise AssertionError("valid OpsiAshBeacon pre-attack options were rejected")
+    if "ask_for_help" in cases["beacon_disabled"]["events"]:
+        raise AssertionError("disabled beacon options requested help")
+    if "ask_for_help" not in cases["beacon_one_hit"]["events"]:
+        raise AssertionError("OneHitMode no longer reaches the help decision")
+    if "ask_for_help" not in cases["beacon_request_assist"]["events"]:
+        raise AssertionError("RequestAssist no longer reaches the help decision")
+    if "dossier_auto_attack" in cases["dossier_disabled"]["events"]:
+        raise AssertionError("disabled dossier auto-attack reached its action")
+    if cases["dossier_enabled"]["events"][-1] != "dossier_auto_attack":
+        raise AssertionError("DossierAutoAttackMode selection drifted")
+    invalid = {}
+    fields = (
+        "one_hit_mode",
+        "request_assist",
+        "dossier_auto_attack",
+    )
+    for field in fields:
+        for value in ("true", None, 0, 1, [], {}):
+            values = {
+                "one_hit_mode": False,
+                "request_assist": False,
+                "dossier_auto_attack": False,
+            }
+            values[field] = value
+            invalid[f"{field}:{value!r}"] = _ash_beacon_pre_attack_case(
+                method,
+                page="beacon-list",
+                **values,
+            )
+    if any(not case["rejected"] or case["events"] for case in invalid.values()):
+        raise AssertionError("invalid OpsiAshBeacon pre-attack option reached page observation")
+    return {"cases": cases, "invalid_entries": invalid}
+
+
 def _verify_contract(
     akashi_filter,
     fleet_filter,
@@ -2370,6 +2578,19 @@ def _verify_contract(
     for attack_mode in OPSI_ASH_BEACON_ATTACK_MODES:
         validate_alas_opsi_ash_beacon_attack_mode(attack_mode=attack_mode)
         accepted += 1
+    for validator in (
+        validate_alas_opsi_ash_beacon_one_hit_mode,
+        validate_alas_opsi_ash_beacon_request_assist,
+        validate_alas_opsi_ash_beacon_dossier_auto_attack,
+    ):
+        for value in (False, True):
+            keyword = {
+                validate_alas_opsi_ash_beacon_one_hit_mode: "one_hit_mode",
+                validate_alas_opsi_ash_beacon_request_assist: "request_assist",
+                validate_alas_opsi_ash_beacon_dossier_auto_attack: "dossier_auto_attack",
+            }[validator]
+            validator(**{keyword: value})
+            accepted += 1
     for tier in (-1, 0, 1, 15, 16):
         validate_alas_opsi_ash_assist_tier(tier=tier)
         accepted += 1
@@ -2515,6 +2736,30 @@ def _verify_contract(
             invalid += 1
         else:
             raise AssertionError("invalid OpsiAshBeacon.AttackMode was admitted")
+    for validator, keyword, field in (
+        (
+            validate_alas_opsi_ash_beacon_one_hit_mode,
+            "one_hit_mode",
+            "OpsiAshBeacon.OneHitMode",
+        ),
+        (
+            validate_alas_opsi_ash_beacon_request_assist,
+            "request_assist",
+            "OpsiAshBeacon.RequestAssist",
+        ),
+        (
+            validate_alas_opsi_ash_beacon_dossier_auto_attack,
+            "dossier_auto_attack",
+            "OpsiAshBeacon.DossierAutoAttackMode",
+        ),
+    ):
+        for value in ("true", None, 0, 1, [], {}):
+            try:
+                validator(**{keyword: value})
+            except SemanticGateClosed:
+                invalid += 1
+            else:
+                raise AssertionError(f"invalid {field} was admitted")
     for value in (None, True, False, "15", 15.0, [], {}):
         try:
             validate_alas_opsi_ash_assist_tier(tier=value)
@@ -2810,7 +3055,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         _consumer_methods(
             ash_assist_path,
             "OpsiAshBeacon",
-            ("OpsiAshBeacon_AttackMode",),
+            (
+                "OpsiAshBeacon_AttackMode",
+                "OpsiAshBeacon_OneHitMode",
+                "OpsiAshBeacon_RequestAssist",
+                "OpsiAshBeacon_DossierAutoAttackMode",
+            ),
         )
     )
     consumers["OpsiFleetFilter_Filter"] = [
@@ -2899,6 +3149,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "os_meowfficer_farming",
         ],
         "OpsiAshBeacon_AttackMode": ["_begin_meta"],
+        "OpsiAshBeacon_OneHitMode": [
+            "_satisfy_attack_condition",
+            "_pre_attack",
+        ],
+        "OpsiAshBeacon_RequestAssist": ["_pre_attack"],
+        "OpsiAshBeacon_DossierAutoAttackMode": ["_pre_attack"],
         "OpsiMeowfficerFarming_ActionPointPreserve": ["os_meowfficer_farming"],
         "OpsiMeowfficerFarming_HazardLevel": ["os_meowfficer_farming"],
         "OpsiMeowfficerFarming_TargetZone": ["os_meowfficer_farming"],
@@ -2939,6 +3195,15 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         ),
         "validate_alas_opsi_ash_beacon_attack_mode": (
             validate_alas_opsi_ash_beacon_attack_mode
+        ),
+        "validate_alas_opsi_ash_beacon_dossier_auto_attack": (
+            validate_alas_opsi_ash_beacon_dossier_auto_attack
+        ),
+        "validate_alas_opsi_ash_beacon_one_hit_mode": (
+            validate_alas_opsi_ash_beacon_one_hit_mode
+        ),
+        "validate_alas_opsi_ash_beacon_request_assist": (
+            validate_alas_opsi_ash_beacon_request_assist
         ),
         "validate_alas_opsi_ash_assist_tier": validate_alas_opsi_ash_assist_tier,
         "validate_alas_opsi_ash_beacon_ensure_fully_collected": (
@@ -2984,7 +3249,10 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "META_MAIN_DOSSIER_ENTRANCE": "meta-main-dossier-entrance",
         "META_BEGIN_ENTRANCE": "meta-begin-entrance",
         "ASH_QUIT": "ash-quit",
+        "META_AUTO_ATTACKING": "meta-auto-attacking",
+        "META_AUTO_ATTACK_START": "meta-auto-attack-start",
         "_server_support": lambda: True,
+        "_server_support_dossier_auto_attack": lambda: True,
     }
     fleet_node = _method(fleet_path, "OSFleet", "fleet_set")
     fleet_filter_node = _method(fleet_path, "OSFleet", "parse_fleet_filter")
@@ -3055,6 +3323,16 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         ash_assist_path,
         "OpsiAshBeacon",
         "_begin_meta",
+    )
+    ash_beacon_one_hit_node = _method(
+        ash_assist_path,
+        "OpsiAshBeacon",
+        "_satisfy_attack_condition",
+    )
+    ash_beacon_pre_attack_node = _method(
+        ash_assist_path,
+        "OpsiAshBeacon",
+        "_pre_attack",
     )
     explore_guard = any(
         isinstance(node, ast.Call)
@@ -3148,6 +3426,27 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and isinstance(node.func, ast.Name)
         and node.func.id == "validate_alas_opsi_ash_beacon_attack_mode"
         for node in ast.walk(ash_beacon_node)
+    )
+    ash_beacon_one_hit_guard = all(
+        any(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "validate_alas_opsi_ash_beacon_one_hit_mode"
+            for node in ast.walk(method)
+        )
+        for method in (ash_beacon_one_hit_node, ash_beacon_pre_attack_node)
+    )
+    ash_beacon_request_assist_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_ash_beacon_request_assist"
+        for node in ast.walk(ash_beacon_pre_attack_node)
+    )
+    ash_beacon_dossier_auto_attack_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_ash_beacon_dossier_auto_attack"
+        for node in ast.walk(ash_beacon_pre_attack_node)
     )
     storage_guard = any(
         isinstance(node, ast.Call)
@@ -3314,6 +3613,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     ash_beacon_attack_mode = _verify_ash_beacon_attack_mode(
         _compile(ash_beacon_node, globals_)
     )
+    ash_beacon_one_hit = _verify_ash_beacon_one_hit_mode(
+        _compile(ash_beacon_one_hit_node, globals_)
+    )
+    ash_beacon_pre_attack = _verify_ash_beacon_pre_attack(
+        _compile(ash_beacon_pre_attack_node, globals_)
+    )
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -3336,7 +3641,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 28,
+        "field_count": 31,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -3363,6 +3668,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and voucher_guard
             and ash_assist_guard
             and ash_beacon_attack_mode_guard
+            and ash_beacon_one_hit_guard
+            and ash_beacon_request_assist_guard
+            and ash_beacon_dossier_auto_attack_guard
             and ash_beacon_ensure_guards
         ),
         "validated_runtime_boundaries": {
@@ -3391,6 +3699,11 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "OpsiExplore.LastZone": "OpsiExplore._os_explore",
             "OpsiAshAssist.Tier": "AshBeaconAssist._ensure_meta_level",
             "OpsiAshBeacon.AttackMode": "OpsiAshBeacon._begin_meta",
+            "OpsiAshBeacon.OneHitMode": (
+                "OpsiAshBeacon._satisfy_attack_condition + OpsiAshBeacon._pre_attack"
+            ),
+            "OpsiAshBeacon.RequestAssist": "OpsiAshBeacon._pre_attack",
+            "OpsiAshBeacon.DossierAutoAttackMode": "OpsiAshBeacon._pre_attack",
             "OpsiFleetFilter.Filter": (
                 "OSFleet.parse_fleet_filter + AzurLaneConfig.opsi_task_delay"
             ),
@@ -3411,6 +3724,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "opsi_voucher_filter": voucher,
         "opsi_ash_assist": ash_assist,
         "opsi_ash_beacon_attack_mode": ash_beacon_attack_mode,
+        "opsi_ash_beacon_one_hit": ash_beacon_one_hit,
+        "opsi_ash_beacon_pre_attack": ash_beacon_pre_attack,
         "explore": explore,
         "task_delay": delay,
         "month_boss": month,
