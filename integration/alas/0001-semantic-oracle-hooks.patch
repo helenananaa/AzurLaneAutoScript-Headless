@@ -4932,7 +4932,7 @@ index c1397ea4..d77b07fd 100644
              if skip_first_screenshot:
                  skip_first_screenshot = False
 diff --git a/module/os/fleet.py b/module/os/fleet.py
-index 4417f871..d6006bbb 100644
+index 4417f871..9519208b 100644
 --- a/module/os/fleet.py
 +++ b/module/os/fleet.py
 @@ -178,8 +178,13 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
@@ -4962,6 +4962,17 @@ index 4417f871..d6006bbb 100644
          return self.image_color_count(
              FLEET_LOW_RESOLVE, color=FLEET_LOW_RESOLVE.color, threshold=221, count=250)
  
+@@ -494,6 +503,10 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+         Returns:
+             bool: If switched.
+         """
++        from alas_headless import validate_alas_opsi_fleet_selection
++
++        fleet_config = validate_alas_opsi_fleet_selection(fleet=index)
++        index = fleet_config.fleet
+         logger.hr(f'Fleet set to {index}')
+         if self.fleet_selector.ensure_to_be(index):
+             self.wait_until_camera_stable()
 diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
 index c4e375f0..12d5cac5 100644
 --- a/module/os/globe_camera.py
@@ -6046,6 +6057,25 @@ index 9c4466bc..9ea65776 100644
                  submarine_call=self.config.OpsiFleet_Submarine)
              self._os_explore_task_delay()
  
+diff --git a/module/os_handler/map_order.py b/module/os_handler/map_order.py
+index df16b9a5..624b4021 100644
+--- a/module/os_handler/map_order.py
++++ b/module/os_handler/map_order.py
+@@ -127,6 +127,14 @@ class MapOrderHandler(MapOperation, ActionPointHandler, MapEventHandler, ZoneMan
+             in: is_in_map
+             out: is_in_map
+         """
++        from alas_headless import validate_alas_opsi_order
++
++        order_config = validate_alas_opsi_order(
++            recon_scan=recon_scan,
++            submarine_call=submarine_call,
++        )
++        recon_scan = order_config.recon_scan
++        submarine_call = order_config.submarine_call
+         # backup = self.config.cover(OS_ACTION_POINT_PRESERVE=0, OS_ACTION_POINT_BOX_USE=True)
+ 
+         if recon_scan:
 diff --git a/module/config/argument/args.json b/module/config/argument/args.json
 index 0c46c9dd..a553286f 100644
 --- a/module/config/argument/args.json

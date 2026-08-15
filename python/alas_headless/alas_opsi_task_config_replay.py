@@ -15,14 +15,17 @@ import numpy as np
 
 from .alas_opsi_task_config_contract import (
     OPSI_HAZARD1_TARGET_ZONES,
+    OPSI_FLEET_INDEXES,
     OPSI_MEOWFFICER_HAZARD_LEVELS,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
+    validate_alas_opsi_fleet_selection,
     validate_alas_opsi_hazard1_config,
     validate_alas_opsi_meowfficer_config,
     validate_alas_opsi_month_boss_config,
+    validate_alas_opsi_order,
     validate_alas_opsi_obscure_config,
 )
 from .semantic_oracle import SemanticGateClosed
@@ -124,6 +127,27 @@ def _compile(node: ast.FunctionDef, globals_: dict[str, Any]):
 
 def _verify_args(args_path: Path) -> None:
     document = json.loads(args_path.read_text(encoding="utf-8"))
+    for panel in (
+        "OpsiExplore",
+        "OpsiDaily",
+        "OpsiObscure",
+        "OpsiArchive",
+        "OpsiMeowfficerFarming",
+        "OpsiHazard1Leveling",
+    ):
+        fleet = document.get(panel, {}).get("OpsiFleet")
+        if not isinstance(fleet, dict) or set(fleet) != {"Fleet", "Submarine"}:
+            raise AssertionError(f"{panel}.OpsiFleet field surface drifted")
+        fleet_index = fleet["Fleet"]
+        if (
+            fleet_index.get("type") != "select"
+            or fleet_index.get("value") != 1
+            or fleet_index.get("option") != list(OPSI_FLEET_INDEXES)
+        ):
+            raise AssertionError(f"{panel}.OpsiFleet.Fleet declaration drifted")
+        submarine = fleet["Submarine"]
+        if submarine.get("type") != "checkbox" or submarine.get("value") is not False:
+            raise AssertionError(f"{panel}.OpsiFleet.Submarine declaration drifted")
     explore = document.get("OpsiExplore", {}).get("OpsiExplore")
     if not isinstance(explore, dict) or set(explore) != {
         "SpecialRadar",
@@ -804,6 +828,93 @@ def _verify_explore(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry": invalid}
 
 
+def _fleet_selection_case(method, *, fleet: object) -> dict[str, Any]:
+    events: list[Any] = []
+    selector = SimpleNamespace(
+        ensure_to_be=lambda index: events.append(["ensure_to_be", index]) or True
+    )
+    host = SimpleNamespace(fleet_selector=selector)
+    host.wait_until_camera_stable = lambda: events.append("camera_stable")
+    rejected = False
+    try:
+        result = MethodType(method, host)(fleet)
+    except SemanticGateClosed:
+        result = None
+        rejected = True
+    return {"rejected": rejected, "result": result, "events": events}
+
+
+def _verify_fleet_selection(method) -> dict[str, Any]:
+    cases = {
+        str(fleet): _fleet_selection_case(method, fleet=fleet)
+        for fleet in OPSI_FLEET_INDEXES
+    }
+    for fleet, case in cases.items():
+        if case != {
+            "rejected": False,
+            "result": True,
+            "events": [["ensure_to_be", int(fleet)], "camera_stable"],
+        }:
+            raise AssertionError("OpsiFleet.Fleet selection boundary drifted")
+    invalid = _fleet_selection_case(method, fleet=0)
+    if invalid != {"rejected": True, "result": None, "events": []}:
+        raise AssertionError("invalid OpsiFleet.Fleet touched selector state")
+    return {"cases": cases, "invalid_entry": invalid}
+
+
+def _order_case(method, *, recon_scan: object, submarine_call: object):
+    events: list[Any] = []
+    config = SimpleNamespace(
+        opsi_task_delay=lambda **kwargs: events.append(["opsi_task_delay", kwargs])
+    )
+    host = SimpleNamespace(config=config)
+    host.order_execute = lambda order: events.append(["order_execute", order]) or True
+    host.wait_until_order_finished = lambda: events.append("order_finished")
+    rejected = False
+    try:
+        MethodType(method, host)(
+            recon_scan=recon_scan,
+            submarine_call=submarine_call,
+        )
+    except SemanticGateClosed:
+        rejected = True
+    return {"rejected": rejected, "events": events}
+
+
+def _verify_order(method) -> dict[str, Any]:
+    cases = {}
+    for recon_scan, submarine_call in product((False, True), repeat=2):
+        name = f"{int(recon_scan)}:{int(submarine_call)}"
+        case = _order_case(
+            method,
+            recon_scan=recon_scan,
+            submarine_call=submarine_call,
+        )
+        expected = []
+        if recon_scan:
+            expected.append(["order_execute", "scan"])
+        if submarine_call:
+            expected.extend(
+                (["order_execute", "submarine"], "order_finished")
+            )
+        expected.append(
+            [
+                "opsi_task_delay",
+                {
+                    "recon_scan": recon_scan,
+                    "submarine_call": submarine_call,
+                },
+            ]
+        )
+        if case != {"rejected": False, "events": expected}:
+            raise AssertionError("OpsiFleet.Submarine order boundary drifted")
+        cases[name] = case
+    invalid = _order_case(method, recon_scan=False, submarine_call=None)
+    if invalid != {"rejected": True, "events": []}:
+        raise AssertionError("invalid OpsiFleet.Submarine touched order state")
+    return {"cases": cases, "invalid_entry": invalid}
+
+
 def _verify_contract() -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
@@ -833,6 +944,15 @@ def _verify_contract() -> tuple[int, int]:
             special_radar=values[4],
         )
         validate_alas_opsi_explore_config(special_radar=values[4])
+        accepted += 1
+    for fleet in OPSI_FLEET_INDEXES:
+        validate_alas_opsi_fleet_selection(fleet=fleet)
+        accepted += 1
+    for recon_scan, submarine_call in product((False, True), repeat=2):
+        validate_alas_opsi_order(
+            recon_scan=recon_scan,
+            submarine_call=submarine_call,
+        )
         accepted += 1
     invalid = 0
     for value in INVALID_MODES:
@@ -890,6 +1010,23 @@ def _verify_contract() -> tuple[int, int]:
                 invalid += 1
             else:
                 raise AssertionError(f"invalid delay boolean {field} was admitted")
+    for value in (-1, 0, 5, None, True, False, "1", 1.0, [], {}):
+        try:
+            validate_alas_opsi_fleet_selection(fleet=value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiFleet.Fleet was admitted")
+    for value in INVALID_BOOLEANS:
+        for field in ("recon_scan", "submarine_call"):
+            kwargs = {"recon_scan": False, "submarine_call": False}
+            kwargs[field] = value
+            try:
+                validate_alas_opsi_order(**kwargs)
+            except SemanticGateClosed:
+                invalid += 1
+            else:
+                raise AssertionError(f"invalid Opsi order boolean {field} was admitted")
     return accepted, invalid
 
 
@@ -897,7 +1034,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     alas_root = alas_root.resolve()
     args_path = alas_root / "module/config/argument/args.json"
     config_path = alas_root / "module/config/config.py"
+    fleet_path = alas_root / "module/os/fleet.py"
     explore_path = alas_root / "module/os/tasks/explore.py"
+    order_path = alas_root / "module/os_handler/map_order.py"
     month_path = alas_root / "module/os/tasks/month_boss.py"
     obscure_path = alas_root / "module/os/tasks/obscure.py"
     daily_path = alas_root / "module/os/tasks/daily.py"
@@ -986,8 +1125,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "DEFAULT_TIME": datetime(1970, 1, 1),
         "dict_to_kv": lambda values: str(values),
         "deep_get": _deep_get,
+        "ORDER_SCAN": "scan",
+        "ORDER_SUBMARINE": "submarine",
     }
+    fleet_node = _method(fleet_path, "OSFleet", "fleet_set")
     explore_node = _method(explore_path, "OpsiExplore", "_os_explore")
+    order_node = _method(order_path, "MapOrderHandler", "os_order_execute")
     delay_task_node = _method(config_path, "AzurLaneConfig", "opsi_task_delay")
     month_node = _method(month_path, "OpsiMonthBoss", "clear_month_boss")
     delay_node = _method(month_path, "OpsiMonthBoss", "month_boss_delay")
@@ -1015,6 +1158,18 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and isinstance(node.func, ast.Name)
         and node.func.id == "validate_alas_opsi_delay_task_config"
         for node in ast.walk(delay_task_node)
+    )
+    fleet_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_fleet_selection"
+        for node in ast.walk(fleet_node)
+    )
+    order_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_order"
+        for node in ast.walk(order_node)
     )
     month_guard = any(
         isinstance(node, ast.Call)
@@ -1060,6 +1215,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     explore_globals = {**globals_, "ScriptError": RuntimeError}
     explore = _verify_explore(_compile(explore_node, explore_globals))
     delay = _verify_delay(_compile(delay_task_node, globals_))
+    fleet_selection = _verify_fleet_selection(_compile(fleet_node, globals_))
+    order = _verify_order(_compile(order_node, globals_))
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -1076,7 +1233,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 10,
+        "field_count": 12,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -1089,7 +1246,15 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and meowfficer_guard
             and explore_guard
             and delay_task_guard
+            and fleet_guard
+            and order_guard
         ),
+        "validated_runtime_boundaries": {
+            "OpsiFleet.Fleet": "OSFleet.fleet_set",
+            "OpsiFleet.Submarine": "MapOrderHandler.os_order_execute",
+        },
+        "fleet_selection": fleet_selection,
+        "order": order,
         "explore": explore,
         "task_delay": delay,
         "month_boss": month,
@@ -1105,7 +1270,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "source_sha256": {
             "args": _sha256(args_path),
             "config": _sha256(config_path),
+            "fleet": _sha256(fleet_path),
             "explore": _sha256(explore_path),
+            "map_order": _sha256(order_path),
             "month_boss": _sha256(month_path),
             "obscure": _sha256(obscure_path),
             "daily": _sha256(daily_path),

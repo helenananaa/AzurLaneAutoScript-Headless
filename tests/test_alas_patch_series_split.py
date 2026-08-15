@@ -119,6 +119,7 @@ FLOW_PATHS = {
         "module/os_handler/enemy_searching.py",
         "module/os_handler/map_event.py",
         "module/os_handler/mission.py",
+        "module/os_handler/map_order.py",
         "module/os_handler/port.py",
         "module/os_handler/storage.py",
         "module/os_shop/port_shop.py",

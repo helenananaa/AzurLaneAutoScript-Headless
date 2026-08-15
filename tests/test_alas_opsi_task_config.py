@@ -5,14 +5,17 @@ from pathlib import Path
 
 from alas_headless.alas_opsi_task_config_contract import (
     OPSI_HAZARD1_TARGET_ZONES,
+    OPSI_FLEET_INDEXES,
     OPSI_MEOWFFICER_HAZARD_LEVELS,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
+    validate_alas_opsi_fleet_selection,
     validate_alas_opsi_hazard1_config,
     validate_alas_opsi_meowfficer_config,
     validate_alas_opsi_month_boss_config,
+    validate_alas_opsi_order,
     validate_alas_opsi_obscure_config,
 )
 from alas_headless.alas_opsi_task_config_replay import verify_opsi_task_config
@@ -29,9 +32,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 10)
-        self.assertEqual(result["accepted_case_count"], 48)
-        self.assertEqual(result["invalid_case_count"], 77)
+        self.assertEqual(result["field_count"], 12)
+        self.assertEqual(result["accepted_case_count"], 56)
+        self.assertEqual(result["invalid_case_count"], 99)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -41,6 +44,13 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         )
         self.assertEqual(result["mutation_budget"], 0)
         self.assertFalse(result["android_input_injected"])
+        self.assertEqual(
+            result["validated_runtime_boundaries"],
+            {
+                "OpsiFleet.Fleet": "OSFleet.fleet_set",
+                "OpsiFleet.Submarine": "MapOrderHandler.os_order_execute",
+            },
+        )
 
     def test_valid_values_are_classified(self):
         for mode in OPSI_MONTH_BOSS_MODES:
@@ -96,6 +106,20 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 ).special_radar,
                 values[4],
             )
+        for fleet in OPSI_FLEET_INDEXES:
+            self.assertEqual(
+                validate_alas_opsi_fleet_selection(fleet=fleet).fleet,
+                fleet,
+            )
+        for recon_scan, submarine_call in product((False, True), repeat=2):
+            snapshot = validate_alas_opsi_order(
+                recon_scan=recon_scan,
+                submarine_call=submarine_call,
+            )
+            self.assertEqual(
+                (snapshot.recon_scan, snapshot.submarine_call),
+                (recon_scan, submarine_call),
+            )
 
     def test_invalid_values_fail_closed(self):
         for mode in ("", "hard", None, 0, True, [], {}):
@@ -143,6 +167,19 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                     SemanticGateClosed
                 ):
                     validate_alas_opsi_delay_task_config(**kwargs)
+        for value in (-1, 0, 5, None, True, False, "1", 1.0, [], {}):
+            with self.subTest(field="fleet", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_fleet_selection(fleet=value)
+        for value in (0, 1, "true", None, [], {}):
+            for field in ("recon_scan", "submarine_call"):
+                kwargs = {"recon_scan": False, "submarine_call": False}
+                kwargs[field] = value
+                with self.subTest(field=field, value=value), self.assertRaises(
+                    SemanticGateClosed
+                ):
+                    validate_alas_opsi_order(**kwargs)
 
     def test_patch_gates_original_task_entries(self):
         patch = ROOT.joinpath(
@@ -154,6 +191,8 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_hazard1_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_meowfficer_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_explore_config("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_fleet_selection("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_order("), 1)
         scheduler_patch = ROOT.joinpath(
             "integration/alas/series/0140-scheduler-contract.patch"
         ).read_text(encoding="utf-8")

@@ -10,6 +10,7 @@ from .semantic_oracle import SemanticGateClosed
 OPSI_MONTH_BOSS_MODES = ("normal", "normal_hard")
 OPSI_HAZARD1_TARGET_ZONES = (0, 44, 22)
 OPSI_MEOWFFICER_HAZARD_LEVELS = (3, 4, 5, 6, 10)
+OPSI_FLEET_INDEXES = (1, 2, 3, 4)
 
 
 @dataclass(frozen=True)
@@ -59,6 +60,17 @@ class AlasOpsiDelayTaskConfigSnapshot:
             or self.abyssal_force_run
             or self.stronghold_force_run
         )
+
+
+@dataclass(frozen=True)
+class AlasOpsiFleetSelectionSnapshot:
+    fleet: int
+
+
+@dataclass(frozen=True)
+class AlasOpsiOrderSnapshot:
+    recon_scan: bool
+    submarine_call: bool
 
 
 def validate_alas_opsi_month_boss_config(
@@ -142,4 +154,25 @@ def validate_alas_opsi_delay_task_config(
         abyssal_force_run=abyssal_force_run,
         stronghold_force_run=stronghold_force_run,
         special_radar=special_radar,
+    )
+
+
+def validate_alas_opsi_fleet_selection(
+    *, fleet: object
+) -> AlasOpsiFleetSelectionSnapshot:
+    if type(fleet) is not int or fleet not in OPSI_FLEET_INDEXES:
+        raise SemanticGateClosed("OpsiFleet.Fleet must be 1, 2, 3, or 4")
+    return AlasOpsiFleetSelectionSnapshot(fleet=fleet)
+
+
+def validate_alas_opsi_order(
+    *, recon_scan: object, submarine_call: object
+) -> AlasOpsiOrderSnapshot:
+    if type(recon_scan) is not bool:
+        raise SemanticGateClosed("Operation Siren recon_scan must be a bool")
+    if type(submarine_call) is not bool:
+        raise SemanticGateClosed("OpsiFleet.Submarine must be a bool")
+    return AlasOpsiOrderSnapshot(
+        recon_scan=recon_scan,
+        submarine_call=submarine_call,
     )

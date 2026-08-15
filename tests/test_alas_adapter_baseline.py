@@ -35,7 +35,7 @@ class AlasAdapterBaselineTests(unittest.TestCase):
             document["upstream_alas_commit"],
             "81ccf63b4540f00241628c82a58c02c7a2bb11af",
         )
-        self.assertEqual(document["integration_patch"]["changed_file_count"], 104)
+        self.assertEqual(document["integration_patch"]["changed_file_count"], 105)
         self.assertGreater(document["integration_patch"]["line_count"], 1_000)
         self.assertGreater(
             document["source_metrics"]["alas_adapter"]["line_count"],
@@ -47,7 +47,7 @@ class AlasAdapterBaselineTests(unittest.TestCase):
         )
         self.assertEqual(
             document["artifact_sha256"]["patch_series_manifest"],
-            "86725c63d0738e7a1811b131f4174c78b21debc164f7270a4b1af3c26d305f07",
+            "9227f0dfe5a5b64603570185803400ed7bdf8da50dddbeb71f080f67ada2e71e",
         )
         self.assertIn(
             "appear",

@@ -294,7 +294,9 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiObscure.ForceRun` 的真假分支直接执行原 `clear_obscure()` 与 `os_obscure()`：关闭时维持一次安全停止，开启时进入原任务切换检查。`OpsiDaily.UseTuningSample` 的真假分支直接执行原 `os_daily()`，只改变调律样本使用步骤，后续接任务、区域初始化、清任务与次日延迟顺序保持不变。`OpsiHazard1Leveling.TargetZone` 覆盖声明的 `0/22/44`：`0` 保持原逻辑映射到 22，另外两值进入对应安全区，回放在原 `run_strategic_search()` 边界停止。`OpsiMeowfficerFarming.HazardLevel` 覆盖 `3/4/5/6/10`，逐值保留原 `zone_select(hazard_level=...)` 参数和后续舰队、指令、自动搜索、后处理、任务切换顺序。
 
-`OpsiExplore.SpecialRadar` 直接回放原 `_os_explore()`，保留是否使用调律样本及 `recon_scan` 参数。它与 `OpsiExplore.ForceRun`、`OpsiObscure.ForceRun`、`OpsiAbyssal.ForceRun`、`OpsiStronghold.ForceRun` 还直接回放原 `AzurLaneConfig.opsi_task_delay()` 的侦察/潜艇任务延迟排除。五个布尔值的 32 种合法组合全部通过，30 个非法单字段值均在 `modified`、`update()` 或任务动作前 fail-closed。连同此前字段，本契约共覆盖 10 个字段、48 个合法类并拒绝 77 个非法值，mutation budget 为 0；没有真实战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
+`OpsiExplore.SpecialRadar` 直接回放原 `_os_explore()`，保留是否使用调律样本及 `recon_scan` 参数。它与 `OpsiExplore.ForceRun`、`OpsiObscure.ForceRun`、`OpsiAbyssal.ForceRun`、`OpsiStronghold.ForceRun` 还直接回放原 `AzurLaneConfig.opsi_task_delay()` 的侦察/潜艇任务延迟排除。五个布尔值的 32 种合法组合全部通过，30 个非法单字段值均在 `modified`、`update()` 或任务动作前 fail-closed。
+
+共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 12 个字段、56 个合法类并拒绝 99 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
 
 此前只检查属性加载的 AST 审计漏掉了动态拼接的 `deep_get()` 字符串路径，因而错误地把 Explore/Abyssal/Stronghold 的 `ForceRun` 记为零读取；本轮已用源码绑定回放纠正。固定上游真正没有运行时消费者的仍只有 `OpsiMonthBoss.ForceRun` 与 `OpsiDaily.DoMission`，两者继续明确标为 `unsupported`。导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板不会因此提升为完整支持。
 
@@ -346,17 +348,17 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 40 | OpsiGeneral | OpsiGeneral | P | 共享页面可读；随机事件、明石过滤、行动力购买、维修阈值、油量和 Logger 未完整覆盖 |
 | 41 | OpsiAshBeacon | Scheduler, OpsiAshBeacon | B | 入口/状态可读；受点数限制，当前/档案、自动攻击、一击、求助和完整领取未闭环 |
 | 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | 可到列表/开始提示；受舰队条件限制，Tier、出击、战斗和领奖未闭环 |
-| 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | B | 到自动寻敌锁定边界；强制运行、续跑区、特殊雷达、舰队/潜艇和清区未闭环 |
+| 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | B | ForceRun、SpecialRadar、Fleet/Submarine 已离线等价；续跑区、真实舰队/潜艇动作和清区未闭环 |
 | 44 | OpsiShop | Scheduler, OpsiShop | B | 可读取并零购买停止；5 个预设、自定义过滤、购买/刷新/货币链路未闭环 |
 | 45 | OpsiVoucher | Scheduler, OpsiVoucher | B | 可读取并零购买停止；过滤器命中和实际兑换未闭环 |
-| 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | 可接任务并进入目标海域；任务开关、调律样本、舰队/潜艇和清图未闭环 |
-| 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | B | 可读仓库/详情；强制运行、坐标消耗、进入和清图未闭环 |
+| 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | UseTuningSample、Fleet/Submarine 已离线等价；DoMission 无消费者，真实舰队/潜艇动作和清图未闭环 |
+| 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | B | ForceRun、Fleet/Submarine 已离线等价；坐标消耗、真实动作、进入和清图未闭环 |
 | 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | B | 可读仓库/详情；强制运行、过滤器、坐标消耗、Boss 和结算未闭环 |
-| 49 | OpsiArchive | Scheduler, OpsiFleet | B | 可读档案商店；舰队/潜艇、购买、使用坐标、进入和清图未闭环 |
+| 49 | OpsiArchive | Scheduler, OpsiFleet | B | Fleet/Submarine 已离线等价且档案商店可读；真实动作、购买、使用坐标、进入和清图未闭环 |
 | 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | M | 3D 漩涡当前无法由 UI 树可靠观察；存在检测、过滤、进入、战斗和结算均未闭环 |
 | 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 能在适应性不足时安全停止；模式、强制运行、过滤器和普通/困难 Boss 未闭环 |
-| 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | B | 到自动寻敌锁定边界；危险等级、行动力保留、选区、舰队/潜艇和循环未闭环 |
-| 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | B | 到自动寻敌锁定边界；目标区、舰队/潜艇和循环未闭环 |
+| 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | B | HazardLevel、Fleet/Submarine 已离线等价；行动力保留、选区、真实动作和循环未闭环 |
+| 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | B | TargetZone、Fleet/Submarine 已离线等价；真实动作、选区和循环未闭环 |
 | 54 | OpsiCrossMonth | Scheduler | B | 非月末安全跳过；月末执行、重置和跨月恢复未验证 |
 | 55 | Daemon | Daemon | P | EnterMap 双值与单轮地图/编队分派已离线等价；真实进入 postcondition、长期值守和稀有恢复仍未闭环 |
 | 56 | OpsiDaemon | OpsiDaemon | P | 修船/选敌四组合与最终边界已离线等价；真实港口修复、最近目标 postcondition 和长期恢复仍未闭环 |
@@ -456,7 +458,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | OpsiAshBeacon | `AttackMode`=`current/current_dossier`; `DossierAutoAttackMode`; `EnsureFullyCollected`; `OneHitMode`; `RequestAssist` | B | 当前/档案、三个布尔开关组合、点数不足/满、生成、攻击、求助、领取和 Boss 结束 |
 | OpsiAshAssist | `Tier` | B | Tier 边界、无目标、舰队不可用、出击、战斗和奖励 |
 | OpsiExplore | `ForceRun`; `LastZone`; `SpecialRadar` | B | 强制真假、续跑区有效/失效、雷达真假、地图重置和清区 |
-| OpsiFleet | `Fleet`=1..4; `Submarine` | B | 四舰队、潜艇真假、舰队不可用、选中结果和调用结果；某些面板隐藏 Submarine 也要保持 override |
+| OpsiFleet | `Fleet`=1..4; `Submarine` | B | 四舰队和潜艇真假已在原最终边界离线等价；舰队不可用、真实选中结果、潜艇调用结果及隐藏字段 override 仍需实机闭环 |
 | OpsiShop | `PresetFilter`=`max_benefit/max_benefit_meta/no_meta/all/custom`; `CustomFilter` | B | 5 预设、自由规则、不同港口库存、货币不足、刷新、购买确认和无匹配 |
 | OpsiVoucher | `Filter` | B | 规则命中/无命中/非法值、兑换券不足、限购和确认 |
 | OpsiDaily | `DoMission`; `UseTuningSample` | B | 四组合、无任务、接取/进入/清图、样本有无和跨日恢复 |
@@ -794,8 +796,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiExplore.ForceRun` | OpsiExplore | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiExplore.LastZone` | OpsiExplore | type=input; display=default | input/default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiExplore.SpecialRadar` | OpsiExplore | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `OpsiFleet.Fleet` | OpsiExplore, OpsiDaily, OpsiObscure, OpsiArchive, OpsiMeowfficerFarming, OpsiHazard1Leveling | type=select; display=default | options: 1, 2, 3, 4; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `OpsiFleet.Submarine` | OpsiExplore, OpsiDaily, OpsiObscure, OpsiArchive, OpsiMeowfficerFarming, OpsiHazard1Leveling | type=checkbox; display=default/hide | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiFleet.Fleet` | OpsiExplore, OpsiDaily, OpsiObscure, OpsiArchive, OpsiMeowfficerFarming, OpsiHazard1Leveling | type=select; display=default | options: 1, 2, 3, 4; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `OpsiFleet.Submarine` | OpsiExplore, OpsiDaily, OpsiObscure, OpsiArchive, OpsiMeowfficerFarming, OpsiHazard1Leveling | type=checkbox; display=default/hide | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiFleetFilter.Filter` | OpsiAbyssal, OpsiStronghold, OpsiMonthBoss | type=textarea; display=default | input/default: "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `OpsiGeneral.AkashiShopFilter` | OpsiGeneral | type=textarea; display=default | input/default: "ActionPoint > PurpleCoins" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiGeneral.BuyActionPointLimit` | OpsiGeneral | type=select; display=default | options: 0, 1, 2, 3, 4, 5; default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |

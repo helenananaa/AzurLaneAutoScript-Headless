@@ -4901,9 +4901,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
@@ -4925,9 +4930,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=checkbox; display=default/hide",
       "panels": [
@@ -7431,7 +7441,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiArchive",
-      "note": "可读档案商店；舰队/潜艇、购买、使用坐标、进入和清图未闭环",
+      "note": "Fleet 四值与 Submarine 两值的最终边界已离线等价；可读档案商店，但真实舰队/潜艇动作、购买、使用坐标、进入和清图未闭环",
       "status": "B"
     },
     {
@@ -7475,7 +7485,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiDaily",
-      "note": "UseTuningSample 已离线等价；DoMission 在固定上游零读取，明确不支持；舰队/潜艇和清图未闭环",
+      "note": "UseTuningSample、Fleet 四值与 Submarine 两值已离线等价；DoMission 在固定上游零读取，明确不支持；真实舰队/潜艇动作和清图未闭环",
       "status": "B"
     },
     {
@@ -7485,7 +7495,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiExplore",
-      "note": "ForceRun 延迟排除及 SpecialRadar 的调谐样本、侦察决策已离线等价；到自动寻敌锁定边界，续跑区、舰队/潜艇和清区仍未闭环",
+      "note": "ForceRun、SpecialRadar、Fleet 四值与 Submarine 两值已离线等价；到自动寻敌锁定边界，续跑区、真实舰队/潜艇动作和清区仍未闭环",
       "status": "B"
     },
     {
@@ -7503,7 +7513,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiHazard1Leveling",
-      "note": "TargetZone 三值已离线等价；舰队/潜艇、真实选区与循环未闭环",
+      "note": "TargetZone 三值、Fleet 四值与 Submarine 两值已离线等价；真实舰队/潜艇动作、选区与循环未闭环",
       "status": "B"
     },
     {
@@ -7513,7 +7523,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiMeowfficerFarming",
-      "note": "HazardLevel 五值已离线等价；行动力保留、自由选区、舰队/潜艇和循环未闭环",
+      "note": "HazardLevel 五值、Fleet 四值与 Submarine 两值已离线等价；行动力保留、自由选区、真实舰队/潜艇动作和循环未闭环",
       "status": "B"
     },
     {
@@ -7533,7 +7543,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiObscure",
-      "note": "ForceRun 的任务继续及侦察/潜艇延迟排除已离线等价；坐标消耗、进入和清图未闭环",
+      "note": "ForceRun、Fleet 四值与 Submarine 两值的任务决策已离线等价；坐标消耗、真实舰队/潜艇动作、进入和清图未闭环",
       "status": "B"
     },
     {
@@ -9485,6 +9495,32 @@
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
         "docs/status.md"
       ],
+      "field": "OpsiFleet.Fleet",
+      "note": "All four declared fleet indexes preserve the original OSFleet selector and camera-stability boundary; invalid values fail before selector or device state is touched."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiFleet.Submarine",
+      "note": "Both exact booleans preserve the original order dispatch, submarine completion wait, and scheduler-delay arguments; invalid values fail before any order or scheduler state is touched."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "field": "OpsiDaily.UseTuningSample",
       "note": "Both exact booleans preserve the original tuning-sample use versus skip branch and the remaining daily mission order; invalid values fail before task state is touched."
     },
@@ -9564,8 +9600,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "65e3bcc2eca0d62ef74dba909ad1338dda2257dd38b0e650d6a08ddc36cf8d7b",
-      "manifest_sha256": "86725c63d0738e7a1811b131f4174c78b21debc164f7270a4b1af3c26d305f07",
+      "combined_sha256": "27db7f0d965dae785d2897bca063e1a924793610cd024870a06832ec4ad3236a",
+      "manifest_sha256": "9227f0dfe5a5b64603570185803400ed7bdf8da50dddbeb71f080f67ada2e71e",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
