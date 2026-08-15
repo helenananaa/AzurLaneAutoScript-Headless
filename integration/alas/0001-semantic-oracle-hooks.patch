@@ -4564,17 +4564,21 @@ diff --git a/module/freebies/freebies.py b/module/freebies/freebies.py
 index 8694e307..0760d9c5 100644
 --- a/module/freebies/freebies.py
 +++ b/module/freebies/freebies.py
-@@ -1,3 +1,6 @@
+@@ -1,3 +1,7 @@
++from alas_headless import validate_alas_battle_pass_config
 +from alas_headless import validate_alas_data_key_config
 +from alas_headless import validate_alas_supply_pack_config
 +
  from module.base.base import ModuleBase
  from module.freebies.battle_pass import BattlePass
  from module.freebies.data_key import DataKey
-@@ -11,6 +14,14 @@ class Freebies(ModuleBase):
+@@ -11,6 +15,17 @@ class Freebies(ModuleBase):
          """
          Run all freebie related modules
          """
++        battle_pass_config = validate_alas_battle_pass_config(
++            collect=self.config.BattlePass_Collect,
++        )
 +        data_key_config = validate_alas_data_key_config(
 +            collect=self.config.DataKey_Collect,
 +            force_collect=self.config.DataKey_ForceCollect,
@@ -4583,10 +4587,11 @@ index 8694e307..0760d9c5 100644
 +            collect=self.config.SupplyPack_Collect,
 +            day_of_week=self.config.SupplyPack_DayOfWeek,
 +        )
-         if self.config.BattlePass_Collect:
+-        if self.config.BattlePass_Collect:
++        if battle_pass_config.collect:
              logger.hr('Battle pass', level=1)
              BattlePass(self.config, self.device).run()
-@@ -18,12 +29,12 @@ class Freebies(ModuleBase):
+@@ -18,12 +33,12 @@ class Freebies(ModuleBase):
  
 -        if self.config.DataKey_Collect:
 +        if data_key_config.collect:

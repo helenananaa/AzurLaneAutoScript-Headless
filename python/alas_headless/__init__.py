@@ -72,6 +72,10 @@ from .alas_data_key_config_contract import (
     AlasDataKeyConfigSnapshot,
     validate_alas_data_key_config,
 )
+from .alas_battle_pass_config_contract import (
+    AlasBattlePassConfigSnapshot,
+    validate_alas_battle_pass_config,
+)
 from .alas_game_manager_config_contract import (
     AlasGameManagerConfigSnapshot,
     validate_alas_game_manager_config,

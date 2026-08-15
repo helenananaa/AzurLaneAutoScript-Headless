@@ -324,7 +324,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 100 changed files, all 99 patched Python files compile, and
-  the repository suite passes `943/943` tests, including Daemon configuration, OpsiDaemon configuration, BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard task configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `948/948` tests, including BattlePass configuration, Daemon configuration, OpsiDaemon configuration, BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard task configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
@@ -515,6 +515,20 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `offline=complete`. Real map-entry postconditions, port HP/resource deltas,
   selected-target identity, long-running recovery, and rare popup branches
   remain incomplete, so both daemon panels stay `P`.
+
+### Battle Pass collection switch: offline dispatch contract passed
+
+- `BattlePass.Collect` admits only exact booleans. Its guard is the first
+  executable statement of `Freebies.run()`, before any BattlePass, DataKey,
+  Mail, or SupplyPack child can be constructed.
+- Replay executes both original dispatch branches. Disabled mode retains Mail
+  without touching BattlePass; enabled mode preserves BattlePass before Mail.
+  The final `task_delay(server_update=True)` remains exact in both cases.
+- Seven non-boolean values fail at zero events. Every child is a recorder;
+  mutation budget is `0`, and no navigation, reward claim, or Android input
+  occurs. Only `offline` becomes complete. Real entrance/red-dot observation,
+  free versus paid rewards, no-reward handling, claim receipts, and recovery
+  remain incomplete, so Freebies stays `P`.
 
 ### Commission preset, custom filter, and major switch: offline contract passed
 

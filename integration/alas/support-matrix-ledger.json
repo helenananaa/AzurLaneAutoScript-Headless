@@ -140,9 +140,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_battle_pass_config.py",
+        "python/alas_headless/alas_battle_pass_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -7196,7 +7201,7 @@
         "SupplyPack"
       ],
       "name": "Freebies",
-      "note": "Data Key 和部分邮件有证据；BattlePass 不可用，补给包无免费项，其余开关组合未闭环",
+      "note": "BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线等价；真实战令奖励、Data Key 容量、免费补给及领取收据仍未闭环",
       "status": "P"
     },
     {
@@ -9288,6 +9293,19 @@
       ],
       "field": "OpsiDaemon.SelectEnemy",
       "note": "Both booleans preserve the original nearest-object probe after repair handling, including repair precedence; selection is a recorder and invalid values fail before OSConfig merge."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_battle_pass_config.py",
+        "python/alas_headless/alas_battle_pass_config_replay.py",
+        "integration/alas/series/0080-current-task-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "BattlePass.Collect",
+      "note": "Both exact booleans preserve the original Freebies dispatch decision and child order; invalid values fail before any child constructor while the BattlePass task itself remains stubbed."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -9300,8 +9318,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "35aa34bd1ed61bd7c382342d2453d5de3d1f74a6e6a4e0e6f8d2a2778afc1124",
-      "manifest_sha256": "57b1aa71cd0cd6acb6dfbe0ee7d067fad204ca749eae6e6a3595c3978999c969",
+      "combined_sha256": "9fb287ae674c0fb809148feb6e93a0e05b0fc7d23e3fb8868d2a1d2b178fab15",
+      "manifest_sha256": "958e837b097cf118a039f6ebf46530020421b14333a10505a369e39300155752",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

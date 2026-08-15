@@ -272,6 +272,14 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 三字段仅提升 `offline=complete`。真实地图进入 postcondition、港口舰队 HP/资源变化、最近目标唯一身份、长期循环、断线/弹窗恢复和停止条件仍未闭环，因此 Daemon/OpsiDaemon 均保持 P，不能称为长期值守完整支持。
 
+### 1.34 本轮 BattlePass 领取开关契约
+
+`BattlePass.Collect` 只接受精确布尔值，并在 `Freebies.run()` 第一条可执行语句完成验证，早于 BattlePass、DataKey、Mail 和 SupplyPack 任一子模块构造。7 个整数伪装、文本、空值和容器值均在零事件处 fail-closed。
+
+两值回放直接执行原 Freebies 分派：关闭时仅保留后续 Mail，开启时严格保持 BattlePass 在 Mail 之前；DataKey 与 SupplyPack 在夹具中关闭，最终 `task_delay(server_update=True)` 不变。所有子模块均为记录桩，mutation budget 为 0，没有真实战令导航、领奖或 Android 输入。
+
+该字段只提升 `offline=complete`。真实战令入口、红点、免费/付费奖励区分、无奖励路径、领取后库存/货币收据和异常恢复仍缺，因此 Freebies 面板保持 P。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -314,7 +322,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | 只有勋章商店一次 DR 图纸购买；其他商店、过滤/子选项和刷新未闭环 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝 |
 | 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；实机仍仅一次轻型建造，其他卡池、多单、票券、快速完成及队列领取未闭环 |
-| 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；Data Key 实机仅有 300/300 观察，BattlePass 不可用，补给包当前无免费项且未执行领取 |
+| 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环 |
 | 38 | Minigame | Scheduler | L | 当前抚顺小游戏路径可用；没有字段配置，但其他轮换小游戏仍属于该任务支持范围 |
 | 39 | PrivateQuarters | Scheduler, PrivateQuarters | M | 蛋糕、玫瑰、互动和 7 个舰船选项均缺适配 |
 | 40 | OpsiGeneral | OpsiGeneral | P | 共享页面可读；随机事件、明石过滤、行动力购买、维修阈值、油量和 Logger 未完整覆盖 |
@@ -415,7 +423,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | ShipyardDr | `ResearchSeries`=2..5; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；数量边界、每日去重、蓝图不足、达到上限和实际购买仍需闭环 |
 | Shipyard | `ResearchSeries`=1..6; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；其余同上，且 PR/DR 页面切换不能串页 |
 | Gacha | `Amount`=1..10; `Pool`=`light/heavy/special/event/wishing_well`; `UseDrill`; `UseTicket` | L | 200 个配置组合已离线等价；实机仍缺其他卡池、多单、票券、快速完成、队列满、资源不足和领取 |
-| BattlePass | `Collect` | B | 开关两值、入口不可用、免费/付费奖励区别、无奖励和领取结果 |
+| BattlePass | `Collect` | B | 两值与 Freebies 分派已离线；真实入口、免费/付费奖励区别、无奖励和领取结果仍待闭环 |
 | DataKey | `Collect`; `ForceCollect` | L | 四组合、非法值和已领取/满容量/强制/有余量边界已离线完成；仍缺真实普通/强制领取、上限弹窗和库存后置条件 |
 | Mail | `ClaimMerit`; `ClaimMaintenance`; `ClaimTradeLicense`; `DeleteCollected` | P | 16 组合、不同邮件类型、附件为空、容量上限、只删除已领取和误删保护 |
 | SupplyPack | `Collect`; `DayOfWeek`=0..6 | B | 开关、七天、日期比较和高油保护已离线覆盖；仍缺免费包已领/可领、跨日、真实领取收据和购买项误触保护实机证据 |
@@ -571,7 +579,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Awaken.Favourite` | Awaken | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Awaken.LevelCap` | Awaken | type=select; display=default | options: "level120", "level125"; default: "level120" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `AzurLaneUncensored.Repository` | AzurLaneUncensored | type=input; display=disabled | input/default: "https://gitee.com/LmeSzinc/AzurLaneUncensored" | `P`/⊘ 当前无效 | ⊘ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `BattlePass.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `BattlePass.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Benchmark.DeviceType` | Benchmark | type=select; display=default | options: "android_phone_vmos", "android_phone", "emulator", "phone_cloud_without_adb", "plone_cloud_with_adb"; default: "emulator" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Benchmark.TestScene` | Benchmark | type=select; display=default | options: "click", "screenshot_click", "screenshot"; default: "screenshot_click" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `BuyFurniture.BuyOption` | Dorm | type=select; display=default | options: "all", "set"; default: "all" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
