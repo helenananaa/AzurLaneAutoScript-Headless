@@ -1,5 +1,5 @@
 diff --git a/module/device/device.py b/module/device/device.py
-index 0d05f343..185afc01 100644
+index 0d05f343..f7e8856 100644
 --- a/module/device/device.py
 +++ b/module/device/device.py
 @@ -1,4 +1,5 @@
@@ -39,6 +39,32 @@ index 0d05f343..185afc01 100644
          if GET_MISSION.match(self.image, offset=True):
              logger.info('Night commission appear.')
              self.click(GET_MISSION)
+@@ -17,6 +18,7 @@ from module.device.control import Control
+ from module.device.screenshot import Screenshot
+ from module.exception import (EmulatorNotRunningError, GameNotRunningError, GameStuckError, GameTooManyClickError,
+                               RequestHumanTakeover)
++from alas_headless import validate_alas_handle_error_config
+ from module.handler.assets import GET_MISSION
+ from module.logger import logger
+ 
+@@ -327,7 +346,7 @@ class Device(Screenshot, Control, AppControl):
+         self.stuck_record_check = empty_function
+ 
+     def app_start(self):
+-        if not self.config.Error_HandleError:
++        if not validate_alas_handle_error_config(self.config.Error_HandleError):
+             logger.critical('No app stop/start, because HandleError disabled')
+             logger.critical('Please enable Alas.Error.HandleError or manually login to AzurLane')
+             raise RequestHumanTakeover
+@@ -336,7 +355,7 @@ class Device(Screenshot, Control, AppControl):
+         self.click_record_clear()
+ 
+     def app_stop(self):
+-        if not self.config.Error_HandleError:
++        if not validate_alas_handle_error_config(self.config.Error_HandleError):
+             logger.critical('No app stop/start, because HandleError disabled')
+             logger.critical('Please enable Alas.Error.HandleError or manually login to AzurLane')
+             raise RequestHumanTakeover
 diff --git a/module/handler/login.py b/module/handler/login.py
 index 57deabe0..77e83eef 100644
 --- a/module/handler/login.py

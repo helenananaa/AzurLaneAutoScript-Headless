@@ -749,6 +749,16 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     configuration substitute; it performs no device navigation, equipment
     import, persistent config write, or Android input.
 
+### Error recovery toggle: offline decision contract passed
+
+  - `Error.HandleError` now admits only a real boolean at every direct read:
+    app start, app stop, no-combat withdrawal, and exhausted-battle withdrawal.
+    The two internal task paths which deliberately override it to `true` do
+    not consume a user-provided value.
+  - Replay invokes parent and withdrawal substitutes only. Disabled and invalid
+    values stop before those boundaries; no app restart, withdrawal, device
+    action, or Android input is performed.
+
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

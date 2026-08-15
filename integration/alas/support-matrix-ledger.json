@@ -2297,9 +2297,15 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_handle_error_config.py",
+        "python/alas_headless/alas_handle_error_config_replay.py",
+        "integration/alas/series/0002-session-lifecycle.patch",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -10064,8 +10070,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "b8c034f00ec731b2264bf26807f6552540553d015c0192a19d2346d48c3e9ec5",
-      "manifest_sha256": "fe4080e9a269ba74743ff37dc75773c365c293dc3d19e08331090224bb35553c",
+      "combined_sha256": "0a2565e0478a1914d3a46044b72c0e6af1b63555d5f816e96d589cc1927bb55a",
+      "manifest_sha256": "76f7b2584147bce460720ad0060481ed4eab671e87bbf38eac529ec1b6bcdd0e",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

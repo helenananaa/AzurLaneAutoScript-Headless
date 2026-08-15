@@ -603,9 +603,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **149 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **71 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **72 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **57 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **1 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -696,7 +696,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Enhance.ShipToEnhance` | General | type=select; display=default | options: "all", "favourite"; default: "all" | `P`/◐ all/favourite typed 控件已实机 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `EquipmentCode.Config` | GemsFarming | type=textarea; display=default | input/default:…4672 tokens truncated…t" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EquipmentCode.ExportToConfig` | GemsFarming | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `Error.HandleError` | Alas | type=checkbox; display=default | input/default: true | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `Error.HandleError` | Alas | type=checkbox; display=default | input/default: true | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Error.OnePushConfig` | Alas | type=textarea; display=default | input/default: "provider: null" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Error.SaveError` | Alas | type=checkbox; display=default | input/default: true | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Error.ScreenshotLength` | Alas | type=input; display=default | input/default: 1 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |

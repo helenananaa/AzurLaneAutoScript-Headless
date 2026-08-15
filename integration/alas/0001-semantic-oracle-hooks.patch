@@ -442,7 +442,7 @@ index 9dfd4f00..9fca01bd 100644
              image_list = [self.pre_process(i) for i in image]
          else:
 diff --git a/module/device/device.py b/module/device/device.py
-index 0d05f343..185afc01 100644
+index 0d05f343..f7e8856 100644
 --- a/module/device/device.py
 +++ b/module/device/device.py
 @@ -1,4 +1,5 @@
@@ -482,6 +482,32 @@ index 0d05f343..185afc01 100644
          if GET_MISSION.match(self.image, offset=True):
              logger.info('Night commission appear.')
              self.click(GET_MISSION)
+@@ -17,6 +18,7 @@ from module.device.control import Control
+ from module.device.screenshot import Screenshot
+ from module.exception import (EmulatorNotRunningError, GameNotRunningError, GameStuckError, GameTooManyClickError,
+                               RequestHumanTakeover)
++from alas_headless import validate_alas_handle_error_config
+ from module.handler.assets import GET_MISSION
+ from module.logger import logger
+ 
+@@ -327,7 +346,7 @@ class Device(Screenshot, Control, AppControl):
+         self.stuck_record_check = empty_function
+ 
+     def app_start(self):
+-        if not self.config.Error_HandleError:
++        if not validate_alas_handle_error_config(self.config.Error_HandleError):
+             logger.critical('No app stop/start, because HandleError disabled')
+             logger.critical('Please enable Alas.Error.HandleError or manually login to AzurLane')
+             raise RequestHumanTakeover
+@@ -336,7 +355,7 @@ class Device(Screenshot, Control, AppControl):
+         self.click_record_clear()
+ 
+     def app_stop(self):
+-        if not self.config.Error_HandleError:
++        if not validate_alas_handle_error_config(self.config.Error_HandleError):
+             logger.critical('No app stop/start, because HandleError disabled')
+             logger.critical('Please enable Alas.Error.HandleError or manually login to AzurLane')
+             raise RequestHumanTakeover
 diff --git a/module/handler/login.py b/module/handler/login.py
 index 57deabe0..77e83eef 100644
 --- a/module/handler/login.py
@@ -2171,11 +2197,12 @@ index a01cdfb1c1500a858770c1210e91dc0e0303f620..c4cc77efb2e404d71d46bdcaee53e58b
              if last in stages:
                  stages = stages[stages.index(last) + 1:]
 diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
-index 15ebf478..7082e26b 100644
+index 15ebf478..3232fe5 100644
 --- a/module/campaign/campaign_base.py
 +++ b/module/campaign/campaign_base.py
-@@ -1,7 +1,7 @@
+@@ -1,7 +1,8 @@
  from module.base.decorator import Config, cached_property
++from alas_headless import validate_alas_handle_error_config
  from module.campaign.campaign_ui import CampaignUI
  from module.combat.auto_search_combat import AutoSearchCombat
 -from module.exception import CampaignEnd, MapEnemyMoved, ScriptError
@@ -2282,7 +2309,16 @@ index 15ebf478..7082e26b 100644
          logger.hr(f'{self.FUNCTION_NAME_BASE}{self.battle_count}', level=2)
          prev = self.battle_count
          result = False
-@@ -127,6 +212,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+@@ -108,7 +193,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+ 
+         if not result:
+             logger.warning('ScriptError, No combat executed.')
+-            if self.config.Error_HandleError:
++            if validate_alas_handle_error_config(self.config.Error_HandleError):
+                 logger.warning('ScriptError, No combat executed, Withdrawing')
+                 self.withdraw()
+             else:
+@@ -127,6 +213,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
          # Map init
          if not self.map_is_auto_search:
              self.handle_map_fleet_lock()
@@ -2290,6 +2326,15 @@ index 15ebf478..7082e26b 100644
              self.map_init(self.MAP)
          else:
              self.map = self.MAP
+@@ -147,7 +234,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+ 
+         # Exception
+         logger.warning('Battle function exhausted.')
+-        if self.config.Error_HandleError:
++        if validate_alas_handle_error_config(self.config.Error_HandleError):
+             logger.warning('ScriptError, Battle function exhausted, Withdrawing')
+             try:
+                 self.withdraw()
 diff --git a/module/campaign/run.py b/module/campaign/run.py
 index 57033308..c70ee57c 100644
 --- a/module/campaign/run.py

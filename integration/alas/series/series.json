@@ -8,7 +8,7 @@
     {
       "order": 2,
       "path": "integration/alas/series/0002-session-lifecycle.patch",
-      "sha256": "db4d8d960f8e86cba8a15ea21cb17a1ff42f31de8c511d813fb24038ddbf90f0"
+      "sha256": "6ed6fd2b206da34b5fc50d69169a0876e5edcdb10d36bba0944a55881f7716a9"
     },
     {
       "order": 3,
@@ -33,7 +33,7 @@
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "88cdf7a817c20988667e7926a91c29578caa9ffccd2047ce27cded221d2d5f70"
+      "sha256": "43b8aeddc60b6e9f1d1ca204da35646e5aa3e9e01f564cedcc2b9c0a3532c823"
     },
     {
       "order": 8,

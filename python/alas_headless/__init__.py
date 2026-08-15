@@ -98,6 +98,7 @@ from .alas_emulator_info_config_contract import (
     validate_alas_emulator_info_config,
 )
 from .alas_equipment_code_config_contract import validate_alas_equipment_code_config
+from .alas_handle_error_config_contract import validate_alas_handle_error_config
 from .alas_onepush_config_contract import validate_alas_onepush_config
 from .alas_data_key_config_contract import (
     AlasDataKeyConfigSnapshot,

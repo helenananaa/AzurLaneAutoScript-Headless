@@ -1,9 +1,10 @@
 diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
-index 15ebf478..7082e26b 100644
+index 15ebf478..3232fe5 100644
 --- a/module/campaign/campaign_base.py
 +++ b/module/campaign/campaign_base.py
-@@ -1,7 +1,7 @@
+@@ -1,7 +1,8 @@
  from module.base.decorator import Config, cached_property
++from alas_headless import validate_alas_handle_error_config
  from module.campaign.campaign_ui import CampaignUI
  from module.combat.auto_search_combat import AutoSearchCombat
 -from module.exception import CampaignEnd, MapEnemyMoved, ScriptError
@@ -110,7 +111,16 @@ index 15ebf478..7082e26b 100644
          logger.hr(f'{self.FUNCTION_NAME_BASE}{self.battle_count}', level=2)
          prev = self.battle_count
          result = False
-@@ -127,6 +212,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+@@ -108,7 +193,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+ 
+         if not result:
+             logger.warning('ScriptError, No combat executed.')
+-            if self.config.Error_HandleError:
++            if validate_alas_handle_error_config(self.config.Error_HandleError):
+                 logger.warning('ScriptError, No combat executed, Withdrawing')
+                 self.withdraw()
+             else:
+@@ -127,6 +213,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
          # Map init
          if not self.map_is_auto_search:
              self.handle_map_fleet_lock()
@@ -118,6 +128,15 @@ index 15ebf478..7082e26b 100644
              self.map_init(self.MAP)
          else:
              self.map = self.MAP
+@@ -147,7 +234,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+ 
+         # Exception
+         logger.warning('Battle function exhausted.')
+-        if self.config.Error_HandleError:
++        if validate_alas_handle_error_config(self.config.Error_HandleError):
+             logger.warning('ScriptError, Battle function exhausted, Withdrawing')
+             try:
+                 self.withdraw()
 diff --git a/module/campaign/run.py b/module/campaign/run.py
 index 57033308..c70ee57c 100644
 --- a/module/campaign/run.py
