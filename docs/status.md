@@ -739,6 +739,16 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     `notify` method, so it performs zero network requests and zero real
     notification deliveries.
 
+### Equipment-code configuration: offline parser boundary passed
+
+  - `EquipmentCode.Config` accepts only YAML mapping streams. It preserves
+    document-order overrides for code lookup and for the in-memory writeback
+    intent used by the export helper.
+  - Invalid text closes before either lookup can reach equipment application or
+    an export can request config writeback. Replay uses only an in-memory
+    configuration substitute; it performs no device navigation, equipment
+    import, persistent config write, or Android input.
+
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

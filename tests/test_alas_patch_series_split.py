@@ -16,6 +16,7 @@ CORE_PATHS = {
     "module/base/base.py",
     "module/device/control.py",
     "module/device/platform/platform_base.py",
+    "module/equipment/equipment_code.py",
     "module/notify/notify.py",
     "module/device/screenshot.py",
     "module/ocr/ocr.py",

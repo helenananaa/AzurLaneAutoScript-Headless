@@ -3,7 +3,7 @@
     {
       "order": 1,
       "path": "integration/alas/series/0001-core-ports.patch",
-      "sha256": "11a9feccd501a95f7ab888bf1e22148d461cd97b60277fc0ac76c1abbaff1034"
+      "sha256": "f621d1bc028b0290f871136aabc6612a2176ae41d85d8cfd350403c47e8ebdf6"
     },
     {
       "order": 2,

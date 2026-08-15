@@ -252,6 +252,48 @@ index 944f7a8..3534edd 100644
          )
  
      @cached_property
+diff --git a/module/equipment/equipment_code.py b/module/equipment/equipment_code.py
+index ff00194..cea8d2f 100644
+--- a/module/equipment/equipment_code.py
++++ b/module/equipment/equipment_code.py
+@@ -1,5 +1,6 @@
+ import yaml
+ 
++from alas_headless import validate_alas_equipment_code_config
+ from module.base.timer import Timer
+ from module.device.method.utils import HierarchyButton
+ from module.equipment.assets import *
+@@ -36,9 +37,9 @@ class EquipmentCodeHandler(StorageHandler):
+ 
+     def get_code(self, name):
+         try:
+-            config = {}
+-            for item in yaml.safe_load_all(self.config.EquipmentCode_Config):
+-                config.update(item)
++            config = validate_alas_equipment_code_config(
++                self.config.EquipmentCode_Config
++            )
+         except Exception:
+             logger.error("Fail to load equipment code config")
+             return None
+@@ -50,12 +51,13 @@ class EquipmentCodeHandler(StorageHandler):
+             return None
+ 
+     def set_code(self, name, code):
+-        config = {}
+         try:
+-            for item in yaml.safe_load_all(self.config.EquipmentCode_Config):
+-                config.update(item)
++            config = validate_alas_equipment_code_config(
++                self.config.EquipmentCode_Config
++            )
+         except Exception:
+-            pass
++            logger.error("Fail to load equipment code config")
++            return
+         try:
+             config.update({name: code})
+             config_yaml = yaml.safe_dump(config)
 diff --git a/module/notify/notify.py b/module/notify/notify.py
 index bb93837..d85af02 100644
 --- a/module/notify/notify.py

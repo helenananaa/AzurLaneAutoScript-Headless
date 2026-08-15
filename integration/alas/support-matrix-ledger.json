@@ -2254,9 +2254,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_equipment_code_config.py",
+        "python/alas_headless/alas_equipment_code_config_replay.py",
+        "integration/alas/series/0001-core-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -10059,8 +10064,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "4bbf2256e0d7747b2b4922f60d6f762f76ca9061db49a70fdd0db31d6b63a3a9",
-      "manifest_sha256": "99b4f07cefd287e010b5bb6a53d851065a4477336838845f6944f08f2b4cbc67",
+      "combined_sha256": "b8c034f00ec731b2264bf26807f6552540553d015c0192a19d2346d48c3e9ec5",
+      "manifest_sha256": "fe4080e9a269ba74743ff37dc75773c365c293dc3d19e08331090224bb35553c",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
