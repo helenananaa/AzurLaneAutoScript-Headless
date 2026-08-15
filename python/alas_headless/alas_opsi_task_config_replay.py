@@ -13,6 +13,7 @@ import numpy as np
 
 from .alas_opsi_task_config_contract import (
     OPSI_MONTH_BOSS_MODES,
+    validate_alas_opsi_daily_config,
     validate_alas_opsi_month_boss_config,
     validate_alas_opsi_obscure_config,
 )
@@ -26,6 +27,7 @@ DEAD_FIELDS = (
     "OpsiExplore_ForceRun",
     "OpsiAbyssal_ForceRun",
     "OpsiMonthBoss_ForceRun",
+    "OpsiDaily_DoMission",
 )
 
 
@@ -89,6 +91,16 @@ def _verify_args(args_path: Path) -> None:
         or obscure.get("value") is not False
     ):
         raise AssertionError("OpsiObscure.ForceRun declaration drifted")
+    daily = document.get("OpsiDaily", {}).get("OpsiDaily")
+    if not isinstance(daily, dict) or set(daily) != {
+        "DoMission",
+        "UseTuningSample",
+    }:
+        raise AssertionError("OpsiDaily field surface drifted")
+    for field, default in (("DoMission", True), ("UseTuningSample", True)):
+        declaration = daily[field]
+        if declaration.get("type") != "checkbox" or declaration.get("value") is not default:
+            raise AssertionError(f"OpsiDaily.{field} declaration drifted")
 
 
 def _consumer_methods(path: Path, owner: str, fields: tuple[str, ...]):
@@ -136,12 +148,20 @@ def _dead_field_loads(alas_root: Path) -> dict[str, list[str]]:
 
 
 class _Config(SimpleNamespace):
-    def __init__(self, *, mode: object, check: object, force: object = False):
+    def __init__(
+        self,
+        *,
+        mode: object,
+        check: object,
+        force: object = False,
+        use_tuning_sample: object = True,
+    ):
         super().__init__(
             OpsiMonthBoss_Mode=mode,
             OpsiMonthBoss_CheckAdaptability=check,
             OpsiMonthBoss_ForceRun=False,
             OpsiObscure_ForceRun=force,
+            OpsiDaily_UseTuningSample=use_tuning_sample,
             OpsiGeneral_UseLogger=False,
             OpsiFleet_Fleet=1,
             OpsiFleet_Submarine=False,
@@ -299,6 +319,52 @@ def _verify_obscure(clear_method, run_method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry_events": invalid_events}
 
 
+def _daily_case(method, *, use_tuning_sample: object) -> dict[str, Any]:
+    config = _Config(
+        mode="normal",
+        check=False,
+        use_tuning_sample=use_tuning_sample,
+    )
+    events = config.events
+    host = SimpleNamespace(config=config)
+    host.tuning_sample_use = lambda: events.append("tuning_sample_use")
+    host.os_mission_overview_accept = lambda: events.append("mission_accept") or True
+    host.zone_init = lambda: events.append("zone_init")
+    host.os_finish_daily_mission = lambda: events.append("finish_daily")
+    host.is_in_opsi_explore = lambda: events.append("explore_probe") or False
+    rejected = False
+    try:
+        MethodType(method, host)()
+    except SemanticGateClosed:
+        rejected = True
+    return {"rejected": rejected, "events": events}
+
+
+def _verify_daily(method) -> dict[str, Any]:
+    cases = {
+        str(value).lower(): _daily_case(method, use_tuning_sample=value)
+        for value in (False, True)
+    }
+    suffix = [
+        "mission_accept",
+        "zone_init",
+        "finish_daily",
+        "explore_probe",
+        ["task_delay", {"server_update": True}],
+    ]
+    if cases["false"] != {"rejected": False, "events": suffix}:
+        raise AssertionError("disabled daily tuning-sample branch drifted")
+    if cases["true"] != {
+        "rejected": False,
+        "events": ["tuning_sample_use", *suffix],
+    }:
+        raise AssertionError("enabled daily tuning-sample branch drifted")
+    invalid = _daily_case(method, use_tuning_sample=None)
+    if invalid != {"rejected": True, "events": []}:
+        raise AssertionError("invalid daily tuning-sample config touched task state")
+    return {"cases": cases, "invalid_entry": invalid}
+
+
 def _verify_contract() -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
@@ -309,6 +375,9 @@ def _verify_contract() -> tuple[int, int]:
             accepted += 1
     for force in (False, True):
         validate_alas_opsi_obscure_config(force_run=force)
+        accepted += 1
+    for use_tuning_sample in (False, True):
+        validate_alas_opsi_daily_config(use_tuning_sample=use_tuning_sample)
         accepted += 1
     invalid = 0
     for value in INVALID_MODES:
@@ -321,14 +390,16 @@ def _verify_contract() -> tuple[int, int]:
         else:
             raise AssertionError("invalid OpsiMonthBoss.Mode was admitted")
     for value in INVALID_BOOLEANS:
-        for field in ("month", "obscure"):
+        for field in ("month", "obscure", "daily"):
             try:
                 if field == "month":
                     validate_alas_opsi_month_boss_config(
                         mode="normal", check_adaptability=value
                     )
-                else:
+                elif field == "obscure":
                     validate_alas_opsi_obscure_config(force_run=value)
+                else:
+                    validate_alas_opsi_daily_config(use_tuning_sample=value)
             except SemanticGateClosed:
                 invalid += 1
             else:
@@ -341,6 +412,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     args_path = alas_root / "module/config/argument/args.json"
     month_path = alas_root / "module/os/tasks/month_boss.py"
     obscure_path = alas_root / "module/os/tasks/obscure.py"
+    daily_path = alas_root / "module/os/tasks/daily.py"
     _verify_args(args_path)
     month_consumers = _consumer_methods(
         month_path,
@@ -352,11 +424,17 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiObscure",
         ("OpsiObscure_ForceRun",),
     )
-    consumers = {**month_consumers, **obscure_consumers}
+    daily_consumers = _consumer_methods(
+        daily_path,
+        "OpsiDaily",
+        ("OpsiDaily_UseTuningSample",),
+    )
+    consumers = {**month_consumers, **obscure_consumers, **daily_consumers}
     expected = {
         "OpsiMonthBoss_Mode": ["clear_month_boss", "month_boss_delay"],
         "OpsiMonthBoss_CheckAdaptability": ["clear_month_boss", "month_boss_delay"],
         "OpsiObscure_ForceRun": ["clear_obscure", "os_obscure"],
+        "OpsiDaily_UseTuningSample": ["os_daily"],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -371,11 +449,13 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "get_os_next_reset": lambda: "next-reset",
         "validate_alas_opsi_month_boss_config": validate_alas_opsi_month_boss_config,
         "validate_alas_opsi_obscure_config": validate_alas_opsi_obscure_config,
+        "validate_alas_opsi_daily_config": validate_alas_opsi_daily_config,
     }
     month_node = _method(month_path, "OpsiMonthBoss", "clear_month_boss")
     delay_node = _method(month_path, "OpsiMonthBoss", "month_boss_delay")
     obscure_clear_node = _method(obscure_path, "OpsiObscure", "clear_obscure")
     obscure_run_node = _method(obscure_path, "OpsiObscure", "os_obscure")
+    daily_node = _method(daily_path, "OpsiDaily", "os_daily")
     month_guard = any(
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)
@@ -388,6 +468,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and node.func.id == "validate_alas_opsi_obscure_config"
         for node in ast.walk(obscure_clear_node)
     )
+    daily_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_daily_config"
+        for node in ast.walk(daily_node)
+    )
     month = _verify_month(
         _compile(month_node, globals_),
         _compile(delay_node, globals_),
@@ -396,6 +482,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         _compile(obscure_clear_node, globals_),
         _compile(obscure_run_node, globals_),
     )
+    daily = _verify_daily(_compile(daily_node, globals_))
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -412,14 +499,15 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 3,
+        "field_count": 4,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
         "zero_runtime_consumers": dead_loads,
-        "patched_guards_present": month_guard and obscure_guard,
+        "patched_guards_present": month_guard and obscure_guard and daily_guard,
         "month_boss": month,
         "obscure": obscure,
+        "daily": daily,
         "invalid_month_entry": invalid_month_events,
         "mutation_budget": 0,
         "real_combat_performed": False,
@@ -429,5 +517,6 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "args": _sha256(args_path),
             "month_boss": _sha256(month_path),
             "obscure": _sha256(obscure_path),
+            "daily": _sha256(daily_path),
         },
     }

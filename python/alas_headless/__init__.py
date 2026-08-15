@@ -83,9 +83,11 @@ from .alas_optimization_config_contract import (
     validate_alas_when_task_queue_empty,
 )
 from .alas_opsi_task_config_contract import (
+    AlasOpsiDailyConfigSnapshot,
     AlasOpsiMonthBossConfigSnapshot,
     AlasOpsiObscureConfigSnapshot,
     OPSI_MONTH_BOSS_MODES,
+    validate_alas_opsi_daily_config,
     validate_alas_opsi_month_boss_config,
     validate_alas_opsi_obscure_config,
 )

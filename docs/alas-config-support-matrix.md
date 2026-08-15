@@ -292,9 +292,9 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiMonthBoss.Mode` 精确接受 `normal/normal_hard`，`CheckAdaptability` 精确接受布尔值。回放直接编译并执行固定上游 `clear_month_boss()` 与 `month_boss_delay()`，保留普通/困难入口选择、普通完成后继续困难、困难已完成跳过、`203/203/156` 适应性阈值及不足时延迟停止的原顺序。非法值在任务、地图或战斗状态前 fail-closed。
 
-`OpsiObscure.ForceRun` 的真假分支直接执行原 `clear_obscure()` 与 `os_obscure()`：关闭时维持一次安全停止，开启时进入原任务切换检查；坐标消耗、导航、战斗和奖励均为记录桩。三字段共覆盖 6 个合法类、拒绝 19 个非法值，mutation budget 为 0，没有真实战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
+`OpsiObscure.ForceRun` 的真假分支直接执行原 `clear_obscure()` 与 `os_obscure()`：关闭时维持一次安全停止，开启时进入原任务切换检查。`OpsiDaily.UseTuningSample` 的真假分支直接执行原 `os_daily()`，只改变调律样本使用步骤，后续接任务、区域初始化、清任务与次日延迟顺序保持不变。四字段共覆盖 8 个合法类、拒绝 25 个非法值，mutation budget 为 0；坐标消耗、导航、战斗、样本使用和奖励均为记录桩，没有真实战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
 
-固定上游全树 AST 还证明 `OpsiExplore.ForceRun`、`OpsiAbyssal.ForceRun` 与 `OpsiMonthBoss.ForceRun` 只有配置声明，没有任何运行时读取。三者现在明确标为 `unsupported`，不再用“实机当前值”暗示存在能力；重新进入必须先出现并审阅上游真实消费者。MonthBoss/Obscure 的导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板保持 B。
+固定上游全树 AST 还证明 `OpsiExplore.ForceRun`、`OpsiAbyssal.ForceRun`、`OpsiMonthBoss.ForceRun` 与 `OpsiDaily.DoMission` 只有配置声明，没有任何运行时读取。四者现在明确标为 `unsupported`，不再用“实机当前值”暗示存在能力；重新进入必须先出现并审阅上游真实消费者。MonthBoss/Obscure/Daily 的导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板保持 B。
 
 ## 2. 60 个面板总表
 
@@ -582,9 +582,9 @@ python scripts/python/verify_alas_support_matrix.py `
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
-| ◐ 有实机当前值/分支证据 | **148 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ◐ 有实机当前值/分支证据 | **147 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **38 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
-| ⊘ 当前未适配或无效 | **59 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
+| ⊘ 当前未适配或无效 | **60 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **33 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
@@ -787,8 +787,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiAshBeacon.RequestAssist` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `OpsiDaemon.RepairShip` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiDaemon.SelectEnemy` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `OpsiDaily.DoMission` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
-| `OpsiDaily.UseTuningSample` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiDaily.DoMission` | OpsiDaily | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `OpsiDaily.UseTuningSample` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiExplore.ForceRun` | OpsiExplore | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OpsiExplore.LastZone` | OpsiExplore | type=input; display=default | input/default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiExplore.SpecialRadar` | OpsiExplore | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |

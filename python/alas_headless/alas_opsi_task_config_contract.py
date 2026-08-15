@@ -21,6 +21,11 @@ class AlasOpsiObscureConfigSnapshot:
     force_run: bool
 
 
+@dataclass(frozen=True)
+class AlasOpsiDailyConfigSnapshot:
+    use_tuning_sample: bool
+
+
 def validate_alas_opsi_month_boss_config(
     *, mode: object, check_adaptability: object
 ) -> AlasOpsiMonthBossConfigSnapshot:
@@ -42,3 +47,11 @@ def validate_alas_opsi_obscure_config(
     if type(force_run) is not bool:
         raise SemanticGateClosed("OpsiObscure.ForceRun must be a bool")
     return AlasOpsiObscureConfigSnapshot(force_run=force_run)
+
+
+def validate_alas_opsi_daily_config(
+    *, use_tuning_sample: object
+) -> AlasOpsiDailyConfigSnapshot:
+    if type(use_tuning_sample) is not bool:
+        raise SemanticGateClosed("OpsiDaily.UseTuningSample must be a bool")
+    return AlasOpsiDailyConfigSnapshot(use_tuning_sample=use_tuning_sample)

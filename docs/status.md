@@ -323,7 +323,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 102 changed files, all 101 patched Python files compile, and
+  patch applies as 103 changed files, all 102 patched Python files compile, and
   the repository suite passes `959/959` tests, including Operation Siren task configuration, Optimization configuration, BattlePass configuration, Daemon configuration, OpsiDaemon configuration, BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard task configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
@@ -559,13 +559,17 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - `OpsiObscure.ForceRun` preserves the original disabled stop and enabled
   task-switch continuation branches through `clear_obscure()` and
   `os_obscure()`.
-- Six valid classes pass and 19 malformed values fail before task, map, combat,
+- `OpsiDaily.UseTuningSample` preserves the original use versus skip branch
+  through `os_daily()` without changing mission acceptance, zone reset, daily
+  mission completion, or next-update delay ordering.
+- Eight valid classes pass and 25 malformed values fail before task, map, combat,
   coordinate, or inventory state changes. Mutation budget is `0`; all effects
   are recorders, with no combat, item consumption, or Android input. Only the
-  three fields' `offline` dimension becomes complete.
+  four fields' `offline` dimension becomes complete.
 - Whole-tree AST inspection finds no runtime loads of
   `OpsiExplore.ForceRun`, `OpsiAbyssal.ForceRun`, or
-  `OpsiMonthBoss.ForceRun` in pinned upstream. They are now explicitly
+  `OpsiMonthBoss.ForceRun`, and also no runtime load of
+  `OpsiDaily.DoMission`, in pinned upstream. They are now explicitly
   unsupported instead of being presented as partially working. Re-entry
   requires a reviewed upstream consumer; Headless does not invent one.
 - Real coordinate use, navigation, fleet filtering, combat, rewards, and

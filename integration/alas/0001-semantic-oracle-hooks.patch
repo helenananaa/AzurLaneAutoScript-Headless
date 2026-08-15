@@ -5215,6 +5215,35 @@ index 0a7d8dcc..7769f5a0 100644
  
              logger.hr('OS voucher', level=1)
              self._os_voucher_enter()
+diff --git a/module/os/tasks/daily.py b/module/os/tasks/daily.py
+index 51f17b9a..8fac8f34 100644
+--- a/module/os/tasks/daily.py
++++ b/module/os/tasks/daily.py
+@@ -1,5 +1,7 @@
+ import numpy as np
+ 
++from alas_headless import validate_alas_opsi_daily_config
++
+ from module.logger import logger
+ from module.os.map import OSMap
+ 
+@@ -59,12 +61,15 @@ class OpsiDaily(OSMap):
+         return count
+ 
+     def os_daily(self):
++        daily_config = validate_alas_opsi_daily_config(
++            use_tuning_sample=self.config.OpsiDaily_UseTuningSample,
++        )
+         # Finish existing missions first
+         # No need anymore, os_mission_overview_accept() is able to handle
+         # self.os_finish_daily_mission()
+ 
+         # Clear tuning samples daily
+-        if self.config.OpsiDaily_UseTuningSample:
++        if daily_config.use_tuning_sample:
+             self.tuning_sample_use()
+ 
+         while True:
 diff --git a/module/os/tasks/hazard_leveling.py b/module/os/tasks/hazard_leveling.py
 index 03501dc8..866f4c51 100644
 --- a/module/os/tasks/hazard_leveling.py
