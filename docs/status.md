@@ -666,10 +666,14 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     replay retains the empty-filter exit, disabled one-pass behavior, successful
     refresh-and-second-pass behavior, and unavailable-refresh stop; malformed
     values fail before either recorder call.
+  - `GeneralShop.Filter` is checked against the pinned upstream shop selector
+    grammar before the original property trims it. Replay preserves the default,
+    Unicode separators, and intentional blank-filter skip; unknown or trailing
+    tokens and non-text input fail before filtering.
   - Recorder calls replace `shop_buy` and `shop_refresh`; no real purchase,
     refresh, currency mutation, confirmation, receipt, or Android input occurs.
-    These four fields move only to `offline=complete`; filter parsing, real
-    balances, purchase/refresh confirmation, and receipts remain unverified.
+    These five fields move only to `offline=complete`; real item/balance
+    observation, purchase/refresh confirmation, and receipts remain unverified.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

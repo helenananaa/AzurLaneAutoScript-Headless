@@ -71,6 +71,7 @@ from .alas_supply_pack_config_contract import (
 from .alas_general_shop_config_contract import (
     AlasGeneralShopCustomItemsConfigSnapshot,
     validate_alas_general_shop_custom_items_config,
+    validate_alas_general_shop_filter,
     validate_alas_general_shop_refresh,
     validate_alas_general_shop_use_gems,
 )

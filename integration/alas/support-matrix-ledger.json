@@ -3218,9 +3218,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_general_shop_config.py",
+        "python/alas_headless/alas_general_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -9909,8 +9914,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "649a427feba1733b310122e086486523fe3d0242031f1238bcb72340d36b66d9",
-      "manifest_sha256": "b1934942cd38b596482f227b8d684b5943063b9e6f7e1a74cf5c879ecea7b719",
+      "combined_sha256": "ec3151743c1ada9f27976d8f0bf7c991401c0870aa9481b6943333c70af34805",
+      "manifest_sha256": "ab90835450e18bed080ea46db84d933be20776ac90f7c153938836b75c7d7a0e",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

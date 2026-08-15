@@ -124,10 +124,32 @@ index 93b011bb..cd28a37f 100644
              logger.info(f'Already at {page_munitions}')
              return
 diff --git a/module/shop/shop_general.py b/module/shop/shop_general.py
-index 48dff114..f4c44f8f 100644
+index 48dff114..fe245758 100644
 --- a/module/shop/shop_general.py
 +++ b/module/shop/shop_general.py
-@@ -98,12 +98,17 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
+@@ -1,6 +1,6 @@
+ from module.base.decorator import cached_property
+ from module.logger import logger
+-from module.shop.base import ShopItemGrid, ShopItemGrid_250814
++from module.shop.base import FILTER, ShopItemGrid, ShopItemGrid_250814
+ from module.shop.clerk import ShopClerk
+ from module.shop.shop_status import ShopStatus
+ from module.shop.ui import ShopUI
+@@ -16,7 +16,12 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
+         Returns:
+             str:
+         """
+-        return self.config.GeneralShop_Filter.strip()
++        from alas_headless import validate_alas_general_shop_filter
++
++        return validate_alas_general_shop_filter(
++            filter_=FILTER,
++            value=self.config.GeneralShop_Filter,
++        ).strip()
+ 
+     # New UI in 2025-08-14
+     @cached_property
+@@ -98,12 +103,17 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
          Returns:
              bool: whether item can be bought
          """
@@ -146,7 +168,7 @@ index 48dff114..f4c44f8f 100644
              if item.cost == 'Gems':
                  if item.price > self.gems:
                      return False
-@@ -121,11 +126,17 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
+@@ -121,11 +131,17 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
          Returns:
              bool: whether item is custom
          """
@@ -166,7 +188,7 @@ index 48dff114..f4c44f8f 100644
              if (not item.is_known_item()) and item.amount == 1 and item.cost == 'Coins' and item.price == 7000:
                  # check a custom item that cannot be template matched as color
                  # and design constantly changes i.e. equip skin box
-@@ -139,6 +150,11 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
+@@ -139,6 +155,11 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
          """
          Run General Shop
          """
@@ -178,7 +200,7 @@ index 48dff114..f4c44f8f 100644
          # Base case; exit run if filter empty
          if not self.shop_filter:
              return
-@@ -149,7 +165,6 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
+@@ -149,7 +170,6 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
  
          # Execute buy operations
          # Refresh if enabled and available

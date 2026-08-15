@@ -354,7 +354,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 30 | Daily | Scheduler, Daily | L | 十四字段离线映射与 fail-closed 契约已完成；实机仍只闭环 Tactical Training 第二关默认舰队，其余日常和配置值未闭环 |
 | 31 | Hard | Scheduler, Hard | B | 64 关目录与两舰队离线契约已完成；实机仍只到 11-4 进入边界，当前账号进度和自动寻敌锁定，尚无战斗/结算证据 |
 | 32 | Exercise | Scheduler, Exercise | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 上游零读取，真实对手/时段/血量观察、刷新持久化、战斗结算和失败恢复未闭环 |
-| 33 | ShopFrequent | Scheduler, GeneralShop | B | ConsumeCoins、BuySkinBox、UseGems 筛选与 Refresh 循环已离线等价；购买、过滤、余额观察与确认仍未完成 |
+| 33 | ShopFrequent | Scheduler, GeneralShop | B | ConsumeCoins、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；购买、余额观察与确认仍未完成 |
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | 只有勋章商店一次 DR 图纸购买；其他商店、过滤/子选项和刷新未闭环 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝 |
 | 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；实机仍仅一次轻型建造，其他卡池、多单、票券、快速完成及队列领取未闭环 |
@@ -451,7 +451,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Daily | `EscortMission`, `AdvanceMission`, `TacticalTraining`, `SupplyLineDisruption`, `FierceAssault`=`skip/first/second/third`; `ModuleDevelopment`, `EmergencyModuleDevelopment`=`skip/first/second`; `EscortMissionFleet`, `AdvanceMissionFleet`, `TacticalTrainingFleet`, `FierceAssaultFleet`, `ModuleDevelopmentFleet`, `EmergencyModuleDevelopmentFleet`=1..6；`UseDailySkip` | L | 全值域、两种排列、skip、次数耗尽及 SupplyLine fleet=0 已离线覆盖；仍缺非默认任务/难度/舰队、快速跳过不可用和战斗结算的实机收据 |
 | Hard | `HardStage`; `HardFleet`=1/2 | B | 固定上游 64 关目录、两舰队、次数为 0/3 和非法值已离线覆盖；仍缺未解锁页、非默认关卡/舰队、真实战斗和结算收据 |
 | Exercise | `ExerciseStrategy`=`aggressive/fri18/sat0/sat12/sat18/sun0/sun12/sun18`; `OpponentChooseMode`=`max_exp/easiest/leftmost/easiest_else_exp`; `OpponentRefreshValue`; `OpponentRefreshRecord`; `OpponentTrial`; `LowHpThreshold`; `LowHpConfirmWait` | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 零读取且明确不支持，真实对手/时段/血量观察、刷新持久化、失败重开和赛季边界仍需闭环 |
-| GeneralShop | `Filter`; `Refresh`; `UseGems`; `ConsumeCoins`; `BuySkinBox` | B | ConsumeCoins 550,000 阈值、BuySkinBox、UseGems 筛选与 Refresh 循环已离线等价；过滤命中/无命中/非法值，真实刷新、余额观察和购买确认仍缺 |
+| GeneralShop | `Filter`; `Refresh`; `UseGems`; `ConsumeCoins`; `BuySkinBox` | B | ConsumeCoins 550,000 阈值、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；真实商品命中、刷新、余额观察和购买确认仍缺 |
 | GuildShop | `Filter`; `Refresh`; `BOOK_T2`; `BOOK_T3`; `BOX_T3`; `BOX_T4`; `PLATE_T2`; `PLATE_T3`; `PLATE_T4`; `RETROFIT_T2`; `RETROFIT_T3`; `PR1`; `PR2`; `PR3` | P | 14 个字段的每个枚举、刷新前后、货币不足、库存为空、商品同名歧义和确认；舰船/阵营/部件选择必须核验 |
 | MedalShop2 | `Filter`; `PLATE_T1`; `PLATE_T2`; `PLATE_T3`; `RETROFIT_T1`; `RETROFIT_T2`; `RETROFIT_T3` | L | 当前只有一次 DR 图纸；7 字段的所有选择、商品轮换、库存/勋章不足和确认未闭环 |
 | MeritShop | `Filter`; `Refresh` | M | 规则命中、刷新真假、功勋不足和购买确认 |
@@ -733,7 +733,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `GemsFarming.CommonDD` | GemsFarming | type=select; display=default | options: "any", "aulick_or_foote", "cassin_or_downes", "favourite", "z20_or_z21"; default: "any" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `GeneralShop.BuySkinBox` | ShopFrequent | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GeneralShop.ConsumeCoins` | ShopFrequent | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `GeneralShop.Filter` | ShopFrequent | type=textarea; display=default | input/default: "BookRedT3 > BookYellowT3 > BookBlueT3 > BookRedT2\n> Cube\n> FoodT6 > FoodT5" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `GeneralShop.Filter` | ShopFrequent | type=textarea; display=default | input/default: "BookRedT3 > BookYellowT3 > BookBlueT3 > BookRedT2\n> Cube\n> FoodT6 > FoodT5" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GeneralShop.Refresh` | ShopFrequent | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GeneralShop.UseGems` | ShopFrequent | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GuildLogistics.Enable` | Guild | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

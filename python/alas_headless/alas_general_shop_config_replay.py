@@ -5,11 +5,13 @@ from __future__ import annotations
 import ast
 import hashlib
 from pathlib import Path
+import re
 from types import SimpleNamespace
 from typing import Any
 
 from .alas_general_shop_config_contract import (
     validate_alas_general_shop_custom_items_config,
+    validate_alas_general_shop_filter,
     validate_alas_general_shop_refresh,
     validate_alas_general_shop_use_gems,
 )
@@ -37,6 +39,21 @@ def _method(path: Path, class_name: str, method_name: str) -> ast.FunctionDef:
     )
 
 
+def _assignment(path: Path, name: str, globals_: dict[str, Any]) -> object:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    assignment = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and any(isinstance(target, ast.Name) and target.id == name for target in node.targets)
+    )
+    module = ast.Module(body=[assignment], type_ignores=[])
+    ast.fix_missing_locations(module)
+    namespace = dict(globals_)
+    exec(compile(module, str(path), "exec"), namespace)
+    return namespace[name]
+
+
 def _compile(method: ast.FunctionDef, globals_: dict[str, Any]):
     module = ast.Module(body=[method], type_ignores=[])
     ast.fix_missing_locations(module)
@@ -55,14 +72,15 @@ class _Logger:
         return None
 
 
-def _verify_generated_config(config_path: Path) -> dict[str, bool]:
+def _verify_generated_config(config_path: Path) -> dict[str, object]:
     tree = ast.parse(config_path.read_text(encoding="utf-8"), filename=str(config_path))
-    values: dict[str, bool] = {}
+    values: dict[str, object] = {}
     expected = {
         "GeneralShop_ConsumeCoins": False,
         "GeneralShop_BuySkinBox": False,
         "GeneralShop_UseGems": False,
         "GeneralShop_Refresh": False,
+        "GeneralShop_Filter": "BookRedT3 > BookYellowT3 > BookBlueT3 > BookRedT2\n> Cube\n> FoodT6 > FoodT5",
     }
     for node in ast.walk(tree):
         if not isinstance(node, ast.Assign):
@@ -70,7 +88,7 @@ def _verify_generated_config(config_path: Path) -> dict[str, bool]:
         for target in node.targets:
             if isinstance(target, ast.Name) and target.id in expected:
                 value = ast.literal_eval(node.value)
-                if type(value) is not bool or value is not expected[target.id]:
+                if type(value) is not type(expected[target.id]) or value != expected[target.id]:
                     raise AssertionError(f"{target.id} generated default drifted")
                 values[target.id] = value
     if values != expected:
@@ -80,10 +98,11 @@ def _verify_generated_config(config_path: Path) -> dict[str, bool]:
         "BuySkinBox": values["GeneralShop_BuySkinBox"],
         "UseGems": values["GeneralShop_UseGems"],
         "Refresh": values["GeneralShop_Refresh"],
+        "Filter": values["GeneralShop_Filter"],
     }
 
 
-def _verify_contract() -> tuple[int, int]:
+def _verify_contract(filter_: object) -> tuple[int, int]:
     accepted = 0
     invalid = 0
     for consume_coins in (False, True):
@@ -105,6 +124,14 @@ def _verify_contract() -> tuple[int, int]:
     for refresh in (False, True):
         if validate_alas_general_shop_refresh(refresh=refresh) is not refresh:
             raise AssertionError("GeneralShop.Refresh canonical value drifted")
+        accepted += 1
+    for value in (
+        "BookRedT3 > Cube > FoodT6",
+        " Cube ＞ FoodT6 ",
+        " \n ",
+    ):
+        if validate_alas_general_shop_filter(filter_=filter_, value=value) != value:
+            raise AssertionError("GeneralShop.Filter canonical value drifted")
         accepted += 1
     for field in ("consume_coins", "buy_skin_box"):
         for value in ("true", None, 0, 1, [], {}):
@@ -130,6 +157,13 @@ def _verify_contract() -> tuple[int, int]:
             invalid += 1
         else:
             raise AssertionError("invalid GeneralShop.Refresh was admitted")
+    for value in ("Cube > invalid", "Cube >", None, True, 1, [], {}):
+        try:
+            validate_alas_general_shop_filter(filter_=filter_, value=value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid GeneralShop.Filter was admitted")
     return accepted, invalid
 
 
@@ -443,16 +477,58 @@ def _verify_run(method) -> dict[str, object]:
     return {"cases": cases, "invalid_entries": invalid}
 
 
+def _filter_case(method, value: object) -> dict[str, object]:
+    host = SimpleNamespace(config=SimpleNamespace(GeneralShop_Filter=value))
+    try:
+        result = method(host)
+    except SemanticGateClosed:
+        rejected = True
+        result = None
+    else:
+        rejected = False
+    return {"rejected": rejected, "result": result, "events": []}
+
+
+def _verify_filter_property(method) -> dict[str, object]:
+    cases = {
+        value: _filter_case(method, value)
+        for value in (
+            "BookRedT3 > Cube > FoodT6",
+            " Cube ＞ FoodT6 ",
+            " \n ",
+        )
+    }
+    expected = {
+        "BookRedT3 > Cube > FoodT6": "BookRedT3 > Cube > FoodT6",
+        " Cube ＞ FoodT6 ": "Cube ＞ FoodT6",
+        " \n ": "",
+    }
+    for value, result in cases.items():
+        if result["rejected"] or result["result"] != expected[value]:
+            raise AssertionError(f"GeneralShop.Filter property drifted: {value!r}")
+    invalid = {
+        repr(value): _filter_case(method, value)
+        for value in ("Cube > invalid", "Cube >", None, True, 1, [], {})
+    }
+    if any(not case["rejected"] or case["events"] for case in invalid.values()):
+        raise AssertionError("invalid GeneralShop.Filter escaped its fail-closed gate")
+    return {"cases": cases, "invalid_entries": invalid}
+
+
 def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
     alas_root = alas_root.resolve()
     source_path = alas_root / "module" / "shop" / "shop_general.py"
+    shop_base_path = alas_root / "module" / "shop" / "base.py"
     config_path = alas_root / "module" / "config" / "config_generated.py"
-    if not source_path.is_file() or not config_path.is_file():
+    if not source_path.is_file() or not shop_base_path.is_file() or not config_path.is_file():
         raise FileNotFoundError("ALAS GeneralShop source is incomplete")
     generated = _verify_generated_config(config_path)
     method = _method(source_path, "GeneralShop_250814", "shop_check_custom_item")
     item_check_method = _method(source_path, "GeneralShop_250814", "shop_check_item")
     run_method = _method(source_path, "GeneralShop_250814", "run")
+    filter_method = _method(source_path, "GeneralShop_250814", "shop_filter")
+    filter_regex = _assignment(shop_base_path, "FILTER_REGEX", {"re": re})
+    filter_contract = SimpleNamespace(regex=filter_regex, preset=())
     attributes = {
         node.attr for node in ast.walk(method) if isinstance(node, ast.Attribute)
     }
@@ -495,7 +571,19 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
     }
     if "validate_alas_general_shop_refresh" not in run_guards:
         raise AssertionError("GeneralShop.Refresh fail-closed guard is absent")
-    accepted, invalid = _verify_contract()
+    filter_attributes = {
+        node.attr for node in ast.walk(filter_method) if isinstance(node, ast.Attribute)
+    }
+    if "GeneralShop_Filter" not in filter_attributes:
+        raise AssertionError("GeneralShop.Filter consumer surface drifted")
+    filter_guards = {
+        node.func.id
+        for node in ast.walk(filter_method)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    }
+    if "validate_alas_general_shop_filter" not in filter_guards:
+        raise AssertionError("GeneralShop.Filter fail-closed guard is absent")
+    accepted, invalid = _verify_contract(filter_contract)
     original = _verify_original(
         _compile(
             method,
@@ -528,10 +616,20 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
             },
         )
     )
+    filter_decisions = _verify_filter_property(
+        _compile(
+            filter_method,
+            {
+                "FILTER": filter_contract,
+                "cached_property": lambda method: method,
+                "validate_alas_general_shop_filter": validate_alas_general_shop_filter,
+            },
+        )
+    )
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 4,
+        "field_count": 5,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "generated_defaults": generated,
@@ -540,12 +638,14 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
             "GeneralShop.BuySkinBox": "GeneralShop_250814.shop_check_custom_item",
             "GeneralShop.UseGems": "GeneralShop_250814.shop_check_item",
             "GeneralShop.Refresh": "GeneralShop_250814.run",
+            "GeneralShop.Filter": "GeneralShop_250814.shop_filter",
         },
         "patched_guard_present": True,
         "original_decisions": {
             "custom_items": original,
             "item_check": item_decisions,
             "run": run_decisions,
+            "filter": filter_decisions,
         },
         "mutation_budget": 0,
         "real_purchase_performed": False,
@@ -553,6 +653,7 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
         "android_input_injected": False,
         "source_sha256": {
             "shop_general": _sha256(source_path),
+            "shop_base": _sha256(shop_base_path),
             "config_generated": _sha256(config_path),
         },
     }
