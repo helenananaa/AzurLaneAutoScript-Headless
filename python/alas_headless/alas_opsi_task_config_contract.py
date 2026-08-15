@@ -14,6 +14,8 @@ OPSI_MONTH_BOSS_MODES = ("normal", "normal_hard")
 OPSI_HAZARD1_TARGET_ZONES = (0, 44, 22)
 OPSI_MEOWFFICER_HAZARD_LEVELS = (3, 4, 5, 6, 10)
 OPSI_FLEET_INDEXES = (1, 2, 3, 4)
+OPSI_FLEET_FILTER_REGEX = re.compile(r"fleet-?(\d)", re.IGNORECASE)
+OPSI_FLEET_FILTER_PRESETS = ("callsubmarine",)
 
 
 @dataclass(frozen=True)
@@ -274,18 +276,33 @@ def _validate_alas_opsi_filter_tokens(
     value: object,
     *,
     field: str,
+    allow_empty: bool = False,
+    fallback_regex: object = None,
+    fallback_presets: tuple[str, ...] = (),
 ) -> str:
     if not isinstance(value, str):
         raise SemanticGateClosed(f"{field} must be text")
     normalized = re.sub(r"[ \t\r\n]", "", value)
     normalized = re.sub(r"[＞﹥›˃ᐳ❯]", ">", normalized)
     normalized = re.sub(r"[‐‑‒–—―−－﹣﹘⁃]", "-", normalized)
+    if not normalized and allow_empty:
+        return value
     tokens = normalized.split(">")
-    regex = getattr(filter_, "regex", None)
+    regex = getattr(filter_, "regex", fallback_regex)
     if not hasattr(regex, "fullmatch"):
         raise SemanticGateClosed("pinned ALAS Operation Siren filter grammar is unavailable")
+    presets = tuple(
+        str(item).lower()
+        for item in getattr(filter_, "preset", fallback_presets)
+    )
     invalid = tuple(
-        token for token in tokens if not token or regex.fullmatch(token) is None
+        token
+        for token in tokens
+        if not token
+        or (
+            token.lower() not in presets
+            and regex.fullmatch(token.lower()) is None
+        )
     )
     if invalid:
         raise SemanticGateClosed(
@@ -377,3 +394,20 @@ def validate_alas_opsi_ash_assist_tier(*, tier: object) -> int:
     if type(tier) is not int:
         raise SemanticGateClosed("OpsiAshAssist.Tier must be an int")
     return tier
+
+
+def validate_alas_opsi_fleet_filter(
+    *,
+    value: object,
+    filter_: object = None,
+    allow_empty: bool = False,
+) -> str:
+    """Validate fleet selector text against the pinned ALAS grammar."""
+    return _validate_alas_opsi_filter_tokens(
+        filter_,
+        value,
+        field="OpsiFleetFilter.Filter",
+        allow_empty=allow_empty,
+        fallback_regex=OPSI_FLEET_FILTER_REGEX,
+        fallback_presets=OPSI_FLEET_FILTER_PRESETS,
+    )

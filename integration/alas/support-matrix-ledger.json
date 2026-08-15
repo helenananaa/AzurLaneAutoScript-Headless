@@ -4969,9 +4969,15 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0140-scheduler-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -7765,6 +7771,20 @@
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0140-scheduler-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiFleetFilter.Filter",
+      "note": "Pinned Filter parsing preserves fleet order, CallSubmarine, Unicode separators and hyphens, duplicate suppression, standby assignment, unavailable-fleet empty selection, and scheduler submarine delays; malformed values fail before parser state, scheduler mutation, or task input."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
         "docs/status.md"
       ],
       "field": "OpsiAshAssist.Tier",
@@ -9834,8 +9854,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "9439a476715cb28dd417a28283c079bcd930f168c47d5d9ba382aa131372a19d",
-      "manifest_sha256": "54f42e23c4284124efea5ac71d1ab48d926537cf8e136a03ed4bdc04c9feceba",
+      "combined_sha256": "720134e38fdabc0952f83c11d51679354470a7d347f955d169b946e37fa23d2e",
+      "manifest_sha256": "1434b7f4f4eeed4c0e577e83c684b5f2c69ab18b7667eaa4ce5519a7768c1dee",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

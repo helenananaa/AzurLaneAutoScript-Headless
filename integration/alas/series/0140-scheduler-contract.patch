@@ -1,5 +1,5 @@
 diff --git a/module/config/config.py b/module/config/config.py
-index 97631fca..43a21595 100644
+index 97631fca..6b26dd61 100644
 --- a/module/config/config.py
 +++ b/module/config/config.py
 @@ -203,6 +203,14 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
@@ -17,17 +17,37 @@ index 97631fca..43a21595 100644
          pending = []
          waiting = []
          error = []
-@@ -452,6 +460,8 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+@@ -452,6 +460,11 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
          """
          if not recon_scan and not submarine_call and not ap_limit and not cl1_preserve:
              return None
-+        from alas_headless import validate_alas_opsi_delay_task_config
++        from alas_headless import (
++            validate_alas_opsi_delay_task_config,
++            validate_alas_opsi_fleet_filter,
++        )
 +
          kv = dict_to_kv(
              {
                  "recon_scan": recon_scan,
-@@ -481,24 +491,30 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
-                 ).lower()
+@@ -473,32 +486,43 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+                     self.modified[keys] = next_run
+ 
+         def is_submarine_call(task):
++            fleet_filter = validate_alas_opsi_fleet_filter(
++                value=deep_get(
++                    self.data,
++                    keys=f"{task}.OpsiFleetFilter.Filter",
++                    default="",
++                ),
++                allow_empty=True,
++            )
+             return (
+                 deep_get(self.data, keys=f"{task}.OpsiFleet.Submarine", default=False)
+-                or "submarine"
+-                in deep_get(
+-                    self.data, keys=f"{task}.OpsiFleetFilter.Filter", default=""
+-                ).lower()
++                or "callsubmarine" in fleet_filter.lower()
              )
  
 -        def is_force_run(task):

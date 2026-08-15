@@ -304,7 +304,9 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiAshAssist.Tier` 直接回放固定上游原 `_ensure_meta_level()`，精确整数保持等级显示等待、OCR 比较、最多五次向后轮换及找不到时使用当前信标的兜底行为。错误类型在首次页面观察或点击前 fail-closed。固定 ALAS 配置没有声明等级范围，因此不虚构 `1..15` 约束；负数、0 和高于当前等级的整数仍按原比较和兜底语义执行。
 
-共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 25 个字段、120 个合法类并拒绝 195 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗、兑换或 Android 输入，因此只提升 `offline=complete`。
+`OpsiFleetFilter.Filter` 直接使用固定上游 `FLEET_FILTER/Filter` 并回放原 `OSFleet.parse_fleet_filter()` 与 `AzurLaneConfig.opsi_task_delay()`。舰队顺序、`CallSubmarine`、Unicode 分隔符和连字符、重复去重、前三舰队待机位、不可用舰队形成空选择，以及潜艇任务延迟均保持原语义；未知或空 token、错误类型在过滤器状态、调度写入、舰队选择或任务输入前 fail-closed。调度器对没有该配置组的任务继续把缺省空值解释为“不调用潜艇”，不把缺省字段误判为非法用户配置。
+
+共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 26 个字段、126 个合法类并拒绝 203 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗、兑换或 Android 输入，因此只提升 `offline=complete`。
 
 此前只检查属性加载的 AST 审计漏掉了动态拼接的 `deep_get()` 字符串路径，因而错误地把 Explore/Abyssal/Stronghold 的 `ForceRun` 记为零读取；本轮已用源码绑定回放纠正。固定上游真正没有运行时消费者的仍只有 `OpsiMonthBoss.ForceRun` 与 `OpsiDaily.DoMission`，两者继续明确标为 `unsupported`。导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板不会因此提升为完整支持。
 
@@ -361,10 +363,10 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 45 | OpsiVoucher | Scheduler, OpsiVoucher | B | 过滤器及重定向已离线等价；真实库存、命中、兑换、代币 postcondition 与异常恢复仍未闭环 |
 | 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | UseTuningSample、Fleet/Submarine 已离线等价；DoMission 无消费者，真实舰队/潜艇动作和清图未闭环 |
 | 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | B | ForceRun、Fleet/Submarine 已离线等价；坐标消耗、真实动作、进入和清图未闭环 |
-| 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | B | 可读仓库/详情；强制运行、过滤器、坐标消耗、Boss 和结算未闭环 |
+| 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | B | ForceRun 与舰队过滤已离线等价；坐标消耗、真实舰队、Boss 和结算未闭环 |
 | 49 | OpsiArchive | Scheduler, OpsiFleet | B | Fleet/Submarine 已离线等价且档案商店可读；真实动作、购买、使用坐标、进入和清图未闭环 |
-| 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | M | 3D 漩涡当前无法由 UI 树可靠观察；存在检测、过滤、进入、战斗和结算均未闭环 |
-| 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 能在适应性不足时安全停止；模式、强制运行、过滤器和普通/困难 Boss 未闭环 |
+| 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | M | 舰队过滤已离线等价；3D 漩涡无可靠观察，进入、真实舰队、战斗和结算未闭环 |
+| 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 模式、适应性检查和舰队过滤已离线等价；ForceRun 无消费者，普通/困难 Boss 未闭环 |
 | 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | B | HazardLevel、Fleet/Submarine 已离线等价；行动力保留、选区、真实动作和循环未闭环 |
 | 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | B | TargetZone、Fleet/Submarine 已离线等价；真实动作、选区和循环未闭环 |
 | 54 | OpsiCrossMonth | Scheduler | B | 非月末安全跳过；月末执行、重置和跨月恢复未验证 |
@@ -472,7 +474,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | OpsiDaily | `DoMission`; `UseTuningSample` | B | 四组合、无任务、接取/进入/清图、样本有无和跨日恢复 |
 | OpsiObscure | `ForceRun` | B | 开关、坐标不存在/存在、消耗、进入、清图与奖励 |
 | OpsiAbyssal | `ForceRun` | B | 开关、坐标、Boss、多舰队、撤退/失败和奖励 |
-| OpsiFleetFilter | `Filter`（默认含 Fleet-4、CallSubmarine、Fleet-2/3/1） | B | 过滤器顺序、潜艇条目、舰队不可用、无匹配、非法规则和最终选中结果 |
+| OpsiFleetFilter | `Filter`（默认含 Fleet-4、CallSubmarine、Fleet-2/3/1） | B | 语法、顺序、潜艇、重复、不可用与非法规则已离线等价；真实舰队可用性、切换结果和战斗仍缺 |
 | OpsiStronghold | `ForceRun` | M | 先补足 3D 漩涡存在性观察；再验证开关、进入、舰队选择、战斗、撤退和结算 |
 | OpsiMonthBoss | `Mode`=`normal/normal_hard`; `CheckAdaptability`; `ForceRun` | B | 两模式、两个开关组合、适应性不足/足够、普通/困难切换、战斗和奖励 |
 | OpsiMeowfficerFarming | `HazardLevel`=3/4/5/6/10; `TargetZone`; `ActionPointPreserve` | B | 五危险等级、自动/显式区域、行动力边界、舰队/潜艇、循环与停止 |
@@ -595,9 +597,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **149 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **39 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **40 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **57 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **33 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **32 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -806,7 +808,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiExplore.SpecialRadar` | OpsiExplore | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiFleet.Fleet` | OpsiExplore, OpsiDaily, OpsiObscure, OpsiArchive, OpsiMeowfficerFarming, OpsiHazard1Leveling | type=select; display=default | options: 1, 2, 3, 4; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiFleet.Submarine` | OpsiExplore, OpsiDaily, OpsiObscure, OpsiArchive, OpsiMeowfficerFarming, OpsiHazard1Leveling | type=checkbox; display=default/hide | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `OpsiFleetFilter.Filter` | OpsiAbyssal, OpsiStronghold, OpsiMonthBoss | type=textarea; display=default | input/default: "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `OpsiFleetFilter.Filter` | OpsiAbyssal, OpsiStronghold, OpsiMonthBoss | type=textarea; display=default | input/default: "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `OpsiGeneral.AkashiShopFilter` | OpsiGeneral | type=textarea; display=default | input/default: "ActionPoint > PurpleCoins" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiGeneral.BuyActionPointLimit` | OpsiGeneral | type=select; display=default | options: 0, 1, 2, 3, 4, 5; default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiGeneral.DoRandomMapEvent` | OpsiGeneral | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |

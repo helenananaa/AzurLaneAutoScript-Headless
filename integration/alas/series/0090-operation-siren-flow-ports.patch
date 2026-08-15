@@ -1,5 +1,5 @@
 diff --git a/module/os/fleet.py b/module/os/fleet.py
-index 4417f871..9519208b 100644
+index 4417f871..aedae5a6 100644
 --- a/module/os/fleet.py
 +++ b/module/os/fleet.py
 @@ -178,8 +178,13 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
@@ -40,6 +40,21 @@ index 4417f871..9519208b 100644
          logger.hr(f'Fleet set to {index}')
          if self.fleet_selector.ensure_to_be(index):
              self.wait_until_camera_stable()
+@@ -506,7 +519,13 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+         Returns:
+             list: List of BossFleet or str. Such as [Fleet-4, 'CallSubmarine', Fleet-2, Fleet-3, Fleet-1].
+         """
+-        FLEET_FILTER.load(self.config.OpsiFleetFilter_Filter)
++        from alas_headless import validate_alas_opsi_fleet_filter
++
++        fleet_filter = validate_alas_opsi_fleet_filter(
++            value=self.config.OpsiFleetFilter_Filter,
++            filter_=FLEET_FILTER,
++        )
++        FLEET_FILTER.load(fleet_filter)
+         fleets = FLEET_FILTER.apply([BossFleet(f) for f in [1, 2, 3, 4]])
+ 
+         # Set standby location
 diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
 index c4e375f0..12d5cac5 100644
 --- a/module/os/globe_camera.py

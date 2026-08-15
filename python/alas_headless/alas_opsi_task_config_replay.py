@@ -18,6 +18,7 @@ import numpy as np
 from .alas_opsi_task_config_contract import (
     OPSI_HAZARD1_TARGET_ZONES,
     OPSI_FLEET_INDEXES,
+    OPSI_FLEET_FILTER_PRESETS,
     OPSI_MEOWFFICER_HAZARD_LEVELS,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
@@ -32,6 +33,7 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_explore_config,
     validate_alas_opsi_explore_last_zone,
     validate_alas_opsi_fleet_selection,
+    validate_alas_opsi_fleet_filter,
     validate_alas_opsi_hazard1_config,
     validate_alas_opsi_meowfficer_config,
     validate_alas_opsi_month_boss_config,
@@ -328,6 +330,15 @@ def _verify_args(args_path: Path) -> None:
             or declaration.get("value") is not False
         ):
             raise AssertionError(f"{task}.ForceRun declaration drifted")
+    expected_fleet_filter = "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1"
+    for task in ("OpsiAbyssal", "OpsiStronghold", "OpsiMonthBoss"):
+        declaration = document.get(task, {}).get("OpsiFleetFilter", {}).get("Filter")
+        if (
+            not isinstance(declaration, dict)
+            or declaration.get("type") != "textarea"
+            or declaration.get("value") != expected_fleet_filter
+        ):
+            raise AssertionError(f"{task}.OpsiFleetFilter.Filter declaration drifted")
     month = document.get("OpsiMonthBoss", {}).get("OpsiMonthBoss")
     expected_month = {
         "Mode": ("select", "normal", list(OPSI_MONTH_BOSS_MODES)),
@@ -1045,6 +1056,19 @@ def _verify_delay(method) -> dict[str, Any]:
         "OpsiAbyssal.Scheduler.NextRun"
     ]:
         raise AssertionError("Abyssal submarine delay drifted")
+    cases["abyssal_filter_submarine"] = _delay_case(
+        method,
+        submarine_call=True,
+        overrides={
+            "OpsiAbyssal.OpsiFleetFilter.Filter": (
+                "Fleet－4 ＞ CallSubmarine ＞ Fleet－1"
+            ),
+        },
+    )
+    if cases["abyssal_filter_submarine"]["modified"] != [
+        "OpsiAbyssal.Scheduler.NextRun"
+    ]:
+        raise AssertionError("Abyssal filter submarine delay drifted")
     cases["abyssal_force"] = _delay_case(
         method,
         submarine_call=True,
@@ -1077,6 +1101,14 @@ def _verify_delay(method) -> dict[str, Any]:
         if case != {"rejected": True, "modified": [], "updates": []}:
             raise AssertionError(f"invalid {path} touched scheduler state")
         invalid_cases[path] = case
+    invalid_filter = _delay_case(
+        method,
+        submarine_call=True,
+        overrides={"OpsiAbyssal.OpsiFleetFilter.Filter": "Fleet-4 > invalid"},
+    )
+    if invalid_filter != {"rejected": True, "modified": [], "updates": []}:
+        raise AssertionError("invalid OpsiFleetFilter touched scheduler state")
+    invalid_cases["OpsiAbyssal.OpsiFleetFilter.Filter"] = invalid_filter
     return {"cases": cases, "invalid_entries": invalid_cases}
 
 
@@ -1258,6 +1290,80 @@ def _verify_fleet_selection(method) -> dict[str, Any]:
     if invalid != {"rejected": True, "result": None, "events": []}:
         raise AssertionError("invalid OpsiFleet.Fleet touched selector state")
     return {"cases": cases, "invalid_entry": invalid}
+
+
+def _fleet_filter_case(method, value: object) -> dict[str, Any]:
+    filter_ = method.__globals__["FLEET_FILTER"]
+    filter_.filter_raw = ["sentinel"]
+    filter_.filter = [["sentinel"]]
+    host = SimpleNamespace(
+        config=SimpleNamespace(OpsiFleetFilter_Filter=value),
+    )
+    try:
+        result = method(host)
+    except SemanticGateClosed:
+        rejected = True
+        result = []
+    else:
+        rejected = False
+    return {
+        "rejected": rejected,
+        "loaded": filter_.filter_raw != ["sentinel"],
+        "items": [str(item) for item in result],
+        "standby": [
+            [str(item), list(item.standby_loca)]
+            for item in result
+            if not isinstance(item, str)
+        ],
+    }
+
+
+def _verify_fleet_filter(method) -> dict[str, Any]:
+    cases = {
+        "default": _fleet_filter_case(
+            method,
+            "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1",
+        ),
+        "compact": _fleet_filter_case(method, "Fleet4 > Fleet2"),
+        "unicode": _fleet_filter_case(
+            method,
+            "Fleet－2 ＞ CallSubmarine",
+        ),
+        "duplicate": _fleet_filter_case(method, "Fleet-1 > Fleet1 > Fleet-2"),
+        "unavailable": _fleet_filter_case(method, "Fleet-9"),
+        "submarine_only": _fleet_filter_case(method, "CallSubmarine"),
+    }
+    if cases["default"]["items"] != [
+        "Fleet-4",
+        "callsubmarine",
+        "Fleet-2",
+        "Fleet-3",
+        "Fleet-1",
+    ]:
+        raise AssertionError("default OpsiFleetFilter ordering drifted")
+    if cases["default"]["standby"] != [
+        ["Fleet-4", [-1, -1]],
+        ["Fleet-2", [0, -1]],
+        ["Fleet-3", [1, -1]],
+        ["Fleet-1", [0, 0]],
+    ]:
+        raise AssertionError("OpsiFleetFilter standby assignment drifted")
+    if cases["unicode"]["items"] != ["Fleet-2", "callsubmarine"]:
+        raise AssertionError("OpsiFleetFilter Unicode normalization drifted")
+    if cases["duplicate"]["items"] != ["Fleet-1", "Fleet-2"]:
+        raise AssertionError("OpsiFleetFilter duplicate suppression drifted")
+    if cases["unavailable"]["items"] or not cases["unavailable"]["loaded"]:
+        raise AssertionError("unavailable pinned fleet behavior drifted")
+    invalid = {
+        repr(value): _fleet_filter_case(method, value)
+        for value in ("", "Fleet-1 >", "unknown", None, True, 1, [], {})
+    }
+    if any(
+        not case["rejected"] or case["loaded"] or case["items"]
+        for case in invalid.values()
+    ):
+        raise AssertionError("invalid OpsiFleetFilter reached original parser")
+    return {"cases": cases, "invalid_entries": invalid}
 
 
 def _order_case(method, *, recon_scan: object, submarine_call: object):
@@ -2021,6 +2127,7 @@ def _verify_ash_assist(method) -> dict[str, Any]:
 
 def _verify_contract(
     akashi_filter,
+    fleet_filter,
     opsi_shop_presets,
     voucher_filter,
     explore_resolver,
@@ -2028,6 +2135,16 @@ def _verify_contract(
     accepted = 0
     for tier in (-1, 0, 1, 15, 16):
         validate_alas_opsi_ash_assist_tier(tier=tier)
+        accepted += 1
+    for value in (
+        "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1",
+        "Fleet4 > Fleet2",
+        "Fleet－2 ＞ CallSubmarine",
+        "Fleet-1 > Fleet1 > Fleet-2",
+        "Fleet-9",
+        "CallSubmarine",
+    ):
+        validate_alas_opsi_fleet_filter(value=value, filter_=fleet_filter)
         accepted += 1
     for mode in OPSI_MONTH_BOSS_MODES:
         for check in (False, True):
@@ -2152,6 +2269,13 @@ def _verify_contract(
             invalid += 1
         else:
             raise AssertionError("invalid OpsiAshAssist.Tier was admitted")
+    for value in ("", "Fleet-1 >", "unknown", None, True, 1, [], {}):
+        try:
+            validate_alas_opsi_fleet_filter(value=value, filter_=fleet_filter)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiFleetFilter.Filter was admitted")
     for value in INVALID_MODES:
         try:
             validate_alas_opsi_month_boss_config(
@@ -2421,6 +2545,14 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             ("OpsiAshAssist_Tier",),
         )
     )
+    consumers["OpsiFleetFilter_Filter"] = [
+        *_consumer_methods(
+            fleet_path,
+            "OSFleet",
+            ("OpsiFleetFilter_Filter",),
+        )["OpsiFleetFilter_Filter"],
+        "AzurLaneConfig.opsi_task_delay",
+    ]
     consumers["OpsiGeneral_UseLogger"] = [
         *_consumer_methods(
             obscure_path,
@@ -2510,6 +2642,10 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiShop_CustomFilter": ["items_filter_in_os_shop"],
         "OpsiVoucher_Filter": ["shop_filter"],
         "OpsiAshAssist_Tier": ["_ensure_meta_level"],
+        "OpsiFleetFilter_Filter": [
+            "parse_fleet_filter",
+            "AzurLaneConfig.opsi_task_delay",
+        ],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -2529,6 +2665,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             validate_alas_opsi_action_point_purchase
         ),
         "validate_alas_opsi_ash_assist_tier": validate_alas_opsi_ash_assist_tier,
+        "validate_alas_opsi_fleet_filter": validate_alas_opsi_fleet_filter,
         "validate_alas_opsi_akashi_filter": validate_alas_opsi_akashi_filter,
         "validate_alas_opsi_shop_custom_filter": (
             validate_alas_opsi_shop_custom_filter
@@ -2563,6 +2700,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OCR_BEACON_TIER": _SequenceOcr(),
     }
     fleet_node = _method(fleet_path, "OSFleet", "fleet_set")
+    fleet_filter_node = _method(fleet_path, "OSFleet", "parse_fleet_filter")
     resolver_node = _method(globe_zone_path, "ZoneManager", "name_to_zone")
     storage_node = _method(storage_path, "StorageHandler", "storage_get_next_item")
     purchase_node = _method(action_point_path, "ActionPointHandler", "action_point_buy")
@@ -2649,6 +2787,18 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and isinstance(node.func, ast.Name)
         and node.func.id == "validate_alas_opsi_fleet_selection"
         for node in ast.walk(fleet_node)
+    )
+    fleet_filter_parse_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_fleet_filter"
+        for node in ast.walk(fleet_filter_node)
+    )
+    fleet_filter_delay_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_fleet_filter"
+        for node in ast.walk(delay_task_node)
     )
     order_guard = any(
         isinstance(node, ast.Call)
@@ -2745,6 +2895,14 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         _class(filter_path, "Filter"),
         {"reduce": reduce, "re": re, "logger": _Logger()},
     )
+    fleet_filter = _assignment(
+        fleet_path,
+        "FLEET_FILTER",
+        {"Filter": filter_type, "re": re},
+    )
+    if tuple(fleet_filter.preset) != OPSI_FLEET_FILTER_PRESETS:
+        raise AssertionError("pinned OpsiFleetFilter presets drifted")
+    boss_fleet_type = _compile_class(_class(fleet_path, "BossFleet"), {})
     akashi_regex = _assignment(selector_path, "FILTER_REGEX", {"re": re})
     akashi_filter = filter_type(
         akashi_regex,
@@ -2807,6 +2965,16 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     )
     delay = _verify_delay(_compile(delay_task_node, globals_))
     fleet_selection = _verify_fleet_selection(_compile(fleet_node, globals_))
+    fleet_filter_result = _verify_fleet_filter(
+        _compile(
+            fleet_filter_node,
+            {
+                **globals_,
+                "FLEET_FILTER": fleet_filter,
+                "BossFleet": boss_fleet_type,
+            },
+        )
+    )
     order = _verify_order(_compile(order_node, globals_))
     storage = _verify_storage(_compile(storage_node, globals_))
     purchase = _verify_purchase(_compile(purchase_node, globals_))
@@ -2850,6 +3018,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         invalid_month_events = invalid
     accepted, invalid = _verify_contract(
         akashi_filter,
+        fleet_filter,
         opsi_shop_presets,
         voucher_filter,
         MethodType(resolver_method, SimpleNamespace(zones=zone_fixtures)),
@@ -2857,7 +3026,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 25,
+        "field_count": 26,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -2872,6 +3041,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and explore_last_zone_guard
             and delay_task_guard
             and fleet_guard
+            and fleet_filter_parse_guard
+            and fleet_filter_delay_guard
             and order_guard
             and storage_guard
             and purchase_guard
@@ -2907,8 +3078,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "OpsiVoucher.Filter": "VoucherShop.shop_filter",
             "OpsiExplore.LastZone": "OpsiExplore._os_explore",
             "OpsiAshAssist.Tier": "AshBeaconAssist._ensure_meta_level",
+            "OpsiFleetFilter.Filter": (
+                "OSFleet.parse_fleet_filter + AzurLaneConfig.opsi_task_delay"
+            ),
         },
         "fleet_selection": fleet_selection,
+        "fleet_filter": fleet_filter_result,
         "order": order,
         "storage": storage,
         "action_point_purchase": purchase,
