@@ -252,6 +252,29 @@ index 944f7a8..3534edd 100644
          )
  
      @cached_property
+diff --git a/module/notify/notify.py b/module/notify/notify.py
+index bb93837..d85af02 100644
+--- a/module/notify/notify.py
++++ b/module/notify/notify.py
+@@ -6,6 +6,7 @@ from onepush.exceptions import OnePushException
+ from onepush.providers.custom import Custom
+ from requests import Response
+ 
++from alas_headless import validate_alas_onepush_config
+ from module.logger import logger
+ 
+ onepush.core.log = logger
+@@ -13,9 +14,7 @@ onepush.core.log = logger
+ 
+ def handle_notify(_config: str, **kwargs) -> bool:
+     try:
+-        config = {}
+-        for item in yaml.safe_load_all(_config):
+-            config.update(item)
++        config = validate_alas_onepush_config(_config)
+     except Exception:
+         logger.error("Fail to load onepush config, skip sending")
+         return False
 diff --git a/module/device/screenshot.py b/module/device/screenshot.py
 index 9940ee05..e692eacb 100644
 --- a/module/device/screenshot.py

@@ -729,6 +729,16 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     `EmulatorInfo` value; replay performs no path probe, process discovery,
     emulator startup, config writeback, device action, or Android input.
 
+### OnePush configuration: offline parser boundary passed
+
+  - `Error.OnePushConfig` accepts ALAS's YAML mapping streams and preserves
+    document-order overrides before resolving a provider. The default
+    `provider: null` configuration continues to skip delivery.
+  - Invalid YAML, scalar/list documents, non-text keys, and non-text providers
+    close before provider lookup. Replay substitutes the provider and its
+    `notify` method, so it performs zero network requests and zero real
+    notification deliveries.
+
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and
