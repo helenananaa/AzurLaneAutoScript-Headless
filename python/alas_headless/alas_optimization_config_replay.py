@@ -337,16 +337,17 @@ def _dedithering_bypassed_in_semantic_mode(screenshot_path: Path) -> bool:
         and isinstance(item.value, ast.Attribute)
         and item.value.attr == "image"
     ]
-    dedithering_reads = [
+    dedithering_operations = [
         item.lineno
         for item in ast.walk(node)
-        if isinstance(item, ast.Attribute)
-        and item.attr == "Emulator_ScreenshotDedithering"
+        if isinstance(item, ast.Call)
+        and isinstance(item.func, ast.Attribute)
+        and item.func.attr == "fastNlMeansDenoising"
     ]
     return bool(
         semantic_returns
-        and dedithering_reads
-        and min(semantic_returns) < min(dedithering_reads)
+        and dedithering_operations
+        and min(semantic_returns) < min(dedithering_operations)
     )
 
 

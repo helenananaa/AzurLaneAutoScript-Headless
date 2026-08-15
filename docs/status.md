@@ -708,6 +708,18 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     Android input. Item-to-choice mapping, live stock/medal observation, and
     purchase confirmation remain unverified.
 
+### Screenshot error-capture settings: offline predicate contract passed
+
+  - `Emulator.ScreenshotDedithering` and `Error.SaveError` require exact
+    booleans before a semantic frame request or native screenshot method.
+  - `Error.ScreenshotLength` preserves ALAS's integer coercion and `1..300`
+    deque bound. Invalid values fail closed before a frame request; valid
+    values are replayed through the semantic frame branch and deque boundary.
+  - Replay records timer and semantic-frame calls only. It performs no real
+    screenshot, image denoising, error-image persistence, file write, device
+    action, or Android input. Real frame content and error-recovery artifacts
+    therefore remain unverified.
+
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

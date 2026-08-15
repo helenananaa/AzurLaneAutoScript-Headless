@@ -214,22 +214,31 @@ index 1224c454..88376a16 100644
          p1, p2 = ensure_int(p1, p2)
          logger.info(
 diff --git a/module/device/screenshot.py b/module/device/screenshot.py
-index 9940ee05..12d4c732 100644
+index 9940ee05..e692eacb 100644
 --- a/module/device/screenshot.py
 +++ b/module/device/screenshot.py
-@@ -7,6 +7,8 @@ import cv2
+@@ -7,6 +7,12 @@ import cv2
  import numpy as np
  from PIL import Image
  
 +from alas_headless import validate_alas_screenshot_interval_config
++from alas_headless import (
++    validate_alas_error_screenshot_length,
++    validate_alas_screenshot_capture_config,
++)
 +
  from module.base.decorator import cached_property
  from module.base.timer import Timer
  from module.base.utils import get_color, image_size, limit_in, save_image
-@@ -56,6 +58,12 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
+@@ -56,6 +62,17 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
          self._screenshot_interval.wait()
          self._screenshot_interval.reset()
  
++        capture = validate_alas_screenshot_capture_config(
++            screenshot_dedithering=self.config.Emulator_ScreenshotDedithering,
++            save_error=self.config.Error_SaveError,
++            screenshot_length=self.config.Error_ScreenshotLength,
++        )
 +        semantic_session = getattr(self, 'semantic_adapter', None)
 +        if semantic_session is not None:
 +            frame = semantic_session.refresh_frame()
@@ -239,7 +248,39 @@ index 9940ee05..12d4c732 100644
          for _ in range(2):
              if self.screenshot_method_override:
                  method = self.screenshot_method_override
-@@ -167,17 +175,21 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
+@@ -64,12 +81,12 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
+             method = self.screenshot_methods.get(method, self.screenshot_adb)
+             self.image = method()
+ 
+-            if self.config.Emulator_ScreenshotDedithering:
++            if capture.screenshot_dedithering:
+                 # This will take 40-60ms
+                 cv2.fastNlMeansDenoising(self.image, self.image, h=17, templateWindowSize=1, searchWindowSize=2)
+             self.image = self._handle_orientated_image(self.image)
+ 
+-            if self.config.Error_SaveError:
++            if capture.save_error:
+                 self.screenshot_deque.append({'time': datetime.now(), 'image': self.image})
+ 
+             if self.check_screen_size() and self.check_screen_black():
+@@ -111,13 +128,9 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
+ 
+     @cached_property
+     def screenshot_deque(self):
+-        try:
+-            length = int(self.config.Error_ScreenshotLength)
+-        except ValueError:
+-            logger.error(f'Error_ScreenshotLength={self.config.Error_ScreenshotLength} is not an integer')
+-            raise RequestHumanTakeover
+-        # Limit in 1~300
+-        length = max(1, min(length, 300))
++        length = validate_alas_error_screenshot_length(
++            screenshot_length=self.config.Error_ScreenshotLength
++        )
+         return deque(maxlen=length)
+ 
+     def save_screenshot(self, genre='items', interval=None, to_base_folder=False):
+@@ -162,17 +175,21 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
                  Minimum interval between 2 screenshots in seconds.
                  Or None for Optimization_ScreenshotInterval, 'combat' for Optimization_CombatScreenshotInterval
          """

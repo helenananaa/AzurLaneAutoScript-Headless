@@ -36,6 +36,43 @@ _SEMANTIC_INSERTION = (
 _OPTIMIZATION_IMPORT = (
     "from alas_headless import validate_alas_screenshot_interval_config\n\n"
 )
+_SCREENSHOT_ERROR_IMPORT = (
+    "from alas_headless import (\n"
+    "    validate_alas_error_screenshot_length,\n"
+    "    validate_alas_screenshot_capture_config,\n"
+    ")\n\n"
+)
+_SCREENSHOT_ERROR_INSERTION = (
+    "        capture = validate_alas_screenshot_capture_config(\n"
+    "            screenshot_dedithering=self.config.Emulator_ScreenshotDedithering,\n"
+    "            save_error=self.config.Error_SaveError,\n"
+    "            screenshot_length=self.config.Error_ScreenshotLength,\n"
+    "        )\n"
+)
+_SCREENSHOT_ERROR_REPLACEMENTS = (
+    (
+        "            if capture.screenshot_dedithering:\n",
+        "            if self.config.Emulator_ScreenshotDedithering:\n",
+    ),
+    (
+        "            if capture.save_error:\n",
+        "            if self.config.Error_SaveError:\n",
+    ),
+    (
+        "        length = validate_alas_error_screenshot_length(\n"
+        "            screenshot_length=self.config.Error_ScreenshotLength\n"
+        "        )\n"
+        "        return deque(maxlen=length)\n",
+        "        try:\n"
+        "            length = int(self.config.Error_ScreenshotLength)\n"
+        "        except ValueError:\n"
+        "            logger.error(f'Error_ScreenshotLength={self.config.Error_ScreenshotLength} is not an integer')\n"
+        "            raise RequestHumanTakeover\n"
+        "        # Limit in 1~300\n"
+        "        length = max(1, min(length, 300))\n"
+        "        return deque(maxlen=length)\n",
+    ),
+)
 _OPTIMIZATION_INSERTION = (
     "        optimization = validate_alas_screenshot_interval_config(\n"
     "            screenshot_interval=self.config.Optimization_ScreenshotInterval,\n"
@@ -141,7 +178,19 @@ def load_patched_screenshot_classes(
     class RequestHumanTakeover(RuntimeError):
         pass
 
-    namespace: dict[str, Any] = {"RequestHumanTakeover": RequestHumanTakeover}
+    namespace: dict[str, Any] = {
+        "RequestHumanTakeover": RequestHumanTakeover,
+        "validate_alas_screenshot_capture_config": (
+            lambda **values: type(
+                "CaptureConfig",
+                (),
+                {
+                    "screenshot_dedithering": values["screenshot_dedithering"],
+                    "save_error": values["save_error"],
+                },
+            )()
+        ),
+    }
     exec(compile(module, "<patched-alas-screenshot-clock>", "exec"), namespace)
     return namespace["Screenshot"], namespace["Device"]
 
@@ -154,7 +203,23 @@ def assert_normal_screenshot_source_preserved(
         raise ScreenshotFrameClockVerificationError(
             "semantic screenshot insertion is missing or duplicated"
         )
-    restored = patched_source.replace(_SEMANTIC_INSERTION, "", 1)
+    restored = patched_source
+    error_markers = (
+        _SCREENSHOT_ERROR_IMPORT,
+        _SCREENSHOT_ERROR_INSERTION,
+        *(patched for patched, _pristine in _SCREENSHOT_ERROR_REPLACEMENTS),
+    )
+    marker_counts = tuple(restored.count(marker) for marker in error_markers)
+    if any(marker_counts):
+        if any(count != 1 for count in marker_counts):
+            raise ScreenshotFrameClockVerificationError(
+                "screenshot error configuration insertion is incomplete or duplicated"
+            )
+        restored = restored.replace(_SCREENSHOT_ERROR_IMPORT, "\n", 1)
+        restored = restored.replace(_SCREENSHOT_ERROR_INSERTION, "", 1)
+        for patched, pristine in _SCREENSHOT_ERROR_REPLACEMENTS:
+            restored = restored.replace(patched, pristine, 1)
+    restored = restored.replace(_SEMANTIC_INSERTION, "", 1)
     optimization_markers = (
         _OPTIMIZATION_IMPORT,
         _OPTIMIZATION_INSERTION,
@@ -397,6 +462,15 @@ def verify(patched_upstream: Path) -> Mapping[str, Any]:
     adapter.begin_login()
     events: list[str] = []
     device = device_class()
+    device.config = type(
+        "Config",
+        (),
+        {
+            "Emulator_ScreenshotDedithering": False,
+            "Error_SaveError": True,
+            "Error_ScreenshotLength": 1,
+        },
+    )()
     device.semantic_adapter = _RecordingSession(session, events)
     device._screenshot_interval = _RecordingTimer(events)
     device.stuck_record_check = lambda: events.append("stuck_record_check")
