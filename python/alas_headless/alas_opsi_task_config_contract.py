@@ -396,6 +396,16 @@ def validate_alas_opsi_ash_assist_tier(*, tier: object) -> int:
     return tier
 
 
+def validate_alas_opsi_ash_beacon_ensure_fully_collected(
+    *, ensure_fully_collected: object
+) -> bool:
+    if type(ensure_fully_collected) is not bool:
+        raise SemanticGateClosed(
+            "OpsiAshBeacon.EnsureFullyCollected must be a bool"
+        )
+    return ensure_fully_collected
+
+
 def validate_alas_opsi_fleet_filter(
     *,
     value: object,

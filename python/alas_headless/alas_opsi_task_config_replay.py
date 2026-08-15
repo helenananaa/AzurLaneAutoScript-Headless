@@ -24,6 +24,7 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
     validate_alas_opsi_ash_assist_tier,
+    validate_alas_opsi_ash_beacon_ensure_fully_collected,
     validate_alas_opsi_akashi_filter,
     validate_alas_opsi_shop_custom_filter,
     validate_alas_opsi_shop_filter,
@@ -479,6 +480,8 @@ class _Config(SimpleNamespace):
         opsi_repair_threshold: object = 0.4,
         opsi_do_random_map_event: object = True,
         special_radar: object = False,
+        ensure_fully_collected: object = False,
+        ash_beacon_enabled: bool = False,
     ):
         super().__init__(
             OpsiMonthBoss_Mode=mode,
@@ -498,12 +501,13 @@ class _Config(SimpleNamespace):
             OpsiGeneral_OilLimit=opsi_oil_limit,
             OpsiGeneral_RepairThreshold=opsi_repair_threshold,
             OpsiGeneral_DoRandomMapEvent=opsi_do_random_map_event,
-            OpsiAshBeacon_EnsureFullyCollected=False,
+            OpsiAshBeacon_EnsureFullyCollected=ensure_fully_collected,
             OpsiFleet_Fleet=1,
             OpsiFleet_Submarine=False,
             OS_CL1_YELLOW_COINS_PRESERVE=100,
         )
         self.events: list[Any] = []
+        self.ash_beacon_enabled = ash_beacon_enabled
 
     def task_delay(self, **kwargs):
         self.events.append(["task_delay", kwargs])
@@ -524,7 +528,7 @@ class _Config(SimpleNamespace):
 
     def is_task_enabled(self, task):
         self.events.append(["is_task_enabled", task])
-        return False
+        return task == "OpsiAshBeacon" and self.ash_beacon_enabled
 
     def cross_set(self, **kwargs):
         self.events.append(["cross_set", kwargs])
@@ -712,17 +716,25 @@ def _verify_daily(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry": invalid}
 
 
-def _hazard_case(method, *, target_zone: object) -> dict[str, Any]:
+def _hazard_case(
+    method,
+    *,
+    target_zone: object,
+    ensure_fully_collected: object = False,
+    ash_beacon_pending: bool = False,
+) -> dict[str, Any]:
     config = _Config(
         mode="normal",
         check=False,
         hazard_target_zone=target_zone,
+        ensure_fully_collected=ensure_fully_collected,
+        ash_beacon_enabled=ash_beacon_pending,
     )
     events = config.events
     host = SimpleNamespace(
         config=config,
         device=SimpleNamespace(semantic_adapter=None),
-        _ash_fully_collected=True,
+        _ash_fully_collected=not ash_beacon_pending,
         _action_point_total=0,
         zone=SimpleNamespace(zone_id=99),
         is_zone_name_hidden=True,
@@ -745,7 +757,12 @@ def _hazard_case(method, *, target_zone: object) -> dict[str, Any]:
         rejected = True
     except _Switch:
         switched = True
-    return {"rejected": rejected, "switched": switched, "events": events}
+    return {
+        "rejected": rejected,
+        "switched": switched,
+        "effective_preserve": getattr(config, "OS_ACTION_POINT_PRESERVE", None),
+        "events": events,
+    }
 
 
 def _verify_hazard(method) -> dict[str, Any]:
@@ -762,9 +779,47 @@ def _verify_hazard(method) -> dict[str, Any]:
         if globe_events != [["globe_goto", zone, {"types": "SAFE", "refresh": True}]]:
             raise AssertionError("hazard target-zone selection drifted")
     invalid = _hazard_case(method, target_zone=23)
-    if invalid != {"rejected": True, "switched": False, "events": []}:
+    if invalid != {
+        "rejected": True,
+        "switched": False,
+        "effective_preserve": None,
+        "events": [],
+    }:
         raise AssertionError("invalid hazard target zone touched task state")
-    return {"cases": cases, "invalid_entry": invalid}
+    ensure_cases = {
+        str(value): _hazard_case(
+            method,
+            target_zone=0,
+            ensure_fully_collected=value,
+            ash_beacon_pending=True,
+        )
+        for value in (False, True)
+    }
+    expected_preserve = {"False": 200, "True": 0}
+    for value, expected in expected_preserve.items():
+        case = ensure_cases[value]
+        if case["rejected"] or not case["switched"]:
+            raise AssertionError("hazard Ash beacon ensure branch drifted")
+        if case["effective_preserve"] != expected:
+            raise AssertionError("hazard Ash beacon AP preserve drifted")
+    invalid_ensure = _hazard_case(
+        method,
+        target_zone=0,
+        ensure_fully_collected=None,
+    )
+    if invalid_ensure != {
+        "rejected": True,
+        "switched": False,
+        "effective_preserve": None,
+        "events": [],
+    }:
+        raise AssertionError("invalid Ash beacon ensure touched hazard state")
+    return {
+        "cases": cases,
+        "invalid_entry": invalid,
+        "ensure_cases": ensure_cases,
+        "invalid_ensure_entry": invalid_ensure,
+    }
 
 
 def _meowfficer_case(
@@ -775,6 +830,8 @@ def _meowfficer_case(
     hazard_level: object,
     action_point_preserve: object = 1000,
     target_zone: object = 0,
+    ensure_fully_collected: object = False,
+    ash_beacon_pending: bool = False,
 ) -> dict[str, Any]:
     config = _Config(
         mode="normal",
@@ -782,13 +839,15 @@ def _meowfficer_case(
         meowfficer_action_point_preserve=action_point_preserve,
         meowfficer_hazard_level=hazard_level,
         meowfficer_target_zone=target_zone,
+        ensure_fully_collected=ensure_fully_collected,
+        ash_beacon_enabled=ash_beacon_pending,
     )
     events = config.events
     host = SimpleNamespace(
         config=config,
         device=SimpleNamespace(semantic_adapter=None),
         is_cl1_enabled=False,
-        _ash_fully_collected=True,
+        _ash_fully_collected=not ash_beacon_pending,
         zone=SimpleNamespace(zone_id=1, location=(0, 0)),
         zones=zone_fixtures,
     )
@@ -858,6 +917,23 @@ def _verify_meowfficer(method, resolver_method, zone_fixtures) -> dict[str, Any]
             raise AssertionError("meowfficer AP-preserve task boundary drifted")
         if case["effective_preserve"] != expected:
             raise AssertionError("meowfficer AP-preserve clamping drifted")
+    ensure_cases = {
+        str(value): _meowfficer_case(
+            method,
+            resolver_method,
+            zone_fixtures,
+            hazard_level=5,
+            ensure_fully_collected=value,
+            ash_beacon_pending=True,
+        )
+        for value in (False, True)
+    }
+    for value, expected in (("False", 1000), ("True", 0)):
+        case = ensure_cases[value]
+        if case["rejected"] or not case["switched"]:
+            raise AssertionError("meowfficer Ash beacon ensure branch drifted")
+        if case["effective_preserve"] != expected:
+            raise AssertionError("meowfficer Ash beacon AP preserve drifted")
     target_inputs = (
         ("int:51", 51),
         ("str:51", "51"),
@@ -928,6 +1004,21 @@ def _verify_meowfficer(method, resolver_method, zone_fixtures) -> dict[str, Any]
         "events": [],
     }:
         raise AssertionError("invalid meowfficer target type touched task state")
+    invalid_ensure = _meowfficer_case(
+        method,
+        resolver_method,
+        zone_fixtures,
+        hazard_level=5,
+        ensure_fully_collected=None,
+    )
+    if invalid_ensure != {
+        "rejected": True,
+        "switched": False,
+        "takeover": False,
+        "effective_preserve": None,
+        "events": [],
+    }:
+        raise AssertionError("invalid Ash beacon ensure touched meowfficer state")
     unknown_target = _meowfficer_case(
         method,
         resolver_method,
@@ -947,9 +1038,11 @@ def _verify_meowfficer(method, resolver_method, zone_fixtures) -> dict[str, Any]
         "cases": cases,
         "preserve_cases": preserve_cases,
         "target_cases": target_cases,
+        "ensure_cases": ensure_cases,
         "invalid_entry": invalid,
         "invalid_preserve_entry": invalid_preserve,
         "invalid_target_type": invalid_target_type,
+        "invalid_ensure_entry": invalid_ensure,
         "unknown_target": unknown_target,
     }
 
@@ -2133,6 +2226,11 @@ def _verify_contract(
     explore_resolver,
 ) -> tuple[int, int]:
     accepted = 0
+    for ensure_fully_collected in (False, True):
+        validate_alas_opsi_ash_beacon_ensure_fully_collected(
+            ensure_fully_collected=ensure_fully_collected,
+        )
+        accepted += 1
     for tier in (-1, 0, 1, 15, 16):
         validate_alas_opsi_ash_assist_tier(tier=tier)
         accepted += 1
@@ -2262,6 +2360,15 @@ def _verify_contract(
         )
         accepted += 1
     invalid = 0
+    for value in INVALID_BOOLEANS:
+        try:
+            validate_alas_opsi_ash_beacon_ensure_fully_collected(
+                ensure_fully_collected=value,
+            )
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiAshBeacon.EnsureFullyCollected was admitted")
     for value in (None, True, False, "15", 15.0, [], {}):
         try:
             validate_alas_opsi_ash_assist_tier(tier=value)
@@ -2519,7 +2626,10 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     hazard_consumers = _consumer_methods(
         hazard_path,
         "OpsiHazard1Leveling",
-        ("OpsiHazard1Leveling_TargetZone",),
+        (
+            "OpsiHazard1Leveling_TargetZone",
+            "OpsiAshBeacon_EnsureFullyCollected",
+        ),
     )
     meowfficer_consumers = _consumer_methods(
         meowfficer_path,
@@ -2528,6 +2638,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "OpsiMeowfficerFarming_ActionPointPreserve",
             "OpsiMeowfficerFarming_HazardLevel",
             "OpsiMeowfficerFarming_TargetZone",
+            "OpsiAshBeacon_EnsureFullyCollected",
         ),
     )
     consumers = {
@@ -2538,6 +2649,10 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         **hazard_consumers,
         **meowfficer_consumers,
     }
+    consumers["OpsiAshBeacon_EnsureFullyCollected"] = [
+        *hazard_consumers["OpsiAshBeacon_EnsureFullyCollected"],
+        *meowfficer_consumers["OpsiAshBeacon_EnsureFullyCollected"],
+    ]
     consumers.update(
         _consumer_methods(
             ash_assist_path,
@@ -2626,6 +2741,10 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiStronghold_ForceRun": ["AzurLaneConfig.opsi_task_delay"],
         "OpsiDaily_UseTuningSample": ["os_daily"],
         "OpsiHazard1Leveling_TargetZone": ["os_hazard1_leveling"],
+        "OpsiAshBeacon_EnsureFullyCollected": [
+            "os_hazard1_leveling",
+            "os_meowfficer_farming",
+        ],
         "OpsiMeowfficerFarming_ActionPointPreserve": ["os_meowfficer_farming"],
         "OpsiMeowfficerFarming_HazardLevel": ["os_meowfficer_farming"],
         "OpsiMeowfficerFarming_TargetZone": ["os_meowfficer_farming"],
@@ -2665,6 +2784,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             validate_alas_opsi_action_point_purchase
         ),
         "validate_alas_opsi_ash_assist_tier": validate_alas_opsi_ash_assist_tier,
+        "validate_alas_opsi_ash_beacon_ensure_fully_collected": (
+            validate_alas_opsi_ash_beacon_ensure_fully_collected
+        ),
         "validate_alas_opsi_fleet_filter": validate_alas_opsi_fleet_filter,
         "validate_alas_opsi_akashi_filter": validate_alas_opsi_akashi_filter,
         "validate_alas_opsi_shop_custom_filter": (
@@ -2829,6 +2951,15 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and isinstance(node.func, ast.Name)
         and node.func.id == "validate_alas_opsi_hazard1_config"
         for node in ast.walk(hazard_node)
+    )
+    ash_beacon_ensure_guards = all(
+        any(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "validate_alas_opsi_ash_beacon_ensure_fully_collected"
+            for node in ast.walk(method)
+        )
+        for method in (hazard_node, meowfficer_node)
     )
     meowfficer_guard = any(
         isinstance(node, ast.Call)
@@ -3026,7 +3157,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 26,
+        "field_count": 27,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -3052,6 +3183,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and all(opsi_shop_guards.values())
             and voucher_guard
             and ash_assist_guard
+            and ash_beacon_ensure_guards
         ),
         "validated_runtime_boundaries": {
             "OpsiFleet.Fleet": "OSFleet.fleet_set",
@@ -3080,6 +3212,10 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "OpsiAshAssist.Tier": "AshBeaconAssist._ensure_meta_level",
             "OpsiFleetFilter.Filter": (
                 "OSFleet.parse_fleet_filter + AzurLaneConfig.opsi_task_delay"
+            ),
+            "OpsiAshBeacon.EnsureFullyCollected": (
+                "OpsiHazard1Leveling.os_hazard1_leveling + "
+                "OpsiMeowfficerFarming.os_meowfficer_farming"
             ),
         },
         "fleet_selection": fleet_selection,

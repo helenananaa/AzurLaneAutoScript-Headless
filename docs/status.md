@@ -607,6 +607,12 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   exact integer thresholds. Malformed values fail before the first page
   observation or click. No artificial level range is imposed because pinned
   ALAS declares none.
+- `OpsiAshBeacon.EnsureFullyCollected` preserves both original action-point
+  reserve branches in `os_hazard1_leveling()` and `os_meowfficer_farming()`.
+  With an enabled, uncollected beacon, `false` retains the normal 200/1,000
+  reserve and `true` temporarily selects zero; malformed values fail before
+  config overrides, scheduler actions, or map input. It does not create,
+  attack, request help for, or collect a beacon.
 - `OpsiExplore.SpecialRadar` preserves the original tuning-sample use and
   `recon_scan` decisions in `_os_explore()`. The same value, together with
   `OpsiExplore.ForceRun`, `OpsiObscure.ForceRun`,
@@ -627,10 +633,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   duplicate suppression, standby positions, unavailable-fleet empty results,
   and scheduler submarine delays. Invalid rules fail before parser state,
   scheduler mutation, fleet selection, or task input.
-- One hundred twenty-six valid classes pass and 203 malformed values fail before task,
+- One hundred twenty-eight valid classes pass and 209 malformed values fail before task,
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
-  or Android input. Twenty-six fields now have complete offline classification.
+  or Android input. Twenty-seven fields now have complete offline classification.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

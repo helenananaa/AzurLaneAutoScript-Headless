@@ -12,6 +12,7 @@ from alas_headless.alas_opsi_task_config_contract import (
     validate_alas_opsi_daily_config,
     validate_alas_opsi_action_point_purchase,
     validate_alas_opsi_ash_assist_tier,
+    validate_alas_opsi_ash_beacon_ensure_fully_collected,
     validate_alas_opsi_akashi_filter,
     validate_alas_opsi_shop_custom_filter,
     validate_alas_opsi_shop_filter,
@@ -45,9 +46,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 26)
-        self.assertEqual(result["accepted_case_count"], 126)
-        self.assertEqual(result["invalid_case_count"], 203)
+        self.assertEqual(result["field_count"], 27)
+        self.assertEqual(result["accepted_case_count"], 128)
+        self.assertEqual(result["invalid_case_count"], 209)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -87,10 +88,21 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 "OpsiFleetFilter.Filter": (
                     "OSFleet.parse_fleet_filter + AzurLaneConfig.opsi_task_delay"
                 ),
+                "OpsiAshBeacon.EnsureFullyCollected": (
+                    "OpsiHazard1Leveling.os_hazard1_leveling + "
+                    "OpsiMeowfficerFarming.os_meowfficer_farming"
+                ),
             },
         )
 
     def test_valid_values_are_classified(self):
+        for value in (False, True):
+            self.assertEqual(
+                validate_alas_opsi_ash_beacon_ensure_fully_collected(
+                    ensure_fully_collected=value,
+                ),
+                value,
+            )
         for value in (
             "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1",
             "Fleet4 > Fleet2",
@@ -312,6 +324,13 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             )
 
     def test_invalid_values_fail_closed(self):
+        for value in (0, 1, "true", None, [], {}):
+            with self.subTest(field="opsi_ash_beacon_ensure", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_ash_beacon_ensure_fully_collected(
+                    ensure_fully_collected=value,
+                )
         for value in ("", "Fleet-1 >", "unknown", None, True, 1, [], {}):
             with self.subTest(field="opsi_fleet_filter", value=value), self.assertRaises(
                 SemanticGateClosed
@@ -505,6 +524,10 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_explore_last_zone("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_ash_assist_tier("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_fleet_filter("), 1)
+        self.assertEqual(
+            patch.count("validate_alas_opsi_ash_beacon_ensure_fully_collected("),
+            2,
+        )
         scheduler_patch = ROOT.joinpath(
             "integration/alas/series/0140-scheduler-contract.patch"
         ).read_text(encoding="utf-8")
