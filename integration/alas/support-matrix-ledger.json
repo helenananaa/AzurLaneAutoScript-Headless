@@ -587,42 +587,52 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_coalition_config.py",
+        "python/alas_headless/alas_coalition_config_replay.py",
+        "integration/alas/series/0175-coalition-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=select; display=default",
       "panels": [
         "Coalition",
         "CoalitionSp"
       ],
       "path": "Coalition.Fleet",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 离线回放",
+      "support": "supported",
       "values": "options: \"multi\", \"single\"; default: \"single\""
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_coalition_config.py",
+        "python/alas_headless/alas_coalition_config_replay.py",
+        "integration/alas/series/0175-coalition-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=select; display=default/hide",
       "panels": [
         "Coalition",
         "CoalitionSp"
       ],
       "path": "Coalition.Mode",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 离线回放",
+      "support": "supported",
       "values": "options: \"easy\", \"hard\", \"normal\", \"sp\"; default: \"hard\", \"sp\""
     },
     {
@@ -7408,8 +7418,8 @@
         "Emotion"
       ],
       "name": "Coalition",
-      "note": "共斗入口、难度、单/多舰队、战斗和结算缺适配",
-      "status": "M"
+      "note": "难度与单/多舰队已离线回放；共斗入口、战斗和结算未适配",
+      "status": "O"
     },
     {
       "groups": [
@@ -7420,8 +7430,8 @@
         "Emotion"
       ],
       "name": "CoalitionSp",
-      "note": "SP 共斗专用状态机缺适配",
-      "status": "M"
+      "note": "SP 强制多舰队和共享配置已离线回放；SP 状态机、战斗和结算未适配",
+      "status": "O"
     },
     {
       "groups": [
@@ -10166,6 +10176,32 @@
       ],
       "field": "RaidDaily.StageFilter",
       "note": "All 64 non-repeating ordered subsets of easy, normal, hard, and ex preserve the original filter forwarding and EX reward route; malformed filters fail before a RaidDaily stateful boundary."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_coalition_config.py",
+        "python/alas_headless/alas_coalition_config_replay.py",
+        "integration/alas/series/0175-coalition-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "Coalition.Fleet",
+      "note": "Both declared fleets preserve the original single-fleet emotion override, SP forced-multi override, and second-combat emotion split; malformed values stop before a Coalition stateful boundary."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_coalition_config.py",
+        "python/alas_headless/alas_coalition_config_replay.py",
+        "integration/alas/series/0175-coalition-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "Coalition.Mode",
+      "note": "All four declared modes preserve the original Coalition run argument, including SP dispatch; malformed values stop before stage normalization or task-state work."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -10178,9 +10214,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "0f35edc6733edf8010b3b06c7ebdb70def026e75b1b4f3a59e3bd444e2dfee91",
-      "manifest_sha256": "506fd22821c0fa650c3b9a5f83ac7711f8328a8da5e10a58c7834b30be93153b",
-      "member_count": 20
+      "combined_sha256": "e8dfcb8ba0c9f9c9fbccb2342108bf81416bebe0f50a408b7dc476d71e630f87",
+      "manifest_sha256": "2aff76242e9603c4493b15ae2720ddb4ed564a24e4373af36c0b13aef925f3ca",
+      "member_count": 21
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

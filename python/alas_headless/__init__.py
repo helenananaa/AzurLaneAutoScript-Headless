@@ -116,6 +116,12 @@ from .alas_hospital_config_contract import (
     AlasHospitalConfigSnapshot,
     validate_alas_hospital_config,
 )
+from .alas_coalition_config_contract import (
+    AlasCoalitionConfigSnapshot,
+    COALITION_FLEETS,
+    COALITION_MODES,
+    validate_alas_coalition_config,
+)
 from .alas_raid_config_contract import (
     validate_alas_raid_daily_stage_filter,
     validate_alas_raid_mode,
@@ -854,6 +860,10 @@ __all__ = (
     "unqualified_alas_combat_observer_manifest",
     "validate_alas_combat_observer_snapshot",
     "validate_alas_awaken_config",
+    "AlasCoalitionConfigSnapshot",
+    "COALITION_FLEETS",
+    "COALITION_MODES",
+    "validate_alas_coalition_config",
     "validate_alas_hospital_config",
     "validate_alas_raid_daily_stage_filter",
     "validate_alas_raid_mode",

@@ -1,0 +1,76 @@
+diff --git a/module/coalition/coalition.py b/module/coalition/coalition.py
+--- a/module/coalition/coalition.py
++++ b/module/coalition/coalition.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_coalition_config
++
+ import re
+ 
+ from module.campaign.campaign_event import CampaignEvent
+@@ -134,13 +136,18 @@ class Coalition(CoalitionCombat, CampaignEvent):
+         Pages:
+             in: in_coalition
+             out: in_coalition
+         """
++        coalition_config = validate_alas_coalition_config(
++            mode=self.config.Coalition_Mode,
++            fleet=self.config.Coalition_Fleet,
++        )
++
+         self.config.override(
+             Campaign_Name=f'{event}_{stage}',
+             Campaign_UseAutoSearch=False,
+             Fleet_FleetOrder='fleet1_all_fleet2_standby',
+         )
+-        if self.config.Coalition_Fleet == 'single' and self.config.Emotion_Fleet1Control == 'prevent_red_face':
++        if coalition_config.fleet == 'single' and self.config.Emotion_Fleet1Control == 'prevent_red_face':
+             logger.warning('AL does not allow single coalition with emotion < 30, '
+                            'emotion control is forced to prevent_yellow_face')
+             self.config.override(Emotion_Fleet1Control='prevent_yellow_face')
+@@ -173,7 +180,12 @@ class Coalition(CoalitionCombat, CampaignEvent):
+     def run(self, event='', mode='', fleet='', total=0):
++        coalition_config = validate_alas_coalition_config(
++            mode=mode if mode else self.config.Coalition_Mode,
++            fleet=fleet if fleet else self.config.Coalition_Fleet,
++        )
++
+         event = event if event else self.config.Campaign_Event
+-        mode = mode if mode else self.config.Coalition_Mode
+-        fleet = fleet if fleet else self.config.Coalition_Fleet
++        mode = coalition_config.mode
++        fleet = coalition_config.fleet
+         if not event or not mode or not fleet:
+             raise ScriptError(f'Coalition arguments unfilled. name={event}, mode={mode}, fleet={fleet}')
+ 
+diff --git a/module/coalition/combat.py b/module/coalition/combat.py
+--- a/module/coalition/combat.py
++++ b/module/coalition/combat.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_coalition_config
++
+ from module.base.timer import Timer
+ from module.campaign.campaign_base import CampaignBase
+ from module.coalition.assets import *
+@@ -62,16 +64,21 @@ class CoalitionCombat(CoalitionUI, CampaignBase):
+     def coalition_combat(self):
+         """
+         Pages:
+             in: is_coalition
+             out: is_coalition
+         """
++        coalition_config = validate_alas_coalition_config(
++            mode=self.config.Coalition_Mode,
++            fleet=self.config.Coalition_Fleet,
++        )
++
+         self.battle_count = 0
+         self.combat_preparation(emotion_reduce=False)
+ 
+         try:
+             while 1:
+                 logger.hr(f'{self.FUNCTION_NAME_BASE}{self.battle_count}', level=2)
+                 self.auto_search_combat_execute(
+-                    emotion_reduce=self.battle_count == 0 or self.config.Coalition_Fleet == 'single',
++                    emotion_reduce=self.battle_count == 0 or coalition_config.fleet == 'single',
+                     fleet_index=1
+                 )

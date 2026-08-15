@@ -99,6 +99,11 @@
       "order": 20,
       "path": "integration/alas/series/0170-raid-config-contract.patch",
       "sha256": "0d4d3903f0ef0d23453b821ba375ee926f32206d358f8df8a1a17f3fd44a5d95"
+    },
+    {
+      "order": 21,
+      "path": "integration/alas/series/0175-coalition-config-contract.patch",
+      "sha256": "94e7c98adf1e254c4524821e025b66d21e57c1b7552e73c88124bc6b94a3a07a"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

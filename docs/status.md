@@ -4,6 +4,20 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-15
 
+### Coalition/CoalitionSp: shared enums replayed before any task state
+
+- `Coalition.Mode` now accepts exactly `easy`/`normal`/`hard`/`sp`,
+  and `Coalition.Fleet` exactly `single`/`multi`, before Coalition run,
+  per-run overrides, or combat preparation. Invalid values stop before stage
+  normalization, task state, stateful overrides, observation, or device input.
+- Recorder-only source replays preserve the original single-fleet emotion
+  override, SP forced-multi override, and the second-combat emotion decision
+  for both fleet values. The final map entry and combat calls are in-memory
+  recorders, not Android input.
+- This is offline-only evidence for the two shared settings. Coalition
+  availability, navigation, battle execution, rewards, postconditions,
+  observation, and all Android input remain unadapted.
+
 ### Raid/RaidDaily: exact configuration gates with recorder-only final inputs
 
 - `Raid.Mode` admits only the four declared difficulties and `Raid.UseTicket`
