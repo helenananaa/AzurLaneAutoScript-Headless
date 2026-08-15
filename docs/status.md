@@ -658,14 +658,18 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   Replay covers the 550,000-coin boundary, custom skin-box price/amount/
   known-item checks, and both disabled branches; malformed values fail before
   item inspection.
-- `GeneralShop.UseGems` now has the same exact-boolean gate before the original
-  `shop_check_item()` predicate. Replay retains Coins precedence, disabled-gem
-  rejection, and equal/insufficient gem-price boundaries; malformed values do
-  not inspect an item.
-- The replay contains no `shop_buy`, refresh, currency mutation, confirmation,
-  or Android input. Both fields move only to `offline=complete`; real purchase
-  eligibility, filtering, refresh, balances, confirmation, and receipts remain
-  unverified.
+  - `GeneralShop.UseGems` now has the same exact-boolean gate before the original
+    `shop_check_item()` predicate. Replay retains Coins precedence, disabled-gem
+    rejection, and equal/insufficient gem-price boundaries; malformed values do
+    not inspect an item.
+  - `GeneralShop.Refresh` is gated before the original `run()` loop. Recorder
+    replay retains the empty-filter exit, disabled one-pass behavior, successful
+    refresh-and-second-pass behavior, and unavailable-refresh stop; malformed
+    values fail before either recorder call.
+  - Recorder calls replace `shop_buy` and `shop_refresh`; no real purchase,
+    refresh, currency mutation, confirmation, receipt, or Android input occurs.
+    These four fields move only to `offline=complete`; filter parsing, real
+    balances, purchase/refresh confirmation, and receipts remain unverified.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

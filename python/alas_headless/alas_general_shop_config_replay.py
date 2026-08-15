@@ -10,6 +10,7 @@ from typing import Any
 
 from .alas_general_shop_config_contract import (
     validate_alas_general_shop_custom_items_config,
+    validate_alas_general_shop_refresh,
     validate_alas_general_shop_use_gems,
 )
 from .semantic_oracle import SemanticGateClosed
@@ -46,6 +47,10 @@ def _compile(method: ast.FunctionDef, globals_: dict[str, Any]):
 
 class _Logger:
     @staticmethod
+    def hr(*_args, **_kwargs) -> None:
+        return None
+
+    @staticmethod
     def info(*_args, **_kwargs) -> None:
         return None
 
@@ -57,6 +62,7 @@ def _verify_generated_config(config_path: Path) -> dict[str, bool]:
         "GeneralShop_ConsumeCoins": False,
         "GeneralShop_BuySkinBox": False,
         "GeneralShop_UseGems": False,
+        "GeneralShop_Refresh": False,
     }
     for node in ast.walk(tree):
         if not isinstance(node, ast.Assign):
@@ -73,6 +79,7 @@ def _verify_generated_config(config_path: Path) -> dict[str, bool]:
         "ConsumeCoins": values["GeneralShop_ConsumeCoins"],
         "BuySkinBox": values["GeneralShop_BuySkinBox"],
         "UseGems": values["GeneralShop_UseGems"],
+        "Refresh": values["GeneralShop_Refresh"],
     }
 
 
@@ -95,6 +102,10 @@ def _verify_contract() -> tuple[int, int]:
         if validate_alas_general_shop_use_gems(use_gems=use_gems) is not use_gems:
             raise AssertionError("GeneralShop.UseGems canonical value drifted")
         accepted += 1
+    for refresh in (False, True):
+        if validate_alas_general_shop_refresh(refresh=refresh) is not refresh:
+            raise AssertionError("GeneralShop.Refresh canonical value drifted")
+        accepted += 1
     for field in ("consume_coins", "buy_skin_box"):
         for value in ("true", None, 0, 1, [], {}):
             values = {"consume_coins": False, "buy_skin_box": False}
@@ -112,6 +123,13 @@ def _verify_contract() -> tuple[int, int]:
             invalid += 1
         else:
             raise AssertionError("invalid GeneralShop.UseGems was admitted")
+    for value in ("true", None, 0, 1, [], {}):
+        try:
+            validate_alas_general_shop_refresh(refresh=value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid GeneralShop.Refresh was admitted")
     return accepted, invalid
 
 
@@ -332,6 +350,99 @@ def _verify_item_check(method) -> dict[str, object]:
     return {"cases": cases, "invalid_entries": invalid}
 
 
+def _run_case(
+    method,
+    *,
+    refresh: object,
+    shop_filter: str,
+    buy_outcomes: tuple[bool, ...],
+    refresh_outcomes: tuple[bool, ...] = (),
+) -> dict[str, object]:
+    events: list[str] = []
+    buy_iter = iter(buy_outcomes)
+    refresh_iter = iter(refresh_outcomes)
+
+    def shop_buy() -> bool:
+        events.append("shop_buy")
+        return next(buy_iter, False)
+
+    def shop_refresh() -> bool:
+        events.append("shop_refresh")
+        return next(refresh_iter, False)
+
+    host = SimpleNamespace(
+        config=SimpleNamespace(GeneralShop_Refresh=refresh),
+        shop_filter=shop_filter,
+        shop_buy=shop_buy,
+        shop_refresh=shop_refresh,
+    )
+    try:
+        result = method(host)
+    except SemanticGateClosed:
+        rejected = True
+        result = None
+    else:
+        rejected = False
+    return {"rejected": rejected, "result": result, "events": events}
+
+
+def _verify_run(method) -> dict[str, object]:
+    cases = {
+        "empty": _run_case(
+            method,
+            refresh=False,
+            shop_filter="",
+            buy_outcomes=(True,),
+        ),
+        "disabled": _run_case(
+            method,
+            refresh=False,
+            shop_filter="Cube",
+            buy_outcomes=(True,),
+        ),
+        "refresh_success": _run_case(
+            method,
+            refresh=True,
+            shop_filter="Cube",
+            buy_outcomes=(True, False),
+            refresh_outcomes=(True,),
+        ),
+        "refresh_unavailable": _run_case(
+            method,
+            refresh=True,
+            shop_filter="Cube",
+            buy_outcomes=(True,),
+            refresh_outcomes=(False,),
+        ),
+    }
+    if any(case["rejected"] for case in cases.values()):
+        raise AssertionError("valid GeneralShop.Refresh was rejected")
+    if cases["empty"]["events"]:
+        raise AssertionError("empty GeneralShop filter entered the shop loop")
+    if cases["disabled"]["events"] != ["shop_buy"]:
+        raise AssertionError("disabled GeneralShop.Refresh branch drifted")
+    if cases["refresh_success"]["events"] != [
+        "shop_buy",
+        "shop_refresh",
+        "shop_buy",
+    ]:
+        raise AssertionError("GeneralShop.Refresh second-pass branch drifted")
+    if cases["refresh_unavailable"]["events"] != ["shop_buy", "shop_refresh"]:
+        raise AssertionError("GeneralShop.Refresh unavailable branch drifted")
+    invalid = {
+        repr(value): _run_case(
+            method,
+            refresh=value,
+            shop_filter="Cube",
+            buy_outcomes=(True,),
+        )
+        for value in ("true", None, 0, 1, [], {})
+    }
+    if any(not case["rejected"] or case["events"] for case in invalid.values()):
+        raise AssertionError("invalid GeneralShop.Refresh entered the shop loop")
+    return {"cases": cases, "invalid_entries": invalid}
+
+
 def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
     alas_root = alas_root.resolve()
     source_path = alas_root / "module" / "shop" / "shop_general.py"
@@ -341,6 +452,7 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
     generated = _verify_generated_config(config_path)
     method = _method(source_path, "GeneralShop_250814", "shop_check_custom_item")
     item_check_method = _method(source_path, "GeneralShop_250814", "shop_check_item")
+    run_method = _method(source_path, "GeneralShop_250814", "run")
     attributes = {
         node.attr for node in ast.walk(method) if isinstance(node, ast.Attribute)
     }
@@ -371,6 +483,18 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
     }
     if "validate_alas_general_shop_use_gems" not in item_check_guards:
         raise AssertionError("GeneralShop.UseGems fail-closed guard is absent")
+    run_attributes = {
+        node.attr for node in ast.walk(run_method) if isinstance(node, ast.Attribute)
+    }
+    if "GeneralShop_Refresh" not in run_attributes:
+        raise AssertionError("GeneralShop.Refresh consumer surface drifted")
+    run_guards = {
+        node.func.id
+        for node in ast.walk(run_method)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    }
+    if "validate_alas_general_shop_refresh" not in run_guards:
+        raise AssertionError("GeneralShop.Refresh fail-closed guard is absent")
     accepted, invalid = _verify_contract()
     original = _verify_original(
         _compile(
@@ -393,10 +517,21 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
             },
         )
     )
+    run_decisions = _verify_run(
+        _compile(
+            run_method,
+            {
+                "logger": _Logger(),
+                "validate_alas_general_shop_refresh": (
+                    validate_alas_general_shop_refresh
+                ),
+            },
+        )
+    )
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 3,
+        "field_count": 4,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "generated_defaults": generated,
@@ -404,11 +539,13 @@ def verify_general_shop_config(alas_root: Path) -> dict[str, object]:
             "GeneralShop.ConsumeCoins": "GeneralShop_250814.shop_check_custom_item",
             "GeneralShop.BuySkinBox": "GeneralShop_250814.shop_check_custom_item",
             "GeneralShop.UseGems": "GeneralShop_250814.shop_check_item",
+            "GeneralShop.Refresh": "GeneralShop_250814.run",
         },
         "patched_guard_present": True,
         "original_decisions": {
             "custom_items": original,
             "item_check": item_decisions,
+            "run": run_decisions,
         },
         "mutation_budget": 0,
         "real_purchase_performed": False,

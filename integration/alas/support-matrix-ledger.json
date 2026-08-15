@@ -1923,9 +1923,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_general_shop_config.py",
+        "python/alas_headless/alas_general_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -3232,9 +3237,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_general_shop_config.py",
+        "python/alas_headless/alas_general_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -3251,9 +3261,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_general_shop_config.py",
+        "python/alas_headless/alas_general_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -9894,8 +9909,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "a22b0162ca9c5dd3ad2c82033d8e666d261857eb1fcbff8428c4ede475b1d358",
-      "manifest_sha256": "6068f0cbe26041a11322c9a1f40ee7b8691df63010b54ed4833e3267a0627c93",
+      "combined_sha256": "649a427feba1733b310122e086486523fe3d0242031f1238bcb72340d36b66d9",
+      "manifest_sha256": "b1934942cd38b596482f227b8d684b5943063b9e6f7e1a74cf5c879ecea7b719",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

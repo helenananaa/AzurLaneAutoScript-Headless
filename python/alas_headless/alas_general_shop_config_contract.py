@@ -32,3 +32,10 @@ def validate_alas_general_shop_use_gems(*, use_gems: object) -> bool:
     if type(use_gems) is not bool:
         raise SemanticGateClosed("GeneralShop.UseGems must be a bool")
     return use_gems
+
+
+def validate_alas_general_shop_refresh(*, refresh: object) -> bool:
+    """Validate the refresh switch before the original shop loop begins."""
+    if type(refresh) is not bool:
+        raise SemanticGateClosed("GeneralShop.Refresh must be a bool")
+    return refresh
