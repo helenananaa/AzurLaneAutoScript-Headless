@@ -4,6 +4,20 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-15
 
+### Guild: nine settings gated before task ownership
+
+- The six Guild switches, monthly start-date limit, `0..1` join threshold, and
+  text exchange filter now form one immutable, fail-closed snapshot before the
+  Guild task, direct logistics consumers, and direct operation consumers take
+  state, observe a page, or reach an input branch.
+- Recorder-only replay retains the original no-enabled-module stop, logistics
+  only, operations only, and combined task dispatch/order. Invalid values emit
+  no recorder event. This run has mutation budget `0` and makes no device,
+  account, guild, resource, task, or Android-input change.
+- Page availability, OCR, mission selection, exchange candidates/currency,
+  operation progress, dispatch, Boss battle, postconditions, and real input
+  remain unadapted; this is offline-only evidence.
+
 ### PrivateQuarters: four settings replayed before UI or currency work
 
 - `PrivateQuarters.BuyRoses`/`BuyCake`/`TargetInteract` now accept only exact

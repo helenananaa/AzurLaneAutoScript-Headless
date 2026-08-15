@@ -109,6 +109,11 @@
       "order": 22,
       "path": "integration/alas/series/0180-private-quarters-config-contract.patch",
       "sha256": "8d2c706cac6fb7b40264ffa72255433ee20c1eeb4d302e1c24fadbe7488e8b99"
+    },
+    {
+      "order": 23,
+      "path": "integration/alas/series/0185-guild-config-contract.patch",
+      "sha256": "36a0bdb71d04ee0f4e356061103dd9d05eeccbf79a77c8994b305e6f11a6b810"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

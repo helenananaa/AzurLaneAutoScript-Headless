@@ -3357,173 +3357,218 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_guild_config.py",
+        "python/alas_headless/alas_guild_config_replay.py",
+        "integration/alas/series/0185-guild-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildLogistics.Enable",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_guild_config.py",
+        "python/alas_headless/alas_guild_config_replay.py",
+        "integration/alas/series/0185-guild-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=textarea; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildLogistics.ExchangeFilter",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: <long default in args.json>"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_guild_config.py",
+        "python/alas_headless/alas_guild_config_replay.py",
+        "integration/alas/series/0185-guild-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildLogistics.SelectNewMission",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_guild_config.py",
+        "python/alas_headless/alas_guild_config_replay.py",
+        "integration/alas/series/0185-guild-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildOperation.AttackBoss",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_guild_config.py",
+        "python/alas_headless/alas_guild_config_replay.py",
+        "integration/alas/series/0185-guild-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildOperation.BossFleetRecommend",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_guild_config.py",
+        "python/alas_headless/alas_guild_config_replay.py",
+        "integration/alas/series/0185-guild-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildOperation.Enable",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_guild_config.py",
+        "python/alas_headless/alas_guild_config_replay.py",
+        "integration/alas/series/0185-guild-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=input; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildOperation.JoinThreshold",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: 1"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_guild_config.py",
+        "python/alas_headless/alas_guild_config_replay.py",
+        "integration/alas/series/0185-guild-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=input; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildOperation.NewOperationMaxDate",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: 15"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_guild_config.py",
+        "python/alas_headless/alas_guild_config_replay.py",
+        "integration/alas/series/0185-guild-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildOperation.SelectNewOperation",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
@@ -7686,8 +7731,8 @@
         "GuildOperation"
       ],
       "name": "Guild",
-      "note": "后勤兑换、新任务、作战、Boss 和推荐舰队均缺适配",
-      "status": "M"
+      "note": "9 项设置有固定上游门禁与任务入口离线回放；观察、页面、兑换、派遣、Boss 和输入闭环仍缺",
+      "status": "O"
     },
     {
       "groups": [
@@ -10286,9 +10331,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "fe9f24889e0f57652c7c578761689ef2ffa0814148fe7b68f2a1ae66a44e26c3",
-      "manifest_sha256": "1a94049b29d807a5f27caa3e722c9112ed6503db28c6111158e4e99915a99b41",
-      "member_count": 22
+      "combined_sha256": "7fee2c8d15bb525a54afd50084e8f64b5a96437a3eb528fe81917256c2f09d97",
+      "manifest_sha256": "88031bea2f9e7b293542f109c572aa712abc0fca3cdc82fc6efdec1d8d942ff8",
+      "member_count": 23
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }
