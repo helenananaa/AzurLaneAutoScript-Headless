@@ -692,6 +692,22 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     purchase, refresh, currency mutation, confirmation, receipt, or Android
     input occurs; real item-to-choice mapping and selection confirmation remain
     unverified.
+
+### MedalShop2 entry choices: offline predicate contract passed
+
+  - `MedalShop2.Filter` is checked against the pinned upstream selector grammar
+    before the original property trims it. The default, Unicode separator, and
+    intentional blank-filter skip remain equivalent; unknown/trailing tokens
+    and non-text input fail before filtering.
+  - All six MedalShop2 secondary choices are checked against their pinned
+    `argument.yaml` options and generated defaults before the shop loop can
+    reach `ShopClerk.shop_get_choice()`. Every allowed value is replayed;
+    malformed text and types fail before any recorder call.
+  - The semantic branch records only `shop_buy`; it performs no real item
+    selection, purchase, currency mutation, confirmation, receipt, refresh, or
+    Android input. Item-to-choice mapping, live stock/medal observation, and
+    purchase confirmation remain unverified.
+
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

@@ -82,6 +82,12 @@ from .alas_guild_shop_config_contract import (
     validate_alas_guild_shop_refresh,
     validate_alas_guild_shop_secondary_choices,
 )
+from .alas_medal_shop_config_contract import (
+    AlasMedalShopSecondaryChoicesSnapshot,
+    MEDAL_SHOP_SECONDARY_CHOICES,
+    validate_alas_medal_shop_filter,
+    validate_alas_medal_shop_secondary_choices,
+)
 from .alas_data_key_config_contract import (
     AlasDataKeyConfigSnapshot,
     validate_alas_data_key_config,

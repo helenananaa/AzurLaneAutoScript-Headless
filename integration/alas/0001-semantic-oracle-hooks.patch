@@ -3018,10 +3018,33 @@ index 73130d55..6cdbc443 100644
                  continue
  
 diff --git a/module/shop/shop_medal.py b/module/shop/shop_medal.py
-index 0e8c030a..703febb6 100644
+index 0e8c030a..baa3f20 100644
 --- a/module/shop/shop_medal.py
 +++ b/module/shop/shop_medal.py
-@@ -114,6 +114,10 @@ class MedalShop2_250814(ShopClerk, ShopStatus):
+@@ -11,7 +11,7 @@ from module.logger import logger
+ from module.map_detection.utils import Points
+ from module.ocr.ocr import Digit, DigitYuv, Ocr
+ from module.shop.assets import *
+-from module.shop.base import ShopItemGrid_250814
++from module.shop.base import FILTER, ShopItemGrid_250814
+ from module.shop.clerk import ShopClerk
+ from module.shop.shop_status import ShopStatus
+ from module.ui.scroll import Scroll
+@@ -76,7 +76,12 @@ class MedalShop2_250814(ShopClerk, ShopStatus):
+         Returns:
+             str:
+         """
+-        return self.config.MedalShop2_Filter.strip()
++        from alas_headless import validate_alas_medal_shop_filter
++
++        return validate_alas_medal_shop_filter(
++            filter_=FILTER,
++            value=self.config.MedalShop2_Filter,
++        ).strip()
+ 
+     # New UI in 2025-08-14
+     def _get_medals(self):
+@@ -114,6 +119,10 @@ class MedalShop2_250814(ShopClerk, ShopStatus):
  
      @cached_property
      def shop_grid(self):
@@ -3032,7 +3055,24 @@ index 0e8c030a..703febb6 100644
          return self.shop_medal_grid()
  
      def shop_medal_grid(self):
-@@ -261,6 +265,12 @@ class MedalShop2_250814(ShopClerk, ShopStatus):
+@@ -253,6 +262,16 @@ class MedalShop2_250814(ShopClerk, ShopStatus):
+         """
+         Run Medal Shop
+         """
++        from alas_headless import validate_alas_medal_shop_secondary_choices
++
++        validate_alas_medal_shop_secondary_choices(
++            retrofit_t1=self.config.MedalShop2_RETROFIT_T1,
++            retrofit_t2=self.config.MedalShop2_RETROFIT_T2,
++            retrofit_t3=self.config.MedalShop2_RETROFIT_T3,
++            plate_t1=self.config.MedalShop2_PLATE_T1,
++            plate_t2=self.config.MedalShop2_PLATE_T2,
++            plate_t3=self.config.MedalShop2_PLATE_T3,
++        )
+         # Base case; exit run if filter empty
+         import time
+         if not self.shop_filter:
+@@ -261,6 +280,12 @@ class MedalShop2_250814(ShopClerk, ShopStatus):
          # When called, expected to be in
          # correct Medal Shop interface
          logger.hr('Medal Shop', level=1)

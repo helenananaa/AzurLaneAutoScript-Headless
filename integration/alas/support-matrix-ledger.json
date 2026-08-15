@@ -4259,9 +4259,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_medal_shop_config.py",
+        "python/alas_headless/alas_medal_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -4278,9 +4283,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_medal_shop_config.py",
+        "python/alas_headless/alas_medal_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -4297,9 +4307,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_medal_shop_config.py",
+        "python/alas_headless/alas_medal_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -4316,9 +4331,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_medal_shop_config.py",
+        "python/alas_headless/alas_medal_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -4335,9 +4355,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_medal_shop_config.py",
+        "python/alas_headless/alas_medal_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -4354,9 +4379,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_medal_shop_config.py",
+        "python/alas_headless/alas_medal_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -4373,9 +4403,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_medal_shop_config.py",
+        "python/alas_headless/alas_medal_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
@@ -9999,8 +10034,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "2c414bc0279ae2f6d20ab0bcc99e622ac1ed53b6c5895113fad543afe2cd7438",
-      "manifest_sha256": "c161652f1fbed4e49b2ba2d943fc5e865a817083eb8145e6525b91c6c8d27f7b",
+      "combined_sha256": "5e0e3f742585b618b588c1750a9d114d76293c0b2453751f4e57fdf2a6dcbc50",
+      "manifest_sha256": "ee4dfe81c9710e53e546ea52a0990281c775504f8fce6888d7b165bc402d6930",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

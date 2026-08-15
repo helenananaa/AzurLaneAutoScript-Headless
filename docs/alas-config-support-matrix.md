@@ -355,7 +355,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 31 | Hard | Scheduler, Hard | B | 64 关目录与两舰队离线契约已完成；实机仍只到 11-4 进入边界，当前账号进度和自动寻敌锁定，尚无战斗/结算证据 |
 | 32 | Exercise | Scheduler, Exercise | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 上游零读取，真实对手/时段/血量观察、刷新持久化、战斗结算和失败恢复未闭环 |
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | ConsumeCoins、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；购买、余额观察与确认仍未完成 |
-| 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | GuildShop 14 字段入口与勋章商店一次 DR 图纸购买已离线等价；其余商店与真实操作未闭环 |
+| 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | GuildShop 14 字段与 MedalShop2 7 字段入口已离线等价；其余商店与真实操作未闭环 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝 |
 | 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；实机仍仅一次轻型建造，其他卡池、多单、票券、快速完成及队列领取未闭环 |
 | 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环 |
@@ -453,7 +453,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Exercise | `ExerciseStrategy`=`aggressive/fri18/sat0/sat12/sat18/sun0/sun12/sun18`; `OpponentChooseMode`=`max_exp/easiest/leftmost/easiest_else_exp`; `OpponentRefreshValue`; `OpponentRefreshRecord`; `OpponentTrial`; `LowHpThreshold`; `LowHpConfirmWait` | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 零读取且明确不支持，真实对手/时段/血量观察、刷新持久化、失败重开和赛季边界仍需闭环 |
 | GeneralShop | `Filter`; `Refresh`; `UseGems`; `ConsumeCoins`; `BuySkinBox` | B | ConsumeCoins 550,000 阈值、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；真实商品命中、刷新、余额观察和购买确认仍缺 |
 | GuildShop | `Filter`; `Refresh`; `BOOK_T2`; `BOOK_T3`; `BOX_T3`; `BOX_T4`; `PLATE_T2`; `PLATE_T3`; `PLATE_T4`; `RETROFIT_T2`; `RETROFIT_T3`; `PR1`; `PR2`; `PR3` | P | 14 字段入口、语法与枚举已离线等价；真实商品/货币/库存、PR 系列判别、选择确认与购买仍缺 |
-| MedalShop2 | `Filter`; `PLATE_T1`; `PLATE_T2`; `PLATE_T3`; `RETROFIT_T1`; `RETROFIT_T2`; `RETROFIT_T3` | L | 当前只有一次 DR 图纸；7 字段的所有选择、商品轮换、库存/勋章不足和确认未闭环 |
+| MedalShop2 | `Filter`; `PLATE_T1`; `PLATE_T2`; `PLATE_T3`; `RETROFIT_T1`; `RETROFIT_T2`; `RETROFIT_T3` | L | 7 字段入口、语法与枚举已离线等价；真实商品/货币/库存、选择确认与购买仍缺 |
 | MeritShop | `Filter`; `Refresh` | M | 规则命中、刷新真假、功勋不足和购买确认 |
 | CoreShop | `Filter` | M | 规则命中/无命中、核心不足、月限购和确认 |
 | ShipyardDr | `ResearchSeries`=2..5; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；数量边界、每日去重、蓝图不足、达到上限和实际购买仍需闭环 |
@@ -603,9 +603,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **149 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **59 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **65 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **57 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **13 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **7 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -774,13 +774,13 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Mail.ClaimMerit` | Freebies | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Mail.ClaimTradeLicense` | Freebies | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Mail.DeleteCollected` | Freebies | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `MedalShop2.Filter` | ShopOnce | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
-| `MedalShop2.PLATE_T1` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `MedalShop2.PLATE_T2` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `MedalShop2.PLATE_T3` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `MedalShop2.RETROFIT_T1` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `MedalShop2.RETROFIT_T2` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `MedalShop2.RETROFIT_T3` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `MedalShop2.Filter` | ShopOnce | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `MedalShop2.PLATE_T1` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MedalShop2.PLATE_T2` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MedalShop2.PLATE_T3` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MedalShop2.RETROFIT_T1` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MedalShop2.RETROFIT_T2` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MedalShop2.RETROFIT_T3` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Meowfficer.BuyAmount` | Meowfficer | type=input; display=default | input/default: 1 | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Meowfficer.FortChoreMeowfficer` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Meowfficer.OverflowCoins` | Meowfficer | type=input; display=default | input/default: -1 | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
