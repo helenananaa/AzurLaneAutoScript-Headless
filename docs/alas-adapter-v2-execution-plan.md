@@ -79,8 +79,10 @@ them after every structural phase and update this document if the source moves.
 ### 3.3 Fail-closed action
 
 - Every action is authorized from a fresh immutable frame lease.
-- The lease binds PID, package/game fingerprint, observer schema, generation,
-  flow scope, action capability, target identity, and remaining budget.
+- The lease binds PID, package/runtime compatibility identity, observer schema
+  and driver revision, generation, flow scope, action capability, target
+  identity, and remaining budget. A game update does not invalidate a lease
+  merely because its version or file digest changed.
 - Coordinates are output data, never authority. An action still requires exact
   Unity path, enabled/interactable state, bounds, screen geometry, foreground,
   top EventSystem raycast, blockers, and a permitted postcondition.

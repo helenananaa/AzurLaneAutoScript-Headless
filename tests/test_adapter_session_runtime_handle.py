@@ -5,7 +5,6 @@ from unittest import mock
 
 from alas_headless import (
     AlasSemanticSession,
-    PINNED_CN_GAME_FINGERPRINT,
     SemanticGateClosed,
 )
 from alas_headless.adapter import (
@@ -16,7 +15,10 @@ from alas_headless.adapter import (
     semantic_runtime_fingerprint_sha256,
 )
 from alas_headless.alas_adapter import AlasSemanticAdapter
-from alas_headless.semantic_oracle import ObserverTransportError
+from alas_headless.semantic_oracle import (
+    ObserverResponseTimeout,
+    ObserverTransportError,
+)
 from alas_headless.semantic_oracle import ActionReceipt, Bounds, Point
 
 
@@ -30,7 +32,7 @@ def expected_fingerprint():
         package=PACKAGE,
         component=COMPONENT,
         driver_revision=REVISION,
-        game_fingerprint=PINNED_CN_GAME_FINGERPRINT,
+        required_primary_abi="x86_64",
     )
 
 
@@ -729,6 +731,73 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         self.assertIs(actual, expected)
         self.assertEqual(acquire.call_count, 2)
 
+    def test_login_update_panel_extends_only_passive_stale_frame_retry(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        expected = mock.Mock(generation=11, frame_id="frame-11")
+        update_surface = mock.Mock(return_value=True)
+        session.adapter = SimpleNamespace(
+            _login_flow=SimpleNamespace(
+                snapshot=lambda: SimpleNamespace(
+                    active=True,
+                    passive_transition_until=90.0,
+                )
+            ),
+            oracle=SimpleNamespace(
+                stale_login_update_in_progress=update_surface,
+            ),
+        )
+        session._frame_clock = mock.Mock(current_frame_id=None)
+        session._frame_clock.acquire.side_effect = (
+            SemanticGateClosed("observer snapshot is stale"),
+            expected,
+        )
+
+        with mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=100.0,
+        ), mock.patch("alas_headless.alas_adapter.time.sleep") as sleep:
+            actual = session.refresh_frame()
+
+        self.assertIs(actual, expected)
+        self.assertEqual(session._frame_clock.acquire.call_count, 2)
+        update_surface.assert_called_once_with()
+        sleep.assert_called_once_with(0.15)
+
+    def test_login_stale_frame_without_update_panel_remains_bounded(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        update_surface = mock.Mock(return_value=False)
+        session.adapter = SimpleNamespace(
+            _login_flow=SimpleNamespace(
+                snapshot=lambda: SimpleNamespace(
+                    active=True,
+                    passive_transition_until=90.0,
+                )
+            ),
+            oracle=SimpleNamespace(
+                stale_login_update_in_progress=update_surface,
+            ),
+        )
+        session._frame_clock = mock.Mock(current_frame_id=None)
+        session._frame_clock.acquire.side_effect = SemanticGateClosed(
+            "observer snapshot is stale"
+        )
+
+        with mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=100.0,
+        ), mock.patch("alas_headless.alas_adapter.time.sleep"):
+            with self.assertRaisesRegex(SemanticGateClosed, "snapshot is stale"):
+                session.refresh_frame()
+
+        self.assertEqual(session._frame_clock.acquire.call_count, 3)
+        self.assertEqual(update_surface.call_count, 3)
+
     def test_session_close_clears_current_frame(self):
         handle = FrameRuntimeHandle()
         session = AlasSemanticSession(
@@ -932,15 +1001,15 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             side_effect=mark_open,
         ) as open_bridge, mock.patch.object(
             bridge,
-            "require_package_fingerprint",
-            return_value=PINNED_CN_GAME_FINGERPRINT,
+            "require_package_compatibility",
+            return_value={"primary_abi": "x86_64"},
         ) as require_package:
             first = session.open()
             self.assertIs(session.open(), first)
 
         self.assertIsInstance(session.runtime_handle, AdbRuntimeHandle)
         open_bridge.assert_called_once_with()
-        require_package.assert_called_once_with(PINNED_CN_GAME_FINGERPRINT)
+        require_package.assert_called_once_with("x86_64")
 
     def test_legacy_partial_open_closes_forwarding_and_clears_state(self):
         session = AlasSemanticSession("device-1", REVISION)
@@ -986,6 +1055,126 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             120.0
         )
         self.assertFalse(session._game_manager_restart_pending)
+
+    def test_game_manager_restart_preverifies_package_before_launch(self):
+        session = AlasSemanticSession("device-1", REVISION)
+        factory = session._runtime_handle_factory
+        self.assertIsNotNone(factory)
+        bridge = factory._bridge
+
+        def restarted(component, *, required_primary_abi):
+            self.assertEqual(component, COMPONENT)
+            self.assertEqual(required_primary_abi, "x86_64")
+            bridge.pid = 4242
+
+        with mock.patch.object(bridge, "restart_game", side_effect=restarted):
+            factory.restart_game(COMPONENT)
+
+        ready = {
+            "status": "ok",
+            "snapshot": {
+                "status": "ok",
+                "pid": 4242,
+                "driver_revision": REVISION,
+                "age_ms": 10,
+            },
+        }
+        with mock.patch.object(bridge, "open", return_value=bridge), mock.patch.object(
+            bridge,
+            "require_package_compatibility",
+        ) as require_package, mock.patch.object(
+            bridge,
+            "request",
+            return_value=ready,
+        ) as request:
+            prepared = factory()
+            prepared.package_gate()
+
+        require_package.assert_not_called()
+        request.assert_called_once_with("GET /v1/state\n")
+        self.assertIsNone(factory._preverified_restart_pid)
+
+    def test_game_manager_restart_waits_for_fresh_observer_snapshot(self):
+        session = AlasSemanticSession("device-1", REVISION)
+        factory = session._runtime_handle_factory
+        self.assertIsNotNone(factory)
+        bridge = factory._bridge
+        bridge.pid = 4242
+        factory._preverified_restart_pid = 4242
+        ready = {
+            "status": "ok",
+            "snapshot": {
+                "status": "ok",
+                "pid": 4242,
+                "driver_revision": REVISION,
+                "age_ms": 10,
+            },
+        }
+
+        with mock.patch.object(bridge, "open", return_value=bridge), mock.patch.object(
+            bridge,
+            "request",
+            side_effect=[
+                ObserverResponseTimeout("observer response timed out"),
+                ObserverTransportError("observer returned an empty response"),
+                {"status": "unavailable"},
+                ready,
+            ],
+        ) as request, mock.patch(
+            "alas_headless.adapter.runtime_handle.time.sleep"
+        ) as sleep:
+            factory()
+
+        self.assertEqual(request.call_count, 4)
+        self.assertEqual(sleep.call_count, 3)
+        self.assertIsNone(factory._preverified_restart_pid)
+
+    def test_game_manager_restart_does_not_retry_other_transport_errors(self):
+        session = AlasSemanticSession("device-1", REVISION)
+        factory = session._runtime_handle_factory
+        self.assertIsNotNone(factory)
+        bridge = factory._bridge
+        bridge.pid = 4242
+        factory._preverified_restart_pid = 4242
+
+        with mock.patch.object(bridge, "open", return_value=bridge), mock.patch.object(
+            bridge,
+            "request",
+            side_effect=ObserverTransportError("observer returned invalid JSON"),
+        ), mock.patch(
+            "alas_headless.adapter.runtime_handle.time.sleep"
+        ) as sleep:
+            with self.assertRaisesRegex(ObserverTransportError, "invalid JSON"):
+                factory()
+
+        sleep.assert_not_called()
+        self.assertEqual(factory._preverified_restart_pid, 4242)
+
+    def test_game_manager_restart_rejects_pid_turnover_while_waiting(self):
+        session = AlasSemanticSession("device-1", REVISION)
+        factory = session._runtime_handle_factory
+        self.assertIsNotNone(factory)
+        bridge = factory._bridge
+        bridge.pid = 4242
+        factory._preverified_restart_pid = 4242
+        factory._OBSERVER_STARTUP_PID_POLL_SECONDS = 0.0
+
+        with mock.patch.object(bridge, "open", return_value=bridge), mock.patch.object(
+            bridge,
+            "request",
+            return_value={"status": "unavailable"},
+        ), mock.patch.object(
+            bridge,
+            "package_pid",
+            return_value=4243,
+        ), mock.patch(
+            "alas_headless.adapter.runtime_handle.time.sleep"
+        ) as sleep:
+            with self.assertRaisesRegex(ObserverTransportError, "PID changed"):
+                factory()
+
+        sleep.assert_not_called()
+        self.assertEqual(factory._preverified_restart_pid, 4242)
 
     def test_login_msgbox_probes_tolerate_stale_observer_during_boot_grace(self):
         handle = FrameRuntimeHandle()

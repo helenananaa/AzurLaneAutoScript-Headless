@@ -2957,12 +2957,14 @@ class AlasSemanticAdapter:
             self._login_flow.active
             and name in LOGIN_UNSUPPORTED_PRESENCE_RESOURCES
         ):
-            try:
-                return self._login_flow.observe_unknown()
-            except UnknownObservationError as exc:
-                raise AlasSemanticUnmapped(
-                    "ALAS resource is not semantically mapped: {0}".format(name)
-                ) from exc
+            # These legacy image assets are only presence probes in the login
+            # handler.  They include Android-system UI such as
+            # ``ANDROID_NO_RESPOND``, which Unity's observer cannot prove.  A
+            # semantic adapter must neither infer their presence nor send an
+            # input to dismiss them.  Keep the answer bounded to absence while
+            # the explicit login context is active, including the narrow
+            # startup-update transition before a known Unity surface exists.
+            return self._login_flow.observe_unsupported_presence(name)
         if self._mail_context is not None:
             context = self._mail_context
             if time.monotonic() <= context.leaving_page_until:
@@ -7978,6 +7980,7 @@ class AlasSemanticSession:
     """Own one lazy semantic adapter over a prepared runtime handle."""
 
     _REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+    _LOGIN_STARTUP_UPDATE_STALE_RETRY_ATTEMPTS = 2399
 
     def __init__(
         self,
@@ -8214,7 +8217,7 @@ class AlasSemanticSession:
                 package=package,
                 component=component,
                 driver_revision=driver_revision,
-                game_fingerprint=PINNED_CN_GAME_FINGERPRINT,
+                required_primary_abi="x86_64",
             )
         )
         self._runtime_handle = runtime_handle
@@ -8489,6 +8492,14 @@ class AlasSemanticSession:
                     and time.monotonic()
                     <= login_snapshot.passive_transition_until
                 )
+                stale_login_update_wait = bool(
+                    login_snapshot.active
+                    and not in_login_transition
+                    and isinstance(exc, SemanticGateClosed)
+                    and message == "observer snapshot is stale"
+                    and self.open().oracle.stale_login_update_in_progress()
+                    and attempt < self._LOGIN_STARTUP_UPDATE_STALE_RETRY_ATTEMPTS
+                )
                 extended_login_retry = bool(
                     in_login_transition
                     and (
@@ -8535,6 +8546,7 @@ class AlasSemanticSession:
                 if not retryable or (
                     attempt >= 2
                     and not extended_login_retry
+                    and not stale_login_update_wait
                     and not extended_combat_result_retry
                 ):
                     raise
@@ -9969,7 +9981,7 @@ class AlasSemanticSession:
         return True
 
     def restart_game_for_manager(self) -> bool:
-        """Cold-restart the pinned game for ALAS GameManager ownership."""
+        """Cold-restart the configured game for ALAS GameManager ownership."""
 
         factory = self._runtime_handle_factory
         if factory is None or self.package_process_lease is not None:

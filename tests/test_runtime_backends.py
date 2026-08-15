@@ -26,9 +26,6 @@ from alas_headless.runtime_command import (
     RuntimeExecutionPolicy,
     RuntimeOwnedProcess,
 )
-from alas_headless.semantic_oracle import AndroidPackageFingerprint
-
-
 HASH = "a" * 64
 COMMIT = "b" * 40
 PACKAGE = "com.bilibili.azurlane"
@@ -148,8 +145,23 @@ class FakeBridge:
             }
         raise AssertionError(request)
 
-    def package_fingerprint(self):
-        return AndroidPackageFingerprint("9.9.9", 999, "arm64-v8a", HASH, HASH)
+    def require_package_compatibility(self, required_primary_abi):
+        if required_primary_abi != "arm64-v8a":
+            raise AssertionError(required_primary_abi)
+        return {
+            # Deliberately differs from the runtime lock: updated games must
+            # be attempted when the concrete ABI/layout remains compatible.
+            "version_name": "10.0.0",
+            "version_code": 10000,
+            "primary_abi": "arm64-v8a",
+            "base_apk_path": "/data/app/pkg/base.apk",
+            "il2cpp_path": "/data/app/pkg/lib/arm64/libil2cpp.so",
+        }
+
+    def _device_sha256(self, path, **kwargs):
+        if path != "/data/app/pkg/lib/arm64/libil2cpp.so":
+            raise AssertionError(path)
+        return "e" * 64
 
     def close(self):
         self.closed = True
@@ -225,7 +237,10 @@ class RuntimeBackendsTests(unittest.TestCase):
         self.assertTrue(backend.wait_android_ready(instance, 1.0)["boot_completed"])
         self.assertEqual(backend.wait_game_ready(instance, 1.0)["pid"], 1234)
         self.assertTrue(backend.wait_observer_ready(instance, 1.0)["atomic"])
-        self.assertEqual(backend.fingerprint(instance)["backend"], "external-adb")
+        actual_fingerprint = backend.fingerprint(instance)
+        self.assertEqual(actual_fingerprint["backend"], "external-adb")
+        self.assertEqual(actual_fingerprint["game_version"], "10.0.0")
+        self.assertEqual(actual_fingerprint["libil2cpp_sha256"], "e" * 64)
         backend.stop(instance)
 
         executor.results["angle-apk-sha256"] = (0, "b" * 64, "")

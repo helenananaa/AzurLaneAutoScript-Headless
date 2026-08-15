@@ -5,7 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import asdict, dataclass, field
+import time
+from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping, Optional
 
 from ..alas_package_process_lease import AlasPackageProcessLease
@@ -13,6 +14,7 @@ from ..runtime_trace import RuntimeTraceRecorder
 from ..semantic_oracle import (
     AdbObserverBridge,
     AndroidPackageFingerprint,
+    ObserverResponseTimeout,
     ObserverTransportError,
     SemanticGateClosed,
 )
@@ -41,7 +43,7 @@ def semantic_runtime_fingerprint_sha256(
     package: str,
     component: str,
     driver_revision: str,
-    game_fingerprint: AndroidPackageFingerprint,
+    required_primary_abi: str = "x86_64",
 ) -> str:
     """Hash the backend-neutral identity required by one semantic session."""
 
@@ -54,14 +56,20 @@ def semantic_runtime_fingerprint_sha256(
         or _REVISION_PATTERN.fullmatch(driver_revision) is None
     ):
         raise ValueError("runtime fingerprint driver revision must be pinned")
-    if not isinstance(game_fingerprint, AndroidPackageFingerprint):
-        raise TypeError("runtime fingerprint requires an Android package fingerprint")
+    if not isinstance(required_primary_abi, str) or not required_primary_abi:
+        raise ValueError("runtime fingerprint required primary ABI is missing")
+    # Installed game versions and hashes are intentionally excluded.  The
+    # runtime identity pins the package/component, supported ABI, and observer
+    # driver; updated clients are attempted and fail only on a concrete runtime
+    # incompatibility.
     payload = {
         "component": component,
         "driver_revision": driver_revision,
-        "game_fingerprint": asdict(game_fingerprint),
+        "package_compatibility": {
+            "primary_abi": required_primary_abi,
+        },
         "package": package,
-        "schema": "alas-headless.semantic-runtime-identity/v1",
+        "schema": "alas-headless.semantic-runtime-identity/v2",
     }
     canonical = json.dumps(
         payload,
@@ -136,10 +144,10 @@ class AdbRuntimeHandle:
 
 @dataclass
 class PinnedPackageGate:
-    """Cache one independent ADB verification of the installed package."""
+    """Cache one independent ADB compatibility check for the live package."""
 
     bridge: AdbObserverBridge
-    expected: AndroidPackageFingerprint = PINNED_CN_GAME_FINGERPRINT
+    required_primary_abi: str = "x86_64"
     _verified_pid: Optional[int] = None
 
     def accept_process_lease(self, lease: AlasPackageProcessLease) -> None:
@@ -158,7 +166,7 @@ class PinnedPackageGate:
             raise SemanticGateClosed("ADB observer bridge is not open")
         if self._verified_pid == self.bridge.pid:
             return
-        self.bridge.require_package_fingerprint(self.expected)
+        self.bridge.require_package_compatibility(self.required_primary_abi)
         self._verified_pid = self.bridge.pid
 
 
@@ -207,6 +215,16 @@ class AdbRuntimeHandleFactory:
     process_lease: Optional[AlasPackageProcessLease] = None
     trace: Optional[RuntimeTraceRecorder] = None
     _bridge: AdbObserverBridge = field(init=False, repr=False)
+    _preverified_restart_pid: Optional[int] = field(
+        default=None,
+        init=False,
+        repr=False,
+    )
+
+    _OBSERVER_STARTUP_TIMEOUT_SECONDS = 600.0
+    _OBSERVER_STARTUP_POLL_SECONDS = 1.0
+    _OBSERVER_STARTUP_MAX_AGE_MS = 5_000.0
+    _OBSERVER_STARTUP_PID_POLL_SECONDS = 10.0
 
     def __post_init__(self) -> None:
         self._bridge = AdbObserverBridge(
@@ -221,7 +239,12 @@ class AdbRuntimeHandleFactory:
         self._bridge.open()
         package_gate = PinnedPackageGate(self._bridge)
         if self.process_lease is None:
-            package_gate()
+            if self._preverified_restart_pid == self._bridge.pid:
+                package_gate._verified_pid = self._bridge.pid
+                self._wait_for_restarted_observer()
+                self._preverified_restart_pid = None
+            else:
+                package_gate()
         else:
             if self.process_lease.driver_revision != self.driver_revision:
                 raise SemanticGateClosed(
@@ -236,9 +259,75 @@ class AdbRuntimeHandleFactory:
             package_gate=package_gate,
         )
 
+    def _wait_for_restarted_observer(self) -> None:
+        """Wait for a fresh snapshot after ``am start`` returns.
+
+        Android's ``-W`` completion only proves that the Activity was launched.
+        The publisher SDK and Unity/IL2CPP can still be initializing, during
+        which the observer socket either closes a request without a payload or
+        returns the explicit ``unavailable`` status.  Only those two startup
+        states are retryable; every other protocol or transport failure remains
+        fail-closed.
+        """
+
+        expected_pid = self._bridge.pid
+        deadline = time.monotonic() + self._OBSERVER_STARTUP_TIMEOUT_SECONDS
+        next_pid_check = (
+            time.monotonic() + self._OBSERVER_STARTUP_PID_POLL_SECONDS
+        )
+        while True:
+            response: Optional[Mapping[str, Any]] = None
+            try:
+                response = self._bridge.request("GET /v1/state\n")
+            except ObserverTransportError as exc:
+                if (
+                    not isinstance(exc, ObserverResponseTimeout)
+                    and str(exc) != "observer returned an empty response"
+                ):
+                    raise
+            if response is not None:
+                status = response.get("status")
+                if status == "ok":
+                    snapshot = response.get("snapshot")
+                    if not isinstance(snapshot, Mapping):
+                        raise ObserverTransportError(
+                            "ready observer response has no snapshot"
+                        )
+                    age_ms = snapshot.get("age_ms")
+                    if (
+                        snapshot.get("status") == "ok"
+                        and snapshot.get("pid") == expected_pid
+                        and snapshot.get("driver_revision") == self.driver_revision
+                        and isinstance(age_ms, (int, float))
+                        and not isinstance(age_ms, bool)
+                        and 0 <= age_ms <= self._OBSERVER_STARTUP_MAX_AGE_MS
+                    ):
+                        return
+                elif status != "unavailable":
+                    raise ObserverTransportError(
+                        "observer returned an unexpected startup status"
+                    )
+            now = time.monotonic()
+            if now >= next_pid_check:
+                if self._bridge.package_pid() != expected_pid:
+                    raise ObserverTransportError(
+                        "game PID changed while observer was starting"
+                    )
+                next_pid_check = now + self._OBSERVER_STARTUP_PID_POLL_SECONDS
+            if now >= deadline:
+                raise ObserverTransportError(
+                    "observer did not become ready after game restart"
+                )
+            time.sleep(self._OBSERVER_STARTUP_POLL_SECONDS)
+
     def close(self) -> None:
         self._bridge.close()
 
     def restart_game(self, component: str) -> None:
         self.close()
-        self._bridge.restart_game(component)
+        self._preverified_restart_pid = None
+        self._bridge.restart_game(
+            component,
+            required_primary_abi="x86_64",
+        )
+        self._preverified_restart_pid = self._bridge.pid

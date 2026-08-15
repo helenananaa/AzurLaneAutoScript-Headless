@@ -52,6 +52,10 @@ class ObserverTransportError(SemanticOracleError):
     """The local observer transport failed or returned malformed data."""
 
 
+class ObserverResponseTimeout(ObserverTransportError):
+    """A connected observer did not finish its response within the read bound."""
+
+
 def request_observer_state(
     request: Callable[[str], Mapping[str, Any]],
 ) -> Tuple[Mapping[str, Any], Mapping[str, Any], bool]:
@@ -2793,10 +2797,12 @@ class TcpObserverTransport:
             )
         started_ns = time.monotonic_ns()
         endpoint = request_line.split(" ", 1)[1].strip()
+        connected = False
         try:
             with socket.create_connection(
                 (self._host, self._port), self._timeout_seconds
             ) as client:
+                connected = True
                 client.settimeout(self._timeout_seconds)
                 client.sendall(request_line.encode("ascii"))
                 chunks = bytearray()
@@ -2820,7 +2826,20 @@ class TcpObserverTransport:
                     fields={"endpoint": endpoint, "exception_type": type(exc).__name__},
                 )
             raise
-        except (OSError, TimeoutError) as exc:
+        except TimeoutError as exc:
+            if self._trace is not None:
+                self._trace.emit(
+                    "observer.request",
+                    outcome="error",
+                    duration_ns=time.monotonic_ns() - started_ns,
+                    fields={"endpoint": endpoint, "exception_type": type(exc).__name__},
+                )
+            if connected:
+                raise ObserverResponseTimeout(
+                    "observer response timed out"
+                ) from exc
+            raise ObserverTransportError("observer socket request failed") from exc
+        except OSError as exc:
             if self._trace is not None:
                 self._trace.emit(
                     "observer.request",
@@ -2887,6 +2906,10 @@ class AdbObserverBridge:
     )
     _DEVICE_PATH_PATTERN = re.compile(r"^/[A-Za-z0-9_./:+@=~-]+$")
     _SHA256_PATTERN = re.compile(r"^([0-9a-fA-F]{64})(?:\s|$)")
+    _DEVICE_SHA256_MAX_ATTEMPTS = 2
+    _DEVICE_SHA256_RETRY_DELAY_SECONDS = 3.0
+    _PACKAGE_IDENTITY_TIMEOUT_SECONDS = 30.0
+    _PACKAGE_PROCESS_TIMEOUT_SECONDS = 30.0
 
     def __init__(
         self,
@@ -2982,7 +3005,10 @@ class AdbObserverBridge:
             return self
         if self._run(("get-state",)) != "device":
             raise ObserverTransportError("ADB device is not ready")
-        pid_text = self._run(("shell", "pidof", self.package))
+        pid_text = self._run(
+            ("shell", "pidof", self.package),
+            timeout_seconds=self._PACKAGE_PROCESS_TIMEOUT_SECONDS,
+        )
         if not pid_text.isdigit():
             raise ObserverTransportError("expected exactly one numeric game PID")
         self.pid = int(pid_text)
@@ -3007,8 +3033,14 @@ class AdbObserverBridge:
                 self.transport = None
                 self.port = None
 
-    def restart_game(self, component: str) -> None:
-        """Cold-restart the pinned game with the required headless Unity flag."""
+    def restart_game(
+        self,
+        component: str,
+        *,
+        expected_package_fingerprint: Optional[AndroidPackageFingerprint] = None,
+        required_primary_abi: Optional[str] = None,
+    ) -> None:
+        """Cold-restart the configured game with the required headless Unity flag."""
 
         if self.transport is not None:
             raise ObserverTransportError(
@@ -3016,7 +3048,48 @@ class AdbObserverBridge:
             )
         if not component or not component.startswith(self.package + "/"):
             raise ObserverTransportError("game restart component is not pinned")
-        self._run(("shell", "am", "force-stop", self.package))
+        previous_pid = self.pid
+        # A busy emulator can take longer than the ordinary read timeout to
+        # tear down Unity and its updater.  This exact, pinned force-stop is
+        # idempotent; allow a bounded command window before relaunching.
+        force_stop_timeout = max(self.command_timeout_seconds, 30.0)
+        try:
+            self._run(
+                ("shell", "am", "force-stop", self.package),
+                timeout_seconds=force_stop_timeout,
+            )
+        except ObserverTransportError as exc:
+            # ``am force-stop`` can finish on-device just after the host-side
+            # adb wait expires.  A heavily loaded emulator can still expose
+            # the old PID for a short interval, so require bounded, repeated
+            # proof that the exact package process has disappeared.
+            stop_deadline = time.monotonic() + 90.0
+            while True:
+                try:
+                    stopped_pid = self._run(
+                        ("shell", "pidof", self.package),
+                        timeout_seconds=force_stop_timeout,
+                    )
+                except ObserverTransportError:
+                    if time.monotonic() >= stop_deadline:
+                        raise exc
+                else:
+                    if not stopped_pid:
+                        break
+                    if not stopped_pid.isdigit():
+                        raise exc
+                    if time.monotonic() >= stop_deadline:
+                        raise exc
+                time.sleep(1.0)
+        if (
+            expected_package_fingerprint is not None
+            and required_primary_abi is not None
+        ):
+            raise ValueError("package restart verification mode is ambiguous")
+        if expected_package_fingerprint is not None:
+            self.require_package_fingerprint(expected_package_fingerprint)
+        elif required_primary_abi is not None:
+            self.require_package_compatibility(required_primary_abi)
         self._run(
             (
                 "shell",
@@ -3031,6 +3104,20 @@ class AdbObserverBridge:
             ),
             timeout_seconds=max(self.command_timeout_seconds, 60.0),
         )
+        pid_text = self._run(
+            ("shell", "pidof", self.package),
+            timeout_seconds=self._PACKAGE_PROCESS_TIMEOUT_SECONDS,
+        )
+        if not pid_text.isdigit():
+            raise ObserverTransportError(
+                "expected exactly one numeric game PID after cold restart"
+            )
+        current_pid = int(pid_text)
+        if previous_pid is not None and current_pid == previous_pid:
+            raise ObserverTransportError(
+                "game PID did not change after cold restart"
+            )
+        self.pid = current_pid
 
     def __enter__(self) -> "AdbObserverBridge":
         return self.open()
@@ -3044,9 +3131,25 @@ class AdbObserverBridge:
         return self.transport.request(request_line)
 
     def foreground_component(self) -> str:
-        output = self._run(("shell", "dumpsys", "activity", "activities"))
+        output = self._run(
+            ("shell", "dumpsys", "activity", "activities"),
+            timeout_seconds=max(self.command_timeout_seconds, 30.0),
+        )
         match = self._FOREGROUND_PATTERN.search(output)
         return match.group(1) if match else ""
+
+    def package_pid(self) -> Optional[int]:
+        """Return the exact package PID, or ``None`` when it is not running."""
+
+        pid_text = self._run(
+            ("shell", "pidof", self.package),
+            timeout_seconds=self._PACKAGE_PROCESS_TIMEOUT_SECONDS,
+        )
+        if not pid_text:
+            return None
+        if not pid_text.isdigit():
+            raise ObserverTransportError("expected exactly one numeric game PID")
+        return int(pid_text)
 
     def tap(self, x: int, y: int) -> None:
         self._run(("shell", "input", "tap", str(x), str(y)))
@@ -3081,11 +3184,37 @@ class AdbObserverBridge:
             )
         return path
 
-    def _device_sha256(self, path: str) -> str:
+    def _device_sha256(
+        self,
+        path: str,
+        *,
+        timeout_seconds: float = 120.0,
+        max_attempts: Optional[int] = None,
+    ) -> str:
         safe_path = self._device_path(path, "sha256 target")
         # The pinned base APK is large enough that hashing it on an emulator can
-        # legitimately exceed the normal short ADB command timeout.
-        output = self._run(("shell", "sha256sum", safe_path), timeout_seconds=120.0)
+        # legitimately exceed the normal short ADB command timeout.  A just
+        # cold-started emulator can additionally starve the first shell child;
+        # retry only this read-only, exact-path hash once.  There is no cache or
+        # fallback value: both package hashes must still match the allowlist.
+        attempts = (
+            self._DEVICE_SHA256_MAX_ATTEMPTS
+            if max_attempts is None
+            else max_attempts
+        )
+        if isinstance(attempts, bool) or not isinstance(attempts, int) or attempts <= 0:
+            raise ValueError("device sha256 attempts must be a positive integer")
+        for attempt in range(attempts):
+            try:
+                output = self._run(
+                    ("shell", "sha256sum", safe_path),
+                    timeout_seconds=timeout_seconds,
+                )
+                break
+            except ObserverTransportError:
+                if attempt + 1 == attempts:
+                    raise
+                time.sleep(self._DEVICE_SHA256_RETRY_DELAY_SECONDS)
         match = self._SHA256_PATTERN.match(output)
         if match is None:
             raise SemanticGateClosed("device sha256 output is malformed")
@@ -3094,7 +3223,14 @@ class AdbObserverBridge:
     def package_fingerprint(self) -> AndroidPackageFingerprint:
         """Read the installed game identity without trusting observer output."""
 
-        package_dump = self._run(("shell", "dumpsys", "package", self.package))
+        identity_timeout = max(
+            self.command_timeout_seconds,
+            self._PACKAGE_IDENTITY_TIMEOUT_SECONDS,
+        )
+        package_dump = self._run(
+            ("shell", "dumpsys", "package", self.package),
+            timeout_seconds=identity_timeout,
+        )
         version_code_match = re.search(r"\bversionCode=(\d+)", package_dump)
         version_name_match = re.search(r"\bversionName=([^\r\n]+)", package_dump)
         primary_abi_match = re.search(r"\bprimaryCpuAbi=([^\r\n]+)", package_dump)
@@ -3112,7 +3248,10 @@ class AdbObserverBridge:
         ):
             raise SemanticGateClosed("installed package identity is incomplete")
 
-        base_output = self._run(("shell", "pm", "path", self.package))
+        base_output = self._run(
+            ("shell", "pm", "path", self.package),
+            timeout_seconds=identity_timeout,
+        )
         base_paths = [
             line[len("package:") :]
             for line in base_output.splitlines()
@@ -3132,7 +3271,8 @@ class AdbObserverBridge:
                 "-name",
                 "libil2cpp.so",
                 "-print",
-            )
+            ),
+            timeout_seconds=identity_timeout,
         )
         il2cpp_paths = [
             line.strip() for line in il2cpp_output.splitlines() if line.strip()
@@ -3145,9 +3285,99 @@ class AdbObserverBridge:
             version_name=version_name_match.group(1).strip(),
             version_code=int(version_code_match.group(1)),
             primary_abi=primary_abi_match.group(1).strip(),
-            base_apk_sha256=self._device_sha256(base_path),
+            # The pinned APK is currently 1.73 GB.  On a cold AVD disk its
+            # sequential read can exceed two separate 120-second attempts;
+            # one continuous bounded pass preserves progress and exactness.
+            base_apk_sha256=self._device_sha256(
+                base_path,
+                timeout_seconds=480.0,
+                max_attempts=1,
+            ),
             il2cpp_sha256=self._device_sha256(il2cpp_path),
         )
+
+    def require_package_compatibility(
+        self,
+        required_primary_abi: str = "x86_64",
+    ) -> Mapping[str, Any]:
+        """Prove only the package shape required to attempt semantic startup.
+
+        Game versions and file hashes are deliberately not allowlisted here.
+        An updated client is allowed to start and the observer/mapping contracts
+        report concrete incompatibilities if they are actually encountered.
+        """
+
+        if not isinstance(required_primary_abi, str) or not required_primary_abi:
+            raise ValueError("required package ABI is missing")
+        identity_timeout = max(
+            self.command_timeout_seconds,
+            self._PACKAGE_IDENTITY_TIMEOUT_SECONDS,
+        )
+        package_dump = self._run(
+            ("shell", "dumpsys", "package", self.package),
+            timeout_seconds=identity_timeout,
+        )
+        version_code_match = re.search(r"\bversionCode=(\d+)", package_dump)
+        version_name_match = re.search(r"\bversionName=([^\r\n]+)", package_dump)
+        primary_abi_match = re.search(r"\bprimaryCpuAbi=([^\r\n]+)", package_dump)
+        native_dir_match = re.search(
+            r"\b(?:legacyNativeLibraryDir|nativeLibraryDir)=([^\r\n]+)",
+            package_dump,
+        )
+        if not all(
+            (
+                version_code_match,
+                version_name_match,
+                primary_abi_match,
+                native_dir_match,
+            )
+        ):
+            raise SemanticGateClosed("installed package identity is incomplete")
+        primary_abi = primary_abi_match.group(1).strip()
+        if primary_abi != required_primary_abi:
+            raise SemanticGateClosed("installed package ABI is unsupported")
+
+        path_output = self._run(
+            ("shell", "pm", "path", self.package),
+            timeout_seconds=identity_timeout,
+        )
+        package_paths = [
+            self._device_path(line[len("package:") :], "package APK")
+            for line in path_output.splitlines()
+            if line.startswith("package:")
+        ]
+        base_paths = [path for path in package_paths if path.endswith("/base.apk")]
+        if len(base_paths) != 1:
+            raise SemanticGateClosed("expected exactly one base APK path")
+
+        native_dir = self._device_path(native_dir_match.group(1), "nativeLibraryDir")
+        il2cpp_output = self._run(
+            (
+                "shell",
+                "find",
+                native_dir,
+                "-type",
+                "f",
+                "-name",
+                "libil2cpp.so",
+                "-print",
+            ),
+            timeout_seconds=identity_timeout,
+        )
+        il2cpp_paths = [
+            self._device_path(line.strip(), "libil2cpp.so")
+            for line in il2cpp_output.splitlines()
+            if line.strip()
+        ]
+        if len(il2cpp_paths) != 1:
+            raise SemanticGateClosed("expected exactly one libil2cpp.so")
+        return {
+            "version_name": version_name_match.group(1).strip(),
+            "version_code": int(version_code_match.group(1)),
+            "primary_abi": primary_abi,
+            "base_apk_path": base_paths[0],
+            "il2cpp_path": il2cpp_paths[0],
+        }
 
     def require_package_fingerprint(
         self, expected: AndroidPackageFingerprint
@@ -3311,6 +3541,8 @@ class SemanticOracle:
         self,
         value: Mapping[str, Any],
         semantic_schema: Optional[str] = None,
+        *,
+        allow_stale: bool = False,
     ) -> None:
         if value.get("protocol_schema") != OBSERVER_SCHEMA:
             raise SemanticGateClosed("observer protocol schema mismatch")
@@ -3335,7 +3567,11 @@ class SemanticOracle:
             and self._integer(value.get("pid"), "pid") != self.fingerprint.expected_pid
         ):
             raise SemanticGateClosed("observer PID mismatch")
-        if self._integer(value.get("age_ms"), "age_ms") > self.fingerprint.max_age_ms:
+        if (
+            not allow_stale
+            and self._integer(value.get("age_ms"), "age_ms")
+            > self.fingerprint.max_age_ms
+        ):
             raise SemanticGateClosed("observer snapshot is stale")
 
     def _parse_button(self, raw: Any) -> ButtonState:
@@ -17947,6 +18183,10 @@ class SemanticOracle:
             r"[0-9]+(?:\.[0-9]+)?(?:B|KB|MB|GB)总共[0-9]+个"
             r"已完成[0-9]+个失败[0-9]+个速度"
             r"[0-9]+(?:\.[0-9]+)?(?:B|KB|MB|GB)/S",
+            # This is an automatic client transition, not a request for an
+            # external restart.  Interrupting it with force-stop leaves the CN
+            # client in its package-switch state and repeats this panel.
+            r"更新完成，正在进入游戏\.\.\.",
         )
         return any(re.fullmatch(pattern, plain) is not None for pattern in patterns)
 
@@ -17975,6 +18215,64 @@ class SemanticOracle:
         if visible:
             self._login_update_seen = True
         return visible
+
+    def stale_login_update_in_progress(self) -> bool:
+        """Recognize one passive UpdatePanel status after frame freshness expires.
+
+        This is deliberately narrower than :meth:`login_update_in_progress`:
+        it admits no frame, records no update transition, and exposes no
+        actionable control. It exists only so the GameManager-owned cold-start
+        wait can remain fail-closed while Unity has left a same-process,
+        identity-valid UpdatePanel snapshot stale during update checking. The
+        stale wait does not interpret status text: some pre-login Unity text is
+        emitted lossily, and this method never converts the observation into an
+        action or an update-completion latch.
+        """
+
+        if self._foreground_component() != self.fingerprint.component:
+            return False
+        ui_snapshot = self._request("GET /v1/ui\n")
+        if not isinstance(ui_snapshot, dict):
+            return False
+        try:
+            self._validate_identity(
+                ui_snapshot,
+                UI_SCHEMA,
+                allow_stale=True,
+            )
+            if self._integer(ui_snapshot.get("age_ms"), "UI age_ms") <= (
+                self.fingerprint.max_age_ms
+            ):
+                return False
+            if (
+                ui_snapshot.get("schema") != 1
+                or ui_snapshot.get("text_truncated") is not False
+                or self._integer(ui_snapshot.get("error_count"), "UI error_count")
+                != 0
+            ):
+                return False
+            raw_texts = ui_snapshot.get("texts")
+            if (
+                not isinstance(raw_texts, list)
+                or self._integer(ui_snapshot.get("text_count"), "text_count")
+                != len(raw_texts)
+            ):
+                return False
+            if self._integer(ui_snapshot.get("method_mask"), "UI method_mask") & 0x6 == 0:
+                return False
+            progress = tuple(
+                text
+                for text in (self._parse_text(raw) for raw in raw_texts)
+                if text.path.endswith("UpdatePanel/progressInfo")
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.bounds is not None
+                and bool(text.text.strip())
+            )
+        except (ObserverTransportError, SemanticGateClosed):
+            return False
+        return len(progress) == 1
 
     def login_update_restart_required(self) -> bool:
         """Recognize the inert black transition left by a completed CN update.
@@ -18027,22 +18325,6 @@ class SemanticOracle:
                 and not text.truncated
                 and text.bounds is not None
             )
-
-        update_completion = tuple(
-            text
-            for text in ui_state.texts
-            if text.path.endswith("UpdatePanel/progressInfo")
-            and text.active_in_hierarchy
-            and text.active_and_enabled
-            and not text.truncated
-            and text.bounds is not None
-            and "".join(text.text.split()) == "更新完成，正在进入游戏..."
-        )
-        if len(update_completion) > 1:
-            raise SemanticGateClosed("login update completion state is ambiguous")
-        if update_completion:
-            self._login_update_restart_consumed = True
-            return True
 
         # Current client metadata contains no normal hot-update restart
         # button.  The only explicit restart surface is repair completion;

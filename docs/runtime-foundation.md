@@ -116,7 +116,7 @@ After that baseline is healthy, `--recovery game` or `--recovery android`
 adds one explicit recovery gate. A game recovery closes the old observer
 forward, force-stops and relaunches the package with the same allowlisted Unity
 command line, waits for the exact foreground component, and requires a new PID,
-fresh coherent observer state, and the same complete runtime fingerprint. An
+fresh coherent observer state, and the same runtime compatibility identity. An
 Android recovery additionally requires an observed ADB-offline boundary before
 ADB, PackageManager, the game, and observer may be declared recovered:
 
@@ -137,14 +137,14 @@ is no silent fallback to a lifecycle-only pass.
 
 Each phase receives a bounded timeout and records duration and a stable failure
 code. Cleanup runs after any post-start failure. The resulting `manifest.json`
-binds the expected and observed exact runtime fingerprints, the immutable lock
-hash, all phase outcomes, trace completeness, whether input was injected, and
-whether the runner changed runtime state. A nominal pass is downgraded if
-cleanup fails, the observed fingerprint differs, or the bounded trace dropped
-or rejected any record. The manifest is compatible with the offline evidence
-index described below. If a complete observed fingerprint differs from the
-lock, that failed record is indexed under the observed identity rather than
-being allowed to overwrite evidence for the expected environment.
+binds the observed runtime evidence fingerprint, the immutable lock hash, all
+phase outcomes, trace completeness, whether input was injected, and whether the
+runner changed runtime state. A nominal pass is downgraded if cleanup fails, an
+exact Android/ANGLE/runtime boundary differs, or the bounded trace dropped or
+rejected any record. The manifest is compatible with the offline evidence
+index described below. Observed game version and `libil2cpp.so` digest remain
+part of evidence isolation, but they do not reject an otherwise compatible
+updated client.
 
 The external-ADB example defaults to observing an already running game:
 `launch_game`, game restart, and Android restart are all disabled. Enabling any
@@ -168,10 +168,12 @@ rendezvous.
 
 The observer readiness gate requires matching protocol, snapshot/Button
 schemas, package, PID, ANGLE revision, and a coherent generation. The final
-fingerprint independently checks Android build/API/ABI, the installed ANGLE
-package APK hash, plus installed game version, APK hash, and `libil2cpp.so`
-hash against the lock. Configuration
-examples live in
+qualification independently checks Android build/API/ABI and the installed
+ANGLE package APK hash against the lock. For the game it requires the lock's
+package profile ABI, one base APK, and one `libil2cpp.so`, then records the
+observed game version and `libil2cpp.so` digest without comparing them with the
+old game lock values. Normal GameManager/session startup performs no game-file
+hashing at all. Configuration examples live in
 [`integration/runtime`](../integration/runtime/).
 
 ## Runtime lock and updates

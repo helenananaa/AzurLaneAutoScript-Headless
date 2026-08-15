@@ -230,7 +230,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 ### 1.24 本轮 GameManager 重启开关契约与 EventStory 跳过记录
 
-`GameManager.AutoRestart` 现在只接受精确布尔值，并在原任务停止应用前 fail-closed。固定上游回放覆盖普通/语义两种后端与真假开关：false 只保留停止，普通 true 保留停止、启动和登录，语义 true 保留冷重启端口和登录。设备与语义生命周期方法均为夹具，mutation budget 为 0，没有真实停止/启动进程、登录或 Android 输入；该字段只提升 `offline`，启动/停止失败和重试边界仍需实机证据。
+`GameManager.AutoRestart` 现在只接受精确布尔值，并在原任务停止应用前 fail-closed。固定上游回放覆盖普通/语义两种后端与真假开关：false 只保留停止，普通 true 保留停止、启动和登录，语义 true 保留冷重启端口和登录。2026-08-15 又在 API 32 x86_64 专用 AVD 上执行了真实语义 true 分支：强停后约 2.2 秒提交冷启动，约 28 秒后原 ALAS 登录处理报告成功；新 PID 的独立观察为 `status=ok`、帧龄 49 ms、40 个活动 Button、0 个提取错误。默认启动只校验包结构、ABI 与观察器运行契约，不再计算或白名单游戏版本、base APK 和 IL2CPP 哈希；离线另覆盖 10.0.0、不同 IL2CPP 摘要和 split APK。已停止、启动/停止/登录失败、PID 连续变化和完整超时边界仍需实机证据，详见 [冷启动验证报告](game-manager-cold-start-validation-report.md)。
 
 `EventStory.SkipBattle` 本轮明确跳过而不提升：固定上游最终配置把它锁为 true，但运行时代码完全不读取该字段，并在剧情战斗处无条件重启应用。支持 false 需要上游提供或单独评审一套继续战斗状态机，以及覆盖代表性活动布局的确定性战斗/结算观察；当前只有故事节点语义适配，强行补分支会重写业务状态机。重新进入条件是获得该原始行为和可回放的战斗、结算夹具。
 
@@ -403,7 +403,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 57 | EventStory | EventStory | P | `SkipBattle` 在固定上游锁为 true 且无运行时消费者；false 需要新的剧情战斗状态机和多活动观察，当前仅一条入口路径，战斗转场及其他故事结构未闭环 |
 | 58 | Benchmark | Benchmark | L | 五种设备类型 x 三种测试场景的原始方法筛选与语义场景选择已离线完成；各设备真实耗时、传输不可用及截图/点击能力仍缺 live 证据 |
 | 59 | AzurLaneUncensored | AzurLaneUncensored | P | 本地 localization 路径可用；`Repository` 对应的远端同步在上游被注释，配置与能力不一致 |
-| 60 | GameManager | GameManager | L | `AutoRestart` 两值及普通/语义生命周期决策已离线完成，true 有一次实机冷重启；已停止、启动/停止/登录失败和重试上限仍未覆盖 |
+| 60 | GameManager | GameManager | L | `AutoRestart` 两值及普通/语义生命周期决策已离线完成；true 已实机强停、冷启动、原 ALAS 登录成功并独立读取新 PID 新鲜观察。默认启动不再因游戏版本/哈希更新拒绝；真实升级客户端、已停止、启动/停止/登录失败和重试上限仍未覆盖 |
 
 ## 3. 配置组字段级矩阵
 
@@ -519,7 +519,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | EventStory | `SkipBattle`（当前只允许 true） | P | 固定上游锁 true 且无字段消费者，实际始终重启跳过战斗；false 需上游/评审后的继续战斗状态机及多活动战斗、结算夹具，当前不外推完成 |
 | Benchmark | `DeviceType`=`emulator/plone_cloud_with_adb/phone_cloud_without_adb/android_phone/android_phone_vmos`; `TestScene`=`screenshot_click/screenshot/click` | L | 5 x 3 原始方法筛选及普通/语义场景决策已离线完成；仍缺各设备真实测速、不可用传输和截图/点击能力 live 证据 |
 | AzurLaneUncensored | `Repository` | P | 先决定恢复远端同步还是删除/禁用该配置；网络失败、仓库不可达、本地文件和回滚必须有明确契约 |
-| GameManager | `AutoRestart` | L | true/false 与普通/语义后端决策已离线完成；仍缺游戏已关/卡死、启动失败、停止失败、登录失败和重试上限实机闭环 |
+| GameManager | `AutoRestart` | L | true/false 与普通/语义后端决策已离线完成；true 已实机完成强停、冷启动、原 ALAS 登录与新 PID 观察。仍缺真实升级客户端、游戏已关/卡死、启动失败、停止失败、登录失败和重试上限实机闭环 |
 
 ## 4. 关键中断面与观察缺口
 

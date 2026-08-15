@@ -30,7 +30,11 @@ from alas_headless import (
     RetirementSettingsState,
     SemanticGateClosed,
 )
-from alas_headless.semantic_oracle import ActionReceipt, AdbObserverBridge
+from alas_headless.semantic_oracle import (
+    ActionReceipt,
+    AdbObserverBridge,
+    ObserverTransportError,
+)
 from alas_headless.adapter import SemanticFrameIdentity
 
 
@@ -1002,9 +1006,9 @@ class FakePackageBridge:
         self.pid = 1234
         self.calls = []
 
-    def require_package_fingerprint(self, expected):
-        self.calls.append(expected)
-        return expected
+    def require_package_compatibility(self, required_primary_abi):
+        self.calls.append(required_primary_abi)
+        return {"primary_abi": required_primary_abi}
 
 
 class AlasSemanticAdapterTests(unittest.TestCase):
@@ -1067,6 +1071,10 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         oracle.enabled = original_enabled
         self.assertFalse(adapter.appear(NamedButton("ANDROID_NO_RESPOND")))
         adapter._login_flow._context.passive_transition_until = 0.0
+        # A completed startup update can still be between Unity login surfaces.
+        # This legacy Android-dialog probe stays a passive, no-input absence
+        # result after the generic transition grace has elapsed.
+        self.assertFalse(adapter.appear(NamedButton("ANDROID_NO_RESPOND")))
         bulletin = adapter.click(NamedButton("LOGIN_ANNOUNCE"))
         self.assertFalse(adapter.appear(NamedButton("LOGIN_RETURN_SIGN")))
 
@@ -4843,7 +4851,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(
             bridge.calls,
-            [PINNED_CN_GAME_FINGERPRINT, PINNED_CN_GAME_FINGERPRINT],
+            ["x86_64", "x86_64"],
         )
 
     def test_package_gate_requires_open_bridge(self):
@@ -5037,8 +5045,10 @@ class ScriptedAdbBridge(AdbObserverBridge):
     def __init__(self, outputs):
         super().__init__("emulator-test", "com.bilibili.azurlane")
         self.outputs = outputs
+        self.calls = []
 
     def _run(self, arguments, timeout_seconds=None):
+        self.calls.append((tuple(arguments), timeout_seconds))
         try:
             return self.outputs[tuple(arguments)]
         except KeyError as exc:
@@ -5101,6 +5111,88 @@ class PackageFingerprintTests(unittest.TestCase):
         )
 
         self.assertEqual(bridge.require_package_fingerprint(expected), expected)
+
+    def test_compatibility_accepts_updated_split_package_without_hashing(self):
+        native_dir = "/data/app/~~new-token/pkg/lib/x86_64"
+        base_apk = "/data/app/~~new-token/pkg/base.apk"
+        split_apk = "/data/app/~~new-token/pkg/split_config.x86_64.apk"
+        il2cpp = native_dir + "/libil2cpp.so"
+        bridge = ScriptedAdbBridge(
+            {
+                ("shell", "dumpsys", "package", bridge_package()): (
+                    "versionCode=10000 minSdk=21\n"
+                    "versionName=10.0.0\n"
+                    "primaryCpuAbi=x86_64\n"
+                    "legacyNativeLibraryDir={0}\n".format(native_dir)
+                ),
+                ("shell", "pm", "path", bridge_package()): (
+                    "package:{0}\npackage:{1}".format(base_apk, split_apk)
+                ),
+                (
+                    "shell",
+                    "find",
+                    native_dir,
+                    "-type",
+                    "f",
+                    "-name",
+                    "libil2cpp.so",
+                    "-print",
+                ): il2cpp,
+            }
+        )
+
+        actual = bridge.require_package_compatibility("x86_64")
+
+        self.assertEqual(actual["version_name"], "10.0.0")
+        self.assertEqual(actual["version_code"], 10000)
+        self.assertEqual(actual["base_apk_path"], base_apk)
+        self.assertEqual(actual["il2cpp_path"], il2cpp)
+        self.assertFalse(
+            any(call[0][:2] == ("shell", "sha256sum") for call in bridge.calls)
+        )
+
+    def test_compatibility_rejects_only_concrete_unsupported_abi(self):
+        native_dir = "/data/app/~~new-token/pkg/lib/arm64"
+        bridge = ScriptedAdbBridge(
+            {
+                ("shell", "dumpsys", "package", bridge_package()): (
+                    "versionCode=10000 minSdk=21\n"
+                    "versionName=10.0.0\n"
+                    "primaryCpuAbi=arm64-v8a\n"
+                    "legacyNativeLibraryDir={0}\n".format(native_dir)
+                ),
+            }
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "ABI is unsupported"):
+            bridge.require_package_compatibility("x86_64")
+
+        self.assertEqual(len(bridge.calls), 1)
+
+    def test_retries_exact_device_hash_once_after_cold_start_adb_failure(self):
+        path = "/data/app/~~token/pkg/base.apk"
+        testcase = self
+
+        class HashRetryBridge(ScriptedAdbBridge):
+            def __init__(self):
+                super().__init__({})
+                self.calls = 0
+
+            def _run(self, arguments, timeout_seconds=None):
+                testcase.assertEqual(
+                    tuple(arguments), ("shell", "sha256sum", path)
+                )
+                testcase.assertEqual(timeout_seconds, 120.0)
+                self.calls += 1
+                if self.calls == 1:
+                    raise ObserverTransportError("transient adb failure")
+                return "{0}  {1}".format("a" * 64, path)
+
+        bridge = HashRetryBridge()
+        bridge._DEVICE_SHA256_RETRY_DELAY_SECONDS = 0.0
+
+        self.assertEqual(bridge._device_sha256(path), "a" * 64)
+        self.assertEqual(bridge.calls, 2)
 
     def test_rejects_non_allowlisted_fingerprint(self):
         expected = AndroidPackageFingerprint("1", 1, "x86_64", "a" * 64, "b" * 64)

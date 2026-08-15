@@ -151,7 +151,10 @@ Required behavior:
 - The ANGLE-loaded process component can discover the pinned `libil2cpp.so` across Android linker namespaces.
 - Unity object snapshots execute through a proven main-thread-safe rendezvous.
 - The protocol exposes allowlisted typed snapshots only; it has no arbitrary IL2CPP invocation endpoint.
-- Snapshot generation, scene generation, freshness, package foreground state, and version fingerprint are mandatory action gates.
+- Snapshot generation, scene generation, freshness, package/component/PID,
+  supported ABI, foreground state, and observer driver revision are mandatory
+  action gates. Installed game version and file digests are evidence fields,
+  not normal-startup allowlists.
 
 ## G4 - Game closed loop
 

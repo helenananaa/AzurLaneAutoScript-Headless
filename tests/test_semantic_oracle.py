@@ -1,6 +1,7 @@
 import copy
 import re
 import unittest
+from unittest import mock
 
 from alas_headless.semantic_oracle import (
     AdbObserverBridge,
@@ -14,6 +15,7 @@ from alas_headless.semantic_oracle import (
     MissionDisposition,
     OracleFingerprint,
     Point,
+    ObserverTransportError,
     SemanticGateClosed,
     SemanticOracle,
     SemanticTextTarget,
@@ -740,6 +742,110 @@ class SemanticOracleTests(unittest.TestCase):
                 "mFocusedActivity=ActivityRecord{abc u0 " + COMPONENT + " t42}"
             )
         )
+
+    def test_foreground_query_has_a_dedicated_busy_emulator_timeout(self):
+        bridge = AdbObserverBridge("device-1", PACKAGE)
+        bridge._run = mock.Mock(
+            return_value=(
+                "topResumedActivity=ActivityRecord{abc u0 "
+                + COMPONENT
+                + " t42}"
+            )
+        )
+
+        self.assertEqual(bridge.foreground_component(), COMPONENT)
+        bridge._run.assert_called_once_with(
+            ("shell", "dumpsys", "activity", "activities"),
+            timeout_seconds=30.0,
+        )
+
+    def test_cold_restart_requires_a_new_numeric_game_pid(self):
+        bridge = AdbObserverBridge("device-1", PACKAGE)
+        bridge.pid = 1234
+        calls = []
+        replies = iter(("", "Status: ok", "5678"))
+
+        def run(arguments, timeout_seconds=None):
+            calls.append((tuple(arguments), timeout_seconds))
+            return next(replies)
+
+        bridge._run = run
+        bridge.restart_game(COMPONENT)
+
+        self.assertEqual(bridge.pid, 5678)
+        self.assertEqual(
+            calls,
+            [
+                (("shell", "am", "force-stop", PACKAGE), 30.0),
+                (
+                    (
+                        "shell",
+                        "am",
+                        "start",
+                        "-W",
+                        "--es",
+                        "unity",
+                        "-force-gfx-st",
+                        "-n",
+                        COMPONENT,
+                    ),
+                    60.0,
+                ),
+                (("shell", "pidof", PACKAGE), 30.0),
+            ],
+        )
+
+    def test_cold_restart_rejects_an_unchanged_pid(self):
+        bridge = AdbObserverBridge("device-1", PACKAGE)
+        bridge.pid = 1234
+        replies = iter(("", "Status: ok", "1234"))
+        bridge._run = lambda arguments, timeout_seconds=None: next(replies)
+
+        with self.assertRaisesRegex(
+            ObserverTransportError, "PID did not change"
+        ):
+            bridge.restart_game(COMPONENT)
+
+    def test_cold_restart_accepts_force_stop_timeout_only_when_pid_is_absent(self):
+        bridge = AdbObserverBridge("device-1", PACKAGE)
+        bridge.pid = 1234
+        calls = []
+
+        def run(arguments, timeout_seconds=None):
+            calls.append((tuple(arguments), timeout_seconds))
+            if len(calls) == 1:
+                raise ObserverTransportError("scripted host timeout")
+            if len(calls) == 2:
+                return ""
+            if len(calls) == 3:
+                return "Status: ok"
+            return "5678"
+
+        bridge._run = run
+        bridge.restart_game(COMPONENT)
+
+        self.assertEqual(bridge.pid, 5678)
+        self.assertEqual(
+            calls[1],
+            (("shell", "pidof", PACKAGE), 30.0),
+        )
+
+    def test_cold_restart_waits_for_timed_out_force_stop_pid_to_disappear(self):
+        bridge = AdbObserverBridge("device-1", PACKAGE)
+        bridge.pid = 1234
+        replies = iter(("1234", "1234", "", "Status: ok", "5678"))
+
+        def run(arguments, timeout_seconds=None):
+            if tuple(arguments) == ("shell", "am", "force-stop", PACKAGE):
+                raise ObserverTransportError("scripted host timeout")
+            return next(replies)
+
+        bridge._run = run
+        with mock.patch("alas_headless.semantic_oracle.time.sleep") as sleep:
+            bridge.restart_game(COMPONENT)
+
+        self.assertEqual(bridge.pid, 5678)
+        self.assertEqual(sleep.call_count, 2)
 
     def test_read_state_uses_atomic_endpoint_and_falls_back_for_old_observer(self):
         backend = FakeBackend([])
@@ -4223,6 +4329,31 @@ class SemanticOracleTests(unittest.TestCase):
         backend.ui["texts"][0]["text"] = "正在下载未知文件"
         self.assertFalse(oracle.login_update_in_progress())
 
+    def test_stale_login_update_panel_is_passive_and_path_exact(self):
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "正在检查更新...",
+                    "root/Overlay/UIMain/UpdatePanel/progressInfo",
+                )
+            ],
+            age_ms=3_000,
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.stale_login_update_in_progress())
+        self.assertEqual(backend.taps, [])
+        self.assertFalse(oracle._login_update_seen)
+
+        backend.ui["texts"][0]["text"] = "decode-lost-status"
+        self.assertTrue(oracle.stale_login_update_in_progress())
+        backend.ui["texts"][0]["text"] = ""
+        self.assertFalse(oracle.stale_login_update_in_progress())
+        backend.ui["texts"][0]["text"] = "正在检查更新..."
+        backend.ui["age_ms"] = 20
+        self.assertFalse(oracle.stale_login_update_in_progress())
+
     def test_login_update_download_prompt_wins_over_background_check_status(self):
         dialog = "root/Overlay/UIMain/DialogPanel/dialog/"
         backend = FakeBackend(
@@ -4278,7 +4409,7 @@ class SemanticOracleTests(unittest.TestCase):
         backend.ui["texts"][0]["text"] = "正在进入游戏..."
         self.assertFalse(oracle.login_update_in_progress())
 
-    def test_update_completion_requests_cold_restart_without_button_tap(self):
+    def test_update_completion_waits_for_client_transition_without_cold_restart(self):
         backend = FakeBackend([])
         backend.ui = make_ui(
             [
@@ -4290,8 +4421,7 @@ class SemanticOracleTests(unittest.TestCase):
         )
         oracle = make_oracle(backend)
 
-        self.assertFalse(oracle.login_update_in_progress())
-        self.assertTrue(oracle.login_update_restart_required())
+        self.assertTrue(oracle.login_update_in_progress())
         self.assertFalse(oracle.login_update_restart_required())
         self.assertEqual(backend.taps, [])
 

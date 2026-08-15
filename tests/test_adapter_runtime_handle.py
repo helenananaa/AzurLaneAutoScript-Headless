@@ -1,7 +1,11 @@
 import unittest
 from unittest import mock
 
-from alas_headless.adapter import AdbRuntimeHandle, RuntimeHandlePort
+from alas_headless.adapter import (
+    AdbRuntimeHandle,
+    RuntimeHandlePort,
+    semantic_runtime_fingerprint_sha256,
+)
 from alas_headless.semantic_oracle import (
     AdbObserverBridge,
     ObserverTransportError,
@@ -110,7 +114,10 @@ class AdbRuntimeHandleTests(unittest.TestCase):
         self.assertEqual(
             run.call_args_list,
             [
-                mock.call(("shell", "dumpsys", "activity", "activities")),
+                mock.call(
+                    ("shell", "dumpsys", "activity", "activities"),
+                    timeout_seconds=30.0,
+                ),
                 mock.call(("shell", "input", "tap", "12", "34")),
                 mock.call(
                     (
@@ -156,6 +163,30 @@ class AdbRuntimeHandleTests(unittest.TestCase):
         ):
             with self.subTest(name=name):
                 self.assertFalse(hasattr(handle, name))
+
+    def test_runtime_identity_depends_on_abi_not_game_version_or_hash(self):
+        common = {
+            "package": "com.example.game",
+            "component": "com.example.game/.Main",
+            "driver_revision": "b" * 40,
+        }
+
+        x86_64 = semantic_runtime_fingerprint_sha256(
+            **common,
+            required_primary_abi="x86_64",
+        )
+        arm64 = semantic_runtime_fingerprint_sha256(
+            **common,
+            required_primary_abi="arm64-v8a",
+        )
+
+        self.assertRegex(x86_64, r"^[0-9a-f]{64}$")
+        self.assertNotEqual(x86_64, arm64)
+        with self.assertRaisesRegex(ValueError, "primary ABI"):
+            semantic_runtime_fingerprint_sha256(
+                **common,
+                required_primary_abi="",
+            )
 
 
 if __name__ == "__main__":

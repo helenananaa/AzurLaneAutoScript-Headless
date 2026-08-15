@@ -17,7 +17,7 @@ Unity/IL2CPP game
       -> bounded typed Unity UI/scene snapshots and RectTransform bounds
         -> credential-checked, versioned local socket protocol
       -> fail-closed SemanticOracle
-        -> independent installed-package fingerprint gate
+        -> independent installed-package compatibility gate
         -> reviewed ALAS resource-name mapping
         -> ADB input only after foreground/freshness/generation/blocker gates
 
@@ -39,11 +39,14 @@ The graphics driver is loaded in-process, but Android places the ANGLE APK in an
 
 The local protocol is not a generic debugging bridge. It uses an abstract local
 socket, validates `SO_PEERCRED`, publishes fixed snapshot and Button schemas,
-and rejects unknown requests. The controller independently hashes the installed
-base APK and `libil2cpp.so`, requires the exact foreground Activity and PID,
-checks freshness and coherent monotonic generations, resolves one unique
-reviewed path, validates point-inside-bounds, and applies known-overlay blockers
-before an action can be considered.
+and rejects unknown requests. The controller independently requires the exact
+package/component, supported ABI, one base APK and one discoverable
+`libil2cpp.so`; installed game versions and file digests are not startup
+allowlists. It then requires the exact foreground Activity and PID, checks
+freshness and coherent monotonic generations, resolves one unique reviewed
+path, validates point-inside-bounds, and applies known-overlay blockers before
+an action can be considered. The pinned ANGLE observer revision and protocol
+remain exact runtime boundaries.
 
 G3 proves the rendezvous on the Unity contract. G4 independently verified that
 the pinned game accepts `-force-gfx-st`, exposes the allowlisted IL2CPP APIs,

@@ -410,18 +410,28 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   resource-shortfall UI, and post-submit receipts remain incomplete; no further
   destructive replay was authorized or attempted.
 
-### Game Manager restart configuration: offline contract passed
+### Game Manager restart configuration: live cold restart passed
 
 - `GameManager.AutoRestart` admits exact booleans before the original task can
   stop the app. Invalid values fail before normal or semantic lifecycle calls.
 - Pinned replay preserves stop-only behavior for `false`, stop/start/login for
   normal `true`, and semantic cold-restart/login for Headless `true`, covering
   both backend modes without replacing the original task entry.
-- Device and semantic lifecycle methods are fixtures. Mutation budget is `0`;
-  no real process stop, start, login, or Android input occurs.
-- The field moves only to `offline=complete`. Existing live evidence covers
-  one enabled cold restart; disabled mode, already-stopped state, start/stop
-  failures, login failure, and retry bounds remain live gaps.
+- Deterministic replay still covers both values and both backends without
+  mutation. In addition, a user-authorized API 32 x86_64 run on 2026-08-15
+  exercised the real semantic `true` branch: force-stop began at 22:24:44,
+  cold launch was submitted at 22:24:46, and original ALAS reported login
+  success at 22:25:12.
+- The post-login game remained foreground on the new PID. An independent
+  observer read returned status `ok`, generation `1921`, frame age `49 ms`,
+  40 active Buttons, and zero extraction errors.
+- Normal startup now checks package shape and ABI but does not hash or pin the
+  installed game version. Tests accept a synthetic updated 10.0.0 split APK
+  and reject any unexpected `sha256sum` in the compatibility path. Exact
+  Android/ANGLE/observer boundaries remain pinned.
+- Disabled mode, already-stopped state, stop/start/login failures, repeated PID
+  turnover, and the full observer-start timeout remain live gaps. See the
+  [cold-start validation report](game-manager-cold-start-validation-report.md).
 
 ### EventStory SkipBattle: explicitly deferred
 
@@ -2027,10 +2037,13 @@ remaining limitations.
   raycast identity. It checks schema, package, PID, peer UID, driver revision,
   foreground component, freshness, generation coherence, unique path mapping,
   bounds, and known blockers.
-- The ALAS-name bridge maps only 14 reviewed aliases for seven main-page
-  semantics. It independently verifies version, ABI, base APK, and IL2CPP
-  hashes. Unmapped assets and raw multi-click/long-click/swipe/drag calls raise
-  instead of injecting coordinates.
+- The ALAS-name bridge in this historical G4 run mapped only 14 reviewed
+  aliases for seven main-page semantics and used the then-current strict game
+  fingerprint gate. Current normal startup instead checks package/component,
+  ABI and IL2CPP layout without pinning the mutable game version or file
+  digests; the observer revision and action gates remain exact. Unmapped assets
+  and raw multi-click/long-click/swipe/drag calls raise instead of injecting
+  coordinates.
 
 Evidence is in
 `evidence/g4-game-init-20260808T160921Z-emulator-5580`,

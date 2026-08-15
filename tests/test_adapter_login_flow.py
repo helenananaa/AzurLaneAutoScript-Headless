@@ -137,7 +137,7 @@ class LoginFlowFacadeParityTests(unittest.TestCase):
     @staticmethod
     def new_unknown_compat(flow, resource):
         try:
-            return flow.observe_unknown()
+            return flow.observe_unsupported_presence(resource)
         except UnknownObservationError as exc:
             raise AlasSemanticUnmapped(
                 "ALAS resource is not semantically mapped: {0}".format(resource)

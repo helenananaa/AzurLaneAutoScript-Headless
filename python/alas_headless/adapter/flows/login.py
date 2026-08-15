@@ -279,6 +279,21 @@ class LoginFlow:
             return False
         raise UnknownObservationError()
 
+    def observe_unsupported_presence(self, resource: str) -> bool:
+        """Bound an explicitly non-semantic login presence probe to absence.
+
+        Legacy login code probes a handful of screenshot assets which have no
+        Unity semantic equivalent, including Android-system UI.  The adapter
+        must retain package identity enforcement but cannot prove the asset or
+        safely dismiss it, so the only safe result is an inactive match.
+        """
+        if resource not in LOGIN_UNSUPPORTED_PRESENCE_RESOURCES:
+            raise UnknownObservationError()
+        self._package_gate()
+        if self._context is None:
+            raise UnknownObservationError()
+        return False
+
     def goto_main_target(self) -> str | None:
         reader = self._reader()
         targets = []

@@ -26,7 +26,6 @@ from .runtime_command import (
 from .runtime_trace import RuntimeTraceRecorder
 from .semantic_oracle import (
     AdbObserverBridge,
-    AndroidPackageFingerprint,
     BUTTON_SCHEMA,
     OBSERVER_SCHEMA,
     request_observer_state,
@@ -528,7 +527,16 @@ class AdbAttachedBackend(RuntimeBackend):
         bridge = self._bridges.get(instance_id)
         if bridge is None:
             raise RuntimeBackendNotReady("observer-bridge-not-open")
-        package_fingerprint = bridge.package_fingerprint()
+        document = self._runtime_lock.document
+        package_compatibility = bridge.require_package_compatibility(
+            document["game"]["abi"]
+        )
+        # The libil2cpp digest remains useful as observed evidence, but it is
+        # no longer compared with the runtime lock.  Game updates therefore do
+        # not reject an otherwise working observer/runtime combination.
+        il2cpp_sha256 = bridge._device_sha256(
+            str(package_compatibility["il2cpp_path"])
+        )
         android_fingerprint = self._require_success(
             self._adb(
                 "android-build-fingerprint",
@@ -578,16 +586,6 @@ class AdbAttachedBackend(RuntimeBackend):
         if angle_sha256_match is None:
             raise RuntimeIdentityMismatch("angle-package-hash-malformed")
         angle_sha256 = angle_sha256_match.group(1).lower()
-        document = self._runtime_lock.document
-        expected_package = AndroidPackageFingerprint(
-            version_name=document["game"]["version_name"],
-            version_code=document["game"]["version_code"],
-            primary_abi=document["game"]["abi"],
-            base_apk_sha256=document["game"]["base_apk_sha256"],
-            il2cpp_sha256=document["game"]["libil2cpp_sha256"],
-        )
-        if package_fingerprint != expected_package:
-            raise RuntimeIdentityMismatch("game-package-fingerprint-mismatch")
         if (
             android_fingerprint != document["android"]["build_fingerprint"]
             or android_abi != document["android"]["abi"]
@@ -600,9 +598,9 @@ class AdbAttachedBackend(RuntimeBackend):
             "backend": self.profile.backend.value,
             "host_class": self.host_class,
             "android_fingerprint": android_fingerprint,
-            "game_version": package_fingerprint.version_name,
-            "game_abi": package_fingerprint.primary_abi,
-            "libil2cpp_sha256": package_fingerprint.il2cpp_sha256,
+            "game_version": str(package_compatibility["version_name"]),
+            "game_abi": str(package_compatibility["primary_abi"]),
+            "libil2cpp_sha256": il2cpp_sha256,
             "angle_sha256": angle_sha256,
             "observer_schema": document["angle"]["observer_schema"],
             "core_commit": document["core"]["core_commit"],
