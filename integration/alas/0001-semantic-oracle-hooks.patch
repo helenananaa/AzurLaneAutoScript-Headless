@@ -7759,3 +7759,53 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
  
          # Reset dock filters
          logger.hr('Awaken run exit', level=1)
+diff --git a/module/event_hospital/combat.py b/module/event_hospital/combat.py
+--- a/module/event_hospital/combat.py
++++ b/module/event_hospital/combat.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_hospital_config
++
+ from module.base.decorator import run_once
+ from module.base.timer import Timer
+ from module.campaign.campaign_event import CampaignEvent
+@@ -38,9 +40,13 @@ class HospitalCombat(Combat, HospitalUI, CampaignEvent):
+     def combat_preparation(self, balance_hp=False, emotion_reduce=False, auto='combat_auto', fleet_index=1):
+         """
+         Args:
+             balance_hp (bool):
+             emotion_reduce (bool):
+             auto (bool):
+             fleet_index (int):
+         """
++        hospital_config = validate_alas_hospital_config(
++            use_recommend_fleet=self.config.Hospital_UseRecommendFleet,
++        )
++
+         logger.info('Combat preparation.')
+@@ -82,7 +89,7 @@ class HospitalCombat(Combat, HospitalUI, CampaignEvent):
+                 continue
+             # Handle fleet preparation
+             if self.appear(RAID_FLEET_PREPARATION, offset=(30, 30), interval=2):
+-                if self.handle_fleet_recommend(recommend=self.config.Hospital_UseRecommendFleet):
++                if self.handle_fleet_recommend(recommend=hospital_config.use_recommend_fleet):
+                     self.interval_clear(RAID_FLEET_PREPARATION)
+                     continue
+                 self.device.click(RAID_FLEET_PREPARATION)
+diff --git a/module/event_hospital/hospital.py b/module/event_hospital/hospital.py
+--- a/module/event_hospital/hospital.py
++++ b/module/event_hospital/hospital.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_hospital_config
++
+ from module.base.timer import Timer
+ from module.base.utils import random_rectangle_vector
+ from module.config.config import TaskEnd
+@@ -232,4 +234,8 @@ class Hospital(HospitalClue, HospitalCombat):
+     def run(self):
++        validate_alas_hospital_config(
++            use_recommend_fleet=self.config.Hospital_UseRecommendFleet,
++        )
++
+         # Check if event available
+         if self.event_time_limit_triggered():
+             self.config.task_stop()

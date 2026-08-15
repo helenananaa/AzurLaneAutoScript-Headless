@@ -89,6 +89,11 @@
       "order": 18,
       "path": "integration/alas/series/0160-awaken-config-contract.patch",
       "sha256": "62a788b75d7c0c4b62676e0a7d95171945624623e22acf9e7bacf4ce56664d7a"
+    },
+    {
+      "order": 19,
+      "path": "integration/alas/series/0165-hospital-config-contract.patch",
+      "sha256": "d611eba4901a3a5474359e7c07fdda4e59a090bc748df0af2e8a4fbbd4d5ddfb"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

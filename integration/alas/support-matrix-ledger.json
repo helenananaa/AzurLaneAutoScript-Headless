@@ -3902,21 +3902,26 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_hospital_config.py",
+        "python/alas_headless/alas_hospital_config_replay.py",
+        "integration/alas/series/0165-hospital-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Hospital"
       ],
       "path": "Hospital.UseRecommendFleet",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 离线回放",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
@@ -7656,8 +7661,8 @@
         "Emotion"
       ],
       "name": "Hospital",
-      "note": "医院专用入口、推荐舰队开关和完整状态机缺适配",
-      "status": "M"
+      "note": "推荐舰队开关已在医院入口与战斗准备入口离线回放并提前 fail-closed；医院页面、候选、推荐动作、战斗和结算观察/输入仍缺适配",
+      "status": "O"
     },
     {
       "groups": [
@@ -10094,6 +10099,19 @@
       ],
       "field": "Awaken.LevelCap",
       "note": "Both pinned level caps preserve the original array-first timeout split and chip fallback; malformed values fail before any awaken-run intent is reached."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_hospital_config.py",
+        "python/alas_headless/alas_hospital_config_replay.py",
+        "integration/alas/series/0165-hospital-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "Hospital.UseRecommendFleet",
+      "note": "Both exact boolean values preserve the original in-use, recommendation, and manual-takeover decisions; malformed values fail before Hospital UI or combat-preparation work, with the recommendation final-input boundary replaced by a recorder."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -10106,9 +10124,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "f67557295812717917e0c011f1f50748e0a691484d7e5200eb2c27888fe39dc6",
-      "manifest_sha256": "5029eaad342fffb5a3b6c9f1c542e987e32c8e2bc3d1c4c3f1aed9664e7463af",
-      "member_count": 18
+      "combined_sha256": "79c5fa1fd8657bc20336db3b31b847208189b018c441c21722b76d787ada2c70",
+      "manifest_sha256": "028f13eb1c581e9eb1bbaf8211467b0beeecb164c4c8688d835e77ce018c8ad5",
+      "member_count": 19
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

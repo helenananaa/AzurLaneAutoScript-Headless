@@ -45,10 +45,10 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 |---|---:|---|
 | ✅ 完整支持（`F`） | **0 / 60** | 暂无 |
 | 🟢 主路径已完成、全配置未完成（`L`） | **13 / 60** | Benchmark、Commission、Daily、Dorm、Event、EventA、Exercise、Gacha、GameManager、Minigame、Research、Restart、Tactical |
-| 🧪 仅离线完成（`O`） | **2 / 60** | Awaken、EventB |
+| 🧪 仅离线完成（`O`） | **3 / 60** | Awaken、EventB、Hospital |
 | 🟡 部分完成（`P`） | **17 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、Main2、Main3、OpsiDaemon、OpsiGeneral、Reward、ShopOnce |
 | 🧱 已到边界、尚未完成（`B`） | **18 / 60** | Hard、Main、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
-| 🔴 尚未完成（`M`） | **10 / 60** | Coalition、CoalitionSp、GemsFarming、Guild、Hospital、Meowfficer、OpsiStronghold、PrivateQuarters、Raid、RaidDaily |
+| 🔴 尚未完成（`M`） | **9 / 60** | Coalition、CoalitionSp、GemsFarming、Guild、Meowfficer、OpsiStronghold、PrivateQuarters、Raid、RaidDaily |
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
 
@@ -379,7 +379,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 10 | Event | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | 当前 A1 默认路径闭环；其他关卡和全部共用地图配置仍按字段验收 |
 | 11 | Event2 | 同 Event | P | 与 Event 共用逻辑，但第二活动配置实例没有独立验收 |
 | 12 | Raid | Scheduler, Raid, Campaign, StopCondition, Emotion | M | 难度、票券、活动入口、次数和结算缺适配 |
-| 13 | Hospital | Scheduler, Hospital, StopCondition, Emotion | M | 医院专用入口、推荐舰队开关和完整状态机缺适配 |
+| 13 | Hospital | Scheduler, Hospital, StopCondition, Emotion | O | 推荐舰队开关已在医院入口与战斗准备入口离线回放并提前 fail-closed；医院页面、候选、推荐动作、战斗和结算观察/输入仍缺适配 |
 | 14 | WarArchives | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | B | 能观察入口/Data Key；48 个档案值的进入、消耗、地图和结算均未形成覆盖台账 |
 | 15 | CoalitionSp | Scheduler, Campaign, Coalition, StopCondition, Emotion | M | SP 共斗专用状态机缺适配 |
 | 16 | EventA | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | A-D StageFilter/LastStage 离线轮转契约已完成；当前仅 A1-A3 默认路径有实机闭环，其余分区和共用地图配置仍未完整覆盖 |
@@ -467,7 +467,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | TaskBalancer | `Enable`; `CoinLimit`; `TaskCall`=`Main/Main2/Main3` | P | 开关、金币边界和三个目标任务切换顺序已离线完成；真实任务调用、失败恢复及防调度环仍缺 |
 | Coalition | `Mode`=`easy/normal/hard/sp`; `Fleet`=`single/multi` | M | 四难度、单/多舰队、次数/票券不足、战斗、结算和 SP 特殊入口 |
 | Raid | `Mode`=`easy/normal/hard/ex`; `UseTicket` | M | 四难度、票券真假、无票券、次数耗尽、推荐舰队和结算 |
-| Hospital | `UseRecommendFleet` | M | 开关两值、推荐不可用、手动舰队、活动结束和结算 |
+| Hospital | `UseRecommendFleet` | O | 开关两值已回放 in-use、推荐与手动接管原分支，错误值在医院 UI 前拒绝；仍需实际候选、推荐、活动结束和结算观察/输入 |
 | EventDaily | `StageFilter`（A/B/C/D 各自 1-3 优先级字符串）；`LastStage` | P | 四分区过滤、缺脚本、无匹配、未解锁、游标恢复及跨日重置已离线覆盖；仍需 B-D 实机轮转和活动切换后的持久化收据 |
 | RaidDaily | `StageFilter`=`hard > normal > easy`（自由优先级字符串） | M | 各难度可用组合、过滤命中/无命中/非法值、次数耗尽和每日重置 |
 
@@ -648,8 +648,8 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **149 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **74 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
-| ⊘ 当前未适配或无效 | **55 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
+| 🧪 只有离线路径证据 | **75 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ⊘ 当前未适配或无效 | **54 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
@@ -806,7 +806,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `GuildShop.Refresh` | ShopOnce | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Hard.HardFleet` | Hard | type=select; display=default | options: 1, 2; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Hard.HardStage` | Hard | type=input; display=default | input/default: "11-4" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Hospital.UseRecommendFleet` | Hospital | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `Hospital.UseRecommendFleet` | Hospital | type=checkbox; display=default | input/default: true | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `HpControl.HpBalanceThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.2 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `HpControl.HpBalanceWeight` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: "1000, 1000, 1000" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `HpControl.LowHpRetreatThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.3 | `P`/🧪 离线路径 | ☑ | ◐ | ☐ | ☑ | ☐ |

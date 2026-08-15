@@ -4,6 +4,20 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-15
 
+### Hospital: recommendation switch replayed before any UI work
+
+- `Hospital.UseRecommendFleet` is now exact-boolean and fail-closed at both
+  `Hospital.run()` and `HospitalCombat.combat_preparation()`. Invalid values
+  stop before the Hospital UI path and before the preparation loop can inspect
+  or click a fleet surface.
+- Recorder-only replay executes the original occupied-fleet skip, enabled
+  recommendation, and disabled/manual-takeover decisions. It also proves the
+  configuration value reaches the original preparation branch in both boolean
+  states; the recommendation final-input boundary is a recorder, not a device.
+- Hospital navigation, candidates, recommendation clicks, combat, rewards,
+  postconditions, observation, and all Android input remain unadapted. This is
+  an offline-only field promotion with a zero mutation budget.
+
 ### Awaken: source-bound two-setting dispatcher replay
 
 - `Awaken.LevelCap` and `Awaken.Favourite` now have an exact, fail-closed
