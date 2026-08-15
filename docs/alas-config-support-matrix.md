@@ -648,8 +648,8 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **149 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **93 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
-| ⊘ 当前未适配或无效 | **36 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
+| 🧪 只有离线路径证据 | **102 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ⊘ 当前未适配或无效 | **27 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
@@ -826,15 +826,15 @@ python scripts/python/verify_alas_support_matrix.py `
 | `MedalShop2.RETROFIT_T1` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MedalShop2.RETROFIT_T2` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MedalShop2.RETROFIT_T3` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Meowfficer.BuyAmount` | Meowfficer | type=input; display=default | input/default: 1 | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `Meowfficer.FortChoreMeowfficer` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `Meowfficer.OverflowCoins` | Meowfficer | type=input; display=default | input/default: -1 | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `MeowfficerTrain.Enable` | Meowfficer | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `MeowfficerTrain.EnhanceIndex` | Meowfficer | type=input; display=default | input/default: 1 | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `MeowfficerTrain.MaxFeedLevel` | Meowfficer | type=input; display=default | input/default: 5 | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `MeowfficerTrain.Mode` | Meowfficer | type=select; display=default | options: "once_a_day", "seamlessly"; default: "seamlessly" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `MeowfficerTrain.RetainTalentedGold` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `MeowfficerTrain.RetainTalentedPurple` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `Meowfficer.BuyAmount` | Meowfficer | type=input; display=default | input/default: 1 | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Meowfficer.FortChoreMeowfficer` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Meowfficer.OverflowCoins` | Meowfficer | type=input; display=default | input/default: -1 | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MeowfficerTrain.Enable` | Meowfficer | type=checkbox; display=default | input/default: false | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MeowfficerTrain.EnhanceIndex` | Meowfficer | type=input; display=default | input/default: 1 | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MeowfficerTrain.MaxFeedLevel` | Meowfficer | type=input; display=default | input/default: 5 | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MeowfficerTrain.Mode` | Meowfficer | type=select; display=default | options: "once_a_day", "seamlessly"; default: "seamlessly" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MeowfficerTrain.RetainTalentedGold` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MeowfficerTrain.RetainTalentedPurple` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MeritShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Cube" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `MeritShop.Refresh` | ShopOnce | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OldRetire.N` | General | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

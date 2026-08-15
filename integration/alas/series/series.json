@@ -114,6 +114,11 @@
       "order": 23,
       "path": "integration/alas/series/0185-guild-config-contract.patch",
       "sha256": "36a0bdb71d04ee0f4e356061103dd9d05eeccbf79a77c8994b305e6f11a6b810"
+    },
+    {
+      "order": 24,
+      "path": "integration/alas/series/0190-meowfficer-config-contract.patch",
+      "sha256": "0b1eef685775f49d2ed300325f1576f4626000475ccb16c0a09058db360f5786"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -4529,173 +4529,218 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_meowfficer_config.py",
+        "python/alas_headless/alas_meowfficer_config_replay.py",
+        "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=input; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "Meowfficer.BuyAmount",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: 1"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_meowfficer_config.py",
+        "python/alas_headless/alas_meowfficer_config_replay.py",
+        "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "Meowfficer.FortChoreMeowfficer",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_meowfficer_config.py",
+        "python/alas_headless/alas_meowfficer_config_replay.py",
+        "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=input; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "Meowfficer.OverflowCoins",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: -1"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_meowfficer_config.py",
+        "python/alas_headless/alas_meowfficer_config_replay.py",
+        "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.Enable",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_meowfficer_config.py",
+        "python/alas_headless/alas_meowfficer_config_replay.py",
+        "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=input; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.EnhanceIndex",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: 1"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_meowfficer_config.py",
+        "python/alas_headless/alas_meowfficer_config_replay.py",
+        "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=input; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.MaxFeedLevel",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: 5"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_meowfficer_config.py",
+        "python/alas_headless/alas_meowfficer_config_replay.py",
+        "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=select; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.Mode",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "options: \"once_a_day\", \"seamlessly\"; default: \"seamlessly\""
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_meowfficer_config.py",
+        "python/alas_headless/alas_meowfficer_config_replay.py",
+        "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.RetainTalentedGold",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_meowfficer_config.py",
+        "python/alas_headless/alas_meowfficer_config_replay.py",
+        "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.RetainTalentedPurple",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
@@ -10331,9 +10376,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "7fee2c8d15bb525a54afd50084e8f64b5a96437a3eb528fe81917256c2f09d97",
-      "manifest_sha256": "88031bea2f9e7b293542f109c572aa712abc0fca3cdc82fc6efdec1d8d942ff8",
-      "member_count": 23
+      "combined_sha256": "cc7a47dd6067b205b14afd80472374f6e0af83c0da61732b263698e118caef31",
+      "manifest_sha256": "3ab2b684f3d1cdf3c2be9d2eb7f7bb091dd9c7f66be9ca90d111b3fd6baf0415",
+      "member_count": 24
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

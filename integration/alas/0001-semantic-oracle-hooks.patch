@@ -8272,3 +8272,67 @@ diff --git a/module/guild/operations.py b/module/guild/operations.py
                      result = self._guild_operations_boss_combat()
                  else:
                      logger.info('Auto-battle disabled, play manually to complete this Guild Task')
+diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
+--- a/module/meowfficer/meowfficer.py
++++ b/module/meowfficer/meowfficer.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_meowfficer_config
++
+ from module.meowfficer.buy import MeowfficerBuy
+ from module.meowfficer.fort import MeowfficerFort
+ from module.meowfficer.train import MeowfficerTrain
+@@ -33,10 +35,21 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+             in: Any page
+             out: page_meowfficer
+         """
+-        if self.config.Meowfficer_BuyAmount <= 0 \
+-                and self.config.Meowfficer_OverflowCoins < 0 \
+-                and not self.config.Meowfficer_FortChoreMeowfficer \
+-                and not self.config.MeowfficerTrain_Enable:
++        meowfficer_config = validate_alas_meowfficer_config(
++            buy_amount=self.config.Meowfficer_BuyAmount,
++            fort_chore_meowfficer=self.config.Meowfficer_FortChoreMeowfficer,
++            overflow_coins=self.config.Meowfficer_OverflowCoins,
++            train_enable=self.config.MeowfficerTrain_Enable,
++            train_mode=self.config.MeowfficerTrain_Mode,
++            retain_talented_gold=self.config.MeowfficerTrain_RetainTalentedGold,
++            retain_talented_purple=self.config.MeowfficerTrain_RetainTalentedPurple,
++            enhance_index=self.config.MeowfficerTrain_EnhanceIndex,
++            max_feed_level=self.config.MeowfficerTrain_MaxFeedLevel,
++        )
++        if meowfficer_config.buy_amount <= 0 \
++                and meowfficer_config.overflow_coins < 0 \
++                and not meowfficer_config.fort_chore_meowfficer \
++                and not meowfficer_config.train_enable:
+             self.config.Scheduler_Enable = False
+             self.config.task_stop()
+ 
+@@ -44,15 +57,15 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+         self.wait_meowfficer_buttons()  # Wait for the ui to load fully
+ 
+-        if self.config.Meowfficer_BuyAmount > 0 \
+-                or self.config.Meowfficer_OverflowCoins >= 0:
++        if meowfficer_config.buy_amount > 0 \
++                or meowfficer_config.overflow_coins >= 0:
+             self.meow_buy()
+-        if self.config.Meowfficer_FortChoreMeowfficer:
++        if meowfficer_config.fort_chore_meowfficer:
+             self.meow_fort()
+ 
+         # Train
+-        if self.config.MeowfficerTrain_Enable:
++        if meowfficer_config.train_enable:
+             self.meow_train()
+-            if self.config.MeowfficerTrain_Mode == 'seamlessly':
++            if meowfficer_config.train_mode == 'seamlessly':
+                 self.meow_enhance()
+             elif self.meow_is_sunday():
+                 self.meow_enhance()
+@@ -61,6 +74,6 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+ 
+         # Scheduler
+-        if self.config.MeowfficerTrain_Enable:
++        if meowfficer_config.train_enable:
+             # Meowfficer training duration:
+             # - Blue, 2.0h ~ 2.5h
+             # - Purple, 5.5h ~ 6.5h
