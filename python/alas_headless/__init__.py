@@ -68,6 +68,10 @@ from .alas_supply_pack_config_contract import (
     AlasSupplyPackConfigSnapshot,
     validate_alas_supply_pack_config,
 )
+from .alas_general_shop_config_contract import (
+    AlasGeneralShopCustomItemsConfigSnapshot,
+    validate_alas_general_shop_custom_items_config,
+)
 from .alas_data_key_config_contract import (
     AlasDataKeyConfigSnapshot,
     validate_alas_data_key_config,

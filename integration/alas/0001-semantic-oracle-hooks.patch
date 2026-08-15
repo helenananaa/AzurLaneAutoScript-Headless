@@ -3080,6 +3080,30 @@ index 93b011bb..cd28a37f 100644
          if self.ui_get_current_page() == page_munitions:
              logger.info(f'Already at {page_munitions}')
              return
+diff --git a/module/shop/shop_general.py b/module/shop/shop_general.py
+index 48dff114..b46cb1a4 100644
+--- a/module/shop/shop_general.py
++++ b/module/shop/shop_general.py
+@@ -121,11 +121,17 @@ class GeneralShop_250814(ShopClerk, ShopUI, ShopStatus):
+         Returns:
+             bool: whether item is custom
+         """
+-        if self.config.GeneralShop_ConsumeCoins and self._currency >= 550000:
++        from alas_headless import validate_alas_general_shop_custom_items_config
++
++        custom_items_config = validate_alas_general_shop_custom_items_config(
++            consume_coins=self.config.GeneralShop_ConsumeCoins,
++            buy_skin_box=self.config.GeneralShop_BuySkinBox,
++        )
++        if custom_items_config.consume_coins and self._currency >= 550000:
+             if item.cost == 'Coins':
+                 return True
+ 
+-        if self.config.GeneralShop_BuySkinBox:
++        if custom_items_config.buy_skin_box:
+             if (not item.is_known_item()) and item.amount == 1 and item.cost == 'Coins' and item.price == 7000:
+                 # check a custom item that cannot be template matched as color
+                 # and design constantly changes i.e. equip skin box
 diff --git a/module/shipyard/shipyard_reward.py b/module/shipyard/shipyard_reward.py
 index 9cb098b8..8f5fb97a 100644
 --- a/module/shipyard/shipyard_reward.py

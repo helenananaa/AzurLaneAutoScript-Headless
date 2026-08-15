@@ -38,7 +38,7 @@
     {
       "order": 8,
       "path": "integration/alas/series/0060-shop-flow-ports.patch",
-      "sha256": "9c3ba305464921aee432f9c62b641675b70df31bb8dd131671b95d934152e448"
+      "sha256": "743c0620b5d931807b5211339907766b9e94a45e7d352602a776b383eefb7f2a"
     },
     {
       "order": 9,

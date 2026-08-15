@@ -650,6 +650,18 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
   or Android input. Thirty-one fields now have complete offline classification.
+
+### GeneralShop custom-item choices: offline predicate contract passed
+
+- `GeneralShop.ConsumeCoins` and `GeneralShop.BuySkinBox` accept exact booleans
+  before the original `shop_check_custom_item()` predicate reads item state.
+  Replay covers the 550,000-coin boundary, custom skin-box price/amount/
+  known-item checks, and both disabled branches; malformed values fail before
+  item inspection.
+- The replay contains no `shop_buy`, refresh, currency mutation, confirmation,
+  or Android input. Both fields move only to `offline=complete`; real purchase
+  eligibility, filtering, refresh, balances, confirmation, and receipts remain
+  unverified.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and
