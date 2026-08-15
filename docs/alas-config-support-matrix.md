@@ -292,11 +292,11 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiMonthBoss.Mode` 精确接受 `normal/normal_hard`，`CheckAdaptability` 精确接受布尔值。回放直接编译并执行固定上游 `clear_month_boss()` 与 `month_boss_delay()`，保留普通/困难入口选择、普通完成后继续困难、困难已完成跳过、`203/203/156` 适应性阈值及不足时延迟停止的原顺序。非法值在任务、地图或战斗状态前 fail-closed。
 
-`OpsiObscure.ForceRun` 的真假分支直接执行原 `clear_obscure()` 与 `os_obscure()`：关闭时维持一次安全停止，开启时进入原任务切换检查。`OpsiDaily.UseTuningSample` 的真假分支直接执行原 `os_daily()`，只改变调律样本使用步骤，后续接任务、区域初始化、清任务与次日延迟顺序保持不变。`OpsiHazard1Leveling.TargetZone` 覆盖声明的 `0/22/44`：`0` 保持原逻辑映射到 22，另外两值进入对应安全区，回放在原 `run_strategic_search()` 边界停止。`OpsiMeowfficerFarming.HazardLevel` 覆盖 `3/4/5/6/10`，逐值保留原 `zone_select(hazard_level=...)` 参数和后续舰队、指令、自动搜索、后处理、任务切换顺序。
+`OpsiObscure.ForceRun` 的真假分支直接执行原 `clear_obscure()` 与 `os_obscure()`：关闭时维持一次安全停止，开启时进入原任务切换检查。`OpsiDaily.UseTuningSample` 的真假分支直接执行原 `os_daily()`，只改变调律样本使用步骤，后续接任务、区域初始化、清任务与次日延迟顺序保持不变。`OpsiHazard1Leveling.TargetZone` 覆盖声明的 `0/22/44`：`0` 保持原逻辑映射到 22，另外两值进入对应安全区，回放在原 `run_strategic_search()` 边界停止。`OpsiMeowfficerFarming.HazardLevel` 覆盖 `3/4/5/6/10`，逐值保留原 `zone_select(hazard_level=...)` 参数和后续舰队、指令、自动搜索、后处理、任务切换顺序。`ActionPointPreserve` 接受非负整数，保持 0 时关闭潜艇及有效值上限裁剪到 2000 的原行为；负数和错误类型在日志、配置覆写、行动力检查或设备状态前拒绝。
 
 `OpsiExplore.SpecialRadar` 直接回放原 `_os_explore()`，保留是否使用调律样本及 `recon_scan` 参数。它与 `OpsiExplore.ForceRun`、`OpsiObscure.ForceRun`、`OpsiAbyssal.ForceRun`、`OpsiStronghold.ForceRun` 还直接回放原 `AzurLaneConfig.opsi_task_delay()` 的侦察/潜艇任务延迟排除。五个布尔值的 32 种合法组合全部通过，30 个非法单字段值均在 `modified`、`update()` 或任务动作前 fail-closed。
 
-共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 12 个字段、56 个合法类并拒绝 99 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
+共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 13 个字段、59 个合法类并拒绝 107 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
 
 此前只检查属性加载的 AST 审计漏掉了动态拼接的 `deep_get()` 字符串路径，因而错误地把 Explore/Abyssal/Stronghold 的 `ForceRun` 记为零读取；本轮已用源码绑定回放纠正。固定上游真正没有运行时消费者的仍只有 `OpsiMonthBoss.ForceRun` 与 `OpsiDaily.DoMission`，两者继续明确标为 `unsupported`。导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板不会因此提升为完整支持。
 
@@ -806,7 +806,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiGeneral.RepairThreshold` | OpsiGeneral | type=input; display=default | input/default: 0.4 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiGeneral.UseLogger` | OpsiGeneral | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiHazard1Leveling.TargetZone` | OpsiHazard1Leveling | type=select; display=default | options: 0, 22, 44; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `OpsiMeowfficerFarming.ActionPointPreserve` | OpsiMeowfficerFarming | type=input; display=default | input/default: 1000 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiMeowfficerFarming.ActionPointPreserve` | OpsiMeowfficerFarming | type=input; display=default | input/default: 1000 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiMeowfficerFarming.HazardLevel` | OpsiMeowfficerFarming | type=select; display=default | options: 10, 3, 4, 5, 6; default: 5 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiMeowfficerFarming.TargetZone` | OpsiMeowfficerFarming | type=input; display=default | input/default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiMonthBoss.CheckAdaptability` | OpsiMonthBoss | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |

@@ -568,6 +568,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - `OpsiMeowfficerFarming.HazardLevel` admits exactly `3`, `4`, `5`, `6`, and
   `10`; each value reaches the original `zone_select()` argument and preserves
   fleet, order, auto-search, postprocessing, and task-switch ordering.
+- `OpsiMeowfficerFarming.ActionPointPreserve` admits non-negative integers.
+  Replay preserves the original zero-value submarine override and the
+  2,000-point effective clamp; malformed values fail before logging, config
+  overrides, action-point checks, or device state.
 - `OpsiExplore.SpecialRadar` preserves the original tuning-sample use and
   `recon_scan` decisions in `_os_explore()`. The same value, together with
   `OpsiExplore.ForceRun`, `OpsiObscure.ForceRun`,
@@ -578,10 +582,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `OSFleet.fleet_set()` selector boundary. `OpsiFleet.Submarine` validates both
   booleans at `MapOrderHandler.os_order_execute()`, preserving scan/submarine
   dispatch, the submarine completion wait, and scheduler-delay arguments.
-- Fifty-six valid classes pass and 99 malformed values fail before task,
+- Fifty-nine valid classes pass and 107 malformed values fail before task,
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
-  or Android input. Twelve fields now have complete offline classification.
+  or Android input. Thirteen fields now have complete offline classification.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

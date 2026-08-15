@@ -32,9 +32,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 12)
-        self.assertEqual(result["accepted_case_count"], 56)
-        self.assertEqual(result["invalid_case_count"], 99)
+        self.assertEqual(result["field_count"], 13)
+        self.assertEqual(result["accepted_case_count"], 59)
+        self.assertEqual(result["invalid_case_count"], 107)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -49,6 +49,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             {
                 "OpsiFleet.Fleet": "OSFleet.fleet_set",
                 "OpsiFleet.Submarine": "MapOrderHandler.os_order_execute",
+                "OpsiMeowfficerFarming.ActionPointPreserve": (
+                    "OpsiMeowfficerFarming.os_meowfficer_farming"
+                ),
             },
         )
 
@@ -81,9 +84,18 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         for hazard_level in OPSI_MEOWFFICER_HAZARD_LEVELS:
             self.assertEqual(
                 validate_alas_opsi_meowfficer_config(
+                    action_point_preserve=1000,
                     hazard_level=hazard_level
                 ).hazard_level,
                 hazard_level,
+            )
+        for action_point_preserve in (0, 1000, 2500):
+            self.assertEqual(
+                validate_alas_opsi_meowfficer_config(
+                    action_point_preserve=action_point_preserve,
+                    hazard_level=5,
+                ).action_point_preserve,
+                action_point_preserve,
             )
         fields = (
             "explore_force_run",
@@ -151,7 +163,18 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             with self.subTest(field="meow_hazard", value=value), self.assertRaises(
                 SemanticGateClosed
             ):
-                validate_alas_opsi_meowfficer_config(hazard_level=value)
+                validate_alas_opsi_meowfficer_config(
+                    action_point_preserve=1000,
+                    hazard_level=value,
+                )
+        for value in (-1, None, True, False, "1000", 1000.0, [], {}):
+            with self.subTest(field="meow_preserve", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_meowfficer_config(
+                    action_point_preserve=value,
+                    hazard_level=5,
+                )
         fields = (
             "explore_force_run",
             "obscure_force_run",

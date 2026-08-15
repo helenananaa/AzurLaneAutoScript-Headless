@@ -36,6 +36,7 @@ class AlasOpsiHazard1ConfigSnapshot:
 
 @dataclass(frozen=True)
 class AlasOpsiMeowfficerConfigSnapshot:
+    action_point_preserve: int
     hazard_level: int
 
 
@@ -113,13 +114,20 @@ def validate_alas_opsi_hazard1_config(
 
 
 def validate_alas_opsi_meowfficer_config(
-    *, hazard_level: object
+    *, action_point_preserve: object, hazard_level: object
 ) -> AlasOpsiMeowfficerConfigSnapshot:
+    if type(action_point_preserve) is not int or action_point_preserve < 0:
+        raise SemanticGateClosed(
+            "OpsiMeowfficerFarming.ActionPointPreserve must be a non-negative int"
+        )
     if type(hazard_level) is not int or hazard_level not in OPSI_MEOWFFICER_HAZARD_LEVELS:
         raise SemanticGateClosed(
             "OpsiMeowfficerFarming.HazardLevel must be 3, 4, 5, 6, or 10"
         )
-    return AlasOpsiMeowfficerConfigSnapshot(hazard_level=hazard_level)
+    return AlasOpsiMeowfficerConfigSnapshot(
+        action_point_preserve=action_point_preserve,
+        hazard_level=hazard_level,
+    )
 
 
 def validate_alas_opsi_explore_config(

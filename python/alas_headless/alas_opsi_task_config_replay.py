@@ -227,6 +227,14 @@ def _verify_args(args_path: Path) -> None:
         or hazard_level.get("option") != list(OPSI_MEOWFFICER_HAZARD_LEVELS)
     ):
         raise AssertionError("OpsiMeowfficerFarming.HazardLevel declaration drifted")
+    action_point_preserve = meowfficer["ActionPointPreserve"]
+    if (
+        action_point_preserve.get("type") != "input"
+        or action_point_preserve.get("value") != 1000
+    ):
+        raise AssertionError(
+            "OpsiMeowfficerFarming.ActionPointPreserve declaration drifted"
+        )
 
 
 def _consumer_methods(path: Path, owner: str, fields: tuple[str, ...]):
@@ -294,6 +302,7 @@ class _Config(SimpleNamespace):
         force: object = False,
         use_tuning_sample: object = True,
         hazard_target_zone: object = 0,
+        meowfficer_action_point_preserve: object = 1000,
         meowfficer_hazard_level: object = 5,
         special_radar: object = False,
     ):
@@ -308,7 +317,7 @@ class _Config(SimpleNamespace):
             OpsiExplore_SpecialRadar=special_radar,
             OpsiExplore_LastZone=0,
             OS_EXPLORE_FILTER="22",
-            OpsiMeowfficerFarming_ActionPointPreserve=1000,
+            OpsiMeowfficerFarming_ActionPointPreserve=meowfficer_action_point_preserve,
             OpsiMeowfficerFarming_TargetZone=0,
             OpsiGeneral_UseLogger=False,
             OpsiGeneral_BuyActionPointLimit=0,
@@ -581,10 +590,13 @@ def _verify_hazard(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry": invalid}
 
 
-def _meowfficer_case(method, *, hazard_level: object) -> dict[str, Any]:
+def _meowfficer_case(
+    method, *, hazard_level: object, action_point_preserve: object = 1000
+) -> dict[str, Any]:
     config = _Config(
         mode="normal",
         check=False,
+        meowfficer_action_point_preserve=action_point_preserve,
         meowfficer_hazard_level=hazard_level,
     )
     events = config.events
@@ -617,7 +629,12 @@ def _meowfficer_case(method, *, hazard_level: object) -> dict[str, Any]:
         rejected = True
     except _Switch:
         switched = True
-    return {"rejected": rejected, "switched": switched, "events": events}
+    return {
+        "rejected": rejected,
+        "switched": switched,
+        "effective_preserve": getattr(config, "OS_ACTION_POINT_PRESERVE", None),
+        "events": events,
+    }
 
 
 def _verify_meowfficer(method) -> dict[str, Any]:
@@ -631,10 +648,46 @@ def _verify_meowfficer(method) -> dict[str, Any]:
         selected = [event for event in case["events"] if event[0] == "zone_select"]
         if selected != [["zone_select", {"hazard_level": int(level)}]]:
             raise AssertionError("meowfficer hazard-level selection drifted")
+    preserve_cases = {
+        str(preserve): _meowfficer_case(
+            method,
+            hazard_level=5,
+            action_point_preserve=preserve,
+        )
+        for preserve in (0, 1000, 2500)
+    }
+    for preserve, expected in (("0", 0), ("1000", 1000), ("2500", 2000)):
+        case = preserve_cases[preserve]
+        if case["rejected"] or not case["switched"]:
+            raise AssertionError("meowfficer AP-preserve task boundary drifted")
+        if case["effective_preserve"] != expected:
+            raise AssertionError("meowfficer AP-preserve clamping drifted")
     invalid = _meowfficer_case(method, hazard_level=7)
-    if invalid != {"rejected": True, "switched": False, "events": []}:
+    if invalid != {
+        "rejected": True,
+        "switched": False,
+        "effective_preserve": None,
+        "events": [],
+    }:
         raise AssertionError("invalid meowfficer hazard level touched task state")
-    return {"cases": cases, "invalid_entry": invalid}
+    invalid_preserve = _meowfficer_case(
+        method,
+        hazard_level=5,
+        action_point_preserve=-1,
+    )
+    if invalid_preserve != {
+        "rejected": True,
+        "switched": False,
+        "effective_preserve": None,
+        "events": [],
+    }:
+        raise AssertionError("invalid meowfficer AP preserve touched task state")
+    return {
+        "cases": cases,
+        "preserve_cases": preserve_cases,
+        "invalid_entry": invalid,
+        "invalid_preserve_entry": invalid_preserve,
+    }
 
 
 _DELAY_TASKS = (
@@ -933,7 +986,16 @@ def _verify_contract() -> tuple[int, int]:
         validate_alas_opsi_hazard1_config(target_zone=target_zone)
         accepted += 1
     for hazard_level in OPSI_MEOWFFICER_HAZARD_LEVELS:
-        validate_alas_opsi_meowfficer_config(hazard_level=hazard_level)
+        validate_alas_opsi_meowfficer_config(
+            action_point_preserve=1000,
+            hazard_level=hazard_level,
+        )
+        accepted += 1
+    for action_point_preserve in (0, 1000, 2500):
+        validate_alas_opsi_meowfficer_config(
+            action_point_preserve=action_point_preserve,
+            hazard_level=5,
+        )
         accepted += 1
     for values in product((False, True), repeat=5):
         validate_alas_opsi_delay_task_config(
@@ -988,11 +1050,26 @@ def _verify_contract() -> tuple[int, int]:
             raise AssertionError("invalid OpsiHazard1Leveling.TargetZone was admitted")
     for value in (0, 1, 2, 7, 9, 11, None, True, "5", 5.0, [], {}):
         try:
-            validate_alas_opsi_meowfficer_config(hazard_level=value)
+            validate_alas_opsi_meowfficer_config(
+                action_point_preserve=1000,
+                hazard_level=value,
+            )
         except SemanticGateClosed:
             invalid += 1
         else:
             raise AssertionError("invalid OpsiMeowfficerFarming.HazardLevel was admitted")
+    for value in (-1, None, True, False, "1000", 1000.0, [], {}):
+        try:
+            validate_alas_opsi_meowfficer_config(
+                action_point_preserve=value,
+                hazard_level=5,
+            )
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError(
+                "invalid OpsiMeowfficerFarming.ActionPointPreserve was admitted"
+            )
     delay_fields = (
         "explore_force_run",
         "obscure_force_run",
@@ -1071,7 +1148,10 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     meowfficer_consumers = _consumer_methods(
         meowfficer_path,
         "OpsiMeowfficerFarming",
-        ("OpsiMeowfficerFarming_HazardLevel",),
+        (
+            "OpsiMeowfficerFarming_ActionPointPreserve",
+            "OpsiMeowfficerFarming_HazardLevel",
+        ),
     )
     consumers = {
         **explore_consumers,
@@ -1100,6 +1180,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiStronghold_ForceRun": ["AzurLaneConfig.opsi_task_delay"],
         "OpsiDaily_UseTuningSample": ["os_daily"],
         "OpsiHazard1Leveling_TargetZone": ["os_hazard1_leveling"],
+        "OpsiMeowfficerFarming_ActionPointPreserve": ["os_meowfficer_farming"],
         "OpsiMeowfficerFarming_HazardLevel": ["os_meowfficer_farming"],
     }
     if consumers != expected:
@@ -1233,7 +1314,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 12,
+        "field_count": 13,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -1252,6 +1333,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "validated_runtime_boundaries": {
             "OpsiFleet.Fleet": "OSFleet.fleet_set",
             "OpsiFleet.Submarine": "MapOrderHandler.os_order_execute",
+            "OpsiMeowfficerFarming.ActionPointPreserve": (
+                "OpsiMeowfficerFarming.os_meowfficer_farming"
+            ),
         },
         "fleet_selection": fleet_selection,
         "order": order,
