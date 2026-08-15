@@ -4,6 +4,22 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-15
 
+### Raid/RaidDaily: exact configuration gates with recorder-only final inputs
+
+- `Raid.Mode` admits only the four declared difficulties and `Raid.UseTicket`
+  only real booleans before `RaidRun` work begins. The ticket-confirmation
+  replay runs both original confirm/cancel branches with their two final-input
+  boundaries replaced by a recorder; malformed values stop before observation
+  or device input.
+- `RaidDaily.StageFilter` canonicalizes separators and whitespace, rejects
+  duplicate/unknown/empty stages, and replays every one of the 64 non-repeating
+  ordered subsets of `easy`/`normal`/`hard`/`ex`. The normal forwarding and
+  EX reward-routing decisions execute only in memory; invalid filters stop
+  before any RaidDaily stateful boundary.
+- This promotes only offline evidence for the three fields. Raid navigation,
+  activity availability, run counts, combat, reward collection,
+  postconditions, observation, and all Android input remain unadapted.
+
 ### Hospital: recommendation switch replayed before any UI work
 
 - `Hospital.UseRecommendFleet` is now exact-boolean and fail-closed at both

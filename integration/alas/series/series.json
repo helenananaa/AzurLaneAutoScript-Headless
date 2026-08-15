@@ -13,7 +13,7 @@
     {
       "order": 3,
       "path": "integration/alas/series/0010-mission-mail-flow-ports.patch",
-      "sha256": "1dbfca0a25e08564a130fbd68cf71f65acf87008c63d64915156bb008717cf5a"
+      "sha256": "b07b4a79aae16034682c35366b4f3add3538c7e311b5d1a69cba83d93d4cc746"
     },
     {
       "order": 4,
@@ -94,6 +94,11 @@
       "order": 19,
       "path": "integration/alas/series/0165-hospital-config-contract.patch",
       "sha256": "d611eba4901a3a5474359e7c07fdda4e59a090bc748df0af2e8a4fbbd4d5ddfb"
+    },
+    {
+      "order": 20,
+      "path": "integration/alas/series/0170-raid-config-contract.patch",
+      "sha256": "0d4d3903f0ef0d23453b821ba375ee926f32206d358f8df8a1a17f3fd44a5d95"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

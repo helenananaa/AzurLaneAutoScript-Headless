@@ -45,10 +45,10 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 |---|---:|---|
 | ✅ 完整支持（`F`） | **0 / 60** | 暂无 |
 | 🟢 主路径已完成、全配置未完成（`L`） | **13 / 60** | Benchmark、Commission、Daily、Dorm、Event、EventA、Exercise、Gacha、GameManager、Minigame、Research、Restart、Tactical |
-| 🧪 仅离线完成（`O`） | **3 / 60** | Awaken、EventB、Hospital |
+| 🧪 仅离线完成（`O`） | **5 / 60** | Awaken、EventB、Hospital、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **17 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、Main2、Main3、OpsiDaemon、OpsiGeneral、Reward、ShopOnce |
 | 🧱 已到边界、尚未完成（`B`） | **18 / 60** | Hard、Main、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
-| 🔴 尚未完成（`M`） | **9 / 60** | Coalition、CoalitionSp、GemsFarming、Guild、Meowfficer、OpsiStronghold、PrivateQuarters、Raid、RaidDaily |
+| 🔴 尚未完成（`M`） | **7 / 60** | Coalition、CoalitionSp、GemsFarming、Guild、Meowfficer、OpsiStronghold、PrivateQuarters |
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
 
@@ -648,8 +648,8 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **149 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **75 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
-| ⊘ 当前未适配或无效 | **54 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
+| 🧪 只有离线路径证据 | **78 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ⊘ 当前未适配或无效 | **51 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
@@ -886,9 +886,9 @@ python scripts/python/verify_alas_support_matrix.py `
 | `PrivateQuarters.BuyRoses` | PrivateQuarters | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `PrivateQuarters.TargetInteract` | PrivateQuarters | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `PrivateQuarters.TargetShip` | PrivateQuarters | type=select; display=default | options: "aegir", "anchorage", "nakhimov", "new_jersey", "noshiro", "sirius", "taihou"; default: "anchorage" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `Raid.Mode` | Raid | type=select; display=default | options: "easy", "ex", "hard", "normal"; default: "hard" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `Raid.UseTicket` | Raid | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `RaidDaily.StageFilter` | RaidDaily | type=textarea; display=default | input/default: "hard > normal > easy" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `Raid.Mode` | Raid | type=select; display=default | options: "easy", "ex", "hard", "normal"; default: "hard" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Raid.UseTicket` | Raid | type=checkbox; display=default | input/default: false | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `RaidDaily.StageFilter` | RaidDaily | type=textarea; display=default | input/default: "hard > normal > easy" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Research.AllowDelay` | Research | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Research.CustomFilter` | Research | type=textarea; display=default | input/default: <long default in args.json> | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Research.PresetFilter` | Research | type=select; display=default | options: "custom", "series_2_457_only", "series_2_blueprint_457", "series_2_blueprint_only", "series_2_than_3_457_234", "series_3_234_only", "series_3_blueprint_234", "series_3_blueprint_only", "series_4_blueprint_only", "series_4_blueprint_tenrai", "series_4_tenrai_only", "series_5_152_only", "series_5_blueprint_152", "series_5_blueprint_only", "series_6_203_only", "series_6_blueprint_203", "series_6_blueprint_only", "series_7_blueprint_la9", "series_7_blueprint_only", "series_7_la9_only", "series_8_305_only", "series_8_blueprint_305", "series_8_blueprint_only", "series_9_blueprint_only", "series_9_blueprint_ta152", "series_9_ta152_only"; default: "series_9_blueprint_ta152" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |

@@ -674,18 +674,24 @@ diff --git a/module/raid/daily.py b/module/raid/daily.py
 index 8dda1bdf..3753c960 100644
 --- a/module/raid/daily.py
 +++ b/module/raid/daily.py
-@@ -1,5 +1,7 @@
+@@ -1,5 +1,10 @@
  import re
  
-+from alas_headless import validate_alas_reward_config
++from alas_headless import (
++    validate_alas_raid_daily_stage_filter,
++    validate_alas_reward_config,
++)
 +
  from module.base.filter import Filter
  from module.logger import logger
  from module.raid.run import RaidRun
-@@ -25,6 +27,13 @@ class RaidDaily(RaidRun):
+@@ -25,6 +30,16 @@ class RaidDaily(RaidRun):
          Args:
              name (str): Raid name, such as 'raid_20200624'
          """
++        raid_daily_stage_filter = validate_alas_raid_daily_stage_filter(
++            self.config.RaidDaily_StageFilter
++        )
 +        reward_config = validate_alas_reward_config(
 +            collect_oil=self.config.Reward_CollectOil,
 +            collect_coin=self.config.Reward_CollectCoin,
@@ -696,7 +702,25 @@ index 8dda1bdf..3753c960 100644
          if self.is_raid_rpg():
              logger.info('RPG raid has no dailies')
              self.config.Scheduler_Enable = False
-@@ -56,7 +65,7 @@ class RaidDaily(RaidRun):
+@@ -33,7 +48,7 @@ class RaidDaily(RaidRun):
+         name = name if name else self.config.Campaign_Event
+         stages = [RaidStage(name) for name in STAGES]
+-        STAGE_FILTER.load(self.config.RaidDaily_StageFilter)
++        STAGE_FILTER.load(raid_daily_stage_filter)
+         stages = STAGE_FILTER.apply(stages)
+ 
+         self.ui_ensure(page_raid)
+ 
+@@ -49,7 +64,7 @@ class RaidDaily(RaidRun):
+         # If configured for EX, always do last
+         # So does not use stage filtering
+         stages = [stage.lower().strip()\
+             for stage in\
+-            self.config.RaidDaily_StageFilter.split('>')]
++            raid_daily_stage_filter.split('>')]
+         if 'ex' in stages:
+             # Collect raid tickets from clearing
+@@ -56,7 +71,7 @@ class RaidDaily(RaidRun):
              # any difficulty 5+ and 10+ times
              self.ui_goto_main()
              Reward(self.config, self.device).reward_mission(
@@ -7809,3 +7833,46 @@ diff --git a/module/event_hospital/hospital.py b/module/event_hospital/hospital.
          # Check if event available
          if self.event_time_limit_triggered():
              self.config.task_stop()
+diff --git a/module/raid/run.py b/module/raid/run.py
+--- a/module/raid/run.py
++++ b/module/raid/run.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_raid_mode, validate_alas_raid_use_ticket
++
+ from module.base.timer import Timer
+ from module.campaign.campaign_event import CampaignEvent
+ from module.exception import ScriptEnd, ScriptError
+@@ -68,11 +70,12 @@ class RaidRun(Raid, CampaignEvent):
+     def run(self, name='', mode='', total=0):
+         """
+         Args:
+             name (str): Raid name, such as 'raid_20200624'
+             mode (str): Raid mode, such as 'hard', 'normal', 'easy'
+             total (int): Total run count
+         """
++        mode = validate_alas_raid_mode(mode if mode else self.config.Raid_Mode)
++        validate_alas_raid_use_ticket(self.config.Raid_UseTicket)
+         name = name if name else self.config.Campaign_Event
+-        mode = mode if mode else self.config.Raid_Mode
+         if not name or not mode:
+             raise ScriptError(f'RaidRun arguments unfilled. name={name}, mode={mode}')
+diff --git a/module/raid/raid.py b/module/raid/raid.py
+--- a/module/raid/raid.py
++++ b/module/raid/raid.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_raid_use_ticket
++
+ import cv2
+ import numpy as np
+ 
+@@ -291,7 +293,8 @@ class Raid(MapOperation, RaidCombat, CampaignEvent):
+         Returns:
+             bool: If clicked.
+         """
++        use_ticket = validate_alas_raid_use_ticket(self.config.Raid_UseTicket)
+         if self.appear(TICKET_USE_CONFIRM, offset=(30, 30), interval=1):
+-            if self.config.Raid_UseTicket:
++            if use_ticket:
+                 self.device.click(TICKET_USE_CONFIRM)
+             else:
+                 self.device.click(TICKET_USE_CANCEL)

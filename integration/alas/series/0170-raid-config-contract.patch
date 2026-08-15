@@ -1,0 +1,43 @@
+diff --git a/module/raid/run.py b/module/raid/run.py
+--- a/module/raid/run.py
++++ b/module/raid/run.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_raid_mode, validate_alas_raid_use_ticket
++
+ from module.base.timer import Timer
+ from module.campaign.campaign_event import CampaignEvent
+ from module.exception import ScriptEnd, ScriptError
+@@ -68,11 +70,12 @@ class RaidRun(Raid, CampaignEvent):
+     def run(self, name='', mode='', total=0):
+         """
+         Args:
+             name (str): Raid name, such as 'raid_20200624'
+             mode (str): Raid mode, such as 'hard', 'normal', 'easy'
+             total (int): Total run count
+         """
++        mode = validate_alas_raid_mode(mode if mode else self.config.Raid_Mode)
++        validate_alas_raid_use_ticket(self.config.Raid_UseTicket)
+         name = name if name else self.config.Campaign_Event
+-        mode = mode if mode else self.config.Raid_Mode
+         if not name or not mode:
+             raise ScriptError(f'RaidRun arguments unfilled. name={name}, mode={mode}')
+diff --git a/module/raid/raid.py b/module/raid/raid.py
+--- a/module/raid/raid.py
++++ b/module/raid/raid.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_raid_use_ticket
++
+ import cv2
+ import numpy as np
+ 
+@@ -291,7 +293,8 @@ class Raid(MapOperation, RaidCombat, CampaignEvent):
+         Returns:
+             bool: If clicked.
+         """
++        use_ticket = validate_alas_raid_use_ticket(self.config.Raid_UseTicket)
+         if self.appear(TICKET_USE_CONFIRM, offset=(30, 30), interval=1):
+-            if self.config.Raid_UseTicket:
++            if use_ticket:
+                 self.device.click(TICKET_USE_CONFIRM)
+             else:
+                 self.device.click(TICKET_USE_CANCEL)

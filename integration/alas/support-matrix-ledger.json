@@ -5828,59 +5828,74 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_raid_config.py",
+        "python/alas_headless/alas_raid_config_replay.py",
+        "integration/alas/series/0170-raid-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=select; display=default",
       "panels": [
         "Raid"
       ],
       "path": "Raid.Mode",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 离线回放",
+      "support": "supported",
       "values": "options: \"easy\", \"ex\", \"hard\", \"normal\"; default: \"hard\""
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_raid_config.py",
+        "python/alas_headless/alas_raid_config_replay.py",
+        "integration/alas/series/0170-raid-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Raid"
       ],
       "path": "Raid.UseTicket",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 离线回放",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_raid_config.py",
+        "python/alas_headless/alas_raid_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=textarea; display=default",
       "panels": [
         "RaidDaily"
       ],
       "path": "RaidDaily.StageFilter",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 离线回放",
+      "support": "supported",
       "values": "input/default: \"hard > normal > easy\""
     },
     {
@@ -7894,8 +7909,8 @@
         "Emotion"
       ],
       "name": "Raid",
-      "note": "难度、票券、活动入口、次数和结算缺适配",
-      "status": "M"
+      "note": "难度和票券的声明值及票券确认最终按钮已离线回放；活动入口、次数和结算未适配",
+      "status": "O"
     },
     {
       "groups": [
@@ -7906,8 +7921,8 @@
         "Emotion"
       ],
       "name": "RaidDaily",
-      "note": "难度过滤、每日次数、战斗和领奖缺适配",
-      "status": "M"
+      "note": "难度过滤的 64 个无重复排列及 EX 奖励路由已离线回放；每日次数、战斗和领奖未适配",
+      "status": "O"
     },
     {
       "groups": [
@@ -10112,6 +10127,45 @@
       ],
       "field": "Hospital.UseRecommendFleet",
       "note": "Both exact boolean values preserve the original in-use, recommendation, and manual-takeover decisions; malformed values fail before Hospital UI or combat-preparation work, with the recommendation final-input boundary replaced by a recorder."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_raid_config.py",
+        "python/alas_headless/alas_raid_config_replay.py",
+        "integration/alas/series/0170-raid-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "Raid.Mode",
+      "note": "All four exact declared Raid modes preserve the original RaidRun mode argument; malformed modes fail before name resolution, state observation, or Raid work."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_raid_config.py",
+        "python/alas_headless/alas_raid_config_replay.py",
+        "integration/alas/series/0170-raid-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "Raid.UseTicket",
+      "note": "Both exact boolean states preserve the original confirm/cancel split with its two final-input boundaries replaced by a recorder; malformed values fail before observation or a ticket click."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_raid_config.py",
+        "python/alas_headless/alas_raid_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "RaidDaily.StageFilter",
+      "note": "All 64 non-repeating ordered subsets of easy, normal, hard, and ex preserve the original filter forwarding and EX reward route; malformed filters fail before a RaidDaily stateful boundary."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -10124,9 +10178,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "79c5fa1fd8657bc20336db3b31b847208189b018c441c21722b76d787ada2c70",
-      "manifest_sha256": "028f13eb1c581e9eb1bbaf8211467b0beeecb164c4c8688d835e77ce018c8ad5",
-      "member_count": 19
+      "combined_sha256": "0f35edc6733edf8010b3b06c7ebdb70def026e75b1b4f3a59e3bd444e2dfee91",
+      "manifest_sha256": "506fd22821c0fa650c3b9a5f83ac7711f8328a8da5e10a58c7834b30be93153b",
+      "member_count": 20
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

@@ -116,6 +116,11 @@ from .alas_hospital_config_contract import (
     AlasHospitalConfigSnapshot,
     validate_alas_hospital_config,
 )
+from .alas_raid_config_contract import (
+    validate_alas_raid_daily_stage_filter,
+    validate_alas_raid_mode,
+    validate_alas_raid_use_ticket,
+)
 from .alas_optimization_config_contract import (
     AlasScreenshotIntervalConfigSnapshot,
     WHEN_TASK_QUEUE_EMPTY,
@@ -850,6 +855,9 @@ __all__ = (
     "validate_alas_combat_observer_snapshot",
     "validate_alas_awaken_config",
     "validate_alas_hospital_config",
+    "validate_alas_raid_daily_stage_filter",
+    "validate_alas_raid_mode",
+    "validate_alas_raid_use_ticket",
     "verify_alas_combat_mapping_receipt",
     "verify_alas_combat_rare_surface_evidence",
     "verify_alas_combat_result_control_evidence",
