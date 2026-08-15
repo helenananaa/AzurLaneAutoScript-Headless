@@ -720,6 +720,15 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     action, or Android input. Real frame content and error-recovery artifacts
     therefore remain unverified.
 
+### EmulatorInfo text settings: offline predicate contract passed
+
+  - `EmulatorInfo.name` and `EmulatorInfo.path` preserve ALAS's textarea
+    trimming, newline removal, and legacy `None`/`False`/`True` sentinel
+    normalization before emulator discovery can read either value.
+  - Only text or null is admitted. Invalid types fail before constructing the
+    `EmulatorInfo` value; replay performs no path probe, process discovery,
+    emulator startup, config writeback, device action, or Android input.
+
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and

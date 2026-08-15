@@ -213,6 +213,45 @@ index 1224c454..88376a16 100644
          self.handle_control_check(name)
          p1, p2 = ensure_int(p1, p2)
          logger.info(
+diff --git a/module/device/platform/platform_base.py b/module/device/platform/platform_base.py
+index 944f7a8..3534edd 100644
+--- a/module/device/platform/platform_base.py
++++ b/module/device/platform/platform_base.py
+@@ -70,26 +70,21 @@ class PlatformBase(Connection, EmulatorManagerBase):
+ 
+     @cached_property
+     def emulator_info(self) -> EmulatorInfo:
++        from alas_headless import validate_alas_emulator_info_config
++
+         emulator = self.config.EmulatorInfo_Emulator
+         if emulator == 'auto':
+             emulator = ''
+ 
+-        def parse_info(value):
+-            if isinstance(value, str):
+-                value = value.strip().replace('\n', '')
+-                if value in ['None', 'False', 'True']:
+-                    value = ''
+-                return value
+-            else:
+-                return ''
+-
+-        name = parse_info(self.config.EmulatorInfo_name)
+-        path = parse_info(self.config.EmulatorInfo_path)
++        info = validate_alas_emulator_info_config(
++            name=self.config.EmulatorInfo_name,
++            path=self.config.EmulatorInfo_path,
++        )
+ 
+         return EmulatorInfo(
+             emulator=emulator,
+-            name=name,
+-            path=path,
++            name=info.name,
++            path=info.path,
+         )
+ 
+     @cached_property
 diff --git a/module/device/screenshot.py b/module/device/screenshot.py
 index 9940ee05..e692eacb 100644
 --- a/module/device/screenshot.py

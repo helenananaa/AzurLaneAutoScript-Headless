@@ -93,6 +93,10 @@ from .alas_screenshot_error_config_contract import (
     validate_alas_error_screenshot_length,
     validate_alas_screenshot_capture_config,
 )
+from .alas_emulator_info_config_contract import (
+    AlasEmulatorInfoConfigSnapshot,
+    validate_alas_emulator_info_config,
+)
 from .alas_data_key_config_contract import (
     AlasDataKeyConfigSnapshot,
     validate_alas_data_key_config,

@@ -603,9 +603,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **149 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **67 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **69 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **57 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **5 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **3 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -688,8 +688,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Emulator.Serial` | Alas | type=input; display=default | input/default: "auto" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `Emulator.ServerName` | Alas | type=select; display=default | options: "cn_android-0", "cn_android-1", "cn_android-10", "cn_android-11", "cn_android-12", "cn_android-13", "cn_android-14", "cn_android-15", "cn_android-16", "cn_android-17", "cn_android-18", "cn_android-19", "cn_android-2", "cn_android-20", "cn_android-21", "cn_android-22", "cn_android-23", "cn_android-24", "cn_android-25", "cn_android-26", "cn_android-27", "cn_android-28", "cn_android-29", "cn_android-3", "cn_android-4", "cn_android-5", "cn_android-6", "cn_android-7", "cn_android-8", "cn_android-9", "cn_channel-0", "cn_channel-1", "cn_channel-2", "cn_channel-3", "cn_channel-4", "cn_channel-5", "cn_ios-0", "cn_ios-1", "cn_ios-10", "cn_ios-2", "cn_ios-3", "cn_ios-4", "cn_ios-5", "cn_ios-6", "cn_ios-7", "cn_ios-8", "cn_ios-9", "disabled", "en-0", "en-1", "en-2", "en-3", "en-4", "en-5", "jp-0", "jp-1", "jp-10", "jp-11", "jp-12", "jp-13", "jp-14", "jp-15", "jp-16", "jp-17", "jp-2", "jp-3", "jp-4", "jp-5", "jp-6", "jp-7", "jp-8", "jp-9"; default: "disabled" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EmulatorInfo.Emulator` | Alas | type=select; display=default | options: "auto", "BlueStacks4", "BlueStacks4HyperV", "BlueStacks5", "BlueStacks5HyperV", "LDPlayer14", "LDPlayer3", "LDPlayer4", "LDPlayer9", "MEmuPlayer", "MuMuPlayer", "MuMuPlayer12", "MuMuPlayerX", "NoxPlayer", "NoxPlayer64"; default: "auto" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `EmulatorInfo.name` | Alas | type=textarea; display=default | input/default: null | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `EmulatorInfo.path` | Alas | type=textarea; display=default | input/default: null | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `EmulatorInfo.name` | Alas | type=textarea; display=default | input/default: null | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `EmulatorInfo.path` | Alas | type=textarea; display=default | input/default: null | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EnemyPriority.EnemyScaleBalanceWeight` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "default_mode", "S1_enemy_first", "S3_enemy_first"; default: "default_mode" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Enhance.CheckPerCategory` | General | type=input; display=default | input/default: 5 | `P`/◐ 正式任务循环已接入 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `Enhance.Filter` | General | type=textarea; display=default | input/default: null | `P`/◐ 8 类型任务筛选已接入 | ☑ | ☑ | ☑ | ☑ | ◐ |

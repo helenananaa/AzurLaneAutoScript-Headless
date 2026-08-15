@@ -15,6 +15,7 @@ INDEX_PATTERN = re.compile(
 CORE_PATHS = {
     "module/base/base.py",
     "module/device/control.py",
+    "module/device/platform/platform_base.py",
     "module/device/screenshot.py",
     "module/ocr/ocr.py",
 }
