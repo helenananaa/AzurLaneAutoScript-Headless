@@ -144,6 +144,9 @@ FLOW_PATHS = {
     "0140-scheduler-contract.patch": {
         "module/config/config.py",
     },
+    "0150-runtime-optimization-contract.patch": {
+        "alas.py",
+    },
 }
 
 

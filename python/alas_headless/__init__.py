@@ -76,6 +76,12 @@ from .alas_battle_pass_config_contract import (
     AlasBattlePassConfigSnapshot,
     validate_alas_battle_pass_config,
 )
+from .alas_optimization_config_contract import (
+    AlasScreenshotIntervalConfigSnapshot,
+    WHEN_TASK_QUEUE_EMPTY,
+    validate_alas_screenshot_interval_config,
+    validate_alas_when_task_queue_empty,
+)
 from .alas_game_manager_config_contract import (
     AlasGameManagerConfigSnapshot,
     validate_alas_game_manager_config,

@@ -32,6 +32,7 @@ UPSTREAM_LOCK_SCHEMA = "alas-headless.alas-upstream-lock/v1"
 COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 PATCH_HEADER_PATTERN = re.compile(r"^diff --git a/(\S+) b/(\S+)$")
 ALLOWED_PATCH_ROOTS = frozenset({"campaign", "module"})
+ALLOWED_ROOT_PYTHON_PATCH_PATHS = frozenset({"alas.py"})
 ALLOWED_NON_PYTHON_PATCH_PATHS = frozenset({"module/config/argument/args.json"})
 CANONICAL_PATCH = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
 SERIES_MANIFEST = ROOT / "integration" / "alas" / "series" / "series.json"
@@ -120,18 +121,22 @@ def parse_patch_paths(patch: Path) -> tuple[str, ...]:
             raise AlasPatchVerificationError("integration patch header is malformed")
         raw_path = match.group(1)
         normalized = PurePosixPath(raw_path)
+        normalized_path = normalized.as_posix()
         if (
             normalized.is_absolute()
             or ".." in normalized.parts
             or not normalized.parts
-            or normalized.parts[0] not in ALLOWED_PATCH_ROOTS
+            or (
+                normalized.parts[0] not in ALLOWED_PATCH_ROOTS
+                and normalized_path not in ALLOWED_ROOT_PYTHON_PATCH_PATHS
+            )
             or (
                 normalized.suffix != ".py"
-                and normalized.as_posix() not in ALLOWED_NON_PYTHON_PATCH_PATHS
+                and normalized_path not in ALLOWED_NON_PYTHON_PATCH_PATHS
             )
         ):
             raise AlasPatchVerificationError("integration patch path is not allowlisted")
-        paths.append(normalized.as_posix())
+        paths.append(normalized_path)
     if not paths:
         raise AlasPatchVerificationError("integration patch has no changed files")
     if len(paths) != len(set(paths)):

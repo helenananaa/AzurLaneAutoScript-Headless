@@ -323,8 +323,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   validates all 50 six-field task surfaces before the original ALAS queueing
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
-  patch applies as 100 changed files, all 99 patched Python files compile, and
-  the repository suite passes `948/948` tests, including BattlePass configuration, Daemon configuration, OpsiDaemon configuration, BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard task configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  patch applies as 101 changed files, all 100 patched Python files compile, and
+  the repository suite passes `954/954` tests, including Optimization configuration, BattlePass configuration, Daemon configuration, OpsiDaemon configuration, BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard task configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
@@ -529,6 +529,25 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   occurs. Only `offline` becomes complete. Real entrance/red-dot observation,
   free versus paid rewards, no-reward handling, claim receipts, and recovery
   remain incomplete, so Freebies stays `P`.
+
+### Global Optimization runtime settings: offline original-method replay passed
+
+- `Optimization.ScreenshotInterval` and `CombatScreenshotInterval` accept only
+  finite non-boolean numbers before the shared timer can change. Original-method
+  replay preserves normal and combat clamps/writeback, the lower nemu/LD cap,
+  the scrcpy override, and unrestricted explicit code-set intervals.
+- `Optimization.WhenTaskQueueEmpty` accepts exactly the three declared modes.
+  Frozen-clock replay preserves stay, goto-main and close-game ordering plus the
+  due-task bypass. Invalid values fail before `config.get_next()` instead of
+  falling back silently to stay-there.
+- Replay admits 9 valid classes and rejects 25 malformed values at zero input.
+  Device, wait and resource-release effects are recorders; mutation budget is
+  `0`. Cross-backend frame timing, long-wait reload, app-stop/Restart leases and
+  return-to-main postconditions remain incomplete, so Alas stays `P`.
+- `Emulator.ScreenshotDedithering` is explicitly not promoted: semantic
+  screenshot returns before its original pixel-denoising branch. Supporting it
+  would require a defined semantic-frame preprocessing contract, not hidden
+  fallback to rendered pixels or OpenCV.
 
 ### Commission preset, custom filter, and major switch: offline contract passed
 

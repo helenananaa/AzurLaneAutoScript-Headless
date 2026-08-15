@@ -68,6 +68,43 @@ class ScreenshotFrameClockVerifierTests(unittest.TestCase):
                 PATCHED_SCREENSHOT,
             )
 
+    def test_reviewed_interval_gate_is_restored_before_source_comparison(self):
+        pristine = (
+            "from PIL import Image\n\n"
+            + PRISTINE_SCREENSHOT
+            + "    def screenshot_interval_set(self, interval=None):\n"
+            + "        if interval is None:\n"
+            + "            origin = self.config.Optimization_ScreenshotInterval\n"
+            + "        elif interval == 'combat':\n"
+            + "            origin = self.config.Optimization_CombatScreenshotInterval\n"
+        )
+        patched = (
+            "from PIL import Image\n\n"
+            "from alas_headless import validate_alas_screenshot_interval_config\n\n"
+            + PATCHED_SCREENSHOT
+            + "    def screenshot_interval_set(self, interval=None):\n"
+            + "        optimization = validate_alas_screenshot_interval_config(\n"
+            + "            screenshot_interval=self.config.Optimization_ScreenshotInterval,\n"
+            + "            combat_screenshot_interval=self.config.Optimization_CombatScreenshotInterval,\n"
+            + "        )\n"
+            + "        if interval is None:\n"
+            + "            origin = optimization.screenshot_interval\n"
+            + "        elif interval == 'combat':\n"
+            + "            origin = optimization.combat_screenshot_interval\n"
+        )
+        assert_normal_screenshot_source_preserved(pristine, patched)
+        with self.assertRaisesRegex(
+            ScreenshotFrameClockVerificationError,
+            "interval validation insertion",
+        ):
+            assert_normal_screenshot_source_preserved(
+                pristine,
+                patched.replace(
+                    "            origin = optimization.combat_screenshot_interval\n",
+                    "            origin = self.config.Optimization_CombatScreenshotInterval\n",
+                ),
+            )
+
     def test_compiled_patched_methods_keep_timer_and_device_call_order(self):
         _, device_class = load_patched_screenshot_classes(
             PATCHED_SCREENSHOT,

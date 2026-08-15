@@ -3,7 +3,7 @@
     {
       "order": 1,
       "path": "integration/alas/series/0001-core-ports.patch",
-      "sha256": "22fd3a4f65b3af446954524093ee0d51284e26c622e406d481d6a979eeab4297"
+      "sha256": "cb15d8ebb80435d651a76731fbceb829c62dcd1e58bb8d52c1b8b548645ac047"
     },
     {
       "order": 2,
@@ -79,6 +79,11 @@
       "order": 16,
       "path": "integration/alas/series/0140-scheduler-contract.patch",
       "sha256": "2cfcc7595708c04b3e6b38a069ef763170c5a05fc37c09eac685f0cd53c3419d"
+    },
+    {
+      "order": 17,
+      "path": "integration/alas/series/0150-runtime-optimization-contract.patch",
+      "sha256": "de7cac06cbaf47a5addf38b3488274a18834cb6088628023696e6ac7f3356015"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

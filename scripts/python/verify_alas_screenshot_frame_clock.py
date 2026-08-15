@@ -33,6 +33,25 @@ _SEMANTIC_INSERTION = (
     "            self.image = semantic_session.pixel_guard(frame)\n"
     "            return self.image\n\n"
 )
+_OPTIMIZATION_IMPORT = (
+    "from alas_headless import validate_alas_screenshot_interval_config\n\n"
+)
+_OPTIMIZATION_INSERTION = (
+    "        optimization = validate_alas_screenshot_interval_config(\n"
+    "            screenshot_interval=self.config.Optimization_ScreenshotInterval,\n"
+    "            combat_screenshot_interval=self.config.Optimization_CombatScreenshotInterval,\n"
+    "        )\n"
+)
+_OPTIMIZATION_ORIGIN_REPLACEMENTS = (
+    (
+        "            origin = optimization.screenshot_interval\n",
+        "            origin = self.config.Optimization_ScreenshotInterval\n",
+    ),
+    (
+        "            origin = optimization.combat_screenshot_interval\n",
+        "            origin = self.config.Optimization_CombatScreenshotInterval\n",
+    ),
+)
 _DEVICE_OS_PATCHED = "import collections\nimport os\nfrom datetime"
 _DEVICE_OS_PRISTINE = "import collections\nfrom datetime"
 _DEVICE_SESSION_INSERTION = (
@@ -135,7 +154,23 @@ def assert_normal_screenshot_source_preserved(
         raise ScreenshotFrameClockVerificationError(
             "semantic screenshot insertion is missing or duplicated"
         )
-    if patched_source.replace(_SEMANTIC_INSERTION, "", 1) != pristine_source:
+    restored = patched_source.replace(_SEMANTIC_INSERTION, "", 1)
+    optimization_markers = (
+        _OPTIMIZATION_IMPORT,
+        _OPTIMIZATION_INSERTION,
+        *tuple(patched for patched, _pristine in _OPTIMIZATION_ORIGIN_REPLACEMENTS),
+    )
+    marker_counts = tuple(restored.count(marker) for marker in optimization_markers)
+    if any(marker_counts):
+        if any(count != 1 for count in marker_counts):
+            raise ScreenshotFrameClockVerificationError(
+                "screenshot interval validation insertion is incomplete or duplicated"
+            )
+        restored = restored.replace(_OPTIMIZATION_IMPORT, "", 1)
+        restored = restored.replace(_OPTIMIZATION_INSERTION, "", 1)
+        for patched, pristine in _OPTIMIZATION_ORIGIN_REPLACEMENTS:
+            restored = restored.replace(patched, pristine, 1)
+    if restored != pristine_source:
         raise ScreenshotFrameClockVerificationError(
             "normal ALAS screenshot source changed outside the semantic guard"
         )

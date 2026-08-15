@@ -5287,9 +5287,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_optimization_config.py",
+        "python/alas_headless/alas_optimization_config_replay.py",
+        "integration/alas/series/0150-runtime-optimization-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -5306,9 +5311,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_optimization_config.py",
+        "python/alas_headless/alas_optimization_config_replay.py",
+        "integration/alas/series/0150-runtime-optimization-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default",
       "panels": [
@@ -5350,9 +5360,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_optimization_config.py",
+        "python/alas_headless/alas_optimization_config_replay.py",
+        "integration/alas/series/0150-runtime-optimization-contract.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -6969,7 +6984,7 @@
         "DropRecord"
       ],
       "name": "Alas",
-      "note": "当前语义观察/输入路径可运行；传统截图/控制方法矩阵、包名/服务器矩阵、错误截图、掉落记录与上传、通知均未完整验收",
+      "note": "三项 Optimization 运行字段和 TaskHoardingDuration 已离线等价；语义截图仍不执行 Dedithering，传统方法/包名矩阵、错误截图、掉落上传与通知未完整验收",
       "status": "P"
     },
     {
@@ -9306,6 +9321,45 @@
       ],
       "field": "BattlePass.Collect",
       "note": "Both exact booleans preserve the original Freebies dispatch decision and child order; invalid values fail before any child constructor while the BattlePass task itself remains stubbed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_optimization_config.py",
+        "python/alas_headless/alas_optimization_config_replay.py",
+        "integration/alas/series/0150-runtime-optimization-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "Optimization.ScreenshotInterval",
+      "note": "Finite numeric values preserve the original 0.1 to 0.3 clamp, nemu_ipc and ldopengl 0.2 cap, scrcpy override and config writeback; invalid values fail before timer mutation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_optimization_config.py",
+        "python/alas_headless/alas_optimization_config_replay.py",
+        "integration/alas/series/0150-runtime-optimization-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "Optimization.CombatScreenshotInterval",
+      "note": "Finite numeric values preserve the original 0.3 to 1.0 combat clamp and writeback while non-finite and wrong-type values fail before timer mutation."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_optimization_config.py",
+        "python/alas_headless/alas_optimization_config_replay.py",
+        "integration/alas/series/0150-runtime-optimization-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "Optimization.WhenTaskQueueEmpty",
+      "note": "All three declared idle modes preserve the original scheduler branches and due-task bypass; invalid values now fail before task dequeue instead of falling back silently."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -9318,9 +9372,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "9fb287ae674c0fb809148feb6e93a0e05b0fc7d23e3fb8868d2a1d2b178fab15",
-      "manifest_sha256": "958e837b097cf118a039f6ebf46530020421b14333a10505a369e39300155752",
-      "member_count": 16
+      "combined_sha256": "88de0ee5b6c5dca4298e5992a5ed10a47487d725ce13efc8a4d8fa52a82fd584",
+      "manifest_sha256": "1ff4c5c371c8ded339785d8abb561c410f4b230d3b27d706e5a1003948e0b0ef",
+      "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

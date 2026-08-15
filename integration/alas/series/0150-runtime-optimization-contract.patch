@@ -1,0 +1,31 @@
+diff --git a/alas.py b/alas.py
+index e0d4cf90..b6e7b782 100644
+--- a/alas.py
++++ b/alas.py
+@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
+ import inflection
+ from cached_property import cached_property
+ 
++from alas_headless import validate_alas_when_task_queue_empty
++
+ from module.base.decorator import del_cached_property
+ from module.config.config import AzurLaneConfig, TaskEnd
+ from module.config.deep import deep_get, deep_set
+@@ -466,6 +468,9 @@ class AzurLaneAutoScript:
+             str: Name of the next task.
+         """
+         while 1:
++            method = validate_alas_when_task_queue_empty(
++                self.config.Optimization_WhenTaskQueueEmpty
++            )
+             task = self.config.get_next()
+             self.config.task = task
+             self.config.bind(task)
+@@ -477,7 +482,6 @@ class AzurLaneAutoScript:
+             if task.next_run > datetime.now():
+                 logger.info(f'Wait until {task.next_run} for task `{task.command}`')
+                 self.is_first_task = False
+-                method = self.config.Optimization_WhenTaskQueueEmpty
+                 if method == 'close_game':
+                     logger.info('Close game during wait')
+                     self.device.app_stop()

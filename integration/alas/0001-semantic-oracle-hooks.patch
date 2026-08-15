@@ -214,10 +214,19 @@ index 1224c454..88376a16 100644
          p1, p2 = ensure_int(p1, p2)
          logger.info(
 diff --git a/module/device/screenshot.py b/module/device/screenshot.py
-index 9940ee05..65f5dde7 100644
+index 9940ee05..12d4c732 100644
 --- a/module/device/screenshot.py
 +++ b/module/device/screenshot.py
-@@ -56,6 +56,12 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
+@@ -7,6 +7,8 @@ import cv2
+ import numpy as np
+ from PIL import Image
+ 
++from alas_headless import validate_alas_screenshot_interval_config
++
+ from module.base.decorator import cached_property
+ from module.base.timer import Timer
+ from module.base.utils import get_color, image_size, limit_in, save_image
+@@ -56,6 +58,12 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
          self._screenshot_interval.wait()
          self._screenshot_interval.reset()
  
@@ -230,6 +239,30 @@ index 9940ee05..65f5dde7 100644
          for _ in range(2):
              if self.screenshot_method_override:
                  method = self.screenshot_method_override
+@@ -167,17 +175,21 @@ class Screenshot(Adb, WSA, DroidCast, AScreenCap, Scrcpy, NemuIpc, LDOpenGL):
+                 Minimum interval between 2 screenshots in seconds.
+                 Or None for Optimization_ScreenshotInterval, 'combat' for Optimization_CombatScreenshotInterval
+         """
++        optimization = validate_alas_screenshot_interval_config(
++            screenshot_interval=self.config.Optimization_ScreenshotInterval,
++            combat_screenshot_interval=self.config.Optimization_CombatScreenshotInterval,
++        )
+         if interval is None:
+-            origin = self.config.Optimization_ScreenshotInterval
++            origin = optimization.screenshot_interval
+             interval = limit_in(origin, 0.1, 0.3)
+             if interval != origin:
+                 logger.warning(f'Optimization.ScreenshotInterval {origin} is revised to {interval}')
+                 self.config.Optimization_ScreenshotInterval = interval
+             # Allow nemu_ipc to have a lower default
+             if self.config.Emulator_ScreenshotMethod in ['nemu_ipc', 'ldopengl']:
+                 interval = limit_in(origin, 0.1, 0.2)
+         elif interval == 'combat':
+-            origin = self.config.Optimization_CombatScreenshotInterval
++            origin = optimization.combat_screenshot_interval
+             interval = limit_in(origin, 0.3, 1.0)
+             if interval != origin:
+                 logger.warning(f'Optimization.CombatScreenshotInterval {origin} is revised to {interval}')
 diff --git a/module/ocr/ocr.py b/module/ocr/ocr.py
 index 9dfd4f00..9fca01bd 100644
 --- a/module/ocr/ocr.py
@@ -6569,3 +6602,34 @@ index eb5a5dca..4a170071 100644
          pending = []
          waiting = []
          error = []
+diff --git a/alas.py b/alas.py
+index e0d4cf90..b6e7b782 100644
+--- a/alas.py
++++ b/alas.py
+@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
+ import inflection
+ from cached_property import cached_property
+ 
++from alas_headless import validate_alas_when_task_queue_empty
++
+ from module.base.decorator import del_cached_property
+ from module.config.config import AzurLaneConfig, TaskEnd
+ from module.config.deep import deep_get, deep_set
+@@ -466,6 +468,9 @@ class AzurLaneAutoScript:
+             str: Name of the next task.
+         """
+         while 1:
++            method = validate_alas_when_task_queue_empty(
++                self.config.Optimization_WhenTaskQueueEmpty
++            )
+             task = self.config.get_next()
+             self.config.task = task
+             self.config.bind(task)
+@@ -477,7 +482,6 @@ class AzurLaneAutoScript:
+             if task.next_run > datetime.now():
+                 logger.info(f'Wait until {task.next_run} for task `{task.command}`')
+                 self.is_first_task = False
+-                method = self.config.Optimization_WhenTaskQueueEmpty
+                 if method == 'close_game':
+                     logger.info('Close game during wait')
+                     self.device.app_stop()

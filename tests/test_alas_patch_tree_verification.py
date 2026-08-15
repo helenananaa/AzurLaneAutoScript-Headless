@@ -148,6 +148,21 @@ class AlasPatchTreeVerificationTests(unittest.TestCase):
                 ("module/config/argument/args.json",),
             )
 
+            allowed_root_python = parent / "allowed-root-python.patch"
+            allowed_root_python.write_text(
+                "diff --git a/alas.py b/alas.py\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(parse_patch_paths(allowed_root_python), ("alas.py",))
+
+            unsafe_root_python = parent / "unsafe-root-python.patch"
+            unsafe_root_python.write_text(
+                "diff --git a/other.py b/other.py\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(AlasPatchVerificationError, "allowlisted"):
+                parse_patch_paths(unsafe_root_python)
+
             unsafe_json = parent / "unsafe-json.patch"
             unsafe_json.write_text(
                 "diff --git a/module/config/other.json b/module/config/other.json\n",

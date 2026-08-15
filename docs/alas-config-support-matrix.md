@@ -280,13 +280,21 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 该字段只提升 `offline=complete`。真实战令入口、红点、免费/付费奖励区分、无奖励路径、领取后库存/货币收据和异常恢复仍缺，因此 Freebies 面板保持 P。
 
+### 1.35 本轮 Optimization 三字段契约
+
+`Optimization.ScreenshotInterval` 与 `CombatScreenshotInterval` 只接受有限数值且拒绝布尔混入；回放直接执行原 `Screenshot.screenshot_interval_set()`，保持普通 `0.1..0.3`、战斗 `0.3..1.0` 的夹取和写回、`nemu_ipc/ldopengl` 的 `0.2` 上限、`scrcpy` 的 `0.1` 覆盖，以及显式手工间隔不夹取。NaN、正负无穷、文本、空值和容器在 timer mutation 前 fail-closed。
+
+`Optimization.WhenTaskQueueEmpty` 精确接受 `stay_there/goto_main/close_game`。冻结时钟回放直接执行原 `AzurLaneAutoScript.get_next_task()`：三种未来任务分支分别保留等待、回主界面、停包动作顺序；已到期任务不触发空队列动作。非法值现在在 `config.get_next()` 前拒绝，不再静默回退 `stay_there`。所有设备、等待和资源释放动作均为记录桩，mutation budget 为 0。
+
+三字段只提升 `offline=complete`。真实跨后端帧时钟、长等待重载、停包后 Restart 租约、回主界面 postcondition 和进程恢复仍缺。另经 AST 证实，Headless 语义截图在读取 `Emulator.ScreenshotDedithering` 前已经返回 semantic frame；该字段当前对 Headless 无效，本批明确跳过，不把像素去抖算法外推为语义适配。Alas 面板保持 P。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
 
 | # | 面板 | 配置组 | 当前 | 尚未闭环的配置范围与验收重点 |
 |---:|---|---|:---:|---|
-| 1 | Alas | Emulator, EmulatorInfo, Error, Optimization, DropRecord | P | 当前语义观察/输入路径可运行；传统截图/控制方法矩阵、包名/服务器矩阵、错误截图、掉落记录与上传、通知均未完整验收 |
+| 1 | Alas | Emulator, EmulatorInfo, Error, Optimization, DropRecord | P | 三项 Optimization 运行字段和 TaskHoardingDuration 已离线等价；语义截图仍不执行 Dedithering，传统方法/包名矩阵、错误截图、掉落上传与通知未完整验收 |
 | 2 | General | Retirement, OneClickRetire, Enhance, OldRetire | P | 三种 `RetireMode` 已离线分类，旧退役在 Headless 页面事件前拒绝；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级语义事务 |
 | 3 | Restart | Scheduler | L | 当前冷重启闭环；`AdbRestart`、其他模拟器生命周期、失败重试与只恢复不重启仍需覆盖 |
 | 4 | Main | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | B | 12-4 能到账号战斗边界；全部共用地图配置分支见 3.2 |
@@ -357,7 +365,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Emulator | `Serial`; `PackageName`（22 值）; `ServerName`（72 值）; `ScreenshotMethod`=`auto/ADB/ADB_nc/uiautomator2/aScreenCap/aScreenCap_nc/DroidCast/DroidCast_raw/nemu_ipc/ldopengl`; `ControlMethod`=`ADB/uiautomator2/minitouch/Hermit/MaaTouch`; `ScreenshotDedithering`; `AdbRestart` | P | Headless 明确支持/拒绝每种方法；至少覆盖当前包/服务器、自动发现失败、设备断连、重连和方法不兼容；不能静默回退到未经授权的像素路径 |
 | EmulatorInfo | `Emulator`=`auto/NoxPlayer/NoxPlayer64/BlueStacks4/BlueStacks5/BlueStacks4HyperV/BlueStacks5HyperV/LDPlayer3/LDPlayer4/LDPlayer9/LDPlayer14/MuMuPlayer/MuMuPlayerX/MuMuPlayer12/MEmuPlayer`; `name`; `path` | P | 自动与显式模拟器发现、找不到安装、多个实例和自定义路径均需 fail-closed |
 | Error | `HandleError`; `SaveError`; `OnePushConfig`; `ScreenshotLength` | P | 两个布尔值组合、错误证据可用性、截图长度边界、通知成功/失败/未配置，以及不泄漏敏感信息 |
-| Optimization | `ScreenshotInterval`; `CombatScreenshotInterval`; `TaskHoardingDuration`; `WhenTaskQueueEmpty`=`stay_there/goto_main/close_game` | P | `TaskHoardingDuration` 已完成 0..1440 分钟离线契约并保留原调度器；截图间隔缺初始化期门禁/跨后端帧时钟证据，`close_game` 缺包进程租约，空队列恢复仍未闭环 |
+| Optimization | `ScreenshotInterval`; `CombatScreenshotInterval`; `TaskHoardingDuration`; `WhenTaskQueueEmpty`=`stay_there/goto_main/close_game` | P | 四字段均已离线等价并 fail-closed；跨后端帧时钟、长等待重载、`close_game` 包进程租约和空队列恢复仍未实机闭环 |
 | DropRecord | `ResearchRecord`, `CommissionRecord`, `CombatRecord`, `OpsiRecord`, `MeowfficerBuy`, `MeowfficerTalent`; `API`; `AzurStatsID`; `SaveFolder` | M | `do_not/save/upload/save_and_upload` 各模式、默认/反代 API、无 ID、无权限目录、网络失败、脱敏和重试；没有有效画面时不得生成伪证据 |
 | Retirement | `RetireMode`=`one_click_retire/enhance/old_retire` | P | 三枚举已离线逐值分类且非法值提前拒绝；`one_click_retire` 已走游戏官方事务并用容量差验证真实数量，`enhance` 已接 ALAS 正式任务并走官方推荐事务；`old_retire` 在 Headless 页面事件前 fail-closed，仍缺其任务级语义事务、完整收藏破坏性任务、自然无素材和非网络中断实机证据 |
 | OneClickRetire | `KeepLimitBreak`=`keep_limit_break/do_not_keep` | P | `keep_limit_break` 已实退；`do_not_keep` 仅验证官方设置值，未做扩大集合后的破坏性实退；唯一舰船保护始终强制开启 |
@@ -797,10 +805,10 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiShop.PresetFilter` | OpsiShop | type=select; display=default | options: "all", "custom", "max_benefit_meta", "max_benefit", "no_meta"; default: "max_benefit_meta" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiStronghold.ForceRun` | OpsiStronghold | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OpsiVoucher.Filter` | OpsiVoucher | type=textarea; display=default | input/default: "LoggerAbyssal > LoggerObscure > Book > Coin > Fragment" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `Optimization.CombatScreenshotInterval` | Alas | type=input; display=default | input/default: 1.0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `Optimization.ScreenshotInterval` | Alas | type=input; display=default | input/default: 0.3 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `Optimization.CombatScreenshotInterval` | Alas | type=input; display=default | input/default: 1.0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Optimization.ScreenshotInterval` | Alas | type=input; display=default | input/default: 0.3 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Optimization.TaskHoardingDuration` | Alas | type=input; display=default | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Optimization.WhenTaskQueueEmpty` | Alas | type=select; display=default | options: "close_game", "goto_main", "stay_there"; default: "goto_main" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `Optimization.WhenTaskQueueEmpty` | Alas | type=select; display=default | options: "close_game", "goto_main", "stay_there"; default: "goto_main" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `PrivateQuarters.BuyCake` | PrivateQuarters | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `PrivateQuarters.BuyRoses` | PrivateQuarters | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `PrivateQuarters.TargetInteract` | PrivateQuarters | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
