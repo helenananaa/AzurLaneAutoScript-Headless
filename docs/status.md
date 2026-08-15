@@ -565,10 +565,13 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - `OpsiHazard1Leveling.TargetZone` admits exactly `0`, `22`, and `44`.
   Original-method replay preserves the default `0 -> 22` mapping and both
   explicit safe-zone choices through the strategic-search boundary.
-- Eleven valid classes pass and 35 malformed values fail before task, map, combat,
+- `OpsiMeowfficerFarming.HazardLevel` admits exactly `3`, `4`, `5`, `6`, and
+  `10`; each value reaches the original `zone_select()` argument and preserves
+  fleet, order, auto-search, postprocessing, and task-switch ordering.
+- Sixteen valid classes pass and 47 malformed values fail before task, map, combat,
   coordinate, or inventory state changes. Mutation budget is `0`; all effects
   are recorders, with no combat, item consumption, or Android input. Only the
-  five fields' `offline` dimension becomes complete.
+  six fields' `offline` dimension becomes complete.
 - Whole-tree AST inspection finds no runtime loads of
   `OpsiExplore.ForceRun`, `OpsiAbyssal.ForceRun`, or
   `OpsiMonthBoss.ForceRun`, and also no runtime load of

@@ -4,9 +4,11 @@ from pathlib import Path
 
 from alas_headless.alas_opsi_task_config_contract import (
     OPSI_HAZARD1_TARGET_ZONES,
+    OPSI_MEOWFFICER_HAZARD_LEVELS,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
     validate_alas_opsi_hazard1_config,
+    validate_alas_opsi_meowfficer_config,
     validate_alas_opsi_month_boss_config,
     validate_alas_opsi_obscure_config,
 )
@@ -24,9 +26,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 5)
-        self.assertEqual(result["accepted_case_count"], 11)
-        self.assertEqual(result["invalid_case_count"], 35)
+        self.assertEqual(result["field_count"], 6)
+        self.assertEqual(result["accepted_case_count"], 16)
+        self.assertEqual(result["invalid_case_count"], 47)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -65,6 +67,13 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 ).target_zone,
                 target_zone,
             )
+        for hazard_level in OPSI_MEOWFFICER_HAZARD_LEVELS:
+            self.assertEqual(
+                validate_alas_opsi_meowfficer_config(
+                    hazard_level=hazard_level
+                ).hazard_level,
+                hazard_level,
+            )
 
     def test_invalid_values_fail_closed(self):
         for mode in ("", "hard", None, 0, True, [], {}):
@@ -92,6 +101,11 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_opsi_hazard1_config(target_zone=value)
+        for value in (0, 1, 2, 7, 9, 11, None, True, "5", 5.0, [], {}):
+            with self.subTest(field="meow_hazard", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_meowfficer_config(hazard_level=value)
 
     def test_patch_gates_original_task_entries(self):
         patch = ROOT.joinpath(
@@ -101,6 +115,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_obscure_config("), 2)
         self.assertEqual(patch.count("validate_alas_opsi_daily_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_hazard1_config("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_meowfficer_config("), 1)
 
     def test_sources_compile(self):
         for relative in (

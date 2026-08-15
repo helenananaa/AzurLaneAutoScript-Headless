@@ -292,7 +292,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiMonthBoss.Mode` 精确接受 `normal/normal_hard`，`CheckAdaptability` 精确接受布尔值。回放直接编译并执行固定上游 `clear_month_boss()` 与 `month_boss_delay()`，保留普通/困难入口选择、普通完成后继续困难、困难已完成跳过、`203/203/156` 适应性阈值及不足时延迟停止的原顺序。非法值在任务、地图或战斗状态前 fail-closed。
 
-`OpsiObscure.ForceRun` 的真假分支直接执行原 `clear_obscure()` 与 `os_obscure()`：关闭时维持一次安全停止，开启时进入原任务切换检查。`OpsiDaily.UseTuningSample` 的真假分支直接执行原 `os_daily()`，只改变调律样本使用步骤，后续接任务、区域初始化、清任务与次日延迟顺序保持不变。`OpsiHazard1Leveling.TargetZone` 覆盖声明的 `0/22/44`：`0` 保持原逻辑映射到 22，另外两值进入对应安全区，回放在原 `run_strategic_search()` 边界停止。五字段共覆盖 11 个合法类、拒绝 35 个非法值，mutation budget 为 0；坐标消耗、导航、战斗、样本使用和奖励均为记录桩，没有真实战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
+`OpsiObscure.ForceRun` 的真假分支直接执行原 `clear_obscure()` 与 `os_obscure()`：关闭时维持一次安全停止，开启时进入原任务切换检查。`OpsiDaily.UseTuningSample` 的真假分支直接执行原 `os_daily()`，只改变调律样本使用步骤，后续接任务、区域初始化、清任务与次日延迟顺序保持不变。`OpsiHazard1Leveling.TargetZone` 覆盖声明的 `0/22/44`：`0` 保持原逻辑映射到 22，另外两值进入对应安全区，回放在原 `run_strategic_search()` 边界停止。`OpsiMeowfficerFarming.HazardLevel` 覆盖 `3/4/5/6/10`，逐值保留原 `zone_select(hazard_level=...)` 参数和后续舰队、指令、自动搜索、后处理、任务切换顺序。六字段共覆盖 16 个合法类、拒绝 47 个非法值，mutation budget 为 0；坐标消耗、导航、战斗、样本使用和奖励均为记录桩，没有真实战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
 
 固定上游全树 AST 还证明 `OpsiExplore.ForceRun`、`OpsiAbyssal.ForceRun`、`OpsiMonthBoss.ForceRun` 与 `OpsiDaily.DoMission` 只有配置声明，没有任何运行时读取。四者现在明确标为 `unsupported`，不再用“实机当前值”暗示存在能力；重新进入必须先出现并审阅上游真实消费者。MonthBoss/Obscure/Daily 的导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板保持 B。
 
@@ -803,7 +803,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiGeneral.UseLogger` | OpsiGeneral | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiHazard1Leveling.TargetZone` | OpsiHazard1Leveling | type=select; display=default | options: 0, 22, 44; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiMeowfficerFarming.ActionPointPreserve` | OpsiMeowfficerFarming | type=input; display=default | input/default: 1000 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `OpsiMeowfficerFarming.HazardLevel` | OpsiMeowfficerFarming | type=select; display=default | options: 10, 3, 4, 5, 6; default: 5 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiMeowfficerFarming.HazardLevel` | OpsiMeowfficerFarming | type=select; display=default | options: 10, 3, 4, 5, 6; default: 5 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiMeowfficerFarming.TargetZone` | OpsiMeowfficerFarming | type=input; display=default | input/default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiMonthBoss.CheckAdaptability` | OpsiMonthBoss | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiMonthBoss.ForceRun` | OpsiMonthBoss | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

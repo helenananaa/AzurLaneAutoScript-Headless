@@ -5287,10 +5287,28 @@ index 03501dc8..2d224fc9 100644
                  zone = 22
              logger.hr(f'OS hazard 1 leveling, zone_id={zone}', level=1)
 diff --git a/module/os/tasks/meowfficer_farming.py b/module/os/tasks/meowfficer_farming.py
-index 43d629c5..513b70ad 100644
+index 43d629c5..5f6ac91a 100644
 --- a/module/os/tasks/meowfficer_farming.py
 +++ b/module/os/tasks/meowfficer_farming.py
-@@ -38,6 +38,18 @@ class OpsiMeowfficerFarming(OSMap):
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_opsi_meowfficer_config
++
+ from module.config.utils import get_os_reset_remain
+ from module.exception import RequestHumanTakeover, ScriptError
+ from module.logger import logger
+@@ -10,7 +12,10 @@ class OpsiMeowfficerFarming(OSMap):
+         """
+         Recommend 3 or 5 for higher meowfficer searching point per action points ratio.
+         """
+-        logger.hr(f'OS meowfficer farming, hazard_level={self.config.OpsiMeowfficerFarming_HazardLevel}', level=1)
++        meowfficer_config = validate_alas_opsi_meowfficer_config(
++            hazard_level=self.config.OpsiMeowfficerFarming_HazardLevel,
++        )
++        logger.hr(f'OS meowfficer farming, hazard_level={meowfficer_config.hazard_level}', level=1)
+         if self.is_cl1_enabled and self.config.OpsiMeowfficerFarming_ActionPointPreserve < 1000:
+             logger.info('With CL1 leveling enabled, set action point preserve to 1000')
+             self.config.OpsiMeowfficerFarming_ActionPointPreserve = 1000
+@@ -38,6 +43,18 @@ class OpsiMeowfficerFarming(OSMap):
              self.config.task_delay(server_update=True)
              self.config.task_stop()
  
@@ -5309,6 +5327,15 @@ index 43d629c5..513b70ad 100644
          ap_checked = False
          while True:
              self.config.OS_ACTION_POINT_PRESERVE = preserve
+@@ -77,7 +94,7 @@ class OpsiMeowfficerFarming(OSMap):
+                     self.handle_after_auto_search()
+                     self.config.check_task_switch()
+             else:
+-                zones = self.zone_select(hazard_level=self.config.OpsiMeowfficerFarming_HazardLevel) \
++                zones = self.zone_select(hazard_level=meowfficer_config.hazard_level) \
+                     .delete(SelectedGrids([self.zone])) \
+                     .delete(SelectedGrids(self.zones.select(is_port=True))) \
+                     .sort_by_clock_degree(center=(1252, 1012), start=self.zone.location)
 diff --git a/module/os/tasks/month_boss.py b/module/os/tasks/month_boss.py
 index 948b5149..168e3abc 100644
 --- a/module/os/tasks/month_boss.py

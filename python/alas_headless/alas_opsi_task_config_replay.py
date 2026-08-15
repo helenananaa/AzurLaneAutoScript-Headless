@@ -13,9 +13,11 @@ import numpy as np
 
 from .alas_opsi_task_config_contract import (
     OPSI_HAZARD1_TARGET_ZONES,
+    OPSI_MEOWFFICER_HAZARD_LEVELS,
     OPSI_MONTH_BOSS_MODES,
     validate_alas_opsi_daily_config,
     validate_alas_opsi_hazard1_config,
+    validate_alas_opsi_meowfficer_config,
     validate_alas_opsi_month_boss_config,
     validate_alas_opsi_obscure_config,
 )
@@ -44,6 +46,22 @@ class _TaskStop(RuntimeError):
 
 class _Switch(RuntimeError):
     pass
+
+
+class _ZoneList:
+    def __init__(self, zone_id: int):
+        self.zone = SimpleNamespace(zone_id=zone_id)
+
+    def delete(self, _value):
+        return self
+
+    def sort_by_clock_degree(self, **_kwargs):
+        return self
+
+    def __getitem__(self, index: int):
+        if index != 0:
+            raise IndexError(index)
+        return self.zone
 
 
 def _sha256(path: Path) -> str:
@@ -113,6 +131,22 @@ def _verify_args(args_path: Path) -> None:
         or hazard.get("option") != list(OPSI_HAZARD1_TARGET_ZONES)
     ):
         raise AssertionError("OpsiHazard1Leveling.TargetZone declaration drifted")
+    meowfficer = document.get("OpsiMeowfficerFarming", {}).get(
+        "OpsiMeowfficerFarming"
+    )
+    if not isinstance(meowfficer, dict) or set(meowfficer) != {
+        "ActionPointPreserve",
+        "HazardLevel",
+        "TargetZone",
+    }:
+        raise AssertionError("OpsiMeowfficerFarming field surface drifted")
+    hazard_level = meowfficer["HazardLevel"]
+    if (
+        hazard_level.get("type") != "select"
+        or hazard_level.get("value") != 5
+        or hazard_level.get("option") != list(OPSI_MEOWFFICER_HAZARD_LEVELS)
+    ):
+        raise AssertionError("OpsiMeowfficerFarming.HazardLevel declaration drifted")
 
 
 def _consumer_methods(path: Path, owner: str, fields: tuple[str, ...]):
@@ -168,6 +202,7 @@ class _Config(SimpleNamespace):
         force: object = False,
         use_tuning_sample: object = True,
         hazard_target_zone: object = 0,
+        meowfficer_hazard_level: object = 5,
     ):
         super().__init__(
             OpsiMonthBoss_Mode=mode,
@@ -176,6 +211,9 @@ class _Config(SimpleNamespace):
             OpsiObscure_ForceRun=force,
             OpsiDaily_UseTuningSample=use_tuning_sample,
             OpsiHazard1Leveling_TargetZone=hazard_target_zone,
+            OpsiMeowfficerFarming_HazardLevel=meowfficer_hazard_level,
+            OpsiMeowfficerFarming_ActionPointPreserve=1000,
+            OpsiMeowfficerFarming_TargetZone=0,
             OpsiGeneral_UseLogger=False,
             OpsiGeneral_BuyActionPointLimit=0,
             OpsiAshBeacon_EnsureFullyCollected=False,
@@ -447,6 +485,62 @@ def _verify_hazard(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry": invalid}
 
 
+def _meowfficer_case(method, *, hazard_level: object) -> dict[str, Any]:
+    config = _Config(
+        mode="normal",
+        check=False,
+        meowfficer_hazard_level=hazard_level,
+    )
+    events = config.events
+    host = SimpleNamespace(
+        config=config,
+        device=SimpleNamespace(semantic_adapter=None),
+        is_cl1_enabled=False,
+        _ash_fully_collected=True,
+        zone=SimpleNamespace(zone_id=1, location=(0, 0)),
+        zones=SimpleNamespace(select=lambda **_kwargs: []),
+    )
+    host.get_action_point_limit = lambda: events.append("ap_limit") or 2000
+    host.is_in_opsi_explore = lambda: events.append("explore_probe") or False
+    host.action_point_set = lambda **kwargs: events.append(["action_point_set", kwargs])
+    host.zone_select = lambda **kwargs: events.append(
+        ["zone_select", kwargs]
+    ) or _ZoneList(44)
+    host.globe_goto = lambda zone, **kwargs: events.append(
+        ["globe_goto", zone.zone_id, kwargs]
+    )
+    host.fleet_set = lambda fleet: events.append(["fleet_set", fleet])
+    host.os_order_execute = lambda **kwargs: events.append(["os_order_execute", kwargs])
+    host.run_auto_search = lambda: events.append("auto_search")
+    host.handle_after_auto_search = lambda: events.append("after_auto_search")
+    rejected = False
+    switched = False
+    try:
+        MethodType(method, host)()
+    except SemanticGateClosed:
+        rejected = True
+    except _Switch:
+        switched = True
+    return {"rejected": rejected, "switched": switched, "events": events}
+
+
+def _verify_meowfficer(method) -> dict[str, Any]:
+    cases = {
+        str(level): _meowfficer_case(method, hazard_level=level)
+        for level in OPSI_MEOWFFICER_HAZARD_LEVELS
+    }
+    for level, case in cases.items():
+        if case["rejected"] or not case["switched"]:
+            raise AssertionError("meowfficer hazard-level task boundary drifted")
+        selected = [event for event in case["events"] if event[0] == "zone_select"]
+        if selected != [["zone_select", {"hazard_level": int(level)}]]:
+            raise AssertionError("meowfficer hazard-level selection drifted")
+    invalid = _meowfficer_case(method, hazard_level=7)
+    if invalid != {"rejected": True, "switched": False, "events": []}:
+        raise AssertionError("invalid meowfficer hazard level touched task state")
+    return {"cases": cases, "invalid_entry": invalid}
+
+
 def _verify_contract() -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
@@ -463,6 +557,9 @@ def _verify_contract() -> tuple[int, int]:
         accepted += 1
     for target_zone in OPSI_HAZARD1_TARGET_ZONES:
         validate_alas_opsi_hazard1_config(target_zone=target_zone)
+        accepted += 1
+    for hazard_level in OPSI_MEOWFFICER_HAZARD_LEVELS:
+        validate_alas_opsi_meowfficer_config(hazard_level=hazard_level)
         accepted += 1
     invalid = 0
     for value in INVALID_MODES:
@@ -496,6 +593,13 @@ def _verify_contract() -> tuple[int, int]:
             invalid += 1
         else:
             raise AssertionError("invalid OpsiHazard1Leveling.TargetZone was admitted")
+    for value in (0, 1, 2, 7, 9, 11, None, True, "5", 5.0, [], {}):
+        try:
+            validate_alas_opsi_meowfficer_config(hazard_level=value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiMeowfficerFarming.HazardLevel was admitted")
     return accepted, invalid
 
 
@@ -506,6 +610,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     obscure_path = alas_root / "module/os/tasks/obscure.py"
     daily_path = alas_root / "module/os/tasks/daily.py"
     hazard_path = alas_root / "module/os/tasks/hazard_leveling.py"
+    meowfficer_path = alas_root / "module/os/tasks/meowfficer_farming.py"
     _verify_args(args_path)
     month_consumers = _consumer_methods(
         month_path,
@@ -527,11 +632,17 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiHazard1Leveling",
         ("OpsiHazard1Leveling_TargetZone",),
     )
+    meowfficer_consumers = _consumer_methods(
+        meowfficer_path,
+        "OpsiMeowfficerFarming",
+        ("OpsiMeowfficerFarming_HazardLevel",),
+    )
     consumers = {
         **month_consumers,
         **obscure_consumers,
         **daily_consumers,
         **hazard_consumers,
+        **meowfficer_consumers,
     }
     expected = {
         "OpsiMonthBoss_Mode": ["clear_month_boss", "month_boss_delay"],
@@ -539,6 +650,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiObscure_ForceRun": ["clear_obscure", "os_obscure"],
         "OpsiDaily_UseTuningSample": ["os_daily"],
         "OpsiHazard1Leveling_TargetZone": ["os_hazard1_leveling"],
+        "OpsiMeowfficerFarming_HazardLevel": ["os_meowfficer_farming"],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -555,6 +667,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "validate_alas_opsi_obscure_config": validate_alas_opsi_obscure_config,
         "validate_alas_opsi_daily_config": validate_alas_opsi_daily_config,
         "validate_alas_opsi_hazard1_config": validate_alas_opsi_hazard1_config,
+        "validate_alas_opsi_meowfficer_config": validate_alas_opsi_meowfficer_config,
+        "SelectedGrids": lambda value: value,
+        "get_os_reset_remain": lambda: 1,
     }
     month_node = _method(month_path, "OpsiMonthBoss", "clear_month_boss")
     delay_node = _method(month_path, "OpsiMonthBoss", "month_boss_delay")
@@ -565,6 +680,11 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         hazard_path,
         "OpsiHazard1Leveling",
         "os_hazard1_leveling",
+    )
+    meowfficer_node = _method(
+        meowfficer_path,
+        "OpsiMeowfficerFarming",
+        "os_meowfficer_farming",
     )
     month_guard = any(
         isinstance(node, ast.Call)
@@ -590,6 +710,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and node.func.id == "validate_alas_opsi_hazard1_config"
         for node in ast.walk(hazard_node)
     )
+    meowfficer_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_meowfficer_config"
+        for node in ast.walk(meowfficer_node)
+    )
     month = _verify_month(
         _compile(month_node, globals_),
         _compile(delay_node, globals_),
@@ -600,6 +726,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     )
     daily = _verify_daily(_compile(daily_node, globals_))
     hazard = _verify_hazard(_compile(hazard_node, globals_))
+    meowfficer = _verify_meowfficer(_compile(meowfficer_node, globals_))
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -616,18 +743,23 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 5,
+        "field_count": 6,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
         "zero_runtime_consumers": dead_loads,
         "patched_guards_present": (
-            month_guard and obscure_guard and daily_guard and hazard_guard
+            month_guard
+            and obscure_guard
+            and daily_guard
+            and hazard_guard
+            and meowfficer_guard
         ),
         "month_boss": month,
         "obscure": obscure,
         "daily": daily,
         "hazard1_leveling": hazard,
+        "meowfficer_farming": meowfficer,
         "invalid_month_entry": invalid_month_events,
         "mutation_budget": 0,
         "real_combat_performed": False,
@@ -639,5 +771,6 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "obscure": _sha256(obscure_path),
             "daily": _sha256(daily_path),
             "hazard1_leveling": _sha256(hazard_path),
+            "meowfficer_farming": _sha256(meowfficer_path),
         },
     }
