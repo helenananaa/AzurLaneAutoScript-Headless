@@ -2,6 +2,39 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-15
+
+### Configuration interaction attack matrix: pinned-source, fixed-seed, zero-input pass
+
+- `verify_alas_configuration_attack_matrix.py` now composes the existing
+  configuration contracts only where their gates share an ALAS ownership path:
+  campaign pre-sortie (`Campaign`, `Fleet`, `HpControl`, `Submarine`), central
+  `Emotion` construction, and Scheduler/EventGeneral/TaskBalancer/Optimization
+  queue decisions. It does not invent a second campaign, scheduler, or combat
+  state machine.
+- The fixed seed `0xA1A5C0DE` produces 21 campaign pairwise rows, 18 scheduler
+  pairwise rows, and 32 valid -> invalid -> valid state sequences. Eight named
+  minimal invalid cases cover integer-as-bool aliases, invalid fleet identity,
+  NaN threshold, active submarine, reversed scheduler range, bool coin limit,
+  infinite interval, and unknown idle mode. A failure includes its stable seed
+  and row/sequence id instead of being reported as an unreproducible fuzz hit.
+- Every invalid pre-sortie case stops at its exact gate before the semantic
+  pre-sortie scope. The matrix checks no configuration value is rewritten, no
+  action authority is minted, and no contract source exposes click, gesture,
+  screenshot, crop, OCR, or template fallback. The gate order is pinned to the
+  authoritative campaign patch, with emotion validation preceding original
+  object ownership.
+- The matrix runs the existing original-method replays against the clean pinned
+  `81ccf63` checkout: scheduler, fleet, HP control, emotion, submarine,
+  EventGeneral/TaskBalancer, and optimization. The HP replay now supplies a
+  source-only six-bar fixture as well as the semantic stub, so it proves the
+  same original weight branch on clean upstream without a framebuffer or
+  server-specific UI layout.
+- All records are in memory, mutation budget remains `0`, and no runtime,
+  account, game action, Android input, or resource mutation is performed. This
+  hardens existing offline claims; it does not promote any field's live,
+  observation, or action dimension.
+
 ## 2026-08-14
 
 ### Campaign clear mode: shared boolean decision replayed across 16 panels

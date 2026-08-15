@@ -52,6 +52,29 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
 
+### 1.1B 配置交互攻击矩阵（2026-08-15）
+
+单字段离线回放并不自动证明多个设置同时出现时仍会在正确的 ALAS 所有权
+边界拒绝。本轮新增 `tests/test_alas_configuration_attack_matrix.py` 与
+`scripts/python/verify_alas_configuration_attack_matrix.py`，使用干净固定上游
+`81ccf63` 运行以下确定性组合：
+
+- Campaign/Fleet/HpControl/Submarine/Emotion 的 pairwise 覆盖为 **21** 行；
+- Scheduler/EventGeneral/TaskBalancer/Optimization 的 pairwise 覆盖为 **18** 行；
+- 固定种子 `0xA1A5C0DE` 再运行 **32** 次 `合法 -> 非法 -> 合法` 序列，验证拒绝
+  后无 scope、状态或 authority 泄漏；
+- **8** 个最小非法案例覆盖 bool 冒充整数、`NaN`/`Infinity`、未知枚举、错误区间和
+  未接管的 active submarine。每个随机/序列失败都带固定 seed 与行号，可独立重放。
+
+矩阵只组合确实位于同一调用链的字段：campaign patch 的四个 gate 仍按
+`Campaign -> Fleet -> HpControl -> EnemyPriority -> Submarine -> pre-sortie`
+顺序，`Emotion` 仍在原对象取得 config 前校验，Scheduler/EventGeneral 则保留原
+排队、任务切换、持久化和循环。合法路径同时重放固定上游的 Scheduler、Fleet、
+HpControl、Emotion、Submarine、EventGeneral/TaskBalancer 和 Optimization 原方法；
+所有输入均为内存 fixture/recorder，mutation budget 为 `0`，不连接设备、不读取
+framebuffer、不走 OCR/模板/裸坐标 fallback，也不提升任何字段的 live/action/
+observation 状态。
+
 ### 1.1A 当前低风险候选完成审计（2026-08-15）
 
 本轮再次逐项审计了所有仍未达到 `offline=complete` 的支持字段，以及

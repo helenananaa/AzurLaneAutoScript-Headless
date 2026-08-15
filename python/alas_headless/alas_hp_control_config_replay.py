@@ -84,11 +84,22 @@ def _verify_original_decisions(hp_balancer: type[Any], combat: type[Any]) -> dic
     original_session_getter = alas_headless.current_semantic_session
     weighted = hp_balancer.__new__(hp_balancer)
     weighted.config = SimpleNamespace(
-        HpControl_HpBalanceWeight="1000， 500， 250"
+        HpControl_HpBalanceWeight="1000， 500， 250",
+        # The unmodified pinned method selects its legacy HP-bar layout by
+        # server before it reaches the weight calculation.  Supplying the
+        # stable default keeps this replay source-only on a clean checkout;
+        # the patched semantic method still receives its typed-session stub
+        # below.
+        SERVER="cn",
     )
     weighted.fleet_current_index = 1
     weighted._hp = {}
     weighted._hp_has_ship = {}
+    raw_hp = iter((0.9, 0.8, 0.7, 0.9, 0.8, 0.7))
+    weighted._hp_grid = lambda: SimpleNamespace(
+        buttons=tuple(SimpleNamespace(area=(index, 0, index + 1, 1)) for index in range(6))
+    )
+    weighted._calculate_hp = lambda _area: next(raw_hp)
     alas_headless.current_semantic_session = lambda: SimpleNamespace(
         campaign_fleet_hp=lambda: (0.9, 0.8, 0.7, 0.9, 0.8, 0.7)
     )
