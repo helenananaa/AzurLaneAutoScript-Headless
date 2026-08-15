@@ -1166,7 +1166,7 @@ index b97f0c0d..c7bf38d3 100644
          skip_get_coins = True
          items.reverse()
 diff --git a/module/shop/shop_voucher.py b/module/shop/shop_voucher.py
-index ca149f03..5d6d27e9 100644
+index ca149f03..fef529e5 100644
 --- a/module/shop/shop_voucher.py
 +++ b/module/shop/shop_voucher.py
 @@ -1,4 +1,4 @@
@@ -1175,7 +1175,17 @@ index ca149f03..5d6d27e9 100644
  from module.base.decorator import cached_property, del_cached_property
  from module.base.timer import Timer
  from module.config.redirect_utils.shop_filter import voucher_redirect
-@@ -19,6 +19,12 @@ TEMPLATE_VOUCHER_ICON = Template('./assets/shop/cost/Voucher.png')
+@@ -7,7 +7,8 @@ from module.logger import logger
+ from module.map_detection.utils import Points
+ from module.ocr.ocr import DigitYuv
+ from module.shop.assets import *
+-from module.shop.base import ShopItemGrid
++from alas_headless import validate_alas_opsi_voucher_filter
++from module.shop.base import FILTER, ShopItemGrid
+ from module.shop.clerk import ShopClerk
+ from module.shop.shop_status import ShopStatus
+ from module.ui.assets import BACK_ARROW
+@@ -19,13 +20,21 @@ TEMPLATE_VOUCHER_ICON = Template('./assets/shop/cost/Voucher.png')
  
  
  class VoucherShop(ShopClerk, ShopStatus):
@@ -1188,7 +1198,17 @@ index ca149f03..5d6d27e9 100644
      @cached_property
      def shop_filter(self):
          """
-@@ -44,6 +50,10 @@ class VoucherShop(ShopClerk, ShopStatus):
+         Returns:
+             str:
+         """
+-        return voucher_redirect(self.config.OpsiVoucher_Filter.strip())
++        value = self.config.OpsiVoucher_Filter
++        redirected = voucher_redirect(value.strip()) if isinstance(value, str) else value
++        return validate_alas_opsi_voucher_filter(FILTER, redirected)
+ 
+     def _get_vouchers(self):
+         """
+@@ -44,6 +53,10 @@ class VoucherShop(ShopClerk, ShopStatus):
          items are not loaded that fast,
          wait until any voucher icon appears
          """
@@ -1199,7 +1219,7 @@ index ca149f03..5d6d27e9 100644
          timeout = Timer(1, count=3).start()
          while 1:
              if skip_first_screenshot:
-@@ -243,6 +253,26 @@ class VoucherShop(ShopClerk, ShopStatus):
+@@ -243,6 +256,26 @@ class VoucherShop(ShopClerk, ShopStatus):
          logger.hr('Voucher Shop', level=1)
          self.wait_until_voucher_appear()
  
@@ -1226,7 +1246,7 @@ index ca149f03..5d6d27e9 100644
          # Execute buy operations
          VOUCHER_SHOP_SCROLL.set_top(main=self)
          while 1:
-@@ -273,6 +303,38 @@ class VoucherShop(ShopClerk, ShopStatus):
+@@ -273,6 +306,38 @@ class VoucherShop(ShopClerk, ShopStatus):
          logger.hr('Voucher Shop Once', level=1)
          self.wait_until_voucher_appear()
  

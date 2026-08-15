@@ -5388,9 +5388,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=textarea; display=default",
       "panels": [
@@ -7752,6 +7757,19 @@
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
         "docs/status.md"
       ],
+      "field": "OpsiVoucher.Filter",
+      "note": "Pinned voucher_redirect and shop FILTER preserve Logger expansion, tier expansion, archive removal, Unicode separators, and empty skip; malformed rules fail before voucher-page work and no exchange occurs."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "field": "OpsiShop.CustomFilter",
       "note": "Custom priority and blank fallback execute the pinned selector and grammar; malformed types and tokens fail before item pretreatment, while CL1 and exhausted-count exclusions remain original and no purchase occurs."
     },
@@ -9780,8 +9798,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "a2c195d53391ae6a9ec701130714b485bcbc0b17899fb35b1d02f6fbd67812a6",
-      "manifest_sha256": "eafee77936416c932e20a45c184e9c4659cd223017e9af691cc133874b60bbaa",
+      "combined_sha256": "a5542e2caf5d88a5e22c4ead21cdb2f1fe65f2b9cb7d734c3f1c1f637130fd6d",
+      "manifest_sha256": "e3e8b21543dbcb9664b2d443790f433c6b727fdb9b823d8eed2499d691c61183",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

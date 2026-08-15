@@ -300,7 +300,9 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiShop.PresetFilter` 的五个声明值直接绑定固定上游 `OS_SHOP`，`CustomFilter` 保留自定义顺序及空值回退默认预设。回放继续执行原 `Selector.items_filter_in_os_shop()`，覆盖 CL1 紫币排除和商品数量耗尽；未知预设、错误类型、未知及空 token 均在商品预处理前 fail-closed。没有刷新商店、读取或改变真实货币、购买商品或注入 Android 输入，因此只提升两个字段的 `offline` 维度。
 
-共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 22 个字段、106 个合法类并拒绝 176 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
+`OpsiVoucher.Filter` 直接执行固定上游 `voucher_redirect()` 与通用商店 `FILTER_REGEX/Filter`，保留 Logger 双类型展开、T1..T6 展开、档案/解锁 Logger 删除、Unicode 分隔符和空过滤器安全跳过。未知 token、尾随空 token 和错误类型在代币商店页面动作前拒绝；没有滚动、兑换、读取或改变真实代币，也没有 Android 输入。
+
+共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 23 个字段、111 个合法类并拒绝 183 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗、兑换或 Android 输入，因此只提升 `offline=complete`。
 
 此前只检查属性加载的 AST 审计漏掉了动态拼接的 `deep_get()` 字符串路径，因而错误地把 Explore/Abyssal/Stronghold 的 `ForceRun` 记为零读取；本轮已用源码绑定回放纠正。固定上游真正没有运行时消费者的仍只有 `OpsiMonthBoss.ForceRun` 与 `OpsiDaily.DoMission`，两者继续明确标为 `unsupported`。导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板不会因此提升为完整支持。
 
@@ -354,7 +356,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | 可到列表/开始提示；受舰队条件限制，Tier、出击、战斗和领奖未闭环 |
 | 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | B | ForceRun、SpecialRadar、Fleet/Submarine 已离线等价；续跑区、真实舰队/潜艇动作和清区未闭环 |
 | 44 | OpsiShop | Scheduler, OpsiShop | B | 5 个预设和自定义过滤已离线等价；真实购买、刷新、货币 postcondition 与异常恢复仍未闭环 |
-| 45 | OpsiVoucher | Scheduler, OpsiVoucher | B | 可读取并零购买停止；过滤器命中和实际兑换未闭环 |
+| 45 | OpsiVoucher | Scheduler, OpsiVoucher | B | 过滤器及重定向已离线等价；真实库存、命中、兑换、代币 postcondition 与异常恢复仍未闭环 |
 | 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | UseTuningSample、Fleet/Submarine 已离线等价；DoMission 无消费者，真实舰队/潜艇动作和清图未闭环 |
 | 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | B | ForceRun、Fleet/Submarine 已离线等价；坐标消耗、真实动作、进入和清图未闭环 |
 | 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | B | 可读仓库/详情；强制运行、过滤器、坐标消耗、Boss 和结算未闭环 |
@@ -464,7 +466,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | OpsiExplore | `ForceRun`; `LastZone`; `SpecialRadar` | B | 强制真假、续跑区有效/失效、雷达真假、地图重置和清区 |
 | OpsiFleet | `Fleet`=1..4; `Submarine` | B | 四舰队和潜艇真假已在原最终边界离线等价；舰队不可用、真实选中结果、潜艇调用结果及隐藏字段 override 仍需实机闭环 |
 | OpsiShop | `PresetFilter`=`max_benefit/max_benefit_meta/no_meta/all/custom`; `CustomFilter` | B | 两字段已离线等价；不同港口真实库存、货币不足、刷新、购买确认和无匹配实机恢复仍缺 |
-| OpsiVoucher | `Filter` | B | 规则命中/无命中/非法值、兑换券不足、限购和确认 |
+| OpsiVoucher | `Filter` | B | 过滤与 Logger/Tier/Archive 重定向已离线等价；真实代币余额、兑换结果、空列表和异常恢复仍缺 |
 | OpsiDaily | `DoMission`; `UseTuningSample` | B | 四组合、无任务、接取/进入/清图、样本有无和跨日恢复 |
 | OpsiObscure | `ForceRun` | B | 开关、坐标不存在/存在、消耗、进入、清图与奖励 |
 | OpsiAbyssal | `ForceRun` | B | 开关、坐标、Boss、多舰队、撤退/失败和奖励 |
@@ -820,7 +822,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiShop.CustomFilter` | OpsiShop | type=textarea; display=default | input/default: <long default in args.json> | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiShop.PresetFilter` | OpsiShop | type=select; display=default | options: "all", "custom", "max_benefit_meta", "max_benefit", "no_meta"; default: "max_benefit_meta" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiStronghold.ForceRun` | OpsiStronghold | type=checkbox; display=default | input/default: false | `M`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `OpsiVoucher.Filter` | OpsiVoucher | type=textarea; display=default | input/default: "LoggerAbyssal > LoggerObscure > Book > Coin > Fragment" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiVoucher.Filter` | OpsiVoucher | type=textarea; display=default | input/default: "LoggerAbyssal > LoggerObscure > Book > Coin > Fragment" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Optimization.CombatScreenshotInterval` | Alas | type=input; display=default | input/default: 1.0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Optimization.ScreenshotInterval` | Alas | type=input; display=default | input/default: 0.3 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Optimization.TaskHoardingDuration` | Alas | type=input; display=default | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |

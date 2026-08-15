@@ -26,6 +26,7 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_shop_custom_filter,
     validate_alas_opsi_shop_filter,
     validate_alas_opsi_shop_preset,
+    validate_alas_opsi_voucher_filter,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
     validate_alas_opsi_fleet_selection,
@@ -175,6 +176,13 @@ def _method(path: Path, owner: str, name: str) -> ast.FunctionDef:
                 if isinstance(child, ast.FunctionDef) and child.name == name:
                     return child
     raise AssertionError(f"missing {owner}.{name} in {path.name}")
+
+
+def _function(path: Path, name: str) -> ast.FunctionDef:
+    for node in _tree(path).body:
+        if isinstance(node, ast.FunctionDef) and node.name == name:
+            return node
+    raise AssertionError(f"missing function {name} in {path.name}")
 
 
 def _class(path: Path, name: str) -> ast.ClassDef:
@@ -1750,7 +1758,55 @@ def _verify_opsi_shop_filter(
     }
 
 
-def _verify_contract(akashi_filter, opsi_shop_presets) -> tuple[int, int]:
+def _voucher_filter_case(method, value: object) -> dict[str, Any]:
+    host = SimpleNamespace(config=SimpleNamespace(OpsiVoucher_Filter=value))
+    rejected = False
+    try:
+        result = MethodType(method, host)()
+    except SemanticGateClosed:
+        rejected = True
+        result = None
+    return {"rejected": rejected, "result": result, "events": []}
+
+
+def _verify_voucher_filter(method) -> dict[str, Any]:
+    cases = {
+        "default": _voucher_filter_case(
+            method,
+            "LoggerAbyssal > LoggerObscure > Book > Coin > Fragment",
+        ),
+        "logger": _voucher_filter_case(method, "Logger > Coin"),
+        "logger_t6": _voucher_filter_case(method, "LoggerT6 > Coin"),
+        "archive_removed": _voucher_filter_case(method, "LoggerArchive"),
+        "unicode_separator": _voucher_filter_case(method, "Coin ＞ Fragment"),
+        "empty_skip": _voucher_filter_case(method, " \n "),
+    }
+    expected = {
+        "default": "LoggerAbyssal > LoggerObscure > Book > Coin > Fragment",
+        "logger": "LoggerAbyssal > LoggerObscure > Coin",
+        "logger_t6": "LoggerAbyssalT6 > LoggerObscureT6 > Coin",
+        "archive_removed": "",
+        "unicode_separator": "Coin ＞ Fragment",
+        "empty_skip": "",
+    }
+    for name, result in expected.items():
+        case = cases[name]
+        if case["rejected"] or case["result"] != result:
+            raise AssertionError(f"OpsiVoucher filter redirect drifted: {name}")
+    invalid = {
+        repr(value): _voucher_filter_case(method, value)
+        for value in ("Coin > unknown", "Coin >", None, True, 1, [], {})
+    }
+    if any(not case["rejected"] or case["events"] for case in invalid.values()):
+        raise AssertionError("invalid OpsiVoucher filter reached shop state")
+    return {"cases": cases, "invalid_entries": invalid}
+
+
+def _verify_contract(
+    akashi_filter,
+    opsi_shop_presets,
+    voucher_filter,
+) -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
         for check in (False, True):
@@ -1808,6 +1864,15 @@ def _verify_contract(akashi_filter, opsi_shop_presets) -> tuple[int, int]:
         accepted += 1
     for parser in ("ActionPoint", "LoggerAbyssalT6"):
         validate_alas_opsi_shop_filter(akashi_filter, parser)
+        accepted += 1
+    for parser in (
+        "",
+        "Coin",
+        "Coin > Fragment",
+        "LoggerAbyssal > LoggerObscure",
+        "Coin ＞ Fragment",
+    ):
+        validate_alas_opsi_voucher_filter(voucher_filter, parser)
         accepted += 1
     for action_point_preserve in (0, 1000, 2500):
         validate_alas_opsi_meowfficer_config(
@@ -2022,6 +2087,13 @@ def _verify_contract(akashi_filter, opsi_shop_presets) -> tuple[int, int]:
             invalid += 1
         else:
             raise AssertionError("invalid OpsiShop.CustomFilter token was admitted")
+    for value in ("Coin > unknown", "Coin >", None, True, 1, [], {}):
+        try:
+            validate_alas_opsi_voucher_filter(voucher_filter, value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiVoucher.Filter was admitted")
     return accepted, invalid
 
 
@@ -2036,6 +2108,11 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     selector_path = alas_root / "module/os_shop/selector.py"
     os_shop_preset_path = alas_root / "module/os_shop/preset.py"
     filter_path = alas_root / "module/base/filter.py"
+    shop_base_path = alas_root / "module/shop/base.py"
+    shop_voucher_path = alas_root / "module/shop/shop_voucher.py"
+    shop_filter_redirect_path = (
+        alas_root / "module/config/redirect_utils/shop_filter.py"
+    )
     action_point_path = alas_root / "module/os_handler/action_point.py"
     storage_path = alas_root / "module/os_handler/storage.py"
     explore_path = alas_root / "module/os/tasks/explore.py"
@@ -2113,6 +2190,13 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     )
     consumers.update(
         _consumer_methods(
+            shop_voucher_path,
+            "VoucherShop",
+            ("OpsiVoucher_Filter",),
+        )
+    )
+    consumers.update(
+        _consumer_methods(
             selector_path,
             "Selector",
             ("OpsiGeneral_AkashiShopFilter",),
@@ -2168,6 +2252,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiGeneral_AkashiShopFilter": ["items_filter_in_akashi_shop"],
         "OpsiShop_PresetFilter": ["items_filter_in_os_shop"],
         "OpsiShop_CustomFilter": ["items_filter_in_os_shop"],
+        "OpsiVoucher_Filter": ["shop_filter"],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -2192,6 +2277,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         ),
         "validate_alas_opsi_shop_filter": validate_alas_opsi_shop_filter,
         "validate_alas_opsi_shop_preset": validate_alas_opsi_shop_preset,
+        "validate_alas_opsi_voucher_filter": validate_alas_opsi_voucher_filter,
         "validate_alas_opsi_hazard1_config": validate_alas_opsi_hazard1_config,
         "validate_alas_opsi_meowfficer_config": validate_alas_opsi_meowfficer_config,
         "validate_alas_opsi_repair_config": validate_alas_opsi_repair_config,
@@ -2247,6 +2333,11 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         selector_path,
         "Selector",
         "check_item_count",
+    )
+    voucher_filter_node = _method(
+        shop_voucher_path,
+        "VoucherShop",
+        "shop_filter",
     )
     explore_node = _method(explore_path, "OpsiExplore", "_os_explore")
     order_node = _method(order_path, "MapOrderHandler", "os_order_execute")
@@ -2363,6 +2454,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "validate_alas_opsi_shop_preset",
         )
     }
+    voucher_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_voucher_filter"
+        for node in ast.walk(voucher_filter_node)
+    )
     filter_type = _compile_class(
         _class(filter_path, "Filter"),
         {"reduce": reduce, "re": re, "logger": _Logger()},
@@ -2376,6 +2473,20 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         os_shop_preset_path,
         "OS_SHOP",
         {},
+    )
+    voucher_regex = _assignment(shop_base_path, "FILTER_REGEX", {"re": re})
+    voucher_filter = filter_type(
+        voucher_regex,
+        ("group", "sub_genre", "tier"),
+    )
+    voucher_redirect_regex = _assignment(
+        shop_filter_redirect_path,
+        "FILTER_REGEX_VOUCHER",
+        {"re": re},
+    )
+    voucher_redirect = _compile(
+        _function(shop_filter_redirect_path, "voucher_redirect"),
+        {"re": re, "FILTER_REGEX_VOUCHER": voucher_redirect_regex},
     )
     akashi_globals = {
         **globals_,
@@ -2426,6 +2537,17 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         _compile(akashi_cl1_node, akashi_globals),
         _compile(opsi_shop_count_node, akashi_globals),
     )
+    voucher = _verify_voucher_filter(
+        _compile(
+            voucher_filter_node,
+            {
+                **globals_,
+                "cached_property": lambda function: function,
+                "FILTER": voucher_filter,
+                "voucher_redirect": voucher_redirect,
+            },
+        )
+    )
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -2438,11 +2560,15 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         if invalid["events"]:
             raise AssertionError("invalid month boss config touched task state")
         invalid_month_events = invalid
-    accepted, invalid = _verify_contract(akashi_filter, opsi_shop_presets)
+    accepted, invalid = _verify_contract(
+        akashi_filter,
+        opsi_shop_presets,
+        voucher_filter,
+    )
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 22,
+        "field_count": 23,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -2463,6 +2589,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and rescan_guard
             and akashi_guard
             and all(opsi_shop_guards.values())
+            and voucher_guard
         ),
         "validated_runtime_boundaries": {
             "OpsiFleet.Fleet": "OSFleet.fleet_set",
@@ -2486,6 +2613,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             ),
             "OpsiShop.PresetFilter": "Selector.items_filter_in_os_shop",
             "OpsiShop.CustomFilter": "Selector.items_filter_in_os_shop",
+            "OpsiVoucher.Filter": "VoucherShop.shop_filter",
         },
         "fleet_selection": fleet_selection,
         "order": order,
@@ -2495,6 +2623,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "random_map_event": rescan,
         "akashi_shop_filter": akashi,
         "opsi_shop_filter": opsi_shop,
+        "opsi_voucher_filter": voucher,
         "explore": explore,
         "task_delay": delay,
         "month_boss": month,
@@ -2517,6 +2646,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "os_shop_selector": _sha256(selector_path),
             "os_shop_preset": _sha256(os_shop_preset_path),
             "base_filter": _sha256(filter_path),
+            "shop_base": _sha256(shop_base_path),
+            "shop_voucher": _sha256(shop_voucher_path),
+            "shop_filter_redirect": _sha256(shop_filter_redirect_path),
             "action_point": _sha256(action_point_path),
             "storage": _sha256(storage_path),
             "explore": _sha256(explore_path),

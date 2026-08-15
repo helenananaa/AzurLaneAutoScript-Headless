@@ -15,6 +15,7 @@ from alas_headless.alas_opsi_task_config_contract import (
     validate_alas_opsi_shop_custom_filter,
     validate_alas_opsi_shop_filter,
     validate_alas_opsi_shop_preset,
+    validate_alas_opsi_voucher_filter,
     validate_alas_opsi_delay_task_config,
     validate_alas_opsi_explore_config,
     validate_alas_opsi_fleet_selection,
@@ -41,9 +42,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 22)
-        self.assertEqual(result["accepted_case_count"], 106)
-        self.assertEqual(result["invalid_case_count"], 176)
+        self.assertEqual(result["field_count"], 23)
+        self.assertEqual(result["accepted_case_count"], 111)
+        self.assertEqual(result["invalid_case_count"], 183)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -77,6 +78,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 ),
                 "OpsiShop.PresetFilter": "Selector.items_filter_in_os_shop",
                 "OpsiShop.CustomFilter": "Selector.items_filter_in_os_shop",
+                "OpsiVoucher.Filter": "VoucherShop.shop_filter",
             },
         )
 
@@ -241,6 +243,27 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             validate_alas_opsi_shop_filter(filter_contract, "ActionPoint"),
             "ActionPoint",
         )
+        voucher_contract = type(
+            "VoucherFilterContract",
+            (),
+            {
+                "regex": re.compile(
+                    r"^(coin|fragment|logger)(abyssal|obscure)?(t[1-6])?$",
+                    re.IGNORECASE,
+                )
+            },
+        )()
+        for parser in (
+            "",
+            "Coin",
+            "Coin > Fragment",
+            "LoggerAbyssal > LoggerObscure",
+            "Coin ＞ Fragment",
+        ):
+            self.assertEqual(
+                validate_alas_opsi_voucher_filter(voucher_contract, parser),
+                parser,
+            )
 
     def test_invalid_values_fail_closed(self):
         for mode in ("", "hard", None, 0, True, [], {}):
@@ -379,6 +402,16 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_opsi_shop_filter(filter_contract, value)
+        voucher_contract = type(
+            "VoucherFilterContract",
+            (),
+            {"regex": re.compile(r"^(coin|fragment)$", re.IGNORECASE)},
+        )()
+        for value in ("Coin > unknown", "Coin >", None, True, 1, [], {}):
+            with self.subTest(field="opsi_voucher_filter", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_voucher_filter(voucher_contract, value)
 
     def test_patch_gates_original_task_entries(self):
         patch = ROOT.joinpath(
@@ -402,6 +435,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_shop_custom_filter("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_shop_filter("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_shop_preset("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_voucher_filter("), 1)
         scheduler_patch = ROOT.joinpath(
             "integration/alas/series/0140-scheduler-contract.patch"
         ).read_text(encoding="utf-8")

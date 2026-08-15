@@ -330,3 +330,17 @@ def validate_alas_opsi_shop_filter(filter_: object, value: object) -> str:
         value,
         field="OpsiShop.CustomFilter",
     )
+
+
+def validate_alas_opsi_voucher_filter(filter_: object, value: object) -> str:
+    """Validate the redirected voucher filter; empty means intentional skip."""
+
+    if not isinstance(value, str):
+        raise SemanticGateClosed("OpsiVoucher.Filter must be text")
+    if not value.strip():
+        return value
+    return _validate_alas_opsi_filter_tokens(
+        filter_,
+        value,
+        field="OpsiVoucher.Filter",
+    )

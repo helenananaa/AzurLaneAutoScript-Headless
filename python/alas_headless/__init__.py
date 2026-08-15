@@ -114,6 +114,7 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_shop_custom_filter,
     validate_alas_opsi_shop_filter,
     validate_alas_opsi_shop_preset,
+    validate_alas_opsi_voucher_filter,
     validate_alas_opsi_repair_config,
     validate_alas_opsi_rescan_config,
     validate_alas_opsi_storage_config,

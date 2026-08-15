@@ -598,6 +598,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   CL1 and exhausted-count exclusions remain original. Unknown presets,
   malformed types, and invalid tokens fail before item pretreatment, with no
   purchase, refresh, currency mutation, or Android input.
+- `OpsiVoucher.Filter` runs pinned `voucher_redirect()` and the original shop
+  grammar, preserving Logger expansion, tier expansion, archive-token removal,
+  Unicode separators, and intentional empty skip. Invalid tokens and types fail
+  before voucher-page work; no exchange, scrolling, or Android input occurs.
 - `OpsiExplore.SpecialRadar` preserves the original tuning-sample use and
   `recon_scan` decisions in `_os_explore()`. The same value, together with
   `OpsiExplore.ForceRun`, `OpsiObscure.ForceRun`,
@@ -608,10 +612,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `OSFleet.fleet_set()` selector boundary. `OpsiFleet.Submarine` validates both
   booleans at `MapOrderHandler.os_order_execute()`, preserving scan/submarine
   dispatch, the submarine completion wait, and scheduler-delay arguments.
-- One hundred six valid classes pass and 176 malformed values fail before task,
+- One hundred eleven valid classes pass and 183 malformed values fail before task,
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
-  or Android input. Twenty-two fields now have complete offline classification.
+  or Android input. Twenty-three fields now have complete offline classification.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and
