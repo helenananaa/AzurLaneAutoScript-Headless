@@ -4,6 +4,23 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-15
 
+### PrivateQuarters: four settings replayed before UI or currency work
+
+- `PrivateQuarters.BuyRoses`/`BuyCake`/`TargetInteract` now accept only exact
+  booleans, while `TargetShip` accepts exactly the seven declared ship ids.
+  The task, shop-filter, and item-eligibility consumers all take one strict
+  snapshot before UI navigation, filter construction, currency comparison, or
+  an interaction can be reached.
+- Recorder-only replay executes all 56 declared four-field combinations through
+  the original task forwarding. It retains the original four gift filters and
+  the rose-coin and cake-gem boundary decisions; malformed values stop with no
+  recorder events. There is no device, account, currency, target interaction,
+  task mutation, or Android input.
+- This is offline-only evidence for all four fields. Private Quarters page
+  availability, item OCR, currency observations, shopping, daily-count
+  observation, ship lookup, interactions, postconditions, and all input remain
+  unadapted.
+
 ### Coalition/CoalitionSp: shared enums replayed before any task state
 
 - `Coalition.Mode` now accepts exactly `easy`/`normal`/`hard`/`sp`,

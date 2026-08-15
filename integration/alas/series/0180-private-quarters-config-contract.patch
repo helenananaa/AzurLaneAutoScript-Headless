@@ -1,0 +1,86 @@
+diff --git a/module/private_quarters/private_quarters.py b/module/private_quarters/private_quarters.py
+--- a/module/private_quarters/private_quarters.py
++++ b/module/private_quarters/private_quarters.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_private_quarters_config
++
+ import module.config.server as server
+ from module.base.timer import Timer
+ from module.logger import logger
+@@ -174,14 +176,21 @@ class PrivateQuarters(PQShop):
+             in: Any page
+             out: page_main, may have info_bar
+         """
++        private_quarters_config = validate_alas_private_quarters_config(
++            buy_roses=self.config.PrivateQuarters_BuyRoses,
++            buy_cake=self.config.PrivateQuarters_BuyCake,
++            target_interact=self.config.PrivateQuarters_TargetInteract,
++            target_ship=self.config.PrivateQuarters_TargetShip,
++        )
++
+         self.ui_ensure(page_dormmenu)
+         self.ui_goto(page_private_quarters, get_ship=False)
+         self.handle_info_bar()
+         self.pq_run(
+-            buy_roses=self.config.PrivateQuarters_BuyRoses,
+-            buy_cake=self.config.PrivateQuarters_BuyCake,
+-            target_interact=self.config.PrivateQuarters_TargetInteract,
+-            target_ship=self.config.PrivateQuarters_TargetShip
++            buy_roses=private_quarters_config.buy_roses,
++            buy_cake=private_quarters_config.buy_cake,
++            target_interact=private_quarters_config.target_interact,
++            target_ship=private_quarters_config.target_ship,
+         )
+ 
+         self.config.task_delay(server_update=True)
+diff --git a/module/private_quarters/shop.py b/module/private_quarters/shop.py
+--- a/module/private_quarters/shop.py
++++ b/module/private_quarters/shop.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_private_quarters_config
++
+ import re
+ 
+ from module.base.button import ButtonGrid
+@@ -62,10 +64,16 @@ class PQShop(PQShopClerk, PQStatus):
+         Returns:
+             str:
+         """
++        private_quarters_config = validate_alas_private_quarters_config(
++            buy_roses=self.config.PrivateQuarters_BuyRoses,
++            buy_cake=self.config.PrivateQuarters_BuyCake,
++            target_interact=self.config.PrivateQuarters_TargetInteract,
++            target_ship=self.config.PrivateQuarters_TargetShip,
++        )
+         list_filter = []
+-        if self.config.PrivateQuarters_BuyRoses:
++        if private_quarters_config.buy_roses:
+             list_filter.append('GiftRoses')
+-        if self.config.PrivateQuarters_BuyCake:
++        if private_quarters_config.buy_cake:
+             list_filter.append('GiftCake')
+ 
+         return ' > '.join(list_filter).strip()
+@@ -130,13 +138,19 @@ class PQShop(PQShopClerk, PQStatus):
+         Returns:
+             bool: whether item can be bought
+         """
+-        if self.config.PrivateQuarters_BuyRoses:
++        private_quarters_config = validate_alas_private_quarters_config(
++            buy_roses=self.config.PrivateQuarters_BuyRoses,
++            buy_cake=self.config.PrivateQuarters_BuyCake,
++            target_interact=self.config.PrivateQuarters_TargetInteract,
++            target_ship=self.config.PrivateQuarters_TargetShip,
++        )
++        if private_quarters_config.buy_roses:
+             if item.sub_genre == 'roses':
+                 if 24000 > self._currency:
+                     return False
+                 return True
+ 
+-        if self.config.PrivateQuarters_BuyCake:
++        if private_quarters_config.buy_cake:
+             if item.sub_genre == 'cake':
+                 if 210 > self.gems:
+                     return False
+                 return True

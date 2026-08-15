@@ -104,6 +104,11 @@
       "order": 21,
       "path": "integration/alas/series/0175-coalition-config-contract.patch",
       "sha256": "94e7c98adf1e254c4524821e025b66d21e57c1b7552e73c88124bc6b94a3a07a"
+    },
+    {
+      "order": 22,
+      "path": "integration/alas/series/0180-private-quarters-config-contract.patch",
+      "sha256": "8d2c706cac6fb7b40264ffa72255433ee20c1eeb4d302e1c24fadbe7488e8b99"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

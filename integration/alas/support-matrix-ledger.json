@@ -5762,78 +5762,98 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_private_quarters_config.py",
+        "python/alas_headless/alas_private_quarters_config_replay.py",
+        "integration/alas/series/0180-private-quarters-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "PrivateQuarters"
       ],
       "path": "PrivateQuarters.BuyCake",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_private_quarters_config.py",
+        "python/alas_headless/alas_private_quarters_config_replay.py",
+        "integration/alas/series/0180-private-quarters-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "PrivateQuarters"
       ],
       "path": "PrivateQuarters.BuyRoses",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_private_quarters_config.py",
+        "python/alas_headless/alas_private_quarters_config_replay.py",
+        "integration/alas/series/0180-private-quarters-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "PrivateQuarters"
       ],
       "path": "PrivateQuarters.TargetInteract",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_private_quarters_config.py",
+        "python/alas_headless/alas_private_quarters_config_replay.py",
+        "integration/alas/series/0180-private-quarters-config-contract.patch",
+        "docs/status.md"
+      ],
+      "group_code": "O",
       "metadata": "type=select; display=default",
       "panels": [
         "PrivateQuarters"
       ],
       "path": "PrivateQuarters.TargetShip",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 仅离线完成",
+      "support": "supported",
       "values": "options: \"aegir\", \"anchorage\", \"nakhimov\", \"new_jersey\", \"noshiro\", \"sirius\", \"taihou\"; default: \"anchorage\""
     },
     {
@@ -7907,8 +7927,8 @@
         "PrivateQuarters"
       ],
       "name": "PrivateQuarters",
-      "note": "蛋糕、玫瑰、互动和 7 个舰船选项均缺适配",
-      "status": "M"
+      "note": "四项设置有固定上游的严格门禁和原方法离线回放；页面、货币、互动与输入闭环仍缺",
+      "status": "O"
     },
     {
       "groups": [
@@ -10202,6 +10222,58 @@
       ],
       "field": "Coalition.Mode",
       "note": "All four declared modes preserve the original Coalition run argument, including SP dispatch; malformed values stop before stage normalization or task-state work."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_private_quarters_config.py",
+        "python/alas_headless/alas_private_quarters_config_replay.py",
+        "integration/alas/series/0180-private-quarters-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "PrivateQuarters.BuyCake",
+      "note": "Both exact booleans preserve the original shop filter and cake gem-boundary eligibility; malformed settings stop before PrivateQuarters UI or currency work."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_private_quarters_config.py",
+        "python/alas_headless/alas_private_quarters_config_replay.py",
+        "integration/alas/series/0180-private-quarters-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "PrivateQuarters.BuyRoses",
+      "note": "Both exact booleans preserve the original shop filter and rose coin-boundary eligibility; malformed settings stop before PrivateQuarters UI or currency work."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_private_quarters_config.py",
+        "python/alas_headless/alas_private_quarters_config_replay.py",
+        "integration/alas/series/0180-private-quarters-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "PrivateQuarters.TargetInteract",
+      "note": "Both exact booleans preserve the original PrivateQuarters task forwarding while malformed settings stop before UI navigation or interaction work."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_private_quarters_config.py",
+        "python/alas_headless/alas_private_quarters_config_replay.py",
+        "integration/alas/series/0180-private-quarters-config-contract.patch",
+        "docs/status.md"
+      ],
+      "field": "PrivateQuarters.TargetShip",
+      "note": "All seven declared ships preserve original task forwarding while invalid names stop before PrivateQuarters navigation, target lookup, or interaction work."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -10214,9 +10286,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "e8dfcb8ba0c9f9c9fbccb2342108bf81416bebe0f50a408b7dc476d71e630f87",
-      "manifest_sha256": "2aff76242e9603c4493b15ae2720ddb4ed564a24e4373af36c0b13aef925f3ca",
-      "member_count": 21
+      "combined_sha256": "fe9f24889e0f57652c7c578761689ef2ffa0814148fe7b68f2a1ae66a44e26c3",
+      "manifest_sha256": "1a94049b29d807a5f27caa3e722c9112ed6503db28c6111158e4e99915a99b41",
+      "member_count": 22
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

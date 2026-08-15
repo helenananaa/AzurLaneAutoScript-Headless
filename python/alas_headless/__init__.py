@@ -64,6 +64,11 @@ from .alas_hard_config_contract import (
     AlasHardConfigSnapshot,
     validate_alas_hard_config,
 )
+from .alas_private_quarters_config_contract import (
+    AlasPrivateQuartersConfigSnapshot,
+    PRIVATE_QUARTERS_SHIPS,
+    validate_alas_private_quarters_config,
+)
 from .alas_supply_pack_config_contract import (
     AlasSupplyPackConfigSnapshot,
     validate_alas_supply_pack_config,
@@ -865,6 +870,9 @@ __all__ = (
     "COALITION_MODES",
     "validate_alas_coalition_config",
     "validate_alas_hospital_config",
+    "AlasPrivateQuartersConfigSnapshot",
+    "PRIVATE_QUARTERS_SHIPS",
+    "validate_alas_private_quarters_config",
     "validate_alas_raid_daily_stage_filter",
     "validate_alas_raid_mode",
     "validate_alas_raid_use_ticket",
