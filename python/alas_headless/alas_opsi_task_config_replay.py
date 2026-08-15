@@ -29,6 +29,7 @@ from .alas_opsi_task_config_contract import (
     validate_alas_opsi_order,
     validate_alas_opsi_obscure_config,
     validate_alas_opsi_repair_config,
+    validate_alas_opsi_rescan_config,
     validate_alas_opsi_storage_config,
 )
 from .semantic_oracle import SemanticGateClosed
@@ -92,6 +93,25 @@ class _ResolverZones:
             for value in self.values
             if all(getattr(value, key) == expected for key, expected in kwargs.items())
         )
+
+
+class _DropRecorder:
+    def __init__(self, events):
+        self.events = events
+        self.count = 0
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+    def add(self, _image):
+        self.count += 1
+        self.events.append("drop_add")
+
+    def clear(self):
+        self.events.append("drop_clear")
 
 
 class _ZoneList:
@@ -376,6 +396,7 @@ class _Config(SimpleNamespace):
         opsi_buy_limit: object = 0,
         opsi_oil_limit: object = 1000,
         opsi_repair_threshold: object = 0.4,
+        opsi_do_random_map_event: object = True,
         special_radar: object = False,
     ):
         super().__init__(
@@ -395,6 +416,7 @@ class _Config(SimpleNamespace):
             OpsiGeneral_BuyActionPointLimit=opsi_buy_limit,
             OpsiGeneral_OilLimit=opsi_oil_limit,
             OpsiGeneral_RepairThreshold=opsi_repair_threshold,
+            OpsiGeneral_DoRandomMapEvent=opsi_do_random_map_event,
             OpsiAshBeacon_EnsureFullyCollected=False,
             OpsiFleet_Fleet=1,
             OpsiFleet_Submarine=False,
@@ -1322,6 +1344,80 @@ def _verify_repair(method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry": invalid}
 
 
+def _rescan_case(
+    method, *, do_random_map_event: object, explicit_rescan=None
+) -> dict[str, Any]:
+    config = _Config(
+        mode="normal",
+        check=False,
+        opsi_do_random_map_event=do_random_map_event,
+    )
+    config.task = SimpleNamespace(command="OpsiMeowfficerFarming")
+    config.DropRecord_OpsiRecord = False
+    events = config.events
+    drop = _DropRecorder(events)
+    host = SimpleNamespace(
+        config=config,
+        stat=SimpleNamespace(new=lambda **_kwargs: drop),
+        device=SimpleNamespace(image="frame"),
+    )
+    host.handle_ash_beacon_attack = lambda: events.append("ash_beacon")
+    host.os_auto_search_run = lambda _drop: events.append("auto_search") or 0
+    host.hp_reset = lambda: events.append("hp_reset")
+    host.hp_get = lambda: events.append("hp_get")
+    host.map_rescan = lambda **kwargs: events.append(["map_rescan", kwargs])
+    rejected = False
+    try:
+        result = MethodType(method, host)(
+            question=False,
+            rescan=explicit_rescan,
+            after_auto_search=False,
+        )
+    except SemanticGateClosed:
+        rejected = True
+        result = None
+    return {"rejected": rejected, "result": result, "events": events}
+
+
+def _verify_rescan(method) -> dict[str, Any]:
+    cases = {
+        str(value).lower(): _rescan_case(
+            method,
+            do_random_map_event=value,
+        )
+        for value in (False, True)
+    }
+    if any(event[0] == "map_rescan" for event in cases["false"]["events"]):
+        raise AssertionError("disabled OpsiGeneral random event rescanned map")
+    rescans = [
+        event for event in cases["true"]["events"] if event[0] == "map_rescan"
+    ]
+    if len(rescans) != 1 or rescans[0][1].get("rescan_mode") != "full":
+        raise AssertionError("enabled OpsiGeneral random event rescan drifted")
+    invalid = _rescan_case(method, do_random_map_event=None)
+    if invalid != {"rejected": True, "result": None, "events": []}:
+        raise AssertionError("invalid OpsiGeneral random event touched task state")
+    explicit = _rescan_case(
+        method,
+        do_random_map_event=None,
+        explicit_rescan="current",
+    )
+    explicit_rescans = [
+        event for event in explicit["events"] if event[0] == "map_rescan"
+    ]
+    if (
+        explicit["rejected"]
+        or len(explicit_rescans) != 1
+        or explicit_rescans[0][1].get("rescan_mode") != "current"
+    ):
+        raise AssertionError("explicit Operation Siren rescan API drifted")
+    for case in (*cases.values(), explicit):
+        for event in case["events"]:
+            if isinstance(event, list) and event[0] == "map_rescan":
+                event[1]["drop"] = "drop-recorder"
+    return {"cases": cases, "invalid_entry": invalid, "explicit_rescan": explicit}
+
+
 def _verify_contract() -> tuple[int, int]:
     accepted = 0
     for mode in OPSI_MONTH_BOSS_MODES:
@@ -1357,6 +1453,11 @@ def _verify_contract() -> tuple[int, int]:
         accepted += 1
     for threshold in (-1, 0, 0.4, 1):
         validate_alas_opsi_repair_config(threshold=threshold)
+        accepted += 1
+    for do_random_map_event in (False, True):
+        validate_alas_opsi_rescan_config(
+            do_random_map_event=do_random_map_event,
+        )
         accepted += 1
     for action_point_preserve in (0, 1000, 2500):
         validate_alas_opsi_meowfficer_config(
@@ -1536,6 +1637,13 @@ def _verify_contract() -> tuple[int, int]:
             invalid += 1
         else:
             raise AssertionError("invalid OpsiGeneral.RepairThreshold was admitted")
+    for value in INVALID_BOOLEANS:
+        try:
+            validate_alas_opsi_rescan_config(do_random_map_event=value)
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError("invalid OpsiGeneral.DoRandomMapEvent was admitted")
     return accepted, invalid
 
 
@@ -1626,7 +1734,10 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         _consumer_methods(
             os_map_path,
             "OSMap",
-            ("OpsiGeneral_RepairThreshold",),
+            (
+                "OpsiGeneral_RepairThreshold",
+                "OpsiGeneral_DoRandomMapEvent",
+            ),
         )
     )
     for field, methods in _dynamic_delay_consumers(config_path).items():
@@ -1658,6 +1769,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         ],
         "OpsiGeneral_OilLimit": ["handle_action_point"],
         "OpsiGeneral_RepairThreshold": ["handle_fleet_repair"],
+        "OpsiGeneral_DoRandomMapEvent": ["run_auto_search"],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -1679,7 +1791,9 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "validate_alas_opsi_hazard1_config": validate_alas_opsi_hazard1_config,
         "validate_alas_opsi_meowfficer_config": validate_alas_opsi_meowfficer_config,
         "validate_alas_opsi_repair_config": validate_alas_opsi_repair_config,
+        "validate_alas_opsi_rescan_config": validate_alas_opsi_rescan_config,
         "validate_alas_opsi_storage_config": validate_alas_opsi_storage_config,
+        "inflection": SimpleNamespace(underscore=lambda value: value.lower()),
         "SelectedGrids": _TaskList,
         "get_os_reset_remain": lambda: 1,
         "datetime": datetime,
@@ -1699,6 +1813,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     storage_node = _method(storage_path, "StorageHandler", "storage_get_next_item")
     purchase_node = _method(action_point_path, "ActionPointHandler", "action_point_buy")
     repair_node = _method(os_map_path, "OSMap", "handle_fleet_repair")
+    rescan_node = _method(os_map_path, "OSMap", "run_auto_search")
     explore_node = _method(explore_path, "OpsiExplore", "_os_explore")
     order_node = _method(order_path, "MapOrderHandler", "os_order_execute")
     delay_task_node = _method(config_path, "AzurLaneConfig", "opsi_task_delay")
@@ -1789,6 +1904,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         and node.func.id == "validate_alas_opsi_repair_config"
         for node in ast.walk(repair_node)
     )
+    rescan_guard = any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "validate_alas_opsi_rescan_config"
+        for node in ast.walk(rescan_node)
+    )
     month = _verify_month(
         _compile(month_node, globals_),
         _compile(delay_node, globals_),
@@ -1812,6 +1933,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     storage = _verify_storage(_compile(storage_node, globals_))
     purchase = _verify_purchase(_compile(purchase_node, globals_))
     repair = _verify_repair(_compile(repair_node, globals_))
+    rescan = _verify_rescan(_compile(rescan_node, globals_))
     invalid_month_events = {}
     if month_guard:
         invalid = _month_clear_case(
@@ -1828,7 +1950,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 18,
+        "field_count": 19,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -1846,6 +1968,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             and storage_guard
             and purchase_guard
             and repair_guard
+            and rescan_guard
         ),
         "validated_runtime_boundaries": {
             "OpsiFleet.Fleet": "OSFleet.fleet_set",
@@ -1863,12 +1986,14 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             ),
             "OpsiGeneral.OilLimit": "ActionPointHandler.action_point_buy",
             "OpsiGeneral.RepairThreshold": "OSMap.handle_fleet_repair",
+            "OpsiGeneral.DoRandomMapEvent": "OSMap.run_auto_search",
         },
         "fleet_selection": fleet_selection,
         "order": order,
         "storage": storage,
         "action_point_purchase": purchase,
         "fleet_repair": repair,
+        "random_map_event": rescan,
         "explore": explore,
         "task_delay": delay,
         "month_boss": month,

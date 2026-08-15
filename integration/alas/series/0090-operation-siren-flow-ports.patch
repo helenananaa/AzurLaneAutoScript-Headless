@@ -173,14 +173,14 @@ index 1a9a7895..fe133663 100644
          unpinned = 0
          for _ in self.loop():
 diff --git a/module/os/map.py b/module/os/map.py
-index 9a900aa3..bca7ce8a 100644
+index 9a900aa3..92380ab0 100644
 --- a/module/os/map.py
 +++ b/module/os/map.py
 @@ -2,6 +2,8 @@ import time
  
  import inflection
  
-+from alas_headless import validate_alas_opsi_repair_config
++from alas_headless import validate_alas_opsi_repair_config, validate_alas_opsi_rescan_config
 +
  from module.base.timer import Timer
  from module.config.utils import get_os_reset_remain
@@ -311,6 +311,18 @@ index 9a900aa3..bca7ce8a 100644
                          'continue OS exploration')
              self.hp_reset()
              return False
+@@ -719,7 +779,10 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+             int: Number of finished combat
+         """
+         if rescan is None:
+-            rescan = self.config.OpsiGeneral_DoRandomMapEvent
++            rescan_config = validate_alas_opsi_rescan_config(
++                do_random_map_event=self.config.OpsiGeneral_DoRandomMapEvent,
++            )
++            rescan = rescan_config.do_random_map_event
+         if rescan is True:
+             rescan = 'full'
+         self.handle_ash_beacon_attack()
 diff --git a/module/os/tasks/archive.py b/module/os/tasks/archive.py
 index 0a7d8dcc..7769f5a0 100644
 --- a/module/os/tasks/archive.py

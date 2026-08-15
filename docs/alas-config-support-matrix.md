@@ -296,9 +296,9 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiExplore.SpecialRadar` 直接回放原 `_os_explore()`，保留是否使用调律样本及 `recon_scan` 参数。它与 `OpsiExplore.ForceRun`、`OpsiObscure.ForceRun`、`OpsiAbyssal.ForceRun`、`OpsiStronghold.ForceRun` 还直接回放原 `AzurLaneConfig.opsi_task_delay()` 的侦察/潜艇任务延迟排除。五个布尔值的 32 种合法组合全部通过，30 个非法单字段值均在 `modified`、`update()` 或任务动作前 fail-closed。
 
-`OpsiGeneral.UseLogger` 的真假分支直接回放原 `StorageHandler.storage_get_next_item()`，保持进入仓库、可选使用全部坐标记录仪和坐标结算顺序。`BuyActionPointLimit=0..5` 与非负整数 `OilLimit` 直接回放原 `ActionPointHandler.action_point_buy()`：周购买次数达到上限时不购买，油量恰好等于费用加保留值时才进入最终购买边界，低一单位则拒绝。`RepairThreshold` 直接回放原 `OSMap.handle_fleet_repair()`，保留负数禁用、两位小数血量边界、回港修理和无需修理分支。购买、血量、维修和仓库动作均为记录桩，非法值在对应页面或设备动作前 fail-closed。
+`OpsiGeneral.UseLogger` 的真假分支直接回放原 `StorageHandler.storage_get_next_item()`，保持进入仓库、可选使用全部坐标记录仪和坐标结算顺序。`BuyActionPointLimit=0..5` 与非负整数 `OilLimit` 直接回放原 `ActionPointHandler.action_point_buy()`：周购买次数达到上限时不购买，油量恰好等于费用加保留值时才进入最终购买边界，低一单位则拒绝。`RepairThreshold` 直接回放原 `OSMap.handle_fleet_repair()`，保留负数禁用、两位小数血量边界、回港修理和无需修理分支。`DoRandomMapEvent` 的真假分支保留不重扫和 `full` 重扫，显式 `current/full` 调用参数仍独立于配置。购买、血量、维修、仓库和地图重扫动作均为记录桩，非法值在对应页面或设备动作前 fail-closed。
 
-共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 18 个字段、90 个合法类并拒绝 149 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
+共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 19 个字段、92 个合法类并拒绝 155 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
 
 此前只检查属性加载的 AST 审计漏掉了动态拼接的 `deep_get()` 字符串路径，因而错误地把 Explore/Abyssal/Stronghold 的 `ForceRun` 记为零读取；本轮已用源码绑定回放纠正。固定上游真正没有运行时消费者的仍只有 `OpsiMonthBoss.ForceRun` 与 `OpsiDaily.DoMission`，两者继续明确标为 `unsupported`。导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板不会因此提升为完整支持。
 
@@ -347,7 +347,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环 |
 | 38 | Minigame | Scheduler | L | 当前抚顺小游戏路径可用；没有字段配置，但其他轮换小游戏仍属于该任务支持范围 |
 | 39 | PrivateQuarters | Scheduler, PrivateQuarters | M | 蛋糕、玫瑰、互动和 7 个舰船选项均缺适配 |
-| 40 | OpsiGeneral | OpsiGeneral | P | Logger、购买次数、保留油量和维修阈值已离线等价；随机事件、明石过滤及真实购买/维修结果仍未闭环 |
+| 40 | OpsiGeneral | OpsiGeneral | P | Logger、购买次数、保留油量、维修阈值和随机事件已离线等价；明石过滤及真实购买/维修结果仍未闭环 |
 | 41 | OpsiAshBeacon | Scheduler, OpsiAshBeacon | B | 入口/状态可读；受点数限制，当前/档案、自动攻击、一击、求助和完整领取未闭环 |
 | 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | 可到列表/开始提示；受舰队条件限制，Tier、出击、战斗和领奖未闭环 |
 | 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | B | ForceRun、SpecialRadar、Fleet/Submarine 已离线等价；续跑区、真实舰队/潜艇动作和清区未闭环 |
@@ -456,7 +456,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| OpsiGeneral | `DoRandomMapEvent`; `AkashiShopFilter`; `BuyActionPointLimit`=0..5; `OilLimit`; `RepairThreshold`; `UseLogger` | P | 后四字段已离线等价；随机事件开关、过滤器、真实维修/购买确认与资源 postcondition 仍缺 |
+| OpsiGeneral | `DoRandomMapEvent`; `AkashiShopFilter`; `BuyActionPointLimit`=0..5; `OilLimit`; `RepairThreshold`; `UseLogger` | P | 除 `AkashiShopFilter` 外均已离线等价；真实维修/购买确认与资源 postcondition 仍缺 |
 | OpsiAshBeacon | `AttackMode`=`current/current_dossier`; `DossierAutoAttackMode`; `EnsureFullyCollected`; `OneHitMode`; `RequestAssist` | B | 当前/档案、三个布尔开关组合、点数不足/满、生成、攻击、求助、领取和 Boss 结束 |
 | OpsiAshAssist | `Tier` | B | Tier 边界、无目标、舰队不可用、出击、战斗和奖励 |
 | OpsiExplore | `ForceRun`; `LastZone`; `SpecialRadar` | B | 强制真假、续跑区有效/失效、雷达真假、地图重置和清区 |
@@ -803,7 +803,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiFleetFilter.Filter` | OpsiAbyssal, OpsiStronghold, OpsiMonthBoss | type=textarea; display=default | input/default: "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `OpsiGeneral.AkashiShopFilter` | OpsiGeneral | type=textarea; display=default | input/default: "ActionPoint > PurpleCoins" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiGeneral.BuyActionPointLimit` | OpsiGeneral | type=select; display=default | options: 0, 1, 2, 3, 4, 5; default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `OpsiGeneral.DoRandomMapEvent` | OpsiGeneral | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiGeneral.DoRandomMapEvent` | OpsiGeneral | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiGeneral.OilLimit` | OpsiGeneral | type=input; display=default | input/default: 1000 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiGeneral.RepairThreshold` | OpsiGeneral | type=input; display=default | input/default: 0.4 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiGeneral.UseLogger` | OpsiGeneral | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |

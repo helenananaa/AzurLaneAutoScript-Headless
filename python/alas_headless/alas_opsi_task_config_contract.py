@@ -92,6 +92,11 @@ class AlasOpsiRepairConfigSnapshot:
     threshold: float
 
 
+@dataclass(frozen=True)
+class AlasOpsiRescanConfigSnapshot:
+    do_random_map_event: bool
+
+
 def validate_alas_opsi_month_boss_config(
     *, mode: object, check_adaptability: object
 ) -> AlasOpsiMonthBossConfigSnapshot:
@@ -250,3 +255,13 @@ def validate_alas_opsi_repair_config(
     if threshold > 1:
         raise SemanticGateClosed("OpsiGeneral.RepairThreshold must not exceed 1")
     return AlasOpsiRepairConfigSnapshot(threshold=float(threshold))
+
+
+def validate_alas_opsi_rescan_config(
+    *, do_random_map_event: object
+) -> AlasOpsiRescanConfigSnapshot:
+    if type(do_random_map_event) is not bool:
+        raise SemanticGateClosed("OpsiGeneral.DoRandomMapEvent must be a bool")
+    return AlasOpsiRescanConfigSnapshot(
+        do_random_map_event=do_random_map_event,
+    )

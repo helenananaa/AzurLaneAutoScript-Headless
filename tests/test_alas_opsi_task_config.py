@@ -19,6 +19,7 @@ from alas_headless.alas_opsi_task_config_contract import (
     validate_alas_opsi_order,
     validate_alas_opsi_obscure_config,
     validate_alas_opsi_repair_config,
+    validate_alas_opsi_rescan_config,
     validate_alas_opsi_storage_config,
 )
 from alas_headless.alas_opsi_task_config_replay import verify_opsi_task_config
@@ -35,9 +36,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 18)
-        self.assertEqual(result["accepted_case_count"], 90)
-        self.assertEqual(result["invalid_case_count"], 149)
+        self.assertEqual(result["field_count"], 19)
+        self.assertEqual(result["accepted_case_count"], 92)
+        self.assertEqual(result["invalid_case_count"], 155)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -65,6 +66,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 ),
                 "OpsiGeneral.OilLimit": "ActionPointHandler.action_point_buy",
                 "OpsiGeneral.RepairThreshold": "OSMap.handle_fleet_repair",
+                "OpsiGeneral.DoRandomMapEvent": "OSMap.run_auto_search",
             },
         )
 
@@ -184,6 +186,13 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 ).threshold,
                 float(threshold),
             )
+        for do_random_map_event in (False, True):
+            self.assertEqual(
+                validate_alas_opsi_rescan_config(
+                    do_random_map_event=do_random_map_event
+                ).do_random_map_event,
+                do_random_map_event,
+            )
 
     def test_invalid_values_fail_closed(self):
         for mode in ("", "hard", None, 0, True, [], {}):
@@ -291,6 +300,11 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_opsi_repair_config(threshold=value)
+        for value in (0, 1, "true", None, [], {}):
+            with self.subTest(field="do_random_map_event", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_rescan_config(do_random_map_event=value)
 
     def test_patch_gates_original_task_entries(self):
         patch = ROOT.joinpath(
@@ -309,6 +323,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             patch.count("validate_alas_opsi_action_point_purchase("), 1
         )
         self.assertEqual(patch.count("validate_alas_opsi_repair_config("), 1)
+        self.assertEqual(patch.count("validate_alas_opsi_rescan_config("), 1)
         scheduler_patch = ROOT.joinpath(
             "integration/alas/series/0140-scheduler-contract.patch"
         ).read_text(encoding="utf-8")

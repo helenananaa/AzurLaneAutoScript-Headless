@@ -586,6 +586,9 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - `OpsiGeneral.RepairThreshold` preserves negative disable, exact rounded-HP
   boundary repair, and no-repair branches. Non-finite and above-one values fail
   before HP observation or port navigation.
+- `OpsiGeneral.DoRandomMapEvent` preserves the original no-rescan and full-map
+  rescan branches. Explicit `current`/`full` API requests remain independent;
+  malformed config fails before ash, combat, drop, HP, or map state.
 - `OpsiExplore.SpecialRadar` preserves the original tuning-sample use and
   `recon_scan` decisions in `_os_explore()`. The same value, together with
   `OpsiExplore.ForceRun`, `OpsiObscure.ForceRun`,
@@ -596,10 +599,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `OSFleet.fleet_set()` selector boundary. `OpsiFleet.Submarine` validates both
   booleans at `MapOrderHandler.os_order_execute()`, preserving scan/submarine
   dispatch, the submarine completion wait, and scheduler-delay arguments.
-- Ninety valid classes pass and 149 malformed values fail before task,
+- Ninety-two valid classes pass and 155 malformed values fail before task,
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
-  or Android input. Eighteen fields now have complete offline classification.
+  or Android input. Nineteen fields now have complete offline classification.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and
