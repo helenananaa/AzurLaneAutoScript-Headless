@@ -111,6 +111,7 @@ FLOW_PATHS = {
         "module/os/tasks/hazard_leveling.py",
         "module/os/tasks/meowfficer_farming.py",
         "module/os/tasks/month_boss.py",
+        "module/os/tasks/obscure.py",
         "module/os/tasks/voucher.py",
         "module/os_ash/ash.py",
         "module/os_handler/enemy_searching.py",

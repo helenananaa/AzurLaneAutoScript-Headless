@@ -120,7 +120,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 `Optimization.TaskHoardingDuration` 现直接对照原 ALAS `hoarding` 属性与既有 Scheduler 回放，覆盖 `0/1/15/1440` 整分钟；负数、超过一天、小数、字符串、布尔、缺失及畸形结构在 `get_next_task()` 时间运算前 fail-closed。一天上限是 Headless 为避免误配置造成长期任务推迟而设置的明确安全边界。原 ALAS 继续拥有 pending/waiting 分类、优先级、`is_hoarding_task` 状态、`NextRun` 调整、持久化和循环；本轮没有运行真实账号队列或注入 Android 输入，因此只提升该字段的 `offline` 维度。
 
-其余三个 Optimization 字段明确跳过：两个截图间隔在 `Device` 初始化时即被钳位和消费，当前门禁位置太晚，且尚无跨截图后端的语义帧新鲜度证据；`WhenTaskQueueEmpty=close_game` 仍会进入没有包进程租约证明的旧 `app_stop()`，而 `goto_main/stay_there` 也缺空队列恢复回放。重新进入需要初始化期纯配置门禁、各后端 frame-clock 证据，以及 `close_game` 的租约化语义进程停止端口。
+其余三个 Optimization 运行字段已在 1.35 节完成原方法离线回放；它们仍缺跨后端 frame-clock、长等待恢复和包进程租约实机证据，因此这里只声明离线完成，不扩张 live/action。`Emulator.ScreenshotDedithering` 对 Headless 语义截图仍无运行时效果，明确不做隐藏像素回退。
 
 ### 1.10 本轮 EnemyPriority 三值目标排序契约
 
@@ -287,6 +287,14 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 `Optimization.WhenTaskQueueEmpty` 精确接受 `stay_there/goto_main/close_game`。冻结时钟回放直接执行原 `AzurLaneAutoScript.get_next_task()`：三种未来任务分支分别保留等待、回主界面、停包动作顺序；已到期任务不触发空队列动作。非法值现在在 `config.get_next()` 前拒绝，不再静默回退 `stay_there`。所有设备、等待和资源释放动作均为记录桩，mutation budget 为 0。
 
 三字段只提升 `offline=complete`。真实跨后端帧时钟、长等待重载、停包后 Restart 租约、回主界面 postcondition 和进程恢复仍缺。另经 AST 证实，Headless 语义截图在读取 `Emulator.ScreenshotDedithering` 前已经返回 semantic frame；该字段当前对 Headless 无效，本批明确跳过，不把像素去抖算法外推为语义适配。Alas 面板保持 P。
+
+### 1.36 本轮 Operation Siren 任务配置契约
+
+`OpsiMonthBoss.Mode` 精确接受 `normal/normal_hard`，`CheckAdaptability` 精确接受布尔值。回放直接编译并执行固定上游 `clear_month_boss()` 与 `month_boss_delay()`，保留普通/困难入口选择、普通完成后继续困难、困难已完成跳过、`203/203/156` 适应性阈值及不足时延迟停止的原顺序。非法值在任务、地图或战斗状态前 fail-closed。
+
+`OpsiObscure.ForceRun` 的真假分支直接执行原 `clear_obscure()` 与 `os_obscure()`：关闭时维持一次安全停止，开启时进入原任务切换检查；坐标消耗、导航、战斗和奖励均为记录桩。三字段共覆盖 6 个合法类、拒绝 19 个非法值，mutation budget 为 0，没有真实战斗、仓库消耗或 Android 输入，因此只提升 `offline=complete`。
+
+固定上游全树 AST 还证明 `OpsiExplore.ForceRun`、`OpsiAbyssal.ForceRun` 与 `OpsiMonthBoss.ForceRun` 只有配置声明，没有任何运行时读取。三者现在明确标为 `unsupported`，不再用“实机当前值”暗示存在能力；重新进入必须先出现并审阅上游真实消费者。MonthBoss/Obscure 的导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板保持 B。
 
 ## 2. 60 个面板总表
 
@@ -574,9 +582,9 @@ python scripts/python/verify_alas_support_matrix.py `
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
-| ◐ 有实机当前值/分支证据 | **151 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ◐ 有实机当前值/分支证据 | **148 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **38 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
-| ⊘ 当前未适配或无效 | **56 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
+| ⊘ 当前未适配或无效 | **59 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **33 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
@@ -770,7 +778,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OldRetire.SR` | General | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OldRetire.SSR` | General | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OneClickRetire.KeepLimitBreak` | General | type=select; display=default | options: "do_not_keep", "keep_limit_break"; default: "keep_limit_break" | `P`/◐ 两设置 typed；keep_limit_break 已实机 | ☑ | ☑ | ☑ | ☑ | ◐ |
-| `OpsiAbyssal.ForceRun` | OpsiAbyssal | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiAbyssal.ForceRun` | OpsiAbyssal | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OpsiAshAssist.Tier` | OpsiAshAssist | type=input; display=default | input/default: 15 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
 | `OpsiAshBeacon.AttackMode` | OpsiAshBeacon | type=select; display=default | options: "current_dossier", "current"; default: "current" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiAshBeacon.DossierAutoAttackMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: false | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
@@ -781,7 +789,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiDaemon.SelectEnemy` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiDaily.DoMission` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
 | `OpsiDaily.UseTuningSample` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `OpsiExplore.ForceRun` | OpsiExplore | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiExplore.ForceRun` | OpsiExplore | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OpsiExplore.LastZone` | OpsiExplore | type=input; display=default | input/default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiExplore.SpecialRadar` | OpsiExplore | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiFleet.Fleet` | OpsiExplore, OpsiDaily, OpsiObscure, OpsiArchive, OpsiMeowfficerFarming, OpsiHazard1Leveling | type=select; display=default | options: 1, 2, 3, 4; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
@@ -797,10 +805,10 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiMeowfficerFarming.ActionPointPreserve` | OpsiMeowfficerFarming | type=input; display=default | input/default: 1000 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiMeowfficerFarming.HazardLevel` | OpsiMeowfficerFarming | type=select; display=default | options: 10, 3, 4, 5, 6; default: 5 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiMeowfficerFarming.TargetZone` | OpsiMeowfficerFarming | type=input; display=default | input/default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `OpsiMonthBoss.CheckAdaptability` | OpsiMonthBoss | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `OpsiMonthBoss.ForceRun` | OpsiMonthBoss | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `OpsiMonthBoss.Mode` | OpsiMonthBoss | type=select; display=default | options: "normal_hard", "normal"; default: "normal" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `OpsiObscure.ForceRun` | OpsiObscure | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiMonthBoss.CheckAdaptability` | OpsiMonthBoss | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `OpsiMonthBoss.ForceRun` | OpsiMonthBoss | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `OpsiMonthBoss.Mode` | OpsiMonthBoss | type=select; display=default | options: "normal_hard", "normal"; default: "normal" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `OpsiObscure.ForceRun` | OpsiObscure | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiShop.CustomFilter` | OpsiShop | type=textarea; display=default | input/default: <long default in args.json> | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiShop.PresetFilter` | OpsiShop | type=select; display=default | options: "all", "custom", "max_benefit_meta", "max_benefit", "no_meta"; default: "max_benefit_meta" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiStronghold.ForceRun` | OpsiStronghold | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

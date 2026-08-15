@@ -328,10 +328,18 @@ index 43d629c5..513b70ad 100644
          while True:
              self.config.OS_ACTION_POINT_PRESERVE = preserve
 diff --git a/module/os/tasks/month_boss.py b/module/os/tasks/month_boss.py
-index 948b5149..ea23a757 100644
+index 948b5149..168e3abc 100644
 --- a/module/os/tasks/month_boss.py
 +++ b/module/os/tasks/month_boss.py
-@@ -9,6 +9,14 @@ from module.os_handler.assets import OS_MONTHBOSS_NORMAL, OS_MONTHBOSS_HARD
+@@ -1,5 +1,7 @@
+ import numpy as np
+ 
++from alas_headless import validate_alas_opsi_month_boss_config
++
+ from module.config.utils import get_os_next_reset
+ from module.logger import logger
+ from module.os.map import OSMap
+@@ -9,6 +11,14 @@ from module.os_handler.assets import OS_MONTHBOSS_NORMAL, OS_MONTHBOSS_HARD
  
  class OpsiMonthBoss(OSMap):
      def get_adaptability(self):
@@ -346,6 +354,101 @@ index 948b5149..ea23a757 100644
          adaptability = OCR_OS_ADAPTABILITY.ocr(self.device.image)
  
          return adaptability
+@@ -23,35 +33,39 @@ class OpsiMonthBoss(OSMap):
+         Raises:
+             ActionPointLimit
+             TaskEnd: if no more month boss
+         """
++        month_boss_config = validate_alas_opsi_month_boss_config(
++            mode=self.config.OpsiMonthBoss_Mode,
++            check_adaptability=self.config.OpsiMonthBoss_CheckAdaptability,
++        )
+         if self.is_in_opsi_explore():
+             logger.info('OpsiExplore is under scheduling, stop OpsiMonthBoss')
+             self.config.task_delay(server_update=True)
+             self.config.task_stop()
+ 
+         logger.hr("OS clear Month Boss", level=1)
+         logger.hr("Month Boss precheck", level=2)
+         self.os_mission_enter()
+-        logger.attr('OpsiMonthBoss.Mode', self.config.OpsiMonthBoss_Mode)
++        logger.attr('OpsiMonthBoss.Mode', month_boss_config.mode)
+         if self.appear(OS_MONTHBOSS_NORMAL, offset=(20, 20)):
+             logger.attr('Month boss difficulty', 'normal')
+             is_normal = True
+         elif self.appear(OS_MONTHBOSS_HARD, offset=(20, 20)):
+             logger.attr('Month boss difficulty', 'hard')
+             is_normal = False
+         else:
+             logger.info("No Normal/Hard boss found, stop")
+             self.os_mission_quit()
+             self.month_boss_delay(is_normal=False, result=False)
+             return True
+         self.os_mission_quit()
+ 
+-        if not is_normal and self.config.OpsiMonthBoss_Mode == "normal":
++        if not is_normal and month_boss_config.mode == "normal":
+             logger.info("Attack normal boss only but having hard boss, skip")
+             self.month_boss_delay(is_normal=False, result=True)
+             self.config.task_stop()
+             return True
+ 
+-        if self.config.OpsiMonthBoss_CheckAdaptability:
++        if month_boss_config.check_adaptability:
+             self.os_map_goto_globe(unpin=False)
+             adaptability = self.get_adaptability()
+@@ -78,10 +92,14 @@ class OpsiMonthBoss(OSMap):
+         Args:
+             is_normal: True for normal, False for hard
+             result: If success to clear boss
+         """
++        month_boss_config = validate_alas_opsi_month_boss_config(
++            mode=self.config.OpsiMonthBoss_Mode,
++            check_adaptability=self.config.OpsiMonthBoss_CheckAdaptability,
++        )
+         if is_normal:
+             if result:
+-                if self.config.OpsiMonthBoss_Mode == 'normal_hard':
++                if month_boss_config.mode == 'normal_hard':
+                     logger.info('Monthly boss normal cleared, run hard boss then')
+                     self.config.task_stop()
+                 else:
+diff --git a/module/os/tasks/obscure.py b/module/os/tasks/obscure.py
+index 6e1f547b..0cff30e2 100644
+--- a/module/os/tasks/obscure.py
++++ b/module/os/tasks/obscure.py
+@@ -1,3 +1,5 @@
++from alas_headless import validate_alas_opsi_obscure_config
++
+ from module.config.utils import get_os_reset_remain
+ from module.logger import logger
+ from module.os.map import OSMap
+@@ -8,9 +10,12 @@ class OpsiObscure(OSMap):
+         Raises:
+             ActionPointLimit:
+         """
++        obscure_config = validate_alas_opsi_obscure_config(
++            force_run=self.config.OpsiObscure_ForceRun,
++        )
+         logger.hr('OS clear obscure', level=1)
+         self.cl1_ap_preserve()
+-        if self.config.OpsiObscure_ForceRun:
++        if obscure_config.force_run:
+             logger.info('OS obscure finish is under force run')
+ 
+         result = self.storage_get_next_item('OBSCURE', use_logger=self.config.OpsiGeneral_UseLogger)
+@@ -42,7 +47,10 @@ class OpsiObscure(OSMap):
+     def os_obscure(self):
+         while True:
+             self.clear_obscure()
+-            if self.config.OpsiObscure_ForceRun:
++            obscure_config = validate_alas_opsi_obscure_config(
++                force_run=self.config.OpsiObscure_ForceRun,
++            )
++            if obscure_config.force_run:
+                 self.config.check_task_switch()
+                 continue
+             else:
 diff --git a/module/os/tasks/voucher.py b/module/os/tasks/voucher.py
 index a3c84ab5..16330ba6 100644
 --- a/module/os/tasks/voucher.py

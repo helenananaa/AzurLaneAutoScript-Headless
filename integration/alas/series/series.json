@@ -53,7 +53,7 @@
     {
       "order": 11,
       "path": "integration/alas/series/0090-operation-siren-flow-ports.patch",
-      "sha256": "f27e1317848e26c7adb0b78508004ea4a8b4d12d066f10576b9196c9197547e9"
+      "sha256": "f923d44647f7783713545a3e0e389ab72f3d5b7a1377397916fccaa23b17c585"
     },
     {
       "order": 12,

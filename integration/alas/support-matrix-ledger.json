@@ -4596,21 +4596,25 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "unsupported",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
-        "offline": "missing"
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
       },
-      "evidence": [],
-      "group_code": "B",
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "docs/status.md"
+      ],
+      "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiAbyssal"
       ],
       "path": "OpsiAbyssal.ForceRun",
-      "status_label": "◐ 实机当前值",
-      "support": "supported",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
       "values": "input/default: false"
     },
     {
@@ -4815,21 +4819,25 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "unsupported",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
-        "offline": "missing"
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
       },
-      "evidence": [],
-      "group_code": "B",
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "docs/status.md"
+      ],
+      "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiExplore"
       ],
       "path": "OpsiExplore.ForceRun",
-      "status_label": "◐ 实机当前值",
-      "support": "supported",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
       "values": "input/default: false"
     },
     {
@@ -5135,9 +5143,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -5150,21 +5163,25 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "unsupported",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
-        "offline": "missing"
+        "live": "unsupported",
+        "observation": "unsupported",
+        "offline": "unsupported"
       },
-      "evidence": [],
-      "group_code": "B",
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "docs/status.md"
+      ],
+      "group_code": "M",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiMonthBoss"
       ],
       "path": "OpsiMonthBoss.ForceRun",
-      "status_label": "◐ 实机当前值",
-      "support": "supported",
+      "status_label": "⊘ 未适配",
+      "support": "unsupported",
       "values": "input/default: false"
     },
     {
@@ -5173,9 +5190,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
@@ -5192,9 +5214,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -7362,7 +7389,7 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiAbyssal",
-      "note": "可读仓库/详情；强制运行、过滤器、坐标消耗、Boss 和结算未闭环",
+      "note": "可读仓库/详情；ForceRun 在固定上游零读取，明确不支持；过滤器、坐标消耗、Boss 和结算未闭环",
       "status": "B"
     },
     {
@@ -7425,7 +7452,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiExplore",
-      "note": "到自动寻敌锁定边界；强制运行、续跑区、特殊雷达、舰队/潜艇和清区未闭环",
+      "note": "到自动寻敌锁定边界；ForceRun 在固定上游零读取，明确不支持；续跑区、特殊雷达、舰队/潜艇和清区未闭环",
       "status": "B"
     },
     {
@@ -7463,7 +7490,7 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiMonthBoss",
-      "note": "能在适应性不足时安全停止；模式、强制运行、过滤器和普通/困难 Boss 未闭环",
+      "note": "Mode 与 CheckAdaptability 已离线等价；ForceRun 在固定上游零读取，明确不支持；过滤器和普通/困难 Boss 实机未闭环",
       "status": "B"
     },
     {
@@ -7473,7 +7500,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiObscure",
-      "note": "可读仓库/详情；强制运行、坐标消耗、进入和清图未闭环",
+      "note": "ForceRun 开关已离线等价；坐标消耗、进入和清图未闭环",
       "status": "B"
     },
     {
@@ -9327,6 +9354,45 @@
         "offline": "complete"
       },
       "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiMonthBoss.Mode",
+      "note": "Both declared modes preserve the original normal and hard boss branch selection and delay behavior; invalid values fail before task state is touched."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiMonthBoss.CheckAdaptability",
+      "note": "Both exact booleans preserve the original adaptability threshold and skip branches; invalid values fail before mission or globe state is touched."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiObscure.ForceRun",
+      "note": "Both exact booleans preserve the original stop versus task-switch continuation boundary; invalid values fail before coordinate or task state is touched."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
         "tests/test_alas_optimization_config.py",
         "python/alas_headless/alas_optimization_config_replay.py",
         "integration/alas/series/0150-runtime-optimization-contract.patch",
@@ -9372,8 +9438,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "88de0ee5b6c5dca4298e5992a5ed10a47487d725ce13efc8a4d8fa52a82fd584",
-      "manifest_sha256": "1ff4c5c371c8ded339785d8abb561c410f4b230d3b27d706e5a1003948e0b0ef",
+      "combined_sha256": "823dd074674ffdadfc3c2d9cecef6e4f5135cdd66d1fb2c48b059c5ccedea6b2",
+      "manifest_sha256": "dad7ab6cbd5de45a709972d57b56eea625f4d448b17c7148b8c5b73575036b19",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
