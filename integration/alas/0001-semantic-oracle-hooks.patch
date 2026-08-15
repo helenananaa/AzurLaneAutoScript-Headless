@@ -3081,7 +3081,7 @@ index 93b011bb..cd28a37f 100644
              logger.info(f'Already at {page_munitions}')
              return
 diff --git a/module/shop/shop_guild.py b/module/shop/shop_guild.py
-index 12e289f1..ef1e2d02 100644
+index 12e289f1..b321dfb2 100644
 --- a/module/shop/shop_guild.py
 +++ b/module/shop/shop_guild.py
 @@ -1,7 +1,7 @@
@@ -3107,14 +3107,31 @@ index 12e289f1..ef1e2d02 100644
  
      # New UI in 2025-08-14
      @cached_property
-@@ -91,6 +96,11 @@ class GuildShop_250814(ShopClerk, ShopUI, ShopStatus):
+@@ -91,6 +96,28 @@ class GuildShop_250814(ShopClerk, ShopUI, ShopStatus):
          """
          Run Guild Shop
          """
-+        from alas_headless import validate_alas_guild_shop_refresh
++        from alas_headless import (
++            validate_alas_guild_shop_refresh,
++            validate_alas_guild_shop_secondary_choices,
++        )
 +
 +        refresh = validate_alas_guild_shop_refresh(
 +            refresh=self.config.GuildShop_Refresh,
++        )
++        validate_alas_guild_shop_secondary_choices(
++            box_t3=self.config.GuildShop_BOX_T3,
++            box_t4=self.config.GuildShop_BOX_T4,
++            book_t2=self.config.GuildShop_BOOK_T2,
++            book_t3=self.config.GuildShop_BOOK_T3,
++            retrofit_t2=self.config.GuildShop_RETROFIT_T2,
++            retrofit_t3=self.config.GuildShop_RETROFIT_T3,
++            plate_t2=self.config.GuildShop_PLATE_T2,
++            plate_t3=self.config.GuildShop_PLATE_T3,
++            plate_t4=self.config.GuildShop_PLATE_T4,
++            pr1=self.config.GuildShop_PR1,
++            pr2=self.config.GuildShop_PR2,
++            pr3=self.config.GuildShop_PR3,
 +        )
          # Base case; exit run if filter empty
          if not self.shop_filter:

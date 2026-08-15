@@ -8,10 +8,13 @@ from pathlib import Path
 import re
 from types import SimpleNamespace
 from typing import Any
+import yaml
 
 from .alas_guild_shop_config_contract import (
+    GUILD_SHOP_SECONDARY_CHOICES,
     validate_alas_guild_shop_filter,
     validate_alas_guild_shop_refresh,
+    validate_alas_guild_shop_secondary_choices,
 )
 from .semantic_oracle import SemanticGateClosed
 
@@ -78,6 +81,18 @@ def _verify_generated_config(config_path: Path) -> dict[str, object]:
             "PlateT4 > BookT3 > PR > CatT3 > Chip > BookT2 > Retrofit > FoodT6 "
             "> FoodT5 > CatT2 > BoxT4"
         ),
+        "GuildShop_BOX_T3": "ironblood",
+        "GuildShop_BOX_T4": "ironblood",
+        "GuildShop_BOOK_T2": "red",
+        "GuildShop_BOOK_T3": "red",
+        "GuildShop_RETROFIT_T2": "cl",
+        "GuildShop_RETROFIT_T3": "cl",
+        "GuildShop_PLATE_T2": "general",
+        "GuildShop_PLATE_T3": "general",
+        "GuildShop_PLATE_T4": "gun",
+        "GuildShop_PR1": "neptune",
+        "GuildShop_PR2": "seattle",
+        "GuildShop_PR3": "cheshire",
     }
     values: dict[str, object] = {}
     for node in ast.walk(tree):
@@ -91,10 +106,39 @@ def _verify_generated_config(config_path: Path) -> dict[str, object]:
                 values[target.id] = value
     if values != expected:
         raise AssertionError("GuildShop entry configuration surface drifted")
-    return {"Refresh": values["GuildShop_Refresh"], "Filter": values["GuildShop_Filter"]}
+    return {
+        "Refresh": values["GuildShop_Refresh"],
+        "Filter": values["GuildShop_Filter"],
+        **{
+            field: values[f"GuildShop_{field}"]
+            for field in GUILD_SHOP_SECONDARY_CHOICES
+        },
+    }
 
 
-def _verify_contract(filter_: object) -> tuple[int, int]:
+def _verify_argument_schema(argument_path: Path, defaults: dict[str, object]) -> None:
+    document = yaml.safe_load(argument_path.read_text(encoding="utf-8"))
+    group = document.get("GuildShop") if isinstance(document, dict) else None
+    if not isinstance(group, dict):
+        raise AssertionError("GuildShop argument schema is unavailable")
+    for field, choices in GUILD_SHOP_SECONDARY_CHOICES.items():
+        definition = group.get(field)
+        if not isinstance(definition, dict):
+            raise AssertionError(f"GuildShop.{field} argument schema drifted")
+        if tuple(definition.get("option", ())) != choices:
+            raise AssertionError(f"GuildShop.{field} choice options drifted")
+        if definition.get("value") != defaults[field]:
+            raise AssertionError(f"GuildShop.{field} default drifted")
+
+
+def _secondary_kwargs(values: dict[str, object]) -> dict[str, object]:
+    return {field.lower(): value for field, value in values.items()}
+
+
+def _verify_contract(
+    filter_: object,
+    secondary_defaults: dict[str, object],
+) -> tuple[int, int]:
     accepted = 0
     invalid = 0
     for refresh in (False, True):
@@ -119,6 +163,27 @@ def _verify_contract(filter_: object) -> tuple[int, int]:
             invalid += 1
         else:
             raise AssertionError("invalid GuildShop.Filter was admitted")
+    for field, choices in GUILD_SHOP_SECONDARY_CHOICES.items():
+        for choice in choices:
+            values = dict(secondary_defaults)
+            values[field] = choice
+            snapshot = validate_alas_guild_shop_secondary_choices(
+                **_secondary_kwargs(values)
+            )
+            if getattr(snapshot, field.lower()) != choice:
+                raise AssertionError(f"GuildShop.{field} canonical value drifted")
+            accepted += 1
+        for value in ("invalid", None):
+            values = dict(secondary_defaults)
+            values[field] = value
+            try:
+                validate_alas_guild_shop_secondary_choices(
+                    **_secondary_kwargs(values)
+                )
+            except SemanticGateClosed:
+                invalid += 1
+            else:
+                raise AssertionError(f"invalid GuildShop.{field} was admitted")
     return accepted, invalid
 
 
@@ -130,6 +195,7 @@ def _run_case(
     currency: int,
     buy_outcomes: tuple[bool, ...],
     refresh_outcomes: tuple[bool, ...] = (),
+    secondary_values: dict[str, object],
 ) -> dict[str, object]:
     events: list[str] = []
     buy_iter = iter(buy_outcomes)
@@ -143,8 +209,12 @@ def _run_case(
         events.append("shop_refresh")
         return next(refresh_iter, False)
 
+    config_values = {
+        "GuildShop_Refresh": refresh,
+        **{f"GuildShop_{field}": value for field, value in secondary_values.items()},
+    }
     host = SimpleNamespace(
-        config=SimpleNamespace(GuildShop_Refresh=refresh),
+        config=SimpleNamespace(**config_values),
         shop_filter=shop_filter,
         _currency=currency,
         shop_buy=shop_buy,
@@ -160,7 +230,7 @@ def _run_case(
     return {"rejected": rejected, "result": result, "events": events}
 
 
-def _verify_run(method) -> dict[str, object]:
+def _verify_run(method, secondary_defaults: dict[str, object]) -> dict[str, object]:
     cases = {
         "empty": _run_case(
             method,
@@ -168,6 +238,7 @@ def _verify_run(method) -> dict[str, object]:
             shop_filter="",
             currency=110,
             buy_outcomes=(True,),
+            secondary_values=secondary_defaults,
         ),
         "disabled": _run_case(
             method,
@@ -175,6 +246,7 @@ def _verify_run(method) -> dict[str, object]:
             shop_filter="Cube",
             currency=110,
             buy_outcomes=(True,),
+            secondary_values=secondary_defaults,
         ),
         "insufficient": _run_case(
             method,
@@ -182,6 +254,7 @@ def _verify_run(method) -> dict[str, object]:
             shop_filter="Cube",
             currency=109,
             buy_outcomes=(True,),
+            secondary_values=secondary_defaults,
         ),
         "refresh_success": _run_case(
             method,
@@ -190,6 +263,7 @@ def _verify_run(method) -> dict[str, object]:
             currency=110,
             buy_outcomes=(True, False),
             refresh_outcomes=(True,),
+            secondary_values=secondary_defaults,
         ),
         "refresh_unavailable": _run_case(
             method,
@@ -198,6 +272,7 @@ def _verify_run(method) -> dict[str, object]:
             currency=110,
             buy_outcomes=(True,),
             refresh_outcomes=(False,),
+            secondary_values=secondary_defaults,
         ),
     }
     expected = {
@@ -218,12 +293,34 @@ def _verify_run(method) -> dict[str, object]:
             shop_filter="Cube",
             currency=110,
             buy_outcomes=(True,),
+            secondary_values=secondary_defaults,
         )
         for value in ("true", None, 0, 1, [], {})
     }
     if any(not case["rejected"] or case["events"] for case in invalid.values()):
         raise AssertionError("invalid GuildShop.Refresh entered the shop loop")
-    return {"cases": cases, "invalid_entries": invalid}
+    invalid_secondary = {}
+    for field in GUILD_SHOP_SECONDARY_CHOICES:
+        values = dict(secondary_defaults)
+        values[field] = "invalid"
+        invalid_secondary[field] = _run_case(
+            method,
+            refresh=True,
+            shop_filter="Cube",
+            currency=110,
+            buy_outcomes=(True,),
+            secondary_values=values,
+        )
+    if any(
+        not case["rejected"] or case["events"]
+        for case in invalid_secondary.values()
+    ):
+        raise AssertionError("invalid GuildShop secondary choice entered the shop loop")
+    return {
+        "cases": cases,
+        "invalid_entries": invalid,
+        "invalid_secondary_entries": invalid_secondary,
+    }
 
 
 def _filter_case(method, value: object) -> dict[str, object]:
@@ -265,9 +362,19 @@ def verify_guild_shop_config(alas_root: Path) -> dict[str, object]:
     source_path = alas_root / "module" / "shop" / "shop_guild.py"
     shop_base_path = alas_root / "module" / "shop" / "base.py"
     config_path = alas_root / "module" / "config" / "config_generated.py"
-    if not source_path.is_file() or not shop_base_path.is_file() or not config_path.is_file():
+    argument_path = alas_root / "module" / "config" / "argument" / "argument.yaml"
+    if (
+        not source_path.is_file()
+        or not shop_base_path.is_file()
+        or not config_path.is_file()
+        or not argument_path.is_file()
+    ):
         raise FileNotFoundError("ALAS GuildShop source is incomplete")
     generated = _verify_generated_config(config_path)
+    secondary_defaults = {
+        field: generated[field] for field in GUILD_SHOP_SECONDARY_CHOICES
+    }
+    _verify_argument_schema(argument_path, secondary_defaults)
     run_method = _method(source_path, "GuildShop_250814", "run")
     filter_method = _method(source_path, "GuildShop_250814", "shop_filter")
     filter_regex = _assignment(shop_base_path, "FILTER_REGEX", {"re": re})
@@ -284,6 +391,11 @@ def verify_guild_shop_config(alas_root: Path) -> dict[str, object]:
     }
     if "validate_alas_guild_shop_refresh" not in run_guards:
         raise AssertionError("GuildShop.Refresh fail-closed guard is absent")
+    if "validate_alas_guild_shop_secondary_choices" not in run_guards:
+        raise AssertionError("GuildShop secondary-choice fail-closed guard is absent")
+    secondary_attributes = {f"GuildShop_{field}" for field in GUILD_SHOP_SECONDARY_CHOICES}
+    if not secondary_attributes <= run_attributes:
+        raise AssertionError("GuildShop secondary-choice consumer surface drifted")
     filter_attributes = {
         node.attr for node in ast.walk(filter_method) if isinstance(node, ast.Attribute)
     }
@@ -296,15 +408,19 @@ def verify_guild_shop_config(alas_root: Path) -> dict[str, object]:
     }
     if "validate_alas_guild_shop_filter" not in filter_guards:
         raise AssertionError("GuildShop.Filter fail-closed guard is absent")
-    accepted, invalid = _verify_contract(filter_contract)
+    accepted, invalid = _verify_contract(filter_contract, secondary_defaults)
     run_decisions = _verify_run(
         _compile(
             run_method,
             {
                 "logger": _Logger(),
                 "validate_alas_guild_shop_refresh": validate_alas_guild_shop_refresh,
+                "validate_alas_guild_shop_secondary_choices": (
+                    validate_alas_guild_shop_secondary_choices
+                ),
             },
-        )
+        ),
+        secondary_defaults,
     )
     filter_decisions = _verify_filter_property(
         _compile(
@@ -319,13 +435,17 @@ def verify_guild_shop_config(alas_root: Path) -> dict[str, object]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 2,
+        "field_count": 14,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "generated_defaults": generated,
         "runtime_consumers": {
             "GuildShop.Refresh": "GuildShop_250814.run",
             "GuildShop.Filter": "GuildShop_250814.shop_filter",
+            **{
+                f"GuildShop.{field}": "GuildShop_250814.run preflight -> ShopClerk.shop_get_choice"
+                for field in GUILD_SHOP_SECONDARY_CHOICES
+            },
         },
         "patched_guard_present": True,
         "original_decisions": {"run": run_decisions, "filter": filter_decisions},
@@ -337,5 +457,6 @@ def verify_guild_shop_config(alas_root: Path) -> dict[str, object]:
             "shop_guild": _sha256(source_path),
             "shop_base": _sha256(shop_base_path),
             "config_generated": _sha256(config_path),
+            "argument_schema": _sha256(argument_path),
         },
     }

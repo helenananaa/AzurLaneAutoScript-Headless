@@ -5,8 +5,10 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from alas_headless.alas_guild_shop_config_contract import (
+    GUILD_SHOP_SECONDARY_CHOICES,
     validate_alas_guild_shop_filter,
     validate_alas_guild_shop_refresh,
+    validate_alas_guild_shop_secondary_choices,
 )
 from alas_headless.semantic_oracle import SemanticGateClosed
 from scripts.python.verify_alas_guild_shop_config import verify_clean_upstream
@@ -20,6 +22,9 @@ FILTER_CONTRACT = SimpleNamespace(
         flags=re.IGNORECASE,
     )
 )
+SECONDARY_DEFAULTS = {
+    field: choices[0] for field, choices in GUILD_SHOP_SECONDARY_CHOICES.items()
+}
 
 
 class AlasGuildShopConfigTests(unittest.TestCase):
@@ -28,9 +33,9 @@ class AlasGuildShopConfigTests(unittest.TestCase):
             self.skipTest("local pinned ALAS verification tree is unavailable")
         result = verify_clean_upstream(PINNED_UPSTREAM)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 2)
-        self.assertEqual(result["accepted_case_count"], 5)
-        self.assertEqual(result["invalid_case_count"], 13)
+        self.assertEqual(result["field_count"], 14)
+        self.assertEqual(result["accepted_case_count"], 56)
+        self.assertEqual(result["invalid_case_count"], 37)
         self.assertEqual(result["mutation_budget"], 0)
         self.assertFalse(result["real_purchase_performed"])
         self.assertFalse(result["real_refresh_performed"])
@@ -44,6 +49,14 @@ class AlasGuildShopConfigTests(unittest.TestCase):
                 validate_alas_guild_shop_filter(filter_=FILTER_CONTRACT, value=value),
                 value,
             )
+        for field, choices in GUILD_SHOP_SECONDARY_CHOICES.items():
+            for choice in choices:
+                values = dict(SECONDARY_DEFAULTS)
+                values[field] = choice
+                snapshot = validate_alas_guild_shop_secondary_choices(
+                    **{key.lower(): value for key, value in values.items()}
+                )
+                self.assertEqual(getattr(snapshot, field.lower()), choice)
 
     def test_invalid_values_fail_closed(self):
         for value in ("true", None, 0, 1, [], {}):
@@ -56,6 +69,16 @@ class AlasGuildShopConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_guild_shop_filter(filter_=FILTER_CONTRACT, value=value)
+        for field in GUILD_SHOP_SECONDARY_CHOICES:
+            for value in ("invalid", None):
+                values = dict(SECONDARY_DEFAULTS)
+                values[field] = value
+                with self.subTest(field=field, value=value), self.assertRaises(
+                    SemanticGateClosed
+                ):
+                    validate_alas_guild_shop_secondary_choices(
+                        **{key.lower(): choice for key, choice in values.items()}
+                    )
 
     def test_patch_gates_guild_shop_entry_decisions(self):
         patch = ROOT.joinpath(
@@ -64,6 +87,7 @@ class AlasGuildShopConfigTests(unittest.TestCase):
         self.assertIn("diff --git a/module/shop/shop_guild.py", patch)
         self.assertEqual(patch.count("validate_alas_guild_shop_refresh("), 1)
         self.assertEqual(patch.count("validate_alas_guild_shop_filter("), 1)
+        self.assertEqual(patch.count("validate_alas_guild_shop_secondary_choices("), 1)
 
     def test_sources_compile(self):
         for relative in (

@@ -355,7 +355,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 31 | Hard | Scheduler, Hard | B | 64 关目录与两舰队离线契约已完成；实机仍只到 11-4 进入边界，当前账号进度和自动寻敌锁定，尚无战斗/结算证据 |
 | 32 | Exercise | Scheduler, Exercise | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 上游零读取，真实对手/时段/血量观察、刷新持久化、战斗结算和失败恢复未闭环 |
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | ConsumeCoins、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；购买、余额观察与确认仍未完成 |
-| 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | GuildShop Filter/Refresh 与勋章商店一次 DR 图纸购买已离线等价；其余商店、子选项和真实操作未闭环 |
+| 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | GuildShop 14 字段入口与勋章商店一次 DR 图纸购买已离线等价；其余商店与真实操作未闭环 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝 |
 | 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；实机仍仅一次轻型建造，其他卡池、多单、票券、快速完成及队列领取未闭环 |
 | 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环 |
@@ -452,7 +452,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Hard | `HardStage`; `HardFleet`=1/2 | B | 固定上游 64 关目录、两舰队、次数为 0/3 和非法值已离线覆盖；仍缺未解锁页、非默认关卡/舰队、真实战斗和结算收据 |
 | Exercise | `ExerciseStrategy`=`aggressive/fri18/sat0/sat12/sat18/sun0/sun12/sun18`; `OpponentChooseMode`=`max_exp/easiest/leftmost/easiest_else_exp`; `OpponentRefreshValue`; `OpponentRefreshRecord`; `OpponentTrial`; `LowHpThreshold`; `LowHpConfirmWait` | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 零读取且明确不支持，真实对手/时段/血量观察、刷新持久化、失败重开和赛季边界仍需闭环 |
 | GeneralShop | `Filter`; `Refresh`; `UseGems`; `ConsumeCoins`; `BuySkinBox` | B | ConsumeCoins 550,000 阈值、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；真实商品命中、刷新、余额观察和购买确认仍缺 |
-| GuildShop | `Filter`; `Refresh`; `BOOK_T2`; `BOOK_T3`; `BOX_T3`; `BOX_T4`; `PLATE_T2`; `PLATE_T3`; `PLATE_T4`; `RETROFIT_T2`; `RETROFIT_T3`; `PR1`; `PR2`; `PR3` | P | Filter grammar 与 Refresh 入口已离线等价；12 个子选项的枚举、真实商品/货币/库存、确认与舰船阵营部件选择仍缺 |
+| GuildShop | `Filter`; `Refresh`; `BOOK_T2`; `BOOK_T3`; `BOX_T3`; `BOX_T4`; `PLATE_T2`; `PLATE_T3`; `PLATE_T4`; `RETROFIT_T2`; `RETROFIT_T3`; `PR1`; `PR2`; `PR3` | P | 14 字段入口、语法与枚举已离线等价；真实商品/货币/库存、PR 系列判别、选择确认与购买仍缺 |
 | MedalShop2 | `Filter`; `PLATE_T1`; `PLATE_T2`; `PLATE_T3`; `RETROFIT_T1`; `RETROFIT_T2`; `RETROFIT_T3` | L | 当前只有一次 DR 图纸；7 字段的所有选择、商品轮换、库存/勋章不足和确认未闭环 |
 | MeritShop | `Filter`; `Refresh` | M | 规则命中、刷新真假、功勋不足和购买确认 |
 | CoreShop | `Filter` | M | 规则命中/无命中、核心不足、月限购和确认 |
@@ -603,9 +603,9 @@ python scripts/python/verify_alas_support_matrix.py `
 |---|---:|---|
 | ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
 | ◐ 有实机当前值/分支证据 | **149 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **45 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **59 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **57 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
-| ☐ 只有配置声明/读取 | **27 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
+| ☐ 只有配置声明/读取 | **13 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -686,8 +686,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Emulator.ScreenshotDedithering` | Alas | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `Emulator.ScreenshotMethod` | Alas | type=select; display=default | options: "ADB_nc", "ADB", "aScreenCap_nc", "aScreenCap", "auto", "DroidCast_raw", "DroidCast", "ldopengl", "nemu_ipc", "uiautomator2"; default: "auto" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
 | `Emulator.Serial` | Alas | type=input; display=default | input/default: "auto" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ◐ | ◐ |
-| `Emulator.ServerName` | Alas | type=select; display=default | options: "cn_android-0", "cn_android-1", "cn_android-10", "cn_android-11", "cn_android-12", "cn_android-13", "cn_android-14", "cn_android-15", "cn_android-16", "cn_android-17", "cn_android-18", "cn_android-19", "cn_android-2", "cn_android-20", "cn_android-21", "cn_android-22", "cn_android-23", "cn_android-24", "cn_android-25", "cn_android-26", "cn_android-27", "cn_android-28", "cn_android-29", "cn_android-3", "cn_android-4", "cn_android-5", "cn_android-6", "cn_android-7", "cn_android-8", "cn_android-9", "cn_channel-0", "cn_channel-1", "cn_channel-2", "cn_channel-3", "cn_channel-4", "cn_channel-5", "cn_ios-0", "cn_ios-1", "cn_ios-10", "cn_ios-2", "cn_ios-3", "cn_ios-4", "cn_ios-5", "cn_ios-6", "cn_ios-7", "cn_ios-8", "cn_ios-9", "disabled", "en-0", "en-1", "en-2", "en-3", "en-4", "en-5", "jp-0", "jp-1", "jp-10", "jp-11", "jp-12", "jp-13", "jp-14", "jp-15", "jp-16", "jp-17", "jp-2", "jp-3", "jp-4", "jp-5", "jp-6", "jp-7", "jp-8", "jp-9"; default: "disabled" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `EmulatorInfo.Emulator` | Alas | type=select; display=default | options: "auto", "BlueStacks4", "BlueStacks4HyperV", "BlueStacks5", "BlueStacks5HyperV", "LDPlayer14", "LDPlayer3", "LDPlayer4", "LDPlayer9", "MEmuPlayer", "MuMuPlayer", "MuMuPlayer12", "MuMuPlayerX", "NoxPlayer", "NoxPlayer64"; default: "auto" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `Emulator.ServerName` | Alas | type=select; display=default | options: "cn_android-0", "cn_android-1", "cn_android-10", "cn_android-11", "cn_android-12", "cn_android-13", "cn_android-14", "cn_android-15", "cn_android-16", "cn_android-17", "cn_android-18", "cn_android-19", "cn_android-2", "cn_android-20", "cn_android-21", "cn_android-22", "cn_android-23", "cn_android-24", "cn_android-25", "cn_android-26", "cn_android-27", "cn_android-28", "cn_android-29", "cn_android-3", "cn_android-4", "cn_android-5", "cn_android-6", "cn_android-7", "cn_android-8", "cn_android-9", "cn_channel-0", "cn_channel-1", "cn_channel-2", "cn_channel-3", "cn_channel-4", "cn_channel-5", "cn_ios-0", "cn_ios-1", "cn_ios-10", "cn_ios-2", "cn_ios-3", "cn_ios-4", "cn_ios-5", "cn_ios-6", "cn_ios-7", "cn_ios-8", "cn_ios-9", "disabled", "en-0", "en-1", "en-2", "en-3", "en-4", "en-5", "jp-0", "jp-1", "jp-10", "jp-11", "jp-12", "jp-13", "jp-14", "jp-15", "jp-16", "jp-17", "jp-2", "jp-3", "jp-4", "jp-5", "jp-6", "jp-7", "jp-8", "jp-9"; default: "disabled" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `EmulatorInfo.Emulator` | Alas | type=select; display=default | options: "auto", "BlueStacks4", "BlueStacks4HyperV", "BlueStacks5", "BlueStacks5HyperV", "LDPlayer14", "LDPlayer3", "LDPlayer4", "LDPlayer9", "MEmuPlayer", "MuMuPlayer", "MuMuPlayer12", "MuMuPlayerX", "NoxPlayer", "NoxPlayer64"; default: "auto" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EmulatorInfo.name` | Alas | type=textarea; display=default | input/default: null | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `EmulatorInfo.path` | Alas | type=textarea; display=default | input/default: null | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `EnemyPriority.EnemyScaleBalanceWeight` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "default_mode", "S1_enemy_first", "S3_enemy_first"; default: "default_mode" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
@@ -745,19 +745,19 @@ python scripts/python/verify_alas_support_matrix.py `
 | `GuildOperation.JoinThreshold` | Guild | type=input; display=default | input/default: 1 | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `GuildOperation.NewOperationMaxDate` | Guild | type=input; display=default | input/default: 15 | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `GuildOperation.SelectNewOperation` | Guild | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `GuildShop.BOOK_T2` | ShopOnce | type=select; display=default | options: "blue", "red", "yellow"; default: "red" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `GuildShop.BOOK_T3` | ShopOnce | type=select; display=default | options: "blue", "red", "yellow"; default: "red" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `GuildShop.BOX_T3` | ShopOnce | type=select; display=default | options: "eagle", "ironblood", "royal", "sakura"; default: "ironblood" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `GuildShop.BOX_T4` | ShopOnce | type=select; display=default | options: "eagle", "ironblood", "royal", "sakura"; default: "ironblood" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `GuildShop.BOOK_T2` | ShopOnce | type=select; display=default | options: "blue", "red", "yellow"; default: "red" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildShop.BOOK_T3` | ShopOnce | type=select; display=default | options: "blue", "red", "yellow"; default: "red" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildShop.BOX_T3` | ShopOnce | type=select; display=default | options: "eagle", "ironblood", "royal", "sakura"; default: "ironblood" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildShop.BOX_T4` | ShopOnce | type=select; display=default | options: "eagle", "ironblood", "royal", "sakura"; default: "ironblood" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildShop.Filter` | ShopOnce | type=textarea; display=default | input/default: <long default in args.json> | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `GuildShop.PLATE_T2` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `GuildShop.PLATE_T3` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `GuildShop.PLATE_T4` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "gun" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `GuildShop.PR1` | ShopOnce | type=select; display=default | options: "ibuki", "izumo", "monarch", "neptune", "roon", "saintlouis"; default: "neptune" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `GuildShop.PR2` | ShopOnce | type=select; display=default | options: "gascogne", "georgia", "kitakaze", "seattle"; default: "seattle" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `GuildShop.PR3` | ShopOnce | type=select; display=default | options: "champagne", "cheshire", "mainz", "odin"; default: "cheshire" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `GuildShop.RETROFIT_T2` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `GuildShop.RETROFIT_T3` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
+| `GuildShop.PLATE_T2` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildShop.PLATE_T3` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildShop.PLATE_T4` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "gun" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildShop.PR1` | ShopOnce | type=select; display=default | options: "ibuki", "izumo", "monarch", "neptune", "roon", "saintlouis"; default: "neptune" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildShop.PR2` | ShopOnce | type=select; display=default | options: "gascogne", "georgia", "kitakaze", "seattle"; default: "seattle" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildShop.PR3` | ShopOnce | type=select; display=default | options: "champagne", "cheshire", "mainz", "odin"; default: "cheshire" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildShop.RETROFIT_T2` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildShop.RETROFIT_T3` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildShop.Refresh` | ShopOnce | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Hard.HardFleet` | Hard | type=select; display=default | options: 1, 2; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Hard.HardStage` | Hard | type=input; display=default | input/default: "11-4" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |

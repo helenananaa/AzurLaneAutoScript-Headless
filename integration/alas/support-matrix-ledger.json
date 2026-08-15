@@ -1992,7 +1992,12 @@
         "observation": "partial",
         "offline": "missing"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -2047,9 +2052,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -2066,9 +2076,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3461,9 +3476,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3480,9 +3500,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3499,9 +3524,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3518,9 +3548,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3561,9 +3596,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3580,9 +3620,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3599,9 +3644,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3618,9 +3668,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3637,9 +3692,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3656,9 +3716,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3675,9 +3740,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -3694,9 +3764,14 @@
         "configuration": "complete",
         "live": "missing",
         "observation": "missing",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_guild_shop_config.py",
+        "python/alas_headless/alas_guild_shop_config_replay.py",
+        "integration/alas/series/0060-shop-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
@@ -9924,8 +9999,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "8a22d3a2bbe02b4f2d76f48f9aec9c7616e04e4849c3a3a7429b9c9e7bd922d9",
-      "manifest_sha256": "4fc75c4b62902fb30f4c399f3f1217452c4755f35c2e0b213817756eaae981d9",
+      "combined_sha256": "2c414bc0279ae2f6d20ab0bcc99e622ac1ed53b6c5895113fad543afe2cd7438",
+      "manifest_sha256": "c161652f1fbed4e49b2ba2d943fc5e865a817083eb8145e6525b91c6c8d27f7b",
       "member_count": 17
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

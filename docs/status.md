@@ -684,9 +684,14 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     grammar before trimming. The default, Unicode separator, and intentional
     blank-filter skip remain equivalent; unknown/trailing tokens and non-text
     input fail before filtering.
+  - All 12 GuildShop secondary choices are checked against the pinned
+    `argument.yaml` options and generated defaults before the loop can reach
+    `ShopClerk.shop_get_choice()`. Every allowed option is replayed; invalid
+    text and type values fail before any recorder call.
   - `shop_buy` and `shop_refresh` are recorders only. No real item choice,
     purchase, refresh, currency mutation, confirmation, receipt, or Android
-    input occurs; all GuildShop secondary choice fields remain unverified.
+    input occurs; real item-to-choice mapping and selection confirmation remain
+    unverified.
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
   those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and
