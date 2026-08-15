@@ -32,9 +32,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 13)
-        self.assertEqual(result["accepted_case_count"], 59)
-        self.assertEqual(result["invalid_case_count"], 107)
+        self.assertEqual(result["field_count"], 14)
+        self.assertEqual(result["accepted_case_count"], 66)
+        self.assertEqual(result["invalid_case_count"], 116)
         self.assertEqual(
             result["zero_runtime_consumers"],
             {
@@ -50,6 +50,10 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 "OpsiFleet.Fleet": "OSFleet.fleet_set",
                 "OpsiFleet.Submarine": "MapOrderHandler.os_order_execute",
                 "OpsiMeowfficerFarming.ActionPointPreserve": (
+                    "OpsiMeowfficerFarming.os_meowfficer_farming"
+                ),
+                "OpsiMeowfficerFarming.TargetZone": (
+                    "ZoneManager.name_to_zone -> "
                     "OpsiMeowfficerFarming.os_meowfficer_farming"
                 ),
             },
@@ -85,7 +89,8 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             self.assertEqual(
                 validate_alas_opsi_meowfficer_config(
                     action_point_preserve=1000,
-                    hazard_level=hazard_level
+                    hazard_level=hazard_level,
+                    target_zone=0,
                 ).hazard_level,
                 hazard_level,
             )
@@ -94,8 +99,26 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 validate_alas_opsi_meowfficer_config(
                     action_point_preserve=action_point_preserve,
                     hazard_level=5,
+                    target_zone=0,
                 ).action_point_preserve,
                 action_point_preserve,
+            )
+        for target_zone in (
+            0,
+            51,
+            "51",
+            "东南洋脊A",
+            "Southeast Ocean Ridge A",
+            "南東海嶺A",
+            "東南洋脊A",
+        ):
+            self.assertEqual(
+                validate_alas_opsi_meowfficer_config(
+                    action_point_preserve=1000,
+                    hazard_level=5,
+                    target_zone=target_zone,
+                ).target_zone,
+                target_zone,
             )
         fields = (
             "explore_force_run",
@@ -166,6 +189,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 validate_alas_opsi_meowfficer_config(
                     action_point_preserve=1000,
                     hazard_level=value,
+                    target_zone=0,
                 )
         for value in (-1, None, True, False, "1000", 1000.0, [], {}):
             with self.subTest(field="meow_preserve", value=value), self.assertRaises(
@@ -174,6 +198,16 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 validate_alas_opsi_meowfficer_config(
                     action_point_preserve=value,
                     hazard_level=5,
+                    target_zone=0,
+                )
+        for value in (-1, "", "   ", None, True, False, 51.0, [], {}):
+            with self.subTest(field="meow_target", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_meowfficer_config(
+                    action_point_preserve=1000,
+                    hazard_level=5,
+                    target_zone=value,
                 )
         fields = (
             "explore_force_run",

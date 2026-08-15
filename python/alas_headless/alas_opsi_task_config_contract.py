@@ -38,6 +38,7 @@ class AlasOpsiHazard1ConfigSnapshot:
 class AlasOpsiMeowfficerConfigSnapshot:
     action_point_preserve: int
     hazard_level: int
+    target_zone: int | str
 
 
 @dataclass(frozen=True)
@@ -114,7 +115,7 @@ def validate_alas_opsi_hazard1_config(
 
 
 def validate_alas_opsi_meowfficer_config(
-    *, action_point_preserve: object, hazard_level: object
+    *, action_point_preserve: object, hazard_level: object, target_zone: object
 ) -> AlasOpsiMeowfficerConfigSnapshot:
     if type(action_point_preserve) is not int or action_point_preserve < 0:
         raise SemanticGateClosed(
@@ -124,9 +125,24 @@ def validate_alas_opsi_meowfficer_config(
         raise SemanticGateClosed(
             "OpsiMeowfficerFarming.HazardLevel must be 3, 4, 5, 6, or 10"
         )
+    if type(target_zone) is int:
+        if target_zone < 0:
+            raise SemanticGateClosed(
+                "OpsiMeowfficerFarming.TargetZone must not be negative"
+            )
+    elif type(target_zone) is str:
+        if not target_zone.strip():
+            raise SemanticGateClosed(
+                "OpsiMeowfficerFarming.TargetZone must not be blank"
+            )
+    else:
+        raise SemanticGateClosed(
+            "OpsiMeowfficerFarming.TargetZone must be a zone id or name"
+        )
     return AlasOpsiMeowfficerConfigSnapshot(
         action_point_preserve=action_point_preserve,
         hazard_level=hazard_level,
+        target_zone=target_zone,
     )
 
 

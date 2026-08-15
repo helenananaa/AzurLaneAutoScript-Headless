@@ -61,6 +61,36 @@ class _Switch(RuntimeError):
     pass
 
 
+class _ScriptError(RuntimeError):
+    pass
+
+
+class _HumanTakeover(RuntimeError):
+    pass
+
+
+class _ResolverZone(SimpleNamespace):
+    pass
+
+
+class _ResolverZones:
+    def __init__(self, values):
+        self.values = list(values)
+
+    def __iter__(self):
+        return iter(self.values)
+
+    def __getitem__(self, index):
+        return self.values[index]
+
+    def select(self, **kwargs):
+        return _ResolverZones(
+            value
+            for value in self.values
+            if all(getattr(value, key) == expected for key, expected in kwargs.items())
+        )
+
+
 class _ZoneList:
     def __init__(self, zone_id: int):
         self.zone = SimpleNamespace(zone_id=zone_id)
@@ -116,6 +146,24 @@ def _method(path: Path, owner: str, name: str) -> ast.FunctionDef:
                 if isinstance(child, ast.FunctionDef) and child.name == name:
                     return child
     raise AssertionError(f"missing {owner}.{name} in {path.name}")
+
+
+def _zone_fixtures(map_data_path: Path) -> _ResolverZones:
+    for node in _tree(map_data_path).body:
+        if (
+            isinstance(node, ast.Assign)
+            and any(isinstance(target, ast.Name) and target.id == "DIC_OS_MAP" for target in node.targets)
+        ):
+            document = ast.literal_eval(node.value)
+            return _ResolverZones(
+                _ResolverZone(
+                    zone_id=zone_id,
+                    is_port=zone_id in (0, 1, 2, 3, 4, 5, 6, 7, 154),
+                    **data,
+                )
+                for zone_id, data in document.items()
+            )
+    raise AssertionError("missing DIC_OS_MAP in map_data.py")
 
 
 def _compile(node: ast.FunctionDef, globals_: dict[str, Any]):
@@ -304,6 +352,7 @@ class _Config(SimpleNamespace):
         hazard_target_zone: object = 0,
         meowfficer_action_point_preserve: object = 1000,
         meowfficer_hazard_level: object = 5,
+        meowfficer_target_zone: object = 0,
         special_radar: object = False,
     ):
         super().__init__(
@@ -318,7 +367,7 @@ class _Config(SimpleNamespace):
             OpsiExplore_LastZone=0,
             OS_EXPLORE_FILTER="22",
             OpsiMeowfficerFarming_ActionPointPreserve=meowfficer_action_point_preserve,
-            OpsiMeowfficerFarming_TargetZone=0,
+            OpsiMeowfficerFarming_TargetZone=meowfficer_target_zone,
             OpsiGeneral_UseLogger=False,
             OpsiGeneral_BuyActionPointLimit=0,
             OpsiAshBeacon_EnsureFullyCollected=False,
@@ -591,13 +640,20 @@ def _verify_hazard(method) -> dict[str, Any]:
 
 
 def _meowfficer_case(
-    method, *, hazard_level: object, action_point_preserve: object = 1000
+    method,
+    resolver_method,
+    zone_fixtures,
+    *,
+    hazard_level: object,
+    action_point_preserve: object = 1000,
+    target_zone: object = 0,
 ) -> dict[str, Any]:
     config = _Config(
         mode="normal",
         check=False,
         meowfficer_action_point_preserve=action_point_preserve,
         meowfficer_hazard_level=hazard_level,
+        meowfficer_target_zone=target_zone,
     )
     events = config.events
     host = SimpleNamespace(
@@ -606,8 +662,9 @@ def _meowfficer_case(
         is_cl1_enabled=False,
         _ash_fully_collected=True,
         zone=SimpleNamespace(zone_id=1, location=(0, 0)),
-        zones=SimpleNamespace(select=lambda **_kwargs: []),
+        zones=zone_fixtures,
     )
+    host.name_to_zone = MethodType(resolver_method, host)
     host.get_action_point_limit = lambda: events.append("ap_limit") or 2000
     host.is_in_opsi_explore = lambda: events.append("explore_probe") or False
     host.action_point_set = lambda **kwargs: events.append(["action_point_set", kwargs])
@@ -623,23 +680,32 @@ def _meowfficer_case(
     host.handle_after_auto_search = lambda: events.append("after_auto_search")
     rejected = False
     switched = False
+    takeover = False
     try:
         MethodType(method, host)()
     except SemanticGateClosed:
         rejected = True
     except _Switch:
         switched = True
+    except _HumanTakeover:
+        takeover = True
     return {
         "rejected": rejected,
         "switched": switched,
+        "takeover": takeover,
         "effective_preserve": getattr(config, "OS_ACTION_POINT_PRESERVE", None),
         "events": events,
     }
 
 
-def _verify_meowfficer(method) -> dict[str, Any]:
+def _verify_meowfficer(method, resolver_method, zone_fixtures) -> dict[str, Any]:
     cases = {
-        str(level): _meowfficer_case(method, hazard_level=level)
+        str(level): _meowfficer_case(
+            method,
+            resolver_method,
+            zone_fixtures,
+            hazard_level=level,
+        )
         for level in OPSI_MEOWFFICER_HAZARD_LEVELS
     }
     for level, case in cases.items():
@@ -651,6 +717,8 @@ def _verify_meowfficer(method) -> dict[str, Any]:
     preserve_cases = {
         str(preserve): _meowfficer_case(
             method,
+            resolver_method,
+            zone_fixtures,
             hazard_level=5,
             action_point_preserve=preserve,
         )
@@ -662,31 +730,99 @@ def _verify_meowfficer(method) -> dict[str, Any]:
             raise AssertionError("meowfficer AP-preserve task boundary drifted")
         if case["effective_preserve"] != expected:
             raise AssertionError("meowfficer AP-preserve clamping drifted")
-    invalid = _meowfficer_case(method, hazard_level=7)
+    target_inputs = (
+        ("int:51", 51),
+        ("str:51", "51"),
+        ("cn", "东南洋脊A"),
+        ("en", "Southeast Ocean Ridge A"),
+        ("jp", "南東海嶺A"),
+        ("tw", "東南洋脊A"),
+    )
+    target_cases = {
+        label: _meowfficer_case(
+            method,
+            resolver_method,
+            zone_fixtures,
+            hazard_level=5,
+            target_zone=target,
+        )
+        for label, target in target_inputs
+    }
+    for case in target_cases.values():
+        if case["rejected"] or case["takeover"] or not case["switched"]:
+            raise AssertionError("meowfficer target-zone task boundary drifted")
+        globe = [event for event in case["events"] if event[0] == "globe_goto"]
+        if globe != [["globe_goto", 51, {"refresh": True}]]:
+            raise AssertionError("meowfficer multilingual target resolution drifted")
+        if any(event[0] == "zone_select" for event in case["events"]):
+            raise AssertionError("explicit meowfficer target used hazard selection")
+    invalid = _meowfficer_case(
+        method,
+        resolver_method,
+        zone_fixtures,
+        hazard_level=7,
+    )
     if invalid != {
         "rejected": True,
         "switched": False,
+        "takeover": False,
         "effective_preserve": None,
         "events": [],
     }:
         raise AssertionError("invalid meowfficer hazard level touched task state")
     invalid_preserve = _meowfficer_case(
         method,
+        resolver_method,
+        zone_fixtures,
         hazard_level=5,
         action_point_preserve=-1,
     )
     if invalid_preserve != {
         "rejected": True,
         "switched": False,
+        "takeover": False,
         "effective_preserve": None,
         "events": [],
     }:
         raise AssertionError("invalid meowfficer AP preserve touched task state")
+    invalid_target_type = _meowfficer_case(
+        method,
+        resolver_method,
+        zone_fixtures,
+        hazard_level=5,
+        target_zone=None,
+    )
+    if invalid_target_type != {
+        "rejected": True,
+        "switched": False,
+        "takeover": False,
+        "effective_preserve": None,
+        "events": [],
+    }:
+        raise AssertionError("invalid meowfficer target type touched task state")
+    unknown_target = _meowfficer_case(
+        method,
+        resolver_method,
+        zone_fixtures,
+        hazard_level=5,
+        target_zone="missing zone",
+    )
+    if unknown_target != {
+        "rejected": False,
+        "switched": False,
+        "takeover": True,
+        "effective_preserve": None,
+        "events": [],
+    }:
+        raise AssertionError("unknown meowfficer target touched task state")
     return {
         "cases": cases,
         "preserve_cases": preserve_cases,
+        "target_cases": target_cases,
         "invalid_entry": invalid,
         "invalid_preserve_entry": invalid_preserve,
+        "invalid_target_type": invalid_target_type,
+        "unknown_target": unknown_target,
     }
 
 
@@ -989,12 +1125,29 @@ def _verify_contract() -> tuple[int, int]:
         validate_alas_opsi_meowfficer_config(
             action_point_preserve=1000,
             hazard_level=hazard_level,
+            target_zone=0,
         )
         accepted += 1
     for action_point_preserve in (0, 1000, 2500):
         validate_alas_opsi_meowfficer_config(
             action_point_preserve=action_point_preserve,
             hazard_level=5,
+            target_zone=0,
+        )
+        accepted += 1
+    for target_zone in (
+        0,
+        51,
+        "51",
+        "东南洋脊A",
+        "Southeast Ocean Ridge A",
+        "南東海嶺A",
+        "東南洋脊A",
+    ):
+        validate_alas_opsi_meowfficer_config(
+            action_point_preserve=1000,
+            hazard_level=5,
+            target_zone=target_zone,
         )
         accepted += 1
     for values in product((False, True), repeat=5):
@@ -1053,6 +1206,7 @@ def _verify_contract() -> tuple[int, int]:
             validate_alas_opsi_meowfficer_config(
                 action_point_preserve=1000,
                 hazard_level=value,
+                target_zone=0,
             )
         except SemanticGateClosed:
             invalid += 1
@@ -1063,12 +1217,26 @@ def _verify_contract() -> tuple[int, int]:
             validate_alas_opsi_meowfficer_config(
                 action_point_preserve=value,
                 hazard_level=5,
+                target_zone=0,
             )
         except SemanticGateClosed:
             invalid += 1
         else:
             raise AssertionError(
                 "invalid OpsiMeowfficerFarming.ActionPointPreserve was admitted"
+            )
+    for value in (-1, "", "   ", None, True, False, 51.0, [], {}):
+        try:
+            validate_alas_opsi_meowfficer_config(
+                action_point_preserve=1000,
+                hazard_level=5,
+                target_zone=value,
+            )
+        except SemanticGateClosed:
+            invalid += 1
+        else:
+            raise AssertionError(
+                "invalid OpsiMeowfficerFarming.TargetZone was admitted"
             )
     delay_fields = (
         "explore_force_run",
@@ -1112,6 +1280,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     args_path = alas_root / "module/config/argument/args.json"
     config_path = alas_root / "module/config/config.py"
     fleet_path = alas_root / "module/os/fleet.py"
+    globe_zone_path = alas_root / "module/os/globe_zone.py"
+    map_data_path = alas_root / "module/os/map_data.py"
     explore_path = alas_root / "module/os/tasks/explore.py"
     order_path = alas_root / "module/os_handler/map_order.py"
     month_path = alas_root / "module/os/tasks/month_boss.py"
@@ -1151,6 +1321,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         (
             "OpsiMeowfficerFarming_ActionPointPreserve",
             "OpsiMeowfficerFarming_HazardLevel",
+            "OpsiMeowfficerFarming_TargetZone",
         ),
     )
     consumers = {
@@ -1182,6 +1353,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "OpsiHazard1Leveling_TargetZone": ["os_hazard1_leveling"],
         "OpsiMeowfficerFarming_ActionPointPreserve": ["os_meowfficer_farming"],
         "OpsiMeowfficerFarming_HazardLevel": ["os_meowfficer_farming"],
+        "OpsiMeowfficerFarming_TargetZone": ["os_meowfficer_farming"],
     }
     if consumers != expected:
         raise AssertionError("selected Opsi task consumer surface drifted")
@@ -1208,8 +1380,12 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "deep_get": _deep_get,
         "ORDER_SCAN": "scan",
         "ORDER_SUBMARINE": "submarine",
+        "RequestHumanTakeover": _HumanTakeover,
+        "ScriptError": _ScriptError,
+        "Zone": _ResolverZone,
     }
     fleet_node = _method(fleet_path, "OSFleet", "fleet_set")
+    resolver_node = _method(globe_zone_path, "ZoneManager", "name_to_zone")
     explore_node = _method(explore_path, "OpsiExplore", "_os_explore")
     order_node = _method(order_path, "MapOrderHandler", "os_order_execute")
     delay_task_node = _method(config_path, "AzurLaneConfig", "opsi_task_delay")
@@ -1292,7 +1468,11 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     )
     daily = _verify_daily(_compile(daily_node, globals_))
     hazard = _verify_hazard(_compile(hazard_node, globals_))
-    meowfficer = _verify_meowfficer(_compile(meowfficer_node, globals_))
+    meowfficer = _verify_meowfficer(
+        _compile(meowfficer_node, globals_),
+        _compile(resolver_node, globals_),
+        _zone_fixtures(map_data_path),
+    )
     explore_globals = {**globals_, "ScriptError": RuntimeError}
     explore = _verify_explore(_compile(explore_node, explore_globals))
     delay = _verify_delay(_compile(delay_task_node, globals_))
@@ -1314,7 +1494,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 13,
+        "field_count": 14,
         "accepted_case_count": accepted,
         "invalid_case_count": invalid,
         "runtime_consumers": consumers,
@@ -1336,6 +1516,10 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "OpsiMeowfficerFarming.ActionPointPreserve": (
                 "OpsiMeowfficerFarming.os_meowfficer_farming"
             ),
+            "OpsiMeowfficerFarming.TargetZone": (
+                "ZoneManager.name_to_zone -> "
+                "OpsiMeowfficerFarming.os_meowfficer_farming"
+            ),
         },
         "fleet_selection": fleet_selection,
         "order": order,
@@ -1355,6 +1539,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
             "args": _sha256(args_path),
             "config": _sha256(config_path),
             "fleet": _sha256(fleet_path),
+            "globe_zone": _sha256(globe_zone_path),
+            "map_data": _sha256(map_data_path),
             "explore": _sha256(explore_path),
             "map_order": _sha256(order_path),
             "month_boss": _sha256(month_path),
