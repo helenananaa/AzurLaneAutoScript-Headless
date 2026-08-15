@@ -264,6 +264,14 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 冻结时钟回放保持原六日调度的精确边界：超过一秒与恰好六日都会运行，早一秒、未来记录会跳过；购买循环连续两次成功候选后停止，退出并把 `LastRun` 写为冻结当前时间。`set/all` 均保持原按钮映射，家具币大于价格及恰好等于价格判为可买，不足或价格为零判为失败。付款页、确认、退出、OCR 和 Dorm scope 全部由桩代替，mutation budget 为 0，没有导航、购买、家具币消耗或 Android 输入。因此三字段只提升 `offline`；真实限时家具识别、已购买状态、余额/价格 typed 观察、确认后货币与库存收据及失败恢复仍缺，Dorm 面板保持 L 而不是完整支持。
 
+### 1.33 本轮 Daemon 与 OpsiDaemon 三开关契约
+
+`Daemon.EnterMap` 与 `OpsiDaemon.RepairShip/SelectEnemy` 只接受精确布尔值。两个门禁分别位于现有 `run_once()` 的第一条可执行语句，早于截图轮询；OpsiDaemon 还早于 `OSConfig` 合并和 override。21 个整数伪装、文本、空值和容器值均在零事件处 fail-closed。
+
+单轮回放覆盖 EnterMap 的两个值和 OpsiDaemon 的四个组合。普通 Daemon 保持 MAP_PREPARATION 先于 FLEET_PREPARATION 的探测及各自早退，关闭时不触及这两个目标，但不篡改无关的伏击处理。OpsiDaemon 保持港口修复优先级、进入→修复→退出→interval reset 的顺序，以及无港口时才执行的最近目标探测。所有点击、修复和选敌都是记录桩，mutation budget 为 0，没有真实截图、导航、维修、移动、选敌或 Android 输入。
+
+三字段仅提升 `offline=complete`。真实地图进入 postcondition、港口舰队 HP/资源变化、最近目标唯一身份、长期循环、断线/弹窗恢复和停止条件仍未闭环，因此 Daemon/OpsiDaemon 均保持 P，不能称为长期值守完整支持。
+
 ## 2. 60 个面板总表
 
 “配置组”列是该面板实际暴露的组；同名配置组的详细字段在第 3 节只定义一次，所有引用它的面板必须共同满足该组的验收要求。
@@ -324,8 +332,8 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | B | 到自动寻敌锁定边界；危险等级、行动力保留、选区、舰队/潜艇和循环未闭环 |
 | 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | B | 到自动寻敌锁定边界；目标区、舰队/潜艇和循环未闭环 |
 | 54 | OpsiCrossMonth | Scheduler | B | 非月末安全跳过；月末执行、重置和跨月恢复未验证 |
-| 55 | Daemon | Daemon | P | 单轮条件路径可用；进入地图开关、长期值守和稀有恢复分支未闭环 |
-| 56 | OpsiDaemon | OpsiDaemon | P | 单轮条件路径可用；修船/选敌各开关组合及长期恢复未闭环 |
+| 55 | Daemon | Daemon | P | EnterMap 双值与单轮地图/编队分派已离线等价；真实进入 postcondition、长期值守和稀有恢复仍未闭环 |
+| 56 | OpsiDaemon | OpsiDaemon | P | 修船/选敌四组合与最终边界已离线等价；真实港口修复、最近目标 postcondition 和长期恢复仍未闭环 |
 | 57 | EventStory | EventStory | P | `SkipBattle` 在固定上游锁为 true 且无运行时消费者；false 需要新的剧情战斗状态机和多活动观察，当前仅一条入口路径，战斗转场及其他故事结构未闭环 |
 | 58 | Benchmark | Benchmark | L | 五种设备类型 x 三种测试场景的原始方法筛选与语义场景选择已离线完成；各设备真实耗时、传输不可用及截图/点击能力仍缺 live 证据 |
 | 59 | AzurLaneUncensored | AzurLaneUncensored | P | 本地 localization 路径可用；`Repository` 对应的远端同步在上游被注释，配置与能力不一致 |
@@ -440,8 +448,8 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| Daemon | `EnterMap` | P | 开关两值、主界面/地图内启动、恢复循环和未知弹窗 |
-| OpsiDaemon | `RepairShip`; `SelectEnemy` | P | 四组合、无需维修/需要维修、无敌人/有敌人、长期循环和异常恢复 |
+| Daemon | `EnterMap` | P | 两值及单轮分派已离线；主界面/地图内真实进入、恢复循环和未知弹窗仍待闭环 |
+| OpsiDaemon | `RepairShip`; `SelectEnemy` | P | 四组合及最终边界已离线；真实维修/选敌 postcondition、长期循环和异常恢复仍待闭环 |
 | EventStory | `SkipBattle`（当前只允许 true） | P | 固定上游锁 true 且无字段消费者，实际始终重启跳过战斗；false 需上游/评审后的继续战斗状态机及多活动战斗、结算夹具，当前不外推完成 |
 | Benchmark | `DeviceType`=`emulator/plone_cloud_with_adb/phone_cloud_without_adb/android_phone/android_phone_vmos`; `TestScene`=`screenshot_click/screenshot/click` | L | 5 x 3 原始方法筛选及普通/语义场景决策已离线完成；仍缺各设备真实测速、不可用传输和截图/点击能力 live 证据 |
 | AzurLaneUncensored | `Repository` | P | 先决定恢复远端同步还是删除/禁用该配置；网络失败、仓库不可达、本地文件和回滚必须有明确契约 |
@@ -588,7 +596,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `ControlExpOverflow.T3Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `ControlExpOverflow.T4Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `CoreShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Array" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `Daemon.EnterMap` | Daemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `Daemon.EnterMap` | Daemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Daily.AdvanceMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.AdvanceMissionFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.EmergencyModuleDevelopment` | Daily | type=select; display=default | options: "first", "second", "skip"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
@@ -753,8 +761,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiAshBeacon.EnsureFullyCollected` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `OpsiAshBeacon.OneHitMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
 | `OpsiAshBeacon.RequestAssist` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☐ | ☐ |
-| `OpsiDaemon.RepairShip` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
-| `OpsiDaemon.SelectEnemy` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
+| `OpsiDaemon.RepairShip` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `OpsiDaemon.SelectEnemy` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiDaily.DoMission` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☐ | ◐ |
 | `OpsiDaily.UseTuningSample` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |
 | `OpsiExplore.ForceRun` | OpsiExplore | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☐ | ◐ |

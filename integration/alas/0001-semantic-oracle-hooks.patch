@@ -5959,7 +5959,7 @@ diff --git a/module/daemon/daemon.py b/module/daemon/daemon.py
 index 7bfc8531..143cc0c2 100644
 --- a/module/daemon/daemon.py
 +++ b/module/daemon/daemon.py
-@@ -6,59 +6,74 @@ from module.map.map_operation import FLEET_PREPARATION, MAP_PREPARATION
+@@ -6,59 +6,78 @@ from module.map.map_operation import FLEET_PREPARATION, MAP_PREPARATION
  
  
  class AzurLaneDaemon(DaemonBase, CampaignBase):
@@ -5971,6 +5971,10 @@ index 7bfc8531..143cc0c2 100644
 +        battle or map takeover is active, and also makes the daemon entrypoint
 +        independently smoke-testable.
 +        """
++        from alas_headless import validate_alas_daemon_config
++        validate_alas_daemon_config(
++            enter_map=self.config.Daemon_EnterMap,
++        )
 +        self.device.screenshot()
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None and self.is_in_main():
@@ -6124,13 +6128,18 @@ index 6fdc403a..ed67e8ae 100644
  
  
  class AzurLaneDaemon(DaemonBase, OSFleet, PortHandler):
-@@ -16,51 +17,73 @@ class AzurLaneDaemon(DaemonBase, OSFleet, PortHandler):
+@@ -16,51 +17,78 @@ class AzurLaneDaemon(DaemonBase, OSFleet, PortHandler):
  
          return super()._os_combat_expected_end()
  
 -    def run(self):
 +    def run_once(self):
 +        """Handle one Operation Siren daemon polling iteration."""
++        from alas_headless import validate_alas_opsi_daemon_config
++        validate_alas_opsi_daemon_config(
++            repair_ship=self.config.OpsiDaemon_RepairShip,
++            select_enemy=self.config.OpsiDaemon_SelectEnemy,
++        )
          self.config.merge(OSConfig())
          self.config.override(HOMO_EDGE_DETECT=False)
 -        while 1:

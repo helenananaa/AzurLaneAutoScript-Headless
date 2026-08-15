@@ -76,6 +76,12 @@ from .alas_game_manager_config_contract import (
     AlasGameManagerConfigSnapshot,
     validate_alas_game_manager_config,
 )
+from .alas_daemon_config_contract import (
+    AlasDaemonConfigSnapshot,
+    AlasOpsiDaemonConfigSnapshot,
+    validate_alas_daemon_config,
+    validate_alas_opsi_daemon_config,
+)
 from .alas_benchmark_config_contract import (
     AlasBenchmarkConfigSnapshot,
     BENCHMARK_DEVICE_TYPES,

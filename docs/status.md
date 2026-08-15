@@ -324,7 +324,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   method; offline replay covers 15 configuration equivalence classes without
   running a real account task queue. Against pinned upstream `81ccf63b`, the
   patch applies as 100 changed files, all 99 patched Python files compile, and
-  the repository suite passes `938/938` tests, including BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard task configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
+  the repository suite passes `943/943` tests, including Daemon configuration, OpsiDaemon configuration, BuyFurniture configuration, Retirement mode configuration, Gacha configuration, Shipyard task configuration, Exercise configuration, Commission configuration, Dorm configuration, Benchmark configuration, Game Manager configuration, Data Key configuration, Campaign switch configuration, Reward configuration, SupplyPack configuration, Hard configuration,
   Daily configuration, EventDaily rotation, Tactical configuration, Campaign clear mode, EventGeneral, TaskBalancer, HpControl,
   task-hoarding, EnemyPriority, Emotion, and Submarine replay additions.
 
@@ -493,6 +493,28 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   consumption, or Android input occurred. Only the three fields' offline
   dimension is promoted; live countdown/ownership, balance/price, purchase
   receipt, and recovery evidence remain incomplete, so Dorm stays `L`.
+
+### Daemon and OpsiDaemon polling switches: offline branch contract passed
+
+- `Daemon.EnterMap`, `OpsiDaemon.RepairShip`, and
+  `OpsiDaemon.SelectEnemy` admit only exact booleans. The normal and Operation
+  Siren guards are the first executable statements of their existing
+  `run_once()` methods, before screenshot polling and, for OpsiDaemon, before
+  `OSConfig` merge or override.
+- Replay executes both normal `EnterMap` values and all four OpsiDaemon switch
+  combinations. Enabled normal polling preserves MAP_PREPARATION before
+  FLEET_PREPARATION, with exact early returns for each target; disabled polling
+  probes neither controlled target while retaining unrelated ambush handling.
+- OpsiDaemon preserves port-repair precedence and the exact enter, dock repair,
+  quit, interval-reset sequence. When no port is present, nearest-object probing
+  follows only if selection is enabled; both disabled switches touch neither
+  final boundary. Twenty-one non-boolean values fail before polling or merge.
+- Every map click, port action, and nearest-object selection is a recorder.
+  Mutation budget is `0`; no repair, movement, target selection, screenshot,
+  navigation, or Android input occurs. All three fields move only to
+  `offline=complete`. Real map-entry postconditions, port HP/resource deltas,
+  selected-target identity, long-running recovery, and rare popup branches
+  remain incomplete, so both daemon panels stay `P`.
 
 ### Commission preset, custom filter, and major switch: offline contract passed
 

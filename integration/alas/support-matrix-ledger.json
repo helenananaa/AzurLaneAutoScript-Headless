@@ -827,9 +827,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daemon_config.py",
+        "python/alas_headless/alas_daemon_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -4723,9 +4728,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daemon_config.py",
+        "python/alas_headless/alas_daemon_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -4742,9 +4752,14 @@
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
-        "offline": "missing"
+        "offline": "complete"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_daemon_config.py",
+        "python/alas_headless/alas_daemon_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
@@ -7015,7 +7030,7 @@
         "Daemon"
       ],
       "name": "Daemon",
-      "note": "单轮条件路径可用；进入地图开关、长期值守和稀有恢复分支未闭环",
+      "note": "EnterMap 双值与单轮地图/编队分派已离线等价；真实进入 postcondition、长期值守和稀有恢复仍未闭环",
       "status": "P"
     },
     {
@@ -7370,7 +7385,7 @@
         "OpsiDaemon"
       ],
       "name": "OpsiDaemon",
-      "note": "单轮条件路径可用；修船/选敌各开关组合及长期恢复未闭环",
+      "note": "修船/选敌四组合与最终边界已离线等价；真实港口修复、最近目标 postcondition 和长期恢复仍未闭环",
       "status": "P"
     },
     {
@@ -9234,6 +9249,45 @@
       ],
       "field": "ShipyardDr.LastRun",
       "note": "Bounded naive records preserve the exact 04:00 DR skip boundary and frozen successful-purchase write while PR continues independently, with all purchase confirmation stubbed."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daemon_config.py",
+        "python/alas_headless/alas_daemon_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "Daemon.EnterMap",
+      "note": "Both booleans preserve the original single-iteration map then fleet preparation probe order; disabled mode reaches neither controlled boundary and invalid values fail before screenshot polling."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daemon_config.py",
+        "python/alas_headless/alas_daemon_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiDaemon.RepairShip",
+      "note": "Both booleans preserve the original port probe and ordered enter, repair, quit and interval-reset boundary; all port actions are recorders and invalid values fail before OSConfig merge."
+    },
+    {
+      "dimensions": {
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_daemon_config.py",
+        "python/alas_headless/alas_daemon_config_replay.py",
+        "integration/alas/series/0100-tool-flow-ports.patch",
+        "docs/status.md"
+      ],
+      "field": "OpsiDaemon.SelectEnemy",
+      "note": "Both booleans preserve the original nearest-object probe after repair handling, including repair precedence; selection is a recorder and invalid values fail before OSConfig merge."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -9246,8 +9300,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "69ee6206a6b55ed51ce8339daddf349cdbcb3c2e8c55ac58b7c8168c3e4bbfbb",
-      "manifest_sha256": "a80a815d5ceef1c405ca0efbd572e4e6027acb11e03424bcd91af51fef097555",
+      "combined_sha256": "35aa34bd1ed61bd7c382342d2453d5de3d1f74a6e6a4e0e6f8d2a2778afc1124",
+      "manifest_sha256": "57b1aa71cd0cd6acb6dfbe0ee7d067fad204ca749eae6e6a3595c3978999c969",
       "member_count": 16
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
