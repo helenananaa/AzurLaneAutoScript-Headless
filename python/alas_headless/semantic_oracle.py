@@ -1151,6 +1151,30 @@ class DormFeedState:
 
 
 @dataclass(frozen=True)
+class DormFurniturePurchaseState:
+    """Exact purchase choice shown by the current dorm furniture dialog."""
+
+    generation: int
+    item_name: str
+    quantity: int
+    maximum_quantity: Optional[int]
+    gold_price: int
+    gem_price: int
+    gold_purchase_button: ButtonState
+    gem_purchase_button: ButtonState
+    close_button: ButtonState
+
+
+@dataclass(frozen=True)
+class DormFurnitureShopBalance:
+    """Currencies currently displayed by the current furniture-shop surface."""
+
+    generation: int
+    dorm_coins: int
+    gems: int
+
+
+@dataclass(frozen=True)
 class BuildSubmitState:
     count: int
     cubes_owned: int
@@ -1330,6 +1354,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "dorm/page/manage",
         "decorate_btn",
         "CourtYardUI(Clone)/main/bottomPanel/bottomright/decorate_btn",
+    ),
+    SemanticTarget(
+        "dorm/furniture/shop",
+        "shop_btn",
+        "CourtYardUI(Clone)/main/bottomPanel/bottomright/shop_btn",
     ),
     SemanticTarget(
         "dorm/train",
@@ -14226,6 +14255,502 @@ class SemanticOracle:
             comfort=int(values["comfort"]),
             floor=int(floor.group(1)),
             food_countdown_seconds=countdown,
+        )
+
+    def click_dorm_furniture_shop(self) -> ActionReceipt:
+        """Open the furniture shop from one proven normal dorm page."""
+
+        self.dorm_state()
+        state = self.read_state()
+        target = self._unique(state, "dorm/furniture/shop")
+        if (
+            not target.active_in_hierarchy
+            or not target.active_and_enabled
+            or not target.interactable
+            or target.point is None
+            or target.bounds is None
+            or not target.bounds.contains(target.point)
+        ):
+            raise SemanticGateClosed("dorm furniture shop control is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture shop")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/shop",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_dorm_furniture_theme(self, index: int) -> ActionReceipt:
+        """Open one exact visible theme in the current furniture shop."""
+
+        if index not in range(7):
+            raise ValueError("dorm furniture theme index must be 0 through 6")
+        state = self.read_state()
+        back = tuple(
+            button
+            for button in state.buttons
+            if button.name == "fanhui"
+            and button.path.endswith("NewBackYardShopUI(Clone)/adpter/top/fanhui")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds is not None
+        )
+        root = (
+            "NewBackYardShopUI(Clone)/pages/BackYardThemePage(Clone)/list/"
+            "frame/mask/content/{0}"
+        ).format(index)
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == str(index)
+            and button.path.endswith(root)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        theme_roots = tuple(
+            button
+            for button in state.buttons
+            if button.path.startswith(
+                "UICamera/Canvas/UIMain/NewBackYardShopUI(Clone)/pages/"
+                "BackYardThemePage(Clone)/list/frame/mask/content/"
+            )
+            and button.name in {str(candidate) for candidate in range(7)}
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds is not None
+        )
+        if len(back) != 1 or len(matches) != 1 or len(theme_roots) != 7:
+            raise SemanticGateClosed("dorm furniture theme list is not proven")
+        target = matches[0]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture theme")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/theme/{0}".format(index),
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_dorm_furniture_tag(self, index: int) -> ActionReceipt:
+        """Choose a current furniture-shop category by its typed tag sprite."""
+
+        if index not in range(7):
+            raise ValueError("dorm furniture tag index must be 0 through 6")
+        state = self.read_state()
+        ui = self.read_ui_state()
+        prefix = "UICamera/Canvas/UIMain/NewBackYardShopUI(Clone)/adpter/tag/list/"
+        tag_images = tuple(
+            image
+            for image in ui.images
+            if image.path.startswith(prefix)
+            and image.sprite == "text_tag{0}".format(index)
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and image.bounds is not None
+        )
+        all_tag_images = tuple(
+            image
+            for image in ui.images
+            if image.path.startswith(prefix)
+            and re.fullmatch(r"text_tag[0-6]", image.sprite) is not None
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and image.bounds is not None
+        )
+        candidates = tuple(
+            button
+            for button in state.buttons
+            if button.path.endswith("NewBackYardShopUI(Clone)/adpter/tag/list/tpl(Clone)")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and any(
+                button.bounds.contains(
+                    Point(
+                        (image.bounds.left + image.bounds.right) / 2.0,
+                        (image.bounds.top + image.bounds.bottom) / 2.0,
+                    )
+                )
+                for image in tag_images
+            )
+        )
+        all_tags = tuple(
+            button
+            for button in state.buttons
+            if button.path.endswith("NewBackYardShopUI(Clone)/adpter/tag/list/tpl(Clone)")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds is not None
+        )
+        if (
+            len(tag_images) != 1
+            or len(all_tag_images) != 7
+            or len(candidates) != 1
+            or len(all_tags) != 7
+        ):
+            raise SemanticGateClosed("dorm furniture category tags are not proven")
+        target = candidates[0]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture tag")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/tag/{0}".format(index),
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def close_dorm_furniture_shop(self) -> ActionReceipt:
+        """Return from the current furniture shop to the proven dorm page."""
+
+        state = self.read_state()
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == "fanhui"
+            and button.path.endswith("NewBackYardShopUI(Clone)/adpter/top/fanhui")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("dorm furniture shop back control is not proven")
+        target = matches[0]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture shop back")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/back",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_dorm_furniture_item(self, index: int) -> ActionReceipt:
+        """Open one exact visible item in the current furniture list."""
+
+        if index not in range(8):
+            raise ValueError("dorm furniture item index must be 0 through 7")
+        state = self.read_state()
+        ui = self.read_text_state()
+        root = (
+            "UICamera/Canvas/UIMain/NewBackYardShopUI(Clone)/pages/"
+            "BackYardFurniturePage(Clone)/adpter/frame/bg/content/{0}"
+        ).format(index)
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == str(index)
+            and button.path.endswith(root)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        all_items = tuple(
+            button
+            for button in state.buttons
+            if re.fullmatch(r"[0-7]", button.name) is not None
+            and button.path.startswith(
+                "UICamera/Canvas/UIMain/NewBackYardShopUI(Clone)/pages/"
+                "BackYardFurniturePage(Clone)/adpter/frame/bg/content/"
+            )
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds is not None
+        )
+        names = tuple(
+            text
+            for text in ui.texts
+            if text.path.endswith(root + "/name")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and text.text.strip()
+        )
+        if len(matches) != 1 or len(all_items) != 8 or len(names) != 1:
+            raise SemanticGateClosed("dorm furniture item list is not proven")
+        target = matches[0]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture item")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/item/{0}".format(index),
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def dorm_furniture_time_limited_item_indices(self) -> Tuple[int, ...]:
+        """Return the visible current furniture cards carrying an exact time marker."""
+
+        button_state = self.read_state()
+        ui_state = self.read_text_state()
+        if (
+            ui_state.generation < button_state.generation
+            or ui_state.generation > button_state.generation + 2
+        ):
+            raise SemanticGateClosed("dorm furniture list snapshots are not coherent")
+        prefix = (
+            "UICamera/Canvas/UIMain/NewBackYardShopUI(Clone)/pages/"
+            "BackYardFurniturePage(Clone)/adpter/frame/bg/content/"
+        )
+        cards = tuple(
+            button
+            for button in button_state.buttons
+            if re.fullmatch(r"[0-7]", button.name) is not None
+            and button.path == prefix + button.name
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(cards) != 8 or {int(card.name) for card in cards} != set(range(8)):
+            raise SemanticGateClosed("dorm furniture list is incomplete")
+        limited: list[int] = []
+        for card in cards:
+            index = int(card.name)
+            root = prefix + str(index)
+            names = tuple(
+                text
+                for text in ui_state.texts
+                if text.path == root + "/name"
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.bounds is not None
+                and text.text.strip()
+            )
+            markers = tuple(
+                text
+                for text in ui_state.texts
+                if text.path == root + "/time/Text"
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.bounds is not None
+                and text.text.strip()
+            )
+            if len(names) != 1 or len(markers) > 1:
+                raise SemanticGateClosed("dorm furniture card text is ambiguous")
+            if (
+                markers
+                and card.bounds.top >= 0
+                and card.bounds.bottom <= self.fingerprint.height
+            ):
+                limited.append(index)
+        return tuple(sorted(limited))
+
+    def dorm_furniture_purchase_state(self) -> DormFurniturePurchaseState:
+        """Read one current furniture-purchase dialog without spending currency."""
+
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < button_state.generation
+            or ui_state.generation > button_state.generation + 2
+        ):
+            raise SemanticGateClosed("dorm furniture dialog snapshots are not coherent")
+        prefix = "OverlayCamera/Overlay/UIMain/FurnitureMsgboxPage(Clone)/frame/"
+
+        def exact_button(suffix: str) -> ButtonState:
+            matches = tuple(
+                button
+                for button in button_state.buttons
+                if button.path == prefix + suffix
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "dorm furniture dialog button is absent or ambiguous: " + suffix
+                )
+            return matches[0]
+
+        def exact_text(suffix: str) -> str:
+            matches = tuple(
+                text
+                for text in ui_state.texts
+                if text.path == prefix + suffix
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.bounds is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "dorm furniture dialog text is absent or ambiguous: " + suffix
+                )
+            return re.sub(r"<[^>]*>", "", matches[0].text).strip()
+
+        gold_button = exact_button("btns/gold_purchase_btn")
+        gem_button = exact_button("btns/gem_purchase_btn")
+        close_button = exact_button("close_btn")
+        item_name = exact_text("name")
+        quantity_text = exact_text("count/Text")
+        maximum_text = exact_text("max_cnt")
+        gold_text = exact_text("price/gold_text")
+        gem_text = exact_text("price/gem_text")
+        if not item_name or re.fullmatch(r"[1-9][0-9]*", quantity_text) is None:
+            raise SemanticGateClosed("dorm furniture dialog quantity is malformed")
+        if maximum_text and re.fullmatch(r"[1-9][0-9]*", maximum_text) is None:
+            raise SemanticGateClosed("dorm furniture dialog maximum is malformed")
+        if (
+            re.fullmatch(r"[1-9][0-9]*", gold_text) is None
+            or re.fullmatch(r"[1-9][0-9]*", gem_text) is None
+        ):
+            raise SemanticGateClosed("dorm furniture dialog price is malformed")
+        quantity = int(quantity_text)
+        maximum_quantity = int(maximum_text) if maximum_text else None
+        if maximum_quantity is not None and quantity > maximum_quantity:
+            raise SemanticGateClosed("dorm furniture quantity exceeds the maximum")
+        return DormFurniturePurchaseState(
+            generation=button_state.generation,
+            item_name=item_name,
+            quantity=quantity,
+            maximum_quantity=maximum_quantity,
+            gold_price=int(gold_text),
+            gem_price=int(gem_text),
+            gold_purchase_button=gold_button,
+            gem_purchase_button=gem_button,
+            close_button=close_button,
+        )
+
+    def dorm_furniture_shop_balance(self) -> DormFurnitureShopBalance:
+        """Read the two exact current furniture-shop currency counters."""
+
+        ui_state = self.read_text_state()
+        prefix = "UICamera/Canvas/UIMain/NewBackYardShopUI(Clone)/adpter/top/"
+
+        def exact_counter(suffix: str) -> int:
+            matches = tuple(
+                text
+                for text in ui_state.texts
+                if text.path == prefix + suffix
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.bounds is not None
+            )
+            if len(matches) != 1 or re.fullmatch(r"[0-9]+", matches[0].text) is None:
+                raise SemanticGateClosed(
+                    "dorm furniture currency is absent or malformed: " + suffix
+                )
+            return int(matches[0].text)
+
+        dorm_coins = exact_counter("res_gold/Text")
+        gems = exact_counter("res_gem/Text")
+        return DormFurnitureShopBalance(
+            generation=ui_state.generation,
+            dorm_coins=dorm_coins,
+            gems=gems,
+        )
+
+    def click_dorm_furniture_purchase(self, currency: str) -> ActionReceipt:
+        """Submit one dialog purchase through an exact declared currency button."""
+
+        if currency not in ("gold", "gem"):
+            raise ValueError("dorm furniture currency must be gold or gem")
+        purchase = self.dorm_furniture_purchase_state()
+        target = (
+            purchase.gold_purchase_button
+            if currency == "gold"
+            else purchase.gem_purchase_button
+        )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture purchase")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/purchase/" + currency,
+            generation=purchase.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_dorm_furniture_quantity(self, direction: str) -> ActionReceipt:
+        """Change the current furniture quantity without submitting a purchase."""
+
+        if direction not in ("increase", "decrease"):
+            raise ValueError("dorm furniture quantity direction must increase or decrease")
+        purchase = self.dorm_furniture_purchase_state()
+        suffix = "count/right_arr" if direction == "increase" else "count/left_arr"
+        state = self.read_state()
+        prefix = "OverlayCamera/Overlay/UIMain/FurnitureMsgboxPage(Clone)/frame/"
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.path == prefix + suffix
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("dorm furniture quantity control is not proven")
+        target = matches[0]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture quantity")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/quantity/" + direction,
+            generation=purchase.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def close_dorm_furniture_purchase(self) -> ActionReceipt:
+        """Close an open furniture-purchase dialog without committing a purchase."""
+
+        purchase = self.dorm_furniture_purchase_state()
+        target = purchase.close_button
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture close")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/purchase/close",
+            generation=purchase.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
         )
 
     def dorm_feed_state(self) -> DormFeedState:

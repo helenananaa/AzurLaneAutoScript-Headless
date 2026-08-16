@@ -1,0 +1,19 @@
+diff --git a/module/dorm/buy_furniture.py b/module/dorm/buy_furniture.py
+index fa1b652d..4ed7e963 100644
+--- a/module/dorm/buy_furniture.py
++++ b/module/dorm/buy_furniture.py
+@@ -202,6 +202,14 @@ class BuyFurniture(UI):
+             in: DORM_FURNITURE_DETAILS_ENTER (furniture shop page)
+             out: page_dorm
+         """
++        semantic_adapter = getattr(getattr(self, 'device', None), 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            logger.info('Buy furniture run through current semantic shop flow')
++            semantic_adapter.run_current_dorm_furniture_purchase(
++                self.config.BuyFurniture_BuyOption
++            )
++            self.config.BuyFurniture_LastRun = datetime.now().replace(microsecond=0)
++            return
+         logger.info("Buy furniture run")
+         while 1:
+             if self._buy_furniture_run():

@@ -116,6 +116,8 @@ from .semantic_oracle import (
     CommissionScrollProof,
     CommissionScrollState,
     CommissionStartProof,
+    DormFurniturePurchaseState,
+    DormFurnitureShopBalance,
     DormState,
     DormFeedState,
     EnhancementExecutionReceipt,
@@ -4512,6 +4514,78 @@ class AlasSemanticAdapter:
     def dorm_state(self) -> DormState:
         self._package_gate()
         return self.oracle.dorm_state()
+
+    def dorm_furniture_purchase_state(self) -> DormFurniturePurchaseState:
+        self._package_gate()
+        return self.oracle.dorm_furniture_purchase_state()
+
+    def dorm_furniture_shop_balance(self) -> DormFurnitureShopBalance:
+        self._package_gate()
+        return self.oracle.dorm_furniture_shop_balance()
+
+    def buy_dorm_furniture_with_gold(self) -> ActionReceipt:
+        """Commit one current furniture purchase with dorm coins only."""
+
+        self._package_gate()
+        purchase = self.oracle.dorm_furniture_purchase_state()
+        balance = self.oracle.dorm_furniture_shop_balance()
+        total_price = purchase.gold_price * purchase.quantity
+        if balance.dorm_coins < total_price:
+            raise SemanticGateClosed("dorm furniture coins are insufficient")
+        if not self._action_ledger.allowed("shop.purchase"):
+            raise SemanticGateClosed(
+                "dorm furniture purchase requires a positive transaction budget"
+            )
+        return self._dispatch_mutation(
+            "shop.purchase",
+            lambda: self.oracle.click_dorm_furniture_purchase("gold"),
+        )
+
+    def run_current_dorm_furniture_purchase(
+        self, buy_option: str
+    ) -> Tuple[ActionReceipt, ...]:
+        """Run the current typed furniture flow for one visible limited card."""
+
+        if buy_option not in ("set", "all"):
+            raise ValueError("dorm furniture buy option must be set or all")
+        self._package_gate()
+        self.oracle.click_dorm_furniture_shop()
+        time.sleep(0.75)
+        self.oracle.click_dorm_furniture_tag(1)
+        time.sleep(0.75)
+        limited = self.oracle.dorm_furniture_time_limited_item_indices()
+        if not limited:
+            self.oracle.close_dorm_furniture_shop()
+            return ()
+        self.oracle.click_dorm_furniture_item(limited[0])
+        purchase = self.oracle._retry_transition_read(
+            self.oracle.dorm_furniture_purchase_state,
+            attempts=20,
+            interval_seconds=0.25,
+        )
+        if buy_option == "all" and purchase.maximum_quantity is not None:
+            while purchase.quantity < purchase.maximum_quantity:
+                self.oracle.click_dorm_furniture_quantity("increase")
+                purchase = self.oracle._retry_transition_read(
+                    self.oracle.dorm_furniture_purchase_state,
+                    attempts=12,
+                    interval_seconds=0.2,
+                )
+        before = self.oracle.dorm_furniture_shop_balance()
+        expected_cost = purchase.gold_price * purchase.quantity
+        receipt = self.buy_dorm_furniture_with_gold()
+        deadline = time.monotonic() + 8.0
+        while True:
+            after = self.oracle.dorm_furniture_shop_balance()
+            if after.dorm_coins == before.dorm_coins - expected_cost:
+                break
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed(
+                    "dorm furniture purchase did not debit the declared coin cost"
+                )
+            time.sleep(0.25)
+        self.oracle.close_dorm_furniture_shop()
+        return (receipt,)
 
     def operation_siren_state(self) -> OperationSirenState:
         self._package_gate()
@@ -9204,6 +9278,20 @@ class AlasSemanticSession:
 
     def dorm_state(self) -> DormState:
         return self.open().dorm_state()
+
+    def dorm_furniture_purchase_state(self) -> DormFurniturePurchaseState:
+        return self.open().dorm_furniture_purchase_state()
+
+    def dorm_furniture_shop_balance(self) -> DormFurnitureShopBalance:
+        return self.open().dorm_furniture_shop_balance()
+
+    def buy_dorm_furniture_with_gold(self) -> ActionReceipt:
+        return self.open().buy_dorm_furniture_with_gold()
+
+    def run_current_dorm_furniture_purchase(
+        self, buy_option: str
+    ) -> Tuple[ActionReceipt, ...]:
+        return self.open().run_current_dorm_furniture_purchase(buy_option)
 
     def operation_siren_state(self) -> OperationSirenState:
         return self.open().operation_siren_state()

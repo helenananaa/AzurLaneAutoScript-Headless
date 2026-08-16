@@ -667,7 +667,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   partial food inventory, post-feed food/capacity proof, and recovery failures
   remain open.
 
-### Dorm furniture configuration: interval and option decisions passed offline
+### Dorm furniture configuration: offline interval/option decisions plus actual all/no-candidate scheduler branch
 
 - `BuyFurniture.Enable` admits exact booleans, `BuyOption` admits only the
   pinned `set/all` values, and `LastRun` is a bounded timezone-naive datetime.
@@ -681,11 +681,15 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   equal to a positive price remains affordable; insufficient coin and zero
   price remain failures. Nineteen malformed, wrong-type, timezone, and range
   cases fail before Dorm scope or furniture handling.
-- Payment entry, OCR, confirmation, page recovery, and Dorm scope are all
-  recorders. Mutation budget is `0`: no navigation, furniture purchase, coin
-  consumption, or Android input occurred. Only the three fields' offline
-  dimension is promoted; live countdown/ownership, balance/price, purchase
-  receipt, and recovery evidence remain incomplete, so Dorm stays `L`.
+- The actual current-client run used `Enable=true`, `BuyOption=all`, and an
+  overdue record. It observed the typed furniture list, found no limited
+  candidate, consumed no purchase authority, persisted a new `LastRun`, and
+  returned to the main page; the temporary config was removed. The receipt is
+  `integration/alas/dorm-furniture-live-validation-receipt.json`.
+- This is only the all/no-candidate scheduler branch and LastRun write. `set`,
+  a live limited candidate, quantity semantics, coin/inventory receipt, and
+  recovery remain incomplete, so Dorm stays `L` and the BuyFurniture fields
+  stay `P`.
 
 ### Daemon and OpsiDaemon polling switches: offline branch contract passed
 

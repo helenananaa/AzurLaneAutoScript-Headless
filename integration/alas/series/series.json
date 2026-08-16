@@ -159,6 +159,11 @@
       "order": 32,
       "path": "integration/alas/series/0260-minigame-budget-exhaustion-flow-port.patch",
       "sha256": "50279457231ca66b443f4b4f2eed813dbeb23e7fa6c0f64429a665d9d578dc05"
+    },
+    {
+      "order": 33,
+      "path": "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
+      "sha256": "37eaa7e2aa1b5beefa1f7052e22f4b7113e1fc3c30bf1ed7834af5ff48a7e847"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

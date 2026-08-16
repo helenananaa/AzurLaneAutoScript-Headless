@@ -1554,6 +1554,33 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(state.food, 0)
         self.assertEqual(attempts, 3)
 
+    def test_dorm_furniture_gold_purchase_uses_shop_authority(self):
+        oracle = FakeOracle()
+        oracle.dorm_furniture_purchase_state = lambda: SimpleNamespace(
+            gold_price=150,
+            quantity=1,
+        )
+        oracle.dorm_furniture_shop_balance = lambda: SimpleNamespace(
+            dorm_coins=4512,
+            gems=5422,
+        )
+        oracle.click_dorm_furniture_purchase = lambda currency: oracle.click_receipt(
+            "dorm/furniture/purchase/" + currency
+        )
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            shop_purchase_budget=1,
+        )
+
+        receipt = adapter.buy_dorm_furniture_with_gold()
+
+        self.assertEqual(receipt.semantic_id, "dorm/furniture/purchase/gold")
+        self.assertEqual(receipt.capability_id, "shop.purchase")
+        self.assertEqual(adapter._action_ledger.remaining("shop.purchase"), 0)
+        with self.assertRaises(SemanticGateClosed):
+            adapter.buy_dorm_furniture_with_gold()
+
     def test_dorm_feed_proof_allows_only_bounded_ship_consumption(self):
         oracle = FakeOracle()
         original_click = oracle.click_dorm_food

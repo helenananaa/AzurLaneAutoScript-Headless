@@ -181,6 +181,9 @@ OVERRIDE_PATHS = {
     "0260-minigame-budget-exhaustion-flow-port.patch": {
         "module/minigame/minigame.py",
     },
+    "0270-dorm-current-furniture-flow-port.patch": {
+        "module/dorm/buy_furniture.py",
+    },
 }
 
 

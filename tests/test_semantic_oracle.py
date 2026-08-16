@@ -3584,6 +3584,58 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertTrue(receipt.path.endswith("food_50001/icon_bg"))
         self.assertEqual(backend.taps, [(447, 428)])
 
+    def test_current_dorm_furniture_purchase_uses_typed_gold_controls(self):
+        shop = "UICamera/Canvas/UIMain/NewBackYardShopUI(Clone)/"
+        cards = shop + "pages/BackYardFurniturePage(Clone)/adpter/frame/bg/content/"
+        dialog = "OverlayCamera/Overlay/UIMain/FurnitureMsgboxPage(Clone)/frame/"
+        buttons = [
+            make_button(str(index), cards + str(index), 320 + index * 90, 260)
+            for index in range(8)
+        ]
+        buttons.extend(
+            [
+                make_button("gold_purchase_btn", dialog + "btns/gold_purchase_btn", 904, 508),
+                make_button("gem_purchase_btn", dialog + "btns/gem_purchase_btn", 725, 508),
+                make_button("close_btn", dialog + "close_btn", 968, 194),
+                make_button("right_arr", dialog + "count/right_arr", 929, 334),
+                make_button("left_arr", dialog + "count/left_arr", 694, 334),
+            ]
+        )
+        backend = FakeBackend(buttons)
+        texts = [
+            make_text("item-{0}".format(index), cards + str(index) + "/name")
+            for index in range(8)
+        ]
+        texts.extend(
+            [
+                make_text("10 days", cards + "0/time/Text"),
+                make_text("limited wall", dialog + "name"),
+                make_text("1", dialog + "count/Text"),
+                make_text("", dialog + "max_cnt"),
+                make_text("150", dialog + "price/gold_text"),
+                make_text("450", dialog + "price/gem_text"),
+                make_text("4512", shop + "adpter/top/res_gold/Text"),
+                make_text("5422", shop + "adpter/top/res_gem/Text"),
+            ]
+        )
+        backend.ui = make_ui(texts)
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.dorm_furniture_time_limited_item_indices(), (0,))
+        purchase = oracle.dorm_furniture_purchase_state()
+        balance = oracle.dorm_furniture_shop_balance()
+        receipt = oracle.click_dorm_furniture_purchase("gold")
+        close = oracle.close_dorm_furniture_purchase()
+
+        self.assertEqual(purchase.item_name, "limited wall")
+        self.assertEqual(purchase.quantity, 1)
+        self.assertIsNone(purchase.maximum_quantity)
+        self.assertEqual((purchase.gold_price, purchase.gem_price), (150, 450))
+        self.assertEqual((balance.dorm_coins, balance.gems), (4512, 5422))
+        self.assertTrue(receipt.path.endswith("gold_purchase_btn"))
+        self.assertTrue(close.path.endswith("close_btn"))
+        self.assertEqual(backend.taps, [(904, 508), (968, 194)])
+
     def test_build_submit_dialog_cross_checks_count_and_typed_costs(self):
         base = (
             "root/UICamera/Canvas/UIMain/BuildShipUI(Clone)/"

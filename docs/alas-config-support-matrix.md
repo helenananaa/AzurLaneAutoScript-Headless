@@ -309,7 +309,9 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `BuyFurniture.Enable` 只接受精确布尔值，`BuyOption` 只接受固定上游 `set/all`，`LastRun` 只接受 2000-01-01 至 2100-01-01 的 naive datetime。三字段在原 Dorm 入口、语义 scope 和页面导航前统一校验；`BuyFurniture.run()` 也有独立的第一业务语句门禁，避免直接调用时先做日期运算。布尔伪装整数、未知枚举、字符串日期、带时区、越界和畸形值均 fail-closed。
 
-冻结时钟回放保持原六日调度的精确边界：超过一秒与恰好六日都会运行，早一秒、未来记录会跳过；购买循环连续两次成功候选后停止，退出并把 `LastRun` 写为冻结当前时间。`set/all` 均保持原按钮映射，家具币大于价格及恰好等于价格判为可买，不足或价格为零判为失败。付款页、确认、退出、OCR 和 Dorm scope 全部由桩代替，mutation budget 为 0，没有导航、购买、家具币消耗或 Android 输入。因此三字段只提升 `offline`；真实限时家具识别、已购买状态、余额/价格 typed 观察、确认后货币与库存收据及失败恢复仍缺，Dorm 面板保持 L 而不是完整支持。
+冻结时钟回放保持原六日调度的精确边界：超过一秒与恰好六日都会运行，早一秒、未来记录会跳过；购买循环连续两次成功候选后停止，退出并把 `LastRun` 写为冻结当前时间。`set/all` 均保持原按钮映射，家具币大于价格及恰好等于价格判为可买，不足或价格为零判为失败。付款页、确认、退出、OCR 和 Dorm scope 的离线回放仍是零 mutation。
+
+当前客户端额外实机执行了 `Enable=true`、`BuyOption=all`、过期 `LastRun`：原 Dorm 调度进入 typed 家具页，确认当前没有限时候选后不消耗购买授权，写入新的 `LastRun`，从宿舍返回主页，并删除临时配置。收据是 `integration/alas/dorm-furniture-live-validation-receipt.json`。这只把 `all` 的无候选分支及记录写入提升为实机部分证据；`set`、有候选时的数量语义、金币扣款/库存变化、失败恢复和收取喂食后置条件仍缺，Dorm 面板保持 L、BuyFurniture 三字段保持 P。
 
 ### 1.33 本轮 Daemon 与 OpsiDaemon 三开关契约
 
@@ -649,8 +651,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
 | ✅ 五维完整支持 | **6 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **144 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **106 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ◐ 有实机当前值/分支证据 | **146 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **104 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
@@ -665,9 +667,9 @@ python scripts/python/verify_alas_support_matrix.py `
 | `BattlePass.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Benchmark.DeviceType` | Benchmark | type=select; display=default | options: "android_phone_vmos", "android_phone", "emulator", "phone_cloud_without_adb", "plone_cloud_with_adb"; default: "emulator" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Benchmark.TestScene` | Benchmark | type=select; display=default | options: "click", "screenshot_click", "screenshot"; default: "screenshot_click" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
-| `BuyFurniture.BuyOption` | Dorm | type=select; display=default | options: "all", "set"; default: "all" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `BuyFurniture.Enable` | Dorm | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `BuyFurniture.LastRun` | Dorm | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `BuyFurniture.BuyOption` | Dorm | type=select; display=default | options: "all", "set"; default: "all" | `P`/◐ all 无候选 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `BuyFurniture.Enable` | Dorm | type=checkbox; display=default | input/default: false | `P`/◐ 启用无候选 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `BuyFurniture.LastRun` | Dorm | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/◐ 实机已写入 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Campaign.AmbushEvade` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Campaign.Event` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "campaign_main", "coalition_20260723", "event_20260625_cn", "event_20260813_cn", "raid_20260212", "war_archives_20180607_cn", "war_archives_20180726_cn", "war_archives_20181020_en", "war_archives_20181026_en", "war_archives_20181227_cn", "war_archives_20190221_en", "war_archives_20190314_en", "war_archives_20190321_en", "war_archives_20190620_en", "war_archives_20190911_cn", "war_archives_20191010_en", "war_archives_20191031_en", "war_archives_20200312_cn", "war_archives_20200507_cn", "war_archives_20200603_cn", "war_archives_20200806_cn", "war_archives_20200820_cn", "war_archives_20200903_cn", "war_archives_20200917_cn", "war_archives_20201012_cn", "war_archives_20201029_cn", "war_archives_20201229_cn", "war_archives_20210225_cn", "war_archives_20210325_cn", "war_archives_20210422_cn", "war_archives_20210527_cn", "war_archives_20210624_cn", "war_archives_20210819_cn", "war_archives_20210916_cn", "war_archives_20211014_cn", "war_archives_20211028_cn", "war_archives_20211111_cn", "war_archives_20211229_cn", "war_archives_20220210_cn", "war_archives_20220224_cn", "war_archives_20220324_cn", "war_archives_20220414_cn", "war_archives_20220428_cn", "war_archives_20220526_cn", "war_archives_20220728_cn", "war_archives_20220818_cn", "war_archives_20220915_cn", "war_archives_20221222_cn", "war_archives_20230223_cn", "war_archives_20230525_cn", "war_archives_20230803_cn", "war_archives_20231026_cn", "war_archives_20240725_cn"; default: "campaign_main" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Mode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "hard", "normal"; default: "normal" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |

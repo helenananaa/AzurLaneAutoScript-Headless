@@ -226,14 +226,19 @@
       "dimensions": {
         "action": "missing",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_buy_furniture_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_buy_furniture_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
+        "scripts/python/run_alas_dorm_furniture_live_validation.py",
+        "integration/alas/dorm-furniture-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -242,7 +247,7 @@
         "Dorm"
       ],
       "path": "BuyFurniture.BuyOption",
-      "status_label": "☐ 未逐值",
+      "status_label": "◐ all 无候选",
       "support": "supported",
       "values": "options: \"all\", \"set\"; default: \"all\""
     },
@@ -256,8 +261,13 @@
       },
       "evidence": [
         "tests/test_alas_buy_furniture_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_buy_furniture_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
+        "scripts/python/run_alas_dorm_furniture_live_validation.py",
+        "integration/alas/dorm-furniture-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -266,22 +276,27 @@
         "Dorm"
       ],
       "path": "BuyFurniture.Enable",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 启用无候选",
       "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_buy_furniture_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_buy_furniture_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
+        "scripts/python/run_alas_dorm_furniture_live_validation.py",
+        "integration/alas/dorm-furniture-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -290,7 +305,7 @@
         "Dorm"
       ],
       "path": "BuyFurniture.LastRun",
-      "status_label": "☐ 未逐值",
+      "status_label": "◐ 实机已写入",
       "support": "supported",
       "values": "input/default: \"2020-01-01 00:00:00\""
     },
@@ -7670,7 +7685,7 @@
         "BuyFurniture"
       ],
       "name": "Dorm",
-      "note": "收取/喂食/食物过滤与买家具三字段已离线分类；实际家具页观察、货币、确认和购买结果仍未闭环",
+      "note": "收取/喂食/食物过滤已离线分类；BuyFurniture 的 all/无候选实机调度、LastRun 写入与主页恢复已验证，但 set/all 差异、限时候选购买和收取喂食后置条件仍未闭环",
       "status": "L"
     },
     {
@@ -10007,16 +10022,23 @@
     },
     {
       "dimensions": {
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_buy_furniture_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_buy_furniture_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
+        "scripts/python/run_alas_dorm_furniture_live_validation.py",
+        "integration/alas/dorm-furniture-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "BuyFurniture.BuyOption",
-      "note": "Both declared options preserve the original exact set/all button mapping and affordability decisions offline; invalid choices fail before Dorm scope or furniture date handling."
+      "note": "Both values preserve the original set/all mapping and affordability decisions offline. The actual all run reached the current typed furniture list, found no time-limited candidate, returned to the main page, and made no purchase; set and any candidate purchase remain unqualified."
     },
     {
       "dimensions": {
@@ -10024,25 +10046,38 @@
       },
       "evidence": [
         "tests/test_alas_buy_furniture_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_buy_furniture_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
+        "scripts/python/run_alas_dorm_furniture_live_validation.py",
+        "integration/alas/dorm-furniture-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "BuyFurniture.Enable",
-      "note": "Both booleans preserve original Dorm dispatch while the full furniture surface is validated before Dorm scope entry; no disabled configuration can be mistaken for purchase authority."
+      "note": "Both booleans preserve original Dorm dispatch. With Enable=true, the actual current typed all/no-candidate branch ran without consuming purchase authority, restored the main page, and left the full candidate purchase surface unqualified."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_buy_furniture_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_buy_furniture_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
+        "scripts/python/run_alas_dorm_furniture_live_validation.py",
+        "integration/alas/dorm-furniture-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "BuyFurniture.LastRun",
-      "note": "Bounded naive records preserve the original exact six-day run boundary, early/future skip, loop completion write, and invalid-value refusal before datetime arithmetic."
+      "note": "Bounded naive records preserve the six-day boundary offline. An actual overdue all/no-candidate run wrote LastRun after typed shop observation, restored the main page, and consumed no purchase authority; date skip and candidate purchase branches still need live evidence."
     },
     {
       "dimensions": {
@@ -10608,9 +10643,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "9c9ea92410f2eafbe334f2fe27b9d1b99a5dfbc5f54558268aeb52ad19717164",
-      "manifest_sha256": "10957f6f69a6785eef11691a866990f7b919fca782621c283adf6d59450a0c6d",
-      "member_count": 32
+      "combined_sha256": "0c401bb04a518a7a974fdb100689b4565e1d130141e8a2b22ded00bfba37b7ef",
+      "manifest_sha256": "d8309aa34693d13df8c1b68c499f0988c70a2a8bf1fa9d7486a4aa60db54b392",
+      "member_count": 33
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

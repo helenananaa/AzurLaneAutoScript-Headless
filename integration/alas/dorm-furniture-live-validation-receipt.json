@@ -1,0 +1,44 @@
+{
+  "schema": "alas-headless.dorm-furniture-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "source_sha256": {
+    "buy_furniture": "4dd046ff76c0cbe7bdaea78705405ec3d20df7ec68a791912ae746bc4fcc4f56",
+    "adapter": "6364dd9e2b67e19f3f950128bfd91692b54bd27ec4e1cabd17c9f259eb0b067d",
+    "oracle": "8539cadb66e3120c6568ea6a44a28b80a4f31c6108e0d66ece2a7fa63420b0a6"
+  },
+  "configured": {
+    "Dorm.Collect": false,
+    "Dorm.Feed": false,
+    "BuyFurniture.Enable": true,
+    "BuyFurniture.BuyOption": "all"
+  },
+  "temporary_config": "codex_dorm_furniture_live_dcd08a0ef78043f4bdce05051d2f7464.json",
+  "passed": true,
+  "elapsed_seconds": 74.625,
+  "before_last_run": "2020-01-01T00:00:00",
+  "after_last_run": "2026-08-16 18:03:50",
+  "dispatches": [],
+  "shop_purchase_grant_remaining": 0,
+  "dorm_after_task": {
+    "occupied_slots": 6,
+    "total_slots": 6,
+    "food": 0,
+    "food_capacity": 40000,
+    "comfort": 454,
+    "floor": 1,
+    "food_countdown_seconds": null
+  },
+  "cleanup": {
+    "semantic_id": "dorm/page/back",
+    "generation": 47495,
+    "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/topPanel/btns/topleft/return",
+    "capability_id": null,
+    "policy_sha256": null
+  },
+  "main_page_visible_after_cleanup": true,
+  "temporary_config_removed": true
+}
