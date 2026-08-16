@@ -320,6 +320,63 @@ def _verify_original(
     }
 
 
+def _verify_semantic_claim_budget(
+    reward_module: Any, reward_type: type[Any]
+) -> dict[str, Any]:
+    """Prove a stale mission frame cannot spend a second semantic claim."""
+
+    class ClaimBudget:
+        def __init__(self) -> None:
+            self.checks = 0
+
+        def mission_claim_allowed(self) -> bool:
+            self.checks += 1
+            return self.checks == 1
+
+    class Device:
+        def __init__(self, budget: ClaimBudget) -> None:
+            self.semantic_adapter = budget
+            self.clicks: list[object] = []
+
+        def click(self, button: object) -> None:
+            self.clicks.append(button)
+
+    class ImmediateTimer:
+        def __init__(self, *args: object, **kwargs: object) -> None:
+            del args, kwargs
+
+        def reached(self) -> bool:
+            return True
+
+        def reset(self) -> None:
+            return None
+
+    budget = ClaimBudget()
+    device = Device(budget)
+    host = object.__new__(reward_type)
+    host.device = device
+    host.loop = lambda: range(3)
+    host.ui_page_appear = lambda page: True
+    host.appear_then_click = lambda button, **kwargs: False
+    host.match_template_color = lambda button, **kwargs: True
+    host.appear = lambda button, **kwargs: False
+    original_timer = reward_module.Timer
+    reward_module.Timer = ImmediateTimer
+    try:
+        if not budget.mission_claim_allowed():
+            raise AssertionError("semantic mission claim preflight drifted")
+        claimed = reward_type._reward_mission_claim_click(host)
+    finally:
+        reward_module.Timer = original_timer
+    if claimed is not True or len(device.clicks) != 1 or budget.checks != 2:
+        raise AssertionError("semantic mission claim budget loop drifted")
+    return {
+        "claimed": claimed,
+        "input_count": len(device.clicks),
+        "budget_checks": budget.checks,
+    }
+
+
 def verify_reward_config(alas_root: Path) -> dict[str, Any]:
     alas_root = alas_root.resolve()
     defaults = _verify_args(alas_root)
@@ -329,9 +386,11 @@ def verify_reward_config(alas_root: Path) -> dict[str, Any]:
     reward_module, raid_module, raid_base, reward_type, raid_type = _load_original(
         alas_root
     )
-    del reward_module
     accepted, invalid = _verify_contract()
     original = _verify_original(reward_type, raid_module, raid_base, raid_type)
+    semantic_claim_budget = _verify_semantic_claim_budget(
+        reward_module, reward_type
+    )
     return {
         "schema": SCHEMA,
         "passed": True,
@@ -341,6 +400,7 @@ def verify_reward_config(alas_root: Path) -> dict[str, Any]:
         "defaults": defaults,
         "runtime_consumers": consumers,
         "original_decisions": original,
+        "semantic_claim_budget": semantic_claim_budget,
         "temporary_config_only": True,
         "mutation_budget": 0,
         "real_claim_method_called": False,

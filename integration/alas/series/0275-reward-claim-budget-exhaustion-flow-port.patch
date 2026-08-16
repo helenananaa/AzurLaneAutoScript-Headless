@@ -1,0 +1,22 @@
+diff --git a/module/reward/reward.py b/module/reward/reward.py
+index cb6e4649..729cb9f9 100644
+--- a/module/reward/reward.py
++++ b/module/reward/reward.py
+@@ -79,6 +79,17 @@ class Reward(UI):
+             if clicked and not self.ui_page_appear(page_mission):
+                 return clicked
+             if click_interval.reached():
++                semantic_adapter = getattr(
++                    getattr(self, 'device', None), 'semantic_adapter', None
++                )
++                if (
++                    clicked
++                    and semantic_adapter is not None
++                    and not semantic_adapter.mission_claim_allowed()
++                ):
++                    logger.info(
++                        'Mission claim submitted; semantic claim budget is now zero')
++                    return clicked
+                 if self.appear_then_click(MISSION_MULTI, offset=(20, 20)):
+                     click_interval.reset()
+                     clicked = True

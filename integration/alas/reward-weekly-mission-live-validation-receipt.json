@@ -1,0 +1,42 @@
+{
+  "schema": "alas-headless.reward-mission-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "source_sha256": {
+    "reward": "73af538ae1df6361941422ccc60dc1816c2e57ed00125adb102f0ff0400c3a8d",
+    "adapter": "60dead556a4ffc2c6bac18a30dba1afc936ccc2ed3034afee614b6cfa69d9c99",
+    "oracle": "bd56ff524debd651b7b116d33e896792f51a23f272c3f9af965ac177ef5bb237"
+  },
+  "configured": {
+    "Reward.CollectOil": false,
+    "Reward.CollectCoin": false,
+    "Reward.CollectExp": false,
+    "Reward.CollectMission": false,
+    "Reward.CollectWeeklyMission": true
+  },
+  "temporary_config": "codex_reward_mission_live_09bdad5c4619477897766f5896930d80.json",
+  "passed": true,
+  "elapsed_seconds": 47.563,
+  "dispatches": [
+    {
+      "capability": "mission.claim",
+      "semantic_id": "task/weekly-progress/claim",
+      "generation": 102118,
+      "path": "UICamera/Canvas/UIMain/TaskScene(Clone)/pages/TaskListForWeekPage(Clone)/task_progress/get_btn",
+      "policy_sha256": "87caf7f4380a2e5cf1b2f0b63408cfa04b439a28c62d73d98f2c716038b6ac86",
+      "remaining_after_dispatch": null
+    }
+  ],
+  "mission_claim_grant_remaining": 0,
+  "cleanup": {
+    "semantic_id": "task/page/back",
+    "generation": 102198,
+    "path": "UICamera/Canvas/UIMain/TaskScene(Clone)/blur_panel/adapt/top/back_btn",
+    "main_page_visible": true
+  },
+  "main_page_visible_after_cleanup": true,
+  "temporary_config_removed": true
+}

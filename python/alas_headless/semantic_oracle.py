@@ -2485,6 +2485,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         (
             "task/page/back",
             "task/claim/all",
+            "task/weekly-progress/claim",
             "task/nav/all",
             "task/nav/main",
             "task/nav/side",
@@ -2493,6 +2494,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "task/nav/event",
             "reward/award-info/close",
             "reward/award-info1/close",
+            "reward/new-ship/continue",
         ),
     ),
     BlockerRule(
@@ -19594,6 +19596,9 @@ class SemanticOracle:
     def mission_page_state(self) -> MissionPageState:
         """Classify the reviewed TaskScene without treating absence as empty."""
 
+        return self._retry_transition_read(self._mission_page_state_once)
+
+    def _mission_page_state_once(self) -> MissionPageState:
         state = self.read_state()
         back = self._unique(state, "task/page/back")
         if not back.actionable or self._blocking_rules(state, "task/page/back"):
@@ -19663,6 +19668,150 @@ class SemanticOracle:
             unfinished_rows=actionable_unfinished_rows,
         )
 
+    def mission_weekly_reward_available(self) -> bool:
+        """Read the exact weekly-task badge on the current TaskScene."""
+
+        return self._retry_transition_read(self._mission_weekly_reward_available_once)
+
+    def _mission_weekly_reward_available_once(self) -> bool:
+        state = self.read_state()
+        back = self._unique(state, "task/page/back")
+        if not back.actionable or self._blocking_rules(state, "task/page/back"):
+            raise SemanticGateClosed("mission page identity is not safely actionable")
+        ui_state = self.read_ui_state()
+        matches = tuple(
+            image
+            for image in ui_state.images
+            if image.name == "tip"
+            and image.path.endswith(
+                "TaskScene(Clone)/blur_panel/adapt/left_length/frame/"
+                "tagRoot/weekly/tip"
+            )
+            and image.sprite == "exclamation_mark"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(matches) > 1:
+            raise SemanticGateClosed("mission weekly badge is ambiguous")
+        return bool(matches)
+
+    def weekly_mission_progress_claim_available(self) -> bool:
+        """Return whether the selected weekly tab exposes its progress reward."""
+
+        return self._retry_transition_read(
+            lambda: self._weekly_mission_progress_claim_target_once() is not None
+        )
+
+    def _weekly_mission_progress_claim_target_once(
+        self,
+    ) -> Optional[ButtonState]:
+        state = self.read_state()
+        back = self._unique(state, "task/page/back")
+        if not back.actionable or self._blocking_rules(state, "task/page/back"):
+            raise SemanticGateClosed("mission page identity is not safely actionable")
+        path = (
+            "TaskScene(Clone)/pages/TaskListForWeekPage(Clone)/task_progress/"
+            "get_btn"
+        )
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == "get_btn" and button.path.endswith(path)
+        )
+        if len(matches) > 1:
+            raise SemanticGateClosed("weekly mission progress claim is ambiguous")
+        if not matches:
+            return None
+        target = matches[0]
+        if (
+            not target.active_in_hierarchy
+            or not target.active_and_enabled
+            or not target.interactable
+            or target.bounds is None
+            or self._blocking_rules(state, "task/weekly-progress/claim")
+        ):
+            return None
+
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < state.generation
+            or ui_state.generation > state.generation + 2
+        ):
+            raise SemanticGateClosed(
+                "weekly mission button and UI snapshots are not coherent"
+            )
+        weekly_selected = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith(
+                "TaskScene(Clone)/blur_panel/adapt/left_length/frame/"
+                "tagRoot/weekly/selected/Image"
+            )
+            and image.sprite == "icon_week_sel"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        button_images = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith(path)
+            and image.sprite == "get_btn"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds == target.bounds
+        )
+        enabled_images = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith(path + "/enable")
+            and image.sprite == "finish_btn_tran_1"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+            and target.bounds.contains(
+                Point(
+                    (image.bounds.left + image.bounds.right) / 2.0,
+                    (image.bounds.top + image.bounds.bottom) / 2.0,
+                )
+            )
+        )
+        if len(weekly_selected) != 1:
+            raise SemanticGateClosed("weekly mission tab identity is absent or ambiguous")
+        if len(button_images) != 1 or len(enabled_images) != 1:
+            return None
+        return target
+
+    def click_weekly_mission_progress_claim(self) -> ActionReceipt:
+        """Claim the unique currently enabled weekly progress reward once."""
+
+        target = self._retry_transition_read(
+            self._weekly_mission_progress_claim_target_once
+        )
+        if target is None or target.bounds is None:
+            raise SemanticGateClosed("weekly mission progress claim is absent")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before weekly mission claim")
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        if not target.bounds.contains(point):
+            raise SemanticGateClosed("weekly mission claim point is invalid")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="task/weekly-progress/claim",
+            generation=self._last_generation or 0,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def wait_for_mission_state(
         self,
         timeout_seconds: float,
@@ -19702,6 +19851,42 @@ class SemanticOracle:
                 "stable mission-state wait timed out"
             ) from last_error
         raise SemanticGateClosed("stable mission-state wait timed out")
+
+    def click_mission_claim_row(self, expected_path: str) -> ActionReceipt:
+        """Claim one uniquely actionable task row by its current typed path."""
+
+        if not isinstance(expected_path, str) or not expected_path:
+            raise ValueError("mission claim row path must be non-empty")
+        page = self.mission_page_state()
+        if page.disposition != MissionDisposition.CLAIMABLE_ROW:
+            raise SemanticGateClosed("mission page is not row-claimable")
+        matches = tuple(
+            row for row in page.claim_rows if row.path == expected_path
+        )
+        if len(page.claim_rows) != 1 or len(matches) != 1:
+            raise SemanticGateClosed("mission claim row is absent or ambiguous")
+        target = matches[0]
+        match = re.search(r"/content/([0-9]+)/frame/get_btn$", target.path)
+        if match is None:
+            raise SemanticGateClosed("mission claim row path is malformed")
+        if not target.actionable or target.point is None or target.bounds is None:
+            raise SemanticGateClosed("mission claim row is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before mission row claim")
+        click_point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        if not target.bounds.contains(click_point):
+            raise SemanticGateClosed("mission claim row click point is invalid")
+        self._tap(int(round(click_point.x)), int(round(click_point.y)))
+        return ActionReceipt(
+            semantic_id="task/claim/row/" + match.group(1),
+            generation=page.generation,
+            point=click_point,
+            bounds=target.bounds,
+            path=target.path,
+        )
 
     def click(self, semantic_id: str) -> ActionReceipt:
         state = self.read_state()
@@ -20105,6 +20290,10 @@ class SemanticOracle:
                     matches = self._matches(state, semantic_id)
                     if len(matches) > 1:
                         raise SemanticGateClosed("semantic target mapping is ambiguous")
+                    if semantic_id == "reward/new-ship/continue":
+                        if matches and self._new_ship_reward_visible_in_state(state):
+                            actionable.append((semantic_id, matches[0]))
+                        continue
                     if (
                         matches
                         and matches[0].actionable

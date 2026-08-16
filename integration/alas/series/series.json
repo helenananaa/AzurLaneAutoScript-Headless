@@ -164,6 +164,16 @@
       "order": 33,
       "path": "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
       "sha256": "37eaa7e2aa1b5beefa1f7052e22f4b7113e1fc3c30bf1ed7834af5ff48a7e847"
+    },
+    {
+      "order": 34,
+      "path": "integration/alas/series/0275-reward-claim-budget-exhaustion-flow-port.patch",
+      "sha256": "a6727879655e913e15defaf52dcc2da61af096e6c648c909b04926089c472107"
+    },
+    {
+      "order": 35,
+      "path": "integration/alas/series/0280-weekly-mission-progress-flow-port.patch",
+      "sha256": "f5c2969d0aec7d797b49490500818cf245a2e0ab8fc75b476ca08af861452546"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

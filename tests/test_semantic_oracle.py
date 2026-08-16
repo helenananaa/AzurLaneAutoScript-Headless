@@ -4393,6 +4393,10 @@ class SemanticOracleTests(unittest.TestCase):
         oracle = make_oracle(backend)
 
         self.assertTrue(oracle.new_ship_reward_visible())
+        semantic_id, _ = oracle.wait_for_any(
+            ("reward/new-ship/continue",), timeout_seconds=1
+        )
+        self.assertEqual(semantic_id, "reward/new-ship/continue")
         receipt = oracle.click("reward/new-ship/continue")
         self.assertEqual(receipt.semantic_id, "reward/new-ship/continue")
         self.assertEqual(backend.taps, [(640, 360)])
@@ -6240,6 +6244,95 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(state.disposition, MissionDisposition.CLAIMABLE_ALL)
         self.assertIsNotNone(state.claim_all)
 
+    def test_mission_weekly_badge_uses_exact_typed_marker(self):
+        root = "root/TaskScene(Clone)/blur_panel/adapt/left_length/frame/tagRoot"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_btn",
+                    "root/TaskScene(Clone)/blur_panel/adapt/top/back_btn",
+                    58,
+                    53,
+                )
+            ]
+        )
+        backend.ui = make_ui(
+            [], images=[make_image(root + "/weekly/tip", "exclamation_mark")]
+        )
+
+        self.assertTrue(make_oracle(backend).mission_weekly_reward_available())
+
+    def test_weekly_progress_claim_requires_selected_typed_reward_control(self):
+        root = "root/TaskScene(Clone)"
+        button_path = root + "/pages/TaskListForWeekPage(Clone)/task_progress/get_btn"
+        bounds = {"left": 1094, "top": 64, "right": 1247, "bottom": 218}
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_btn", root + "/blur_panel/adapt/top/back_btn", 58, 53
+                ),
+                make_button(
+                    "get_btn", button_path, 1094, 64, bounds, raycast_top=None
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    root
+                    + "/blur_panel/adapt/left_length/frame/tagRoot/weekly/"
+                    "selected/Image",
+                    "icon_week_sel",
+                ),
+                make_image(button_path, "get_btn", bounds),
+                make_image(
+                    button_path + "/enable",
+                    "finish_btn_tran_1",
+                    {"left": 1191, "top": 69, "right": 1247, "bottom": 125},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.weekly_mission_progress_claim_available())
+        receipt = oracle.click_weekly_mission_progress_claim()
+
+        self.assertEqual(receipt.semantic_id, "task/weekly-progress/claim")
+        self.assertEqual(receipt.point, Point(1170.5, 141.0))
+        self.assertEqual(backend.taps, [(1170, 141)])
+
+    def test_mission_state_retries_an_incoherent_transition_snapshot(self):
+        buttons = [
+            make_button(
+                "back_btn",
+                "root/TaskScene(Clone)/blur_panel/adapt/top/back_btn",
+                58,
+                53,
+            ),
+            make_button(
+                "get_btn",
+                "root/TaskScene(Clone)/pages/TaskListPage(Clone)/"
+                "right_panel/content/0/frame/get_btn",
+                1170,
+                158,
+            ),
+        ]
+        backend = FakeBackend(buttons)
+        backend.buttons_sequence = [
+            make_buttons(buttons, generation=10),
+            make_buttons(buttons, generation=15),
+        ]
+        backend.ui_sequence = [make_ui([], generation=14), make_ui([], generation=15)]
+        backend.snapshot = make_snapshot(generation=15)
+        backend.buttons = make_buttons(buttons, generation=15)
+        backend.ui = make_ui([], generation=15)
+
+        state = make_oracle(backend).mission_page_state()
+
+        self.assertEqual(state.disposition, MissionDisposition.CLAIMABLE_ROW)
+        self.assertEqual(state.generation, 15)
+
     def test_mission_row_claims_are_ordered_by_runtime_index(self):
         backend = FakeBackend(
             [
@@ -6271,6 +6364,35 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(state.disposition, MissionDisposition.CLAIMABLE_ROW)
         self.assertIn("content/1/", state.claim_rows[0].path)
         self.assertIn("content/3/", state.claim_rows[1].path)
+
+    def test_mission_row_claim_requires_one_current_typed_row(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_btn",
+                    "root/TaskScene(Clone)/blur_panel/adapt/top/back_btn",
+                    58,
+                    53,
+                ),
+                make_button(
+                    "get_btn",
+                    "root/TaskScene(Clone)/pages/TaskListPage(Clone)/"
+                    "right_panel/content/3/frame/get_btn",
+                    1095,
+                    81,
+                    {"left": 1095, "top": 81, "right": 1247, "bottom": 235},
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+        path = oracle.mission_page_state().claim_rows[0].path
+
+        receipt = oracle.click_mission_claim_row(path)
+
+        self.assertEqual(receipt.semantic_id, "task/claim/row/3")
+        self.assertEqual(receipt.path, path)
+        self.assertEqual(backend.taps, [(1171, 158)])
+        self.assertEqual(receipt.point, Point(1171, 158))
 
     def test_mission_absence_is_unknown_not_empty(self):
         backend = FakeBackend(

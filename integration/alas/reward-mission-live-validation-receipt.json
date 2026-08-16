@@ -1,0 +1,37 @@
+{
+  "schema": "alas-headless.reward-mission-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "source_sha256": {
+    "reward": "6b7d64b9ebe1434372b40ecae29f1e3ddc42aed8cb3914b81eb13956f78fb070",
+    "adapter": "e38a961e50423af490a0f8a95a7bcb8442a26ca70ad0cc282e3629afa88989fc",
+    "oracle": "92fe85dd33c42cb0b244941a83463190723b801c34dddad6b1fce06ba8c66cb9"
+  },
+  "configured": {
+    "Reward.CollectOil": false,
+    "Reward.CollectCoin": false,
+    "Reward.CollectExp": false,
+    "Reward.CollectMission": true,
+    "Reward.CollectWeeklyMission": false
+  },
+  "temporary_config": "codex_reward_mission_live_653b49f172fc4e5aa240cd9ca064c10b.json",
+  "passed": false,
+  "elapsed_seconds": 137.594,
+  "dispatches": [
+    {
+      "capability": "mission.claim",
+      "semantic_id": "task/claim/row/0",
+      "generation": 85955,
+      "path": "UICamera/Canvas/UIMain/TaskScene(Clone)/pages/TaskListPage(Clone)/right_panel/content/0/frame/get_btn",
+      "policy_sha256": "87caf7f4380a2e5cf1b2f0b63408cfa04b439a28c62d73d98f2c716038b6ac86",
+      "remaining_after_dispatch": null
+    }
+  ],
+  "mission_claim_grant_remaining": 0,
+  "error": "AttributeError: 'AlasSemanticAdapter' object has no attribute 'close'",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\scripts\\python\\run_alas_reward_mission_live_validation.py\", line 177, in validate\n    adapter.close()\n    ^^^^^^^^^^^^^\nAttributeError: 'AlasSemanticAdapter' object has no attribute 'close'\n",
+  "temporary_config_removed": true
+}

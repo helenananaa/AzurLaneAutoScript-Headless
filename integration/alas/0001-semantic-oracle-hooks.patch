@@ -8608,3 +8608,40 @@ index fa1b652d..4ed7e963 100644
          logger.info("Buy furniture run")
          while 1:
              if self._buy_furniture_run():
+diff --git a/module/reward/reward.py b/module/reward/reward.py
+index cb6e4649..729cb9f9 100644
+--- a/module/reward/reward.py
++++ b/module/reward/reward.py
+@@ -79,6 +79,17 @@ class Reward(UI):
+             if clicked and not self.ui_page_appear(page_mission):
+                 return clicked
+             if click_interval.reached():
++                semantic_adapter = getattr(
++                    getattr(self, 'device', None), 'semantic_adapter', None
++                )
++                if (
++                    clicked
++                    and semantic_adapter is not None
++                    and not semantic_adapter.mission_claim_allowed()
++                ):
++                    logger.info(
++                        'Mission claim submitted; semantic claim budget is now zero')
++                    return clicked
+                 if self.appear_then_click(MISSION_MULTI, offset=(20, 20)):
+                     click_interval.reset()
+                     clicked = True
+diff --git a/module/reward/reward.py b/module/reward/reward.py
+index 729cb9f9..919e8266 100644
+--- a/module/reward/reward.py
++++ b/module/reward/reward.py
+@@ -216,6 +216,10 @@ class Reward(UI):
+             return False
+ 
+         self.reward_side_navbar_ensure(upper=5)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            logger.info('Weekly mission progress through semantic task flow')
++            return bool(semantic_adapter.claim_weekly_mission_progress_once())
+         return self._reward_mission_collect()
+ 
+     def reward_mission_notice(self):

@@ -124,10 +124,13 @@ class FakeOracle:
         self.click_calls = []
         self.wait_calls = []
         self.wait_any_calls = []
+        self.wait_any_results = []
         self.mission_disposition = MissionDisposition.UNFINISHED
         self.mission_dispositions = []
         self.streaming_mission_dispositions = []
         self.streaming_generation = 0
+        self.mission_weekly_reward_available_value = False
+        self.weekly_mission_progress_claim_available_value = False
         # Exact login/bulletin overlays are absent in ordinary adapter unit
         # fixtures unless a test opts them in explicitly.  Keeping the generic
         # default enabled preserves the older concise target fixtures without
@@ -143,6 +146,7 @@ class FakeOracle:
         self.enable_main_after_overlay_click = False
         self.text_groups = ()
         self.image_selected_values = {"task/nav/all": True}
+        self.main_red_dot_values = {"main/task": False}
         self.toggle_selected_values = {}
         self.mail_empty = False
         self.mail_confirmation_kind_value = None
@@ -348,6 +352,16 @@ class FakeOracle:
             point=Point(2, 3),
             bounds=Bounds(1, 2, 3, 4),
             path="root/target",
+        )
+
+    def click_mission_claim_row(self, expected_path):
+        self.click_calls.append("task/claim/row/0")
+        return ActionReceipt(
+            semantic_id="task/claim/row/0",
+            generation=7,
+            point=Point(2, 3),
+            bounds=Bounds(1, 2, 3, 4),
+            path=expected_path,
         )
 
     def image_selected(self, semantic_id):
@@ -944,7 +958,12 @@ class FakeOracle:
                 else None
             ),
             claim_rows=(
-                (object(),)
+                (
+                    SimpleNamespace(
+                        path="root/TaskScene(Clone)/pages/TaskListPage(Clone)/"
+                        "right_panel/content/0/frame/get_btn"
+                    ),
+                )
                 if disposition == MissionDisposition.CLAIMABLE_ROW
                 else ()
             ),
@@ -955,16 +974,32 @@ class FakeOracle:
             ),
         )
 
+    def mission_weekly_reward_available(self):
+        return self.mission_weekly_reward_available_value
+
+    def weekly_mission_progress_claim_available(self):
+        return self.weekly_mission_progress_claim_available_value
+
+    def click_weekly_mission_progress_claim(self):
+        self.click_calls.append("task/weekly-progress/claim")
+        self.weekly_mission_progress_claim_available_value = False
+        return self.click_receipt("task/weekly-progress/claim")
+
+    def main_red_dot(self, semantic_id):
+        return self.main_red_dot_values[semantic_id]
+
     def wait_for_any(
         self, semantic_ids, timeout_seconds, minimum_generation=None
     ):
         self.wait_any_calls.append(
             (semantic_ids, timeout_seconds, minimum_generation)
         )
-        return (
-            "reward/award-info/close",
-            SimpleNamespace(path="root/AwardInfoUI(Clone)/items/close"),
-        )
+        if self.wait_any_results:
+            result = self.wait_any_results.pop(0)
+            if isinstance(result, BaseException):
+                raise result
+            return result
+        return (semantic_ids[0], SimpleNamespace(path="root/target"))
 
     def commission_rows(self):
         return ()
@@ -4556,6 +4591,76 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             adapter.click(NamedButton("MISSION_SINGLE"))
         self.assertEqual(oracle.click_calls, [])
 
+    def test_weekly_only_mission_notice_uses_exact_main_task_badge(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.main_red_dot_values["main/task"] = True
+        adapter.begin_mission_reward(daily=False, weekly=True)
+
+        self.assertTrue(adapter.appear(NamedButton("MISSION_NOTICE")))
+
+    def test_weekly_progress_claim_uses_one_typed_input_and_acknowledgement(self):
+        adapter, oracle, _ = self.make_adapter(allow_mission_claim_once=True)
+        oracle.weekly_mission_progress_claim_available_value = True
+        oracle.wait_any_results = [
+            (
+                "reward/award-info/close",
+                SimpleNamespace(path="root/AwardInfoUI(Clone)/items/close"),
+            ),
+            SemanticGateClosed("semantic wait timed out"),
+        ]
+        adapter.begin_mission_reward(daily=False, weekly=True)
+
+        receipt = adapter.claim_weekly_mission_progress_once()
+
+        self.assertEqual(receipt.semantic_id, "task/weekly-progress/claim")
+        self.assertEqual(
+            oracle.click_calls,
+            ["task/weekly-progress/claim", "reward/award-info/close"],
+        )
+        self.assertFalse(adapter.mission_claim_allowed())
+
+    def test_weekly_progress_claim_closes_deferred_new_ship_reward(self):
+        adapter, oracle, _ = self.make_adapter(allow_mission_claim_once=True)
+        oracle.weekly_mission_progress_claim_available_value = True
+        oracle.wait_any_results = [
+            (
+                "reward/award-info/close",
+                SimpleNamespace(path="root/AwardInfoUI(Clone)/items/close"),
+            ),
+            (
+                "reward/new-ship/continue",
+                SimpleNamespace(path="root/NewShipUI(Clone)/shake_panel/click"),
+            ),
+            SemanticGateClosed("semantic wait timed out"),
+        ]
+        adapter.begin_mission_reward(daily=False, weekly=True)
+
+        receipt = adapter.claim_weekly_mission_progress_once()
+
+        self.assertEqual(receipt.semantic_id, "task/weekly-progress/claim")
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "task/weekly-progress/claim",
+                "reward/award-info/close",
+                "reward/new-ship/continue",
+            ],
+        )
+
+    def test_weekly_badge_is_read_from_typed_mission_marker(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.mission_weekly_reward_available_value = True
+        adapter.begin_mission_reward(daily=False, weekly=True)
+
+        self.assertTrue(
+            adapter.image_color_count(
+                NamedButton("MISSION_WEEKLY_RED_DOT"),
+                color=(206, 81, 66),
+                threshold=221,
+                count=20,
+            )
+        )
+
     def test_default_navbar_requires_exact_mission_entry_click(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.enabled_values["task/page/back"] = True
@@ -5072,6 +5177,19 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(oracle.click_calls, ["main/task", "task/page/back"])
         self.assertEqual(len(gate_calls), 1)
+
+    def test_alas_owned_row_claim_uses_one_exact_typed_row(self):
+        adapter, oracle, _ = self.make_adapter(allow_mission_claim_once=True)
+        oracle.mission_disposition = MissionDisposition.CLAIMABLE_ROW
+        adapter.begin_mission_reward(daily=True, weekly=False)
+
+        self.assertFalse(adapter.appear(NamedButton("MISSION_SINGLE")))
+        self.assertTrue(adapter.appear(NamedButton("MISSION_SINGLE")))
+        receipt = adapter.click(NamedButton("MISSION_SINGLE"))
+
+        self.assertEqual(receipt.semantic_id, "task/claim/row/0")
+        self.assertEqual(oracle.click_calls, ["task/claim/row/0"])
+        self.assertFalse(adapter.mission_claim_allowed())
 
     def test_package_gate_verifies_once_per_bridge_pid(self):
         bridge = FakePackageBridge()

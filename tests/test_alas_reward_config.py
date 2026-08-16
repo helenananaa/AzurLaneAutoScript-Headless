@@ -41,6 +41,10 @@ class AlasRewardConfigTests(unittest.TestCase):
         self.assertFalse(result["real_claim_method_called"])
         self.assertEqual(result["mutation_budget"], 0)
         self.assertFalse(result["android_input_injected"])
+        self.assertEqual(
+            result["semantic_claim_budget"],
+            {"claimed": True, "input_count": 1, "budget_checks": 2},
+        )
 
     def test_all_boolean_combinations_are_accepted(self):
         keys = tuple(_values())

@@ -1315,7 +1315,7 @@ class AlasSemanticAdapter:
                 quantity = self.oracle.shop_purchase_dialog_quantity(
                     item.display_name
                 )
-            except SemanticGateClosed:
+            except SemanticGateClosed as exc:
                 if time.monotonic() >= deadline:
                     raise
                 time.sleep(0.2)
@@ -1520,6 +1520,55 @@ class AlasSemanticAdapter:
 
         self._require_mission_context()
         return self._action_ledger.allowed("mission.claim")
+
+    def claim_weekly_mission_progress_once(self) -> Optional[ActionReceipt]:
+        """Claim one proven weekly progress reward and close its receipt popup."""
+
+        context = self._require_mission_context()
+        if not context.weekly:
+            raise SemanticGateClosed("weekly mission claim is not configured")
+        if not self.oracle.weekly_mission_progress_claim_available():
+            return None
+        if not self._action_ledger.allowed("mission.claim"):
+            raise SemanticGateClosed(
+                "mission claim input requires the separate one-claim opt-in"
+            )
+        receipt = self._dispatch_mutation(
+            "mission.claim", self.oracle.click_weekly_mission_progress_claim
+        )
+        acknowledgement_targets = (
+            "reward/award-info/close",
+            "reward/award-info1/close",
+            "reward/new-ship/continue",
+        )
+        minimum_generation = receipt.generation
+        dismissed = 0
+        # The current client can queue a NewShipUI after the ordinary AwardInfo
+        # receipt.  Consume only this typed acknowledgement chain, then return
+        # control to the ALAS task state machine.
+        while dismissed < 3:
+            try:
+                semantic_id, _ = self.oracle.wait_for_any(
+                    acknowledgement_targets,
+                    3.0,
+                    minimum_generation=minimum_generation,
+                )
+            except SemanticGateClosed as exc:
+                if (
+                    dismissed
+                    and str(exc) == "semantic wait timed out"
+                    and exc.__cause__ is None
+                ):
+                    return receipt
+                if not dismissed:
+                    raise SemanticGateClosed(
+                        "weekly mission claim acknowledgement is absent"
+                    ) from exc
+                raise
+            acknowledgement = self.oracle.click(semantic_id)
+            minimum_generation = acknowledgement.generation
+            dismissed += 1
+        raise SemanticGateClosed("weekly mission claim acknowledgement chain is excessive")
 
     def begin_mail(self) -> None:
         """Open one ALAS-owned mail state-machine invocation."""
@@ -2644,10 +2693,11 @@ class AlasSemanticAdapter:
 
     def _mission_notice_appears(self) -> bool:
         context = self._require_mission_context()
-        # The current typed observer does not expose the red-dot Image.  A
-        # scheduled daily mission run may safely inspect the proven main task
-        # entry instead.  Weekly-only runs stay closed until tab evidence exists.
-        return bool(context.daily and self.oracle.exists("main/task"))
+        if context.daily and self.oracle.exists("main/task"):
+            return True
+        return bool(
+            context.weekly and self.oracle.main_red_dot("main/task")
+        )
 
     def _award_close_target(self) -> Optional[str]:
         targets = tuple(
@@ -2730,7 +2780,7 @@ class AlasSemanticAdapter:
             # slice.  The validated AwardInfo popup is handled before this test.
             return False
         if name == "MISSION_WEEKLY_RED_DOT":
-            return False
+            return self.oracle.mission_weekly_reward_available()
 
         state = self._stable_mission_state()
         if state is None:
@@ -7940,7 +7990,22 @@ class AlasSemanticAdapter:
             )
             return receipt
         if name == "MISSION_SINGLE":
-            raise SemanticGateClosed("numeric-row mission claiming is not validated")
+            state = self._stable_mission_state()
+            if (
+                state is None
+                or state.disposition != MissionDisposition.CLAIMABLE_ROW
+                or len(state.claim_rows) != 1
+            ):
+                raise SemanticGateClosed("stable mission claim row is absent")
+            if not self._action_ledger.allowed("mission.claim"):
+                raise SemanticGateClosed(
+                    "mission claim input requires the separate one-claim opt-in"
+                )
+            expected_path = state.claim_rows[0].path
+            return self._dispatch_mutation(
+                "mission.claim",
+                lambda: self.oracle.click_mission_claim_row(expected_path),
+            )
         if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
             target = self._award_close_target()
             if target is None:
@@ -9955,6 +10020,9 @@ class AlasSemanticSession:
 
     def mission_claim_allowed(self) -> bool:
         return self.open().mission_claim_allowed()
+
+    def claim_weekly_mission_progress_once(self) -> Optional[ActionReceipt]:
+        return self.open().claim_weekly_mission_progress_once()
 
     def begin_mail(self) -> None:
         self.open().begin_mail()
