@@ -203,6 +203,27 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         self.assertIn("diff --git a/module/dorm/dorm.py", self.patch_text)
         self.assertIn("semantic_session.dorm_state().occupied_slots", self.patch_text)
 
+    def test_dorm_scheduler_recovers_the_exact_empty_food_modal(self):
+        self.assertIn(
+            "from module.ui.assets import DORM_CHECK, DORM_FEED_CANCEL",
+            self.patch_text,
+        )
+        self.assertIn("except SemanticGateClosed:", self.patch_text)
+        self.assertIn(
+            "self.appear_then_click(DORM_FEED_CANCEL, offset=(30, 30))",
+            self.patch_text,
+        )
+        self.assertIn(
+            'semantic_adapter.open().oracle.enabled("dorm/empty-food/cancel")',
+            self.patch_text,
+        )
+        self.assertIn("self.device.click(DORM_FEED_CANCEL)", self.patch_text)
+        self.assertIn(
+            'semantic_adapter.open().oracle.enabled("dorm/feed")',
+            self.patch_text,
+        )
+        self.assertIn("self.device.click(DORM_FEED_ENTER)", self.patch_text)
+
     def test_shared_scheduler_is_validated_before_original_queueing(self):
         self.assertIn("diff --git a/module/config/config.py", self.patch_text)
         gate = self.patch_text.index("validate_alas_scheduler_config(self.data)")

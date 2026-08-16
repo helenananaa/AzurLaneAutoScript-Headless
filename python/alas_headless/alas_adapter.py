@@ -2713,6 +2713,17 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("reward popup close target is ambiguous")
         return targets[0] if targets else None
 
+    def _dorm_empty_food_modal_appears(self) -> bool:
+        """Keep a partially mounted empty-food popup out of page probes."""
+
+        try:
+            return self.oracle.dorm_empty_food_cancel_available()
+        except SemanticGateClosed:
+            # This is only an ALAS presence probe.  The typed modal has not
+            # completed its identity proof yet, so let the owning page keep
+            # polling instead of treating a Unity mount race as a task error.
+            return False
+
     def _goto_main_target(self) -> Optional[str]:
         targets = []
         try:
@@ -3481,14 +3492,11 @@ class AlasSemanticAdapter:
             if (
                 name == "DORM_CHECK"
                 and self._dorm_context is not None
-                and (
-                    self.oracle.dorm_empty_food_cancel_available()
-                    or self.oracle.enabled("dorm/feed/close")
-                )
+                and self.oracle.enabled("dorm/feed/close")
             ):
-                # Do not report the CourtYard page through its modal empty-food
-                # prompt.  This lets ALAS reach ui_additional() and invoke its
-                # own dedicated DORM_FEED_CANCEL branch.
+                # The feed panel is a real nested page, unlike the empty-food
+                # modal.  Let ALAS' existing close branch resolve it before
+                # declaring the underlying CourtYard page visible.
                 return False
             if name == "RESEARCH_CHECK" and self._research_context is not None:
                 try:
@@ -3708,7 +3716,7 @@ class AlasSemanticAdapter:
                 except SemanticGateClosed:
                     return False
             if name == "DORM_FEED_CANCEL":
-                if self.oracle.dorm_empty_food_cancel_available():
+                if self._dorm_empty_food_modal_appears():
                     return True
                 if not self.oracle.enabled("dorm/feed/close"):
                     return False
@@ -4087,6 +4095,13 @@ class AlasSemanticAdapter:
             if name == "MAIL_BATCH_DELETE":
                 return self.oracle.enabled("mail/manage/delete")
             if name == "MAIL_WHITE_EMPTY":
+                # MailWhite probes this while it is still waiting for the
+                # navigation click to mount MailUI.  An empty-mail reading
+                # needs the exact page tree (and its count text), whereas a
+                # pre-mount probe is only an ALAS control-flow sentinel.
+                # Treat that transient state as a passive non-match.
+                if not self.oracle.exists("mail/page/back"):
+                    return False
                 return self.oracle.mail_is_empty()
             return False
         if (
@@ -7915,15 +7930,25 @@ class AlasSemanticAdapter:
             if toggle_target is not None:
                 return self.oracle.click_toggle(toggle_target)
             if name in ("MAIL_BATCH_CLAIM", "MAIL_BATCH_DELETE"):
-                if not self._action_ledger.allowed("mail.mutation"):
-                    raise SemanticGateClosed(
-                        "mail mutation requires the separate explicit opt-in"
-                    )
+                # MailWhite reuses MAIL_BATCH_CLAIM as its generic dismiss
+                # input after a successful claim has opened an award popup.
+                # That input is a read-only popup-close continuation, not a
+                # second manager mutation.  The manager action is no longer
+                # actionable behind that foreground popup, which gives this
+                # otherwise overloaded ALAS input an exact typed meaning.
                 target = (
                     "mail/manage/claim"
                     if name == "MAIL_BATCH_CLAIM"
                     else "mail/manage/delete"
                 )
+                if name == "MAIL_BATCH_CLAIM" and not self.oracle.enabled(target):
+                    award_target = self._award_close_target()
+                    if award_target is not None:
+                        return self.oracle.click(award_target)
+                if not self._action_ledger.allowed("mail.mutation"):
+                    raise SemanticGateClosed(
+                        "mail mutation requires the separate explicit opt-in"
+                    )
                 receipt = self._dispatch_mutation(
                     "mail.mutation",
                     lambda: self.oracle.click(target),

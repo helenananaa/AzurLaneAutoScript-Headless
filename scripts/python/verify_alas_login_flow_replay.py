@@ -27,7 +27,7 @@ PATCH_PATH = ROOT / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
 SERIES_MANIFEST_PATH = ROOT / "integration" / "alas" / "series" / "series.json"
 SCHEMA = "alas-headless.login-flow-replay/v1"
 PATCHED_LOGIN_SHA256 = (
-    "b0b39ab20f3d9e98834cf370b93173e35f6cb133bc09045c192b4847484510fb"
+    "5581e448854dada9b84a3d9855d3519930e24a8a677bff1eb215efb085254a76"
 )
 
 

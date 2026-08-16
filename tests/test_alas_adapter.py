@@ -1295,17 +1295,32 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.click(NamedButton("BUILD_CHECK"))
 
-    def test_dorm_page_check_yields_to_empty_food_modal(self):
+    def test_dorm_page_check_keeps_owned_page_visible_under_empty_food_modal(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_dorm()
         oracle.exists_values["dorm/page/manage"] = True
+        oracle.enabled_values["dorm/feed/close"] = False
         oracle.dorm_empty_food_cancel_value = True
 
-        self.assertFalse(adapter.appear(NamedButton("DORM_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("DORM_CHECK")))
         self.assertTrue(adapter.appear(NamedButton("DORM_FEED_CANCEL")))
         receipt = adapter.click(NamedButton("DORM_FEED_CANCEL"))
 
         self.assertEqual(receipt.semantic_id, "dorm/empty-food/cancel")
+
+    def test_dorm_page_check_treats_incomplete_empty_food_probe_as_absent(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_dorm()
+        oracle.exists_values["dorm/page/manage"] = True
+        oracle.enabled_values["dorm/feed/close"] = False
+
+        def incomplete_empty_food_modal():
+            raise SemanticGateClosed("dorm empty-food snapshots are incomplete")
+
+        oracle.dorm_empty_food_cancel_available = incomplete_empty_food_modal
+
+        self.assertTrue(adapter.appear(NamedButton("DORM_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("DORM_FEED_CANCEL")))
 
     def test_dorm_page_check_yields_to_feed_panel_close(self):
         adapter, oracle, _ = self.make_adapter()
@@ -3906,6 +3921,28 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "reward/award-info/close")
 
+    def test_mail_claim_alias_closes_award_popup_without_spending_mutation_grant(self):
+        oracle = FakeOracle()
+        oracle.enabled_values.update(
+            {
+                "reward/award-info/close": True,
+                "reward/award-info1/close": False,
+                "mail/manage/claim": False,
+            }
+        )
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            allow_mail_mutations=True,
+        )
+        adapter.begin_mail()
+
+        receipt = adapter.click(NamedButton("MAIL_BATCH_CLAIM"))
+
+        self.assertEqual(receipt.semantic_id, "reward/award-info/close")
+        self.assertEqual(adapter._action_ledger.remaining("mail.mutation"), 1)
+        self.assertEqual(oracle.click_calls, ["reward/award-info/close"])
+
     def test_mail_manager_close_and_filters_use_typed_controls(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_mail()
@@ -4039,11 +4076,20 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(oracle.click_calls, ["mail/confirm/claim"])
         self.assertFalse(adapter._action_ledger.allowed("mail.mutation"))
 
-    def test_mail_empty_never_uses_button_absence(self):
+    def test_mail_empty_requires_mounted_page_and_never_uses_button_absence(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_mail()
 
+        oracle.mail_empty = True
+
+        def fail_if_read_before_mail_page():
+            raise AssertionError("empty-mail reader must not run before MailUI mounts")
+
+        oracle.mail_is_empty = fail_if_read_before_mail_page
         self.assertFalse(adapter.appear(NamedButton("MAIL_WHITE_EMPTY")))
+
+        oracle.mail_is_empty = lambda: oracle.mail_empty
+        oracle.exists_values["mail/page/back"] = True
         oracle.mail_empty = True
         self.assertTrue(adapter.appear(NamedButton("MAIL_WHITE_EMPTY")))
 

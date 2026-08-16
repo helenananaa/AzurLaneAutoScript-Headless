@@ -1,0 +1,60 @@
+diff --git a/module/dorm/dorm.py b/module/dorm/dorm.py
+index 870f5d96..f49290a2 100644
+--- a/module/dorm/dorm.py
++++ b/module/dorm/dorm.py
+@@ -12,7 +12,7 @@ from module.handler.assets import POPUP_CONFIRM
+ from module.logger import logger
+ from module.ocr.ocr import Digit, DigitCounter
+ from module.template.assets import TEMPLATE_DORM_COIN, TEMPLATE_DORM_LOVE
+-from module.ui.assets import DORM_CHECK
++from module.ui.assets import DORM_CHECK, DORM_FEED_CANCEL
+ from module.ui.page import page_dorm, page_dormmenu
+ from module.ui.ui import UI
+ 
+@@ -567,10 +567,20 @@ class RewardDorm(UI):
+         Pages:
+             in: page_dorm
+         """
+-        from alas_headless import current_semantic_session
++        from alas_headless import SemanticGateClosed, current_semantic_session
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
+-            return semantic_session.dorm_state().occupied_slots
++            try:
++                return semantic_session.dorm_state().occupied_slots
++            except SemanticGateClosed:
++                # Quick collect can surface CourtYardEmptyFoodUI immediately
++                # before the scheduler reads the typed slot counter. Reuse
++                # ALAS' owned cancel branch, then refresh and read again.
++                self.device.screenshot()
++                if not self.appear_then_click(DORM_FEED_CANCEL, offset=(30, 30)):
++                    raise
++                self.device.screenshot()
++                return semantic_session.dorm_state().occupied_slots
+         timeout = Timer(2, count=4).start()
+         current = 0
+         for _ in self.loop():
+diff --git a/module/dorm/dorm.py b/module/dorm/dorm.py
+index f49290a2..d1ed554c 100644
+--- a/module/dorm/dorm.py
++++ b/module/dorm/dorm.py
+@@ -418,6 +418,19 @@ class RewardDorm(UI):
+             if self.appear(DORM_FEED_CHECK, offset=(20, 20)):
+                 break
+ 
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if (
++                semantic_adapter is not None
++                and semantic_adapter.open().oracle.enabled("dorm/empty-food/cancel")
++            ):
++                self.device.click(DORM_FEED_CANCEL)
++                continue
++            if (
++                semantic_adapter is not None
++                and semantic_adapter.open().oracle.enabled("dorm/feed")
++            ):
++                self.device.click(DORM_FEED_ENTER)
++                continue
+             if self.ui_additional(get_ship=False):
+                 self.interval_clear(DORM_CHECK)
+                 continue

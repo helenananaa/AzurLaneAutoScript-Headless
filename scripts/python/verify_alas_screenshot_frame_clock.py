@@ -91,6 +91,9 @@ _OPTIMIZATION_ORIGIN_REPLACEMENTS = (
 )
 _DEVICE_OS_PATCHED = "import collections\nimport os\nfrom datetime"
 _DEVICE_OS_PRISTINE = "import collections\nfrom datetime"
+_DEVICE_HANDLE_ERROR_IMPORT = "from alas_headless import validate_alas_handle_error_config\n"
+_DEVICE_HANDLE_ERROR_PATCHED = "        if not validate_alas_handle_error_config(self.config.Error_HandleError):"
+_DEVICE_HANDLE_ERROR_PRISTINE = "        if not self.config.Error_HandleError:"
 _DEVICE_SESSION_INSERTION = (
     "        self.semantic_adapter = None\n"
     "        if os.environ.get('ALAS_SEMANTIC_MODE') == '1':\n"
@@ -257,6 +260,20 @@ def assert_normal_device_source_preserved(
                 "semantic Device insertion is missing or duplicated"
             )
         restored = restored.replace(patched, pristine, 1)
+    if restored.count(_DEVICE_HANDLE_ERROR_IMPORT) != 1:
+        raise ScreenshotFrameClockVerificationError(
+            "semantic Device HandleError import is missing or duplicated"
+        )
+    restored = restored.replace(_DEVICE_HANDLE_ERROR_IMPORT, "", 1)
+    if restored.count(_DEVICE_HANDLE_ERROR_PATCHED) != 2:
+        raise ScreenshotFrameClockVerificationError(
+            "semantic Device HandleError guards are missing or duplicated"
+        )
+    restored = restored.replace(
+        _DEVICE_HANDLE_ERROR_PATCHED,
+        _DEVICE_HANDLE_ERROR_PRISTINE,
+        2,
+    )
     if restored != pristine_source:
         raise ScreenshotFrameClockVerificationError(
             "normal ALAS Device source changed outside semantic guards"
@@ -394,10 +411,7 @@ class _RecordingSession:
 
 def verify(patched_upstream: Path) -> Mapping[str, Any]:
     check_generated_patch(SERIES_MANIFEST_PATH, PATCH_PATH, root=ROOT)
-    from alas_headless import (
-        AlasSemanticSession,
-        PINNED_CN_GAME_FINGERPRINT,
-    )
+    from alas_headless import AlasSemanticSession
     from alas_headless.adapter import (
         SemanticPixelGuard,
         StaleFrameError,
@@ -451,7 +465,6 @@ def verify(patched_upstream: Path) -> Mapping[str, Any]:
         package=PACKAGE,
         component=COMPONENT,
         driver_revision=REVISION,
-        game_fingerprint=PINNED_CN_GAME_FINGERPRINT,
     )
     handle = _FrameRuntimeHandle(fingerprint)
     session = AlasSemanticSession(
