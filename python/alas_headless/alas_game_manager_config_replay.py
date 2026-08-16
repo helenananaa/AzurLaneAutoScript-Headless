@@ -99,7 +99,8 @@ def _run_case(
     adapter = None
     if semantic_backend:
         adapter = SimpleNamespace(
-            restart_game_for_manager=lambda: events.append("semantic_restart")
+            restart_game_for_manager=lambda: events.append("semantic_restart"),
+            close=lambda: events.append("semantic_close"),
         )
     device = SimpleNamespace(
         semantic_adapter=adapter,
@@ -127,11 +128,13 @@ def _verify_original(
                 semantic_backend=semantic_backend,
             )
             if semantic_path_present and semantic_backend and auto_restart:
-                expected = ["semantic_restart", "login"]
+                expected = ["semantic_restart", "login", "semantic_close"]
             elif auto_restart:
                 expected = ["app_stop", "app_start", "login"]
             else:
                 expected = ["app_stop"]
+            if semantic_path_present and semantic_backend and not auto_restart:
+                expected.append("semantic_close")
             if events != expected:
                 raise AssertionError("original GameManager lifecycle decision drifted")
             cases[key] = events
@@ -150,6 +153,46 @@ def _verify_contract() -> int:
         else:
             raise AssertionError("invalid GameManager.AutoRestart was admitted")
     return invalid_count
+
+
+def _verify_semantic_cleanup(manager_type: type[Any]) -> dict[str, list[str]]:
+    cases: dict[str, list[str]] = {}
+
+    for failure in ("stop", "restart", "login"):
+        events: list[str] = []
+
+        def fail(name: str) -> None:
+            events.append(name)
+            if name == failure:
+                raise RuntimeError(name)
+
+        adapter = SimpleNamespace(
+            restart_game_for_manager=lambda: fail("restart"),
+            close=lambda: events.append("semantic_close"),
+        )
+        device = SimpleNamespace(
+            semantic_adapter=adapter,
+            app_stop=lambda: fail("stop"),
+            app_start=lambda: fail("start"),
+        )
+        host = object.__new__(manager_type)
+        host.config = SimpleNamespace(
+            GameManager_AutoRestart=(failure != "stop")
+        )
+        host.device = device
+        host.handle_app_login = MethodType(lambda self: fail("login"), host)
+        try:
+            manager_type.run(host)
+        except RuntimeError as exc:
+            if str(exc) != failure:
+                raise
+        else:
+            raise AssertionError("GameManager failure injection was not surfaced")
+        if not events or events[-1] != "semantic_close":
+            raise AssertionError("GameManager did not close its semantic session")
+        cases[failure] = events
+
+    return cases
 
 
 def _verify_invalid_entry(manager_type: type[Any], *, guard_present: bool) -> list[Any]:
@@ -177,6 +220,9 @@ def verify_game_manager_config(alas_root: Path) -> dict[str, Any]:
         manager_type,
         guard_present=guard_present,
     )
+    cleanup_cases = (
+        _verify_semantic_cleanup(manager_type) if semantic_path_present else {}
+    )
     return {
         "schema": SCHEMA,
         "passed": True,
@@ -186,6 +232,7 @@ def verify_game_manager_config(alas_root: Path) -> dict[str, Any]:
         "patched_guard_present": guard_present,
         "semantic_restart_path_present": semantic_path_present,
         "original_decisions": decisions,
+        "semantic_cleanup_cases": cleanup_cases,
         "invalid_entry_events": invalid_events,
         "temporary_config_only": True,
         "mutation_budget": 0,

@@ -1,0 +1,113 @@
+{
+  "schema": "alas-headless.game-manager-live-validation/v1",
+  "validated_at": "2026-08-16T13:32:00+08:00",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+  "client": {
+    "version_name": "9.7.10",
+    "version_code": 9710,
+    "abi": "x86_64"
+  },
+  "observer_driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "cases": [
+    {
+      "name": "auto_restart_false_running",
+      "started_at": "2026-08-16T13:08:02+08:00",
+      "exit_code": 0,
+      "before_pid": 1981,
+      "after_pid": null,
+      "observation_seconds": 45,
+      "relaunch_observed": false
+    },
+    {
+      "name": "auto_restart_false_already_stopped",
+      "started_at": "2026-08-16T13:09:05+08:00",
+      "exit_code": 0,
+      "before_pid": null,
+      "after_pid": null
+    },
+    {
+      "name": "consecutive_restart_1",
+      "started_at": "2026-08-16T13:13:05+08:00",
+      "exit_code": 0,
+      "before_pid": 7133,
+      "after_pid": 8748,
+      "login_success": true,
+      "login_to_main_confirm": true,
+      "remaining_observer_forwards": 0
+    },
+    {
+      "name": "consecutive_restart_2",
+      "started_at": "2026-08-16T13:13:49+08:00",
+      "exit_code": 0,
+      "before_pid": 8748,
+      "after_pid": 10361,
+      "login_success": true,
+      "login_to_main_confirm": true,
+      "remaining_observer_forwards": 0
+    },
+    {
+      "name": "start_failure_disabled_package",
+      "started_at": "2026-08-16T13:15:10+08:00",
+      "exit_code": 1,
+      "failure": "ObserverTransportError: ADB command failed",
+      "after_pid": null,
+      "remaining_observer_forwards": 0,
+      "recovery_pid": 12030,
+      "recovery_login_success": true
+    },
+    {
+      "name": "observer_start_full_timeout",
+      "started_at": "2026-08-16T13:16:29+08:00",
+      "exit_code": 1,
+      "elapsed_seconds": 605.746,
+      "failure": "ObserverTransportError: observer did not become ready after game restart",
+      "after_pid": 13790,
+      "remaining_observer_forwards": 0,
+      "recovery_pid": 14519,
+      "recovery_login_success": true
+    },
+    {
+      "name": "login_network_failure",
+      "started_at": "2026-08-16T13:28:33+08:00",
+      "exit_code": 1,
+      "elapsed_seconds": 134.364,
+      "failure": "SemanticGateClosed: observer snapshot is stale",
+      "login_click_observed": false,
+      "remaining_observer_forwards": 0,
+      "recovery_pid": 21799,
+      "recovery_login_success": true
+    },
+    {
+      "name": "stop_transport_failure",
+      "started_at": "2026-08-16T13:34:09+08:00",
+      "exit_code": 1,
+      "elapsed_seconds": 93.638,
+      "failure": "ObserverTransportError: ADB command failed",
+      "before_pid": 21799,
+      "after_pid": 21799,
+      "remaining_observer_forwards": 0
+    }
+  ],
+  "final_state": {
+    "package_enabled": true,
+    "pid": 21799,
+    "top_resumed_component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "angle_debug_package": "org.chromium.angle",
+    "angle_selection_package": "com.bilibili.azurlane",
+    "angle_selection_value": "angle",
+    "temporary_network_reject_present": false,
+    "remaining_observer_forwards": 0,
+    "observer": {
+      "protocol": "alas-headless.observer/v1",
+      "status": "ok",
+      "generation": 4210,
+      "scene_generation": 2,
+      "semantic_generation": 2,
+      "age_ms": 79,
+      "button_count": 45,
+      "button_extraction_errors": 0
+    }
+  }
+}

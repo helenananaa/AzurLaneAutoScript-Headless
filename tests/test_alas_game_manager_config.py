@@ -24,6 +24,14 @@ class AlasGameManagerConfigTests(unittest.TestCase):
         self.assertEqual(result["field_count"], 1)
         self.assertEqual(result["accepted_case_count"], 2)
         self.assertEqual(result["invalid_case_count"], 6)
+        self.assertEqual(
+            result["semantic_cleanup_cases"],
+            {
+                "stop": ["stop", "semantic_close"],
+                "restart": ["restart", "semantic_close"],
+                "login": ["restart", "login", "semantic_close"],
+            },
+        )
         self.assertEqual(result["mutation_budget"], 0)
         self.assertFalse(result["real_app_lifecycle_called"])
         self.assertFalse(result["android_input_injected"])
@@ -46,6 +54,7 @@ class AlasGameManagerConfigTests(unittest.TestCase):
             "integration/alas/series/0100-tool-flow-ports.patch"
         ).read_text(encoding="utf-8")
         self.assertEqual(patch.count("validate_alas_game_manager_config("), 1)
+        self.assertIn("semantic_adapter.close()", patch)
 
     def test_sources_compile(self):
         for relative in (

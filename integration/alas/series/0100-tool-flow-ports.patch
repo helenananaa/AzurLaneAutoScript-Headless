@@ -291,10 +291,11 @@ index 7bfc8531..143cc0c2 100644
              # No end condition, stop it manually.
  
 diff --git a/module/daemon/game_manager.py b/module/daemon/game_manager.py
-index 8ecdbf77..f5e8b975 100644
+index 8ecdbf77..39e990c3 100644
 --- a/module/daemon/game_manager.py
 +++ b/module/daemon/game_manager.py
-@@ -5,9 +5,21 @@ from module.logger import logger
+@@ -4,13 +4,29 @@ from module.logger import logger
+ 
  class GameManager(LoginHandler):
      def run(self):
 +        from alas_headless import validate_alas_game_manager_config
@@ -303,20 +304,31 @@ index 8ecdbf77..f5e8b975 100644
 +        )
 +
          logger.hr('Force Stop AzurLane', level=1)
+-        self.device.app_stop()
+-        logger.info('Force Stop finished')
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if semantic_adapter is not None and manager_config.auto_restart:
-+            semantic_adapter.restart_game_for_manager()
-+            logger.info('Semantic cold restart submitted with -force-gfx-st')
-+            self.handle_app_login()
-+            return
++        try:
++            if semantic_adapter is not None and manager_config.auto_restart:
++                semantic_adapter.restart_game_for_manager()
++                logger.info('Semantic cold restart submitted with -force-gfx-st')
++                self.handle_app_login()
++                return
 +
-         self.device.app_stop()
-         logger.info('Force Stop finished')
++            self.device.app_stop()
++            logger.info('Force Stop finished')
  
 -        if self.config.GameManager_AutoRestart:
-+        if manager_config.auto_restart:
-             self.device.app_start()
-             self.handle_app_login()
+-            self.device.app_start()
+-            self.handle_app_login()
++            if manager_config.auto_restart:
++                self.device.app_start()
++                self.handle_app_login()
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.close()
+ 
+ 
+ if __name__ == '__main__':
 diff --git a/module/daemon/os_daemon.py b/module/daemon/os_daemon.py
 index 6fdc403a..ed67e8ae 100644
 --- a/module/daemon/os_daemon.py

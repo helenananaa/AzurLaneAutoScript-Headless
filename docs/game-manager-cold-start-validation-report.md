@@ -2,8 +2,11 @@
 
 ## Outcome
 
-The Headless GameManager cold-restart path passed a live validation on
-2026-08-15. The normal session path no longer rejects an installed game because
+The Headless GameManager panel completed live qualification on 2026-08-16.
+Both `AutoRestart` values, an already-stopped app, repeated PID turnover,
+start/transport/login failures, the full 600-second observer-start timeout,
+recovery, and observer-forward cleanup were exercised through the original
+patched ALAS entry. The normal session path no longer rejects an installed game because
 its version, base APK digest, or `libil2cpp.so` digest differs from the original
 9.7.10 evidence build. It checks the concrete package shape needed to attempt
 the runtime, launches the game, and lets the observer and semantic contracts
@@ -13,6 +16,10 @@ This is update-tolerant startup, not a claim that every future game version is
 already semantically compatible. The live device still had CN 9.7.10 installed;
 acceptance of a changed version and split APK layout is covered by deterministic
 tests rather than a fabricated live update.
+
+Within the qualified CN x86_64 semantic profile, `GameManager.AutoRestart` is
+therefore fully supported. Other packages, ABIs and Activities remain separate
+runtime profiles rather than values of this field.
 
 ## Runtime policy
 
@@ -117,15 +124,44 @@ Focused regression tests additionally prove that:
 
 `git diff --check` also passed.
 
-## Remaining boundaries
+## Full lifecycle qualification
 
-- A real post-9.7.10 client was not installed during this validation. Its first
-  run must still prove observer attachment, semantic mappings, and login/main
-  behavior.
+The 2026-08-16 run added the previously missing lifecycle branches. The
+machine-readable source is
+[`integration/alas/game-manager-live-validation-receipt.json`](../integration/alas/game-manager-live-validation-receipt.json).
+
+| Case | Live result |
+| --- | --- |
+| `AutoRestart=false`, game running | PID `1981` stopped; seven samples over 45 seconds found no package PID and no relaunch |
+| `AutoRestart=false`, already stopped | exited `0` and remained stopped |
+| repeated `AutoRestart=true` | `7133 -> 8748 -> 10361`; both runs reached `Login success` and `Login to main confirm` |
+| start failure | disabling the exact package produced exit `1`, no PID and no observer forward; re-enable recovered to PID `12030` |
+| full observer timeout | native graphics deliberately withheld the observer; the production 600-second bound failed after `605.746s`, left PID `13790`, injected no login input and leaked no forward |
+| login network failure | one reversible Android `eth0` OUTPUT reject caused fail-closed stale observation after `134.364s`; no login click occurred and removal recovered to PID `21799` |
+| stop transport failure | a missing ADB executable exercised the real 90-second stop-verification window; exit `1` after `93.638s`, PID stayed `21799`, and no forward leaked |
+
+Live qualification exposed 49 observer forwards retained by earlier standalone
+GameManager invocations. GameManager now closes its semantic session in a
+`finally` block on success, disabled mode, restart failure and login failure.
+After removing the historical forwards, two consecutive successful restarts
+and every failure case each ended with zero matching forwards. Deterministic
+replay also asserts cleanup after stop, restart and login exceptions.
+
+The final restoration check proved the game package enabled, ANGLE selection
+restored to `angle`, the temporary network rule absent, MainActivity foreground,
+and a fresh PID `21799` observation at generation `4210`, age `79 ms`, with 45
+buttons and zero extraction errors. The independent probe closed its own
+forward, leaving the host count at zero.
+
+## Profile boundaries
+
+- A future client update still needs ordinary runtime compatibility evidence;
+  GameManager does not promise semantic mappings for software that does not yet
+  exist. Version and split-layout admission are nevertheless covered without a
+  hard-coded game digest.
 - ARM64, other package/server variants, different Activities, and missing or
-  relocated IL2CPP layouts are not qualified by this x86_64 result.
-- Stop failure, start failure, login failure, repeated PID turnover, and the
-  full 600-second observer-start timeout remain negative live cases.
+  relocated IL2CPP layouts are different runtime profiles and are not inferred
+  from this x86_64 qualification.
 - The strict package fingerprint API remains diagnostic-only. Reintroducing it
   into a normal GameManager/session path requires an explicit policy change and
   new update-tolerance review.

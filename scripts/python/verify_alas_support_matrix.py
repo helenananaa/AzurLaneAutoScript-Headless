@@ -32,8 +32,18 @@ DIMENSIONS = ("configuration", "observation", "action", "offline", "live")
 DIMENSION_STATES = frozenset(
     ("complete", "partial", "missing", "unsupported", "not_applicable")
 )
-FIELD_CLASSES = ("live_partial", "offline_only", "unsupported", "declared_only")
+FIELD_CLASSES = (
+    "complete",
+    "live_partial",
+    "offline_only",
+    "unsupported",
+    "declared_only",
+)
 CLASS_LABELS = {
+    "complete": (
+        "✅ 五维完整支持",
+        "配置、观察、输入、离线和实机五个维度均已完成",
+    ),
     "live_partial": (
         "◐ 有实机当前值/分支证据",
         "至少一个当前值或安全停止分支在实机出现；仍不是完整支持",
@@ -129,6 +139,8 @@ def _field_class(field: Mapping[str, Any]) -> str:
     dimensions = field["dimensions"]
     if field["support"] == "unsupported":
         return "unsupported"
+    if all(dimensions[dimension] == "complete" for dimension in DIMENSIONS):
+        return "complete"
     if dimensions["live"] in ("complete", "partial"):
         return "live_partial"
     if dimensions["offline"] in ("complete", "partial"):
@@ -494,7 +506,6 @@ def _render_field_section(ledger: Mapping[str, Any]) -> str:
         "",
         "| 结论 | 字段数 | 含义 |",
         "|---|---:|---|",
-        f"| ✅ 五维完整支持 | **0 / {len(fields)}** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |",
     ]
     for classification in FIELD_CLASSES:
         label, meaning = CLASS_LABELS[classification]

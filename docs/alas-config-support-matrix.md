@@ -29,7 +29,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 | 标记 | 完成度标注 | 含义 |
 |---|---|---|
-| `F` | ✅ 完整支持 | 面板内全部配置值和必要异常分支均已按本文口径闭环；Commission 已达到此状态 |
+| `F` | ✅ 完整支持 | 面板内全部配置值和必要异常分支均已按本文口径闭环；Commission、GameManager 已达到此状态 |
 | `L` | 🟢 主路径已完成，完整支持未完成 | 至少一条实机主路径闭环，但不代表组内所有配置值已闭环 |
 | `P` | 🟡 部分完成 | 有实现或可到达部分页面，配置分支仍不完整 |
 | `B` | 🧱 已到边界，尚未完成 | 已安全到达账号、资源、日期或观察能力边界 |
@@ -43,8 +43,8 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
-| ✅ 完整支持（`F`） | **1 / 60** | Commission |
-| 🟢 主路径已完成、全配置未完成（`L`） | **12 / 60** | Benchmark、Daily、Dorm、Event、EventA、Exercise、Gacha、GameManager、Minigame、Research、Restart、Tactical |
+| ✅ 完整支持（`F`） | **2 / 60** | Commission、GameManager |
+| 🟢 主路径已完成、全配置未完成（`L`） | **11 / 60** | Benchmark、Daily、Dorm、Event、EventA、Exercise、Gacha、Minigame、Research、Restart、Tactical |
 | 🧪 仅离线完成（`O`） | **9 / 60** | Awaken、Coalition、CoalitionSp、EventB、Guild、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **17 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、Main2、Main3、OpsiDaemon、OpsiGeneral、Reward、ShopOnce |
 | 🧱 已到边界、尚未完成（`B`） | **18 / 60** | Hard、Main、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
@@ -253,7 +253,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 ### 1.24 本轮 GameManager 重启开关契约与 EventStory 跳过记录
 
-`GameManager.AutoRestart` 现在只接受精确布尔值，并在原任务停止应用前 fail-closed。固定上游回放覆盖普通/语义两种后端与真假开关：false 只保留停止，普通 true 保留停止、启动和登录，语义 true 保留冷重启端口和登录。2026-08-15 又在 API 32 x86_64 专用 AVD 上执行了真实语义 true 分支：强停后约 2.2 秒提交冷启动，约 28 秒后原 ALAS 登录处理报告成功；新 PID 的独立观察为 `status=ok`、帧龄 49 ms、40 个活动 Button、0 个提取错误。默认启动只校验包结构、ABI 与观察器运行契约，不再计算或白名单游戏版本、base APK 和 IL2CPP 哈希；离线另覆盖 10.0.0、不同 IL2CPP 摘要和 split APK。已停止、启动/停止/登录失败、PID 连续变化和完整超时边界仍需实机证据，详见 [冷启动验证报告](game-manager-cold-start-validation-report.md)。
+`GameManager.AutoRestart` 只接受精确布尔值，并在原任务停止应用前 fail-closed。固定上游回放覆盖普通/语义两种后端与真假开关，并证明停止、重启和登录异常都执行 semantic session 清理。2026-08-16 在 API 32 x86_64 专用 AVD 上完成 false 运行中停止、false 已停止幂等、两轮连续 PID 冷启动、包禁用启动失败、ADB 传输停止失败、真实断网登录失败、故障恢复及未缩短的 600 秒 observer 启动超时。GameManager 新增 `finally` 清理后，所有成功/失败案例均以零 ADB observer forward 遗留结束；最终恢复到 PID 21799、前台 MainActivity、ANGLE 驱动和 `status=ok` 新鲜观察。该字段在已限定的 CN x86_64 语义运行时配置内达到五维完整支持，详见 [冷启动验证报告](game-manager-cold-start-validation-report.md)及机器可读收据。
 
 `EventStory.SkipBattle` 本轮明确跳过而不提升：固定上游最终配置把它锁为 true，但运行时代码完全不读取该字段，并在剧情战斗处无条件重启应用。支持 false 需要上游提供或单独评审一套继续战斗状态机，以及覆盖代表性活动布局的确定性战斗/结算观察；当前只有故事节点语义适配，强行补分支会重写业务状态机。重新进入条件是获得该原始行为和可回放的战斗、结算夹具。
 
@@ -428,7 +428,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 57 | EventStory | EventStory | P | `SkipBattle` 在固定上游锁为 true 且无运行时消费者；false 需要新的剧情战斗状态机和多活动观察，当前仅一条入口路径，战斗转场及其他故事结构未闭环 |
 | 58 | Benchmark | Benchmark | L | 五种设备类型 x 三种测试场景的原始方法筛选与语义场景选择已离线完成；各设备真实耗时、传输不可用及截图/点击能力仍缺 live 证据 |
 | 59 | AzurLaneUncensored | AzurLaneUncensored | P | 本地 localization 路径可用；`Repository` 对应的远端同步在上游被注释，配置与能力不一致 |
-| 60 | GameManager | GameManager | L | `AutoRestart` 两值及普通/语义生命周期决策已离线完成；true 已实机强停、冷启动、原 ALAS 登录成功并独立读取新 PID 新鲜观察。默认启动不再因游戏版本/哈希更新拒绝；真实升级客户端、已停止、启动/停止/登录失败和重试上限仍未覆盖 |
+| 60 | GameManager | GameManager | F | 真假双值、已停止幂等、连续 PID 冷启动、登录、停止/启动/断网/600 秒 observer 超时、恢复及零 forward 遗留均已闭环 |
 
 ## 3. 配置组字段级矩阵
 
@@ -544,7 +544,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | EventStory | `SkipBattle`（当前只允许 true） | P | 固定上游锁 true 且无字段消费者，实际始终重启跳过战斗；false 需上游/评审后的继续战斗状态机及多活动战斗、结算夹具，当前不外推完成 |
 | Benchmark | `DeviceType`=`emulator/plone_cloud_with_adb/phone_cloud_without_adb/android_phone/android_phone_vmos`; `TestScene`=`screenshot_click/screenshot/click` | L | 5 x 3 原始方法筛选及普通/语义场景决策已离线完成；仍缺各设备真实测速、不可用传输和截图/点击能力 live 证据 |
 | AzurLaneUncensored | `Repository` | P | 先决定恢复远端同步还是删除/禁用该配置；网络失败、仓库不可达、本地文件和回滚必须有明确契约 |
-| GameManager | `AutoRestart` | L | true/false 与普通/语义后端决策已离线完成；true 已实机完成强停、冷启动、原 ALAS 登录与新 PID 观察。仍缺真实升级客户端、游戏已关/卡死、启动失败、停止失败、登录失败和重试上限实机闭环 |
+| GameManager | `AutoRestart` | F | true/false、运行中/已停止、连续 PID 冷启动、登录、停止/启动/断网/完整 observer 超时、恢复和 session/forward 清理均已实机与回放闭环 |
 
 ## 4. 关键中断面与观察缺口
 
@@ -648,8 +648,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **0 / 278** | 当前没有任何详细设置同时完成全部值的配置、观察、输入、离线和实机闭环 |
-| ◐ 有实机当前值/分支证据 | **150 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **4 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **146 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **106 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -772,7 +772,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Gacha.Pool` | Gacha | type=select; display=default | options: "event", "heavy", "light", "special", "wishing_well"; default: "light" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Gacha.UseDrill` | Gacha | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Gacha.UseTicket` | Gacha | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `GameManager.AutoRestart` | GameManager | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `GameManager.AutoRestart` | GameManager | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `GemsFarming.ChangeFlagship` | GemsFarming | type=select; display=default | options: "ship_equip", "ship"; default: "ship" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GemsFarming.ChangeVanguard` | GemsFarming | type=select; display=default | options: "disabled", "ship_equip", "ship"; default: "ship" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GemsFarming.CommissionLimit` | GemsFarming | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |

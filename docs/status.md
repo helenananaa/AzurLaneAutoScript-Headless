@@ -534,28 +534,33 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   resource-shortfall UI, and post-submit receipts remain incomplete; no further
   destructive replay was authorized or attempted.
 
-### Game Manager restart configuration: live cold restart passed
+### Game Manager restart configuration: fully qualified
 
 - `GameManager.AutoRestart` admits exact booleans before the original task can
   stop the app. Invalid values fail before normal or semantic lifecycle calls.
 - Pinned replay preserves stop-only behavior for `false`, stop/start/login for
   normal `true`, and semantic cold-restart/login for Headless `true`, covering
   both backend modes without replacing the original task entry.
-- Deterministic replay still covers both values and both backends without
-  mutation. In addition, a user-authorized API 32 x86_64 run on 2026-08-15
-  exercised the real semantic `true` branch: force-stop began at 22:24:44,
-  cold launch was submitted at 22:24:46, and original ALAS reported login
-  success at 22:25:12.
-- The post-login game remained foreground on the new PID. An independent
-  observer read returned status `ok`, generation `1921`, frame age `49 ms`,
-  40 active Buttons, and zero extraction errors.
+- Live runs on 2026-08-16 completed `false` from running and already-stopped
+  states, two consecutive successful cold restarts (`7133 -> 8748 -> 10361`),
+  package-disabled launch failure, missing-ADB stop failure, a real network
+  login failure, recovery after each fault, and the unshortened 600-second
+  observer-start timeout (`605.746s`).
+- GameManager now closes the semantic session in `finally`. After clearing 49
+  historical leaked forwards, all success and error cases ended with zero
+  matching ADB forwards. Replay proves the same cleanup after stop, restart and
+  login exceptions.
+- Final restoration left MainActivity foreground at PID `21799`. An independent
+  observer read returned status `ok`, generation `4210`, frame age `79 ms`, 45
+  Buttons and zero extraction errors; ANGLE and network settings were restored.
 - Normal startup now checks package shape and ABI but does not hash or pin the
   installed game version. Tests accept a synthetic updated 10.0.0 split APK
   and reject any unexpected `sha256sum` in the compatibility path. Exact
   Android/ANGLE/observer boundaries remain pinned.
-- Disabled mode, already-stopped state, stop/start/login failures, repeated PID
-  turnover, and the full observer-start timeout remain live gaps. See the
-  [cold-start validation report](game-manager-cold-start-validation-report.md).
+- The field is fully supported for the qualified CN x86_64 semantic profile.
+  Other packages, ABIs and Activities remain separate runtime profiles. See the
+  [cold-start validation report](game-manager-cold-start-validation-report.md)
+  and machine-readable live receipt.
 
 ### EventStory SkipBattle: explicitly deferred
 
