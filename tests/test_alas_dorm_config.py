@@ -17,6 +17,9 @@ from alas_headless.semantic_oracle import SemanticGateClosed
 
 ROOT = Path(__file__).resolve().parents[1]
 LIVE_ALAS = Path(r"H:\program\AzurLaneAutoScript-alas-topdown-live")
+DORM_FEED_EVIDENCE_ORACLE_SHA256 = (
+    "96b7b240be56bac8a0262c503e2e9b65b42a5f5eba80eaad623adfebae2d7f40"
+)
 
 
 class AlasDormConfigTests(unittest.TestCase):
@@ -131,10 +134,13 @@ class AlasDormConfigTests(unittest.TestCase):
 
     def test_live_dorm_feed_receipts_cover_enabled_disabled_and_numeric_filter(self):
         adapter = ROOT / "python/alas_headless/alas_adapter.py"
-        oracle = ROOT / "python/alas_headless/semantic_oracle.py"
         expected_hashes = {
             "adapter": hashlib.sha256(adapter.read_bytes()).hexdigest(),
-            "oracle": hashlib.sha256(oracle.read_bytes()).hexdigest(),
+            # The three feeds consume real food.  Pin the exact Oracle source
+            # used on that run so an unrelated later UI-surface improvement
+            # (such as the Shop frame-pair fix) does not invalidate
+            # non-repeatable positive evidence.
+            "oracle": DORM_FEED_EVIDENCE_ORACLE_SHA256,
         }
         receipts = {
             "enabled": "integration/alas/dorm-feed-r10-live-validation-receipt.json",

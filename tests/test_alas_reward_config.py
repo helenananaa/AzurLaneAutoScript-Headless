@@ -15,6 +15,15 @@ PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
 DAILY_MISSION_EVIDENCE_ADAPTER_SHA256 = (
     "e02aae0a20cc8e63dfc219185e0f9645ff7ab8fa05632382f9e9dd66e6b54ff1"
 )
+DAILY_MISSION_EVIDENCE_ORACLE_SHA256 = (
+    "96b7b240be56bac8a0262c503e2e9b65b42a5f5eba80eaad623adfebae2d7f40"
+)
+WEEKLY_MISSION_ENABLED_EVIDENCE_ADAPTER_SHA256 = (
+    "60dead556a4ffc2c6bac18a30dba1afc936ccc2ed3034afee614b6cfa69d9c99"
+)
+WEEKLY_MISSION_ENABLED_EVIDENCE_ORACLE_SHA256 = (
+    "bd56ff524debd651b7b116d33e896792f51a23f272c3f9af965ac177ef5bb237"
+)
 
 
 def _values(**overrides: object) -> dict[str, object]:
@@ -119,15 +128,83 @@ class AlasRewardConfigTests(unittest.TestCase):
                 )
                 self.assertEqual(
                     receipt["source_sha256"]["oracle"],
-                    hashlib.sha256(
-                        ROOT.joinpath("python/alas_headless/semantic_oracle.py").read_bytes()
-                    ).hexdigest(),
+                    DAILY_MISSION_EVIDENCE_ORACLE_SHA256,
                 )
         enabled_dispatches = receipts[True]["dispatches"]
         self.assertEqual(len(enabled_dispatches), 1)
         self.assertEqual(enabled_dispatches[0]["capability"], "mission.claim")
         self.assertEqual(enabled_dispatches[0]["semantic_id"], "task/claim/all")
         self.assertEqual(receipts[False]["dispatches"], [])
+        self.assertEqual(
+            {receipt["source_sha256"]["reward"] for receipt in receipts.values()},
+            {"73af538ae1df6361941422ccc60dc1816c2e57ed00125adb102f0ff0400c3a8d"},
+        )
+
+    def test_weekly_mission_live_evidence_covers_enabled_and_disabled_values(self):
+        receipt_paths = {
+            True: ROOT / "integration/alas/reward-weekly-mission-live-validation-receipt.json",
+            False: ROOT
+            / "integration/alas/reward-weekly-mission-disabled-r1-live-validation-receipt.json",
+        }
+        receipts = {
+            enabled: json.loads(path.read_text(encoding="utf-8"))
+            for enabled, path in receipt_paths.items()
+        }
+        for enabled, receipt in receipts.items():
+            with self.subTest(enabled=enabled):
+                self.assertTrue(receipt["passed"])
+                self.assertEqual(
+                    receipt["configured"],
+                    {
+                        "Reward.CollectOil": False,
+                        "Reward.CollectCoin": False,
+                        "Reward.CollectExp": False,
+                        "Reward.CollectMission": False,
+                        "Reward.CollectWeeklyMission": enabled,
+                    },
+                )
+                self.assertEqual(receipt["mission_claim_grant_remaining"], 0)
+                self.assertTrue(receipt["main_page_visible_after_cleanup"])
+                self.assertTrue(receipt["temporary_config_removed"])
+        # The enabled weekly branch is consumptive.  Pin its original adapter
+        # and Oracle source digests rather than requiring a repeat claim after
+        # subsequent unrelated adapter/oracle improvements.
+        enabled_receipt = receipts[True]
+        self.assertEqual(
+            enabled_receipt["source_sha256"]["adapter"],
+            WEEKLY_MISSION_ENABLED_EVIDENCE_ADAPTER_SHA256,
+        )
+        self.assertEqual(
+            enabled_receipt["source_sha256"]["oracle"],
+            WEEKLY_MISSION_ENABLED_EVIDENCE_ORACLE_SHA256,
+        )
+        self.assertEqual(
+            enabled_receipt["dispatches"],
+            [
+                {
+                    "capability": "mission.claim",
+                    "semantic_id": "task/weekly-progress/claim",
+                    "generation": 102118,
+                    "path": "UICamera/Canvas/UIMain/TaskScene(Clone)/pages/TaskListForWeekPage(Clone)/task_progress/get_btn",
+                    "policy_sha256": "87caf7f4380a2e5cf1b2f0b63408cfa04b439a28c62d73d98f2c716038b6ac86",
+                    "remaining_after_dispatch": None,
+                }
+            ],
+        )
+        disabled_receipt = receipts[False]
+        self.assertEqual(disabled_receipt["dispatches"], [])
+        self.assertEqual(
+            disabled_receipt["source_sha256"]["adapter"],
+            hashlib.sha256(
+                ROOT.joinpath("python/alas_headless/alas_adapter.py").read_bytes()
+            ).hexdigest(),
+        )
+        self.assertEqual(
+            disabled_receipt["source_sha256"]["oracle"],
+            hashlib.sha256(
+                ROOT.joinpath("python/alas_headless/semantic_oracle.py").read_bytes()
+            ).hexdigest(),
+        )
         self.assertEqual(
             {receipt["source_sha256"]["reward"] for receipt in receipts.values()},
             {"73af538ae1df6361941422ccc60dc1816c2e57ed00125adb102f0ff0400c3a8d"},

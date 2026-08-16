@@ -6398,15 +6398,16 @@
         "integration/alas/series/0280-weekly-mission-progress-flow-port.patch",
         "scripts/python/run_alas_reward_mission_live_validation.py",
         "integration/alas/reward-weekly-mission-live-validation-receipt.json",
+        "integration/alas/reward-weekly-mission-disabled-r1-live-validation-receipt.json",
         "docs/reward-mission-live-validation-report.md"
       ],
-      "group_code": "P",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Reward"
       ],
       "path": "Reward.CollectWeeklyMission",
-      "status_label": "✅ 周常领取实机闭环",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -9649,10 +9650,11 @@
         "integration/alas/series/0280-weekly-mission-progress-flow-port.patch",
         "scripts/python/run_alas_reward_mission_live_validation.py",
         "integration/alas/reward-weekly-mission-live-validation-receipt.json",
+        "integration/alas/reward-weekly-mission-disabled-r1-live-validation-receipt.json",
         "docs/reward-mission-live-validation-report.md"
       ],
       "field": "Reward.CollectWeeklyMission",
-      "note": "Both boolean values preserve original Reward mission forwarding; one original-ALAS weekly claim used the exact selected-tab progress button, typed receipt chain, one grant, and typed return to main."
+      "note": "Both declared values now complete original Reward task runs: weekly=true made exactly one typed selected-tab progress claim, exhausted its grant, and returned to main; weekly=false made no mutation dispatch and also returned to main. Invalid values still fail before either entry can navigate."
     },
     {
       "dimensions": {

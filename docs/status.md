@@ -38,6 +38,18 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `Reward.CollectMission` is complete; this does not qualify the independent
   oil, coin, or experience claim switches.
 
+### Reward: weekly-mission claim switch complete on the live client
+
+- The prior original-ALAS `Reward.CollectWeeklyMission=true` run used exactly
+  one typed `task/weekly-progress/claim`, exhausted its grant, and returned to
+  the main page.  The new current-code `false` run entered and exited the
+  original Reward task without any `mission.claim` dispatch, resource change,
+  or retained temporary configuration.  The paired receipts are
+  `integration/alas/reward-weekly-mission-live-validation-receipt.json` and
+  `integration/alas/reward-weekly-mission-disabled-r1-live-validation-receipt.json`.
+  `Reward.CollectWeeklyMission` is complete independently of daily missions
+  and the three resource-collection switches.
+
 ### Gacha: all declared Amount values complete on the live client
 
 - Light-pool `Gacha.Amount=1..10` has now passed one real original-ALAS task

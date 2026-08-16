@@ -7068,8 +7068,18 @@ class SemanticOracle:
     def recommendation_shop_visible(self) -> bool:
         """Identify the exact top-level post-2025 Shop shell."""
 
+        return self._retry_transition_read(self._recommendation_shop_visible_once)
+
+    def _recommendation_shop_visible_once(self) -> bool:
         state = self.read_state()
         ui_state = self.read_ui_state()
+        return self._recommendation_shop_visible_from_states(state, ui_state)
+
+    def _recommendation_shop_visible_from_states(
+        self, state: OracleState, ui_state: UiState
+    ) -> bool:
+        """Check the Shop shell from one coherent Button/UI frame pair."""
+
         if not state.generation <= ui_state.generation <= state.generation + 2:
             raise SemanticGateClosed("shop shell snapshots are not coherent")
         controls = tuple(
@@ -7095,12 +7105,16 @@ class SemanticOracle:
         return len(controls) == 2 and len(title) == 1 and len(gift) == 1
 
     def shop_oil(self) -> int:
-        if not self.recommendation_shop_visible():
+        return self._retry_transition_read(self._shop_oil_once)
+
+    def _shop_oil_once(self) -> int:
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not self._recommendation_shop_visible_from_states(state, ui_state):
             raise SemanticGateClosed("shop shell identity is absent")
-        state = self.read_ui_state()
         matches = tuple(
             text
-            for text in state.texts
+            for text in ui_state.texts
             if (
                 text.path.endswith("/adapt/top/resources/oil/Text")
                 or text.path.endswith("buttonList/top/resources/oil/Text")
@@ -7116,9 +7130,18 @@ class SemanticOracle:
         return int(matches[0].text.strip())
 
     def gift_pack_page_visible(self) -> bool:
-        if not self.recommendation_shop_visible():
-            return False
+        return self._retry_transition_read(self._gift_pack_page_visible_once)
+
+    def _gift_pack_page_visible_once(self) -> bool:
+        state = self.read_state()
         ui_state = self.read_ui_state()
+        return self._gift_pack_page_visible_from_states(state, ui_state)
+
+    def _gift_pack_page_visible_from_states(
+        self, state: OracleState, ui_state: UiState
+    ) -> bool:
+        if not self._recommendation_shop_visible_from_states(state, ui_state):
+            return False
         selected = tuple(
             toggle
             for toggle in self._toggle_matches(ui_state, "shop/gift-pack")
@@ -7140,10 +7163,13 @@ class SemanticOracle:
     def free_weekly_supply_pack_available(self) -> bool:
         """Require one exact zero-price weekly pack; paid cards are never matches."""
 
-        if not self.gift_pack_page_visible():
-            return False
+        return self._retry_transition_read(self._free_weekly_supply_pack_available_once)
+
+    def _free_weekly_supply_pack_available_once(self) -> bool:
         state = self.read_state()
         ui_state = self.read_ui_state()
+        if not self._gift_pack_page_visible_from_states(state, ui_state):
+            return False
         roots = tuple(
             button.path
             for button in state.buttons
@@ -16527,7 +16553,9 @@ class SemanticOracle:
         if semantic_id == "shop/gift-pack" and len(matches) == 1:
             toggle = matches[0]
             delegated_shop_nav = bool(
-                self.recommendation_shop_visible()
+                self._recommendation_shop_visible_from_states(
+                    button_state, ui_state
+                )
                 and not toggle.checked
                 and toggle.active_in_hierarchy
                 and toggle.active_and_enabled

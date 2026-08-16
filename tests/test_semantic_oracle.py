@@ -667,6 +667,40 @@ def make_campaign_map_backend(generations=(10, 11)):
 
 
 class SemanticOracleTests(unittest.TestCase):
+    def test_shop_gift_pack_toggle_uses_its_coherent_frame_pair(self):
+        root = "OverlayCamera/Overlay/UIMain/"
+        backend = FakeBackend(
+            [
+                make_button("homeBtn", root + "buttonList/top/homeBtn"),
+                make_button("closeBtn", root + "buttonList/top/closeBtn"),
+            ]
+        )
+        toggle = make_toggle(
+            root + "buttonList/shop1List/giftPackShop/shop1Tg",
+            checked=False,
+            raycast_top=None,
+        )
+        shell_ui = make_ui(
+            [make_text("商店", root + "buttonList/top/title/Text")],
+            toggles=[toggle],
+        )
+        # The first Button/UI pair is coherent.  A later UI frame is
+        # deliberately incoherent to prove click_toggle does not issue a
+        # second, unrelated Shop-shell read before it taps the proven Toggle.
+        backend.ui_sequence = [
+            shell_ui,
+            make_ui(
+                [make_text("商店", root + "buttonList/top/title/Text")],
+                toggles=[toggle],
+                generation=99,
+            ),
+        ]
+
+        receipt = make_oracle(backend).click_toggle("shop/gift-pack")
+
+        self.assertEqual(receipt.semantic_id, "shop/gift-pack")
+        self.assertEqual(backend.taps, [(640, 360)])
+
     def test_campaign_battle_reward_requires_result_stack_marker(self):
         backend = FakeBackend(
             [

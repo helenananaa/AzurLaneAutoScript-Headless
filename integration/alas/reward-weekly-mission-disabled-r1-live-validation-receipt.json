@@ -1,0 +1,31 @@
+{
+  "schema": "alas-headless.reward-mission-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "source_sha256": {
+    "reward": "73af538ae1df6361941422ccc60dc1816c2e57ed00125adb102f0ff0400c3a8d",
+    "adapter": "99cfc62760cf28ec52ef306624eb0b76fb5d32bbd4e2a1041137e3ee744e0358",
+    "oracle": "5f8ad8130ddf55f233fb8f883f2acb95a848876bebb2af63744c5618c71df443"
+  },
+  "configured": {
+    "Reward.CollectOil": false,
+    "Reward.CollectCoin": false,
+    "Reward.CollectExp": false,
+    "Reward.CollectMission": false,
+    "Reward.CollectWeeklyMission": false
+  },
+  "temporary_config": "codex_reward_mission_live_082ddc1fd996466a85f496fb20da35c1.json",
+  "passed": true,
+  "elapsed_seconds": 147.703,
+  "dispatches": [],
+  "mission_claim_grant_remaining": 0,
+  "cleanup": {
+    "semantic_id": null,
+    "main_page_visible": true
+  },
+  "main_page_visible_after_cleanup": true,
+  "temporary_config_removed": true
+}
