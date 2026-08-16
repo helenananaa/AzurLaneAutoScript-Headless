@@ -20,6 +20,9 @@ from typing import Any, Mapping
 ROOT = Path(__file__).resolve().parents[2]
 POOL_INDEX = {"event": 0, "light": 1, "heavy": 2, "special": 3}
 
+if str(ROOT / "python") not in sys.path:
+    sys.path.insert(0, str(ROOT / "python"))
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()

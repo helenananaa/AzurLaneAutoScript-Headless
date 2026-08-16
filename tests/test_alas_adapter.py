@@ -4661,6 +4661,17 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             )
         )
 
+    def test_mission_ship_receipt_uses_exact_new_ship_continue(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.new_ship_reward_visible_value = True
+        adapter.begin_mission_reward(daily=True, weekly=False)
+
+        self.assertTrue(adapter.appear(NamedButton("GET_SHIP")))
+        receipt = adapter.click(NamedButton("GET_SHIP"))
+
+        self.assertEqual(receipt.semantic_id, "reward/new-ship/continue")
+        self.assertEqual(oracle.click_calls, ["reward/new-ship/continue"])
+
     def test_default_navbar_requires_exact_mission_entry_click(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.enabled_values["task/page/back"] = True

@@ -379,6 +379,7 @@ MISSION_CLICK_RESOURCES = frozenset(
         "MISSION_SINGLE",
         "GET_ITEMS_1",
         "GET_ITEMS_2",
+        "GET_SHIP",
         "GUILD_POPUP_CANCEL",
     }
 )
@@ -2776,9 +2777,7 @@ class AlasSemanticAdapter:
         if name in ("GUILD_POPUP_CONFIRM", "GUILD_POPUP_CANCEL"):
             return self.oracle.enabled("overlay/guild-message/close")
         if name == "GET_SHIP":
-            # Ship-reward handling has no reviewed semantic contract in this
-            # slice.  The validated AwardInfo popup is handled before this test.
-            return False
+            return self.oracle.new_ship_reward_visible()
         if name == "MISSION_WEEKLY_RED_DOT":
             return self.oracle.mission_weekly_reward_available()
 
@@ -8011,6 +8010,10 @@ class AlasSemanticAdapter:
             if target is None:
                 raise SemanticGateClosed("reviewed reward popup close is absent")
             return self.oracle.click(target)
+        if name == "GET_SHIP":
+            if not self.oracle.new_ship_reward_visible():
+                raise SemanticGateClosed("reviewed ship reward popup is absent")
+            return self.oracle.click("reward/new-ship/continue")
         raise AlasSemanticUnmapped(
             "ALAS resource is not semantically mapped for input: {0}".format(name)
         )

@@ -297,7 +297,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `Gacha.Pool` 只接受 `light/heavy/special/event/wishing_well`，`Amount` 只接受精确整数 `1..10`，`UseTicket/UseDrill` 只接受精确布尔值。四字段在 `RewardGacha.run()` 第一条可执行语句统一校验，早于语义 build scope、资源读取、队列处理或提交；布尔伪装整数、浮点、字符串、越界和空值均 fail-closed。
 
-200 个配置组合仍保持原卡池成本分类、仅活动池检查票券、票券优先与魔方余量拆分、提交后快速完成队列刷新；25 个非法单字段仍在 scope 前拒绝。实机 `event` 和 `special` 各完成一次两单建造：两次均从空队列开始，分别精确消耗 `4` 魔方和 `3000` 金币，并得到两条非空倒计时；回执为 `integration/alas/gacha-event-two-live-validation-receipt.json` 与 `integration/alas/gacha-special-two-live-validation-receipt.json`。已观察的快速完成提示、NewShip 和 AwardInfo 由纯语义输入关闭，恢复回执精确记录一次工具消耗后空队列。`UseDrill=true` 的原 Gacha 任务仍会在 NewShip 后遇到当前客户端的结果页截图停滞，故只把它提升为局部实机输入而非完整任务闭环；活动票券栏当前不存在，祈愿池亦未开放，`UseTicket` 与 `wishing_well` 不能宣称完成。
+200 个配置组合仍保持原卡池成本分类、仅活动池检查票券、票券优先与魔方余量拆分、提交后快速完成队列刷新；25 个非法单字段仍在 scope 前拒绝。实机 `event` 和 `special` 各完成一次两单建造：两次均从空队列开始，分别精确消耗 `4` 魔方和 `3000` 金币，并得到两条非空倒计时；回执为 `integration/alas/gacha-event-two-live-validation-receipt.json` 与 `integration/alas/gacha-special-two-live-validation-receipt.json`。其后以当前默认 `light`/`Amount=1` 重跑原任务：完整快照仅在池页、确认框和队列短暂陈旧时重读，最终精确消耗 `1` 魔方和 `600` 金币并产生一条队列倒计时，见 `integration/alas/gacha-light-daily-seed-validation-receipt.json`。已观察的快速完成提示、NewShip 和 AwardInfo 由纯语义输入关闭，恢复回执精确记录一次工具消耗后空队列。`UseDrill=true` 的原 Gacha 任务仍会在 NewShip 后遇到当前客户端的结果页截图停滞，故只把它提升为局部实机输入而非完整任务闭环；活动票券栏当前不存在，祈愿池亦未开放，`UseTicket` 与 `wishing_well` 不能宣称完成。
 
 ### 1.31 本轮 Retirement 模式入口与旧退役拒绝契约
 

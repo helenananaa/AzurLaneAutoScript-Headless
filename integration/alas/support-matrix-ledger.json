@@ -3066,6 +3066,7 @@
         "scripts/python/run_alas_gacha_live_validation.py",
         "integration/alas/gacha-event-two-live-validation-receipt.json",
         "integration/alas/gacha-special-two-live-validation-receipt.json",
+        "integration/alas/gacha-light-daily-seed-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -3094,6 +3095,7 @@
         "scripts/python/run_alas_gacha_live_validation.py",
         "integration/alas/gacha-event-two-live-validation-receipt.json",
         "integration/alas/gacha-special-two-live-validation-receipt.json",
+        "integration/alas/gacha-light-daily-seed-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",

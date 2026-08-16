@@ -1402,7 +1402,7 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "build/pool/event")
         self.assertEqual(backend.taps, [(235, 641)])
 
-    def test_build_queue_uses_selected_tab_capacity_and_exact_two_slot_timers(self):
+    def test_build_queue_retries_stale_snapshot_then_uses_exact_two_slot_timers(self):
         page = "root/Overlay/UIMain/blur_panel/"
         queue = (
             "root/UICamera/Canvas/UIMain/BuildShipUI(Clone)/BuildShipDetailUI1(Clone)/"
@@ -1431,6 +1431,9 @@ class SemanticOracleTests(unittest.TestCase):
                 )
             ],
         )
+        stale_ui = copy.deepcopy(backend.ui)
+        stale_ui["generation"] = 7
+        backend.ui_sequence = [stale_ui]
         oracle = make_oracle(backend)
 
         self.assertEqual(oracle.build_queue_timers(), ("99:99:99", "01:29:41"))
@@ -3636,7 +3639,7 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertTrue(close.path.endswith("close_btn"))
         self.assertEqual(backend.taps, [(904, 508), (968, 194)])
 
-    def test_build_submit_dialog_cross_checks_count_and_typed_costs(self):
+    def test_build_submit_dialog_retries_stale_snapshot_then_cross_checks_costs(self):
         base = (
             "root/UICamera/Canvas/UIMain/BuildShipUI(Clone)/"
             "BuildShipPoolsPageUI(Clone)/gallery/"
@@ -3668,6 +3671,9 @@ class SemanticOracleTests(unittest.TestCase):
                 for name in ("light", "heavy", "special")
             ],
         )
+        stale_ui = copy.deepcopy(backend.ui)
+        stale_ui["generation"] = 7
+        backend.ui_sequence = [stale_ui]
 
         state = make_oracle(backend).build_submit_state()
 

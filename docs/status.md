@@ -13,6 +13,11 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   the same exact `4`-cube/`3000`-coin delta and two typed timers.  The
   receipts are `integration/alas/gacha-event-two-live-validation-receipt.json`
   and `integration/alas/gacha-special-two-live-validation-receipt.json`.
+- A later default Light run retried only complete read-only snapshots while
+  the Unity pool, confirmation, and queue views settled.  The original task
+  returned success and changed cubes from `3664` to `3663`, coins from
+  `103999` to `103399`, and the empty queue to one `00:27:39` timer; see
+  `integration/alas/gacha-light-daily-seed-validation-receipt.json`.
 - The semantic queue implementation now proves the batch-finish button, the
   exact Chinese quick-finish confirmation and owned-tool count, the NewShip
   result, and AwardInfo close.  A real recovery consumed one quick-finish

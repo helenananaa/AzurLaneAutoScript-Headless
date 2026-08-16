@@ -5421,6 +5421,9 @@ class SemanticOracle:
     def build_selected_pool(self) -> BuildPool:
         """Return the selected construction pool from exact Unity Toggles."""
 
+        return self._retry_transition_read(self._build_selected_pool_once)
+
+    def _build_selected_pool_once(self) -> BuildPool:
         button_state = self.read_state()
         page_markers = tuple(
             button
@@ -5514,6 +5517,9 @@ class SemanticOracle:
     def build_submit_state(self) -> BuildSubmitState:
         """Read and cross-check the open construction confirmation dialog."""
 
+        return self._retry_transition_read(self._build_submit_state_once)
+
+    def _build_submit_state_once(self) -> BuildSubmitState:
         button_state = self.read_state()
         confirm = self._unique(button_state, "build/prep/confirm")
         cancel = self._unique(button_state, "build/prep/cancel")
@@ -5584,6 +5590,9 @@ class SemanticOracle:
     def build_queue_timers(self) -> Tuple[str, ...]:
         """Read the pinned two-slot construction queue without mutating it."""
 
+        return self._retry_transition_read(self._build_queue_timers_once)
+
+    def _build_queue_timers_once(self) -> Tuple[str, ...]:
         button_state = self.read_state()
         back = self._unique(button_state, "build/page/back")
         if not back.actionable or self._blocking_rules(button_state, "build/nav/queue"):
