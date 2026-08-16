@@ -1818,6 +1818,26 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
     ),
     SemanticTarget(
+        "commission/start/cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
+        "commission/start/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "commission/cancel/cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
+        "commission/cancel/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
         "research/start/cancel",
         "custom_button_2(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
@@ -2417,6 +2437,10 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "commission/detail/back",
             "commission/detail/recommend",
             "commission/detail/start",
+            "commission/start/cancel",
+            "commission/start/confirm",
+            "commission/cancel/cancel",
+            "commission/cancel/confirm",
             "commission/scroll",
         ),
     ),
@@ -2427,6 +2451,10 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "commission/detail/back",
             "commission/detail/recommend",
             "commission/detail/start",
+            "commission/start/cancel",
+            "commission/start/confirm",
+            "commission/cancel/cancel",
+            "commission/cancel/confirm",
         ),
     ),
     BlockerRule(
@@ -2697,6 +2725,10 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "tactical/continue/cancel",
             "tactical/course/cancel",
             "tactical/course/confirm",
+            "commission/start/cancel",
+            "commission/start/confirm",
+            "commission/cancel/cancel",
+            "commission/cancel/confirm",
             "research/start/cancel",
             "research/start/confirm",
             "research/queue/cancel",
@@ -4895,6 +4927,93 @@ class SemanticOracle:
             path=button.path,
         )
 
+    def click_commission_running_row(
+        self, expected_signature: Sequence[Union[int, str]]
+    ) -> ActionReceipt:
+        """Open an exact running row while allowing its countdown to advance."""
+
+        expected = tuple(expected_signature)
+        if len(expected) != 6 or expected[4] != CommissionStatus.RUNNING.value:
+            raise SemanticGateClosed("running commission signature is malformed")
+        rows = self.commission_rows()
+        matches = tuple(
+            row
+            for row in rows
+            if row.index == expected[0]
+            and row.name == expected[1]
+            and row.level == expected[2]
+            and row.status == CommissionStatus.RUNNING
+            and row.type_sprite == expected[5]
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed(
+                "running commission row identity is absent or ambiguous"
+            )
+        row = matches[0]
+        state = self.read_state()
+        current = tuple(button for button in state.buttons if button.path == row.button.path)
+        if len(current) != 1 or not current[0].actionable:
+            raise SemanticGateClosed("running commission row is not actionable")
+        button = current[0]
+        if button.point is None or button.bounds is None:
+            raise SemanticGateClosed("running commission row geometry is absent")
+        if self._blocking_rules(state, "commission/page/back"):
+            raise SemanticGateClosed("running commission row action is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before commission input")
+        self._tap(int(round(button.point.x)), int(round(button.point.y)))
+        return ActionReceipt(
+            semantic_id="commission/running/{0}".format(row.index),
+            generation=state.generation,
+            point=button.point,
+            bounds=button.bounds,
+            path=button.path,
+        )
+
+    def click_commission_cancel(self) -> ActionReceipt:
+        """Click the exact visible cancel image on a coherent running detail."""
+
+        state = self.read_state()
+        back = self._unique(state, "commission/detail/back")
+        if not back.actionable:
+            raise SemanticGateClosed("running commission detail is not actionable")
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("running commission detail snapshots are incoherent")
+        suffix = "/maskDetail/detailPanel/btn/giveup"
+        labels = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith(suffix + "/text")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.text.strip() == "取消"
+        )
+        images = tuple(
+            item
+            for item in ui_state.images
+            if item.path.endswith(suffix)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.sprite == "btn_sel"
+            and item.bounds is not None
+        )
+        if len(labels) != 1 or len(images) != 1:
+            raise SemanticGateClosed("running commission cancel identity is incomplete")
+        bounds = images[0].bounds
+        assert bounds is not None
+        point = Point((bounds.left + bounds.right) / 2, (bounds.top + bounds.bottom) / 2)
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before commission cancel")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="commission/detail/cancel",
+            generation=state.generation,
+            point=point,
+            bounds=bounds,
+            path=images[0].path,
+        )
+
     def commission_detail_state(self) -> CommissionDetailState:
         """Read the exact selected commission and ship-assignment state."""
 
@@ -4992,11 +5111,6 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "commission start requires at least three assigned ships"
             )
-        if require_assigned_ships and detail.oil_cost != 0:
-            raise SemanticGateClosed(
-                "semantic commission start is limited to zero-oil rows"
-            )
-
         state = self.read_state()
         target = self._unique(state, semantic_id)
         if (
@@ -18448,6 +18562,17 @@ class SemanticOracle:
         resource_id = {"物资": "gold", "心智魔方": "20001"}[match.group(1)]
         return resource_id, int(match.group(2))
 
+    def commission_start_prompt_cost(self) -> Optional[int]:
+        state = self.read_state()
+        parts = self._msgbox_prompt_parts(state)
+        if parts is None:
+            return None
+        plain, cancel, confirm = parts
+        match = re.fullmatch(r"本次委托需要花费([1-9][0-9]*)石油", plain)
+        if match is None or cancel != "取消" or confirm != "确定":
+            return None
+        return int(match.group(1))
+
     def _research_queue_prompt_matches(self, state: OracleState) -> bool:
         parts = self._msgbox_prompt_parts(state)
         if parts is None:
@@ -18796,6 +18921,12 @@ class SemanticOracle:
             in ("login/update/restart-dialog", "login/update/restart-msgbox")
             and self._login_update_restart_prompt_target(state) == semantic_id
         )
+        delegated_activity_main_back = bool(
+            semantic_id == "event-list/page/back"
+            and len(self._matches(state, "event-list/page/back")) == 1
+            and not self._matches(state, "reward/award-info/close")
+            and not self._matches(state, "reward/award-info1/close")
+        )
         delegated_mail_confirmation = bool(
             semantic_id in ("mail/confirm/claim", "mail/confirm/cancel")
             and self.mail_confirmation_kind() is not None
@@ -18962,6 +19093,26 @@ class SemanticOracle:
             "tactical/course/confirm",
         ) and not self._tactical_course_prompt_matches(state):
             raise SemanticGateClosed("tactical course prompt identity is not proven")
+        if semantic_id in (
+            "commission/start/cancel",
+            "commission/start/confirm",
+        ):
+            parts = self._msgbox_prompt_parts(state)
+            if parts is None or re.fullmatch(
+                r"本次委托需要花费([1-9][0-9]*)石油", parts[0]
+            ) is None or parts[1:] != ("取消", "确定"):
+                raise SemanticGateClosed(
+                    "commission start prompt identity is not proven"
+                )
+        if semantic_id in (
+            "commission/cancel/cancel",
+            "commission/cancel/confirm",
+        ):
+            parts = self._msgbox_prompt_parts(state)
+            if parts != ("确定放弃任务？", "取消", "确定"):
+                raise SemanticGateClosed(
+                    "commission cancel prompt identity is not proven"
+                )
         if (
             semantic_id in ("research/start/cancel", "research/start/confirm")
             and self._research_start_prompt_cost(state) is None
@@ -18984,6 +19135,7 @@ class SemanticOracle:
                 not target.actionable
                 and not delegated_login_update
                 and not delegated_login_restart
+                and not delegated_activity_main_back
                 and not delegated_shop_home
                 and not delegated_mail_confirmation
                 and not delegated_exercise_opponent

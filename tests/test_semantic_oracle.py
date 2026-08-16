@@ -5183,6 +5183,12 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(rows[0].status, CommissionStatus.RUNNING)
         self.assertEqual(rows[0].duration_seconds, 7124)
 
+        receipt = make_oracle(backend).click_commission_running_row(
+            (0, "高阶战术研发II", 50, 7200, "running", "faxiankuangmai")
+        )
+        self.assertEqual(receipt.semantic_id, "commission/running/0")
+        self.assertEqual(backend.taps, [(640, 190)])
+
     def test_commission_detail_recommend_requires_exact_selected_identity(self):
         root = "root/Overlay/UIMain/blur_panel/"
         detail = root + "scrollItem/maskDetail/detailPanel/"
@@ -5283,7 +5289,7 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(proof.after_duration_seconds, 7124)
         self.assertEqual(proof.after_status_sprite, "tag_ongoing")
 
-    def test_commission_start_rejects_nonzero_oil_cost(self):
+    def test_commission_start_accepts_nonzero_oil_cost(self):
         root = "root/Overlay/UIMain/blur_panel/"
         detail = root + "scrollItem/maskDetail/detailPanel/"
         backend = FakeBackend(
@@ -5304,9 +5310,70 @@ class SemanticOracleTests(unittest.TestCase):
         )
         signature = (1, "日常资源开发III", 15, 3600, "pending", "faxiankuangmai")
 
-        with self.assertRaises(SemanticGateClosed):
-            make_oracle(backend).click_commission_start(signature)
-        self.assertEqual(backend.taps, [])
+        receipt = make_oracle(backend).click_commission_start(signature)
+        self.assertEqual(receipt.semantic_id, "commission/detail/start")
+        self.assertEqual(backend.taps, [(1092, 363)])
+
+    def test_commission_oil_prompt_and_cancel_prompt_require_exact_copy(self):
+        popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "custom_button_2(Clone)",
+                    popup + "button_container/custom_button_2(Clone)",
+                ),
+                make_button(
+                    "custom_button_1(Clone)",
+                    popup + "button_container/custom_button_1(Clone)",
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("本次委托需要花费1200石油", popup + "msg_panel/content"),
+                make_text(
+                    "取消", popup + "button_container/custom_button_2(Clone)/pic"
+                ),
+                make_text(
+                    "确定", popup + "button_container/custom_button_1(Clone)/pic"
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.commission_start_prompt_cost(), 1200)
+        self.assertEqual(
+            oracle.click("commission/start/confirm").semantic_id,
+            "commission/start/confirm",
+        )
+
+        backend.ui["texts"][0]["text"] = "确定放弃任务？"
+        self.assertEqual(
+            oracle.click("commission/cancel/confirm").semantic_id,
+            "commission/cancel/confirm",
+        )
+
+    def test_commission_running_detail_cancel_uses_exact_label_and_image(self):
+        root = "root/Overlay/UIMain/blur_panel/"
+        giveup = root + "scrollItem/maskDetail/detailPanel/btn/giveup"
+        backend = FakeBackend(
+            [make_button("back_btn", root + "adapt/top/back_btn", 58, 53)]
+        )
+        backend.ui = make_ui(
+            [make_text("取消", giveup + "/text")],
+            images=[
+                make_image(
+                    giveup,
+                    "btn_sel",
+                    {"left": 905, "top": 410, "right": 1045, "bottom": 470},
+                )
+            ],
+        )
+
+        receipt = make_oracle(backend).click_commission_cancel()
+
+        self.assertEqual(receipt.semantic_id, "commission/detail/cancel")
+        self.assertEqual(backend.taps, [(975, 440)])
 
     def test_commission_unknown_status_sprite_fails_closed(self):
         page = "root/UICamera/Canvas/UIMain/EventUI(Clone)"

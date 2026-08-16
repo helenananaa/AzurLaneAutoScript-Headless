@@ -2185,3 +2185,28 @@ The NULL-only build therefore needs a narrow loader-token translation before
 display construction. It also needs common RGBX Android configs and an
 implementation of swap-with-damage used by HWUI. These are maintained as
 separate patches so each compatibility behavior remains auditable.
+
+### 2026-08-16 Commission full qualification: passed
+
+- Real ALAS runs started zero-oil tactical/resource commissions and a major
+  `高阶自主训练`; the latter confirmed the exact 1200-oil prompt and reached
+  a decreasing `tag_ongoing` countdown.
+- One running tactical commission was reopened, cancelled through the exact
+  `确定放弃任务？` prompt, observed absent from the running set, and refilled
+  by a subsequent complete ALAS Commission run.
+- A real positional-list bug was fixed: after a start reorders rows, ALAS now
+  rebinds the intended commission by immutable typed fields before clicking
+  the fresh signature, rather than trusting a stale row index.
+- A two-slot live regression then started two identical pending
+  `日常资源开发VI` rows in one ALAS invocation: the first used current row 2,
+  the rescan used fresh row 3, both reached `tag_ongoing`, and the command
+  returned to 4/4 running with next run `2026-08-16 12:50:21`.
+- `cube`, `cube_24h`, `chip`, `chip_24h`, `oil`, and `custom`, plus
+  `DoMajorCommission=false/true`, each completed a separate live dynamic-list
+  run. All eight runs preserved 4/4 running state and scheduled the earliest
+  completion at approximately `2026-08-16 12:02:29`.
+- The Commission panel and its three configuration fields now have complete
+  configuration, observation, action, offline, and live evidence. The support
+  matrix promotes Commission from `L` to the repository's first `F` panel.
+
+See [G8 real ALAS reward and commission validation](g8-alas-reward-commission-validation-report.md).

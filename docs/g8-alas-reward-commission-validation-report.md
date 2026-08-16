@@ -28,9 +28,10 @@ The first reward remains recovery-qualified historical evidence. Commission
 reward budget `1` is now also clean-qualified by the later independent natural
 completion and in-context proof.
 
-This is not full unattended ALAS qualification. Larger budgets, nonzero-oil
-starts, cancellation, gestures outside the exact reviewed commission handle,
-and other task mutations remain separate gates.
+The 2026-08-16 follow-up below completes the remaining Commission gates:
+nonzero-oil confirmation, a real major commission, cancellation, refill,
+all six presets, both major-switch values, dynamic multipage identity after
+list reordering, and continuous earliest-finish scheduling.
 
 ## Pinned runtime
 
@@ -84,8 +85,8 @@ The adapter stopped ALAS before row input. The command returned
 
 Each positive invocation used the canonical integer start budget `1`. Before a
 start input, the adapter required the original typed row signature to match the
-detail name, level, and duration, at least three assigned ships, exact zero oil
-cost, and one remaining independent budget unit. Package identity, foreground,
+detail name, level, and duration, at least three assigned ships, an exact typed
+oil cost, and one remaining independent budget unit. Package identity, foreground,
 freshness, unique bounds, blockers, and top EventSystem raycast also had to
 remain valid.
 
@@ -212,10 +213,12 @@ neither track nor handle is accepted only as an exact single-page state; a
 partial or ambiguous pair fails closed.
 
 The pinned ALAS scan now reuses its original `_commission_scan_list()` loop and
-delegates only its scroll operations to those typed primitives. Semantic
-commissions carry a stable `(daily|urgent, row_index)` key so a ticking running
-row is deduplicated across viewports while two real same-name rows at different
-indexes remain distinct. A full reward/start-budget-zero run reported:
+delegates only its scroll operations to those typed primitives. During one
+scan, `(daily|urgent, row_index)` deduplicates a ticking running row across
+viewports while preserving same-name rows at different indexes. Before a
+later start, ALAS rebinds the candidate by immutable typed content and uses the
+fresh positional signature, because a completed start can reorder indexes. A
+full reward/start-budget-zero run reported:
 
 ```text
 ALAS_COMMISSION_MULTIPAGE_BUDGET0_RESULT True
@@ -244,12 +247,77 @@ single page. No reward or start mutation was admitted by this run.
   clean reward run, one real outage blocked the commission page. The exact
   reviewed confirm target was top-raycastable and restored the page; no other
   Msgbox prompt is admitted by this mapping.
-- The current start mutation slice permits only exact pending, zero-oil rows;
-  cancellation remains unallowlisted.
+- Commission start confirmation accepts only the exact
+  `本次委托需要花费N石油` prompt and rechecks `N` against the selected detail.
+- Running-row cancellation requires the same typed commission identity while
+  allowing its countdown to advance, the exact `取消` image, and the exact
+  `确定放弃任务？` confirmation.
+
+## 2026-08-16 full Commission qualification
+
+The remaining gates were exercised on `emulator-5580` with the same pinned
+package and observer revision. The daily list contained two identical
+`日常资源开发VI` rows, two tactical rows, and one major row. Typed scrolling
+covered all five rows; the urgent tab was genuinely empty and proved by the
+game's exact empty marker.
+
+Four real starts completed through the ALAS state machine. They included
+`高阶战术研发II` (`7200 -> 7197` seconds), `高阶战术研发I`,
+`日常资源开发VI`, and the major `高阶自主训练`. The major start displayed
+the exact `本次委托需要花费1200石油` prompt, was confirmed, and changed to
+`tag_ongoing`; the account paid the real 1200-oil cost. This removes the old
+zero-oil-only limitation.
+
+A running `高阶战术研发I` row was then reopened using its stable typed fields
+while its countdown advanced. The exact `取消` control and
+`确定放弃任务？` prompt were confirmed. The list changed from four running
+rows to three running rows plus one pending row. A subsequent full ALAS
+Commission invocation refilled the slot with `高阶战术研发I`, returning the
+account to `4/4` running.
+
+That sequence exposed and fixed one real correctness issue: Unity row indices
+are positional, so starting a row can shift later rows. Reusing a stale index
+could select a different commission. Semantic ALAS now rebinds each selected
+candidate by name, level, duration, status, and type, then passes the fresh row
+signature to the adapter for the actual click. This preserves duplicate
+same-name rows without allowing a shifted major row to inherit another row's
+identity.
+
+The fix itself received a positive live regression rather than only a unit
+test. Two slots were released, leaving two identical pending
+`日常资源开发VI` rows. One full ALAS invocation with start budget `2` selected
+the first at current row `2`, proved `7200 -> 7200, tag_ongoing`, returned
+through the reward dashboard, rescanned the reordered list, selected the second
+at fresh row `3`, and proved the same transition. It exited successfully at
+4/4 running and scheduled `2026-08-16 12:50:21`. Thus the second action was
+both duplicate-aware and independent of the stale pre-start row index.
+
+With all four slots occupied and both mutation budgets at zero, six independent
+full ALAS runs exercised `cube`, `cube_24h`, `chip`, `chip_24h`, `oil`, and
+`custom` against the live five-row list. The custom expression was
+`major > daily-resource > shortest`. Two further runs exercised
+`DoMajorCommission=false` and `true`. Every run completed its daily/urgent tab
+switches, typed multipage scan, original ALAS filter, no-slot branch, and
+earliest-finish scheduler. The final observed finish set was:
+
+```text
+2026-08-16 12:02:29
+2026-08-16 12:50:21
+2026-08-16 12:53:38
+2026-08-16 20:57:42
+```
+
+All eight configuration runs selected `12:02:28` or `12:02:29` as the next
+Commission execution, depending only on the countdown tick. Together with the
+existing deterministic grammar, invalid-value, day/night, major-filter, reward,
+empty-list, and popup tests, Commission now satisfies the support matrix's full
+panel criterion.
 
 ## Verification
 
-- Controller suite: `148 passed`.
+- Repository suite: `1054 passed` (`48` pre-existing dependency/syntax warnings).
+- Commission, adapter, oracle, patch-series, pixel-inventory, and baseline
+  focused suite: `409 passed`.
 - Main Python and patched ALAS compilation: passed.
 - Native observer build with 128 Button records: passed.
 - Final APK installation and post-restart complete snapshot: passed.

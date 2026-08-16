@@ -637,73 +637,82 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_commission_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_commission_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/g8-alas-reward-commission-validation-report.md",
         "docs/status.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=textarea; display=default",
       "panels": [
         "Commission"
       ],
       "path": "Commission.CustomFilter",
-      "status_label": "☐ 未逐值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: <long default in args.json>"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_commission_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_commission_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/g8-alas-reward-commission-validation-report.md",
         "docs/status.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Commission"
       ],
       "path": "Commission.DoMajorCommission",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_commission_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_commission_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/g8-alas-reward-commission-validation-report.md",
         "docs/status.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=select; display=default",
       "panels": [
         "Commission"
       ],
       "path": "Commission.PresetFilter",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "options: \"chip_24h\", \"chip\", \"cube_24h\", \"cube\", \"custom\", \"oil\"; default: \"cube\""
     },
@@ -7578,8 +7587,8 @@
         "Commission"
       ],
       "name": "Commission",
-      "note": "领取和零油开始有证据；非零油、重大委托、全部过滤器、取消和连续循环未闭环",
-      "status": "L"
+      "note": "六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环",
+      "status": "F"
     },
     {
       "groups": [
@@ -9679,42 +9688,63 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_commission_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_commission_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/g8-alas-reward-commission-validation-report.md",
         "docs/status.md"
       ],
       "field": "Commission.PresetFilter",
-      "note": "All six declared presets preserve original day and night resolution, including 24-hour and custom behavior; invalid values fail before scope entry, rewards, or dispatch."
+      "note": "All six declared presets completed real dynamic-list ALAS runs and preserve deterministic day and night resolution; invalid values fail before scope entry, rewards, or dispatch."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_commission_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_commission_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/g8-alas-reward-commission-validation-report.md",
         "docs/status.md"
       ],
       "field": "Commission.CustomFilter",
-      "note": "Pinned custom and built-in expressions plus representative priority and Unicode normalization preserve the original Filter grammar; empty, malformed, and unsupported entries fail before scope entry."
+      "note": "A real custom priority run completed on the dynamic list; pinned expressions, priority and Unicode normalization preserve the original Filter grammar, while invalid rules fail before scope entry."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_commission_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_commission_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "docs/g8-alas-reward-commission-validation-report.md",
         "docs/status.md"
       ],
       "field": "Commission.DoMajorCommission",
-      "note": "Both booleans preserve original valid-pending and major-category admission decisions; invalid values fail before scope entry, rewards, or dispatch."
+      "note": "Both booleans completed real ALAS runs, a major commission paid its exact 1200-oil prompt and started, and deterministic admission decisions cover pending and invalid states."
     },
     {
       "dimensions": {
@@ -10405,8 +10435,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "9baa1268c6a366a51f43af04fcb98f9e95e9c87a8364b6d5847455718ecb03d0",
-      "manifest_sha256": "d879c705943f5161e839241e5e3cb897aecc7606b2c75ae1d7e18c012153810f",
+      "combined_sha256": "057a9fdffe2c8316b0e3c90f3758de9d9e325629a595989337c9e7b3f14a9b3a",
+      "manifest_sha256": "57944ea26b61622ddd6330bdaf011721646f87fd2b14c0288b2eedb724d16dda",
       "member_count": 26
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

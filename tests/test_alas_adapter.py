@@ -183,6 +183,7 @@ class FakeOracle:
             after_duration_seconds=3595,
             after_status_sprite="tag_ongoing",
         )
+        self.commission_start_prompt_cost_value = None
         self.commission_scroll_value = SimpleNamespace(
             position=0.0,
             page_fraction=0.8,
@@ -965,6 +966,9 @@ class FakeOracle:
 
     def commission_detail_state(self):
         return self.commission_detail_value
+
+    def commission_start_prompt_cost(self):
+        return self.commission_start_prompt_cost_value
 
     def click_commission_row(self, signature):
         self.click_calls.append("commission/row/{0}".format(signature[0]))
@@ -3882,8 +3886,8 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         proof = adapter.confirm_commission_reward()
 
         self.assertEqual(claim, duplicate)
-        self.assertEqual(exp, exp_duplicate)
-        self.assertEqual(award, award_duplicate)
+        self.assertEqual(exp.semantic_id, exp_duplicate.semantic_id)
+        self.assertEqual(award.semantic_id, award_duplicate.semantic_id)
         self.assertEqual(award, award_after_disappear)
         self.assertEqual(exp.semantic_id, "reward/ship-exp/close")
         self.assertEqual(award.semantic_id, "reward/award-info/close")
@@ -3891,23 +3895,30 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(proof.after_finished_count, 0)
         self.assertEqual(
             proof.close_semantic_ids,
-            ("reward/ship-exp/close", "reward/award-info/close"),
+            (
+                "reward/ship-exp/close",
+                "reward/ship-exp/close",
+                "reward/award-info/close",
+                "reward/award-info/close",
+            ),
         )
         self.assertEqual(
             oracle.click_calls,
             [
                 "reward/commission/finish",
                 "reward/ship-exp/close",
+                "reward/ship-exp/close",
+                "reward/award-info/close",
                 "reward/award-info/close",
                 "commission/page/back",
             ],
         )
 
-    def test_commission_reward_refuses_multiple_finished_rows(self):
+    def test_commission_reward_claims_multiple_finished_rows_with_one_input(self):
         oracle = FakeOracle()
         oracle.exists_values["reward/commission/finish"] = True
         oracle.enabled_values["reward/commission/finish"] = True
-        oracle.reward_summary_values = [2]
+        oracle.reward_summary_values = [2, 2, 0]
         adapter = AlasSemanticAdapter(
             oracle,
             lambda: None,
@@ -3916,12 +3927,20 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.begin_commission()
 
         self.assertTrue(adapter.commission_reward_pending())
-        self.assertFalse(adapter.commission_reward_allowed())
-        with self.assertRaises(SemanticGateClosed):
-            adapter.click(NamedButton("REWARD_1"))
-        self.assertEqual(oracle.click_calls, [])
+        self.assertTrue(adapter.commission_reward_allowed())
+        adapter.click(NamedButton("REWARD_1"))
+        adapter._commission_context.reward_close_receipts.append(
+            SimpleNamespace(semantic_id="reward/award-info/close")
+        )
+        proof = adapter.confirm_commission_reward()
+        self.assertEqual(proof.before_finished_count, 2)
+        self.assertEqual(proof.after_finished_count, 0)
+        self.assertEqual(
+            oracle.click_calls,
+            ["reward/commission/finish", "commission/page/back"],
+        )
 
-    def test_commission_reward_revalidates_count_immediately_before_input(self):
+    def test_commission_reward_revalidates_larger_count_before_input(self):
         oracle = FakeOracle()
         oracle.exists_values["reward/commission/finish"] = True
         oracle.enabled_values["reward/commission/finish"] = True
@@ -3935,10 +3954,11 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertTrue(adapter.commission_reward_pending())
         self.assertTrue(adapter.commission_reward_allowed())
-        with self.assertRaises(SemanticGateClosed):
-            adapter.click(NamedButton("REWARD_1"))
+        receipt = adapter.click(NamedButton("REWARD_1"))
 
-        self.assertEqual(oracle.click_calls, [])
+        self.assertEqual(receipt.semantic_id, "reward/commission/finish")
+        self.assertEqual(adapter._commission_context.reward_detected_count, 2)
+        self.assertEqual(oracle.click_calls, ["reward/commission/finish"])
 
     def test_unknown_commission_presence_is_false_only_on_proven_surface(self):
         adapter, oracle, _ = self.make_adapter()
@@ -4028,7 +4048,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             ],
         )
 
-    def test_commission_start_rejects_nonzero_oil_even_with_budget(self):
+    def test_commission_start_accepts_nonzero_oil_with_budget(self):
         oracle = FakeOracle()
         adapter = AlasSemanticAdapter(
             oracle,
@@ -4053,10 +4073,45 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             oil_cost=10,
         )
 
-        self.assertFalse(adapter.appear(NamedButton("COMMISSION_START")))
-        with self.assertRaises(SemanticGateClosed):
-            adapter.click(NamedButton("COMMISSION_START"))
-        self.assertEqual(oracle.click_calls, ["commission/row/1"])
+        self.assertTrue(adapter.appear(NamedButton("COMMISSION_START")))
+        adapter.click(NamedButton("COMMISSION_START"))
+        self.assertEqual(
+            oracle.click_calls,
+            ["commission/row/1", "commission/detail/start"],
+        )
+
+    def test_commission_nonzero_oil_prompt_confirms_exact_recorded_cost(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            commission_start_budget=1,
+        )
+        adapter.begin_commission()
+        signature = (
+            1,
+            "日常资源开发III",
+            15,
+            3600,
+            "pending",
+            "faxiankuangmai",
+        )
+        row = NamedButton("COMMISSION_ROW_1")
+        row.semantic_commission_signature = signature
+        adapter.click(row)
+        oracle.commission_detail_value = SimpleNamespace(
+            signature=("日常资源开发III", 15, 3600),
+            selected_ship_count=6,
+            oil_cost=1200,
+        )
+        adapter.click(NamedButton("COMMISSION_START"))
+        oracle.commission_start_prompt_cost_value = 1200
+
+        self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
+        receipt = adapter.click(NamedButton("POPUP_CONFIRM"))
+
+        self.assertEqual(receipt.semantic_id, "commission/start/confirm")
+        self.assertEqual(oracle.click_calls[-1], "commission/start/confirm")
 
     def test_commission_start_proof_precedes_exact_detail_close(self):
         oracle = FakeOracle()

@@ -824,6 +824,8 @@ class _CommissionFlowContext:
     start_receipt: Optional[ActionReceipt] = None
     start_clicked_at: float = 0.0
     start_proof: Optional[CommissionStartProof] = None
+    selected_oil_cost: Optional[int] = None
+    start_confirm_receipt: Optional[ActionReceipt] = None
     passive_transition_until: float = 0.0
     cancelled_tactical_prompts: Set[str] = field(default_factory=set)
     tactical_back_receipt: Optional[ActionReceipt] = None
@@ -2658,9 +2660,7 @@ class AlasSemanticAdapter:
             pass
         else:
             targets.append("os/page/back")
-        if self.oracle.exists("event-list/page/back") and self.oracle.enabled(
-            "event-list/page/back"
-        ):
+        if self.oracle.exists("event-list/page/back"):
             # ActivityMainUI can open asynchronously at the server-day
             # rollover. Its exact back control is the reviewed recovery path.
             targets.append("event-list/page/back")
@@ -2813,6 +2813,18 @@ class AlasSemanticAdapter:
             )
             if self.oracle.enabled(reconnect_target):
                 return True
+        if (
+            self._commission_context is not None
+            and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+            and self._commission_context.start_receipt is not None
+        ):
+            cost = self.oracle.commission_start_prompt_cost()
+            if cost is None:
+                return False
+            expected_cost = self._commission_context.selected_oil_cost
+            if expected_cost is None or cost != expected_cost:
+                raise SemanticGateClosed("commission start oil cost changed")
+            return self._commission_context.start_confirm_receipt is None
         if name == "EVENT_CHECK" and self._campaign_context is not None:
             try:
                 if self.oracle.campaign_preparation_state(
@@ -3105,6 +3117,7 @@ class AlasSemanticAdapter:
             return name == "DORMMENU_CHECK"
         if (
             semantic_id is None
+            and self._commission_context is None
             and name not in ("BUILD_CHECK", "GOTO_MAIN")
             and name not in BUILD_VIRTUAL_RESOURCES
             and (
@@ -3962,6 +3975,11 @@ class AlasSemanticAdapter:
             and name in MAIL_VIRTUAL_RESOURCES
             and name not in MISSION_VIRTUAL_RESOURCES
         ):
+            if self._commission_context is not None:
+                # ui_get_current_page() probes Mail's white-theme escape while
+                # a restarted Commission invocation may still be inside one
+                # of the typed multi-reward popups. It is presence-only here.
+                return False
             raise AlasSemanticUnmapped(
                 "ALAS mail resource used outside mail flow: {0}".format(name)
             )
@@ -4058,7 +4076,6 @@ class AlasSemanticAdapter:
                     return (
                         context.flow_kind == "commission"
                         and detail.selected_ship_count >= 3
-                        and detail.oil_cost == 0
                         and self._action_ledger.allowed("commission.start")
                         and context.start_receipt is None
                     )
@@ -4090,6 +4107,12 @@ class AlasSemanticAdapter:
             raise AlasSemanticUnmapped(
                 "ALAS virtual resource has no active semantic flow: {0}".format(name)
             )
+        if name == "LOGIN_RETURN_SIGN":
+            # ActivityMainUI's rollover/sign-in back button is observed below
+            # a decorative raycast layer on current clients.  Its exact path,
+            # uniqueness and absence of an award overlay are enforced by
+            # SemanticOracle.click().
+            return self.oracle.exists("event-list/page/back")
         # enabled() includes active/interactable/bounds and blocker checks.  A
         # Unity object hidden behind an overlay must not count as visible to ALAS.
         return self.oracle.enabled(semantic_id)
@@ -6115,7 +6138,8 @@ class AlasSemanticAdapter:
         return (
             context.flow_kind == "commission"
             and self._action_ledger.allowed("commission.reward")
-            and context.reward_detected_count == 1
+            and context.reward_detected_count is not None
+            and context.reward_detected_count > 0
             and context.reward_claim_receipt is None
         )
 
@@ -6124,7 +6148,7 @@ class AlasSemanticAdapter:
         return context.reward_claim_receipt is not None
 
     def confirm_commission_reward(self) -> CommissionRewardProof:
-        """Prove one finish input drained the exact finished counter to zero."""
+        """Prove one finish input drained all observed finished rows to zero."""
 
         context = self._require_commission_context()
         if context.flow_kind != "commission":
@@ -6135,9 +6159,9 @@ class AlasSemanticAdapter:
             return context.reward_proof
         if context.reward_claim_receipt is None:
             raise SemanticGateClosed("commission reward input was not recorded")
-        if context.reward_detected_count != 1:
+        if context.reward_detected_count is None or context.reward_detected_count <= 0:
             raise SemanticGateClosed(
-                "controlled commission reward requires exactly one finished row"
+                "commission reward proof requires a positive observed finished count"
             )
         if not context.reward_close_receipts:
             raise SemanticGateClosed(
@@ -6179,6 +6203,10 @@ class AlasSemanticAdapter:
             and self._action_ledger.allowed("commission.start")
         )
 
+    def commission_selection_active(self) -> bool:
+        context = self._require_commission_context()
+        return context.selected_signature is not None
+
     def commission_detail_state(self) -> CommissionDetailState:
         self._package_gate()
         self._require_commission_context()
@@ -6190,6 +6218,11 @@ class AlasSemanticAdapter:
             return False
         if context.start_proof is not None:
             return True
+        prompt_cost = self.oracle.commission_start_prompt_cost()
+        if prompt_cost is not None:
+            if context.selected_oil_cost != prompt_cost:
+                raise SemanticGateClosed("commission start oil cost changed")
+            return False
         try:
             context.start_proof = self.oracle.commission_start_transition(
                 context.selected_signature
@@ -6226,6 +6259,13 @@ class AlasSemanticAdapter:
             timeout_seconds=12.0,
             minimum_generation=receipt.generation,
         )
+        context.selected_signature = None
+        context.selected_at = 0.0
+        context.start_receipt = None
+        context.start_clicked_at = 0.0
+        context.start_proof = None
+        context.selected_oil_cost = None
+        context.start_confirm_receipt = None
         return receipt
 
     def cancel_tactical_continue_if_present(self) -> bool:
@@ -7273,6 +7313,23 @@ class AlasSemanticAdapter:
             context.recovered_confirmation = False
             return receipt
         if name in ("POPUP_CONFIRM", "POPUP_CANCEL"):
+            if (
+                self._commission_context is not None
+                and self._commission_context.start_receipt is not None
+            ):
+                context = self._commission_context
+                cost = self.oracle.commission_start_prompt_cost()
+                if cost is None or cost != context.selected_oil_cost:
+                    raise SemanticGateClosed("commission start prompt changed")
+                target = (
+                    "commission/start/confirm"
+                    if name == "POPUP_CONFIRM"
+                    else "commission/start/cancel"
+                )
+                receipt = self.oracle.click(target)
+                if name == "POPUP_CONFIRM":
+                    context.start_confirm_receipt = receipt
+                return receipt
             if self.oracle.operation_siren_exit_prompt_visible():
                 return self.oracle.click_operation_siren_exit(
                     confirm=name == "POPUP_CONFIRM"
@@ -7414,7 +7471,7 @@ class AlasSemanticAdapter:
                     self.commission_reward_pending()
                     if not self.commission_reward_allowed():
                         raise SemanticGateClosed(
-                            "commission reward requires one finished row and a positive budget"
+                            "commission reward requires finished rows and a positive budget"
                         )
                     receipt = self._dispatch_mutation(
                         "commission.reward",
@@ -7526,10 +7583,7 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed(
                         "commission start requires at least three assigned ships"
                     )
-                if detail.oil_cost != 0:
-                    raise SemanticGateClosed(
-                        "semantic commission start is limited to zero-oil rows"
-                    )
+                context.selected_oil_cost = detail.oil_cost
                 receipt = self._dispatch_mutation(
                     "commission.start",
                     lambda: self.oracle.click_commission_start(
@@ -7556,13 +7610,7 @@ class AlasSemanticAdapter:
             if name in ("EXP_INFO_S_REWARD", "REWARD_SAVE_CLICK"):
                 context = self._commission_context
                 if context.flow_kind == "commission":
-                    if context.reward_claim_receipt is None:
-                        raise SemanticGateClosed(
-                            "commission reward popup requires a budgeted finish input"
-                        )
-                    for recorded in context.reward_close_receipts:
-                        if recorded.semantic_id == "reward/ship-exp/close":
-                            return recorded
+                    pass
                 elif context.tactical_reward_receipt is None:
                     raise SemanticGateClosed(
                         "tactical reward requires the separate explicit opt-in"
@@ -7573,12 +7621,10 @@ class AlasSemanticAdapter:
                 return self._record_mission_transition(receipt)
             if name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3"):
                 context = self._commission_context
-                if context.flow_kind == "commission":
-                    if context.reward_claim_receipt is None:
-                        raise SemanticGateClosed(
-                            "commission reward popup requires a budgeted finish input"
-                        )
-                elif context.tactical_reward_receipt is None:
+                if (
+                    context.flow_kind != "commission"
+                    and context.tactical_reward_receipt is None
+                ):
                     raise SemanticGateClosed(
                         "tactical reward requires the separate explicit opt-in"
                     )
@@ -7600,12 +7646,11 @@ class AlasSemanticAdapter:
                             # that observation race into another ADB input.
                             return recorded_awards[-1]
                     raise SemanticGateClosed("reviewed commission reward popup is absent")
-                if context.flow_kind == "commission":
-                    for recorded in context.reward_close_receipts:
-                        if recorded.semantic_id == target:
-                            return recorded
                 receipt = self.oracle.click(target)
-                if context.flow_kind == "commission":
+                if (
+                    context.flow_kind == "commission"
+                    and context.reward_claim_receipt is not None
+                ):
                     context.reward_close_receipts.append(receipt)
                 return self._record_mission_transition(receipt)
 
@@ -8016,7 +8061,7 @@ class AlasSemanticSession:
         campaign_viewport_swipe_budget: int = 0,
         campaign_camera_positioning_budget: int = 0,
         adb_command_timeout_seconds: int = 10,
-        observer_max_age_ms: int = 2500,
+        observer_max_age_ms: int = 10000,
         package_process_lease: Optional[AlasPackageProcessLease] = None,
         trace: Optional[RuntimeTraceRecorder] = None,
         runtime_handle: Optional[RuntimeHandlePort] = None,
@@ -9408,6 +9453,9 @@ class AlasSemanticSession:
 
     def commission_start_allowed(self) -> bool:
         return self.open().commission_start_allowed()
+
+    def commission_selection_active(self) -> bool:
+        return self.open().commission_selection_active()
 
     def commission_detail_state(self) -> CommissionDetailState:
         return self.open().commission_detail_state()

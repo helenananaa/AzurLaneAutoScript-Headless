@@ -24,7 +24,18 @@ index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0
          commissions = SelectedGrids([])
          for _ in range(trial):
              if skip_first_screenshot:
-@@ -239,6 +254,12 @@ class RewardCommission(UI, InfoHandler):
+@@ -205,4 +220,10 @@ class RewardCommission(UI, InfoHandler):
+     def _commission_ensure_mode(self, mode):
+         if COMMISSION_SWITCH.set(mode, main=self):
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None:
++                # Typed row extraction already retries through the tab-change
++                # animation and proves the selected list without pixel lines.
++                semantic_adapter.commission_rows()
++                return True
+             # If daily list has commissions > 4, usually to be 5, and 1 <= urgent <= 4
+             # commission list will have an animation to scroll,
+@@ -241,6 +262,12 @@ class RewardCommission(UI, InfoHandler):
          return True
  
      def _commission_swipe(self):
@@ -37,7 +48,7 @@ index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0
          if COMMISSION_SCROLL.appear(main=self):
              if COMMISSION_SCROLL.at_bottom(main=self):
                  return False
-@@ -249,6 +270,12 @@ class RewardCommission(UI, InfoHandler):
+@@ -251,6 +278,12 @@ class RewardCommission(UI, InfoHandler):
              return False
  
      def _commission_swipe_to_top(self):
@@ -50,7 +61,7 @@ index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0
          if not COMMISSION_SCROLL.appear(main=self):
              return False
          COMMISSION_SCROLL.set_top(main=self, skip_first_screenshot=True)
-@@ -347,6 +374,7 @@ class RewardCommission(UI, InfoHandler):
+@@ -347,6 +372,7 @@ class RewardCommission(UI, InfoHandler):
          self.interval_clear(COMMISSION_START)
          comm_timer = Timer(7)
          count = 0
@@ -58,7 +69,7 @@ index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0
          while 1:
              if skip_first_screenshot:
                  skip_first_screenshot = False
-@@ -354,6 +382,18 @@ class RewardCommission(UI, InfoHandler):
+@@ -354,6 +380,28 @@ class RewardCommission(UI, InfoHandler):
                  self.device.screenshot()
  
              # End
@@ -74,10 +85,20 @@ index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0
 +                    semantic_adapter.close_started_commission_detail()
 +                    self.ui_ensure(page_commission)
 +                    break
++                if semantic_adapter.commission_selection_active():
++                    if self.handle_popup_confirm('COMMISSION_START'):
++                        continue
++                    if semantic_adapter.appear(COMMISSION_ADVICE):
++                        logger.info('Selected exact typed commission row')
++                        self.device.click(COMMISSION_ADVICE)
++                        count += 1
++                    elif semantic_adapter.appear(COMMISSION_START):
++                        self.device.click(COMMISSION_START)
++                    continue
              if self.info_bar_count():
                  break
              if count >= 3:
-@@ -381,19 +421,22 @@ class RewardCommission(UI, InfoHandler):
+@@ -381,19 +429,22 @@ class RewardCommission(UI, InfoHandler):
                  continue
              # Check if is the right commission
              if self.appear(COMMISSION_ADVICE, offset=(5, 20), interval=7):
@@ -112,7 +133,44 @@ index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0
                  self.device.click(COMMISSION_ADVICE)
                  count += 1
                  self.interval_reset(COMMISSION_ADVICE)
-@@ -476,19 +519,51 @@ class RewardCommission(UI, InfoHandler):
+@@ -429,9 +480,33 @@ class RewardCommission(UI, InfoHandler):
+                 # Update commission position.
+                 # In different scans, they have the same information, but have different locations.
+                 current = None
+-                for new_comm in new:
+-                    if new_comm == comm:
+-                        current = new_comm
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if semantic_adapter is not None:
++                    # Unity list indices are positional and can shift after a
++                    # preceding commission starts. Rebind by the immutable
++                    # typed commission fields, then use the fresh row signature
++                    # for the actual click.
++                    semantic_identity = (
++                        comm.name,
++                        getattr(comm, 'semantic_level', None),
++                        int(comm.duration.total_seconds()),
++                        comm.status,
++                        getattr(comm, 'semantic_type_sprite', None),
++                    )
++                    for new_comm in new:
++                        if (
++                            new_comm.name,
++                            getattr(new_comm, 'semantic_level', None),
++                            int(new_comm.duration.total_seconds()),
++                            new_comm.status,
++                            getattr(new_comm, 'semantic_type_sprite', None),
++                        ) == semantic_identity:
++                            current = new_comm
++                            break
++                else:
++                    for new_comm in new:
++                        if new_comm == comm:
++                            current = new_comm
+                 if current is not None:
+                     if self._commission_start_click(current, is_urgent=is_urgent):
+                         self.device.click_record_clear()
+@@ -476,19 +551,51 @@ class RewardCommission(UI, InfoHandler):
          logger.hr('Commission run', level=1)
          if self.daily_choose:
              for comm in self.daily_choose:
@@ -217,7 +275,7 @@ index 195d84a1354760fb116f8833f963f1bdd0f20555..fda74c41f81b5a897e961d59a234edd0
 +            ):
 +                logger.info(
 +                    'Semantic commission reward pending; reward budget is closed '
-+                    'or the finished count is not exactly one'
++                    'or no finished row is available'
 +                )
 +                return
 +            self.commission_receive()
