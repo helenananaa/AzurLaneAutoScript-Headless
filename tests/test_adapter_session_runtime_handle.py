@@ -378,6 +378,24 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         oracle.new_ship_reward_visible.assert_called_once_with()
         combat_visible.assert_called_once_with()
 
+    def test_build_result_probe_delegates_before_generic_reward_aliases(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        adapter = SimpleNamespace(
+            _login_flow=SimpleNamespace(active=False),
+            _mail_context=None,
+            _minigame_context=None,
+            _build_context=object(),
+            appear=mock.Mock(return_value=True),
+        )
+        session.adapter = adapter
+
+        self.assertTrue(session.appear("GET_ITEMS_SHIP_1"))
+
+        adapter.appear.assert_called_once_with("GET_ITEMS_SHIP_1")
+
     def test_new_ship_click_revalidates_current_frame_and_arms_transition(self):
         session = AlasSemanticSession(
             driver_revision=REVISION,

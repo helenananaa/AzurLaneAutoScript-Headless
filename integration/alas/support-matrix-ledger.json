@@ -3114,29 +3114,33 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_gacha_config.py",
+        "tests/test_adapter_session_runtime_handle.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_gacha_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
         "integration/alas/series/0230-gacha-queue-finish-flow-port.patch",
         "integration/alas/series/0240-gacha-result-wait-port.patch",
         "scripts/python/run_alas_gacha_queue_finish_live_validation.py",
         "integration/alas/gacha-light-drill-recovery-live-validation-receipt.json",
+        "integration/alas/gacha-light-daily-seed-validation-receipt.json",
+        "integration/alas/gacha-light-drill-task-r7-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Gacha"
       ],
       "path": "Gacha.UseDrill",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -7852,7 +7856,7 @@
         "Gacha"
       ],
       "name": "Gacha",
-      "note": "四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，快速完成恢复已关闭奖励页；票券、祈愿池与原任务完整 UseDrill 仍未闭环",
+      "note": "四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，UseDrill 两值均已完成原任务闭环；票券、祈愿池、其余卡池和数量仍未闭环",
       "status": "L"
     },
     {
@@ -10010,22 +10014,28 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_adapter.py",
         "tests/test_alas_gacha_config.py",
+        "tests/test_adapter_session_runtime_handle.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_gacha_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
         "integration/alas/series/0230-gacha-queue-finish-flow-port.patch",
         "integration/alas/series/0240-gacha-result-wait-port.patch",
         "scripts/python/run_alas_gacha_queue_finish_live_validation.py",
         "integration/alas/gacha-light-drill-recovery-live-validation-receipt.json",
+        "integration/alas/gacha-light-daily-seed-validation-receipt.json",
+        "integration/alas/gacha-light-drill-task-r7-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Gacha.UseDrill",
-      "note": "Both booleans preserve original post-submit queue flush decisions across the complete configuration matrix; a real existing queue consumed the exact prompted tool count, closed NewShip and AwardInfo, and returned to typed empty state. The native UseDrill task still lacks its terminal receipt, so the action dimension is partial."
+      "note": "Both booleans preserve original post-submit queue flush decisions across the complete configuration matrix. The false receipt records a typed nonempty construction queue, and the true receipt records the original task's exact cube, coin, and quick-item deltas plus NewShip, AwardInfo, and typed empty-queue terminal state."
     },
     {
       "dimensions": {

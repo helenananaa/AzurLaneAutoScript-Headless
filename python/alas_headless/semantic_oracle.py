@@ -10515,9 +10515,13 @@ class SemanticOracle:
             return False
 
         ui_state = self.read_ui_state()
+        # A full NewShipUI tree is substantially larger than its companion
+        # Button snapshot.  On the observed client, the sequential observer
+        # reads can span four monotonically increasing generations while both
+        # still prove this exact same click layer and typed identity.
         if (
             ui_state.generation < state.generation
-            or ui_state.generation > state.generation + 2
+            or ui_state.generation > state.generation + 4
         ):
             raise SemanticGateClosed("new-ship snapshots are not coherent")
 
@@ -10569,10 +10573,30 @@ class SemanticOracle:
             and dialogue
         )
 
+    def _new_ship_reward_action_state(self) -> OracleState:
+        """Read a settled, actionable NewShipUI state immediately before input.
+
+        The client can publish the full-screen click Button one observer frame
+        before the companion typed UI tree.  Preserve every identity check, but
+        retry the complete read-only proof while that transition settles so an
+        already-proven construction result does not abort before its sole
+        acknowledgement input.
+        """
+
+        def reader() -> OracleState:
+            state = self.read_state()
+            if not self._new_ship_reward_visible_in_state(state):
+                raise SemanticGateClosed("new-ship reward identity is not proven")
+            return state
+
+        return self._retry_transition_read(reader)
+
     def new_ship_reward_visible(self) -> bool:
         """Return whether a safely actionable ship-acquisition page is present."""
 
-        return self._new_ship_reward_visible_in_state(self.read_state())
+        return self._retry_transition_read(
+            lambda: self._new_ship_reward_visible_in_state(self.read_state())
+        )
 
     def click_daily_battle_result(self) -> ActionReceipt:
         state = self.read_state()
@@ -19898,13 +19922,12 @@ class SemanticOracle:
         )
 
     def click(self, semantic_id: str) -> ActionReceipt:
-        state = self.read_state()
-        delegated_new_ship_reward = bool(
-            semantic_id == "reward/new-ship/continue"
-            and self._new_ship_reward_visible_in_state(state)
+        delegated_new_ship_reward = semantic_id == "reward/new-ship/continue"
+        state = (
+            self._new_ship_reward_action_state()
+            if delegated_new_ship_reward
+            else self.read_state()
         )
-        if semantic_id == "reward/new-ship/continue" and not delegated_new_ship_reward:
-            raise SemanticGateClosed("new-ship reward identity is not proven")
         delegated_login_update = (
             semantic_id == "login/update/download"
             and self._login_update_download_prompt_matches(state)

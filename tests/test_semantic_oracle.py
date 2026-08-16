@@ -4395,16 +4395,51 @@ class SemanticOracleTests(unittest.TestCase):
                 make_text("博伊西", root + "dialogue/bg/name"),
             ],
             images=[delegated],
+            generation=14,
         )
         oracle = make_oracle(backend)
 
-        self.assertTrue(oracle.new_ship_reward_visible())
-        semantic_id, _ = oracle.wait_for_any(
-            ("reward/new-ship/continue",), timeout_seconds=1
-        )
-        self.assertEqual(semantic_id, "reward/new-ship/continue")
         receipt = oracle.click("reward/new-ship/continue")
         self.assertEqual(receipt.semantic_id, "reward/new-ship/continue")
+        self.assertEqual(backend.taps, [(640, 360)])
+
+    def test_new_ship_reward_retries_incoherent_transition_before_click(self):
+        root = "root/OverlayCamera/Overlay/UIMain/NewShipUI(Clone)/shake_panel/"
+        full_screen = {"left": 0.0, "top": 0.0, "right": 1280.0, "bottom": 720.0}
+        button = make_button(
+            "click", root + "click", bounds=full_screen, raycast_top=None
+        )
+        delegated = make_image(root + "click", "liaotian04", bounds=full_screen)
+        delegated["raycast_target"] = True
+        texts = [
+            make_text("博伊西", root + "ship_type/name_bg/mask/Text"),
+            make_text("USS Boise", root + "ship_type/english_name"),
+            make_text("请问，有什么能为您做的吗？", root + "dialogue/Text"),
+            make_text("轻巡", root + "dialogue/bg/type"),
+            make_text("博伊西", root + "dialogue/bg/name"),
+        ]
+        backend = FakeBackend([button])
+        backend.snapshot = make_snapshot(generation=13)
+        backend.buttons = make_buttons([button], generation=13)
+        backend.ui = make_ui(texts, images=[delegated], generation=13)
+        backend.snapshot_sequence = [
+            make_snapshot(generation=10),
+            make_snapshot(generation=13),
+        ]
+        backend.buttons_sequence = [
+            make_buttons([button], generation=10),
+            make_buttons([button], generation=13),
+        ]
+        backend.ui_sequence = [
+            make_ui(texts, images=[delegated], generation=7),
+            make_ui(texts, images=[delegated], generation=13),
+        ]
+        oracle = make_oracle(backend)
+
+        receipt = oracle.click("reward/new-ship/continue")
+
+        self.assertEqual(receipt.semantic_id, "reward/new-ship/continue")
+        self.assertEqual(receipt.generation, 13)
         self.assertEqual(backend.taps, [(640, 360)])
 
     def test_network_reconnect_confirm_requires_exact_reviewed_prompt(self):

@@ -9126,6 +9126,11 @@ class AlasSemanticSession:
             # list overlay. Let the minigame context classify those before
             # generic reward/combat probes apply unrelated blocker rules.
             return adapter.appear(button)
+        if getattr(adapter, "_build_context", None) is not None:
+            # Construction results reuse generic reward controls, but
+            # GET_ITEMS_SHIP_1 is a build-owned acknowledgement.  Delegate it
+            # before the generic AwardInfo fallback aliases only GET_ITEMS_1.
+            return adapter.appear(button)
         if (
             adapter._campaign_context is not None
             and adapter.oracle.enabled("overlay/network-reconnect/confirm")

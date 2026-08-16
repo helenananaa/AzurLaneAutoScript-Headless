@@ -23,11 +23,15 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   result, and AwardInfo close.  A real recovery consumed one quick-finish
   tool, closed all three pages, and proved the queue empty; see
   `integration/alas/gacha-light-drill-recovery-live-validation-receipt.json`.
-- This is deliberately not a Gacha promotion to complete: the native
-  `UseDrill=true` task reaches NewShip but the current client/driver can stall
-  while awaiting the deferred AwardInfo screenshot.  Event ticket inventory
-  was absent and Wishing Well was unavailable, so neither `UseTicket` nor
-  `wishing_well` has real consumption evidence.
+- The native `UseDrill=true` Light task now completed under the original ALAS
+  state machine: it returned true after `890.078` seconds, reduced cubes by
+  `1`, coins by `600`, and quick-finish tools by `1`, closed both NewShip and
+  AwardInfo, and ended with an empty typed queue.  The session layer delegates
+  build-owned result aliases before generic reward handling; see
+  `integration/alas/gacha-light-drill-task-r7-live-validation-receipt.json`.
+  `Gacha.UseDrill` is therefore complete for both boolean values.  Event ticket
+  inventory was absent and Wishing Well was unavailable, so neither
+  `UseTicket` nor `wishing_well` has real consumption evidence.
 
 ### Restart: real cold recovery and Scheduler durable state
 

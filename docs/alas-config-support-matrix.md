@@ -297,7 +297,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `Gacha.Pool` 只接受 `light/heavy/special/event/wishing_well`，`Amount` 只接受精确整数 `1..10`，`UseTicket/UseDrill` 只接受精确布尔值。四字段在 `RewardGacha.run()` 第一条可执行语句统一校验，早于语义 build scope、资源读取、队列处理或提交；布尔伪装整数、浮点、字符串、越界和空值均 fail-closed。
 
-200 个配置组合仍保持原卡池成本分类、仅活动池检查票券、票券优先与魔方余量拆分、提交后快速完成队列刷新；25 个非法单字段仍在 scope 前拒绝。实机 `event` 和 `special` 各完成一次两单建造：两次均从空队列开始，分别精确消耗 `4` 魔方和 `3000` 金币，并得到两条非空倒计时；回执为 `integration/alas/gacha-event-two-live-validation-receipt.json` 与 `integration/alas/gacha-special-two-live-validation-receipt.json`。其后以当前默认 `light`/`Amount=1` 重跑原任务：完整快照仅在池页、确认框和队列短暂陈旧时重读，最终精确消耗 `1` 魔方和 `600` 金币并产生一条队列倒计时，见 `integration/alas/gacha-light-daily-seed-validation-receipt.json`。已观察的快速完成提示、NewShip 和 AwardInfo 由纯语义输入关闭，恢复回执精确记录一次工具消耗后空队列。`UseDrill=true` 的原 Gacha 任务仍会在 NewShip 后遇到当前客户端的结果页截图停滞，故只把它提升为局部实机输入而非完整任务闭环；活动票券栏当前不存在，祈愿池亦未开放，`UseTicket` 与 `wishing_well` 不能宣称完成。
+200 个配置组合仍保持原卡池成本分类、仅活动池检查票券、票券优先与魔方余量拆分、提交后快速完成队列刷新；25 个非法单字段仍在 scope 前拒绝。实机 `event` 和 `special` 各完成一次两单建造：两次均从空队列开始，分别精确消耗 `4` 魔方和 `3000` 金币，并得到两条非空倒计时；回执为 `integration/alas/gacha-event-two-live-validation-receipt.json` 与 `integration/alas/gacha-special-two-live-validation-receipt.json`。其后以当前默认 `light`/`Amount=1` 重跑原任务：完整快照仅在池页、确认框和队列短暂陈旧时重读，最终精确消耗 `1` 魔方和 `600` 金币并产生一条队列倒计时，见 `integration/alas/gacha-light-daily-seed-validation-receipt.json`。`UseDrill=true` 现也由原 Gacha 任务完整闭环：从空队列开始，精确消耗 `1` 魔方、`600` 金币和 `1` 个快速完成道具，任务返回 true，依次关闭 NewShip 与 AwardInfo，并回到 typed 空队列；回执为 `integration/alas/gacha-light-drill-task-r7-live-validation-receipt.json`。因此 `Gacha.UseDrill` 两个布尔值均提升为完整。活动票券栏当前不存在，祈愿池亦未开放，`UseTicket` 与 `wishing_well` 不能宣称完成。
 
 ### 1.31 本轮 Retirement 模式入口与旧退役拒绝契约
 
@@ -406,7 +406,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | ConsumeCoins、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；购买、余额观察与确认仍未完成 |
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | GuildShop 14 字段与 MedalShop2 7 字段入口已离线等价；其余商店与真实操作未闭环 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝 |
-| 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，快速完成恢复已关闭奖励页；票券、祈愿池与原任务完整 UseDrill 仍未闭环 |
+| 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，UseDrill 两值均已完成原任务闭环；票券、祈愿池、其余卡池和数量仍未闭环 |
 | 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环 |
 | 38 | Minigame | Scheduler | F | 固定源代码仅声明抚顺挑战；无用户字段，单票实机任务已完整进入、结算、退出、预算耗尽停止并返回主界面 |
 | 39 | PrivateQuarters | Scheduler, PrivateQuarters | M | 蛋糕、玫瑰、互动和 7 个舰船选项均缺适配 |
@@ -507,7 +507,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | CoreShop | `Filter` | M | 规则命中/无命中、核心不足、月限购和确认 |
 | ShipyardDr | `ResearchSeries`=2..5; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；数量边界、每日去重、蓝图不足、达到上限和实际购买仍需闭环 |
 | Shipyard | `ResearchSeries`=1..6; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；其余同上，且 PR/DR 页面切换不能串页 |
-| Gacha | `Amount`=1..10; `Pool`=`light/heavy/special/event/wishing_well`; `UseDrill`; `UseTicket` | L | 200 个配置组合已离线等价；实机仍缺其他卡池、多单、票券、快速完成、队列满、资源不足和领取 |
+| Gacha | `Amount`=1..10; `Pool`=`light/heavy/special/event/wishing_well`; `UseDrill`; `UseTicket` | L | 200 个配置组合已离线等价；`UseDrill` 两值已实机完整，仍缺其他卡池、多单、票券、队列满、资源不足和领取 |
 | BattlePass | `Collect` | B | 两值与 Freebies 分派已离线；真实入口、免费/付费奖励区别、无奖励和领取结果仍待闭环 |
 | DataKey | `Collect`; `ForceCollect` | L | 四组合、非法值和已领取/满容量/强制/有余量边界已离线完成；仍缺真实普通/强制领取、上限弹窗和库存后置条件 |
 | Mail | `ClaimMerit`; `ClaimMaintenance`; `ClaimTradeLicense`; `DeleteCollected` | P | 16 组合、不同邮件类型、附件为空、容量上限、只删除已领取和误删保护 |
@@ -650,8 +650,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **7 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **145 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **8 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **144 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **104 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -772,7 +772,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Fleet.FleetOrder` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/display | options: "fleet1_all_fleet2_standby", "fleet1_boss_fleet2_mob", "fleet1_mob_fleet2_boss", "fleet1_standby_fleet2_all"; default: "fleet1_all_fleet2_standby", "fleet1_mob_fleet2_boss" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Gacha.Amount` | Gacha | type=select; display=default | options: 1, 10, 2, 3, 4, 5, 6, 7, 8, 9; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Gacha.Pool` | Gacha | type=select; display=default | options: "event", "heavy", "light", "special", "wishing_well"; default: "light" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Gacha.UseDrill` | Gacha | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Gacha.UseDrill` | Gacha | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Gacha.UseTicket` | Gacha | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GameManager.AutoRestart` | GameManager | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `GemsFarming.ChangeFlagship` | GemsFarming | type=select; display=default | options: "ship_equip", "ship"; default: "ship" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
