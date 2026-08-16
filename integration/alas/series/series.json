@@ -149,6 +149,11 @@
       "order": 30,
       "path": "integration/alas/series/0240-gacha-result-wait-port.patch",
       "sha256": "ce0d6c37d16acd0309fd34db634abef94716d16414f5347267e3d39e5160bd9f"
+    },
+    {
+      "order": 31,
+      "path": "integration/alas/series/0250-benchmark-return-main-flow-port.patch",
+      "sha256": "d1ac316501d89ac94ea54c1dd53e1a58d73e6f3e99c360badb02fcdf4b638544"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

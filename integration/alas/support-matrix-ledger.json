@@ -170,49 +170,55 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_benchmark_config.py",
         "python/alas_headless/alas_benchmark_config_replay.py",
         "integration/alas/series/0100-tool-flow-ports.patch",
+        "integration/alas/series/0250-benchmark-return-main-flow-port.patch",
+        "scripts/python/run_alas_benchmark_live_validation.py",
+        "integration/alas/benchmark-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=select; display=default",
       "panels": [
         "Benchmark"
       ],
       "path": "Benchmark.DeviceType",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "options: \"android_phone_vmos\", \"android_phone\", \"emulator\", \"phone_cloud_without_adb\", \"plone_cloud_with_adb\"; default: \"emulator\""
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_benchmark_config.py",
         "python/alas_headless/alas_benchmark_config_replay.py",
         "integration/alas/series/0100-tool-flow-ports.patch",
+        "integration/alas/series/0250-benchmark-return-main-flow-port.patch",
+        "scripts/python/run_alas_benchmark_live_validation.py",
+        "integration/alas/benchmark-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=select; display=default",
       "panels": [
         "Benchmark"
       ],
       "path": "Benchmark.TestScene",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "options: \"click\", \"screenshot_click\", \"screenshot\"; default: \"screenshot_click\""
     },
@@ -7604,8 +7610,8 @@
         "Benchmark"
       ],
       "name": "Benchmark",
-      "note": "当前设备默认 `screenshot_click` 跑过；设备类型和测试场景矩阵未覆盖",
-      "status": "L"
+      "note": "五种 DeviceType 与三种 TestScene 已逐组实机执行；每组保留原 15 次计时、确认回到主页并清理临时配置。DeviceType 在 Headless semantic 后端是已验证的配置来源，不宣称旧云/VMOS 传输。",
+      "status": "F"
     },
     {
       "groups": [
@@ -9685,23 +9691,32 @@
         "tests/test_alas_benchmark_config.py",
         "python/alas_headless/alas_benchmark_config_replay.py",
         "integration/alas/series/0100-tool-flow-ports.patch",
+        "integration/alas/series/0250-benchmark-return-main-flow-port.patch",
+        "scripts/python/run_alas_benchmark_live_validation.py",
+        "integration/alas/benchmark-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Benchmark.DeviceType",
-      "note": "All five declared values preserve original candidate-method filtering on the normal backend; the semantic backend validates them but deliberately benchmarks its observer instead, and invalid values fail before device mutation."
+      "note": "All five declared values preserve original candidate-method filtering on the normal backend. The live semantic matrix binds and validates every value, benchmarks the reviewed observer transport, records a timing result, returns to main, and removes its temporary config; this does not claim legacy cloud or VMOS transport hardware."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_benchmark_config.py",
         "python/alas_headless/alas_benchmark_config_replay.py",
         "integration/alas/series/0100-tool-flow-ports.patch",
+        "integration/alas/series/0250-benchmark-return-main-flow-port.patch",
+        "scripts/python/run_alas_benchmark_live_validation.py",
+        "integration/alas/benchmark-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Benchmark.TestScene",
-      "note": "All three scenes preserve screenshot-only, click-only, or combined selection on normal and semantic paths; invalid values fail before device mutation."
+      "note": "All three scenes preserve screenshot-only, settings-round-trip-only, or combined selection on normal and semantic paths. The live matrix records the expected one-or-zero timing lists for every scene, verifies main-page return, and removes its temporary config."
     },
     {
       "dimensions": {
@@ -10593,9 +10608,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "986752d2196d4d169dca238bdfdb3793711ee1c990cba1762c5e7f8753925dbb",
-      "manifest_sha256": "4bbf2948cd0438e41994925efdc8d2a6e798618274692dd1d50fad49f0998bb8",
-      "member_count": 30
+      "combined_sha256": "33ff50256724e51c9fc45ef92385011acba531d7dcd5ee7fe2ad1adcb792e6f6",
+      "manifest_sha256": "26b0b18a38f7270e499411cd55d8094121c252b9a63fd8ac6980e8699b39b162",
+      "member_count": 31
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

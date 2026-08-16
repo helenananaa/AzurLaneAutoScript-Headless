@@ -1,0 +1,281 @@
+{
+  "schema": "alas-headless.benchmark-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "source_sha256": {
+    "benchmark": "d0b00072a9a3f246521048ad8c9684181439a478524f4acbd1235f50588b8f43",
+    "args": "762ff3b65fda4597d25c27ea442ecc31ff4b40184e5e56f3f2ca5ac5a9cf3d29"
+  },
+  "configured_device_types": [
+    "emulator",
+    "plone_cloud_with_adb",
+    "phone_cloud_without_adb",
+    "android_phone",
+    "android_phone_vmos"
+  ],
+  "test_scenes": [
+    "screenshot_click",
+    "screenshot",
+    "click"
+  ],
+  "case_count": 15,
+  "cases": [
+    {
+      "device_type": "emulator",
+      "test_scene": "screenshot_click",
+      "temporary_config": "codex_benchmark_live_f4b8eb60c9264e22ba99c8c2ddeee45f.json",
+      "elapsed_seconds": 23.078,
+      "observe": [
+        [
+          "semantic_observe",
+          0.2026959916741665
+        ]
+      ],
+      "control": [
+        [
+          "semantic_reversible_input",
+          1.0748465416642528
+        ]
+      ],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "emulator",
+      "test_scene": "screenshot",
+      "temporary_config": "codex_benchmark_live_f501116b3c974e2e86c63b441d8623b9.json",
+      "elapsed_seconds": 4.031,
+      "observe": [
+        [
+          "semantic_observe",
+          0.209089550000499
+        ]
+      ],
+      "control": [],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "emulator",
+      "test_scene": "click",
+      "temporary_config": "codex_benchmark_live_bbde505447984330a3ba792aab05d2ea.json",
+      "elapsed_seconds": 17.969,
+      "observe": [],
+      "control": [
+        [
+          "semantic_reversible_input",
+          1.0601855750137474
+        ]
+      ],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "plone_cloud_with_adb",
+      "test_scene": "screenshot_click",
+      "temporary_config": "codex_benchmark_live_2759886a5956436882a7799846e43812.json",
+      "elapsed_seconds": 21.219,
+      "observe": [
+        [
+          "semantic_observe",
+          0.19930695000706086
+        ]
+      ],
+      "control": [
+        [
+          "semantic_reversible_input",
+          1.0545890749975417
+        ]
+      ],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "plone_cloud_with_adb",
+      "test_scene": "screenshot",
+      "temporary_config": "codex_benchmark_live_b1b67cfd019c4998a3519c3f2cb7f335.json",
+      "elapsed_seconds": 4.0,
+      "observe": [
+        [
+          "semantic_observe",
+          0.20425598334501652
+        ]
+      ],
+      "control": [],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "plone_cloud_with_adb",
+      "test_scene": "click",
+      "temporary_config": "codex_benchmark_live_a4e096f4755a429e97a4db6e5aee8338.json",
+      "elapsed_seconds": 18.109,
+      "observe": [],
+      "control": [
+        [
+          "semantic_reversible_input",
+          1.0676689333389124
+        ]
+      ],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "phone_cloud_without_adb",
+      "test_scene": "screenshot_click",
+      "temporary_config": "codex_benchmark_live_ce8836eb5b9a4dcbad980d9d5316afb3.json",
+      "elapsed_seconds": 20.875,
+      "observe": [
+        [
+          "semantic_observe",
+          0.20218686666339636
+        ]
+      ],
+      "control": [
+        [
+          "semantic_reversible_input",
+          1.0477489583281567
+        ]
+      ],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "phone_cloud_without_adb",
+      "test_scene": "screenshot",
+      "temporary_config": "codex_benchmark_live_61e1a9c1add248d6be0ac30c0d3603d6.json",
+      "elapsed_seconds": 3.718,
+      "observe": [
+        [
+          "semantic_observe",
+          0.1762012000011358
+        ]
+      ],
+      "control": [],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "phone_cloud_without_adb",
+      "test_scene": "click",
+      "temporary_config": "codex_benchmark_live_9a6d3306b5bb45f09488b30d461c225e.json",
+      "elapsed_seconds": 18.359,
+      "observe": [],
+      "control": [
+        [
+          "semantic_reversible_input",
+          1.0676318499899935
+        ]
+      ],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "android_phone",
+      "test_scene": "screenshot_click",
+      "temporary_config": "codex_benchmark_live_016aa61383474bb1a58ca286d7b0943f.json",
+      "elapsed_seconds": 21.296,
+      "observe": [
+        [
+          "semantic_observe",
+          0.1885206833248958
+        ]
+      ],
+      "control": [
+        [
+          "semantic_reversible_input",
+          1.0662582916702377
+        ]
+      ],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "android_phone",
+      "test_scene": "screenshot",
+      "temporary_config": "codex_benchmark_live_f537c052524247568fa33d206558356b.json",
+      "elapsed_seconds": 4.062,
+      "observe": [
+        [
+          "semantic_observe",
+          0.20991286665472822
+        ]
+      ],
+      "control": [],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "android_phone",
+      "test_scene": "click",
+      "temporary_config": "codex_benchmark_live_5ee840963d754413896b914f76266ad9.json",
+      "elapsed_seconds": 18.563,
+      "observe": [],
+      "control": [
+        [
+          "semantic_reversible_input",
+          1.0693045333415891
+        ]
+      ],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "android_phone_vmos",
+      "test_scene": "screenshot_click",
+      "temporary_config": "codex_benchmark_live_eacdf9f43b124a5dba847c46752616de.json",
+      "elapsed_seconds": 21.422,
+      "observe": [
+        [
+          "semantic_observe",
+          0.2020277333261523
+        ]
+      ],
+      "control": [
+        [
+          "semantic_reversible_input",
+          1.0668498833401827
+        ]
+      ],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "android_phone_vmos",
+      "test_scene": "screenshot",
+      "temporary_config": "codex_benchmark_live_e004f1799ef24531bd711b5cf3a28a55.json",
+      "elapsed_seconds": 3.766,
+      "observe": [
+        [
+          "semantic_observe",
+          0.19393566666985862
+        ]
+      ],
+      "control": [],
+      "passed": true,
+      "temporary_config_removed": true
+    },
+    {
+      "device_type": "android_phone_vmos",
+      "test_scene": "click",
+      "temporary_config": "codex_benchmark_live_af435f01130443ec8cd709a48342a38b.json",
+      "elapsed_seconds": 17.875,
+      "observe": [],
+      "control": [
+        [
+          "semantic_reversible_input",
+          1.046893183340823
+        ]
+      ],
+      "passed": true,
+      "temporary_config_removed": true
+    }
+  ],
+  "postcondition": {
+    "main_page_visible_after_every_case": true
+  },
+  "passed": true
+}

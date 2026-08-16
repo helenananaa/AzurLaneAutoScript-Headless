@@ -29,7 +29,7 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 | 标记 | 完成度标注 | 含义 |
 |---|---|---|
-| `F` | ✅ 完整支持 | 面板内全部配置值和必要异常分支均已按本文口径闭环；Commission、GameManager 已达到此状态 |
+| `F` | ✅ 完整支持 | 面板内全部配置值和必要异常分支均已按本文口径闭环；Benchmark、Commission、GameManager、Restart 已达到此状态 |
 | `L` | 🟢 主路径已完成，完整支持未完成 | 至少一条实机主路径闭环，但不代表组内所有配置值已闭环 |
 | `P` | 🟡 部分完成 | 有实现或可到达部分页面，配置分支仍不完整 |
 | `B` | 🧱 已到边界，尚未完成 | 已安全到达账号、资源、日期或观察能力边界 |
@@ -43,8 +43,8 @@ Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
 
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
-| ✅ 完整支持（`F`） | **3 / 60** | Commission、GameManager、Restart |
-| 🟢 主路径已完成、全配置未完成（`L`） | **10 / 60** | Benchmark、Daily、Dorm、Event、EventA、Exercise、Gacha、Minigame、Research、Tactical |
+| ✅ 完整支持（`F`） | **4 / 60** | Benchmark、Commission、GameManager、Restart |
+| 🟢 主路径已完成、全配置未完成（`L`） | **9 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Minigame、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **9 / 60** | Awaken、Coalition、CoalitionSp、EventB、Guild、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **17 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、Main2、Main3、OpsiDaemon、OpsiGeneral、Reward、ShopOnce |
 | 🧱 已到边界、尚未完成（`B`） | **18 / 60** | Hard、Main、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
@@ -257,11 +257,11 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `EventStory.SkipBattle` 本轮明确跳过而不提升：固定上游最终配置把它锁为 true，但运行时代码完全不读取该字段，并在剧情战斗处无条件重启应用。支持 false 需要上游提供或单独评审一套继续战斗状态机，以及覆盖代表性活动布局的确定性战斗/结算观察；当前只有故事节点语义适配，强行补分支会重写业务状态机。重新进入条件是获得该原始行为和可回放的战斗、结算夹具。
 
-### 1.25 本轮 Benchmark 设备类型与测试场景契约
+### 1.25 本轮 Benchmark 设备类型与测试场景实机矩阵
 
-`Benchmark.DeviceType` 现在只接受固定上游声明的五种设备类型，`Benchmark.TestScene` 只接受 `screenshot_click/screenshot/click`，并在原任务卸载应用、导航或调用任一测速方法前 fail-closed。普通后端回放完整覆盖 5 x 3 组合并执行原 `get_test_methods()` 的 SDK 30 候选过滤，包括 Plone 去除 `ADB_nc` 与 VMOS 改用 aScreenCap/Hermit 的差异；语义后端保留观察、输入或二者组合的原场景选择，但明确不把旧设备类型伪装成语义测速差异。
+`Benchmark.DeviceType` 只接受固定上游声明的五种设备类型，`Benchmark.TestScene` 只接受 `screenshot_click/screenshot/click`，并在原任务卸载应用、导航或调用任一测速方法前 fail-closed。普通后端回放完整覆盖 5 x 3 组合并执行原 `get_test_methods()` 的 SDK 30 候选过滤，包括 Plone 去除 `ADB_nc` 与 VMOS 改用 aScreenCap/Hermit 的差异；语义后端保留观察、输入或二者组合的原场景选择，但不把旧设备类型伪装成语义测速差异。
 
-12 个非法单字段输入都在入口事件前拒绝。测速方法、语义观察和输入均为夹具，mutation budget 为 0，没有真实卸载、页面导航、设备测速或 Android 注入。因此两字段只提升 `offline`；各设备的实测耗时、传输不可用以及真实截图/点击能力仍需 live 证据。
+12 个非法单字段输入都在入口事件前拒绝。实机回执 `integration/alas/benchmark-live-validation-receipt.json` 逐组运行五种 DeviceType 与三种 TestScene；每组保留原 15 次计时、返回所选的零或一条 observer/settings-round-trip 测量、确认回到主页并删除临时配置，15/15 通过、累计 218.342 秒。DeviceType 的实机结论是 Headless semantic 后端对全部声明值的绑定和验证，不宣称本设备具备旧 Plone、云端或 VMOS 传输；在该适配边界内两字段均为完整支持。
 
 ### 1.26 本轮 Dorm 收取、喂食与食物优先级契约
 
@@ -426,7 +426,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 55 | Daemon | Daemon | P | EnterMap 双值与单轮地图/编队分派已离线等价；真实进入 postcondition、长期值守和稀有恢复仍未闭环 |
 | 56 | OpsiDaemon | OpsiDaemon | P | 修船/选敌四组合与最终边界已离线等价；真实港口修复、最近目标 postcondition 和长期恢复仍未闭环 |
 | 57 | EventStory | EventStory | P | `SkipBattle` 在固定上游锁为 true 且无运行时消费者；false 需要新的剧情战斗状态机和多活动观察，当前仅一条入口路径，战斗转场及其他故事结构未闭环 |
-| 58 | Benchmark | Benchmark | L | 五种设备类型 x 三种测试场景的原始方法筛选与语义场景选择已离线完成；各设备真实耗时、传输不可用及截图/点击能力仍缺 live 证据 |
+| 58 | Benchmark | Benchmark | F | 五种 DeviceType 与三种 TestScene 已逐组实机运行；每组保留原 15 次计时、确认回主页并清理临时配置。DeviceType 是已验证的 Headless semantic 配置来源，不宣称旧云/VMOS 传输 |
 | 59 | AzurLaneUncensored | AzurLaneUncensored | P | 本地 localization 路径可用；`Repository` 对应的远端同步在上游被注释，配置与能力不一致 |
 | 60 | GameManager | GameManager | F | 真假双值、已停止幂等、连续 PID 冷启动、登录、停止/启动/断网/600 秒 observer 超时、恢复及零 forward 遗留均已闭环 |
 
@@ -542,7 +542,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Daemon | `EnterMap` | P | 两值及单轮分派已离线；主界面/地图内真实进入、恢复循环和未知弹窗仍待闭环 |
 | OpsiDaemon | `RepairShip`; `SelectEnemy` | P | 四组合及最终边界已离线；真实维修/选敌 postcondition、长期循环和异常恢复仍待闭环 |
 | EventStory | `SkipBattle`（当前只允许 true） | P | 固定上游锁 true 且无字段消费者，实际始终重启跳过战斗；false 需上游/评审后的继续战斗状态机及多活动战斗、结算夹具，当前不外推完成 |
-| Benchmark | `DeviceType`=`emulator/plone_cloud_with_adb/phone_cloud_without_adb/android_phone/android_phone_vmos`; `TestScene`=`screenshot_click/screenshot/click` | L | 5 x 3 原始方法筛选及普通/语义场景决策已离线完成；仍缺各设备真实测速、不可用传输和截图/点击能力 live 证据 |
+| Benchmark | `DeviceType`=`emulator/plone_cloud_with_adb/phone_cloud_without_adb/android_phone/android_phone_vmos`; `TestScene`=`screenshot_click/screenshot/click` | F | 5 x 3 全矩阵已实机执行；逐组返回预期 observer/settings-round-trip 测量、回主页并清理临时配置。设备类型完成范围是 Headless semantic 配置绑定与验证，不宣称旧云/VMOS 传输 |
 | AzurLaneUncensored | `Repository` | P | 先决定恢复远端同步还是删除/禁用该配置；网络失败、仓库不可达、本地文件和回滚必须有明确契约 |
 | GameManager | `AutoRestart` | F | true/false、运行中/已停止、连续 PID 冷启动、登录、停止/启动/断网/完整 observer 超时、恢复和 session/forward 清理均已实机与回放闭环 |
 
@@ -648,8 +648,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **4 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **146 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **6 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **144 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **106 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -663,8 +663,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Awaken.LevelCap` | Awaken | type=select; display=default | options: "level120", "level125"; default: "level120" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `AzurLaneUncensored.Repository` | AzurLaneUncensored | type=input; display=disabled | input/default: "https://gitee.com/LmeSzinc/AzurLaneUncensored" | `P`/⊘ 当前无效 | ⊘ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `BattlePass.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Benchmark.DeviceType` | Benchmark | type=select; display=default | options: "android_phone_vmos", "android_phone", "emulator", "phone_cloud_without_adb", "plone_cloud_with_adb"; default: "emulator" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Benchmark.TestScene` | Benchmark | type=select; display=default | options: "click", "screenshot_click", "screenshot"; default: "screenshot_click" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Benchmark.DeviceType` | Benchmark | type=select; display=default | options: "android_phone_vmos", "android_phone", "emulator", "phone_cloud_without_adb", "plone_cloud_with_adb"; default: "emulator" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `Benchmark.TestScene` | Benchmark | type=select; display=default | options: "click", "screenshot_click", "screenshot"; default: "screenshot_click" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `BuyFurniture.BuyOption` | Dorm | type=select; display=default | options: "all", "set"; default: "all" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `BuyFurniture.Enable` | Dorm | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `BuyFurniture.LastRun` | Dorm | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |

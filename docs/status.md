@@ -623,7 +623,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   event layouts, and battle/settlement fixtures. Until then the field remains
   partial and unknown story/battle states remain fail-closed.
 
-### Benchmark device and scene configuration: offline contract passed
+### Benchmark device and scene configuration: full semantic matrix passed
 
 - `Benchmark.DeviceType` admits exactly the five values declared by pinned
   ALAS, while `Benchmark.TestScene` admits screenshot, click, or their combined
@@ -633,12 +633,17 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   original SDK-30 candidate filtering, including Plone and VMOS differences.
   Semantic replay preserves screenshot-only, click-only, and combined observer
   selection without pretending the legacy device type changes semantic timing.
-- Twelve invalid single-field cases fail before any entry event. All benchmark,
-  observer, and input operations are fixtures: mutation budget is `0`, no real
-  uninstall/navigation/benchmark or Android input occurs.
-- Both fields move only to `offline=complete`. Device-specific timing quality,
-  unavailable transports, and live screenshot/click capability remain live
-  evidence requirements.
+- On the live semantic client, `run_alas_benchmark_live_validation.py` invoked
+  the unmodified 15-sample loop for every 5 x 3 configuration, recorded the
+  required zero-or-one observer/input timing lists, returned to the main page
+  after every case, and removed every temporary config. The receipt is
+  `integration/alas/benchmark-live-validation-receipt.json` (15/15 passed,
+  218.342 seconds total).
+- `DeviceType` is therefore complete as a declared-and-validated Headless
+  semantic configuration provenance. It does not claim that this one device
+  physically provides the legacy Plone, cloud, or VMOS transports. `TestScene`
+  is complete for the actual semantic observer and reversible settings round
+  trip; the final return-to-main port makes odd 15-sample control runs safe.
 
 ### Dorm collection, feeding, and food filter configuration: offline contract passed
 

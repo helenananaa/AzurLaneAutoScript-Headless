@@ -165,6 +165,7 @@ def _semantic_cases(
             expected.append("Semantic observation")
         if "click" in scene:
             expected.append("Semantic UI round trip")
+        expected.append("ensure_main")
         if events != expected:
             raise AssertionError("semantic Benchmark scene decision drifted")
         result[f"{device_type}:{scene}"] = {

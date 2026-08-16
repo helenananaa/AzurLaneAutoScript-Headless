@@ -8547,3 +8547,30 @@ index beeb8dab..ce56d828 100644
 +            self.device.stuck_long_wait_list.append('GET_ITEMS_SHIP_1')
 +
          # Go to Gacha/Orders page
+diff --git a/module/daemon/benchmark.py b/module/daemon/benchmark.py
+index 37191d84..8952dbe4 100644
+--- a/module/daemon/benchmark.py
++++ b/module/daemon/benchmark.py
+@@ -203,10 +203,12 @@ class Benchmark(DaemonBase, CampaignUI):
+             oracle = session.open().oracle
+             if oracle.main_page_visible():
+                 return True
+-            target = None
+-            if oracle.event_campaign_page_visible():
++            if oracle.exists('settings/back'):
++                target = 'settings/back'
++            elif oracle.event_campaign_page_visible():
+                 target = 'campaign-menu/page/back'
+             else:
++                target = None
+                 try:
+                     oracle.campaign_page_state()
+                 except (SemanticGateClosed, SemanticTargetMissing):
+@@ -256,6 +258,7 @@ class Benchmark(DaemonBase, CampaignUI):
+                 data=control,
+                 evaluate_func=self.evaluate_click,
+             )
++        self.semantic_ensure_main()
+         return observe, control
+ 
+     def get_test_methods(self) -> t.Tuple[t.Tuple[str], t.Tuple[str]]:

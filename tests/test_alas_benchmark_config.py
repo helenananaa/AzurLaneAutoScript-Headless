@@ -52,6 +52,13 @@ class AlasBenchmarkConfigTests(unittest.TestCase):
         patch = ROOT.joinpath("integration/alas/series/0100-tool-flow-ports.patch").read_text(encoding="utf-8")
         self.assertEqual(patch.count("validate_alas_benchmark_config("), 1)
 
+    def test_benchmark_returns_to_main_after_an_odd_control_sample_count(self):
+        patch = ROOT.joinpath(
+            "integration/alas/series/0250-benchmark-return-main-flow-port.patch"
+        ).read_text(encoding="utf-8")
+        self.assertIn("oracle.exists('settings/back')", patch)
+        self.assertIn("self.semantic_ensure_main()", patch)
+
     def test_sources_compile(self):
         for relative in (
             "python/alas_headless/alas_benchmark_config_contract.py",

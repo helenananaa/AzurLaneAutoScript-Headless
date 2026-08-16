@@ -175,6 +175,9 @@ OVERRIDE_PATHS = {
     "0240-gacha-result-wait-port.patch": {
         "module/gacha/gacha_reward.py",
     },
+    "0250-benchmark-return-main-flow-port.patch": {
+        "module/daemon/benchmark.py",
+    },
 }
 
 
