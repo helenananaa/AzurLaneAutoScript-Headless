@@ -178,6 +178,9 @@ OVERRIDE_PATHS = {
     "0250-benchmark-return-main-flow-port.patch": {
         "module/daemon/benchmark.py",
     },
+    "0260-minigame-budget-exhaustion-flow-port.patch": {
+        "module/minigame/minigame.py",
+    },
 }
 
 

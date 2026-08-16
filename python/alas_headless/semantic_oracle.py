@@ -1307,6 +1307,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "GameHallUI(Clone)/ad/topPanel/btnHome",
     ),
     SemanticTarget(
+        "minigame/shooting/back",
+        "back",
+        "GameRoomShootingUI(Clone)/noAdaptPanel/blur_panel/top/back",
+    ),
+    SemanticTarget(
         "minigame/tickets/cancel",
         "custom_button_2(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
@@ -5846,6 +5851,65 @@ class SemanticOracle:
             ):
                 return False
         return True
+
+    def shooting_minigame_prepare_visible(self) -> bool:
+        """Identify the current shooting-minigame pre-start panel exactly."""
+
+        state = self.read_state()
+        required = {
+            "back": "GameRoomShootingUI(Clone)/noAdaptPanel/blur_panel/top/back",
+            "ruleGame": (
+                "GameRoomShootingUI(Clone)/noAdaptPanel/blur_panel/"
+                "start_mask/ruleGame"
+            ),
+            "startGame": (
+                "GameRoomShootingUI(Clone)/noAdaptPanel/blur_panel/"
+                "start_mask/startGame"
+            ),
+        }
+        for name, suffix in required.items():
+            matches = tuple(
+                button
+                for button in state.buttons
+                if button.name == name
+                and button.path.endswith(suffix)
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.bounds is not None
+            )
+            if len(matches) != 1:
+                return False
+        counters = tuple(
+            text
+            for text in self.read_ui_state().texts
+            if text.path.endswith("GameRoomCoinUI(Clone)/ad/window/text")
+            and text.name == "text"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and re.fullmatch(r"[0-9]+/[0-9]+", text.text.strip())
+        )
+        return len(counters) == 1
+
+    def click_shooting_minigame_back(self) -> ActionReceipt:
+        """Leave the proven current shooting-minigame pre-start panel."""
+
+        if not self.shooting_minigame_prepare_visible():
+            raise SemanticTargetMissing("shooting minigame pre-start panel is absent")
+        state = self.read_state()
+        target = self._unique(state, "minigame/shooting/back")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before shooting minigame back")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="minigame/shooting/back",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
 
     def game_room_list_visible(self) -> bool:
         if not self.game_room_page_visible():

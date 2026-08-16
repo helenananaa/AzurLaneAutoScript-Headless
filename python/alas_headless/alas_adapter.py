@@ -659,6 +659,7 @@ MINIGAME_VIRTUAL_RESOURCES = frozenset(
         "NEW_YEAR_CHALLENGE_START",
         "NEW_YEAR_CHALLENGE_END",
         "NEW_YEAR_CHALLENGE_EXIT",
+        "RESET_TICKET_POPUP",
         "BACK",
         "COIN_POPUP",
         "POPUP_CANCEL",
@@ -1718,8 +1719,9 @@ class AlasSemanticAdapter:
 
     def minigame_play_allowed(self) -> bool:
         context = self._require_minigame_context()
-        return context.play_receipt is not None or self._action_ledger.allowed(
-            "minigame.play"
+        return (
+            context.play_receipt is None
+            and self._action_ledger.allowed("minigame.play")
         )
 
     def minigame_prepare_default_ticket(self) -> int:
@@ -3747,6 +3749,8 @@ class AlasSemanticAdapter:
                 except SemanticGateClosed:
                     return False
             if name == "NEW_YEAR_CHALLENGE_EXIT":
+                return False
+            if name == "RESET_TICKET_POPUP":
                 return False
             if name == "BACK":
                 if self.oracle.new_year_challenge_result() is not None:

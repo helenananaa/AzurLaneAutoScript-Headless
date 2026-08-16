@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 
 from alas_headless.adapter import (
     DEFAULT_CAPABILITY_INVENTORY,
@@ -133,6 +134,32 @@ class ActionLedgerTests(unittest.TestCase):
         self.assertEqual(adapter._action_ledger.remaining("dorm.collect"), 0)
         with self.assertRaises(ActionLeaseError):
             adapter._dispatch_mutation("dorm.collect", lambda: None)
+
+    def test_minigame_play_budget_does_not_admit_a_second_start(self):
+        adapter = AlasSemanticAdapter(
+            object(),
+            lambda: None,
+            minigame_play_budget=1,
+        )
+        adapter.begin_minigame()
+        self.assertTrue(adapter.minigame_play_allowed())
+        adapter._minigame_context.play_receipt = object()
+        self.assertFalse(adapter.minigame_play_allowed())
+
+    def test_minigame_ignores_the_unrelated_opsi_reset_ticket_probe(self):
+        class NoSurfaceOracle:
+            def enabled(self, semantic_id):
+                return False
+
+            def __getattr__(self, name):
+                return lambda *args, **kwargs: False
+
+        adapter = AlasSemanticAdapter(
+            NoSurfaceOracle(),
+            lambda: None,
+        )
+        adapter.begin_minigame()
+        self.assertFalse(adapter.appear(SimpleNamespace(name="RESET_TICKET_POPUP")))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,42 @@
+{
+  "schema": "alas-headless.minigame-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "source_sha256": {
+    "minigame": "88ce46cc227b5777d4d53c600d85982cac4152a2398fa56e65f9f0d0efdd0445",
+    "new_year_challenge": "c90d11e53f2ed0dffea9f55a9f33ee5d9cc70a58abd67e0bf816bce538d52b18",
+    "adapter": "e887691436e47794f073adf1b70c45f843dbfadaf1d1df478e0a6c5160440d60"
+  },
+  "ticket_grant": 1,
+  "postcondition": {
+    "main_page_visible_after_cleanup": true
+  },
+  "temporary_config": "codex_minigame_live_2e70c9e9bb7e4a1cb27c94ae9544c20f.json",
+  "passed": true,
+  "elapsed_seconds": 193.407,
+  "game_room_after_task": true,
+  "remaining_minigame_play_grant": 0,
+  "dispatches": [
+    {
+      "capability": "minigame.play",
+      "receipt": {
+        "semantic_id": "minigame/new-year/start",
+        "generation": 5650,
+        "path": "UICamera/Canvas/UIMain/GameRoomFushun2UI(Clone)/btn_start",
+        "capability_id": "minigame.play",
+        "policy_sha256": "51950e56a3c8e20e8baf095a0a7972951a3fb8f3a85c66472e67d54c1d07f88a"
+      }
+    }
+  ],
+  "cleanup": {
+    "semantic_id": "game-room/home",
+    "generation": 6015,
+    "path": "UICamera/Canvas/UIMain/GameHallUI(Clone)/ad/topPanel/btnHome",
+    "capability_id": null,
+    "policy_sha256": null
+  },
+  "temporary_config_removed": true
+}

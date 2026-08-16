@@ -8574,3 +8574,18 @@ index 37191d84..8952dbe4 100644
          return observe, control
  
      def get_test_methods(self) -> t.Tuple[t.Tuple[str], t.Tuple[str]]:
+diff --git a/module/minigame/minigame.py b/module/minigame/minigame.py
+index 3fdad6a9..69ffe1f8 100644
+--- a/module/minigame/minigame.py
++++ b/module/minigame/minigame.py
+@@ -240,6 +240,10 @@ class Minigame(UI):
+                 logger.info(f"coin count : {coin_count}, finished")
+                 break
+             logger.info(f"coin count > 0, spend")
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None and not semantic_adapter.minigame_play_allowed():
++                logger.info('Minigame play budget is exhausted, finished')
++                break
+             # specific game logic
+             if minigame_instance is not None and minigame_instance.minigame_run():
+                 play_count += 1

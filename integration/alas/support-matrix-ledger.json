@@ -7953,8 +7953,8 @@
         "Scheduler"
       ],
       "name": "Minigame",
-      "note": "当前抚顺小游戏路径可用；没有字段配置，但其他轮换小游戏仍属于该任务支持范围",
-      "status": "L"
+      "note": "固定源代码仅声明抚顺挑战；无用户字段，单票实机任务已完整进入、结算、退出、预算耗尽停止并返回主界面",
+      "status": "F"
     },
     {
       "groups": [
@@ -10608,9 +10608,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "33ff50256724e51c9fc45ef92385011acba531d7dcd5ee7fe2ad1adcb792e6f6",
-      "manifest_sha256": "26b0b18a38f7270e499411cd55d8094121c252b9a63fd8ac6980e8699b39b162",
-      "member_count": 31
+      "combined_sha256": "9c9ea92410f2eafbe334f2fe27b9d1b99a5dfbc5f54558268aeb52ad19717164",
+      "manifest_sha256": "10957f6f69a6785eef11691a866990f7b919fca782621c283adf6d59450a0c6d",
+      "member_count": 32
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

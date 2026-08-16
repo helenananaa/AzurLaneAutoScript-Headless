@@ -154,6 +154,11 @@
       "order": 31,
       "path": "integration/alas/series/0250-benchmark-return-main-flow-port.patch",
       "sha256": "d1ac316501d89ac94ea54c1dd53e1a58d73e6f3e99c360badb02fcdf4b638544"
+    },
+    {
+      "order": 32,
+      "path": "integration/alas/series/0260-minigame-budget-exhaustion-flow-port.patch",
+      "sha256": "50279457231ca66b443f4b4f2eed813dbeb23e7fa6c0f64429a665d9d578dc05"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",
