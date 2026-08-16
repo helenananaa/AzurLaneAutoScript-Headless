@@ -1017,6 +1017,7 @@ class AlasSemanticAdapter:
         frame_identity_provider: Optional[
             Callable[[], SemanticFrameIdentity]
         ] = None,
+        input_frame_refresher: Optional[Callable[[], Any]] = None,
         action_ledger: Optional[ActionLedger] = None,
     ) -> None:
         if package_gate is None:
@@ -1134,6 +1135,9 @@ class AlasSemanticAdapter:
         self._observer_stale_since: Optional[float] = None
         self._frame_observation_oracle = frame_observation_oracle
         self._frame_identity_provider = frame_identity_provider
+        if input_frame_refresher is not None and not callable(input_frame_refresher):
+            raise TypeError("semantic input frame refresher is invalid")
+        self._input_frame_refresher = input_frame_refresher
         self._compat_observation_ordinal = 0
         self._observation_registry = ObservationRegistry()
         register_login_observations(
@@ -3840,11 +3844,18 @@ class AlasSemanticAdapter:
                         str(exc)
                         == "semantic toggle target is absent or ambiguous: build/nav/queue"
                         and (
-                            self.oracle.build_queue_finish_prompt_cost() is not None
-                            or self.oracle.new_ship_reward_visible()
-                            or self._award_close_target() is not None
-                            or time.monotonic()
+                            # Evaluate the monotonic transition window before
+                            # inspecting other transient result surfaces.  Each
+                            # typed inspection is itself a device round-trip;
+                            # doing those first can consume the whole window
+                            # immediately after the batch-finish tap.
+                            time.monotonic()
                             <= self._build_context.queue_finish_transition_until
+                            or self.oracle.build_queue_finish_prompt_cost() is not None
+                            or self.oracle.new_ship_reward_visible()
+                            or self.oracle.new_ship_reward_page_visible()
+                            or self.oracle.award_info_page_visible()
+                            or self._award_close_target() is not None
                         )
                     ):
                         return False
@@ -3858,6 +3869,27 @@ class AlasSemanticAdapter:
                         # ALAS polls this queue sentinel immediately after a
                         # successful tab change. A new coherent frame may
                         # already be on pools, where the sentinel is absent.
+                        return False
+                    if (
+                        str(exc) == "construction queue page identity is not proven"
+                        and (
+                            # A selected background queue tab can be observed
+                            # before the foreground NewShip/AwardInfo page has
+                            # finished publishing its own typed identity.
+                            # Preserve the same bounded post-finish grace used
+                            # when the queue toggle itself is absent.
+                            time.monotonic()
+                            <= self._build_context.queue_finish_transition_until
+                            or self.oracle.new_ship_reward_visible()
+                            or self.oracle.new_ship_reward_page_visible()
+                            or self.oracle.award_info_page_visible()
+                            or self._award_close_target() is not None
+                        )
+                    ):
+                        # The selected queue tab remains in the background
+                        # while a typed construction result page owns the
+                        # foreground.  It is not valid to read queue timers
+                        # through that page; let the result aliases close it.
                         return False
                     raise
                 if not empty and self._build_context.submit_receipt is None:
@@ -3876,11 +3908,15 @@ class AlasSemanticAdapter:
                         str(exc)
                         == "semantic toggle target is absent or ambiguous: build/nav/queue"
                         and (
-                            self.oracle.build_queue_finish_prompt_cost() is not None
-                            or self.oracle.new_ship_reward_visible()
-                            or self._award_close_target() is not None
-                            or time.monotonic()
+                            # See BUILD_QUEUE_EMPTY above.  Keep the bounded
+                            # post-tap grace before any slow typed state probe.
+                            time.monotonic()
                             <= self._build_context.queue_finish_transition_until
+                            or self.oracle.build_queue_finish_prompt_cost() is not None
+                            or self.oracle.new_ship_reward_visible()
+                            or self.oracle.new_ship_reward_page_visible()
+                            or self.oracle.award_info_page_visible()
+                            or self._award_close_target() is not None
                         )
                     ):
                         return False
@@ -3891,6 +3927,18 @@ class AlasSemanticAdapter:
                     return self.oracle.build_queue_all_launch_available()
                 except SemanticGateClosed as exc:
                     if str(exc) == "construction queue tab is not selected":
+                        return False
+                    if (
+                        str(exc) == "construction queue page identity is not proven"
+                        and (
+                            time.monotonic()
+                            <= self._build_context.queue_finish_transition_until
+                            or self.oracle.new_ship_reward_visible()
+                            or self.oracle.new_ship_reward_page_visible()
+                            or self.oracle.award_info_page_visible()
+                            or self._award_close_target() is not None
+                        )
+                    ):
                         return False
                     raise
             if name == "BUILD_MINUS":
@@ -4844,6 +4892,13 @@ class AlasSemanticAdapter:
             if state.count == target:
                 return state
             control = "build/prep/add" if state.count < target else "build/prep/minus"
+            # The complete typed construction dialog can take longer to read
+            # than one immutable frame lease.  Refresh immediately before
+            # each exact quantity mutation; SemanticOracle then re-reads the
+            # target and the runtime still invalidates that fresh lease at the
+            # final tap boundary.
+            if self._input_frame_refresher is not None:
+                self._input_frame_refresher()
             self.oracle.click(control)
             state = self.build_submit_state()
         raise SemanticGateClosed("construction count did not reach requested value")
@@ -7147,7 +7202,24 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed(
                     "construction side navigation input is outside build/queue"
                 )
-            return self.oracle.click_toggle(BUILD_SIDE_NAVBAR_TARGETS[index])
+            target = BUILD_SIDE_NAVBAR_TARGETS[index]
+            # The native queue-cleanup loop can request this exact navigation
+            # immediately after a stable queue sentinel.  On the CN client a
+            # short-lived foreground layer can still be published between
+            # those two observer turns.  Re-read only this same typed toggle
+            # while it is blocked; click_toggle remains the sole input gate
+            # and will not tap until the blocker is gone.
+            deadline = time.monotonic() + 8.0
+            while True:
+                try:
+                    return self.oracle.click_toggle(target)
+                except SemanticGateClosed as exc:
+                    if (
+                        str(exc) != "semantic toggle action is blocked"
+                        or time.monotonic() >= deadline
+                    ):
+                        raise
+                    time.sleep(0.25)
         if self._build_context is not None and build_pool_navbar_match is not None:
             index = int(build_pool_navbar_match.group(1))
             target = BUILD_POOL_NAVBAR_TARGETS.get(index)
@@ -7486,8 +7558,16 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed(
                         "construction preparation alias requires the exact warning"
                     )
+                receipt = self.oracle.click("build/warning/confirm")
+                deadline = time.monotonic() + 8.0
+                while self.oracle.enabled("build/warning/confirm"):
+                    if time.monotonic() >= deadline:
+                        raise SemanticGateClosed(
+                            "construction warning did not close after confirmation"
+                        )
+                    time.sleep(0.25)
                 context.warning_confirmed = True
-                return self.oracle.click("build/warning/confirm")
+                return receipt
             if name == "POPUP_CONFIRM_GACHA_ORDER":
                 if self.oracle.enabled("build/warning/confirm"):
                     raise SemanticGateClosed(
@@ -8767,6 +8847,7 @@ class AlasSemanticSession:
                 ),
                 frame_observation_oracle=self._frame_reader.oracle,
                 frame_identity_provider=self._frame_reader.identity,
+                input_frame_refresher=self.refresh_frame,
                 action_ledger=self.action_ledger,
             )
             if self.trace is not None:

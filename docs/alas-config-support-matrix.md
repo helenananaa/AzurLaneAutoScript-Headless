@@ -297,7 +297,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `Gacha.Pool` 只接受 `light/heavy/special/event/wishing_well`，`Amount` 只接受精确整数 `1..10`，`UseTicket/UseDrill` 只接受精确布尔值。四字段在 `RewardGacha.run()` 第一条可执行语句统一校验，早于语义 build scope、资源读取、队列处理或提交；布尔伪装整数、浮点、字符串、越界和空值均 fail-closed。
 
-200 个配置组合仍保持原卡池成本分类、仅活动池检查票券、票券优先与魔方余量拆分、提交后快速完成队列刷新；25 个非法单字段仍在 scope 前拒绝。实机 `event` 和 `special` 各完成一次两单建造：两次均从空队列开始，分别精确消耗 `4` 魔方和 `3000` 金币，并得到两条非空倒计时；回执为 `integration/alas/gacha-event-two-live-validation-receipt.json` 与 `integration/alas/gacha-special-two-live-validation-receipt.json`。其后以当前默认 `light`/`Amount=1` 重跑原任务：完整快照仅在池页、确认框和队列短暂陈旧时重读，最终精确消耗 `1` 魔方和 `600` 金币并产生一条队列倒计时，见 `integration/alas/gacha-light-daily-seed-validation-receipt.json`。`UseDrill=true` 现也由原 Gacha 任务完整闭环：从空队列开始，精确消耗 `1` 魔方、`600` 金币和 `1` 个快速完成道具，任务返回 true，依次关闭 NewShip 与 AwardInfo，并回到 typed 空队列；回执为 `integration/alas/gacha-light-drill-task-r7-live-validation-receipt.json`。因此 `Gacha.UseDrill` 两个布尔值均提升为完整。活动票券栏当前不存在，祈愿池亦未开放，`UseTicket` 与 `wishing_well` 不能宣称完成。
+200 个配置组合仍保持原卡池成本分类、仅活动池检查票券、票券优先与魔方余量拆分、提交后快速完成队列刷新；25 个非法单字段仍在 scope 前拒绝。实机 `event` 和 `special` 各完成一次两单建造：两次均从空队列开始，分别精确消耗 `4` 魔方和 `3000` 金币，并得到两条非空倒计时；回执为 `integration/alas/gacha-event-two-live-validation-receipt.json` 与 `integration/alas/gacha-special-two-live-validation-receipt.json`。其后以当前默认 `light`/`Amount=1` 重跑原任务：完整快照仅在池页、确认框和队列短暂陈旧时重读，最终精确消耗 `1` 魔方和 `600` 金币并产生一条队列倒计时，见 `integration/alas/gacha-light-daily-seed-validation-receipt.json`。`UseDrill=true` 现也由原 Gacha 任务完整闭环：从空队列开始，精确消耗 `1` 魔方、`600` 金币和 `1` 个快速完成道具，任务返回 true，依次关闭 NewShip 与 AwardInfo，并回到 typed 空队列；回执为 `integration/alas/gacha-light-drill-task-r7-live-validation-receipt.json`。随后对 `light`、`UseTicket=false`、`UseDrill=true` 的每个声明 `Amount=1..10` 逐值执行原任务：每次都从并回到 typed 空队列，返回 true，精确消耗 `N` 魔方、`600*N` 金币和 `N` 个快速完成道具；最终 Amount=10 还经过四槽完成态、十张 NewShip 和 AwardInfo 的真实恢复链。来源收据及摘要由 `integration/alas/gacha-light-amounts-1-10-live-validation-receipt.json` 绑定，故 `Gacha.Amount` 提升为完整。因此 `Gacha.UseDrill` 两个布尔值均提升为完整。活动票券栏当前不存在，祈愿池亦未开放，`UseTicket` 与 `wishing_well` 不能宣称完成。
 
 ### 1.31 本轮 Retirement 模式入口与旧退役拒绝契约
 
@@ -650,8 +650,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **8 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **144 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **9 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **143 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **104 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -770,7 +770,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Fleet.Fleet2Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "combat_auto", "combat_manual", "hide_in_bottom_left", "hide_in_upper_left", "stand_still_in_the_middle"; default: "combat_auto" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Fleet.Fleet2Step` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 2, 3, 4, 5; default: 2 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Fleet.FleetOrder` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/display | options: "fleet1_all_fleet2_standby", "fleet1_boss_fleet2_mob", "fleet1_mob_fleet2_boss", "fleet1_standby_fleet2_all"; default: "fleet1_all_fleet2_standby", "fleet1_mob_fleet2_boss" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Gacha.Amount` | Gacha | type=select; display=default | options: 1, 10, 2, 3, 4, 5, 6, 7, 8, 9; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Gacha.Amount` | Gacha | type=select; display=default | options: 1, 10, 2, 3, 4, 5, 6, 7, 8, 9; default: 1 | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Gacha.Pool` | Gacha | type=select; display=default | options: "event", "heavy", "light", "special", "wishing_well"; default: "light" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Gacha.UseDrill` | Gacha | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Gacha.UseTicket` | Gacha | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |

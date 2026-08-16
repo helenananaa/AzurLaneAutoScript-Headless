@@ -1446,6 +1446,36 @@ class SemanticOracleTests(unittest.TestCase):
         with self.assertRaises(SemanticGateClosed):
             oracle.build_queue_timers()
 
+    def test_build_queue_accepts_observed_four_generation_ui_read_skew(self):
+        page = "root/Overlay/UIMain/blur_panel/"
+        queue = (
+            "root/UICamera/Canvas/UIMain/BuildShipUI(Clone)/BuildShipDetailUI1(Clone)/"
+        )
+        backend = FakeBackend(
+            [make_button("back_btn", page + "adapt/top/back_btn", 58, 53)]
+        )
+        backend.snapshot = make_snapshot(generation=20)
+        backend.buttons = make_buttons(backend.buttons["buttons"], generation=20)
+        backend.ui = make_ui(
+            [
+                make_text("2", queue + "title/value"),
+                make_text(
+                    "99:99:99",
+                    queue
+                    + "list_single_line/content/project_1/frame/buiding/timer/Text",
+                ),
+            ],
+            toggles=[
+                make_toggle(
+                    page + "adapt/left_length/frame/tagRoot/queue_btn",
+                    checked=True,
+                )
+            ],
+            generation=24,
+        )
+
+        self.assertEqual(make_oracle(backend).build_queue_timers(), ("99:99:99",))
+
     def test_build_queue_batch_finish_uses_exact_delegated_control(self):
         page = "root/Overlay/UIMain/blur_panel/"
         queue = (
@@ -1494,6 +1524,62 @@ class SemanticOracleTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "build/queue/all-launch")
         self.assertEqual(backend.taps, [(1191, 121)])
+
+    def test_build_queue_finished_four_slot_batch_is_not_empty(self):
+        page = "root/Overlay/UIMain/blur_panel/"
+        queue = (
+            "root/UICamera/Canvas/UIMain/BuildShipDetailUI1(Clone)/"
+        )
+        backend = FakeBackend(
+            [
+                make_button("back_btn", page + "adapt/top/back_btn"),
+                make_button(
+                    "all_launch", queue + "all_launch", 1191, 121, raycast_top=None
+                ),
+                *[
+                    make_button(
+                        "launched_btn",
+                        queue
+                        + "list_mult_line/content/project_"
+                        + str(index)
+                        + "/frame/finished/launched_btn",
+                        raycast_top=None,
+                    )
+                    for index in range(1, 5)
+                ],
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("2", queue + "title/value"),
+                *[
+                    make_text(
+                        "99:99:99",
+                        queue
+                        + "list_mult_line/content/project_"
+                        + str(index)
+                        + "/frame/buiding/timer/Text",
+                    )
+                    for index in range(1, 5)
+                ],
+            ],
+            toggles=[make_toggle(page + "adapt/left_length/frame/tagRoot/queue_btn", checked=True)],
+            images=[
+                {
+                    **make_image(
+                        queue + "all_launch",
+                        "btn_batch",
+                        bounds={"left": 1117, "top": 95, "right": 1265, "bottom": 147},
+                    ),
+                    "raycast_target": True,
+                }
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.build_queue_timers(), ("99:99:99",) * 4)
+        self.assertFalse(oracle.build_queue_empty())
+        self.assertTrue(oracle.build_queue_all_launch_available())
 
     def test_build_queue_finish_confirmation_requires_exact_quick_tool_prompt(self):
         popup = "root/OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
@@ -4329,6 +4415,20 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "reward/new-ship/continue")
         self.assertEqual(backend.taps, [(640, 360)])
 
+    def test_new_ship_page_visible_is_non_actionable_page_ownership_only(self):
+        root = "root/UICamera/Canvas/UIOrigin/NewShipUI(Clone)/shake_panel/"
+        backend = FakeBackend(
+            [make_button("property_btn", root + "property_btn", x=1096, y=620)]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.new_ship_reward_page_visible())
+        self.assertFalse(oracle.new_ship_reward_visible())
+        self.assertFalse(oracle.enabled("reward/new-ship/continue"))
+
+        backend.buttons = make_buttons([])
+        self.assertFalse(oracle.new_ship_reward_page_visible())
+
     def test_new_ship_reward_fails_closed_on_name_overlay_or_raycast_mismatch(self):
         root = "root/UICamera/Canvas/UIOrigin/NewShipUI(Clone)/shake_panel/"
         full_screen = {
@@ -4371,7 +4471,7 @@ class SemanticOracleTests(unittest.TestCase):
             oracle.click("reward/new-ship/continue")
         self.assertEqual(backend.taps, [])
 
-    def test_new_ship_reward_accepts_current_exact_delegated_click_image(self):
+    def test_new_ship_reward_accepts_current_dialogue_background_when_click_image_is_lossy(self):
         root = "root/OverlayCamera/Overlay/UIMain/NewShipUI(Clone)/shake_panel/"
         full_screen = {"left": 0.0, "top": 0.0, "right": 1280.0, "bottom": 720.0}
         backend = FakeBackend(
@@ -4384,8 +4484,9 @@ class SemanticOracleTests(unittest.TestCase):
                 )
             ]
         )
-        delegated = make_image(root + "click", "liaotian04", bounds=full_screen)
-        delegated["raycast_target"] = True
+        dialogue_background = make_image(
+            root + "dialogue/bg", "liaotian04", bounds=full_screen
+        )
         backend.ui = make_ui(
             [
                 make_text("博伊西", root + "ship_type/name_bg/mask/Text"),
@@ -4394,7 +4495,7 @@ class SemanticOracleTests(unittest.TestCase):
                 make_text("轻巡", root + "dialogue/bg/type"),
                 make_text("博伊西", root + "dialogue/bg/name"),
             ],
-            images=[delegated],
+            images=[dialogue_background],
             generation=14,
         )
         oracle = make_oracle(backend)
@@ -4409,8 +4510,9 @@ class SemanticOracleTests(unittest.TestCase):
         button = make_button(
             "click", root + "click", bounds=full_screen, raycast_top=None
         )
-        delegated = make_image(root + "click", "liaotian04", bounds=full_screen)
-        delegated["raycast_target"] = True
+        dialogue_background = make_image(
+            root + "dialogue/bg", "liaotian04", bounds=full_screen
+        )
         texts = [
             make_text("博伊西", root + "ship_type/name_bg/mask/Text"),
             make_text("USS Boise", root + "ship_type/english_name"),
@@ -4421,7 +4523,7 @@ class SemanticOracleTests(unittest.TestCase):
         backend = FakeBackend([button])
         backend.snapshot = make_snapshot(generation=13)
         backend.buttons = make_buttons([button], generation=13)
-        backend.ui = make_ui(texts, images=[delegated], generation=13)
+        backend.ui = make_ui(texts, images=[dialogue_background], generation=13)
         backend.snapshot_sequence = [
             make_snapshot(generation=10),
             make_snapshot(generation=13),
@@ -4431,8 +4533,8 @@ class SemanticOracleTests(unittest.TestCase):
             make_buttons([button], generation=13),
         ]
         backend.ui_sequence = [
-            make_ui(texts, images=[delegated], generation=7),
-            make_ui(texts, images=[delegated], generation=13),
+            make_ui(texts, images=[dialogue_background], generation=7),
+            make_ui(texts, images=[dialogue_background], generation=13),
         ]
         oracle = make_oracle(backend)
 
@@ -4532,6 +4634,42 @@ class SemanticOracleTests(unittest.TestCase):
         oracle = make_oracle(backend)
 
         self.assertTrue(oracle.enabled("overlay/network-reconnect/confirm"))
+
+    def test_msgbox_identity_retries_one_reversed_opening_snapshot(self):
+        popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
+        buttons = [
+            make_button(
+                "custom_button_2(Clone)",
+                popup + "button_container/custom_button_2(Clone)",
+            ),
+            make_button(
+                "custom_button_1(Clone)",
+                popup + "button_container/custom_button_1(Clone)",
+            ),
+        ]
+        texts = [
+            make_text(
+                "服务器连接失败，是否重新连接？\n[NetworkDown]",
+                popup + "msg_panel/content",
+            ),
+            make_text("取 消", popup + "button_container/custom_button_2(Clone)/pic"),
+            make_text("确 定", popup + "button_container/custom_button_1(Clone)/pic"),
+        ]
+        backend = FakeBackend(buttons)
+        backend.snapshot_sequence = [
+            make_snapshot(generation=generation) for generation in (10, 31, 33)
+        ]
+        backend.buttons_sequence = [
+            make_buttons(buttons, generation=generation) for generation in (10, 31, 33)
+        ]
+        backend.ui_sequence = [
+            make_ui(texts, generation=generation) for generation in (32, 32)
+        ]
+
+        oracle = make_oracle(backend)
+        before = oracle.read_state()
+
+        self.assertTrue(oracle._network_reconnect_prompt_matches(before))
 
     def test_login_data_expired_confirm_requires_exact_single_button_prompt(self):
         popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"

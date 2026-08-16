@@ -1,5 +1,7 @@
 import ast
+import hashlib
 import itertools
+import json
 import unittest
 from pathlib import Path
 
@@ -92,11 +94,53 @@ class AlasGachaConfigTests(unittest.TestCase):
         self.assertIn("GET_ITEMS_SHIP_1", wait)
         self.assertIn("stuck_long_wait_list.append", wait)
 
+    def test_live_amount_matrix_evidence_binds_each_declared_value(self):
+        path = ROOT / "integration/alas/gacha-light-amounts-1-10-live-validation-receipt.json"
+        evidence = json.loads(path.read_text(encoding="utf-8"))
+        self.assertTrue(evidence["passed"])
+        self.assertEqual(evidence["gacha"]["Amount"], list(GACHA_AMOUNTS))
+        source_by_amount = {}
+        for source in evidence["source_receipts"]:
+            source_path = ROOT / source["path"]
+            self.assertEqual(
+                hashlib.sha256(
+                    source_path.read_bytes().replace(b"\r\n", b"\n")
+                ).hexdigest(),
+                source["sha256"],
+            )
+            receipt = json.loads(source_path.read_text(encoding="utf-8"))
+            runs = receipt.get("runs", [receipt])
+            selected = set(source["amounts"])
+            for run in runs:
+                amount = run["gacha"]["Amount"]
+                if amount in selected:
+                    self.assertTrue(run["passed"])
+                    self.assertTrue(run["task_result"])
+                    self.assertEqual(run["gacha"]["Pool"], "light")
+                    self.assertFalse(run["gacha"]["UseTicket"])
+                    self.assertTrue(run["gacha"]["UseDrill"])
+                    source_by_amount[amount] = run
+        self.assertEqual(sorted(source_by_amount), list(GACHA_AMOUNTS))
+        self.assertEqual(
+            [run["amount"] for run in evidence["runs"]], list(GACHA_AMOUNTS)
+        )
+        for summary in evidence["runs"]:
+            source = source_by_amount[summary["amount"]]
+            self.assertEqual(summary["resource_delta"], source["resource_delta"])
+            self.assertEqual(summary["quick_item_delta"], source["quick_item_delta"])
+            self.assertEqual(
+                summary["queue_empty_before"], source["queue_postcondition"]["empty_before"]
+            )
+            self.assertEqual(
+                summary["queue_empty_after"], source["queue_postcondition"]["empty_after"]
+            )
+
     def test_sources_compile(self):
         for relative in (
             "python/alas_headless/alas_gacha_config_contract.py",
             "python/alas_headless/alas_gacha_config_replay.py",
             "scripts/python/verify_alas_gacha_config.py",
+            "scripts/python/run_alas_gacha_amount_matrix_live_validation.py",
         ):
             ast.parse(ROOT.joinpath(relative).read_text(encoding="utf-8"))
 

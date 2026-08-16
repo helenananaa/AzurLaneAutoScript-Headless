@@ -5598,9 +5598,14 @@ class SemanticOracle:
         if not back.actionable or self._blocking_rules(button_state, "build/nav/queue"):
             raise SemanticGateClosed("construction queue page identity is not proven")
         ui_state = self.read_ui_state()
+        # On the pinned CN client, a read of the unchanged queue Button tree
+        # followed by its much larger typed UI tree can span up to four
+        # monotonically increasing observer generations.  Keep the queue-tab,
+        # capacity, and timer-shape proofs below exact; this only admits the
+        # observed read skew while those immutable page identities settle.
         if (
             ui_state.generation < button_state.generation
-            or ui_state.generation > button_state.generation + 2
+            or ui_state.generation > button_state.generation + 4
         ):
             raise SemanticGateClosed("construction queue snapshots are not coherent")
         selected_tabs = self._toggle_matches(ui_state, "build/nav/queue")
@@ -5624,7 +5629,7 @@ class SemanticOracle:
             ),
             "multi": re.compile(
                 r"BuildShipDetailUI1\(Clone\)/list_mult_line/content/"
-                r"project_([123])/frame/buiding/timer/Text$"
+                r"project_([1234])/frame/buiding/timer/Text$"
             ),
         }
         timers_by_layout: Dict[str, Dict[int, str]] = {
@@ -5673,7 +5678,7 @@ class SemanticOracle:
                 and button.active_and_enabled
                 and re.search(
                     r"BuildShipDetailUI1\(Clone\)/list_(?:single|mult)_line/"
-                    r"content/project_[123](?:/|$)",
+                    r"content/project_[1234](?:/|$)",
                     button.path,
                 )
                 is not None
@@ -5694,14 +5699,40 @@ class SemanticOracle:
         if len(observed) != 1:
             raise SemanticGateClosed("construction queue timers are incomplete")
         layout, timers = observed[0]
-        maximum = 2 if layout == "single" else 3
+        maximum = 2 if layout == "single" else 4
         expected = tuple(range(1, len(timers) + 1))
         if len(timers) > maximum or tuple(sorted(timers)) != expected:
             raise SemanticGateClosed("construction queue timers are incomplete")
         return tuple(timers[index] for index in expected)
 
     def build_queue_empty(self) -> bool:
-        return all(value == "99:99:99" for value in self.build_queue_timers())
+        timers = self.build_queue_timers()
+        state = self.read_state()
+        finished = tuple(
+            button
+            for button in state.buttons
+            if button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is None
+            and button.bounds is not None
+            and re.search(
+                r"BuildShipDetailUI1\(Clone\)/list_(?:single|mult)_line/content/"
+                r"project_([1234])/frame/finished/launched_btn$",
+                button.path,
+            )
+            is not None
+        )
+        if finished:
+            # A finished slot retains the sentinel timer on the pinned CN
+            # client until the exact batch-launch action is taken.  Its active
+            # ``launched_btn`` is authoritative nonempty queue state; otherwise
+            # a four-slot completed batch would be mistaken for an empty queue.
+            paths = {button.path for button in finished}
+            if len(paths) != len(finished):
+                raise SemanticGateClosed("construction finished slots are ambiguous")
+            return False
+        return all(value == "99:99:99" for value in timers)
 
     def build_queue_finish_prompt_cost(self) -> Optional[Tuple[int, int]]:
         """Return the exact quick-finish cost and owned count for one queue prompt."""
@@ -10525,23 +10556,25 @@ class SemanticOracle:
         ):
             raise SemanticGateClosed("new-ship snapshots are not coherent")
 
-        delegated_image = tuple(
+        dialogue_background = tuple(
             image
             for image in ui_state.images
-            if image.path == target.path
-            and image.name == "click"
+            if image.path.endswith("NewShipUI(Clone)/shake_panel/dialogue/bg")
             and image.sprite == "liaotian04"
             and image.active_in_hierarchy
             and image.active_and_enabled
-            and image.raycast_target
-            and image.raycast_top is None
-            and image.bounds is not None
-            and image.bounds.contains(target.point)
         )
-        if target.raycast_top is not True and len(delegated_image) != 1:
+        # On the current CN client, the observer can associate an unrelated
+        # child Image sprite with the full-screen ``click`` Button while the
+        # Button itself remains the exact actionable target.  Use the unique
+        # same-page dialogue background as the companion visual identity
+        # instead of trusting that lossy Image association.  The exact Button
+        # path, its full-screen bounds, and the typed name/type/dialogue proof
+        # below remain mandatory.
+        if target.raycast_top is not True and len(dialogue_background) != 1:
             return False
-        if len(delegated_image) > 1:
-            raise SemanticGateClosed("new-ship delegated input is ambiguous")
+        if len(dialogue_background) > 1:
+            raise SemanticGateClosed("new-ship dialogue background is ambiguous")
 
         root = "NewShipUI(Clone)/shake_panel/"
 
@@ -10597,6 +10630,58 @@ class SemanticOracle:
         return self._retry_transition_read(
             lambda: self._new_ship_reward_visible_in_state(self.read_state())
         )
+
+    def new_ship_reward_page_visible(self) -> bool:
+        """Return whether an active typed NewShipUI page owns the foreground.
+
+        This is deliberately weaker than :meth:`new_ship_reward_visible`: it
+        exists only for negative queue probes while the client is publishing a
+        new-ship result.  It never authorizes the full-screen acknowledgement
+        input, which continues to require the complete name/type/dialogue
+        proof above.
+        """
+
+        def reader() -> bool:
+            state = self.read_state()
+            roots = tuple(
+                button
+                for button in state.buttons
+                if button.active_in_hierarchy
+                and button.active_and_enabled
+                and "/NewShipUI(Clone)/shake_panel/" in button.path
+            )
+            page_roots = {
+                button.path.split("/NewShipUI(Clone)/", 1)[0]
+                + "/NewShipUI(Clone)"
+                for button in roots
+            }
+            if len(page_roots) > 1 or len({button.path for button in roots}) > 32:
+                raise SemanticGateClosed("new-ship result page identity is ambiguous")
+            return bool(roots)
+
+        return self._retry_transition_read(reader)
+
+    def award_info_page_visible(self) -> bool:
+        """Return whether the typed AwardInfo result hierarchy owns the page.
+
+        This intentionally proves only page ownership, not its close action:
+        the close Button can appear one observer turn after the result canvas.
+        """
+
+        def reader() -> bool:
+            state = self.read_state()
+            roots = tuple(
+                button
+                for button in state.buttons
+                if button.active_in_hierarchy
+                and button.active_and_enabled
+                and "/AwardInfoUI(Clone)/" in button.path
+            )
+            if len({button.path for button in roots}) > 32:
+                raise SemanticGateClosed("award-info page identity is ambiguous")
+            return bool(roots)
+
+        return self._retry_transition_read(reader)
 
     def click_daily_battle_result(self) -> ActionReceipt:
         state = self.read_state()
@@ -18765,16 +18850,25 @@ class SemanticOracle:
     def _stable_msgbox_ui_state(self, before: OracleState) -> UiState:
         """Sandwich Msgbox text between two identical Button snapshots."""
 
-        ui_state = self.read_ui_state()
-        after = self.read_state()
-        if not (
-            before.generation <= ui_state.generation <= after.generation
-            and before.scene_handle == after.scene_handle
-            and self._msgbox_button_signature(before)
-            == self._msgbox_button_signature(after)
-        ):
-            raise SemanticGateClosed("Msgbox snapshots are not coherent")
-        return ui_state
+        before_signature = self._msgbox_button_signature(before)
+
+        def reader() -> UiState:
+            ui_state = self.read_ui_state()
+            after = self.read_state()
+            if not (
+                before.generation <= ui_state.generation <= after.generation
+                and before.scene_handle == after.scene_handle
+                and before_signature == self._msgbox_button_signature(after)
+            ):
+                raise SemanticGateClosed("Msgbox snapshots are not coherent")
+            return ui_state
+
+        # Unity can publish the text slice one observer turn after the modal
+        # Button tree during its opening transition.  Repeat only this
+        # read-only sandwich; every accepted attempt still has to bind the
+        # original exact modal Button signature to its typed text and closing
+        # Button snapshot.
+        return self._retry_transition_read(reader)
 
     def _tactical_continue_prompt_text(self, state: OracleState) -> Optional[str]:
         parts = self._msgbox_prompt_parts(state)

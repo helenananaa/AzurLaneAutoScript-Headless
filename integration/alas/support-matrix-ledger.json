@@ -3056,30 +3056,35 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_gacha_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_adapter_session_runtime_handle.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_gacha_config_replay.py",
+        "python/alas_headless/semantic_oracle.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
         "integration/alas/series/0220-gacha-multi-order-flow-port.patch",
-        "scripts/python/run_alas_gacha_live_validation.py",
-        "integration/alas/gacha-event-two-live-validation-receipt.json",
-        "integration/alas/gacha-special-two-live-validation-receipt.json",
-        "integration/alas/gacha-light-daily-seed-validation-receipt.json",
+        "integration/alas/series/0230-gacha-queue-finish-flow-port.patch",
+        "integration/alas/series/0240-gacha-result-wait-port.patch",
+        "scripts/python/run_alas_gacha_amount_matrix_live_validation.py",
+        "integration/alas/gacha-light-amounts-1-10-live-validation-receipt.json",
+        "integration/alas/gacha-amount-patch-tree-validation-r7/result.json",
         "docs/status.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=select; display=default",
       "panels": [
         "Gacha"
       ],
       "path": "Gacha.Amount",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "options: 1, 10, 2, 3, 4, 5, 6, 7, 8, 9; default: 1"
     },
@@ -9988,16 +9993,29 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_gacha_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_adapter_session_runtime_handle.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_gacha_config_replay.py",
+        "python/alas_headless/semantic_oracle.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0220-gacha-multi-order-flow-port.patch",
+        "integration/alas/series/0230-gacha-queue-finish-flow-port.patch",
+        "integration/alas/series/0240-gacha-result-wait-port.patch",
+        "scripts/python/run_alas_gacha_amount_matrix_live_validation.py",
+        "integration/alas/gacha-light-amounts-1-10-live-validation-receipt.json",
+        "integration/alas/gacha-amount-patch-tree-validation-r7/result.json",
         "docs/status.md"
       ],
       "field": "Gacha.Amount",
-      "note": "All amounts one through ten preserve original ticket and cube split plus affordability decisions; invalid values fail before build scope entry or resource reads."
+      "note": "All declared amounts one through ten now run the original Light-pool Gacha task with ticket=false and drill=true.  Each passed run begins and ends at a typed empty queue, returns true, and consumes exactly N cubes, 600*N coins, and N quick-finish tools.  The amount-10 run also proves the four-slot finished-state recovery before result closure; invalid values still fail before build scope entry or resource reads."
     },
     {
       "dimensions": {

@@ -1,0 +1,48 @@
+{
+  "schema": "alas-headless.gacha-amount-matrix-evidence/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "gacha": {
+    "Pool": "light",
+    "Amount": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "UseTicket": false,
+    "UseDrill": true
+  },
+  "source_receipts": [
+    {
+      "path": "integration/alas/gacha-light-drill-task-r7-live-validation-receipt.json",
+      "sha256": "03c1dba4f700657dcf6503619f6ab0bb5efbbaee49e41c517ce7d1dbec73296d",
+      "amounts": [1]
+    },
+    {
+      "path": "integration/alas/gacha-light-amount-2-r3-live-validation-receipt.json",
+      "sha256": "c1ec407aa532fa764a578f3e849445e10157447de0f1c53b51b05279d037709a",
+      "amounts": [2]
+    },
+    {
+      "path": "integration/alas/gacha-light-amounts-3-10-live-validation-receipt.json",
+      "sha256": "1f84411f70f198b568b8ef138a323eb5086aefead65b46c884591f278f35e073",
+      "amounts": [3, 4, 5, 6, 7, 8, 9],
+      "excluded_failed_amount": 10
+    },
+    {
+      "path": "integration/alas/gacha-light-amount-10-r7-live-validation-receipt.json",
+      "sha256": "828fb4e11c071addd29e20b9d91ba41f676b44ffb9c0b1483e175768a7f2c2dc",
+      "amounts": [10]
+    }
+  ],
+  "runs": [
+    {"amount": 1, "resource_delta": {"cubes": 1, "coins": 600}, "quick_item_delta": 1, "queue_empty_before": true, "queue_empty_after": true, "task_result": true, "passed": true},
+    {"amount": 2, "resource_delta": {"cubes": 2, "coins": 1200}, "quick_item_delta": 2, "queue_empty_before": true, "queue_empty_after": true, "task_result": true, "passed": true},
+    {"amount": 3, "resource_delta": {"cubes": 3, "coins": 1800}, "quick_item_delta": 3, "queue_empty_before": true, "queue_empty_after": true, "task_result": true, "passed": true},
+    {"amount": 4, "resource_delta": {"cubes": 4, "coins": 2400}, "quick_item_delta": 4, "queue_empty_before": true, "queue_empty_after": true, "task_result": true, "passed": true},
+    {"amount": 5, "resource_delta": {"cubes": 5, "coins": 3000}, "quick_item_delta": 5, "queue_empty_before": true, "queue_empty_after": true, "task_result": true, "passed": true},
+    {"amount": 6, "resource_delta": {"cubes": 6, "coins": 3600}, "quick_item_delta": 6, "queue_empty_before": true, "queue_empty_after": true, "task_result": true, "passed": true},
+    {"amount": 7, "resource_delta": {"cubes": 7, "coins": 4200}, "quick_item_delta": 7, "queue_empty_before": true, "queue_empty_after": true, "task_result": true, "passed": true},
+    {"amount": 8, "resource_delta": {"cubes": 8, "coins": 4800}, "quick_item_delta": 8, "queue_empty_before": true, "queue_empty_after": true, "task_result": true, "passed": true},
+    {"amount": 9, "resource_delta": {"cubes": 9, "coins": 5400}, "quick_item_delta": 9, "queue_empty_before": true, "queue_empty_after": true, "task_result": true, "passed": true},
+    {"amount": 10, "resource_delta": {"cubes": 10, "coins": 6000}, "quick_item_delta": 10, "queue_empty_before": true, "queue_empty_after": true, "task_result": true, "passed": true}
+  ],
+  "passed": true
+}

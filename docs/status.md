@@ -2,6 +2,22 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-17
+
+### Gacha: all declared Amount values complete on the live client
+
+- Light-pool `Gacha.Amount=1..10` has now passed one real original-ALAS task
+  per declared value with `UseTicket=false` and `UseDrill=true`.  Every run
+  began and ended on a typed empty queue, returned `true`, and consumed exactly
+  `N` cubes, `600*N` coins, and `N` quick-finish tools.  The Amount=10 run
+  returned true after `995.235` seconds (`3571 -> 3561` cubes, `48199 ->
+  42199` coins, `2595 -> 2585` tools) and exercised the real four-slot
+  finished-state recovery before closing all reward cards.  The hash-bound
+  source receipts and their per-value summaries are in
+  `integration/alas/gacha-light-amounts-1-10-live-validation-receipt.json`.
+  `Gacha.Amount` is therefore complete for every declared value; this does not
+  promote the separately unqualified ticket, wishing-well, or all-pool surface.
+
 ## 2026-08-16
 
 ### Gacha: real two-order pools and semantic queue-finish recovery
