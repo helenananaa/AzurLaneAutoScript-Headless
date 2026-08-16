@@ -4810,6 +4810,24 @@ class AlasSemanticAdapter:
                 ) from last_error
             time.sleep(0.25)
 
+    def _fresh_dorm_feed_state(self) -> DormFeedState:
+        """Read the food panel from one newly acquired immutable frame.
+
+        A multi-card ALAS feed invokes this helper without a screenshot
+        boundary between cards.  The card input invalidates the preceding
+        frame, so taking the next panel reading directly from the live oracle
+        can mix a pre-input counter with a later card tap.  Re-acquire the
+        current frame for both sides of each individual card transaction.
+        """
+
+        if (
+            self._input_frame_refresher is not None
+            and self._frame_observation_oracle is not None
+        ):
+            self._input_frame_refresher()
+            return self._require_frame_observation_oracle().dorm_feed_state()
+        return self._stable_dorm_feed_state()
+
     def dorm_feed_food(self, item_index: int, count: int) -> Tuple[ActionReceipt, ...]:
         """Apply ALAS' chosen food/count through exact per-item Buttons."""
 
@@ -4826,7 +4844,7 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("dorm feed count exceeds the remaining budget")
         receipts = []
         for _ in range(count):
-            before = self._stable_dorm_feed_state()
+            before = self._fresh_dorm_feed_state()
             item = before.items[item_index]
             if item.count <= 0 or before.food + item.value > before.capacity:
                 raise SemanticGateClosed("dorm feed item is unavailable or would overflow")
@@ -4840,7 +4858,7 @@ class AlasSemanticAdapter:
             last_error: Optional[SemanticOracleError] = None
             while True:
                 try:
-                    after = self.oracle.dorm_feed_state()
+                    after = self._fresh_dorm_feed_state()
                     after_item = after.items[item_index]
                     # Up to six ships consume at most 18 food per 15-second
                     # tick.  A tick can straddle either snapshot boundary, so
@@ -9533,6 +9551,11 @@ class AlasSemanticSession:
         return self.open().dorm_food_counts()
 
     def dorm_feed_food(self, item_index: int, count: int) -> Tuple[ActionReceipt, ...]:
+        # ALAS can spend a long time waiting for BackYardFeedUI's typed text
+        # after its last screenshot. Acquire a new immutable frame at the
+        # exact mutation boundary instead of allowing that observation to
+        # expire before the oracle re-proves the selected food card.
+        self.refresh_frame()
         return self.open().dorm_feed_food(item_index, count)
 
     def build_submit_state(self) -> BuildSubmitState:

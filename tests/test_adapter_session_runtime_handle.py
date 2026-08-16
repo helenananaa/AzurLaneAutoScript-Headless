@@ -917,6 +917,18 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             },
         )
 
+    def test_dorm_feed_input_refreshes_frame_before_delegating(self):
+        session = object.__new__(AlasSemanticSession)
+        session.refresh_frame = mock.Mock()
+        adapter = mock.Mock()
+        session.open = mock.Mock(return_value=adapter)
+
+        result = session.dorm_feed_food(4, 3)
+
+        session.refresh_frame.assert_called_once_with()
+        adapter.dorm_feed_food.assert_called_once_with(4, 3)
+        self.assertIs(result, adapter.dorm_feed_food.return_value)
+
     def test_explicit_handle_path_wires_only_the_protocol(self):
         handle = FakeRuntimeHandle()
         session = AlasSemanticSession(

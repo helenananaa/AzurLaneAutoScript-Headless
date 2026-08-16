@@ -1310,18 +1310,22 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_dorm_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_adapter_session_runtime_handle.py",
         "python/alas_headless/alas_dorm_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
         "scripts/python/run_alas_dorm_feed_live_validation.py",
-        "integration/alas/dorm-feed-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r10-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1330,24 +1334,28 @@
         "Dorm"
       ],
       "path": "Dorm.Feed",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_dorm_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_adapter_session_runtime_handle.py",
         "python/alas_headless/alas_dorm_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
         "scripts/python/run_alas_dorm_feed_live_validation.py",
-        "integration/alas/dorm-feed-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r10-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1356,7 +1364,7 @@
         "Dorm"
       ],
       "path": "Dorm.FeedFilter",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: \"20000 > 10000 > 5000 > 3000 > 2000 > 1000\""
     },
@@ -9793,29 +9801,47 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_dorm_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_adapter_session_runtime_handle.py",
         "python/alas_headless/alas_dorm_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "scripts/python/run_alas_dorm_feed_live_validation.py",
+        "integration/alas/dorm-feed-r10-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Dorm.Feed",
-      "note": "Both booleans preserve original feed dispatch and scheduler delay behavior; invalid values fail before Dorm scope entry, navigation, or feeding."
+      "note": "All 1,956 legal priority orders retain the original strict-fill, fallback, and no-op semantics in replay. The real original task then proves both booleans: enabled uses only the planned typed cards and exact inventory deltas, while disabled emits no feed mutation and both paths restore main."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_dorm_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_adapter_session_runtime_handle.py",
         "python/alas_headless/alas_dorm_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "scripts/python/run_alas_dorm_feed_live_validation.py",
+        "integration/alas/dorm-feed-r10-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Dorm.FeedFilter",
-      "note": "Every non-empty unique ordering of the six known food values preserves original filter priority; unknown, duplicate, malformed, and empty rules fail before Dorm scope entry."
+      "note": "Every non-empty unique ordering of the six known food values preserves original priority in replay. The current client proves both the default list and a single numeric UI value, including ConfigUpdater's int canonicalization, against typed exact-card input and inventory postconditions."
     },
     {
       "dimensions": {

@@ -4,6 +4,27 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-17
 
+### Dorm: feed switch and priority filter complete on the live client
+
+- `Dorm.Feed` is now complete for both booleans.  The enabled original-ALAS
+  task consumed exactly the dynamically planned typed food card(s), exhausted
+  its granted input budget, observed the matching inventory delta, and restored
+  the main page.  The complementary disabled task returned success with zero
+  feed dispatches and the same cleanup.  The source-hash-bound receipts are
+  `integration/alas/dorm-feed-r10-live-validation-receipt.json` and
+  `integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json`.
+- `Dorm.FeedFilter` is also complete: all 1,956 nonempty unique orderings of
+  the six declared food values remain covered by the original-state-machine
+  replay, while the live client passed both the default priority list and the
+  single UI value `"1000"`.  The latter is important because original
+  ConfigUpdater canonicalizes that textarea value to an integer before
+  `RewardDorm.run()`; the adapter accepts only the six exact legal integer
+  singletons on that compatibility path.  Its real task clicked only
+  `dorm/feed/item/50001`, changed inventory `17863 -> 17862`, and returned to
+  main; see `integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json`.
+  `Dorm.Collect` remains unqualified: current live observations did not expose
+  an actually collectable dorm reward.
+
 ### Reward: daily-mission claim switch complete on the live client
 
 - `Reward.CollectMission=true` now has a fresh original-ALAS daily task pass

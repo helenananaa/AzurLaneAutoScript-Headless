@@ -1,6 +1,6 @@
 # ALAS Headless 配置项级支持矩阵
 
-更新日期：2026-08-16
+更新日期：2026-08-17
 Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 固定 ALAS 上游基线：`81ccf63b4540f00241628c82a58c02c7a2bb11af`
 
@@ -265,9 +265,11 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 ### 1.26 本轮 Dorm 收取、喂食与食物优先级契约
 
-`Dorm.Collect` 与 `Dorm.Feed` 现在只接受精确布尔值，`Dorm.FeedFilter` 接受固定上游六种食物值的任意非空、无重复排列或子集，并保留 ALAS 对空白及 Unicode 大于号分隔符的规范化。空项、重复项、未知食物、前导零、尾随字符和非字符串会在 `RewardDorm.run()` 第一条可执行语句 fail-closed，早于语义 scope、页面导航、收取或喂食。
+`Dorm.Collect` 与 `Dorm.Feed` 现在只接受精确布尔值，`Dorm.FeedFilter` 接受固定上游六种食物值的任意非空、无重复排列或子集，并保留 ALAS 对空白及 Unicode 大于号分隔符的规范化。空项、重复项、未知食物、前导零、尾随字符和除原 `ConfigUpdater` 数字 textarea 兼容值以外的非字符串会在 `RewardDorm.run()` 第一条可执行语句 fail-closed，早于语义 scope、页面导航、收取或喂食；该兼容路径也只接受六种精确食物数值。
 
-回放覆盖 1,956 种食物优先级和四种收取/喂食开关组合，共 7,824 个合法配置；原状态机仍拥有“全关则禁用并停止”、其余组合的 `dorm_run` 分派和三舰 417 分钟调度。食物边界保持严格 `fill > food`、首选食物为空时回退以及无可用食物不操作。22 个非法单字段案例均在入口事件前拒绝，mutation budget 为 0，没有领取奖励、消耗食物、导航、截图/OCR 或 Android 输入。2026-08-16 的原 ALAS 实机运行在 `Dorm.Collect=false`、`Dorm.Feed=true`、`Dorm.FeedFilter="10000 > 5000"` 下精确关闭空食物弹层，执行四次 `dorm/feed/item/50005`，食物由 0 变为 39982、10k 食物库存由 1010 变为 1006，并清理回主界面；见 `integration/alas/dorm-feed-live-validation-receipt.json`。三字段仍为 `L`：空收取、部分库存及其余 1,955 种合法过滤器尚未逐值实机覆盖。
+回放覆盖 1,956 种食物优先级和四种收取/喂食开关组合，共 7,824 个合法配置；原状态机仍拥有“全关则禁用并停止”、其余组合的 `dorm_run` 分派和三舰 417 分钟调度。食物边界保持严格 `fill > food`、首选食物为空时回退以及无可用食物不操作。22 个非法单字段案例均在入口事件前拒绝，mutation budget 为 0，没有领取奖励、消耗食物、导航、截图/OCR 或 Android 输入。
+
+2026-08-17 的原 ALAS 实机矩阵完成了 `Dorm.Feed` 的两条布尔路径：启用的默认优先级运行只发出动态计划的 typed 食物输入、耗尽授权并以精确库存差闭环（`integration/alas/dorm-feed-r10-live-validation-receipt.json`）；禁用运行成功且没有任何喂食输入（`integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json`）。自定义单值 `Dorm.FeedFilter="1000"` 同样通过真实 ConfigUpdater→RewardDorm 路径，它在该路径中会规范为整数，实机仅点击 `dorm/feed/item/50001` 一次，库存 `17863→17862`、食物 `38760→39454` 并回到主页（`integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json`）。连同全部 1,956 个原状态机过滤器回放、每张卡片读写边界的新鲜帧证明和非法值零输入契约，`Dorm.Feed` 与 `Dorm.FeedFilter` 达到五维完整支持；`Dorm.Collect` 仍为 `L`，因为当前账号没有出现可实际领取的宿舍奖励，不能以空路径代替领取闭环。
 
 ### 1.27 本轮 Commission 预设、自定义规则与重大委托契约
 
@@ -650,8 +652,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **10 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **142 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **12 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **140 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **104 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -707,8 +709,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `DataKey.Collect` | Freebies | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `DataKey.ForceCollect` | Freebies | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Dorm.Collect` | Dorm | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Dorm.Feed` | Dorm | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Dorm.FeedFilter` | Dorm | type=textarea; display=default | input/default: "20000 > 10000 > 5000 > 3000 > 2000 > 1000" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Dorm.Feed` | Dorm | type=checkbox; display=default | input/default: true | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `Dorm.FeedFilter` | Dorm | type=textarea; display=default | input/default: "20000 > 10000 > 5000 > 3000 > 2000 > 1000" | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `DropRecord.API` | Alas | type=select; display=default | options: "cn_gz_reverse_proxy", "default"; default: "default" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `DropRecord.AzurStatsID` | Alas | type=input; display=default | input/default: null | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `DropRecord.CombatRecord` | Alas | type=select; display=default | options: "do_not", "save"; default: "do_not" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

@@ -24,6 +24,13 @@ class AlasDormConfigSnapshot:
 def parse_alas_dorm_feed_filter(value: object) -> tuple[int, ...]:
     """Return a unique, known food priority list using ALAS separators."""
 
+    # ``ConfigUpdater.parse_value`` canonicalizes a numeric textarea value to
+    # ``int`` before ``RewardDorm.run`` receives it.  A one-item filter such
+    # as the UI value ``"1000"`` must therefore remain usable on the real
+    # original ALAS configuration path; ``Filter.load`` itself already treats
+    # that exact integer as the corresponding text token.
+    if type(value) is int and value in DORM_FOOD_VALUES:
+        return (value,)
     if type(value) is not str:
         raise SemanticGateClosed("Dorm.FeedFilter must be a string")
     normalized = _DORM_FILTER_WHITESPACE.sub("", value)

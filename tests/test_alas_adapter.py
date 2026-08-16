@@ -1545,6 +1545,29 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with self.assertRaises(SemanticGateClosed):
             adapter.dorm_feed_food(0, 1)
 
+    def test_dorm_feed_refreshes_an_immutable_frame_for_each_card_boundary(self):
+        oracle = FakeOracle()
+        refresh = Mock()
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            dorm_feed_budget=2,
+            frame_observation_oracle=lambda: oracle,
+            input_frame_refresher=refresh,
+        )
+        adapter.begin_dorm()
+
+        receipts = adapter.dorm_feed_food(0, 2)
+
+        self.assertEqual(len(receipts), 2)
+        self.assertEqual(refresh.call_count, 4)
+        self.assertEqual(
+            oracle.click_calls,
+            ["dorm/feed/item/50001", "dorm/feed/item/50001"],
+        )
+        self.assertEqual(oracle.dorm_feed_state_value.food, 2000)
+        self.assertEqual(oracle.dorm_feed_state_value.items[0].count, 3)
+
     def test_dorm_feed_postcondition_tolerates_transient_card_animation(self):
         oracle = FakeOracle()
         adapter = AlasSemanticAdapter(

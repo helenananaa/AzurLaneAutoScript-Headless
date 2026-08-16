@@ -1,5 +1,8 @@
 import ast
+import hashlib
 import itertools
+import json
+import runpy
 import unittest
 from pathlib import Path
 
@@ -47,6 +50,17 @@ class AlasDormConfigTests(unittest.TestCase):
                 order_count += 1
         self.assertEqual(order_count, 1956)
 
+    def test_single_numeric_filter_survives_original_config_canonicalization(self):
+        self.assertEqual(parse_alas_dorm_feed_filter(1000), (1000,))
+        self.assertEqual(
+            validate_alas_dorm_config(
+                collect=False,
+                feed=True,
+                feed_filter=1000,
+            ).feed_order,
+            (1000,),
+        )
+
     def test_invalid_single_fields_fail_closed(self):
         for field in ("collect", "feed"):
             for value in (0, 1, None, "true", [], {}):
@@ -64,6 +78,7 @@ class AlasDormConfigTests(unittest.TestCase):
             None,
             True,
             1,
+            999,
             "",
             "unknown",
             "1000 >> 2000",
@@ -87,11 +102,99 @@ class AlasDormConfigTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertEqual(patch.count("validate_alas_dorm_config("), 1)
 
+    def test_live_validation_plans_every_original_feed_pass(self):
+        module = runpy.run_path(
+            str(ROOT / "scripts/python/run_alas_dorm_feed_live_validation.py")
+        )
+        plan = module["_planned_feeds"](
+            {
+                "food": 32038,
+                "capacity": 40000,
+                "items": [
+                    {"item_id": 50001, "value": 1000, "count": 1},
+                    {"item_id": 50002, "value": 2000, "count": 1},
+                    {"item_id": 50003, "value": 3000, "count": 1},
+                    {"item_id": 50004, "value": 5000, "count": 1},
+                    {"item_id": 50005, "value": 10000, "count": 1},
+                    {"item_id": 50006, "value": 20000, "count": 0},
+                ],
+            },
+            feed_filter="20000 > 10000 > 5000 > 3000 > 2000 > 1000",
+        )
+        self.assertEqual(
+            plan,
+            (
+                {"item_id": 50004, "value": 5000, "dispatch_count": 1},
+                {"item_id": 50002, "value": 2000, "dispatch_count": 1},
+            ),
+        )
+
+    def test_live_dorm_feed_receipts_cover_enabled_disabled_and_numeric_filter(self):
+        adapter = ROOT / "python/alas_headless/alas_adapter.py"
+        oracle = ROOT / "python/alas_headless/semantic_oracle.py"
+        expected_hashes = {
+            "adapter": hashlib.sha256(adapter.read_bytes()).hexdigest(),
+            "oracle": hashlib.sha256(oracle.read_bytes()).hexdigest(),
+        }
+        receipts = {
+            "enabled": "integration/alas/dorm-feed-r10-live-validation-receipt.json",
+            "disabled": "integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json",
+            "numeric": "integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json",
+        }
+        loaded = {
+            name: json.loads(ROOT.joinpath(path).read_text(encoding="utf-8"))
+            for name, path in receipts.items()
+        }
+        for receipt in loaded.values():
+            self.assertTrue(receipt["passed"])
+            self.assertTrue(receipt["task_result"])
+            self.assertEqual(receipt["dorm_feed_grant_remaining"], 0)
+            self.assertEqual(receipt["after"]["cleanup"], "main")
+            self.assertTrue(receipt["temporary_config_removed"])
+            self.assertEqual(
+                {name: receipt["source_sha256"][name] for name in expected_hashes},
+                expected_hashes,
+            )
+
+        enabled = loaded["enabled"]
+        self.assertTrue(enabled["configured"]["Dorm.Feed"])
+        self.assertGreater(enabled["planned_dispatch_count"], 0)
+        self.assertEqual(
+            tuple(item["semantic_id"] for item in enabled["dispatches"]),
+            tuple(
+                "dorm/feed/item/{0}".format(step["item_id"])
+                for step in enabled["planned_feeds"]
+                for _ in range(step["dispatch_count"])
+            ),
+        )
+
+        disabled = loaded["disabled"]
+        self.assertFalse(disabled["configured"]["Dorm.Feed"])
+        self.assertEqual(disabled["dispatches"], [])
+        self.assertEqual(disabled["planned_dispatch_count"], 0)
+
+        numeric = loaded["numeric"]
+        self.assertEqual(numeric["configured"]["Dorm.FeedFilter"], "1000")
+        self.assertEqual(
+            numeric["planned_feeds"],
+            [{"item_id": 50001, "value": 1000, "dispatch_count": 1}],
+        )
+        self.assertEqual(
+            [item["semantic_id"] for item in numeric["dispatches"]],
+            ["dorm/feed/item/50001"],
+        )
+        before = numeric["before"]["feed"]
+        after = numeric["after"]["feed"]
+        before_item = next(item for item in before["items"] if item["item_id"] == 50001)
+        after_item = next(item for item in after["items"] if item["item_id"] == 50001)
+        self.assertEqual(after_item["count"], before_item["count"] - 1)
+
     def test_sources_compile(self):
         for relative in (
             "python/alas_headless/alas_dorm_config_contract.py",
             "python/alas_headless/alas_dorm_config_replay.py",
             "scripts/python/verify_alas_dorm_config.py",
+            "scripts/python/run_alas_dorm_feed_live_validation.py",
         ):
             ast.parse(ROOT.joinpath(relative).read_text(encoding="utf-8"))
 

@@ -1,0 +1,679 @@
+{
+  "schema": "alas-headless.dorm-feed-live-validation/v1",
+  "serial": "emulator-5580",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "configured": {
+    "Dorm.Collect": false,
+    "Dorm.Feed": true,
+    "Dorm.FeedFilter": "20000 > 10000 > 5000 > 3000 > 2000 > 1000"
+  },
+  "planned_feeds": [
+    {
+      "item_id": 50003,
+      "value": 3000,
+      "dispatch_count": 1
+    }
+  ],
+  "planned_dispatch_count": 1,
+  "source_sha256": {
+    "dorm": "2e2dd75c321ffd7ef48dc90a9c568bb68903072d002dee1a82c6367da544a46a",
+    "adapter": "99cfc62760cf28ec52ef306624eb0b76fb5d32bbd4e2a1041137e3ee744e0358",
+    "oracle": "96b7b240be56bac8a0262c503e2e9b65b42a5f5eba80eaad623adfebae2d7f40"
+  },
+  "passed": true,
+  "before": {
+    "actions": [
+      "dorm/feed/close",
+      "dorm/feed",
+      "dorm/feed/close",
+      "dorm/page/back"
+    ],
+    "before_open": {
+      "occupied_slots": 6,
+      "total_slots": 6,
+      "food": 36534,
+      "food_capacity": 40000,
+      "comfort": 454,
+      "floor": 1,
+      "food_countdown_seconds": 30423
+    },
+    "feed": {
+      "food": 36534,
+      "capacity": 40000,
+      "items": [
+        {
+          "item_id": 50001,
+          "value": 1000,
+          "count": 17863,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50001/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 447.66,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 395.451,
+              "top": 375.452,
+              "right": 499.869,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50001/icon_bg",
+              "sprite": "bg2",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 395.451,
+                "top": 375.452,
+                "right": 499.869,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "item_id": 50002,
+          "value": 2000,
+          "count": 15846,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50002/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 576.079,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 523.87,
+              "top": 375.452,
+              "right": 628.288,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50002/icon_bg",
+              "sprite": "bg2",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 523.87,
+                "top": 375.452,
+                "right": 628.288,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "item_id": 50003,
+          "value": 3000,
+          "count": 1542,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50003/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 704.4975,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 652.288,
+              "top": 375.452,
+              "right": 756.707,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50003/icon_bg",
+              "sprite": "bg2",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 652.288,
+                "top": 375.452,
+                "right": 756.707,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "item_id": 50004,
+          "value": 5000,
+          "count": 304,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50004/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 832.9165,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 780.707,
+              "top": 375.452,
+              "right": 885.126,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50004/icon_bg",
+              "sprite": "bg2",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 780.707,
+                "top": 375.452,
+                "right": 885.126,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "item_id": 50005,
+          "value": 10000,
+          "count": 1003,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50005/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 961.3354999999999,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 909.126,
+              "top": 375.452,
+              "right": 1013.545,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50005/icon_bg",
+              "sprite": "bg3",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 909.126,
+                "top": 375.452,
+                "right": 1013.545,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "item_id": 50006,
+          "value": 20000,
+          "count": 0,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50006/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1089.7545,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 1037.545,
+              "top": 375.452,
+              "right": 1141.964,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50006/icon_bg",
+              "sprite": "bg3",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 1037.545,
+                "top": 375.452,
+                "right": 1141.964,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        }
+      ]
+    },
+    "after_close": {
+      "occupied_slots": 6,
+      "total_slots": 6,
+      "food": 36516,
+      "food_capacity": 40000,
+      "comfort": 454,
+      "floor": 1,
+      "food_countdown_seconds": 30414
+    },
+    "cleanup": "main"
+  },
+  "task_result": true,
+  "elapsed_seconds": 217.844,
+  "dispatches": [
+    {
+      "capability": "dorm.feed",
+      "semantic_id": "dorm/feed/item/50003",
+      "generation": 10229,
+      "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50003/icon_bg"
+    }
+  ],
+  "dorm_feed_grant_remaining": 0,
+  "after": {
+    "actions": [
+      "dorm/feed",
+      "dorm/feed/close",
+      "dorm/page/back"
+    ],
+    "before_open": {
+      "occupied_slots": 6,
+      "total_slots": 6,
+      "food": 39210,
+      "food_capacity": 40000,
+      "comfort": 454,
+      "floor": 1,
+      "food_countdown_seconds": 32668
+    },
+    "feed": {
+      "food": 39210,
+      "capacity": 40000,
+      "items": [
+        {
+          "item_id": 50001,
+          "value": 1000,
+          "count": 17863,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50001/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 447.66,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 395.451,
+              "top": 375.452,
+              "right": 499.869,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50001/icon_bg",
+              "sprite": "bg2",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 395.451,
+                "top": 375.452,
+                "right": 499.869,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "item_id": 50002,
+          "value": 2000,
+          "count": 15846,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50002/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 576.079,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 523.87,
+              "top": 375.452,
+              "right": 628.288,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50002/icon_bg",
+              "sprite": "bg2",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 523.87,
+                "top": 375.452,
+                "right": 628.288,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "item_id": 50003,
+          "value": 3000,
+          "count": 1541,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50003/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 704.4975,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 652.288,
+              "top": 375.452,
+              "right": 756.707,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50003/icon_bg",
+              "sprite": "bg2",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 652.288,
+                "top": 375.452,
+                "right": 756.707,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "item_id": 50004,
+          "value": 5000,
+          "count": 304,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50004/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 832.9165,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 780.707,
+              "top": 375.452,
+              "right": 885.126,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50004/icon_bg",
+              "sprite": "bg2",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 780.707,
+                "top": 375.452,
+                "right": 885.126,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "item_id": 50005,
+          "value": 10000,
+          "count": 1003,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50005/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 961.3354999999999,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 909.126,
+              "top": 375.452,
+              "right": 1013.545,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50005/icon_bg",
+              "sprite": "bg3",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 909.126,
+                "top": 375.452,
+                "right": 1013.545,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "item_id": 50006,
+          "value": 20000,
+          "count": 0,
+          "button": {
+            "name": "icon_bg",
+            "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50006/icon_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1089.7545,
+              "y": 427.74
+            },
+            "bounds": {
+              "left": 1037.545,
+              "top": 375.452,
+              "right": 1141.964,
+              "bottom": 480.028
+            },
+            "raw": {
+              "kind": "image",
+              "name": "icon_bg",
+              "path": "UICamera/Canvas/UIMain/BackYardFeedUI(Clone)/frame/food_50006/icon_bg",
+              "sprite": "bg3",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 1037.545,
+                "top": 375.452,
+                "right": 1141.964,
+                "bottom": 480.028
+              },
+              "anchor_world_position": null
+            }
+          }
+        }
+      ]
+    },
+    "after_close": {
+      "occupied_slots": 6,
+      "total_slots": 6,
+      "food": 39210,
+      "food_capacity": 40000,
+      "comfort": 454,
+      "floor": 1,
+      "food_countdown_seconds": 32660
+    },
+    "cleanup": "main"
+  },
+  "temporary_config_removed": true
+}
