@@ -1,7 +1,7 @@
 # ALAS Headless 配置项级支持矩阵
 
 更新日期：2026-08-16
-Headless 适配证据提交：`3d0f60ce1c89c54fd8a2519c260f6e19018ef93d`
+Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 固定 ALAS 上游基线：`81ccf63b4540f00241628c82a58c02c7a2bb11af`
 
 ## 1. 目的与口径
@@ -650,8 +650,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **6 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **146 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **7 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **145 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **104 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -904,7 +904,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Reward.CollectExp` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Reward.CollectMission` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Reward.CollectOil` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Reward.CollectWeeklyMission` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Reward.CollectWeeklyMission` | Reward | type=checkbox; display=default | input/default: true | `P`/✅ 周常领取实机闭环 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Scheduler.Command` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=input; display=hide | input/default: "Awaken", "Coalition", "CoalitionSp", "Commission", "Daily", "Dorm", "Event", "Event2", "EventA", "EventB", "EventC", "EventD", "EventSp", "Exercise", "Freebies", "Gacha", "GemsFarming", "Guild", "Hard", "Hospital", "Main", "Main2", "Main3", "Meowfficer", "Minigame", "OpsiAbyssal", "OpsiArchive", "OpsiAshAssist", "OpsiAshBeacon", "OpsiCrossMonth", "OpsiDaily", "OpsiExplore", "OpsiHazard1Leveling", "OpsiMeowfficerFarming", "OpsiMonthBoss", "OpsiObscure", "OpsiShop", "OpsiStronghold", "OpsiVoucher", "PrivateQuarters", "Raid", "RaidDaily", "Research", "Restart", "Reward", "Shipyard", "ShopFrequent", "ShopOnce", "Tactical", "WarArchives" | `F`/☑ 完整 | ☑ | — | — | ☑ | ☑ |
 | `Scheduler.Enable` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=checkbox/lock/state; display=default | options: false, true; default: false, true | `F`/☑ 完整 | ☑ | — | — | ☑ | ☑ |
 | `Scheduler.FailureInterval` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=input; display=hide | input/default: "120-240", "30-60", 0, 120, 278, 30, 60 | `F`/☑ 完整 | ☑ | — | — | ☑ | ☑ |

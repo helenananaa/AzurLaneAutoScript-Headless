@@ -6354,17 +6354,22 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_reward_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_reward_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
-        "docs/status.md"
+        "integration/alas/series/0280-weekly-mission-progress-flow-port.patch",
+        "scripts/python/run_alas_reward_mission_live_validation.py",
+        "integration/alas/reward-weekly-mission-live-validation-receipt.json",
+        "docs/reward-mission-live-validation-report.md"
       ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default",
@@ -6372,7 +6377,7 @@
         "Reward"
       ],
       "path": "Reward.CollectWeeklyMission",
-      "status_label": "◐ 实机当前值",
+      "status_label": "✅ 周常领取实机闭环",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -9590,16 +9595,25 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_reward_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_reward_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
-        "docs/status.md"
+        "integration/alas/series/0280-weekly-mission-progress-flow-port.patch",
+        "scripts/python/run_alas_reward_mission_live_validation.py",
+        "integration/alas/reward-weekly-mission-live-validation-receipt.json",
+        "docs/reward-mission-live-validation-report.md"
       ],
       "field": "Reward.CollectWeeklyMission",
-      "note": "Both boolean values preserve original Reward mission forwarding and are also validated at the shared RaidDaily entry; invalid values fail before either flow."
+      "note": "Both boolean values preserve original Reward mission forwarding; one original-ALAS weekly claim used the exact selected-tab progress button, typed receipt chain, one grant, and typed return to main."
     },
     {
       "dimensions": {
@@ -10635,7 +10649,7 @@
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
   "source": {
-    "adapter_evidence_commit": "3d0f60ce1c89c54fd8a2519c260f6e19018ef93d",
+    "adapter_evidence_commit": "266a77f6ce760b2aed3c05739e0e78d77a9f88dc",
     "config_sha256": {
       "config/template.json": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
       "module/config/argument/args.json": "94a4e553e857e7e3bada215e08b8963f46d287ac530f32a02b7daf6b7533ad90",
@@ -10643,9 +10657,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "0c401bb04a518a7a974fdb100689b4565e1d130141e8a2b22ded00bfba37b7ef",
-      "manifest_sha256": "d8309aa34693d13df8c1b68c499f0988c70a2a8bf1fa9d7486a4aa60db54b392",
-      "member_count": 33
+      "combined_sha256": "978271f051eceb90192505eb7ad119b1bfd31c440801743debaa9c9b3be15898",
+      "manifest_sha256": "3968f353f513853a955637422625d730d29090da39f1ddf1ab091c9c0db34c61",
+      "member_count": 35
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }
