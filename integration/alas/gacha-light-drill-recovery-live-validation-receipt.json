@@ -1,0 +1,17 @@
+{
+  "schema": "alas-headless.gacha-queue-finish-live-validation/v1",
+  "serial": "emulator-5580",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "recovered_existing_prompt": {
+    "tool_cost": 1,
+    "owned_before": 2689
+  },
+  "closed_result_pages": [
+    "build/queue/finish-confirm",
+    "reward/new-ship/continue",
+    "reward/award-info/close"
+  ],
+  "after_timers": [],
+  "queue_empty": true,
+  "passed": true
+}

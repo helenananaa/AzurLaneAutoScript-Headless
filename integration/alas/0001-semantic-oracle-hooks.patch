@@ -8484,3 +8484,66 @@ index 4974bb77..6e26d2b6 100644
          self.handle_app_login()
          # self.ensure_no_unfinished_campaign()
          self.config.task_delay(server_update=True)
+diff --git a/module/gacha/gacha_reward.py b/module/gacha/gacha_reward.py
+index 7a28c725..1e51efba 100644
+--- a/module/gacha/gacha_reward.py
++++ b/module/gacha/gacha_reward.py
+@@ -92,9 +92,9 @@ class RewardGacha(GachaUI, Retirement):
+         from alas_headless import current_semantic_session
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
+-            state = semantic_session.build_submit_state()
+-            if target != 1 or state.count != 1:
+-                raise ScriptError('Semantic construction currently admits one order only')
++            state = semantic_session.build_set_count(target)
++            if state.count != target:
++                raise ScriptError('Semantic construction quantity did not converge')
+             return True
+ 
+         area = ocr_submit.buttons[0]
+diff --git a/module/gacha/gacha_reward.py b/module/gacha/gacha_reward.py
+index 1e51efba..beeb8dab 100644
+--- a/module/gacha/gacha_reward.py
++++ b/module/gacha/gacha_reward.py
+@@ -233,7 +233,9 @@ class RewardGacha(GachaUI, Retirement):
+             if self.handle_popup_confirm('FINISH_ORDERS'):
+                 if confirm_mode:
+                     self.device.sleep((0.5, 0.8))
+-                    self.device.click(BUILD_FINISH_ORDERS)  # Skip animation, safe area
++                    from alas_headless import current_semantic_session
++                    if current_semantic_session() is None:
++                        self.device.click(BUILD_FINISH_ORDERS)  # Skip animation, safe area
+                     confirm_mode = False
+                 confirm_timer.reset()
+                 continue
+@@ -250,6 +252,10 @@ class RewardGacha(GachaUI, Retirement):
+                 continue
+ 
+             if self.appear(BUILD_FINISH_RESULTS, offset=(20, 150), interval=3):
+-                self.device.click(BUILD_FINISH_ORDERS)  # Safe area
++                from alas_headless import current_semantic_session
++                if current_semantic_session() is not None:
++                    self.device.click(BUILD_FINISH_RESULTS)
++                else:
++                    self.device.click(BUILD_FINISH_ORDERS)  # Safe area
+                 confirm_timer.reset()
+                 continue
+diff --git a/module/gacha/gacha_reward.py b/module/gacha/gacha_reward.py
+index beeb8dab..ce56d828 100644
+--- a/module/gacha/gacha_reward.py
++++ b/module/gacha/gacha_reward.py
+@@ -200,4 +200,14 @@ class RewardGacha(GachaUI, Retirement):
+             May exit if unable to flush queue entirely,
+             dock likely full
+         """
++        from alas_headless import current_semantic_session
++        if (
++            current_semantic_session() is not None
++            and 'GET_ITEMS_SHIP_1' not in self.device.stuck_long_wait_list
++        ):
++            # The current client can defer AwardInfoUI after NewShipUI closes.
++            # Keep only this exact already-observed result resource on the
++            # existing bounded long-wait path.
++            self.device.stuck_long_wait_list.append('GET_ITEMS_SHIP_1')
++
+         # Go to Gacha/Orders page

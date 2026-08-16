@@ -1,0 +1,19 @@
+diff --git a/module/gacha/gacha_reward.py b/module/gacha/gacha_reward.py
+index beeb8dab..ce56d828 100644
+--- a/module/gacha/gacha_reward.py
++++ b/module/gacha/gacha_reward.py
+@@ -200,4 +200,14 @@ class RewardGacha(GachaUI, Retirement):
+             May exit if unable to flush queue entirely,
+             dock likely full
+         """
++        from alas_headless import current_semantic_session
++        if (
++            current_semantic_session() is not None
++            and 'GET_ITEMS_SHIP_1' not in self.device.stuck_long_wait_list
++        ):
++            # The current client can defer AwardInfoUI after NewShipUI closes.
++            # Keep only this exact already-observed result resource on the
++            # existing bounded long-wait path.
++            self.device.stuck_long_wait_list.append('GET_ITEMS_SHIP_1')
++
+         # Go to Gacha/Orders page

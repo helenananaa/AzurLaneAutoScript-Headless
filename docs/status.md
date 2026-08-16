@@ -4,6 +4,26 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-16
 
+### Gacha: real two-order pools and semantic queue-finish recovery
+
+- The original ALAS `Gacha` task submitted two Event orders from an empty
+  queue.  Cubes changed from `3672` to `3668`, coins from `107499` to
+  `104499`, and the resulting typed queue timers were `01:29:55` and
+  `01:59:55`.  It then submitted two Special orders from an empty queue with
+  the same exact `4`-cube/`3000`-coin delta and two typed timers.  The
+  receipts are `integration/alas/gacha-event-two-live-validation-receipt.json`
+  and `integration/alas/gacha-special-two-live-validation-receipt.json`.
+- The semantic queue implementation now proves the batch-finish button, the
+  exact Chinese quick-finish confirmation and owned-tool count, the NewShip
+  result, and AwardInfo close.  A real recovery consumed one quick-finish
+  tool, closed all three pages, and proved the queue empty; see
+  `integration/alas/gacha-light-drill-recovery-live-validation-receipt.json`.
+- This is deliberately not a Gacha promotion to complete: the native
+  `UseDrill=true` task reaches NewShip but the current client/driver can stall
+  while awaiting the deferred AwardInfo screenshot.  Event ticket inventory
+  was absent and Wishing Well was unavailable, so neither `UseTicket` nor
+  `wishing_well` has real consumption evidence.
+
 ### Restart: real cold recovery and Scheduler durable state
 
 - The original scheduler was run with all 50 declared Scheduler instances and

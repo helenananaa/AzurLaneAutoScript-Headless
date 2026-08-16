@@ -166,6 +166,15 @@ OVERRIDE_PATHS = {
         "alas.py",
         "module/handler/login.py",
     },
+    "0220-gacha-multi-order-flow-port.patch": {
+        "module/gacha/gacha_reward.py",
+    },
+    "0230-gacha-queue-finish-flow-port.patch": {
+        "module/gacha/gacha_reward.py",
+    },
+    "0240-gacha-result-wait-port.patch": {
+        "module/gacha/gacha_reward.py",
+    },
 }
 
 

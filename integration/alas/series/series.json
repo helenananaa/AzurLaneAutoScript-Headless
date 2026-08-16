@@ -134,6 +134,21 @@
       "order": 27,
       "path": "integration/alas/series/0210-restart-scheduler-flow-port.patch",
       "sha256": "4c70a2c5d136d3b8bfe228ef6a2e2a77e577079bca9cd23bb00d0299dd48bb46"
+    },
+    {
+      "order": 28,
+      "path": "integration/alas/series/0220-gacha-multi-order-flow-port.patch",
+      "sha256": "48640210ed613c8082c4f5de1ab07f9ea2dc1462e4933773976e3ea6b11443d4"
+    },
+    {
+      "order": 29,
+      "path": "integration/alas/series/0230-gacha-queue-finish-flow-port.patch",
+      "sha256": "1f0d68d31c40072594c80d08216eb43cc9b2a1627d02916051c42c2a30eb865a"
+    },
+    {
+      "order": 30,
+      "path": "integration/alas/series/0240-gacha-result-wait-port.patch",
+      "sha256": "ce0d6c37d16acd0309fd34db634abef94716d16414f5347267e3d39e5160bd9f"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

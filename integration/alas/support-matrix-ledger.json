@@ -3041,6 +3041,10 @@
         "tests/test_alas_gacha_config.py",
         "python/alas_headless/alas_gacha_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0220-gacha-multi-order-flow-port.patch",
+        "scripts/python/run_alas_gacha_live_validation.py",
+        "integration/alas/gacha-event-two-live-validation-receipt.json",
+        "integration/alas/gacha-special-two-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -3065,6 +3069,10 @@
         "tests/test_alas_gacha_config.py",
         "python/alas_headless/alas_gacha_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0220-gacha-multi-order-flow-port.patch",
+        "scripts/python/run_alas_gacha_live_validation.py",
+        "integration/alas/gacha-event-two-live-validation-receipt.json",
+        "integration/alas/gacha-special-two-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -3079,7 +3087,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -3089,6 +3097,10 @@
         "tests/test_alas_gacha_config.py",
         "python/alas_headless/alas_gacha_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0230-gacha-queue-finish-flow-port.patch",
+        "integration/alas/series/0240-gacha-result-wait-port.patch",
+        "scripts/python/run_alas_gacha_queue_finish_live_validation.py",
+        "integration/alas/gacha-light-drill-recovery-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -7808,7 +7820,7 @@
         "Gacha"
       ],
       "name": "Gacha",
-      "note": "四配置字段已离线等价；实机仍仅一次轻型建造，其他卡池、多单、票券、快速完成及队列领取未闭环",
+      "note": "四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，快速完成恢复已关闭奖励页；票券、祈愿池与原任务完整 UseDrill 仍未闭环",
       "status": "L"
     },
     {
@@ -9948,16 +9960,22 @@
     },
     {
       "dimensions": {
+        "action": "partial",
         "offline": "complete"
       },
       "evidence": [
+        "tests/test_alas_adapter.py",
         "tests/test_alas_gacha_config.py",
         "python/alas_headless/alas_gacha_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0230-gacha-queue-finish-flow-port.patch",
+        "integration/alas/series/0240-gacha-result-wait-port.patch",
+        "scripts/python/run_alas_gacha_queue_finish_live_validation.py",
+        "integration/alas/gacha-light-drill-recovery-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Gacha.UseDrill",
-      "note": "Both booleans preserve original post-submit queue flush decisions across the complete configuration matrix; invalid values fail before build scope entry."
+      "note": "Both booleans preserve original post-submit queue flush decisions across the complete configuration matrix; a real existing queue consumed the exact prompted tool count, closed NewShip and AwardInfo, and returned to typed empty state. The native UseDrill task still lacks its terminal receipt, so the action dimension is partial."
     },
     {
       "dimensions": {
@@ -10575,9 +10593,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "4db2db280130526c1ec93171cfff3749cc8bcceab5dd36c92276df2db6278228",
-      "manifest_sha256": "dbefcfff0dc7d830fe61d3c98c2f0ea7b250517c19907afb05620a9c922298fe",
-      "member_count": 27
+      "combined_sha256": "986752d2196d4d169dca238bdfdb3793711ee1c990cba1762c5e7f8753925dbb",
+      "manifest_sha256": "4bbf2948cd0438e41994925efdc8d2a6e798618274692dd1d50fad49f0998bb8",
+      "member_count": 30
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

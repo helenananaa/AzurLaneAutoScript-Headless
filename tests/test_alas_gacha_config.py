@@ -80,6 +80,18 @@ class AlasGachaConfigTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertEqual(patch.count("validate_alas_gacha_config("), 1)
 
+    def test_gacha_queue_finish_ports_remain_semantic_specific(self):
+        finish = ROOT.joinpath(
+            "integration/alas/series/0230-gacha-queue-finish-flow-port.patch"
+        ).read_text(encoding="utf-8")
+        wait = ROOT.joinpath(
+            "integration/alas/series/0240-gacha-result-wait-port.patch"
+        ).read_text(encoding="utf-8")
+        self.assertIn("current_semantic_session() is None", finish)
+        self.assertIn("self.device.click(BUILD_FINISH_RESULTS)", finish)
+        self.assertIn("GET_ITEMS_SHIP_1", wait)
+        self.assertIn("stuck_long_wait_list.append", wait)
+
     def test_sources_compile(self):
         for relative in (
             "python/alas_headless/alas_gacha_config_contract.py",

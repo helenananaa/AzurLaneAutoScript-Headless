@@ -209,6 +209,8 @@ class FakeOracle:
         self.build_queue_empty_value = True
         self.build_queue_timer_values = ("99:99:99", "99:99:99")
         self.build_queue_visible_value = False
+        self.build_queue_finish_prompt_value = None
+        self.new_ship_reward_visible_value = False
         self.retirement_keep_limit_break = None
         self.enhancement_calls = []
         self.enhancement_candidates = {
@@ -364,6 +366,9 @@ class FakeOracle:
     def toggle_selected(self, semantic_id):
         return self.toggle_selected_values.get(semantic_id, False)
 
+    def toggle_present(self, semantic_id):
+        return semantic_id in self.toggle_selected_values
+
     def campaign_auto_search_selected(self):
         return self.toggle_selected_values.get(
             "campaign/map-preparation/auto-search", False
@@ -432,10 +437,22 @@ class FakeOracle:
     def build_queue_empty(self):
         return self.build_queue_empty_value
 
+    def build_queue_all_launch_available(self):
+        return not self.build_queue_empty_value
+
+    def click_build_queue_all_launch(self):
+        return self.click("build/queue/all-launch")
+
     def build_queue_timers(self):
         if not self.build_queue_visible_value:
             raise SemanticGateClosed("construction queue is not visible")
         return self.build_queue_timer_values
+
+    def build_queue_finish_prompt_cost(self):
+        return self.build_queue_finish_prompt_value
+
+    def new_ship_reward_visible(self):
+        return self.new_ship_reward_visible_value
 
     def retire_ships_one_click(self, keep_limit_break):
         self.retirement_keep_limit_break = keep_limit_break
@@ -1599,6 +1616,71 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with self.assertRaises(SemanticGateClosed):
             insufficient.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER"))
 
+    def test_build_set_count_proves_multi_order_and_split_submissions(self):
+        oracle = FakeOracle()
+        oracle.enabled_values.update(
+            {
+                "build/warning/confirm": False,
+                "build/prep/confirm": True,
+            }
+        )
+        count = 1
+
+        def submit_state():
+            return SimpleNamespace(
+                count=count,
+                cubes_owned=10,
+                cubes_required=count,
+                coins_required=600 * count,
+            )
+
+        original_click = oracle.click
+
+        def click(semantic_id):
+            nonlocal count
+            if semantic_id == "build/prep/add":
+                count += 1
+            elif semantic_id == "build/prep/minus":
+                count -= 1
+            return original_click(semantic_id)
+
+        oracle.build_submit_state = submit_state
+        oracle.click = click
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            build_submit_budget=2,
+        )
+        adapter.begin_build()
+        adapter.click(NamedButton("MAIN_GOTO_BUILD"))
+        adapter.click(NamedButton("BUILD_SUBMIT_ORDERS"))
+
+        prepared = adapter.build_set_count(3)
+        first = adapter.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER"))
+
+        self.assertEqual(prepared.count, 3)
+        self.assertEqual(first.semantic_id, "build/prep/confirm")
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "main/build",
+                "build/page/start",
+                "build/prep/add",
+                "build/prep/add",
+                "build/prep/confirm",
+            ],
+        )
+
+        count = 1
+        adapter.click(NamedButton("BUILD_SUBMIT_ORDERS"))
+        self.assertEqual(adapter.build_set_count(2).count, 2)
+        second = adapter.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER"))
+
+        self.assertEqual(second.semantic_id, "build/prep/confirm")
+        self.assertEqual(adapter._action_ledger.remaining("build.submit"), 0)
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton("POPUP_CONFIRM_GACHA_ORDER"))
+
     def test_official_retirement_budget_is_single_use_and_receipted(self):
         adapter, oracle, gate_calls = self.make_adapter(retirement_budget=1)
 
@@ -1767,8 +1849,64 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "build/prep/confirm")
         self.assertFalse(adapter.appear(NamedButton("POPUP_CONFIRM")))
 
+    def test_build_fast_finish_and_result_closure_use_typed_targets(self):
+        adapter, oracle, _ = self.make_adapter(build_submit_budget=1)
+        adapter.begin_build()
+        oracle.enabled_values.update(
+            {
+                "reward/award-info/close": False,
+                "reward/award-info1/close": False,
+            }
+        )
+        oracle.build_queue_finish_prompt_value = (2, 9)
+
+        self.assertTrue(adapter.appear(NamedButton("POPUP_CANCEL")))
+        self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
+
+        def overlay_has_no_queue_tab(_semantic_id):
+            raise SemanticGateClosed(
+                "semantic toggle target is absent or ambiguous: build/nav/queue"
+            )
+
+        oracle.toggle_selected = overlay_has_no_queue_tab
+        self.assertFalse(adapter.appear(NamedButton("BUILD_QUEUE_EMPTY")))
+        self.assertFalse(adapter.appear(NamedButton("BUILD_FINISH_ORDERS")))
+        receipt = adapter.click(NamedButton("POPUP_CONFIRM_FINISH_ORDERS"))
+        self.assertEqual(receipt.semantic_id, "build/queue/finish-confirm")
+
+        oracle.build_queue_finish_prompt_value = None
+        self.assertFalse(adapter.appear(NamedButton("BUILD_QUEUE_EMPTY")))
+        self.assertFalse(adapter.appear(NamedButton("BUILD_FINISH_ORDERS")))
+        oracle.new_ship_reward_visible_value = True
+        self.assertTrue(adapter.appear(NamedButton("GET_SHIP")))
+        self.assertTrue(adapter.appear(NamedButton("STORY_SKIP")))
+
+        def result_page_has_no_queue_tab(_semantic_id):
+            raise SemanticGateClosed(
+                "semantic toggle target is absent or ambiguous: build/nav/queue"
+            )
+
+        oracle.toggle_selected = result_page_has_no_queue_tab
+        self.assertFalse(adapter.appear(NamedButton("BUILD_QUEUE_EMPTY")))
+        self.assertFalse(adapter.appear(NamedButton("BUILD_FINISH_ORDERS")))
+        receipt = adapter.click(NamedButton("BUILD_FINISH_ORDERS"))
+        self.assertEqual(receipt.semantic_id, "reward/new-ship/continue")
+
+        oracle.new_ship_reward_visible_value = False
+        oracle.enabled_values["reward/award-info/close"] = True
+        self.assertTrue(adapter.appear(NamedButton("GET_ITEMS_SHIP_1")))
+        self.assertTrue(adapter.appear(NamedButton("BUILD_FINISH_RESULTS")))
+        receipt = adapter.click(NamedButton("BUILD_FINISH_RESULTS"))
+        self.assertEqual(receipt.semantic_id, "reward/award-info/close")
+
     def test_build_navbars_and_queue_observations_feed_alas_primitives(self):
         oracle = FakeOracle()
+        oracle.enabled_values.update(
+            {
+                "reward/award-info/close": False,
+                "reward/award-info1/close": False,
+            }
+        )
         oracle.build_queue_visible_value = True
         oracle.toggle_selected_values.update(
             {
@@ -1811,7 +1949,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             )
         )
         self.assertTrue(adapter.appear(NamedButton("BUILD_QUEUE_EMPTY")))
-        self.assertTrue(adapter.appear(NamedButton("BUILD_FINISH_ORDERS")))
+        self.assertFalse(adapter.appear(NamedButton("BUILD_FINISH_ORDERS")))
         session = AlasSemanticSession.__new__(AlasSemanticSession)
         session.adapter = adapter
         session.open = lambda: adapter
@@ -1822,12 +1960,25 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             oracle.click_calls,
             ["build/nav/pools", "build/pool/heavy"],
         )
-        with self.assertRaises(SemanticGateClosed):
-            adapter.click(NamedButton("BUILD_FINISH_ORDERS"))
-
         oracle.build_queue_empty_value = False
         with self.assertRaises(SemanticGateClosed):
             adapter.appear(NamedButton("BUILD_QUEUE_EMPTY"))
+        self.assertTrue(adapter.appear(NamedButton("BUILD_FINISH_ORDERS")))
+        receipt = adapter.click(NamedButton("BUILD_FINISH_ORDERS"))
+        self.assertEqual(receipt.semantic_id, "build/queue/all-launch")
+
+        oracle.toggle_selected_values["build/nav/queue"] = False
+        self.assertFalse(adapter.appear(NamedButton("BUILD_QUEUE_EMPTY")))
+
+        oracle.toggle_selected_values["build/nav/queue"] = True
+
+        def queue_switched_during_probe():
+            raise SemanticGateClosed("construction queue tab is not selected")
+
+        oracle.build_queue_empty = queue_switched_during_probe
+        oracle.build_queue_all_launch_available = queue_switched_during_probe
+        self.assertFalse(adapter.appear(NamedButton("BUILD_QUEUE_EMPTY")))
+        self.assertFalse(adapter.appear(NamedButton("BUILD_FINISH_ORDERS")))
 
     def test_build_queue_goto_main_uses_typed_queue_identity(self):
         adapter, oracle, _ = self.make_adapter()

@@ -1,0 +1,27 @@
+diff --git a/module/gacha/gacha_reward.py b/module/gacha/gacha_reward.py
+index 1e51efba..beeb8dab 100644
+--- a/module/gacha/gacha_reward.py
++++ b/module/gacha/gacha_reward.py
+@@ -233,7 +233,9 @@ class RewardGacha(GachaUI, Retirement):
+             if self.handle_popup_confirm('FINISH_ORDERS'):
+                 if confirm_mode:
+                     self.device.sleep((0.5, 0.8))
+-                    self.device.click(BUILD_FINISH_ORDERS)  # Skip animation, safe area
++                    from alas_headless import current_semantic_session
++                    if current_semantic_session() is None:
++                        self.device.click(BUILD_FINISH_ORDERS)  # Skip animation, safe area
+                     confirm_mode = False
+                 confirm_timer.reset()
+                 continue
+@@ -250,6 +252,10 @@ class RewardGacha(GachaUI, Retirement):
+                 continue
+ 
+             if self.appear(BUILD_FINISH_RESULTS, offset=(20, 150), interval=3):
+-                self.device.click(BUILD_FINISH_ORDERS)  # Safe area
++                from alas_headless import current_semantic_session
++                if current_semantic_session() is not None:
++                    self.device.click(BUILD_FINISH_RESULTS)
++                else:
++                    self.device.click(BUILD_FINISH_ORDERS)  # Safe area
+                 confirm_timer.reset()
+                 continue

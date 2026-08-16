@@ -1,0 +1,17 @@
+diff --git a/module/gacha/gacha_reward.py b/module/gacha/gacha_reward.py
+index 7a28c725..1e51efba 100644
+--- a/module/gacha/gacha_reward.py
++++ b/module/gacha/gacha_reward.py
+@@ -92,9 +92,9 @@ class RewardGacha(GachaUI, Retirement):
+         from alas_headless import current_semantic_session
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
+-            state = semantic_session.build_submit_state()
+-            if target != 1 or state.count != 1:
+-                raise ScriptError('Semantic construction currently admits one order only')
++            state = semantic_session.build_set_count(target)
++            if state.count != target:
++                raise ScriptError('Semantic construction quantity did not converge')
+             return True
+ 
+         area = ocr_submit.buttons[0]

@@ -1409,7 +1409,25 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget(
         "build/page/back",
         "back_btn",
-        "Overlay/UIMain/blur_panel/adapt/top/back_btn",
+        (
+            "Overlay/UIMain/blur_panel/adapt/top/back_btn",
+            "UIOrigin/blur_panel/adapt/top/back_btn",
+        ),
+    ),
+    SemanticTarget(
+        "build/queue/all-launch",
+        "all_launch",
+        "BuildShipDetailUI1(Clone)/all_launch",
+    ),
+    SemanticTarget(
+        "build/queue/finish-cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
+        "build/queue/finish-confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
     ),
     SemanticTarget(
         "campaign-menu/page/back",
@@ -2217,26 +2235,42 @@ DEFAULT_TOGGLE_TARGETS: Tuple[SemanticToggleTarget, ...] = (
     SemanticToggleTarget(
         "build/pool/event",
         "frame",
-        "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
-        "toggles/new(Clone)/frame",
+        (
+            "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
+            "toggles/new(Clone)/frame",
+            "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
+            "toggles/new/frame",
+        ),
     ),
     SemanticToggleTarget(
         "build/pool/light",
         "frame",
-        "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
-        "toggles/light(Clone)/frame",
+        (
+            "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
+            "toggles/light(Clone)/frame",
+            "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
+            "toggles/light/frame",
+        ),
     ),
     SemanticToggleTarget(
         "build/pool/heavy",
         "frame",
-        "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
-        "toggles/heavy(Clone)/frame",
+        (
+            "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
+            "toggles/heavy(Clone)/frame",
+            "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
+            "toggles/heavy/frame",
+        ),
     ),
     SemanticToggleTarget(
         "build/pool/special",
         "frame",
-        "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
-        "toggles/special(Clone)/frame",
+        (
+            "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
+            "toggles/special(Clone)/frame",
+            "BuildShipUI(Clone)/BuildShipPoolsPageUI(Clone)/gallery/toggle_bg/bg/"
+            "toggles/special/frame",
+        ),
     ),
     SemanticToggleTarget(
         "mail/manage/all",
@@ -2465,11 +2499,15 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "build/nav/queue",
             "build/nav/support",
             "build/nav/unseam",
+            "build/pool/event",
             "build/pool/light",
             "build/pool/heavy",
             "build/pool/special",
             "build/page/back",
             "build/page/start",
+            "build/queue/all-launch",
+            "build/queue/finish-cancel",
+            "build/queue/finish-confirm",
             "build/warning/cancel",
             "build/warning/confirm",
             "build/prep/confirm",
@@ -2478,6 +2516,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "build/prep/minus",
             "build/prep/add",
             "build/prep/max",
+            "reward/new-ship/continue",
         ),
     ),
     BlockerRule(
@@ -2739,6 +2778,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "login/update/restart-msgbox",
             "build/warning/cancel",
             "build/warning/confirm",
+            "build/queue/finish-cancel",
+            "build/queue/finish-confirm",
             "minigame/tickets/cancel",
             "minigame/tickets/confirm",
         ),
@@ -5511,14 +5552,15 @@ class SemanticOracle:
         back = self._unique(button_state, "build/page/back")
         if not back.actionable or self._blocking_rules(button_state, "build/nav/queue"):
             raise SemanticGateClosed("construction queue page identity is not proven")
-        if not self.toggle_selected("build/nav/queue"):
-            raise SemanticGateClosed("construction queue tab is not selected")
         ui_state = self.read_ui_state()
         if (
             ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2
         ):
             raise SemanticGateClosed("construction queue snapshots are not coherent")
+        selected_tabs = self._toggle_matches(ui_state, "build/nav/queue")
+        if len(selected_tabs) != 1 or not selected_tabs[0].checked:
+            raise SemanticGateClosed("construction queue tab is not selected")
         capacity = tuple(
             item
             for item in ui_state.texts
@@ -5578,6 +5620,32 @@ class SemanticOracle:
         observed = tuple(
             (layout, timers) for layout, timers in timers_by_layout.items() if timers
         )
+        if not observed:
+            project_rows = tuple(
+                button
+                for button in button_state.buttons
+                if button.active_in_hierarchy
+                and button.active_and_enabled
+                and re.search(
+                    r"BuildShipDetailUI1\(Clone\)/list_(?:single|mult)_line/"
+                    r"content/project_[123](?:/|$)",
+                    button.path,
+                )
+                is not None
+            )
+            quick_counts = tuple(
+                item
+                for item in ui_state.texts
+                if item.path.endswith("BuildShipDetailUI1(Clone)/quick_count/value")
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+                and re.fullmatch(r"[0-9]+", item.text.strip()) is not None
+            )
+            if project_rows or len(quick_counts) != 1:
+                raise SemanticGateClosed("construction queue timers are incomplete")
+            return ()
         if len(observed) != 1:
             raise SemanticGateClosed("construction queue timers are incomplete")
         layout, timers = observed[0]
@@ -5589,6 +5657,84 @@ class SemanticOracle:
 
     def build_queue_empty(self) -> bool:
         return all(value == "99:99:99" for value in self.build_queue_timers())
+
+    def build_queue_finish_prompt_cost(self) -> Optional[Tuple[int, int]]:
+        """Return the exact quick-finish cost and owned count for one queue prompt."""
+
+        state = self.read_state()
+        confirm = self._matches(state, "build/queue/finish-confirm")
+        cancel = self._matches(state, "build/queue/finish-cancel")
+        if not confirm and not cancel:
+            return None
+        if len(confirm) != 1 or len(cancel) != 1:
+            raise SemanticGateClosed("construction quick-finish prompt is ambiguous")
+        if (
+            not confirm[0].actionable
+            or not cancel[0].actionable
+            or self._blocking_rules(state, "build/queue/finish-confirm")
+            or self._blocking_rules(state, "build/queue/finish-cancel")
+        ):
+            raise SemanticGateClosed("construction quick-finish prompt is not actionable")
+        return self._build_queue_finish_prompt_cost(state)
+
+    def build_queue_all_launch_available(self) -> bool:
+        """Prove the exact batch-finish control on a nonempty build queue."""
+
+        if self.build_queue_empty():
+            return False
+        state = self.read_state()
+        control = self._unique(state, "build/queue/all-launch")
+        if (
+            not control.active_in_hierarchy
+            or not control.active_and_enabled
+            or not control.interactable
+            or control.raycast_top is not None
+            or control.point is None
+            or control.bounds is None
+            or not control.bounds.contains(control.point)
+            or self._blocking_rules(state, "build/queue/all-launch")
+        ):
+            return False
+        ui_state = self.read_ui_state()
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == control.path
+            and image.name == "all_launch"
+            and image.sprite == "btn_batch"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and image.raycast_target
+            and image.raycast_top is None
+            and not image.truncated
+            and image.bounds is not None
+            and image.bounds.contains(control.point)
+        )
+        if len(images) > 1:
+            raise SemanticGateClosed("construction batch-finish Image is ambiguous")
+        return len(images) == 1
+
+    def click_build_queue_all_launch(self) -> ActionReceipt:
+        """Click the proven queue batch-finish control without pixel fallback."""
+
+        if not self.build_queue_all_launch_available():
+            raise SemanticGateClosed("construction batch-finish control is not proven")
+        state = self.read_state()
+        control = self._unique(state, "build/queue/all-launch")
+        assert control.point is not None
+        assert control.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before construction finish input")
+        self._tap(int(round(control.point.x)), int(round(control.point.y)))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed after construction finish input")
+        return ActionReceipt(
+            semantic_id="build/queue/all-launch",
+            generation=state.generation,
+            point=control.point,
+            bounds=control.bounds,
+            path=control.path,
+        )
 
     def campaign_menu_is_entry(self) -> bool:
         """Identify the campaign entrance without conflating the chapter page."""
@@ -10247,8 +10393,11 @@ class SemanticOracle:
         target = matches[0]
         bounds = target.bounds
         if (
-            not target.actionable
+            not target.active_in_hierarchy
+            or not target.active_and_enabled
+            or not target.interactable
             or bounds is None
+            or target.point is None
             or not math.isclose(bounds.left, 0.0, abs_tol=0.01)
             or not math.isclose(bounds.top, 0.0, abs_tol=0.01)
             or not math.isclose(
@@ -10267,6 +10416,24 @@ class SemanticOracle:
             or ui_state.generation > state.generation + 2
         ):
             raise SemanticGateClosed("new-ship snapshots are not coherent")
+
+        delegated_image = tuple(
+            image
+            for image in ui_state.images
+            if image.path == target.path
+            and image.name == "click"
+            and image.sprite == "liaotian04"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and image.raycast_target
+            and image.raycast_top is None
+            and image.bounds is not None
+            and image.bounds.contains(target.point)
+        )
+        if target.raycast_top is not True and len(delegated_image) != 1:
+            return False
+        if len(delegated_image) > 1:
+            raise SemanticGateClosed("new-ship delegated input is ambiguous")
 
         root = "NewShipUI(Clone)/shake_panel/"
 
@@ -15403,6 +15570,17 @@ class SemanticOracle:
     def toggle_selected(self, semantic_id: str) -> bool:
         return self.toggle_state(semantic_id).checked
 
+    def toggle_present(self, semantic_id: str) -> bool:
+        """Return whether one exact typed Toggle exists on the current UI."""
+
+        state = self.read_ui_state()
+        matches = self._toggle_matches(state, semantic_id)
+        if len(matches) > 1:
+            raise SemanticGateClosed(
+                "semantic toggle target is ambiguous: {0}".format(semantic_id)
+            )
+        return bool(matches)
+
     def campaign_auto_search_selected(self) -> bool:
         """Return the effective auto-search state on campaign preparation."""
 
@@ -18531,6 +18709,27 @@ class SemanticOracle:
             and confirm == "确定"
         )
 
+    def _build_queue_finish_prompt_cost(
+        self, state: OracleState
+    ) -> Optional[Tuple[int, int]]:
+        parts = self._msgbox_prompt_parts(state)
+        if parts is None:
+            return None
+        plain, cancel, confirm = parts
+        match = re.fullmatch(
+            r"快速完成需要消耗([1-9][0-9]*)个快速完成工具\s*"
+            r"剩余加速道具:\s*([0-9]+)个",
+            plain,
+        )
+        if match is None or cancel != "取消" or confirm != "确定":
+            return None
+        required, owned = (int(match.group(1)), int(match.group(2)))
+        if owned < required:
+            raise SemanticGateClosed(
+                "construction quick-finish resources are insufficient"
+            )
+        return required, owned
+
     def _tactical_course_prompt_matches(self, state: OracleState) -> bool:
         parts = self._msgbox_prompt_parts(state)
         if parts is None:
@@ -18627,6 +18826,11 @@ class SemanticOracle:
             return bool(matches and self._login_data_expired_prompt_matches(state))
         if semantic_id in ("build/warning/cancel", "build/warning/confirm"):
             return bool(matches and self._build_warning_prompt_matches(state))
+        if semantic_id in (
+            "build/queue/finish-cancel",
+            "build/queue/finish-confirm",
+        ):
+            return bool(matches and self._build_queue_finish_prompt_cost(state) is not None)
         if semantic_id in ("tactical/course/cancel", "tactical/course/confirm"):
             return bool(matches and self._tactical_course_prompt_matches(state))
         if semantic_id in ("research/start/cancel", "research/start/confirm"):
@@ -18702,6 +18906,11 @@ class SemanticOracle:
             "build/warning/cancel",
             "build/warning/confirm",
         ) and not self._build_warning_prompt_matches(state):
+            return False
+        if semantic_id in (
+            "build/queue/finish-cancel",
+            "build/queue/finish-confirm",
+        ) and self._build_queue_finish_prompt_cost(state) is None:
             return False
         if semantic_id in (
             "tactical/course/cancel",
@@ -18907,10 +19116,11 @@ class SemanticOracle:
 
     def click(self, semantic_id: str) -> ActionReceipt:
         state = self.read_state()
-        if (
+        delegated_new_ship_reward = bool(
             semantic_id == "reward/new-ship/continue"
-            and not self._new_ship_reward_visible_in_state(state)
-        ):
+            and self._new_ship_reward_visible_in_state(state)
+        )
+        if semantic_id == "reward/new-ship/continue" and not delegated_new_ship_reward:
             raise SemanticGateClosed("new-ship reward identity is not proven")
         delegated_login_update = (
             semantic_id == "login/update/download"
@@ -19089,6 +19299,13 @@ class SemanticOracle:
         ) and not self._build_warning_prompt_matches(state):
             raise SemanticGateClosed("build warning prompt identity is not proven")
         if semantic_id in (
+            "build/queue/finish-cancel",
+            "build/queue/finish-confirm",
+        ) and self._build_queue_finish_prompt_cost(state) is None:
+            raise SemanticGateClosed(
+                "construction quick-finish prompt identity is not proven"
+            )
+        if semantic_id in (
             "tactical/course/cancel",
             "tactical/course/confirm",
         ) and not self._tactical_course_prompt_matches(state):
@@ -19153,6 +19370,7 @@ class SemanticOracle:
                 and not dorm_empty_food_cancel
                 and not dorm_page_control
                 and not mail_manager_back_delegated
+                and not delegated_new_ship_reward
             )
             or target.point is None
             or target.bounds is None

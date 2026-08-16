@@ -675,6 +675,10 @@ BUILD_VIRTUAL_RESOURCES = frozenset(
         "SHOP_MEDAL_CHECK",
         "BUILD_MINUS",
         "BUILD_PLUS",
+        "BUILD_FINISH_RESULTS",
+        "GET_ITEMS_SHIP_1",
+        "GET_SHIP",
+        "STORY_SKIP",
         "POPUP_CONFIRM",
         "POPUP_CONFIRM_GACHA_PREP",
         "POPUP_CONFIRM_GACHA_ORDER",
@@ -870,6 +874,7 @@ class _BuildFlowContext:
     coins_owned: Optional[int] = None
     submit_receipt: Optional[ActionReceipt] = None
     passive_transition_until: float = 0.0
+    queue_finish_transition_until: float = 0.0
 
 
 @dataclass
@@ -1399,6 +1404,7 @@ class AlasSemanticAdapter:
             "POPUP_CONFIRM_MAIL_QUIT",
             "POPUP_CONFIRM_TICKETS_FULL",
             "POPUP_CONFIRM_MINIGAME_ENTER",
+            "POPUP_CONFIRM_FINISH_ORDERS",
         ):
             return (
                 "POPUP_CONFIRM_WHITE"
@@ -3759,19 +3765,71 @@ class AlasSemanticAdapter:
                 return self.oracle.enabled("build/page/start")
             if name in ("BUILD_SUBMIT_WW_ORDERS", "BUILD_WW_CHECK", "SHOP_MEDAL_CHECK"):
                 return False
+            if name in ("GET_SHIP", "STORY_SKIP"):
+                return self.oracle.new_ship_reward_visible()
+            if name in ("GET_ITEMS_SHIP_1", "BUILD_FINISH_RESULTS"):
+                return self._award_close_target() is not None
             if name == "BUILD_QUEUE_EMPTY":
-                empty = self.oracle.build_queue_empty()
+                try:
+                    queue_selected = self.oracle.toggle_selected("build/nav/queue")
+                except SemanticGateClosed as exc:
+                    if (
+                        str(exc)
+                        == "semantic toggle target is absent or ambiguous: build/nav/queue"
+                        and (
+                            self.oracle.build_queue_finish_prompt_cost() is not None
+                            or self.oracle.new_ship_reward_visible()
+                            or self._award_close_target() is not None
+                            or time.monotonic()
+                            <= self._build_context.queue_finish_transition_until
+                        )
+                    ):
+                        return False
+                    raise
+                if not queue_selected:
+                    return False
+                try:
+                    empty = self.oracle.build_queue_empty()
+                except SemanticGateClosed as exc:
+                    if str(exc) == "construction queue tab is not selected":
+                        # ALAS polls this queue sentinel immediately after a
+                        # successful tab change. A new coherent frame may
+                        # already be on pools, where the sentinel is absent.
+                        return False
+                    raise
                 if not empty and self._build_context.submit_receipt is None:
                     raise SemanticGateClosed(
                         "construction queue must be empty before a bounded submit"
                     )
                 return empty
             if name == "BUILD_FINISH_ORDERS":
+                # Gacha polls the batch-finish sentinel after it returns from
+                # the queue to a pool.  A pool frame has no queue control; it
+                # is an ordinary negative probe, not an invalid queue state.
                 try:
-                    self.oracle.build_queue_timers()
-                    return True
-                except SemanticGateClosed:
+                    queue_selected = self.oracle.toggle_selected("build/nav/queue")
+                except SemanticGateClosed as exc:
+                    if (
+                        str(exc)
+                        == "semantic toggle target is absent or ambiguous: build/nav/queue"
+                        and (
+                            self.oracle.build_queue_finish_prompt_cost() is not None
+                            or self.oracle.new_ship_reward_visible()
+                            or self._award_close_target() is not None
+                            or time.monotonic()
+                            <= self._build_context.queue_finish_transition_until
+                        )
+                    ):
+                        return False
+                    raise
+                if not queue_selected:
                     return False
+                try:
+                    return self.oracle.build_queue_all_launch_available()
+                except SemanticGateClosed as exc:
+                    if str(exc) == "construction queue tab is not selected":
+                        return False
+                    raise
             if name == "BUILD_MINUS":
                 return self.oracle.enabled("build/prep/minus")
             if name == "BUILD_PLUS":
@@ -3779,22 +3837,28 @@ class AlasSemanticAdapter:
             if name in ("POPUP_CONFIRM", "POPUP_CONFIRM_GACHA_PREP"):
                 if self.oracle.enabled("build/warning/confirm"):
                     return not self._build_context.warning_confirmed
+                if (
+                    name == "POPUP_CONFIRM"
+                    and self.oracle.build_queue_finish_prompt_cost() is not None
+                ):
+                    return True
                 if name == "POPUP_CONFIRM":
                     return bool(
                         self._build_context.prep_validated
                         and self.oracle.enabled("build/prep/confirm")
-                        and self._build_context.submit_receipt is None
+                        and self._build_context.prep_opened
                     )
                 return False
             if name == "POPUP_CONFIRM_GACHA_ORDER":
                 return bool(
                     self.oracle.enabled("build/prep/confirm")
-                    and self._build_context.submit_receipt is None
+                    and self._build_context.prep_opened
                 )
             if name == "POPUP_CANCEL":
                 return bool(
                     self.oracle.enabled("build/warning/cancel")
                     or self.oracle.enabled("build/prep/cancel")
+                    or self.oracle.build_queue_finish_prompt_cost() is not None
                 )
         if (
             name in TACTICAL_VIRTUAL_RESOURCES
@@ -4620,6 +4684,27 @@ class AlasSemanticAdapter:
         if self._build_context is not None:
             self._build_context.prep_validated = True
         return state
+
+    def build_set_count(self, target: int) -> BuildSubmitState:
+        """Set and prove the exact pending construction quantity (1..10)."""
+
+        self._package_gate()
+        if self._build_context is None:
+            raise SemanticGateClosed(
+                "construction count used outside ALAS build flow"
+            )
+        if type(target) is not int or not 1 <= target <= 10:
+            raise SemanticGateClosed(
+                "construction count must be an integer from 1 to 10"
+            )
+        state = self.build_submit_state()
+        for _ in range(10):
+            if state.count == target:
+                return state
+            control = "build/prep/add" if state.count < target else "build/prep/minus"
+            self.oracle.click(control)
+            state = self.build_submit_state()
+        raise SemanticGateClosed("construction count did not reach requested value")
 
     def build_coins_owned(self) -> int:
         if self._build_context is None:
@@ -7200,6 +7285,8 @@ class AlasSemanticAdapter:
             if name == "BUILD_SUBMIT_ORDERS":
                 receipt = self.oracle.click("build/page/start")
                 context.prep_opened = True
+                context.prep_validated = False
+                context.warning_confirmed = False
                 return receipt
             if name == "BUILD_MINUS":
                 return self.oracle.click("build/prep/minus")
@@ -7207,7 +7294,6 @@ class AlasSemanticAdapter:
                 return self.oracle.click("build/prep/add")
             if name in (
                 "BUILD_QUEUE_EMPTY",
-                "BUILD_FINISH_ORDERS",
                 "BUILD_SUBMIT_WW_ORDERS",
                 "BUILD_WW_CHECK",
                 "SHOP_MEDAL_CHECK",
@@ -7215,7 +7301,28 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed(
                     "construction observation resource is not an admitted input"
                 )
+            if name in ("GET_SHIP", "STORY_SKIP"):
+                if not self.oracle.new_ship_reward_visible():
+                    raise SemanticGateClosed("construction ship reward is absent")
+                return self.oracle.click("reward/new-ship/continue")
+            if name in ("GET_ITEMS_SHIP_1", "BUILD_FINISH_RESULTS"):
+                target = self._award_close_target()
+                if target is None:
+                    raise SemanticGateClosed("construction reward popup is absent")
+                return self.oracle.click(target)
+            if name == "BUILD_FINISH_ORDERS":
+                if self.oracle.new_ship_reward_visible():
+                    return self.oracle.click("reward/new-ship/continue")
+                target = self._award_close_target()
+                if target is not None:
+                    return self.oracle.click(target)
+                return self._dispatch_mutation(
+                    "build.submit",
+                    self.oracle.click_build_queue_all_launch,
+                )
             if name == "POPUP_CANCEL":
+                if self.oracle.build_queue_finish_prompt_cost() is not None:
+                    return self.oracle.click("build/queue/finish-cancel")
                 target = (
                     "build/warning/cancel"
                     if self.oracle.enabled("build/warning/cancel")
@@ -7223,6 +7330,13 @@ class AlasSemanticAdapter:
                 )
                 return self.oracle.click(target)
             if name in ("POPUP_CONFIRM", "POPUP_CONFIRM_GACHA_PREP"):
+                if (
+                    name == "POPUP_CONFIRM"
+                    and self.oracle.build_queue_finish_prompt_cost() is not None
+                ):
+                    receipt = self.oracle.click("build/queue/finish-confirm")
+                    context.queue_finish_transition_until = time.monotonic() + 15.0
+                    return receipt
                 if (
                     not self.oracle.enabled("build/warning/confirm")
                     or context.warning_confirmed
@@ -7240,20 +7354,22 @@ class AlasSemanticAdapter:
                 submit = self.oracle.build_submit_state()
                 if (
                     not self._action_ledger.allowed("build.submit")
-                    or submit.count != 1
+                    or not 1 <= submit.count <= 10
                     or submit.cubes_owned < submit.cubes_required
                     or context.coins_owned is None
                     or context.coins_owned < submit.coins_required
-                    or context.submit_receipt is not None
+                    or not context.prep_opened
                 ):
                     raise SemanticGateClosed(
-                        "construction submit requires one build, sufficient resources, and a positive budget"
+                        "construction submit requires 1..10 builds, sufficient resources, and a positive budget"
                     )
                 receipt = self._dispatch_mutation(
                     "build.submit",
                     lambda: self.oracle.click("build/prep/confirm"),
                 )
                 context.submit_receipt = receipt
+                context.prep_opened = False
+                context.prep_validated = False
                 return receipt
         if semantic_id is None and name == "GOTO_MAIN":
             if self._mail_context is not None and self.oracle.enabled("mail/manage/back"):
@@ -7816,7 +7932,7 @@ class AlasSemanticAdapter:
             if normalized_color == BUILD_POOL_NAVBAR_ACTIVE_COLOR:
                 return selected
             if normalized_color == BUILD_POOL_NAVBAR_INACTIVE_COLOR:
-                if index == 0 and not self.oracle.exists(target):
+                if index == 0 and not self.oracle.toggle_present(target):
                     # The event construction pool is optional.  An unselected
                     # toggle alone cannot distinguish an absent seasonal pool
                     # from a present inactive tab.
@@ -9150,6 +9266,9 @@ class AlasSemanticSession:
 
     def build_submit_state(self) -> BuildSubmitState:
         return self.open().build_submit_state()
+
+    def build_set_count(self, target: int) -> BuildSubmitState:
+        return self.open().build_set_count(target)
 
     def build_coins_owned(self) -> int:
         return self.open().build_coins_owned()
