@@ -8654,11 +8654,11 @@ index 870f5d96..f49290a2 100644
  from module.ocr.ocr import Digit, DigitCounter
  from module.template.assets import TEMPLATE_DORM_COIN, TEMPLATE_DORM_LOVE
 -from module.ui.assets import DORM_CHECK
-+from module.ui.assets import DORM_CHECK, DORM_FEED_CANCEL
++from module.ui.assets import DORM_CHECK, DORM_FEED_CANCEL, DORM_INFO
  from module.ui.page import page_dorm, page_dormmenu
  from module.ui.ui import UI
  
-@@ -567,10 +567,20 @@ class RewardDorm(UI):
+@@ -567,10 +567,25 @@ class RewardDorm(UI):
          Pages:
              in: page_dorm
          """
@@ -8670,10 +8670,15 @@ index 870f5d96..f49290a2 100644
 +            try:
 +                return semantic_session.dorm_state().occupied_slots
 +            except SemanticGateClosed:
-+                # Quick collect can surface CourtYardEmptyFoodUI immediately
-+                # before the scheduler reads the typed slot counter. Reuse
-+                # ALAS' owned cancel branch, then refresh and read again.
++                # Quick collect can surface a typed dorm reward overlay
++                # immediately before the scheduler reads the typed slot
++                # counter. Reuse ALAS' exact existing popup branches, then
++                # refresh and read again.
 +                self.device.screenshot()
++                if self.appear(DORM_INFO, offset=(30, 30), similarity=0.75):
++                    self.device.click(DORM_INFO)
++                    self.device.screenshot()
++                    return semantic_session.dorm_state().occupied_slots
 +                if not self.appear_then_click(DORM_FEED_CANCEL, offset=(30, 30)):
 +                    raise
 +                self.device.screenshot()

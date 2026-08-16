@@ -4,6 +4,19 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-17
 
+### Reward: daily-mission claim switch complete on the live client
+
+- `Reward.CollectMission=true` now has a fresh original-ALAS daily task pass
+  with the other four Reward claim switches disabled.  It issued exactly one
+  typed `task/claim/all` `mission.claim`, exhausted its grant, and returned to
+  the typed main page.  The complementary false invocation ran the original
+  Reward task with all claims disabled, emitted no mutation dispatch, returned
+  to the main page, and removed its temporary configuration.  Both hash-bound
+  receipts are recorded in `integration/alas/reward-daily-mission-r2-live-validation-receipt.json`
+  and `integration/alas/reward-daily-mission-disabled-live-validation-receipt.json`.
+  `Reward.CollectMission` is complete; this does not qualify the independent
+  oil, coin, or experience claim switches.
+
 ### Gacha: all declared Amount values complete on the live client
 
 - Light-pool `Gacha.Amount=1..10` has now passed one real original-ALAS task

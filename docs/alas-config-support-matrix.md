@@ -650,8 +650,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **9 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **143 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **10 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **142 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **104 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -902,7 +902,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Retirement.RetireMode` | General | type=select; display=default | options: "enhance", "old_retire", "one_click_retire"; default: "one_click_retire" | `P`/◐ 一键与强化已接入；旧退役未适配 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Reward.CollectCoin` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Reward.CollectExp` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Reward.CollectMission` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Reward.CollectMission` | Reward | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Reward.CollectOil` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Reward.CollectWeeklyMission` | Reward | type=checkbox; display=default | input/default: true | `P`/✅ 周常领取实机闭环 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Scheduler.Command` | Restart, Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily, Commission, Tactical, Research, Dorm, Meowfficer, Guild, Reward, Awaken, Daily, Hard, Exercise, ShopFrequent, ShopOnce, Shipyard, Gacha, Freebies, Minigame, PrivateQuarters, OpsiAshBeacon, OpsiAshAssist, OpsiExplore, OpsiShop, OpsiVoucher, OpsiDaily, OpsiObscure, OpsiAbyssal, OpsiArchive, OpsiStronghold, OpsiMonthBoss, OpsiMeowfficerFarming, OpsiHazard1Leveling, OpsiCrossMonth | type=input; display=hide | input/default: "Awaken", "Coalition", "CoalitionSp", "Commission", "Daily", "Dorm", "Event", "Event2", "EventA", "EventB", "EventC", "EventD", "EventSp", "Exercise", "Freebies", "Gacha", "GemsFarming", "Guild", "Hard", "Hospital", "Main", "Main2", "Main3", "Meowfficer", "Minigame", "OpsiAbyssal", "OpsiArchive", "OpsiAshAssist", "OpsiAshBeacon", "OpsiCrossMonth", "OpsiDaily", "OpsiExplore", "OpsiHazard1Leveling", "OpsiMeowfficerFarming", "OpsiMonthBoss", "OpsiObscure", "OpsiShop", "OpsiStronghold", "OpsiVoucher", "PrivateQuarters", "Raid", "RaidDaily", "Research", "Restart", "Reward", "Shipyard", "ShopFrequent", "ShopOnce", "Tactical", "WarArchives" | `F`/☑ 完整 | ☑ | — | — | ☑ | ☑ |

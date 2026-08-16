@@ -33,14 +33,21 @@ covers the enabled value and one real claim.  Missing progress rewards produce
 no input; ambiguous task identity, unknown popups, or an excessive receipt
 chain remain closed rather than being dismissed with a generic screen tap.
 
-## Daily row status
+## Qualified daily claim and disabled value
 
-[`integration/alas/reward-mission-live-validation-receipt.json`](../integration/alas/reward-mission-live-validation-receipt.json)
-is retained as a diagnostic historical run, not a passing qualification.  It
-proves that original `Reward.reward_mission()` dispatched one exact numeric
-row target and exhausted its grant, but its old runner called `close()` on the
-adapter instead of its session after the ALAS call had returned.  The runner
-has since been corrected and the row-center/AwardInfo primitive has been
-checked on the device, but a fresh original-ALAS daily-row pass is still
-required before `Reward.CollectMission` or the whole Reward panel can be
-marked fully supported.
+The fresh daily invocation in
+[`integration/alas/reward-daily-mission-r2-live-validation-receipt.json`](../integration/alas/reward-daily-mission-r2-live-validation-receipt.json)
+enabled only `Reward.CollectMission`.  The original `Reward` task ran for
+344.563 seconds, dispatched exactly one `mission.claim` at the typed
+`task/claim/all` target, exhausted the grant, then used `task/page/back` and
+proved the main task page was visible.  The temporary configuration was
+removed after the task returned.
+
+The companion
+[`integration/alas/reward-daily-mission-disabled-live-validation-receipt.json`](../integration/alas/reward-daily-mission-disabled-live-validation-receipt.json)
+sets all five Reward claim options false.  It executes the same original task,
+returns to the typed main page, clears its temporary configuration, and records
+an empty dispatch list.  Together with the deterministic complete boolean
+replay, these two receipts qualify both declared values of
+`Reward.CollectMission`; no weekly, oil, coin, or experience claim is inferred
+from this qualification.

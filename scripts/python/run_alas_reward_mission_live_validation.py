@@ -50,11 +50,18 @@ def _adb(serial: str, *arguments: str) -> str:
     return completed.stdout.strip()
 
 
-def _load_modules(alas_root: Path, driver_revision: str) -> SimpleNamespace:
+def _load_modules(
+    alas_root: Path,
+    driver_revision: str,
+    *,
+    mission_claim_enabled: bool,
+) -> SimpleNamespace:
     os.environ["ALAS_SEMANTIC_MODE"] = "1"
     os.environ["ALAS_SEMANTIC_DRIVER_REVISION"] = driver_revision
     os.environ["ALAS_SEMANTIC_ADB"] = "adb"
-    os.environ["ALAS_SEMANTIC_ALLOW_MISSION_CLAIM_ONCE"] = "1"
+    os.environ["ALAS_SEMANTIC_ALLOW_MISSION_CLAIM_ONCE"] = (
+        "1" if mission_claim_enabled else "0"
+    )
     for path in (ROOT / "python", alas_root):
         value = str(path)
         if value not in sys.path:
@@ -100,7 +107,12 @@ def _cleanup_to_main(serial: str) -> Mapping[str, Any]:
 
 
 def validate(
-    *, alas_root: Path, seed_config: str, driver_revision: str, mode: str
+    *,
+    alas_root: Path,
+    seed_config: str,
+    driver_revision: str,
+    mode: str,
+    mission_claim_enabled: bool,
 ) -> Mapping[str, Any]:
     if mode not in ("daily", "weekly"):
         raise ValueError("reward mission validation mode must be daily or weekly")
@@ -122,8 +134,8 @@ def validate(
             "CollectOil": False,
             "CollectCoin": False,
             "CollectExp": False,
-            "CollectMission": mode == "daily",
-            "CollectWeeklyMission": mode == "weekly",
+            "CollectMission": mode == "daily" and mission_claim_enabled,
+            "CollectWeeklyMission": mode == "weekly" and mission_claim_enabled,
         }
     )
     config_name = "codex_reward_mission_live_" + uuid.uuid4().hex
@@ -132,7 +144,11 @@ def validate(
     instance: object | None = None
     result: dict[str, Any] = {"temporary_config": config_path.name, "passed": False}
     try:
-        modules = _load_modules(alas_root, driver_revision)
+        modules = _load_modules(
+            alas_root,
+            driver_revision,
+            mission_claim_enabled=mission_claim_enabled,
+        )
         instance = modules.AzurLaneAutoScript(config_name)
         instance.config.bind("Reward")
         adapter = instance.device.semantic_adapter.open()
@@ -163,8 +179,12 @@ def validate(
         result["mission_claim_grant_remaining"] = adapter._action_ledger.remaining(
             "mission.claim"
         )
-        if len(dispatches) != 1 or dispatches[0]["capability"] != "mission.claim":
+        if mission_claim_enabled and (
+            len(dispatches) != 1 or dispatches[0]["capability"] != "mission.claim"
+        ):
             raise AssertionError("Reward mission run did not use exactly one claim grant")
+        if not mission_claim_enabled and dispatches:
+            raise AssertionError("disabled Reward mission claim dispatched a mutation")
         typed_claim_targets = {
             "daily": {
                 "task/claim/all",
@@ -176,7 +196,9 @@ def validate(
             },
             "weekly": {"task/weekly-progress/claim"},
         }
-        if dispatches[0]["semantic_id"] not in typed_claim_targets[mode]:
+        if mission_claim_enabled and (
+            dispatches[0]["semantic_id"] not in typed_claim_targets[mode]
+        ):
             raise AssertionError("Reward mission run did not use a typed claim target")
         if result["mission_claim_grant_remaining"] != 0:
             raise AssertionError("Reward mission claim grant was not exhausted")
@@ -211,8 +233,8 @@ def validate(
             "Reward.CollectOil": False,
             "Reward.CollectCoin": False,
             "Reward.CollectExp": False,
-            "Reward.CollectMission": mode == "daily",
-            "Reward.CollectWeeklyMission": mode == "weekly",
+            "Reward.CollectMission": mode == "daily" and mission_claim_enabled,
+            "Reward.CollectWeeklyMission": mode == "weekly" and mission_claim_enabled,
         },
         **result,
     }
@@ -223,6 +245,12 @@ def main() -> int:
     parser.add_argument("--alas-root", type=Path, required=True)
     parser.add_argument("--seed-config", default="semantic_e2e")
     parser.add_argument("--mode", choices=("daily", "weekly"), default="daily")
+    parser.add_argument(
+        "--mission-claim-enabled",
+        choices=("true", "false"),
+        default="true",
+        help="set the selected mission-claim option explicitly",
+    )
     parser.add_argument("--driver-revision", required=True)
     parser.add_argument("--output", type=Path, required=True)
     arguments = parser.parse_args()
@@ -232,6 +260,7 @@ def main() -> int:
         seed_config=arguments.seed_config,
         driver_revision=arguments.driver_revision,
         mode=arguments.mode,
+        mission_claim_enabled=arguments.mission_claim_enabled == "true",
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_json(output, result)

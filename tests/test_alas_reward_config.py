@@ -1,5 +1,7 @@
 import ast
+import hashlib
 import itertools
+import json
 import unittest
 from pathlib import Path
 
@@ -75,11 +77,61 @@ class AlasRewardConfigTests(unittest.TestCase):
         raid_rpg = patch.index("if self.is_raid_rpg():", raid_guard)
         self.assertLess(raid_guard, raid_rpg)
 
+    def test_daily_mission_live_evidence_covers_enabled_and_disabled_values(self):
+        receipt_paths = {
+            True: ROOT
+            / "integration/alas/reward-daily-mission-r2-live-validation-receipt.json",
+            False: ROOT
+            / "integration/alas/reward-daily-mission-disabled-live-validation-receipt.json",
+        }
+        receipts = {
+            enabled: json.loads(path.read_text(encoding="utf-8"))
+            for enabled, path in receipt_paths.items()
+        }
+        for enabled, receipt in receipts.items():
+            with self.subTest(enabled=enabled):
+                self.assertTrue(receipt["passed"])
+                self.assertEqual(
+                    receipt["configured"],
+                    {
+                        "Reward.CollectOil": False,
+                        "Reward.CollectCoin": False,
+                        "Reward.CollectExp": False,
+                        "Reward.CollectMission": enabled,
+                        "Reward.CollectWeeklyMission": False,
+                    },
+                )
+                self.assertEqual(receipt["mission_claim_grant_remaining"], 0)
+                self.assertTrue(receipt["main_page_visible_after_cleanup"])
+                self.assertTrue(receipt["temporary_config_removed"])
+                self.assertEqual(
+                    receipt["source_sha256"]["adapter"],
+                    hashlib.sha256(
+                        ROOT.joinpath("python/alas_headless/alas_adapter.py").read_bytes()
+                    ).hexdigest(),
+                )
+                self.assertEqual(
+                    receipt["source_sha256"]["oracle"],
+                    hashlib.sha256(
+                        ROOT.joinpath("python/alas_headless/semantic_oracle.py").read_bytes()
+                    ).hexdigest(),
+                )
+        enabled_dispatches = receipts[True]["dispatches"]
+        self.assertEqual(len(enabled_dispatches), 1)
+        self.assertEqual(enabled_dispatches[0]["capability"], "mission.claim")
+        self.assertEqual(enabled_dispatches[0]["semantic_id"], "task/claim/all")
+        self.assertEqual(receipts[False]["dispatches"], [])
+        self.assertEqual(
+            {receipt["source_sha256"]["reward"] for receipt in receipts.values()},
+            {"73af538ae1df6361941422ccc60dc1816c2e57ed00125adb102f0ff0400c3a8d"},
+        )
+
     def test_sources_compile(self):
         for relative in (
             "python/alas_headless/alas_reward_config_contract.py",
             "python/alas_headless/alas_reward_config_replay.py",
             "scripts/python/verify_alas_reward_config.py",
+            "scripts/python/run_alas_reward_mission_live_validation.py",
         ):
             ast.parse(ROOT.joinpath(relative).read_text(encoding="utf-8"))
 

@@ -50,11 +50,16 @@ def _adb(serial: str, *arguments: str) -> str:
     return completed.stdout.strip()
 
 
-def _load_modules(alas_root: Path, driver_revision: str) -> SimpleNamespace:
+def _load_modules(
+    alas_root: Path,
+    driver_revision: str,
+    *,
+    dorm_collect_budget: int,
+) -> SimpleNamespace:
     os.environ["ALAS_SEMANTIC_MODE"] = "1"
     os.environ["ALAS_SEMANTIC_DRIVER_REVISION"] = driver_revision
     os.environ["ALAS_SEMANTIC_ADB"] = "adb"
-    os.environ["ALAS_SEMANTIC_DORM_COLLECT_BUDGET"] = "1"
+    os.environ["ALAS_SEMANTIC_DORM_COLLECT_BUDGET"] = str(dorm_collect_budget)
     for path in (ROOT / "python", alas_root):
         value = str(path)
         if value not in sys.path:
@@ -79,7 +84,7 @@ def _close(instance: object | None) -> None:
 
 
 def _dorm_snapshot(serial: str, driver_revision: str) -> Mapping[str, Any]:
-    from alas_headless import AlasSemanticSession
+    from alas_headless import AlasSemanticSession, SemanticGateClosed
 
     with AlasSemanticSession(serial=serial, driver_revision=driver_revision) as adapter:
         oracle = adapter.oracle
@@ -106,6 +111,10 @@ def _dorm_snapshot(serial: str, driver_revision: str) -> Mapping[str, Any]:
 
             deadline = time.monotonic() + 25
             while not oracle.enabled("dorm/page/manage"):
+                if oracle.enabled("dorm/statistics/confirm"):
+                    confirm = oracle.click("dorm/statistics/confirm")
+                    actions.append(confirm.semantic_id)
+                    continue
                 if oracle.enabled("dorm/empty-food/cancel"):
                     cancel = oracle.click("dorm/empty-food/cancel")
                     actions.append(cancel.semantic_id)
@@ -120,17 +129,37 @@ def _dorm_snapshot(serial: str, driver_revision: str) -> Mapping[str, Any]:
             "state": asdict(state),
             "quick_collect_available": oracle.enabled("dorm/collect"),
         }
-        if oracle.enabled("dorm/page/back"):
-            cleanup = oracle.click("dorm/page/back")
-            actions.append(cleanup.semantic_id)
-            oracle.wait_for("main/task", 15, minimum_generation=cleanup.generation)
+        cleanup_deadline = time.monotonic() + 12
+        while not oracle.main_page_visible():
+            if oracle.enabled("dorm/statistics/confirm"):
+                confirm = oracle.click("dorm/statistics/confirm")
+                actions.append(confirm.semantic_id)
+                continue
+            if oracle.enabled("dorm/page/back"):
+                try:
+                    cleanup = oracle.click("dorm/page/back")
+                except SemanticGateClosed:
+                    time.sleep(0.25)
+                    continue
+                actions.append(cleanup.semantic_id)
+                oracle.wait_for("main/task", 15, minimum_generation=cleanup.generation)
+                break
+            if time.monotonic() >= cleanup_deadline:
+                raise AssertionError("dorm snapshot cannot prove a safe cleanup")
+            time.sleep(0.25)
         if not oracle.main_page_visible():
             raise AssertionError("dorm snapshot cleanup did not restore main page")
         snapshot["cleanup"] = {"actions": actions, "main": True}
         return snapshot
 
 
-def validate(*, alas_root: Path, seed_config: str, driver_revision: str) -> Mapping[str, Any]:
+def validate(
+    *,
+    alas_root: Path,
+    seed_config: str,
+    driver_revision: str,
+    collect: bool,
+) -> Mapping[str, Any]:
     seed_path = alas_root / "config" / (seed_config + ".json")
     seed = _read_json(seed_path)
     serial = seed["Alas"]["Emulator"]["Serial"]
@@ -146,7 +175,7 @@ def validate(*, alas_root: Path, seed_config: str, driver_revision: str) -> Mapp
     payload = copy.deepcopy(seed)
     payload["Alas"]["Error"].update({"HandleError": False, "SaveError": False})
     payload["Dorm"]["Scheduler"]["Enable"] = False
-    payload["Dorm"]["Dorm"].update({"Collect": True, "Feed": False})
+    payload["Dorm"]["Dorm"].update({"Collect": collect, "Feed": False})
     payload["Dorm"]["BuyFurniture"]["Enable"] = False
     config_name = "codex_dorm_collect_live_" + uuid.uuid4().hex
     config_path = alas_root / "config" / (config_name + ".json")
@@ -158,9 +187,13 @@ def validate(*, alas_root: Path, seed_config: str, driver_revision: str) -> Mapp
     dispatches: list[dict[str, Any]] = []
     prior_budget = os.environ.get("ALAS_SEMANTIC_DORM_COLLECT_BUDGET")
     try:
-        if not before["quick_collect_available"]:
+        if collect and not before["quick_collect_available"]:
             raise AssertionError("dorm quick collect is not available before task")
-        modules = _load_modules(alas_root, driver_revision)
+        modules = _load_modules(
+            alas_root,
+            driver_revision,
+            dorm_collect_budget=1 if collect else 0,
+        )
         instance = modules.AzurLaneAutoScript(config_name)
         instance.config.bind("Dorm")
         instance.config.task = modules.name_to_function("Dorm")
@@ -189,8 +222,14 @@ def validate(*, alas_root: Path, seed_config: str, driver_revision: str) -> Mapp
         )
         if result["task_result"] is not True:
             raise AssertionError("original ALAS Dorm task did not return success")
-        if len(dispatches) != 1 or dispatches[0]["capability"] != "dorm.collect" or dispatches[0]["semantic_id"] != "dorm/collect":
+        if collect and (
+            len(dispatches) != 1
+            or dispatches[0]["capability"] != "dorm.collect"
+            or dispatches[0]["semantic_id"] != "dorm/collect"
+        ):
             raise AssertionError("dorm task did not issue exactly one typed quick collect")
+        if not collect and dispatches:
+            raise AssertionError("disabled Dorm.Collect dispatched a typed quick collect")
         if result["dorm_collect_grant_remaining"] != 0:
             raise AssertionError("dorm task did not exhaust its quick-collect grant")
         instance.device.semantic_adapter.close()
@@ -224,7 +263,7 @@ def validate(*, alas_root: Path, seed_config: str, driver_revision: str) -> Mapp
         "driver_revision": driver_revision,
         "seed_config": seed_config,
         "seed_config_sha256": _sha256(seed_path),
-        "configured": {"Dorm.Collect": True, "Dorm.Feed": False},
+        "configured": {"Dorm.Collect": collect, "Dorm.Feed": False},
         "source_sha256": {
             "dorm": _sha256(alas_root / "module" / "dorm" / "dorm.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),
@@ -239,6 +278,12 @@ def main() -> int:
     parser.add_argument("--alas-root", type=Path, required=True)
     parser.add_argument("--seed-config", default="semantic_e2e")
     parser.add_argument("--driver-revision", required=True)
+    parser.add_argument(
+        "--collect",
+        choices=("true", "false"),
+        default="true",
+        help="run the original Dorm task with Dorm.Collect set explicitly",
+    )
     parser.add_argument("--output", type=Path, required=True)
     arguments = parser.parse_args()
     output = arguments.output.resolve()
@@ -246,6 +291,7 @@ def main() -> int:
         alas_root=arguments.alas_root.resolve(),
         seed_config=arguments.seed_config,
         driver_revision=arguments.driver_revision,
+        collect=arguments.collect == "true",
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_json(output, result)

@@ -205,10 +205,15 @@ class AlasIntegrationPatchTests(unittest.TestCase):
 
     def test_dorm_scheduler_recovers_the_exact_empty_food_modal(self):
         self.assertIn(
-            "from module.ui.assets import DORM_CHECK, DORM_FEED_CANCEL",
+            "from module.ui.assets import DORM_CHECK, DORM_FEED_CANCEL, DORM_INFO",
             self.patch_text,
         )
         self.assertIn("except SemanticGateClosed:", self.patch_text)
+        self.assertIn(
+            "self.appear(DORM_INFO, offset=(30, 30), similarity=0.75)",
+            self.patch_text,
+        )
+        self.assertIn("self.device.click(DORM_INFO)", self.patch_text)
         self.assertIn(
             "self.appear_then_click(DORM_FEED_CANCEL, offset=(30, 30))",
             self.patch_text,
