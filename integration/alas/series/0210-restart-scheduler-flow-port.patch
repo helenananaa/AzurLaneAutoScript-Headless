@@ -1,0 +1,36 @@
+diff --git a/alas.py b/alas.py
+index e0e52437..96ba4292 100644
+--- a/alas.py
++++ b/alas.py
+@@ -553,5 +553,10 @@ class AzurLaneAutoScript:
+             self.device.click_record_clear()
+             logger.hr(task, level=0)
+-            success = self.run(inflection.underscore(task))
++            # Restart owns the lifecycle that makes a first screenshot
++            # possible.  Do not require an already-running game before its
++            # LoginHandler.app_restart() can stop, launch, and log in again.
++            success = self.run(
++                inflection.underscore(task), skip_first_screenshot=(task == 'Restart')
++            )
+             logger.info(f'Scheduler: End task `{task}`')
+             self.is_first_task = False
+diff --git a/module/handler/login.py b/module/handler/login.py
+index 4974bb77..6e26d2b6 100644
+--- a/module/handler/login.py
++++ b/module/handler/login.py
+@@ -164,7 +164,12 @@ class LoginHandler(ModuleBase):
+ 
+     def app_restart(self):
+         logger.hr('App restart')
+-        self.device.app_stop()
+-        self.device.app_start()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.restart_game_for_manager()
++            logger.info('Semantic cold restart submitted with -force-gfx-st')
++        else:
++            self.device.app_stop()
++            self.device.app_start()
+         self.handle_app_login()
+         # self.ensure_no_unfinished_campaign()
+         self.config.task_delay(server_update=True)

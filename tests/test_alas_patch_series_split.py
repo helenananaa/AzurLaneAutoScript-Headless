@@ -161,6 +161,13 @@ FLOW_PATHS = {
     },
 }
 
+OVERRIDE_PATHS = {
+    "0210-restart-scheduler-flow-port.patch": {
+        "alas.py",
+        "module/handler/login.py",
+    },
+}
+
 
 def manifest_patch_names():
     document = json.loads((SERIES / "series.json").read_text(encoding="utf-8"))
@@ -218,11 +225,11 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
 
         self.assertEqual(set(core), CORE_PATHS)
         self.assertEqual(set(lifecycle), LIFECYCLE_PATHS)
-        expected_tasks = set().union(*FLOW_PATHS.values())
+        expected_tasks = set().union(*FLOW_PATHS.values(), *OVERRIDE_PATHS.values())
         self.assertEqual(set(tasks), expected_tasks)
         self.assertFalse(set(core) & set(lifecycle))
         self.assertFalse(set(core) & set(tasks))
-        self.assertFalse(set(lifecycle) & set(tasks))
+        self.assertEqual(set(lifecycle) & set(tasks), {"module/handler/login.py"})
         self.assertEqual(set(core) | set(lifecycle) | set(tasks), set(legacy))
 
     def test_split_target_blobs_match_generated_combined_patch(self):
@@ -257,6 +264,14 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                 self.assertEqual(actual, expected_paths)
                 self.assertFalse(promoted & actual)
                 promoted.update(actual)
+        for name, expected_paths in OVERRIDE_PATHS.items():
+            if name in names:
+                actual = set(target_blobs(SERIES / name))
+                self.assertEqual(actual, expected_paths)
+                self.assertEqual(
+                    actual & (promoted | LIFECYCLE_PATHS),
+                    expected_paths,
+                )
         if "0090-legacy-task-hooks.patch" in names:
             residual = set(
                 target_blobs(SERIES / "0090-legacy-task-hooks.patch")

@@ -155,6 +155,14 @@ class AlasPatchTreeVerificationTests(unittest.TestCase):
             )
             self.assertEqual(parse_patch_paths(allowed_root_python), ("alas.py",))
 
+            duplicate = parent / "duplicate.patch"
+            duplicate.write_text(
+                "diff --git a/module/example.py b/module/example.py\n"
+                "diff --git a/module/example.py b/module/example.py\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(parse_patch_paths(duplicate), ("module/example.py",))
+
             unsafe_root_python = parent / "unsafe-root-python.patch"
             unsafe_root_python.write_text(
                 "diff --git a/other.py b/other.py\n",

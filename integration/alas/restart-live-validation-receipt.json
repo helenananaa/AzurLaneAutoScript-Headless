@@ -1,0 +1,831 @@
+{
+  "schema": "alas-headless.restart-live-validation/v1",
+  "validated_at": "2026-08-16T14:17:07+08:00",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+  "semantic_mode": true,
+  "observer_driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "source_sha256": {
+    "alas.py": "49cd48a83360f326646a851f2dbb5c2b1142bf53a074f04e5398866bc1194b28",
+    "config.py": "9e3569482bcfb62608fb230fabf113f7dd57ff31b15d0834f3ccff345348ade2",
+    "login.py": "9cc32513ab25a8fa0ebb9f6c91714be4ea8afd7c6ef880c7a532ac7331049b35",
+    "args.json": "762ff3b65fda4597d25c27ea442ecc31ff4b40184e5e56f3f2ca5ac5a9cf3d29"
+  },
+  "scheduler": {
+    "equivalence_classes": 15,
+    "scheduler_instances": 50,
+    "disabled_panel": "Main",
+    "disabled_not_queued": true,
+    "durable_writes": [
+      {
+        "panel": "Restart",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:07",
+          "failure": "2026-08-16 14:17:07",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Main",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Main"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:07",
+          "failure": "2026-08-16 16:17:07",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Main2",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Main2"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:07",
+          "failure": "2026-08-16 16:17:07",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Main3",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Main3"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:07",
+          "failure": "2026-08-16 16:17:07",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "GemsFarming",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "GemsFarming"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:07",
+          "failure": "2026-08-16 16:17:07",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Coalition",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Coalition"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:07",
+          "failure": "2026-08-16 14:47:07",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Event",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Event"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:08",
+          "failure": "2026-08-16 16:17:08",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Event2",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Event2"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:08",
+          "failure": "2026-08-16 16:17:08",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Raid",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Raid"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:08",
+          "failure": "2026-08-16 16:17:08",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Hospital",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Hospital"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:08",
+          "failure": "2026-08-16 16:17:08",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "WarArchives",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "WarArchives"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:08",
+          "failure": "2026-08-16 14:47:08",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "CoalitionSp",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "CoalitionSp"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:08",
+          "failure": "2026-08-16 14:47:08",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "EventA",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "EventA"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:08",
+          "failure": "2026-08-16 14:47:08",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "EventB",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "EventB"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:08",
+          "failure": "2026-08-16 14:47:08",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "EventC",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "EventC"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:09",
+          "failure": "2026-08-16 14:47:09",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "EventD",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "EventD"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:09",
+          "failure": "2026-08-16 14:47:09",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "EventSp",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "EventSp"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:09",
+          "failure": "2026-08-16 14:47:09",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "RaidDaily",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "RaidDaily"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:09",
+          "failure": "2026-08-16 14:47:09",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Commission",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:57:11",
+          "failure": "2026-08-16 15:09:49",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Tactical",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Tactical",
+          "Research",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 15:04:19",
+          "failure": "2026-08-16 16:49:40",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Research",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:56:02",
+          "failure": "2026-08-16 14:56:15",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Dorm",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Dorm",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 18:55:09",
+          "failure": "2026-08-16 18:55:09",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Meowfficer",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Meowfficer",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:09",
+          "failure": "2026-08-16 14:47:09",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Guild",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Guild",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:10",
+          "failure": "2026-08-16 14:47:10",
+          "server_update": "2026-08-16 18:00:00"
+        }
+      },
+      {
+        "panel": "Reward",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 16:49:27",
+          "failure": "2026-08-16 17:20:22",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Awaken",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Awaken"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:10",
+          "failure": "2026-08-16 16:17:10",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Daily",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Daily"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:10",
+          "failure": "2026-08-16 14:47:10",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Hard",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Hard"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:10",
+          "failure": "2026-08-16 14:47:10",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Exercise",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Exercise",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:10",
+          "failure": "2026-08-16 14:47:10",
+          "server_update": "2026-08-16 18:00:00"
+        }
+      },
+      {
+        "panel": "ShopFrequent",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "ShopFrequent"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:10",
+          "failure": "2026-08-16 14:47:10",
+          "server_update": "2026-08-16 18:00:00"
+        }
+      },
+      {
+        "panel": "ShopOnce",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "ShopOnce"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:10",
+          "failure": "2026-08-16 14:47:10",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Shipyard",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Shipyard"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:10",
+          "failure": "2026-08-16 14:47:10",
+          "server_update": "2026-08-17 04:00:00"
+        }
+      },
+      {
+        "panel": "Gacha",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Gacha",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:11",
+          "failure": "2026-08-16 14:47:11",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Freebies",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Freebies"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:11",
+          "failure": "2026-08-16 14:47:11",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "Minigame",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "Minigame"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:11",
+          "failure": "2026-08-16 16:17:11",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "PrivateQuarters",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "PrivateQuarters"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:11",
+          "failure": "2026-08-16 14:47:11",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiAshBeacon",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiAshBeacon"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:11",
+          "failure": "2026-08-16 14:47:11",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiAshAssist",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiAshAssist"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:11",
+          "failure": "2026-08-16 14:47:11",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiExplore",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiExplore"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:11",
+          "failure": "2026-08-16 14:17:11",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiShop",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiShop"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:11",
+          "failure": "2026-08-16 14:47:11",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiVoucher",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiVoucher"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:11",
+          "failure": "2026-08-16 14:47:11",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiDaily",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiDaily"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:11",
+          "failure": "2026-08-16 14:47:11",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiObscure",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiObscure"
+        ],
+        "writes": {
+          "success": "2026-08-16 15:17:12",
+          "failure": "2026-08-16 15:17:12",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiAbyssal",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiAbyssal"
+        ],
+        "writes": {
+          "success": "2026-08-16 15:17:12",
+          "failure": "2026-08-16 15:17:12",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiArchive",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiArchive"
+        ],
+        "writes": {
+          "success": "2026-08-16 15:17:12",
+          "failure": "2026-08-16 15:17:12",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiStronghold",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiStronghold"
+        ],
+        "writes": {
+          "success": "2026-08-16 15:17:12",
+          "failure": "2026-08-16 15:17:12",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiMonthBoss",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiMonthBoss"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:12",
+          "failure": "2026-08-16 16:17:12",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiMeowfficerFarming",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiMeowfficerFarming"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:12",
+          "failure": "2026-08-16 14:47:12",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiHazard1Leveling",
+        "due_queue": [
+          "Restart",
+          "Commission",
+          "Research",
+          "Reward",
+          "OpsiMeowfficerFarming",
+          "OpsiHazard1Leveling"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:47:12",
+          "failure": "2026-08-16 15:17:12",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      },
+      {
+        "panel": "OpsiCrossMonth",
+        "due_queue": [
+          "Restart",
+          "OpsiCrossMonth",
+          "Commission",
+          "Research",
+          "Reward"
+        ],
+        "writes": {
+          "success": "2026-08-16 14:17:12",
+          "failure": "2026-08-16 16:17:12",
+          "server_update": "2026-08-17 00:00:00"
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "initial_restart_skip",
+      "next_run": "2026-08-17 00:00:00",
+      "exact_server_update_call": true,
+      "app_restart_executed": false
+    },
+    {
+      "started_at": "2026-08-16T14:17:13+08:00",
+      "elapsed_seconds": 2.875,
+      "exit_code": 1,
+      "failure": "ModuleNotFoundError: No module named 'onepush'",
+      "run_commands": [
+        "restart"
+      ],
+      "before_pid": null,
+      "after_pid": null,
+      "next_run": "2026-08-16 14:16:13",
+      "remaining_observer_forwards": 0,
+      "name": "disabled_package_restart_failure"
+    },
+    {
+      "started_at": "2026-08-16T14:17:17+08:00",
+      "elapsed_seconds": 35.0,
+      "exit_code": 0,
+      "failure": null,
+      "run_commands": [
+        "restart"
+      ],
+      "before_pid": null,
+      "after_pid": 25778,
+      "next_run": "2026-08-17 00:00:00",
+      "remaining_observer_forwards": 0,
+      "name": "restart_recovery_cold_start"
+    },
+    {
+      "started_at": "2026-08-16T14:17:52+08:00",
+      "elapsed_seconds": 32.781,
+      "exit_code": 0,
+      "failure": null,
+      "run_commands": [
+        "restart"
+      ],
+      "before_pid": 25778,
+      "after_pid": 27548,
+      "next_run": "2026-08-17 00:00:00",
+      "remaining_observer_forwards": 0,
+      "name": "restart_running_pid_turnover"
+    }
+  ],
+  "final_state": {
+    "package_enabled": true,
+    "pid": 27548,
+    "top_resumed_component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "restart_next_run": "2026-08-17 00:00:00",
+    "remaining_observer_forwards": 0
+  },
+  "passed": true,
+  "temporary_config_removed": true
+}

@@ -113,6 +113,7 @@ def parse_patch_paths(patch: Path) -> tuple[str, ...]:
     except (OSError, UnicodeError) as exc:
         raise AlasPatchVerificationError("cannot read integration patch") from exc
     paths = []
+    seen = set()
     for line in lines:
         if not line.startswith("diff --git "):
             continue
@@ -136,11 +137,15 @@ def parse_patch_paths(patch: Path) -> tuple[str, ...]:
             )
         ):
             raise AlasPatchVerificationError("integration patch path is not allowlisted")
-        paths.append(normalized_path)
+        # A generated combined patch preserves the authoritative series order,
+        # so distinct members can legitimately touch the same file.  The
+        # verification result describes the final worktree surface, not the
+        # number of member hunks; keep first occurrence order for that surface.
+        if normalized_path not in seen:
+            seen.add(normalized_path)
+            paths.append(normalized_path)
     if not paths:
         raise AlasPatchVerificationError("integration patch has no changed files")
-    if len(paths) != len(set(paths)):
-        raise AlasPatchVerificationError("integration patch has duplicate changed files")
     return tuple(paths)
 
 

@@ -2,6 +2,35 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-16
+
+### Restart: real cold recovery and Scheduler durable state
+
+- The original scheduler was run with all 50 declared Scheduler instances and
+  their 15 declared interval/server-update equivalence classes.  Every instance
+  used the original `AzurLaneConfig` queue and persistence paths for command
+  identity plus success, failure, and server-update `NextRun` writes.  A normal
+  disabled task (`Main.Enable=false`) was not queued; `Restart.Enable` itself
+  is an upstream locked `state` field and only admits true.
+- A focused patch makes scheduled `Restart` skip only the pre-restart first
+  screenshot, so a stopped game can reach `LoginHandler.app_restart()`.  On a
+  semantic device the same handler delegates cold startup to the session-owned
+  `-force-gfx-st` launcher; the ordinary device stop/start path remains
+  unchanged.
+- On `emulator-5580`, a disabled-package execution failed with exit code 1 and
+  no leaked observer forwards; re-enabling then recovered from no PID to PID
+  `25778` and logged in.  A second run turned PID `25778` into `27548`, logged
+  in, persisted next server update, and left zero forwards.  The first service
+  startup was also verified to take the exact server-update skip path without
+  an app restart.  The receipt and bounded reproducer are in
+  `integration/alas/restart-live-validation-receipt.json` and
+  `scripts/python/run_alas_restart_live_validation.py`.
+- The disabled-package root `ObserverTransportError` is present in the ALAS
+  log, but this workspace lacks optional `onepush` and upstream notification
+  handling then exposes `ModuleNotFoundError`.  That notification masking is
+  an `Alas.Error/OnePushConfig` limitation, not a false Restart success; it
+  remains outside this Restart promotion.
+
 ## 2026-08-15
 
 ### Guild: nine settings gated before task ownership

@@ -6347,7 +6347,7 @@
       "dimensions": {
         "action": "not_applicable",
         "configuration": "complete",
-        "live": "partial",
+        "live": "complete",
         "observation": "not_applicable",
         "offline": "complete"
       },
@@ -6355,9 +6355,15 @@
         "tests/test_alas_scheduler_contract.py",
         "python/alas_headless/alas_scheduler_replay.py",
         "python/alas_headless/alas_scheduler_contract.py",
-        "tests/test_alas_integration_patch.py"
+        "tests/test_alas_integration_patch.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
       ],
-      "group_code": "R",
+      "group_code": "F",
       "metadata": "type=input; display=hide",
       "panels": [
         "Restart",
@@ -6412,7 +6418,7 @@
         "OpsiCrossMonth"
       ],
       "path": "Scheduler.Command",
-      "status_label": "◐ 调度路径",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: \"Awaken\", \"Coalition\", \"CoalitionSp\", \"Commission\", \"Daily\", \"Dorm\", \"Event\", \"Event2\", \"EventA\", \"EventB\", \"EventC\", \"EventD\", \"EventSp\", \"Exercise\", \"Freebies\", \"Gacha\", \"GemsFarming\", \"Guild\", \"Hard\", \"Hospital\", \"Main\", \"Main2\", \"Main3\", \"Meowfficer\", \"Minigame\", \"OpsiAbyssal\", \"OpsiArchive\", \"OpsiAshAssist\", \"OpsiAshBeacon\", \"OpsiCrossMonth\", \"OpsiDaily\", \"OpsiExplore\", \"OpsiHazard1Leveling\", \"OpsiMeowfficerFarming\", \"OpsiMonthBoss\", \"OpsiObscure\", \"OpsiShop\", \"OpsiStronghold\", \"OpsiVoucher\", \"PrivateQuarters\", \"Raid\", \"RaidDaily\", \"Research\", \"Restart\", \"Reward\", \"Shipyard\", \"ShopFrequent\", \"ShopOnce\", \"Tactical\", \"WarArchives\""
     },
@@ -6420,7 +6426,7 @@
       "dimensions": {
         "action": "not_applicable",
         "configuration": "complete",
-        "live": "partial",
+        "live": "complete",
         "observation": "not_applicable",
         "offline": "complete"
       },
@@ -6428,9 +6434,15 @@
         "tests/test_alas_scheduler_contract.py",
         "python/alas_headless/alas_scheduler_replay.py",
         "python/alas_headless/alas_scheduler_contract.py",
-        "tests/test_alas_integration_patch.py"
+        "tests/test_alas_integration_patch.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
       ],
-      "group_code": "R",
+      "group_code": "F",
       "metadata": "type=checkbox/lock/state; display=default",
       "panels": [
         "Restart",
@@ -6485,7 +6497,7 @@
         "OpsiCrossMonth"
       ],
       "path": "Scheduler.Enable",
-      "status_label": "◐ 调度路径",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "options: false, true; default: false, true"
     },
@@ -6493,7 +6505,7 @@
       "dimensions": {
         "action": "not_applicable",
         "configuration": "complete",
-        "live": "partial",
+        "live": "complete",
         "observation": "not_applicable",
         "offline": "complete"
       },
@@ -6501,9 +6513,15 @@
         "tests/test_alas_scheduler_contract.py",
         "python/alas_headless/alas_scheduler_replay.py",
         "python/alas_headless/alas_scheduler_contract.py",
-        "tests/test_alas_integration_patch.py"
+        "tests/test_alas_integration_patch.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
       ],
-      "group_code": "R",
+      "group_code": "F",
       "metadata": "type=input; display=hide",
       "panels": [
         "Restart",
@@ -6558,7 +6576,7 @@
         "OpsiCrossMonth"
       ],
       "path": "Scheduler.FailureInterval",
-      "status_label": "◐ 调度路径",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: \"120-240\", \"30-60\", 0, 120, 278, 30, 60"
     },
@@ -6566,7 +6584,7 @@
       "dimensions": {
         "action": "not_applicable",
         "configuration": "complete",
-        "live": "partial",
+        "live": "complete",
         "observation": "not_applicable",
         "offline": "complete"
       },
@@ -6574,9 +6592,15 @@
         "tests/test_alas_scheduler_contract.py",
         "python/alas_headless/alas_scheduler_replay.py",
         "python/alas_headless/alas_scheduler_contract.py",
-        "tests/test_alas_integration_patch.py"
+        "tests/test_alas_integration_patch.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
       ],
-      "group_code": "R",
+      "group_code": "F",
       "metadata": "type=datetime; display=default; validate=datetime",
       "panels": [
         "Restart",
@@ -6631,7 +6655,7 @@
         "OpsiCrossMonth"
       ],
       "path": "Scheduler.NextRun",
-      "status_label": "◐ 调度路径",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: \"2020-01-01 00:00:00\""
     },
@@ -6639,7 +6663,7 @@
       "dimensions": {
         "action": "not_applicable",
         "configuration": "complete",
-        "live": "partial",
+        "live": "complete",
         "observation": "not_applicable",
         "offline": "complete"
       },
@@ -6647,9 +6671,15 @@
         "tests/test_alas_scheduler_contract.py",
         "python/alas_headless/alas_scheduler_replay.py",
         "python/alas_headless/alas_scheduler_contract.py",
-        "tests/test_alas_integration_patch.py"
+        "tests/test_alas_integration_patch.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
       ],
-      "group_code": "R",
+      "group_code": "F",
       "metadata": "type=input; display=hide",
       "panels": [
         "Restart",
@@ -6704,7 +6734,7 @@
         "OpsiCrossMonth"
       ],
       "path": "Scheduler.ServerUpdate",
-      "status_label": "◐ 调度路径",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: \"00:00, 06:00, 12:00, 18:00, 21:00\", \"00:00, 12:00, 18:00\", \"00:00, 12:00\", \"00:00\", \"04:00\""
     },
@@ -6712,7 +6742,7 @@
       "dimensions": {
         "action": "not_applicable",
         "configuration": "complete",
-        "live": "partial",
+        "live": "complete",
         "observation": "not_applicable",
         "offline": "complete"
       },
@@ -6720,9 +6750,15 @@
         "tests/test_alas_scheduler_contract.py",
         "python/alas_headless/alas_scheduler_replay.py",
         "python/alas_headless/alas_scheduler_contract.py",
-        "tests/test_alas_integration_patch.py"
+        "tests/test_alas_integration_patch.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
       ],
-      "group_code": "R",
+      "group_code": "F",
       "metadata": "type=input; display=hide",
       "panels": [
         "Restart",
@@ -6777,7 +6813,7 @@
         "OpsiCrossMonth"
       ],
       "path": "Scheduler.SuccessInterval",
-      "status_label": "◐ 调度路径",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: \"120-240\", \"30-60\", 0, 278, 30, 60"
     },
@@ -8098,8 +8134,8 @@
         "Scheduler"
       ],
       "name": "Restart",
-      "note": "当前冷重启闭环；`AdbRestart`、其他模拟器生命周期、失败重试与只恢复不重启仍需覆盖",
-      "status": "L"
+      "note": "50 Scheduler 实例、15 等价类、首次启动跳过、禁包失败、冷恢复、运行中 PID 切换、登录、持久化与零 forward 遗留均已实机闭环；`AdbRestart` 属于 Alas 面板",
+      "status": "F"
     },
     {
       "groups": [
@@ -10431,6 +10467,102 @@
       ],
       "field": "PrivateQuarters.TargetShip",
       "note": "All seven declared ships preserve original task forwarding while invalid names stop before PrivateQuarters navigation, target lookup, or interaction work."
+    },
+    {
+      "dimensions": {
+        "live": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
+      ],
+      "field": "Scheduler.Command",
+      "note": "All 50 declared Scheduler instances use the original queue path with their exact Command identity; the live Restart runs prove the selected command reaches the original lifecycle and login path."
+    },
+    {
+      "dimensions": {
+        "live": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
+      ],
+      "field": "Scheduler.Enable",
+      "note": "A normal false Enable state is absent from the original queue, while Restart retains its upstream locked true state; the latter then runs through actual failure, cold recovery, and PID-turnover paths."
+    },
+    {
+      "dimensions": {
+        "live": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
+      ],
+      "field": "Scheduler.FailureInterval",
+      "note": "Original durable failure writes were exercised for all 15 declared Scheduler equivalence classes, and a disabled-package Restart produced a real nonzero failure outcome with no observer-forward leak."
+    },
+    {
+      "dimensions": {
+        "live": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
+      ],
+      "field": "Scheduler.NextRun",
+      "note": "Original success, failure, and server-update writes persist Scheduler.NextRun for every declared instance; the live Restart recovery and running restart both finish at the recorded next server refresh."
+    },
+    {
+      "dimensions": {
+        "live": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
+      ],
+      "field": "Scheduler.ServerUpdate",
+      "note": "The first-service Restart path exactly takes task_delay(server_update=True) without restarting the game, and both successful real restarts persist the same server-update schedule."
+    },
+    {
+      "dimensions": {
+        "live": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_scheduler_contract.py",
+        "tests/test_alas_restart_scheduler_flow.py",
+        "scripts/python/run_alas_restart_live_validation.py",
+        "integration/alas/0001-semantic-oracle-hooks.patch",
+        "integration/alas/restart-live-validation-receipt.json",
+        "docs/restart-scheduler-live-validation-report.md",
+        "docs/status.md"
+      ],
+      "field": "Scheduler.SuccessInterval",
+      "note": "Original durable success writes were exercised across all 15 declared Scheduler equivalence classes before the live Restart path overwrote the Restart-specific outcome with its upstream server-update schedule."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -10443,9 +10575,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "c1a5e43534fb8a943bffdb8e4bda4c4b87532e99b961d8321566764805677e51",
-      "manifest_sha256": "012ea7863b66443db25452fe2ae57328f6d13b8f660b7c09b1df04e013a98733",
-      "member_count": 26
+      "combined_sha256": "4db2db280130526c1ec93171cfff3749cc8bcceab5dd36c92276df2db6278228",
+      "manifest_sha256": "dbefcfff0dc7d830fe61d3c98c2f0ea7b250517c19907afb05620a9c922298fe",
+      "member_count": 27
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

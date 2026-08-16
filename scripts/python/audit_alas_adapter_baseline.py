@@ -305,6 +305,7 @@ def _combat_coverage(root: Path) -> Mapping[str, Any]:
 def _patch_metrics(path: Path) -> Mapping[str, Any]:
     source = _read_text(path)
     changed_files = []
+    seen = set()
     for line in source.splitlines():
         if not line.startswith("diff --git a/"):
             continue
@@ -315,8 +316,13 @@ def _patch_metrics(path: Path) -> Mapping[str, Any]:
         new_path = parts[3][2:]
         if old_path != new_path or not old_path or old_path.startswith("/"):
             raise AdapterBaselineError("integration patch target is unsafe")
-        changed_files.append(old_path)
-    if not changed_files or len(changed_files) != len(set(changed_files)):
+        # The generated combined patch preserves ordered members.  A later
+        # corrective member may legally amend an earlier lifecycle file, while
+        # this baseline reports the final changed-file surface.
+        if old_path not in seen:
+            seen.add(old_path)
+            changed_files.append(old_path)
+    if not changed_files:
         raise AdapterBaselineError("integration patch file surface is malformed")
     return {
         "changed_file_count": len(changed_files),

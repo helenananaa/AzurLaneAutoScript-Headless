@@ -129,6 +129,11 @@
       "order": 26,
       "path": "integration/alas/series/0200-opsi-stronghold-source-only-gate.patch",
       "sha256": "6296ebb0196a40d2092337cef97d0413406f5c03be2306ef99e77af798b83e4a"
+    },
+    {
+      "order": 27,
+      "path": "integration/alas/series/0210-restart-scheduler-flow-port.patch",
+      "sha256": "4c70a2c5d136d3b8bfe228ef6a2e2a77e577079bca9cd23bb00d0299dd48bb46"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",
