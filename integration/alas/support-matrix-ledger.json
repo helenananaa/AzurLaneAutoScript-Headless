@@ -3098,10 +3098,10 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -3113,15 +3113,18 @@
         "integration/alas/gacha-event-two-live-validation-receipt.json",
         "integration/alas/gacha-special-two-live-validation-receipt.json",
         "integration/alas/gacha-light-daily-seed-validation-receipt.json",
+        "integration/alas/gacha-heavy-r1-live-validation-receipt.json",
+        "integration/alas/gacha-wishing-well-unavailable-r2-live-validation-receipt.json",
+        "docs/gacha-pool-live-validation-report.md",
         "docs/status.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=select; display=default",
       "panels": [
         "Gacha"
       ],
       "path": "Gacha.Pool",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "options: \"event\", \"heavy\", \"light\", \"special\", \"wishing_well\"; default: \"light\""
     },
@@ -10089,16 +10092,28 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_gacha_config.py",
         "python/alas_headless/alas_gacha_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0220-gacha-multi-order-flow-port.patch",
+        "scripts/python/run_alas_gacha_live_validation.py",
+        "integration/alas/gacha-event-two-live-validation-receipt.json",
+        "integration/alas/gacha-special-two-live-validation-receipt.json",
+        "integration/alas/gacha-light-daily-seed-validation-receipt.json",
+        "integration/alas/gacha-heavy-r1-live-validation-receipt.json",
+        "integration/alas/gacha-wishing-well-unavailable-r2-live-validation-receipt.json",
+        "docs/gacha-pool-live-validation-report.md",
         "docs/status.md"
       ],
       "field": "Gacha.Pool",
-      "note": "All five declared pools preserve original navigation and cost class decisions, including unavailable event or wishing-well fallback and configured wishing-well refusal; invalid values fail before build scope entry."
+      "note": "Every declared value now ran through the original Gacha task. Light, Event, Heavy, and Special consumed their selected typed pool costs; current unavailable wishing_well returned light from original gacha_goto_pool, then consumed the exact Light cost. A seasonally configured Wishing Well remains intentionally user-owned and original ALAS refuses to automate it. Invalid values still fail before build scope entry."
     },
     {
       "dimensions": {

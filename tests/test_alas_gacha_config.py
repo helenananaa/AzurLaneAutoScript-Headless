@@ -2,6 +2,7 @@ import ast
 import hashlib
 import itertools
 import json
+import runpy
 import unittest
 from pathlib import Path
 
@@ -94,6 +95,70 @@ class AlasGachaConfigTests(unittest.TestCase):
         self.assertIn("GET_ITEMS_SHIP_1", wait)
         self.assertIn("stuck_long_wait_list.append", wait)
 
+    def test_live_runner_records_original_wishing_well_fallback_pool(self):
+        module = runpy.run_path(
+            str(ROOT / "scripts/python/run_alas_gacha_live_validation.py")
+        )
+        self.assertEqual(
+            module["GACHA_POOLS"],
+            ("event", "light", "heavy", "special", "wishing_well"),
+        )
+        self.assertEqual(module["_observed_pool"]("heavy"), "heavy")
+        self.assertEqual(module["_observed_pool"]("wishing_well"), "light")
+
+    def test_live_pool_evidence_covers_every_declared_pool(self):
+        receipts = {
+            "event": (
+                "integration/alas/gacha-event-two-live-validation-receipt.json",
+                "event",
+            ),
+            "light": (
+                "integration/alas/gacha-light-daily-seed-validation-receipt.json",
+                "light",
+            ),
+            "heavy": (
+                "integration/alas/gacha-heavy-r1-live-validation-receipt.json",
+                "heavy",
+            ),
+            "special": (
+                "integration/alas/gacha-special-two-live-validation-receipt.json",
+                "special",
+            ),
+            "wishing_well": (
+                "integration/alas/gacha-wishing-well-unavailable-r2-live-validation-receipt.json",
+                "light",
+            ),
+        }
+        self.assertEqual(set(receipts), set(GACHA_POOLS))
+        for configured_pool, (relative, observed_pool) in receipts.items():
+            with self.subTest(pool=configured_pool):
+                receipt = json.loads(ROOT.joinpath(relative).read_text(encoding="utf-8"))
+                self.assertTrue(receipt["passed"])
+                self.assertTrue(receipt["task_result"])
+                self.assertEqual(receipt["gacha"]["Pool"], configured_pool)
+                self.assertFalse(receipt["gacha"]["UseTicket"])
+                self.assertEqual(receipt["before"]["pool"], observed_pool)
+                self.assertEqual(receipt["after"]["pool"], observed_pool)
+                self.assertTrue(receipt["before"]["queue_empty"])
+                self.assertEqual(
+                    receipt["resource_delta"], receipt["expected_resource_delta"]
+                )
+                self.assertTrue(receipt["temporary_config_removed"])
+                if receipt["gacha"]["UseDrill"]:
+                    self.assertTrue(receipt["after"]["queue_empty"])
+                    self.assertGreaterEqual(receipt["quick_item_delta"], 1)
+                else:
+                    self.assertTrue(receipt["queue_postcondition"]["nonempty_after"])
+
+        wishing_well = json.loads(
+            ROOT.joinpath(receipts["wishing_well"][0]).read_text(encoding="utf-8")
+        )
+        self.assertEqual(wishing_well["expected_observed_pool"], "light")
+        self.assertEqual(
+            wishing_well["gacha_goto_pool"],
+            {"requested": "wishing_well", "returned": "light"},
+        )
+
     def test_live_amount_matrix_evidence_binds_each_declared_value(self):
         path = ROOT / "integration/alas/gacha-light-amounts-1-10-live-validation-receipt.json"
         evidence = json.loads(path.read_text(encoding="utf-8"))
@@ -140,6 +205,7 @@ class AlasGachaConfigTests(unittest.TestCase):
             "python/alas_headless/alas_gacha_config_contract.py",
             "python/alas_headless/alas_gacha_config_replay.py",
             "scripts/python/verify_alas_gacha_config.py",
+            "scripts/python/run_alas_gacha_live_validation.py",
             "scripts/python/run_alas_gacha_amount_matrix_live_validation.py",
         ):
             ast.parse(ROOT.joinpath(relative).read_text(encoding="utf-8"))

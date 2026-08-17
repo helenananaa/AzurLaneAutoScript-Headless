@@ -76,7 +76,20 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   source receipts and their per-value summaries are in
   `integration/alas/gacha-light-amounts-1-10-live-validation-receipt.json`.
   `Gacha.Amount` is therefore complete for every declared value; this does not
-  promote the separately unqualified ticket, wishing-well, or all-pool surface.
+  promote the separately unqualified event-ticket surface.
+
+### Gacha: all declared Pool values complete on the live client
+
+- The original ALAS task now has a resource-receipted execution for every
+  configured `Gacha.Pool` value.  Existing Light, Event, and Special runs are
+  joined by a new Heavy run that consumed exactly 2 cubes, 1500 coins, and one
+  quick-finish item before returning to an empty queue.  On the current client
+  the Wishing Well fifth entry is unavailable; with `Pool=wishing_well`, the
+  original `gacha_goto_pool()` returned `light`, then consumed exactly one
+  Light order (1 cube, 600 coins, and one quick-finish item) and returned to an
+  empty queue.  This is the original current-state fallback, not a claim that
+  a configured seasonal Wishing Well was automated.  See
+  `docs/gacha-pool-live-validation-report.md` and its five linked receipts.
 
 ## 2026-08-16
 
@@ -106,8 +119,9 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   build-owned result aliases before generic reward handling; see
   `integration/alas/gacha-light-drill-task-r7-live-validation-receipt.json`.
   `Gacha.UseDrill` is therefore complete for both boolean values.  Event ticket
-  inventory was absent and Wishing Well was unavailable, so neither
-  `UseTicket` nor `wishing_well` has real consumption evidence.
+  inventory was absent, so `UseTicket` still has no positive ticket-consumption
+  evidence.  The current unavailable Wishing Well fallback is qualified
+  separately above.
 
 ### Restart: real cold recovery and Scheduler durable state
 

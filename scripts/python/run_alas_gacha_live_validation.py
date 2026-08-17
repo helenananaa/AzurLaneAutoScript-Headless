@@ -19,6 +19,8 @@ from typing import Any, Mapping
 
 ROOT = Path(__file__).resolve().parents[2]
 POOL_INDEX = {"event": 0, "light": 1, "heavy": 2, "special": 3}
+GACHA_POOLS = tuple(POOL_INDEX) + ("wishing_well",)
+WISHING_WELL_FALLBACK_POOL = "light"
 
 if str(ROOT / "python") not in sys.path:
     sys.path.insert(0, str(ROOT / "python"))
@@ -30,6 +32,16 @@ def _sha256(path: Path) -> str:
 
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _observed_pool(pool: str) -> str:
+    """Map a configured pool to the normal-pool page used for receipt reads."""
+
+    if pool == "wishing_well":
+        return WISHING_WELL_FALLBACK_POOL
+    if pool not in POOL_INDEX:
+        raise ValueError("live construction pool is not declared")
+    return pool
 
 
 def _write_json(path: Path, value: Mapping[str, Any]) -> None:
@@ -50,10 +62,12 @@ def _load_modules(alas_root: Path, driver_revision: str) -> SimpleNamespace:
     os.chdir(alas_root)
     from alas import AzurLaneAutoScript
     from module.config.config import name_to_function
+    from module.gacha.gacha_reward import RewardGacha
 
     return SimpleNamespace(
         AzurLaneAutoScript=AzurLaneAutoScript,
         name_to_function=name_to_function,
+        RewardGacha=RewardGacha,
     )
 
 
@@ -145,8 +159,8 @@ def _validate(
     use_drill: bool,
     output: Path,
 ) -> Mapping[str, Any]:
-    if pool not in POOL_INDEX:
-        raise ValueError("live construction pool is not a normal typed pool")
+    if pool not in GACHA_POOLS:
+        raise ValueError("live construction pool is not declared")
     if not 1 <= amount <= 10:
         raise ValueError("amount must be 1..10")
     if use_ticket:
@@ -162,9 +176,12 @@ def _validate(
     if not _adb(serial, "shell", "pidof", package):
         raise RuntimeError("game package is not running")
 
-    before = _read_build_state(serial, driver_revision, pool)
+    observed_pool = _observed_pool(pool)
+    before = _read_build_state(serial, driver_revision, observed_pool)
     if not before["queue_empty"]:
         raise RuntimeError("live build queue is not empty before qualification")
+    if before["pool"] != observed_pool:
+        raise AssertionError("precondition selected pool differs from receipt pool")
     payload = copy.deepcopy(seed)
     payload["Alas"]["Error"].update(
         {
@@ -193,6 +210,7 @@ def _validate(
         "seed_config": seed_config,
         "seed_config_sha256": _sha256(seed_path),
         "gacha": payload["Gacha"]["Gacha"],
+        "expected_observed_pool": observed_pool,
         "before": before,
         "source_sha256": {
             "gacha_reward": _sha256(alas_root / "module" / "gacha" / "gacha_reward.py"),
@@ -200,6 +218,7 @@ def _validate(
         },
     }
     instance = None
+    original_goto_pool = None
     previous_budget = os.environ.get("ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET")
     try:
         os.environ["ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET"] = "2" if use_drill else "1"
@@ -207,10 +226,20 @@ def _validate(
         instance = modules.AzurLaneAutoScript(config_name)
         instance.config.bind("Gacha")
         instance.config.task = modules.name_to_function("Gacha")
+        original_goto_pool = modules.RewardGacha.gacha_goto_pool
+
+        def observed_goto_pool(task: object, target: str) -> str:
+            actual = original_goto_pool(task, target)
+            result["gacha_goto_pool"] = {"requested": target, "returned": actual}
+            return actual
+
+        modules.RewardGacha.gacha_goto_pool = observed_goto_pool
         started = time.monotonic()
         result["task_result"] = instance.run("gacha")
         result["elapsed_seconds"] = round(time.monotonic() - started, 3)
     finally:
+        if original_goto_pool is not None:
+            modules.RewardGacha.gacha_goto_pool = original_goto_pool
         _close(instance) if instance is not None else None
         if previous_budget is None:
             os.environ.pop("ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET", None)
@@ -219,7 +248,7 @@ def _validate(
         config_path.unlink(missing_ok=True)
         result["temporary_config_removed"] = not config_path.exists()
 
-    after = _read_build_state(serial, driver_revision, pool)
+    after = _read_build_state(serial, driver_revision, observed_pool)
     expected_cubes = before["cubes_per_build"] * amount
     expected_coins = before["coins_per_build"] * amount
     result["after"] = after
@@ -242,6 +271,13 @@ def _validate(
     )
     if result["task_result"] is not True:
         raise AssertionError("ALAS Gacha task did not return success")
+    if result.get("gacha_goto_pool") != {
+        "requested": pool,
+        "returned": observed_pool,
+    }:
+        raise AssertionError("original Gacha pool routing differs from receipt")
+    if after["pool"] != observed_pool:
+        raise AssertionError("postcondition selected pool differs from receipt pool")
     if result["resource_delta"] != result["expected_resource_delta"]:
         raise AssertionError("live Gacha resource delta differs from confirmed order")
     if not use_drill and not result["queue_postcondition"]["nonempty_after"]:
@@ -259,7 +295,7 @@ def main() -> int:
     parser.add_argument("--alas-root", type=Path, required=True)
     parser.add_argument("--seed-config", default="semantic_e2e")
     parser.add_argument("--driver-revision", required=True)
-    parser.add_argument("--pool", choices=tuple(POOL_INDEX), required=True)
+    parser.add_argument("--pool", choices=GACHA_POOLS, required=True)
     parser.add_argument("--amount", type=int, required=True)
     parser.add_argument("--use-drill", action="store_true")
     parser.add_argument("--output", type=Path, required=True)

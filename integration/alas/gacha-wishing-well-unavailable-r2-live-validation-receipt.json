@@ -1,0 +1,62 @@
+{
+  "schema": "alas-headless.gacha-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "gacha": {
+    "Pool": "wishing_well",
+    "Amount": 1,
+    "UseTicket": false,
+    "UseDrill": true
+  },
+  "expected_observed_pool": "light",
+  "before": {
+    "pool": "light",
+    "cubes_owned": 3560,
+    "cubes_per_build": 1,
+    "coins_owned": 53607,
+    "coins_per_build": 600,
+    "queue_timers": [],
+    "queue_empty": true,
+    "quick_items_owned": 2587
+  },
+  "source_sha256": {
+    "gacha_reward": "94796731094495a47b339c0ad88a88823b9823af2ca1228a9dca519febcb119c",
+    "args": "762ff3b65fda4597d25c27ea442ecc31ff4b40184e5e56f3f2ca5ac5a9cf3d29"
+  },
+  "gacha_goto_pool": {
+    "requested": "wishing_well",
+    "returned": "light"
+  },
+  "task_result": true,
+  "elapsed_seconds": 88.234,
+  "temporary_config_removed": true,
+  "after": {
+    "pool": "light",
+    "cubes_owned": 3559,
+    "cubes_per_build": 1,
+    "coins_owned": 53007,
+    "coins_per_build": 600,
+    "queue_timers": [],
+    "queue_empty": true,
+    "quick_items_owned": 2586
+  },
+  "resource_delta": {
+    "cubes": 1,
+    "coins": 600
+  },
+  "expected_resource_delta": {
+    "cubes": 1,
+    "coins": 600
+  },
+  "queue_postcondition": {
+    "empty_before": true,
+    "nonempty_after": false,
+    "empty_after": true,
+    "timer_count": 0
+  },
+  "quick_item_delta": 1,
+  "passed": true
+}
