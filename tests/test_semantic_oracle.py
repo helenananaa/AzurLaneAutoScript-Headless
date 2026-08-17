@@ -7026,6 +7026,134 @@ class EnhancementSemanticOracleTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             enhancement_config_policy("all", 0, None)
 
+    def test_candidate_favourite_uses_common_toggle_and_returns_to_dock(self):
+        backend = FakeBackend([])
+        dock_root = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/"
+        )
+        card_path = (
+            "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/"
+            "ships/201351"
+        )
+
+        def set_dock(generation):
+            filter_path = dock_root + "index_button"
+            backend.snapshot = make_snapshot(generation=generation)
+            backend.buttons = make_buttons(
+                [
+                    make_button("201351", card_path, 170, 200),
+                    make_button("index_button", filter_path, 40, 40),
+                ],
+                generation=generation,
+            )
+            backend.ui = make_ui(
+                [
+                    make_text("20/500", dock_root + "capacity/Text"),
+                    make_text("船坞容量:", dock_root + "capacity/label"),
+                    make_text(
+                        "那智.改", card_path + "/content/info/name_mask/name"
+                    ),
+                    make_text("1", card_path + "/content/dockyard/lv/Text"),
+                ],
+                images=[
+                    make_image(
+                        filter_path,
+                        "shaixuan_on",
+                        {"left": 20, "top": 20, "right": 60, "bottom": 60},
+                    )
+                ],
+                generation=generation,
+            )
+
+        def set_ship_detail(generation, *, detail, common):
+            set_enhancement_page(backend, generation)
+            backend.buttons["buttons"].append(
+                make_button(
+                    "back_btn",
+                    "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back_btn",
+                    57,
+                    53,
+                )
+            )
+            backend.buttons["button_count"] = len(backend.buttons["buttons"])
+            detail_path = (
+                "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/"
+                "frame/root/detail_toggle"
+            )
+            backend.ui["toggles"].append(
+                make_toggle(detail_path, checked=detail, x=52, y=439)
+            )
+            if detail:
+                common_path = (
+                    "OverlayCamera/Overlay/UIMain/detail_container(Adapt)/"
+                    "detail_container/ShipDetailView(Clone)/common_toggle"
+                )
+                backend.ui["toggles"].append(
+                    make_toggle(
+                        common_path,
+                        checked=common,
+                        x=1180,
+                        y=718,
+                        bounds={
+                            "left": 1138,
+                            "top": 628,
+                            "right": 1222,
+                            "bottom": 718,
+                        },
+                    )
+                )
+                backend.ui["images"].append(
+                    make_image(
+                        common_path + ("/on" if common else "/off"),
+                        "common_active" if common else "common_deactive",
+                        {
+                            "left": 1138,
+                            "top": 628,
+                            "right": 1222,
+                            "bottom": 718,
+                        },
+                    )
+                )
+            backend.ui["toggle_count"] = len(backend.ui["toggles"])
+            backend.ui["image_count"] = len(backend.ui["images"])
+
+        set_dock(10)
+        stage = 0
+
+        def advance():
+            nonlocal stage
+            if stage == 0:
+                set_ship_detail(11, detail=False, common=False)
+            elif stage == 1:
+                set_ship_detail(12, detail=True, common=False)
+            elif stage == 2:
+                set_ship_detail(13, detail=True, common=True)
+            elif stage == 3:
+                set_dock(14)
+            else:
+                self.fail("unexpected favourite-toggle input")
+            stage += 1
+
+        backend.on_tap = advance
+
+        receipts = make_oracle(backend).set_enhancement_dock_candidate_favourite(
+            0, 201351, "那智.改", 1, True
+        )
+
+        self.assertEqual(
+            tuple(item.semantic_id for item in receipts),
+            (
+                "enhancement/dock/ship/201351",
+                "enhancement/detail/tab",
+                "enhancement/detail/favourite/on",
+                "enhancement/detail/back",
+            ),
+        )
+        self.assertEqual(
+            backend.taps,
+            [(170, 200), (52, 439), (1180, 718), (57, 53)],
+        )
+
     def test_preview_reads_exact_target_attributes_and_materials(self):
         backend = FakeBackend([])
         set_enhancement_page(
@@ -7169,6 +7297,45 @@ class EnhancementSemanticOracleTests(unittest.TestCase):
         self.assertTrue(receipt.equipment_preserved)
         self.assertEqual(receipt.equipment_quantities, ())
         self.assertEqual(backend.taps, [(1024, 626), (1191, 626)])
+
+    def test_official_enhancement_waits_past_transitional_empty_material_panel(self):
+        backend = FakeBackend([])
+        set_enhancement_page(backend, 20)
+        stage = 0
+
+        def advance():
+            nonlocal stage
+            if stage == 0:
+                set_enhancement_page(
+                    backend,
+                    21,
+                    materials=((0, "xiaolietuquan"),),
+                    complete_card_images=True,
+                )
+            else:
+                set_enhancement_page(backend, 22)
+                interim_snapshot = copy.deepcopy(backend.snapshot)
+                interim_buttons = copy.deepcopy(backend.buttons)
+                interim_ui = copy.deepcopy(backend.ui)
+                set_enhancement_page(backend, 23, enhanced=True)
+                final_snapshot = copy.deepcopy(backend.snapshot)
+                final_buttons = copy.deepcopy(backend.buttons)
+                final_ui = copy.deepcopy(backend.ui)
+                backend.snapshot_sequence = [interim_snapshot, final_snapshot]
+                backend.buttons_sequence = [interim_buttons, final_buttons]
+                backend.ui_sequence = [interim_ui, final_ui]
+            stage += 1
+
+        backend.on_tap = advance
+
+        receipt = make_oracle(backend).enhance_with_official_recommendation()
+
+        self.assertEqual(receipt.generation_after, 23)
+        self.assertEqual(receipt.consumed_count, 1)
+        cannon = next(
+            item for item in receipt.attributes_after if item.name == "炮击"
+        )
+        self.assertEqual((cannon.current, cannon.addition), (197, 0))
 
     def test_official_enhancement_preserves_followup_equipment(self):
         backend = FakeBackend([])

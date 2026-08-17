@@ -1,0 +1,3393 @@
+{
+  "schema": "alas-headless.enhancement-task-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "configured": {
+    "Enhance.ShipToEnhance": "all",
+    "Enhance.Filter": "dd",
+    "Enhance.CheckPerCategory": 1
+  },
+  "source_sha256": {
+    "enhancement": "d2943b4fc11d16dbb6f2b2ed2159890ad44be6be6c202eaea57715addc30575b",
+    "adapter": "820b68deac3465a0b49aff0c84189c9794d884951d86ecf29a96dfe3a8dea065",
+    "oracle": "4bdb5406320a02eff91d56f5d8530d4cfe6117308d7e8b12b75730694c54cf03",
+    "runner": "d3ba407b00ec8db22ad211b2f7d68fde08014e36acdc01f3795a0cc12f4e0226"
+  },
+  "passed": true,
+  "temporary_config": "codex_enhancement_live_a870c292ecb04219b9bc8efdc80fa278.json",
+  "forwarded": [
+    {
+      "ship_to_enhance": "all",
+      "check_per_category": 1,
+      "filter_expression": "dd"
+    }
+  ],
+  "dispatches": [
+    {
+      "capability": "enhancement.execute",
+      "receipt": {
+        "target_name": "雅努斯",
+        "materials": [
+          {
+            "slot": 6,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "huixing"
+          },
+          {
+            "slot": 0,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "aolike"
+          },
+          {
+            "slot": 7,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "fute"
+          },
+          {
+            "slot": 1,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "ruyue"
+          },
+          {
+            "slot": 8,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "fute"
+          },
+          {
+            "slot": 2,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "xiaotiane"
+          },
+          {
+            "slot": 9,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "tangsi"
+          },
+          {
+            "slot": 3,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "sipengsi"
+          },
+          {
+            "slot": 10,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "xiaotiane"
+          },
+          {
+            "slot": 4,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "ruyue"
+          },
+          {
+            "slot": 11,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "maoyue"
+          },
+          {
+            "slot": 5,
+            "level": 1,
+            "rarity_sprite": "bg1",
+            "ship_sprite": "ruyue"
+          }
+        ],
+        "attributes_before": [
+          {
+            "index": 2,
+            "name": "炮击",
+            "current": 23,
+            "maximum": 28,
+            "addition": 1,
+            "exp_current": 69,
+            "exp_total": 35
+          },
+          {
+            "index": 3,
+            "name": "雷击",
+            "current": 107,
+            "maximum": 117,
+            "addition": 10,
+            "exp_current": 150,
+            "exp_total": 15
+          },
+          {
+            "index": 5,
+            "name": "航空",
+            "current": 0,
+            "maximum": 0,
+            "addition": 0,
+            "exp_current": 0,
+            "exp_total": 1
+          },
+          {
+            "index": 6,
+            "name": "装填",
+            "current": 96,
+            "maximum": 105,
+            "addition": 9,
+            "exp_current": 135,
+            "exp_total": 15
+          }
+        ],
+        "attributes_after": [
+          {
+            "index": 2,
+            "name": "炮击",
+            "current": 24,
+            "maximum": 28,
+            "addition": 0,
+            "exp_current": 34,
+            "exp_total": 35
+          },
+          {
+            "index": 3,
+            "name": "雷击",
+            "current": 117,
+            "maximum": 117,
+            "addition": 0,
+            "exp_current": 0,
+            "exp_total": 15
+          },
+          {
+            "index": 5,
+            "name": "航空",
+            "current": 0,
+            "maximum": 0,
+            "addition": 0,
+            "exp_current": 0,
+            "exp_total": 1
+          },
+          {
+            "index": 6,
+            "name": "装填",
+            "current": 105,
+            "maximum": 105,
+            "addition": 0,
+            "exp_current": 0,
+            "exp_total": 15
+          }
+        ],
+        "confirmation": {
+          "semantic_id": "enhancement/confirm",
+          "generation": 177165,
+          "point": {
+            "x": 1191.333,
+            "y": 625.867
+          },
+          "bounds": {
+            "left": 1122.667,
+            "top": 600.533,
+            "right": 1260.0,
+            "bottom": 651.2
+          },
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel(Adapt)/blur_panel/main/ok_btn",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        "equipment_quantities": [
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            4
+          ]
+        ],
+        "equipment_actions": [
+          {
+            "semantic_id": "enhancement/equipment/deselect-all",
+            "generation": 177184,
+            "point": {
+              "x": 200.333,
+              "y": 601.333
+            },
+            "bounds": {
+              "left": 143.667,
+              "top": 584.667,
+              "right": 257.0,
+              "bottom": 618.0
+            },
+            "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/options/ALL",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/equipment/cancel-disassembly",
+            "generation": 177201,
+            "point": {
+              "x": 844.267,
+              "y": 605.867
+            },
+            "bounds": {
+              "left": 753.267,
+              "top": 572.2,
+              "right": 935.267,
+              "bottom": 639.533
+            },
+            "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/cancel_btn",
+            "policy_sha256": null,
+            "capability_id": null
+          },
+          {
+            "semantic_id": "enhancement/equipment/preserve/confirm",
+            "generation": 177215,
+            "point": {
+              "x": 790.0,
+              "y": 515.0
+            },
+            "bounds": {
+              "left": 699.0,
+              "top": 481.333,
+              "right": 881.0,
+              "bottom": 548.667
+            },
+            "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+            "policy_sha256": null,
+            "capability_id": null
+          }
+        ],
+        "equipment_preserved": true,
+        "generation_after": 177175,
+        "policy_sha256": "f2d52297a635e48da7da610b15c412e4b36f8bb883ffab6162190881993c4d51",
+        "capability_id": "enhancement.execute",
+        "receipt_type": "EnhancementExecutionReceipt",
+        "consumed_count": 12
+      }
+    }
+  ],
+  "dock_scopes": [
+    {
+      "enabled": false,
+      "receipt": null
+    },
+    {
+      "enabled": false,
+      "receipt": null
+    }
+  ],
+  "dock_filters": [
+    {
+      "ship_type": "dd",
+      "receipts": [
+        {
+          "semantic_id": "enhancement/dock/filter/open",
+          "generation": 177105,
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button",
+          "point": {
+            "x": 1146.3025,
+            "y": 26.7085
+          }
+        },
+        {
+          "semantic_id": "enhancement/dock/filter/confirm",
+          "generation": 177119,
+          "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/btns/ok",
+          "point": {
+            "x": 800.0275,
+            "y": 675.4110000000001
+          }
+        }
+      ],
+      "candidates_after": [
+        {
+          "position": 0,
+          "ship_id": 201351,
+          "ship_name": "雅努斯",
+          "level": 1,
+          "button": {
+            "name": "201351",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201351",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 162.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 84.8,
+              "top": 69.333,
+              "right": 239.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "201351",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201351",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -10.619,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 162.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 162.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 84.8,
+                "bottom": 434.0,
+                "right": 239.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 84.8,
+                "top": 69.333,
+                "right": 239.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 1,
+          "ship_id": 301881,
+          "ship_name": "若月",
+          "level": 1,
+          "button": {
+            "name": "301881",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301881",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 69.333,
+              "right": 404.133,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "301881",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301881",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -6.96,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": 434.0,
+                "right": 404.133,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 2,
+          "ship_id": 101171,
+          "ship_name": "拉菲",
+          "level": 1,
+          "button": {
+            "name": "101171",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101171",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 69.333,
+              "right": 568.8,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "101171",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101171",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -3.301,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": 434.0,
+                "right": 568.8,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 69.333,
+                "right": 568.8,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 3,
+          "ship_id": 101501,
+          "ship_name": "哈曼II",
+          "level": 1,
+          "button": {
+            "name": "101501",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101501",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 656.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 578.8,
+              "top": 69.333,
+              "right": 733.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "101501",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101501",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 0.359,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 656.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 656.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 578.8,
+                "bottom": 434.0,
+                "right": 733.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 578.8,
+                "top": 69.333,
+                "right": 733.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 4,
+          "ship_id": 201151,
+          "ship_name": "格里芬",
+          "level": 1,
+          "button": {
+            "name": "201151",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201151",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 820.8,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 743.467,
+              "top": 69.333,
+              "right": 898.133,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "201151",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201151",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 4.018,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 820.8,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 820.8,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 743.467,
+                "bottom": 434.0,
+                "right": 898.133,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 743.467,
+                "top": 69.333,
+                "right": 898.133,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 5,
+          "ship_id": 301051,
+          "ship_name": "绫波",
+          "level": 1,
+          "button": {
+            "name": "301051",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301051",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 985.467,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 908.133,
+              "top": 69.333,
+              "right": 1062.8,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "301051",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301051",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 7.677,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 985.467,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 985.467,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 908.133,
+                "bottom": 434.0,
+                "right": 1062.8,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 908.133,
+                "top": 69.333,
+                "right": 1062.8,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 6,
+          "ship_id": 301471,
+          "ship_name": "海风",
+          "level": 1,
+          "button": {
+            "name": "301471",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301471",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1150.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 1072.8,
+              "top": 69.333,
+              "right": 1227.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "301471",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301471",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 11.336,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 1150.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 1150.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 1072.8,
+                "bottom": 434.0,
+                "right": 1227.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 1072.8,
+                "top": 69.333,
+                "right": 1227.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 7,
+          "ship_id": 301471,
+          "ship_name": "海风",
+          "level": 1,
+          "button": {
+            "name": "301471",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301471",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 162.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 84.8,
+              "top": 296.0,
+              "right": 239.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "301471",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301471",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -10.619,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 162.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 162.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 84.8,
+                "bottom": 207.333,
+                "right": 239.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 84.8,
+                "top": 296.0,
+                "right": 239.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 8,
+          "ship_id": 401141,
+          "ship_name": "Z14",
+          "level": 1,
+          "button": {
+            "name": "401141",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/401141",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 296.0,
+              "right": 404.133,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "401141",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/401141",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -6.96,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": 207.333,
+                "right": 404.133,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 296.0,
+                "right": 404.133,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 9,
+          "ship_id": 401151,
+          "ship_name": "Z15",
+          "level": 1,
+          "button": {
+            "name": "401151",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/401151",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 296.0,
+              "right": 568.8,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "401151",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/401151",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -3.301,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": 207.333,
+                "right": 568.8,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 296.0,
+                "right": 568.8,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 10,
+          "ship_id": 401161,
+          "ship_name": "Z16",
+          "level": 1,
+          "button": {
+            "name": "401161",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/401161",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 656.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 578.8,
+              "top": 296.0,
+              "right": 733.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "401161",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/401161",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 0.359,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 656.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 656.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 578.8,
+                "bottom": 207.333,
+                "right": 733.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 578.8,
+                "top": 296.0,
+                "right": 733.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 11,
+          "ship_id": 601031,
+          "ship_name": "文琴佐·焦贝蒂",
+          "level": 1,
+          "button": {
+            "name": "601031",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/601031",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 820.8,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 743.467,
+              "top": 296.0,
+              "right": 898.133,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "601031",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/601031",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 4.018,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 820.8,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 820.8,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 743.467,
+                "bottom": 207.333,
+                "right": 898.133,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 743.467,
+                "top": 296.0,
+                "right": 898.133,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 12,
+          "ship_id": 701021,
+          "ship_name": "威严",
+          "level": 1,
+          "button": {
+            "name": "701021",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/701021",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 985.467,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 908.133,
+              "top": 296.0,
+              "right": 1062.8,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "701021",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/701021",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 7.677,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 985.467,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 985.467,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 908.133,
+                "bottom": 207.333,
+                "right": 1062.8,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 908.133,
+                "top": 296.0,
+                "right": 1062.8,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 13,
+          "ship_id": 701071,
+          "ship_name": "雷鸣",
+          "level": 1,
+          "button": {
+            "name": "701071",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/701071",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1150.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 1072.8,
+              "top": 296.0,
+              "right": 1227.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "701071",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/701071",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 11.336,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 1150.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 1150.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 1072.8,
+                "bottom": 207.333,
+                "right": 1227.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 1072.8,
+                "top": 296.0,
+                "right": 1227.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 14,
+          "ship_id": 801061,
+          "ship_name": "无惧",
+          "level": 1,
+          "button": {
+            "name": "801061",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/801061",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 162.133,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 84.8,
+              "top": 522.667,
+              "right": 239.467,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "801061",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/801061",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -10.619,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 162.133,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 162.133,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 84.8,
+                "bottom": -19.333,
+                "right": 239.467,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 84.8,
+                "top": 522.667,
+                "right": 239.467,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 15,
+          "ship_id": 101351,
+          "ship_name": "贝奇",
+          "level": 1,
+          "button": {
+            "name": "101351",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101351",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 522.667,
+              "right": 404.133,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "101351",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101351",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -6.96,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": -19.333,
+                "right": 404.133,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 522.667,
+                "right": 404.133,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 16,
+          "ship_id": 101371,
+          "ship_name": "科尔克",
+          "level": 1,
+          "button": {
+            "name": "101371",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101371",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 522.667,
+              "right": 568.8,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "101371",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101371",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -3.301,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": -19.333,
+                "right": 568.8,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 522.667,
+                "right": 568.8,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 17,
+          "ship_id": 101411,
+          "ship_name": "斯坦利",
+          "level": 1,
+          "button": {
+            "name": "101411",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101411",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 656.133,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 578.8,
+              "top": 522.667,
+              "right": 733.467,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "101411",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101411",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 0.359,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 656.133,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 656.133,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 578.8,
+                "bottom": -19.333,
+                "right": 733.467,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 578.8,
+                "top": 522.667,
+                "right": 733.467,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 18,
+          "ship_id": 101411,
+          "ship_name": "斯坦利",
+          "level": 1,
+          "button": {
+            "name": "101411",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101411",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 820.8,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 743.467,
+              "top": 522.667,
+              "right": 898.133,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "101411",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101411",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 4.018,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 820.8,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 820.8,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 743.467,
+                "bottom": -19.333,
+                "right": 898.133,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 743.467,
+                "top": 522.667,
+                "right": 898.133,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 19,
+          "ship_id": 201021,
+          "ship_name": "阿卡司塔",
+          "level": 1,
+          "button": {
+            "name": "201021",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201021",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 985.467,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 908.133,
+              "top": 522.667,
+              "right": 1062.8,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "201021",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201021",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 7.677,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 985.467,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 985.467,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 908.133,
+                "bottom": -19.333,
+                "right": 1062.8,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 908.133,
+                "top": 522.667,
+                "right": 1062.8,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 20,
+          "ship_id": 201031,
+          "ship_name": "热心",
+          "level": 1,
+          "button": {
+            "name": "201031",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201031",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1150.133,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 1072.8,
+              "top": 522.667,
+              "right": 1227.467,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "201031",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201031",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 11.336,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 1150.133,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 1150.133,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 1072.8,
+                "bottom": -19.333,
+                "right": 1227.467,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 1072.8,
+                "top": 522.667,
+                "right": 1227.467,
+                "bottom": 739.333
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "ship_type": null,
+      "receipts": [
+        {
+          "semantic_id": "enhancement/dock/filter/open",
+          "generation": 177265,
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button",
+          "point": {
+            "x": 1146.3025,
+            "y": 26.7085
+          }
+        },
+        {
+          "semantic_id": "enhancement/dock/filter/index/tpl",
+          "generation": 177273,
+          "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/container/indexsort_index/bg/tpl",
+          "point": {
+            "x": 290.247,
+            "y": 133.2775
+          }
+        },
+        {
+          "semantic_id": "enhancement/dock/filter/confirm",
+          "generation": 177282,
+          "path": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/btns/ok",
+          "point": {
+            "x": 800.0275,
+            "y": 675.4110000000001
+          }
+        }
+      ],
+      "candidates_after": [
+        {
+          "position": 0,
+          "ship_id": 302141,
+          "ship_name": "那珂",
+          "level": 78,
+          "button": {
+            "name": "302141",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/302141",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 162.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 84.8,
+              "top": 69.333,
+              "right": 239.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "302141",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/302141",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -10.619,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 162.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 162.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 84.8,
+                "bottom": 434.0,
+                "right": 239.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 84.8,
+                "top": 69.333,
+                "right": 239.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 1,
+          "ship_id": 102111,
+          "ship_name": "里士满",
+          "level": 78,
+          "button": {
+            "name": "102111",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/102111",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 69.333,
+              "right": 404.133,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "102111",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/102111",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -6.96,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": 434.0,
+                "right": 404.133,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 2,
+          "ship_id": 302041,
+          "ship_name": "长良",
+          "level": 78,
+          "button": {
+            "name": "302041",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/302041",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 69.333,
+              "right": 568.8,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "302041",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/302041",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -3.301,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": 434.0,
+                "right": 568.8,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 69.333,
+                "right": 568.8,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 3,
+          "ship_id": 303031,
+          "ship_name": "青叶",
+          "level": 78,
+          "button": {
+            "name": "303031",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/303031",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 656.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 578.8,
+              "top": 69.333,
+              "right": 733.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "303031",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/303031",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 0.359,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 656.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 656.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 578.8,
+                "bottom": 434.0,
+                "right": 733.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 578.8,
+                "top": 69.333,
+                "right": 733.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 4,
+          "ship_id": 10600022,
+          "ship_name": "穗香",
+          "level": 59,
+          "button": {
+            "name": "10600022",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/10600022",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 820.8,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 743.467,
+              "top": 69.333,
+              "right": 898.133,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "10600022",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/10600022",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 4.018,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 820.8,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 820.8,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 743.467,
+                "bottom": 434.0,
+                "right": 898.133,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 743.467,
+                "top": 69.333,
+                "right": 898.133,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 5,
+          "ship_id": 201351,
+          "ship_name": "雅努斯",
+          "level": 1,
+          "button": {
+            "name": "201351",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201351",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 985.467,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 908.133,
+              "top": 69.333,
+              "right": 1062.8,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "201351",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201351",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 7.677,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 985.467,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 985.467,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 908.133,
+                "bottom": 434.0,
+                "right": 1062.8,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 908.133,
+                "top": 69.333,
+                "right": 1062.8,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 6,
+          "ship_id": 202301,
+          "ship_name": "卡律布狄斯",
+          "level": 1,
+          "button": {
+            "name": "202301",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/202301",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1150.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 1072.8,
+              "top": 69.333,
+              "right": 1227.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "202301",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/202301",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 11.336,
+                "y": 4.052,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 1150.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 1150.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 1072.8,
+                "bottom": 434.0,
+                "right": 1227.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 1072.8,
+                "top": 69.333,
+                "right": 1227.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 7,
+          "ship_id": 301881,
+          "ship_name": "若月",
+          "level": 1,
+          "button": {
+            "name": "301881",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301881",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 162.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 84.8,
+              "top": 296.0,
+              "right": 239.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "301881",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301881",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -10.619,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 162.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 162.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 84.8,
+                "bottom": 207.333,
+                "right": 239.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 84.8,
+                "top": 296.0,
+                "right": 239.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 8,
+          "ship_id": 702011,
+          "ship_name": "阿芙乐尔",
+          "level": 1,
+          "button": {
+            "name": "702011",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/702011",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 296.0,
+              "right": 404.133,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "702011",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/702011",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -6.96,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": 207.333,
+                "right": 404.133,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 296.0,
+                "right": 404.133,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 9,
+          "ship_id": 802021,
+          "ship_name": "圣女贞德",
+          "level": 1,
+          "button": {
+            "name": "802021",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/802021",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 296.0,
+              "right": 568.8,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "802021",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/802021",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -3.301,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": 207.333,
+                "right": 568.8,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 296.0,
+                "right": 568.8,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 10,
+          "ship_id": 902021,
+          "ship_name": "马赛曲",
+          "level": 1,
+          "button": {
+            "name": "902021",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/902021",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 656.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 578.8,
+              "top": 296.0,
+              "right": 733.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "902021",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/902021",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 0.359,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 656.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 656.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 578.8,
+                "bottom": 207.333,
+                "right": 733.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 578.8,
+                "top": 296.0,
+                "right": 733.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 11,
+          "ship_id": 902021,
+          "ship_name": "马赛曲",
+          "level": 1,
+          "button": {
+            "name": "902021",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/902021",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 820.8,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 743.467,
+              "top": 296.0,
+              "right": 898.133,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "902021",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/902021",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 4.018,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 820.8,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 820.8,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 743.467,
+                "bottom": 207.333,
+                "right": 898.133,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 743.467,
+                "top": 296.0,
+                "right": 898.133,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 12,
+          "ship_id": 101171,
+          "ship_name": "拉菲",
+          "level": 1,
+          "button": {
+            "name": "101171",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101171",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 985.467,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 908.133,
+              "top": 296.0,
+              "right": 1062.8,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "101171",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101171",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 7.677,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 985.467,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 985.467,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 908.133,
+                "bottom": 207.333,
+                "right": 1062.8,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 908.133,
+                "top": 296.0,
+                "right": 1062.8,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 13,
+          "ship_id": 101501,
+          "ship_name": "哈曼II",
+          "level": 1,
+          "button": {
+            "name": "101501",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101501",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1150.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 1072.8,
+              "top": 296.0,
+              "right": 1227.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "101501",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/101501",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 11.336,
+                "y": -0.985,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 1150.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 1150.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 1072.8,
+                "bottom": 207.333,
+                "right": 1227.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 1072.8,
+                "top": 296.0,
+                "right": 1227.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 14,
+          "ship_id": 102151,
+          "ship_name": "丹佛",
+          "level": 1,
+          "button": {
+            "name": "102151",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/102151",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 162.133,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 84.8,
+              "top": 522.667,
+              "right": 239.467,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "102151",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/102151",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -10.619,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 162.133,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 162.133,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 84.8,
+                "bottom": -19.333,
+                "right": 239.467,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 84.8,
+                "top": 522.667,
+                "right": 239.467,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 15,
+          "ship_id": 102191,
+          "ship_name": "小海伦娜",
+          "level": 1,
+          "button": {
+            "name": "102191",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/102191",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 522.667,
+              "right": 404.133,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "102191",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/102191",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -6.96,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": -19.333,
+                "right": 404.133,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 522.667,
+                "right": 404.133,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 16,
+          "ship_id": 102201,
+          "ship_name": "小克利夫兰",
+          "level": 1,
+          "button": {
+            "name": "102201",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/102201",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 522.667,
+              "right": 568.8,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "102201",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/102201",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -3.301,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": -19.333,
+                "right": 568.8,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 522.667,
+                "right": 568.8,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 17,
+          "ship_id": 102291,
+          "ship_name": "博伊西",
+          "level": 1,
+          "button": {
+            "name": "102291",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/102291",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 656.133,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 578.8,
+              "top": 522.667,
+              "right": 733.467,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "102291",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/102291",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 0.359,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 656.133,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 656.133,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 578.8,
+                "bottom": -19.333,
+                "right": 733.467,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 578.8,
+                "top": 522.667,
+                "right": 733.467,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 18,
+          "ship_id": 201151,
+          "ship_name": "格里芬",
+          "level": 1,
+          "button": {
+            "name": "201151",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201151",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 820.8,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 743.467,
+              "top": 522.667,
+              "right": 898.133,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "201151",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/201151",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 4.018,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 820.8,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 820.8,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 743.467,
+                "bottom": -19.333,
+                "right": 898.133,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 743.467,
+                "top": 522.667,
+                "right": 898.133,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 19,
+          "ship_id": 301051,
+          "ship_name": "绫波",
+          "level": 1,
+          "button": {
+            "name": "301051",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301051",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 985.467,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 908.133,
+              "top": 522.667,
+              "right": 1062.8,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "301051",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301051",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 7.677,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 985.467,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 985.467,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 908.133,
+                "bottom": -19.333,
+                "right": 1062.8,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 908.133,
+                "top": 522.667,
+                "right": 1062.8,
+                "bottom": 739.333
+              }
+            }
+          }
+        },
+        {
+          "position": 20,
+          "ship_id": 301471,
+          "ship_name": "海风",
+          "level": 1,
+          "button": {
+            "name": "301471",
+            "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301471",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1150.133,
+              "y": 631.0
+            },
+            "bounds": {
+              "left": 1072.8,
+              "top": 522.667,
+              "right": 1227.467,
+              "bottom": 739.333
+            },
+            "raw": {
+              "name": "301471",
+              "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/301471",
+              "canvas": "Canvas",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 11.336,
+                "y": -6.022,
+                "z": 10.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 1150.133,
+                "y": 89.0
+              },
+              "adb_point": {
+                "x": 1150.133,
+                "y": 631.0
+              },
+              "screen_bounds": {
+                "left": 1072.8,
+                "bottom": -19.333,
+                "right": 1227.467,
+                "top": 197.333
+              },
+              "adb_bounds": {
+                "left": 1072.8,
+                "top": 522.667,
+                "right": 1227.467,
+                "bottom": 739.333
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "dock_entry": {
+    "already_in_dock": true,
+    "entry": null,
+    "candidate_count": 21
+  },
+  "original_task_result": 12,
+  "elapsed_seconds": 15.187,
+  "enhancement_grant_remaining": 0,
+  "execution_receipts": [
+    {
+      "target_name": "雅努斯",
+      "materials": [
+        {
+          "slot": 6,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "huixing"
+        },
+        {
+          "slot": 0,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "aolike"
+        },
+        {
+          "slot": 7,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "fute"
+        },
+        {
+          "slot": 1,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "ruyue"
+        },
+        {
+          "slot": 8,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "fute"
+        },
+        {
+          "slot": 2,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "xiaotiane"
+        },
+        {
+          "slot": 9,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "tangsi"
+        },
+        {
+          "slot": 3,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "sipengsi"
+        },
+        {
+          "slot": 10,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "xiaotiane"
+        },
+        {
+          "slot": 4,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "ruyue"
+        },
+        {
+          "slot": 11,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "maoyue"
+        },
+        {
+          "slot": 5,
+          "level": 1,
+          "rarity_sprite": "bg1",
+          "ship_sprite": "ruyue"
+        }
+      ],
+      "attributes_before": [
+        {
+          "index": 2,
+          "name": "炮击",
+          "current": 23,
+          "maximum": 28,
+          "addition": 1,
+          "exp_current": 69,
+          "exp_total": 35
+        },
+        {
+          "index": 3,
+          "name": "雷击",
+          "current": 107,
+          "maximum": 117,
+          "addition": 10,
+          "exp_current": 150,
+          "exp_total": 15
+        },
+        {
+          "index": 5,
+          "name": "航空",
+          "current": 0,
+          "maximum": 0,
+          "addition": 0,
+          "exp_current": 0,
+          "exp_total": 1
+        },
+        {
+          "index": 6,
+          "name": "装填",
+          "current": 96,
+          "maximum": 105,
+          "addition": 9,
+          "exp_current": 135,
+          "exp_total": 15
+        }
+      ],
+      "attributes_after": [
+        {
+          "index": 2,
+          "name": "炮击",
+          "current": 24,
+          "maximum": 28,
+          "addition": 0,
+          "exp_current": 34,
+          "exp_total": 35
+        },
+        {
+          "index": 3,
+          "name": "雷击",
+          "current": 117,
+          "maximum": 117,
+          "addition": 0,
+          "exp_current": 0,
+          "exp_total": 15
+        },
+        {
+          "index": 5,
+          "name": "航空",
+          "current": 0,
+          "maximum": 0,
+          "addition": 0,
+          "exp_current": 0,
+          "exp_total": 1
+        },
+        {
+          "index": 6,
+          "name": "装填",
+          "current": 105,
+          "maximum": 105,
+          "addition": 0,
+          "exp_current": 0,
+          "exp_total": 15
+        }
+      ],
+      "confirmation": {
+        "semantic_id": "enhancement/confirm",
+        "generation": 177165,
+        "point": {
+          "x": 1191.333,
+          "y": 625.867
+        },
+        "bounds": {
+          "left": 1122.667,
+          "top": 600.533,
+          "right": 1260.0,
+          "bottom": 651.2
+        },
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel(Adapt)/blur_panel/main/ok_btn",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "equipment_quantities": [
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          5
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ]
+      ],
+      "equipment_actions": [
+        {
+          "semantic_id": "enhancement/equipment/deselect-all",
+          "generation": 177184,
+          "point": {
+            "x": 200.333,
+            "y": 601.333
+          },
+          "bounds": {
+            "left": 143.667,
+            "top": 584.667,
+            "right": 257.0,
+            "bottom": 618.0
+          },
+          "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/options/ALL",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "enhancement/equipment/cancel-disassembly",
+          "generation": 177201,
+          "point": {
+            "x": 844.267,
+            "y": 605.867
+          },
+          "bounds": {
+            "left": 753.267,
+            "top": 572.2,
+            "right": 935.267,
+            "bottom": 639.533
+          },
+          "path": "OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/cancel_btn",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "enhancement/equipment/preserve/confirm",
+          "generation": 177215,
+          "point": {
+            "x": 790.0,
+            "y": 515.0
+          },
+          "bounds": {
+            "left": 699.0,
+            "top": 481.333,
+            "right": 881.0,
+            "bottom": 548.667
+          },
+          "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+          "policy_sha256": null,
+          "capability_id": null
+        }
+      ],
+      "equipment_preserved": true,
+      "generation_after": 177175,
+      "policy_sha256": "f2d52297a635e48da7da610b15c412e4b36f8bb883ffab6162190881993c4d51",
+      "capability_id": "enhancement.execute",
+      "receipt_type": "EnhancementExecutionReceipt",
+      "consumed_count": 12
+    }
+  ],
+  "dock_after": {
+    "candidate_count": 21,
+    "main_page_visible": false
+  },
+  "temporary_config_removed": true
+}

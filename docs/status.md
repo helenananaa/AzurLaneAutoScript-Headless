@@ -564,9 +564,24 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   was clicked in that smoke.
 - The complete ALAS task loop is deterministic-test covered for ordered filters,
   per-category checking, no-material skips, budget exhaustion, cleanup, invalid
-  configuration, and default denial. A full `favourite` destructive task and a
-  naturally empty-material live branch remain unrun to avoid unnecessary ship
-  consumption; those are evidence gaps, not pixel fallbacks.
+  configuration, and default denial. A naturally empty-material live branch
+  remains unrun; that is an evidence gap, not a pixel fallback.
+- `Enhance.Filter` is now fully live-qualified: the exact typed Dock selection
+  was exercised for `dd`, `cl`, `ca`, `bb`, `cv`, `repair`, `ss`, and `others`.
+  Each run selected its reviewed native index and confirmed it; the final reset
+  selected the exact `无限制` option before returning the normal Dock state.
+  Evidence: `integration/alas/enhancement-filter-matrix-r1-live-validation-receipt.json`.
+- `Enhance.ShipToEnhance` is now fully live-qualified across both public values:
+  the original ALAS task made one real `all`-scoped transaction and one real
+  `favourite`-scoped transaction. The latter seeded exactly one named ship,
+  then proved the normal Dock scope/filter reset and removed the temporary
+  favourite mark. Evidence: `integration/alas/enhancement-task-all-dd-r2-live-validation-receipt.json`
+  and `integration/alas/enhancement-task-favourite-dd-r4-live-validation-receipt.json`.
+- `Enhance.CheckPerCategory` remains partial. A live value of two reached a
+  real confirmed enhancement, but the client took longer than the old
+  five-second equipment-preservation handoff and the invocation therefore did
+  not emit two verified execution receipts. It is not promoted until a single
+  original ALAS call records both configured transactions.
 
 ### StopCondition priority port: typed map achievement and fleet levels passed
 

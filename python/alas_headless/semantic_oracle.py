@@ -17238,9 +17238,12 @@ class SemanticOracle:
         raise SemanticGateClosed("Dock favourite state did not change")
 
     def set_enhancement_dock_filter(
-        self, ship_type: Optional[str]
+        self,
+        ship_type: Optional[str],
+        *,
+        enhanceable_only: bool = True,
     ) -> Tuple[ActionReceipt, ...]:
-        """Apply ALAS's level/all/all/all/enhanceable filter semantically."""
+        """Apply ALAS's Dock type filter, optionally retaining maxed ships."""
 
         index_options = {
             None: ("tpl", "全部"),
@@ -17255,6 +17258,8 @@ class SemanticOracle:
         }
         if ship_type not in index_options:
             raise ValueError("enhancement ship type is unsupported")
+        if not isinstance(enhanceable_only, bool):
+            raise TypeError("enhancement Dock enhanceable_only must be boolean")
         state, ui_state = self._enhancement_dock_records()
         filter_path = (
             "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button"
@@ -17269,7 +17274,12 @@ class SemanticOracle:
             ("index", index_options[ship_type][0], index_options[ship_type][1], "btn_index_blue"),
             ("camp", "tpl", "全阵营", "btn_index_blue"),
             ("rarity", "tpl", "全部", "btn_index_blue"),
-            ("extraindex", "3", "可强化", "btn_index_blue"),
+            (
+                "extraindex",
+                "3" if enhanceable_only else "tpl",
+                "可强化" if enhanceable_only else "无限制",
+                "btn_index_blue",
+            ),
         )
         for group, option, label, selected_sprite in choices:
             state, _, image = self._wait_enhancement_filter_option(
@@ -17489,6 +17499,242 @@ class SemanticOracle:
             self._sleep(0.05)
         raise SemanticGateClosed("ship enhancement tab did not become available")
 
+    def _click_exact_toggle(
+        self,
+        state: OracleState,
+        toggle: ToggleState,
+        semantic_id: str,
+    ) -> ActionReceipt:
+        """Tap one exact typed toggle at its exported semantic point."""
+
+        if (
+            not toggle.active_in_hierarchy
+            or not toggle.active_and_enabled
+            or not toggle.interactable
+            or toggle.bounds is None
+        ):
+            raise SemanticGateClosed(semantic_id + " toggle is incomplete")
+        point = toggle.point
+        if point is None:
+            raise SemanticGateClosed(semantic_id + " toggle has no input point")
+        if not toggle.bounds.contains(point) or self._blocking_rules(
+            state, semantic_id
+        ):
+            raise SemanticGateClosed(semantic_id + " input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before toggle input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed after toggle input")
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=state.generation,
+            point=point,
+            bounds=toggle.bounds,
+            path=toggle.path,
+        )
+
+    @staticmethod
+    def _enhancement_detail_toggle(
+        ui_state: UiState,
+        *,
+        name: str,
+        path: str,
+    ) -> ToggleState:
+        if ui_state.method_mask & 0x1 == 0:
+            raise SemanticGateClosed("typed Unity Toggle snapshot is incomplete")
+        toggles = tuple(
+            item
+            for item in ui_state.toggles
+            if item.name == name
+            and item.path == path
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.bounds is not None
+        )
+        if len(toggles) != 1:
+            raise SemanticGateClosed("enhancement detail toggle is incomplete")
+        return toggles[0]
+
+    def _wait_enhancement_detail_toggle(
+        self,
+        *,
+        name: str,
+        path: str,
+        checked: Optional[bool] = None,
+    ) -> Tuple[OracleState, UiState, ToggleState]:
+        last_error: Optional[SemanticGateClosed] = None
+        for attempt in range(30):
+            try:
+                state, ui_state = self._retirement_records()
+                toggle = self._enhancement_detail_toggle(
+                    ui_state, name=name, path=path
+                )
+                if checked is not None and toggle.checked is not checked:
+                    raise SemanticGateClosed("enhancement detail toggle has not changed")
+                return state, ui_state, toggle
+            except SemanticGateClosed as exc:
+                last_error = exc
+                if attempt < 29:
+                    self._sleep(0.05)
+        raise SemanticGateClosed(
+            "enhancement detail toggle did not stabilize"
+        ) from last_error
+
+    @staticmethod
+    def _enhancement_detail_ship_name(
+        ui_state: UiState,
+    ) -> str:
+        path = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/adapt/name/"
+            "nameRect/name_mask/Text"
+        )
+        names = tuple(
+            item.text.strip()
+            for item in ui_state.texts
+            if item.path == path
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.text.strip()
+        )
+        if len(names) != 1:
+            raise SemanticGateClosed("enhancement detail ship identity is incomplete")
+        return names[0]
+
+    def _return_from_enhancement_detail_to_dock(self) -> ActionReceipt:
+        """Leave the ship detail tab and prove the original Dock grid returns."""
+
+        state = self.read_state()
+        suffix = "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back_btn"
+        buttons = tuple(
+            item
+            for item in state.buttons
+            if item.path.endswith(suffix) and item.name == "back_btn" and item.actionable
+        )
+        if len(buttons) != 1:
+            raise SemanticGateClosed("enhancement detail back control is incomplete")
+        target = buttons[0]
+        assert target.point is not None and target.bounds is not None
+        if self._blocking_rules(state, "enhancement/detail/back"):
+            raise SemanticGateClosed("enhancement detail back input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed(
+                "game activity changed before enhancement detail back input"
+            )
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        receipt = ActionReceipt(
+            semantic_id="enhancement/detail/back",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+        self._retry_transition_read(
+            self._enhancement_dock_records,
+            attempts=30,
+            interval_seconds=0.1,
+        )
+        return receipt
+
+    def set_enhancement_dock_candidate_favourite(
+        self,
+        position: int,
+        ship_id: int,
+        ship_name: str,
+        level: int,
+        enabled: bool,
+    ) -> Tuple[ActionReceipt, ...]:
+        """Set one exact Dock card's in-client common/favourite state.
+
+        This is intentionally separate from the Dock scope toggle used by the
+        task.  It gives live qualification a reversible way to seed and then
+        restore a real favourite target without changing ALAS task control.
+        """
+
+        if not isinstance(enabled, bool):
+            raise TypeError("enhancement candidate favourite must be boolean")
+        receipts = [
+            self.open_enhancement_dock_candidate(
+                position, ship_id, ship_name, level
+            )
+        ]
+        detail_path = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/root/"
+            "detail_toggle"
+        )
+        state, ui_state, detail = self._wait_enhancement_detail_toggle(
+            name="detail_toggle", path=detail_path
+        )
+        if detail.checked is not True:
+            receipts.append(
+                self._click_exact_toggle(
+                    state, detail, "enhancement/detail/tab"
+                )
+            )
+        common_path = (
+            "OverlayCamera/Overlay/UIMain/detail_container(Adapt)/detail_container/"
+            "ShipDetailView(Clone)/common_toggle"
+        )
+        state, ui_state, common = self._wait_enhancement_detail_toggle(
+            name="common_toggle", path=common_path
+        )
+        if self._enhancement_detail_ship_name(ui_state) != ship_name:
+            raise SemanticGateClosed("enhancement detail ship changed")
+        expected_sprite = "common_active" if enabled else "common_deactive"
+        current_sprite = "common_active" if common.checked else "common_deactive"
+        visible = tuple(
+            item
+            for item in ui_state.images
+            if item.path == common_path + ("/on" if common.checked else "/off")
+            and item.sprite == current_sprite
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(visible) != 1:
+            raise SemanticGateClosed("enhancement candidate favourite state is incomplete")
+        if common.checked != enabled:
+            # The detail toggle exposes the control before its hit target is
+            # ready on the live client.  Refresh the typed state once after
+            # the panel has settled, then use its exact input point.
+            self._sleep(0.2)
+            state, ui_state, common = self._wait_enhancement_detail_toggle(
+                name="common_toggle", path=common_path
+            )
+            if common.checked != enabled:
+                if self._enhancement_detail_ship_name(ui_state) != ship_name:
+                    raise SemanticGateClosed("enhancement detail ship changed")
+                receipts.append(
+                    self._click_exact_toggle(
+                        state,
+                        common,
+                        "enhancement/detail/favourite/"
+                        + ("on" if enabled else "off"),
+                    )
+                )
+            _, after, common = self._wait_enhancement_detail_toggle(
+                name="common_toggle", path=common_path, checked=enabled
+            )
+            after_visible = tuple(
+                item
+                for item in after.images
+                if item.path == common_path + ("/on" if enabled else "/off")
+                and item.sprite == expected_sprite
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if len(after_visible) != 1:
+                raise SemanticGateClosed(
+                    "enhancement candidate favourite did not change"
+                )
+        receipts.append(self._return_from_enhancement_detail_to_dock())
+        return tuple(receipts)
+
     def return_to_enhancement_dock(self) -> ActionReceipt:
         """Leave a completed/empty enhancement target and prove Dock recovery."""
 
@@ -17541,11 +17787,17 @@ class SemanticOracle:
             self._click_exact_image(state, opener, "enhancement/dock/reset/open")
         )
         self._sleep(0.1)
+        no_limit_error: Optional[SemanticGateClosed] = None
         for attempt in range(20):
             state, ui_state = self._retirement_records()
-            no_limit = self._enhancement_filter_option(
-                ui_state, "extraindex", "tpl", "无限制"
-            )
+            try:
+                no_limit = self._enhancement_filter_option(
+                    ui_state, "extraindex", "tpl", "无限制"
+                )
+            except SemanticGateClosed as exc:
+                no_limit_error = exc
+                self._sleep(0.05)
+                continue
             if no_limit.sprite == "btn_index_blue":
                 break
             if no_limit.sprite != "btn_index_grey":
@@ -17560,7 +17812,9 @@ class SemanticOracle:
             )
             break
         else:
-            raise SemanticGateClosed("Dock reset extra filter stayed blocked")
+            raise SemanticGateClosed(
+                "Dock reset extra filter did not stabilize"
+            ) from no_limit_error
         for attempt in range(20):
             state, ui_state = self._retirement_records()
             if not self._blocking_rules(state, "enhancement/dock/reset/confirm"):
@@ -18040,6 +18294,30 @@ class SemanticOracle:
         confirmation = self._click_enhancement_control(
             "enhancement/confirm", "ok_btn", "qianghua_butten"
         )
+
+        def result_gain(preview: EnhancementPreview) -> Optional[int]:
+            """Return the exact observed gain once the client has settled."""
+
+            if preview.target_name != selected.target_name:
+                return None
+            before_by_index = {item.index: item for item in selected.attributes}
+            after_by_index = {item.index: item for item in preview.attributes}
+            if before_by_index.keys() != after_by_index.keys():
+                return None
+            gain = 0
+            for index, before in before_by_index.items():
+                after = after_by_index[index]
+                expected = min(before.maximum, before.current + before.addition)
+                if (
+                    after.name != before.name
+                    or after.maximum != before.maximum
+                    or after.current != expected
+                    or after.addition != 0
+                ):
+                    return None
+                gain += after.current - before.current
+            return gain if gain > 0 else None
+
         deadline = time.monotonic() + timeout_seconds
         completed: Optional[EnhancementPreview] = None
         equipment_result: Optional[
@@ -18050,9 +18328,21 @@ class SemanticOracle:
                 preview = self.enhancement_preview()
             except SemanticGateClosed:
                 preview = None
-            if preview is not None and not preview.materials:
+            # The live client clears its material slots one observer frame
+            # before applying the corresponding attribute values.  Do not
+            # mistake that transitional empty panel for the completed order.
+            if (
+                preview is not None
+                and not preview.materials
+                and result_gain(preview) is not None
+            ):
                 completed = preview
                 break
+            if preview is not None:
+                # This remains the known enhancement panel, so avoid mixing
+                # in a second page probe while its rows are still animating.
+                self._sleep(0.05)
+                continue
             state, ui_state = self._retirement_records()
             active_paths = tuple(
                 item.path
@@ -18072,8 +18362,14 @@ class SemanticOracle:
                 )
             )
             if equipment_visible or preserve_visible:
+                # The stock client's equipment-resolution handoff is visibly
+                # slower than recommendation/confirmation (and has exceeded
+                # the five-second transaction window on the live client).
+                # It is an already-confirmed order at this point, so wait for
+                # its normal preservation exit rather than misclassifying the
+                # completed enhancement as retryable.
                 equipment_result = self._finish_enhancement_equipment_preservation(
-                    timeout_seconds=timeout_seconds
+                    timeout_seconds=max(timeout_seconds, 30.0)
                 )
                 completed = self.enhancement_preview()
                 if completed.materials:
@@ -18086,31 +18382,14 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "official enhancement result was not observed; do not retry"
             )
-        if completed.target_name != selected.target_name:
-            raise SemanticGateClosed("enhancement target changed after confirmation")
-        before_by_index = {item.index: item for item in selected.attributes}
-        after_by_index = {item.index: item for item in completed.attributes}
-        if before_by_index.keys() != after_by_index.keys():
-            raise SemanticGateClosed("enhancement attribute rows changed")
-        observed_gain = 0
-        for index, before in before_by_index.items():
-            after = after_by_index[index]
-            expected = min(before.maximum, before.current + before.addition)
-            if (
-                after.name != before.name
-                or after.maximum != before.maximum
-                or after.current != expected
-                or after.addition != 0
-            ):
-                raise SemanticGateClosed(
-                    "enhancement attribute result does not match the preview"
-                )
-            observed_gain += after.current - before.current
-        if observed_gain <= 0:
-            raise SemanticGateClosed("enhancement consumed material without a gain")
+        observed_gain = result_gain(completed)
+        if observed_gain is None:
+            raise SemanticGateClosed(
+                "enhancement attribute result does not match the preview"
+            )
         if equipment_result is None:
             equipment_result = self._finish_enhancement_equipment_preservation(
-                timeout_seconds=timeout_seconds
+                timeout_seconds=max(timeout_seconds, 30.0)
             )
         equipment_quantities, equipment_actions = equipment_result
         return EnhancementExecutionReceipt(
@@ -18661,6 +18940,7 @@ class SemanticOracle:
         actions: List[ActionReceipt] = []
         quantities: Optional[Tuple[Tuple[int, int], ...]] = None
         clean_samples = 0
+        awaiting_preserve_completion = False
         while self._monotonic() < deadline:
             state, ui_state = self._retirement_records()
             active_paths = tuple(
@@ -18685,6 +18965,7 @@ class SemanticOracle:
                         ),
                     )
                 )
+                awaiting_preserve_completion = True
                 clean_samples = 0
                 self._sleep(0.2)
                 continue
@@ -18692,6 +18973,23 @@ class SemanticOracle:
                 raise SemanticGateClosed(
                     "unknown dialog interrupted enhancement equipment handling"
                 )
+            if awaiting_preserve_completion:
+                # The resolve panel can remain reported for one observer
+                # generation behind the preservation prompt.  Once its
+                # affirmative exit is sent, only accept the settled
+                # enhancement panel; do not issue a second cancellation.
+                try:
+                    preview = self.enhancement_preview()
+                except SemanticGateClosed:
+                    preview = None
+                if preview is not None and not preview.materials:
+                    clean_samples += 1
+                    if clean_samples >= 3:
+                        return quantities or (), tuple(actions)
+                else:
+                    clean_samples = 0
+                self._sleep(0.2)
+                continue
             if any(
                 path.endswith("ResolveEquipmentUI(Clone)/main/cancel_btn")
                 for path in active_paths
@@ -18729,6 +19027,7 @@ class SemanticOracle:
                             identity_text="取 消",
                         )
                     )
+                    awaiting_preserve_completion = True
                 clean_samples = 0
                 self._sleep(0.2)
                 continue

@@ -652,8 +652,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **19 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **136 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **21 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **134 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **101 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -743,8 +743,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `EmulatorInfo.path` | Alas | type=textarea; display=default | input/default: null | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EnemyPriority.EnemyScaleBalanceWeight` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "default_mode", "S1_enemy_first", "S3_enemy_first"; default: "default_mode" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Enhance.CheckPerCategory` | General | type=input; display=default | input/default: 5 | `P`/◐ 正式任务循环已接入 | ☑ | ☑ | ☑ | ☑ | ◐ |
-| `Enhance.Filter` | General | type=textarea; display=default | input/default: null | `P`/◐ 8 类型任务筛选已接入 | ☑ | ☑ | ☑ | ☑ | ◐ |
-| `Enhance.ShipToEnhance` | General | type=select; display=default | options: "all", "favourite"; default: "all" | `P`/◐ all/favourite typed 控件已实机 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `Enhance.Filter` | General | type=textarea; display=default | input/default: null | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `Enhance.ShipToEnhance` | General | type=select; display=default | options: "all", "favourite"; default: "all" | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `EquipmentCode.Config` | GemsFarming | type=textarea; display=default | input/default:…4672 tokens truncated…t" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EquipmentCode.ExportToConfig` | GemsFarming | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Error.HandleError` | Alas | type=checkbox; display=default | input/default: true | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
