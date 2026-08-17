@@ -341,6 +341,18 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
       EndsWith(path, "Overlay/UIMain/CommissionInfoUI4Mellow(Clone)")) {
     return true;
   }
+  if (name == "bubble" &&
+      (EndsWith(path,
+                "CommissionInfoUI4Mellow(Clone)/frame/resources/canteen/"
+                "bubble") ||
+       EndsWith(path,
+                "CommissionInfoUI4Mellow(Clone)/frame/resources/merchant/"
+                "bubble") ||
+       EndsWith(path,
+                "CommissionInfoUI4Mellow(Clone)/frame/resources/class/"
+                "bubble"))) {
+    return true;
+  }
   if (name == "finish_btn" &&
       (EndsWith(path,
                 "CommissionInfoUI4Mellow(Clone)/frame/main/content/event/"
@@ -1749,6 +1761,8 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           path.find("LevelStageInfoView(Clone)/panel/") !=
               std::string_view::npos ||
           path.find("LevelFleetSelectView(Clone)/panel/ShipList/") !=
+              std::string_view::npos ||
+          path.find("CommissionInfoUI4Mellow(Clone)/frame/resources/") !=
               std::string_view::npos ||
           EndsWith(path,
                    "LevelStageView(Clone)/right_stage/event/collapse/"

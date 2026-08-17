@@ -288,6 +288,11 @@ if ! grep -Fq 'CommissionInfoUI4Mellow(Clone)/frame/main/content/event/' \
   echo "Reward-page semantic entries are missing" >&2
   exit 1
 fi
+if ! grep -Fq 'CommissionInfoUI4Mellow(Clone)/frame/resources/canteen/' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
+  echo "Reward resource bubble raycast allowlist is missing" >&2
+  exit 1
+fi
 if ! grep -Fq 'frame/go_btn' \
     "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
   echo "Reward-page go-button allowlist is missing" >&2

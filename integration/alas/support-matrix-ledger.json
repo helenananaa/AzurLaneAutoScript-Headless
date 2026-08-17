@@ -6281,25 +6281,29 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_reward_config.py",
         "python/alas_headless/alas_reward_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "scripts/python/run_alas_reward_resource_live_validation.py",
+        "integration/alas/reward-coin-live-validation-receipt.json",
+        "integration/alas/reward-resource-disabled-live-validation-receipt.json",
+        "docs/reward-resource-live-validation-report.md",
         "docs/status.md"
       ],
-      "group_code": "P",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Reward"
       ],
       "path": "Reward.CollectCoin",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -6323,7 +6327,7 @@
         "Reward"
       ],
       "path": "Reward.CollectExp",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 实机零值；等待正值",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -6359,25 +6363,29 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_reward_config.py",
         "python/alas_headless/alas_reward_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "scripts/python/run_alas_reward_resource_live_validation.py",
+        "integration/alas/reward-oil-live-validation-receipt.json",
+        "integration/alas/reward-resource-disabled-live-validation-receipt.json",
+        "docs/reward-resource-live-validation-report.md",
         "docs/status.md"
       ],
-      "group_code": "P",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Reward"
       ],
       "path": "Reward.CollectOil",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -9573,29 +9581,47 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_reward_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_reward_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "scripts/python/run_alas_reward_resource_live_validation.py",
+        "integration/alas/reward-oil-live-validation-receipt.json",
+        "integration/alas/reward-resource-disabled-live-validation-receipt.json",
+        "docs/reward-resource-live-validation-report.md",
         "docs/status.md"
       ],
       "field": "Reward.CollectOil",
-      "note": "Both boolean values are forwarded to original reward_receive; non-booleans fail before any Reward UI operation."
+      "note": "Oil=true consumed one exact positive typed resource amount and observed it at zero after the original Reward task; false emitted no resource dispatch and also returned to main. Invalid values still fail before Reward UI entry."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_reward_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_reward_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "scripts/python/run_alas_reward_resource_live_validation.py",
+        "integration/alas/reward-coin-live-validation-receipt.json",
+        "integration/alas/reward-resource-disabled-live-validation-receipt.json",
+        "docs/reward-resource-live-validation-report.md",
         "docs/status.md"
       ],
       "field": "Reward.CollectCoin",
-      "note": "Both boolean values are forwarded to original reward_receive; non-booleans fail before any Reward UI operation."
+      "note": "Coin=true consumed one exact positive typed resource amount and observed it at zero after the original Reward task; false emitted no resource dispatch and also returned to main. Invalid values still fail before Reward UI entry."
     },
     {
       "dimensions": {

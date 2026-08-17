@@ -72,5 +72,13 @@ class RuntimeObserverContractTests(unittest.TestCase):
         )
 
 
+    def test_reward_resource_bubbles_publish_a_topmost_click_point(self):
+        reward_root = "CommissionInfoUI4Mellow(Clone)/frame/resources/"
+        self.assertGreaterEqual(self.probe_source.count(reward_root), 4)
+        self.assertIn(
+            "Reward resource bubble raycast allowlist is missing",
+            self.build_script,
+        )
+
 if __name__ == "__main__":
     unittest.main()

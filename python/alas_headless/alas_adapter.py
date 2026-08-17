@@ -356,6 +356,12 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "POPUP_CONFIRM_UI_ADDITIONAL": "overlay/network-reconnect/confirm",
 }
 
+REWARD_RESOURCE_FIELDS: Mapping[str, str] = {
+    "OIL": "oil",
+    "COIN": "coin",
+    "EXP": "exp",
+}
+
 
 MISSION_VIRTUAL_RESOURCES = frozenset(
     {
@@ -3011,6 +3017,10 @@ class AlasSemanticAdapter:
             return self.oracle.exists("event/mode/story")
         if semantic_id == "reward/meta/enter":
             return self.oracle.meta_entrance_available()
+        if name in REWARD_RESOURCE_FIELDS:
+            return self.oracle.reward_resource_available(
+                REWARD_RESOURCE_FIELDS[name]
+            )
         if semantic_id == "meta/page/back":
             try:
                 self.oracle.meta_entrance_state()
@@ -7726,6 +7736,10 @@ class AlasSemanticAdapter:
                 return self.oracle.click("os/voucher/back")
             if semantic_id == "reward/meta/enter":
                 return self.oracle.click_meta_entrance()
+            if name in REWARD_RESOURCE_FIELDS:
+                return self.oracle.click_reward_resource(
+                    REWARD_RESOURCE_FIELDS[name]
+                )
             if semantic_id in ("meta/current/open", "meta/dossier/open"):
                 return self.oracle.click_meta_card(
                     dossier=semantic_id == "meta/dossier/open"

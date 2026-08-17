@@ -1,5 +1,4 @@
 import ast
-import hashlib
 import itertools
 import json
 import runpy
@@ -19,6 +18,9 @@ ROOT = Path(__file__).resolve().parents[1]
 LIVE_ALAS = Path(r"H:\program\AzurLaneAutoScript-alas-topdown-live")
 DORM_FEED_EVIDENCE_ORACLE_SHA256 = (
     "96b7b240be56bac8a0262c503e2e9b65b42a5f5eba80eaad623adfebae2d7f40"
+)
+DORM_FEED_EVIDENCE_ADAPTER_SHA256 = (
+    "99cfc62760cf28ec52ef306624eb0b76fb5d32bbd4e2a1041137e3ee744e0358"
 )
 
 
@@ -133,9 +135,11 @@ class AlasDormConfigTests(unittest.TestCase):
         )
 
     def test_live_dorm_feed_receipts_cover_enabled_disabled_and_numeric_filter(self):
-        adapter = ROOT / "python/alas_headless/alas_adapter.py"
         expected_hashes = {
-            "adapter": hashlib.sha256(adapter.read_bytes()).hexdigest(),
+            # All three historical feed receipts used this adapter revision.
+            # Do not couple consumptive evidence to later unrelated adapter
+            # improvements such as Reward resource collection.
+            "adapter": DORM_FEED_EVIDENCE_ADAPTER_SHA256,
             # The three feeds consume real food.  Pin the exact Oracle source
             # used on that run so an unrelated later UI-surface improvement
             # (such as the Shop frame-pair fix) does not invalidate

@@ -1,5 +1,4 @@
 import ast
-import hashlib
 import itertools
 import json
 import unittest
@@ -23,6 +22,18 @@ WEEKLY_MISSION_ENABLED_EVIDENCE_ADAPTER_SHA256 = (
 )
 WEEKLY_MISSION_ENABLED_EVIDENCE_ORACLE_SHA256 = (
     "bd56ff524debd651b7b116d33e896792f51a23f272c3f9af965ac177ef5bb237"
+)
+WEEKLY_MISSION_DISABLED_EVIDENCE_ADAPTER_SHA256 = (
+    "99cfc62760cf28ec52ef306624eb0b76fb5d32bbd4e2a1041137e3ee744e0358"
+)
+WEEKLY_MISSION_DISABLED_EVIDENCE_ORACLE_SHA256 = (
+    "5f8ad8130ddf55f233fb8f883f2acb95a848876bebb2af63744c5618c71df443"
+)
+RESOURCE_EVIDENCE_ADAPTER_SHA256 = (
+    "f85437ec16f4d425bad9fb589476f957330f91de56946b624487265a6847a999"
+)
+RESOURCE_EVIDENCE_ORACLE_SHA256 = (
+    "9632075433eca0a9d71842b3ad2dee148b84b4c25218a565fcfd97997eff50ae"
 )
 
 
@@ -193,21 +204,109 @@ class AlasRewardConfigTests(unittest.TestCase):
         )
         disabled_receipt = receipts[False]
         self.assertEqual(disabled_receipt["dispatches"], [])
+        # This older non-mutating weekly-disabled receipt is historical
+        # evidence.  Pin its sources instead of coupling it to later unrelated
+        # Reward adapter/oracle improvements.
         self.assertEqual(
             disabled_receipt["source_sha256"]["adapter"],
-            hashlib.sha256(
-                ROOT.joinpath("python/alas_headless/alas_adapter.py").read_bytes()
-            ).hexdigest(),
+            WEEKLY_MISSION_DISABLED_EVIDENCE_ADAPTER_SHA256,
         )
         self.assertEqual(
             disabled_receipt["source_sha256"]["oracle"],
-            hashlib.sha256(
-                ROOT.joinpath("python/alas_headless/semantic_oracle.py").read_bytes()
-            ).hexdigest(),
+            WEEKLY_MISSION_DISABLED_EVIDENCE_ORACLE_SHA256,
         )
         self.assertEqual(
             {receipt["source_sha256"]["reward"] for receipt in receipts.values()},
             {"73af538ae1df6361941422ccc60dc1816c2e57ed00125adb102f0ff0400c3a8d"},
+        )
+
+    def test_resource_live_evidence_completes_oil_and_coin_only(self):
+        cases = {
+            "Reward.CollectOil": (
+                ROOT / "integration/alas/reward-oil-live-validation-receipt.json",
+                "OIL",
+                "reward/resource/oil",
+            ),
+            "Reward.CollectCoin": (
+                ROOT / "integration/alas/reward-coin-live-validation-receipt.json",
+                "COIN",
+                "reward/resource/coin",
+            ),
+        }
+        for field, (path, button, semantic_id) in cases.items():
+            with self.subTest(field=field):
+                receipt = json.loads(path.read_text(encoding="utf-8"))
+                self.assertTrue(receipt["passed"])
+                self.assertEqual(
+                    receipt["configured"],
+                    {
+                        "Reward.CollectOil": field == "Reward.CollectOil",
+                        "Reward.CollectCoin": field == "Reward.CollectCoin",
+                        "Reward.CollectExp": False,
+                        "Reward.CollectMission": False,
+                        "Reward.CollectWeeklyMission": False,
+                    },
+                )
+                self.assertGreater(receipt["resource_state_before"][field]["amount"], 0)
+                self.assertTrue(receipt["resource_state_before"][field]["available"])
+                self.assertEqual(receipt["resource_state_after"][field], {
+                    "amount": 0,
+                    "available": False,
+                })
+                self.assertEqual(len(receipt["resource_dispatches"]), 1)
+                dispatch = receipt["resource_dispatches"][0]
+                self.assertEqual(dispatch["button"], button)
+                self.assertEqual(dispatch["semantic_id"], semantic_id)
+                self.assertIsInstance(dispatch["generation"], int)
+                self.assertTrue(
+                    dispatch["path"].endswith(
+                        {
+                            "OIL": "/canteen/bubble",
+                            "COIN": "/merchant/bubble",
+                        }[button]
+                    )
+                )
+                self.assertEqual(set(dispatch["point"]), {"x", "y"})
+                for coordinate in dispatch["point"].values():
+                    self.assertIsInstance(coordinate, (int, float))
+                self.assertTrue(receipt["cleanup"]["main_page_visible"])
+                self.assertTrue(receipt["temporary_config_removed"])
+                self.assertEqual(
+                    receipt["source_sha256"]["adapter"],
+                    RESOURCE_EVIDENCE_ADAPTER_SHA256,
+                )
+                self.assertEqual(
+                    receipt["source_sha256"]["oracle"],
+                    RESOURCE_EVIDENCE_ORACLE_SHA256,
+                )
+
+        disabled = json.loads(
+            (
+                ROOT
+                / "integration/alas/reward-resource-disabled-live-validation-receipt.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertTrue(disabled["passed"])
+        self.assertEqual(
+            disabled["configured"],
+            {
+                "Reward.CollectOil": False,
+                "Reward.CollectCoin": False,
+                "Reward.CollectExp": False,
+                "Reward.CollectMission": False,
+                "Reward.CollectWeeklyMission": False,
+            },
+        )
+        self.assertEqual(disabled["resource_dispatches"], [])
+        self.assertTrue(disabled["cleanup"]["main_page_visible"])
+        self.assertTrue(disabled["temporary_config_removed"])
+        self.assertEqual(
+            disabled["source_sha256"]["adapter"],
+            RESOURCE_EVIDENCE_ADAPTER_SHA256,
+        )
+        self.assertEqual(
+            disabled["source_sha256"]["oracle"],
+            RESOURCE_EVIDENCE_ORACLE_SHA256,
         )
 
     def test_sources_compile(self):
@@ -216,6 +315,7 @@ class AlasRewardConfigTests(unittest.TestCase):
             "python/alas_headless/alas_reward_config_replay.py",
             "scripts/python/verify_alas_reward_config.py",
             "scripts/python/run_alas_reward_mission_live_validation.py",
+            "scripts/python/run_alas_reward_resource_live_validation.py",
         ):
             ast.parse(ROOT.joinpath(relative).read_text(encoding="utf-8"))
 

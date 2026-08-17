@@ -35,8 +35,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   to the main page, and removed its temporary configuration.  Both hash-bound
   receipts are recorded in `integration/alas/reward-daily-mission-r2-live-validation-receipt.json`
   and `integration/alas/reward-daily-mission-disabled-live-validation-receipt.json`.
-  `Reward.CollectMission` is complete; this does not qualify the independent
-  oil, coin, or experience claim switches.
+  `Reward.CollectMission` is complete; independent resource-switch
+  qualification is recorded below.
 
 ### Reward: weekly-mission claim switch complete on the live client
 
@@ -48,7 +48,21 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `integration/alas/reward-weekly-mission-live-validation-receipt.json` and
   `integration/alas/reward-weekly-mission-disabled-r1-live-validation-receipt.json`.
   `Reward.CollectWeeklyMission` is complete independently of daily missions
-  and the three resource-collection switches.
+  and resource-collection switches.
+
+### Reward: Oil and Coin resource switches complete on the live client
+
+- Resource bubbles are now admitted only with an exact positive typed amount,
+  not merely because their card is clickable.  The original `Reward.run()`
+  with Oil alone changed `32 -> 0` through exactly one typed
+  `reward/resource/oil` input; Coin alone changed `108 -> 0` through exactly
+  one typed `reward/resource/coin` input.  The all-disabled task made no
+  resource input and restored the main page.  See
+  `integration/alas/reward-oil-live-validation-receipt.json`,
+  `integration/alas/reward-coin-live-validation-receipt.json`, and
+  `integration/alas/reward-resource-disabled-live-validation-receipt.json`.
+  `Reward.CollectExp` remains partial because the current exact amount is zero
+  and no claim was inferred from its static resource card.
 
 ### Gacha: all declared Amount values complete on the live client
 

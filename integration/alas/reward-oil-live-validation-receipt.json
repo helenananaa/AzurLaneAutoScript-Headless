@@ -1,0 +1,79 @@
+{
+  "schema": "alas-headless.reward-resource-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "configured": {
+    "Reward.CollectOil": true,
+    "Reward.CollectCoin": false,
+    "Reward.CollectExp": false,
+    "Reward.CollectMission": false,
+    "Reward.CollectWeeklyMission": false
+  },
+  "source_sha256": {
+    "reward": "73af538ae1df6361941422ccc60dc1816c2e57ed00125adb102f0ff0400c3a8d",
+    "adapter": "f85437ec16f4d425bad9fb589476f957330f91de56946b624487265a6847a999",
+    "oracle": "9632075433eca0a9d71842b3ad2dee148b84b4c25218a565fcfd97997eff50ae",
+    "native_probe": "c9241177df451ae2784cf95c6bb44827dcb1f3110e1cd387736277d752e315f7",
+    "validator": "d1e0f8f67387f79c78d473927d0db32b76065ed5b03ef49d9d4faf3d3f49611b"
+  },
+  "temporary_config": "codex_reward_resource_live_3fdc88c1a1914a2eb4f8874f335b74e2.json",
+  "passed": true,
+  "resource_state_before": {
+    "Reward.CollectOil": {
+      "amount": 32,
+      "available": true
+    },
+    "Reward.CollectCoin": {
+      "amount": 108,
+      "available": true
+    },
+    "Reward.CollectExp": {
+      "amount": 0,
+      "available": false
+    }
+  },
+  "elapsed_seconds": 44.063,
+  "resource_dispatches": [
+    {
+      "button": "OIL",
+      "semantic_id": "reward/resource/oil",
+      "generation": 10180,
+      "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)/frame/resources/canteen/bubble",
+      "point": {
+        "x": 142.387,
+        "y": 71.178
+      }
+    }
+  ],
+  "resource_state_after": {
+    "Reward.CollectOil": {
+      "amount": 0,
+      "available": false
+    },
+    "Reward.CollectCoin": {
+      "amount": 108,
+      "available": true
+    },
+    "Reward.CollectExp": {
+      "amount": 0,
+      "available": false
+    }
+  },
+  "cleanup": {
+    "entry": {
+      "semantic_id": "main/more",
+      "generation": 10578,
+      "path": "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/left/extend"
+    },
+    "cleanup": {
+      "semantic_id": "reward/page/back",
+      "generation": 10610,
+      "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)"
+    },
+    "main_page_visible": true
+  },
+  "temporary_config_removed": true
+}

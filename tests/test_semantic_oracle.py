@@ -5311,6 +5311,47 @@ class SemanticOracleTests(unittest.TestCase):
             3,
         )
 
+    def test_reward_resource_requires_an_exact_positive_typed_amount(self):
+        page = "root/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)"
+        bubble = page + "/frame/resources/canteen/bubble"
+        backend = FakeBackend(
+            [
+                make_button("CommissionInfoUI4Mellow(Clone)", page, 827, 622),
+                make_button("bubble", bubble, 142, 67),
+            ]
+        )
+        backend.ui = make_ui([make_text("32", bubble + "/Text")])
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.reward_resource_amount("oil"), 32)
+        self.assertTrue(oracle.reward_resource_available("oil"))
+        receipt = oracle.click_reward_resource("oil")
+
+        self.assertEqual(receipt.semantic_id, "reward/resource/oil")
+        self.assertEqual(backend.taps, [(142, 67)])
+
+    def test_reward_resource_zero_requires_the_exact_resource_card(self):
+        page = "root/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)"
+        backend = FakeBackend(
+            [make_button("CommissionInfoUI4Mellow(Clone)", page, 827, 622)]
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    page + "/frame/resources/canteen",
+                    "icon_oil",
+                )
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.reward_resource_amount("oil"), 0)
+        self.assertFalse(oracle.reward_resource_available("oil"))
+        with self.assertRaisesRegex(SemanticGateClosed, "no collectible amount"):
+            oracle.click_reward_resource("oil")
+        self.assertEqual(backend.taps, [])
+
     def test_reward_summary_retries_a_transitional_counter_frame(self):
         backend = FakeBackend(
             [

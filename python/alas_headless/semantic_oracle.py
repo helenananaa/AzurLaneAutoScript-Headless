@@ -4424,6 +4424,136 @@ class SemanticOracle:
             lambda: self._reward_summary_count_once(section, counter)
         )
 
+    def reward_resource_amount(self, resource: str) -> int:
+        """Read the exact positive collectible amount for one reward resource."""
+
+        amount, _, _ = self._retry_transition_read(
+            lambda: self._reward_resource_state_once(resource)
+        )
+        return amount
+
+    def reward_resource_available(self, resource: str) -> bool:
+        """Return true only when the exact resource bubble carries an amount."""
+
+        return self.reward_resource_amount(resource) > 0
+
+    def _reward_resource_state_once(
+        self, resource: str
+    ) -> Tuple[int, Optional[ButtonState], OracleState]:
+        resources = {
+            "oil": (
+                "reward/resource/oil",
+                "canteen",
+                "icon_oil",
+            ),
+            "coin": (
+                "reward/resource/coin",
+                "merchant",
+                "icon_gold",
+            ),
+            "exp": (
+                "reward/resource/exp",
+                "class",
+                "icon_class",
+            ),
+        }
+        try:
+            semantic_id, root_name, root_sprite = resources[resource]
+        except KeyError as exc:
+            raise SemanticGateClosed("reward resource is not mapped") from exc
+
+        button_state = self.read_state()
+        page = self._unique(button_state, "reward/page/back")
+        if not page.actionable or self._blocking_rules(
+            button_state, "reward/page/back"
+        ):
+            raise SemanticGateClosed("reward resource page identity is not proven")
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < button_state.generation
+            or ui_state.generation > button_state.generation + 2
+            or ui_state.image_truncated
+            or ui_state.method_mask & 0x8 == 0
+        ):
+            raise SemanticGateClosed("reward resource snapshots are incomplete")
+
+        target_matches = self._matches(button_state, semantic_id)
+        if len(target_matches) > 1:
+            raise SemanticGateClosed("reward resource bubble is ambiguous")
+        bubble_root = (
+            "CommissionInfoUI4Mellow(Clone)/frame/resources/"
+            + root_name
+            + "/bubble"
+        )
+        text_matches = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith(bubble_root + "/Text")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(text_matches) > 1:
+            raise SemanticGateClosed("reward resource amount is ambiguous")
+        if target_matches:
+            target = target_matches[0]
+            if not target.actionable or self._blocking_rules(button_state, semantic_id):
+                raise SemanticGateClosed("reward resource bubble is not actionable")
+            if len(text_matches) != 1:
+                raise SemanticGateClosed("reward resource amount is absent")
+            value = text_matches[0].text.strip()
+            if re.fullmatch(r"[1-9][0-9]*", value) is None:
+                raise SemanticGateClosed("reward resource amount is malformed")
+            return int(value), target, button_state
+
+        # A resource with no accumulated amount omits both its bubble Button
+        # and text.  Admit that zero only when the exact resource card remains
+        # present in a complete typed Image snapshot.
+        if text_matches:
+            raise SemanticGateClosed("reward resource has text without its bubble")
+        root_path = (
+            "CommissionInfoUI4Mellow(Clone)/frame/resources/" + root_name
+        )
+        roots = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith(root_path)
+            and image.name == root_name
+            and image.sprite == root_sprite
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(roots) != 1:
+            raise SemanticGateClosed("reward resource zero state is not proven")
+        return 0, None, button_state
+
+    def click_reward_resource(self, resource: str) -> ActionReceipt:
+        """Claim one non-zero resource bubble after re-proving its amount."""
+
+        amount, target, state = self._retry_transition_read(
+            lambda: self._reward_resource_state_once(resource)
+        )
+        if amount <= 0 or target is None:
+            raise SemanticGateClosed("reward resource has no collectible amount")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before reward resource input")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id={
+                "oil": "reward/resource/oil",
+                "coin": "reward/resource/coin",
+                "exp": "reward/resource/exp",
+            }[resource],
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def _reward_summary_count_once(self, section: str, counter: str) -> int:
         """Read one exact reward-summary generation."""
 
