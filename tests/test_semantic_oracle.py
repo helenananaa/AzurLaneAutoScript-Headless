@@ -4269,6 +4269,10 @@ class SemanticOracleTests(unittest.TestCase):
                     make_button("cancel_btn", root + "/cancel_btn", x, 650),
                 ]
             )
+            if root_name == "info(Clone)":
+                buttons.append(
+                    make_button("403994", root + "/403994", x, 225, bounds)
+                )
             text_bounds = {
                 "left": x - 40,
                 "top": 100,
@@ -4319,6 +4323,11 @@ class SemanticOracleTests(unittest.TestCase):
                 make_text("荆棘与坚盾", skill_row + "/name/Text/subText"),
                 make_text("Lv.9", skill_row + "/name/level"),
                 make_text("8400/10000", skill_row + "/next"),
+                make_text(
+                    "900/3200",
+                    "root/UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/"
+                    "adpter/NewNavalTacticsStudentsPage(Clone)/info/skill/next",
+                ),
             ],
             images=[row],
         )
@@ -4374,10 +4383,33 @@ class SemanticOracleTests(unittest.TestCase):
         books = oracle.tactical_books()
         book_receipt = oracle.click_tactical_book(0)
 
+        self.assertEqual(oracle.tactical_book_skill_progress(), "900/3200")
         self.assertEqual(books[0].item_id, "16024")
         self.assertEqual((books[0].genre, books[0].tier), (3, 4))
         self.assertTrue(books[0].exp_bonus)
         self.assertEqual(book_receipt.semantic_id, "tactical/book/0")
+
+    def test_tactical_empty_slots_ready_requires_complete_current_slot_columns(self):
+        page = "root/UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/"
+        root = page + "NewNavalTacticsStudentsPage(Clone)/"
+        buttons = [
+            make_button("add", root + "add", x=200 + 180 * index, y=580)
+            for index in range(4)
+        ]
+        backend = FakeBackend(buttons)
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.tactical_empty_slots_ready())
+        backend.buttons = make_buttons(buttons[:3])
+        self.assertFalse(oracle.tactical_empty_slots_ready())
+        occupied = make_button("403994", root + "info/403994", x=200, y=400)
+        backend.buttons = make_buttons([occupied, *buttons[1:]])
+
+        self.assertTrue(oracle.tactical_empty_slots_ready())
+        receipt = oracle.click_tactical_empty_slot(2)
+
+        self.assertEqual(receipt.semantic_id, "tactical/slot/2")
+        self.assertEqual(backend.taps[-1], (380, 580))
 
     def test_tactical_continue_cancel_requires_exact_prompt_text(self):
         popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
@@ -4410,6 +4442,14 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertTrue(oracle.enabled("tactical/continue/cancel"))
         oracle.click("tactical/continue/cancel")
         self.assertEqual(backend.taps, [(640, 360)])
+
+        backend.ui["texts"][0]["text"] = (
+            "<color=#92fc63>「希佩尔海军上将·改」</color>学习完成，"
+            "<color=#92fc63>「荆棘与坚盾」</color>技能获得"
+            "<color=#92fc63>3000</color>点经验(技能等级提升:6→7）！"
+            "是否继续学习该技能？"
+        )
+        self.assertTrue(oracle.enabled("tactical/continue/cancel"))
 
         backend.ui["texts"][0]["text"] = "是否购买资源？"
         self.assertFalse(oracle.enabled("tactical/continue/cancel"))
@@ -6161,6 +6201,35 @@ class SemanticOracleTests(unittest.TestCase):
             oracle.click("main/settings")
         self.assertEqual(backend.taps, [])
 
+    def test_tactical_dock_allows_only_favourite_scope_to_cross_page_owner(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "ship",
+                    "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship",
+                ),
+                make_button(
+                    "back",
+                    "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+        state = oracle.read_state()
+
+        self.assertEqual(
+            oracle._blocking_rules(state, "enhancement/dock/favourite/on"), ()
+        )
+        self.assertEqual(
+            tuple(
+                rule.blocker_id
+                for rule in oracle._blocking_rules(
+                    state, "enhancement/dock/filter/open"
+                )
+            ),
+            ("tactical-page",),
+        )
+
     def test_bulletin_blocks_main_but_allows_mapped_close(self):
         backend = FakeBackend(
             [
@@ -6872,6 +6941,76 @@ class SemanticOracleTests(unittest.TestCase):
 
 
 class EnhancementSemanticOracleTests(unittest.TestCase):
+    def test_dock_favourite_uses_on_layer_as_positive_state_discriminator(self):
+        root = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/switch/toggles/"
+            "preference_toggle/"
+        )
+        filter_path = "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button"
+
+        for enabled, current_name, expected_point in (
+            (True, "off", (820, 30)),
+            (False, "on", (760, 30)),
+        ):
+            with self.subTest(enabled=enabled):
+                backend = FakeBackend(
+                    [
+                        make_button(
+                            "index_button",
+                            filter_path,
+                            40,
+                            40,
+                            bounds={"left": 20, "top": 20, "right": 60, "bottom": 60},
+                        )
+                    ]
+                )
+                filter_image = make_image(
+                    filter_path,
+                    "shaixuan_off",
+                    {"left": 20, "top": 20, "right": 60, "bottom": 60},
+                )
+                on = make_image(
+                    root + "on",
+                    "changyong_butten01",
+                    {"left": 740, "top": 10, "right": 780, "bottom": 50},
+                )
+                off = make_image(
+                    root + "off",
+                    "changyong_butten02",
+                    {"left": 800, "top": 10, "right": 840, "bottom": 50},
+                )
+                on["raycast_target"] = True
+                off["raycast_target"] = True
+
+                def set_scope(name):
+                    backend.ui = make_ui(
+                        [
+                            make_text(
+                                "20/500",
+                                "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/capacity/Text",
+                            ),
+                            make_text(
+                                "船坞容量:",
+                                "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/capacity/label",
+                            ),
+                        ],
+                        images=[
+                            filter_image,
+                            *( (on, off) if name == "on" else (off,) ),
+                        ],
+                    )
+
+                set_scope(current_name)
+                backend.on_tap = lambda: set_scope("on" if enabled else "off")
+
+                receipt = make_oracle(backend).set_enhancement_dock_favourite(enabled)
+
+                self.assertEqual(
+                    receipt.semantic_id,
+                    "enhancement/dock/favourite/" + ("on" if enabled else "off"),
+                )
+                self.assertEqual(backend.taps, [expected_point])
+
     def test_detailed_config_is_normalized_without_random_fallback(self):
         policy = enhancement_config_policy("favourite", 5, "DD > cl > repair")
 

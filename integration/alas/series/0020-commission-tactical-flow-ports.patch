@@ -640,7 +640,7 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..ce2879036976f1a196e59e79c29cd6d1
          logger.attr('AddNewStudent_MinLevel', min_level)
  
          should_select_button = None
-@@ -737,9 +817,15 @@ class RewardTacticalClass(Dock):
+@@ -737,9 +834,19 @@ class RewardTacticalClass(Dock):
              in: Any
              out: page_tactical
          """
@@ -651,7 +651,11 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..ce2879036976f1a196e59e79c29cd6d1
 +        if semantic_adapter is not None:
 +            semantic_adapter.begin_tactical()
 +        try:
-+            self.ui_ensure(page_reward)
++            if (
++                    semantic_adapter is None
++                    or not semantic_adapter.open().oracle.exists('reward/page/back')
++            ):
++                self.ui_ensure(page_reward)
 +            self.tactical_class_receive()
 +        finally:
 +            if semantic_adapter is not None:
@@ -659,3 +663,101 @@ index 0e518a49a454a1d5ba4204059a22c0c3cc601f29..ce2879036976f1a196e59e79c29cd6d1
  
          if self.tactical_finish:
              self.config.task_delay(target=self.tactical_finish)
+
+diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
+--- a/module/tactical/tactical_class.py
++++ b/module/tactical/tactical_class.py
+@@ -399,6 +463,26 @@ class RewardTacticalClass(Dock):
+         logger.info(f'Tactical finish: {[str(f) for f in self.tactical_finish]}')
+         return self.tactical_finish
+ 
++    def _return_from_tactical_page(self):
++        from alas_headless import current_semantic_session
++
++        semantic_session = current_semantic_session()
++        if semantic_session is None:
++            self.device.click(BACK_ARROW)
++            return False
++        oracle = semantic_session.open().oracle
++        if not oracle.enabled('tactical/page/back'):
++            return False
++        oracle.click('tactical/page/back')
++        return True
++
++    def _tactical_dock_selected(self):
++        from alas_headless import current_semantic_session
++
++        if current_semantic_session() is not None:
++            return False
++        return self.dock_selected()
++
+     def tactical_class_receive(self, skip_first_screenshot=True):
+         """
+         Receive tactical rewards and fill books.
+@@ -448,11 +529,13 @@ class RewardTacticalClass(Dock):
+                     and self.appear(TACTICAL_CHECK, offset=(20, 20), interval=2):
+                 self.interval_clear([POPUP_CONFIRM, POPUP_CANCEL, GET_MISSION])
+                 if book_empty:
+-                    self.device.click(BACK_ARROW)
++                    if self._return_from_tactical_page():
++                        return True
+                     self.interval_reset(TACTICAL_CHECK)
+                     continue
+                 if self._tactical_get_finish():
+-                    self.device.click(BACK_ARROW)
++                    if self._return_from_tactical_page():
++                        return True
+                     self.interval_reset(TACTICAL_CHECK)
+                     empty_confirm.reset()
+                     received = True
+@@ -460,7 +543,14 @@ class RewardTacticalClass(Dock):
+                 else:
+                     self.interval_clear(TACTICAL_CHECK)
++                    from alas_headless import current_semantic_session
++
++                    semantic_session = current_semantic_session()
++                    if semantic_session is not None:
++                        if study_finished and self._return_from_tactical_page():
++                            return True
+                     if empty_confirm.reached():
+-                        self.device.click(BACK_ARROW)
++                        if self._return_from_tactical_page():
++                            return True
+                         empty_confirm.reset()
+                         received = True
+                         continue
+
+diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
+--- a/module/tactical/tactical_class.py
++++ b/module/tactical/tactical_class.py
+@@ -500,8 +500,15 @@ class RewardTacticalClass(Dock):
+                 self.device.screenshot()
+ 
+             # End
+-            if received and self.appear(REWARD_CHECK, offset=(20, 20)):
+-                break
++            if received:
++                from alas_headless import current_semantic_session
++
++                semantic_session = current_semantic_session()
++                if semantic_session is not None:
++                    if semantic_session.open().oracle.exists('reward/page/back'):
++                        break
++                elif self.appear(REWARD_CHECK, offset=(20, 20)):
++                    break
+ 
+             # Learn new skills
+             if not study_finished and self.appear(TACTICAL_CHECK, offset=(20, 20)):
+
+diff --git a/module/tactical/tactical_class.py b/module/tactical/tactical_class.py
+--- a/module/tactical/tactical_class.py
++++ b/module/tactical/tactical_class.py
+@@ -609,7 +609,7 @@ class RewardTacticalClass(Dock):
+             if self.handle_game_tips():
+                 return True
+             if self.appear(DOCK_CHECK, offset=(20, 20), interval=3):
+-                if self.dock_selected():
++                if self._tactical_dock_selected():
+                     # When you click a ship from page_main -> dock,
+                     # this ship will be selected default in tactical dock,
+                     # so we need click BACK_ARROW to clear selected state

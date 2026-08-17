@@ -2,6 +2,7 @@ import ast
 import unittest
 from types import SimpleNamespace
 from pathlib import Path
+from unittest.mock import Mock
 
 from alas_headless import AlasSemanticAdapter, Bounds, Point
 from alas_headless.alas_tactical_config_contract import (
@@ -71,9 +72,7 @@ class TacticalOracle:
 class AlasTacticalConfigTests(unittest.TestCase):
     def test_exact_live_tree_replay_when_available(self):
         source = LIVE_ALAS.joinpath("module/tactical/tactical_class.py")
-        if source.is_file() and "rapid_training_slot=self.config" in source.read_text(
-            encoding="utf-8"
-        ):
+        if source.is_file():
             result = verify_tactical_config(LIVE_ALAS)
         elif PINNED_UPSTREAM.joinpath("module/tactical/tactical_class.py").is_file():
             result = verify_clean_upstream(PINNED_UPSTREAM)
@@ -139,10 +138,14 @@ class AlasTacticalConfigTests(unittest.TestCase):
 
     def test_favorite_filter_is_forwarded_before_candidate_selection(self):
         oracle = TacticalOracle()
+        refresh = Mock()
+        tactical_refresh = Mock()
         adapter = AlasSemanticAdapter(
             oracle,
             lambda: None,
             tactical_assign_budget=1,
+            input_frame_refresher=refresh,
+            tactical_input_frame_refresher=tactical_refresh,
         )
         adapter.begin_tactical()
 
@@ -168,6 +171,8 @@ class AlasTacticalConfigTests(unittest.TestCase):
                 ("wait", "tactical/skill/confirm", 11),
             ],
         )
+        refresh.assert_not_called()
+        self.assertEqual(tactical_refresh.call_count, 3)
 
     def test_patch_gates_all_original_tactical_decision_methods(self):
         patch = ROOT.joinpath(
@@ -177,6 +182,14 @@ class AlasTacticalConfigTests(unittest.TestCase):
         self.assertIn("tactical_config.add_new_student_favorite", patch)
         self.assertIn("BOOK_FILTER.load(tactical_config.tactical_filter)", patch)
         self.assertIn("slot = tactical_config.rapid_training_slot", patch)
+        self.assertIn(
+            "not semantic_adapter.open().oracle.exists('reward/page/back')", patch
+        )
+        self.assertIn("if not oracle.enabled('tactical/page/back')", patch)
+        self.assertIn("oracle.click('tactical/page/back')", patch)
+        self.assertIn(
+            "semantic_session.open().oracle.exists('reward/page/back')", patch
+        )
 
     def test_sources_compile(self):
         for relative in (

@@ -1227,12 +1227,18 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   It is now forwarded to the existing exact shared Dock favourite toggle
   before candidates are read; the patched replay proves the call order and
   preserves the selected ship and original confirmation waits.
-- These results use mutation budget `0` and no Android input. No live student
-  assignment or book consumption was attempted. Remaining evidence includes a
-  Tactical-context live proof of the typed favourite control and candidate
-  state, real book inventory/current-skill-exp observation, and a stable exact
-  assignment postcondition with a safe rollback. Therefore only `offline` is
-  complete for these eight fields; live/action status is unchanged.
+- `AddNewStudent` now also has a true device proof chain. Disabled preserves
+  pre-existing running-course identities with no assignment; enabled enters the
+  original receive, Dock, skill, book, and final confirmation branches. The
+  live client exposes `off` alone for the ordinary Dock scope and retains both
+  layers for favourite scope, so both scopes were toggled and produced their
+  distinct candidate sets before selecting level-120 ships.
+- The original confirmations started 204044 and 306064 respectively. Their
+  immediate post-confirmation card tree retained old identities at the same
+  Unity roots; the semantic parser now groups physical card bounds and the
+  postcondition receipts prove each selected ship remains in its expected
+  running course. `AddNewStudent.Enable/Favorite/MinLevel` are therefore fully
+  supported. `ControlExpOverflow` remains offline-only.
 
 ### Tactical book priority and rapid-training slots: offline contract passed
 

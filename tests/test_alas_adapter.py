@@ -175,6 +175,8 @@ class FakeOracle:
         self.tactical_slot_values = []
         self.tactical_remaining_values = ()
         self.tactical_prompt_text = None
+        self.tactical_empty_slots_ready_value = True
+        self.tactical_book_skill_progress_value = "900/3200"
         self.tactical_book_values = []
         self.commission_detail_value = SimpleNamespace(
             signature=("日常资源开发III", 15, 3600),
@@ -900,8 +902,14 @@ class FakeOracle:
     def tactical_slots(self):
         return tuple(self.tactical_slot_values)
 
+    def tactical_empty_slots_ready(self):
+        return self.tactical_empty_slots_ready_value
+
     def tactical_books(self):
         return tuple(self.tactical_book_values)
+
+    def tactical_book_skill_progress(self):
+        return self.tactical_book_skill_progress_value
 
     def tactical_remaining_seconds(self):
         return tuple(self.tactical_remaining_values)
@@ -1519,7 +1527,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         adapter.click(NamedButton("TACTICAL_CLASS_START"))
         self.assertEqual(adapter._action_ledger.remaining("tactical.assign"), 1)
-        receipt = adapter.click(NamedButton("POPUP_CONFIRM"))
+        receipt = adapter.click(NamedButton("POPUP_CONFIRM_TACTICAL"))
 
         self.assertEqual(receipt.semantic_id, "tactical/course/confirm")
         self.assertEqual(adapter._action_ledger.remaining("tactical.assign"), 0)
@@ -2230,6 +2238,52 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(duplicate, receipt)
         self.assertEqual(oracle.click_calls, ["tactical/page/back"])
         self.assertFalse(adapter.appear(NamedButton("SP_CHECK")))
+
+    def test_tactical_check_precedes_unrelated_global_page_classification(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_tactical()
+        oracle.exists_values["tactical/page/back"] = True
+        for target in (
+            "tactical/dock/cancel",
+            "tactical/skill/confirm",
+            "tactical/book/start",
+            "tactical/course/confirm",
+            "tactical/course/cancel",
+        ):
+            oracle.enabled_values[target] = False
+        oracle.war_archives_page_visible = lambda: (_ for _ in ()).throw(
+            AssertionError("unrelated War Archives probe")
+        )
+
+        self.assertTrue(adapter.appear(NamedButton("TACTICAL_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("POPUP_CANCEL")))
+        self.assertFalse(adapter.appear(NamedButton("POPUP_CONFIRM_WHITE")))
+        self.assertFalse(adapter.appear(NamedButton("GET_MISSION")))
+        oracle.enabled_values["tactical/course/confirm"] = True
+        self.assertFalse(adapter.appear(NamedButton("TACTICAL_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("ADD_NEW_STUDENT")))
+
+    def test_tactical_course_probe_treats_truncated_absent_msgbox_as_non_match(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_tactical()
+        oracle.exists_values["tactical/page/back"] = True
+        for target in (
+            "tactical/dock/cancel",
+            "tactical/skill/confirm",
+            "tactical/book/start",
+        ):
+            oracle.enabled_values[target] = False
+        enabled = oracle.enabled
+
+        def truncated_course_probe(target):
+            if target.startswith("tactical/course/"):
+                raise SemanticGateClosed("toggle snapshot is truncated")
+            return enabled(target)
+
+        oracle.enabled = truncated_course_probe
+
+        self.assertTrue(adapter.appear(NamedButton("TACTICAL_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("POPUP_CONFIRM")))
 
     def test_build_goto_main_uses_exact_reviewed_back(self):
         adapter, oracle, _ = self.make_adapter()
@@ -4596,6 +4650,17 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(value, "01:23:45")
         self.assertEqual(oracle.last_text_bounds, (Bounds(90, 90, 210, 140),))
         self.assertEqual(len(gate_calls), 1)
+
+    def test_tactical_book_progress_ocr_strips_only_the_selected_book_bonus(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_tactical()
+        oracle.tactical_book_skill_progress_value = "900/3200"
+
+        value = adapter.ocr_text(
+            [(771, 191, 951, 209)], alphabet="0123456789/IDSB"
+        )
+
+        self.assertEqual(value, "900/3200")
 
     def test_semantic_ocr_rejects_missing_or_overlapping_text(self):
         adapter, oracle, _ = self.make_adapter()

@@ -1,0 +1,996 @@
+{
+  "schema": "alas-headless.tactical-new-student-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "configured": {
+    "AddNewStudent.Enable": true,
+    "AddNewStudent.Favorite": false,
+    "AddNewStudent.MinLevel": 120
+  },
+  "allow_tactical_rewards": false,
+  "tactical_assign_budget": 1,
+  "source_sha256": {
+    "tactical": "7147e33a43a42135f14bc0bc92ff5dbe39644146c16e23c0d78b9d2380f1e685",
+    "adapter": "820b68deac3465a0b49aff0c84189c9794d884951d86ecf29a96dfe3a8dea065",
+    "oracle": "7d8aa2ea2e3e348c9707bd5c364c3819021bf6f4b6e391f5f76d156815b38264",
+    "validator": "e770974a73a24bba32ed58c617e8a9ba104061f7bc44a8cfe3a99e690c516758"
+  },
+  "passed": false,
+  "temporary_config": "codex_tactical_student_live_428a56472300490cb73cb2a04fe2ae8f.json",
+  "error": "SemanticGateClosed: tactical slot identity is ambiguous",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\scripts\\python\\run_alas_tactical_new_student_live_validation.py\", line 292, in validate\n    instance.tactical()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\alas.py\", line 196, in tactical\n    RewardTacticalClass(config=self.config, device=self.device).run()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\tactical\\tactical_class.py\", line 866, in run\n    self.tactical_class_receive()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\tactical\\tactical_class.py\", line 547, in tactical_class_receive\n    if self._tactical_get_finish():\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\tactical\\tactical_class.py\", line 443, in _tactical_get_finish\n    remains = semantic_session.tactical_remaining_seconds()\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\python\\alas_headless\\alas_adapter.py\", line 10124, in tactical_remaining_seconds\n    return self.open().tactical_remaining_seconds()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\python\\alas_headless\\alas_adapter.py\", line 6532, in tactical_remaining_seconds\n    return self.oracle.tactical_remaining_seconds()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\python\\alas_headless\\semantic_oracle.py\", line 16519, in tactical_remaining_seconds\n    for slot in self.tactical_slots()\n                ^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\python\\alas_headless\\semantic_oracle.py\", line 16403, in tactical_slots\n    raise SemanticGateClosed(\"tactical slot identity is ambiguous\")\nalas_headless.semantic_oracle.SemanticGateClosed: tactical slot identity is ambiguous\n",
+  "dispatches": [
+    {
+      "capability": "tactical.assign",
+      "receipt": {
+        "semantic_id": "tactical/course/confirm",
+        "generation": 135958,
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "point": {
+          "x": 790.0,
+          "y": 515.0
+        }
+      }
+    }
+  ],
+  "reward_clicks": [],
+  "favorite_calls": [
+    {
+      "enabled": false,
+      "receipt": {
+        "semantic_id": "enhancement/dock/favourite/off",
+        "generation": 135465,
+        "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/switch/toggles/preference_toggle/on",
+        "point": {
+          "x": 767.292,
+          "y": 27.441499999999998
+        }
+      },
+      "candidates_after": [
+        {
+          "position": 0,
+          "ship_id": 306064,
+          "ship_name": "龙骧",
+          "level": 120,
+          "button": {
+            "name": "306064",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/306064",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 162.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 84.8,
+              "top": 69.333,
+              "right": 239.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "306064",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/306064",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -10.619,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 162.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 162.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 84.8,
+                "bottom": 434.0,
+                "right": 239.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 84.8,
+                "top": 69.333,
+                "right": 239.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 1,
+          "ship_id": 206054,
+          "ship_name": "追赶者",
+          "level": 119,
+          "button": {
+            "name": "206054",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/206054",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 69.333,
+              "right": 404.133,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "206054",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/206054",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -6.96,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": 434.0,
+                "right": 404.133,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 2,
+          "ship_id": 207014,
+          "ship_name": "鹰",
+          "level": 113,
+          "button": {
+            "name": "207014",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207014",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 69.333,
+              "right": 568.8,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "207014",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207014",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -3.301,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": 434.0,
+                "right": 568.8,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 69.333,
+                "right": 568.8,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 3,
+          "ship_id": 207134,
+          "ship_name": "小可畏",
+          "level": 112,
+          "button": {
+            "name": "207134",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207134",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 656.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 578.8,
+              "top": 69.333,
+              "right": 733.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "207134",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207134",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 0.359,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 656.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 656.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 578.8,
+                "bottom": 434.0,
+                "right": 733.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 578.8,
+                "top": 69.333,
+                "right": 733.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 4,
+          "ship_id": 303174,
+          "ship_name": "铃谷",
+          "level": 112,
+          "button": {
+            "name": "303174",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/303174",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 820.8,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 743.467,
+              "top": 69.333,
+              "right": 898.133,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "303174",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/303174",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 4.018,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 820.8,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 820.8,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 743.467,
+                "bottom": 434.0,
+                "right": 898.133,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 743.467,
+                "top": 69.333,
+                "right": 898.133,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 5,
+          "ship_id": 302254,
+          "ship_name": "渡良濑",
+          "level": 110,
+          "button": {
+            "name": "302254",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/302254",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 985.467,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 908.133,
+              "top": 69.333,
+              "right": 1062.8,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "302254",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/302254",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 7.677,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 985.467,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 985.467,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 908.133,
+                "bottom": 434.0,
+                "right": 1062.8,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 908.133,
+                "top": 69.333,
+                "right": 1062.8,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 6,
+          "ship_id": 818014,
+          "ship_name": "瑟堡",
+          "level": 109,
+          "button": {
+            "name": "818014",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/818014",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1150.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 1072.8,
+              "top": 69.333,
+              "right": 1227.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "818014",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/818014",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 11.336,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 1150.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 1150.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 1072.8,
+                "bottom": 434.0,
+                "right": 1227.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 1072.8,
+                "top": 69.333,
+                "right": 1227.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 7,
+          "ship_id": 207094,
+          "ship_name": "小光辉",
+          "level": 107,
+          "button": {
+            "name": "207094",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207094",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 162.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 84.8,
+              "top": 296.0,
+              "right": 239.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "207094",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207094",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -10.619,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 162.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 162.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 84.8,
+                "bottom": 207.333,
+                "right": 239.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 84.8,
+                "top": 296.0,
+                "right": 239.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 8,
+          "ship_id": 299062,
+          "ship_name": "邓肯",
+          "level": 103,
+          "button": {
+            "name": "299062",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/299062",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 296.0,
+              "right": 404.133,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "299062",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/299062",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -6.96,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": 207.333,
+                "right": 404.133,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 296.0,
+                "right": 404.133,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 9,
+          "ship_id": 408154,
+          "ship_name": "U-2501",
+          "level": 100,
+          "button": {
+            "name": "408154",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/408154",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 296.0,
+              "right": 568.8,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "408154",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/408154",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -3.301,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": 207.333,
+                "right": 568.8,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 296.0,
+                "right": 568.8,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 10,
+          "ship_id": 502044,
+          "ship_name": "应瑞·改",
+          "level": 100,
+          "button": {
+            "name": "502044",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/502044",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 656.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 578.8,
+              "top": 296.0,
+              "right": 733.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "502044",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/502044",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 0.359,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 656.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 656.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 578.8,
+                "bottom": 207.333,
+                "right": 733.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 578.8,
+                "top": 296.0,
+                "right": 733.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 11,
+          "ship_id": 502054,
+          "ship_name": "肇和·改",
+          "level": 100,
+          "button": {
+            "name": "502054",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/502054",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 820.8,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 743.467,
+              "top": 296.0,
+              "right": 898.133,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "502054",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/502054",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 4.018,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 820.8,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 820.8,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 743.467,
+                "bottom": 207.333,
+                "right": 898.133,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 743.467,
+                "top": 296.0,
+                "right": 898.133,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 12,
+          "ship_id": 703021,
+          "ship_name": "库尔斯克",
+          "level": 100,
+          "button": {
+            "name": "703021",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/703021",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 985.467,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 908.133,
+              "top": 296.0,
+              "right": 1062.8,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "703021",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/703021",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 7.677,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 985.467,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 985.467,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 908.133,
+                "bottom": 207.333,
+                "right": 1062.8,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 908.133,
+                "top": 296.0,
+                "right": 1062.8,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 13,
+          "ship_id": 801012,
+          "ship_name": "凯旋",
+          "level": 100,
+          "button": {
+            "name": "801012",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/801012",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1150.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 1072.8,
+              "top": 296.0,
+              "right": 1227.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "801012",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/801012",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 11.336,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 1150.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 1150.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 1072.8,
+                "bottom": 207.333,
+                "right": 1227.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 1072.8,
+                "top": 296.0,
+                "right": 1227.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "selected_ships": [
+    {
+      "ship_id": 306064,
+      "receipt": {
+        "semantic_id": "tactical/dock/ship/306064",
+        "generation": 135477,
+        "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/306064",
+        "point": {
+          "x": 162.133,
+          "y": 177.667
+        }
+      }
+    }
+  ],
+  "tactical_assign_grant_remaining": 0,
+  "temporary_config_removed": true
+}

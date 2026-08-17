@@ -201,7 +201,7 @@ observation 状态。
 
 `ControlExpOverflow.Enable/T1Allow/T2Allow/T3Allow/T4Allow` 与 `AddNewStudent.Enable/Favorite/MinLevel` 现在会在原 ALAS 的经验书过滤、领取循环和学员选择方法入口 fail-closed。离线契约覆盖 34 个合法配置和 12 个非法值：四档允许溢出量必须是 `0..5800` 的精确整数，学员等级接受 `1..125` 及可规范化的十进制文本；布尔值、非十进制文本及越界值均拒绝。
 
-回放直接执行原 `_tactical_books_filter_exp()` 的等级 10 边界：关闭时只保留特殊 100 经验书，开启时逐档保留配置边界并排除越界书，技能未满时九本夹具全部保留。`Favorite` 原先未传入语义候选选择，本轮会在读取候选前调用既有的精确共享 Dock 收藏切换。整个回放的 mutation budget 为 0，且没有 Android 输入、真实选舰或书本消耗；仍缺 Tactical 场景下收藏状态与候选的实机 typed 观察、真实书库存/技能经验、教学结果 postcondition 和安全回滚。因此八字段只提升 `offline`，不提升 observation/action/live。
+回放直接执行原 `_tactical_books_filter_exp()` 的等级 10 边界：关闭时只保留特殊 100 经验书，开启时逐档保留配置边界并排除越界书，技能未满时九本夹具全部保留。`Favorite` 会在读取候选前调用既有的精确共享 Dock 收藏切换。真机已完成 disabled 的不变性验证，以及两个 enabled 运行：收藏和非收藏范围各产生不同候选集，分别选择 204044 与 306064，并执行原 ALAS 的技能、书本和唯一课程确认。确认后的 Unity 卡片树会在同一根上保留旧身份；按物理槽位边界解析后，两个后置回执均证明选中舰船处于运行中的课程。故 `AddNewStudent.Enable/Favorite/MinLevel` 已五维完整；`ControlExpOverflow` 五字段仍仅离线完成。
 
 ### 1.16 本轮 Tactical 选书优先级与快速学习槽位契约
 
@@ -395,7 +395,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | P | SP 地图脚本存在，无实机闭环 |
 | 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | M | 难度过滤、每日次数、战斗和领奖缺适配 |
 | 22 | Commission | Scheduler, Commission | F | 六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环 |
-| 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 十个专属配置字段离线契约已完成；真实收藏/等级候选、完整书库存、四槽快速学习实机结果及安全回滚仍未闭环 |
+| 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | AddNewStudent 三字段已完成真实收藏/等级候选、选舰、选书、确认和运行后置条件；经验溢出、完整书库存、四槽快速学习及其他 Tactical 分支仍未闭环 |
 | 24 | Research | Scheduler, Research | L | 一个金币项目闭环；魔方/零件、延迟、重置、26 个预设和自定义规则未完整覆盖 |
 | 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取/喂食四组合与 1,956 种已知食物优先级已离线完成；空收取、部分库存、喂食后置条件、买家具两模式和日期状态仍未闭环 |
 | 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | M | 买箱、金币溢出、训练、增强和保留天赋规则均缺适配 |
@@ -484,7 +484,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Commission | `PresetFilter`=`cube/cube_24h/chip/chip_24h/oil/custom`; `CustomFilter`; `DoMajorCommission` | F | 六预设与重大委托双值均完成动态列表实机单轮；custom 语法、非零油确认、重大委托、奖励、取消、补位和连续调度均已闭环 |
 | Tactical | `RapidTrainingSlot`=`do_not_use/slot_1/slot_2/slot_3/slot_4`; `TacticalFilter` | L | 五值槽位与完整过滤语法已离线覆盖；仍需真实快速学习可用性/次数、完整书库存、无书/无空位及教学结果闭环 |
 | ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | P | 离线关闭/启用及各等级 0/配置/最大/越界已覆盖；仍需真实库存、当前技能经验及选书结果闭环 |
-| AddNewStudent | `Enable`; `Favorite`; `MinLevel` | P | 离线开关、收藏传播和等级边界已覆盖；仍需真实收藏候选状态、无/多候选及教学结果验证 |
+| AddNewStudent | `Enable`; `Favorite`; `MinLevel` | F | Disabled 不变性、收藏/非收藏候选范围、120 级选舰、原始选书与唯一课程确认、运行中课程后置条件均已实机闭环 |
 | Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 26 预设、自由规则、重置、延迟、三种资源各四策略、资源不足、队列满和跨轮选择 |
 | Dorm | `Collect`; `Feed`; `FeedFilter` | L | 两开关四组合、全部已知食物优先级及严格容量边界已离线完成；仍缺空收取、部分库存、真实喂食结果和失败恢复 live 证据 |
 | BuyFurniture | `Enable`; `BuyOption`=`set/all`; `LastRun` | P | 开关、套装/全部、货币不足、已购买、日期去重和购买确认 |
@@ -652,17 +652,17 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **16 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ✅ 五维完整支持 | **19 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
 | ◐ 有实机当前值/分支证据 | **136 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **104 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **101 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
 |---|---|---|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| `AddNewStudent.Enable` | Tactical | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `AddNewStudent.Favorite` | Tactical | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `AddNewStudent.MinLevel` | Tactical | type=input; display=default | input/default: 50 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `AddNewStudent.Enable` | Tactical | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `AddNewStudent.Favorite` | Tactical | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `AddNewStudent.MinLevel` | Tactical | type=input; display=default | input/default: 50 | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Awaken.Favourite` | Awaken | type=checkbox; display=default | input/default: false | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Awaken.LevelCap` | Awaken | type=select; display=default | options: "level120", "level125"; default: "level120" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `AzurLaneUncensored.Repository` | AzurLaneUncensored | type=input; display=disabled | input/default: "https://gitee.com/LmeSzinc/AzurLaneUncensored" | `P`/⊘ 当前无效 | ⊘ | ⊘ | ⊘ | ⊘ | ⊘ |

@@ -15161,19 +15161,34 @@ class SemanticOracle:
         if slot not in range(1, 5):
             raise ValueError("tactical slot must be 1 through 4")
         state = self.read_state()
-        prefix = "NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/"
-        matches = tuple(
-            button
-            for button in state.buttons
-            if button.name in ("add", "add(Clone)")
-            and button.path.endswith(prefix + button.name)
-            and button.actionable
-            and button.point is not None
+        targets = self._tactical_empty_slot_targets(state)
+        try:
+            target = targets[slot]
+        except KeyError as exc:
+            raise SemanticGateClosed("tactical slot is not empty") from exc
+        if self._blocking_rules(state, "tactical/slot/{0}".format(slot)):
+            raise SemanticGateClosed("tactical slot input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="tactical/slot/{0}".format(slot),
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
         )
-        matches = tuple(sorted(matches, key=lambda button: button.point.x))
-        if len(matches) != 4:
-            raise SemanticGateClosed("tactical empty slots are incomplete")
-        target = matches[slot - 1]
+
+    def click_tactical_first_empty_slot(self) -> ActionReceipt:
+        """Click the leftmost current tactical empty slot."""
+
+        state = self.read_state()
+        targets = self._tactical_empty_slot_targets(state)
+        if not targets:
+            raise SemanticGateClosed("tactical class has no empty slot")
+        slot = min(targets)
+        target = targets[slot]
         if self._blocking_rules(state, "tactical/slot/{0}".format(slot)):
             raise SemanticGateClosed("tactical slot input is blocked")
         if self._foreground_component() != self.fingerprint.component:
@@ -15305,14 +15320,14 @@ class SemanticOracle:
             or ui_state.generation > button_state.generation + 2
         ):
             raise SemanticGateClosed("tactical skill snapshots are not coherent")
+        rows_path_fragment = (
+            "NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/"
+        )
         rows = tuple(
             image
             for image in ui_state.images
             if image.name in ("skill", "skill(Clone)")
-            and image.path.endswith(
-                "NewNavalTacticsSkillsPage(Clone)/frame/skill_container/content/"
-                + image.name
-            )
+            and image.path.endswith(rows_path_fragment + image.name)
             and image.active_in_hierarchy
             and image.active_and_enabled
             and image.raycast_target
@@ -15532,6 +15547,52 @@ class SemanticOracle:
         if sum(book.selected for book in books) != 1:
             raise SemanticGateClosed("tactical selected book is absent or ambiguous")
         return tuple(books)
+
+    def tactical_book_skill_progress(self) -> str:
+        """Return the selected skill's pre-book progress as ``current/total``."""
+
+        button_state = self.read_state()
+        start = self._unique(button_state, "tactical/book/start")
+        cancel = self._unique(button_state, "tactical/book/cancel")
+        if not start.active_and_enabled or not cancel.active_and_enabled:
+            raise SemanticGateClosed("tactical book progress page identity is not proven")
+        text_state = self.read_text_state()
+        if (
+            text_state.generation < button_state.generation
+            or text_state.generation > button_state.generation + 2
+        ):
+            raise SemanticGateClosed("tactical book progress snapshots are not coherent")
+        root = "NewNavalTacticsLessonPage(Clone)/skill/info/next"
+        labels = tuple(
+            text
+            for text in text_state.texts
+            if text.path.endswith(root + "/label")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        progress = tuple(
+            text
+            for text in text_state.texts
+            if text.path.endswith(root)
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        if len(labels) != 1 or labels[0].text.strip() != "NEXT:" or len(progress) != 1:
+            raise SemanticGateClosed("tactical book progress text is absent or ambiguous")
+        match = re.fullmatch(
+            r"([0-9]+)\+<color=#A9F548FF>[0-9]+</color>/([0-9]+)",
+            progress[0].text.strip(),
+        )
+        if match is None:
+            raise SemanticGateClosed("tactical book progress text is malformed")
+        current, total = (int(value) for value in match.groups())
+        if total not in (100, 200, 400, 800, 1400, 2200, 3200, 4400, 5800) or not 0 <= current <= total:
+            raise SemanticGateClosed("tactical book progress values are invalid")
+        return "{0}/{1}".format(current, total)
 
     def click_tactical_book(self, position: int) -> ActionReceipt:
         books = self.tactical_books()
@@ -16245,6 +16306,25 @@ class SemanticOracle:
             and button.bounds.left < self.fingerprint.width
             and button.bounds.top < self.fingerprint.height
         )
+        slot_groups: Dict[Tuple[str, float, float, float, float], List[ButtonState]] = {}
+        for button in raw_ship_buttons:
+            assert button.bounds is not None
+            bounds = button.bounds
+            slot_key = (
+                button.path.rsplit("/", 1)[0],
+                bounds.left,
+                bounds.top,
+                bounds.right,
+                bounds.bottom,
+            )
+            slot_groups.setdefault(slot_key, []).append(button)
+        ship_buttons = []
+        for candidates in slot_groups.values():
+            # After a course confirmation, the live client can retain the
+            # previous ship button on the current physical card while
+            # publishing the current identity first.  One ``info(Clone)``
+            # root can also host more than one independently positioned card.
+            ship_buttons.append(candidates[0])
         if len(ship_buttons) > 4 or len(
             {button.name for button in ship_buttons}
         ) != len(ship_buttons):
@@ -17097,7 +17177,7 @@ class SemanticOracle:
         ) from last_error
 
     def set_enhancement_dock_favourite(self, enabled: bool) -> Optional[ActionReceipt]:
-        """Set the exact Dock favourite scope and prove the resulting state."""
+        """Set the Dock favourite scope using its currently rendered toggle."""
 
         if not isinstance(enabled, bool):
             raise TypeError("enhancement favourite scope must be boolean")
@@ -17105,42 +17185,56 @@ class SemanticOracle:
             "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/switch/toggles/"
             "preference_toggle/"
         )
-        expected = ("on", "changyong_butten01") if enabled else (
-            "off",
-            "changyong_butten02",
+        state, ui_state = self._enhancement_dock_records()
+        active = {
+            suffix: tuple(
+                item
+                for item in ui_state.images
+                if item.path == root + suffix
+                and item.sprite == sprite
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            for suffix, sprite in (
+                ("on", "changyong_butten01"),
+                ("off", "changyong_butten02"),
+            )
+        }
+        if len(active["on"]) > 1 or len(active["off"]) > 1:
+            raise SemanticGateClosed("Dock favourite state is ambiguous")
+        # The live client keeps the off layer active when favourite is on;
+        # the on layer is therefore the positive state discriminator.
+        current = bool(active["on"])
+        if current == enabled:
+            return None
+        target_name = "on" if enabled else "off"
+        current_name = "on" if current else "off"
+        if len(active[current_name]) != 1:
+            raise SemanticGateClosed("Dock favourite state is incomplete")
+        receipt = self._click_exact_image(
+            state,
+            active[current_name][0],
+            "enhancement/dock/favourite/" + target_name,
         )
-        receipt: Optional[ActionReceipt] = None
         deadline = time.monotonic() + 5.0
         while time.monotonic() < deadline:
-            state, ui_state = self._enhancement_dock_records()
-            active = {
-                suffix: tuple(
-                    item
-                    for item in ui_state.images
-                    if item.path == root + suffix
-                    and item.sprite == sprite
-                    and item.active_in_hierarchy
-                    and item.active_and_enabled
-                    and not item.truncated
-                    and item.bounds is not None
-                )
-                for suffix, sprite in (
-                    ("on", "changyong_butten01"),
-                    ("off", "changyong_butten02"),
-                )
-            }
-            # The client retains the off layer while favourite is on.  The on
-            # layer is therefore the positive state discriminator.
-            current = bool(active["on"])
-            if current == enabled:
-                return receipt
-            target = active["off"] if enabled else active["on"]
-            if receipt is not None or len(target) != 1:
-                raise SemanticGateClosed("Dock favourite state is ambiguous")
-            receipt = self._click_exact_image(
-                state, target[0], "enhancement/dock/favourite/" + expected[0]
+            _, after = self._enhancement_dock_records()
+            visible = tuple(
+                item
+                for item in after.images
+                if item.path == root + target_name
+                and item.sprite
+                == ("changyong_butten01" if enabled else "changyong_butten02")
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
             )
-            self._sleep(0.1)
+            if len(visible) == 1:
+                return receipt
+            self._sleep(0.05)
         raise SemanticGateClosed("Dock favourite state did not change")
 
     def set_enhancement_dock_filter(
@@ -18934,6 +19028,10 @@ class SemanticOracle:
                 rule.blocker_id == "tactical-dock"
                 and semantic_id.startswith("enhancement/dock/")
             )
+            and not (
+                rule.blocker_id == "tactical-page"
+                and semantic_id.startswith("enhancement/dock/favourite/")
+            )
             and any(rule.path_fragment in button.path for button in state.buttons)
         )
 
@@ -19036,6 +19134,7 @@ class SemanticOracle:
         if (
             re.fullmatch(
                 r"「[^」]+」学习完成，「[^」]+」技能获得[1-9][0-9]*点经验"
+                r"(?:[(（]技能等级提升:[1-9][0-9]?→[1-9][0-9]?[)）]！)?"
                 r"是否继续学习该技能？",
                 plain,
             )

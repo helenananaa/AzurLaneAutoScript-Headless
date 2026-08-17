@@ -7,73 +7,90 @@
   "fields": [
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_tactical_config_replay.py",
+        "scripts/python/run_alas_tactical_new_student_live_validation.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "integration/alas/tactical-new-student-disabled-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-postcondition-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "P",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Tactical"
       ],
       "path": "AddNewStudent.Enable",
-      "status_label": "☐ 未逐值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_tactical_config_replay.py",
+        "scripts/python/run_alas_tactical_new_student_live_validation.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "integration/alas/tactical-new-student-favorite-false-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-false-postcondition-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-postcondition-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "P",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Tactical"
       ],
       "path": "AddNewStudent.Favorite",
-      "status_label": "☐ 未逐值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_tactical_config_replay.py",
+        "scripts/python/run_alas_tactical_new_student_live_validation.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "integration/alas/tactical-new-student-favorite-false-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-false-postcondition-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-postcondition-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "P",
+      "group_code": "F",
       "metadata": "type=input; display=default",
       "panels": [
         "Tactical"
       ],
       "path": "AddNewStudent.MinLevel",
-      "status_label": "☐ 未逐值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: 50"
     },
@@ -9199,42 +9216,68 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_tactical_config_replay.py",
+        "scripts/python/run_alas_tactical_new_student_live_validation.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "integration/alas/tactical-new-student-disabled-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-postcondition-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "AddNewStudent.Enable",
-      "note": "Both boolean values are validated before the original tactical receive loop; no live student assignment is implied."
+      "note": "Disabled preserves the pre-existing running-course identities with no assignment, while enabled executes the original receive, selection, book, confirmation, and running-course postcondition path."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_tactical_config_replay.py",
+        "scripts/python/run_alas_tactical_new_student_live_validation.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "integration/alas/tactical-new-student-favorite-false-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-false-postcondition-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-postcondition-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "AddNewStudent.Favorite",
-      "note": "The value is now forwarded to the exact shared Dock favourite toggle before semantic candidate selection."
+      "note": "Both live Dock scopes are observed and toggled through the current client layer; their distinct candidate sets each select and confirm a running course through original ALAS flow."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_tactical_config_replay.py",
+        "scripts/python/run_alas_tactical_new_student_live_validation.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "integration/alas/tactical-new-student-favorite-false-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-false-postcondition-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-live-validation-receipt.json",
+        "integration/alas/tactical-new-student-favorite-true-postcondition-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "AddNewStudent.MinLevel",
-      "note": "Levels 1 through 125 and decimal text are normalized; invalid values now fail closed instead of silently becoming level 1."
+      "note": "The 120 threshold is read from original ALAS configuration and selects level-120 live candidates across both Dock scopes; the exact 1..125 contract and invalid-value rejection remain replay-covered."
     },
     {
       "dimensions": {

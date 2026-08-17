@@ -703,6 +703,7 @@ TACTICAL_VIRTUAL_RESOURCES = frozenset(
         "TACTICAL_CLASS_START",
         "TACTICAL_CLASS_CANCEL",
         "POPUP_CONFIRM",
+        "POPUP_CANCEL",
         "BACK_ARROW",
     }
 )
@@ -1024,6 +1025,7 @@ class AlasSemanticAdapter:
             Callable[[], SemanticFrameIdentity]
         ] = None,
         input_frame_refresher: Optional[Callable[[], Any]] = None,
+        tactical_input_frame_refresher: Optional[Callable[[], Any]] = None,
         action_ledger: Optional[ActionLedger] = None,
     ) -> None:
         if package_gate is None:
@@ -1144,6 +1146,12 @@ class AlasSemanticAdapter:
         if input_frame_refresher is not None and not callable(input_frame_refresher):
             raise TypeError("semantic input frame refresher is invalid")
         self._input_frame_refresher = input_frame_refresher
+        if (
+            tactical_input_frame_refresher is not None
+            and not callable(tactical_input_frame_refresher)
+        ):
+            raise TypeError("semantic Tactical input frame refresher is invalid")
+        self._tactical_input_frame_refresher = tactical_input_frame_refresher
         self._compat_observation_ordinal = 0
         self._observation_registry = ObservationRegistry()
         register_login_observations(
@@ -1419,6 +1427,7 @@ class AlasSemanticAdapter:
             "POPUP_CONFIRM_TICKETS_FULL",
             "POPUP_CONFIRM_MINIGAME_ENTER",
             "POPUP_CONFIRM_FINISH_ORDERS",
+            "POPUP_CONFIRM_TACTICAL",
         ):
             return (
                 "POPUP_CONFIRM_WHITE"
@@ -2883,6 +2892,80 @@ class AlasSemanticAdapter:
                 raise
         semantic_id = self._mappings.get(name)
         if (
+            self._commission_context is not None
+            and self._commission_context.flow_kind == "tactical"
+        ):
+            if name == "TACTICAL_CHECK":
+                return bool(
+                    self.oracle.exists("tactical/page/back")
+                    and not self.oracle.enabled("tactical/dock/cancel")
+                    and not self.oracle.enabled("tactical/skill/confirm")
+                    and not self.oracle.enabled("tactical/book/start")
+                    and not self._tactical_course_target_enabled(
+                        "tactical/course/confirm"
+                    )
+                    and not self._tactical_course_target_enabled(
+                        "tactical/course/cancel"
+                    )
+                )
+            if name in ("POPUP_CONFIRM_WHITE", "POPUP_CANCEL_WHITE"):
+                return False
+            if name in TACTICAL_VIRTUAL_RESOURCES:
+                if name == "ADD_NEW_STUDENT":
+                    try:
+                        if any(
+                            self.oracle.enabled(target)
+                            for target in (
+                                "tactical/book/start",
+                                "tactical/book/cancel",
+                            )
+                        ) or self._tactical_course_target_enabled(
+                            "tactical/course/confirm"
+                        ) or self._tactical_course_target_enabled("tactical/course/cancel"):
+                            return False
+                        return (
+                            len(self.oracle.tactical_slots()) < 4
+                            and self.oracle.tactical_empty_slots_ready()
+                        )
+                    except SemanticGateClosed:
+                        return False
+                if name == "DOCK_CHECK":
+                    try:
+                        return bool(self.oracle.tactical_candidate_ships())
+                    except SemanticGateClosed:
+                        return False
+                if name == "SKILL_CONFIRM":
+                    try:
+                        return bool(self.oracle.tactical_skills())
+                    except SemanticGateClosed:
+                        return False
+                if name == "BACK_ARROW":
+                    return any(
+                        self.oracle.enabled(target)
+                        for target in (
+                            "tactical/dock/back",
+                            "tactical/page/back",
+                        )
+                    )
+                if name in ("TACTICAL_CLASS_START", "TACTICAL_CLASS_CANCEL"):
+                    target = (
+                        "tactical/book/start"
+                        if name == "TACTICAL_CLASS_START"
+                        else "tactical/book/cancel"
+                    )
+                    return self.oracle.enabled(target)
+                if name == "POPUP_CONFIRM":
+                    return (
+                        self._action_ledger.allowed("tactical.assign")
+                        and self._tactical_course_target_enabled(
+                            "tactical/course/confirm"
+                        )
+                    )
+                if name == "POPUP_CANCEL":
+                    return self._tactical_course_target_enabled("tactical/course/cancel")
+            if semantic_id is None:
+                return False
+        if (
             self._campaign_context is not None
             and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
         ):
@@ -3981,46 +4064,6 @@ class AlasSemanticAdapter:
                     or self.oracle.enabled("build/prep/cancel")
                     or self.oracle.build_queue_finish_prompt_cost() is not None
                 )
-        if (
-            name in TACTICAL_VIRTUAL_RESOURCES
-            and self._commission_context is not None
-            and self._commission_context.flow_kind == "tactical"
-        ):
-            if name == "ADD_NEW_STUDENT":
-                try:
-                    return len(self.oracle.tactical_slots()) < 4
-                except SemanticGateClosed:
-                    return False
-            if name == "DOCK_CHECK":
-                try:
-                    return bool(self.oracle.tactical_candidate_ships())
-                except SemanticGateClosed:
-                    return False
-            if name == "SKILL_CONFIRM":
-                try:
-                    return bool(self.oracle.tactical_skills())
-                except SemanticGateClosed:
-                    return False
-            if name == "BACK_ARROW":
-                return any(
-                    self.oracle.enabled(target)
-                    for target in (
-                        "tactical/dock/back",
-                        "tactical/page/back",
-                    )
-                )
-            if name in ("TACTICAL_CLASS_START", "TACTICAL_CLASS_CANCEL"):
-                target = (
-                    "tactical/book/start"
-                    if name == "TACTICAL_CLASS_START"
-                    else "tactical/book/cancel"
-                )
-                return self.oracle.enabled(target)
-            if name == "POPUP_CONFIRM":
-                return (
-                    self._action_ledger.allowed("tactical.assign")
-                    and self.oracle.enabled("tactical/course/confirm")
-                )
         if semantic_id is None and name == "CAMPAIGN_MENU_CHECK":
             return self.oracle.campaign_menu_is_entry()
         if semantic_id is None and name == "ACADEMY_CHECK":
@@ -4367,6 +4410,18 @@ class AlasSemanticAdapter:
             return value
         if len(bounds) == 1 and bounds[0] == Bounds(133.0, 39.0, 250.0, 72.0):
             value = self.oracle.war_archives_data_key_text()
+            if alphabet is not None and any(character not in alphabet for character in value):
+                raise SemanticGateClosed(
+                    "typed text violates the ALAS OCR alphabet contract"
+                )
+            return value
+        if (
+            self._commission_context is not None
+            and self._commission_context.flow_kind == "tactical"
+            and len(bounds) == 1
+            and bounds[0] == Bounds(771.0, 191.0, 951.0, 209.0)
+        ):
+            value = self.oracle.tactical_book_skill_progress()
             if alphabet is not None and any(character not in alphabet for character in value):
                 raise SemanticGateClosed(
                     "typed text violates the ALAS OCR alphabet contract"
@@ -6265,6 +6320,17 @@ class AlasSemanticAdapter:
         self._package_gate()
         return self.oracle.tactical_candidate_ships()
 
+    def _refresh_tactical_input_frame(self) -> None:
+        refresher = self._tactical_input_frame_refresher or self._input_frame_refresher
+        if refresher is not None:
+            refresher()
+
+    def _tactical_course_target_enabled(self, target: str) -> bool:
+        try:
+            return self.oracle.enabled(target)
+        except SemanticGateClosed:
+            return False
+
     def tactical_skills(self) -> Tuple[TacticalSkillState, ...]:
         self._package_gate()
         return self.oracle.tactical_skills()
@@ -6287,6 +6353,10 @@ class AlasSemanticAdapter:
         ):
             raise ValueError("tactical ship selection bounds are invalid")
         # Tactical and enhancement share the exact Dock favourite toggle.
+        # The original ALAS Dock scan can wait for cards for longer than a
+        # frame lease, while the favourite toggle itself may be an input.
+        # Acquire a current immutable frame for each precise Dock mutation.
+        self._refresh_tactical_input_frame()
         self.oracle.set_enhancement_dock_favourite(favourite)
         candidates = self.oracle.tactical_candidate_ships()
         selected = next(
@@ -6299,12 +6369,14 @@ class AlasSemanticAdapter:
         )
         if selected is None:
             return False
+        self._refresh_tactical_input_frame()
         receipt = self.oracle.click_tactical_ship(selected.ship_id)
         self.oracle.wait_for(
             "tactical/dock/confirm",
             timeout_seconds=5.0,
             minimum_generation=receipt.generation,
         )
+        self._refresh_tactical_input_frame()
         confirm = self.oracle.click("tactical/dock/confirm")
         self.oracle.wait_for(
             "tactical/skill/confirm",
@@ -6326,12 +6398,14 @@ class AlasSemanticAdapter:
         )
         if skill is None:
             return False
+        self._refresh_tactical_input_frame()
         receipt = self.oracle.click_tactical_skill(skill.position)
         self.oracle.wait_for(
             "tactical/skill/confirm",
             timeout_seconds=5.0,
             minimum_generation=receipt.generation,
         )
+        self._refresh_tactical_input_frame()
         self.oracle.click("tactical/skill/confirm")
         return True
 
@@ -6365,6 +6439,7 @@ class AlasSemanticAdapter:
                 bounds=image.bounds,
                 path=image.path,
             )
+        self._refresh_tactical_input_frame()
         receipt = self.oracle.click_tactical_book(position)
         deadline = time.monotonic() + 5.0
         while time.monotonic() < deadline:
@@ -7265,11 +7340,7 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed(
                         "tactical assignment requires a positive budget"
                     )
-                occupied = {slot.slot for slot in self.oracle.tactical_slots()}
-                empty = next((slot for slot in range(1, 5) if slot not in occupied), None)
-                if empty is None:
-                    raise SemanticGateClosed("tactical class has no empty slot")
-                return self.oracle.click_tactical_empty_slot(empty)
+                return self.oracle.click_tactical_first_empty_slot()
             if name == "BACK_ARROW":
                 targets = tuple(
                     target
@@ -8880,6 +8951,7 @@ class AlasSemanticSession:
                 frame_observation_oracle=self._frame_reader.oracle,
                 frame_identity_provider=self._frame_reader.identity,
                 input_frame_refresher=self.refresh_frame,
+                tactical_input_frame_refresher=self.refresh_tactical_input_frame,
                 action_ledger=self.action_ledger,
             )
             if self.trace is not None:
@@ -8905,7 +8977,7 @@ class AlasSemanticSession:
         if self.trace is not None:
             self.trace.emit("semantic.session.close")
 
-    def refresh_frame(self) -> SemanticFrame:
+    def refresh_frame(self, *, include_ui: bool = True) -> SemanticFrame:
         self.open()
         if self._frame_clock is None:
             raise StaleFrameError()
@@ -8917,7 +8989,7 @@ class AlasSemanticSession:
         attempt = 0
         while True:
             try:
-                frame = self._frame_clock.acquire(include_ui=True)
+                frame = self._frame_clock.acquire(include_ui=include_ui)
                 break
             except (
                 SemanticGateClosed,
@@ -9011,6 +9083,11 @@ class AlasSemanticSession:
                 },
             )
         return frame
+
+    def refresh_tactical_input_frame(self) -> SemanticFrame:
+        """Acquire the Dock action lease without requiring its truncated UI tree."""
+
+        return self.refresh_frame(include_ui=False)
 
     def __enter__(self) -> AlasSemanticAdapter:
         return self.open()
