@@ -43,10 +43,10 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
-| ✅ 完整支持（`F`） | **5 / 60** | Benchmark、Commission、GameManager、Minigame、Restart |
+| ✅ 完整支持（`F`） | **6 / 60** | Benchmark、Commission、GameManager、Minigame、Restart、Reward |
 | 🟢 主路径已完成、全配置未完成（`L`） | **8 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **9 / 60** | Awaken、Coalition、CoalitionSp、EventB、Guild、Hospital、PrivateQuarters、Raid、RaidDaily |
-| 🟡 部分完成（`P`） | **17 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、Main2、Main3、OpsiDaemon、OpsiGeneral、Reward、ShopOnce |
+| 🟡 部分完成（`P`） | **16 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、Main2、Main3、OpsiDaemon、OpsiGeneral、ShopOnce |
 | 🧱 已到边界、尚未完成（`B`） | **18 / 60** | Hard、Main、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **3 / 60** | GemsFarming、Meowfficer、OpsiStronghold |
 
@@ -237,7 +237,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `Reward.CollectOil`、`CollectCoin`、`CollectExp`、`CollectMission` 和 `CollectWeeklyMission` 现在只接受精确布尔值。原 `Reward.run()` 在页面导航和领取前验证全部五字段；共享这些配置的 `RaidDaily.run()` 也在 EX 奖励路径前验证同一字段面，避免只守住普通 Reward 入口。
 
-固定上游回放覆盖全部 32 种合法开关组合和 20 个非法单字段案例，执行原 Reward 参数转发与调度尾部、RaidDaily EX 下 `CollectMission` 的真假转发，以及非 EX 绕过。真实资源、任务和周常领取方法均未调用，mutation budget 为 0，没有页面输入或 Android 注入。因此五字段只提升 `offline`；资源上限、日常/周常领取后置条件、红点、数字行、空页和特殊舰船奖励仍需实机闭环。
+固定上游回放覆盖全部 32 种合法开关组合和 20 个非法单字段案例，执行原 Reward 参数转发与调度尾部、RaidDaily EX 下 `CollectMission` 的真假转发，以及非 EX 绕过。该回放本身的 mutation budget 为 0；随后五个字段分别取得原始 ALAS 的开启/关闭实机收据，正向领取均使用精确语义输入并回读后置状态。`Reward` 五开关现在完整支持。
 
 ### 1.22 本轮 Campaign 四个共享开关契约
 
@@ -492,7 +492,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | MeowfficerTrain | `Enable`; `Mode`=`seamlessly/once_a_day`; `RetainTalentedGold`; `RetainTalentedPurple`; `MaxFeedLevel`; `EnhanceIndex` | M | 两训练模式、两保留开关组合、等级/索引边界、无材料、错误目标保护和每日去重 |
 | GuildLogistics | `Enable`; `ExchangeFilter`; `SelectNewMission` | M | 开关、兑换规则、新任务选择、贡献不足、无奖励和重复领取 |
 | GuildOperation | `Enable`; `JoinThreshold`; `SelectNewOperation`; `NewOperationMaxDate`; `AttackBoss`; `BossFleetRecommend` | M | 阈值/日期边界、加入/选择、Boss 与非 Boss、推荐舰队开关、次数不足和奖励 |
-| Reward | `CollectOil`; `CollectCoin`; `CollectExp`; `CollectMission`; `CollectWeeklyMission` | P | 32 种开关组合、20 个非法单字段案例及 Reward/RaidDaily 双入口 fail-closed 已离线完成；仍缺资源上限、日常/周常领取后置条件、数字行、空页、红点和特殊奖励实机闭环 |
+| Reward | `CollectOil`; `CollectCoin`; `CollectExp`; `CollectMission`; `CollectWeeklyMission` | F | 32 种开关组合、20 个非法单字段案例及 Reward/RaidDaily 双入口 fail-closed 已离线完成；五个开关均有原始 ALAS 的开启/关闭实机闭环 |
 | Awaken | `Favourite`; `LevelCap`=`level120/level125` | O | 两个布尔/枚举设置已在原分派器回放，错误值在 `awaken_run` 前拒绝；仍需资源不足、无候选、批量选择、确认结果和所有实机观察/输入 |
 
 ### 3.5 每日、演习、商店、船坞、建造与免费领取
@@ -652,8 +652,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **15 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **137 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **16 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **136 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **104 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -903,7 +903,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Research.UsePart` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Retirement.RetireMode` | General | type=select; display=default | options: "enhance", "old_retire", "one_click_retire"; default: "one_click_retire" | `P`/◐ 一键与强化已接入；旧退役未适配 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Reward.CollectCoin` | Reward | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
-| `Reward.CollectExp` | Reward | type=checkbox; display=default | input/default: true | `P`/◐ 实机零值；等待正值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Reward.CollectExp` | Reward | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Reward.CollectMission` | Reward | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Reward.CollectOil` | Reward | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Reward.CollectWeeklyMission` | Reward | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |

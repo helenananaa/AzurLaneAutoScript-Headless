@@ -6312,25 +6312,30 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_reward_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_reward_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "scripts/python/run_alas_reward_resource_live_validation.py",
+        "integration/alas/reward-exp-live-validation-receipt.json",
+        "integration/alas/reward-exp-disabled-live-validation-receipt.json",
+        "docs/reward-resource-live-validation-report.md",
         "docs/status.md"
       ],
-      "group_code": "P",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Reward"
       ],
       "path": "Reward.CollectExp",
-      "status_label": "◐ 实机零值；等待正值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -8222,8 +8227,8 @@
         "Reward"
       ],
       "name": "Reward",
-      "note": "资源气泡可领取，任务领取部分可用；周常、红点、数字行、空页面和舰船奖励未完整闭环",
-      "status": "P"
+      "note": "五个 Reward 领取开关均已在原始 ALAS 流程中完成开启与关闭的实机闭环",
+      "status": "F"
     },
     {
       "groups": [
@@ -9628,16 +9633,25 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_reward_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_reward_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "scripts/python/run_alas_reward_resource_live_validation.py",
+        "integration/alas/reward-exp-live-validation-receipt.json",
+        "integration/alas/reward-exp-disabled-live-validation-receipt.json",
+        "docs/reward-resource-live-validation-report.md",
         "docs/status.md"
       ],
       "field": "Reward.CollectExp",
-      "note": "Both boolean values are forwarded to original reward_receive; non-booleans fail before any Reward UI operation."
+      "note": "Exp=true consumed one exact positive typed resource amount and observed it at zero after the original Reward task; false emitted no resource dispatch and also returned to main. Invalid values still fail before Reward UI entry."
     },
     {
       "dimensions": {

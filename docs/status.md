@@ -50,19 +50,20 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `Reward.CollectWeeklyMission` is complete independently of daily missions
   and resource-collection switches.
 
-### Reward: Oil and Coin resource switches complete on the live client
+### Reward: Oil, Coin, and Exp resource switches complete on the live client
 
 - Resource bubbles are now admitted only with an exact positive typed amount,
   not merely because their card is clickable.  The original `Reward.run()`
   with Oil alone changed `32 -> 0` through exactly one typed
   `reward/resource/oil` input; Coin alone changed `108 -> 0` through exactly
-  one typed `reward/resource/coin` input.  The all-disabled task made no
-  resource input and restored the main page.  See
+  one typed `reward/resource/coin` input; Exp alone changed `8 -> 0` through
+  exactly one typed `reward/resource/exp` input. The Exp-disabled task made no
+  resource input and restored the main page. See
   `integration/alas/reward-oil-live-validation-receipt.json`,
   `integration/alas/reward-coin-live-validation-receipt.json`, and
-  `integration/alas/reward-resource-disabled-live-validation-receipt.json`.
-  `Reward.CollectExp` remains partial because the current exact amount is zero
-  and no claim was inferred from its static resource card.
+  `integration/alas/reward-resource-disabled-live-validation-receipt.json`,
+  `integration/alas/reward-exp-live-validation-receipt.json`, and
+  `integration/alas/reward-exp-disabled-live-validation-receipt.json`.
 
 ### Gacha: all declared Amount values complete on the live client
 

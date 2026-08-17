@@ -103,6 +103,11 @@ def _resource_state(oracle: object) -> dict[str, dict[str, Any]]:
 def _ensure_reward_page(oracle: object) -> None:
     if oracle.exists("reward/page/back"):
         return
+    if oracle.enabled("overlay/bulletin/close"):
+        dismissal = oracle.click("overlay/bulletin/close")
+        oracle.wait_for(
+            "main/more", 10, minimum_generation=dismissal.generation
+        )
     if not oracle.main_page_visible():
         raise AssertionError("resource validation has no reviewed entry page")
     entry = oracle.click("main/more")

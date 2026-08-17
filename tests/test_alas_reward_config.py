@@ -35,6 +35,12 @@ RESOURCE_EVIDENCE_ADAPTER_SHA256 = (
 RESOURCE_EVIDENCE_ORACLE_SHA256 = (
     "9632075433eca0a9d71842b3ad2dee148b84b4c25218a565fcfd97997eff50ae"
 )
+EXP_RESOURCE_EVIDENCE_ADAPTER_SHA256 = (
+    "993c9776e05985561192c9b4725ef39181509a488a00f7e6010d37b4a9e6d172"
+)
+EXP_RESOURCE_EVIDENCE_ORACLE_SHA256 = (
+    "c696a1c8e34225e254cfacb61fef2e120ecf54f7cb31c82ed81c3f141883be0e"
+)
 
 
 def _values(**overrides: object) -> dict[str, object]:
@@ -307,6 +313,64 @@ class AlasRewardConfigTests(unittest.TestCase):
         self.assertEqual(
             disabled["source_sha256"]["oracle"],
             RESOURCE_EVIDENCE_ORACLE_SHA256,
+        )
+
+    def test_exp_resource_live_evidence_covers_enabled_and_disabled_values(self):
+        enabled = json.loads(
+            (
+                ROOT / "integration/alas/reward-exp-live-validation-receipt.json"
+            ).read_text(encoding="utf-8")
+        )
+        disabled = json.loads(
+            (
+                ROOT
+                / "integration/alas/reward-exp-disabled-live-validation-receipt.json"
+            ).read_text(encoding="utf-8")
+        )
+        for configured, receipt in ((True, enabled), (False, disabled)):
+            with self.subTest(configured=configured):
+                self.assertTrue(receipt["passed"])
+                self.assertEqual(
+                    receipt["configured"],
+                    {
+                        "Reward.CollectOil": False,
+                        "Reward.CollectCoin": False,
+                        "Reward.CollectExp": configured,
+                        "Reward.CollectMission": False,
+                        "Reward.CollectWeeklyMission": False,
+                    },
+                )
+                self.assertTrue(receipt["cleanup"]["main_page_visible"])
+                self.assertTrue(receipt["temporary_config_removed"])
+                self.assertEqual(
+                    receipt["source_sha256"]["adapter"],
+                    EXP_RESOURCE_EVIDENCE_ADAPTER_SHA256,
+                )
+                self.assertEqual(
+                    receipt["source_sha256"]["oracle"],
+                    EXP_RESOURCE_EVIDENCE_ORACLE_SHA256,
+                )
+
+        self.assertGreater(
+            enabled["resource_state_before"]["Reward.CollectExp"]["amount"], 0
+        )
+        self.assertTrue(
+            enabled["resource_state_before"]["Reward.CollectExp"]["available"]
+        )
+        self.assertEqual(
+            enabled["resource_state_after"]["Reward.CollectExp"],
+            {"amount": 0, "available": False},
+        )
+        self.assertEqual(len(enabled["resource_dispatches"]), 1)
+        dispatch = enabled["resource_dispatches"][0]
+        self.assertEqual(dispatch["button"], "EXP")
+        self.assertEqual(dispatch["semantic_id"], "reward/resource/exp")
+        self.assertTrue(dispatch["path"].endswith("/class/bubble"))
+        self.assertEqual(set(dispatch["point"]), {"x", "y"})
+        self.assertEqual(disabled["resource_dispatches"], [])
+        self.assertEqual(
+            disabled["resource_state_before"]["Reward.CollectExp"],
+            disabled["resource_state_after"]["Reward.CollectExp"],
         )
 
     def test_sources_compile(self):
