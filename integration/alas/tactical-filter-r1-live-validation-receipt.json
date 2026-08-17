@@ -1,0 +1,1342 @@
+{
+  "schema": "alas-headless.tactical-filter-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "configured": {
+    "Tactical.TacticalFilter": "BlueT1 > RedT1 > YellowT1 > BlueT2 > RedT2 > YellowT2 > first",
+    "AddNewStudent.Enable": true,
+    "AddNewStudent.Favorite": false,
+    "AddNewStudent.MinLevel": 1
+  },
+  "source_sha256": {
+    "tactical": "7147e33a43a42135f14bc0bc92ff5dbe39644146c16e23c0d78b9d2380f1e685",
+    "adapter": "820b68deac3465a0b49aff0c84189c9794d884951d86ecf29a96dfe3a8dea065",
+    "oracle": "8e964a483e14cae31c9640948051ddeeaf82d4e03f04f4cd26d4f3f867944d4e",
+    "runner": "b15ac7597006adf4c3113d4dbb6e3044d01ce50c78c8afdd6a70940e4dc4dfa4"
+  },
+  "passed": true,
+  "temporary_config": "codex_tactical_filter_live_375d36c2df3b4fd6b20b816a78a5645b.json",
+  "filter_loads": [
+    "BlueT1 > RedT1 > YellowT1 > BlueT2 > RedT2 > YellowT2 > first"
+  ],
+  "filter_applications": [
+    {
+      "input": [
+        {
+          "position": 0,
+          "book": "Blue_T4"
+        },
+        {
+          "position": 1,
+          "book": "Yellow_T4"
+        },
+        {
+          "position": 2,
+          "book": "Red_T3_Exp"
+        },
+        {
+          "position": 3,
+          "book": "Blue_T3"
+        },
+        {
+          "position": 4,
+          "book": "Yellow_T3"
+        },
+        {
+          "position": 5,
+          "book": "Red_T2_Exp"
+        },
+        {
+          "position": 6,
+          "book": "Blue_T2"
+        },
+        {
+          "position": 7,
+          "book": "Yellow_T2"
+        },
+        {
+          "position": 8,
+          "book": "Red_T1_Exp"
+        },
+        {
+          "position": 9,
+          "book": "Blue_T1"
+        },
+        {
+          "position": 10,
+          "book": "Yellow_T1"
+        }
+      ],
+      "selected": [
+        {
+          "position": 9,
+          "book": "Blue_T1"
+        },
+        {
+          "position": 8,
+          "book": "Red_T1_Exp"
+        },
+        {
+          "position": 10,
+          "book": "Yellow_T1"
+        },
+        {
+          "position": 6,
+          "book": "Blue_T2"
+        },
+        {
+          "position": 5,
+          "book": "Red_T2_Exp"
+        },
+        {
+          "position": 7,
+          "book": "Yellow_T2"
+        },
+        {
+          "position": null,
+          "book": "first"
+        }
+      ]
+    }
+  ],
+  "book_selection_calls": [
+    {
+      "position": 9,
+      "before": [
+        {
+          "position": 0,
+          "item_id": "16014",
+          "genre": 2,
+          "tier": 4,
+          "exp_bonus": false,
+          "count": 28,
+          "selected": true,
+          "image": {
+            "name": "item",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 210.333,
+              "top": 289.667,
+              "right": 313.667,
+              "bottom": 393.0
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 210.333,
+                "top": 289.667,
+                "right": 313.667,
+                "bottom": 393.0
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "position": 1,
+          "item_id": "16024",
+          "genre": 3,
+          "tier": 4,
+          "exp_bonus": false,
+          "count": 5,
+          "selected": false,
+          "image": {
+            "name": "item(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 357.4,
+              "top": 289.667,
+              "right": 460.733,
+              "bottom": 393.0
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item(Clone)",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 357.4,
+                "top": 289.667,
+                "right": 460.733,
+                "bottom": 393.0
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "position": 2,
+          "item_id": "16003",
+          "genre": 1,
+          "tier": 3,
+          "exp_bonus": true,
+          "count": 6,
+          "selected": false,
+          "image": {
+            "name": "item(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 504.467,
+              "top": 289.667,
+              "right": 607.8,
+              "bottom": 393.0
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item(Clone)",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 504.467,
+                "top": 289.667,
+                "right": 607.8,
+                "bottom": 393.0
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "position": 3,
+          "item_id": "16013",
+          "genre": 2,
+          "tier": 3,
+          "exp_bonus": false,
+          "count": 1308,
+          "selected": false,
+          "image": {
+            "name": "item(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 651.533,
+              "top": 289.667,
+              "right": 754.867,
+              "bottom": 393.0
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item(Clone)",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 651.533,
+                "top": 289.667,
+                "right": 754.867,
+                "bottom": 393.0
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "position": 4,
+          "item_id": "16023",
+          "genre": 3,
+          "tier": 3,
+          "exp_bonus": false,
+          "count": 756,
+          "selected": false,
+          "image": {
+            "name": "item(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 798.6,
+              "top": 289.667,
+              "right": 901.933,
+              "bottom": 393.0
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item(Clone)",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 798.6,
+                "top": 289.667,
+                "right": 901.933,
+                "bottom": 393.0
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "position": 5,
+          "item_id": "16002",
+          "genre": 1,
+          "tier": 2,
+          "exp_bonus": true,
+          "count": 156,
+          "selected": false,
+          "image": {
+            "name": "item(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 945.667,
+              "top": 289.667,
+              "right": 1049.0,
+              "bottom": 393.0
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item(Clone)",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 945.667,
+                "top": 289.667,
+                "right": 1049.0,
+                "bottom": 393.0
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "position": 6,
+          "item_id": "16012",
+          "genre": 2,
+          "tier": 2,
+          "exp_bonus": false,
+          "count": 218,
+          "selected": false,
+          "image": {
+            "name": "item(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 210.333,
+              "top": 406.367,
+              "right": 313.667,
+              "bottom": 509.7
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item(Clone)",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 210.333,
+                "top": 406.367,
+                "right": 313.667,
+                "bottom": 509.7
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "position": 7,
+          "item_id": "16022",
+          "genre": 3,
+          "tier": 2,
+          "exp_bonus": false,
+          "count": 210,
+          "selected": false,
+          "image": {
+            "name": "item(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 357.4,
+              "top": 406.367,
+              "right": 460.733,
+              "bottom": 509.7
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item(Clone)",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 357.4,
+                "top": 406.367,
+                "right": 460.733,
+                "bottom": 509.7
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "position": 8,
+          "item_id": "16001",
+          "genre": 1,
+          "tier": 1,
+          "exp_bonus": true,
+          "count": 54,
+          "selected": false,
+          "image": {
+            "name": "item(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 504.467,
+              "top": 406.367,
+              "right": 607.8,
+              "bottom": 509.7
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item(Clone)",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 504.467,
+                "top": 406.367,
+                "right": 607.8,
+                "bottom": 509.7
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "position": 9,
+          "item_id": "16011",
+          "genre": 2,
+          "tier": 1,
+          "exp_bonus": false,
+          "count": 127,
+          "selected": false,
+          "image": {
+            "name": "item(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 651.533,
+              "top": 406.367,
+              "right": 754.867,
+              "bottom": 509.7
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item(Clone)",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 651.533,
+                "top": 406.367,
+                "right": 754.867,
+                "bottom": 509.7
+              },
+              "anchor_world_position": null
+            }
+          }
+        },
+        {
+          "position": 10,
+          "item_id": "16021",
+          "genre": 3,
+          "tier": 1,
+          "exp_bonus": false,
+          "count": 110,
+          "selected": false,
+          "image": {
+            "name": "item(Clone)",
+            "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+            "sprite": "icon_frame_bg",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": true,
+            "raycast_top": true,
+            "color": [
+              1.0,
+              1.0,
+              1.0,
+              1.0
+            ],
+            "fill_amount": 1.0,
+            "truncated": false,
+            "bounds": {
+              "left": 798.6,
+              "top": 406.367,
+              "right": 901.933,
+              "bottom": 509.7
+            },
+            "raw": {
+              "kind": "image",
+              "name": "item(Clone)",
+              "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+              "sprite": "icon_frame_bg",
+              "flags": 2031,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "raycast_target": true,
+              "raycast_top": true,
+              "color": {
+                "red": 1.0,
+                "green": 1.0,
+                "blue": 1.0,
+                "alpha": 1.0
+              },
+              "fill_amount": 1.0,
+              "adb_bounds": {
+                "left": 798.6,
+                "top": 406.367,
+                "right": 901.933,
+                "bottom": 509.7
+              },
+              "anchor_world_position": null
+            }
+          }
+        }
+      ],
+      "receipt": {
+        "semantic_id": "tactical/book/9",
+        "generation": 326798,
+        "path": "OverlayCamera/Overlay/UIMain/NewNavalTacticsLessonPage(Clone)/items/scorll/content/item(Clone)",
+        "point": {
+          "x": 703.2,
+          "y": 458.0335
+        }
+      }
+    }
+  ],
+  "dispatches": [
+    {
+      "capability": "tactical.assign",
+      "receipt": {
+        "semantic_id": "tactical/course/confirm",
+        "generation": 326938,
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "point": {
+          "x": 790.0,
+          "y": 515.0
+        }
+      }
+    }
+  ],
+  "before": {
+    "finish_available": false,
+    "go_available": true,
+    "slots": [
+      {
+        "slot": 1,
+        "ship_id": 403994,
+        "ship_name": "希佩尔海军上将..",
+        "ship_level": 120,
+        "skill_name": "荆棘与坚盾",
+        "skill_level": 7,
+        "exp_current": 900,
+        "exp_total": 3200,
+        "status": "running",
+        "remaining_seconds": 28371,
+        "button": {
+          "name": "403994",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 401.172,
+            "top": 86.626,
+            "right": 599.081,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "403994",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": -3.108,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 500.127,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 500.127,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 401.172,
+              "bottom": 356.131,
+              "right": 599.081,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 401.172,
+              "top": 86.626,
+              "right": 599.081,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 2,
+        "ship_id": 204044,
+        "ship_name": "小声望",
+        "ship_level": 120,
+        "skill_name": "小骑士的射击训练",
+        "skill_level": 9,
+        "exp_current": 3200,
+        "exp_total": 5800,
+        "status": "running",
+        "remaining_seconds": 15806,
+        "button": {
+          "name": "204044",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 719.94,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 620.986,
+            "top": 86.626,
+            "right": 818.895,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "204044",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 1.776,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 719.94,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 719.94,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 620.986,
+              "bottom": 356.131,
+              "right": 818.895,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 620.986,
+              "top": 86.626,
+              "right": 818.895,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 3,
+        "ship_id": 306064,
+        "ship_name": "龙骧",
+        "ship_level": 120,
+        "skill_name": "空袭信号",
+        "skill_level": 8,
+        "exp_current": 3850,
+        "exp_total": 4400,
+        "status": "running",
+        "remaining_seconds": 16081,
+        "button": {
+          "name": "306064",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/306064",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 939.753,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 840.799,
+            "top": 86.626,
+            "right": 1038.708,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "306064",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/306064",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 6.661,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 939.753,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 939.753,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 840.799,
+              "bottom": 356.131,
+              "right": 1038.708,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 840.799,
+              "top": 86.626,
+              "right": 1038.708,
+              "bottom": 363.869
+            }
+          }
+        }
+      }
+    ],
+    "actions": [
+      {
+        "semantic_id": "reward/tactical/go",
+        "generation": 325968,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)/frame/main/content/class/frame/go_btn",
+        "point": {
+          "x": 464.804,
+          "y": 434.961
+        }
+      },
+      {
+        "semantic_id": "tactical/page/back",
+        "generation": 325986,
+        "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack",
+        "point": {
+          "x": 57.746,
+          "y": 53.982
+        }
+      },
+      {
+        "semantic_id": "reward/page/back",
+        "generation": 325994,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)",
+        "point": {
+          "x": 827.0,
+          "y": 622.0
+        }
+      }
+    ],
+    "main_page_visible": true
+  },
+  "elapsed_seconds": 60.938,
+  "tactical_assign_grant_remaining": 0,
+  "after": {
+    "finish_available": false,
+    "go_available": true,
+    "slots": [
+      {
+        "slot": 1,
+        "ship_id": 403994,
+        "ship_name": "希佩尔海军上将..",
+        "ship_level": 120,
+        "skill_name": "荆棘与坚盾",
+        "skill_level": 7,
+        "exp_current": 900,
+        "exp_total": 3200,
+        "status": "running",
+        "remaining_seconds": 28301,
+        "button": {
+          "name": "403994",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 401.172,
+            "top": 86.626,
+            "right": 599.081,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "403994",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": -3.108,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 500.127,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 500.127,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 401.172,
+              "bottom": 356.131,
+              "right": 599.081,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 401.172,
+              "top": 86.626,
+              "right": 599.081,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 2,
+        "ship_id": 204044,
+        "ship_name": "小声望",
+        "ship_level": 120,
+        "skill_name": "小骑士的射击训练",
+        "skill_level": 9,
+        "exp_current": 3200,
+        "exp_total": 5800,
+        "status": "running",
+        "remaining_seconds": 15736,
+        "button": {
+          "name": "204044",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 719.94,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 620.986,
+            "top": 86.626,
+            "right": 818.895,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "204044",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 1.776,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 719.94,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 719.94,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 620.986,
+              "bottom": 356.131,
+              "right": 818.895,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 620.986,
+              "top": 86.626,
+              "right": 818.895,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 3,
+        "ship_id": 306064,
+        "ship_name": "龙骧",
+        "ship_level": 120,
+        "skill_name": "空袭信号",
+        "skill_level": 8,
+        "exp_current": 3850,
+        "exp_total": 4400,
+        "status": "running",
+        "remaining_seconds": 16011,
+        "button": {
+          "name": "306064",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/306064",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 939.753,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 840.799,
+            "top": 86.626,
+            "right": 1038.708,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "306064",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/306064",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 6.661,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 939.753,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 939.753,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 840.799,
+              "bottom": 356.131,
+              "right": 1038.708,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 840.799,
+              "top": 86.626,
+              "right": 1038.708,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 4,
+        "ship_id": 102011,
+        "ship_name": "奥马哈",
+        "ship_level": 79,
+        "skill_name": "快速装填",
+        "skill_level": 1,
+        "exp_current": 0,
+        "exp_total": 100,
+        "status": "running",
+        "remaining_seconds": 7195,
+        "button": {
+          "name": "102011",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/102011",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 1159.567,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 1060.612,
+            "top": 86.626,
+            "right": 1258.521,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "102011",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/102011",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 11.546,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 1159.567,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 1159.567,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 1060.612,
+              "bottom": 356.131,
+              "right": 1258.521,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 1060.612,
+              "top": 86.626,
+              "right": 1258.521,
+              "bottom": 363.869
+            }
+          }
+        }
+      }
+    ],
+    "actions": [
+      {
+        "semantic_id": "reward/tactical/go",
+        "generation": 327022,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)/frame/main/content/class/frame/go_btn",
+        "point": {
+          "x": 465.206,
+          "y": 434.961
+        }
+      },
+      {
+        "semantic_id": "tactical/page/back",
+        "generation": 327037,
+        "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack",
+        "point": {
+          "x": 57.746,
+          "y": 53.982
+        }
+      },
+      {
+        "semantic_id": "reward/page/back",
+        "generation": 327046,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)",
+        "point": {
+          "x": 827.0,
+          "y": 622.0
+        }
+      }
+    ],
+    "main_page_visible": true
+  },
+  "filtered_book_position": 9,
+  "temporary_config_removed": true
+}

@@ -7570,25 +7570,28 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
-        "docs/status.md"
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "integration/alas/tactical-filter-r1-live-validation-receipt.json",
+        "docs/status.md",
+        "docs/alas-config-support-matrix.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=textarea; display=default",
       "panels": [
         "Tactical"
       ],
       "path": "Tactical.TacticalFilter",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: <long default in args.json>"
     },
@@ -9366,16 +9369,23 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
-        "docs/status.md"
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "integration/alas/tactical-filter-r1-live-validation-receipt.json",
+        "docs/status.md",
+        "docs/alas-config-support-matrix.md"
       ],
       "field": "Tactical.TacticalFilter",
-      "note": "Original ALAS ordering covers same-color, genre, tier, first fallback, Unicode separators, and no-match cancellation; malformed or partially matched tokens now fail closed."
+      "note": "The configured BlueT1-priority rule was loaded by original ALAS, sorted a real 11-book inventory, selected Blue_T1 at position 9, confirmed one course, and left slot 4 running. Offline replay covers matching, no-match cancellation, and illegal rules."
     },
     {
       "dimensions": {

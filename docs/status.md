@@ -4,6 +4,19 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-17
 
+### Tactical: book filter complete on the live client
+
+- The original Tactical task loaded `BlueT1 > RedT1 > YellowT1 > BlueT2 >
+  RedT2 > YellowT2 > first`, sorted a real 11-book inventory, and selected
+  `Blue_T1` at position 9. It then issued exactly one typed
+  `tactical/course/confirm` input; its grant reached zero and slot 4 remained
+  running for ship `102011` with skill `快速装填`. The source-hash-bound receipt
+  is `integration/alas/tactical-filter-r1-live-validation-receipt.json`.
+- Original-state-machine replay already covers matching priorities, `first`
+  fallback, no-match cancellation, Unicode normalization, and malformed rules.
+  `Tactical.TacticalFilter` is therefore complete; `RapidTrainingSlot` and
+  the remaining Tactical paths are still separately unqualified.
+
 ### Dorm: feed switch and priority filter complete on the live client
 
 - `Dorm.Feed` is now complete for both booleans.  The enabled original-ALAS
