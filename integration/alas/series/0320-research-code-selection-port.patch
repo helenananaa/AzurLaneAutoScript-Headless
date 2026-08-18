@@ -1,0 +1,14 @@
+diff --git a/module/research/research.py b/module/research/research.py
+index 8b2e45b5..bbca8144 100644
+--- a/module/research/research.py
++++ b/module/research/research.py
+@@ -211,5 +211,8 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+             if click_timer.reached() and self.is_in_research():
+                 i = (index - self._research_project_offset) % 5
+                 logger.info(f'Project offset: {self._research_project_offset}, project {index} is at {i}')
+-                self.device.click(RESEARCH_ENTRANCE[i])
++                if semantic_session is not None:
++                    semantic_session.click_research_project_code(project.name)
++                else:
++                    self.device.click(RESEARCH_ENTRANCE[i])
+                 self.ensure_research_stable()

@@ -4558,6 +4558,133 @@ class AlasSemanticAdapter:
             projects.append(project)
         return tuple(projects)
 
+    def click_research_project_code(self, code: str) -> ActionReceipt:
+        """Click the one current card selected by upstream's project code.
+
+        Upstream makes the policy decision over its previously typed project
+        objects.  The client can reorder the visible Unity children before the
+        later ``ENTRANCE_n`` input, so preserve that decision by resolving the
+        selected code against one fresh semantic card snapshot at input time.
+        """
+
+        self._package_gate()
+        if self._research_context is None:
+            raise SemanticGateClosed("research project selection used outside ALAS research flow")
+        normalized = code.strip() if isinstance(code, str) else ""
+        if not normalized:
+            raise SemanticGateClosed("research project code is absent")
+        projects = self.oracle.research_projects()
+        matches = tuple(project for project in projects if project.code == normalized)
+        if len(matches) != 1:
+            raise SemanticGateClosed("selected research project code is ambiguous: " + normalized)
+        project = matches[0]
+        if project.status == ResearchProjectStatus.FINISHED:
+            raise SemanticGateClosed("research policy cannot select a finished project")
+        receipt = self.oracle.click_research_project(project.slot)
+        context = self._research_context
+        context.selected_slot = project.slot
+        context.selected_code = project.code
+        context.selected_status = project.status
+        context.start_receipt = None
+        context.start_confirm_receipt = None
+        context.pending_resource_id = None
+        context.pending_resource_required = None
+        context.queue_add_receipt = None
+        context.queue_confirm_receipt = None
+        context.queue_add_requires_start_grant = False
+        return receipt
+
+    def start_research_project_code(self, code: str) -> bool:
+        """Start the upstream-selected current research card atomically.
+
+        ALAS still chooses ``code`` through its own filter and resource-policy
+        logic. Once that decision has been made, the selected-detail panel
+        hides the card-list checker used by its pixel retry loop. Drive the
+        typed card, start button, and exact resource-confirmation prompt as
+        one semantic transition instead of letting that loop wait indefinitely.
+        """
+
+        self._package_gate()
+        if self._research_context is None:
+            raise SemanticGateClosed("research start used outside ALAS research flow")
+        self.click_research_project_code(code)
+        self.research_detail_stable()
+        context = self._research_context
+        detail = self.oracle.research_detail_state()
+        if detail.code != context.selected_code:
+            raise SemanticGateClosed("selected research project identity changed")
+        # The original Research command also selects an already-running sixth
+        # project when a queue slot becomes free, then sends it through the
+        # ordinary queue-add branch. It is not a new start and must not open a
+        # resource confirmation here.
+        if detail.is_running:
+            return True
+        if not detail.can_start:
+            self.oracle.click("research/detail/root")
+            return False
+        if not self._action_ledger.allowed("research.start"):
+            raise SemanticGateClosed("research start requires a positive budget")
+
+        context.pending_resource_id = detail.resource_id
+        context.pending_resource_required = detail.resource_required
+        if not detail.resource_id:
+            # Resource-free projects have no confirmation modal.  The exact
+            # typed Start control is the one budgeted mutation in this path.
+            receipt = self._dispatch_mutation(
+                "research.start",
+                lambda: self.oracle.click("research/detail/start"),
+            )
+            context.start_receipt = receipt
+            context.start_confirm_receipt = receipt
+            context.last_queue_state = None
+            context.last_projects = None
+        else:
+            start_receipt = self.oracle.click("research/detail/start")
+            context.start_receipt = start_receipt
+            context.start_confirm_receipt = None
+            expected_cost = (detail.resource_id, detail.resource_required)
+
+            deadline = time.monotonic() + 8.0
+            last_prompt_error: Optional[SemanticGateClosed] = None
+            while time.monotonic() < deadline:
+                try:
+                    prompt_cost = self.oracle.research_start_prompt_cost()
+                except SemanticGateClosed as exc:
+                    # The message box mounts its Button and typed text in separate
+                    # Unity updates. Keep the exact-cost gate, but retry this
+                    # documented transient until the bounded start transition ends.
+                    last_prompt_error = exc
+                    time.sleep(0.25)
+                    continue
+                if prompt_cost == expected_cost:
+                    receipt = self._dispatch_mutation(
+                        "research.start",
+                        lambda: self.oracle.click("research/start/confirm"),
+                    )
+                    context.start_confirm_receipt = receipt
+                    context.last_queue_state = None
+                    context.last_projects = None
+                    break
+                time.sleep(0.25)
+            else:
+                raise SemanticGateClosed(
+                    "research start confirmation did not show the selected exact cost"
+                ) from last_prompt_error
+
+        deadline = time.monotonic() + 8.0
+        last_error: Optional[SemanticOracleError] = None
+        while time.monotonic() < deadline:
+            try:
+                running = self.oracle.research_detail_state()
+                if running.code == context.selected_code and running.is_running:
+                    return True
+            except SemanticOracleError as exc:
+                last_error = exc
+            time.sleep(0.25)
+        raise SemanticGateClosed(
+            "research did not enter running state after exact-cost confirmation"
+        ) from last_error
+
     def validate_research_filter(self, filter_: object, value: str) -> None:
         """Fail closed on tokens that upstream's permissive parser would ignore."""
 
@@ -6297,6 +6424,94 @@ class AlasSemanticAdapter:
 
     def research_statuses(self) -> List[str]:
         return [project.status.value for project in self.research_projects()]
+
+    def research_detail_stable(self) -> None:
+        """Require two identical typed detail snapshots after card selection."""
+
+        self._package_gate()
+        if self._research_context is None:
+            raise SemanticGateClosed("research detail stability used outside ALAS research flow")
+        deadline = time.monotonic() + 6.0
+        previous: Optional[Tuple[object, ...]] = None
+        last_error: Optional[SemanticGateClosed] = None
+        while time.monotonic() < deadline:
+            try:
+                detail = self.oracle.research_detail_state()
+                signature = (
+                    detail.code,
+                    detail.subtitle,
+                    detail.duration_seconds,
+                    detail.resource_id,
+                    detail.resource_owned,
+                    detail.resource_required,
+                    detail.requirement,
+                    detail.can_start,
+                    detail.can_queue,
+                    detail.is_running,
+                    detail.is_finished,
+                )
+                if signature == previous:
+                    return
+                previous = signature
+                last_error = None
+            except SemanticGateClosed as exc:
+                last_error = exc
+                previous = None
+            time.sleep(0.25)
+        raise SemanticGateClosed("research detail did not become stably typed") from last_error
+
+    def research_page_stable(self) -> None:
+        """Require two coherent identical typed research-card snapshots.
+
+        Upstream uses a fixed image checker after leaving the queue.  In
+        semantic mode the complete five-card projection is the equivalent
+        observation: it must stay structurally identical across two fresh
+        reads before ALAS continues its existing state machine.
+        """
+
+        self._package_gate()
+        if self._research_context is None:
+            raise SemanticGateClosed("research stability used outside ALAS research flow")
+        deadline = time.monotonic() + 6.0
+        previous: Optional[Tuple[Tuple[object, ...], ...]] = None
+        last_error: Optional[SemanticGateClosed] = None
+        while time.monotonic() < deadline:
+            try:
+                states = self.oracle.research_projects()
+                if len(states) != 5 or {state.slot for state in states} != set(
+                    range(1, 6)
+                ):
+                    raise SemanticGateClosed(
+                        "research stability requires exactly five card slots"
+                    )
+                if {state.unity_index for state in states} != set(range(1, 6)):
+                    raise SemanticGateClosed(
+                        "research stability requires unique Unity card identities"
+                    )
+                signature = tuple(
+                    sorted(
+                        (
+                            state.slot,
+                            state.unity_index,
+                            state.code,
+                            state.series,
+                            state.duration_seconds,
+                            state.status.value,
+                        )
+                        for state in states
+                    )
+                )
+                if signature == previous:
+                    self._research_context.last_projects = states
+                    self._research_context.last_projects_observed_at = time.monotonic()
+                    return
+                previous = signature
+                last_error = None
+            except SemanticGateClosed as exc:
+                last_error = exc
+                previous = None
+            time.sleep(0.25)
+        raise SemanticGateClosed("research page did not become stably typed") from last_error
 
     def research_finished_index(self) -> Optional[int]:
         finished = [
@@ -9522,6 +9737,12 @@ class AlasSemanticSession:
     ) -> Tuple[object, ...]:
         return self.open().research_projects_for_alas(project_factory)
 
+    def click_research_project_code(self, code: str) -> ActionReceipt:
+        return self.open().click_research_project_code(code)
+
+    def start_research_project_code(self, code: str) -> bool:
+        return self.open().start_research_project_code(code)
+
     def validate_research_filter(self, filter_: object, value: str) -> None:
         self.open().validate_research_filter(filter_, value)
 
@@ -9886,6 +10107,12 @@ class AlasSemanticSession:
 
     def research_statuses(self) -> List[str]:
         return self.open().research_statuses()
+
+    def research_detail_stable(self) -> None:
+        self.open().research_detail_stable()
+
+    def research_page_stable(self) -> None:
+        self.open().research_page_stable()
 
     def research_finished_index(self) -> Optional[int]:
         return self.open().research_finished_index()

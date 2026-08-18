@@ -339,6 +339,28 @@ diff --git a/module/research/ui.py b/module/research/ui.py
 index 3f652c11..dea1bd5f 100644
 --- a/module/research/ui.py
 +++ b/module/research/ui.py
+@@ -17,11 +17,21 @@ class ResearchUI(UI):
+     def is_in_queue(self, interval=0):
+         return self.appear(QUEUE_CHECK, offset=(20, 20), interval=interval)
+ 
+     def ensure_research_stable(self):
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.research_detail_stable()
++            return
+         self.wait_until_stable(STABLE_CHECKER)
+ 
+     def ensure_research_center_stable(self):
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.research_page_stable()
++            return
+         self.wait_until_stable(STABLE_CHECKER_CENTER)
+ 
+     def queue_enter(self, skip_first_screenshot=True):
+         """
 @@ -99,6 +99,12 @@ class ResearchUI(UI):
          Returns:
              list[str]: List of project status

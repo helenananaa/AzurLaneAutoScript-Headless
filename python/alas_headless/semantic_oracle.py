@@ -15674,24 +15674,13 @@ class SemanticOracle:
                 )
             return matches[0].text.strip()
 
-        status_texts = {
-            "查看详情": ResearchProjectStatus.DETAIL,
-            "进行中": ResearchProjectStatus.RUNNING,
-            "等待中": ResearchProjectStatus.WAITING,
-            "研究完成": ResearchProjectStatus.FINISHED,
-        }
         projects = []
         for slot, (unity_index, button) in enumerate(indexed, start=1):
             root = button.path + "/frame/"
             code = text_at(root + "name_bg/Text")
             subtitle = text_at(root + "sub_name")
             marker = re.sub(r"<[^>]*>", "", text_at(root + "marks/Text")).strip()
-            try:
-                status = status_texts[marker]
-            except KeyError as exc:
-                raise SemanticGateClosed(
-                    "research project status is not reviewed: " + marker
-                ) from exc
+            status = self._research_status_from_text(marker)
             duration = self.parse_countdown_seconds(text_at(root + "marks/time"))
             version_path = root + "top/label/version"
             versions = tuple(
@@ -15761,6 +15750,9 @@ class SemanticOracle:
             "查看详情": ResearchProjectStatus.DETAIL,
             "进行中": ResearchProjectStatus.RUNNING,
             "等待中": ResearchProjectStatus.WAITING,
+            # The live CN queue currently labels a queued item as
+            # “等待进行”, rather than the older “等待中” wording.
+            "等待进行": ResearchProjectStatus.WAITING,
             "研究完成": ResearchProjectStatus.FINISHED,
         }
         try:
@@ -15827,31 +15819,6 @@ class SemanticOracle:
                 )
             return matches[0].text.strip()
 
-        duration = self.parse_countdown_seconds(panel_text("timer/bg/Text"))
-        resource = re.fullmatch(
-            r"([0-9]+)/([1-9][0-9]*)",
-            re.sub(
-                r"<[^>]*>",
-                "",
-                panel_text("consume_panel/bg/container/item_tpl/icon_bg/count"),
-            ),
-        )
-        if resource is None or not code:
-            raise SemanticGateClosed("research detail resource state is malformed")
-        owned, required = map(int, resource.groups())
-        resource_path = panel + "consume_panel/bg/container/item_tpl/icon_bg/icon"
-        icons = tuple(
-            item
-            for item in ui_state.images
-            if item.path.endswith(resource_path)
-            and item.active_in_hierarchy
-            and item.active_and_enabled
-            and not item.truncated
-            and item.bounds is not None
-        )
-        if len(icons) != 1 or re.fullmatch(r"[A-Za-z0-9_.-]+", icons[0].sprite) is None:
-            raise SemanticGateClosed("research detail resource identity is ambiguous")
-
         action_ids = {
             "start": "research/detail/start",
             "stop": "research/detail/stop",
@@ -15869,16 +15836,86 @@ class SemanticOracle:
                 )
             else:
                 actions[key] = bool(matches and matches[0].actionable)
+
+        duration = self.parse_countdown_seconds(panel_text("timer/bg/Text"))
+        if not code:
+            raise SemanticGateClosed("research detail code is absent")
+
+        # A running or finished project no longer has a start cost panel in
+        # the native client.  Its stop/finish action is sufficient to prove
+        # the non-startable detail state; inventing a resource for it would
+        # make a later confirmation unsafe.  Some idle projects likewise cost
+        # no resource.  Their live detail has no cost count or resource icon,
+        # and starts directly without a confirmation prompt.
+        if actions["stop"] or actions["finish"]:
+            resource_id = ""
+            owned = 0
+            required = 0
+            requirement = ""
+        else:
+            resource_count_path = (
+                panel + "consume_panel/bg/container/item_tpl/icon_bg/count"
+            )
+            resource_path = panel + "consume_panel/bg/container/item_tpl/icon_bg/icon"
+            resource_counts = tuple(
+                item
+                for item in ui_state.texts
+                if item.path.endswith(resource_count_path)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            icons = tuple(
+                item
+                for item in ui_state.images
+                if item.path.endswith(resource_path)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if not resource_counts and not icons:
+                resource_id = ""
+                owned = 0
+                required = 0
+                requirement = ""
+            elif len(resource_counts) != 1 or len(icons) != 1:
+                raise SemanticGateClosed("research detail resource identity is ambiguous")
+            else:
+                resource = re.fullmatch(
+                    r"([0-9]+)/([1-9][0-9]*)",
+                    re.sub(r"<[^>]*>", "", resource_counts[0].text),
+                )
+                if resource is None:
+                    raise SemanticGateClosed("research detail resource state is malformed")
+                if re.fullmatch(r"[A-Za-z0-9_.-]+", icons[0].sprite) is None:
+                    raise SemanticGateClosed("research detail resource identity is ambiguous")
+                owned, required = map(int, resource.groups())
+                # Research Q projects display the numeric inventory sprite
+                # on their detail card, while the confirmation prompt names
+                # the same carrier-aircraft part by tier.  Normalize the
+                # reviewed item-id range so both independent observations
+                # must agree before the irreversible confirmation.
+                resource_id = {
+                    "17041": "research_part_t1",
+                    "17042": "research_part_t2",
+                    "17043": "research_part_t3",
+                    "17044": "research_part_t4",
+                }.get(icons[0].sprite, icons[0].sprite)
+                requirement = re.sub(
+                    r"<[^>]*>",
+                    "",
+                    panel_text("consume_panel/bg/task_panel/slider/Text"),
+                ).strip()
         return ResearchDetailState(
             code=code,
             subtitle=subtitle,
             duration_seconds=duration,
-            resource_id=icons[0].sprite,
+            resource_id=resource_id,
             resource_owned=owned,
             resource_required=required,
-            requirement=re.sub(
-                r"<[^>]*>", "", panel_text("consume_panel/bg/task_panel/slider/Text")
-            ).strip(),
+            requirement=requirement,
             can_start=actions["start"] and owned >= required,
             can_queue=actions["queue"],
             is_running=actions["stop"],
@@ -16218,7 +16255,7 @@ class SemanticOracle:
         )
         if (
             not back.actionable
-            or len(queue_title) != 1
+            or len(queue_title) > 1
             or ui_state.image_truncated
             or ui_state.generation < button_state.generation
             or ui_state.generation > button_state.generation + 2
@@ -16273,6 +16310,8 @@ class SemanticOracle:
                     remaining_seconds=self.parse_countdown_seconds(remain),
                 )
             )
+        if not queue_title and not entries:
+            raise SemanticGateClosed("research queue has no typed identity anchor")
         claim_matches = self._matches(button_state, "research/queue/claim")
         if len(claim_matches) > 1:
             raise SemanticGateClosed("research queue claim target is ambiguous")
@@ -20027,12 +20066,19 @@ class SemanticOracle:
             return None
         plain, cancel, confirm = parts
         match = re.fullmatch(
-            r"开启该科研项目需要消耗\s*:\s*(物资|心智魔方)x([1-9][0-9]*)",
+            r"开启该科研项目需要消耗\s*:\s*(物资|心智魔方|舰载机部件T[1-4])x([1-9][0-9]*)",
             plain,
         )
         if match is None or cancel != "取消" or confirm != "确定":
             return None
-        resource_id = {"物资": "gold", "心智魔方": "20001"}[match.group(1)]
+        resource_id = {
+            "物资": "gold",
+            "心智魔方": "20001",
+            "舰载机部件T1": "research_part_t1",
+            "舰载机部件T2": "research_part_t2",
+            "舰载机部件T3": "research_part_t3",
+            "舰载机部件T4": "research_part_t4",
+        }[match.group(1)]
         return resource_id, int(match.group(2))
 
     def commission_start_prompt_cost(self) -> Optional[int]:

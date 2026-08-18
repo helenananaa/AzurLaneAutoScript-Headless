@@ -3836,6 +3836,11 @@ class SemanticOracleTests(unittest.TestCase):
         receipt = oracle.click("research/start/confirm")
         self.assertEqual(receipt.semantic_id, "research/start/confirm")
 
+        backend.ui["texts"][0]["text"] = "开启该科研项目需要消耗 :舰载机部件T2x20"
+        self.assertEqual(
+            oracle.research_start_prompt_cost(), ("research_part_t2", 20)
+        )
+
         backend.ui["texts"][0]["text"] = "开启该科研项目需要消耗 :钻石x1500"
         self.assertIsNone(oracle.research_start_prompt_cost())
         with self.assertRaises(SemanticGateClosed):
@@ -3922,7 +3927,9 @@ class SemanticOracleTests(unittest.TestCase):
                     make_text("小型项目", frame + "sub_name"),
                     make_text(
                         "<color=#776AB0FF>{0}</color>".format(
-                            "进行中" if slot == 3 else "查看详情"
+                            "进行中"
+                            if slot == 3
+                            else "等待进行" if slot == 4 else "查看详情"
                         ),
                         frame + "marks/Text",
                     ),
@@ -3941,6 +3948,7 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual([item.unity_index for item in projects], [2, 1, 5, 4, 3])
         self.assertEqual([item.slot for item in projects], [1, 2, 3, 4, 5])
         self.assertEqual(projects[2].status, ResearchProjectStatus.RUNNING)
+        self.assertEqual(projects[3].status, ResearchProjectStatus.WAITING)
         self.assertEqual(projects[2].duration_seconds, 24 * 60 + 43)
         self.assertTrue(all(item.series == 9 for item in projects))
 
@@ -4028,6 +4036,139 @@ class SemanticOracleTests(unittest.TestCase):
             queue_state.entries[0].status,
             ResearchProjectStatus.FINISHED,
         )
+
+        backend.ui["images"] = [
+            image
+            for image in backend.ui["images"]
+            if not image["path"].endswith("title_queue")
+        ]
+        backend.ui["image_count"] = len(backend.ui["images"])
+        queue_state_without_title = oracle.research_queue_state()
+
+        self.assertEqual(queue_state_without_title.entries, queue_state.entries)
+
+    def test_research_queue_accepts_live_waiting_label(self):
+        page = "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"
+        queue = page + "main/queue_page/queue_rect/content/2/frame/"
+        backend = FakeBackend(
+            [make_button("back", page + "blur_panel/adapt/top/back")]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("G-236", queue + "name_bg/Text"),
+                make_text("等待进行", queue + "marks/Text"),
+                make_text("02:30:00", queue + "marks/time"),
+            ],
+            images=[
+                make_image(page + "blur_panel/adapt/top/title_queue", "title_queue"),
+                make_image(queue + "top/label/version", "version_9"),
+            ],
+        )
+
+        state = make_oracle(backend).research_queue_state()
+
+        self.assertFalse(state.reward_claimable)
+        self.assertEqual(state.empty_slots, 4)
+        self.assertEqual(state.entries[0].code, "G-236")
+        self.assertEqual(state.entries[0].status, ResearchProjectStatus.WAITING)
+
+    def test_running_research_detail_has_no_start_resource(self):
+        selected = (
+            "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"
+            "main/base_page/selecte_panel/"
+        )
+        card = selected + "technology_card/frame/"
+        backend = FakeBackend(
+            [
+                make_button("selecte_panel", selected.rstrip("/")),
+                make_button("stop_btn", card + "btns/stop_btn"),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("G-412", card + "name_bg/Text"),
+                make_text("基础研究", card + "sub_name"),
+                make_text("01:29:59", selected + "timer/bg/Text"),
+            ]
+        )
+
+        detail = make_oracle(backend).research_detail_state()
+
+        self.assertTrue(detail.is_running)
+        self.assertFalse(detail.can_start)
+        self.assertEqual(detail.resource_id, "")
+        self.assertEqual(detail.resource_owned, 0)
+        self.assertEqual(detail.resource_required, 0)
+
+    def test_resource_free_idle_research_starts_without_a_cost_panel(self):
+        selected = (
+            "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"
+            "main/base_page/selecte_panel/"
+        )
+        card = selected + "technology_card/frame/"
+        backend = FakeBackend(
+            [
+                make_button("selecte_panel", selected.rstrip("/")),
+                make_button("start_btn", card + "btns/start_btn"),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("C-153", card + "name_bg/Text"),
+                make_text("中型项目", card + "sub_name"),
+                make_text("06:00:00", selected + "timer/bg/Text"),
+            ]
+        )
+
+        detail = make_oracle(backend).research_detail_state()
+
+        self.assertTrue(detail.can_start)
+        self.assertFalse(detail.is_running)
+        self.assertEqual(detail.resource_id, "")
+        self.assertEqual(detail.resource_owned, 0)
+        self.assertEqual(detail.resource_required, 0)
+
+    def test_research_part_tier_two_normalizes_detail_item_id(self):
+        selected = (
+            "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"
+            "main/base_page/selecte_panel/"
+        )
+        card = selected + "technology_card/frame/"
+        backend = FakeBackend(
+            [
+                make_button("selecte_panel", selected.rstrip("/")),
+                make_button("start_btn", card + "btns/start_btn"),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("Q-289", card + "name_bg/Text"),
+                make_text("小型项目", card + "sub_name"),
+                make_text("02:00:00", selected + "timer/bg/Text"),
+                make_text(
+                    "29300/20",
+                    selected
+                    + "consume_panel/bg/container/item_tpl/icon_bg/count",
+                ),
+                make_text(
+                    "无",
+                    selected + "consume_panel/bg/task_panel/slider/Text",
+                ),
+            ],
+            images=[
+                make_image(
+                    selected
+                    + "consume_panel/bg/container/item_tpl/icon_bg/icon",
+                    "17042",
+                )
+            ],
+        )
+
+        detail = make_oracle(backend).research_detail_state()
+
+        self.assertEqual(detail.resource_id, "research_part_t2")
+        self.assertEqual(detail.resource_owned, 29300)
+        self.assertEqual(detail.resource_required, 20)
 
     def test_finished_research_cannot_close_through_detail_root(self):
         selected = (

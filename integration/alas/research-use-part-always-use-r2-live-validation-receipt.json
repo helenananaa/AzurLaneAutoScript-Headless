@@ -1,0 +1,465 @@
+{
+  "schema": "alas-headless.research-resource-policy-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "configured": {
+    "Research.PresetFilter": "custom",
+    "Research.CustomFilter": "S9-Q",
+    "Research.AllowDelay": false,
+    "Research.UseCoin": "do_not_use",
+    "Research.UseCube": "do_not_use",
+    "Research.UsePart": "always_use"
+  },
+  "target_resource": "part",
+  "strategy": "always_use",
+  "source_sha256": {
+    "research": "a8c601ff5910edc1354d0a6da52c5fceba03de514d4e57c9be594e17e813fc5a",
+    "selector": "91d95dabb303940478b854227be90380e2439f6d920e155144a7e08881320a82",
+    "adapter": "993c9776e05985561192c9b4725ef39181509a488a00f7e6010d37b4a9e6d172",
+    "oracle": "c696a1c8e34225e254cfacb61fef2e120ecf54f7cb31c82ed81c3f141883be0e",
+    "runner": "711c5fd8cae61b5487e7f629c0d4faf9f94a56b7de2f8d1cbf8ee2d89db53f20"
+  },
+  "passed": true,
+  "dispatches": [
+    {
+      "capability": "research.start",
+      "selected_code": "Q-289-MI",
+      "expected_prompt_cost": {
+        "resource_id": "research_part_t2",
+        "required": 20
+      },
+      "semantic_id": "research/start/confirm",
+      "generation": 195262,
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+      "point": {
+        "x": 790.0,
+        "y": 515.0
+      }
+    }
+  ],
+  "selector_calls": [
+    {
+      "enforce": false,
+      "projects": [
+        {
+          "code": "S9 T-384-MI",
+          "series": "S9",
+          "genre": "T",
+          "duration": "4",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S7 C-185-MI",
+          "series": "S7",
+          "genre": "C",
+          "duration": "8",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 Q-289-MI",
+          "series": "S9",
+          "genre": "Q",
+          "duration": "2",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": true,
+          "valid": true
+        },
+        {
+          "code": "S6 Q-351-MI",
+          "series": "S6",
+          "genre": "Q",
+          "duration": "1",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": true,
+          "valid": true
+        },
+        {
+          "code": "S9 D-732-MI",
+          "series": "S9",
+          "genre": "D",
+          "duration": "2.5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        }
+      ],
+      "priority": [
+        {
+          "code": "S9 Q-289-MI",
+          "series": "S9",
+          "genre": "Q",
+          "duration": "2",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": true,
+          "valid": true
+        }
+      ]
+    }
+  ],
+  "bounded_queue_append_skips": 1,
+  "task_return": null,
+  "task_completed": true,
+  "elapsed_seconds": 92.672,
+  "research_start_grant_remaining": 0,
+  "projects_after_task": [
+    {
+      "slot": 1,
+      "unity_index": 2,
+      "code": "D-332-MI",
+      "subtitle": "中型项目",
+      "series": 9,
+      "status": "detail",
+      "duration_seconds": 18000,
+      "button": {
+        "name": "2",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/2",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 180.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 98.211,
+          "top": 144.686,
+          "right": 261.789,
+          "bottom": 575.314
+        },
+        "raw": {
+          "name": "2",
+          "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/2",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "world_position": {
+            "x": -10.222,
+            "y": 0.0,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -107.5,
+            "y": -283.0,
+            "width": 215.0,
+            "height": 566.0
+          },
+          "screen_point": {
+            "x": 180.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 180.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 98.211,
+            "bottom": 144.686,
+            "right": 261.789,
+            "top": 575.314
+          },
+          "adb_bounds": {
+            "left": 98.211,
+            "top": 144.686,
+            "right": 261.789,
+            "bottom": 575.314
+          }
+        }
+      }
+    },
+    {
+      "slot": 2,
+      "unity_index": 4,
+      "code": "D-747-MI",
+      "subtitle": "小型项目",
+      "series": 9,
+      "status": "detail",
+      "duration_seconds": 9000,
+      "button": {
+        "name": "4",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/4",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 410.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 315.3,
+          "top": 110.697,
+          "right": 504.7,
+          "bottom": 609.303
+        },
+        "raw": {
+          "name": "4",
+          "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/4",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "world_position": {
+            "x": -5.111,
+            "y": 0.0,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -107.5,
+            "y": -283.0,
+            "width": 215.0,
+            "height": 566.0
+          },
+          "screen_point": {
+            "x": 410.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 410.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 315.3,
+            "bottom": 110.697,
+            "right": 504.7,
+            "top": 609.303
+          },
+          "adb_bounds": {
+            "left": 315.3,
+            "top": 110.697,
+            "right": 504.7,
+            "bottom": 609.303
+          }
+        }
+      }
+    },
+    {
+      "slot": 3,
+      "unity_index": 5,
+      "code": "C-185-MI",
+      "subtitle": "大型项目",
+      "series": 6,
+      "status": "detail",
+      "duration_seconds": 28800,
+      "button": {
+        "name": "5",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/5",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 532.611,
+          "top": 77.291,
+          "right": 747.39,
+          "bottom": 642.709
+        },
+        "raw": {
+          "name": "5",
+          "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/5",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "world_position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -107.5,
+            "y": -283.0,
+            "width": 215.0,
+            "height": 566.0
+          },
+          "screen_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 532.611,
+            "bottom": 77.291,
+            "right": 747.39,
+            "top": 642.709
+          },
+          "adb_bounds": {
+            "left": 532.611,
+            "top": 77.291,
+            "right": 747.39,
+            "bottom": 642.709
+          }
+        }
+      }
+    },
+    {
+      "slot": 4,
+      "unity_index": 3,
+      "code": "D-337-MI",
+      "subtitle": "中型项目",
+      "series": 9,
+      "status": "detail",
+      "duration_seconds": 18000,
+      "button": {
+        "name": "3",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/3",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 870.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 775.4,
+          "top": 110.96,
+          "right": 964.6,
+          "bottom": 609.04
+        },
+        "raw": {
+          "name": "3",
+          "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/3",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "world_position": {
+            "x": 5.111,
+            "y": 0.0,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -107.5,
+            "y": -283.0,
+            "width": 215.0,
+            "height": 566.0
+          },
+          "screen_point": {
+            "x": 870.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 870.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 775.4,
+            "bottom": 110.96,
+            "right": 964.6,
+            "top": 609.04
+          },
+          "adb_bounds": {
+            "left": 775.4,
+            "top": 110.96,
+            "right": 964.6,
+            "bottom": 609.04
+          }
+        }
+      }
+    },
+    {
+      "slot": 5,
+      "unity_index": 1,
+      "code": "T-384-MI",
+      "subtitle": "小型项目",
+      "series": 7,
+      "status": "detail",
+      "duration_seconds": 14400,
+      "button": {
+        "name": "1",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 1100.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 1018.245,
+          "top": 144.775,
+          "right": 1181.755,
+          "bottom": 575.225
+        },
+        "raw": {
+          "name": "1",
+          "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/1",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "world_position": {
+            "x": 10.222,
+            "y": 0.0,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -107.5,
+            "y": -283.0,
+            "width": 215.0,
+            "height": 566.0
+          },
+          "screen_point": {
+            "x": 1100.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 1100.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 1018.245,
+            "bottom": 144.775,
+            "right": 1181.755,
+            "top": 575.225
+          },
+          "adb_bounds": {
+            "left": 1018.245,
+            "top": 144.775,
+            "right": 1181.755,
+            "bottom": 575.225
+          }
+        }
+      }
+    }
+  ],
+  "temporary_config_removed": true
+}

@@ -1311,6 +1311,14 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.click(NamedButton("BUILD_CHECK"))
 
+    def test_research_page_check_rejects_selected_detail_panel(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.research_projects_visible_value = False
+        oracle.enabled_values["research/detail/root"] = True
+
+        self.assertFalse(adapter.appear(NamedButton("RESEARCH_CHECK")))
+
     def test_dorm_page_check_keeps_owned_page_visible_under_empty_food_modal(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_dorm()
@@ -1433,6 +1441,262 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "slots are incomplete"):
             adapter.research_projects_for_alas(Project)
         self.assertEqual(oracle.click_calls, [])
+
+    def test_research_page_stable_requires_two_identical_typed_snapshots(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=slot,
+                unity_index=slot,
+                code="Q-{0:03d}".format(slot),
+                series=9,
+                duration_seconds=1800,
+                status=ResearchProjectStatus.DETAIL,
+            )
+            for slot in range(1, 6)
+        ]
+
+        adapter.research_page_stable()
+
+        self.assertEqual(oracle.click_calls, [])
+        self.assertEqual(adapter.research_statuses(), ["detail"] * 5)
+
+    def test_research_detail_stable_requires_two_identical_typed_snapshots(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.research_detail_value = SimpleNamespace(
+            code="G-412",
+            subtitle="small project",
+            duration_seconds=5400,
+            resource_id="gold",
+            resource_owned=9000,
+            resource_required=1500,
+            requirement="",
+            can_start=True,
+            can_queue=False,
+            is_running=False,
+            is_finished=False,
+        )
+
+        adapter.research_detail_stable()
+
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_research_code_selection_tracks_the_current_card_position(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=1,
+                unity_index=2,
+                code="G-236-MI",
+                status=ResearchProjectStatus.DETAIL,
+            ),
+            SimpleNamespace(
+                slot=5,
+                unity_index=1,
+                code="D-381-MI",
+                status=ResearchProjectStatus.DETAIL,
+            ),
+        ]
+
+        receipt = adapter.click_research_project_code("G-236-MI")
+
+        self.assertEqual(receipt.semantic_id, "research/project/1")
+        self.assertEqual(adapter._research_context.selected_slot, 1)
+        self.assertEqual(adapter._research_context.selected_code, "G-236-MI")
+        self.assertEqual(oracle.click_calls, ["research/project/1"])
+
+    def test_research_atomic_start_confirms_the_selected_exact_cost(self):
+        oracle = FakeOracle()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=1,
+                unity_index=3,
+                code="G-236-MI",
+                status=ResearchProjectStatus.DETAIL,
+            )
+        ]
+        oracle.research_detail_value = SimpleNamespace(
+            code="G-236-MI",
+            subtitle="small project",
+            duration_seconds=9000,
+            resource_id="gold",
+            resource_owned=51507,
+            resource_required=3000,
+            requirement="",
+            can_start=True,
+            can_queue=False,
+            is_running=False,
+            is_finished=False,
+        )
+        oracle.research_prompt_cost = ("gold", 3000)
+        original_click = oracle.click
+
+        def click(semantic_id):
+            receipt = original_click(semantic_id)
+            if semantic_id == "research/start/confirm":
+                oracle.research_detail_value.is_running = True
+                oracle.research_detail_value.can_start = False
+            return receipt
+
+        oracle.click = click
+        original_prompt_cost = oracle.research_start_prompt_cost
+        prompt_reads = 0
+
+        def research_start_prompt_cost():
+            nonlocal prompt_reads
+            prompt_reads += 1
+            if prompt_reads == 1:
+                raise SemanticGateClosed("Msgbox snapshots are not coherent")
+            return original_prompt_cost()
+
+        oracle.research_start_prompt_cost = research_start_prompt_cost
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            research_start_budget=1,
+        )
+        adapter.begin_research()
+
+        self.assertTrue(adapter.start_research_project_code("G-236-MI"))
+
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
+        self.assertGreaterEqual(prompt_reads, 2)
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "research/project/1",
+                "research/detail/start",
+                "research/start/confirm",
+            ],
+        )
+
+    def test_research_atomic_start_preserves_running_project_for_queue_add(self):
+        oracle = FakeOracle()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=2,
+                unity_index=4,
+                code="G-412-MI",
+                status=ResearchProjectStatus.RUNNING,
+            )
+        ]
+        oracle.research_detail_value = SimpleNamespace(
+            code="G-412-MI",
+            subtitle="small project",
+            duration_seconds=5400,
+            resource_id="",
+            resource_owned=0,
+            resource_required=0,
+            requirement="",
+            can_start=False,
+            can_queue=True,
+            is_running=True,
+            is_finished=False,
+        )
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            research_start_budget=1,
+        )
+        adapter.begin_research()
+
+        self.assertTrue(adapter.start_research_project_code("G-412-MI"))
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 1)
+        self.assertEqual(oracle.click_calls, ["research/project/2"])
+
+    def test_research_atomic_start_dispatches_resource_free_project_directly(self):
+        oracle = FakeOracle()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=4,
+                unity_index=5,
+                code="C-153-MI",
+                status=ResearchProjectStatus.DETAIL,
+            )
+        ]
+        oracle.research_detail_value = SimpleNamespace(
+            code="C-153-MI",
+            subtitle="medium project",
+            duration_seconds=21600,
+            resource_id="",
+            resource_owned=0,
+            resource_required=0,
+            requirement="",
+            can_start=True,
+            can_queue=False,
+            is_running=False,
+            is_finished=False,
+        )
+        original_click = oracle.click
+
+        def click(semantic_id):
+            receipt = original_click(semantic_id)
+            if semantic_id == "research/detail/start":
+                oracle.research_detail_value.is_running = True
+                oracle.research_detail_value.can_start = False
+            return receipt
+
+        oracle.click = click
+        adapter = AlasSemanticAdapter(oracle, lambda: None, research_start_budget=1)
+        adapter.begin_research()
+
+        self.assertTrue(adapter.start_research_project_code("C-153-MI"))
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
+        self.assertEqual(
+            oracle.click_calls,
+            ["research/project/4", "research/detail/start"],
+        )
+
+    def test_research_atomic_start_matches_normalized_part_prompt(self):
+        oracle = FakeOracle()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=1,
+                unity_index=1,
+                code="Q-289-MI",
+                status=ResearchProjectStatus.DETAIL,
+            )
+        ]
+        oracle.research_detail_value = SimpleNamespace(
+            code="Q-289-MI",
+            subtitle="small project",
+            duration_seconds=7200,
+            resource_id="research_part_t2",
+            resource_owned=29300,
+            resource_required=20,
+            requirement="",
+            can_start=True,
+            can_queue=False,
+            is_running=False,
+            is_finished=False,
+        )
+        oracle.research_prompt_cost = ("research_part_t2", 20)
+        original_click = oracle.click
+
+        def click(semantic_id):
+            receipt = original_click(semantic_id)
+            if semantic_id == "research/start/confirm":
+                oracle.research_detail_value.is_running = True
+                oracle.research_detail_value.can_start = False
+            return receipt
+
+        oracle.click = click
+        adapter = AlasSemanticAdapter(oracle, lambda: None, research_start_budget=1)
+        adapter.begin_research()
+
+        self.assertTrue(adapter.start_research_project_code("Q-289-MI"))
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "research/project/1",
+                "research/detail/start",
+                "research/start/confirm",
+            ],
+        )
 
     def test_research_start_budget_is_spent_only_on_matching_final_confirm(self):
         oracle = FakeOracle()

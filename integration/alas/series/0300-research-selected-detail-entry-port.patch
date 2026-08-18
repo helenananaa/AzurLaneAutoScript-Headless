@@ -1,0 +1,34 @@
+diff --git a/module/research/ui.py b/module/research/ui.py
+index dea1bd5f..4a07f401 100644
+--- a/module/research/ui.py
++++ b/module/research/ui.py
+@@ -35,9 +35,16 @@ class ResearchUI(UI):
+     def queue_enter(self, skip_first_screenshot=True):
+         """
+         Pages:
+             in: is_in_research
+             out: is_in_queue
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None and self.appear(RESEARCH_DETAIL_QUIT):
++            # A previously selected project is still owned by the Research
++            # page, but it covers the queue entry control.  Resolve it through
++            # the normal detail-quit branch before entering the queue.
++            self.research_detail_quit()
+         self.ui_click(RESEARCH_GOTO_QUEUE, check_button=self.is_in_queue, appear_button=self.is_in_research,
+                       retry_wait=1, skip_first_screenshot=skip_first_screenshot)
+ 
+@@ -137,6 +144,12 @@ class ResearchUI(UI):
+ 
+     def research_detail_quit(self, skip_first_screenshot=True):
+         logger.info('Research detail quit')
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None and self.appear(RESEARCH_DETAIL_QUIT):
++            self.device.click(RESEARCH_DETAIL_QUIT)
++            self.ensure_research_center_stable()
++            return
+         click_timer = Timer(10)
+         while 1:
+             if skip_first_screenshot:

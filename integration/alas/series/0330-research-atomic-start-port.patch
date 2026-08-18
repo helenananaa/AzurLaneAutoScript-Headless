@@ -1,0 +1,26 @@
+diff --git a/module/research/research.py b/module/research/research.py
+--- a/module/research/research.py
++++ b/module/research/research.py
+@@ -189,6 +189,22 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+             logger.warning(f'The project to start: {project} is not in known projects')
+             return None
+         logger.info(f'Research project: {index}')
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            # ALAS owns filtering and resource-policy selection. Once that
++            # decision names one card, use the typed selected-detail transition
++            # so the pixel list checker cannot strand this loop below it.
++            if isinstance(project, int):
++                selected_code = semantic_session.research_projects()[index].code
++            else:
++                selected_code = project.name
++            started = semantic_session.start_research_project_code(selected_code)
++            if started and add_queue:
++                self.research_queue_add()
++            self.research_project_started = project if started else None
++            self._research_project_offset = (index - 2) % 5
++            return started
+         self.interval_clear([RESEARCH_START])
+         self.popup_interval_clear()
+         available = False

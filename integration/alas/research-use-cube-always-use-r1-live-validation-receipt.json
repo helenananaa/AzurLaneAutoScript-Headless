@@ -1,0 +1,128 @@
+{
+  "schema": "alas-headless.research-resource-policy-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "847f7ebb60fb3cbd2b7ae43e2a6690569df6632aa452de593be91fb2b2a61555",
+  "configured": {
+    "Research.PresetFilter": "custom",
+    "Research.CustomFilter": "S9-H",
+    "Research.AllowDelay": false,
+    "Research.UseCoin": "do_not_use",
+    "Research.UseCube": "always_use",
+    "Research.UsePart": "do_not_use"
+  },
+  "target_resource": "cube",
+  "strategy": "always_use",
+  "source_sha256": {
+    "research": "a8c601ff5910edc1354d0a6da52c5fceba03de514d4e57c9be594e17e813fc5a",
+    "selector": "91d95dabb303940478b854227be90380e2439f6d920e155144a7e08881320a82",
+    "adapter": "993c9776e05985561192c9b4725ef39181509a488a00f7e6010d37b4a9e6d172",
+    "oracle": "c696a1c8e34225e254cfacb61fef2e120ecf54f7cb31c82ed81c3f141883be0e",
+    "runner": "711c5fd8cae61b5487e7f629c0d4faf9f94a56b7de2f8d1cbf8ee2d89db53f20"
+  },
+  "passed": true,
+  "dispatches": [
+    {
+      "capability": "research.start",
+      "selected_code": "H-387-MI",
+      "expected_prompt_cost": {
+        "resource_id": "20001",
+        "required": 3
+      },
+      "semantic_id": "research/start/confirm",
+      "generation": 206326,
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+      "point": {
+        "x": 790.0,
+        "y": 515.0
+      }
+    }
+  ],
+  "selector_calls": [
+    {
+      "enforce": false,
+      "projects": [
+        {
+          "code": "S9 T-018-MI",
+          "series": "S9",
+          "genre": "T",
+          "duration": "3",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S8 C-185-MI",
+          "series": "S8",
+          "genre": "C",
+          "duration": "8",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 H-387-MI",
+          "series": "S9",
+          "genre": "H",
+          "duration": "1",
+          "need_coin": false,
+          "need_cube": true,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 G-412-MI",
+          "series": "S9",
+          "genre": "G",
+          "duration": "1.5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 H-339-MI",
+          "series": "S9",
+          "genre": "H",
+          "duration": "2",
+          "need_coin": false,
+          "need_cube": true,
+          "need_part": false,
+          "valid": true
+        }
+      ],
+      "priority": [
+        {
+          "code": "S9 H-387-MI",
+          "series": "S9",
+          "genre": "H",
+          "duration": "1",
+          "need_coin": false,
+          "need_cube": true,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 H-339-MI",
+          "series": "S9",
+          "genre": "H",
+          "duration": "2",
+          "need_coin": false,
+          "need_cube": true,
+          "need_part": false,
+          "valid": true
+        }
+      ]
+    }
+  ],
+  "task_return": null,
+  "task_completed": true,
+  "elapsed_seconds": 58.141,
+  "research_start_grant_remaining": 0,
+  "projects_after_task_error": "SemanticGateClosed: research project Buttons are incomplete",
+  "temporary_config_removed": true
+}

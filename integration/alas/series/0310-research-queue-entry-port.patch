@@ -1,0 +1,17 @@
+diff --git a/module/research/research.py b/module/research/research.py
+index ff4edac5..8b2e45b5 100644
+--- a/module/research/research.py
++++ b/module/research/research.py
+@@ -607,6 +607,12 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+         if semantic_adapter is not None:
+             semantic_adapter.begin_research()
+         try:
++            if semantic_adapter is not None and self.appear(RESEARCH_DETAIL_QUIT):
++                self.research_detail_quit()
++            # Recover a normal Research command that starts on its own queue
++            # page through ALAS' existing return-to-list flow.
++            if semantic_adapter is not None and self.is_in_queue():
++                self.queue_quit()
+             # ALAS still owns selection, queue filling, retry, and scheduling.
+             return self._run_alas_state_machine()
+         finally:
