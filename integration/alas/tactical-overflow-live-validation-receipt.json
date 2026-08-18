@@ -1,0 +1,355 @@
+{
+  "schema": "alas-headless.tactical-filter-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "e4c2619b5cd8cf88c51e7f0ee03734871ceceeb0cfe8ba861a35bee98008521d",
+  "configured": {
+    "Tactical.TacticalFilter": "first",
+    "AddNewStudent.Enable": true,
+    "AddNewStudent.Favorite": false,
+    "AddNewStudent.MinLevel": 120,
+    "ControlExpOverflow.Enable": true,
+    "ControlExpOverflow.T1Allow": 100,
+    "ControlExpOverflow.T2Allow": 250,
+    "ControlExpOverflow.T3Allow": 750,
+    "ControlExpOverflow.T4Allow": 1450
+  },
+  "source_sha256": {
+    "tactical": "7147e33a43a42135f14bc0bc92ff5dbe39644146c16e23c0d78b9d2380f1e685",
+    "adapter": "cb62bd82a14db43c6d74858f398d9474696fcf9fc6c82fd016610ecf1155ae00",
+    "oracle": "da06ec5668c79a666a52cb1dbc6e3a627117d15b793b149d508341e02110e8ed",
+    "runner": "c6e7e8a1ceade7d936ce81b299b3d33ba78efca9e23155712d2e8da58f3bc498"
+  },
+  "passed": false,
+  "temporary_config": "codex_tactical_filter_live_fddf1c8beee74280b679e5e10b3a0cd9.json",
+  "filter_loads": [
+    "first"
+  ],
+  "filter_applications": [
+    {
+      "input": [
+        {
+          "position": 0,
+          "book": "Blue_T4",
+          "tier": 4,
+          "exp_value": 1500
+        },
+        {
+          "position": 1,
+          "book": "Yellow_T4",
+          "tier": 4,
+          "exp_value": 1500
+        },
+        {
+          "position": 3,
+          "book": "Blue_T3",
+          "tier": 3,
+          "exp_value": 800
+        },
+        {
+          "position": 4,
+          "book": "Yellow_T3",
+          "tier": 3,
+          "exp_value": 800
+        },
+        {
+          "position": 6,
+          "book": "Blue_T2",
+          "tier": 2,
+          "exp_value": 300
+        },
+        {
+          "position": 7,
+          "book": "Yellow_T2",
+          "tier": 2,
+          "exp_value": 300
+        },
+        {
+          "position": 8,
+          "book": "Red_T1_Exp",
+          "tier": 1,
+          "exp_value": 150.0
+        },
+        {
+          "position": 9,
+          "book": "Blue_T1",
+          "tier": 1,
+          "exp_value": 100
+        },
+        {
+          "position": 10,
+          "book": "Yellow_T1",
+          "tier": 1,
+          "exp_value": 100
+        }
+      ],
+      "selected": [
+        {
+          "position": null,
+          "book": "first",
+          "tier": null,
+          "exp_value": null
+        }
+      ]
+    }
+  ],
+  "overflow_filter_applications": [
+    {
+      "progress": "5750/5800",
+      "before": [
+        {
+          "position": 0,
+          "book": "Blue_T4",
+          "tier": 4,
+          "exp_value": 1500
+        },
+        {
+          "position": 1,
+          "book": "Yellow_T4",
+          "tier": 4,
+          "exp_value": 1500
+        },
+        {
+          "position": 2,
+          "book": "Red_T3_Exp",
+          "tier": 3,
+          "exp_value": 1200.0
+        },
+        {
+          "position": 3,
+          "book": "Blue_T3",
+          "tier": 3,
+          "exp_value": 800
+        },
+        {
+          "position": 4,
+          "book": "Yellow_T3",
+          "tier": 3,
+          "exp_value": 800
+        },
+        {
+          "position": 5,
+          "book": "Red_T2_Exp",
+          "tier": 2,
+          "exp_value": 450.0
+        },
+        {
+          "position": 6,
+          "book": "Blue_T2",
+          "tier": 2,
+          "exp_value": 300
+        },
+        {
+          "position": 7,
+          "book": "Yellow_T2",
+          "tier": 2,
+          "exp_value": 300
+        },
+        {
+          "position": 8,
+          "book": "Red_T1_Exp",
+          "tier": 1,
+          "exp_value": 150.0
+        },
+        {
+          "position": 9,
+          "book": "Blue_T1",
+          "tier": 1,
+          "exp_value": 100
+        },
+        {
+          "position": 10,
+          "book": "Yellow_T1",
+          "tier": 1,
+          "exp_value": 100
+        }
+      ],
+      "after": [
+        {
+          "position": 0,
+          "book": "Blue_T4",
+          "tier": 4,
+          "exp_value": 1500
+        },
+        {
+          "position": 1,
+          "book": "Yellow_T4",
+          "tier": 4,
+          "exp_value": 1500
+        },
+        {
+          "position": 3,
+          "book": "Blue_T3",
+          "tier": 3,
+          "exp_value": 800
+        },
+        {
+          "position": 4,
+          "book": "Yellow_T3",
+          "tier": 3,
+          "exp_value": 800
+        },
+        {
+          "position": 6,
+          "book": "Blue_T2",
+          "tier": 2,
+          "exp_value": 300
+        },
+        {
+          "position": 7,
+          "book": "Yellow_T2",
+          "tier": 2,
+          "exp_value": 300
+        },
+        {
+          "position": 8,
+          "book": "Red_T1_Exp",
+          "tier": 1,
+          "exp_value": 150.0
+        },
+        {
+          "position": 9,
+          "book": "Blue_T1",
+          "tier": 1,
+          "exp_value": 100
+        },
+        {
+          "position": 10,
+          "book": "Yellow_T1",
+          "tier": 1,
+          "exp_value": 100
+        }
+      ]
+    }
+  ],
+  "book_selection_calls": [],
+  "dispatches": [
+    {
+      "capability": "tactical.assign",
+      "receipt": {
+        "semantic_id": "tactical/course/confirm",
+        "generation": 135347,
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "point": {
+          "x": 790.0,
+          "y": 515.0
+        }
+      }
+    }
+  ],
+  "before": {
+    "finish_available": false,
+    "go_available": true,
+    "slots": [
+      {
+        "slot": 1,
+        "ship_id": 403994,
+        "ship_name": "希佩尔海军上将..",
+        "ship_level": 120,
+        "skill_name": "荆棘与坚盾",
+        "skill_level": 8,
+        "exp_current": 700,
+        "exp_total": 4400,
+        "status": "running",
+        "remaining_seconds": 4607,
+        "button": {
+          "name": "403994",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 401.172,
+            "top": 86.626,
+            "right": 599.081,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "403994",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": -3.108,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 500.127,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 500.127,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 401.172,
+              "bottom": 356.131,
+              "right": 599.081,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 401.172,
+              "top": 86.626,
+              "right": 599.081,
+              "bottom": 363.869
+            }
+          }
+        }
+      }
+    ],
+    "actions": [
+      {
+        "semantic_id": "reward/tactical/go",
+        "generation": 134379,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)/frame/main/content/class/frame/go_btn",
+        "point": {
+          "x": 465.206,
+          "y": 434.961
+        }
+      },
+      {
+        "semantic_id": "tactical/page/back",
+        "generation": 134395,
+        "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack",
+        "point": {
+          "x": 57.746,
+          "y": 53.982
+        }
+      },
+      {
+        "semantic_id": "reward/page/back",
+        "generation": 134405,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)",
+        "point": {
+          "x": 827.0,
+          "y": 622.0
+        }
+      }
+    ],
+    "main_page_visible": true
+  },
+  "elapsed_seconds": 76.016,
+  "tactical_assign_grant_remaining": 0,
+  "error": "AssertionError: configured filter selected no typed tactical book",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\scripts\\python\\run_alas_tactical_filter_live_validation.py\", line 240, in validate\n    raise AssertionError(\"configured filter selected no typed tactical book\")\nAssertionError: configured filter selected no typed tactical book\n",
+  "temporary_config_removed": true
+}

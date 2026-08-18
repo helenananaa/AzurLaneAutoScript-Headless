@@ -201,7 +201,9 @@ observation 状态。
 
 `ControlExpOverflow.Enable/T1Allow/T2Allow/T3Allow/T4Allow` 与 `AddNewStudent.Enable/Favorite/MinLevel` 现在会在原 ALAS 的经验书过滤、领取循环和学员选择方法入口 fail-closed。离线契约覆盖 34 个合法配置和 12 个非法值：四档允许溢出量必须是 `0..5800` 的精确整数，学员等级接受 `1..125` 及可规范化的十进制文本；布尔值、非十进制文本及越界值均拒绝。
 
-回放直接执行原 `_tactical_books_filter_exp()` 的等级 10 边界：关闭时只保留特殊 100 经验书，开启时逐档保留配置边界并排除越界书，技能未满时九本夹具全部保留。`Favorite` 会在读取候选前调用既有的精确共享 Dock 收藏切换。真机已完成 disabled 的不变性验证，以及两个 enabled 运行：收藏和非收藏范围各产生不同候选集，分别选择 204044 与 306064，并执行原 ALAS 的技能、书本和唯一课程确认。确认后的 Unity 卡片树会在同一根上保留旧身份；按物理槽位边界解析后，两个后置回执均证明选中舰船处于运行中的课程。故 `AddNewStudent.Enable/Favorite/MinLevel` 已五维完整；`ControlExpOverflow` 五字段仍仅离线完成。
+回放直接执行原 `_tactical_books_filter_exp()` 的等级 10 边界：关闭时只保留特殊 100 经验书，开启时逐档保留配置边界并排除越界书，技能未满时九本夹具全部保留。`Favorite` 会在读取候选前调用既有的精确共享 Dock 收藏切换。真机已完成 disabled 的不变性验证，以及两个 enabled 运行：收藏和非收藏范围各产生不同候选集，分别选择 204044 与 306064，并执行原 ALAS 的技能、书本和唯一课程确认。确认后的 Unity 卡片树会在同一根上保留旧身份；按物理槽位边界解析后，两个后置回执均证明选中舰船处于运行中的课程。故 `AddNewStudent.Enable/Favorite/MinLevel` 已五维完整。
+
+2026-08-18，领取三门完成课程后，小声望的“小骑士的射击训练”处于 Lv.9、`5750/5800`。关闭溢出的原方法把 11 本真实库存过滤为两本基础 100 经验 T1，未消耗开课授权；开启并设置 `T1=100/T2=250/T3=750/T4=1450` 后，150/300/800/1500 经验的对应教材均按精确边界重新放行。最终原任务选中 `Blue_T4`，发出唯一 `tactical/course/confirm`，授权归零并留下约 12 小时运行卡；因此 `ControlExpOverflow` 五字段达到五维完整。证据为 `integration/alas/tactical-overflow-strict-live-validation-receipt.json`、`integration/alas/tactical-overflow-live-validation-receipt.json` 与 `integration/alas/tactical-overflow-postcondition-live-validation-receipt.json`。
 
 ### 1.16 本轮 Tactical 选书优先级与快速学习槽位契约
 
@@ -209,7 +211,7 @@ observation 状态。
 
 `Tactical.RapidTrainingSlot` 严格限定 `do_not_use/slot_1/slot_2/slot_3/slot_4`。原 `handle_rapid_training()` 回放验证四个精确槽位偏移、按钮不可用返回 false，以及只有命中后才执行的 interval clear。十字段 Tactical 合并回放现有 45 个合法配置和 20 个非法配置。
 
-2026-08-17，原始 Tactical 任务在实机加载 `BlueT1 > RedT1 > YellowT1 > BlueT2 > RedT2 > YellowT2 > first`，对 11 本真实库存排序并选择第 9 格 `Blue_T1`，随后以一条 typed `tactical/course/confirm` 输入开课。输入预算耗尽后，第 4 槽确认处于运行中（舰船 `102011`、技能“快速装填”）；完整收据见 `integration/alas/tactical-filter-r1-live-validation-receipt.json`。因此 `Tactical.TacticalFilter` 达到五维完整支持；快速学习槽位及其余 Tactical 分支仍未完成。
+2026-08-17，原始 Tactical 任务在实机加载 `BlueT1 > RedT1 > YellowT1 > BlueT2 > RedT2 > YellowT2 > first`，对 11 本真实库存排序并选择第 9 格 `Blue_T1`，随后以一条 typed `tactical/course/confirm` 输入开课。输入预算耗尽后，第 4 槽确认处于运行中（舰船 `102011`、技能“快速装填”）；完整收据见 `integration/alas/tactical-filter-r1-live-validation-receipt.json`。因此 `Tactical.TacticalFilter` 达到五维完整支持；当前只剩限时活动快速学习槽位未完成。
 
 ### 1.17 本轮 EventA-D 每日关卡轮转契约
 
@@ -487,7 +489,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 |---|---|:---:|---|
 | Commission | `PresetFilter`=`cube/cube_24h/chip/chip_24h/oil/custom`; `CustomFilter`; `DoMajorCommission` | F | 六预设与重大委托双值均完成动态列表实机单轮；custom 语法、非零油确认、重大委托、奖励、取消、补位和连续调度均已闭环 |
 | Tactical | `RapidTrainingSlot`=`do_not_use/slot_1/slot_2/slot_3/slot_4`; `TacticalFilter` | L | TacticalFilter 已通过原始任务的真实书库存排序、选书、开课确认和运行后置状态；仍需真实快速学习可用性/次数、无书/无空位及其他教学分支闭环 |
-| ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | P | 离线关闭/启用及各等级 0/配置/最大/越界已覆盖；仍需真实库存、当前技能经验及选书结果闭环 |
+| ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | F | `5750/5800` 真实临界技能下完成关闭过滤、四档精确放行、T4 选书、唯一课程确认与运行后置状态；全部边界继续由离线回放覆盖 |
 | AddNewStudent | `Enable`; `Favorite`; `MinLevel` | F | Disabled 不变性、收藏/非收藏候选范围、120 级选舰、原始选书与唯一课程确认、运行中课程后置条件均已实机闭环 |
 | Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 26 预设、自由规则、重置、延迟、三种资源各四策略、资源不足、队列满和跨轮选择 |
 | Dorm | `Collect`; `Feed`; `FeedFilter` | L | 三字段均已达到五维完整：真实收取控件由有变无、喂食库存差、关闭分支、单值过滤器与全部合法优先级均有证据；面板仍由 BuyFurniture all 的实买缺口限制 |
@@ -656,9 +658,9 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **23 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **132 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **101 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ✅ 五维完整支持 | **28 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **130 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **98 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
@@ -689,11 +691,11 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Commission.CustomFilter` | Commission | type=textarea; display=default | input/default: <long default in args.json> | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Commission.DoMajorCommission` | Commission | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Commission.PresetFilter` | Commission | type=select; display=default | options: "chip_24h", "chip", "cube_24h", "cube", "custom", "oil"; default: "cube" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
-| `ControlExpOverflow.Enable` | Tactical | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `ControlExpOverflow.T1Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `ControlExpOverflow.T2Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `ControlExpOverflow.T3Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `ControlExpOverflow.T4Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `ControlExpOverflow.Enable` | Tactical | type=checkbox; display=default | input/default: true | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `ControlExpOverflow.T1Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `ControlExpOverflow.T2Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `ControlExpOverflow.T3Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `ControlExpOverflow.T4Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `CoreShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Array" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `Daemon.EnterMap` | Daemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Daily.AdvanceMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |

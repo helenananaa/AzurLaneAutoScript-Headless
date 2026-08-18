@@ -1,0 +1,26 @@
+{
+  "schema": "alas-headless.tactical-overflow-postcondition-validation/v1",
+  "serial": "emulator-5580",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "passed": true,
+  "prior_receipt": "tactical-overflow-live-validation-receipt.json",
+  "prior_receipt_sha256": "c6f7569ac6276b8b0c11ddc37b2782c8af455ca82b08c550b334ebfd6f177072",
+  "prior_source_sha256": {
+    "tactical": "7147e33a43a42135f14bc0bc92ff5dbe39644146c16e23c0d78b9d2380f1e685",
+    "adapter": "cb62bd82a14db43c6d74858f398d9474696fcf9fc6c82fd016610ecf1155ae00",
+    "oracle": "da06ec5668c79a666a52cb1dbc6e3a627117d15b793b149d508341e02110e8ed",
+    "runner": "c6e7e8a1ceade7d936ce81b299b3d33ba78efca9e23155712d2e8da58f3bc498"
+  },
+  "expected_skill": "小骑士的射击训练",
+  "physical_card_root": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)",
+  "progress": "5750/5800",
+  "remaining": "11:56:09",
+  "anonymous_card_identity_boundary": true,
+  "actions": [
+    "main/more",
+    "reward/tactical/go",
+    "tactical/page/back",
+    "reward/page/back"
+  ],
+  "main_page_visible": true
+}

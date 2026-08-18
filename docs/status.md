@@ -63,6 +63,32 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `P` because independent live task startup and map completion are still not
   proven; offline instance coverage is not promoted to live evidence.
 
+### Tactical experience-overflow configuration complete on the live client
+
+- Three completed courses were claimed with no new assignment budget. Little
+  Renown's level-9 `小骑士的射击训练` then exposed the exact live boundary
+  `5750/5800` against an 11-book inventory spanning T1 through T4.
+- With overflow disabled and all limits zero, original
+  `_tactical_books_filter_exp()` removed nine books and retained only the two
+  mandatory base 100-exp T1 books. The probe stopped before selection, left
+  the assignment grant at one, consumed no book, and restored main.
+- With overflow enabled at T1/T2/T3/T4 limits `100/250/750/1450`, the same
+  method admitted the 150/300/800/1500-exp tier boundaries. Original ALAS then
+  selected `Blue_T4`, issued exactly one typed `tactical/course/confirm`,
+  exhausted the grant, scheduled the task, and left the same skill on a
+  running card with roughly 12 hours remaining.
+- The first full receipt is intentionally retained as `passed=false`: the
+  course succeeded, but the validator initially treated the `first` preset as
+  a book lacking a semantic position. The runner now resolves `first` to the
+  first filtered book, and a separate zero-mutation postcondition receipt
+  binds the successful dispatch to the running physical skill card. Evidence:
+  `integration/alas/tactical-overflow-strict-live-validation-receipt.json`,
+  `integration/alas/tactical-overflow-live-validation-receipt.json`, and
+  `integration/alas/tactical-overflow-postcondition-live-validation-receipt.json`.
+- All five `ControlExpOverflow` fields are therefore complete. Tactical stays
+  `L` only because rapid training is a limited-time activity unavailable on
+  the current client.
+
 ### Research, Mail, and Observer WIP split and evidence boundary
 
 - Research now has four independent upstream patch members for selected-detail
@@ -94,8 +120,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   is `integration/alas/tactical-filter-r1-live-validation-receipt.json`.
 - Original-state-machine replay already covers matching priorities, `first`
   fallback, no-match cancellation, Unicode normalization, and malformed rules.
-  `Tactical.TacticalFilter` is therefore complete; `RapidTrainingSlot` and
-  the remaining Tactical paths are still separately unqualified.
+  `Tactical.TacticalFilter` is therefore complete; `RapidTrainingSlot` remains
+  separately blocked by the current non-event period.
 
 ### Dorm: feed switch and priority filter complete on the live client
 
@@ -1359,7 +1385,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   Unity roots; the semantic parser now groups physical card bounds and the
   postcondition receipts prove each selected ship remains in its expected
   running course. `AddNewStudent.Enable/Favorite/MinLevel` are therefore fully
-  supported. `ControlExpOverflow` remains offline-only.
+  supported. `ControlExpOverflow` was subsequently completed on the 2026-08-18
+  live `5750/5800` boundary described above.
 
 ### Tactical book priority and rapid-training slots: offline contract passed
 

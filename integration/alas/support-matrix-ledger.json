@@ -788,16 +788,21 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "scripts/python/run_alas_tactical_overflow_postcondition_validation.py",
+        "integration/alas/tactical-overflow-strict-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-postcondition-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -806,22 +811,25 @@
         "Tactical"
       ],
       "path": "ControlExpOverflow.Enable",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "integration/alas/tactical-overflow-strict-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -830,22 +838,25 @@
         "Tactical"
       ],
       "path": "ControlExpOverflow.T1Allow",
-      "status_label": "☐ 未逐值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: 200"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "integration/alas/tactical-overflow-strict-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -854,22 +865,25 @@
         "Tactical"
       ],
       "path": "ControlExpOverflow.T2Allow",
-      "status_label": "☐ 未逐值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: 200"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "integration/alas/tactical-overflow-strict-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -878,22 +892,27 @@
         "Tactical"
       ],
       "path": "ControlExpOverflow.T3Allow",
-      "status_label": "☐ 未逐值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: 100"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "scripts/python/run_alas_tactical_overflow_postcondition_validation.py",
+        "integration/alas/tactical-overflow-strict-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-postcondition-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -902,7 +921,7 @@
         "Tactical"
       ],
       "path": "ControlExpOverflow.T4Allow",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: 100"
     },
@@ -8333,7 +8352,7 @@
         "AddNewStudent"
       ],
       "name": "Tactical",
-      "note": "一个学员/技能/T4 书路径闭环；快速槽、新学员、收藏/等级、经验溢出和过滤器分支未闭环",
+      "note": "新学员、选书过滤与经验溢出均已实机闭环；快速学习因当前非活动期仍未闭环",
       "status": "L"
     },
     {
@@ -9328,68 +9347,102 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "scripts/python/run_alas_tactical_overflow_postcondition_validation.py",
+        "integration/alas/tactical-overflow-strict-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-postcondition-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "ControlExpOverflow.Enable",
-      "note": "Enabled and disabled original book-filter branches execute at the level-10 threshold with no input."
+      "note": "Disabled live filtering reduced an 11-book inventory at 5750/5800 to two base T1 books without assignment; enabled thresholds retained tier-specific books and the original task confirmed one T4 course."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "integration/alas/tactical-overflow-strict-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "ControlExpOverflow.T1Allow",
-      "note": "Zero, configured boundary, maximum, and over-boundary T1 decisions are covered by contract and original filtering replay."
+      "note": "The live 5750/5800 boundary rejects the 150-exp T1 bonus book at zero and retains it at T1Allow=100; replay covers zero, configured, maximum, and invalid values."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "integration/alas/tactical-overflow-strict-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "ControlExpOverflow.T2Allow",
-      "note": "Zero, configured boundary, maximum, and over-boundary T2 decisions are covered by contract and original filtering replay."
+      "note": "The live 5750/5800 boundary rejects 300-exp T2 books at zero and retains them at T2Allow=250; replay covers zero, configured, maximum, and invalid values."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "integration/alas/tactical-overflow-strict-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "ControlExpOverflow.T3Allow",
-      "note": "Zero, configured boundary, maximum, and over-boundary T3 decisions are covered by contract and original filtering replay."
+      "note": "The live 5750/5800 boundary rejects 800-exp T3 books at zero and retains them at T3Allow=750; replay covers zero, configured, maximum, and invalid values."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_tactical_config.py",
         "python/alas_headless/alas_tactical_config_replay.py",
         "integration/alas/series/0020-commission-tactical-flow-ports.patch",
+        "scripts/python/run_alas_tactical_filter_live_validation.py",
+        "scripts/python/run_alas_tactical_overflow_postcondition_validation.py",
+        "integration/alas/tactical-overflow-strict-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-live-validation-receipt.json",
+        "integration/alas/tactical-overflow-postcondition-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "ControlExpOverflow.T4Allow",
-      "note": "Zero, configured boundary, maximum, and over-boundary T4 decisions are covered by contract and original filtering replay."
+      "note": "The live 5750/5800 boundary rejects 1500-exp T4 books at zero, retains them at T4Allow=1450, confirms one Blue_T4 course, and proves the running skill card postcondition."
     },
     {
       "dimensions": {
