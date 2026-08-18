@@ -1,6 +1,6 @@
 # ALAS Headless 配置项级支持矩阵
 
-更新日期：2026-08-17
+更新日期：2026-08-18
 Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 固定 ALAS 上游基线：`81ccf63b4540f00241628c82a58c02c7a2bb11af`
 
@@ -44,10 +44,10 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **6 / 60** | Benchmark、Commission、GameManager、Minigame、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **8 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Research、Tactical |
+| 🟢 主路径已完成、全配置未完成（`L`） | **9 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Main、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **9 / 60** | Awaken、Coalition、CoalitionSp、EventB、Guild、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **16 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、Main2、Main3、OpsiDaemon、OpsiGeneral、ShopOnce |
-| 🧱 已到边界、尚未完成（`B`） | **18 / 60** | Hard、Main、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
+| 🧱 已到边界、尚未完成（`B`） | **17 / 60** | Hard、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **3 / 60** | GemsFarming、Meowfficer、OpsiStronghold |
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
@@ -104,13 +104,13 @@ observation 状态。
 | 字段 | 本轮结果 | 确定性证据 | 仍未完成/本轮跳过 |
 |---|---|---|---|
 | `OilLimit` | 🟡 保留既有实现 | 全局油量已经是 typed 读取，原 ALAS 保留 `< max(500, OilLimit)` 停止与延迟逻辑 | 500 下限、等于边界和多个停止条件同时满足尚未形成独立实机记录 |
-| `RunCount` | 🟡 保留既有实现 | 原 ALAS 仍拥有初始化、每轮减一、归零禁用任务和循环前后复查 | 0/1/多次、异常中断不多扣和恢复后的计数持久化尚未受控实机复核 |
+| `RunCount` | 🧪 **新增三主线实例回放** | Main/Main2/Main3 分别执行固定上游 `_run()`；覆盖 1 次、2 次、恢复余量 1 次、异常零扣次及无限次数有界运行，原 ALAS 仍拥有初始化、成功后减一、归零禁用和退出 | 真实设备上的 Main2/Main3 独立任务启动、跨进程恢复和多轮资源后置条件仍待复核 |
 | `MapAchievement` | 🧪 **本轮新增 typed port** | 真实 12-4 语义快照已给出 `100%`、三个星标和“威胁排除”；离线覆盖达成、未达成、畸形百分比和星标缺失，原五枚举判断保持不变 | 普通主线以外的活动/SP/档案布局、五种枚举的逐项实机停止仍待复核 |
 | `StageIncrease` | 🟡 可接收新的 typed 达成信号 | 原 ALAS 仍拥有下一关计算、关卡存在性检查、写回 `Campaign.Name` 和末关停用 | 跨 A/B 分区、自定义链、末关和中断恢复尚未逐值实机验证 |
 | `ReachLevel` | 🧪 **本轮新增 typed port** | 已审阅 G25 六舰等级节点（真实值 `118/109/117/110/118/107`）；离线覆盖排序、1..125 范围和非法 126 fail-closed；原 ALAS 保留升级跨阈值判断 | 为制造升级而等待/刷经验的实机触发按要求跳过；自动寻敌与双舰队切换后的等级复核仍待做 |
 | `GetNewShip` | 🧱 **明确跳过首次获得实测** | 普通 `GET_SHIP` 页面可由确定性夹具关闭并继续 | 当前观察数据没有能把“首次获得 `NEW_SHIP`”与普通掉落可靠区分的节点；不伪造 selector、不把普通掉落误报成停止条件，待自然样本出现后补证据 |
 
-实际固定 ALAS 方法的确定性回放现覆盖 **77 条断言**（含 40 条 `MapAchievement` 真值表组合），并静态证明 `RunCount` 只在 `campaign.run()` 返回后、下一次停止检查前扣减，且无限次数不会扣减。因此 `OilLimit`、`RunCount`、`MapAchievement`、`StageIncrease`、`ReachLevel` 的确定性边界已经闭环；StopCondition 整组仍为 `P`，因为 `GetNewShip=true` 继续按要求跳过自然首次获得实测并 fail-closed。
+实际固定 ALAS 方法的确定性回放现覆盖 **79 条断言**（含 40 条 `MapAchievement` 真值表组合）。Main、Main2、Main3 各自绑定独立 Scheduler 命令和 `campaign_main` 路由，并共同完成 15 个 `_run()` 循环场景；静态与动态证据共同证明 `RunCount` 只在 `campaign.run()` 成功返回后、下一次停止检查前扣减，异常不多扣且无限次数不会扣减。因此 `OilLimit`、`RunCount`、`MapAchievement`、`StageIncrease`、`ReachLevel` 的确定性边界已经闭环；StopCondition 整组仍为 `P`，因为 `GetNewShip=true` 继续按要求跳过自然首次获得实测并 fail-closed。
 
 ### 1.3 本轮官方一键退役适配标注
 
@@ -378,9 +378,9 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 1 | Alas | Emulator, EmulatorInfo, Error, Optimization, DropRecord | P | 三项 Optimization 运行字段和 TaskHoardingDuration 已离线等价；语义截图仍不执行 Dedithering，传统方法/包名矩阵、错误截图、掉落上传与通知未完整验收 |
 | 2 | General | Retirement, OneClickRetire, Enhance, OldRetire | P | 三种 `RetireMode` 已离线分类，旧退役在 Headless 页面事件前拒绝；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级语义事务 |
 | 3 | Restart | Scheduler | F | 50 Scheduler 实例、15 等价类、首次启动跳过、禁包失败、冷恢复、运行中 PID 切换、登录、持久化与零 forward 遗留均已实机闭环；`AdbRestart` 属于 Alas 面板 |
-| 4 | Main | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | B | 12-4 能到账号战斗边界；全部共用地图配置分支见 3.2 |
-| 5 | Main2 | 同 Main | P | 共用实现，没有独立配置实例验收；不能沿用 Main 的运行记录直接判定完整 |
-| 6 | Main3 | 同 Main | P | 共用实现，没有独立配置实例验收；不能沿用 Main 的运行记录直接判定完整 |
+| 4 | Main | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | 12-4 已由原始 ALAS 完成入口、舰队、完整正交寻路、普通战、Boss 战、D 级败北结算、提示关闭和回图；Boss 胜利受当前账号战力限制，全部共用地图配置分支见 3.2 |
+| 5 | Main2 | 同 Main | P | 已独立验证 Scheduler 命令、campaign_main 路由及 RunCount 五类循环；尚无 Main2 实机任务启动与地图闭环，不能沿用 Main 的运行记录提升为 L |
+| 6 | Main3 | 同 Main | P | 已独立验证 Scheduler 命令、campaign_main 路由及 RunCount 五类循环；尚无 Main3 实机任务启动与地图闭环，不能沿用 Main 的运行记录提升为 L |
 | 7 | GemsFarming | Scheduler, GemsFarming, EquipmentCode, Campaign, StopCondition, Fleet, Submarine, Emotion | M | 换旗舰/前排、常用舰选择、装备导入导出和换船后的强化衔接缺失；只有委托限制可复用 |
 | 8 | EventGeneral | EventGeneral, TaskBalancer | P | 五字段离线决策已完整；仍缺 typed PT/金币实机观察、时间相关性、真实任务切换恢复和防调度环证据 |
 | 9 | Coalition | Scheduler, Campaign, Coalition, StopCondition, Emotion | M | 共斗入口、难度、单/多舰队、战斗和结算缺适配 |
@@ -675,9 +675,9 @@ python scripts/python/verify_alas_support_matrix.py `
 | `BuyFurniture.Enable` | Dorm | type=checkbox; display=default | input/default: false | `P`/◐ 启用无候选 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `BuyFurniture.LastRun` | Dorm | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/◐ 实机已写入 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Campaign.AmbushEvade` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Campaign.Event` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "campaign_main", "coalition_20260723", "event_20260625_cn", "event_20260813_cn", "raid_20260212", "war_archives_20180607_cn", "war_archives_20180726_cn", "war_archives_20181020_en", "war_archives_20181026_en", "war_archives_20181227_cn", "war_archives_20190221_en", "war_archives_20190314_en", "war_archives_20190321_en", "war_archives_20190620_en", "war_archives_20190911_cn", "war_archives_20191010_en", "war_archives_20191031_en", "war_archives_20200312_cn", "war_archives_20200507_cn", "war_archives_20200603_cn", "war_archives_20200806_cn", "war_archives_20200820_cn", "war_archives_20200903_cn", "war_archives_20200917_cn", "war_archives_20201012_cn", "war_archives_20201029_cn", "war_archives_20201229_cn", "war_archives_20210225_cn", "war_archives_20210325_cn", "war_archives_20210422_cn", "war_archives_20210527_cn", "war_archives_20210624_cn", "war_archives_20210819_cn", "war_archives_20210916_cn", "war_archives_20211014_cn", "war_archives_20211028_cn", "war_archives_20211111_cn", "war_archives_20211229_cn", "war_archives_20220210_cn", "war_archives_20220224_cn", "war_archives_20220324_cn", "war_archives_20220414_cn", "war_archives_20220428_cn", "war_archives_20220526_cn", "war_archives_20220728_cn", "war_archives_20220818_cn", "war_archives_20220915_cn", "war_archives_20221222_cn", "war_archives_20230223_cn", "war_archives_20230525_cn", "war_archives_20230803_cn", "war_archives_20231026_cn", "war_archives_20240725_cn"; default: "campaign_main" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Campaign.Mode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "hard", "normal"; default: "normal" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
-| `Campaign.Name` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: "12-4", "dynamic", "sp" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Campaign.Event` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "campaign_main", "coalition_20260723", "event_20260625_cn", "event_20260813_cn", "raid_20260212", "war_archives_20180607_cn", "war_archives_20180726_cn", "war_archives_20181020_en", "war_archives_20181026_en", "war_archives_20181227_cn", "war_archives_20190221_en", "war_archives_20190314_en", "war_archives_20190321_en", "war_archives_20190620_en", "war_archives_20190911_cn", "war_archives_20191010_en", "war_archives_20191031_en", "war_archives_20200312_cn", "war_archives_20200507_cn", "war_archives_20200603_cn", "war_archives_20200806_cn", "war_archives_20200820_cn", "war_archives_20200903_cn", "war_archives_20200917_cn", "war_archives_20201012_cn", "war_archives_20201029_cn", "war_archives_20201229_cn", "war_archives_20210225_cn", "war_archives_20210325_cn", "war_archives_20210422_cn", "war_archives_20210527_cn", "war_archives_20210624_cn", "war_archives_20210819_cn", "war_archives_20210916_cn", "war_archives_20211014_cn", "war_archives_20211028_cn", "war_archives_20211111_cn", "war_archives_20211229_cn", "war_archives_20220210_cn", "war_archives_20220224_cn", "war_archives_20220324_cn", "war_archives_20220414_cn", "war_archives_20220428_cn", "war_archives_20220526_cn", "war_archives_20220728_cn", "war_archives_20220818_cn", "war_archives_20220915_cn", "war_archives_20221222_cn", "war_archives_20230223_cn", "war_archives_20230525_cn", "war_archives_20230803_cn", "war_archives_20231026_cn", "war_archives_20240725_cn"; default: "campaign_main" | `P`/🧪 三主线常规路由 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Campaign.Mode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "hard", "normal"; default: "normal" | `P`/🧪 三主线常规路由 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Campaign.Name` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: "12-4", "dynamic", "sp" | `P`/🧪 三主线 64 图路由 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Use2xBook` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Campaign.UseAutoSearch` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false, true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Campaign.UseClearMode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
@@ -927,7 +927,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `StopCondition.MapAchievement` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "100_percent_clear", "map_3_stars", "non_stop", "threat_safe_without_3_stars", "threat_safe"; default: "non_stop" | `P`/◐ typed 主线夹具 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `StopCondition.OilLimit` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default | input/default: 1000 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `StopCondition.ReachLevel` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: 0 | `P`/◐ typed 六舰等级 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `StopCondition.RunCount` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `StopCondition.RunCount` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: 0 | `P`/🧪 三主线实例回放 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `StopCondition.StageIncrease` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, Hospital, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Submarine.AutoSearchMode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/hide | options: "sub_auto_call", "sub_standby"; default: "sub_standby" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Submarine.DistanceToBoss` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/hide | options: "1_grid_to_boss", "2_grid_to_boss", "to_boss_position", "use_open_ocean_support"; default: "2_grid_to_boss", "use_open_ocean_support" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |

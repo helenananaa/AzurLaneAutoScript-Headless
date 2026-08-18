@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import ast
 import hashlib
+import json
 import re
 from pathlib import Path
 from types import MethodType, SimpleNamespace
@@ -218,6 +219,194 @@ def _expect(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
+class _ReplayScriptEnd(Exception):
+    """Exact control-flow substitute for ALAS ScriptEnd in an input-free replay."""
+
+
+class _ReplayCampaignEnd(Exception):
+    pass
+
+
+class _RunConfig(_Config):
+    def __init__(self, *, task_name: str, run_count: int) -> None:
+        super().__init__(
+            StopCondition_RunCount=run_count,
+            Scheduler_Enable=True,
+            config_name=task_name,
+        )
+        self.Campaign_Mode = "normal"
+        self.overrides: list[Mapping[str, object]] = []
+
+    def override(self, **values: object) -> None:
+        self.overrides.append(dict(values))
+        for name, value in values.items():
+            setattr(self, name, value)
+
+    def task_switched(self) -> bool:
+        return False
+
+    def task_stop(self, *_args: object, **_kwargs: object) -> None:
+        raise AssertionError("bounded main replay unexpectedly stopped the task")
+
+
+class _RunCampaign:
+    def __init__(self, *, fail_first: bool = False) -> None:
+        self.config = SimpleNamespace(
+            Campaign_Mode="normal",
+            MAP_IS_ONE_TIME_STAGE=False,
+            LV_TRIGGERED=False,
+            GET_SHIP_TRIGGERED=False,
+        )
+        self.device = SimpleNamespace(image=None)
+        self.auto_search_oil_limit_triggered = False
+        self.auto_search_coin_limit_triggered = False
+        self.run_calls = 0
+        self.exit_calls = 0
+        self._fail_first = fail_first
+
+    def event_time_limit_triggered(self) -> bool:
+        return False
+
+    def event_pt_limit_triggered(self) -> bool:
+        return False
+
+    def is_in_map(self) -> bool:
+        return False
+
+    def is_in_auto_search_menu(self) -> bool:
+        return False
+
+    def ensure_campaign_ui(self, **_kwargs: object) -> None:
+        return None
+
+    def run(self) -> None:
+        self.run_calls += 1
+        if self._fail_first and self.run_calls == 1:
+            raise _ReplayScriptEnd("injected pre-success interruption")
+
+    def ensure_auto_search_exit(self) -> None:
+        self.exit_calls += 1
+
+    def handle_map_stop(self) -> None:
+        raise AssertionError("bounded main replay reached one-time map handling")
+
+
+def _verify_main_task_instances(
+    alas_root: Path,
+    run_method: Callable[..., Any],
+    stop_method: Callable[..., Any],
+    logger: _Logger,
+) -> Mapping[str, object]:
+    """Replay exact ``CampaignRun._run`` for all three independent Main tasks."""
+
+    template_path = alas_root / "config" / "template.json"
+    template = json.loads(template_path.read_text(encoding="utf-8"))
+    task_names = ("Main", "Main2", "Main3")
+    expected_groups = (
+        "Scheduler",
+        "Campaign",
+        "StopCondition",
+        "Fleet",
+        "Submarine",
+        "Emotion",
+        "HpControl",
+        "EnemyPriority",
+        "Storage",
+    )
+    instance_results: dict[str, object] = {}
+
+    for task_name in task_names:
+        task = template.get(task_name)
+        if not isinstance(task, dict) or tuple(task) != expected_groups:
+            raise AssertionError(f"{task_name} campaign groups drifted")
+        if task["Scheduler"].get("Command") != task_name:
+            raise AssertionError(f"{task_name} scheduler command is not independent")
+        if task["Campaign"].get("Event") != "campaign_main":
+            raise AssertionError(f"{task_name} is not routed to campaign_main")
+        if task["Campaign"].get("Mode") != "normal":
+            raise AssertionError(f"{task_name} default mode changed")
+
+        scenarios: dict[str, object] = {}
+        for scenario, remaining, total, fail_first, expected_runs in (
+            ("one", 1, 0, False, 1),
+            ("two", 2, 0, False, 2),
+            ("resume-one", 1, 0, False, 1),
+            ("interrupted", 2, 0, True, 1),
+            ("unlimited-bounded", 0, 2, False, 2),
+        ):
+            config = _RunConfig(task_name=task_name, run_count=remaining)
+            campaign = _RunCampaign(fail_first=fail_first)
+            device = SimpleNamespace(
+                semantic_adapter=None,
+                has_cached_image=True,
+                image=object(),
+                stuck_record_clear=lambda: None,
+                click_record_clear=lambda: None,
+                screenshot=lambda: None,
+            )
+            host = SimpleNamespace(
+                config=config,
+                campaign=campaign,
+                device=device,
+                is_stage_loop=False,
+                stage=task["Campaign"]["Name"],
+                name=task["Campaign"]["Name"],
+                handle_stage_name=lambda name, folder, mode: (name, folder),
+                load_campaign=lambda name, folder: None,
+                disable_raid_on_event=lambda: None,
+                handle_commission_notice=lambda: None,
+                ui_page_appear=lambda _page: False,
+                get_oil=lambda: 99999,
+                handle_task_balancer=lambda: None,
+                triggered_task_balancer=lambda: False,
+            )
+            host.triggered_stop_condition = MethodType(stop_method, host)
+            MethodType(run_method, host)(
+                task["Campaign"]["Name"],
+                folder=task["Campaign"]["Event"],
+                mode=task["Campaign"]["Mode"],
+                total=total,
+            )
+            if campaign.run_calls != expected_runs:
+                raise AssertionError(f"{task_name} {scenario} run count drifted")
+            if fail_first:
+                if config.StopCondition_RunCount != remaining or host.run_count != 0:
+                    raise AssertionError(f"{task_name} interruption consumed a run")
+            elif remaining:
+                if config.StopCondition_RunCount != 0 or host.run_count != remaining:
+                    raise AssertionError(f"{task_name} successful runs did not persist")
+                if config.Scheduler_Enable is not False:
+                    raise AssertionError(f"{task_name} did not stop at zero")
+            elif config.StopCondition_RunCount != 0 or host.run_count != total:
+                raise AssertionError(f"{task_name} unlimited count was mutated")
+            if campaign.exit_calls != 1:
+                raise AssertionError(f"{task_name} did not close auto-search exactly once")
+            scenarios[scenario] = {
+                "campaign_run_calls": campaign.run_calls,
+                "successful_runs": host.run_count,
+                "remaining": config.StopCondition_RunCount,
+                "scheduler_enabled": config.Scheduler_Enable,
+            }
+        instance_results[task_name] = {
+            "scheduler_command": task_name,
+            "campaign_name": task["Campaign"]["Name"],
+            "campaign_event": task["Campaign"]["Event"],
+            "campaign_mode": task["Campaign"]["Mode"],
+            "scenarios": scenarios,
+        }
+
+    return {
+        "task_count": len(instance_results),
+        "scenario_count": sum(
+            len(value["scenarios"]) for value in instance_results.values()
+        ),
+        "instances": instance_results,
+        "template_sha256": _sha256(template_path),
+        "mutation_budget": 0,
+        "android_input_injected": False,
+    }
+
+
 def verify_stop_conditions(alas_root: Path) -> Mapping[str, object]:
     """Run deterministic cases against methods extracted from ``alas_root``."""
 
@@ -270,6 +459,34 @@ def verify_stop_conditions(alas_root: Path) -> Mapping[str, object]:
     level_method = _compile_method(
         trees["module/combat/level.py"], "Level", "lv_triggered", {"logger": logger}
     )
+    try:
+        run_node_name = "_run"
+        run_method = _compile_method(
+            trees["module/campaign/run.py"],
+            "CampaignRun",
+            run_node_name,
+            {
+                "logger": logger,
+                "CampaignEnd": _ReplayCampaignEnd,
+                "ScriptEnd": _ReplayScriptEnd,
+                "page_campaign": object(),
+                "MODE_SWITCH_1": SimpleNamespace(get=lambda **_kwargs: "normal"),
+            },
+        )
+    except ValueError:
+        run_node_name = "run"
+        run_method = _compile_method(
+            trees["module/campaign/run.py"],
+            "CampaignRun",
+            run_node_name,
+            {
+                "logger": logger,
+                "CampaignEnd": _ReplayCampaignEnd,
+                "ScriptEnd": _ReplayScriptEnd,
+                "page_campaign": object(),
+                "MODE_SWITCH_1": SimpleNamespace(get=lambda **_kwargs: "normal"),
+            },
+        )
 
     case_names: list[str] = []
 
@@ -303,6 +520,11 @@ def verify_stop_conditions(alas_root: Path) -> Mapping[str, object]:
 
     run_order = _assert_run_decrement_order(trees["module/campaign/run.py"])
     case("run-count-post-success-order", True)
+    main_task_instances = _verify_main_task_instances(
+        alas_root, run_method, stop_method, logger
+    )
+    case("main-task-instance-count", main_task_instances["task_count"] == 3)
+    case("main-task-run-scenarios", main_task_instances["scenario_count"] == 15)
 
     # MapAchievement covers every supported value across its three observations.
     achievement_options = (
@@ -438,6 +660,8 @@ def verify_stop_conditions(alas_root: Path) -> Mapping[str, object]:
         "cases": case_names,
         "map_achievement_truth_table_rows": achievement_rows,
         "run_count_post_success": run_order,
+        "main_task_instances": main_task_instances,
+        "run_method": run_node_name,
         "new_ship_live_test": "skipped-nondeterministic-first-acquisition",
         "input_injected": False,
     }

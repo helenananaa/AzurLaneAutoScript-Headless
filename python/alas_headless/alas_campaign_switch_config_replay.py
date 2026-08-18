@@ -103,14 +103,21 @@ def _verify_guard(run_path: Path) -> bool:
         run = methods.get("run")
         if run is None or not run.body:
             raise AssertionError("CampaignRun.run is missing")
+        if len(run.body) < 2:
+            raise AssertionError("CampaignRun.run guards are missing")
         first = run.body[0]
+        second = run.body[1]
         if not (
             isinstance(first, ast.Expr)
             and isinstance(first.value, ast.Call)
             and isinstance(first.value.func, ast.Attribute)
-            and first.value.func.attr == "_validate_campaign_switch_config"
+            and first.value.func.attr == "_validate_main_campaign_route_config"
+            and isinstance(second, ast.Expr)
+            and isinstance(second.value, ast.Call)
+            and isinstance(second.value.func, ast.Attribute)
+            and second.value.func.attr == "_validate_campaign_switch_config"
         ):
-            raise AssertionError("Campaign switch guard is not first in CampaignRun.run")
+            raise AssertionError("Campaign route/switch guards are not first in CampaignRun.run")
         attrs = {
             item.attr
             for item in ast.walk(guard)

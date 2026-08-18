@@ -373,7 +373,13 @@
         "observation": "partial",
         "offline": "partial"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_main_campaign_routes.py",
+        "python/alas_headless/alas_campaign_route_config_contract.py",
+        "python/alas_headless/alas_campaign_route_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
       "panels": [
@@ -395,7 +401,7 @@
         "RaidDaily"
       ],
       "path": "Campaign.Event",
-      "status_label": "◐ 实机当前值",
+      "status_label": "🧪 三主线常规路由",
       "support": "supported",
       "values": "options: \"campaign_main\", \"coalition_20260723\", \"event_20260625_cn\", \"event_20260813_cn\", \"raid_20260212\", \"war_archives_20180607_cn\", \"war_archives_20180726_cn\", \"war_archives_20181020_en\", \"war_archives_20181026_en\", \"war_archives_20181227_cn\", \"war_archives_20190221_en\", \"war_archives_20190314_en\", \"war_archives_20190321_en\", \"war_archives_20190620_en\", \"war_archives_20190911_cn\", \"war_archives_20191010_en\", \"war_archives_20191031_en\", \"war_archives_20200312_cn\", \"war_archives_20200507_cn\", \"war_archives_20200603_cn\", \"war_archives_20200806_cn\", \"war_archives_20200820_cn\", \"war_archives_20200903_cn\", \"war_archives_20200917_cn\", \"war_archives_20201012_cn\", \"war_archives_20201029_cn\", \"war_archives_20201229_cn\", \"war_archives_20210225_cn\", \"war_archives_20210325_cn\", \"war_archives_20210422_cn\", \"war_archives_20210527_cn\", \"war_archives_20210624_cn\", \"war_archives_20210819_cn\", \"war_archives_20210916_cn\", \"war_archives_20211014_cn\", \"war_archives_20211028_cn\", \"war_archives_20211111_cn\", \"war_archives_20211229_cn\", \"war_archives_20220210_cn\", \"war_archives_20220224_cn\", \"war_archives_20220324_cn\", \"war_archives_20220414_cn\", \"war_archives_20220428_cn\", \"war_archives_20220526_cn\", \"war_archives_20220728_cn\", \"war_archives_20220818_cn\", \"war_archives_20220915_cn\", \"war_archives_20221222_cn\", \"war_archives_20230223_cn\", \"war_archives_20230525_cn\", \"war_archives_20230803_cn\", \"war_archives_20231026_cn\", \"war_archives_20240725_cn\"; default: \"campaign_main\""
     },
@@ -407,7 +413,13 @@
         "observation": "partial",
         "offline": "partial"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_main_campaign_routes.py",
+        "python/alas_headless/alas_campaign_route_config_contract.py",
+        "python/alas_headless/alas_campaign_route_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=select; display=default/hide",
       "panels": [
@@ -429,7 +441,7 @@
         "RaidDaily"
       ],
       "path": "Campaign.Mode",
-      "status_label": "◐ 实机当前值",
+      "status_label": "🧪 三主线常规路由",
       "support": "supported",
       "values": "options: \"hard\", \"normal\"; default: \"normal\""
     },
@@ -441,7 +453,13 @@
         "observation": "partial",
         "offline": "partial"
       },
-      "evidence": [],
+      "evidence": [
+        "tests/test_alas_main_campaign_routes.py",
+        "python/alas_headless/alas_campaign_route_config_contract.py",
+        "python/alas_headless/alas_campaign_route_config_replay.py",
+        "integration/alas/series/0050-combat-flow-ports.patch",
+        "docs/status.md"
+      ],
       "group_code": "P",
       "metadata": "type=input; display=default/hide",
       "panels": [
@@ -463,7 +481,7 @@
         "RaidDaily"
       ],
       "path": "Campaign.Name",
-      "status_label": "◐ 实机当前值",
+      "status_label": "🧪 三主线 64 图路由",
       "support": "supported",
       "values": "input/default: \"12-4\", \"dynamic\", \"sp\""
     },
@@ -7312,7 +7330,7 @@
         "RaidDaily"
       ],
       "path": "StopCondition.RunCount",
-      "status_label": "◐ 实机当前值",
+      "status_label": "🧪 三主线实例回放",
       "support": "supported",
       "values": "input/default: 0"
     },
@@ -7998,8 +8016,8 @@
         "EnemyPriority"
       ],
       "name": "Main",
-      "note": "12-4 能到账号战斗边界；全部共用地图配置分支见 3.2",
-      "status": "B"
+      "note": "普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；12-4 已由原始 ALAS 实机完成入口、舰队、完整正交寻路、普通战、Boss 战、D 级败北结算、提示关闭和回图；Boss 胜利受当前账号战力限制，全部共用地图配置分支见 3.2",
+      "status": "L"
     },
     {
       "groups": [
@@ -8013,7 +8031,7 @@
         "EnemyPriority"
       ],
       "name": "Main2",
-      "note": "共用实现，没有独立配置实例验收；不能沿用 Main 的运行记录直接判定完整",
+      "note": "已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；尚无 Main2 实机任务启动与地图闭环，不能沿用 Main 的运行记录提升为 L",
       "status": "P"
     },
     {
@@ -8028,7 +8046,7 @@
         "EnemyPriority"
       ],
       "name": "Main3",
-      "note": "共用实现，没有独立配置实例验收；不能沿用 Main 的运行记录直接判定完整",
+      "note": "已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；尚无 Main3 实机任务启动与地图闭环，不能沿用 Main 的运行记录提升为 L",
       "status": "P"
     },
     {
@@ -10850,8 +10868,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "56abd60830b97189eda72b878602b9cb940e69715364610db7d107a254504987",
-      "manifest_sha256": "b6b1c67465689673047fe27c7f20b9146f06175d063bfd28987048d140e565b2",
+      "combined_sha256": "a4445e384077be2c3a079f68a7f5a5cb7b3201a4d8cdf10dce1e6dce27eeffc5",
+      "manifest_sha256": "d4166959bad064ed738a90b047f8d442256d7c20afd5f8b4f2cbb97d1c1215d7",
       "member_count": 40
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

@@ -419,6 +419,7 @@ def _assert_contract_sources_are_pure() -> None:
 def _verify_patch_order() -> None:
     patch = (ROOT / "integration" / "alas" / "series" / "0050-combat-flow-ports.patch").read_text(encoding="utf-8")
     ordered = (
+        "self._validate_main_campaign_route_config(name, folder, mode)",
         "self._validate_campaign_switch_config()",
         "semantic_adapter.validate_campaign_fleet_config(",
         "semantic_adapter.validate_campaign_hp_control_config(",

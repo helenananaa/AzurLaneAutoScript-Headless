@@ -48,6 +48,13 @@ from .alas_campaign_switch_config_contract import (
     AlasCampaignSwitchConfigSnapshot,
     validate_alas_campaign_switch_config,
 )
+from .alas_campaign_route_config_contract import (
+    AlasMainCampaignRouteConfig,
+    MAIN_CAMPAIGN_EVENT,
+    MAIN_CAMPAIGN_MODES,
+    MAIN_TASKS,
+    validate_alas_main_campaign_route_config,
+)
 from .alas_tactical_config_contract import (
     AlasTacticalConfigSnapshot,
     validate_alas_tactical_config,
@@ -607,6 +614,11 @@ from .runtime_qualification import (
 )
 
 __all__ = (
+    "AlasMainCampaignRouteConfig",
+    "MAIN_CAMPAIGN_EVENT",
+    "MAIN_CAMPAIGN_MODES",
+    "MAIN_TASKS",
+    "validate_alas_main_campaign_route_config",
     "AlasSchedulerTaskSnapshot",
     "SCHEDULER_FIELDS",
     "validate_alas_scheduler_config",

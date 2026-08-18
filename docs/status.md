@@ -4,6 +4,44 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-18
 
+### Main 1-1 through 16-4 route admission
+
+- Main, Main2, and Main3 now share a fail-closed normal-campaign route
+  contract for all 64 pinned upstream modules from 1-1 through 16-4. The
+  verifier executes all 192 task/stage combinations through the original
+  ALAS `CampaignRun.handle_stage_name()` on both the patched and pristine
+  pinned trees; eight malformed, out-of-range, event, and mode cases are
+  rejected with zero Android input.
+- `CampaignRun.run()` enforces the task, stage, event, and mode contract before
+  campaign switch validation, semantic pre-sortie scope, navigation, or any
+  input. Main-family tasks accept only `campaign_main` plus `normal`; hard mode
+  remains owned by the separate Hard task, while non-Main campaign families
+  retain their existing routing behavior.
+- The only attached device is currently MuMu running EN package
+  `com.YoStarEN.AzurLane` 9.3.6. It does not match the pinned CN package and
+  fingerprint, and no compatible semantic observer is available, so it was
+  not used as evidence and no account-changing input was sent. Main retains
+  its prior 12-4 live result; Main2/Main3 remain offline-only `P`.
+- The authoritative 40-member patch applies to pristine pinned upstream and
+  all 128 changed Python files compile. The complete repository suite passes
+  1,139/1,139 with 50 upstream deprecation/syntax warnings; support-matrix,
+  baseline, pixel-inventory, and combined-patch hashes are synchronized.
+
+### Main task instances and bounded RunCount replay
+
+- The pinned ALAS `CampaignRun._run()` now executes in an input-free replay
+  for each independent `Main`, `Main2`, and `Main3` configuration instance.
+  Every instance is bound to its own Scheduler command and to the declared
+  `campaign_main` normal route instead of inheriting Main by assertion.
+- Each task covers one run, two runs, a persisted one-run remainder, an
+  interrupted pre-success run, and a bounded unlimited-count run. Across 15
+  scenarios, ALAS decrements only after `campaign.run()` returns, disables the
+  task exactly at zero, preserves the remainder after `ScriptEnd`, and leaves
+  unlimited count unchanged. Mutation budget and Android input remain zero.
+- Main remains `L` from its existing 12-4 live path. Main2 and Main3 remain
+  `P` because independent live task startup and map completion are still not
+  proven; offline instance coverage is not promoted to live evidence.
+
 ### Research, Mail, and Observer WIP split and evidence boundary
 
 - Research now has four independent upstream patch members for selected-detail

@@ -19,6 +19,27 @@ class AlasStopConditionReplayTests(unittest.TestCase):
         self.assertTrue(result["passed"])
         self.assertEqual(result["map_achievement_truth_table_rows"], 40)
         self.assertGreaterEqual(result["case_count"], 70)
+        self.assertEqual(result["run_method"], "_run")
+        instances = result["main_task_instances"]
+        self.assertEqual(instances["task_count"], 3)
+        self.assertEqual(instances["scenario_count"], 15)
+        self.assertEqual(set(instances["instances"]), {"Main", "Main2", "Main3"})
+        for task_name, instance in instances["instances"].items():
+            with self.subTest(task_name=task_name):
+                self.assertEqual(instance["scheduler_command"], task_name)
+                self.assertEqual(instance["campaign_event"], "campaign_main")
+                self.assertEqual(instance["campaign_mode"], "normal")
+                self.assertEqual(
+                    instance["scenarios"]["interrupted"]["remaining"], 2
+                )
+                self.assertEqual(
+                    instance["scenarios"]["interrupted"]["successful_runs"], 0
+                )
+                self.assertEqual(
+                    instance["scenarios"]["two"]["campaign_run_calls"], 2
+                )
+        self.assertEqual(instances["mutation_budget"], 0)
+        self.assertFalse(instances["android_input_injected"])
         self.assertEqual(
             result["new_ship_live_test"],
             "skipped-nondeterministic-first-acquisition",
