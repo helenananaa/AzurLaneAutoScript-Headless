@@ -668,6 +668,125 @@ def make_campaign_map_backend(generations=(10, 11)):
 
 
 class SemanticOracleTests(unittest.TestCase):
+    def test_campaign_auto_search_roles_use_exact_duty_controls(self):
+        prefix = (
+            "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/"
+            "panel/"
+        )
+        buttons = []
+        for fleet in (1, 2):
+            for item in range(1, 5):
+                buttons.append(
+                    make_button(
+                        "Item{0}".format(item),
+                        prefix
+                        + "ShipList/fleet/{0}/DutySelect/Item{1}".format(
+                            fleet, item
+                        ),
+                    )
+                )
+        backend = FakeBackend(buttons)
+        backend.ui = make_ui(
+            [],
+            toggles=[
+                make_toggle(
+                    prefix + "Fixed/RightTabs/duty_btn", checked=True
+                )
+            ],
+            images=[
+                make_image(
+                    prefix
+                    + "ShipList/fleet/1/DutySelect/Item1/Checkmark",
+                    "gou",
+                ),
+                make_image(
+                    prefix
+                    + "ShipList/fleet/2/DutySelect/Item2/Checkmark",
+                    "gou",
+                ),
+            ],
+        )
+
+        state = make_oracle(backend).campaign_auto_search_role_state()
+
+        self.assertEqual((state.fleet1_role, state.fleet2_role), ("mob", "boss"))
+
+    def test_campaign_auto_search_roles_reject_multiple_checkmarks(self):
+        prefix = (
+            "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/"
+            "panel/"
+        )
+        buttons = [
+            make_button(
+                "Item{0}".format(item),
+                prefix
+                + "ShipList/fleet/{0}/DutySelect/Item{1}".format(fleet, item),
+            )
+            for fleet in (1, 2)
+            for item in range(1, 5)
+        ]
+        backend = FakeBackend(buttons)
+        backend.ui = make_ui(
+            [],
+            toggles=[
+                make_toggle(
+                    prefix + "Fixed/RightTabs/duty_btn", checked=True
+                )
+            ],
+            images=[
+                make_image(
+                    prefix
+                    + "ShipList/fleet/1/DutySelect/Item1/Checkmark",
+                    "gou",
+                ),
+                make_image(
+                    prefix
+                    + "ShipList/fleet/1/DutySelect/Item3/Checkmark",
+                    "gou",
+                ),
+                make_image(
+                    prefix
+                    + "ShipList/fleet/2/DutySelect/Item2/Checkmark",
+                    "gou",
+                ),
+            ],
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "ambiguous"):
+            make_oracle(backend).campaign_auto_search_role_state()
+
+    def test_campaign_official_combat_auto_state_requires_exact_checked_toggle(self):
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [],
+            toggles=[
+                make_toggle(
+                    "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn",
+                    checked=True,
+                )
+            ],
+            generation=37,
+        )
+
+        self.assertEqual(
+            make_oracle(backend).campaign_official_combat_auto_state(),
+            (37, True),
+        )
+
+    def test_campaign_official_combat_auto_state_rejects_ambiguous_toggle(self):
+        backend = FakeBackend([])
+        suffix = "CombatUIStandard(Clone)/AutoBtn"
+        backend.ui = make_ui(
+            [],
+            toggles=[
+                make_toggle("UICamera/A/" + suffix, checked=True),
+                make_toggle("UICamera/B/" + suffix, checked=True),
+            ],
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "ambiguous"):
+            make_oracle(backend).campaign_official_combat_auto_state()
+
     def test_daily_stage_requires_a_topmost_event_point(self):
         root = (
             "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/desc_panel/main_mask/"

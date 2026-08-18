@@ -907,6 +907,19 @@ class CampaignFleetSelectionState:
     sortie_button: ButtonState
 
 
+@dataclass(frozen=True)
+class CampaignAutoSearchRoleState:
+    generation: int
+    fleet1_role: str
+    fleet2_role: str
+
+
+@dataclass(frozen=True)
+class CampaignAutoSearchActiveState:
+    generation: int
+    root_path: str
+
+
 # Normal campaign stages without an oil-cap panel do not publish per-fleet
 # costs in this surface.  Reserve a deliberately conservative amount for the
 # two-fight sortie admission instead of treating absent UI as zero cost.
@@ -1715,6 +1728,25 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "LevelFleetSelectView(Clone)/panel/Fixed/start_button",
     ),
     SemanticTarget(
+        "campaign/fleet-preparation/roles/open",
+        "Click",
+        "LevelFleetSelectView(Clone)/panel/Fixed/title/DropSide/Click",
+    ),
+    *tuple(
+        SemanticTarget(
+            "campaign/fleet-preparation/roles/fleet{0}/{1}".format(
+                fleet_index, role
+            ),
+            "Item{0}".format(item_index),
+            "LevelFleetSelectView(Clone)/panel/ShipList/fleet/{0}/"
+            "DutySelect/Item{1}".format(fleet_index, item_index),
+        )
+        for fleet_index in (1, 2)
+        for item_index, role in enumerate(
+            ("mob", "boss", "all", "standby"), 1
+        )
+    ),
+    SemanticTarget(
         "campaign/fleet-preparation/fleet/1/select",
         "btn_select",
         "LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/btn_select",
@@ -2232,6 +2264,11 @@ DEFAULT_TOGGLE_TARGETS: Tuple[SemanticToggleTarget, ...] = (
         "LevelFleetSelectView(Clone)/mask/list/item1",
     ),
     SemanticToggleTarget(
+        "campaign/fleet-preparation/roles/tab",
+        "duty_btn",
+        "LevelFleetSelectView(Clone)/panel/Fixed/RightTabs/duty_btn",
+    ),
+    SemanticToggleTarget(
         "campaign/fleet-preparation/option/2",
         "item2",
         "LevelFleetSelectView(Clone)/mask/list/item2",
@@ -2373,6 +2410,16 @@ _CAMPAIGN_FLEET_INPUT_TARGETS = tuple(
         "fleet/2/clear",
         "submarine/1/select",
         "submarine/1/clear",
+        "roles/open",
+        "roles/tab",
+        "roles/fleet1/mob",
+        "roles/fleet1/boss",
+        "roles/fleet1/all",
+        "roles/fleet1/standby",
+        "roles/fleet2/mob",
+        "roles/fleet2/boss",
+        "roles/fleet2/all",
+        "roles/fleet2/standby",
         "sortie",
         "option/1",
         "option/2",
@@ -11113,6 +11160,66 @@ class SemanticOracle:
             attempts=12,
         )
 
+    def campaign_auto_search_active_state(
+        self,
+    ) -> CampaignAutoSearchActiveState:
+        """Prove the official auto-search map or battle surface read-only."""
+
+        try:
+            entered = self.campaign_map_entry_state()
+        except SemanticGateClosed:
+            ui_state = self.read_ui_state()
+            markers = (
+                "ChapterPreCombatUI(Clone)",
+                "CombatUIStandard(Clone)",
+                "NewBattleResultEmptyUI(Clone)",
+            )
+            paths = tuple(
+                item.path
+                for item in (*ui_state.texts, *ui_state.images)
+                if item.active_in_hierarchy
+                and item.active_and_enabled
+                and any(("/" + marker + "/") in item.path for marker in markers)
+            )
+            roots = {
+                path[: path.index("(Clone)") + len("(Clone)")]
+                for path in paths
+            }
+            if len(roots) != 1:
+                raise SemanticGateClosed(
+                    "campaign official auto-search surface is not proven"
+                )
+            return CampaignAutoSearchActiveState(
+                generation=ui_state.generation,
+                root_path=next(iter(roots)),
+            )
+        return CampaignAutoSearchActiveState(
+            generation=entered.generation,
+            root_path=entered.root_path,
+        )
+
+    def campaign_official_combat_auto_state(
+        self,
+    ) -> Optional[Tuple[int, bool]]:
+        """Read the official combat AutoBtn when a battle is visible."""
+
+        ui_state = self.read_ui_state()
+        suffix = "CombatUIStandard(Clone)/AutoBtn"
+        matches = tuple(
+            toggle
+            for toggle in ui_state.toggles
+            if toggle.path.endswith(suffix)
+            and toggle.active_in_hierarchy
+            and toggle.active_and_enabled
+        )
+        if not matches:
+            return None
+        if len(matches) != 1:
+            raise SemanticGateClosed(
+                "campaign official combat auto toggle is ambiguous"
+            )
+        return ui_state.generation, matches[0].checked
+
     def _campaign_map_entry_state_once(self) -> CampaignMapEntryState:
         button_state = self.read_state()
         ui_state = self.read_ui_state()
@@ -14193,6 +14300,82 @@ class SemanticOracle:
             attempts=12,
         )
 
+    def campaign_auto_search_role_state(self) -> CampaignAutoSearchRoleState:
+        """Read the official auto-search duties for both surface fleets."""
+
+        return self._retry_transition_read(
+            self._campaign_auto_search_role_state_once,
+            attempts=12,
+        )
+
+    def _campaign_auto_search_role_state_once(
+        self,
+    ) -> CampaignAutoSearchRoleState:
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if (
+            not button_state.generation <= ui_state.generation <= button_state.generation + 2
+            or ui_state.image_truncated
+            or ui_state.method_mask & 0xF != 0xF
+        ):
+            raise SemanticGateClosed(
+                "campaign auto-search role snapshots are incomplete"
+            )
+        tabs = self._toggle_matches(
+            ui_state, "campaign/fleet-preparation/roles/tab"
+        )
+        if len(tabs) != 1 or not tabs[0].checked:
+            raise SemanticGateClosed(
+                "campaign auto-search role tab is not selected"
+            )
+        roles = ("mob", "boss", "all", "standby")
+        selected = []
+        for fleet_index in (1, 2):
+            root = (
+                "LevelFleetSelectView(Clone)/panel/ShipList/fleet/{0}/"
+                "DutySelect/"
+            ).format(fleet_index)
+            controls = []
+            for item_index, role in enumerate(roles, 1):
+                semantic_id = (
+                    "campaign/fleet-preparation/roles/fleet{0}/{1}"
+                ).format(fleet_index, role)
+                matches = self._matches(button_state, semantic_id)
+                if len(matches) != 1 or not matches[0].actionable:
+                    raise SemanticGateClosed(
+                        "campaign auto-search role control is incomplete"
+                    )
+                controls.append(matches[0])
+            checkmarks = tuple(
+                image
+                for image in ui_state.images
+                if image.name == "Checkmark"
+                and ("/" + root) in image.path
+                and image.path.endswith("/Checkmark")
+                and image.active_in_hierarchy
+                and image.active_and_enabled
+                and not image.truncated
+                and image.color[3] > 0.99
+            )
+            if len(checkmarks) != 1:
+                raise SemanticGateClosed(
+                    "campaign auto-search role selection is ambiguous"
+                )
+            match = re.search(
+                re.escape(root) + r"Item([1-4])/Checkmark$",
+                checkmarks[0].path,
+            )
+            if match is None:
+                raise SemanticGateClosed(
+                    "campaign auto-search role selection path is malformed"
+                )
+            selected.append(roles[int(match.group(1)) - 1])
+        return CampaignAutoSearchRoleState(
+            generation=button_state.generation,
+            fleet1_role=selected[0],
+            fleet2_role=selected[1],
+        )
+
     def _campaign_fleet_selection_state_once(
         self, stage_code: str, *, fallback_oil_cost: Optional[int] = None
     ) -> CampaignFleetSelectionState:
@@ -14555,6 +14738,26 @@ class SemanticOracle:
         target = observed.sortie_button
         if not target.actionable or target.point is None or target.bounds is None:
             raise SemanticGateClosed("campaign sortie is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="campaign/fleet-preparation/sortie",
+            generation=observed.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_campaign_auto_search_sortie(
+        self, stage_code: str
+    ) -> ActionReceipt:
+        """Click sortie from the official duty tab after caller preflight."""
+
+        observed = self.campaign_fleet_preparation_state(stage_code)
+        target = observed.proceed_button
+        if not target.actionable or target.point is None or target.bounds is None:
+            raise SemanticGateClosed("campaign auto-search sortie is not actionable")
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
         self._tap(int(round(target.point.x)), int(round(target.point.y)))

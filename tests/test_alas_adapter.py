@@ -1,3 +1,4 @@
+import re
 import time
 import unittest
 from dataclasses import replace
@@ -283,6 +284,8 @@ class FakeOracle:
             "submarine": 1,
         }
         self.campaign_fleet_dropdown_row = None
+        self.campaign_role_tab_selected = False
+        self.campaign_roles = ["all", "standby"]
         self.campaign_oil_value = 9504
         self.campaign_achievement_value = SimpleNamespace(
             generation=31,
@@ -346,6 +349,16 @@ class FakeOracle:
 
     def click(self, semantic_id):
         self.click_calls.append(semantic_id)
+        role_match = re.fullmatch(
+            r"campaign/fleet-preparation/roles/fleet([12])/"
+            r"(mob|boss|all|standby)",
+            semantic_id,
+        )
+        if role_match is not None:
+            self.campaign_roles[int(role_match.group(1)) - 1] = (
+                role_match.group(2)
+            )
+            self.campaign_fleet_generation += 1
         if semantic_id == "overlay/network-reconnect/confirm":
             self.enabled_values[semantic_id] = False
         if self.enable_main_after_overlay_click and semantic_id.startswith("overlay/"):
@@ -382,6 +395,8 @@ class FakeOracle:
         )
 
     def toggle_selected(self, semantic_id):
+        if semantic_id == "campaign/fleet-preparation/roles/tab":
+            return self.campaign_role_tab_selected
         return self.toggle_selected_values.get(semantic_id, False)
 
     def toggle_present(self, semantic_id):
@@ -397,6 +412,8 @@ class FakeOracle:
 
     def click_toggle(self, semantic_id):
         self.click_calls.append(semantic_id)
+        if semantic_id == "campaign/fleet-preparation/roles/tab":
+            self.campaign_role_tab_selected = True
         return ActionReceipt(
             semantic_id=semantic_id,
             generation=8,
@@ -626,6 +643,16 @@ class FakeOracle:
                 "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/"
                 "display/mask/sea",
             ),
+        )
+
+    def campaign_auto_search_active_state(self):
+        if not self.campaign_in_map_value:
+            raise SemanticGateClosed(
+                "campaign official auto-search surface is not proven"
+            )
+        return SimpleNamespace(
+            generation=self.campaign_map_generation,
+            root_path="UICamera/Canvas/UIMain/CombatUIStandard(Clone)",
         )
 
     def campaign_map_state(
@@ -904,6 +931,20 @@ class FakeOracle:
         return self.click_receipt(
             "campaign/fleet-preparation/sortie",
             generation=self.campaign_fleet_generation,
+        )
+
+    def click_campaign_auto_search_sortie(self, stage_code):
+        return self.click_campaign_sortie(stage_code)
+
+    def campaign_auto_search_role_state(self):
+        if not self.campaign_role_tab_selected:
+            raise SemanticGateClosed(
+                "campaign auto-search role tab is not selected"
+            )
+        return SimpleNamespace(
+            generation=self.campaign_fleet_generation,
+            fleet1_role=self.campaign_roles[0],
+            fleet2_role=self.campaign_roles[1],
         )
 
     def tactical_slots(self):
@@ -3202,7 +3243,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             oracle,
             lambda: None,
             campaign_stage_entry_budget=1,
-            campaign_fleet_mutation_budget=3,
+            campaign_fleet_mutation_budget=6,
         )
         entrance = NamedButton("12-4")
         entrance.semantic_campaign_stage_code = "12-4"
@@ -3354,6 +3395,82 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             proof.map_root_path, "LevelCamera/Canvas/UIMain/LevelGrid"
         )
         self.assertEqual(oracle.click_calls[-1], "campaign/fleet-preparation/sortie")
+
+    def test_campaign_auto_search_proves_roles_and_passive_start(self):
+        oracle = FakeOracle()
+        oracle.campaign_fleets["submarine"] = 0
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=6,
+            campaign_sortie_budget=1,
+        )
+        entrance = NamedButton("12-4")
+        entrance.semantic_campaign_stage_code = "12-4"
+        adapter.begin_campaign_pre_sortie("12-4")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+        adapter.click(NamedButton("FLEET_2_CLEAR"))
+        adapter.click(NamedButton("FLEET_2_CHOOSE"))
+        adapter.click(NamedButton("FLEET_2_BAR_INDEX_2"))
+        adapter.confirm_campaign_fleet_selection()
+
+        roles = adapter.ensure_campaign_auto_search_roles(
+            "fleet1_mob_fleet2_boss"
+        )
+        self.assertEqual((roles.fleet1_role, roles.fleet2_role), ("mob", "boss"))
+        self.assertTrue(
+            adapter.authorize_campaign_sortie(
+                use_auto_search=True,
+                use_2x_book=False,
+                submarine_mode="do_not_use",
+                fleet_order="fleet1_mob_fleet2_boss",
+            )
+        )
+        adapter.click(NamedButton("FLEET_PREPARATION"))
+
+        self.assertTrue(adapter.campaign_auto_search_running())
+        proof = adapter.confirm_campaign_auto_search_started()
+        self.assertEqual(proof.prepared_fleets, (1, 2, 0))
+        self.assertIn("CombatUIStandard", proof.map_root_path)
+        self.assertEqual(
+            oracle.click_calls[-1], "campaign/fleet-preparation/sortie"
+        )
+
+    def test_campaign_auto_search_accepts_reversed_mob_boss_roles(self):
+        oracle = FakeOracle()
+        oracle.campaign_fleets["submarine"] = 0
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=6,
+        )
+        entrance = NamedButton("12-4")
+        entrance.semantic_campaign_stage_code = "12-4"
+        adapter.begin_campaign_pre_sortie("12-4")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+        adapter.click(NamedButton("FLEET_2_CLEAR"))
+        adapter.click(NamedButton("FLEET_2_CHOOSE"))
+        adapter.click(NamedButton("FLEET_2_BAR_INDEX_2"))
+        adapter.confirm_campaign_fleet_selection()
+
+        roles = adapter.ensure_campaign_auto_search_roles(
+            "fleet1_boss_fleet2_mob"
+        )
+
+        self.assertEqual((roles.fleet1_role, roles.fleet2_role), ("boss", "mob"))
+        self.assertEqual(
+            oracle.click_calls[-2:],
+            [
+                "campaign/fleet-preparation/roles/fleet1/boss",
+                "campaign/fleet-preparation/roles/fleet2/mob",
+            ],
+        )
 
     def test_campaign_sortie_accepts_typed_single_fleet_profile(self):
         oracle = FakeOracle()

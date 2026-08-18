@@ -102,6 +102,8 @@ from .semantic_oracle import (
     BuildCostState,
     BuildPool,
     BuildSubmitState,
+    CampaignAutoSearchRoleState,
+    CampaignAutoSearchActiveState,
     CampaignFleetRowState,
     CampaignFleetSelectionState,
     CampaignMapEntryState,
@@ -930,6 +932,19 @@ class CampaignCameraPositioningAdmission:
     bounds: Bounds
 
 
+@dataclass(frozen=True)
+class CampaignAutoSearchCompletionProof:
+    stage_code: str
+    result_generation: int
+    result_path: str
+    fleet1_role: str
+    fleet2_role: str
+    waited_seconds: float
+    combat_auto_generation: int
+    combat_auto_proven: bool = True
+    passive_after_sortie: bool = True
+
+
 @dataclass
 class _CampaignFlowContext:
     stage_code: str
@@ -948,6 +963,8 @@ class _CampaignFlowContext:
     required_fleet_mutations: int = 0
     expected_fleet_mutations: Tuple[str, ...] = ()
     fleet_mutation_receipts: List[ActionReceipt] = field(default_factory=list)
+    auto_search_role_receipts: List[ActionReceipt] = field(default_factory=list)
+    auto_search_role_state: Optional[CampaignAutoSearchRoleState] = None
     fleet_dropdown_row: Optional[str] = None
     fleet_dropdown_previous_index: Optional[int] = None
     fleet_proof: Optional[CampaignFleetPreparationProof] = None
@@ -980,6 +997,7 @@ class _CampaignFlowContext:
     map_fleet_switch_receipts: List[ActionReceipt] = field(default_factory=list)
     combat_receipt: Optional[ActionReceipt] = None
     combat_proof: Optional[AlasCampaignCombatProof] = None
+    auto_search_completion: Optional[CampaignAutoSearchCompletionProof] = None
     passive_transition_until: float = 0.0
 
 
@@ -1134,6 +1152,9 @@ class AlasSemanticAdapter:
         self._supply_pack_context: Optional[_SupplyPackFlowContext] = None
         self._minigame_context: Optional[_MinigameFlowContext] = None
         self._campaign_context: Optional[_CampaignFlowContext] = None
+        self._last_campaign_auto_search_completion: Optional[
+            CampaignAutoSearchCompletionProof
+        ] = None
         self._operation_siren_globe_swipe_intent: Optional[
             _OperationSirenGlobeSwipeIntent
         ] = None
@@ -1852,6 +1873,11 @@ class AlasSemanticAdapter:
             passive_transition_until=time.monotonic() + 20.0,
         )
 
+    def last_campaign_auto_search_completion(
+        self,
+    ) -> Optional[CampaignAutoSearchCompletionProof]:
+        return self._last_campaign_auto_search_completion
+
     def end_campaign_pre_sortie(self) -> None:
         self._campaign_context = None
 
@@ -1892,6 +1918,140 @@ class AlasSemanticAdapter:
     def campaign_sortie_committed(self) -> bool:
         context = self._require_campaign_context()
         return context.sortie_receipt is not None
+
+    def campaign_auto_search_running(self) -> bool:
+        context = self._require_campaign_context()
+        if (
+            context.sortie_receipt is None
+            or context.auto_search_role_state is None
+        ):
+            return False
+        if self.oracle.exists("reward/campaign-total/exit"):
+            return False
+        try:
+            self.oracle.campaign_auto_search_active_state()
+        except SemanticGateClosed:
+            return False
+        return True
+
+    def confirm_campaign_auto_search_started(self) -> CampaignSortieProof:
+        """Prove official auto-search took ownership after the sortie input."""
+
+        context = self._require_campaign_context()
+        if context.sortie_proof is not None:
+            return context.sortie_proof
+        if (
+            not context.sortie_authorized
+            or context.sortie_receipt is None
+            or context.initial_fleet_state is None
+            or context.prepared_fleet_state is None
+            or context.requested_fleets is None
+            or context.oil_before_sortie is None
+            or context.auto_search_role_state is None
+        ):
+            raise SemanticGateClosed(
+                "campaign auto-search start proof is incomplete"
+            )
+        active = self.oracle.campaign_auto_search_active_state()
+        if active.generation <= context.sortie_receipt.generation:
+            raise SemanticGateClosed(
+                "campaign auto-search surface did not advance generation"
+            )
+        required_oil = (
+            context.prepared_fleet_state.mob_oil_cost
+            + context.prepared_fleet_state.boss_oil_cost
+        )
+        context.sortie_proof = CampaignSortieProof(
+            stage_code=context.stage_code,
+            initial_fleets=self._campaign_fleet_tuple(
+                context.initial_fleet_state
+            ),
+            requested_fleets=context.requested_fleets,
+            prepared_fleets=self._campaign_fleet_tuple(
+                context.prepared_fleet_state
+            ),
+            mutation_semantic_ids=tuple(
+                receipt.semantic_id
+                for receipt in context.fleet_mutation_receipts
+            ),
+            oil_before_sortie=context.oil_before_sortie,
+            required_oil=required_oil,
+            sortie_generation=context.sortie_receipt.generation,
+            map_generation=active.generation,
+            map_root_path=active.root_path,
+        )
+        return context.sortie_proof
+
+    def wait_campaign_auto_search_completion(
+        self, stage_code: str, timeout_seconds: float = 1800.0
+    ) -> CampaignAutoSearchCompletionProof:
+        """Passively wait for the official auto-search total-reward panel."""
+
+        self._package_gate()
+        context = self._require_campaign_context()
+        if stage_code != context.stage_code or stage_code != "12-4":
+            raise SemanticGateClosed(
+                "campaign auto-search completion identity changed"
+            )
+        if context.sortie_proof is None or context.auto_search_role_state is None:
+            raise SemanticGateClosed(
+                "campaign auto-search completion requires sortie and role proof"
+            )
+        if (
+            isinstance(timeout_seconds, bool)
+            or not isinstance(timeout_seconds, Real)
+            or not 60 <= float(timeout_seconds) <= 3600
+        ):
+            raise ValueError("campaign auto-search timeout must be in [60, 3600]")
+        started = time.monotonic()
+        deadline = started + float(timeout_seconds)
+        combat_auto_generation: Optional[int] = None
+        while time.monotonic() < deadline:
+            self._package_gate()
+            combat_auto = self.oracle.campaign_official_combat_auto_state()
+            if combat_auto is not None:
+                generation, enabled = combat_auto
+                if not enabled:
+                    raise SemanticGateClosed(
+                        "official combat automation is disabled"
+                    )
+                combat_auto_generation = generation
+            if self.oracle.enabled("reward/campaign-total/exit"):
+                if combat_auto_generation is None:
+                    raise SemanticGateClosed(
+                        "official combat automation was not proven"
+                    )
+                state = self.oracle.read_state()
+                targets = tuple(
+                    button
+                    for button in state.buttons
+                    if button.name == "ButtonExit"
+                    and button.path.endswith(
+                        "LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit"
+                    )
+                    and button.actionable
+                )
+                if len(targets) != 1:
+                    raise SemanticGateClosed(
+                        "campaign auto-search result target is ambiguous"
+                    )
+                roles = context.auto_search_role_state
+                proof = CampaignAutoSearchCompletionProof(
+                    stage_code=stage_code,
+                    result_generation=state.generation,
+                    result_path=targets[0].path,
+                    fleet1_role=roles.fleet1_role,
+                    fleet2_role=roles.fleet2_role,
+                    waited_seconds=round(time.monotonic() - started, 3),
+                    combat_auto_generation=combat_auto_generation,
+                )
+                context.auto_search_completion = proof
+                self._last_campaign_auto_search_completion = proof
+                return proof
+            time.sleep(1.0)
+        raise SemanticGateClosed(
+            "campaign auto-search did not reach the total-reward panel in time"
+        )
 
     @staticmethod
     def _campaign_fleet_tuple(
@@ -2022,6 +2182,11 @@ class AlasSemanticAdapter:
     def campaign_fleet_operator_in_use(self, row_key: str) -> bool:
         return self._campaign_fleet_row(row_key).in_use
 
+    def campaign_fleet_operator_selected_fleet(
+        self, row_key: str
+    ) -> Optional[int]:
+        return self._campaign_fleet_row(row_key).selected_fleet
+
     def campaign_fleet_dropdown_opened(self) -> bool:
         return self.oracle.campaign_fleet_dropdown_state() is not None
 
@@ -2060,6 +2225,84 @@ class AlasSemanticAdapter:
         context.prepared_fleet_state = prepared
         return prepared
 
+    def ensure_campaign_auto_search_roles(
+        self, fleet_order: str
+    ) -> CampaignAutoSearchRoleState:
+        """Ensure one official mob fleet and one official boss fleet on 12-4."""
+
+        self._package_gate()
+        context = self._require_campaign_context()
+        if context.stage_code != "12-4" or context.mode != "normal":
+            raise SemanticGateClosed(
+                "campaign auto-search roles are qualified only for normal 12-4"
+            )
+        if context.prepared_fleet_state is None or context.requested_fleets is None:
+            raise SemanticGateClosed(
+                "campaign auto-search roles require proven fleet selection"
+            )
+        if context.requested_fleets != (1, 2, 0):
+            raise SemanticGateClosed(
+                "campaign auto-search roles require fleet 1 and fleet 2 only"
+            )
+        expected = {
+            "fleet1_mob_fleet2_boss": ("mob", "boss"),
+            "fleet1_boss_fleet2_mob": ("boss", "mob"),
+        }.get(fleet_order)
+        if expected is None:
+            raise SemanticGateClosed(
+                "campaign auto-search requires one mob fleet and one boss fleet"
+            )
+
+        if not self.oracle.toggle_selected(
+            "campaign/fleet-preparation/roles/tab"
+        ):
+            receipt = self._dispatch_mutation(
+                "campaign.fleet_mutation",
+                lambda: self.oracle.click_toggle(
+                    "campaign/fleet-preparation/roles/tab"
+                ),
+            )
+            context.auto_search_role_receipts.append(receipt)
+            context.passive_transition_until = time.monotonic() + 3.0
+
+        state = self.oracle.campaign_auto_search_role_state()
+        for fleet_index, (actual, target) in enumerate(
+            zip((state.fleet1_role, state.fleet2_role), expected), 1
+        ):
+            if actual == target:
+                continue
+            semantic_id = (
+                "campaign/fleet-preparation/roles/fleet{0}/{1}"
+            ).format(fleet_index, target)
+            receipt = self._dispatch_mutation(
+                "campaign.fleet_mutation",
+                lambda semantic_id=semantic_id: self.oracle.click(semantic_id),
+            )
+            context.auto_search_role_receipts.append(receipt)
+            context.passive_transition_until = time.monotonic() + 3.0
+            deadline = time.monotonic() + 5.0
+            while True:
+                state = self.oracle.campaign_auto_search_role_state()
+                observed = (
+                    state.fleet1_role
+                    if fleet_index == 1
+                    else state.fleet2_role
+                )
+                if observed == target:
+                    break
+                if time.monotonic() >= deadline:
+                    raise SemanticGateClosed(
+                        "campaign auto-search role transition did not settle"
+                    )
+                time.sleep(0.2)
+
+        if (state.fleet1_role, state.fleet2_role) != expected:
+            raise SemanticGateClosed(
+                "campaign auto-search role postcondition did not match"
+            )
+        context.auto_search_role_state = state
+        return state
+
     def authorize_campaign_sortie(
         self,
         *,
@@ -2096,15 +2339,34 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "campaign sortie fleet profile is not reviewed"
             ) from exc
-        if use_auto_search is not False or use_2x_book is not False:
-            raise SemanticGateClosed(
-                "campaign sortie requires auto search and 2x book disabled"
-            )
+        if use_2x_book is not False:
+            raise SemanticGateClosed("campaign sortie requires 2x book disabled")
+        if use_auto_search:
+            if context.stage_code != "12-4" or context.requested_fleets != (1, 2, 0):
+                raise SemanticGateClosed(
+                    "campaign auto-search sortie is qualified only for two-fleet 12-4"
+                )
+            expected_roles = {
+                "fleet1_mob_fleet2_boss": ("mob", "boss"),
+                "fleet1_boss_fleet2_mob": ("boss", "mob"),
+            }.get(fleet_order)
+            role_state = context.auto_search_role_state
+            if (
+                expected_roles is None
+                or role_state is None
+                or (role_state.fleet1_role, role_state.fleet2_role)
+                != expected_roles
+            ):
+                raise SemanticGateClosed(
+                    "campaign auto search fleet roles were not proven"
+                )
+        elif use_auto_search is not False:
+            raise SemanticGateClosed("campaign auto-search setting is malformed")
         if submarine_mode != "do_not_use":
             raise SemanticGateClosed(
                 "campaign sortie requires submarine mode do_not_use"
             )
-        if fleet_order != expected_fleet_order:
+        if not use_auto_search and fleet_order != expected_fleet_order:
             raise SemanticGateClosed(
                 "campaign sortie fleet order does not match the reviewed profile"
             )
@@ -7379,9 +7641,15 @@ class AlasSemanticAdapter:
                 )
             receipt = self._dispatch_mutation(
                 "campaign.sortie",
-                lambda: self.oracle.click_campaign_sortie(
-                    context.stage_code,
-                    fallback_oil_cost=context.map_preparation_oil_cost,
+                lambda: (
+                    self.oracle.click_campaign_auto_search_sortie(
+                        context.stage_code
+                    )
+                    if context.auto_search_role_state is not None
+                    else self.oracle.click_campaign_sortie(
+                        context.stage_code,
+                        fallback_oil_cost=context.map_preparation_oil_cost,
+                    )
                 ),
             )
             if receipt.generation < context.prepared_fleet_state.generation:
@@ -10246,6 +10514,11 @@ class AlasSemanticSession:
     def campaign_fleet_operator_in_use(self, row_key: str) -> bool:
         return self.open().campaign_fleet_operator_in_use(row_key)
 
+    def campaign_fleet_operator_selected_fleet(
+        self, row_key: str
+    ) -> Optional[int]:
+        return self.open().campaign_fleet_operator_selected_fleet(row_key)
+
     def campaign_fleet_dropdown_opened(self) -> bool:
         return self.open().campaign_fleet_dropdown_opened()
 
@@ -10254,6 +10527,29 @@ class AlasSemanticSession:
 
     def confirm_campaign_fleet_selection(self) -> CampaignFleetSelectionState:
         return self.open().confirm_campaign_fleet_selection()
+
+    def ensure_campaign_auto_search_roles(
+        self, fleet_order: str
+    ) -> CampaignAutoSearchRoleState:
+        return self.open().ensure_campaign_auto_search_roles(fleet_order)
+
+    def campaign_auto_search_running(self) -> bool:
+        return self.open().campaign_auto_search_running()
+
+    def confirm_campaign_auto_search_started(self) -> CampaignSortieProof:
+        return self.open().confirm_campaign_auto_search_started()
+
+    def wait_campaign_auto_search_completion(
+        self, stage_code: str, timeout_seconds: float = 1800.0
+    ) -> CampaignAutoSearchCompletionProof:
+        return self.open().wait_campaign_auto_search_completion(
+            stage_code, timeout_seconds=timeout_seconds
+        )
+
+    def last_campaign_auto_search_completion(
+        self,
+    ) -> Optional[CampaignAutoSearchCompletionProof]:
+        return self.open().last_campaign_auto_search_completion()
 
     def close_campaign_fleet_dropdown_for_rollback(self) -> None:
         self.open().close_campaign_fleet_dropdown_for_rollback()

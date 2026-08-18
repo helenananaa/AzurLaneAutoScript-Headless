@@ -8964,3 +8964,156 @@ diff --git a/module/research/research.py b/module/research/research.py
          self.interval_clear([RESEARCH_START])
          self.popup_interval_clear()
          available = False
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+index 3232fe5e..88b5f629 100644
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -210,6 +210,22 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+         self.ENTRANCE.area = self.ENTRANCE.button
+         self.enter_map(self.ENTRANCE, mode=self.config.Campaign_Mode)
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if self.map_is_auto_search and semantic_adapter is not None:
++            semantic_stage = self.config.Campaign_Name
++            if semantic_stage == 'campaign_12_4':
++                semantic_stage = '12-4'
++            proof = semantic_adapter.wait_campaign_auto_search_completion(
++                semantic_stage
++            )
++            logger.attr(
++                'Semantic_Auto_Search_Result',
++                f'{proof.stage_code}, roles='
++                f'{proof.fleet1_role}/{proof.fleet2_role}, '
++                f'waited={proof.waited_seconds}s',
++            )
++            return True
++
+         # Map init
+         if not self.map_is_auto_search:
+             self.handle_map_fleet_lock()
+diff --git a/module/handler/auto_search.py b/module/handler/auto_search.py
+index 307b2d9b..2a232ba6 100644
+--- a/module/handler/auto_search.py
++++ b/module/handler/auto_search.py
+@@ -176,6 +176,9 @@ class AutoSearchHandler(EnemySearchingHandler):
+         Returns:
+             bool:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.campaign_auto_search_running()
+         return self.appear(AUTO_SEARCH_MAP_OPTION_ON, offset=self._auto_search_offset) \
+                and self.appear(AUTO_SEARCH_MAP_OPTION_ON)
+ 
+diff --git a/module/handler/fast_forward.py b/module/handler/fast_forward.py
+index bc0ed183..8387887b 100644
+--- a/module/handler/fast_forward.py
++++ b/module/handler/fast_forward.py
+@@ -313,6 +313,18 @@ class FastForwardHandler(AutoSearchHandler):
+             return False
+ 
+         logger.info('Auto search setting')
++        semantic_adapter = getattr(
++            getattr(self, 'device', None), 'semantic_adapter', None
++        )
++        if semantic_adapter is not None:
++            state = semantic_adapter.ensure_campaign_auto_search_roles(
++                self.config.Fleet_FleetOrder
++            )
++            logger.attr(
++                'Auto_Search_Roles',
++                f'fleet1={state.fleet1_role}, fleet2={state.fleet2_role}',
++            )
++            return True
+         self.fleet_preparation_sidebar_ensure(3)
+         self.auto_search_setting_ensure(self.config.Fleet_FleetOrder)
+         if self.config.SUBMARINE:
+diff --git a/module/map/map_fleet_preparation.py b/module/map/map_fleet_preparation.py
+index 68fc84e4..4cd8f41e 100644
+--- a/module/map/map_fleet_preparation.py
++++ b/module/map/map_fleet_preparation.py
+@@ -341,6 +341,16 @@ class FleetOperator:
+         Args:
+             index (int): Fleet index, 1-6.
+         """
++        semantic_adapter = self._semantic_adapter()
++        if semantic_adapter is not None:
++            selected = semantic_adapter.campaign_fleet_operator_selected_fleet(
++                self._semantic_row_key()
++            )
++            if selected == index:
++                return
++            self.open()
++            self.click(index)
++            return
+         self.open()
+         if index in self.selected():
+             self.close()
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+index 78c9d812..62022064 100644
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -174,6 +174,23 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                 ):
+                     logger.info('Semantic pre-sortie: scan fleet preparation')
+                     if semantic_adapter.campaign_sortie_committed():
++                        if (
++                            self.map_is_auto_search
++                            and semantic_adapter.campaign_auto_search_running()
++                        ):
++                            proof = (
++                                semantic_adapter
++                                .confirm_campaign_auto_search_started()
++                            )
++                            logger.info(
++                                'Semantic official auto-search started: '
++                                f'{proof.stage_code}, '
++                                f'{proof.prepared_fleets}, '
++                                f'{proof.sortie_generation}'
++                                f'->{proof.map_generation}, '
++                                f'root={proof.map_root_path}'
++                            )
++                            break
+                         if self.is_in_map():
+                             proof = semantic_adapter.confirm_campaign_sortie()
+                             logger.info(
+@@ -222,6 +239,12 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                                     fleet_timer.reset()
+                                     campaign_timer.reset()
+                                     sortie_clicked = True
++                        except Exception as exc:
++                            logger.warning(
++                                f'Semantic campaign sortie admission failed: '
++                                f'{type(exc).__name__}: {exc}'
++                            )
++                            raise
+                         finally:
+                             if not sortie_clicked:
+                                 try:
+@@ -255,12 +278,26 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                     logger.info('Semantic pre-sortie: scan map preparation')
+                     if self.appear(MAP_PREPARATION, offset=(20, 20)):
+                         logger.info('Semantic pre-sortie: map preparation active')
++                        if self.config.Campaign_UseAutoSearch:
++                            # The typed AutoFight control itself proves that
++                            # this cleared stage supports the official clear-
++                            # mode auto-search path.  The original pixel
++                            # map_get_info() is intentionally unavailable in
++                            # semantic mode, so initialize the same ALAS state
++                            # from that exact control and the reviewed config.
++                            self.map_has_clear_mode = True
++                            self.map_is_clear_mode = True
++                            self.map_is_auto_search = True
++                            self.map_is_2x_book = False
+                         auto_search_selected = (
+                             semantic_adapter.campaign_auto_search_selected()
+                         )
+                         logger.attr('SemanticAutoSearch', auto_search_selected)
+                         if auto_search_selected != self.map_is_auto_search:
+                             self.handle_auto_search()
++                            # Re-enter the ALAS observation loop and require a
++                            # fresh typed postcondition before proceeding.
++                            continue
+                         logger.info('Semantic pre-sortie: click map preparation')
+                         self.device.click(MAP_PREPARATION)
+                         map_click += 1

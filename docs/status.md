@@ -4,6 +4,27 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-18
 
+### Main 12-4 official auto-search
+
+- `Main` now supports one bounded normal 12-4 official auto-search run with
+  fleet 1 and fleet 2 selected, submarines disabled, and either
+  `fleet1_mob_fleet2_boss` or `fleet1_boss_fleet2_mob`. Both role orders are
+  exact typed contracts; the first order completed a live API 32 x86_64 run,
+  while the reversed order is covered by the same fail-closed adapter path and
+  an explicit deterministic test.
+- ALAS owns chapter navigation, fleet selection, duty-role selection, sortie,
+  and final acceptance. After sortie, the official game owns all map movement
+  and combat. The live run used zero campaign-combat and viewport-swipe budget,
+  repeatedly proved the official combat `AutoBtn` checked, waited 519 seconds,
+  accepted only the exact 12-4 total-reward panel, decremented RunCount to zero,
+  disabled the Scheduler task, and used no raw-input fallback. Evidence is in
+  `integration/alas/main-12-4-auto-search-live-validation-receipt.json`.
+- The authoritative series now has 41 members; member 0340 contains the five
+  narrow upstream ALAS hooks for role selection, official-auto admission,
+  passive completion, and result hand-off. This does not promote auto-search
+  for other stages, events, tasks, fleet numbers, fleet lock, submarines, or
+  2x-book use.
+
 ### Main 1-1 through 16-4 route admission
 
 - Main, Main2, and Main3 now share a fail-closed normal-campaign route
@@ -22,7 +43,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   fingerprint, and no compatible semantic observer is available, so it was
   not used as evidence and no account-changing input was sent. Main retains
   its prior 12-4 live result; Main2/Main3 remain offline-only `P`.
-- The authoritative 40-member patch applies to pristine pinned upstream and
+- The authoritative 41-member patch applies to pristine pinned upstream and
   all 128 changed Python files compile. The complete repository suite passes
   1,139/1,139 with 50 upstream deprecation/syntax warnings; support-matrix,
   baseline, pixel-inventory, and combined-patch hashes are synchronized.

@@ -1,0 +1,56 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-08-18T10:13:03.336211Z",
+  "finished_at": "2026-08-18T10:25:09.798527Z",
+  "task": "Main",
+  "stage": "12-4",
+  "event": "campaign_main",
+  "mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "scheduler_command": "Main",
+  "run_result": true,
+  "run_count_before": 1,
+  "run_count_after": 0,
+  "scheduler_enabled_after": false,
+  "use_auto_search": true,
+  "fleet_order": "fleet1_mob_fleet2_boss",
+  "auto_search_completion": {
+    "stage": "12-4",
+    "result_generation": 11420,
+    "result_path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+    "fleet1_role": "mob",
+    "fleet2_role": "boss",
+    "waited_seconds": 519.0,
+    "combat_auto_generation": 11378,
+    "combat_auto_proven": true,
+    "passive_after_sortie": true
+  },
+  "login_recovery_performed": true,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "generation": 273
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 6,
+    "sortie": 1,
+    "combat": 0,
+    "viewport_swipe": 0
+  },
+  "observer": {
+    "apk_sha256": "97d9ea8c30b62d2b82a94aa7f130e8cc006318d4fe72b4aed93a2779942257da",
+    "generation": 11548,
+    "scene_handle": -76,
+    "button_count": 22
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false
+  },
+  "raw_input_fallback_used": false
+}

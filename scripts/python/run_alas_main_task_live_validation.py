@@ -37,8 +37,18 @@ def _close_semantic_session(instance: object) -> None:
         session.close()
 
 
+def _surface_visible(probe: Any) -> bool:
+    try:
+        return bool(probe())
+    except Exception as exc:
+        if exc.__class__.__name__ != "SemanticGateClosed":
+            raise
+        return False
+
+
 def _configure(
-    seed: Mapping[str, Any], *, task: str, stage: str, use_auto_search: bool
+    seed: Mapping[str, Any], *, task: str, stage: str, use_auto_search: bool,
+    fleet_order: str
 ) -> dict[str, Any]:
     payload = copy.deepcopy(seed)
     target = payload[task]
@@ -49,7 +59,7 @@ def _configure(
             "Name": stage,
             "Event": "campaign_main",
             "Mode": "normal",
-            "UseClearMode": False,
+            "UseClearMode": use_auto_search,
             "UseFleetLock": False,
             "UseAutoSearch": use_auto_search,
             "Use2xBook": False,
@@ -67,6 +77,10 @@ def _configure(
     )
     target["Submarine"]["Fleet"] = 0
     target["Submarine"]["Mode"] = "do_not_use"
+    if stage == "12-4" and use_auto_search:
+        target["Fleet"]["Fleet1"] = 1
+        target["Fleet"]["Fleet2"] = 2
+        target["Fleet"]["FleetOrder"] = fleet_order
     if stage == "1-1":
         target["Fleet"]["Fleet2"] = 0
         target["Fleet"]["FleetOrder"] = "fleet1_all_fleet2_standby"
@@ -85,6 +99,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         task=args.task,
         stage=args.stage,
         use_auto_search=args.use_auto_search,
+        fleet_order=args.fleet_order,
     )
     config_name = f"_codex_main_live_{args.task.lower()}_{uuid.uuid4().hex}"
     config_path = alas_root / "config" / f"{config_name}.json"
@@ -112,7 +127,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "ALAS_SEMANTIC_DRIVER_REVISION": args.driver_revision,
             "ALAS_SEMANTIC_ADB": args.adb,
             "ALAS_SEMANTIC_CAMPAIGN_STAGE_ENTRY_BUDGET": "1",
-            "ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET": "3",
+            "ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET": "6",
             "ALAS_SEMANTIC_CAMPAIGN_SORTIE_BUDGET": "1",
             "ALAS_SEMANTIC_CAMPAIGN_COMBAT_BUDGET": str(args.combat_budget),
             "ALAS_SEMANTIC_CAMPAIGN_VIEWPORT_SWIPE_BUDGET": str(
@@ -137,9 +152,11 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         startup_oracle = semantic_session.open().oracle
         startup_state = startup_oracle.read_state()
         starting_surface = {
-            "main_page": startup_oracle.main_page_visible(),
-            "campaign_map": startup_oracle.campaign_is_in_map(),
-            "campaign_entry": startup_oracle.campaign_menu_is_entry(),
+            "main_page": _surface_visible(startup_oracle.main_page_visible),
+            "campaign_map": _surface_visible(startup_oracle.campaign_is_in_map),
+            "campaign_entry": _surface_visible(
+                startup_oracle.campaign_menu_is_entry
+            ),
             "generation": startup_state.generation,
         }
         if (
@@ -158,10 +175,13 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         session = instance.device.semantic_adapter
         adapter = session.open()
         state = adapter.oracle.read_state()
+        completion = session.last_campaign_auto_search_completion()
         final_surface = {
-            "main_page": adapter.oracle.main_page_visible(),
-            "campaign_map": adapter.oracle.campaign_is_in_map(),
-            "campaign_entry": adapter.oracle.campaign_menu_is_entry(),
+            "main_page": _surface_visible(adapter.oracle.main_page_visible),
+            "campaign_map": _surface_visible(adapter.oracle.campaign_is_in_map),
+            "campaign_entry": _surface_visible(
+                adapter.oracle.campaign_menu_is_entry
+            ),
         }
         run_count = task_post["StopCondition"]["RunCount"]
         enabled = task_post["Scheduler"]["Enable"]
@@ -183,11 +203,29 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "run_count_after": run_count,
             "scheduler_enabled_after": enabled,
             "use_auto_search": args.use_auto_search,
+            "fleet_order": args.fleet_order,
+            "auto_search_completion": (
+                {
+                    "stage": completion.stage_code,
+                    "result_generation": completion.result_generation,
+                    "result_path": completion.result_path,
+                    "fleet1_role": completion.fleet1_role,
+                    "fleet2_role": completion.fleet2_role,
+                    "waited_seconds": completion.waited_seconds,
+                    "combat_auto_generation": (
+                        completion.combat_auto_generation
+                    ),
+                    "combat_auto_proven": completion.combat_auto_proven,
+                    "passive_after_sortie": completion.passive_after_sortie,
+                }
+                if completion is not None
+                else None
+            ),
             "login_recovery_performed": login_recovery_performed,
             "starting_surface": starting_surface,
             "budgets": {
                 "stage_entry": 1,
-                "fleet_mutation": 3,
+                "fleet_mutation": 6,
                 "sortie": 1,
                 "combat": args.combat_budget,
                 "viewport_swipe": args.viewport_swipe_budget,
@@ -222,6 +260,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--task", required=True, choices=TASKS)
     parser.add_argument("--stage", default="1-1")
     parser.add_argument("--use-auto-search", action="store_true")
+    parser.add_argument(
+        "--fleet-order",
+        choices=(
+            "fleet1_mob_fleet2_boss",
+            "fleet1_boss_fleet2_mob",
+        ),
+        default="fleet1_mob_fleet2_boss",
+    )
     parser.add_argument("--combat-budget", type=int, default=8)
     parser.add_argument("--viewport-swipe-budget", type=int, default=2)
     parser.add_argument("--output", type=Path)

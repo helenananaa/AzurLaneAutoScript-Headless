@@ -199,6 +199,11 @@
       "order": 40,
       "path": "integration/alas/series/0330-research-atomic-start-port.patch",
       "sha256": "026b107be195294c0125f3254323e5085992273063a47ec4ba6b457d1425f3b3"
+    },
+    {
+      "order": 41,
+      "path": "integration/alas/series/0340-campaign-auto-search-port.patch",
+      "sha256": "af24fcc8c7dfb2f6d86382aa2ed21d94f65735a1c6449c056849df47ff9b93a3"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

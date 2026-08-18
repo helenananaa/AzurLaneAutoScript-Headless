@@ -534,7 +534,10 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
                 "LevelFleetSelectView(Clone)/panel/Fixed/btnBack")) ||
       (name == "start_button" &&
        EndsWith(path,
-                "LevelFleetSelectView(Clone)/panel/Fixed/start_button"))) {
+                "LevelFleetSelectView(Clone)/panel/Fixed/start_button")) ||
+      (name == "Click" &&
+       EndsWith(path,
+                "LevelFleetSelectView(Clone)/panel/Fixed/title/DropSide/Click"))) {
     return true;
   }
   if ((name == "btn_select" || name == "btn_clear") &&
@@ -547,6 +550,16 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
        EndsWith(path,
                 "LevelFleetSelectView(Clone)/panel/ShipList/sub/1/" +
                     std::string(name)))) {
+    return true;
+  }
+  if (name.size() == 5 && name.substr(0, 4) == "Item" &&
+      name[4] >= '1' && name[4] <= '4' &&
+      (EndsWith(path,
+                "LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/"
+                "DutySelect/" + std::string(name)) ||
+       EndsWith(path,
+                "LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/"
+                "DutySelect/" + std::string(name)))) {
     return true;
   }
   if (name == "back_btn" &&
@@ -715,6 +728,11 @@ bool ShouldEvaluateToggleTopRaycast(std::string_view name,
       EndsWith(path,
                "LevelFleetSelectView(Clone)/mask/list/" +
                    std::string(name))) {
+    return true;
+  }
+  if (name == "duty_btn" &&
+      EndsWith(path,
+               "LevelFleetSelectView(Clone)/panel/Fixed/RightTabs/duty_btn")) {
     return true;
   }
   if ((name == "build_btn" || name == "queue_btn") &&
