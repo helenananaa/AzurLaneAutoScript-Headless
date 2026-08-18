@@ -1934,6 +1934,28 @@ diff --git a/module/research/ui.py b/module/research/ui.py
 index 3f652c11..dea1bd5f 100644
 --- a/module/research/ui.py
 +++ b/module/research/ui.py
+@@ -17,11 +17,21 @@ class ResearchUI(UI):
+     def is_in_queue(self, interval=0):
+         return self.appear(QUEUE_CHECK, offset=(20, 20), interval=interval)
+ 
+     def ensure_research_stable(self):
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.research_detail_stable()
++            return
+         self.wait_until_stable(STABLE_CHECKER)
+ 
+     def ensure_research_center_stable(self):
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.research_page_stable()
++            return
+         self.wait_until_stable(STABLE_CHECKER_CENTER)
+ 
+     def queue_enter(self, skip_first_screenshot=True):
+         """
 @@ -99,6 +99,12 @@ class ResearchUI(UI):
          Returns:
              list[str]: List of project status
@@ -8812,3 +8834,94 @@ index f49290a2..d1ed554c 100644
              if self.ui_additional(get_ship=False):
                  self.interval_clear(DORM_CHECK)
                  continue
+diff --git a/module/research/ui.py b/module/research/ui.py
+index dea1bd5f..4a07f401 100644
+--- a/module/research/ui.py
++++ b/module/research/ui.py
+@@ -35,9 +35,16 @@ class ResearchUI(UI):
+     def queue_enter(self, skip_first_screenshot=True):
+         """
+         Pages:
+             in: is_in_research
+             out: is_in_queue
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None and self.appear(RESEARCH_DETAIL_QUIT):
++            # A previously selected project is still owned by the Research
++            # page, but it covers the queue entry control.  Resolve it through
++            # the normal detail-quit branch before entering the queue.
++            self.research_detail_quit()
+         self.ui_click(RESEARCH_GOTO_QUEUE, check_button=self.is_in_queue, appear_button=self.is_in_research,
+                       retry_wait=1, skip_first_screenshot=skip_first_screenshot)
+ 
+@@ -137,6 +144,12 @@ class ResearchUI(UI):
+ 
+     def research_detail_quit(self, skip_first_screenshot=True):
+         logger.info('Research detail quit')
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None and self.appear(RESEARCH_DETAIL_QUIT):
++            self.device.click(RESEARCH_DETAIL_QUIT)
++            self.ensure_research_center_stable()
++            return
+         click_timer = Timer(10)
+         while 1:
+             if skip_first_screenshot:
+diff --git a/module/research/research.py b/module/research/research.py
+index ff4edac5..8b2e45b5 100644
+--- a/module/research/research.py
++++ b/module/research/research.py
+@@ -607,6 +607,12 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+         if semantic_adapter is not None:
+             semantic_adapter.begin_research()
+         try:
++            if semantic_adapter is not None and self.appear(RESEARCH_DETAIL_QUIT):
++                self.research_detail_quit()
++            # Recover a normal Research command that starts on its own queue
++            # page through ALAS' existing return-to-list flow.
++            if semantic_adapter is not None and self.is_in_queue():
++                self.queue_quit()
+             # ALAS still owns selection, queue filling, retry, and scheduling.
+             return self._run_alas_state_machine()
+         finally:
+diff --git a/module/research/research.py b/module/research/research.py
+index 8b2e45b5..bbca8144 100644
+--- a/module/research/research.py
++++ b/module/research/research.py
+@@ -211,5 +211,8 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+             if click_timer.reached() and self.is_in_research():
+                 i = (index - self._research_project_offset) % 5
+                 logger.info(f'Project offset: {self._research_project_offset}, project {index} is at {i}')
+-                self.device.click(RESEARCH_ENTRANCE[i])
++                if semantic_session is not None:
++                    semantic_session.click_research_project_code(project.name)
++                else:
++                    self.device.click(RESEARCH_ENTRANCE[i])
+                 self.ensure_research_stable()
+diff --git a/module/research/research.py b/module/research/research.py
+--- a/module/research/research.py
++++ b/module/research/research.py
+@@ -189,6 +189,22 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+             logger.warning(f'The project to start: {project} is not in known projects')
+             return None
+         logger.info(f'Research project: {index}')
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            # ALAS owns filtering and resource-policy selection. Once that
++            # decision names one card, use the typed selected-detail transition
++            # so the pixel list checker cannot strand this loop below it.
++            if isinstance(project, int):
++                selected_code = semantic_session.research_projects()[index].code
++            else:
++                selected_code = project.name
++            started = semantic_session.start_research_project_code(selected_code)
++            if started and add_queue:
++                self.research_queue_add()
++            self.research_project_started = project if started else None
++            self._research_project_offset = (index - 2) % 5
++            return started
+         self.interval_clear([RESEARCH_START])
+         self.popup_interval_clear()
+         available = False

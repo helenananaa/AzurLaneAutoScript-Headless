@@ -2,6 +2,27 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-18
+
+### Research, Mail, and Observer WIP split and evidence boundary
+
+- Research now has four independent upstream patch members for selected-detail
+  entry, queue entry, code-bound card selection, and atomic exact-cost start.
+  Seven successful resource-policy receipts are retained only as historical
+  stage evidence because their source hashes predate this closure; no Research
+  field is promoted from those receipts.
+- The Mail qualifier declares exact maintenance, merit, and trade-license
+  configurations and grants. Existing maintenance and merit attempts failed
+  their mail-count postcondition, so the negative receipts remain local
+  artifacts and Mail support is unchanged.
+- Daily, Tactical, and Research observer fixes remain typed and fail closed.
+  They add no pixel fallback and grant no new production authority. See
+  [the WIP closure record](alas-wip-closure-20260818.md).
+- The 40-member patch applies cleanly to pinned ALAS `81ccf63`; the
+  zero-mutation configuration attack matrix passes, focused integrity tests
+  pass 41/41, and the full repository suite passes 1,135/1,135 with 49
+  warnings.
+
 ## 2026-08-17
 
 ### Tactical: book filter complete on the live client

@@ -23,7 +23,7 @@
     {
       "order": 5,
       "path": "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
-      "sha256": "56b12896952f2bcfa1eeffc1fba60afcf99ccdd02730cd9c6f2db73cddae23aa"
+      "sha256": "9c5d3acb48fee4b6073649362fbbf8f00e2adce949a437ea526cf120bb1c1dd5"
     },
     {
       "order": 6,
@@ -179,6 +179,26 @@
       "order": 36,
       "path": "integration/alas/series/0290-dorm-collect-empty-food-flow-port.patch",
       "sha256": "34a2156a5512d382c94653ed70992c5022e94ac3bf85e95bb0e7b6e69cd35714"
+    },
+    {
+      "order": 37,
+      "path": "integration/alas/series/0300-research-selected-detail-entry-port.patch",
+      "sha256": "d66d2aa8165116430725e69786fd18029996926ddb99db429a7c584a431dff67"
+    },
+    {
+      "order": 38,
+      "path": "integration/alas/series/0310-research-queue-entry-port.patch",
+      "sha256": "07d638c1865d4ee16e416943a2b0bddac2667c9e82ac1056fa6b57c0afb582c4"
+    },
+    {
+      "order": 39,
+      "path": "integration/alas/series/0320-research-code-selection-port.patch",
+      "sha256": "38ec077fe1cfed451ac1271471a434ffb7b8c0248d668a7e778067c579f34711"
+    },
+    {
+      "order": 40,
+      "path": "integration/alas/series/0330-research-atomic-start-port.patch",
+      "sha256": "026b107be195294c0125f3254323e5085992273063a47ec4ba6b457d1425f3b3"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",
