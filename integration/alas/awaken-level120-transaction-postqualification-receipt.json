@@ -1,0 +1,49 @@
+{
+  "schema": "alas-headless.awaken-live-postqualification/v1",
+  "passed": true,
+  "qualification_kind": "unexpected-success-reclassified-from-insufficient-expectation",
+  "configured": {
+    "Awaken.LevelCap": "level120",
+    "Awaken.Favourite": false
+  },
+  "task_result": true,
+  "original_validator_result": "failed_only_because_transaction_was_sufficient",
+  "execution_receipt": {
+    "ship_id": 806024,
+    "current_level": 100,
+    "target_level": 105,
+    "observed_level": 100,
+    "cost": {
+      "generation": 241892,
+      "coins_available": 2707,
+      "coins_required": 2000,
+      "chips_available": 73690,
+      "chips_required": 200,
+      "arrays_available": null,
+      "arrays_required": null,
+      "sufficient": true
+    },
+    "actions": [
+      {
+        "semantic_id": "awaken/confirm/commit",
+        "generation": 241898
+      },
+      {
+        "semantic_id": "awaken/completion/close",
+        "generation": 241932
+      }
+    ],
+    "policy_sha256": "3873467d162a145dffd4d34812dc9f98959db35106776f410d9ce19036ccca66",
+    "capability_id": "awaken.execute"
+  },
+  "awaken_grant_remaining": 0,
+  "postconditions": {
+    "typed_completion_observed": true,
+    "official_level_cap_transition": "100->105",
+    "resource_mode": "cognitive_chips",
+    "temporary_config_removed": true,
+    "main_page_restored": true,
+    "subsequent_level120_candidate_set_empty": true,
+    "subsequent_evidence": "integration/alas/awaken-level120-no-candidate-live-validation-receipt.json"
+  }
+}

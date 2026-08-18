@@ -5,7 +5,10 @@ import unittest
 from unittest import mock
 
 from alas_headless.semantic_oracle import (
+    ActionReceipt,
     AdbObserverBridge,
+    AwakenCostState,
+    AwakenExecutionReceipt,
     Bounds,
     BuildPool,
     CampaignMapEntryState,
@@ -7870,6 +7873,54 @@ class GuildSemanticOracleTests(unittest.TestCase):
         backend.ui = make_ui([make_text("20/20", root + "/frame/cnt")])
 
         self.assertEqual(make_oracle(backend).guild_report_count(), 20)
+class AwakenSemanticStateTests(unittest.TestCase):
+    @staticmethod
+    def cost(*, arrays_available=100, arrays_required=100):
+        return AwakenCostState(
+            generation=20,
+            ship_id=100001,
+            ship_name="fixture",
+            current_level=120,
+            target_level=125,
+            coins_available=2000,
+            coins_required=2000,
+            chips_available=200,
+            chips_required=200,
+            arrays_available=arrays_available,
+            arrays_required=arrays_required,
+        )
+
+    def test_awaken_cost_requires_every_exact_resource(self):
+        self.assertTrue(self.cost().sufficient)
+        self.assertFalse(self.cost(arrays_available=99).sufficient)
+        chip_only = dataclasses.replace(
+            self.cost(),
+            current_level=115,
+            target_level=120,
+            arrays_available=None,
+            arrays_required=None,
+        )
+        self.assertFalse(chip_only.use_array)
+        self.assertTrue(chip_only.sufficient)
+
+    def test_awaken_execution_receipt_requires_authoritative_completion(self):
+        action = ActionReceipt(
+            semantic_id="awaken/confirm/commit",
+            generation=21,
+            point=Point(100, 100),
+            bounds=Bounds(50, 50, 150, 150),
+            path="root/confirm",
+        )
+        with self.assertRaisesRegex(ValueError, "commit and completion"):
+            AwakenExecutionReceipt(
+                ship_id=100001,
+                ship_name="fixture",
+                current_level=120,
+                target_level=125,
+                observed_level=120,
+                cost=self.cost(),
+                actions=(action,),
+            )
 
 
 class EnhancementSemanticOracleTests(unittest.TestCase):

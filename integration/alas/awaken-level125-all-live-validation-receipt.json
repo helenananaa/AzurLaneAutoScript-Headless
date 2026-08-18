@@ -1,0 +1,88 @@
+{
+  "schema": "alas-headless.awaken-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "e4c2619b5cd8cf88c51e7f0ee03734871ceceeb0cfe8ba861a35bee98008521d",
+  "configured": {
+    "Awaken.LevelCap": "level125",
+    "Awaken.Favourite": false
+  },
+  "source_sha256": {
+    "awaken": "cd0c968c7710429737239978c47a87685e0722272c82e461dab0c4207c6dee0f",
+    "adapter": "f81a0065abccd8597706a0e5261d8650eccb1004761c1d9b63db099bf3025c0d",
+    "oracle": "eba6a23801ee394611291aefd52f0f597eb6e5430a27faaeff35984f4f3efd79",
+    "runner": "50d9169c6fb984da254ade59a1e7e5b012032638b1ed5bcf41b3546706918881"
+  },
+  "passed": true,
+  "task_result": true,
+  "elapsed_seconds": 47.125,
+  "execution_receipts": [
+    {
+      "ship_id": 101114,
+      "ship_name": "查尔斯·奥斯本.改",
+      "current_level": 120,
+      "target_level": 125,
+      "observed_level": 120,
+      "cost": {
+        "generation": 237831,
+        "ship_id": 101114,
+        "ship_name": "查尔斯·奥斯本.改",
+        "current_level": 120,
+        "target_level": 125,
+        "coins_available": 8707,
+        "coins_required": 2000,
+        "chips_available": 74290,
+        "chips_required": 200,
+        "arrays_available": 9097,
+        "arrays_required": 100
+      },
+      "actions": [
+        {
+          "semantic_id": "awaken/confirm/commit",
+          "generation": 237836,
+          "point": {
+            "x": 760.6,
+            "y": 532.225
+          },
+          "bounds": {
+            "left": 674.15,
+            "top": 500.242,
+            "right": 847.05,
+            "bottom": 564.209
+          },
+          "path": "OverlayCamera/Overlay/UIMain/ShipCustomMsgBox(Clone)/frame/btns/confirm_btn",
+          "policy_sha256": null,
+          "capability_id": null
+        },
+        {
+          "semantic_id": "awaken/completion/close",
+          "generation": 237872,
+          "point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          },
+          "path": "OverlayCamera/Overlay/UIMain/AwakenCompleteWindows(Clone)",
+          "policy_sha256": null,
+          "capability_id": null
+        }
+      ],
+      "policy_sha256": "3873467d162a145dffd4d34812dc9f98959db35106776f410d9ce19036ccca66",
+      "capability_id": "awaken.execute"
+    }
+  ],
+  "awaken_grant_remaining": 0,
+  "cleanup": {
+    "semantic_id": "awaken/dock/back",
+    "generation": 238520,
+    "main_page_visible": true
+  },
+  "temporary_config_removed": true
+}

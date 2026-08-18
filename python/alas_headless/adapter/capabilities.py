@@ -21,6 +21,7 @@ RECOVERY_MANUAL_TAKEOVER = "recovery.manual_takeover"
 
 ACTION_CAPABILITIES = frozenset(
     {
+        "awaken.execute",
         "build.submit",
         "campaign.camera_positioning",
         "campaign.grid_click",

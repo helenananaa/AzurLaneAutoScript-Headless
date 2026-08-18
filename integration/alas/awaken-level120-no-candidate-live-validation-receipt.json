@@ -1,0 +1,31 @@
+{
+  "schema": "alas-headless.awaken-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "e4c2619b5cd8cf88c51e7f0ee03734871ceceeb0cfe8ba861a35bee98008521d",
+  "configured": {
+    "Awaken.LevelCap": "level120",
+    "Awaken.Favourite": false
+  },
+  "expected_outcome": "no-candidate",
+  "source_sha256": {
+    "awaken": "cd0c968c7710429737239978c47a87685e0722272c82e461dab0c4207c6dee0f",
+    "adapter": "dab4ac32e00e3a8667fa20dd16d7ae136f143a730c144a64ff7eb8753670bc64",
+    "oracle": "a7b8b5062fce47efdea8e592341baebd7ca5c007b62637f58eca570ae126c7ca",
+    "runner": "3602420ef195257a9532077f9945894e194c235bee091b6ee4059c81a66cbc86"
+  },
+  "passed": true,
+  "task_result": true,
+  "elapsed_seconds": 15.922,
+  "execution_receipts": [],
+  "cost_observations": [],
+  "awaken_grant_remaining": 1,
+  "cleanup": {
+    "semantic_id": "awaken/dock/back",
+    "generation": 244331,
+    "main_page_visible": true
+  },
+  "temporary_config_removed": true
+}

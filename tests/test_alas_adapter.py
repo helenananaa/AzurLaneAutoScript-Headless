@@ -12,6 +12,9 @@ from alas_headless import (
     AlasCampaignDecisionPreview,
     MissionClaimableDetected,
     AndroidPackageFingerprint,
+    AwakenCostState,
+    AwakenDetailState,
+    AwakenExecutionReceipt,
     Bounds,
     BuildPool,
     ButtonState,
@@ -222,6 +225,12 @@ class FakeOracle:
         self.award_info_page_visible_value = False
         self.retirement_keep_limit_break = None
         self.enhancement_calls = []
+        self.awaken_calls = []
+        self.awaken_use_array = False
+        self.awaken_sufficient = True
+        self.awaken_candidate = SimpleNamespace(
+            position=0, ship_id=100003, ship_name="C", level=115
+        )
         self.enhancement_candidates = {
             "dd": [SimpleNamespace(position=0, ship_id=100001, ship_name="A", level=1)],
             "cl": [SimpleNamespace(position=0, ship_id=100002, ship_name="B", level=1)],
@@ -501,6 +510,79 @@ class FakeOracle:
 
     def set_enhancement_dock_favourite(self, enabled):
         self.enhancement_calls.append(("favourite", enabled))
+        self.awaken_calls.append(("favourite", enabled))
+
+    def _enhancement_dock_records(self):
+        return object(), object()
+
+    def set_awaken_dock_filter(self, use_array):
+        self.awaken_use_array = use_array
+        self.awaken_calls.append(("filter", use_array))
+        return ()
+
+    def awaken_dock_candidates(self):
+        self.awaken_calls.append(("candidates", self.awaken_use_array))
+        if self.awaken_use_array:
+            return (
+                SimpleNamespace(
+                    position=0, ship_id=100004, ship_name="D", level=120
+                ),
+            )
+        return (self.awaken_candidate,)
+
+    def open_awaken_dock_candidate(self, position, ship_id, ship_name, level):
+        self.awaken_calls.append(("open", ship_id))
+        return (
+            AwakenDetailState(
+                generation=30,
+                ship_id=ship_id,
+                ship_name=ship_name,
+                level=level,
+                exp_maxed=True,
+                use_array=level >= 120,
+            ),
+            (self.click_receipt("awaken/dock/ship/{0}".format(ship_id), 30),),
+        )
+
+    def open_awaken_confirmation(self, detail):
+        self.awaken_calls.append(("modal", detail.ship_id))
+        cost = AwakenCostState(
+            generation=31,
+            ship_id=detail.ship_id,
+            ship_name=detail.ship_name,
+            current_level=detail.level,
+            target_level=detail.level + 5,
+            coins_available=20000 if self.awaken_sufficient else 0,
+            coins_required=2000 if detail.use_array else 10000,
+            chips_available=75000,
+            chips_required=200 if detail.use_array else 1000,
+            arrays_available=9000 if detail.use_array else None,
+            arrays_required=100 if detail.use_array else None,
+        )
+        return cost, self.click_receipt("awaken/detail/open", 31)
+
+    def cancel_awaken_confirmation(self, cost):
+        self.awaken_calls.append(("cancel", cost.ship_id))
+        return self.click_receipt("awaken/confirm/cancel", 32)
+
+    def commit_awaken_confirmation(self, cost):
+        self.awaken_calls.append(("commit", cost.ship_id))
+        return AwakenExecutionReceipt(
+            ship_id=cost.ship_id,
+            ship_name=cost.ship_name,
+            current_level=cost.current_level,
+            target_level=cost.target_level,
+            observed_level=cost.target_level,
+            cost=cost,
+            actions=(
+                self.click_receipt("awaken/confirm/commit", 32),
+                self.click_receipt("awaken/completion/close", 33),
+            ),
+        )
+
+    def return_from_awaken_detail_to_dock(self):
+        self.awaken_calls.append(("back", self.awaken_use_array))
+        return self.click_receipt("awaken/detail/back", 34)
 
     def set_enhancement_dock_filter(self, ship_type):
         self.enhancement_ship_type = ship_type
@@ -529,6 +611,7 @@ class FakeOracle:
 
     def reset_enhancement_dock(self):
         self.enhancement_calls.append(("reset", None))
+        self.awaken_calls.append(("reset", None))
         return ()
 
     def war_archives_page_visible(self):
@@ -2312,6 +2395,74 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         with self.assertRaisesRegex(SemanticGateClosed, "positive transaction budget"):
             adapter.retire_ships_one_click(True)
+
+    def test_awaken_level120_honours_favourite_and_single_use_budget(self):
+        adapter, oracle, gate_calls = self.make_adapter(awaken_budget=1)
+
+        completed = adapter.awaken_task("level120", True)
+        receipts = adapter.awaken_receipts()
+
+        self.assertEqual(completed, 1)
+        self.assertEqual(len(receipts), 1)
+        self.assertEqual(receipts[0].current_level, 115)
+        self.assertEqual(receipts[0].target_level, 120)
+        self.assertEqual(receipts[0].capability_id, "awaken.execute")
+        self.assertEqual(len(receipts[0].policy_sha256), 64)
+        self.assertEqual(
+            oracle.awaken_calls,
+            [
+                ("favourite", True),
+                ("filter", False),
+                ("candidates", False),
+                ("open", 100003),
+                ("modal", 100003),
+                ("commit", 100003),
+                ("back", False),
+                ("reset", None),
+            ],
+        )
+        self.assertEqual(adapter._action_ledger.remaining("awaken.execute"), 0)
+        self.assertEqual(len(gate_calls), 1)
+
+    def test_awaken_level125_prefers_array_candidates(self):
+        adapter, oracle, _ = self.make_adapter(awaken_budget=1)
+
+        self.assertEqual(adapter.awaken_task("level125", False), 1)
+
+        receipt = adapter.awaken_receipts()[0]
+        self.assertEqual((receipt.current_level, receipt.target_level), (120, 125))
+        self.assertTrue(receipt.cost.use_array)
+        self.assertEqual(
+            oracle.awaken_calls[:5],
+            [
+                ("favourite", False),
+                ("filter", True),
+                ("candidates", True),
+                ("open", 100004),
+                ("modal", 100004),
+            ],
+        )
+
+    def test_awaken_is_default_denied_before_navigation(self):
+        adapter, oracle, _ = self.make_adapter()
+
+        with self.assertRaisesRegex(SemanticGateClosed, "positive transaction budget"):
+            adapter.awaken_task("level120", False)
+
+        self.assertEqual(oracle.awaken_calls, [])
+
+    def test_awaken_insufficient_modal_cancels_without_consuming_grant(self):
+        adapter, oracle, gate_calls = self.make_adapter(awaken_budget=1)
+        oracle.awaken_sufficient = False
+
+        self.assertEqual(adapter.awaken_task("level120", False), 0)
+
+        self.assertEqual(adapter.awaken_receipts(), ())
+        self.assertEqual(len(adapter.awaken_cost_observations()), 1)
+        self.assertFalse(adapter.awaken_cost_observations()[0].sufficient)
+        self.assertIn(("cancel", 100003), oracle.awaken_calls)
+        self.assertEqual(adapter._action_ledger.remaining("awaken.execute"), 1)
+        self.assertEqual(gate_calls, [True])
 
     def test_enhancement_task_honours_favourite_filter_and_check_budget(self):
         adapter, oracle, gate_calls = self.make_adapter(enhancement_budget=2)

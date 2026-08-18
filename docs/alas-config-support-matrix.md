@@ -43,9 +43,9 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
-| ✅ 完整支持（`F`） | **6 / 60** | Benchmark、Commission、GameManager、Minigame、Restart、Reward |
+| ✅ 完整支持（`F`） | **7 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、Restart、Reward |
 | 🟢 主路径已完成、全配置未完成（`L`） | **12 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Main、Main2、Main3、Research、Tactical |
-| 🧪 仅离线完成（`O`） | **8 / 60** | Awaken、Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
+| 🧪 仅离线完成（`O`） | **7 / 60** | Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
 | 🧱 已到边界、尚未完成（`B`） | **18 / 60** | Hard、Meowfficer、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **2 / 60** | GemsFarming、OpsiStronghold |
@@ -411,7 +411,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | B | 已用 typed 状态完成购买次数已满与训练 10/10 已满的原 ALAS 无资源变化实机闭环；正向购买、自动领取/排队、指挥喵宿舍、增强及天赋保留仍未闭环 |
 | 27 | Guild | Scheduler, GuildLogistics, GuildOperation | M | 后勤兑换、新任务、作战、Boss 和推荐舰队均缺适配 |
 | 28 | Reward | Scheduler, Reward | P | 五个领取开关及 RaidDaily 共享入口已离线完成；资源气泡可领取，任务领取部分可用，周常、红点、数字行、空页面和舰船奖励仍未完整闭环 |
-| 29 | Awaken | Scheduler, Awaken | O | Favourite 与 120/125 上限已在原分派入口离线回放并提前 fail-closed；资源、候选、批量选择、确认和结果观察/输入仍缺适配 |
+| 29 | Awaken | Scheduler, Awaken | F | 原始任务已实机闭环收藏开关、阵列优先/芯片回退、精确资源门、单次授权、完成弹窗、实际等级、无候选退出与主页恢复 |
 | 30 | Daily | Scheduler, Daily | L | 十四字段离线映射与 fail-closed 契约已完成；实机仍只闭环 Tactical Training 第二关默认舰队，其余日常和配置值未闭环 |
 | 31 | Hard | Scheduler, Hard | B | 64 关目录与两舰队离线契约已完成；实机仍只到 11-4 进入边界，当前账号进度和自动寻敌锁定，尚无战斗/结算证据 |
 | 32 | Exercise | Scheduler, Exercise | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 上游零读取，真实对手/时段/血量观察、刷新持久化、战斗结算和失败恢复未闭环 |
@@ -503,7 +503,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | GuildLogistics | `Enable`; `ExchangeFilter`; `SelectNewMission` | M | 开关、兑换规则、新任务选择、贡献不足、无奖励和重复领取 |
 | GuildOperation | `Enable`; `JoinThreshold`; `SelectNewOperation`; `NewOperationMaxDate`; `AttackBoss`; `BossFleetRecommend` | M | 阈值/日期边界、加入/选择、Boss 与非 Boss、推荐舰队开关、次数不足和奖励 |
 | Reward | `CollectOil`; `CollectCoin`; `CollectExp`; `CollectMission`; `CollectWeeklyMission` | F | 32 种开关组合、20 个非法单字段案例及 Reward/RaidDaily 双入口 fail-closed 已离线完成；五个开关均有原始 ALAS 的开启/关闭实机闭环 |
-| Awaken | `Favourite`; `LevelCap`=`level120/level125` | O | 两个布尔/枚举设置已在原分派器回放，错误值在 `awaken_run` 前拒绝；仍需资源不足、无候选、批量选择、确认结果和所有实机观察/输入 |
+| Awaken | `Favourite`; `LevelCap`=`level120/level125` | F | 两个配置值均经原始任务实机验收：120→125 阵列、level125 芯片回退、level120 芯片事务、收藏/全部范围、无候选零授权、过滤恢复和主页后置条件均有回执 |
 
 ### 3.5 每日、演习、商店、船坞、建造与免费领取
 
@@ -662,9 +662,9 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **31 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ✅ 五维完整支持 | **33 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
 | ◐ 有实机当前值/分支证据 | **136 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **89 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **87 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
@@ -673,8 +673,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `AddNewStudent.Enable` | Tactical | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `AddNewStudent.Favorite` | Tactical | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `AddNewStudent.MinLevel` | Tactical | type=input; display=default | input/default: 50 | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
-| `Awaken.Favourite` | Awaken | type=checkbox; display=default | input/default: false | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Awaken.LevelCap` | Awaken | type=select; display=default | options: "level120", "level125"; default: "level120" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Awaken.Favourite` | Awaken | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `Awaken.LevelCap` | Awaken | type=select; display=default | options: "level120", "level125"; default: "level120" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `AzurLaneUncensored.Repository` | AzurLaneUncensored | type=input; display=disabled | input/default: "https://gitee.com/LmeSzinc/AzurLaneUncensored" | `P`/⊘ 当前无效 | ⊘ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `BattlePass.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Benchmark.DeviceType` | Benchmark | type=select; display=default | options: "android_phone_vmos", "android_phone", "emulator", "phone_cloud_without_adb", "plone_cloud_with_adb"; default: "emulator" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |

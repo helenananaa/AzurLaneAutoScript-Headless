@@ -28,6 +28,7 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_OPSI_COORDINATE_CHECKOUT_BUDGET",
         "ALAS_SEMANTIC_ALLOW_MISSION_CLAIM_ONCE",
         "ALAS_SEMANTIC_ALLOW_TACTICAL_REWARDS",
+        "ALAS_SEMANTIC_AWAKEN_BUDGET",
         "ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET",
         "ALAS_SEMANTIC_CAMPAIGN_COMBAT_BUDGET",
         "ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET",
@@ -62,6 +63,10 @@ LEGACY_BOOLEAN_GRANTS: Mapping[str, str] = MappingProxyType(
 
 LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
     {
+        "ALAS_SEMANTIC_AWAKEN_BUDGET": (
+            "awaken.execute",
+            "awaken",
+        ),
         "ALAS_SEMANTIC_MAIL_MUTATION_BUDGET": (
             "mail.mutation",
             "mail mutation",
@@ -199,6 +204,7 @@ class LegacyEnvironmentTranslation:
                 "research_start_budget": self.grant("research.start"),
                 "dorm_collect_budget": self.grant("dorm.collect"),
                 "dorm_feed_budget": self.grant("dorm.feed"),
+                "awaken_budget": self.grant("awaken.execute"),
                 "enhancement_budget": self.grant("enhancement.execute"),
                 "build_submit_budget": self.grant("build.submit"),
                 "retirement_budget": self.grant("retirement.execute"),

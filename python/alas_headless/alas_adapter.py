@@ -98,6 +98,8 @@ from .alas_package_process_lease import AlasPackageProcessLease
 from .runtime_trace import RuntimeTraceRecorder
 from .semantic_oracle import (
     ActionReceipt,
+    AwakenCostState,
+    AwakenExecutionReceipt,
     Bounds,
     BuildCostState,
     BuildPool,
@@ -187,6 +189,7 @@ def _legacy_action_grants(
     research_start_budget: int,
     dorm_collect_budget: int,
     dorm_feed_budget: int,
+    awaken_budget: int,
     enhancement_budget: int,
     build_submit_budget: int,
     retirement_budget: int,
@@ -217,6 +220,7 @@ def _legacy_action_grants(
             "research.start": research_start_budget,
             "dorm.collect": dorm_collect_budget,
             "dorm.feed": dorm_feed_budget,
+            "awaken.execute": awaken_budget,
             "enhancement.execute": enhancement_budget,
             "build.submit": build_submit_budget,
             "retirement.execute": retirement_budget,
@@ -1055,6 +1059,7 @@ class AlasSemanticAdapter:
         research_start_budget: int = 0,
         dorm_collect_budget: int = 0,
         dorm_feed_budget: int = 0,
+        awaken_budget: int = 0,
         enhancement_budget: int = 0,
         build_submit_budget: int = 0,
         retirement_budget: int = 0,
@@ -1098,6 +1103,7 @@ class AlasSemanticAdapter:
             ("research start", research_start_budget),
             ("dorm collect", dorm_collect_budget),
             ("dorm feed", dorm_feed_budget),
+            ("awaken", awaken_budget),
             ("enhancement", enhancement_budget),
             ("build submit", build_submit_budget),
             ("retirement", retirement_budget),
@@ -1139,6 +1145,7 @@ class AlasSemanticAdapter:
                 research_start_budget=research_start_budget,
                 dorm_collect_budget=dorm_collect_budget,
                 dorm_feed_budget=dorm_feed_budget,
+                awaken_budget=awaken_budget,
                 enhancement_budget=enhancement_budget,
                 build_submit_budget=build_submit_budget,
                 retirement_budget=retirement_budget,
@@ -1185,6 +1192,8 @@ class AlasSemanticAdapter:
         self._last_retirement_receipt: Optional[
             Union[RetirementExecutionReceipt, RetirementNoCandidateReceipt]
         ] = None
+        self._awaken_receipts: List[AwakenExecutionReceipt] = []
+        self._awaken_cost_observations: List[AwakenCostState] = []
         self._enhancement_receipts: List[
             Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt]
         ] = []
@@ -1226,6 +1235,7 @@ class AlasSemanticAdapter:
             dispatch.value,
             (
                 ActionReceipt,
+                AwakenExecutionReceipt,
                 EnhancementExecutionReceipt,
                 EnhancementNoMaterialReceipt,
                 RetirementExecutionReceipt,
@@ -1241,6 +1251,86 @@ class AlasSemanticAdapter:
 
     def retirement_allowed(self) -> bool:
         return self._action_ledger.allowed("retirement.execute")
+
+    def awaken_allowed(self) -> bool:
+        return self._action_ledger.allowed("awaken.execute")
+
+    def awaken_receipts(self) -> Tuple[AwakenExecutionReceipt, ...]:
+        return tuple(self._awaken_receipts)
+
+    def awaken_cost_observations(self) -> Tuple[AwakenCostState, ...]:
+        return tuple(self._awaken_cost_observations)
+
+    def awaken_task(self, level_cap: str, favourite: bool) -> int:
+        """Run the configured Awaken task through bounded typed transactions."""
+
+        if level_cap not in ("level120", "level125"):
+            raise ValueError("awaken level cap must be level120 or level125")
+        if not isinstance(favourite, bool):
+            raise TypeError("awaken favourite must be boolean")
+        if not self.awaken_allowed():
+            raise SemanticGateClosed(
+                "awaken requires a positive transaction budget"
+            )
+        self._package_gate()
+        self._awaken_receipts = []
+        self._awaken_cost_observations = []
+        try:
+            self.oracle._enhancement_dock_records()
+        except SemanticGateClosed:
+            if not self.oracle.main_page_visible():
+                raise SemanticGateClosed(
+                    "awaken task must start on main or the official Dock"
+                )
+            self.oracle.click("main/dock")
+            self.oracle._retry_transition_read(
+                self.oracle._enhancement_dock_records,
+                attempts=50,
+                interval_seconds=0.1,
+            )
+        completed_normally = False
+        try:
+            self.oracle.set_enhancement_dock_favourite(favourite)
+            modes = (True, False) if level_cap == "level125" else (False,)
+            for use_array in modes:
+                if not self.awaken_allowed():
+                    break
+                self.oracle.set_awaken_dock_filter(use_array)
+                while self.awaken_allowed():
+                    candidates = self.oracle.awaken_dock_candidates()
+                    if not candidates:
+                        break
+                    candidate = candidates[0]
+                    detail, _ = self.oracle.open_awaken_dock_candidate(
+                        candidate.position,
+                        candidate.ship_id,
+                        candidate.ship_name,
+                        candidate.level,
+                    )
+                    cost, _ = self.oracle.open_awaken_confirmation(detail)
+                    self._awaken_cost_observations.append(cost)
+                    if cost.use_array != use_array:
+                        self.oracle.cancel_awaken_confirmation(cost)
+                        raise SemanticGateClosed(
+                            "awaken modal resource mode differs from configuration"
+                        )
+                    if not cost.sufficient:
+                        self.oracle.cancel_awaken_confirmation(cost)
+                        self.oracle.return_from_awaken_detail_to_dock()
+                        break
+                    receipt = self._dispatch_mutation(
+                        "awaken.execute",
+                        lambda cost=cost: self.oracle.commit_awaken_confirmation(
+                            cost
+                        ),
+                    )
+                    self._awaken_receipts.append(receipt)
+                    self.oracle.return_from_awaken_detail_to_dock()
+            completed_normally = True
+        finally:
+            if completed_normally:
+                self.oracle.reset_enhancement_dock()
+        return len(self._awaken_receipts)
 
     def enhancement_allowed(self) -> bool:
         return self._action_ledger.allowed("enhancement.execute")
@@ -9457,6 +9547,7 @@ class AlasSemanticSession:
         research_start_budget: int = 0,
         dorm_collect_budget: int = 0,
         dorm_feed_budget: int = 0,
+        awaken_budget: int = 0,
         enhancement_budget: int = 0,
         build_submit_budget: int = 0,
         retirement_budget: int = 0,
@@ -9536,6 +9627,7 @@ class AlasSemanticSession:
             ("research start", research_start_budget),
             ("dorm collect", dorm_collect_budget),
             ("dorm feed", dorm_feed_budget),
+            ("awaken", awaken_budget),
             ("enhancement", enhancement_budget),
             ("build submit", build_submit_budget),
             ("retirement", retirement_budget),
@@ -9566,6 +9658,7 @@ class AlasSemanticSession:
         self.research_start_budget = research_start_budget
         self.dorm_collect_budget = dorm_collect_budget
         self.dorm_feed_budget = dorm_feed_budget
+        self.awaken_budget = awaken_budget
         self.enhancement_budget = enhancement_budget
         self.build_submit_budget = build_submit_budget
         self.retirement_budget = retirement_budget
@@ -9603,6 +9696,7 @@ class AlasSemanticSession:
             research_start_budget=research_start_budget,
             dorm_collect_budget=dorm_collect_budget,
             dorm_feed_budget=dorm_feed_budget,
+            awaken_budget=awaken_budget,
             enhancement_budget=enhancement_budget,
             build_submit_budget=build_submit_budget,
             retirement_budget=retirement_budget,
@@ -9869,6 +9963,7 @@ class AlasSemanticSession:
                 research_start_budget=self.research_start_budget,
                 dorm_collect_budget=self.dorm_collect_budget,
                 dorm_feed_budget=self.dorm_feed_budget,
+                awaken_budget=self.awaken_budget,
                 enhancement_budget=self.enhancement_budget,
                 build_submit_budget=self.build_submit_budget,
                 retirement_budget=self.retirement_budget,
@@ -10420,6 +10515,18 @@ class AlasSemanticSession:
 
     def retirement_allowed(self) -> bool:
         return self.open().retirement_allowed()
+
+    def awaken_allowed(self) -> bool:
+        return self.open().awaken_allowed()
+
+    def awaken_task(self, level_cap: str, favourite: bool) -> int:
+        return self.open().awaken_task(level_cap, favourite)
+
+    def awaken_receipts(self) -> Tuple[AwakenExecutionReceipt, ...]:
+        return self.open().awaken_receipts()
+
+    def awaken_cost_observations(self) -> Tuple[AwakenCostState, ...]:
+        return self.open().awaken_cost_observations()
 
     def enhancement_allowed(self) -> bool:
         return self.open().enhancement_allowed()

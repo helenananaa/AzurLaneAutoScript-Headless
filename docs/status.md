@@ -402,21 +402,31 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   postconditions, observation, and all Android input remain unadapted. This is
   an offline-only field promotion with a zero mutation budget.
 
-### Awaken: source-bound two-setting dispatcher replay
+### Awaken: original-task live cognitive-awakening closure
 
 - `Awaken.LevelCap` and `Awaken.Favourite` now have an exact, fail-closed
   contract at the first executable statement of pinned upstream `Awaken.run()`.
   Only `level120`/`level125` and real booleans are admitted; enum aliases,
   casing changes, integer booleans, and wrong types stop before any
   `awaken_run` call.
-- Recorder-only replay executes the original level-120 path, both favourite
-  reset variants, the level-125 array timeout path, and the array-to-chip
-  fallback. It preserves the original `task_delay(server_update=True)` and
-  dock-filter reset order while making no device, account, resource, or Android
-  input request.
-- This is an offline-only promotion for the two settings. Dock candidates,
-  resource checks, batch selection, confirmation, postconditions, observation,
-  and all real input remain unadapted; no live or action dimension is promoted.
+- Semantic mode now delegates from the original `Awaken.run()` into a bounded
+  transaction loop. It proves the official Dock and favourite scope, selects
+  the exact `可认知觉醒`/`可认知觉醒 II` filter, waits until card levels match
+  that filter, reads coins/chips/arrays from their exact sprites, and commits
+  only a sufficient modal under the `awaken.execute` single-use grant.
+- Live receipts cover all-scope 120→125 with arrays, favourite-scope 105→110
+  through the original level-125 chip fallback, and a level-120 100→105 chip
+  transaction. Completion is accepted only from the exact official result
+  text; the receipt records both the unlocked cap and observed ship level so
+  stored EXP (for example 105→110 producing level 106) is not misreported.
+- A subsequent level-120 run proves the empty-candidate exit consumes no
+  action grant. Every run restores the Dock filter and favourite scope, leaves
+  through the exact Dock back control, proves the main page, schedules the
+  original server-update delay, and removes its temporary configuration.
+- Qualification consumed only the explicitly authorized official resources:
+  20,000 coins, 2,000 Cognitive Chips, and 200 Cognitive Arrays across five
+  reconnaissance/qualification awakenings. No paid-resource purchase path was
+  invoked; the account finishes with 707 coins, 73,490 chips, and 8,997 arrays.
 
 ### Configuration interaction attack matrix: pinned-source, fixed-seed, zero-input pass
 

@@ -96,49 +96,61 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_awaken_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_awaken_config_replay.py",
         "integration/alas/series/0160-awaken-config-contract.patch",
+        "scripts/python/run_alas_awaken_live_validation.py",
+        "integration/alas/awaken-level125-favourite-live-validation-receipt.json",
+        "integration/alas/awaken-level120-transaction-postqualification-receipt.json",
+        "integration/alas/awaken-level120-no-candidate-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "O",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Awaken"
       ],
       "path": "Awaken.Favourite",
-      "status_label": "🧪 离线回放",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_awaken_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_awaken_config_replay.py",
         "integration/alas/series/0160-awaken-config-contract.patch",
+        "scripts/python/run_alas_awaken_live_validation.py",
+        "integration/alas/awaken-level125-all-live-validation-receipt.json",
+        "integration/alas/awaken-level120-transaction-postqualification-receipt.json",
+        "integration/alas/awaken-level120-no-candidate-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "O",
+      "group_code": "F",
       "metadata": "type=select; display=default",
       "panels": [
         "Awaken"
       ],
       "path": "Awaken.LevelCap",
-      "status_label": "🧪 离线回放",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "options: \"level120\", \"level125\"; default: \"level120\""
     },
@@ -7790,8 +7802,8 @@
         "Awaken"
       ],
       "name": "Awaken",
-      "note": "Favourite 与 120/125 上限已在原分派入口离线回放并提前 fail-closed；资源、候选、批量选择、确认和结果观察/输入仍缺适配",
-      "status": "O"
+      "note": "原始 Awaken 任务已实机覆盖收藏开关、阵列优先与芯片回退、精确候选过滤、资源充足门、单次授权、完成弹窗、实际等级与上限分离、无候选退出及恢复主页。",
+      "status": "F"
     },
     {
       "groups": [
@@ -10746,29 +10758,49 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_awaken_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_awaken_config_replay.py",
         "integration/alas/series/0160-awaken-config-contract.patch",
+        "scripts/python/run_alas_awaken_live_validation.py",
+        "integration/alas/awaken-level125-favourite-live-validation-receipt.json",
+        "integration/alas/awaken-level120-transaction-postqualification-receipt.json",
+        "integration/alas/awaken-level120-no-candidate-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Awaken.Favourite",
-      "note": "Both exact boolean values preserve the original Awaken dispatcher and dock-filter reset order; malformed values fail before any awaken-run intent is reached."
+      "note": "Both exact boolean values preserve the original dispatcher; live receipts prove all-scope and favourite-scope transactions, exact reset order, and safe return to main, while malformed values fail before any Awaken intent."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_awaken_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_awaken_config_replay.py",
         "integration/alas/series/0160-awaken-config-contract.patch",
+        "scripts/python/run_alas_awaken_live_validation.py",
+        "integration/alas/awaken-level125-all-live-validation-receipt.json",
+        "integration/alas/awaken-level120-transaction-postqualification-receipt.json",
+        "integration/alas/awaken-level120-no-candidate-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Awaken.LevelCap",
-      "note": "Both pinned level caps preserve the original array-first timeout split and chip fallback; malformed values fail before any awaken-run intent is reached."
+      "note": "Both pinned level caps are live-qualified through the original task: level125 proves array-first plus chip fallback, level120 proves a chip transaction and empty-candidate exit, and malformed values fail before any Awaken intent."
     },
     {
       "dimensions": {
@@ -11040,8 +11072,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "3323df895cafe7aa62c7e151983ed7425bfcca386a2a35b7167423b29be153d0",
-      "manifest_sha256": "d8eb09dd235685367b1f37085a497ca9ff735ca52db5587dd7f26eb32c03d0e6",
+      "combined_sha256": "994e3fcb303448755e2a00b813014198df510ae300168dc093b7b8f4d3ae1319",
+      "manifest_sha256": "9dfb9ab37e77c0868f271fd035ebed83dd82b6e64dee61bd9cdc262f5e0f5e18",
       "member_count": 43
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

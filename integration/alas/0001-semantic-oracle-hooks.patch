@@ -7982,12 +7982,12 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
 --- a/module/awaken/awaken.py
 +++ b/module/awaken/awaken.py
 @@ -1,3 +1,5 @@
-+from alas_headless import validate_alas_awaken_config
++from alas_headless import current_semantic_session, validate_alas_awaken_config
 +
  from module.awaken.assets import *
  from module.base.timer import Timer
  from module.exception import ScriptError
-@@ -371,19 +373,24 @@ class Awaken(Dock):
+@@ -371,19 +373,32 @@ class Awaken(Dock):
          return result
  
      def run(self):
@@ -7995,6 +7995,14 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
 +            level_cap=self.config.Awaken_LevelCap,
 +            favourite=self.config.Awaken_Favourite,
 +        )
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.awaken_task(
++                level_cap=awaken_config.level_cap,
++                favourite=awaken_config.favourite,
++            )
++            self.config.task_delay(server_update=True)
++            return
 +
          # Run Awakening+ first
 -        favourite = self.config.Awaken_Favourite
