@@ -159,6 +159,11 @@ if ! grep -Fq 'kReviewedRaycastFractions' \
   echo "Dorm Button bounded raycast search is missing" >&2
   exit 1
 fi
+if ! grep -Fq 'DailyLevelUI(Clone)/desc_panel/main_mask/main/scrollview/' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
+  echo "Daily stage Button raycast allowlist is missing" >&2
+  exit 1
+fi
 if ! grep -Fq 'BackYardStatisticsUI(Clone)/painting/confirm_btn' \
     "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
   echo "Dorm statistics confirm allowlist is missing" >&2

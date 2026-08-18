@@ -667,6 +667,51 @@ def make_campaign_map_backend(generations=(10, 11)):
 
 
 class SemanticOracleTests(unittest.TestCase):
+    def test_daily_stage_requires_a_topmost_event_point(self):
+        root = (
+            "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/desc_panel/main_mask/"
+            "main/scrollview/content/stagetpl(Clone)/info"
+        )
+        backend = FakeBackend(
+            [
+                make_button(
+                    "info",
+                    root,
+                    779.0,
+                    133.0,
+                    bounds={
+                        "left": 381.0,
+                        "top": 133.0,
+                        "right": 1187.0,
+                        "bottom": 280.0,
+                    },
+                    raycast_top=True,
+                ),
+                make_button(
+                    "info",
+                    root,
+                    779.0,
+                    293.0,
+                    bounds={
+                        "left": 381.0,
+                        "top": 293.0,
+                        "right": 1187.0,
+                        "bottom": 440.0,
+                    },
+                    raycast_top=False,
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.daily_stage_available(1))
+        self.assertFalse(oracle.daily_stage_available(2))
+        receipt = oracle.click_daily_stage(1)
+
+        self.assertEqual(receipt.semantic_id, "daily/stage/1")
+        self.assertEqual(receipt.point, Point(779.0, 133.0))
+        self.assertEqual(backend.taps, [(779, 133)])
+
     def test_shop_gift_pack_toggle_uses_its_coherent_frame_pair(self):
         root = "OverlayCamera/Overlay/UIMain/"
         backend = FakeBackend(
@@ -4495,6 +4540,11 @@ class SemanticOracleTests(unittest.TestCase):
         item["raycast_top"] = True
         backend.ui = make_ui(
             [
+                make_text("NEXT:", lesson + "skill/info/next/label"),
+                make_text(
+                    "900+<color=#A9F548FF>1500</color>/3200",
+                    lesson + "skill/info/next",
+                ),
                 make_text(
                     "3",
                     item_path + "/icon_bg/count",

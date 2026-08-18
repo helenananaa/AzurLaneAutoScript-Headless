@@ -558,6 +558,11 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
                "ActivityMainUI(Clone)/adapt/blur_panel/adapt/top/back_btn")) {
     return true;
   }
+  if (name == "info" &&
+      path.find("DailyLevelUI(Clone)/desc_panel/main_mask/main/scrollview/"
+                "content/stagetpl(Clone)/info") != std::string_view::npos) {
+    return true;
+  }
   if (name == "back" &&
       EndsWith(path,
                "SelectTechnologyUI(Clone)/blur_panel/adapt/top/back")) {
@@ -1761,6 +1766,9 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           path.find("LevelStageInfoView(Clone)/panel/") !=
               std::string_view::npos ||
           path.find("LevelFleetSelectView(Clone)/panel/ShipList/") !=
+              std::string_view::npos ||
+          path.find("DailyLevelUI(Clone)/desc_panel/main_mask/main/scrollview/"
+                    "content/stagetpl(Clone)/info") !=
               std::string_view::npos ||
           path.find("CommissionInfoUI4Mellow(Clone)/frame/resources/") !=
               std::string_view::npos ||

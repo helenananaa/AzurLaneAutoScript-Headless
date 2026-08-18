@@ -11035,7 +11035,7 @@ class SemanticOracle:
                     and button.active_in_hierarchy
                     and button.active_and_enabled
                     and button.interactable
-                    and button.raycast_top is None
+                    and button.raycast_top is True
                     and button.point is not None
                     and button.bounds is not None
                     and button.bounds.contains(button.point)
@@ -11055,10 +11055,9 @@ class SemanticOracle:
         if index not in (1, 2, 3) or len(stages) < index:
             raise SemanticGateClosed("daily stage is absent")
         target = stages[index - 1]
-        point = Point(
-            (target.bounds.left + target.bounds.right) / 2.0,
-            (target.bounds.top + target.bounds.bottom) / 2.0,
-        )
+        point = target.point
+        if point is None:
+            raise SemanticGateClosed("daily stage point is absent")
         generation = self.read_state().generation
         self._tap(int(round(point.x)), int(round(point.y)))
         return ActionReceipt(
@@ -15203,6 +15202,48 @@ class SemanticOracle:
             path=target.path,
         )
 
+    def _tactical_empty_slot_targets(
+        self, state: UiState
+    ) -> Mapping[int, ButtonState]:
+        """Return current empty slots keyed by their physical left-to-right index."""
+
+        prefix = "NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/"
+        empty = tuple(
+            button
+            for button in state.buttons
+            if button.name in ("add", "add(Clone)")
+            and button.path.endswith(prefix + button.name)
+            and button.actionable
+            and button.point is not None
+        )
+        occupied = tuple(
+            button
+            for button in state.buttons
+            if re.fullmatch(r"[1-9][0-9]{5}", button.name) is not None
+            and prefix in button.path
+            and button.path.endswith("/" + button.name)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.point is not None
+        )
+        columns = tuple(sorted((*empty, *occupied), key=lambda button: button.point.x))
+        if len(columns) != 4 or len({button.point.x for button in columns}) != 4:
+            raise SemanticGateClosed("tactical slot controls are incomplete")
+        return {
+            index: button
+            for index, button in enumerate(columns, start=1)
+            if button in empty
+        }
+
+    def tactical_empty_slots_ready(self) -> bool:
+        """Report whether at least one complete current tactical empty slot exists."""
+
+        state = self.read_state()
+        try:
+            return bool(self._tactical_empty_slot_targets(state))
+        except SemanticGateClosed:
+            return False
+
     def tactical_candidate_ships(self) -> Tuple[TacticalCandidateShipState, ...]:
         """Read visible tactical Dock candidates in ALAS grid order."""
 
@@ -15348,7 +15389,8 @@ class SemanticOracle:
                 matches = tuple(
                     text
                     for text in ui_state.texts
-                    if text.path.endswith(suffix)
+                    if rows_path_fragment in text.path
+                    and text.path.endswith(suffix)
                     and text.active_in_hierarchy
                     and text.active_and_enabled
                     and not text.truncated
@@ -16331,7 +16373,7 @@ class SemanticOracle:
             raise SemanticGateClosed("tactical page identity is not proven")
 
         prefix = "NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/"
-        ship_buttons = tuple(
+        raw_ship_buttons = tuple(
             button
             for button in button_state.buttons
             if re.fullmatch(r"[1-9][0-9]{5}", button.name) is not None
@@ -16379,13 +16421,16 @@ class SemanticOracle:
         ):
             raise SemanticGateClosed("tactical snapshots are not coherent")
 
-        def text_in_slot(button: ButtonState, suffix: str) -> str:
+        def text_in_slot(
+            button: ButtonState, suffix: str, *, identity_scoped: bool
+        ) -> str:
             assert button.bounds is not None
+            slot_root = button.path.rsplit("/", 1)[0]
+            path_root = button.path if identity_scoped else slot_root
             matches = tuple(
                 text
                 for text in ui_state.texts
-                if text.path.endswith(suffix)
-                and prefix in text.path
+                if text.path == path_root + suffix
                 and text.active_in_hierarchy
                 and text.active_and_enabled
                 and not text.truncated
@@ -16402,12 +16447,24 @@ class SemanticOracle:
 
         slots = []
         for slot, button in enumerate(ship_buttons, start=1):
-            ship_name = text_in_slot(button, "/content/info/name_mask/name")
-            ship_level_text = text_in_slot(button, "/content/dockyard/lv/Text")
-            skill_name = text_in_slot(button, "/skill/name_Text")
-            skill_level_text = text_in_slot(button, "/skill/level")
-            progress_text = text_in_slot(button, "/skill/next")
-            timer_text = text_in_slot(button, "/timer_Text")
+            ship_name = text_in_slot(
+                button, "/content/info/name_mask/name", identity_scoped=True
+            )
+            ship_level_text = text_in_slot(
+                button, "/content/dockyard/lv/Text", identity_scoped=True
+            )
+            skill_name = text_in_slot(
+                button, "/skill/name_Text", identity_scoped=False
+            )
+            skill_level_text = text_in_slot(
+                button, "/skill/level", identity_scoped=False
+            )
+            progress_text = text_in_slot(
+                button, "/skill/next", identity_scoped=False
+            )
+            timer_text = text_in_slot(
+                button, "/timer_Text", identity_scoped=False
+            )
             progress = re.fullmatch(r"([0-9]+)/([1-9][0-9]*)", progress_text)
             if (
                 not ship_name

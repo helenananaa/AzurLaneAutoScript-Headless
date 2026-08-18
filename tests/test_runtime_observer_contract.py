@@ -71,6 +71,16 @@ class RuntimeObserverContractTests(unittest.TestCase):
             self.build_script,
         )
 
+    def test_daily_stage_rows_publish_a_topmost_click_point(self):
+        daily_root = "DailyLevelUI(Clone)/desc_panel/main_mask/main/scrollview/"
+        self.assertGreaterEqual(self.probe_source.count(daily_root), 2)
+        self.assertGreaterEqual(
+            self.probe_source.count("content/stagetpl(Clone)/info"), 2
+        )
+        self.assertIn(
+            "Daily stage Button raycast allowlist is missing",
+            self.build_script,
+        )
 
     def test_reward_resource_bubbles_publish_a_topmost_click_point(self):
         reward_root = "CommissionInfoUI4Mellow(Clone)/frame/resources/"
