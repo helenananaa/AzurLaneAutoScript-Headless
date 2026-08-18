@@ -115,8 +115,11 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   singletons on that compatibility path.  Its real task clicked only
   `dorm/feed/item/50001`, changed inventory `17863 -> 17862`, and returned to
   main; see `integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json`.
-  `Dorm.Collect` remains unqualified: current live observations did not expose
-  an actually collectable dorm reward.
+  `Dorm.Collect` is now complete as well: when the current account exposed a
+  real collectable dorm reward, the original task issued exactly one typed
+  `dorm.collect`, exhausted its grant, changed the quick-collect control from
+  available to absent, preserved all six dorm slots, and returned to main; see
+  `integration/alas/dorm-collect-live-validation-receipt.json`.
 
 ### Reward: daily-mission claim switch complete on the live client
 
@@ -853,7 +856,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   is complete for the actual semantic observer and reversible settings round
   trip; the final return-to-main port makes odd 15-sample control runs safe.
 
-### Dorm collection, feeding, and food filter configuration: offline contract passed
+### Dorm collection, feeding, and food filter configuration: complete
 
 - `Dorm.Collect` and `Dorm.Feed` admit exact booleans, and `Dorm.FeedFilter`
   admits any non-empty unique ordering or subset of the six food values known
@@ -869,13 +872,14 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   four switch combinations, or 7,824 admitted configurations. Original feed
   boundaries retain strict `fill > food`, empty-priority fallback, and no-food
   behavior. Twenty-two invalid single-field cases fail closed.
-- Dorm methods are deterministic fixtures: mutation budget is `0`; no reward
-  collection, food consumption, navigation, screenshot/OCR, or Android input
-  occurs. The fields move only to `offline=complete`; live empty-collection,
-  partial food inventory, post-feed food/capacity proof, and recovery failures
-  remain open.
+- The deterministic fixtures retain mutation budget `0`; no reward collection,
+  food consumption, navigation, screenshot/OCR, or Android input occurs during
+  offline replay. Live receipts now cover enabled and disabled feeding, exact
+  inventory/capacity deltas, a single-value filter, main-page recovery, and a
+  real collection whose quick-collect control changed from present to absent.
+  Together with the full filter replay, all three Dorm fields are complete.
 
-### Dorm furniture configuration: offline interval/option decisions plus actual all/no-candidate scheduler branch
+### Dorm furniture configuration: live set purchase plus safe post-set all boundary
 
 - `BuyFurniture.Enable` admits exact booleans, `BuyOption` admits only the
   pinned `set/all` values, and `LastRun` is a bounded timezone-naive datetime.
@@ -889,15 +893,24 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   equal to a positive price remains affordable; insufficient coin and zero
   price remain failures. Nineteen malformed, wrong-type, timezone, and range
   cases fail before Dorm scope or furniture handling.
-- The actual current-client run used `Enable=true`, `BuyOption=all`, and an
-  overdue record. It observed the typed furniture list, found no limited
-  candidate, consumed no purchase authority, persisted a new `LastRun`, and
-  returned to the main page; the temporary config was removed. The receipt is
-  `integration/alas/dorm-furniture-live-validation-receipt.json`.
-- This is only the all/no-candidate scheduler branch and LastRun write. `set`,
-  a live limited candidate, quantity semantics, coin/inventory receipt, and
-  recovery remain incomplete, so Dorm stays `L` and the BuyFurniture fields
-  stay `P`.
+- The adapter now targets the current theme-detail controls directly: `set`
+  selects the native purchase-set button, `all` selects the distinct native
+  purchase-all button, and final payment accepts only the furniture-coin
+  action. It also clears the empty-food popup before entering the shop and
+  rejects non-limited themes without spending purchase authority.
+- The live `set` run bought the current event theme through one typed
+  `shop.purchase`; furniture coins changed `4693 -> 3363`, gems stayed `5022`,
+  `LastRun` was written, the six-ship 278-minute delay was scheduled, and the
+  task returned to main. See
+  `integration/alas/dorm-furniture-set-live-validation-receipt.json`.
+- Buying the set caused that event theme to disappear from this account's
+  candidate list. The subsequent configured `all` run recognized that the
+  first remaining theme was an ordinary non-limited theme, spent neither its
+  purchase grant nor currency, wrote `LastRun`, and recovered to main. See
+  `integration/alas/dorm-furniture-all-post-set-boundary-receipt.json`.
+  The native `all` button and final-submit path are implemented and replayed,
+  but a final live `all` purchase needs another unowned event theme or account;
+  Dorm therefore remains `L` and the BuyFurniture fields remain `P`.
 
 ### Daemon and OpsiDaemon polling switches: offline branch contract passed
 

@@ -1,0 +1,72 @@
+{
+  "schema": "alas-headless.dorm-collect-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "e4c2619b5cd8cf88c51e7f0ee03734871ceceeb0cfe8ba861a35bee98008521d",
+  "configured": {
+    "Dorm.Collect": true,
+    "Dorm.Feed": false
+  },
+  "source_sha256": {
+    "dorm": "2e2dd75c321ffd7ef48dc90a9c568bb68903072d002dee1a82c6367da544a46a",
+    "adapter": "c3889abab1266ced22edb5c89065c759172971220b372e8982d066f1ecf1c797",
+    "oracle": "da06ec5668c79a666a52cb1dbc6e3a627117d15b793b149d508341e02110e8ed"
+  },
+  "passed": true,
+  "before": {
+    "actions": [
+      "dorm/page/back"
+    ],
+    "state": {
+      "occupied_slots": 6,
+      "total_slots": 6,
+      "food": 0,
+      "food_capacity": 40000,
+      "comfort": 454,
+      "floor": 1,
+      "food_countdown_seconds": null
+    },
+    "quick_collect_available": true,
+    "cleanup": {
+      "actions": [
+        "dorm/page/back"
+      ],
+      "main": true
+    }
+  },
+  "task_result": true,
+  "elapsed_seconds": 17.734,
+  "dispatches": [
+    {
+      "capability": "dorm.collect",
+      "semantic_id": "dorm/collect",
+      "generation": 92791,
+      "path": "UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/rightPanel/onekey"
+    }
+  ],
+  "dorm_collect_grant_remaining": 0,
+  "after": {
+    "actions": [
+      "dorm/page/back"
+    ],
+    "state": {
+      "occupied_slots": 6,
+      "total_slots": 6,
+      "food": 0,
+      "food_capacity": 40000,
+      "comfort": 454,
+      "floor": 1,
+      "food_countdown_seconds": null
+    },
+    "quick_collect_available": false,
+    "cleanup": {
+      "actions": [
+        "dorm/page/back"
+      ],
+      "main": true
+    }
+  },
+  "temporary_config_removed": true
+}

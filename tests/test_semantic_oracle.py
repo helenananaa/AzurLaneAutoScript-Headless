@@ -4166,6 +4166,78 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertTrue(close.path.endswith("close_btn"))
         self.assertEqual(backend.taps, [(904, 508), (968, 194)])
 
+    def test_current_dorm_furniture_theme_details_uses_exact_typed_image(self):
+        shop = "UICamera/Canvas/UIMain/NewBackYardShopUI(Clone)/"
+        themes = shop + "pages/BackYardThemePage(Clone)/list/frame/mask/content/"
+        buttons = [
+            make_button(str(index), themes + str(index), 220 + index * 90, 610)
+            for index in range(7)
+        ]
+        backend = FakeBackend(buttons)
+        detail = make_image(
+            "OverlayCamera/Overlay/UIMain/adpter/descript/btn_goumai",
+            "buy_bg",
+            {"left": 997.0, "top": 444.0, "right": 1265.0, "bottom": 496.0},
+        )
+        detail["raycast_target"] = True
+        backend.ui = make_ui([], images=[detail])
+        oracle = make_oracle(backend)
+
+        receipt = oracle.click_dorm_furniture_theme_details()
+
+        self.assertEqual(receipt.semantic_id, "dorm/furniture/theme/details")
+        self.assertTrue(receipt.path.endswith("descript/btn_goumai"))
+        self.assertEqual(backend.taps, [(1131, 470)])
+
+    def test_current_dorm_furniture_theme_uses_distinct_set_and_all_controls(self):
+        root = "OverlayCamera/Overlay/UIMain/BackYardThemeInfoPage(Clone)"
+        frame = root + "/frame/"
+        buttons = [
+            make_button("BackYardThemeInfoPage(Clone)", root, 640, 360),
+            make_button("purchase_btn", frame + "purchase_btn", 632, 649),
+            make_button("purchase_all_btn", frame + "purchase_all_btn", 945, 649),
+            make_button("back", frame + "back", 107, 131),
+        ]
+        backend = FakeBackend(buttons)
+        oracle = make_oracle(backend)
+
+        one = oracle.click_dorm_furniture_theme_purchase_option("set")
+        all_items = oracle.click_dorm_furniture_theme_purchase_option("all")
+        back = oracle.close_dorm_furniture_theme_details()
+
+        self.assertEqual(one.semantic_id, "dorm/furniture/theme/set")
+        self.assertEqual(all_items.semantic_id, "dorm/furniture/theme/all")
+        self.assertEqual(back.semantic_id, "dorm/furniture/theme/back")
+        self.assertEqual(backend.taps, [(632, 649), (945, 649), (107, 131)])
+
+    def test_current_dorm_furniture_theme_payment_is_gold_only_and_typed(self):
+        root = "OverlayCamera/Overlay/UIMain/ThemeMsgboxPage(Clone)"
+        frame = root + "/frame/"
+        buttons = [
+            make_button("ThemeMsgboxPage(Clone)", root, 640, 360),
+            make_button("gold_purchase_btn", frame + "btns/gold_purchase_btn", 808, 491),
+            make_button("close_btn", frame + "close_btn", 968, 194),
+        ]
+        backend = FakeBackend(buttons)
+        backend.ui = make_ui(
+            [
+                make_text("limited theme", frame + "name"),
+                make_text("1", frame + "count/Text"),
+                make_text("1330", frame + "price/gold_text"),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        purchase = oracle.dorm_furniture_theme_purchase_state()
+        commit = oracle.click_dorm_furniture_theme_purchase_gold()
+        close = oracle.close_dorm_furniture_theme_purchase()
+
+        self.assertEqual(purchase.theme_name, "limited theme")
+        self.assertEqual((purchase.quantity, purchase.gold_price), (1, 1330))
+        self.assertEqual(commit.semantic_id, "dorm/furniture/theme/purchase/gold")
+        self.assertEqual(close.semantic_id, "dorm/furniture/theme/purchase/close")
+        self.assertEqual(backend.taps, [(808, 491), (968, 194)])
+
     def test_build_submit_dialog_retries_stale_snapshot_then_cross_checks_costs(self):
         base = (
             "root/UICamera/Canvas/UIMain/BuildShipUI(Clone)/"

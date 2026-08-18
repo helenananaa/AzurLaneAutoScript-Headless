@@ -271,7 +271,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 回放覆盖 1,956 种食物优先级和四种收取/喂食开关组合，共 7,824 个合法配置；原状态机仍拥有“全关则禁用并停止”、其余组合的 `dorm_run` 分派和三舰 417 分钟调度。食物边界保持严格 `fill > food`、首选食物为空时回退以及无可用食物不操作。22 个非法单字段案例均在入口事件前拒绝，mutation budget 为 0，没有领取奖励、消耗食物、导航、截图/OCR 或 Android 输入。
 
-2026-08-17 的原 ALAS 实机矩阵完成了 `Dorm.Feed` 的两条布尔路径：启用的默认优先级运行只发出动态计划的 typed 食物输入、耗尽授权并以精确库存差闭环（`integration/alas/dorm-feed-r10-live-validation-receipt.json`）；禁用运行成功且没有任何喂食输入（`integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json`）。自定义单值 `Dorm.FeedFilter="1000"` 同样通过真实 ConfigUpdater→RewardDorm 路径，它在该路径中会规范为整数，实机仅点击 `dorm/feed/item/50001` 一次，库存 `17863→17862`、食物 `38760→39454` 并回到主页（`integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json`）。连同全部 1,956 个原状态机过滤器回放、每张卡片读写边界的新鲜帧证明和非法值零输入契约，`Dorm.Feed` 与 `Dorm.FeedFilter` 达到五维完整支持；`Dorm.Collect` 仍为 `L`，因为当前账号没有出现可实际领取的宿舍奖励，不能以空路径代替领取闭环。
+2026-08-17 的原 ALAS 实机矩阵完成了 `Dorm.Feed` 的两条布尔路径：启用的默认优先级运行只发出动态计划的 typed 食物输入、耗尽授权并以精确库存差闭环（`integration/alas/dorm-feed-r10-live-validation-receipt.json`）；禁用运行成功且没有任何喂食输入（`integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json`）。自定义单值 `Dorm.FeedFilter="1000"` 同样通过真实 ConfigUpdater→RewardDorm 路径，它在该路径中会规范为整数，实机仅点击 `dorm/feed/item/50001` 一次，库存 `17863→17862`、食物 `38760→39454` 并回到主页（`integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json`）。2026-08-18 当前账号出现真实可领取奖励后，启用收取的原任务只消耗一次 `dorm.collect` 授权，后置快照证明精确收取控件由有变无、六个宿舍槽位不变且主页恢复（`integration/alas/dorm-collect-live-validation-receipt.json`）。连同全部 1,956 个原状态机过滤器回放、每张卡片读写边界的新鲜帧证明和非法值零输入契约，`Dorm.Collect`、`Dorm.Feed` 与 `Dorm.FeedFilter` 均达到五维完整支持。
 
 ### 1.27 本轮 Commission 预设、自定义规则与重大委托契约
 
@@ -315,7 +315,9 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 冻结时钟回放保持原六日调度的精确边界：超过一秒与恰好六日都会运行，早一秒、未来记录会跳过；购买循环连续两次成功候选后停止，退出并把 `LastRun` 写为冻结当前时间。`set/all` 均保持原按钮映射，家具币大于价格及恰好等于价格判为可买，不足或价格为零判为失败。付款页、确认、退出、OCR 和 Dorm scope 的离线回放仍是零 mutation。
 
-当前客户端额外实机执行了 `Enable=true`、`BuyOption=all`、过期 `LastRun`：原 Dorm 调度进入 typed 家具页，确认当前没有限时候选后不消耗购买授权，写入新的 `LastRun`，从宿舍返回主页，并删除临时配置。收据是 `integration/alas/dorm-furniture-live-validation-receipt.json`。这只把 `all` 的无候选分支及记录写入提升为实机部分证据；`set`、有候选时的数量语义、金币扣款/库存变化、失败恢复和收取喂食后置条件仍缺，Dorm 面板保持 L、BuyFurniture 三字段保持 P。
+2026-08-18 当前客户端把新活动主题的原生套装页纳入 typed 观察与输入：主题详情、八张限时家具卡、`purchase_btn`（一套）、`purchase_all_btn`（全部）、家具币确认、价格、家具币/钻石余额和返回控件均有精确结构门禁。`Enable=true + BuyOption=set + 过期 LastRun` 的原 Dorm 任务只消耗一次 `shop.purchase` 授权，家具币 `4693→3363`（精确扣除 1330），钻石保持 5022，随后写入 `LastRun`、按六舰调度 278 分钟并恢复主页；收据为 `integration/alas/dorm-furniture-set-live-validation-receipt.json`。
+
+按用户要求先买一套后，同一活动主题立即从该账号的主题候选列表消失。随后运行 `BuyOption=all` 时，适配器精确识别排在首位的是无任何限时标记的普通旧主题，保留全部购买授权、不改变家具币或钻石、写入 `LastRun` 并恢复主页；边界收据为 `integration/alas/dorm-furniture-all-post-set-boundary-receipt.json`。因此 set、真实扣款、空食物弹窗恢复和 post-set 无候选边界均已闭环；all 的原生按钮与最终提交路径已离线覆盖，但完整实买仍需要下一次未购买活动主题或另一个未购买账号，Dorm 面板保持 L、BuyFurniture 三字段保持 P。
 
 ### 1.33 本轮 Daemon 与 OpsiDaemon 三开关契约
 
@@ -399,7 +401,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 22 | Commission | Scheduler, Commission | F | 六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环 |
 | 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | AddNewStudent 三字段及 TacticalFilter 已完成真实库存观察、选书、确认和运行后置条件；经验溢出、四槽快速学习及其他 Tactical 分支仍未闭环 |
 | 24 | Research | Scheduler, Research | L | 一个金币项目闭环；魔方/零件、延迟、重置、26 个预设和自定义规则未完整覆盖 |
-| 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取/喂食四组合与 1,956 种已知食物优先级已离线完成；空收取、部分库存、喂食后置条件、买家具两模式和日期状态仍未闭环 |
+| 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取、喂食、食物过滤与活动家具 set 实买均已闭环；all 因 set 后当前活动候选消失，尚缺另一未购买活动主题的最终实买回执 |
 | 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | M | 买箱、金币溢出、训练、增强和保留天赋规则均缺适配 |
 | 27 | Guild | Scheduler, GuildLogistics, GuildOperation | M | 后勤兑换、新任务、作战、Boss 和推荐舰队均缺适配 |
 | 28 | Reward | Scheduler, Reward | P | 五个领取开关及 RaidDaily 共享入口已离线完成；资源气泡可领取，任务领取部分可用，周常、红点、数字行、空页面和舰船奖励仍未完整闭环 |
@@ -488,8 +490,8 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | P | 离线关闭/启用及各等级 0/配置/最大/越界已覆盖；仍需真实库存、当前技能经验及选书结果闭环 |
 | AddNewStudent | `Enable`; `Favorite`; `MinLevel` | F | Disabled 不变性、收藏/非收藏候选范围、120 级选舰、原始选书与唯一课程确认、运行中课程后置条件均已实机闭环 |
 | Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 26 预设、自由规则、重置、延迟、三种资源各四策略、资源不足、队列满和跨轮选择 |
-| Dorm | `Collect`; `Feed`; `FeedFilter` | L | 两开关四组合、全部已知食物优先级及严格容量边界已离线完成；仍缺空收取、部分库存、真实喂食结果和失败恢复 live 证据 |
-| BuyFurniture | `Enable`; `BuyOption`=`set/all`; `LastRun` | P | 开关、套装/全部、货币不足、已购买、日期去重和购买确认 |
+| Dorm | `Collect`; `Feed`; `FeedFilter` | L | 三字段均已达到五维完整：真实收取控件由有变无、喂食库存差、关闭分支、单值过滤器与全部合法优先级均有证据；面板仍由 BuyFurniture all 的实买缺口限制 |
+| BuyFurniture | `Enable`; `BuyOption`=`set/all`; `LastRun` | P | set 活动主题实买、家具币精确扣款、LastRun、六舰调度、主页恢复和 post-set all 无候选均已闭环；all 最终实买等待另一未购买活动主题 |
 | Meowfficer | `BuyAmount`; `FortChoreMeowfficer`; `OverflowCoins` | M | 数量 0/边界、保留后勤猫、金币阈值、箱位满和购买确认 |
 | MeowfficerTrain | `Enable`; `Mode`=`seamlessly/once_a_day`; `RetainTalentedGold`; `RetainTalentedPurple`; `MaxFeedLevel`; `EnhanceIndex` | M | 两训练模式、两保留开关组合、等级/索引边界、无材料、错误目标保护和每日去重 |
 | GuildLogistics | `Enable`; `ExchangeFilter`; `SelectNewMission` | M | 开关、兑换规则、新任务选择、贡献不足、无奖励和重复领取 |
@@ -654,8 +656,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **22 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **133 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **23 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **132 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **101 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -671,9 +673,9 @@ python scripts/python/verify_alas_support_matrix.py `
 | `BattlePass.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Benchmark.DeviceType` | Benchmark | type=select; display=default | options: "android_phone_vmos", "android_phone", "emulator", "phone_cloud_without_adb", "plone_cloud_with_adb"; default: "emulator" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Benchmark.TestScene` | Benchmark | type=select; display=default | options: "click", "screenshot_click", "screenshot"; default: "screenshot_click" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
-| `BuyFurniture.BuyOption` | Dorm | type=select; display=default | options: "all", "set"; default: "all" | `P`/◐ all 无候选 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `BuyFurniture.Enable` | Dorm | type=checkbox; display=default | input/default: false | `P`/◐ 启用无候选 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `BuyFurniture.LastRun` | Dorm | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/◐ 实机已写入 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `BuyFurniture.BuyOption` | Dorm | type=select; display=default | options: "all", "set"; default: "all" | `P`/◐ set 已购买/all 后置边界 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `BuyFurniture.Enable` | Dorm | type=checkbox; display=default | input/default: false | `P`/◐ 启用购买已闭环 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `BuyFurniture.LastRun` | Dorm | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/◐ 实机已写入 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `Campaign.AmbushEvade` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Campaign.Event` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "campaign_main", "coalition_20260723", "event_20260625_cn", "event_20260813_cn", "raid_20260212", "war_archives_20180607_cn", "war_archives_20180726_cn", "war_archives_20181020_en", "war_archives_20181026_en", "war_archives_20181227_cn", "war_archives_20190221_en", "war_archives_20190314_en", "war_archives_20190321_en", "war_archives_20190620_en", "war_archives_20190911_cn", "war_archives_20191010_en", "war_archives_20191031_en", "war_archives_20200312_cn", "war_archives_20200507_cn", "war_archives_20200603_cn", "war_archives_20200806_cn", "war_archives_20200820_cn", "war_archives_20200903_cn", "war_archives_20200917_cn", "war_archives_20201012_cn", "war_archives_20201029_cn", "war_archives_20201229_cn", "war_archives_20210225_cn", "war_archives_20210325_cn", "war_archives_20210422_cn", "war_archives_20210527_cn", "war_archives_20210624_cn", "war_archives_20210819_cn", "war_archives_20210916_cn", "war_archives_20211014_cn", "war_archives_20211028_cn", "war_archives_20211111_cn", "war_archives_20211229_cn", "war_archives_20220210_cn", "war_archives_20220224_cn", "war_archives_20220324_cn", "war_archives_20220414_cn", "war_archives_20220428_cn", "war_archives_20220526_cn", "war_archives_20220728_cn", "war_archives_20220818_cn", "war_archives_20220915_cn", "war_archives_20221222_cn", "war_archives_20230223_cn", "war_archives_20230525_cn", "war_archives_20230803_cn", "war_archives_20231026_cn", "war_archives_20240725_cn"; default: "campaign_main" | `P`/🧪 三主线常规路由 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Mode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "hard", "normal"; default: "normal" | `P`/🧪 三主线常规路由 | ☑ | ◐ | ◐ | ◐ | ◐ |
@@ -710,7 +712,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Daily.UseDailySkip` | Daily | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `DataKey.Collect` | Freebies | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `DataKey.ForceCollect` | Freebies | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Dorm.Collect` | Dorm | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Dorm.Collect` | Dorm | type=checkbox; display=default | input/default: true | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Dorm.Feed` | Dorm | type=checkbox; display=default | input/default: true | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Dorm.FeedFilter` | Dorm | type=textarea; display=default | input/default: "20000 > 10000 > 5000 > 3000 > 2000 > 1000" | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `DropRecord.API` | Alas | type=select; display=default | options: "cn_gz_reverse_proxy", "default"; default: "default" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

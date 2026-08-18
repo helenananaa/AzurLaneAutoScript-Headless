@@ -1189,6 +1189,18 @@ class DormFurniturePurchaseState:
 
 
 @dataclass(frozen=True)
+class DormFurnitureThemePurchaseState:
+    """Exact set/all payment shown for one selected furniture theme."""
+
+    generation: int
+    theme_name: str
+    quantity: int
+    gold_price: int
+    gold_purchase_button: ButtonState
+    close_button: ButtonState
+
+
+@dataclass(frozen=True)
 class DormFurnitureShopBalance:
     """Currencies currently displayed by the current furniture-shop surface."""
 
@@ -14981,6 +14993,326 @@ class SemanticOracle:
             path=target.path,
         )
 
+    def click_dorm_furniture_theme_details(self) -> ActionReceipt:
+        """Open the selected theme through its exact typed purchase-detail image."""
+
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < button_state.generation
+            or ui_state.generation > button_state.generation + 2
+        ):
+            raise SemanticGateClosed("dorm furniture theme snapshots are not coherent")
+        theme_prefix = (
+            "UICamera/Canvas/UIMain/NewBackYardShopUI(Clone)/pages/"
+            "BackYardThemePage(Clone)/list/frame/mask/content/"
+        )
+        themes = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == theme_prefix + button.name
+            and button.name in {str(index) for index in range(7)}
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds is not None
+        )
+        path = "OverlayCamera/Overlay/UIMain/adpter/descript/btn_goumai"
+        matches = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "buy_bg"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and image.raycast_target
+            and image.bounds is not None
+        )
+        if len(themes) != 7 or len(matches) != 1:
+            raise SemanticGateClosed("dorm furniture theme detail control is not proven")
+        target = matches[0]
+        assert target.bounds is not None
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        if not target.bounds.contains(point):
+            raise SemanticGateClosed("dorm furniture theme detail point is invalid")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture details")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/theme/details",
+            generation=button_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_dorm_furniture_theme_purchase_option(
+        self, buy_option: str
+    ) -> ActionReceipt:
+        """Open the exact set/all payment dialog for the selected theme."""
+
+        if buy_option not in ("set", "all"):
+            raise ValueError("dorm furniture buy option must be set or all")
+        state = self.read_state()
+        roots_allowed = (
+            "OverlayCamera/Overlay/UIMain/BackYardThemeInfoPage(Clone)",
+            "UICamera/Canvas/UIOrigin/BackYardThemeInfoPage(Clone)",
+        )
+        suffix = "purchase_btn" if buy_option == "set" else "purchase_all_btn"
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.path in {root + "/frame/" + suffix for root in roots_allowed}
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        roots = tuple(
+            button
+            for button in state.buttons
+            if button.path in roots_allowed
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.bounds is not None
+        )
+        if len(matches) != 1 or len(roots) != 1:
+            raise SemanticGateClosed("dorm furniture theme purchase control is not proven")
+        target = matches[0]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed(
+                "foreground changed before dorm furniture theme purchase option"
+            )
+        assert target.bounds is not None
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/theme/" + buy_option,
+            generation=state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def dorm_furniture_theme_is_time_limited(self) -> bool:
+        """Prove that every visible item in the selected theme has a time marker."""
+
+        button_state = self.read_state()
+        ui_state = self.read_text_state()
+        if (
+            ui_state.generation < button_state.generation
+            or ui_state.generation > button_state.generation + 2
+        ):
+            raise SemanticGateClosed("dorm furniture theme item snapshots are not coherent")
+        roots_allowed = (
+            "OverlayCamera/Overlay/UIMain/BackYardThemeInfoPage(Clone)",
+            "UICamera/Canvas/UIOrigin/BackYardThemeInfoPage(Clone)",
+        )
+        roots = tuple(
+            button.path
+            for button in button_state.buttons
+            if button.path in roots_allowed
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.bounds is not None
+        )
+        if len(roots) != 1:
+            raise SemanticGateClosed("dorm furniture theme detail root is not proven")
+        prefix = roots[0] + "/frame/list/content/"
+        cards = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == prefix + button.name
+            and button.name in {str(index) for index in range(8)}
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds is not None
+        )
+        if len(cards) != 8:
+            raise SemanticGateClosed("dorm furniture theme item list is not proven")
+        for card in cards:
+            root = prefix + card.name
+            names = tuple(
+                text
+                for text in ui_state.texts
+                if text.path == root + "/name"
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.text.strip()
+            )
+            markers = tuple(
+                text
+                for text in ui_state.texts
+                if text.path == root + "/time/Text"
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.text.strip()
+            )
+            if len(names) != 1 or len(markers) != 1:
+                return False
+        return True
+
+    def close_dorm_furniture_theme_details(self) -> ActionReceipt:
+        """Close the exact current theme-detail overlay."""
+
+        state = self.read_state()
+        paths = {
+            "OverlayCamera/Overlay/UIMain/BackYardThemeInfoPage(Clone)/frame/back",
+            "UICamera/Canvas/UIOrigin/BackYardThemeInfoPage(Clone)/frame/back",
+        }
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.path in paths
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("dorm furniture theme back control is not proven")
+        target = matches[0]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture theme back")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/theme/back",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def dorm_furniture_theme_purchase_state(
+        self,
+    ) -> DormFurnitureThemePurchaseState:
+        """Read the exact gold-only theme payment dialog."""
+
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < button_state.generation
+            or ui_state.generation > button_state.generation + 2
+        ):
+            raise SemanticGateClosed("dorm furniture theme dialog snapshots are not coherent")
+        roots_allowed = (
+            "OverlayCamera/Overlay/UIMain/ThemeMsgboxPage(Clone)",
+            "UICamera/Canvas/UIOrigin/ThemeMsgboxPage(Clone)",
+        )
+        roots = tuple(
+            button.path
+            for button in button_state.buttons
+            if button.path in roots_allowed
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.bounds is not None
+        )
+        if len(roots) != 1:
+            raise SemanticGateClosed("dorm furniture theme dialog root is not proven")
+        prefix = roots[0] + "/frame/"
+
+        def exact_button(suffix: str) -> ButtonState:
+            matches = tuple(
+                button
+                for button in button_state.buttons
+                if button.path == prefix + suffix
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "dorm furniture theme dialog button is absent or ambiguous: "
+                    + suffix
+                )
+            return matches[0]
+
+        def exact_text(suffix: str) -> str:
+            matches = tuple(
+                text
+                for text in ui_state.texts
+                if text.path == prefix + suffix
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.bounds is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "dorm furniture theme dialog text is absent or ambiguous: "
+                    + suffix
+                )
+            return re.sub(r"<[^>]*>", "", matches[0].text).strip()
+
+        theme_name = exact_text("name")
+        quantity_text = exact_text("count/Text")
+        gold_text = exact_text("price/gold_text")
+        if (
+            not theme_name
+            or re.fullmatch(r"[1-9][0-9]*", quantity_text) is None
+            or re.fullmatch(r"[1-9][0-9]*", gold_text) is None
+        ):
+            raise SemanticGateClosed("dorm furniture theme dialog values are malformed")
+        return DormFurnitureThemePurchaseState(
+            generation=button_state.generation,
+            theme_name=theme_name,
+            quantity=int(quantity_text),
+            gold_price=int(gold_text),
+            gold_purchase_button=exact_button("btns/gold_purchase_btn"),
+            close_button=exact_button("close_btn"),
+        )
+
+    def click_dorm_furniture_theme_purchase_gold(self) -> ActionReceipt:
+        """Submit the currently proven theme payment with furniture coins."""
+
+        purchase = self.dorm_furniture_theme_purchase_state()
+        target = purchase.gold_purchase_button
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture theme payment")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/theme/purchase/gold",
+            generation=purchase.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def close_dorm_furniture_theme_purchase(self) -> ActionReceipt:
+        """Close a theme payment dialog without spending furniture coins."""
+
+        purchase = self.dorm_furniture_theme_purchase_state()
+        target = purchase.close_button
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before dorm furniture theme close")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="dorm/furniture/theme/purchase/close",
+            generation=purchase.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def click_dorm_furniture_tag(self, index: int) -> ActionReceipt:
         """Choose a current furniture-shop category by its typed tag sprite."""
 
@@ -15036,8 +15368,9 @@ class SemanticOracle:
             and button.bounds is not None
         )
         if (
-            len(tag_images) != 1
-            or len(all_tag_images) != 7
+            not tag_images
+            or {image.sprite for image in all_tag_images}
+            != {"text_tag{0}".format(candidate) for candidate in range(7)}
             or len(candidates) != 1
             or len(all_tags) != 7
         ):
@@ -15045,12 +15378,16 @@ class SemanticOracle:
         target = candidates[0]
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed before dorm furniture tag")
-        assert target.point is not None and target.bounds is not None
-        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        assert target.bounds is not None
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
         return ActionReceipt(
             semantic_id="dorm/furniture/tag/{0}".format(index),
             generation=state.generation,
-            point=target.point,
+            point=point,
             bounds=target.bounds,
             path=target.path,
         )

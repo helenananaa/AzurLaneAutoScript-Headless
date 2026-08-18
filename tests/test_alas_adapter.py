@@ -1982,6 +1982,98 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with self.assertRaises(SemanticGateClosed):
             adapter.buy_dorm_furniture_with_gold()
 
+    def test_dorm_furniture_theme_purchase_uses_shop_authority(self):
+        oracle = FakeOracle()
+        oracle.dorm_furniture_theme_purchase_state = lambda: SimpleNamespace(
+            gold_price=1330,
+        )
+        oracle.dorm_furniture_shop_balance = lambda: SimpleNamespace(
+            dorm_coins=4693,
+            gems=5022,
+        )
+        oracle.click_dorm_furniture_theme_purchase_gold = lambda: oracle.click_receipt(
+            "dorm/furniture/theme/purchase/gold"
+        )
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            shop_purchase_budget=1,
+        )
+
+        receipt = adapter.buy_dorm_furniture_theme_with_gold()
+
+        self.assertEqual(receipt.semantic_id, "dorm/furniture/theme/purchase/gold")
+        self.assertEqual(receipt.capability_id, "shop.purchase")
+        self.assertEqual(adapter._action_ledger.remaining("shop.purchase"), 0)
+
+    def test_dorm_furniture_flow_clears_exact_empty_food_popup_before_shop(self):
+        oracle = FakeOracle()
+        oracle.dorm_empty_food_cancel_value = True
+        oracle.click_dorm_furniture_shop = Mock(
+            side_effect=SemanticGateClosed("stop after proved popup recovery")
+        )
+        adapter = AlasSemanticAdapter(oracle, lambda: None)
+
+        with patch("alas_headless.alas_adapter.time.sleep"), self.assertRaises(
+            SemanticGateClosed
+        ):
+            adapter.run_current_dorm_furniture_purchase("set")
+
+        self.assertEqual(oracle.click_calls, ["dorm/empty-food/cancel"])
+        oracle.click_dorm_furniture_shop.assert_called_once_with()
+
+    def test_dorm_furniture_theme_flow_preserves_set_and_all_options(self):
+        for buy_option in ("set", "all"):
+            with self.subTest(buy_option=buy_option):
+                oracle = FakeOracle()
+                calls = []
+                balances = iter((4693, 4693, 3363))
+                oracle.dorm_empty_food_cancel_value = False
+                oracle.click_dorm_furniture_shop = lambda: calls.append("shop")
+                oracle.click_dorm_furniture_tag = lambda index: calls.append(
+                    "tag:{0}".format(index)
+                )
+                oracle.click_dorm_furniture_theme = lambda index: calls.append(
+                    "theme:{0}".format(index)
+                )
+                oracle.click_dorm_furniture_theme_details = lambda: calls.append(
+                    "details"
+                )
+                oracle.dorm_furniture_theme_is_time_limited = lambda: True
+                oracle.click_dorm_furniture_theme_purchase_option = (
+                    lambda option: calls.append("option:" + option)
+                )
+                oracle.dorm_furniture_theme_purchase_state = lambda: SimpleNamespace(
+                    gold_price=1330
+                )
+                oracle.dorm_state_value = SimpleNamespace(floor=1)
+                oracle.dorm_furniture_shop_balance = lambda: SimpleNamespace(
+                    dorm_coins=next(balances), gems=5022
+                )
+                oracle.click_dorm_furniture_theme_purchase_gold = (
+                    lambda: oracle.click_receipt(
+                        "dorm/furniture/theme/purchase/gold"
+                    )
+                )
+                oracle.close_dorm_furniture_theme_details = lambda: calls.append(
+                    "theme-back"
+                )
+                oracle.close_dorm_furniture_shop = lambda: calls.append("shop-back")
+                oracle._retry_transition_read = lambda reader, **_: reader()
+                adapter = AlasSemanticAdapter(
+                    oracle,
+                    lambda: None,
+                    shop_purchase_budget=1,
+                )
+
+                with patch("alas_headless.alas_adapter.time.sleep"):
+                    receipts = adapter.run_current_dorm_furniture_purchase(buy_option)
+
+                self.assertEqual(len(receipts), 1)
+                self.assertEqual(receipts[0].capability_id, "shop.purchase")
+                self.assertIn("option:" + buy_option, calls)
+                self.assertEqual(calls[-2:], ["theme-back", "shop-back"])
+
     def test_dorm_feed_proof_allows_only_bounded_ship_consumption(self):
         oracle = FakeOracle()
         original_click = oracle.click_dorm_food

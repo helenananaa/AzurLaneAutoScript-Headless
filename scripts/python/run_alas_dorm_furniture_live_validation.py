@@ -59,11 +59,13 @@ def _adb(serial: str, *arguments: str) -> str:
     return completed.stdout.strip()
 
 
-def _load_modules(alas_root: Path, driver_revision: str) -> SimpleNamespace:
+def _load_modules(
+    alas_root: Path, driver_revision: str, *, shop_purchase_budget: int
+) -> SimpleNamespace:
     os.environ["ALAS_SEMANTIC_MODE"] = "1"
     os.environ["ALAS_SEMANTIC_DRIVER_REVISION"] = driver_revision
     os.environ["ALAS_SEMANTIC_ADB"] = "adb"
-    os.environ["ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET"] = "0"
+    os.environ["ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET"] = str(shop_purchase_budget)
     for path in (ROOT / "python", alas_root):
         value = str(path)
         if value not in sys.path:
@@ -84,7 +86,12 @@ def _close(instance: object | None) -> None:
 
 
 def validate(
-    *, alas_root: Path, seed_config: str, driver_revision: str
+    *,
+    alas_root: Path,
+    seed_config: str,
+    driver_revision: str,
+    buy_option: str,
+    expect_purchase: bool,
 ) -> Mapping[str, Any]:
     seed_path = alas_root / "config" / (seed_config + ".json")
     seed = _read_json(seed_path)
@@ -103,7 +110,7 @@ def validate(
     payload["Dorm"]["BuyFurniture"].update(
         {
             "Enable": True,
-            "BuyOption": "all",
+            "BuyOption": buy_option,
             "LastRun": "2020-01-01 00:00:00",
         }
     )
@@ -113,17 +120,24 @@ def validate(
     instance: object | None = None
     result: dict[str, Any] = {"temporary_config": config_path.name, "passed": False}
     try:
-        modules = _load_modules(alas_root, driver_revision)
+        modules = _load_modules(
+            alas_root, driver_revision, shop_purchase_budget=1
+        )
         instance = modules.AzurLaneAutoScript(config_name)
         instance.config.bind("Dorm")
         adapter = instance.device.semantic_adapter.open()
         if adapter.oracle.dorm_empty_food_cancel_available():
             adapter.oracle.click("dorm/empty-food/cancel")
             time.sleep(0.75)
-        if adapter.oracle.dorm_state().floor < 1:
-            raise AssertionError("Dorm validation must start on the normal dorm page")
+        if not (
+            adapter.oracle.main_page_visible()
+            or adapter.oracle.enabled("dorm/page/manage")
+        ):
+            raise AssertionError("Dorm validation must start on the main or dorm page")
         dispatches: list[dict[str, Any]] = []
+        balances: list[dict[str, Any]] = []
         original_dispatch = adapter._dispatch_mutation
+        original_balance = adapter.oracle.dorm_furniture_shop_balance
 
         def record_dispatch(capability: str, operation: object) -> object:
             receipt = original_dispatch(capability, operation)
@@ -131,6 +145,18 @@ def validate(
             return receipt
 
         adapter._dispatch_mutation = record_dispatch
+        def record_balance() -> object:
+            balance = original_balance()
+            balances.append(
+                {
+                    "generation": balance.generation,
+                    "dorm_coins": balance.dorm_coins,
+                    "gems": balance.gems,
+                }
+            )
+            return balance
+
+        adapter.oracle.dorm_furniture_shop_balance = record_balance
         before_last_run = instance.config.BuyFurniture_LastRun
         started = time.monotonic()
         instance.dorm()
@@ -140,6 +166,7 @@ def validate(
         result["before_last_run"] = before_last_run.isoformat()
         result["after_last_run"] = after_last_run
         result["dispatches"] = dispatches
+        result["balances"] = balances
         result["shop_purchase_grant_remaining"] = adapter._action_ledger.remaining(
             "shop.purchase"
         )
@@ -151,8 +178,30 @@ def validate(
         result["dorm_after_task"] = adapter.oracle.dorm_state().__dict__
         if after_last_run <= before_last_run.isoformat(sep=" "):
             raise AssertionError("BuyFurniture LastRun was not committed after the run")
-        if dispatches:
-            raise AssertionError("no limited furniture must not consume purchase authority")
+        coin_values = [item["dorm_coins"] for item in balances]
+        if expect_purchase:
+            if (
+                len(dispatches) != 1
+                or dispatches[0]["capability"] != "shop.purchase"
+                or dispatches[0]["receipt"]["semantic_id"]
+                != "dorm/furniture/theme/purchase/gold"
+            ):
+                raise AssertionError(
+                    "theme purchase did not consume one exact shop authority"
+                )
+            if result["shop_purchase_grant_remaining"] != 0:
+                raise AssertionError(
+                    "theme purchase did not exhaust its transaction budget"
+                )
+            if len(coin_values) < 2 or coin_values[-1] >= coin_values[0]:
+                raise AssertionError("theme purchase did not prove a furniture-coin debit")
+        else:
+            if dispatches or result["shop_purchase_grant_remaining"] != 1:
+                raise AssertionError(
+                    "no-candidate boundary unexpectedly consumed transaction authority"
+                )
+            if coin_values and coin_values[-1] != coin_values[0]:
+                raise AssertionError("no-candidate boundary changed furniture coins")
         cleanup = adapter.oracle.click("dorm/page/back")
         result["cleanup"] = _receipt(cleanup)
         time.sleep(0.75)
@@ -180,8 +229,9 @@ def validate(
             "Dorm.Collect": False,
             "Dorm.Feed": False,
             "BuyFurniture.Enable": True,
-            "BuyFurniture.BuyOption": "all",
+            "BuyFurniture.BuyOption": buy_option,
         },
+        "expect_purchase": expect_purchase,
         **result,
     }
 
@@ -191,6 +241,10 @@ def main() -> int:
     parser.add_argument("--alas-root", type=Path, required=True)
     parser.add_argument("--seed-config", default="semantic_e2e")
     parser.add_argument("--driver-revision", required=True)
+    parser.add_argument("--buy-option", choices=("set", "all"), required=True)
+    parser.add_argument(
+        "--expect-purchase", choices=("true", "false"), default="true"
+    )
     parser.add_argument("--output", type=Path, required=True)
     arguments = parser.parse_args()
     output = arguments.output.resolve()
@@ -200,6 +254,8 @@ def main() -> int:
             alas_root=arguments.alas_root.resolve(),
             seed_config=arguments.seed_config,
             driver_revision=arguments.driver_revision,
+            buy_option=arguments.buy_option,
+            expect_purchase=arguments.expect_purchase == "true",
         )
         return 0
     except BaseException as exc:

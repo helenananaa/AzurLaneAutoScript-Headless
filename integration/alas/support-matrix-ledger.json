@@ -241,10 +241,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -256,6 +256,8 @@
         "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
         "scripts/python/run_alas_dorm_furniture_live_validation.py",
         "integration/alas/dorm-furniture-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-set-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-all-post-set-boundary-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -264,16 +266,16 @@
         "Dorm"
       ],
       "path": "BuyFurniture.BuyOption",
-      "status_label": "◐ all 无候选",
+      "status_label": "◐ set 已购买/all 后置边界",
       "support": "supported",
       "values": "options: \"all\", \"set\"; default: \"all\""
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -285,6 +287,8 @@
         "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
         "scripts/python/run_alas_dorm_furniture_live_validation.py",
         "integration/alas/dorm-furniture-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-set-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-all-post-set-boundary-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -293,16 +297,16 @@
         "Dorm"
       ],
       "path": "BuyFurniture.Enable",
-      "status_label": "◐ 启用无候选",
+      "status_label": "◐ 启用购买已闭环",
       "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -314,6 +318,8 @@
         "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
         "scripts/python/run_alas_dorm_furniture_live_validation.py",
         "integration/alas/dorm-furniture-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-set-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-all-post-set-boundary-receipt.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -1329,16 +1335,21 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_dorm_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_adapter_session_runtime_handle.py",
         "python/alas_headless/alas_dorm_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0290-dorm-collect-empty-food-flow-port.patch",
+        "scripts/python/run_alas_dorm_collect_live_validation.py",
+        "integration/alas/dorm-collect-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1347,7 +1358,7 @@
         "Dorm"
       ],
       "path": "Dorm.Collect",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -7789,7 +7800,7 @@
         "BuyFurniture"
       ],
       "name": "Dorm",
-      "note": "收取/喂食/食物过滤已离线分类；BuyFurniture 的 all/无候选实机调度、LastRun 写入与主页恢复已验证，但 set/all 差异、限时候选购买和收取喂食后置条件仍未闭环",
+      "note": "收取、喂食与食物过滤均已完整闭环；BuyFurniture 已完成活动主题 set 实买、家具币扣款、LastRun、调度与主页恢复，all 原生路径已实现但因 set 后活动候选从当前账号消失，尚缺另一未购买活动主题的最终实买回执",
       "status": "L"
     },
     {
@@ -9919,16 +9930,24 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_dorm_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_adapter_session_runtime_handle.py",
         "python/alas_headless/alas_dorm_config_replay.py",
         "integration/alas/series/0030-research-dorm-build-flow-ports.patch",
+        "integration/alas/series/0290-dorm-collect-empty-food-flow-port.patch",
+        "scripts/python/run_alas_dorm_collect_live_validation.py",
+        "integration/alas/dorm-collect-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Dorm.Collect",
-      "note": "Both booleans preserve original collect dispatch and all-disabled task-stop behavior; invalid values fail before Dorm scope entry, navigation, or collection."
+      "note": "Both booleans preserve original collect dispatch and all-disabled task-stop behavior; invalid values fail before Dorm scope entry, navigation, or collection. The enabled original task consumed exactly one typed dorm.collect grant while the real quick-collect control was present, and the independent after snapshot proved that control absent with slot count unchanged and main-page recovery complete."
     },
     {
       "dimensions": {
@@ -10255,8 +10274,9 @@
     },
     {
       "dimensions": {
+        "action": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -10268,13 +10288,18 @@
         "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
         "scripts/python/run_alas_dorm_furniture_live_validation.py",
         "integration/alas/dorm-furniture-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-set-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-all-post-set-boundary-receipt.json",
         "docs/status.md"
       ],
       "field": "BuyFurniture.BuyOption",
-      "note": "Both values preserve the original set/all mapping and affordability decisions offline. The actual all run reached the current typed furniture list, found no time-limited candidate, returned to the main page, and made no purchase; set and any candidate purchase remain unqualified."
+      "note": "Both values now map to the current theme page's distinct typed set/all controls and share the same furniture-coin-only final commit. The real set run spent exactly one transaction grant, debited 1330 furniture coins (4693 to 3363), left gems unchanged, wrote LastRun, and restored main. After that set purchase the event theme disappeared from the account's candidate list, so the requested all run correctly retained its grant, made no currency mutation, and stopped on the next non-limited theme; all remains live-partial until another unowned event theme or account is available."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -10286,16 +10311,18 @@
         "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
         "scripts/python/run_alas_dorm_furniture_live_validation.py",
         "integration/alas/dorm-furniture-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-set-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-all-post-set-boundary-receipt.json",
         "docs/status.md"
       ],
       "field": "BuyFurniture.Enable",
-      "note": "Both booleans preserve original Dorm dispatch. With Enable=true, the actual current typed all/no-candidate branch ran without consuming purchase authority, restored the main page, and left the full candidate purchase surface unqualified."
+      "note": "Both booleans preserve original Dorm dispatch. With Enable=true, the real set candidate used the exact theme detail, set option, gold confirmation, debit, LastRun, six-ship delay, and main recovery. The subsequent all/no-candidate boundary consumed no authority; the disabled branch remains contract-complete but does not need a resource mutation."
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -10307,10 +10334,12 @@
         "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
         "scripts/python/run_alas_dorm_furniture_live_validation.py",
         "integration/alas/dorm-furniture-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-set-live-validation-receipt.json",
+        "integration/alas/dorm-furniture-all-post-set-boundary-receipt.json",
         "docs/status.md"
       ],
       "field": "BuyFurniture.LastRun",
-      "note": "Bounded naive records preserve the six-day boundary offline. An actual overdue all/no-candidate run wrote LastRun after typed shop observation, restored the main page, and consumed no purchase authority; date skip and candidate purchase branches still need live evidence."
+      "note": "Bounded naive records preserve the six-day boundary offline. Actual overdue runs now cover both a successful set candidate purchase and the post-set all/no-candidate boundary; both wrote LastRun, preserved the six-ship 278-minute delay, removed temporary configuration, and restored main. A fresh-date skip remains the only live date branch not separately re-run."
     },
     {
       "dimensions": {
