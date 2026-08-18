@@ -4320,6 +4320,9 @@ class SemanticOracleTests(unittest.TestCase):
             oracle.research_start_prompt_cost(), ("research_part_t2", 20)
         )
 
+        backend.ui["texts"][0]["text"] = "开启该科研项目需要消耗 :鱼雷部件T1x20"
+        self.assertEqual(oracle.research_start_prompt_cost(), ("17021", 20))
+
         backend.ui["texts"][0]["text"] = "开启该科研项目需要消耗 :钻石x1500"
         self.assertIsNone(oracle.research_start_prompt_cost())
         with self.assertRaises(SemanticGateClosed):

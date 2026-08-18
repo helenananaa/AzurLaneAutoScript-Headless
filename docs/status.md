@@ -96,6 +96,20 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   Seven successful resource-policy receipts are retained only as historical
   stage evidence because their source hashes predate this closure; no Research
   field is promoted from those receipts.
+- A new 2026-08-18 current-account requalification then exercised the split
+  flow against the current adapter. It closed the typed queue-capacity handoff,
+  exact component-family prompt mapping, and duplicate-code selection by
+  binding the upstream-selected 0-based position to a fresh matching code.
+  Bounded starts consumed exactly 8,000 coins, three cubes, and 20 torpedo T1
+  parts across two coin, one cube, and one part projects. Three `do_not_use`
+  runs consumed no resources and retained their start grants.
+- The final source-bound run used `AllowDelay=true`, observed the original
+  no-match and enforced-fallback decisions, safely selected one of two
+  `C-153-MI` cards by position, started one resource-free project, and restored
+  scheduling. It does not prove the insufficient-resource delay decision.
+  The five-slot queue is now full until its first project completes around
+  2026-08-19 01:44 local time, so the earlier resource receipts remain stage
+  evidence after the later duplicate-code fix; Research stays `L`.
 - The Mail qualifier declares exact maintenance, merit, and trade-license
   configurations and grants. Existing maintenance and merit attempts failed
   their mail-count postcondition, so the negative receipts remain local

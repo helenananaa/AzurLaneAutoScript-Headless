@@ -79,6 +79,9 @@ def _load_modules(alas_root: Path, driver_revision: str) -> SimpleNamespace:
     os.environ["ALAS_SEMANTIC_DRIVER_REVISION"] = driver_revision
     os.environ["ALAS_SEMANTIC_ADB"] = "adb"
     os.environ["ALAS_SEMANTIC_RESEARCH_START_BUDGET"] = "1"
+    # Original ALAS can first claim the five-slot queue and then a separately
+    # finished sixth card before it reaches selection.  Bound both claims.
+    os.environ["ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET"] = "2"
     for path in (ROOT / "python", alas_root):
         value = str(path)
         if value not in sys.path:
@@ -141,6 +144,7 @@ def validate(
     driver_revision: str,
     resource: str,
     strategy: str,
+    allow_delay: bool = False,
 ) -> Mapping[str, Any]:
     if resource not in RESOURCE_FIELDS:
         raise ValueError("resource must be coin, cube, or part")
@@ -164,7 +168,7 @@ def validate(
     configured = {
         "PresetFilter": "custom",
         "CustomFilter": RESOURCE_FILTERS[resource],
-        "AllowDelay": False,
+        "AllowDelay": allow_delay,
         "UseCoin": "do_not_use",
         "UseCube": "do_not_use",
         "UsePart": "do_not_use",
@@ -175,12 +179,17 @@ def validate(
     config_path = alas_root / "config" / (config_name + ".json")
     _write_json(config_path, payload)
 
-    result: dict[str, Any] = {"passed": False, "dispatches": []}
+    result: dict[str, Any] = {
+        "passed": False,
+        "dispatches": [],
+        "reward_dispatches": [],
+    }
     instance: object | None = None
     adapter: object | None = None
     original_sort_filter: Callable[..., object] | None = None
     original_dispatch: Callable[..., object] | None = None
     prior_budget = os.environ.get("ALAS_SEMANTIC_RESEARCH_START_BUDGET")
+    prior_reward_budget = os.environ.get("ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET")
     try:
         modules = _load_modules(alas_root, driver_revision)
         instance = modules.AzurLaneAutoScript(config_name)
@@ -193,17 +202,19 @@ def validate(
         def record_dispatch(capability: str, operation: object) -> object:
             receipt = original_dispatch(capability, operation)
             context = adapter._research_context
-            result["dispatches"].append(
-                {
-                    "capability": capability,
-                    "selected_code": getattr(context, "selected_code", None),
-                    "expected_prompt_cost": {
-                        "resource_id": getattr(context, "pending_resource_id", None),
-                        "required": getattr(context, "pending_resource_required", None),
-                    },
-                    **_receipt_value(receipt),
-                }
-            )
+            record = {
+                "capability": capability,
+                "selected_code": getattr(context, "selected_code", None),
+                "expected_prompt_cost": {
+                    "resource_id": getattr(context, "pending_resource_id", None),
+                    "required": getattr(context, "pending_resource_required", None),
+                },
+                **_receipt_value(receipt),
+            }
+            if capability == "research.reward":
+                result["reward_dispatches"].append(record)
+            else:
+                result["dispatches"].append(record)
             return receipt
 
         adapter._dispatch_mutation = record_dispatch
@@ -249,6 +260,9 @@ def validate(
         result["research_start_grant_remaining"] = adapter._action_ledger.remaining(
             "research.start"
         )
+        result["research_reward_grant_remaining"] = adapter._action_ledger.remaining(
+            "research.reward"
+        )
         try:
             result["projects_after_task"] = _typed_projects(adapter)
         except Exception as exc:
@@ -265,6 +279,17 @@ def validate(
             raise AssertionError("Research policy issued an unexpected mutation capability")
         if len(result["dispatches"]) > 1:
             raise AssertionError("bounded Research policy run exceeded one start receipt")
+        if len(result["reward_dispatches"]) > 2:
+            raise AssertionError("bounded Research policy run exceeded two reward receipts")
+        if any(
+            item["capability"] != "research.reward"
+            for item in result["reward_dispatches"]
+        ):
+            raise AssertionError("Research reward issued an unexpected mutation capability")
+        if result["research_reward_grant_remaining"] != 2 - len(
+            result["reward_dispatches"]
+        ):
+            raise AssertionError("Research reward-budget accounting is inconsistent")
         if strategy == "do_not_use":
             # A no-resource project is allowed by all three upstream
             # ``do_not_use`` choices and starts directly, without consuming
@@ -297,6 +322,9 @@ def validate(
             result["research_start_grant_remaining"] = adapter._action_ledger.remaining(
                 "research.start"
             )
+            result["research_reward_grant_remaining"] = adapter._action_ledger.remaining(
+                "research.reward"
+            )
         _close(instance)
         config_path.unlink(missing_ok=True)
         result["temporary_config_removed"] = not config_path.exists()
@@ -304,6 +332,10 @@ def validate(
             os.environ.pop("ALAS_SEMANTIC_RESEARCH_START_BUDGET", None)
         else:
             os.environ["ALAS_SEMANTIC_RESEARCH_START_BUDGET"] = prior_budget
+        if prior_reward_budget is None:
+            os.environ.pop("ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET", None)
+        else:
+            os.environ["ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET"] = prior_reward_budget
 
     return {
         "schema": "alas-headless.research-resource-policy-live-validation/v1",
@@ -333,6 +365,9 @@ def main() -> int:
     parser.add_argument("--driver-revision", required=True)
     parser.add_argument("--resource", choices=tuple(RESOURCE_FIELDS), required=True)
     parser.add_argument("--strategy", choices=STRATEGIES, required=True)
+    parser.add_argument(
+        "--allow-delay", choices=("true", "false"), default="false"
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     output = args.output.resolve()
@@ -342,6 +377,7 @@ def main() -> int:
         driver_revision=args.driver_revision,
         resource=args.resource,
         strategy=args.strategy,
+        allow_delay=args.allow_delay == "true",
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_json(output, result)

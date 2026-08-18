@@ -1556,6 +1556,36 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(adapter._research_context.selected_code, "G-236-MI")
         self.assertEqual(oracle.click_calls, ["research/project/1"])
 
+    def test_research_code_selection_uses_upstream_position_for_duplicates(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=1,
+                unity_index=1,
+                code="C-153-MI",
+                status=ResearchProjectStatus.DETAIL,
+            ),
+            SimpleNamespace(
+                slot=5,
+                unity_index=2,
+                code="C-153-MI",
+                status=ResearchProjectStatus.DETAIL,
+            ),
+        ]
+
+        with self.assertRaisesRegex(SemanticGateClosed, "ambiguous"):
+            adapter.click_research_project_code("C-153-MI")
+        receipt = adapter.click_research_project_code(
+            "C-153-MI", position=1
+        )
+
+        self.assertEqual(receipt.semantic_id, "research/project/5")
+        self.assertEqual(adapter._research_context.selected_slot, 5)
+
+        with self.assertRaisesRegex(SemanticGateClosed, "no longer matches"):
+            adapter.click_research_project_code("G-236-MI", position=1)
+
     def test_research_atomic_start_confirms_the_selected_exact_cost(self):
         oracle = FakeOracle()
         oracle.research_project_values = [
@@ -5889,6 +5919,16 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter._research_context.last_queue_observed_at = time.monotonic() - 31.0
         with self.assertRaisesRegex(SemanticGateClosed, "identity is not proven"):
             adapter.research_queue_empty_slots()
+
+    def test_research_queue_exit_caches_the_last_typed_capacity(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.research_queue_visible_value = True
+
+        adapter.click(NamedButton("BACK_ARROW"))
+        oracle.research_queue_visible_value = False
+
+        self.assertEqual(adapter.research_queue_empty_slots(), 5)
 
     def test_research_fill_slots_are_limited_by_current_run_budget(self):
         oracle = FakeOracle()

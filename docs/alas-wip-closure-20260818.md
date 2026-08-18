@@ -28,6 +28,33 @@ promote any Research field to complete support.  Failed iterations, raw probes,
 and transient logs are preserved locally under
 `artifacts/alas-wip-closure-20260818/research`.
 
+### Later current-account Research requalification
+
+A bounded requalification later on 2026-08-18 exposed and closed three typed
+integration gaps without relaxing a mutation gate:
+
+- the queue page is snapshotted before exit so original ALAS can query its
+  capacity immediately after returning to the card list;
+- all five component families and tiers bind their exact prompt name to the
+  reviewed item id, including the observed torpedo T1 `17021` prompt;
+- duplicate project codes are selected by the 0-based position already chosen
+  by original ALAS and rechecked against one fresh matching typed card.
+
+The bounded live sequence started `D-340-MI` for 5,000 coins, `Q-351-MI` for
+20 torpedo T1 parts, `G-236-MI` for 3,000 coins, `H-387-MI` for three cubes,
+and one resource-free `C-153-MI`. Separate coin, cube, and part `do_not_use`
+runs emitted no resource-consuming start. The final source-bound run used
+`AllowDelay=true` and proved the exact no-match, enforced fallback, duplicate
+card selection, free start, and scheduler return. It did not encounter an
+insufficient-resource project, so the actual delay decision remains open.
+
+The final free start filled the five-slot queue; the first queued project is
+scheduled to complete around 2026-08-19 01:44 local time. Resource-policy
+receipts created before the later duplicate-position change remain stage
+evidence rather than being re-signed. `Research.AllowDelay` and
+`Research.CustomFilter` gain only the partial dimensions recorded by the
+authoritative ledger; the panel remains `L`.
+
 ## Mail
 
 The bounded live-validation driver now declares maintenance, merit, and trade

@@ -137,6 +137,8 @@ observation 状态。
 
 语义模式新增两道动作前门禁：五张 typed 科研卡必须具有完整且唯一的槽位/Unity 身份，并且每张卡都能由固定上游 `ResearchProject` 解析；自定义过滤器中任何空 token、非法 token 或仅被上游宽松 `re.search` 部分匹配的 token 都会 fail-closed。回放 mutation budget 为 **0**，没有启动科研、重置、资源消费或 Android 输入。因此六个 Research 配置字段的 `offline` 维度提升为 `complete`，既有 observation/action/live 维度不因离线证据而提升，Research 面板仍保持 `L` 而不是 `F`。
 
+2026-08-18 的当前账号复验补齐了离开队列前的 typed 容量快照、五类部件名称到精确物品 ID 的确认映射，以及原 ALAS 已选位置与新鲜项目代码的双重校验；后者允许安全处理同一批次两张 `S9 C-153-MI`，但位置或代码任一变化仍会拒绝输入。受限运行启动两项金币科研（合计 8,000 金币）、一项魔方科研（3 魔方）、一项零件科研（鱼雷部件 T1×20）和一项无资源科研；Coin/Cube/Part 的三个 `do_not_use` 路径均没有消耗资源。最终源码绑定的 `AllowDelay=true` 回执覆盖无匹配、强制回退、重名卡选择、无资源启动及调度恢复，但当前资源充足，未触发“资源不足后等待”判定。五格队列已满，最早项目约在 2026-08-19 01:44 完成，因此 Research 保持 `L`，资源回执在最后一次位置接口变更后仍按阶段证据处理。
+
 ### 1.5 本轮 Scheduler 六字段跨任务契约
 
 固定上游 `args.json` 中共有 **50 个面板**引用同一个六字段 Scheduler。校验器逐面板证明 `Enable/NextRun/Command/SuccessInterval/FailureInterval/ServerUpdate` 字段集合完整、`Command` 自识别，并按启用默认值、成功/失败间隔和服务器刷新表生成 **15 个等价类**；每个面板都明确列入一个类，不从单一任务样本直接外推。
@@ -491,7 +493,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Tactical | `RapidTrainingSlot`=`do_not_use/slot_1/slot_2/slot_3/slot_4`; `TacticalFilter` | L | TacticalFilter 已通过原始任务的真实书库存排序、选书、开课确认和运行后置状态；仍需真实快速学习可用性/次数、无书/无空位及其他教学分支闭环 |
 | ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | F | `5750/5800` 真实临界技能下完成关闭过滤、四档精确放行、T4 选书、唯一课程确认与运行后置状态；全部边界继续由离线回放覆盖 |
 | AddNewStudent | `Enable`; `Favorite`; `MinLevel` | F | Disabled 不变性、收藏/非收藏候选范围、120 级选舰、原始选书与唯一课程确认、运行中课程后置条件均已实机闭环 |
-| Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 26 预设、自由规则、重置、延迟、三种资源各四策略、资源不足、队列满和跨轮选择 |
+| Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 三资源 always/do_not、重名卡、队列容量与真值回退已实机；仍缺当前最终哈希下四策略全矩阵、26 预设、真实资源不足延迟、可用重置和跨轮闭环 |
 | Dorm | `Collect`; `Feed`; `FeedFilter` | L | 三字段均已达到五维完整：真实收取控件由有变无、喂食库存差、关闭分支、单值过滤器与全部合法优先级均有证据；面板仍由 BuyFurniture all 的实买缺口限制 |
 | BuyFurniture | `Enable`; `BuyOption`=`set/all`; `LastRun` | P | set 活动主题实买、家具币精确扣款、LastRun、六舰调度、主页恢复和 post-set all 无候选均已闭环；all 最终实买等待另一未购买活动主题 |
 | Meowfficer | `BuyAmount`; `FortChoreMeowfficer`; `OverflowCoins` | M | 数量 0/边界、保留后勤猫、金币阈值、箱位满和购买确认 |
@@ -659,8 +661,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
 | ✅ 五维完整支持 | **28 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **130 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **98 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ◐ 有实机当前值/分支证据 | **131 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **97 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
@@ -901,8 +903,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Raid.Mode` | Raid | type=select; display=default | options: "easy", "ex", "hard", "normal"; default: "hard" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Raid.UseTicket` | Raid | type=checkbox; display=default | input/default: false | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `RaidDaily.StageFilter` | RaidDaily | type=textarea; display=default | input/default: "hard > normal > easy" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Research.AllowDelay` | Research | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Research.CustomFilter` | Research | type=textarea; display=default | input/default: <long default in args.json> | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Research.AllowDelay` | Research | type=checkbox; display=default | input/default: true | `L`/◐ 双值读取/真值回退 | ☑ | ☑ | ◐ | ☑ | ◐ |
+| `Research.CustomFilter` | Research | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 当前规则/重名闭环 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Research.PresetFilter` | Research | type=select; display=default | options: "custom", "series_2_457_only", "series_2_blueprint_457", "series_2_blueprint_only", "series_2_than_3_457_234", "series_3_234_only", "series_3_blueprint_234", "series_3_blueprint_only", "series_4_blueprint_only", "series_4_blueprint_tenrai", "series_4_tenrai_only", "series_5_152_only", "series_5_blueprint_152", "series_5_blueprint_only", "series_6_203_only", "series_6_blueprint_203", "series_6_blueprint_only", "series_7_blueprint_la9", "series_7_blueprint_only", "series_7_la9_only", "series_8_305_only", "series_8_blueprint_305", "series_8_blueprint_only", "series_9_blueprint_only", "series_9_blueprint_ta152", "series_9_ta152_only"; default: "series_9_blueprint_ta152" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Research.UseCoin` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Research.UseCube` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "only_05_hour" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |

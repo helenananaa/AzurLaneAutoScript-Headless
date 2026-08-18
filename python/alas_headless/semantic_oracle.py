@@ -16636,9 +16636,9 @@ class SemanticOracle:
                 owned, required = map(int, resource.groups())
                 # Research Q projects display the numeric inventory sprite
                 # on their detail card, while the confirmation prompt names
-                # the same carrier-aircraft part by tier.  Normalize the
-                # reviewed item-id range so both independent observations
-                # must agree before the irreversible confirmation.
+                # the component by family and tier. Keep the reviewed legacy
+                # carrier-aircraft aliases; other component families retain
+                # their exact numeric item ids so both observations agree.
                 resource_id = {
                     "17041": "research_part_t1",
                     "17042": "research_part_t2",
@@ -20823,7 +20823,9 @@ class SemanticOracle:
             return None
         plain, cancel, confirm = parts
         match = re.fullmatch(
-            r"开启该科研项目需要消耗\s*:\s*(物资|心智魔方|舰载机部件T[1-4])x([1-9][0-9]*)",
+            r"开启该科研项目需要消耗\s*:\s*"
+            r"(物资|心智魔方|(?:通用|主炮|鱼雷|防空炮|舰载机)部件T[1-4])"
+            r"x([1-9][0-9]*)",
             plain,
         )
         if match is None or cancel != "取消" or confirm != "确定":
@@ -20835,6 +20837,22 @@ class SemanticOracle:
             "舰载机部件T2": "research_part_t2",
             "舰载机部件T3": "research_part_t3",
             "舰载机部件T4": "research_part_t4",
+            "通用部件T1": "17001",
+            "通用部件T2": "17002",
+            "通用部件T3": "17003",
+            "通用部件T4": "17004",
+            "主炮部件T1": "17011",
+            "主炮部件T2": "17012",
+            "主炮部件T3": "17013",
+            "主炮部件T4": "17014",
+            "鱼雷部件T1": "17021",
+            "鱼雷部件T2": "17022",
+            "鱼雷部件T3": "17023",
+            "鱼雷部件T4": "17024",
+            "防空炮部件T1": "17031",
+            "防空炮部件T2": "17032",
+            "防空炮部件T3": "17033",
+            "防空炮部件T4": "17034",
         }[match.group(1)]
         return resource_id, int(match.group(2))
 

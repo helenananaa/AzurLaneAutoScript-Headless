@@ -1,7 +1,7 @@
 diff --git a/module/research/research.py b/module/research/research.py
 --- a/module/research/research.py
 +++ b/module/research/research.py
-@@ -189,6 +189,22 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+@@ -189,6 +189,23 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
              logger.warning(f'The project to start: {project} is not in known projects')
              return None
          logger.info(f'Research project: {index}')
@@ -15,7 +15,8 @@ diff --git a/module/research/research.py b/module/research/research.py
 +                selected_code = semantic_session.research_projects()[index].code
 +            else:
 +                selected_code = project.name
-+            started = semantic_session.start_research_project_code(selected_code)
++            started = semantic_session.start_research_project_code(
++                selected_code, position=index)
 +            if started and add_queue:
 +                self.research_queue_add()
 +            self.research_project_started = project if started else None

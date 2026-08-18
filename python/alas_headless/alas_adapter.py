@@ -4851,7 +4851,9 @@ class AlasSemanticAdapter:
             projects.append(project)
         return tuple(projects)
 
-    def click_research_project_code(self, code: str) -> ActionReceipt:
+    def click_research_project_code(
+        self, code: str, *, position: Optional[int] = None
+    ) -> ActionReceipt:
         """Click the one current card selected by upstream's project code.
 
         Upstream makes the policy decision over its previously typed project
@@ -4867,10 +4869,25 @@ class AlasSemanticAdapter:
         if not normalized:
             raise SemanticGateClosed("research project code is absent")
         projects = self.oracle.research_projects()
-        matches = tuple(project for project in projects if project.code == normalized)
-        if len(matches) != 1:
-            raise SemanticGateClosed("selected research project code is ambiguous: " + normalized)
-        project = matches[0]
+        if position is None:
+            matches = tuple(
+                project for project in projects if project.code == normalized
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "selected research project code is ambiguous: " + normalized
+                )
+            project = matches[0]
+        else:
+            if not isinstance(position, int) or isinstance(position, bool):
+                raise SemanticGateClosed("selected research project position is invalid")
+            if position < 0 or position >= len(projects):
+                raise SemanticGateClosed("selected research project position is out of range")
+            project = projects[position]
+            if project.code != normalized:
+                raise SemanticGateClosed(
+                    "selected research project position no longer matches its code"
+                )
         if project.status == ResearchProjectStatus.FINISHED:
             raise SemanticGateClosed("research policy cannot select a finished project")
         receipt = self.oracle.click_research_project(project.slot)
@@ -4887,7 +4904,9 @@ class AlasSemanticAdapter:
         context.queue_add_requires_start_grant = False
         return receipt
 
-    def start_research_project_code(self, code: str) -> bool:
+    def start_research_project_code(
+        self, code: str, *, position: Optional[int] = None
+    ) -> bool:
         """Start the upstream-selected current research card atomically.
 
         ALAS still chooses ``code`` through its own filter and resource-policy
@@ -4900,7 +4919,7 @@ class AlasSemanticAdapter:
         self._package_gate()
         if self._research_context is None:
             raise SemanticGateClosed("research start used outside ALAS research flow")
-        self.click_research_project_code(code)
+        self.click_research_project_code(code, position=position)
         self.research_detail_stable()
         context = self._research_context
         detail = self.oracle.research_detail_state()
@@ -8216,6 +8235,16 @@ class AlasSemanticAdapter:
                     and time.monotonic() <= context.passive_transition_until
                 ):
                     return cached
+                # ALAS asks for queue capacity immediately after leaving the
+                # queue page. Preserve the last complete typed snapshot so the
+                # post-exit query neither guesses nor falls back to pixels.
+                try:
+                    queue_state = self.oracle.research_queue_state()
+                except SemanticGateClosed:
+                    pass
+                else:
+                    context.last_queue_state = queue_state
+                    context.last_queue_observed_at = time.monotonic()
                 receipt = self._record_mission_transition(
                     self.oracle.click("research/page/back")
                 )
@@ -10221,11 +10250,15 @@ class AlasSemanticSession:
     ) -> Tuple[object, ...]:
         return self.open().research_projects_for_alas(project_factory)
 
-    def click_research_project_code(self, code: str) -> ActionReceipt:
-        return self.open().click_research_project_code(code)
+    def click_research_project_code(
+        self, code: str, *, position: Optional[int] = None
+    ) -> ActionReceipt:
+        return self.open().click_research_project_code(code, position=position)
 
-    def start_research_project_code(self, code: str) -> bool:
-        return self.open().start_research_project_code(code)
+    def start_research_project_code(
+        self, code: str, *, position: Optional[int] = None
+    ) -> bool:
+        return self.open().start_research_project_code(code, position=position)
 
     def validate_research_filter(self, filter_: object, value: str) -> None:
         self.open().validate_research_filter(filter_, value)

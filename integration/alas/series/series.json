@@ -193,12 +193,12 @@
     {
       "order": 39,
       "path": "integration/alas/series/0320-research-code-selection-port.patch",
-      "sha256": "38ec077fe1cfed451ac1271471a434ffb7b8c0248d668a7e778067c579f34711"
+      "sha256": "04d0e525fe66e3280c430025445f0f9b05f84036757524ced0244eb9f2844555"
     },
     {
       "order": 40,
       "path": "integration/alas/series/0330-research-atomic-start-port.patch",
-      "sha256": "026b107be195294c0125f3254323e5085992273063a47ec4ba6b457d1425f3b3"
+      "sha256": "b8f0730af27ba557f952dd1a2ab6354fe72a3c0a98ae30ffb0d9c645bbf8b030"
     },
     {
       "order": 41,
