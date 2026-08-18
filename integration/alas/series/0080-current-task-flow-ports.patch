@@ -1550,13 +1550,17 @@ index e3fccd3f..b859a7e7 100644
          if not self.is_in_map():
              return False
  
-@@ -55,6 +58,9 @@ class EnemySearchingHandler(InfoHandler):
+@@ -55,6 +58,13 @@ class EnemySearchingHandler(InfoHandler):
          """
          Has any stage entrance, which means stage page is fully loaded
          """
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
-+            return semantic_adapter.open().oracle.event_campaign_stage_selector_visible()
++            oracle = semantic_adapter.open().oracle
++            return (
++                oracle.event_campaign_stage_selector_visible()
++                or oracle.campaign_page_is_normal()
++            )
          # campaign_extract_name_image in CampaignOcr.
          try:
              if hasattr(self, 'campaign_extract_name_image'):

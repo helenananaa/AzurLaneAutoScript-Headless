@@ -44,9 +44,9 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **6 / 60** | Benchmark、Commission、GameManager、Minigame、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **9 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Main、Research、Tactical |
+| 🟢 主路径已完成、全配置未完成（`L`） | **11 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Main、Main2、Main3、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **9 / 60** | Awaken、Coalition、CoalitionSp、EventB、Guild、Hospital、PrivateQuarters、Raid、RaidDaily |
-| 🟡 部分完成（`P`） | **16 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、Main2、Main3、OpsiDaemon、OpsiGeneral、ShopOnce |
+| 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
 | 🧱 已到边界、尚未完成（`B`） | **17 / 60** | Hard、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **3 / 60** | GemsFarming、Meowfficer、OpsiStronghold |
 

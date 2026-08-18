@@ -2,6 +2,7 @@
 
 import copy
 import re
+import re
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, Optional, Tuple
 
@@ -233,6 +234,16 @@ def synchronize_alas_campaign_map(
         raise SemanticGateClosed("ALAS campaign map interface is incomplete")
     source_map = campaign.MAP
     source_name = getattr(source_map, "name", None)
+    # A small set of legacy main-campaign modules (including upstream 1-1)
+    # constructs CampaignMap() without its name.  In that exact case, bind the
+    # already-loaded map to ALAS's task-level Campaign_Name; shape and complete
+    # static topology are still independently checked below.
+    if source_name is None:
+        source_name = getattr(campaign.config, "Campaign_Name", None)
+    if isinstance(source_name, str):
+        legacy_main = re.fullmatch(r"campaign_([1-9][0-9]*)_([1-9][0-9]*)", source_name)
+        if legacy_main is not None:
+            source_name = "{0}-{1}".format(*legacy_main.groups())
     if (
         not isinstance(source_name, str)
         or source_name.casefold() != state.stage_code.casefold()

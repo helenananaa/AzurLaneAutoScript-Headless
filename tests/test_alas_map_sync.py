@@ -151,6 +151,7 @@ class FakeCampaign:
         self.MAP = FakeMap()
         self.map = "original-map"
         self.config = SimpleNamespace(
+            Campaign_Name="12-4",
             Campaign_AmbushEvade=True,
             Campaign_Event="campaign_main",
             Campaign_UseFleetLock=True,
@@ -409,6 +410,18 @@ class AlasCampaignMapSyncTests(unittest.TestCase):
         projection = synchronize_alas_campaign_map(campaign, state)
 
         self.assertEqual(projection.stage_code, "a1")
+
+    def test_legacy_unnamed_map_uses_loaded_campaign_name(self):
+        campaign = FakeCampaign()
+        campaign.MAP.name = None
+        campaign.config.Campaign_Name = "campaign_12_4"
+
+        projection = synchronize_alas_campaign_map(campaign, make_state())
+
+        self.assertEqual(projection.stage_code, "12-4")
+        campaign.config.Campaign_Name = "12-3"
+        with self.assertRaisesRegex(SemanticGateClosed, "stage disagrees"):
+            synchronize_alas_campaign_map(campaign, make_state())
 
     def test_siren_decision_is_admitted_only_for_typed_siren(self):
         campaign = FakeGotoCampaign()

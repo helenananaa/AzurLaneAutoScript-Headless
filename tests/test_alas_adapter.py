@@ -805,6 +805,13 @@ class FakeOracle:
                 selected_fleet=(selected or None),
                 in_use=bool(selected),
                 ship_levels=((100,) if selected else ()),
+                available=True,
+                select_button=SimpleNamespace(
+                    generation=self.campaign_fleet_generation,
+                    point=Point(2, 3),
+                    bounds=Bounds(1, 2, 3, 4),
+                    path="root/{0}/select".format(row_key),
+                ),
                 clear_button=SimpleNamespace(
                     generation=self.campaign_fleet_generation,
                     point=Point(2, 3),
@@ -2613,6 +2620,18 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
         self.assertEqual(oracle.click_calls, ["campaign-menu/page/back"])
 
+    def test_campaign_check_short_circuits_restored_chapter_before_preparation(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_campaign_pre_sortie("12-4")
+        oracle.campaign_page_value = True
+        oracle.campaign_preparation_error = AssertionError(
+            "restored chapter must not probe campaign preparation"
+        )
+
+        self.assertTrue(adapter.appear(NamedButton("CAMPAIGN_CHECK")))
+
+        adapter.end_campaign_pre_sortie()
+
     def test_campaign_page_state_retries_only_generation_coherence(self):
         adapter, oracle, _ = self.make_adapter()
         expected = oracle.campaign_state_value
@@ -2707,6 +2726,26 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(
             oracle.click_calls, ["overlay/network-reconnect/confirm"]
         )
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_combat_session_delegates_restored_chapter_check(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_campaign_pre_sortie("12-4")
+        adapter.campaign_combat_committed = lambda: True
+        oracle.campaign_page_value = True
+        oracle.campaign_preparation_error = AssertionError(
+            "restored chapter must not enter combat or preparation probing"
+        )
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+        session._live_combat_visible = lambda: self.fail(
+            "restored chapter must not be classified as combat"
+        )
+
+        self.assertTrue(session.appear(NamedButton("CAMPAIGN_CHECK")))
+
         adapter.end_campaign_pre_sortie()
 
     def test_campaign_stage_probe_defers_to_exact_late_reconnect_prompt(self):
@@ -3316,6 +3355,69 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
         self.assertEqual(oracle.click_calls[-1], "campaign/fleet-preparation/sortie")
 
+    def test_campaign_sortie_accepts_typed_single_fleet_profile(self):
+        oracle = FakeOracle()
+        oracle.campaign_fleets.update(fleet2=0, submarine=0)
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=1,
+            campaign_sortie_budget=1,
+        )
+        entrance = NamedButton("1-1")
+        entrance.semantic_campaign_stage_code = "1-1"
+        adapter.begin_campaign_pre_sortie("1-1")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        self.assertTrue(adapter.authorize_campaign_fleet_preparation(1, 0, 0))
+        adapter.confirm_campaign_fleet_selection()
+
+        self.assertTrue(
+            adapter.authorize_campaign_sortie(
+                use_auto_search=False,
+                use_2x_book=False,
+                submarine_mode="do_not_use",
+                fleet_order="fleet1_all_fleet2_standby",
+            )
+        )
+        adapter.click(NamedButton("FLEET_PREPARATION"))
+        proof = adapter.confirm_campaign_sortie()
+        adapter.end_campaign_pre_sortie()
+
+        self.assertEqual(proof.stage_code, "1-1")
+        self.assertEqual(proof.prepared_fleets, (1, 0, 0))
+        self.assertEqual(proof.mutation_semantic_ids, ())
+        self.assertEqual(proof.required_oil, 97)
+
+    def test_campaign_sortie_rejects_single_fleet_with_two_fleet_order(self):
+        oracle = FakeOracle()
+        oracle.campaign_fleets.update(fleet2=0, submarine=0)
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=1,
+            campaign_sortie_budget=1,
+        )
+        entrance = NamedButton("1-1")
+        entrance.semantic_campaign_stage_code = "1-1"
+        adapter.begin_campaign_pre_sortie("1-1")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        adapter.authorize_campaign_fleet_preparation(1, 0, 0)
+        adapter.confirm_campaign_fleet_selection()
+
+        with self.assertRaisesRegex(SemanticGateClosed, "fleet order"):
+            adapter.authorize_campaign_sortie(
+                use_auto_search=False,
+                use_2x_book=False,
+                submarine_mode="do_not_use",
+                fleet_order="fleet1_mob_fleet2_boss",
+            )
+        self.assertNotIn("campaign/fleet-preparation/sortie", oracle.click_calls)
+        adapter.end_campaign_pre_sortie()
+
     def test_campaign_sortie_preconditions_fail_before_input(self):
         oracle = FakeOracle()
         adapter = AlasSemanticAdapter(
@@ -3513,6 +3615,84 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(adapter._action_ledger.remaining("campaign.grid_click"), 1)
         adapter.end_campaign_pre_sortie()
 
+    def test_campaign_post_combat_refocus_consumes_same_axis_swipe_pair(self):
+        oracle = FakeOracle()
+        before = make_campaign_combat_state()
+        oracle.campaign_map_state_value = before
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_combat_budget=1,
+            campaign_viewport_swipe_budget=2,
+        )
+        adapter.begin_campaign_pre_sortie("12-4")
+        state = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        adapter.authorize_campaign_combat(
+            make_campaign_combat_decision(), state
+        )
+        adapter.click(CampaignGridButton((3, 5)))
+        oracle.campaign_map_state_value = make_campaign_combat_state(
+            generation=55, after=True
+        )
+        adapter.campaign_camera_state()
+        self.assertTrue(adapter.campaign_post_combat_arrived((3, 5)))
+        with self.assertRaisesRegex(SemanticGateClosed, "destination changed"):
+            adapter.campaign_post_combat_arrived((4, 5))
+
+        intent = adapter.begin_campaign_map_swipe_vector(
+            (200.0, 0.0),
+            box=(123, 159, 1175, 628),
+            random_range=(0, 0, 0, 0),
+            padding=15,
+            duration=(0.1, 0.2),
+            whitelist_area=None,
+            blacklist_area=None,
+            name="MAP_SWIPE_-2_0",
+            distance_check=True,
+        )
+        proof = adapter.swipe(
+            (500, 400),
+            (700, 400),
+            duration=0.375,
+            name="MAP_SWIPE_-2_0",
+            distance_check=True,
+        )
+        adapter.end_campaign_map_swipe_vector(intent)
+
+        reverse_intent = adapter.begin_campaign_map_swipe_vector(
+            (200.0, 0.0),
+            box=(123, 159, 1175, 628),
+            random_range=(0, 0, 0, 0),
+            padding=15,
+            duration=(0.1, 0.2),
+            whitelist_area=None,
+            blacklist_area=None,
+            name="MAP_SWIPE_-2_0",
+            distance_check=True,
+        )
+        reverse_proof = adapter.swipe(
+            (500, 400),
+            (700, 400),
+            duration=0.375,
+            name="MAP_SWIPE_-2_0",
+            distance_check=True,
+        )
+        adapter.end_campaign_map_swipe_vector(reverse_intent)
+
+        self.assertEqual(proof.target_node, "D6")
+        self.assertEqual(reverse_proof.grid_vector, (-2, 0))
+        self.assertEqual(len(adapter._campaign_context.post_combat_viewport_proofs), 2)
+        self.assertEqual(
+            adapter._action_ledger.remaining("campaign.viewport_swipe"), 0
+        )
+        self.assertTrue(adapter.campaign_combat_committed())
+        adapter.end_campaign_pre_sortie()
+
     def test_campaign_combat_executes_alas_waypoint_then_enemy_input(self):
         oracle = FakeOracle()
         base = make_campaign_combat_state()
@@ -3613,6 +3793,8 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             fleets=(replace(before.fleets[0], node="D3", ammo=4),),
             enemies=(),
         )
+        post_camera = adapter.campaign_camera_state()
+        self.assertEqual(post_camera.fleets[0].node, "D3")
         proof = adapter.confirm_campaign_combat(battle_count_after=1)
         adapter.end_campaign_pre_sortie()
 

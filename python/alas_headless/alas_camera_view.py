@@ -98,6 +98,27 @@ class _ProjectiveCameraModel:
         )
 
 
+class _AffineCameraModel:
+    """Exact affine projector for a proven single-row or single-column map."""
+
+    def __init__(self, matrix: np.ndarray, offset: np.ndarray) -> None:
+        self.matrix = matrix
+        self.offset = offset
+
+    def grid_to_screen(self, points: Any) -> np.ndarray:
+        values = np.asarray(points, dtype=float)
+        if values.ndim != 2 or values.shape[1] != 2:
+            raise SemanticGateClosed(
+                "semantic ALAS camera grid projection is malformed"
+            )
+        projected = values @ self.matrix.T + self.offset
+        if np.any(~np.isfinite(projected)):
+            raise SemanticGateClosed(
+                "semantic ALAS camera affine projection is malformed"
+            )
+        return projected
+
+
 class AlasSemanticCampaignGrid:
     """Native-shaped grid record backed by one exact Unity map-cell quad."""
 
@@ -106,7 +127,7 @@ class AlasSemanticCampaignGrid:
         cell: CampaignMapCellState,
         *,
         state: CampaignMapState,
-        projector: _ProjectiveCameraModel,
+        projector: Any,
     ) -> None:
         self.location = (cell.column - 1, cell.row - 1)
         self.corner = np.asarray(
@@ -143,11 +164,42 @@ class AlasSemanticCampaignGrid:
         self.is_mystery = bool(
             pickup is not None and pickup.kind.lower() == "mystery"
         )
+        self.is_ammo = bool(
+            pickup is not None and pickup.kind.lower() == "ammo"
+        )
         self.is_fleet = fleet is not None
         self.is_current_fleet = bool(
             fleet is not None and fleet.marker == state.current_fleet_marker
         )
+        # ``CampaignMap.update`` passes every detected grid through
+        # ``GridInfo.merge``.  Keep the typed record structurally compatible
+        # with every field that merge reads, using conservative false/empty
+        # defaults for categories the observer did not prove.
+        self.is_submarine = False
+        self.is_caught_by_siren = False
+        self.is_carrier = False
+        self.is_missile_attack = False
+        self.enemy_scale = int(enemy.scale) if enemy is not None else 0
+        self.enemy_genre = enemy.genre if enemy is not None else None
         self.outer = self.button
+
+    @property
+    def str(self) -> str:
+        if self.is_boss:
+            return "BO"
+        if self.is_siren:
+            return "SI"
+        if self.is_enemy:
+            return "EN"
+        if self.is_current_fleet:
+            return "FL"
+        if self.is_fleet:
+            return "Fl"
+        if self.is_mystery:
+            return "MY"
+        if self.is_ammo:
+            return "AM"
+        return "--"
 
     def grid2screen(self, points: Any) -> np.ndarray:
         return self._projector.grid_to_screen(
@@ -189,7 +241,7 @@ class AlasSemanticCampaignView:
         *,
         state: CampaignMapState,
         observation: AlasCampaignCameraViewObservation,
-        projector: _ProjectiveCameraModel,
+        projector: Any,
     ) -> None:
         self.semantic_state = state
         self.semantic_observation = observation
@@ -253,8 +305,21 @@ class AlasSemanticCampaignView:
             raise SemanticGateClosed("ALAS camera swipe prediction lost typed view")
         before = self.semantic_observation
         after = current.semantic_observation
+        before_signature = self.semantic_state.signature
+        after_signature = current.semantic_state.signature
+        before_enemies = set(self.semantic_state.enemies)
+        after_enemies = set(current.semantic_state.enemies)
+        added_enemies = after_enemies - before_enemies
+        removed_enemies = before_enemies - after_enemies
+        additive_boss = (
+            before_signature[:6] + before_signature[7:]
+            == after_signature[:6] + after_signature[7:]
+            and not removed_enemies
+            and len(added_enemies) == 1
+            and next(iter(added_enemies)).genre == "Boss"
+        )
         if (
-            self.semantic_state.signature != current.semantic_state.signature
+            (before_signature != after_signature and not additive_boss)
             or after.generation <= before.generation
         ):
             raise SemanticGateClosed("ALAS camera swipe prediction changed map state")
@@ -273,7 +338,7 @@ class AlasSemanticCampaignView:
 def _fit_projective_camera(
     state: CampaignMapState,
     screen_center: Tuple[float, float],
-) -> Tuple[Tuple[float, float], float, float, _ProjectiveCameraModel]:
+) -> Tuple[Tuple[float, float], float, float, Any]:
     source = np.asarray(
         [(cell.column - 0.5, cell.row - 0.5) for cell in state.cells],
         dtype=float,
@@ -281,6 +346,75 @@ def _fit_projective_camera(
     target = np.asarray(
         [(cell.point.x, cell.point.y) for cell in state.cells], dtype=float
     )
+    if state.rows == 1 or state.columns == 1:
+        if len(source) < 3 or (state.rows == 1 and state.columns == 1):
+            raise SemanticGateClosed(
+                "semantic ALAS camera linear map needs at least three cells"
+            )
+        varying_axis = 0 if state.rows == 1 else 1
+        fixed_axis = 1 - varying_axis
+        coordinate = source[:, varying_axis]
+        design = np.column_stack((coordinate, np.ones(len(coordinate))))
+        coefficients, _, rank, _ = np.linalg.lstsq(design, target, rcond=None)
+        if rank != 2:
+            raise SemanticGateClosed("semantic ALAS camera linear model is singular")
+        direction = coefficients[0]
+        intercept = coefficients[1]
+        direction_length = float(np.linalg.norm(direction))
+        if not 40.0 <= direction_length <= 240.0:
+            raise SemanticGateClosed(
+                "semantic ALAS camera linear cell spread is outside limits"
+            )
+        perpendicular = np.asarray((-direction[1], direction[0]), dtype=float)
+        perpendicular /= float(np.linalg.norm(perpendicular))
+        if perpendicular[1] < 0.0:
+            perpendicular *= -1.0
+        bounds_scale = float(
+            np.median(
+                np.asarray(
+                    [
+                        (cell.bounds.bottom - cell.bounds.top)
+                        if state.rows == 1
+                        else (cell.bounds.right - cell.bounds.left)
+                        for cell in state.cells
+                    ],
+                    dtype=float,
+                )
+            )
+        )
+        if not 40.0 <= bounds_scale <= 240.0:
+            raise SemanticGateClosed(
+                "semantic ALAS camera linear cross-axis is outside limits"
+            )
+        cross_direction = perpendicular * bounds_scale
+        matrix = np.empty((2, 2), dtype=float)
+        matrix[:, varying_axis] = direction
+        matrix[:, fixed_axis] = cross_direction
+        fixed_value = float(source[0, fixed_axis])
+        offset = intercept - cross_direction * fixed_value
+        determinant = float(np.linalg.det(matrix))
+        if not math.isfinite(determinant) or abs(determinant) < 1e-4:
+            raise SemanticGateClosed("semantic ALAS camera linear model collapses")
+        projector = _AffineCameraModel(matrix, offset)
+        predicted = projector.grid_to_screen(source)
+        residuals = np.linalg.norm(predicted - target, axis=1)
+        maximum_residual = float(np.max(residuals))
+        rms_residual = float(np.sqrt(np.mean(residuals ** 2)))
+        if maximum_residual > 2.0 or rms_residual > 1.0:
+            raise SemanticGateClosed(
+                "semantic ALAS camera linear geometry is incoherent"
+            )
+        continuous = np.linalg.solve(
+            matrix, np.asarray(screen_center, dtype=float) - offset
+        )
+        if np.any(~np.isfinite(continuous)):
+            raise SemanticGateClosed("semantic ALAS camera screen center is singular")
+        return (
+            (float(continuous[0]), float(continuous[1])),
+            maximum_residual,
+            rms_residual,
+            projector,
+        )
     if len(source) < 8:
         raise SemanticGateClosed("semantic ALAS camera needs at least eight cells")
 
@@ -428,6 +562,14 @@ def build_alas_campaign_camera_view(
                     below.point.y - cell.point.y,
                 )
             )
+    if not horizontal and state.columns == 1:
+        horizontal = [
+            cell.bounds.right - cell.bounds.left for cell in state.cells
+        ]
+    if not vertical and state.rows == 1:
+        vertical = [
+            cell.bounds.bottom - cell.bounds.top for cell in state.cells
+        ]
     if not horizontal or not vertical:
         raise SemanticGateClosed("semantic ALAS camera swipe base is incomplete")
     swipe_base = (

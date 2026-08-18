@@ -965,6 +965,9 @@ class _CampaignFlowContext:
     viewport_swipe_required: bool = False
     viewport_swipe_intent: Optional[CampaignMapViewportSwipeIntent] = None
     viewport_swipe_proof: Optional[CampaignMapViewportSwipeProof] = None
+    post_combat_viewport_proofs: List[
+        CampaignMapViewportSwipeProof
+    ] = field(default_factory=list)
     camera_positioning_admission: Optional[
         CampaignCameraPositioningAdmission
     ] = None
@@ -1998,11 +2001,10 @@ class AlasSemanticAdapter:
         return True
 
     def campaign_fleet_row_allowed(self, row_key: str) -> bool:
-        # ALAS FleetOperator.clear() exits only when the row remains available
-        # while in_use() becomes false.  The typed state proves all three exact
-        # row controls independently of whether a fleet is currently assigned.
-        self._campaign_fleet_row(row_key)
-        return True
+        # Early campaign stages can explicitly cap the panel at one surface
+        # fleet and zero submarines.  Such rows are typed but intentionally do
+        # not expose synthetic controls to ALAS.
+        return self._campaign_fleet_row(row_key).available
 
     def campaign_fleet_operator_is_hard(self, row_key: str) -> bool:
         self._campaign_fleet_row(row_key)
@@ -2082,10 +2084,18 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign sortie is qualified only in normal mode")
         if context.prepared_fleet_state is None or context.requested_fleets is None:
             raise SemanticGateClosed("campaign fleet selection was not proven")
-        if context.requested_fleets != (1, 2, 0):
+        sortie_profiles = {
+            (1, 2, 0): ("fleet1_mob_fleet2_boss", 2),
+            (1, 0, 0): ("fleet1_all_fleet2_standby", 1),
+        }
+        try:
+            expected_fleet_order, expected_surface_count = sortie_profiles[
+                context.requested_fleets
+            ]
+        except KeyError as exc:
             raise SemanticGateClosed(
-                "campaign sortie is qualified only for fleets (1, 2, 0)"
-            )
+                "campaign sortie fleet profile is not reviewed"
+            ) from exc
         if use_auto_search is not False or use_2x_book is not False:
             raise SemanticGateClosed(
                 "campaign sortie requires auto search and 2x book disabled"
@@ -2094,20 +2104,33 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "campaign sortie requires submarine mode do_not_use"
             )
-        if fleet_order != "fleet1_mob_fleet2_boss":
-            raise SemanticGateClosed("campaign sortie fleet order is not reviewed")
+        if fleet_order != expected_fleet_order:
+            raise SemanticGateClosed(
+                "campaign sortie fleet order does not match the reviewed profile"
+            )
 
         prepared = context.prepared_fleet_state
         rows = {row.row_key: row for row in prepared.rows}
+        if set(rows) != {"fleet1", "fleet2", "submarine"}:
+            raise SemanticGateClosed("campaign sortie fleet rows are incomplete")
+        if not rows["fleet1"].ship_levels:
+            raise SemanticGateClosed("campaign sortie fleet 1 has no proven ships")
+        if bool(rows["fleet2"].ship_levels) != bool(context.requested_fleets[1]):
+            raise SemanticGateClosed("campaign sortie fleet 2 occupancy changed")
+        if rows["submarine"].ship_levels:
+            raise SemanticGateClosed("campaign sortie submarine occupancy changed")
         if (
-            set(rows) != {"fleet1", "fleet2", "submarine"}
-            or not rows["fleet1"].ship_levels
-            or not rows["fleet2"].ship_levels
-            or rows["submarine"].ship_levels
-            or prepared.surface_fleets != (2, 2)
-            or prepared.submarine_fleets != (0, 1)
+            len(prepared.surface_fleets) != 2
+            or prepared.surface_fleets[0] != expected_surface_count
+            or prepared.surface_fleets[1] not in (1, 2)
+            or expected_surface_count > prepared.surface_fleets[1]
         ):
-            raise SemanticGateClosed("campaign sortie fleet validity is not proven")
+            raise SemanticGateClosed("campaign sortie surface fleet count changed")
+        if (
+            prepared.submarine_fleets[0] != 0
+            or prepared.submarine_fleets[1] not in (0, 1)
+        ):
+            raise SemanticGateClosed("campaign sortie submarine fleet count changed")
         if context.oil_before_sortie is None:
             raise SemanticGateClosed("campaign oil was not captured before stage input")
         required_oil = prepared.mob_oil_cost + prepared.boss_oil_cost
@@ -4078,6 +4101,21 @@ class AlasSemanticAdapter:
             return not self.oracle.campaign_event_entrance_available()
         if semantic_id is None and name == "CAMPAIGN_CHECK":
             if self._campaign_context is not None:
+                # A completed combat returns directly to the normal chapter
+                # page.  Prove that strict identity first: probing a stale
+                # preparation layer before this check can keep ALAS waiting
+                # after the boss result even though the chapter page is
+                # already fully restored.
+                try:
+                    if self.oracle.campaign_page_is_normal():
+                        return True
+                except SemanticGateClosed:
+                    if (
+                        time.monotonic()
+                        <= self._campaign_context.passive_transition_until
+                    ):
+                        return False
+                    raise
                 if self._campaign_preparation_kind() is not None:
                     return False
                 if (
@@ -4087,15 +4125,7 @@ class AlasSemanticAdapter:
                     <= self._campaign_context.passive_transition_until
                 ):
                     return False
-                try:
-                    return self.oracle.campaign_page_is_normal()
-                except SemanticGateClosed:
-                    if (
-                        time.monotonic()
-                        <= self._campaign_context.passive_transition_until
-                    ):
-                        return False
-                    raise
+                return False
             return self.oracle.campaign_page_is_normal()
         if semantic_id is None and name in (
             "BATTLE_PREPARATION",
@@ -5501,8 +5531,20 @@ class AlasSemanticAdapter:
             and not context.camera_positioning_completed
             and context.combat_receipt is None
         )
+        post_combat_ready = (
+            self._action_ledger.allowed("campaign.viewport_swipe")
+            and self._action_ledger.remaining("campaign.viewport_swipe") >= 1
+            and context.combat_admission is not None
+            and context.combat_receipt is not None
+            and len(context.combat_route_receipts)
+            == len(context.combat_admission.input_nodes)
+            and context.camera_positioning_admission is None
+            and context.map_state is not None
+            and self._campaign_post_combat_state_proven(context, context.map_state)
+            and len(context.post_combat_viewport_proofs) < 2
+        )
         if (
-            combat_ready == positioning_ready
+            sum((combat_ready, positioning_ready, post_combat_ready)) != 1
             or context.map_state is None
             or context.viewport_swipe_intent is not None
         ):
@@ -5580,6 +5622,16 @@ class AlasSemanticAdapter:
             ),
             distance_check=True,
         )
+        if post_combat_ready and context.post_combat_viewport_proofs:
+            previous = context.post_combat_viewport_proofs[-1]
+            if (
+                len(context.post_combat_viewport_proofs) != 1
+                or tuple(abs(value) for value in intent.grid_vector)
+                != tuple(abs(value) for value in previous.grid_vector)
+            ):
+                raise SemanticGateClosed(
+                    "campaign post-combat refocus changed its edge-swipe axis"
+                )
         context.viewport_swipe_intent = intent
         return intent
 
@@ -5843,6 +5895,12 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign map viewport final duration changed")
         positioning = context.camera_positioning_admission
         combat = context.combat_admission
+        post_combat = bool(
+            combat is not None
+            and context.combat_receipt is not None
+            and context.map_state is not None
+            and self._campaign_post_combat_state_proven(context, context.map_state)
+        )
         if (
             context.map_state is None
             or context.map_columns is None
@@ -5872,7 +5930,21 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed("campaign map viewport lease is incomplete")
             assert combat is not None
             capability = "campaign.viewport_swipe"
-            target_node = combat.input_nodes[len(context.combat_route_receipts)]
+            if post_combat:
+                fleets = tuple(
+                    fleet
+                    for fleet in context.map_state.fleets
+                    if fleet.marker == combat.fleet_marker
+                )
+                if len(fleets) != 1:
+                    raise SemanticGateClosed(
+                        "campaign post-combat refocus fleet is ambiguous"
+                    )
+                target_node = fleets[0].node
+            else:
+                target_node = combat.input_nodes[
+                    len(context.combat_route_receipts)
+                ]
             # One ALAS in_sight() call can legitimately require more than one
             # clamped camera gesture.  Each gesture is independently budgeted
             # and proven; the next proof replaces the previous one for the
@@ -5901,20 +5973,23 @@ class AlasSemanticAdapter:
             assert combat is not None
             context.viewport_swipe_proof = proof
             context.viewport_swipe_required = False
-            context.combat_admission = replace(
-                combat,
-                input_generation=proof.post_generation,
-                point=(
-                    proof.target_after_point
-                    if target_node == combat.target_node
-                    else combat.point
-                ),
-                bounds=(
-                    proof.target_after_bounds
-                    if target_node == combat.target_node
-                    else combat.bounds
-                ),
-            )
+            if post_combat:
+                context.post_combat_viewport_proofs.append(proof)
+            if not post_combat:
+                context.combat_admission = replace(
+                    combat,
+                    input_generation=proof.post_generation,
+                    point=(
+                        proof.target_after_point
+                        if target_node == combat.target_node
+                        else combat.point
+                    ),
+                    bounds=(
+                        proof.target_after_bounds
+                        if target_node == combat.target_node
+                        else combat.bounds
+                    ),
+                )
         return proof
 
     def campaign_map_viewport_swipe_committed(self) -> bool:
@@ -5929,6 +6004,52 @@ class AlasSemanticAdapter:
         if proof is None:
             raise SemanticGateClosed("campaign map viewport swipe is not proven")
         return proof
+
+    def campaign_post_combat_arrived(self, location: Any) -> bool:
+        """Prove ALAS's just-fought fleet occupies its destination grid."""
+
+        self._package_gate()
+        context = self._require_campaign_context()
+        admission = context.combat_admission
+        if (
+            admission is None
+            or context.combat_receipt is None
+            or context.map_columns is None
+            or context.map_rows is None
+            or context.map_expected_fleet_count is None
+        ):
+            raise SemanticGateClosed("campaign post-combat arrival is not authorized")
+        try:
+            exact_location = tuple(int(value) for value in location)
+        except (TypeError, ValueError) as exc:
+            raise SemanticGateClosed("campaign post-combat location is malformed") from exc
+        if len(exact_location) != 2:
+            raise SemanticGateClosed("campaign post-combat location is malformed")
+        node = self._campaign_node(exact_location)
+        if node != admission.target_node:
+            raise SemanticGateClosed("campaign post-combat destination changed")
+        state = self.oracle.campaign_map_state(
+            context.stage_code,
+            columns=context.map_columns,
+            rows=context.map_rows,
+            land_cells=context.map_land_cells,
+            expected_fleet_count=context.map_expected_fleet_count,
+        )
+        prove_alas_campaign_combat_transition(
+            admission,
+            state,
+            battle_count_after=admission.battle_count + 1,
+            input_path=context.combat_receipt.path,
+        )
+        fleets = tuple(
+            fleet
+            for fleet in state.fleets
+            if fleet.marker == admission.fleet_marker and fleet.node == node
+        )
+        if len(fleets) != 1:
+            raise SemanticGateClosed("campaign post-combat fleet did not arrive")
+        context.map_state = state
+        return True
 
     def campaign_camera_positioning_committed(self) -> bool:
         context = self._require_campaign_context()
@@ -6002,10 +6123,28 @@ class AlasSemanticAdapter:
             expected_fleet_count=context.map_expected_fleet_count,
         )
         admission = context.combat_admission
+        post_combat_state = False
         if admission is not None and context.combat_route_receipts:
-            self._validate_campaign_combat_route_state(
-                context, state, for_next_input=False
-            )
+            if (
+                context.combat_receipt is not None
+                and len(context.combat_route_receipts) == len(admission.input_nodes)
+            ):
+                try:
+                    prove_alas_campaign_combat_transition(
+                        admission,
+                        state,
+                        battle_count_after=admission.battle_count + 1,
+                        input_path=context.combat_receipt.path,
+                    )
+                    post_combat_state = True
+                except SemanticGateClosed:
+                    self._validate_campaign_combat_route_state(
+                        context, state, for_next_input=False
+                    )
+            else:
+                self._validate_campaign_combat_route_state(
+                    context, state, for_next_input=False
+                )
         elif admission is not None and context.map_fleet_switch_receipts:
             if (
                 state.current_fleet_marker != admission.fleet_marker
@@ -6030,6 +6169,7 @@ class AlasSemanticAdapter:
         positioning = context.camera_positioning_admission
         if (
             positioning is not None
+            and not post_combat_state
             and state.signature != positioning.map_signature
         ):
             raise SemanticGateClosed(
@@ -6148,6 +6288,26 @@ class AlasSemanticAdapter:
         if not (0 <= column < 26 and 0 <= row < 99):
             raise SemanticGateClosed("campaign combat grid location is outside bounds")
         return chr(ord("A") + column) + str(row + 1)
+
+    @staticmethod
+    def _campaign_post_combat_state_proven(
+        context: _CampaignFlowContext,
+        state: CampaignMapState,
+    ) -> bool:
+        admission = context.combat_admission
+        receipt = context.combat_receipt
+        if admission is None or receipt is None:
+            return False
+        try:
+            prove_alas_campaign_combat_transition(
+                admission,
+                state,
+                battle_count_after=admission.battle_count + 1,
+                input_path=receipt.path,
+            )
+        except SemanticGateClosed:
+            return False
+        return True
 
     @staticmethod
     def _validate_campaign_combat_route_state(
@@ -7252,6 +7412,10 @@ class AlasSemanticAdapter:
                 dropdown = self.oracle.campaign_fleet_dropdown_state()
                 if dropdown is None:
                     row = self._campaign_fleet_row(row_key)
+                    if row.select_button is None:
+                        raise SemanticGateClosed(
+                            "campaign fleet select row is unavailable: " + row_key
+                        )
                     receipt = self.oracle.click_campaign_fleet_row(
                         row_key, "select"
                     )
@@ -7303,7 +7467,11 @@ class AlasSemanticAdapter:
                     )
                 row = matches[0]
                 clear_button = row.clear_button
-                if clear_button.point is None or clear_button.bounds is None:
+                if (
+                    clear_button is None
+                    or clear_button.point is None
+                    or clear_button.bounds is None
+                ):
                     raise SemanticGateClosed(
                         "campaign fleet empty-row clear identity is incomplete"
                     )
@@ -9565,6 +9733,17 @@ class AlasSemanticSession:
             # observation when the typed full-screen continue layer is the
             # exact top raycast above coherent ship-name/type/dialogue text.
             return adapter.oracle.new_ship_reward_visible()
+        if (
+            name == "CAMPAIGN_CHECK"
+            and adapter._campaign_context is not None
+            and adapter.campaign_combat_committed()
+        ):
+            # CAMPAIGN_CHECK is part of the broad defensive combat query set,
+            # but after the boss result it must be decided by the strict
+            # chapter-page identity in the campaign adapter.  Otherwise the
+            # combat observer's empty visible-resource set masks the restored
+            # stage page forever.
+            return adapter.appear(button)
         if adapter.oracle.daily_battle_result_visible():
             if name == "BATTLE_STATUS_S":
                 self._combat_result_observation = (name, time.monotonic())
@@ -10002,6 +10181,9 @@ class AlasSemanticSession:
         self,
     ) -> CampaignMapViewportSwipeProof:
         return self.open().campaign_map_viewport_swipe_proof()
+
+    def campaign_post_combat_arrived(self, location: Any) -> bool:
+        return self.open().campaign_post_combat_arrived(location)
 
     def campaign_camera_positioning_committed(self) -> bool:
         return self.open().campaign_camera_positioning_committed()

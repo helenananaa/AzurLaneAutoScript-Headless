@@ -881,8 +881,12 @@ class CampaignFleetRowState:
     row_key: str
     selected_fleet: Optional[int]
     ship_levels: Tuple[int, ...]
-    select_button: ButtonState
-    clear_button: ButtonState
+    select_button: Optional[ButtonState]
+    clear_button: Optional[ButtonState]
+
+    @property
+    def available(self) -> bool:
+        return self.select_button is not None and self.clear_button is not None
 
     @property
     def in_use(self) -> bool:
@@ -901,6 +905,12 @@ class CampaignFleetSelectionState:
     submarine_oil_cost: int
     rows: Tuple[CampaignFleetRowState, ...]
     sortie_button: ButtonState
+
+
+# Normal campaign stages without an oil-cap panel do not publish per-fleet
+# costs in this surface.  Reserve a deliberately conservative amount for the
+# two-fight sortie admission instead of treating absent UI as zero cost.
+UNCAPPED_CAMPAIGN_SORTIE_OIL_RESERVE = 1000
 
 
 @dataclass(frozen=True)
@@ -11320,7 +11330,10 @@ class SemanticOracle:
         land = tuple(sorted(set(normalized_land)))
         if len(land) != len(normalized_land):
             raise SemanticGateClosed("campaign map land topology contains duplicates")
-        if not land or len(land) >= rows * columns:
+        # A fully navigable map is valid (for example main campaign 1-1 is a
+        # one-row corridor with no ``--`` land cells).  An all-land map still
+        # cannot contain a spawn, fleet, or combat target and stays closed.
+        if len(land) >= rows * columns:
             raise SemanticGateClosed("campaign map land topology is incomplete")
 
         reader = lambda: self._campaign_map_state_once(
@@ -11350,6 +11363,7 @@ class SemanticOracle:
         node: str,
         *,
         require_top_raycast: bool,
+        require_unblocked: bool = True,
     ) -> ButtonState:
         if not isinstance(state, CampaignMapState):
             raise SemanticGateClosed("campaign map-cell input requires a typed state")
@@ -11366,6 +11380,26 @@ class SemanticOracle:
         if len(buttons) != 1:
             raise SemanticGateClosed("campaign map-cell Button identity changed")
         target = buttons[0]
+        if target.point is not None and target.bounds is not None:
+            geometry_delta = max(
+                abs(target.point.x - cell.point.x),
+                abs(target.point.y - cell.point.y),
+                abs(target.bounds.left - cell.bounds.left),
+                abs(target.bounds.top - cell.bounds.top),
+                abs(target.bounds.right - cell.bounds.right),
+                abs(target.bounds.bottom - cell.bounds.bottom),
+            )
+        else:
+            geometry_delta = math.inf
+        # A viewport move does not tap this coordinate.  Unity can continue a
+        # sub-pixel easing step between the stabilized map read and this final
+        # identity check, so allow only a tightly bounded drift there.  Actual
+        # grid taps retain exact geometry below.
+        geometry_matches = (
+            geometry_delta == 0.0
+            if require_top_raycast
+            else geometry_delta <= 5.0
+        )
         if (
             not target.active_in_hierarchy
             or not target.active_and_enabled
@@ -11374,8 +11408,7 @@ class SemanticOracle:
             or target.point is None
             or target.bounds is None
             or not target.bounds.contains(target.point)
-            or target.point != cell.point
-            or target.bounds != cell.bounds
+            or not geometry_matches
         ):
             raise SemanticGateClosed(
                 "campaign map-cell geometry or actionability changed"
@@ -11384,7 +11417,7 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "campaign map-cell geometry or actionability changed"
             )
-        if self._blocking_rules(observed, "campaign/map/grid"):
+        if require_unblocked and self._blocking_rules(observed, "campaign/map/grid"):
             raise SemanticGateClosed("campaign map-cell input is blocked")
         if require_top_raycast and not (
             0 <= target.point.x < self.fingerprint.width
@@ -11479,6 +11512,60 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "campaign map projective model needs at least four cells"
             )
+
+        before_x_span = max(point.x for point in before_points) - min(
+            point.x for point in before_points
+        )
+        before_y_span = max(point.y for point in before_points) - min(
+            point.y for point in before_points
+        )
+        major_span = max(before_x_span, before_y_span)
+        minor_span = min(before_x_span, before_y_span)
+        if major_span >= 10.0 and minor_span <= max(1.0, major_span * 0.01):
+            horizontal = before_x_span >= before_y_span
+            parameters = tuple(
+                point.x if horizontal else point.y for point in before_points
+            )
+            parameter_mean = sum(parameters) / len(parameters)
+            denominator = sum(
+                (value - parameter_mean) ** 2 for value in parameters
+            )
+            if not math.isfinite(denominator) or denominator < 1.0:
+                raise SemanticGateClosed(
+                    "campaign map affine cell spread is degenerate"
+                )
+            after_x_mean = sum(point.x for point in after_points) / len(after_points)
+            after_y_mean = sum(point.y for point in after_points) / len(after_points)
+            slope_x = sum(
+                (value - parameter_mean) * (point.x - after_x_mean)
+                for value, point in zip(parameters, after_points)
+            ) / denominator
+            slope_y = sum(
+                (value - parameter_mean) * (point.y - after_y_mean)
+                for value, point in zip(parameters, after_points)
+            ) / denominator
+            forward_scale = slope_x if horizontal else slope_y
+            if (
+                not math.isfinite(slope_x)
+                or not math.isfinite(slope_y)
+                or forward_scale < 0.10
+            ):
+                raise SemanticGateClosed(
+                    "campaign map affine model collapses or reverses geometry"
+                )
+            intercept_x = after_x_mean - slope_x * parameter_mean
+            intercept_y = after_y_mean - slope_y * parameter_mean
+            residuals = tuple(
+                math.hypot(
+                    point.x - (slope_x * value + intercept_x),
+                    point.y - (slope_y * value + intercept_y),
+                )
+                for value, point in zip(parameters, after_points)
+            )
+            rms = math.sqrt(
+                sum(value * value for value in residuals) / len(residuals)
+            )
+            return residuals, rms
 
         def normalize(points: Sequence[Point]):
             center_x = sum(point.x for point in points) / len(points)
@@ -11590,16 +11677,39 @@ class SemanticOracle:
         )
         if post_state.generation <= input_generation:
             raise SemanticGateClosed("campaign map viewport post-state predates input")
-        if post_state.signature != state.signature:
+        before_signature = state.signature
+        post_signature = post_state.signature
+        # Boss appearance is an asynchronous map event which can race the
+        # camera gesture ALAS performs immediately after a battle.  Admit only
+        # the exact additive transition: every non-enemy field is unchanged,
+        # every previous enemy remains byte-for-byte identical, and exactly
+        # one newly observed enemy is typed as Boss.  A swipe still cannot
+        # hide, replace, move, or otherwise mutate logical map state.
+        same_non_enemy_state = (
+            before_signature[:6] + before_signature[7:]
+            == post_signature[:6] + post_signature[7:]
+        )
+        removed_enemies = tuple(
+            enemy for enemy in state.enemies if enemy not in post_state.enemies
+        )
+        added_enemies = tuple(
+            enemy for enemy in post_state.enemies if enemy not in state.enemies
+        )
+        boss_appeared = bool(
+            same_non_enemy_state
+            and not removed_enemies
+            and len(added_enemies) == 1
+            and added_enemies[0].genre == "Boss"
+        )
+        if post_signature != before_signature and not boss_appeared:
             raise SemanticGateClosed("campaign map viewport changed logical map state")
-        after_target = self.campaign_map_cell_input(post_state, target_node)
-        if after_target.path != before_target.path:
-            raise SemanticGateClosed("campaign map viewport target identity changed")
-
         before_cells = {cell.node: cell for cell in state.cells}
         after_cells = {cell.node: cell for cell in post_state.cells}
         if set(before_cells) != set(after_cells) or len(before_cells) < 4:
             raise SemanticGateClosed("campaign map viewport cell set changed")
+        after_target = after_cells[target_node]
+        if after_target.button_path != before_target.path:
+            raise SemanticGateClosed("campaign map viewport target identity changed")
         ordered_nodes = sorted(before_cells)
         deltas = tuple(
             (
@@ -11619,9 +11729,14 @@ class SemanticOracle:
         alignment = (median_dx * finger_dx + median_dy * finger_dy) / (
             median_norm * finger_norm
         )
-        if alignment < 0.75:
+        # Boss appearance can trigger Unity's own camera animation while the
+        # ALAS gesture is in flight.  Depending on which movement dominates,
+        # coherent map content may follow or oppose the finger.  It must still
+        # move on the same axis; the subsequent typed ALAS camera observation
+        # proves the signed logical delta.
+        if abs(alignment) < 0.75:
             raise SemanticGateClosed(
-                "campaign map viewport moved against the ALAS gesture"
+                "campaign map viewport did not align with the physical gesture axis"
             )
         residuals, root_mean_square_residual = self._campaign_projective_residuals(
             tuple(before_cells[node].point for node in ordered_nodes),
@@ -11673,7 +11788,7 @@ class SemanticOracle:
             coherent_cell_count=len(deltas),
             median_cell_delta=(median_dx, median_dy),
             maximum_delta_residual=maximum_residual,
-            target_path=after_target.path,
+            target_path=after_target.button_path,
             target_before_point=before_target.point,
             target_after_point=after_target.point,
             target_after_bounds=after_target.bounds,
@@ -11716,7 +11831,6 @@ class SemanticOracle:
             raise SemanticGateClosed("campaign map Image snapshot is truncated")
 
         grid_root = entry.root_path
-        event_coordinates = re.fullmatch(r"[a-z]+[0-9]*", stage_code) is not None
         cell_pattern = re.compile(
             re.escape(grid_root)
             + r"/DragLayer/plane/quads/chapter_cell_quad_([0-9]+)_([0-9]+)$"
@@ -11733,22 +11847,30 @@ class SemanticOracle:
             for match in (cell_pattern.fullmatch(button.path),)
             if match is not None
         )
+        # Unity may center small campaign maps inside a larger backing grid.
+        # Derive one exact row/column translation from the complete topology
+        # instead of assuming normal stages are already one-based (1-1 is
+        # exposed as raw row 4 while remaining logical row 1).
         coordinate_offsets = tuple(
-            offset
-            for offset in ((1, 0) if event_coordinates else (0,))
+            (row_offset, column_offset)
+            for row_offset, column_offset in {
+                (expected_row - raw_row, expected_column - raw_column)
+                for raw_row, raw_column in raw_coordinates
+                for expected_row, expected_column in expected_cells
+            }
             if {
-                (raw_row + offset, raw_column + offset)
+                (raw_row + row_offset, raw_column + column_offset)
                 for raw_row, raw_column in raw_coordinates
             }
             == expected_cells
         )
         if len(coordinate_offsets) != 1:
             raise SemanticGateClosed("campaign map grid topology disagrees with ALAS")
-        coordinate_offset = coordinate_offsets[0]
+        row_offset, column_offset = coordinate_offsets[0]
 
         def logical_coordinate(raw_row: int, raw_column: int) -> Tuple[int, int]:
-            row = raw_row + coordinate_offset
-            column = raw_column + coordinate_offset
+            row = raw_row + row_offset
+            column = raw_column + column_offset
             if row < 1 or column < 1:
                 raise SemanticGateClosed("campaign map grid topology is invalid")
             return row, column
@@ -14103,24 +14225,78 @@ class SemanticOracle:
         if visible_options:
             raise SemanticGateClosed("campaign fleet-selection dropdown is still open")
 
+        def exact_text(suffix: str, pattern: str) -> re.Match[str]:
+            matches = tuple(
+                text
+                for text in ui_state.texts
+                if text.path.endswith(suffix)
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "campaign fleet summary text is absent or ambiguous"
+                )
+            match = re.fullmatch(pattern, matches[0].text.strip())
+            if match is None:
+                raise SemanticGateClosed("campaign fleet summary text is malformed")
+            return match
+
+        surface = exact_text(
+            "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/limit/number",
+            r"([0-9]+)/([0-9]+)",
+        )
+        submarine = exact_text(
+            "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/limit/number_sub",
+            r"([0-9]+)/([0-9]+)",
+        )
+        surface_counts = tuple(map(int, surface.groups()))
+        submarine_counts = tuple(map(int, submarine.groups()))
+        if (
+            not (0 <= surface_counts[0] <= surface_counts[1] <= 2)
+            or not (0 <= submarine_counts[0] <= submarine_counts[1] <= 1)
+            or surface_counts[1] < 1
+        ):
+            raise SemanticGateClosed("campaign fleet capacity is outside reviewed bounds")
+
         numerals = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6}
         rows = []
         for row_key in ("fleet1", "fleet2", "submarine"):
             semantic_root, path_root, row_kind = self._campaign_fleet_row_definition(
                 row_key
             )
-            select_button = self._unique(button_state, semantic_root + "/select")
-            clear_button = self._unique(button_state, semantic_root + "/clear")
-            for semantic_id, button in (
-                (semantic_root + "/select", select_button),
-                (semantic_root + "/clear", clear_button),
-            ):
-                if not button.actionable or self._blocking_rules(
-                    button_state, semantic_id
-                ):
+            available = {
+                "fleet1": surface_counts[1] >= 1,
+                "fleet2": surface_counts[1] >= 2,
+                "submarine": submarine_counts[1] >= 1,
+            }[row_key]
+            select_matches = self._matches(button_state, semantic_root + "/select")
+            clear_matches = self._matches(button_state, semantic_root + "/clear")
+            if available:
+                if len(select_matches) != 1 or len(clear_matches) != 1:
                     raise SemanticGateClosed(
-                        "campaign fleet row input is not proven: " + row_key
+                        "campaign fleet row controls are absent or ambiguous: " + row_key
                     )
+                select_button = select_matches[0]
+                clear_button = clear_matches[0]
+                for semantic_id, button in (
+                    (semantic_root + "/select", select_button),
+                    (semantic_root + "/clear", clear_button),
+                ):
+                    if not button.actionable or self._blocking_rules(
+                        button_state, semantic_id
+                    ):
+                        raise SemanticGateClosed(
+                            "campaign fleet row input is not proven: " + row_key
+                        )
+            else:
+                if select_matches or clear_matches:
+                    raise SemanticGateClosed(
+                        "campaign unavailable fleet row exposes controls: " + row_key
+                    )
+                select_button = None
+                clear_button = None
 
             names = tuple(
                 text
@@ -14165,6 +14341,10 @@ class SemanticOracle:
                 raise SemanticGateClosed(
                     "campaign fleet row level is outside the pinned range"
                 )
+            if not available and (levels or any(name.text.strip() for name in names)):
+                raise SemanticGateClosed(
+                    "campaign unavailable fleet row contains a selection: " + row_key
+                )
 
             selected_fleet = None
             if levels:
@@ -14194,32 +14374,6 @@ class SemanticOracle:
                 )
             )
 
-        def exact_text(suffix: str, pattern: str) -> re.Match[str]:
-            matches = tuple(
-                text
-                for text in ui_state.texts
-                if text.path.endswith(suffix)
-                and text.active_in_hierarchy
-                and text.active_and_enabled
-                and not text.truncated
-            )
-            if len(matches) != 1:
-                raise SemanticGateClosed(
-                    "campaign fleet summary text is absent or ambiguous"
-                )
-            match = re.fullmatch(pattern, matches[0].text.strip())
-            if match is None:
-                raise SemanticGateClosed("campaign fleet summary text is malformed")
-            return match
-
-        surface = exact_text(
-            "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/limit/number",
-            r"([0-9]+)/([0-9]+)",
-        )
-        submarine = exact_text(
-            "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/limit/number_sub",
-            r"([0-9]+)/([0-9]+)",
-        )
         cost_root = "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/cost_limit/"
         cost_texts = {
             item.path: item.text.strip()
@@ -14236,19 +14390,25 @@ class SemanticOracle:
             sub_cost = exact_text(cost_root + "cost_sub/Text", r"潜艇\(([0-9]+)\)")
             costs = (int(mob.group(1)), int(boss.group(1)), int(sub_cost.group(1)))
         else:
-            if (
-                re.fullmatch(r"[a-z]+[0-9]*", stage_code) is None
-                or fallback_oil_cost is None
-                or isinstance(fallback_oil_cost, bool)
-                or not isinstance(fallback_oil_cost, int)
-                or fallback_oil_cost <= 0
-            ):
+            numeric_stage = re.fullmatch(
+                r"[1-9][0-9]*-[1-9][0-9]*", stage_code
+            ) is not None
+            event_stage = re.fullmatch(r"[a-z]+[0-9]*", stage_code) is not None
+            valid_fallback = (
+                fallback_oil_cost is not None
+                and not isinstance(fallback_oil_cost, bool)
+                and isinstance(fallback_oil_cost, int)
+                and fallback_oil_cost > 0
+            )
+            if not numeric_stage and not (event_stage and valid_fallback):
                 raise SemanticGateClosed(
                     "campaign fleet oil cost is absent or ambiguous"
                 )
-            costs = (fallback_oil_cost, fallback_oil_cost, 0)
-        surface_counts = tuple(map(int, surface.groups()))
-        submarine_counts = tuple(map(int, submarine.groups()))
+            if valid_fallback:
+                costs = (fallback_oil_cost, fallback_oil_cost, 0)
+            else:
+                reserve = UNCAPPED_CAMPAIGN_SORTIE_OIL_RESERVE // 2
+                costs = (reserve, reserve, 0)
         if (
             surface_counts[0] != sum(row.in_use for row in rows[:2])
             or submarine_counts[0] != int(rows[2].in_use)

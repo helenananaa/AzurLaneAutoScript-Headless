@@ -719,11 +719,14 @@ index 9fa9cba2..1f7044a1 100644
          try:
              if not self.is_in_map() \
 diff --git a/module/map/fleet.py b/module/map/fleet.py
-index 249f61e2..010ae735 100644
+index 249f61e2..4d802f14 100644
 --- a/module/map/fleet.py
 +++ b/module/map/fleet.py
-@@ -301,7 +301,19 @@ class Fleet(Camera, AmbushHandler):
+@@ -299,9 +299,22 @@ class Fleet(Camera, AmbushHandler):
+             walk_timeout = Timer(20)
+             walk_timeout.start()
  
++            semantic_arrival_proven = False
              while 1:
                  self.device.screenshot()
 -                self.view.update(image=self.device.image)
@@ -743,7 +746,28 @@ index 249f61e2..010ae735 100644
                  if is_portal:
                      self.update(allow_error=True)
                      grid = self.view[self.view.center_loca]
-@@ -893,6 +905,22 @@ class Fleet(Camera, AmbushHandler):
+@@ -339,6 +352,8 @@ class Fleet(Camera, AmbushHandler):
+                         self.camera = location
+                         self.update()
+                     grid = self.convert_global_to_local(location)
++                    if semantic_adapter is not None:
++                        semantic_arrival_proven = semantic_adapter.campaign_post_combat_arrived(location)
+                     arrive_timer = Timer(0.5 + extra, count=2)
+                     arrive_unexpected_timer = Timer(1.5 + extra, count=6)
+                     walk_timeout.reset()
+@@ -381,7 +396,10 @@ class Fleet(Camera, AmbushHandler):
+                 # Arrive
+                 arrive_predict = ''
+                 arrive_checker = False
+-                if self.is_in_map():
++                if semantic_arrival_proven:
++                    arrive_predict = '(semantic post-combat proof)'
++                    arrive_checker = True
++                elif self.is_in_map():
+                     if not may_submarine_icon and grid.predict_fleet():
+                         arrive_predict = '(is_fleet)'
+                         arrive_checker = True
+@@ -893,6 +911,22 @@ class Fleet(Camera, AmbushHandler):
          self.handle_strategy(index=self.fleet_show_index)
          self.hp_reset()
          self.hp_get()

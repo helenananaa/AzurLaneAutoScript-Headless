@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from alas_headless import (
     Bounds,
     CampaignMapCellState,
+    CampaignMapEnemyState,
     CampaignMapState,
     Point,
     SemanticGateClosed,
@@ -55,7 +56,45 @@ def make_state(*, generation=10, dx=0.0, dy=0.0, deform=False, columns=5):
     )
 
 
+def make_single_row_state(*, generation=10, dx=0.0):
+    state = make_state(generation=generation, columns=7)
+    cells = tuple(
+        replace(cell, row=1, node=cell.node[0] + "1")
+        for cell in state.cells
+        if cell.row == 1
+    )
+    if dx:
+        cells = tuple(
+            replace(
+                cell,
+                point=Point(cell.point.x + dx, cell.point.y),
+                bounds=Bounds(
+                    cell.bounds.left + dx,
+                    cell.bounds.top,
+                    cell.bounds.right + dx,
+                    cell.bounds.bottom,
+                ),
+            )
+            for cell in cells
+        )
+    return replace(state, stage_code="1-1", rows=1, cells=cells, land_nodes=())
+
+
 class AlasCampaignCameraViewTests(unittest.TestCase):
+    def test_builds_single_row_camera_from_typed_centers_and_bounds(self):
+        view = build_alas_campaign_camera_view(
+            make_single_row_state(),
+            screen_center=(350.0, 140.0),
+            target_node="C1",
+        )
+        observation = view.semantic_observation
+
+        self.assertEqual(observation.camera_location, (2, 0))
+        self.assertAlmostEqual(observation.center_offset[0], 0.5)
+        self.assertAlmostEqual(observation.center_offset[1], 0.5)
+        self.assertEqual(tuple(view.swipe_base), (100.0, 60.0))
+        self.assertLess(observation.projective_maximum_residual, 1e-8)
+
     def test_builds_exact_internal_camera_view_and_target_grid(self):
         state = make_state()
         view = build_alas_campaign_camera_view(
@@ -73,6 +112,22 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
         self.assertEqual(view[(2, 2)].semantic_path, observation.target_path)
         self.assertEqual(tuple(view.swipe_base), (100.0, 80.0))
         self.assertLess(observation.projective_maximum_residual, 1e-8)
+
+    def test_grid_exposes_conservative_native_merge_fields(self):
+        view = build_alas_campaign_camera_view(
+            make_single_row_state(),
+            screen_center=(350.0, 140.0),
+        )
+        grid = view[(0, 0)]
+
+        self.assertFalse(grid.is_submarine)
+        self.assertFalse(grid.is_caught_by_siren)
+        self.assertFalse(grid.is_carrier)
+        self.assertFalse(grid.is_missile_attack)
+        self.assertFalse(grid.is_ammo)
+        self.assertEqual(grid.enemy_scale, 0)
+        self.assertIsNone(grid.enemy_genre)
+        self.assertEqual(grid.str, "--")
 
     def test_predict_swipe_uses_observed_camera_delta(self):
         before = build_alas_campaign_camera_view(
@@ -98,6 +153,38 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
         )
 
         self.assertEqual(before.predict_swipe(after), (5, 0))
+
+    def test_predict_swipe_allows_only_exact_additive_boss_transition(self):
+        before_state = make_state(generation=10)
+        before = build_alas_campaign_camera_view(
+            before_state, screen_center=(350.0, 300.0)
+        )
+        boss = CampaignMapEnemyState(
+            row=1,
+            column=5,
+            node="E1",
+            object_id=1001,
+            sprite="bossicon",
+            scale=0,
+            genre="Boss",
+            level=2,
+            fighting=False,
+        )
+        after_state = replace(
+            make_state(generation=12, dx=-100.0), enemies=(boss,)
+        )
+        after = build_alas_campaign_camera_view(
+            after_state, screen_center=(350.0, 300.0)
+        )
+
+        self.assertEqual(before.predict_swipe(after), (1, 0))
+
+        mob = replace(boss, genre="Enemy", sprite="enemyicon")
+        changed = build_alas_campaign_camera_view(
+            replace(after_state, enemies=(mob,)), screen_center=(350.0, 300.0)
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "changed map"):
+            before.predict_swipe(changed)
 
     def test_rejects_incoherent_projection_and_unqualified_edge(self):
         with self.assertRaisesRegex(SemanticGateClosed, "incoherent"):

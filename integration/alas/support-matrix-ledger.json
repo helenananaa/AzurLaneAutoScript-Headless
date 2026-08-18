@@ -8016,7 +8016,7 @@
         "EnemyPriority"
       ],
       "name": "Main",
-      "note": "普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；12-4 已由原始 ALAS 实机完成入口、舰队、完整正交寻路、普通战、Boss 战、D 级败北结算、提示关闭和回图；Boss 胜利受当前账号战力限制，全部共用地图配置分支见 3.2",
+      "note": "普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；Main 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、单舰队选择、出击、类型化地图同步、普通战、Boss 出现镜头归位、战后到达证明、Boss 胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main-1-1-live-validation-receipt.json；12-4 的既有完整正交寻路与 D 级败北闭环仍保留。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图未由本凭证提升",
       "status": "L"
     },
     {
@@ -8031,8 +8031,8 @@
         "EnemyPriority"
       ],
       "name": "Main2",
-      "note": "已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；尚无 Main2 实机任务启动与地图闭环，不能沿用 Main 的运行记录提升为 L",
-      "status": "P"
+      "note": "已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main2 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、阵型策略、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main2-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升",
+      "status": "L"
     },
     {
       "groups": [
@@ -8046,8 +8046,8 @@
         "EnemyPriority"
       ],
       "name": "Main3",
-      "note": "已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；尚无 Main3 实机任务启动与地图闭环，不能沿用 Main 的运行记录提升为 L",
-      "status": "P"
+      "note": "已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main3 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main3-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升",
+      "status": "L"
     },
     {
       "groups": [
@@ -10868,8 +10868,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "a4445e384077be2c3a079f68a7f5a5cb7b3201a4d8cdf10dce1e6dce27eeffc5",
-      "manifest_sha256": "d4166959bad064ed738a90b047f8d442256d7c20afd5f8b4f2cbb97d1c1215d7",
+      "combined_sha256": "ee51e7cd26af86584ad65c9aa8948fcd9fd6ab62e6f02cb6fd87f5d54cd253b5",
+      "manifest_sha256": "9dcaa954ebe0c3b416340ce39f64c1ab6183e1943d59013a80f7664ab65f84ac",
       "member_count": 40
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
