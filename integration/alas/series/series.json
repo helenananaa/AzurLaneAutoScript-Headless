@@ -204,6 +204,11 @@
       "order": 41,
       "path": "integration/alas/series/0340-campaign-auto-search-port.patch",
       "sha256": "af24fcc8c7dfb2f6d86382aa2ed21d94f65735a1c6449c056849df47ff9b93a3"
+    },
+    {
+      "order": 42,
+      "path": "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+      "sha256": "440ee4c47cf831b27f152e62d1b166273a18afbff8e36ef5d90ad35f0e426367"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

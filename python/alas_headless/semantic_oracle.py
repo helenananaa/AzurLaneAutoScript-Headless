@@ -766,6 +766,40 @@ class DormState:
 
 
 @dataclass(frozen=True)
+class MeowfficerDockState:
+    """Exact resource counters on the current Commander Cat dock page."""
+
+    purchased: int
+    purchase_total: int
+    coins: int
+    capacity_used: int
+    capacity_total: int
+    fort_current: int
+    fort_total: int
+    training_finished: int
+    training_total: int
+    box_counts: Tuple[int, int, int]
+
+
+@dataclass(frozen=True)
+class MeowfficerTrainingState:
+    """Exact counters and completion state in CommanderBoxesUI."""
+
+    active_training: int
+    active_capacity: int
+    waiting: int
+    waiting_capacity: int
+    completed: int
+
+
+@dataclass(frozen=True)
+class MeowfficerQueueState:
+    selected: int
+    capacity: int
+    box_counts: Tuple[int, int, int]
+
+
+@dataclass(frozen=True)
 class OperationSirenState:
     zone_name: str
     coins: int
@@ -1429,6 +1463,96 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "dorm/statistics/confirm",
         "confirm_btn",
         "BackYardStatisticsUI(Clone)/painting/confirm_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/page/back",
+        "back_btn",
+        "CommanderCatUI(Clone)/blur_panel/top/back_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/fort/enter",
+        "home",
+        "CommanderCatDockUI(Clone)/box/home",
+    ),
+    SemanticTarget(
+        "meowfficer/fort/close",
+        "close_btn",
+        "CommanderHomeUI(Clone)/bg/frame/close_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/buy/enter",
+        "reserve_btn",
+        "CommanderCatDockUI(Clone)/box/reserve_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/train/enter",
+        "boxes_btn",
+        "CommanderCatDockUI(Clone)/box/boxes_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/train/close",
+        "close_btn",
+        "CommanderBoxesUI(Clone)/frame/close_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/train/complete/first",
+        "frame",
+        "CommanderBoxesUI(Clone)/frame/boxes/mask/content/frame",
+    ),
+    SemanticTarget(
+        "meowfficer/train/finish-all",
+        "finish_btn",
+        "CommanderBoxesUI(Clone)/frame/boxes/finish_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/train/start",
+        "start_btn",
+        "CommanderBoxesUI(Clone)/frame/boxes/start_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/get/continue",
+        "click",
+        "GetCommanderUI(Clone)/click",
+    ),
+    SemanticTarget(
+        "meowfficer/get/lock-cancel",
+        "cancel_btn",
+        "GetCommanderUI(Clone)/CommanderMsgBoxUI(Clone)/frame/cancel_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/get/lock-confirm",
+        "confirm_btn",
+        "GetCommanderUI(Clone)/CommanderMsgBoxUI(Clone)/frame/confirm_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/get/result/close",
+        "GetCommanderResultUI(Clone)",
+        "CommanderBoxesUI(Clone)/GetCommanderResultUI(Clone)",
+    ),
+    SemanticTarget(
+        "meowfficer/queue/auto",
+        "auto_btn",
+        "CommanderBuildPoolUI(Clone)/frame/bg/auto_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/queue/start",
+        "start_btn",
+        "CommanderBuildPoolUI(Clone)/frame/bg/start_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/queue/close",
+        "close_btn",
+        "CommanderBuildPoolUI(Clone)/frame/bg/close_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/queue/cancel",
+        "cancel_btn",
+        "CommanderMsgBoxUI(Clone)/frame/cancel_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/queue/confirm",
+        "confirm_btn",
+        "CommanderMsgBoxUI(Clone)/frame/confirm_btn",
     ),
     SemanticTarget(
         "build/page/start",
@@ -2782,6 +2906,96 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "dorm-statistics",
         "/BackYardStatisticsUI(Clone)/",
         ("dorm/statistics/confirm",),
+    ),
+    BlockerRule(
+        "meowfficer-dock",
+        "/CommanderCatUI(Clone)/",
+        (
+            "meowfficer/page/back",
+            "meowfficer/fort/enter",
+            "meowfficer/fort/close",
+            "meowfficer/buy/enter",
+            "meowfficer/train/enter",
+            "meowfficer/train/close",
+            "meowfficer/train/complete/first",
+            "meowfficer/train/finish-all",
+            "meowfficer/train/start",
+            "meowfficer/get/continue",
+            "meowfficer/get/lock-cancel",
+            "meowfficer/get/lock-confirm",
+            "meowfficer/get/result/close",
+            "meowfficer/queue/auto",
+            "meowfficer/queue/start",
+            "meowfficer/queue/close",
+            "meowfficer/queue/cancel",
+            "meowfficer/queue/confirm",
+        ),
+    ),
+    BlockerRule(
+        "meowfficer-training",
+        "/CommanderBoxesUI(Clone)/",
+        (
+            "meowfficer/train/close",
+            "meowfficer/train/complete/first",
+            "meowfficer/train/finish-all",
+            "meowfficer/train/start",
+            "meowfficer/get/continue",
+            "meowfficer/get/lock-cancel",
+            "meowfficer/get/lock-confirm",
+            "meowfficer/get/result/close",
+            "meowfficer/queue/auto",
+            "meowfficer/queue/start",
+            "meowfficer/queue/close",
+            "meowfficer/queue/cancel",
+            "meowfficer/queue/confirm",
+        ),
+    ),
+    BlockerRule(
+        "meowfficer-fort",
+        "/CommanderHomeUI(Clone)/",
+        ("meowfficer/fort/close",),
+    ),
+    BlockerRule(
+        "meowfficer-get",
+        "/GetCommanderUI(Clone)/",
+        (
+            "meowfficer/get/continue",
+            "meowfficer/get/lock-cancel",
+            "meowfficer/get/lock-confirm",
+            "meowfficer/get/result/close",
+        ),
+    ),
+    BlockerRule(
+        "meowfficer-lock-prompt",
+        "/GetCommanderUI(Clone)/CommanderMsgBoxUI(Clone)/",
+        (
+            "meowfficer/get/lock-cancel",
+            "meowfficer/get/lock-confirm",
+        ),
+    ),
+    BlockerRule(
+        "meowfficer-get-result",
+        "/GetCommanderResultUI(Clone)/",
+        ("meowfficer/get/result/close",),
+    ),
+    BlockerRule(
+        "meowfficer-queue",
+        "/CommanderBuildPoolUI(Clone)/",
+        (
+            "meowfficer/queue/auto",
+            "meowfficer/queue/start",
+            "meowfficer/queue/close",
+            "meowfficer/queue/cancel",
+            "meowfficer/queue/confirm",
+        ),
+    ),
+    BlockerRule(
+        "meowfficer-queue-prompt",
+        "/CommanderMsgBoxUI(Clone)/",
+        (
+            "meowfficer/queue/cancel",
+            "meowfficer/queue/confirm",
+        ),
     ),
     BlockerRule(
         "dorm-page",
@@ -14837,6 +15051,451 @@ class SemanticOracle:
             path=target.path,
         )
 
+    def meowfficer_dock_state(self) -> MeowfficerDockState:
+        """Read the Commander Cat dock counters without entering a sub-page."""
+
+        button_state = self.read_state()
+        controls = {
+            semantic_id: self._matches(button_state, semantic_id)
+            for semantic_id in (
+                "meowfficer/fort/enter",
+                "meowfficer/buy/enter",
+                "meowfficer/train/enter",
+            )
+        }
+        if any(len(matches) != 1 for matches in controls.values()):
+            raise SemanticGateClosed("meowfficer dock identity is not proven")
+        for semantic_id, matches in controls.items():
+            control = matches[0]
+            if (
+                self._blocking_rules(button_state, semantic_id)
+                or not control.active_in_hierarchy
+                or not control.active_and_enabled
+                or not control.interactable
+                or control.raycast_top is not None
+                or control.point is None
+                or control.bounds is None
+                or not control.bounds.contains(control.point)
+            ):
+                raise SemanticGateClosed("meowfficer dock control is not proven")
+
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < button_state.generation
+            or ui_state.generation > button_state.generation + 2
+            or ui_state.snapshot.get("text_truncated") is not False
+        ):
+            raise SemanticGateClosed("meowfficer dock snapshots are not coherent")
+        root = "CommanderCatUI(Clone)/blur_panel/"
+        suffixes = {
+            "fort": root + "pages/CommanderCatDockUI(Clone)/box/home/Text",
+            "training": root + "pages/CommanderCatDockUI(Clone)/box/boxes_btn/Text",
+            "purchase": root + "pages/CommanderCatDockUI(Clone)/box/reserve_btn/Text",
+            "capacity": root + "pages/CommanderCatDockUI(Clone)/box/capcity/Text",
+            "coins": root + "top/res/gold/Text",
+            "box_1": root + "top/res/1/Text",
+            "box_2": root + "top/res/2/Text",
+            "box_3": root + "top/res/3/Text",
+        }
+        values: Dict[str, str] = {}
+        for key, suffix in suffixes.items():
+            matches = tuple(
+                item
+                for item in ui_state.texts
+                if item.path.endswith(suffix)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed("meowfficer counter is absent: " + key)
+            values[key] = matches[0].text.strip()
+
+        pairs: Dict[str, Tuple[int, int]] = {}
+        for key in ("fort", "training", "purchase", "capacity"):
+            match = re.fullmatch(r"([0-9]+)/([1-9][0-9]*)", values[key])
+            if match is None:
+                raise SemanticGateClosed("meowfficer counter is malformed: " + key)
+            pairs[key] = tuple(map(int, match.groups()))
+            if pairs[key][0] > pairs[key][1]:
+                raise SemanticGateClosed("meowfficer counter is inconsistent: " + key)
+        scalars: Dict[str, int] = {}
+        for key in ("coins", "box_1", "box_2", "box_3"):
+            if re.fullmatch(r"[0-9]+", values[key]) is None:
+                raise SemanticGateClosed("meowfficer resource is malformed: " + key)
+            scalars[key] = int(values[key])
+        return MeowfficerDockState(
+            purchased=pairs["purchase"][0],
+            purchase_total=pairs["purchase"][1],
+            coins=scalars["coins"],
+            capacity_used=pairs["capacity"][0],
+            capacity_total=pairs["capacity"][1],
+            fort_current=pairs["fort"][0],
+            fort_total=pairs["fort"][1],
+            training_finished=pairs["training"][0],
+            training_total=pairs["training"][1],
+            box_counts=(scalars["box_1"], scalars["box_2"], scalars["box_3"]),
+        )
+
+    def meowfficer_training_state(self) -> MeowfficerTrainingState:
+        """Read the exact training queue without image matching or OCR."""
+
+        button_state = self.read_state()
+        control_ids = (
+            "meowfficer/train/close",
+            "meowfficer/train/finish-all",
+            "meowfficer/train/start",
+        )
+        for semantic_id in control_ids:
+            matches = self._matches(button_state, semantic_id)
+            if len(matches) != 1:
+                raise SemanticGateClosed("meowfficer training identity is not proven")
+            control = matches[0]
+            if (
+                self._blocking_rules(button_state, semantic_id)
+                or not control.active_in_hierarchy
+                or not control.active_and_enabled
+                or not control.interactable
+                or control.raycast_top is not None
+                or control.point is None
+                or control.bounds is None
+                or not control.bounds.contains(control.point)
+            ):
+                raise SemanticGateClosed("meowfficer training control is not proven")
+
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < button_state.generation
+            or ui_state.generation > button_state.generation + 2
+            or ui_state.snapshot.get("text_truncated") is not False
+        ):
+            raise SemanticGateClosed("meowfficer training snapshots are not coherent")
+        root = "CommanderBoxesUI(Clone)/frame/boxes/"
+
+        def exact_text(suffix: str) -> str:
+            matches = tuple(
+                item
+                for item in ui_state.texts
+                if item.path.endswith(suffix)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed("meowfficer training counter is ambiguous")
+            return matches[0].text.strip()
+
+        active_match = re.fullmatch(
+            r"([0-9]+)/([1-9][0-9]*)",
+            exact_text(root + "statistics/traning"),
+        )
+        waiting_match = re.fullmatch(
+            r"([0-9]+)/([1-9][0-9]*)",
+            exact_text(root + "statistics/wait"),
+        )
+        if active_match is None or waiting_match is None:
+            raise SemanticGateClosed("meowfficer training counter is malformed")
+        active, active_capacity = map(int, active_match.groups())
+        waiting, waiting_capacity = map(int, waiting_match.groups())
+        if active > active_capacity or waiting > waiting_capacity:
+            raise SemanticGateClosed("meowfficer training counter is inconsistent")
+        completed = sum(
+            1
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith("/CommanderBoxesUI(Clone)/frame/boxes/mask/content/frame/ongoing/time/Text")
+            and item.text.strip() == "COMPLETE"
+        )
+        complete_buttons = self._matches(
+            button_state, "meowfficer/train/complete/first"
+        )
+        if completed > 0 and len(complete_buttons) != 1:
+            raise SemanticGateClosed("meowfficer completed training identity is inconsistent")
+        return MeowfficerTrainingState(
+            active_training=active,
+            active_capacity=active_capacity,
+            waiting=waiting,
+            waiting_capacity=waiting_capacity,
+            completed=completed,
+        )
+
+    def _meowfficer_get_continue_proven(self, button_state: ObserverState) -> bool:
+        matches = self._matches(button_state, "meowfficer/get/continue")
+        if len(matches) != 1:
+            return False
+        target = matches[0]
+        if (
+            self._blocking_rules(button_state, "meowfficer/get/continue")
+            or not target.active_in_hierarchy
+            or not target.active_and_enabled
+            or not target.interactable
+            or target.raycast_top is not None
+            or target.point is None
+            or target.bounds is None
+            or not target.bounds.contains(target.point)
+        ):
+            return False
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < button_state.generation
+            or ui_state.generation > button_state.generation + 2
+            or ui_state.snapshot.get("text_truncated") is not False
+            or ui_state.snapshot.get("image_truncated") is not False
+        ):
+            return False
+        titles = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith("GetCommanderUI(Clone)/main/bg/Image")
+            and item.text.strip() == "COMMAND MEOW"
+        )
+        rarities = tuple(
+            item
+            for item in ui_state.images
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith(
+                "GetCommanderUI(Clone)/main/info/content/rarity/value"
+            )
+            and item.sprite in ("R", "SR", "SSR")
+        )
+        return len(titles) == 1 and len(rarities) == 1
+
+    def _meowfficer_lock_prompt_proven(self, button_state: ObserverState) -> bool:
+        controls = tuple(
+            self._matches(button_state, semantic_id)
+            for semantic_id in (
+                "meowfficer/get/lock-cancel",
+                "meowfficer/get/lock-confirm",
+            )
+        )
+        if any(len(matches) != 1 for matches in controls):
+            return False
+        if any(
+            self._blocking_rules(button_state, semantic_id)
+            for semantic_id in (
+                "meowfficer/get/lock-cancel",
+                "meowfficer/get/lock-confirm",
+            )
+        ):
+            return False
+        if any(
+            not control.active_in_hierarchy
+            or not control.active_and_enabled
+            or not control.interactable
+            or control.raycast_top is not None
+            or control.point is None
+            or control.bounds is None
+            or not control.bounds.contains(control.point)
+            for matches in controls
+            for control in matches
+        ):
+            return False
+        ui_state = self.read_ui_state()
+        prompts = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith(
+                "GetCommanderUI(Clone)/CommanderMsgBoxUI(Clone)/frame/bg/content/Text"
+            )
+            and item.text.startswith("<color=#847D7B>")
+            and "<color=#92fc63>" in item.text
+        )
+        return len(prompts) == 1
+
+    def _meowfficer_get_result_proven(self, button_state: ObserverState) -> bool:
+        matches = self._matches(button_state, "meowfficer/get/result/close")
+        if len(matches) != 1:
+            return False
+        target = matches[0]
+        if (
+            self._blocking_rules(button_state, "meowfficer/get/result/close")
+            or not target.active_in_hierarchy
+            or not target.active_and_enabled
+            or not target.interactable
+            or target.raycast_top is not None
+            or target.point is None
+            or target.bounds is None
+            or not target.bounds.contains(target.point)
+        ):
+            return False
+        ui_state = self.read_ui_state()
+        result_rows = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith(
+                "GetCommanderResultUI(Clone)/frame/list1/tpl(Clone)/info/Text"
+            )
+            and bool(item.text.strip())
+        )
+        instructions = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith("GetCommanderResultUI(Clone)/frame/Text")
+            and bool(item.text.strip())
+        )
+        return len(result_rows) >= 1 and len(instructions) == 1
+
+    def meowfficer_queue_state(self) -> MeowfficerQueueState:
+        button_state = self.read_state()
+        for semantic_id in (
+            "meowfficer/queue/auto",
+            "meowfficer/queue/start",
+            "meowfficer/queue/close",
+        ):
+            matches = self._matches(button_state, semantic_id)
+            if len(matches) != 1:
+                raise SemanticGateClosed("meowfficer queue identity is not proven")
+            control = matches[0]
+            if (
+                self._blocking_rules(button_state, semantic_id)
+                or not control.active_in_hierarchy
+                or not control.active_and_enabled
+                or not control.interactable
+                or control.raycast_top is not None
+                or control.point is None
+                or control.bounds is None
+                or not control.bounds.contains(control.point)
+            ):
+                raise SemanticGateClosed("meowfficer queue control is not proven")
+        ui_state = self.read_ui_state()
+
+        def exact_text(suffix: str) -> str:
+            matches = tuple(
+                item
+                for item in ui_state.texts
+                if item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.path.endswith(suffix)
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed("meowfficer queue text is ambiguous")
+            return matches[0].text.strip()
+
+        root = "CommanderBuildPoolUI(Clone)/"
+        counter = re.fullmatch(r"([0-9]+)/([1-9][0-9]*)", exact_text(root + "statistics/Text"))
+        if counter is None:
+            raise SemanticGateClosed("meowfficer queue counter is malformed")
+        selected, capacity = map(int, counter.groups())
+        if selected > capacity:
+            raise SemanticGateClosed("meowfficer queue counter is inconsistent")
+        counts = tuple(
+            int(exact_text(root + "frame/bg/content/list/{0}/Text".format(index)))
+            for index in (1, 2, 3)
+        )
+        return MeowfficerQueueState(
+            selected=selected,
+            capacity=capacity,
+            box_counts=counts,
+        )
+
+    def _meowfficer_fort_close_proven(self, button_state: ObserverState) -> bool:
+        matches = self._matches(button_state, "meowfficer/fort/close")
+        if len(matches) != 1:
+            return False
+        target = matches[0]
+        if (
+            self._blocking_rules(button_state, "meowfficer/fort/close")
+            or not target.active_in_hierarchy
+            or not target.active_and_enabled
+            or not target.interactable
+            or target.raycast_top is not None
+            or target.point is None
+            or target.bounds is None
+            or not target.bounds.contains(target.point)
+        ):
+            return False
+        ui_state = self.read_ui_state()
+        counters = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith("CommanderHomeUI(Clone)/bg/frame/cnt/Text")
+            and re.fullmatch(r"[0-9]+/[1-9][0-9]*", item.text.strip())
+        )
+        levels = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith("CommanderHomeUI(Clone)/bg/frame/title/Text")
+            and re.fullmatch(r"LV\.[1-9][0-9]*", item.text.strip())
+        )
+        return len(counters) == 1 and len(levels) == 1
+
+    def _meowfficer_queue_prompt_proven(self, button_state: ObserverState) -> bool:
+        controls = tuple(
+            self._matches(button_state, semantic_id)
+            for semantic_id in (
+                "meowfficer/queue/cancel",
+                "meowfficer/queue/confirm",
+            )
+        )
+        if any(len(matches) != 1 for matches in controls):
+            return False
+        if any(
+            not control.active_in_hierarchy
+            or not control.active_and_enabled
+            or not control.interactable
+            or control.raycast_top is not None
+            or control.point is None
+            or control.bounds is None
+            or not control.bounds.contains(control.point)
+            for matches in controls
+            for control in matches
+        ):
+            return False
+        ui_state = self.read_ui_state()
+        queue_counts = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith("CommanderBuildPoolUI(Clone)/statistics/Text")
+            and item.text.strip() == "10/10"
+        )
+        prompts = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith("CommanderMsgBoxUI(Clone)/frame/bg/content/Text")
+            and item.text.startswith("<color=#847D7B>")
+            and "10" in item.text
+        )
+        selected_boxes = tuple(
+            item
+            for item in ui_state.images
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and "CommanderBuildPoolUI(Clone)/frame/bg/content/queue/" in item.path
+            and item.path.endswith("/icon")
+            and item.sprite in ("R1", "sr1", "ssr1")
+        )
+        return len(queue_counts) == 1 and len(prompts) == 1 and len(selected_boxes) == 10
+
     def dorm_state(self) -> DormState:
         """Read the dorm summary without opening a mutating sub-page."""
 
@@ -20948,6 +21607,42 @@ class SemanticOracle:
         state = self.read_state()
         if semantic_id == "reward/new-ship/continue":
             return self._new_ship_reward_visible_in_state(state)
+        if semantic_id == "meowfficer/get/continue":
+            return self._meowfficer_get_continue_proven(state)
+        if semantic_id in (
+            "meowfficer/get/lock-cancel",
+            "meowfficer/get/lock-confirm",
+        ):
+            return self._meowfficer_lock_prompt_proven(state)
+        if semantic_id == "meowfficer/get/result/close":
+            return self._meowfficer_get_result_proven(state)
+        if semantic_id == "meowfficer/fort/close":
+            return self._meowfficer_fort_close_proven(state)
+        if semantic_id in (
+            "meowfficer/queue/auto",
+            "meowfficer/queue/start",
+            "meowfficer/queue/close",
+        ):
+            try:
+                self.meowfficer_queue_state()
+            except SemanticGateClosed:
+                return False
+            matches = self._matches(state, semantic_id)
+            return bool(
+                len(matches) == 1
+                and matches[0].active_in_hierarchy
+                and matches[0].active_and_enabled
+                and matches[0].interactable
+                and matches[0].raycast_top is None
+                and matches[0].point is not None
+                and matches[0].bounds is not None
+                and matches[0].bounds.contains(matches[0].point)
+            )
+        if semantic_id in (
+            "meowfficer/queue/cancel",
+            "meowfficer/queue/confirm",
+        ):
+            return self._meowfficer_queue_prompt_proven(state)
         if semantic_id == "academy/munitions":
             return self.academy_munitions_available()
         if semantic_id == "shipyard/series/open":
@@ -20994,6 +21689,50 @@ class SemanticOracle:
             return self._dorm_empty_food_cancel_proven(state)
         if semantic_id in ("dorm/feed", "dorm/collect"):
             return self._dorm_page_control_proven(state, semantic_id)
+        if semantic_id in (
+            "meowfficer/page/back",
+            "meowfficer/fort/enter",
+            "meowfficer/buy/enter",
+            "meowfficer/train/enter",
+        ):
+            try:
+                self.meowfficer_dock_state()
+            except SemanticGateClosed:
+                return False
+            return bool(
+                matches
+                and matches[0].active_in_hierarchy
+                and matches[0].active_and_enabled
+                and matches[0].interactable
+                and matches[0].raycast_top is None
+                and matches[0].point is not None
+                and matches[0].bounds is not None
+                and matches[0].bounds.contains(matches[0].point)
+            )
+        if semantic_id in (
+            "meowfficer/train/close",
+            "meowfficer/train/complete/first",
+            "meowfficer/train/finish-all",
+            "meowfficer/train/start",
+        ):
+            try:
+                training = self.meowfficer_training_state()
+            except SemanticGateClosed:
+                return False
+            return bool(
+                matches
+                and (
+                    semantic_id != "meowfficer/train/complete/first"
+                    or training.completed > 0
+                )
+                and matches[0].active_in_hierarchy
+                and matches[0].active_and_enabled
+                and matches[0].interactable
+                and matches[0].raycast_top is None
+                and matches[0].point is not None
+                and matches[0].bounds is not None
+                and matches[0].bounds.contains(matches[0].point)
+            )
         if (
             semantic_id == "tactical/continue/cancel"
             and not self._tactical_continue_prompt_matches(state)
@@ -21469,6 +22208,100 @@ class SemanticOracle:
         ) and not self._minigame_ticket_prompt_matches(state):
             raise SemanticGateClosed("minigame ticket prompt identity is not proven")
         target = self._unique(state, semantic_id)
+        delegated_meowfficer_get_continue = bool(
+            semantic_id == "meowfficer/get/continue"
+            and self._meowfficer_get_continue_proven(state)
+        )
+        delegated_meowfficer_lock_prompt = bool(
+            semantic_id
+            in (
+                "meowfficer/get/lock-cancel",
+                "meowfficer/get/lock-confirm",
+            )
+            and self._meowfficer_lock_prompt_proven(state)
+        )
+        delegated_meowfficer_get_result = bool(
+            semantic_id == "meowfficer/get/result/close"
+            and self._meowfficer_get_result_proven(state)
+        )
+        delegated_meowfficer_fort_close = bool(
+            semantic_id == "meowfficer/fort/close"
+            and self._meowfficer_fort_close_proven(state)
+        )
+        delegated_meowfficer_queue_control = False
+        if semantic_id in (
+            "meowfficer/queue/auto",
+            "meowfficer/queue/start",
+            "meowfficer/queue/close",
+        ):
+            try:
+                self.meowfficer_queue_state()
+            except SemanticGateClosed:
+                pass
+            else:
+                delegated_meowfficer_queue_control = bool(
+                    target.active_in_hierarchy
+                    and target.active_and_enabled
+                    and target.interactable
+                    and target.raycast_top is None
+                    and target.point is not None
+                    and target.bounds is not None
+                    and target.bounds.contains(target.point)
+                )
+        delegated_meowfficer_queue_prompt = bool(
+            semantic_id
+            in (
+                "meowfficer/queue/cancel",
+                "meowfficer/queue/confirm",
+            )
+            and self._meowfficer_queue_prompt_proven(state)
+        )
+        delegated_meowfficer_dock_control = False
+        if semantic_id in (
+            "meowfficer/page/back",
+            "meowfficer/fort/enter",
+            "meowfficer/buy/enter",
+            "meowfficer/train/enter",
+        ):
+            try:
+                self.meowfficer_dock_state()
+            except SemanticGateClosed:
+                pass
+            else:
+                delegated_meowfficer_dock_control = bool(
+                    target.active_in_hierarchy
+                    and target.active_and_enabled
+                    and target.interactable
+                    and target.raycast_top is None
+                    and target.point is not None
+                    and target.bounds is not None
+                    and target.bounds.contains(target.point)
+                )
+        delegated_meowfficer_training_control = False
+        if semantic_id in (
+            "meowfficer/train/close",
+            "meowfficer/train/complete/first",
+            "meowfficer/train/finish-all",
+            "meowfficer/train/start",
+        ):
+            try:
+                training = self.meowfficer_training_state()
+            except SemanticGateClosed:
+                pass
+            else:
+                delegated_meowfficer_training_control = bool(
+                    (
+                        semantic_id != "meowfficer/train/complete/first"
+                        or training.completed > 0
+                    )
+                    and target.active_in_hierarchy
+                    and target.active_and_enabled
+                    and target.interactable
+                    and target.raycast_top is None
+                    and target.point is not None
+                    and target.bounds is not None
+                    and target.bounds.contains(target.point)
+                )
         delegated_operation_siren_control = bool(
             semantic_id
             in (
@@ -21655,6 +22488,14 @@ class SemanticOracle:
                 and not dorm_page_control
                 and not mail_manager_back_delegated
                 and not delegated_new_ship_reward
+                and not delegated_meowfficer_dock_control
+                and not delegated_meowfficer_training_control
+                and not delegated_meowfficer_get_continue
+                and not delegated_meowfficer_lock_prompt
+                and not delegated_meowfficer_get_result
+                and not delegated_meowfficer_fort_close
+                and not delegated_meowfficer_queue_control
+                and not delegated_meowfficer_queue_prompt
             )
             or target.point is None
             or target.bounds is None
@@ -21669,6 +22510,24 @@ class SemanticOracle:
             point = Point(
                 (target.bounds.left + target.bounds.right) / 2.0,
                 (target.bounds.top + target.bounds.bottom) / 2.0,
+            )
+        if semantic_id == "meowfficer/page/back":
+            # CommanderCatUI docks this button partly outside the left/top
+            # viewport and reports that clipped pivot as its input point.
+            # The full dock identity was proven above; tap the centre of the
+            # visible part of the exact button bounds.
+            assert target.bounds is not None
+            point = Point(
+                (
+                    max(target.bounds.left, 0.0)
+                    + min(target.bounds.right, self.fingerprint.width - 1.0)
+                )
+                / 2.0,
+                (
+                    max(target.bounds.top, 0.0)
+                    + min(target.bounds.bottom, self.fingerprint.height - 1.0)
+                )
+                / 2.0,
             )
         if dorm_page_control:
             ui_state = self.read_ui_state()

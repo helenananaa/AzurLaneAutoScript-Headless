@@ -1174,6 +1174,26 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "main/formation")
         self.assertEqual(len(gate_calls), 2)
 
+    def test_meowfficer_check_color_only_matches_the_dock_page(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.enabled_values.update(
+            {
+                "meowfficer/page/back": False,
+                "meowfficer/get/result/close": False,
+                "meowfficer/queue/close": False,
+                "meowfficer/train/close": True,
+                "meowfficer/fort/close": False,
+            }
+        )
+
+        self.assertFalse(
+            adapter.match_template_color(NamedButton("MEOWFFICER_CHECK"))
+        )
+        adapter.click(NamedButton("MEOWFFICER_CHECK"))
+
+        self.assertEqual(oracle.click_calls, ["meowfficer/train/close"])
+        self.assertEqual(len(gate_calls), 2)
+
     def test_original_login_handler_uses_exact_semantic_entry_context(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.enabled_values["login/enter"] = True

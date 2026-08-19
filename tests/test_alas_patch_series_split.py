@@ -159,6 +159,11 @@ FLOW_PATHS = {
     "0150-runtime-optimization-contract.patch": {
         "alas.py",
     },
+    "0350-meowfficer-dock-training-port.patch": {
+        "module/meowfficer/buy.py",
+        "module/meowfficer/train.py",
+        "module/ui/ui.py",
+    },
 }
 
 OVERRIDE_PATHS = {
@@ -280,7 +285,12 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
             if name in names:
                 actual = set(target_blobs(SERIES / name))
                 self.assertEqual(actual, expected_paths)
-                self.assertFalse(promoted & actual)
+                expected_overlap = (
+                    {"module/ui/ui.py"}
+                    if name == "0350-meowfficer-dock-training-port.patch"
+                    else set()
+                )
+                self.assertEqual(promoted & actual, expected_overlap)
                 promoted.update(actual)
         for name, expected_paths in OVERRIDE_PATHS.items():
             if name in names:

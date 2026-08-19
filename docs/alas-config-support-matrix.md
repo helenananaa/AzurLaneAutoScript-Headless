@@ -47,8 +47,8 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | 🟢 主路径已完成、全配置未完成（`L`） | **11 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Main、Main2、Main3、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **9 / 60** | Awaken、Coalition、CoalitionSp、EventB、Guild、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
-| 🧱 已到边界、尚未完成（`B`） | **17 / 60** | Hard、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
-| 🔴 尚未完成（`M`） | **3 / 60** | GemsFarming、Meowfficer、OpsiStronghold |
+| 🧱 已到边界、尚未完成（`B`） | **18 / 60** | Hard、Meowfficer、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
+| 🔴 尚未完成（`M`） | **2 / 60** | GemsFarming、OpsiStronghold |
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
 
@@ -408,7 +408,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | AddNewStudent 三字段及 TacticalFilter 已完成真实库存观察、选书、确认和运行后置条件；经验溢出、四槽快速学习及其他 Tactical 分支仍未闭环 |
 | 24 | Research | Scheduler, Research | L | 一个金币项目闭环；魔方/零件、延迟、重置、26 个预设和自定义规则未完整覆盖 |
 | 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取、喂食、食物过滤与活动家具 set 实买均已闭环；all 因 set 后当前活动候选消失，尚缺另一未购买活动主题的最终实买回执 |
-| 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | M | 买箱、金币溢出、训练、增强和保留天赋规则均缺适配 |
+| 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | B | 已用 typed 状态完成购买次数已满与训练 10/10 已满的原 ALAS 无资源变化实机闭环；正向购买、自动领取/排队、指挥喵宿舍、增强及天赋保留仍未闭环 |
 | 27 | Guild | Scheduler, GuildLogistics, GuildOperation | M | 后勤兑换、新任务、作战、Boss 和推荐舰队均缺适配 |
 | 28 | Reward | Scheduler, Reward | P | 五个领取开关及 RaidDaily 共享入口已离线完成；资源气泡可领取，任务领取部分可用，周常、红点、数字行、空页面和舰船奖励仍未完整闭环 |
 | 29 | Awaken | Scheduler, Awaken | O | Favourite 与 120/125 上限已在原分派入口离线回放并提前 fail-closed；资源、候选、批量选择、确认和结果观察/输入仍缺适配 |
@@ -498,8 +498,8 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 三资源 always/do_not、重名卡、队列容量与真值回退已实机；仍缺当前最终哈希下四策略全矩阵、26 预设、真实资源不足延迟、可用重置和跨轮闭环 |
 | Dorm | `Collect`; `Feed`; `FeedFilter` | L | 三字段均已达到五维完整：真实收取控件由有变无、喂食库存差、关闭分支、单值过滤器与全部合法优先级均有证据；面板仍由 BuyFurniture all 的实买缺口限制 |
 | BuyFurniture | `Enable`; `BuyOption`=`set/all`; `LastRun` | P | set 活动主题实买、家具币精确扣款、LastRun、六舰调度、主页恢复和 post-set all 无候选均已闭环；all 最终实买等待另一未购买活动主题 |
-| Meowfficer | `BuyAmount`; `FortChoreMeowfficer`; `OverflowCoins` | M | 数量 0/边界、保留后勤猫、金币阈值、箱位满和购买确认 |
-| MeowfficerTrain | `Enable`; `Mode`=`seamlessly/once_a_day`; `RetainTalentedGold`; `RetainTalentedPurple`; `MaxFeedLevel`; `EnhanceIndex` | M | 两训练模式、两保留开关组合、等级/索引边界、无材料、错误目标保护和每日去重 |
+| Meowfficer | `BuyAmount`; `FortChoreMeowfficer`; `OverflowCoins` | B | 已精确读取 15/15 购买次数、707 物资、35/40 容量、0/8 宿舍及三类箱子；原购买任务在次数已满边界零输入并调度至次日。仍缺正向购买、金币溢出消费和宿舍任务动作 |
+| MeowfficerTrain | `Enable`; `Mode`=`seamlessly/once_a_day`; `RetainTalentedGold`; `RetainTalentedPurple`; `MaxFeedLevel`; `EnhanceIndex` | B | 原任务以 once_a_day 进入训练页、确认 4/4 训练中与 6/6 等待、仅关闭页面且资源不变；领取、自动排队的 typed 控件已有一次受控侦察，尚未接入正式事务，增强和天赋保留仍仅离线 |
 | GuildLogistics | `Enable`; `ExchangeFilter`; `SelectNewMission` | M | 开关、兑换规则、新任务选择、贡献不足、无奖励和重复领取 |
 | GuildOperation | `Enable`; `JoinThreshold`; `SelectNewOperation`; `NewOperationMaxDate`; `AttackBoss`; `BossFleetRecommend` | M | 阈值/日期边界、加入/选择、Boss 与非 Boss、推荐舰队开关、次数不足和奖励 |
 | Reward | `CollectOil`; `CollectCoin`; `CollectExp`; `CollectMission`; `CollectWeeklyMission` | F | 32 种开关组合、20 个非法单字段案例及 Reward/RaidDaily 双入口 fail-closed 已离线完成；五个开关均有原始 ALAS 的开启/关闭实机闭环 |
@@ -663,8 +663,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
 | ✅ 五维完整支持 | **28 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **131 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **97 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ◐ 有实机当前值/分支证据 | **136 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **92 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
@@ -842,13 +842,13 @@ python scripts/python/verify_alas_support_matrix.py `
 | `MedalShop2.RETROFIT_T1` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MedalShop2.RETROFIT_T2` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MedalShop2.RETROFIT_T3` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Meowfficer.BuyAmount` | Meowfficer | type=input; display=default | input/default: 1 | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Meowfficer.FortChoreMeowfficer` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Meowfficer.OverflowCoins` | Meowfficer | type=input; display=default | input/default: -1 | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `MeowfficerTrain.Enable` | Meowfficer | type=checkbox; display=default | input/default: false | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Meowfficer.BuyAmount` | Meowfficer | type=input; display=default | input/default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Meowfficer.FortChoreMeowfficer` | Meowfficer | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Meowfficer.OverflowCoins` | Meowfficer | type=input; display=default | input/default: -1 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `MeowfficerTrain.Enable` | Meowfficer | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `MeowfficerTrain.EnhanceIndex` | Meowfficer | type=input; display=default | input/default: 1 | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MeowfficerTrain.MaxFeedLevel` | Meowfficer | type=input; display=default | input/default: 5 | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `MeowfficerTrain.Mode` | Meowfficer | type=select; display=default | options: "once_a_day", "seamlessly"; default: "seamlessly" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `MeowfficerTrain.Mode` | Meowfficer | type=select; display=default | options: "once_a_day", "seamlessly"; default: "seamlessly" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `MeowfficerTrain.RetainTalentedGold` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MeowfficerTrain.RetainTalentedPurple` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MeritShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Cube" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

@@ -1,0 +1,85 @@
+diff --git a/module/meowfficer/buy.py b/module/meowfficer/buy.py
+index 3b506ba1..31f3f11f 100644
+--- a/module/meowfficer/buy.py
++++ b/module/meowfficer/buy.py
+@@ -29,15 +29,23 @@ class MeowfficerBuy(MeowfficerBase):
+         Returns:
+             int: 0 to BUY_MAX, number of boxes to buy now.
+         """
+-        for _ in self.loop(timeout=2):
+-            remain, bought, total = MEOWFFICER.ocr(self.device.image)
+-            coins = MEOWFFICER_COINS.ocr(self.device.image)
+-            if total > 0:
+-                break
+-            # else: retry if MEOWFFICER has ocr error
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            state = semantic_adapter.meowfficer_dock_state()
++            bought = state.purchased
++            total = state.purchase_total
++            remain = total - bought
++            coins = state.coins
+         else:
+-            logger.warning('Failed to get meowfficer buy status')
+-            return 0
++            for _ in self.loop(timeout=2):
++                remain, bought, total = MEOWFFICER.ocr(self.device.image)
++                coins = MEOWFFICER_COINS.ocr(self.device.image)
++                if total > 0:
++                    break
++                # else: retry if MEOWFFICER has ocr error
++            else:
++                logger.warning('Failed to get meowfficer buy status')
++                return 0
+ 
+         logger.attr('Meowfficer_remain', remain)
+         logger.attr('Meowfficer_coins', coins)
+diff --git a/module/meowfficer/train.py b/module/meowfficer/train.py
+index 24a406b4..e2774302 100644
+--- a/module/meowfficer/train.py
++++ b/module/meowfficer/train.py
+@@ -159,6 +159,26 @@ class MeowfficerTrain(MeowfficerCollect, MeowfficerEnhance):
+         """
+         logger.hr('Meowfficer train', level=1)
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            dock = semantic_adapter.meowfficer_dock_state()
++            self._box_count = list(dock.box_counts)
++            self.meow_enter(
++                MEOWFFICER_TRAIN_ENTER,
++                check_button=MEOWFFICER_TRAIN_START,
++            )
++            training = semantic_adapter.meowfficer_training_state()
++            occupied = training.active_training + training.waiting
++            capacity = training.active_capacity + training.waiting_capacity
++            if training.completed == 0 and occupied >= capacity:
++                logger.info('Meowfficer training queue is full, stopped')
++                self.meow_menu_close()
++                return False
++            from alas_headless import SemanticGateClosed
++            raise SemanticGateClosed(
++                'Meowfficer semantic training requires a reviewed collect or queue boundary'
++            )
++
+         # Retrieve capacity to determine whether able to collect
+         current, remain, total = MEOWFFICER_CAPACITY.ocr(self.device.image)
+         logger.attr('Meowfficer_capacity_remain', remain)
+diff --git a/module/ui/ui.py b/module/ui/ui.py
+index afad4234..434ff2de 100644
+--- a/module/ui/ui.py
++++ b/module/ui/ui.py
+@@ -309,6 +309,13 @@ class UI(InfoHandler):
+             bool: If UI switched.
+         """
+         logger.hr("UI ensure")
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and self.ui_page_appear(
++                page=destination, offset=(30, 30), interval=0
++        ):
++            logger.info('Already at %s' % destination)
++            self.ui_current = destination
++            return False
+         self.ui_get_current_page(skip_first_screenshot=skip_first_screenshot)
+         if self.ui_current == destination:
+             logger.info("Already at %s" % destination)

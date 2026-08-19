@@ -1,0 +1,71 @@
+{
+  "schema": "alas-headless.meowfficer-train-full-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "e4c2619b5cd8cf88c51e7f0ee03734871ceceeb0cfe8ba861a35bee98008521d",
+  "configured": {
+    "Meowfficer.BuyAmount": 0,
+    "Meowfficer.FortChoreMeowfficer": false,
+    "Meowfficer.OverflowCoins": -1,
+    "MeowfficerTrain.Enable": true,
+    "MeowfficerTrain.Mode": "once_a_day"
+  },
+  "source_sha256": {
+    "train": "9786b37d5fe65c9ede58525d36037ef118aa8ec1f3389b041d28b25306c2adc5",
+    "task": "fb3cc011a9d33847178467ce349b8cd67c4daf9818c801c500872553be55f980",
+    "adapter": "0fa28860f72ec14bfe4e09ac654f0afa8c0966d42b2d1754f3b43faa46f1c440",
+    "oracle": "257daaff82b3671398fcbb1b1e49dd3f3c72c30f571fae2f815547e8737a73c1"
+  },
+  "passed": true,
+  "temporary_config": "codex_meowfficer_train_full_live_de3bd32921ed41c59f9e9a1fd9509166.json",
+  "elapsed_seconds": 5.203,
+  "before": {
+    "purchased": 15,
+    "purchase_total": 15,
+    "coins": 707,
+    "capacity_used": 35,
+    "capacity_total": 40,
+    "fort_current": 0,
+    "fort_total": 8,
+    "training_finished": 0,
+    "training_total": 10,
+    "box_counts": [
+      2205,
+      1531,
+      469
+    ]
+  },
+  "after": {
+    "purchased": 15,
+    "purchase_total": 15,
+    "coins": 707,
+    "capacity_used": 35,
+    "capacity_total": 40,
+    "fort_current": 0,
+    "fort_total": 8,
+    "training_finished": 0,
+    "training_total": 10,
+    "box_counts": [
+      2205,
+      1531,
+      469
+    ]
+  },
+  "navigation_taps": [
+    [
+      1185,
+      622
+    ],
+    [
+      1019,
+      164
+    ]
+  ],
+  "android_mutation_dispatched": false,
+  "mutation_dispatches": [],
+  "before_next_run": "2020-01-01T00:00:00",
+  "after_next_run": "2026-08-19 15:33:25",
+  "temporary_config_removed": true
+}

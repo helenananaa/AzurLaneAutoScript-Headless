@@ -4027,6 +4027,160 @@ class SemanticOracleTests(unittest.TestCase):
             ),
         )
 
+    def test_meowfficer_dock_state_uses_exact_typed_counters(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        dock = root + "pages/CommanderCatDockUI(Clone)/box/"
+        backend = FakeBackend(
+            [
+                make_button("back_btn", root + "top/back_btn", raycast_top=None),
+                make_button("home", dock + "home", 870, 622, raycast_top=None),
+                make_button(
+                    "reserve_btn", dock + "reserve_btn", 1032, 622, raycast_top=None
+                ),
+                make_button(
+                    "boxes_btn", dock + "boxes_btn", 1185, 622, raycast_top=None
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/8", dock + "home/Text"),
+                make_text("1/10", dock + "boxes_btn/Text"),
+                make_text("15/15", dock + "reserve_btn/Text"),
+                make_text("34/40", dock + "capcity/Text"),
+                make_text("707", root + "top/res/gold/Text"),
+                make_text("2205", root + "top/res/1/Text"),
+                make_text("1531", root + "top/res/2/Text"),
+                make_text("479", root + "top/res/3/Text"),
+            ]
+        )
+
+        state = make_oracle(backend).meowfficer_dock_state()
+
+        self.assertEqual(state.purchased, 15)
+        self.assertEqual(state.purchase_total, 15)
+        self.assertEqual(state.coins, 707)
+        self.assertEqual(state.capacity_used, 34)
+        self.assertEqual(state.capacity_total, 40)
+        self.assertEqual(state.fort_current, 0)
+        self.assertEqual(state.training_finished, 1)
+        self.assertEqual(state.box_counts, (2205, 1531, 479))
+
+    def test_meowfficer_back_uses_visible_part_of_clipped_button(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        dock = root + "pages/CommanderCatDockUI(Clone)/box/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_btn",
+                    root + "top/back_btn",
+                    -14,
+                    0,
+                    bounds={"left": -14, "top": 0, "right": 90, "bottom": 78},
+                    raycast_top=None,
+                ),
+                make_button("home", dock + "home", 870, 622, raycast_top=None),
+                make_button(
+                    "reserve_btn", dock + "reserve_btn", 1032, 622, raycast_top=None
+                ),
+                make_button(
+                    "boxes_btn", dock + "boxes_btn", 1185, 622, raycast_top=None
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/8", dock + "home/Text"),
+                make_text("1/10", dock + "boxes_btn/Text"),
+                make_text("15/15", dock + "reserve_btn/Text"),
+                make_text("34/40", dock + "capcity/Text"),
+                make_text("707", root + "top/res/gold/Text"),
+                make_text("2205", root + "top/res/1/Text"),
+                make_text("1531", root + "top/res/2/Text"),
+                make_text("479", root + "top/res/3/Text"),
+            ]
+        )
+
+        receipt = make_oracle(backend).click("meowfficer/page/back")
+
+        self.assertEqual(receipt.point, Point(45.0, 39.0))
+        self.assertEqual(backend.taps, [(45, 39)])
+
+    def test_meowfficer_dock_rejects_malformed_purchase_counter(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        dock = root + "pages/CommanderCatDockUI(Clone)/box/"
+        backend = FakeBackend(
+            [
+                make_button("home", dock + "home", 870, 622, raycast_top=None),
+                make_button(
+                    "reserve_btn", dock + "reserve_btn", 1032, 622, raycast_top=None
+                ),
+                make_button(
+                    "boxes_btn", dock + "boxes_btn", 1185, 622, raycast_top=None
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/8", dock + "home/Text"),
+                make_text("1/10", dock + "boxes_btn/Text"),
+                make_text("已满", dock + "reserve_btn/Text"),
+                make_text("34/40", dock + "capcity/Text"),
+                make_text("707", root + "top/res/gold/Text"),
+                make_text("2205", root + "top/res/1/Text"),
+                make_text("1531", root + "top/res/2/Text"),
+                make_text("479", root + "top/res/3/Text"),
+            ]
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "purchase"):
+            make_oracle(backend).meowfficer_dock_state()
+
+    def test_meowfficer_training_state_uses_exact_typed_counters(self):
+        root = "root/OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/frame/"
+        boxes = root + "boxes/"
+        backend = FakeBackend(
+            [
+                make_button("close_btn", root + "close_btn", raycast_top=None),
+                make_button("finish_btn", boxes + "finish_btn", raycast_top=None),
+                make_button("start_btn", boxes + "start_btn", raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("4/4", boxes + "statistics/traning"),
+                make_text("6/6", boxes + "statistics/wait"),
+            ]
+        )
+
+        state = make_oracle(backend).meowfficer_training_state()
+
+        self.assertEqual(state.active_training, 4)
+        self.assertEqual(state.active_capacity, 4)
+        self.assertEqual(state.waiting, 6)
+        self.assertEqual(state.waiting_capacity, 6)
+        self.assertEqual(state.completed, 0)
+
+    def test_meowfficer_training_state_rejects_over_capacity_counter(self):
+        root = "root/OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/frame/"
+        boxes = root + "boxes/"
+        backend = FakeBackend(
+            [
+                make_button("close_btn", root + "close_btn", raycast_top=None),
+                make_button("finish_btn", boxes + "finish_btn", raycast_top=None),
+                make_button("start_btn", boxes + "start_btn", raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("5/4", boxes + "statistics/traning"),
+                make_text("6/6", boxes + "statistics/wait"),
+            ]
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "inconsistent"):
+            make_oracle(backend).meowfficer_training_state()
+
     def test_dorm_state_accepts_delegated_manage_raycast_with_exact_summary(self):
         page = "root/UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/"
         backend = FakeBackend(

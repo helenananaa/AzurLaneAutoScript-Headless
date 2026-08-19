@@ -123,6 +123,9 @@ from .semantic_oracle import (
     DormFurnitureShopBalance,
     DormState,
     DormFeedState,
+    MeowfficerDockState,
+    MeowfficerQueueState,
+    MeowfficerTrainingState,
     EnhancementExecutionReceipt,
     EnhancementNoMaterialReceipt,
     GeneralShopItemState,
@@ -277,6 +280,20 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "OS_GAME_TIPS": "os/help/close",
     "DORM_INFO": "dorm/statistics/confirm",
     "DORM_FEED_CANCEL": "dorm/empty-food/cancel",
+    "MEOWFFICER_CHECK": "meowfficer/page/back",
+    "MEOWFFICER_GOTO_DORMMENU": "meowfficer/page/back",
+    "MEOWFFICER_BUY_ENTER": "meowfficer/buy/enter",
+    "MEOWFFICER_FORT_ENTER": "meowfficer/fort/enter",
+    "MEOWFFICER_TRAIN_ENTER": "meowfficer/train/enter",
+    "MEOWFFICER_TRAIN_FILL_QUEUE": "meowfficer/queue/auto",
+    "MEOWFFICER_TRAIN_COMPLETE": "meowfficer/train/complete/first",
+    "MEOWFFICER_TRAIN_FINISH_ALL": "meowfficer/train/finish-all",
+    "MEOWFFICER_TRAIN_EVALUATE": "meowfficer/get/result/close",
+    "MEOWFFICER_GET_CHECK": "meowfficer/get/continue",
+    "MEOWFFICER_TRAIN_START": "meowfficer/train/start",
+    "MEOWFFICER_FORT_CHECK": "meowfficer/fort/close",
+    "MEOWFFICER_CONFIRM": "meowfficer/queue/confirm",
+    "MEOWFFICER_CANCEL": "meowfficer/queue/cancel",
     "CAMPAIGN_MENU_GOTO_CAMPAIGN": "campaign-menu/normal",
     "CAMPAIGN_MENU_GOTO_EXERCISE": "campaign-menu/exercise",
     "CAMPAIGN_MENU_GOTO_WAR_ARCHIVES": "campaign-menu/archive",
@@ -1469,6 +1486,37 @@ class AlasSemanticAdapter:
             raise AlasSemanticUnmapped(
                 "ALAS resource is not semantically mapped: {0}".format(name)
             ) from exc
+
+    def _meowfficer_contextual_target(self, name: str) -> Optional[str]:
+        candidates = {
+            "MEOWFFICER_CHECK": (
+                "meowfficer/get/result/close",
+                "meowfficer/queue/close",
+                "meowfficer/train/close",
+                "meowfficer/fort/close",
+                "meowfficer/page/back",
+            ),
+            "MEOWFFICER_TRAIN_START": (
+                "meowfficer/queue/start",
+                "meowfficer/train/start",
+            ),
+            "MEOWFFICER_CONFIRM": (
+                "meowfficer/queue/confirm",
+                "meowfficer/get/lock-confirm",
+            ),
+            "MEOWFFICER_CANCEL": (
+                "meowfficer/queue/cancel",
+                "meowfficer/get/lock-cancel",
+            ),
+        }.get(name, ())
+        enabled = tuple(
+            semantic_id
+            for semantic_id in candidates
+            if self.oracle.enabled(semantic_id)
+        )
+        if len(enabled) > 1:
+            raise SemanticGateClosed("meowfficer contextual target is ambiguous")
+        return enabled[0] if enabled else None
 
     def supports(self, button: Any) -> bool:
         try:
@@ -3176,7 +3224,9 @@ class AlasSemanticAdapter:
                 ):
                     return False
                 raise
-        semantic_id = self._mappings.get(name)
+        semantic_id = self._meowfficer_contextual_target(name)
+        if semantic_id is None:
+            semantic_id = self._mappings.get(name)
         if (
             self._commission_context is not None
             and self._commission_context.flow_kind == "tactical"
@@ -5130,6 +5180,18 @@ class AlasSemanticAdapter:
     def dorm_state(self) -> DormState:
         self._package_gate()
         return self.oracle.dorm_state()
+
+    def meowfficer_dock_state(self) -> MeowfficerDockState:
+        self._package_gate()
+        return self.oracle.meowfficer_dock_state()
+
+    def meowfficer_training_state(self) -> MeowfficerTrainingState:
+        self._package_gate()
+        return self.oracle.meowfficer_training_state()
+
+    def meowfficer_queue_state(self) -> MeowfficerQueueState:
+        self._package_gate()
+        return self.oracle.meowfficer_queue_state()
 
     def dorm_furniture_purchase_state(self) -> DormFurniturePurchaseState:
         self._package_gate()
@@ -7387,7 +7449,9 @@ class AlasSemanticAdapter:
                         name
                     )
                 ) from exc
-        semantic_id = self._mappings.get(name)
+        semantic_id = self._meowfficer_contextual_target(name)
+        if semantic_id is None:
+            semantic_id = self._mappings.get(name)
         if (
             self._campaign_context is not None
             and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
@@ -8947,6 +9011,9 @@ class AlasSemanticAdapter:
         )
 
     def match_template_color(self, button: Any) -> bool:
+        if self._button_name(button) == "MEOWFFICER_CHECK":
+            self._package_gate()
+            return self.oracle.enabled("meowfficer/page/back")
         return self.appear(button)
 
     def image_color_count(
@@ -10307,6 +10374,15 @@ class AlasSemanticSession:
 
     def dorm_state(self) -> DormState:
         return self.open().dorm_state()
+
+    def meowfficer_dock_state(self) -> MeowfficerDockState:
+        return self.open().meowfficer_dock_state()
+
+    def meowfficer_training_state(self) -> MeowfficerTrainingState:
+        return self.open().meowfficer_training_state()
+
+    def meowfficer_queue_state(self) -> MeowfficerQueueState:
+        return self.open().meowfficer_queue_state()
 
     def dorm_furniture_purchase_state(self) -> DormFurniturePurchaseState:
         return self.open().dorm_furniture_purchase_state()

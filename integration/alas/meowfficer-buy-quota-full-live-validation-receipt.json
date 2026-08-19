@@ -1,0 +1,60 @@
+{
+  "schema": "alas-headless.meowfficer-buy-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "e4c2619b5cd8cf88c51e7f0ee03734871ceceeb0cfe8ba861a35bee98008521d",
+  "configured": {
+    "Meowfficer.BuyAmount": 1,
+    "Meowfficer.FortChoreMeowfficer": false,
+    "Meowfficer.OverflowCoins": -1,
+    "MeowfficerTrain.Enable": false
+  },
+  "source_sha256": {
+    "buy": "31f985f551676a4973a4f91a8b73107c1f8398b3b973a12d670713376286838d",
+    "task": "fb3cc011a9d33847178467ce349b8cd67c4daf9818c801c500872553be55f980",
+    "adapter": "0fa28860f72ec14bfe4e09ac654f0afa8c0966d42b2d1754f3b43faa46f1c440",
+    "oracle": "257daaff82b3671398fcbb1b1e49dd3f3c72c30f571fae2f815547e8737a73c1"
+  },
+  "passed": true,
+  "temporary_config": "codex_meowfficer_buy_live_b5544feae9954fe2b6605d95ac22ab78.json",
+  "elapsed_seconds": 1.688,
+  "before": {
+    "purchased": 15,
+    "purchase_total": 15,
+    "coins": 707,
+    "capacity_used": 35,
+    "capacity_total": 40,
+    "fort_current": 0,
+    "fort_total": 8,
+    "training_finished": 0,
+    "training_total": 10,
+    "box_counts": [
+      2205,
+      1531,
+      469
+    ]
+  },
+  "after": {
+    "purchased": 15,
+    "purchase_total": 15,
+    "coins": 707,
+    "capacity_used": 35,
+    "capacity_total": 40,
+    "fort_current": 0,
+    "fort_total": 8,
+    "training_finished": 0,
+    "training_total": 10,
+    "box_counts": [
+      2205,
+      1531,
+      469
+    ]
+  },
+  "android_input_injected": false,
+  "mutation_dispatches": [],
+  "before_next_run": "2020-01-01T00:00:00",
+  "after_next_run": "2026-08-20 00:00:00",
+  "temporary_config_removed": true
+}

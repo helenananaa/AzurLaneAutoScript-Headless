@@ -4708,23 +4708,27 @@
       "dimensions": {
         "action": "missing",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-buy-quota-full-live-validation-receipt.json",
+        "scripts/python/run_alas_meowfficer_buy_live_validation.py",
+        "tests/test_semantic_oracle.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=input; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "Meowfficer.BuyAmount",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机当前值",
       "support": "supported",
       "values": "input/default: 1"
     },
@@ -4732,23 +4736,25 @@
       "dimensions": {
         "action": "missing",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "tests/test_semantic_oracle.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "Meowfficer.FortChoreMeowfficer",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机当前值",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -4756,47 +4762,56 @@
       "dimensions": {
         "action": "missing",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-buy-quota-full-live-validation-receipt.json",
+        "scripts/python/run_alas_meowfficer_buy_live_validation.py",
+        "tests/test_semantic_oracle.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=input; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "Meowfficer.OverflowCoins",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机当前值",
       "support": "supported",
       "values": "input/default: -1"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-train-full-live-validation-receipt.json",
+        "scripts/python/run_alas_meowfficer_train_full_live_validation.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.Enable",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机当前值",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -4850,25 +4865,30 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-train-full-live-validation-receipt.json",
+        "scripts/python/run_alas_meowfficer_train_full_live_validation.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=select; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.Mode",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机当前值",
       "support": "supported",
       "values": "options: \"once_a_day\", \"seamlessly\"; default: \"seamlessly\""
     },
@@ -8115,8 +8135,8 @@
         "MeowfficerTrain"
       ],
       "name": "Meowfficer",
-      "note": "买箱、金币溢出、训练、增强和保留天赋规则均缺适配",
-      "status": "M"
+      "note": "已用 typed 状态完成购买次数已满无操作、训练 10/10 已满无资源变化的原 ALAS 实机闭环；训练领取与排队控件已完成一次受控实机侦察。正向购买、自动领取/排队、指挥喵宿舍、增强与紫/金天赋保留全分支仍未闭环",
+      "status": "B"
     },
     {
       "groups": [
@@ -11014,9 +11034,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "71a68e801b5e3d4b41b191588f85081443b4820d9154b36560bac16f963d4428",
-      "manifest_sha256": "d551856daf701c7fb16c67f797e5af8d9f4cb597b661f88c39690b565d142d53",
-      "member_count": 41
+      "combined_sha256": "98a1b1f14e7ee32ec790111405e73160ca425ef38d369e63f8ce415f284d7fae",
+      "manifest_sha256": "d5011a69c2fb18ee56a6aba04d9b558567c24dce284841e3fbd791550b081048",
+      "member_count": 42
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }
