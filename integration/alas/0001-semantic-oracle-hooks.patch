@@ -2716,7 +2716,7 @@ index fbc5fd3c..1e81a107 100644
  
          if emotion_reduce:
              self.emotion.wait(fleet_index=fleet_index)
-@@ -241,6 +259,28 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+@@ -241,6 +259,23 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
  
          for _ in self.loop():
  
@@ -2724,12 +2724,7 @@ index fbc5fd3c..1e81a107 100644
 +            if semantic_adapter is not None:
 +                oracle = semantic_adapter.open().oracle
 +                if oracle.daily_precombat_visible():
-+                    try:
-+                        semantic_adapter.refresh_frame()
-+                        semantic_adapter.open().oracle.click_daily_precombat_start()
-+                    except Exception as exc:
-+                        if exc.__class__.__name__ not in ('SemanticGateClosed', 'StaleFrameError'):
-+                            raise
++                    semantic_adapter.click_daily_precombat_start()
 +                    semantic_daily_start_at = time.time()
 +                    continue
 +                if oracle.daily_combat_visible():
@@ -2745,6 +2740,24 @@ index fbc5fd3c..1e81a107 100644
              if self.appear(BATTLE_PREPARATION, offset=(20, 20)):
                  if self.handle_combat_automation_set(auto=auto == 'combat_auto'):
                      continue
+@@ -415,9 +455,16 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         if self.appear(BATTLE_STATUS_S, interval=self.battle_status_click_interval):
+             if drop:
+                 drop.handle_add(self)
+             else:
+                 self.device.sleep((0.25, 0.5))
+-            self.device.click(BATTLE_STATUS_S)
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if (
++                semantic_adapter is not None
++                and semantic_adapter.open().oracle.daily_battle_result_visible()
++            ):
++                semantic_adapter.complete_daily_battle_result()
++            else:
++                self.device.click(BATTLE_STATUS_S)
+             return True
+         if self.appear(BATTLE_STATUS_A, interval=self.battle_status_click_interval):
+             logger.warning('Battle status A')
 @@ -559,15 +599,60 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
          self.device.click_record_clear()
          battle_status = False
@@ -2759,10 +2772,10 @@ index fbc5fd3c..1e81a107 100644
 +            ):
 +                oracle = semantic_adapter.open().oracle
 +                if oracle.daily_battle_result_visible():
-+                    oracle.click_daily_battle_result()
++                    semantic_adapter.complete_daily_battle_result()
 +                    battle_status = True
 +                    semantic_daily_result = True
-+                    continue
++                    break
 +                if semantic_daily_result and oracle.daily_page_visible():
 +                    break
 +                if semantic_daily_result:
@@ -5079,7 +5092,7 @@ index f9b86c33..a9434987 100644
 @@ -1,5 +1,7 @@
  import numpy as np
  
-+from alas_headless import validate_alas_daily_config
++from alas_headless import SemanticGateClosed, validate_alas_daily_config
 +
  import module.config.server as server
  from module.base.utils import get_color
@@ -5115,7 +5128,84 @@ index f9b86c33..a9434987 100644
          color = get_color(image=self.device.image, area=DAILY_ACTIVE.area)
          color = np.array(color).astype(float)
          color = (np.max(color) + np.min(color)) / 2
-@@ -265,7 +290,26 @@ class Daily(Combat):
+@@ -49,6 +74,37 @@ class Daily(Combat):
+             int: Stage index, 0 to 3
+             int: Fleet index, 1 to 6
+         """
++        semantic_adapter = getattr(getattr(self, 'device', None), 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            kind = semantic_adapter.daily_current_kind()
++            self.daily_semantic_kind = kind
++            mapping = {
++                'escort_mission': (
++                    self.config.Daily_EscortMission,
++                    self.config.Daily_EscortMissionFleet,
++                ),
++                'advance_mission': (
++                    self.config.Daily_AdvanceMission,
++                    self.config.Daily_AdvanceMissionFleet,
++                ),
++                'fierce_assault': (
++                    self.config.Daily_FierceAssault,
++                    self.config.Daily_FierceAssaultFleet,
++                ),
++                'tactical_training': (
++                    self.config.Daily_TacticalTraining,
++                    self.config.Daily_TacticalTrainingFleet,
++                ),
++                'supply_line_disruption': (
++                    self.config.Daily_SupplyLineDisruption, 0,
++                ),
++                'module_development': (
++                    self.config.Daily_ModuleDevelopment,
++                    self.config.Daily_ModuleDevelopmentFleet,
++                ),
++            }
++            stage, fleet = mapping[kind]
++            return {'skip': 0, 'first': 1, 'second': 2, 'third': 3}[stage], int(fleet)
+         if self.emergency_module_development:
+             # Meaning of daily_current
+             # 1 Emergency Module Development 限时兵装训练
+@@ -192,17 +247,35 @@ class Daily(Combat):
+ 
+         button = DAILY_MISSION_LIST[stage - 1]
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         for n in range(remain):
+             logger.hr(f'Count {n + 1}')
+             result = self.daily_enter(button)
+             if not result:
+                 break
+-            if self.daily_current == self.supply_line_disruption_index:
++            is_supply_line = (
++                self.daily_semantic_kind == 'supply_line_disruption'
++                if semantic_adapter is not None
++                else self.daily_current == self.supply_line_disruption_index
++            )
++            if is_supply_line:
+                 logger.info('Submarine daily skip not unlocked, skip')
+                 self.ui_click(click_button=BACK_ARROW, check_button=daily_enter_check, skip_first_screenshot=True)
+                 break
+             # Execute classic daily run
+-            self.ui_ensure_index(fleet, letter=OCR_DAILY_FLEET_INDEX, prev_button=DAILY_FLEET_PREV,
+-                                 next_button=DAILY_FLEET_NEXT, fast=False, skip_first_screenshot=True)
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None:
++                for _ in range(6):
++                    current = semantic_adapter.daily_fleet_index()
++                    if current == fleet:
++                        break
++                    direction = 'next' if current < fleet else 'prev'
++                    semantic_adapter.click_daily_fleet(direction)
++                    self.device.sleep((0.5, 0.7))
++                else:
++                    raise SemanticGateClosed('daily fleet selection did not converge')
++            else:
++                self.ui_ensure_index(fleet, letter=OCR_DAILY_FLEET_INDEX, prev_button=DAILY_FLEET_PREV,
++                                     next_button=DAILY_FLEET_NEXT, fast=False, skip_first_screenshot=True)
+             self.combat(emotion_reduce=False, save_get_items=False, expected_end=daily_end, balance_hp=False)
+ 
+         self.ui_click(click_button=BACK_ARROW, check_button=DAILY_CHECK, additional=self.handle_daily_additional,
+@@ -265,7 +332,26 @@ class Daily(Combat):
  
      def daily_run_one(self):
          logger.hr('Daily run one', level=1)
@@ -5132,17 +5222,48 @@ index f9b86c33..a9434987 100644
 +        ):
 +            semantic_adapter.click_daily_precombat_back()
 +            self.device.sleep((1, 1.2))
-         self.ui_ensure(page_daily)
 +        if (
 +            semantic_adapter is not None
 +            and semantic_adapter.daily_detail_visible()
 +        ):
 +            semantic_adapter.click_daily_back()
 +            self.device.sleep((1, 1.2))
+         self.ui_ensure(page_daily)
          self.device.sleep(0.2)
          self.device.screenshot()
          self.daily_current = 1
-@@ -304,7 +348,12 @@ class Daily(Combat):
+@@ -284,8 +348,19 @@ class Daily(Combat):
+                 self.daily_check()
+                 self.next()
+                 continue
+-            stage, fleet = self.get_daily_stage_and_fleet()
+-            if self.daily_current == self.supply_line_disruption_index and not self.config.Daily_UseDailySkip:
++            try:
++                stage, fleet = self.get_daily_stage_and_fleet()
++            except SemanticGateClosed:
++                logger.info('Centered daily card has no reviewed identity, skip')
++                self.daily_check()
++                self.next()
++                continue
++            is_supply_line = (
++                self.daily_semantic_kind == 'supply_line_disruption'
++                if semantic_adapter is not None
++                else self.daily_current == self.supply_line_disruption_index
++            )
++            if is_supply_line and not self.config.Daily_UseDailySkip:
+                 logger.info('Skip supply line disruption if UseDailySkip disabled')
+                 self.daily_check()
+                 self.next()
+@@ -295,7 +370,7 @@ class Daily(Combat):
+                 self.daily_check()
+                 self.next()
+                 continue
+-            if self.daily_current != self.supply_line_disruption_index and not fleet:
++            if not is_supply_line and not fleet:
+                 logger.info(f'No fleet set on daily_current: {self.daily_current}, skip')
+                 self.daily_check()
+                 self.next()
+@@ -304,7 +379,12 @@ class Daily(Combat):
                  self.daily_check()
                  self.next()
                  continue

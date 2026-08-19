@@ -37,6 +37,7 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_CAMPAIGN_VIEWPORT_SWIPE_BUDGET",
         "ALAS_SEMANTIC_COMMISSION_REWARD_BUDGET",
         "ALAS_SEMANTIC_COMMISSION_START_BUDGET",
+        "ALAS_SEMANTIC_DAILY_EXECUTE_BUDGET",
         "ALAS_SEMANTIC_DORM_COLLECT_BUDGET",
         "ALAS_SEMANTIC_DORM_FEED_BUDGET",
         "ALAS_SEMANTIC_DRIVER_REVISION",
@@ -94,6 +95,10 @@ LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
         "ALAS_SEMANTIC_COMMISSION_START_BUDGET": (
             "commission.start",
             "commission start",
+        ),
+        "ALAS_SEMANTIC_DAILY_EXECUTE_BUDGET": (
+            "daily.execute",
+            "daily execute",
         ),
         "ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET": (
             "research.reward",
@@ -200,6 +205,7 @@ class LegacyEnvironmentTranslation:
                 "tactical_assign_budget": self.grant("tactical.assign"),
                 "commission_reward_budget": self.grant("commission.reward"),
                 "commission_start_budget": self.grant("commission.start"),
+                "daily_execute_budget": self.grant("daily.execute"),
                 "research_reward_budget": self.grant("research.reward"),
                 "research_start_budget": self.grant("research.start"),
                 "dorm_collect_budget": self.grant("dorm.collect"),

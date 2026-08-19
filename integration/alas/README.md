@@ -560,6 +560,21 @@ full Gacha attempt submitted one exact Light order but returned
 false after exposing the now-fixed warning/order phase alias; its corrected
 full replay remains gated by the resulting natural nonempty queue.
 
+Daily execution is separately bounded by
+`ALAS_SEMANTIC_DAILY_EXECUTE_BUDGET`. The adapter identifies the centered
+challenge by its reviewed title sprite, selects an exact stage row and fleet
+label, and spends one grant only at the pre-combat start button. The live
+validation runner configures Tactical Training second/fleet 2 and Fierce
+Assault first/fleet 1 with `UseDailySkip=false`, leaves combat to the game's official auto mode, and
+requires both typed result stacks to return to the Daily page. Its receipt is
+`daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json`.
+The acceptance runner caps the observer-reported repeat count to one per type;
+production does not apply this cap, and separate live recovery runs exercised
+all three Tactical Training repeats through the same loop.
+The expanded-stage observer distinguishes normal, one-time quick, and
+bulk-quick actions. The original `UseDailySkip=true` branch maps to a bounded
+bulk-quick mutation, but that state-changing branch remains live-unqualified.
+
 To stage this against a compatible ALAS checkout:
 
 ```powershell

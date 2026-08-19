@@ -1381,7 +1381,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   input. Both fields move only to `offline=complete`; the existing 11-4 live
   boundary is not evidence that all 64 stages or both fleets work live.
 
-### Daily fourteen-field configuration: offline contract passed
+### Daily: two challenge types now run through official auto combat
 
 - The shared Daily group now validates all seven stage selectors, six fleet
   selectors, and `UseDailySkip` before the original `daily_run()` state
@@ -1396,9 +1396,24 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   values fail before `daily_run`; valid replay never invokes the real
   `daily_execute()`, enters combat, consumes an attempt, or injects Android
   input. Mutation budget remains `0`.
-- All fourteen fields move only to `offline=complete`. Existing observation,
-  action, and live statuses remain unchanged; only Tactical Training stage two
-  with its current fleet has prior live closure.
+- The semantic path now identifies the centered challenge from its exact title
+  sprite instead of assuming ALAS's static weekday position, selects a typed
+  stage row and an exact fleet index from 1 through 6, and authorizes only the
+  final pre-combat start through `daily.execute`. Repeated start polling is
+  idempotent and cannot consume a second grant for the same preparation page.
+- On the API 32 x86_64 AVD, the original ALAS Daily state machine selected
+  Tactical Training `second` with fleet 2 and Fierce Assault `first` with fleet
+  1, delegated each battle to the game's official auto-combat, drained the
+  grade/statistics/reward stack, and returned to the Daily page. The checked-in
+  receipt binds each sortie to challenge, stage, fleet, observer generation,
+  exact start path, bounds, policy hash, and the exact `6 -> 4` budget balance.
+- The current expanded-stage surface exposes exact normal, one-time quick, and
+  bulk-quick buttons. Normal mode is live-qualified; `UseDailySkip=true` has a
+  typed, budgeted bulk-quick action but was deliberately not consumed during
+  this acceptance run. The other weekday challenge types, remaining
+  stages, fleets 3-6, Supply Line's special fleet-zero route, and limited-time
+  Emergency Module Development remain offline-only. Daily therefore stays `L`
+  rather than being promoted to full support.
 
 ### EventA-D daily stage rotation: offline contract passed
 

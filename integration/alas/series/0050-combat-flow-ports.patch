@@ -312,7 +312,7 @@ index fbc5fd3c..1e81a107 100644
  
          if emotion_reduce:
              self.emotion.wait(fleet_index=fleet_index)
-@@ -241,6 +259,28 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+@@ -241,6 +259,23 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
  
          for _ in self.loop():
  
@@ -320,12 +320,7 @@ index fbc5fd3c..1e81a107 100644
 +            if semantic_adapter is not None:
 +                oracle = semantic_adapter.open().oracle
 +                if oracle.daily_precombat_visible():
-+                    try:
-+                        semantic_adapter.refresh_frame()
-+                        semantic_adapter.open().oracle.click_daily_precombat_start()
-+                    except Exception as exc:
-+                        if exc.__class__.__name__ not in ('SemanticGateClosed', 'StaleFrameError'):
-+                            raise
++                    semantic_adapter.click_daily_precombat_start()
 +                    semantic_daily_start_at = time.time()
 +                    continue
 +                if oracle.daily_combat_visible():
@@ -341,6 +336,24 @@ index fbc5fd3c..1e81a107 100644
              if self.appear(BATTLE_PREPARATION, offset=(20, 20)):
                  if self.handle_combat_automation_set(auto=auto == 'combat_auto'):
                      continue
+@@ -415,9 +455,16 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         if self.appear(BATTLE_STATUS_S, interval=self.battle_status_click_interval):
+             if drop:
+                 drop.handle_add(self)
+             else:
+                 self.device.sleep((0.25, 0.5))
+-            self.device.click(BATTLE_STATUS_S)
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if (
++                semantic_adapter is not None
++                and semantic_adapter.open().oracle.daily_battle_result_visible()
++            ):
++                semantic_adapter.complete_daily_battle_result()
++            else:
++                self.device.click(BATTLE_STATUS_S)
+             return True
+         if self.appear(BATTLE_STATUS_A, interval=self.battle_status_click_interval):
+             logger.warning('Battle status A')
 @@ -559,15 +599,60 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
          self.device.click_record_clear()
          battle_status = False
@@ -355,10 +368,10 @@ index fbc5fd3c..1e81a107 100644
 +            ):
 +                oracle = semantic_adapter.open().oracle
 +                if oracle.daily_battle_result_visible():
-+                    oracle.click_daily_battle_result()
++                    semantic_adapter.complete_daily_battle_result()
 +                    battle_status = True
 +                    semantic_daily_result = True
-+                    continue
++                    break
 +                if semantic_daily_result and oracle.daily_page_visible():
 +                    break
 +                if semantic_daily_result:

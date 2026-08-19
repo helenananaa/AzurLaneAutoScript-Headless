@@ -89,7 +89,10 @@ class AlasDailyConfigTests(unittest.TestCase):
         patch = ROOT.joinpath(
             "integration/alas/series/0080-current-task-flow-ports.patch"
         ).read_text(encoding="utf-8")
-        self.assertIn("from alas_headless import validate_alas_daily_config", patch)
+        self.assertIn(
+            "from alas_headless import SemanticGateClosed, validate_alas_daily_config",
+            patch,
+        )
         self.assertIn("def _validate_daily_config(self):", patch)
         self.assertIn("self._validate_daily_config()\n         self.daily_run()", patch)
 

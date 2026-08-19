@@ -31,6 +31,7 @@ ACTION_CAPABILITIES = frozenset(
         "campaign.viewport_swipe",
         "commission.reward",
         "commission.start",
+        "daily.execute",
         "dorm.collect",
         "dorm.feed",
         "enhancement.execute",

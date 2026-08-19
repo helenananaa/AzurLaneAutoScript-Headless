@@ -1,0 +1,71 @@
+{
+  "schema": "alas-headless.daily-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "configured": {
+    "UseDailySkip": false,
+    "EscortMission": "skip",
+    "EscortMissionFleet": 1,
+    "AdvanceMission": "skip",
+    "AdvanceMissionFleet": 1,
+    "FierceAssault": "first",
+    "FierceAssaultFleet": 1,
+    "TacticalTraining": "second",
+    "TacticalTrainingFleet": 2,
+    "SupplyLineDisruption": "skip",
+    "ModuleDevelopment": "skip",
+    "ModuleDevelopmentFleet": 1,
+    "EmergencyModuleDevelopment": "skip",
+    "EmergencyModuleDevelopmentFleet": 1
+  },
+  "budget": 6,
+  "validation_remain_cap": 1,
+  "source_sha256": {
+    "daily": "aba7c95e048241887fb71768952ce846e5df3b29d3b4d672940d05bf9db21794",
+    "adapter": "2725255c12122987247909b799ab99b2224884724328d111e3bd0edfe411fdc7",
+    "oracle": "8c11c1a0d0404161fafc73f0a45c5132c9750989d8b853151eca4c3a4c259c5a",
+    "runner": "2d158e26ca7c41fb6509c17a4e090ae34213dd5cdd3f714082d24f7be4c60197"
+  },
+  "passed": true,
+  "task_result": true,
+  "elapsed_seconds": 505.938,
+  "execution_receipts": [
+    {
+      "semantic_id": "daily/execute/tactical_training/stage/2/fleet/2",
+      "generation": 347042,
+      "point": {
+        "x": 1142.0,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1026.371,
+        "top": 596.481,
+        "right": 1257.629,
+        "bottom": 686.452
+      },
+      "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "553e0f721685dc6e2023ab9ea4fb64383bb958d5713d1c903f0db391d8c04bbc",
+      "capability_id": "daily.execute"
+    },
+    {
+      "semantic_id": "daily/execute/fierce_assault/stage/1/fleet/1",
+      "generation": 349319,
+      "point": {
+        "x": 1142.0,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1026.371,
+        "top": 596.481,
+        "right": 1257.629,
+        "bottom": 686.452
+      },
+      "path": "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "553e0f721685dc6e2023ab9ea4fb64383bb958d5713d1c903f0db391d8c04bbc",
+      "capability_id": "daily.execute"
+    }
+  ],
+  "daily_grant_remaining": 4,
+  "temporary_config_removed": true
+}

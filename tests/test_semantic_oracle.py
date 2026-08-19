@@ -832,8 +832,69 @@ class SemanticOracleTests(unittest.TestCase):
         receipt = oracle.click_daily_stage(1)
 
         self.assertEqual(receipt.semantic_id, "daily/stage/1")
-        self.assertEqual(receipt.point, Point(779.0, 133.0))
-        self.assertEqual(backend.taps, [(779, 133)])
+        self.assertEqual(receipt.point, Point(591.0, 206.5))
+        self.assertEqual(backend.taps, [(591, 206)])
+
+    def test_daily_current_kind_uses_centered_card_title_sprite(self):
+        root = "UICamera/Canvas/UIMain/DailyLevelUI(Clone)"
+        card = root + "/list_panel/list/601"
+        backend = FakeBackend(
+            [
+                make_button("back_button", root + "/blur_panel/adapt/top/back_button"),
+                make_button(
+                    "601",
+                    card,
+                    x=636.0,
+                    y=384.0,
+                    bounds={"left": 515.0, "top": 102.0, "right": 758.0, "bottom": 666.0},
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [], images=[make_image(card + "/icon/card/title", "zhanshuzuanyan_zi")]
+        )
+
+        self.assertEqual(make_oracle(backend).daily_current_kind(), "tactical_training")
+
+    def test_daily_expanded_stage_uses_exact_normal_and_bulk_skip_buttons(self):
+        root = "OverlayCamera/Overlay/UIMain/selected/stagetpl/quickly/bg/"
+        backend = FakeBackend(
+            [
+                make_button("challenge", root + "challenge", 484.0, 322.0),
+                make_button("once", root + "once", 900.0, 322.0),
+                make_button("mult", root + "mult", 1078.0, 322.0),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.daily_run_choice_visible("normal"))
+        self.assertTrue(oracle.daily_run_choice_visible("skip"))
+        normal = oracle.click_daily_run_choice("normal")
+        skip = oracle.click_daily_run_choice("skip")
+
+        self.assertEqual(normal.path, root + "challenge")
+        self.assertEqual(skip.path, root + "mult")
+        self.assertEqual(backend.taps, [(484, 322), (1078, 322)])
+
+    def test_daily_precombat_reads_and_moves_typed_fleet_on_ui_origin(self):
+        root = "UICamera/Canvas/UIOrigin/PreCombatUI(Clone)"
+        backend = FakeBackend(
+            [
+                make_button("start", root + "/adapt/right/start", raycast_top=None),
+                make_button("nextPage", root + "/adapt/middle/nextPage", x=915.0, y=340.0, raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("1", root + "/adapt/middle/fleet_info/fleet_number")]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.daily_precombat_visible())
+        self.assertEqual(oracle.daily_fleet_index(), 1)
+        receipt = oracle.click_daily_fleet("next")
+        self.assertEqual(receipt.semantic_id, "daily/fleet/next")
+        self.assertEqual(backend.taps, [(915, 340)])
 
     def test_shop_gift_pack_toggle_uses_its_coherent_frame_pair(self):
         root = "OverlayCamera/Overlay/UIMain/"

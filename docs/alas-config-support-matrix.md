@@ -227,7 +227,9 @@ observation 状态。
 
 Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会在原 `daily_run()` 前整组 fail-closed。五类普通日常严格接受 `skip/first/second/third`，普通与限时兵装开发只接受 `skip/first/second`，舰队只接受精确整数 1-6，快速跳过只接受布尔值。文本数字、布尔舰队、越界舰队、大小写或带空白的近似枚举都不会进入原状态机。
 
-固定上游回放执行原 `get_daily_stage_and_fleet()`、`daily_enter()`、`daily_run_one()` 和 `run()`，覆盖普通及限时兵装两种 1-7 位排列、快速跳过与普通作战控件选择、破交作战 fleet=0 特例、关闭快速跳过时的安全略过、任务未激活和剩余次数为 0。64 个合法和 80 个非法单字段案例均通过，mutation budget 为 0，没有调用 `daily_execute()` 的真实实现、进入战斗、消耗次数或注入 Android 输入。十四字段只提升 `offline`，原 observation/action/live 证据不外推。
+固定上游回放执行原 `get_daily_stage_and_fleet()`、`daily_enter()`、`daily_run_one()` 和 `run()`，覆盖普通及限时兵装两种 1-7 位排列、快速跳过与普通作战控件选择、破交作战 fleet=0 特例、关闭快速跳过时的安全略过、任务未激活和剩余次数为 0。64 个合法和 80 个非法单字段案例均通过，离线 mutation budget 为 0。
+
+2026-08-19 的 API 32 x86_64 实机运行新增按标题 sprite 判别日常类型、关卡行安全点、1-6 舰队标签切换、一次性 `daily.execute` 出击授权，以及成绩/统计/奖励栈的幂等清理。原 ALAS Daily 状态机以 Tactical Training `second`/舰队 2 和 Fierce Assault `first`/舰队 1 进入官方全自动战斗并返回每日页；每次实际出击只有一条绑定类型、关卡、舰队和 observer generation 的回执。`UseDailySkip=true` 当前只证明“账号无快速跳过资格时回退普通战斗”，快速跳过可用分支、其他星期类型、其余关卡与舰队、破交特殊路线和限时兵装开发仍未实机触发，因此 Daily 保持 `L`。
 
 ### 1.19 本轮 Hard 关卡与舰队契约
 
@@ -412,7 +414,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 27 | Guild | Scheduler, GuildLogistics, GuildOperation | M | 后勤兑换、新任务、作战、Boss 和推荐舰队均缺适配 |
 | 28 | Reward | Scheduler, Reward | P | 五个领取开关及 RaidDaily 共享入口已离线完成；资源气泡可领取，任务领取部分可用，周常、红点、数字行、空页面和舰船奖励仍未完整闭环 |
 | 29 | Awaken | Scheduler, Awaken | F | 原始任务已实机闭环收藏开关、阵列优先/芯片回退、精确资源门、单次授权、完成弹窗、实际等级、无候选退出与主页恢复 |
-| 30 | Daily | Scheduler, Daily | L | 十四字段离线映射与 fail-closed 契约已完成；实机仍只闭环 Tactical Training 第二关默认舰队，其余日常和配置值未闭环 |
+| 30 | Daily | Scheduler, Daily | L | 原 Daily 状态机已实机闭环 Tactical Training 第二关/舰队 2 与 Fierce Assault 第一关/舰队 1，并覆盖 `UseDailySkip=true` 在当前无快速跳过资格时回退官方自动战斗；其余星期类型、难度、舰队及快速跳过可用分支仍未完整覆盖 |
 | 31 | Hard | Scheduler, Hard | B | 64 关目录与两舰队离线契约已完成；实机仍只到 11-4 进入边界，当前账号进度和自动寻敌锁定，尚无战斗/结算证据 |
 | 32 | Exercise | Scheduler, Exercise | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 上游零读取，真实对手/时段/血量观察、刷新持久化、战斗结算和失败恢复未闭环 |
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | ConsumeCoins、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；购买、余额观察与确认仍未完成 |
@@ -663,8 +665,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
 | ✅ 五维完整支持 | **33 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **136 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **87 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ◐ 有实机当前值/分支证据 | **138 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **85 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
@@ -708,14 +710,14 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Daily.EmergencyModuleDevelopmentFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.EscortMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.EscortMissionFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Daily.FierceAssault` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Daily.FierceAssaultFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Daily.FierceAssault` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Daily.FierceAssaultFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Daily.ModuleDevelopment` | Daily | type=select; display=default | options: "first", "second", "skip"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.ModuleDevelopmentFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.SupplyLineDisruption` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "second" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.TacticalTraining` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "second" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Daily.TacticalTrainingFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Daily.UseDailySkip` | Daily | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Daily.UseDailySkip` | Daily | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `DataKey.Collect` | Freebies | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `DataKey.ForceCollect` | Freebies | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Dorm.Collect` | Dorm | type=checkbox; display=default | input/default: true | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |

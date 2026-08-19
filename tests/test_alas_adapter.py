@@ -158,6 +158,11 @@ class FakeOracle:
         self.main_page_visible_value = False
         self.event_campaign_page_visible_value = False
         self.game_room_page_visible_value = False
+        self.daily_page_visible_value = False
+        self.daily_detail_visible_value = False
+        self.daily_precombat_visible_value = False
+        self.daily_selected_stage_visible_value = False
+        self.daily_run_choices = set()
         self.research_project_values = []
         self.research_projects_visible_value = True
         self.research_detail_value = SimpleNamespace(
@@ -681,10 +686,19 @@ class FakeOracle:
         return self.campaign_in_map_value
 
     def daily_page_visible(self):
-        return False
+        return self.daily_page_visible_value
 
     def daily_precombat_visible(self):
-        return False
+        return self.daily_precombat_visible_value
+
+    def daily_detail_visible(self):
+        return self.daily_detail_visible_value
+
+    def daily_selected_stage_visible(self, index):
+        return self.daily_selected_stage_visible_value
+
+    def daily_run_choice_visible(self, choice):
+        return choice in self.daily_run_choices
 
     def daily_combat_visible(self):
         return False
@@ -4951,6 +4965,49 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(adapter.semantic_id_for("MAIL_CHECK"), "mail/page/back")
         self.assertEqual(adapter.semantic_id_for("MAIL_MANAGE"), "mail/manage")
+
+    def test_daily_page_makes_mail_escape_probe_a_passive_miss(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.daily_page_visible_value = True
+
+        self.assertFalse(adapter.appear(NamedButton("GOTO_MAIN_WHITE")))
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+
+    def test_daily_check_distinguishes_overview_from_stage_detail(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.daily_page_visible_value = True
+        self.assertTrue(adapter.appear(NamedButton("DAILY_CHECK")))
+
+        oracle.daily_detail_visible_value = True
+        self.assertFalse(adapter.appear(NamedButton("DAILY_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("DAILY_ENTER_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("BACK_ARROW")))
+
+    def test_daily_expanded_stage_exposes_exact_run_choices(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._daily_kind = "fierce_assault"
+        adapter._daily_stage = 1
+        oracle.daily_page_visible_value = True
+        oracle.daily_detail_visible_value = True
+        oracle.daily_selected_stage_visible_value = True
+        oracle.daily_run_choices = {"normal", "skip"}
+
+        self.assertFalse(adapter.appear(NamedButton("DAILY_ENTER_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("DAILY_NORMAL_RUN")))
+        self.assertTrue(adapter.appear(NamedButton("DAILY_SKIP")))
+
+    def test_campaign_menu_makes_exercise_page_probe_a_passive_miss(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_menu_value = True
+
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+
+    def test_daily_stage_transition_makes_in_map_probe_a_passive_miss(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._daily_transition_until = time.monotonic() + 1.0
+        oracle.campaign_page_error = SemanticGateClosed("not a campaign page")
+
+        self.assertFalse(adapter.appear(NamedButton("IN_MAP")))
 
     def test_mail_context_reuses_alas_state_machine_and_exact_back(self):
         adapter, oracle, _ = self.make_adapter()

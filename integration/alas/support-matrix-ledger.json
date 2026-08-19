@@ -1014,8 +1014,12 @@
       },
       "evidence": [
         "tests/test_alas_daily_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daily_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "scripts/python/run_alas_daily_live_validation.py",
+        "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1126,16 +1130,20 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_daily_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daily_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "scripts/python/run_alas_daily_live_validation.py",
+        "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1144,22 +1152,26 @@
         "Daily"
       ],
       "path": "Daily.FierceAssault",
-      "status_label": "☐ 未逐值",
+      "status_label": "◐ 实机当前值",
       "support": "supported",
       "values": "options: \"first\", \"second\", \"skip\", \"third\"; default: \"first\""
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_daily_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daily_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "scripts/python/run_alas_daily_live_validation.py",
+        "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1168,7 +1180,7 @@
         "Daily"
       ],
       "path": "Daily.FierceAssaultFleet",
-      "status_label": "☐ 未逐值",
+      "status_label": "◐ 实机当前值",
       "support": "supported",
       "values": "options: 1, 2, 3, 4, 5, 6; default: 1"
     },
@@ -1278,8 +1290,12 @@
       },
       "evidence": [
         "tests/test_alas_daily_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daily_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "scripts/python/run_alas_daily_live_validation.py",
+        "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1294,7 +1310,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -1302,8 +1318,12 @@
       },
       "evidence": [
         "tests/test_alas_daily_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daily_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "scripts/python/run_alas_daily_live_validation.py",
+        "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -7868,7 +7888,7 @@
         "Daily"
       ],
       "name": "Daily",
-      "note": "只闭环 Tactical Training 第二关；其余日常类型、难度、舰队和 `UseDailySkip` 未覆盖",
+      "note": "原 Daily 状态机已实机闭环 Tactical Training 第二关/舰队 2 与 Fierce Assault 第一关/舰队 1；新版展开层的普通、单次快速和批量快速控件已 typed 区分，普通模式实机通过，UseDailySkip=true 的批量快速动作仅完成有界实现而未实耗验收；其余星期类型、难度和舰队仍未完整覆盖",
       "status": "L"
     },
     {
@@ -9642,29 +9662,43 @@
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_daily_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daily_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "scripts/python/run_alas_daily_live_validation.py",
+        "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Daily.FierceAssault",
-      "note": "All four declared choices preserve the original standard and emergency Fierce Assault positions without resource consumption."
+      "note": "All four declared choices preserve the original mapping; the live original-ALAS run identifies Fierce Assault by its exact card sprite, selects first, starts official auto combat under the Daily execution ledger, drains the typed result stack, and returns to Daily. Other stages remain offline-only."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_daily_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daily_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "scripts/python/run_alas_daily_live_validation.py",
+        "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Daily.FierceAssaultFleet",
-      "note": "Fleet indices 1 through 6 preserve the original Fierce Assault mapping and wrong types or bounds fail closed."
+      "note": "Fleet indices 1 through 6 preserve the original mapping and wrong types or bounds fail closed; fleet 1 is read from the exact pre-combat label and live-qualified for Fierce Assault first."
     },
     {
       "dimensions": {
@@ -9707,42 +9741,63 @@
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_daily_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daily_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "scripts/python/run_alas_daily_live_validation.py",
+        "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Daily.TacticalTraining",
-      "note": "Skip and all three stage choices preserve original Tactical Training mapping; the actionable fixture forwards stage two unchanged."
+      "note": "Skip and all three stage choices preserve original mapping; the live original-ALAS run identifies Tactical Training by its exact card sprite, selects second, starts official auto combat under the Daily execution ledger, drains the typed result stack, and returns to Daily. Other stages remain offline-only."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_daily_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daily_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "scripts/python/run_alas_daily_live_validation.py",
+        "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Daily.TacticalTrainingFleet",
-      "note": "Fleet indices 1 through 6 preserve original Tactical Training selection; the actionable fixture forwards fleet four unchanged."
+      "note": "Fleet indices 1 through 6 preserve original selection; the semantic fleet loop reads and changes the exact 1-6 label, and fleet 2 is live-qualified for Tactical Training second."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_daily_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daily_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "scripts/python/run_alas_daily_live_validation.py",
+        "integration/alas/daily-tactical2-fleet2-fierce1-fleet1-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Daily.UseDailySkip",
-      "note": "Both booleans execute the original DAILY_SKIP versus DAILY_NORMAL_RUN choice and the Supply Line disabled-skip bypass; non-booleans fail closed."
+      "note": "Both booleans execute the original choice and the Supply Line disabled-skip bypass; true is live-qualified only for the current account's proven no-fast-skip fallback into official auto combat. The fast-skip-available surface and false remain without live closure."
     },
     {
       "dimensions": {
@@ -11072,8 +11127,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "994e3fcb303448755e2a00b813014198df510ae300168dc093b7b8f4d3ae1319",
-      "manifest_sha256": "9dfb9ab37e77c0868f271fd035ebed83dd82b6e64dee61bd9cdc262f5e0f5e18",
+      "combined_sha256": "8a311f95ded2e45cc7fe758fffbada7e8f458702151530390e69bb48bd064297",
+      "manifest_sha256": "3b4065c4a333b5b4bf41681c9423203be38d30e75bb1800c67daff47a0fdf906",
       "member_count": 43
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

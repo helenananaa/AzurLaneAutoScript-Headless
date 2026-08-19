@@ -185,6 +185,7 @@ def _legacy_action_grants(
     tactical_assign_budget: int,
     commission_reward_budget: int,
     commission_start_budget: int,
+    daily_execute_budget: int,
     research_reward_budget: int,
     research_start_budget: int,
     dorm_collect_budget: int,
@@ -216,6 +217,7 @@ def _legacy_action_grants(
             "tactical.assign": tactical_assign_budget,
             "commission.reward": commission_reward_budget,
             "commission.start": commission_start_budget,
+            "daily.execute": daily_execute_budget,
             "research.reward": research_reward_budget,
             "research.start": research_start_budget,
             "dorm.collect": dorm_collect_budget,
@@ -615,6 +617,9 @@ PAGE_VIRTUAL_RESOURCES = frozenset(
         "DAILY_MISSION_1",
         "DAILY_MISSION_2",
         "DAILY_MISSION_3",
+        "DAILY_SKIP",
+        "DAILY_NORMAL_RUN",
+        "DAILY_LOCKED",
         "BATTLE_PREPARATION",
         "BATTLE_PREPARATION_WITH_OVERLAY",
         "EXERCISE_CHECK",
@@ -1055,6 +1060,7 @@ class AlasSemanticAdapter:
         tactical_assign_budget: int = 0,
         commission_reward_budget: int = 0,
         commission_start_budget: int = 0,
+        daily_execute_budget: int = 0,
         research_reward_budget: int = 0,
         research_start_budget: int = 0,
         dorm_collect_budget: int = 0,
@@ -1099,6 +1105,7 @@ class AlasSemanticAdapter:
             ("tactical assign", tactical_assign_budget),
             ("commission reward", commission_reward_budget),
             ("commission start", commission_start_budget),
+            ("daily execute", daily_execute_budget),
             ("research reward", research_reward_budget),
             ("research start", research_start_budget),
             ("dorm collect", dorm_collect_budget),
@@ -1141,6 +1148,7 @@ class AlasSemanticAdapter:
                 tactical_assign_budget=tactical_assign_budget,
                 commission_reward_budget=commission_reward_budget,
                 commission_start_budget=commission_start_budget,
+                daily_execute_budget=daily_execute_budget,
                 research_reward_budget=research_reward_budget,
                 research_start_budget=research_start_budget,
                 dorm_collect_budget=dorm_collect_budget,
@@ -1183,6 +1191,13 @@ class AlasSemanticAdapter:
         self._supply_pack_context: Optional[_SupplyPackFlowContext] = None
         self._minigame_context: Optional[_MinigameFlowContext] = None
         self._campaign_context: Optional[_CampaignFlowContext] = None
+        self._daily_kind: Optional[str] = None
+        self._daily_stage: Optional[int] = None
+        self._daily_execution_receipts: List[ActionReceipt] = []
+        self._daily_pending_receipt: Optional[ActionReceipt] = None
+        self._daily_pending_stage_receipt: Optional[ActionReceipt] = None
+        self._daily_stage_confirmed = False
+        self._daily_transition_until = 0.0
         self._last_campaign_auto_search_completion: Optional[
             CampaignAutoSearchCompletionProof
         ] = None
@@ -2946,6 +2961,7 @@ class AlasSemanticAdapter:
                 or self.oracle.daily_precombat_visible()
                 or self.oracle.daily_combat_visible()
                 or self.oracle.daily_battle_result_visible()
+                or time.monotonic() <= self._daily_transition_until
             ):
                 return False
             if any(
@@ -2998,6 +3014,10 @@ class AlasSemanticAdapter:
         self._package_gate()
         return self.oracle.daily_current_active()
 
+    def daily_current_kind(self) -> str:
+        self._package_gate()
+        return self.oracle.daily_current_kind()
+
     def daily_current_remain(self) -> int:
         self._package_gate()
         return self.oracle.daily_current_remain()
@@ -3009,6 +3029,115 @@ class AlasSemanticAdapter:
     def daily_precombat_visible(self) -> bool:
         self._package_gate()
         return self.oracle.daily_precombat_visible()
+
+    def daily_fleet_index(self) -> int:
+        self._package_gate()
+        return self.oracle.daily_fleet_index()
+
+    def click_daily_current_card(self) -> ActionReceipt:
+        self._package_gate()
+        kind = self.oracle.daily_current_kind()
+        receipt = self.oracle.click_daily_current_card()
+        self._daily_kind = kind
+        self._daily_stage = None
+        self._daily_pending_stage_receipt = None
+        self._daily_stage_confirmed = False
+        return receipt
+
+    def click_daily_stage(self, index: int) -> ActionReceipt:
+        self._package_gate()
+        if self._daily_kind is None:
+            raise SemanticGateClosed("daily challenge identity was not admitted")
+        if (
+            self._daily_stage == index
+            and self._daily_pending_stage_receipt is not None
+            and time.monotonic() <= self._daily_transition_until
+        ):
+            return self._daily_pending_stage_receipt
+        receipt = self.oracle.click_daily_stage(index)
+        self._daily_stage = index
+        self._daily_pending_receipt = None
+        self._daily_pending_stage_receipt = receipt
+        self._daily_stage_confirmed = False
+        self._daily_transition_until = time.monotonic() + 45.0
+        return receipt
+
+    def click_daily_fleet(self, direction: str) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_daily_fleet(direction)
+
+    def click_daily_precombat_start(self) -> ActionReceipt:
+        self._package_gate()
+        if self._daily_kind is None or self._daily_stage not in (1, 2, 3):
+            raise SemanticGateClosed("daily execution intent is incomplete")
+        if self._daily_pending_receipt is not None:
+            return self._daily_pending_receipt
+        fleet = self.oracle.daily_fleet_index()
+        receipt = self._dispatch_mutation(
+            "daily.execute", self.oracle.click_daily_precombat_start
+        )
+        receipt = replace(
+            receipt,
+            semantic_id="daily/execute/{0}/stage/{1}/fleet/{2}".format(
+                self._daily_kind, self._daily_stage, fleet
+            ),
+        )
+        self._daily_execution_receipts.append(receipt)
+        self._daily_pending_receipt = receipt
+        self._daily_transition_until = time.monotonic() + 20.0
+        return receipt
+
+    def complete_daily_battle_result(self, timeout_seconds: float = 30.0) -> Tuple[ActionReceipt, ...]:
+        """Drain the typed Daily result stack without full-UI frame polling."""
+
+        self._package_gate()
+        deadline = time.monotonic() + timeout_seconds
+        receipts: List[ActionReceipt] = []
+        while time.monotonic() < deadline:
+            if self.oracle.daily_page_visible():
+                return tuple(receipts)
+            if self.oracle.daily_battle_result_visible():
+                try:
+                    self._refresh_tactical_input_frame()
+                except StaleFrameError:
+                    # Unity can invalidate the result frame while changing
+                    # grade -> statistics -> reward.  No input occurred, so
+                    # wait for the next typed frame and retry observation.
+                    time.sleep(0.25)
+                    continue
+                try:
+                    receipts.append(self.oracle.click_daily_battle_result())
+                except SemanticGateClosed:
+                    # The grade/statistics pages can advance while the
+                    # button-only frame is being refreshed.  Re-observe the
+                    # typed stack instead of treating that proven transition
+                    # as a failed click.
+                    continue
+                time.sleep(1.0)
+                continue
+            if self.oracle.campaign_battle_reward_visible():
+                target = (
+                    "reward/award-info/close"
+                    if self.oracle.enabled("reward/award-info/close")
+                    else "reward/award-info1/close"
+                )
+                try:
+                    self._refresh_tactical_input_frame()
+                except StaleFrameError:
+                    time.sleep(0.25)
+                    continue
+                try:
+                    receipts.append(self.oracle.click(target))
+                except SemanticGateClosed:
+                    # AwardInfo can close as its fresh input frame arrives.
+                    continue
+                time.sleep(1.0)
+                continue
+            time.sleep(0.25)
+        raise SemanticGateClosed("daily battle result did not return to Daily page")
+
+    def daily_execution_receipts(self) -> Tuple[ActionReceipt, ...]:
+        return tuple(self._daily_execution_receipts)
 
     def server_maintenance_visible(self) -> bool:
         self._package_gate()
@@ -3797,6 +3926,11 @@ class AlasSemanticAdapter:
             # surfaces. They are passive absences until an exact typed surface
             # below proves the next ALAS state.
             return False
+        if name == "BACK_ARROW":
+            if self.oracle.daily_precombat_visible():
+                return True
+            if self.oracle.daily_page_visible():
+                return True
         if (
             semantic_id is None
             and name not in MISSION_VIRTUAL_RESOURCES
@@ -3986,6 +4120,15 @@ class AlasSemanticAdapter:
             if name == "EXERCISE_CHECK":
                 if self.oracle.exercise_page_visible():
                     return True
+                if (
+                    self.oracle.daily_page_visible()
+                    or self.oracle.daily_precombat_visible()
+                ):
+                    return False
+                if self.oracle.campaign_menu_is_entry():
+                    # ui_goto(page_campaign_menu) probes Exercise first.
+                    # The exact campaign-menu root makes this a passive miss.
+                    return False
                 if self._active_flow_allows_passive_probe():
                     return False
                 raise AlasSemanticUnmapped(
@@ -4015,15 +4158,30 @@ class AlasSemanticAdapter:
             if name in shop_tab_labels:
                 return self.oracle.shop_selected_tab_label() == shop_tab_labels[name]
             if name == "DAILY_CHECK":
-                return self.oracle.daily_page_visible()
+                return bool(
+                    self.oracle.daily_page_visible()
+                    and not self.oracle.daily_detail_visible()
+                )
             if name in ("BATTLE_PREPARATION", "BATTLE_PREPARATION_WITH_OVERLAY"):
                 return self.oracle.daily_precombat_visible()
             if name == "DAILY_ENTER":
                 return self.oracle.daily_current_active()
             if name == "DAILY_ENTER_CHECK":
-                return self.oracle.daily_detail_visible()
+                return bool(
+                    self.oracle.daily_detail_visible()
+                    and not (
+                        self._daily_stage in (1, 2, 3)
+                        and self.oracle.daily_selected_stage_visible(self._daily_stage)
+                    )
+                )
             if name.startswith("DAILY_MISSION_"):
                 return self.oracle.daily_stage_available(int(name.rsplit("_", 1)[1]))
+            if name == "DAILY_LOCKED" and self.oracle.daily_detail_visible():
+                return False
+            if name == "DAILY_SKIP":
+                return self.oracle.daily_run_choice_visible("skip")
+            if name == "DAILY_NORMAL_RUN":
+                return self.oracle.daily_run_choice_visible("normal")
             if (
                 name == "DORM_CHECK"
                 and self._dorm_context is not None
@@ -4550,7 +4708,12 @@ class AlasSemanticAdapter:
         ):
             return self.oracle.daily_precombat_visible()
         if semantic_id is None and name == "IN_MAP":
-            if self.oracle.daily_precombat_visible():
+            if (
+                self.oracle.daily_page_visible()
+                or self.oracle.daily_precombat_visible()
+                or self.oracle.daily_combat_visible()
+                or self.oracle.daily_battle_result_visible()
+            ):
                 return False
             if self._campaign_context is not None:
                 if self._campaign_context.sortie_receipt is not None:
@@ -4657,6 +4820,14 @@ class AlasSemanticAdapter:
             and name in MAIL_VIRTUAL_RESOURCES
             and name not in MISSION_VIRTUAL_RESOURCES
         ):
+            if (
+                self.oracle.daily_page_visible()
+                or self.oracle.daily_precombat_visible()
+            ):
+                # ui_get_current_page() probes the white-theme mail escape
+                # before DAILY_CHECK.  A typed Daily root proves that this is
+                # only a page-enumeration miss, not mail-flow misuse.
+                return False
             if self._commission_context is not None:
                 # ui_get_current_page() probes Mail's white-theme escape while
                 # a restarted Commission invocation may still be inside one
@@ -7852,6 +8023,8 @@ class AlasSemanticAdapter:
                 self._campaign_context,
             )
         ):
+            if self.oracle.daily_precombat_visible():
+                return self.oracle.click_daily_precombat_back()
             if self.oracle.daily_page_visible():
                 return self.oracle.click_daily_control("daily/page/back")
             if (
@@ -7863,9 +8036,29 @@ class AlasSemanticAdapter:
                 "ALAS resource is not semantically mapped for input: BACK_ARROW"
             )
         if name == "DAILY_ENTER":
-            return self.oracle.click_daily_current_card()
+            return self.click_daily_current_card()
         if name.startswith("DAILY_MISSION_"):
-            return self.oracle.click_daily_stage(int(name.rsplit("_", 1)[1]))
+            return self.click_daily_stage(int(name.rsplit("_", 1)[1]))
+        if name == "DAILY_NORMAL_RUN":
+            receipt = self.oracle.click_daily_run_choice("normal")
+            self._daily_transition_until = time.monotonic() + 45.0
+            return receipt
+        if name == "DAILY_SKIP":
+            if self._daily_kind is None or self._daily_stage not in (1, 2, 3):
+                raise SemanticGateClosed("daily execution intent is incomplete")
+            receipt = self._dispatch_mutation(
+                "daily.execute", lambda: self.oracle.click_daily_run_choice("skip")
+            )
+            receipt = replace(
+                receipt,
+                semantic_id="daily/execute/{0}/stage/{1}/quick/all".format(
+                    self._daily_kind, self._daily_stage
+                ),
+            )
+            self._daily_execution_receipts.append(receipt)
+            self._daily_pending_receipt = receipt
+            self._daily_transition_until = time.monotonic() + 45.0
+            return receipt
         if (
             semantic_id is None
             and name not in MISSION_CLICK_RESOURCES
@@ -8846,7 +9039,7 @@ class AlasSemanticAdapter:
             if semantic_id == "campaign-menu/daily":
                 return self.oracle.click_campaign_daily_entrance()
             if semantic_id == "daily/precombat/start":
-                return self.oracle.click_daily_precombat_start()
+                return self.click_daily_precombat_start()
             if semantic_id in ("daily/next", "daily/prev"):
                 return self.oracle.click_daily_control(semantic_id)
             if (
@@ -9543,6 +9736,7 @@ class AlasSemanticSession:
         tactical_assign_budget: int = 0,
         commission_reward_budget: int = 0,
         commission_start_budget: int = 0,
+        daily_execute_budget: int = 0,
         research_reward_budget: int = 0,
         research_start_budget: int = 0,
         dorm_collect_budget: int = 0,
@@ -9623,6 +9817,7 @@ class AlasSemanticSession:
             ("tactical assign", tactical_assign_budget),
             ("commission reward", commission_reward_budget),
             ("commission start", commission_start_budget),
+            ("daily execute", daily_execute_budget),
             ("research reward", research_reward_budget),
             ("research start", research_start_budget),
             ("dorm collect", dorm_collect_budget),
@@ -9654,6 +9849,7 @@ class AlasSemanticSession:
         self.commission_reward_budget = commission_reward_budget
         self.tactical_assign_budget = tactical_assign_budget
         self.commission_start_budget = commission_start_budget
+        self.daily_execute_budget = daily_execute_budget
         self.research_reward_budget = research_reward_budget
         self.research_start_budget = research_start_budget
         self.dorm_collect_budget = dorm_collect_budget
@@ -9692,6 +9888,7 @@ class AlasSemanticSession:
             tactical_assign_budget=tactical_assign_budget,
             commission_reward_budget=commission_reward_budget,
             commission_start_budget=commission_start_budget,
+            daily_execute_budget=daily_execute_budget,
             research_reward_budget=research_reward_budget,
             research_start_budget=research_start_budget,
             dorm_collect_budget=dorm_collect_budget,
@@ -9959,6 +10156,7 @@ class AlasSemanticSession:
                 tactical_assign_budget=self.tactical_assign_budget,
                 commission_reward_budget=self.commission_reward_budget,
                 commission_start_budget=self.commission_start_budget,
+                daily_execute_budget=self.daily_execute_budget,
                 research_reward_budget=self.research_reward_budget,
                 research_start_budget=self.research_start_budget,
                 dorm_collect_budget=self.dorm_collect_budget,
@@ -11251,6 +11449,7 @@ class AlasSemanticSession:
             and name not in LOGIN_ACTION_TARGETS
             and name != "DAILY_ENTER"
             and not name.startswith("DAILY_MISSION_")
+            and name not in ("DAILY_NORMAL_RUN", "DAILY_SKIP")
             and name not in ("MISSION_FINISH", "MISSION_CHECKOUT")
             and name not in MISSION_CLICK_RESOURCES
             and name not in MAIL_CLICK_RESOURCES
@@ -11319,6 +11518,9 @@ class AlasSemanticSession:
     def daily_current_active(self) -> bool:
         return self.open().daily_current_active()
 
+    def daily_current_kind(self) -> str:
+        return self.open().daily_current_kind()
+
     def daily_current_remain(self) -> int:
         return self.open().daily_current_remain()
 
@@ -11327,6 +11529,23 @@ class AlasSemanticSession:
 
     def daily_precombat_visible(self) -> bool:
         return self.open().daily_precombat_visible()
+
+    def daily_fleet_index(self) -> int:
+        return self.open().daily_fleet_index()
+
+    def click_daily_fleet(self, direction: str) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().click_daily_fleet(direction)
+
+    def click_daily_precombat_start(self) -> ActionReceipt:
+        self.refresh_tactical_input_frame()
+        return self.open().click_daily_precombat_start()
+
+    def daily_execution_receipts(self) -> Tuple[ActionReceipt, ...]:
+        return self.open().daily_execution_receipts()
+
+    def complete_daily_battle_result(self) -> Tuple[ActionReceipt, ...]:
+        return self.open().complete_daily_battle_result()
 
     def click_daily_back(self) -> ActionReceipt:
         self.refresh_frame()

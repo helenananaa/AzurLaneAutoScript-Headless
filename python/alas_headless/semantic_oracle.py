@@ -11838,8 +11838,9 @@ class SemanticOracle:
         if SemanticOracle._daily_combat_visible(state):
             return False
         return any(
-            button.path
-            == "OverlayCamera/Overlay/UIMain/PreCombatUI(Clone)/adapt/right/start"
+            button.path.endswith(
+                "/PreCombatUI(Clone)/adapt/right/start"
+            )
             and button.active_in_hierarchy
             and button.active_and_enabled
             and button.interactable
@@ -12186,6 +12187,48 @@ class SemanticOracle:
         )
         return not locked
 
+    def daily_current_kind(self) -> str:
+        """Return the centered challenge identity from its exact card sprite."""
+
+        if not self.daily_page_visible():
+            raise SemanticGateClosed("daily page is absent")
+        prefix = "UICamera/Canvas/UIMain/DailyLevelUI(Clone)/list_panel/list/"
+        buttons = self.read_state()
+        cards = tuple(
+            button
+            for button in buttons.buttons
+            if button.path.startswith(prefix)
+            and button.path.count("/") == prefix.count("/")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.point is not None
+            and 500.0 <= button.point.x <= 780.0
+        )
+        if len(cards) != 1:
+            raise SemanticGateClosed("centered daily card is absent or ambiguous")
+        title_path = cards[0].path + "/icon/card/title"
+        titles = tuple(
+            image
+            for image in self.read_ui_state().images
+            if image.path == title_path
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+        )
+        if len(titles) != 1:
+            raise SemanticGateClosed("centered daily identity is absent or ambiguous")
+        kinds = {
+            "shangchuanhuwei_zi": "escort_mission",
+            "haiyutujin_zi": "advance_mission",
+            "zhanshouxingdong_zi": "fierce_assault",
+            "zhanshuzuanyan_zi": "tactical_training",
+            "pojiaozuozhan_zi": "supply_line_disruption",
+            "bingzhuangDesc": "module_development",
+        }
+        try:
+            return kinds[titles[0].sprite]
+        except KeyError as exc:
+            raise SemanticGateClosed("centered daily identity is not reviewed") from exc
+
     def daily_current_remain(self) -> int:
         """Return the remaining count from the centered card's exact text."""
 
@@ -12285,20 +12328,197 @@ class SemanticOracle:
             return False
         return len(self._daily_visible_stages()) >= index
 
+    def daily_selected_stage_visible(self, index: int) -> bool:
+        """Prove that the requested row is mounted in the exact selected layer."""
+
+        if index not in (1, 2, 3) or not self.daily_detail_visible():
+            return False
+        state = self.read_state()
+        rows = tuple(
+            sorted(
+                (
+                    button
+                    for button in state.buttons
+                    if button.path.endswith(
+                        "/DailyLevelUI(Clone)/desc_panel/main_mask/main/"
+                        "scrollview/content/stagetpl(Clone)/info"
+                    )
+                    and button.active_in_hierarchy
+                    and button.active_and_enabled
+                    and button.bounds is not None
+                    and 110.0 <= button.bounds.top <= 650.0
+                ),
+                key=lambda button: button.bounds.top,
+            )
+        )
+        selected = tuple(
+            button
+            for button in state.buttons
+            if button.path == "OverlayCamera/Overlay/UIMain/selected/stagetpl/info"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds is not None
+        )
+        return bool(
+            len(rows) >= index
+            and len(selected) == 1
+            and abs(selected[0].bounds.top - rows[index - 1].bounds.top) <= 2.0
+            and abs(selected[0].bounds.bottom - rows[index - 1].bounds.bottom) <= 2.0
+        )
+
+    def daily_run_choice_visible(self, choice: str) -> bool:
+        """Return whether an exact action is present on the expanded stage."""
+
+        names = {"normal": "challenge", "skip": "mult"}
+        try:
+            name = names[choice]
+        except KeyError as exc:
+            raise ValueError("unknown daily run choice") from exc
+        path = "OverlayCamera/Overlay/UIMain/selected/stagetpl/quickly/bg/" + name
+        state = self.read_state()
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.path == path
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        return len(matches) == 1
+
+    def click_daily_run_choice(self, choice: str) -> ActionReceipt:
+        names = {"normal": "challenge", "skip": "mult"}
+        try:
+            name = names[choice]
+        except KeyError as exc:
+            raise ValueError("unknown daily run choice") from exc
+        path = "OverlayCamera/Overlay/UIMain/selected/stagetpl/quickly/bg/" + name
+        state = self.read_state()
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.path == path
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("daily run choice is absent or ambiguous")
+        target = matches[0]
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="daily/run/{0}".format(choice),
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_daily_selected_stage(self, index: int) -> ActionReceipt:
+        if not self.daily_selected_stage_visible(index):
+            raise SemanticGateClosed("selected daily stage is absent")
+        state = self.read_state()
+        target = next(
+            button
+            for button in state.buttons
+            if button.path == "OverlayCamera/Overlay/UIMain/selected/stagetpl/info"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds is not None
+        )
+        point = Point(
+            x=target.bounds.left
+            + min(210.0, (target.bounds.right - target.bounds.left) / 3.0),
+            y=(target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="daily/stage/{0}/selected".format(index),
+            generation=state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def click_daily_stage(self, index: int) -> ActionReceipt:
         stages = self._daily_visible_stages()
         if index not in (1, 2, 3) or len(stages) < index:
             raise SemanticGateClosed("daily stage is absent")
         target = stages[index - 1]
-        point = target.point
-        if point is None:
-            raise SemanticGateClosed("daily stage point is absent")
+        if target.bounds is None:
+            raise SemanticGateClosed("daily stage bounds are absent")
+        # The observer's RectTransform pivot lies on the row's upper edge on
+        # the current client.  The original ALAS target is the row's left
+        # information panel, so derive a stable in-bounds point from that exact
+        # actionable row instead of tapping the pivot or the reward children.
+        point = Point(
+            x=target.bounds.left
+            + min(210.0, (target.bounds.right - target.bounds.left) / 3.0),
+            y=(target.bounds.top + target.bounds.bottom) / 2.0,
+        )
         generation = self.read_state().generation
         self._tap(int(round(point.x)), int(round(point.y)))
         return ActionReceipt(
             semantic_id="daily/stage/{0}".format(index),
             generation=generation,
             point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def daily_fleet_index(self) -> int:
+        """Read the selected 1-6 fleet from the exact pre-combat label."""
+
+        if not self.daily_precombat_visible():
+            raise SemanticGateClosed("daily precombat page is absent")
+        suffix = "/PreCombatUI(Clone)/adapt/middle/fleet_info/fleet_number"
+        matches = tuple(
+            text
+            for text in self.read_ui_state().texts
+            if text.path.endswith(suffix)
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+        )
+        if len(matches) != 1 or re.fullmatch(r"[1-6]", matches[0].text.strip()) is None:
+            raise SemanticGateClosed("daily fleet index is absent or ambiguous")
+        return int(matches[0].text.strip())
+
+    def click_daily_fleet(self, direction: str) -> ActionReceipt:
+        """Move one fleet in the requested direction on Daily pre-combat."""
+
+        if direction not in ("next", "prev") or not self.daily_precombat_visible():
+            raise SemanticGateClosed("daily fleet direction is not actionable")
+        suffix = "/PreCombatUI(Clone)/adapt/middle/{0}Page".format(direction)
+        state = self.read_state()
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.path.endswith(suffix)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("daily fleet control is absent or ambiguous")
+        target = matches[0]
+        assert target.point is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="daily/fleet/" + direction,
+            generation=state.generation,
+            point=target.point,
             bounds=target.bounds,
             path=target.path,
         )
