@@ -243,6 +243,7 @@ def validate(
     driver_revision: str,
     feed_enabled: bool,
     feed_filter: str,
+    expect_feed: bool,
 ) -> Mapping[str, Any]:
     seed_path = alas_root / "config" / (seed_config + ".json")
     seed = _read_json(seed_path)
@@ -256,8 +257,10 @@ def validate(
     expected_dispatch_count = sum(
         step["dispatch_count"] for step in planned_feeds
     )
-    if feed_enabled and expected_dispatch_count <= 0:
+    if expect_feed and (not feed_enabled or expected_dispatch_count <= 0):
         raise AssertionError("current dorm state cannot prove the configured feed path")
+    if not expect_feed and expected_dispatch_count != 0:
+        raise AssertionError("no-feed boundary still has a planned food input")
 
     payload = copy.deepcopy(seed)
     payload["Alas"]["Error"].update({"HandleError": False, "SaveError": False})
@@ -380,6 +383,7 @@ def validate(
             "Dorm.Feed": feed_enabled,
             "Dorm.FeedFilter": feed_filter,
         },
+        "expect_feed": expect_feed,
         "planned_feeds": list(planned_feeds),
         "planned_dispatch_count": expected_dispatch_count,
         "source_sha256": {
@@ -406,6 +410,9 @@ def main() -> int:
         default=DEFAULT_FEED_FILTER,
         help="exact ALAS Dorm.FeedFilter value to validate",
     )
+    parser.add_argument(
+        "--expect-feed", choices=("true", "false"), default="true"
+    )
     parser.add_argument("--driver-revision", required=True)
     parser.add_argument("--output", type=Path, required=True)
     arguments = parser.parse_args()
@@ -416,6 +423,7 @@ def main() -> int:
         driver_revision=arguments.driver_revision,
         feed_enabled=arguments.feed_enabled == "true",
         feed_filter=arguments.feed_filter,
+        expect_feed=arguments.expect_feed == "true",
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_json(output, result)

@@ -1,0 +1,683 @@
+{
+  "schema": "alas-headless.tactical-new-student-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "e4c2619b5cd8cf88c51e7f0ee03734871ceceeb0cfe8ba861a35bee98008521d",
+  "configured": {
+    "AddNewStudent.Enable": true,
+    "AddNewStudent.Favorite": false,
+    "AddNewStudent.MinLevel": 1
+  },
+  "allow_tactical_rewards": false,
+  "tactical_assign_budget": 0,
+  "expect_assignment": false,
+  "expected_assignment_count": 0,
+  "expect_reward_claim": false,
+  "expect_no_slot": true,
+  "source_sha256": {
+    "tactical": "7147e33a43a42135f14bc0bc92ff5dbe39644146c16e23c0d78b9d2380f1e685",
+    "adapter": "7bf1b1b556a33e02e942faec2e226cfa0df40d9504ccaf3daabc3a1e64166fb4",
+    "oracle": "50341992d762a4f8eb1f18d22d7d637a922fc9e86129356fccc6b581e6f9e6cf",
+    "validator": "981b3177737c2040eef8f38931d9c3b0a9ef02332778553dc543f48be7e2a87b"
+  },
+  "passed": true,
+  "temporary_config": "codex_tactical_student_live_5003007daa6c48d6b1db0bf837231196.json",
+  "elapsed_seconds": 6.297,
+  "tactical_assign_grant_remaining": 0,
+  "dispatches": [],
+  "reward_clicks": [],
+  "favorite_calls": [],
+  "selected_ships": [],
+  "continue_prompts_cancelled": [],
+  "before": {
+    "finish_available": false,
+    "go_available": true,
+    "slots": [
+      {
+        "slot": 1,
+        "ship_id": 403994,
+        "ship_name": "希佩尔海军上将..",
+        "ship_level": 120,
+        "skill_name": "荆棘与坚盾",
+        "skill_level": 8,
+        "exp_current": 3700,
+        "exp_total": 4400,
+        "status": "running",
+        "remaining_seconds": 42444,
+        "button": {
+          "name": "403994",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 401.172,
+            "top": 86.626,
+            "right": 599.081,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "403994",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": -3.108,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 500.127,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 500.127,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 401.172,
+              "bottom": 356.131,
+              "right": 599.081,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 401.172,
+              "top": 86.626,
+              "right": 599.081,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 2,
+        "ship_id": 204044,
+        "ship_name": "小声望",
+        "ship_level": 120,
+        "skill_name": "小骑士的团队演练",
+        "skill_level": 1,
+        "exp_current": 0,
+        "exp_total": 100,
+        "status": "running",
+        "remaining_seconds": 42855,
+        "button": {
+          "name": "204044",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 719.94,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 620.986,
+            "top": 86.626,
+            "right": 818.895,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "204044",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 1.776,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 719.94,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 719.94,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 620.986,
+              "bottom": 356.131,
+              "right": 818.895,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 620.986,
+              "top": 86.626,
+              "right": 818.895,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 3,
+        "ship_id": 206054,
+        "ship_name": "追赶者",
+        "ship_level": 120,
+        "skill_name": "816中队 +",
+        "skill_level": 6,
+        "exp_current": 1600,
+        "exp_total": 2200,
+        "status": "running",
+        "remaining_seconds": 28566,
+        "button": {
+          "name": "206054",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/206054",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 939.753,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 840.799,
+            "top": 86.626,
+            "right": 1038.708,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "206054",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/206054",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 6.661,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 939.753,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 939.753,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 840.799,
+              "bottom": 356.131,
+              "right": 1038.708,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 840.799,
+              "top": 86.626,
+              "right": 1038.708,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 4,
+        "ship_id": 306064,
+        "ship_name": "龙骧",
+        "ship_level": 120,
+        "skill_name": "空袭信号",
+        "skill_level": 9,
+        "exp_current": 3050,
+        "exp_total": 5800,
+        "status": "running",
+        "remaining_seconds": 28681,
+        "button": {
+          "name": "306064",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/306064",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 1159.567,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 1060.612,
+            "top": 86.626,
+            "right": 1258.521,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "306064",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/306064",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 11.546,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 1159.567,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 1159.567,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 1060.612,
+              "bottom": 356.131,
+              "right": 1258.521,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 1060.612,
+              "top": 86.626,
+              "right": 1258.521,
+              "bottom": 363.869
+            }
+          }
+        }
+      }
+    ],
+    "actions": [
+      {
+        "semantic_id": "reward/tactical/go",
+        "generation": 24582,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)/frame/main/content/class/frame/go_btn",
+        "point": {
+          "x": 464.946,
+          "y": 434.961
+        }
+      },
+      {
+        "semantic_id": "tactical/page/back",
+        "generation": 24597,
+        "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack",
+        "point": {
+          "x": 57.746,
+          "y": 53.982
+        }
+      },
+      {
+        "semantic_id": "reward/page/back",
+        "generation": 24603,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)",
+        "point": {
+          "x": 827.0,
+          "y": 622.0
+        }
+      }
+    ],
+    "main_page_visible": true
+  },
+  "after": {
+    "finish_available": false,
+    "go_available": true,
+    "slots": [
+      {
+        "slot": 1,
+        "ship_id": 403994,
+        "ship_name": "希佩尔海军上将..",
+        "ship_level": 120,
+        "skill_name": "荆棘与坚盾",
+        "skill_level": 8,
+        "exp_current": 3700,
+        "exp_total": 4400,
+        "status": "running",
+        "remaining_seconds": 42427,
+        "button": {
+          "name": "403994",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 401.172,
+            "top": 86.626,
+            "right": 599.081,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "403994",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": -3.108,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 500.127,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 500.127,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 401.172,
+              "bottom": 356.131,
+              "right": 599.081,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 401.172,
+              "top": 86.626,
+              "right": 599.081,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 2,
+        "ship_id": 204044,
+        "ship_name": "小声望",
+        "ship_level": 120,
+        "skill_name": "小骑士的团队演练",
+        "skill_level": 1,
+        "exp_current": 0,
+        "exp_total": 100,
+        "status": "running",
+        "remaining_seconds": 42838,
+        "button": {
+          "name": "204044",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 719.94,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 620.986,
+            "top": 86.626,
+            "right": 818.895,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "204044",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 1.776,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 719.94,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 719.94,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 620.986,
+              "bottom": 356.131,
+              "right": 818.895,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 620.986,
+              "top": 86.626,
+              "right": 818.895,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 3,
+        "ship_id": 206054,
+        "ship_name": "追赶者",
+        "ship_level": 120,
+        "skill_name": "816中队 +",
+        "skill_level": 6,
+        "exp_current": 1600,
+        "exp_total": 2200,
+        "status": "running",
+        "remaining_seconds": 28549,
+        "button": {
+          "name": "206054",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/206054",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 939.753,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 840.799,
+            "top": 86.626,
+            "right": 1038.708,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "206054",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/206054",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 6.661,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 939.753,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 939.753,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 840.799,
+              "bottom": 356.131,
+              "right": 1038.708,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 840.799,
+              "top": 86.626,
+              "right": 1038.708,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 4,
+        "ship_id": 306064,
+        "ship_name": "龙骧",
+        "ship_level": 120,
+        "skill_name": "空袭信号",
+        "skill_level": 9,
+        "exp_current": 3050,
+        "exp_total": 5800,
+        "status": "running",
+        "remaining_seconds": 28664,
+        "button": {
+          "name": "306064",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/306064",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 1159.567,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 1060.612,
+            "top": 86.626,
+            "right": 1258.521,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "306064",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/306064",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 11.546,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 1159.567,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 1159.567,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 1060.612,
+              "bottom": 356.131,
+              "right": 1258.521,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 1060.612,
+              "top": 86.626,
+              "right": 1258.521,
+              "bottom": 363.869
+            }
+          }
+        }
+      }
+    ],
+    "actions": [
+      {
+        "semantic_id": "reward/tactical/go",
+        "generation": 24825,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)/frame/main/content/class/frame/go_btn",
+        "point": {
+          "x": 465.206,
+          "y": 434.961
+        }
+      },
+      {
+        "semantic_id": "tactical/page/back",
+        "generation": 24839,
+        "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack",
+        "point": {
+          "x": 57.746,
+          "y": 53.982
+        }
+      },
+      {
+        "semantic_id": "reward/page/back",
+        "generation": 24847,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)",
+        "point": {
+          "x": 827.0,
+          "y": 622.0
+        }
+      }
+    ],
+    "main_page_visible": true
+  },
+  "temporary_config_removed": true
+}

@@ -7355,7 +7355,10 @@ class AlasSemanticAdapter:
             return False
         if (
             self._commission_context.flow_kind != "tactical"
-            or not self._action_ledger.allowed("tactical.reward")
+            or (
+                self._commission_context.tactical_reward_receipt is None
+                and not self._action_ledger.allowed("tactical.reward")
+            )
         ):
             raise SemanticGateClosed(
                 "tactical reward requires the separate explicit opt-in"

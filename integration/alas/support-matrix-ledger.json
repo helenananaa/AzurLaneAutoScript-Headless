@@ -1399,6 +1399,7 @@
         "integration/alas/dorm-feed-r10-live-validation-receipt.json",
         "integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json",
         "integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r14-filter-20000-no-stock-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1429,6 +1430,7 @@
         "integration/alas/dorm-feed-r10-live-validation-receipt.json",
         "integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json",
         "integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r14-filter-20000-no-stock-live-validation-receipt.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -10038,10 +10040,11 @@
         "integration/alas/dorm-feed-r10-live-validation-receipt.json",
         "integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json",
         "integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r14-filter-20000-no-stock-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Dorm.Feed",
-      "note": "All 1,956 legal priority orders retain the original strict-fill, fallback, and no-op semantics in replay. The real original task then proves both booleans: enabled uses only the planned typed cards and exact inventory deltas, while disabled emits no feed mutation and both paths restore main."
+      "note": "All 1,956 legal priority orders retain the original strict-fill, fallback, and no-op semantics in replay. The real original task then proves both booleans: enabled uses only the planned typed cards and exact inventory deltas, while disabled emits no feed mutation. A live 20000-only run with 0/40000 food and zero 20000-stock also proved the original no-input branch; every path restored main."
     },
     {
       "dimensions": {
@@ -10060,10 +10063,11 @@
         "integration/alas/dorm-feed-r10-live-validation-receipt.json",
         "integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json",
         "integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json",
+        "integration/alas/dorm-feed-r14-filter-20000-no-stock-live-validation-receipt.json",
         "docs/status.md"
       ],
       "field": "Dorm.FeedFilter",
-      "note": "Every non-empty unique ordering of the six known food values preserves original priority in replay. The current client proves both the default list and a single numeric UI value, including ConfigUpdater's int canonicalization, against typed exact-card input and inventory postconditions."
+      "note": "Every non-empty unique ordering of the six known food values preserves original priority in replay. The current client proves the default list, a consuming single numeric 1000 value, and the zero-stock single numeric 20000 value, including ConfigUpdater's int canonicalization, exact typed-card input or no-input behavior, inventory postconditions, and main-page recovery."
     },
     {
       "dimensions": {

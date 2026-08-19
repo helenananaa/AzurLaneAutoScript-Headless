@@ -136,6 +136,12 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   fallback, no-match cancellation, Unicode normalization, and malformed rules.
   `Tactical.TacticalFilter` is therefore complete; `RapidTrainingSlot` remains
   separately blocked by the current non-event period.
+- A 2026-08-19 recovery run also claimed one completed course, accepted both
+  exact official continue-prompt wordings and the `ConnectionReset` reconnect
+  code, then filled the fourth slot through original ALAS.  A second zero-budget
+  run began and ended with four identical running slots and never entered Dock;
+  see `integration/alas/tactical-empty-slot-fill-r4-live-validation-receipt.json`
+  and `integration/alas/tactical-full-slot-r5-live-validation-receipt.json`.
 
 ### Dorm: feed switch and priority filter complete on the live client
 
@@ -155,6 +161,12 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   singletons on that compatibility path.  Its real task clicked only
   `dorm/feed/item/50001`, changed inventory `17863 -> 17862`, and returned to
   main; see `integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json`.
+- A fresh 2026-08-19 single-value `"20000"` run covered the complementary
+  no-stock branch.  The account had `0/40000` food capacity available but zero
+  20000-value items; original ALAS entered and exited Feed with no typed food
+  dispatch, preserved every inventory count and restored main.  See
+  `integration/alas/dorm-feed-r14-filter-20000-no-stock-live-validation-receipt.json`.
+  One 20000-value item is still required for the consuming live postcondition.
   `Dorm.Collect` is now complete as well: when the current account exposed a
   real collectable dorm reward, the original task issued exactly one typed
   `dorm.collect`, exhausted its grant, changed the quick-collect control from

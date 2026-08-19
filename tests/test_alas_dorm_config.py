@@ -199,6 +199,28 @@ class AlasDormConfigTests(unittest.TestCase):
         after_item = next(item for item in after["items"] if item["item_id"] == 50001)
         self.assertEqual(after_item["count"], before_item["count"] - 1)
 
+        no_stock = json.loads(
+            ROOT.joinpath(
+                "integration/alas/dorm-feed-r14-filter-20000-no-stock-live-validation-receipt.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertTrue(no_stock["passed"])
+        self.assertTrue(no_stock["configured"]["Dorm.Feed"])
+        self.assertEqual(no_stock["configured"]["Dorm.FeedFilter"], "20000")
+        self.assertFalse(no_stock["expect_feed"])
+        self.assertEqual(no_stock["planned_dispatch_count"], 0)
+        self.assertEqual(no_stock["dispatches"], [])
+        self.assertEqual(no_stock["before"]["feed"]["food"], 0)
+        self.assertEqual(no_stock["before"]["feed"]["capacity"], 40000)
+        item = next(
+            value
+            for value in no_stock["before"]["feed"]["items"]
+            if value["value"] == 20000
+        )
+        self.assertEqual(item["count"], 0)
+        self.assertEqual(no_stock["after"]["cleanup"], "main")
+        self.assertTrue(no_stock["temporary_config_removed"])
+
     def test_sources_compile(self):
         for relative in (
             "python/alas_headless/alas_dorm_config_contract.py",

@@ -4742,6 +4742,28 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(oracle.click_calls, ["tactical/continue/cancel"])
         adapter.end_commission()
 
+    def test_tactical_continue_cancel_accepts_the_consumed_reward_receipt(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            allow_tactical_rewards=True,
+        )
+        oracle.tactical_prompt_text = (
+            "「舰船」学习完成，「技能」技能获得450点经验是否继续学习该技能？"
+        )
+        adapter.begin_tactical()
+        reward_receipt = adapter._dispatch_mutation(
+            "tactical.reward",
+            lambda: oracle.click_receipt("reward/tactical/finish"),
+        )
+        adapter._commission_context.tactical_reward_receipt = reward_receipt
+
+        self.assertEqual(adapter._action_ledger.remaining("tactical.reward"), 0)
+        self.assertTrue(adapter.cancel_tactical_continue_if_present())
+        self.assertEqual(oracle.click_calls, ["tactical/continue/cancel"])
+        adapter.end_commission()
+
     def test_tactical_passive_continue_probe_is_false_without_prompt_or_opt_in(self):
         oracle = FakeOracle()
         adapter = AlasSemanticAdapter(oracle, lambda: None)

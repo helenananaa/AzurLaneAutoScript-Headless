@@ -126,13 +126,22 @@ def validate(
         instance = modules.AzurLaneAutoScript(config_name)
         instance.config.bind("Dorm")
         adapter = instance.device.semantic_adapter.open()
+        if adapter.oracle.enabled("dorm/statistics/confirm"):
+            adapter.oracle.click("dorm/statistics/confirm")
+            time.sleep(0.75)
         if adapter.oracle.dorm_empty_food_cancel_available():
             adapter.oracle.click("dorm/empty-food/cancel")
             time.sleep(0.75)
-        if not (
-            adapter.oracle.main_page_visible()
-            or adapter.oracle.enabled("dorm/page/manage")
-        ):
+        on_dorm_page = False
+        if not adapter.oracle.main_page_visible():
+            from alas_headless import SemanticGateClosed
+
+            try:
+                adapter.oracle.dorm_state()
+                on_dorm_page = True
+            except SemanticGateClosed:
+                pass
+        if not (adapter.oracle.main_page_visible() or on_dorm_page):
             raise AssertionError("Dorm validation must start on the main or dorm page")
         dispatches: list[dict[str, Any]] = []
         balances: list[dict[str, Any]] = []

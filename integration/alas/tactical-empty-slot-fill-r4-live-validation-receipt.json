@@ -1,0 +1,1567 @@
+{
+  "schema": "alas-headless.tactical-new-student-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "e4c2619b5cd8cf88c51e7f0ee03734871ceceeb0cfe8ba861a35bee98008521d",
+  "configured": {
+    "AddNewStudent.Enable": true,
+    "AddNewStudent.Favorite": false,
+    "AddNewStudent.MinLevel": 1
+  },
+  "allow_tactical_rewards": false,
+  "tactical_assign_budget": 1,
+  "expect_assignment": true,
+  "expected_assignment_count": 1,
+  "expect_reward_claim": false,
+  "source_sha256": {
+    "tactical": "7147e33a43a42135f14bc0bc92ff5dbe39644146c16e23c0d78b9d2380f1e685",
+    "adapter": "7bf1b1b556a33e02e942faec2e226cfa0df40d9504ccaf3daabc3a1e64166fb4",
+    "oracle": "50341992d762a4f8eb1f18d22d7d637a922fc9e86129356fccc6b581e6f9e6cf",
+    "validator": "e094f1cde0f67041334c70e837d1ec693bf1703e9580cb0ec94bebbd0e395f98"
+  },
+  "passed": true,
+  "temporary_config": "codex_tactical_student_live_77bb2e053a594ba9bae55d830a82d091.json",
+  "elapsed_seconds": 72.391,
+  "tactical_assign_grant_remaining": 0,
+  "dispatches": [
+    {
+      "capability": "tactical.assign",
+      "receipt": {
+        "semantic_id": "tactical/course/confirm",
+        "generation": 22690,
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "point": {
+          "x": 790.0,
+          "y": 515.0
+        }
+      }
+    }
+  ],
+  "reward_clicks": [],
+  "favorite_calls": [
+    {
+      "enabled": false,
+      "receipt": null,
+      "candidates_after": [
+        {
+          "position": 0,
+          "ship_id": 306064,
+          "ship_name": "龙骧",
+          "level": 120,
+          "button": {
+            "name": "306064",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/306064",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 162.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 84.8,
+              "top": 69.333,
+              "right": 239.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "306064",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/306064",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -10.619,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 162.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 162.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 84.8,
+                "bottom": 434.0,
+                "right": 239.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 84.8,
+                "top": 69.333,
+                "right": 239.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 1,
+          "ship_id": 207014,
+          "ship_name": "鹰",
+          "level": 114,
+          "button": {
+            "name": "207014",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207014",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 69.333,
+              "right": 404.133,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "207014",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207014",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -6.96,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": 434.0,
+                "right": 404.133,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 69.333,
+                "right": 404.133,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 2,
+          "ship_id": 207134,
+          "ship_name": "小可畏",
+          "level": 114,
+          "button": {
+            "name": "207134",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207134",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 69.333,
+              "right": 568.8,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "207134",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207134",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -3.301,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": 434.0,
+                "right": 568.8,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 69.333,
+                "right": 568.8,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 3,
+          "ship_id": 303174,
+          "ship_name": "铃谷",
+          "level": 114,
+          "button": {
+            "name": "303174",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/303174",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 656.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 578.8,
+              "top": 69.333,
+              "right": 733.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "303174",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/303174",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 0.359,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 656.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 656.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 578.8,
+                "bottom": 434.0,
+                "right": 733.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 578.8,
+                "top": 69.333,
+                "right": 733.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 4,
+          "ship_id": 302254,
+          "ship_name": "渡良濑",
+          "level": 111,
+          "button": {
+            "name": "302254",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/302254",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 820.8,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 743.467,
+              "top": 69.333,
+              "right": 898.133,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "302254",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/302254",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 4.018,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 820.8,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 820.8,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 743.467,
+                "bottom": 434.0,
+                "right": 898.133,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 743.467,
+                "top": 69.333,
+                "right": 898.133,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 5,
+          "ship_id": 818014,
+          "ship_name": "瑟堡",
+          "level": 109,
+          "button": {
+            "name": "818014",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/818014",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 985.467,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 908.133,
+              "top": 69.333,
+              "right": 1062.8,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "818014",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/818014",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 7.677,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 985.467,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 985.467,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 908.133,
+                "bottom": 434.0,
+                "right": 1062.8,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 908.133,
+                "top": 69.333,
+                "right": 1062.8,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 6,
+          "ship_id": 207094,
+          "ship_name": "小光辉",
+          "level": 108,
+          "button": {
+            "name": "207094",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207094",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1150.133,
+              "y": 177.667
+            },
+            "bounds": {
+              "left": 1072.8,
+              "top": 69.333,
+              "right": 1227.467,
+              "bottom": 286.0
+            },
+            "raw": {
+              "name": "207094",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/207094",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 11.336,
+                "y": 4.052,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 1150.133,
+                "y": 542.333
+              },
+              "adb_point": {
+                "x": 1150.133,
+                "y": 177.667
+              },
+              "screen_bounds": {
+                "left": 1072.8,
+                "bottom": 434.0,
+                "right": 1227.467,
+                "top": 650.667
+              },
+              "adb_bounds": {
+                "left": 1072.8,
+                "top": 69.333,
+                "right": 1227.467,
+                "bottom": 286.0
+              }
+            }
+          }
+        },
+        {
+          "position": 7,
+          "ship_id": 299062,
+          "ship_name": "邓肯",
+          "level": 104,
+          "button": {
+            "name": "299062",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/299062",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 162.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 84.8,
+              "top": 296.0,
+              "right": 239.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "299062",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/299062",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -10.619,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 162.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 162.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 84.8,
+                "bottom": 207.333,
+                "right": 239.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 84.8,
+                "top": 296.0,
+                "right": 239.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 8,
+          "ship_id": 301174,
+          "ship_name": "阳炎.改",
+          "level": 103,
+          "button": {
+            "name": "301174",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/301174",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 326.8,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 249.467,
+              "top": 296.0,
+              "right": 404.133,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "301174",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/301174",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -6.96,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 326.8,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 326.8,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 249.467,
+                "bottom": 207.333,
+                "right": 404.133,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 249.467,
+                "top": 296.0,
+                "right": 404.133,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 9,
+          "ship_id": 408154,
+          "ship_name": "U-2501",
+          "level": 100,
+          "button": {
+            "name": "408154",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/408154",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 491.467,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 414.133,
+              "top": 296.0,
+              "right": 568.8,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "408154",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/408154",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": -3.301,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 491.467,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 491.467,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 414.133,
+                "bottom": 207.333,
+                "right": 568.8,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 414.133,
+                "top": 296.0,
+                "right": 568.8,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 10,
+          "ship_id": 502044,
+          "ship_name": "应瑞·改",
+          "level": 100,
+          "button": {
+            "name": "502044",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/502044",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 656.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 578.8,
+              "top": 296.0,
+              "right": 733.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "502044",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/502044",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 0.359,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 656.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 656.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 578.8,
+                "bottom": 207.333,
+                "right": 733.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 578.8,
+                "top": 296.0,
+                "right": 733.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 11,
+          "ship_id": 502054,
+          "ship_name": "肇和·改",
+          "level": 100,
+          "button": {
+            "name": "502054",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/502054",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 820.8,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 743.467,
+              "top": 296.0,
+              "right": 898.133,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "502054",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/502054",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 4.018,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 820.8,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 820.8,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 743.467,
+                "bottom": 207.333,
+                "right": 898.133,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 743.467,
+                "top": 296.0,
+                "right": 898.133,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 12,
+          "ship_id": 703021,
+          "ship_name": "库尔斯克",
+          "level": 100,
+          "button": {
+            "name": "703021",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/703021",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 985.467,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 908.133,
+              "top": 296.0,
+              "right": 1062.8,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "703021",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/703021",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 7.677,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 985.467,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 985.467,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 908.133,
+                "bottom": 207.333,
+                "right": 1062.8,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 908.133,
+                "top": 296.0,
+                "right": 1062.8,
+                "bottom": 512.667
+              }
+            }
+          }
+        },
+        {
+          "position": 13,
+          "ship_id": 801012,
+          "ship_name": "凯旋",
+          "level": 100,
+          "button": {
+            "name": "801012",
+            "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/801012",
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": true,
+            "point": {
+              "x": 1150.133,
+              "y": 404.333
+            },
+            "bounds": {
+              "left": 1072.8,
+              "top": 296.0,
+              "right": 1227.467,
+              "bottom": 512.667
+            },
+            "raw": {
+              "name": "801012",
+              "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/801012",
+              "canvas": "Overlay",
+              "flags": 7679,
+              "active_in_hierarchy": true,
+              "active_and_enabled": true,
+              "interactable": true,
+              "raycast_top": true,
+              "canvas_render_mode": 1,
+              "world_position": {
+                "x": 11.336,
+                "y": -0.985,
+                "z": -390.0
+              },
+              "local_rect": {
+                "x": -116.0,
+                "y": -162.5,
+                "width": 232.0,
+                "height": 325.0
+              },
+              "screen_point": {
+                "x": 1150.133,
+                "y": 315.667
+              },
+              "adb_point": {
+                "x": 1150.133,
+                "y": 404.333
+              },
+              "screen_bounds": {
+                "left": 1072.8,
+                "bottom": 207.333,
+                "right": 1227.467,
+                "top": 424.0
+              },
+              "adb_bounds": {
+                "left": 1072.8,
+                "top": 296.0,
+                "right": 1227.467,
+                "bottom": 512.667
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "selected_ships": [
+    {
+      "ship_id": 306064,
+      "receipt": {
+        "semantic_id": "tactical/dock/ship/306064",
+        "generation": 22193,
+        "path": "OverlayCamera/Overlay/UIMain/DockyardUI(Clone)/main/ship_container/ships/306064",
+        "point": {
+          "x": 162.133,
+          "y": 177.667
+        }
+      }
+    }
+  ],
+  "continue_prompts_cancelled": [],
+  "before": {
+    "finish_available": false,
+    "go_available": true,
+    "slots": [
+      {
+        "slot": 1,
+        "ship_id": 403994,
+        "ship_name": "希佩尔海军上将..",
+        "ship_level": 120,
+        "skill_name": "荆棘与坚盾",
+        "skill_level": 8,
+        "exp_current": 3700,
+        "exp_total": 4400,
+        "status": "running",
+        "remaining_seconds": 42641,
+        "button": {
+          "name": "403994",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 401.172,
+            "top": 86.626,
+            "right": 599.081,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "403994",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": -3.108,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 500.127,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 500.127,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 401.172,
+              "bottom": 356.131,
+              "right": 599.081,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 401.172,
+              "top": 86.626,
+              "right": 599.081,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 2,
+        "ship_id": 204044,
+        "ship_name": "小声望",
+        "ship_level": 120,
+        "skill_name": "小骑士的团队演练",
+        "skill_level": 1,
+        "exp_current": 0,
+        "exp_total": 100,
+        "status": "running",
+        "remaining_seconds": 43052,
+        "button": {
+          "name": "204044",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 719.94,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 620.986,
+            "top": 86.626,
+            "right": 818.895,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "204044",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 1.776,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 719.94,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 719.94,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 620.986,
+              "bottom": 356.131,
+              "right": 818.895,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 620.986,
+              "top": 86.626,
+              "right": 818.895,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 3,
+        "ship_id": 206054,
+        "ship_name": "追赶者",
+        "ship_level": 120,
+        "skill_name": "816中队 +",
+        "skill_level": 6,
+        "exp_current": 1600,
+        "exp_total": 2200,
+        "status": "running",
+        "remaining_seconds": 28763,
+        "button": {
+          "name": "206054",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/206054",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 939.753,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 840.799,
+            "top": 86.626,
+            "right": 1038.708,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "206054",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/206054",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 6.661,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 939.753,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 939.753,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 840.799,
+              "bottom": 356.131,
+              "right": 1038.708,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 840.799,
+              "top": 86.626,
+              "right": 1038.708,
+              "bottom": 363.869
+            }
+          }
+        }
+      }
+    ],
+    "actions": [
+      {
+        "semantic_id": "reward/tactical/go",
+        "generation": 21584,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)/frame/main/content/class/frame/go_btn",
+        "point": {
+          "x": 465.206,
+          "y": 434.961
+        }
+      },
+      {
+        "semantic_id": "tactical/page/back",
+        "generation": 21599,
+        "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack",
+        "point": {
+          "x": 57.746,
+          "y": 53.982
+        }
+      },
+      {
+        "semantic_id": "reward/page/back",
+        "generation": 21604,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)",
+        "point": {
+          "x": 827.0,
+          "y": 622.0
+        }
+      }
+    ],
+    "main_page_visible": true
+  },
+  "after": {
+    "finish_available": false,
+    "go_available": true,
+    "slots": [
+      {
+        "slot": 1,
+        "ship_id": 403994,
+        "ship_name": "希佩尔海军上将..",
+        "ship_level": 120,
+        "skill_name": "荆棘与坚盾",
+        "skill_level": 8,
+        "exp_current": 3700,
+        "exp_total": 4400,
+        "status": "running",
+        "remaining_seconds": 42559,
+        "button": {
+          "name": "403994",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 500.127,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 401.172,
+            "top": 86.626,
+            "right": 599.081,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "403994",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info/403994",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": -3.108,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 500.127,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 500.127,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 401.172,
+              "bottom": 356.131,
+              "right": 599.081,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 401.172,
+              "top": 86.626,
+              "right": 599.081,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 2,
+        "ship_id": 204044,
+        "ship_name": "小声望",
+        "ship_level": 120,
+        "skill_name": "小骑士的团队演练",
+        "skill_level": 1,
+        "exp_current": 0,
+        "exp_total": 100,
+        "status": "running",
+        "remaining_seconds": 42970,
+        "button": {
+          "name": "204044",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 719.94,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 620.986,
+            "top": 86.626,
+            "right": 818.895,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "204044",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/204044",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 1.776,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 719.94,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 719.94,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 620.986,
+              "bottom": 356.131,
+              "right": 818.895,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 620.986,
+              "top": 86.626,
+              "right": 818.895,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 3,
+        "ship_id": 206054,
+        "ship_name": "追赶者",
+        "ship_level": 120,
+        "skill_name": "816中队 +",
+        "skill_level": 6,
+        "exp_current": 1600,
+        "exp_total": 2200,
+        "status": "running",
+        "remaining_seconds": 28681,
+        "button": {
+          "name": "206054",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/206054",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 939.753,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 840.799,
+            "top": 86.626,
+            "right": 1038.708,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "206054",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/206054",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 6.661,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 939.753,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 939.753,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 840.799,
+              "bottom": 356.131,
+              "right": 1038.708,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 840.799,
+              "top": 86.626,
+              "right": 1038.708,
+              "bottom": 363.869
+            }
+          }
+        }
+      },
+      {
+        "slot": 4,
+        "ship_id": 306064,
+        "ship_name": "龙骧",
+        "ship_level": 120,
+        "skill_name": "空袭信号",
+        "skill_level": 9,
+        "exp_current": 3050,
+        "exp_total": 5800,
+        "status": "running",
+        "remaining_seconds": 28796,
+        "button": {
+          "name": "306064",
+          "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/306064",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "point": {
+            "x": 1159.567,
+            "y": 225.248
+          },
+          "bounds": {
+            "left": 1060.612,
+            "top": 86.626,
+            "right": 1258.521,
+            "bottom": 363.869
+          },
+          "raw": {
+            "name": "306064",
+            "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/NewNavalTacticsStudentsPage(Clone)/info(Clone)/306064",
+            "canvas": "Canvas",
+            "flags": 1535,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "interactable": true,
+            "raycast_top": null,
+            "canvas_render_mode": 1,
+            "world_position": {
+              "x": 11.546,
+              "y": 2.994,
+              "z": 10.0
+            },
+            "local_rect": {
+              "x": -116.0,
+              "y": -162.5,
+              "width": 232.0,
+              "height": 325.0
+            },
+            "screen_point": {
+              "x": 1159.567,
+              "y": 494.752
+            },
+            "adb_point": {
+              "x": 1159.567,
+              "y": 225.248
+            },
+            "screen_bounds": {
+              "left": 1060.612,
+              "bottom": 356.131,
+              "right": 1258.521,
+              "top": 633.374
+            },
+            "adb_bounds": {
+              "left": 1060.612,
+              "top": 86.626,
+              "right": 1258.521,
+              "bottom": 363.869
+            }
+          }
+        }
+      }
+    ],
+    "actions": [
+      {
+        "semantic_id": "reward/tactical/go",
+        "generation": 22769,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)/frame/main/content/class/frame/go_btn",
+        "point": {
+          "x": 465.206,
+          "y": 434.961
+        }
+      },
+      {
+        "semantic_id": "tactical/page/back",
+        "generation": 22780,
+        "path": "UICamera/Canvas/UIMain/NewNavalTacticsUI(Clone)/adpter/frame/btnBack",
+        "point": {
+          "x": 57.746,
+          "y": 53.982
+        }
+      },
+      {
+        "semantic_id": "reward/page/back",
+        "generation": 22786,
+        "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)",
+        "point": {
+          "x": 827.0,
+          "y": 622.0
+        }
+      }
+    ],
+    "main_page_visible": true
+  },
+  "temporary_config_removed": true
+}

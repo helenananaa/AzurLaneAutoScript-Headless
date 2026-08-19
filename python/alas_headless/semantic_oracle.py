@@ -14842,8 +14842,15 @@ class SemanticOracle:
 
         button_state = self.read_state()
         page = self._unique(button_state, "dorm/page/manage")
-        if not page.actionable or self._blocking_rules(
-            button_state, "dorm/page/manage"
+        if (
+            self._blocking_rules(button_state, "dorm/page/manage")
+            or not page.active_in_hierarchy
+            or not page.active_and_enabled
+            or not page.interactable
+            or page.raycast_top not in (True, False)
+            or page.point is None
+            or page.bounds is None
+            or not page.bounds.contains(page.point)
         ):
             raise SemanticGateClosed("dorm page identity is not proven")
 
@@ -20230,7 +20237,7 @@ class SemanticOracle:
             re.fullmatch(
                 r"「[^」]+」学习完成，「[^」]+」技能获得[1-9][0-9]*点经验"
                 r"(?:[(（]技能等级提升:[1-9][0-9]?→[1-9][0-9]?[)）]！)?"
-                r"是否继续学习该技能？",
+                r"是否继续学习该(?:角色)?技能？",
                 plain,
             )
             and cancel == "取消"
@@ -20247,7 +20254,7 @@ class SemanticOracle:
         return bool(
             re.fullmatch(
                 r"服务器连接失败，是否重新连接？\s*"
-                r"\[(?:NetworkDown|HostNotFound)\]",
+                r"\[(?:NetworkDown|HostNotFound|ConnectionReset)\]",
                 plain,
             )
             and cancel == "取消"

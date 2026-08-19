@@ -4027,6 +4027,31 @@ class SemanticOracleTests(unittest.TestCase):
             ),
         )
 
+    def test_dorm_state_accepts_delegated_manage_raycast_with_exact_summary(self):
+        page = "root/UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "decorate_btn",
+                    page + "bottomPanel/bottomright/decorate_btn",
+                    977,
+                    640,
+                    raycast_top=False,
+                )
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("6/6", page + "bottomPanel/bottomleft/train_btn/Text"),
+                make_text("0/40000", page + "bottomPanel/bottomleft/feed_btn/Text"),
+                make_text("454", page + "topPanel/btns/topright/comfortable/Text"),
+                make_text("1F", page + "topPanel/btns/topright/switch/Text"),
+                make_text("", page + "bottomPanel/bottomleft/feed_btn/time"),
+            ]
+        )
+
+        self.assertEqual(make_oracle(backend).dorm_state().total_slots, 6)
+
     def test_dorm_state_rejects_inconsistent_capacity(self):
         page = "root/UICamera/Canvas/UIMain/CourtYardUI(Clone)/main/"
         backend = FakeBackend(
@@ -5079,6 +5104,13 @@ class SemanticOracleTests(unittest.TestCase):
         )
         self.assertTrue(oracle.enabled("tactical/continue/cancel"))
 
+        backend.ui["texts"][0]["text"] = (
+            "<color=#92fc63>「小声望」</color>学习完成，"
+            "<color=#92fc63>「小骑士的射击训练」</color>技能获得"
+            "<color=#92fc63>1500</color>点经验是否继续学习该角色技能？"
+        )
+        self.assertTrue(oracle.enabled("tactical/continue/cancel"))
+
         backend.ui["texts"][0]["text"] = "是否购买资源？"
         self.assertFalse(oracle.enabled("tactical/continue/cancel"))
 
@@ -5292,6 +5324,11 @@ class SemanticOracleTests(unittest.TestCase):
 
         backend.ui["texts"][0]["text"] = (
             "服务器连接失败，是否重新连接？\n[HostNotFound]"
+        )
+        self.assertTrue(oracle.enabled("overlay/network-reconnect/confirm"))
+
+        backend.ui["texts"][0]["text"] = (
+            "服务器连接失败，是否重新连接？\n[ConnectionReset]"
         )
         self.assertTrue(oracle.enabled("overlay/network-reconnect/confirm"))
 

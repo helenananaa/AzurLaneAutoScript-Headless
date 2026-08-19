@@ -215,6 +215,8 @@ observation 状态。
 
 2026-08-17，原始 Tactical 任务在实机加载 `BlueT1 > RedT1 > YellowT1 > BlueT2 > RedT2 > YellowT2 > first`，对 11 本真实库存排序并选择第 9 格 `Blue_T1`，随后以一条 typed `tactical/course/confirm` 输入开课。输入预算耗尽后，第 4 槽确认处于运行中（舰船 `102011`、技能“快速装填”）；完整收据见 `integration/alas/tactical-filter-r1-live-validation-receipt.json`。因此 `Tactical.TacticalFilter` 达到五维完整支持；当前只剩限时活动快速学习槽位未完成。
 
+2026-08-19 的恢复矩阵还覆盖了已完成课程领取后的两种官方“继续学习”文案、`ConnectionReset` 精确重连、从三槽运行到第四槽开课，以及四槽全满时零预算、零 Dock/选船/教材输入且槽位身份不变；收据为 `integration/alas/tactical-empty-slot-fill-r4-live-validation-receipt.json` 与 `integration/alas/tactical-full-slot-r5-live-validation-receipt.json`。这不改变面板分类，唯一剩余项仍是当前非活动期无法出现的 `RapidTrainingSlot`。
+
 ### 1.17 本轮 EventA-D 每日关卡轮转契约
 
 `EventDaily.StageFilter` 现在与当前 `Scheduler.Command` 严格绑定：A1-A3、B1-B3、C1-C3、D1-D3 各自所有非空有序子集均合法，并保留原过滤优先级；跨分区、重复、空 token、第四关、尾随垃圾和非文本值会在枚举活动脚本前 fail-closed。`LastStage` 只接受数值 `0` 或当前分区 1-3 关。门禁特意保留在原服务器日界判断之后：过期的异常游标仍由 ALAS 先重置为 `0`，未过期的跨分区游标则在运行关卡前拒绝。
@@ -275,7 +277,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 回放覆盖 1,956 种食物优先级和四种收取/喂食开关组合，共 7,824 个合法配置；原状态机仍拥有“全关则禁用并停止”、其余组合的 `dorm_run` 分派和三舰 417 分钟调度。食物边界保持严格 `fill > food`、首选食物为空时回退以及无可用食物不操作。22 个非法单字段案例均在入口事件前拒绝，mutation budget 为 0，没有领取奖励、消耗食物、导航、截图/OCR 或 Android 输入。
 
-2026-08-17 的原 ALAS 实机矩阵完成了 `Dorm.Feed` 的两条布尔路径：启用的默认优先级运行只发出动态计划的 typed 食物输入、耗尽授权并以精确库存差闭环（`integration/alas/dorm-feed-r10-live-validation-receipt.json`）；禁用运行成功且没有任何喂食输入（`integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json`）。自定义单值 `Dorm.FeedFilter="1000"` 同样通过真实 ConfigUpdater→RewardDorm 路径，它在该路径中会规范为整数，实机仅点击 `dorm/feed/item/50001` 一次，库存 `17863→17862`、食物 `38760→39454` 并回到主页（`integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json`）。2026-08-18 当前账号出现真实可领取奖励后，启用收取的原任务只消耗一次 `dorm.collect` 授权，后置快照证明精确收取控件由有变无、六个宿舍槽位不变且主页恢复（`integration/alas/dorm-collect-live-validation-receipt.json`）。连同全部 1,956 个原状态机过滤器回放、每张卡片读写边界的新鲜帧证明和非法值零输入契约，`Dorm.Collect`、`Dorm.Feed` 与 `Dorm.FeedFilter` 均达到五维完整支持。
+2026-08-17 的原 ALAS 实机矩阵完成了 `Dorm.Feed` 的两条布尔路径：启用的默认优先级运行只发出动态计划的 typed 食物输入、耗尽授权并以精确库存差闭环（`integration/alas/dorm-feed-r10-live-validation-receipt.json`）；禁用运行成功且没有任何喂食输入（`integration/alas/dorm-feed-r11-disabled-live-validation-receipt.json`）。自定义单值 `Dorm.FeedFilter="1000"` 同样通过真实 ConfigUpdater→RewardDorm 路径，它在该路径中会规范为整数，实机仅点击 `dorm/feed/item/50001` 一次，库存 `17863→17862`、食物 `38760→39454` 并回到主页（`integration/alas/dorm-feed-r13-filter-1000-live-validation-receipt.json`）。2026-08-19 在食物槽 `0/40000` 的实机状态下，单值 `Dorm.FeedFilter="20000"` 由原任务进入喂食页后精确识别库存为零，零 typed 食物输入、六档库存不变并恢复主页（`integration/alas/dorm-feed-r14-filter-20000-no-stock-live-validation-receipt.json`）；实际消耗 20000 食物的正向后置条件仍需账号先取得至少一个该食物。2026-08-18 当前账号出现真实可领取奖励后，启用收取的原任务只消耗一次 `dorm.collect` 授权，后置快照证明精确收取控件由有变无、六个宿舍槽位不变且主页恢复（`integration/alas/dorm-collect-live-validation-receipt.json`）。连同全部 1,956 个原状态机过滤器回放、每张卡片读写边界的新鲜帧证明和非法值零输入契约，`Dorm.Collect`、`Dorm.Feed` 与 `Dorm.FeedFilter` 均达到五维完整支持。
 
 ### 1.27 本轮 Commission 预设、自定义规则与重大委托契约
 

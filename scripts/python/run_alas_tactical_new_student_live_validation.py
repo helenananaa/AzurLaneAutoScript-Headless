@@ -102,6 +102,10 @@ def _receipt_value(receipt: object | None) -> dict[str, Any] | None:
 def _ensure_reward_page(oracle: Any) -> None:
     from alas_headless.semantic_oracle import SemanticGateClosed
 
+    if oracle.enabled("overlay/network-reconnect/confirm"):
+        reconnect = oracle.click("overlay/network-reconnect/confirm")
+        time.sleep(1.5)
+        oracle.read_state()
     if oracle.exists("reward/page/back"):
         return
     try:
@@ -192,6 +196,9 @@ def validate(
     allow_tactical_rewards: bool,
     tactical_assign_budget: int,
     expect_assignment: bool,
+    expect_reward_claim: bool,
+    expected_assignment_count: int,
+    expect_no_slot: bool,
 ) -> Mapping[str, Any]:
     if not 1 <= min_level <= 125:
         raise ValueError("min_level must be in 1..125")
@@ -199,6 +206,25 @@ def validate(
         raise ValueError("tactical_assign_budget must be non-negative")
     if not isinstance(expect_assignment, bool):
         raise TypeError("expect_assignment must be boolean")
+    if not isinstance(expect_reward_claim, bool):
+        raise TypeError("expect_reward_claim must be boolean")
+    if not isinstance(expect_no_slot, bool):
+        raise TypeError("expect_no_slot must be boolean")
+    if (
+        not isinstance(expected_assignment_count, int)
+        or isinstance(expected_assignment_count, bool)
+        or expected_assignment_count < 0
+        or expected_assignment_count > tactical_assign_budget
+        or expect_assignment is not (expected_assignment_count > 0)
+    ):
+        raise ValueError("expected assignment count is inconsistent with its budget")
+    if expect_no_slot and (
+        not enabled
+        or expect_assignment
+        or expected_assignment_count != 0
+        or tactical_assign_budget != 0
+    ):
+        raise ValueError("full-slot validation must be enabled with a zero mutation budget")
     seed_path = alas_root / "config" / (seed_config + ".json")
     seed = _read_json(seed_path)
     serial = seed["Alas"]["Emulator"]["Serial"]
@@ -227,6 +253,7 @@ def validate(
     reward_clicks: list[dict[str, Any]] = []
     favorite_calls: list[dict[str, Any]] = []
     selected_ships: list[dict[str, Any]] = []
+    continue_prompts_cancelled: list[str] = []
     before: Mapping[str, Any] | None = None
     prior_environment = {
         name: os.environ.get(name)
@@ -236,7 +263,7 @@ def validate(
         )
     }
     try:
-        if not enabled or not expect_assignment:
+        if not enabled or not expect_assignment or not allow_tactical_rewards:
             before = _tactical_snapshot(serial, driver_revision)
         modules = _load_modules(
             alas_root,
@@ -248,6 +275,25 @@ def validate(
         instance.config.bind("Tactical")
         semantic_session = instance.device.semantic_adapter
         adapter = semantic_session.open()
+        if adapter.oracle.tactical_continue_prompt_text() is not None:
+            adapter.begin_tactical()
+            try:
+                for _ in range(8):
+                    prompt = adapter.oracle.tactical_continue_prompt_text()
+                    if prompt is None:
+                        break
+                    if not adapter.cancel_tactical_continue_if_present():
+                        raise AssertionError(
+                            "Tactical continue prompt did not accept reviewed cancel"
+                        )
+                    continue_prompts_cancelled.append(prompt)
+                    time.sleep(0.75)
+                else:
+                    raise AssertionError(
+                        "Tactical continue prompt recovery exceeded its bound"
+                    )
+            finally:
+                adapter.end_commission()
         _ensure_reward_page(adapter.oracle)
         original_dispatch = adapter._dispatch_mutation
         original_click = semantic_session.click
@@ -304,57 +350,76 @@ def validate(
             expected_favourite_action = "enhancement/dock/favourite/" + (
                 "on" if favorite else "off"
             )
-            if len(favorite_calls) != 1 or any(
+            expected_favorite_calls = (
+                0
+                if expect_no_slot
+                else (expected_assignment_count if expect_assignment else 1)
+            )
+            if len(favorite_calls) != expected_favorite_calls or any(
                 item["enabled"] is not favorite for item in favorite_calls
             ):
                 raise AssertionError("configured favourite value was not applied in Dock")
             if expect_assignment:
-                if len(dispatches) != 1 or any(
+                if len(dispatches) != expected_assignment_count or any(
                     item["capability"] != "tactical.assign" for item in dispatches
                 ):
                     raise AssertionError(
-                        "enabled Tactical task did not start a typed course"
+                        "enabled Tactical task did not start the expected typed courses"
                     )
                 if any(
-                    item["receipt"] is None
-                    or item["receipt"]["semantic_id"] != expected_favourite_action
+                    item["receipt"] is not None
+                    and item["receipt"]["semantic_id"] != expected_favourite_action
                     for item in favorite_calls
                 ):
                     raise AssertionError(
-                        "Dock favourite action did not use its exact live layer"
+                        "Dock favourite action did not preserve its exact live layer"
                     )
-                if len(selected_ships) != 1:
+                if len(selected_ships) != expected_assignment_count:
                     raise AssertionError(
-                        "enabled Tactical task did not select exactly one ship"
+                        "enabled Tactical task did not select the expected ships"
                     )
             else:
                 if dispatches or selected_ships:
-                    raise AssertionError(
-                        "min-level no-candidate run unexpectedly assigned a course"
-                    )
-                candidates = favorite_calls[0]["candidates_after"]
-                if any(candidate["level"] >= min_level for candidate in candidates):
-                    raise AssertionError(
-                        "min-level no-candidate run still exposed an eligible ship"
-                    )
+                    raise AssertionError("no-assignment Tactical task assigned a course")
+                if expect_no_slot:
+                    if len(before["slots"]) != 4 or any(
+                        slot["status"] != "running" for slot in before["slots"]
+                    ):
+                        raise AssertionError(
+                            "full-slot validation did not begin with four running courses"
+                        )
+                else:
+                    candidates = favorite_calls[0]["candidates_after"]
+                    if any(candidate["level"] >= min_level for candidate in candidates):
+                        raise AssertionError(
+                            "min-level no-candidate run still exposed an eligible ship"
+                        )
         else:
             if dispatches or favorite_calls:
                 raise AssertionError("disabled Tactical task unexpectedly entered assignment")
-        if allow_tactical_rewards:
+        if expect_reward_claim:
             if len(reward_clicks) != 1:
                 raise AssertionError("Tactical reward claim was not exactly once")
         elif reward_clicks:
-            raise AssertionError("Tactical reward claim occurred without its opt-in")
+            raise AssertionError("Tactical reward claim was not expected")
         result["dispatches"] = dispatches
         result["reward_clicks"] = reward_clicks
         result["favorite_calls"] = favorite_calls
         result["selected_ships"] = selected_ships
+        result["continue_prompts_cancelled"] = continue_prompts_cancelled
         result["before"] = before
         semantic_session.close()
         instance.device.semantic_adapter = None
         result["after"] = _tactical_snapshot(serial, driver_revision)
         if enabled and expect_assignment and not result["after"]["slots"]:
             raise AssertionError("enabled Tactical task left no typed running course")
+        if enabled and expect_assignment and before is not None:
+            if len(result["after"]["slots"]) != (
+                len(before["slots"]) + expected_assignment_count
+            ):
+                raise AssertionError(
+                    "typed running-course delta does not match assignment count"
+                )
         if not enabled or not expect_assignment:
             assert before is not None
             before_slots = tuple(
@@ -375,6 +440,7 @@ def validate(
         result["reward_clicks"] = reward_clicks
         result["favorite_calls"] = favorite_calls
         result["selected_ships"] = selected_ships
+        result["continue_prompts_cancelled"] = continue_prompts_cancelled
         result["before"] = before
         if adapter is not None:
             result["tactical_assign_grant_remaining"] = adapter._action_ledger.remaining(
@@ -404,6 +470,9 @@ def validate(
         "allow_tactical_rewards": allow_tactical_rewards,
         "tactical_assign_budget": tactical_assign_budget,
         "expect_assignment": expect_assignment,
+        "expected_assignment_count": expected_assignment_count,
+        "expect_reward_claim": expect_reward_claim,
+        "expect_no_slot": expect_no_slot,
         "source_sha256": {
             "tactical": _sha256(alas_root / "module" / "tactical" / "tactical_class.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),
@@ -551,6 +620,13 @@ def main() -> int:
     parser.add_argument(
         "--expect-assignment", choices=("true", "false"), default="true"
     )
+    parser.add_argument("--expected-assignment-count", type=int)
+    parser.add_argument(
+        "--expect-reward-claim", choices=("true", "false")
+    )
+    parser.add_argument(
+        "--expect-no-slot", choices=("true", "false"), default="false"
+    )
     parser.add_argument("--driver-revision", required=True)
     parser.add_argument("--resume-from", type=Path)
     parser.add_argument("--expected-ship-id", type=int)
@@ -568,8 +644,21 @@ def main() -> int:
         "tactical_assign_budget": arguments.tactical_assign_budget,
     }
     if arguments.resume_from is None:
+        expect_assignment = arguments.expect_assignment == "true"
         result = validate(
-            **common, expect_assignment=arguments.expect_assignment == "true"
+            **common,
+            expect_assignment=expect_assignment,
+            expected_assignment_count=(
+                (1 if expect_assignment else 0)
+                if arguments.expected_assignment_count is None
+                else arguments.expected_assignment_count
+            ),
+            expect_reward_claim=(
+                arguments.allow_tactical_rewards == "true"
+                if arguments.expect_reward_claim is None
+                else arguments.expect_reward_claim == "true"
+            ),
+            expect_no_slot=arguments.expect_no_slot == "true",
         )
     else:
         if arguments.expected_ship_id is None:
