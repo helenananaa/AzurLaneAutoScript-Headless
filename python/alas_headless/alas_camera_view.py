@@ -318,8 +318,42 @@ class AlasSemanticCampaignView:
             and len(added_enemies) == 1
             and next(iter(added_enemies)).genre == "Boss"
         )
+        before_fleets = {
+            fleet.marker: fleet for fleet in self.semantic_state.fleets
+        }
+        after_fleets = {
+            fleet.marker: fleet for fleet in current.semantic_state.fleets
+        }
+        current_marker = current.semantic_state.current_fleet_marker
+        before_fleet = before_fleets.get(current_marker)
+        after_fleet = after_fleets.get(current_marker)
+        same_static_state = (
+            before_signature[:5] == after_signature[:5]
+            and before_signature[7:] == after_signature[7:]
+        )
+        post_combat_wave = bool(
+            same_static_state
+            and before_fleet is not None
+            and after_fleet is not None
+            and set(before_fleets) == set(after_fleets)
+            and all(
+                before_fleets[marker] == after_fleets[marker]
+                for marker in before_fleets
+                if marker != current_marker
+            )
+            and before_fleet.node != after_fleet.node
+            and after_fleet.ammo == max(0, before_fleet.ammo - 1)
+            and after_fleet.ammo_capacity == before_fleet.ammo_capacity
+            and len(removed_enemies) == 1
+            and next(iter(removed_enemies)).node == after_fleet.node
+            and all(not enemy.fighting for enemy in added_enemies)
+        )
         if (
-            (before_signature != after_signature and not additive_boss)
+            (
+                before_signature != after_signature
+                and not additive_boss
+                and not post_combat_wave
+            )
             or after.generation <= before.generation
         ):
             raise SemanticGateClosed("ALAS camera swipe prediction changed map state")
@@ -330,7 +364,44 @@ class AlasSemanticCampaignView:
         # ALAS requests at most (4, 3), but Unity clamps the camera at a map
         # edge after applying the fractional center correction.  The observed
         # logical delta can therefore be one cell larger on either axis.
-        if delta == (0, 0) or abs(delta[0]) > 5 or abs(delta[1]) > 4:
+        if delta == (0, 0):
+            fractional_delta = float(
+                np.linalg.norm(
+                    np.asarray(after.center_offset)
+                    - np.asarray(before.center_offset)
+                )
+            )
+            # A large requested swipe can be clamped against a map edge while
+            # still moving every projected cell by a coherent fraction of one
+            # grid unit.  The typed viewport proof already verifies that
+            # physical displacement; preserve ALAS's integer camera location
+            # for this bounded fractional-edge case.  A true no-op is also
+            # valid when the exact requested target remains at the identical
+            # in-screen point; the owning oracle has separately required it
+            # to be the unique top raycast after the edge-clamped gesture.
+            stable_target = bool(
+                post_combat_wave
+                or (
+                    after.target_node is not None
+                    and (
+                        before.target_node is None
+                        or (
+                            before.target_node == after.target_node
+                            and before.target_path == after.target_path
+                            and before.target_point == after.target_point
+                            and before.target_bounds == after.target_bounds
+                        )
+                    )
+                    and after.target_point is not None
+                    and after.target_bounds is not None
+                    and after.target_bounds.contains(after.target_point)
+                )
+            )
+            if not (0.05 <= fractional_delta <= 0.75 or stable_target):
+                raise SemanticGateClosed(
+                    "ALAS camera observed swipe is outside limits"
+                )
+        elif abs(delta[0]) > 5 or abs(delta[1]) > 4:
             raise SemanticGateClosed("ALAS camera observed swipe is outside limits")
         return delta
 

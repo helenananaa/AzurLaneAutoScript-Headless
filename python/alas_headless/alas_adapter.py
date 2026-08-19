@@ -383,6 +383,7 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "LOGIN_ANNOUNCE_2": "overlay/bulletin/close",
     "LOGIN_RETURN_SIGN": "event-list/page/back",
     "AUTO_SEARCH_MENU_EXIT": "reward/campaign-total/exit",
+    "AUTO_SEARCH_MENU_CONTINUE": "reward/campaign-total/continue",
     "POPUP_CANCEL": "overlay/network-reconnect/cancel",
     "POPUP_CONFIRM": "overlay/network-reconnect/confirm",
     "POPUP_CONFIRM_UI_ADDITIONAL": "overlay/network-reconnect/confirm",
@@ -2149,9 +2150,13 @@ class AlasSemanticAdapter:
 
         self._package_gate()
         context = self._require_campaign_context()
-        if stage_code != context.stage_code or stage_code != "12-4":
+        if stage_code != context.stage_code:
             raise SemanticGateClosed(
                 "campaign auto-search completion identity changed"
+            )
+        if context.mode == "normal" and stage_code != "12-4":
+            raise SemanticGateClosed(
+                "normal campaign auto-search completion is qualified only for 12-4"
             )
         if context.sortie_proof is None or context.auto_search_role_state is None:
             raise SemanticGateClosed(
@@ -2213,6 +2218,34 @@ class AlasSemanticAdapter:
             "campaign auto-search did not reach the total-reward panel in time"
         )
 
+    def continue_campaign_hard_auto_search(self) -> ActionReceipt:
+        """Spend one remaining sortie lease on the exact official Continue button."""
+
+        self._package_gate()
+        context = self._require_campaign_context()
+        if context.mode != "hard":
+            raise SemanticGateClosed(
+                "campaign auto-search continue is qualified only for hard mode"
+            )
+        if context.auto_search_completion is None:
+            raise SemanticGateClosed(
+                "campaign auto-search continue requires a proven result"
+            )
+        if not self._action_ledger.allowed("campaign.sortie"):
+            raise SemanticGateClosed(
+                "campaign auto-search continue requires a remaining sortie budget"
+            )
+        receipt = self._dispatch_mutation(
+            "campaign.sortie",
+            lambda: self.oracle.click("reward/campaign-total/continue"),
+        )
+        context.sortie_receipt = receipt
+        context.sortie_proof = None
+        context.map_entry_state = None
+        context.auto_search_completion = None
+        context.passive_transition_until = time.monotonic() + 60.0
+        return receipt
+
     @staticmethod
     def _campaign_fleet_tuple(
         state: CampaignFleetSelectionState,
@@ -2243,10 +2276,6 @@ class AlasSemanticAdapter:
 
         self._package_gate()
         context = self._require_campaign_context()
-        if context.mode != "normal":
-            raise SemanticGateClosed(
-                "typed campaign fleet preparation is qualified only for normal mode"
-            )
         if fleet1 not in range(1, 7) or fleet2 not in range(0, 7) or submarine not in range(0, 7):
             raise SemanticGateClosed("campaign fleet configuration is outside 1 through 6")
         if context.initial_fleet_state is not None:
@@ -2259,6 +2288,41 @@ class AlasSemanticAdapter:
         context.requested_fleets = (fleet1, fleet2, submarine)
         if not self._action_ledger.allowed("campaign.fleet_mutation"):
             return False
+
+        if context.mode == "hard":
+            if (fleet1, fleet2, submarine) != (1, 2, 0):
+                raise SemanticGateClosed(
+                    "hard campaign requires the two fixed surface fleet rows"
+                )
+            if not initial.hard_mode:
+                raise SemanticGateClosed(
+                    "hard campaign fleet restrictions are not present"
+                )
+            rows = {row.row_key: row for row in initial.rows}
+            if set(rows) != {"fleet1", "fleet2", "submarine"}:
+                raise SemanticGateClosed("hard campaign fleet rows are incomplete")
+            if rows["submarine"].in_use:
+                raise SemanticGateClosed(
+                    "hard campaign qualification requires no submarine fleet"
+                )
+            operations = tuple(
+                "campaign/fleet-preparation/fleet/{0}/recommend".format(index)
+                for index, row_key in ((1, "fleet1"), (2, "fleet2"))
+                if rows[row_key].hard_satisfied is not True
+            )
+            context.required_fleet_mutations = len(operations)
+            context.expected_fleet_mutations = operations
+            remaining = self._action_ledger.remaining("campaign.fleet_mutation")
+            if remaining < len(operations):
+                raise SemanticGateClosed(
+                    "campaign fleet mutation budget is below the hard fleet "
+                    "recommendation requirement: {0} < {1}".format(
+                        remaining, len(operations)
+                    )
+                )
+            return True
+        if context.mode != "normal":
+            raise SemanticGateClosed("campaign fleet mode is not reviewed")
 
         values = dict(
             zip(("fleet1", "fleet2", "submarine"), self._campaign_fleet_tuple(initial))
@@ -2320,6 +2384,56 @@ class AlasSemanticAdapter:
             )
         return True
 
+    def prepare_campaign_hard_fleets(self) -> CampaignFleetSelectionState:
+        """Apply only the preflighted official hard-fleet recommendations."""
+
+        context = self._require_campaign_context()
+        if context.mode != "hard" or context.initial_fleet_state is None:
+            raise SemanticGateClosed("hard campaign fleet preparation is not armed")
+        if context.fleet_mutation_receipts:
+            raise SemanticGateClosed(
+                "hard campaign fleet recommendations were already attempted"
+            )
+        for semantic_id in context.expected_fleet_mutations:
+            row_key = "fleet1" if "/fleet/1/" in semantic_id else "fleet2"
+            receipt = self._dispatch_mutation(
+                "campaign.fleet_mutation",
+                lambda row_key=row_key: self.oracle.click_campaign_hard_recommend(
+                    context.stage_code, row_key
+                ),
+            )
+            context.fleet_mutation_receipts.append(receipt)
+            context.passive_transition_until = time.monotonic() + 5.0
+            deadline = time.monotonic() + 8.0
+            while True:
+                observed = self.oracle.campaign_fleet_selection_state(
+                    context.stage_code,
+                    fallback_oil_cost=context.map_preparation_oil_cost,
+                )
+                row = next(item for item in observed.rows if item.row_key == row_key)
+                if row.hard_satisfied is True:
+                    break
+                if time.monotonic() >= deadline:
+                    raise SemanticGateClosed(
+                        "hard campaign fleet recommendation did not settle: "
+                        + row_key
+                    )
+                time.sleep(0.2)
+        prepared = self.oracle.campaign_fleet_selection_state(
+            context.stage_code,
+            fallback_oil_cost=context.map_preparation_oil_cost,
+        )
+        rows = {row.row_key: row for row in prepared.rows}
+        if any(rows[key].hard_satisfied is not True for key in ("fleet1", "fleet2")):
+            raise SemanticGateClosed("hard campaign fixed fleet slots are incomplete")
+        if not prepared.hard_requirements or any(
+            not requirement.satisfied for requirement in prepared.hard_requirements
+        ):
+            raise SemanticGateClosed(
+                "hard campaign global fleet requirements are not satisfied"
+            )
+        return prepared
+
     def campaign_fleet_row_allowed(self, row_key: str) -> bool:
         # Early campaign stages can explicitly cap the panel at one surface
         # fleet and zero submarines.  Such rows are typed but intentionally do
@@ -2335,9 +2449,7 @@ class AlasSemanticAdapter:
     ) -> Optional[bool]:
         if not self.campaign_fleet_operator_is_hard(row_key):
             return None
-        raise SemanticGateClosed(
-            "hard-mode campaign fleet restrictions are not typed"
-        )
+        return self._campaign_fleet_row(row_key).hard_satisfied
 
     def campaign_fleet_operator_in_use(self, row_key: str) -> bool:
         return self._campaign_fleet_row(row_key).in_use
@@ -2388,14 +2500,10 @@ class AlasSemanticAdapter:
     def ensure_campaign_auto_search_roles(
         self, fleet_order: str
     ) -> CampaignAutoSearchRoleState:
-        """Ensure one official mob fleet and one official boss fleet on 12-4."""
+        """Ensure the exact official auto-search duties for the active mode."""
 
         self._package_gate()
         context = self._require_campaign_context()
-        if context.stage_code != "12-4" or context.mode != "normal":
-            raise SemanticGateClosed(
-                "campaign auto-search roles are qualified only for normal 12-4"
-            )
         if context.prepared_fleet_state is None or context.requested_fleets is None:
             raise SemanticGateClosed(
                 "campaign auto-search roles require proven fleet selection"
@@ -2404,10 +2512,37 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "campaign auto-search roles require fleet 1 and fleet 2 only"
             )
-        expected = {
-            "fleet1_mob_fleet2_boss": ("mob", "boss"),
-            "fleet1_boss_fleet2_mob": ("boss", "mob"),
-        }.get(fleet_order)
+        if context.mode == "normal":
+            if context.stage_code != "12-4":
+                raise SemanticGateClosed(
+                    "normal campaign auto-search roles are qualified only for 12-4"
+                )
+            expected = {
+                "fleet1_mob_fleet2_boss": ("mob", "boss"),
+                "fleet1_boss_fleet2_mob": ("boss", "mob"),
+            }.get(fleet_order)
+        elif context.mode == "hard":
+            # CN 9.7.10 removed the legacy DutySelect surface.  Its replacement
+            # third tab is ship-position adjustment and must never be clicked
+            # as though it selected all/standby duties.  Keep only the default
+            # HardFleet=1 compatibility value and prove the exact new
+            # game-managed surface read-only.
+            if fleet_order != "fleet1_all_fleet2_standby":
+                raise SemanticGateClosed(
+                    "HardFleet=2 is not qualified on the game-managed 9.7.10 UI"
+                )
+            state = self.oracle.campaign_auto_search_role_state()
+            if (state.fleet1_role, state.fleet2_role) != (
+                "game-managed",
+                "game-managed",
+            ):
+                raise SemanticGateClosed(
+                    "hard campaign game-managed auto-search proof changed"
+                )
+            context.auto_search_role_state = state
+            return state
+        else:
+            expected = None
         if expected is None:
             raise SemanticGateClosed(
                 "campaign auto-search requires one mob fleet and one boss fleet"
@@ -2479,12 +2614,17 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign sortie was already authorized")
         if not self._action_ledger.allowed("campaign.sortie"):
             return False
-        if self._action_ledger.remaining("campaign.sortie") != 1:
+        remaining_sorties = self._action_ledger.remaining("campaign.sortie")
+        if context.mode == "normal" and remaining_sorties != 1:
             raise SemanticGateClosed(
                 "campaign sortie is qualified only with an exact budget of one"
             )
-        if context.mode != "normal":
-            raise SemanticGateClosed("campaign sortie is qualified only in normal mode")
+        if context.mode == "hard" and remaining_sorties not in (1, 2, 3):
+            raise SemanticGateClosed(
+                "hard campaign sortie budget must match one through three remaining runs"
+            )
+        if context.mode not in ("normal", "hard"):
+            raise SemanticGateClosed("campaign sortie mode is not reviewed")
         if context.prepared_fleet_state is None or context.requested_fleets is None:
             raise SemanticGateClosed("campaign fleet selection was not proven")
         sortie_profiles = {
@@ -2502,14 +2642,26 @@ class AlasSemanticAdapter:
         if use_2x_book is not False:
             raise SemanticGateClosed("campaign sortie requires 2x book disabled")
         if use_auto_search:
-            if context.stage_code != "12-4" or context.requested_fleets != (1, 2, 0):
+            if (
+                context.mode == "normal"
+                and (
+                    context.stage_code != "12-4"
+                    or context.requested_fleets != (1, 2, 0)
+                )
+            ):
                 raise SemanticGateClosed(
                     "campaign auto-search sortie is qualified only for two-fleet 12-4"
                 )
-            expected_roles = {
-                "fleet1_mob_fleet2_boss": ("mob", "boss"),
-                "fleet1_boss_fleet2_mob": ("boss", "mob"),
-            }.get(fleet_order)
+            expected_roles = (
+                {
+                    "fleet1_mob_fleet2_boss": ("mob", "boss"),
+                    "fleet1_boss_fleet2_mob": ("boss", "mob"),
+                }
+                if context.mode == "normal"
+                else {"fleet1_all_fleet2_standby": (
+                    "game-managed", "game-managed"
+                )}
+            ).get(fleet_order)
             role_state = context.auto_search_role_state
             if (
                 expected_roles is None
@@ -2522,6 +2674,14 @@ class AlasSemanticAdapter:
                 )
         elif use_auto_search is not False:
             raise SemanticGateClosed("campaign auto-search setting is malformed")
+        if context.mode == "hard" and not use_auto_search and not (
+            context.stage_code == "11-4"
+            and context.requested_fleets == (1, 2, 0)
+            and fleet_order == "fleet1_mob_fleet2_boss"
+        ):
+            raise SemanticGateClosed(
+                "manual hard campaign is qualified only for two-fleet 11-4"
+            )
         if submarine_mode != "do_not_use":
             raise SemanticGateClosed(
                 "campaign sortie requires submarine mode do_not_use"
@@ -2532,6 +2692,22 @@ class AlasSemanticAdapter:
             )
 
         prepared = context.prepared_fleet_state
+        if context.mode == "hard":
+            hard_rows = {row.row_key: row for row in prepared.rows}
+            if not prepared.hard_mode or any(
+                hard_rows[key].hard_satisfied is not True
+                for key in ("fleet1", "fleet2")
+            ):
+                raise SemanticGateClosed(
+                    "hard campaign fleet restrictions are not satisfied"
+                )
+            if not prepared.hard_requirements or any(
+                not requirement.satisfied
+                for requirement in prepared.hard_requirements
+            ):
+                raise SemanticGateClosed(
+                    "hard campaign global requirements are not satisfied"
+                )
         rows = {row.row_key: row for row in prepared.rows}
         if set(rows) != {"fleet1", "fleet2", "submarine"}:
             raise SemanticGateClosed("campaign sortie fleet rows are incomplete")
@@ -3139,6 +3315,11 @@ class AlasSemanticAdapter:
     def daily_execution_receipts(self) -> Tuple[ActionReceipt, ...]:
         return tuple(self._daily_execution_receipts)
 
+    def daily_execution_active(self) -> bool:
+        """Return whether the result owner is the bounded Daily flow."""
+
+        return self._daily_kind is not None and self._campaign_context is None
+
     def server_maintenance_visible(self) -> bool:
         self._package_gate()
         return self.oracle.server_maintenance_visible()
@@ -3415,6 +3596,11 @@ class AlasSemanticAdapter:
             now = time.monotonic()
             if self._observer_stale_since is None:
                 self._observer_stale_since = now
+            if (
+                self._campaign_context is not None
+                and now <= self._campaign_context.passive_transition_until
+            ):
+                return False
             if now - self._observer_stale_since <= 5.0:
                 return False
             raise
@@ -5976,6 +6162,11 @@ class AlasSemanticAdapter:
         context = self._require_campaign_context()
         return self.oracle.campaign_map_achievement_state(context.stage_code)
 
+    def campaign_map_clear_percentage(self) -> float:
+        self._package_gate()
+        context = self._require_campaign_context()
+        return self.oracle.campaign_map_clear_percentage(context.stage_code)
+
     def campaign_auto_search_selected(self) -> bool:
         self._package_gate()
         self._require_campaign_context()
@@ -6049,9 +6240,13 @@ class AlasSemanticAdapter:
 
         self._package_gate()
         context = self._require_campaign_context()
-        if context.mode != "normal":
+        if context.mode == "hard" and context.stage_code != "11-4":
             raise SemanticGateClosed(
-                "campaign map model is qualified only in normal mode"
+                "hard campaign map model is qualified only for 11-4"
+            )
+        if context.mode not in ("normal", "hard"):
+            raise SemanticGateClosed(
+                "campaign map model mode is not reviewed"
             )
         state = self.oracle.campaign_map_state(
             context.stage_code,
@@ -6303,6 +6498,7 @@ class AlasSemanticAdapter:
 
         self._package_gate()
         context = self._require_campaign_context()
+        self._rebase_campaign_partial_route_if_proven(context)
         combat_ready = (
             self._action_ledger.allowed("campaign.viewport_swipe")
             and self._action_ledger.remaining("campaign.viewport_swipe") >= 1
@@ -6425,6 +6621,63 @@ class AlasSemanticAdapter:
                 )
         context.viewport_swipe_intent = intent
         return intent
+
+    def _rebase_campaign_partial_route_if_proven(
+        self, context: _CampaignFlowContext
+    ) -> None:
+        """Re-arm the same target after Unity stops at a route waypoint.
+
+        On hard maps a single destination tap may legally move only part of
+        the already-admitted route.  Re-arm no input unless the complete map
+        identity is unchanged, ammunition is unchanged, and the same fleet is
+        observed at one strict interior node of that route.
+        """
+
+        admission = context.combat_admission
+        state = context.map_state
+        if (
+            admission is None
+            or state is None
+            or context.combat_receipt is None
+            or len(context.combat_route_receipts) != len(admission.input_nodes)
+            or self._campaign_post_combat_state_proven(context, state)
+        ):
+            return
+        self._validate_campaign_combat_route_state(
+            context, state, for_next_input=False
+        )
+        fleets = tuple(
+            fleet for fleet in state.fleets if fleet.marker == admission.fleet_marker
+        )
+        if len(fleets) != 1:
+            raise SemanticGateClosed("campaign partial route fleet is ambiguous")
+        current_node = fleets[0].node
+        if current_node not in admission.route_nodes[1:-1]:
+            return
+        route_index = admission.route_nodes.index(current_node)
+        target = next(
+            (cell for cell in state.cells if cell.node == admission.target_node),
+            None,
+        )
+        if target is None:
+            raise SemanticGateClosed("campaign partial route target disappeared")
+        context.combat_admission = replace(
+            admission,
+            generation=state.generation,
+            input_generation=state.generation,
+            origin_node=current_node,
+            route_nodes=admission.route_nodes[route_index:],
+            input_nodes=(admission.target_node,),
+            cell_path=target.button_path,
+            point=target.point,
+            bounds=target.bounds,
+            map_signature=state.signature,
+        )
+        context.combat_route_receipts.clear()
+        context.combat_receipt = None
+        context.viewport_swipe_proof = None
+        context.target_recheck_proof = None
+        context.viewport_swipe_required = False
 
     def recover_campaign_map_network_reconnect(self) -> bool:
         """Dismiss one exact NetworkDown prompt before ALAS moves the camera.
@@ -6755,6 +7008,7 @@ class AlasSemanticAdapter:
                 rows=context.map_rows,
                 land_cells=context.map_land_cells,
                 expected_fleet_count=context.map_expected_fleet_count,
+                allow_enemy_additions=post_combat,
             ),
         )
         context.map_state = proof.post_state
@@ -7030,7 +7284,9 @@ class AlasSemanticAdapter:
                 "campaign target recheck changed viewport identity"
             )
         target = self.oracle.campaign_map_cell_input(
-            state, target_node
+            state,
+            target_node,
+            allow_expected_enemy_coverage=True,
         )
         if target.path != expected_path:
             raise SemanticGateClosed("campaign target recheck changed cell path")
@@ -7142,12 +7398,14 @@ class AlasSemanticAdapter:
                     "campaign combat route has not reached its previous input"
                 )
         else:
-            prior_node = (
-                admission.origin_node
-                if route_index <= 1
-                else admission.input_nodes[route_index - 2]
-            )
-            if fleets[0].node not in (prior_node, previous_node):
+            # A single ALAS destination click makes Unity animate the fleet
+            # through every cell of the already-admitted route.  Camera and
+            # arrival probes may observe any of those intermediate nodes
+            # before ChapterPreCombatUI mounts.  No extra input is authorized:
+            # the complete enemy/pickup/fleet identity below must remain the
+            # admitted baseline and ammo cannot change.
+            allowed_progress = set(admission.route_nodes)
+            if fleets[0].node not in allowed_progress:
                 raise SemanticGateClosed(
                     "campaign combat route fleet left its admitted progress"
                 )
@@ -7285,14 +7543,26 @@ class AlasSemanticAdapter:
             context, state, for_next_input=True
         )
         if context.viewport_swipe_required:
-            raise SemanticGateClosed(
-                "campaign combat grid input requires proven viewport movement"
+            # The admitted frame can observe the destination under a passing
+            # fleet animation even though ALAS reaches its click several
+            # seconds later.  Waive the stale swipe requirement only when the
+            # final fresh state proves the identical cell is now the unique
+            # actionable top raycast; otherwise this exact read still fails
+            # closed and no input is sent.
+            target = self.oracle.campaign_map_cell_input(
+                state, node, allow_expected_enemy_coverage=True
             )
-        target = self.oracle.campaign_map_cell_input(state, node)
+            context.viewport_swipe_required = False
+        else:
+            target = self.oracle.campaign_map_cell_input(
+                state, node, allow_expected_enemy_coverage=True
+            )
         assert target.point is not None and target.bounds is not None
         receipt = self._dispatch_mutation(
             "campaign.grid_click",
-            lambda: self.oracle.click_campaign_map_cell(state, node),
+            lambda: self.oracle.click_campaign_map_cell(
+                state, node, allow_expected_enemy_coverage=True
+            ),
         )
         # The ADB tap has happened.  Consume and record the lease before any
         # subsequent assertion so an anomalous receipt can never be replayed.
@@ -7334,6 +7604,25 @@ class AlasSemanticAdapter:
 
         context = self._campaign_context
         return context is not None and context.combat_admission is not None
+
+    def handle_campaign_ambush(self, *, evade: bool) -> bool:
+        """Resolve one exact official ambush popup inside the campaign lease."""
+
+        self._package_gate()
+        context = self._require_campaign_context()
+        if not self.oracle.campaign_ambush_visible(evade=evade):
+            return False
+        if (
+            not self._action_ledger.allowed("campaign.grid_click")
+            or self._action_ledger.remaining("campaign.grid_click") < 1
+        ):
+            raise SemanticGateClosed("campaign ambush requires remaining budget")
+        self._dispatch_mutation(
+            "campaign.grid_click",
+            lambda: self.oracle.click_campaign_ambush(evade=evade),
+        )
+        context.passive_transition_until = time.monotonic() + 20.0
+        return True
 
     def confirm_campaign_combat(
         self,
@@ -7994,6 +8283,11 @@ class AlasSemanticAdapter:
                 time.monotonic() + 5.0
             )
             return receipt
+        if (
+            self._campaign_context is not None
+            and name == "AUTO_SEARCH_MENU_CONTINUE"
+        ):
+            return self.continue_campaign_hard_auto_search()
         if self._campaign_context is not None and name == "STRATEGY_OPENED":
             receipt = self.oracle.click_campaign_strategy_close()
             self._campaign_context.passive_transition_until = (
@@ -8185,10 +8479,16 @@ class AlasSemanticAdapter:
             return receipt
         if self._campaign_context is not None and name == "FLEET_PREPARATION":
             context = self._require_campaign_context()
+            remaining_sorties = self._action_ledger.remaining("campaign.sortie")
+            exact_sortie_budget = (
+                remaining_sorties == 1
+                if context.mode == "normal"
+                else remaining_sorties in (1, 2, 3)
+            )
             if (
                 not context.sortie_authorized
                 or not self._action_ledger.allowed("campaign.sortie")
-                or self._action_ledger.remaining("campaign.sortie") != 1
+                or not exact_sortie_budget
                 or context.sortie_receipt is not None
                 or context.prepared_fleet_state is None
             ):
@@ -8487,7 +8787,12 @@ class AlasSemanticAdapter:
             context.passive_transition_until = time.monotonic() + 20.0
             return receipt
         if self._campaign_context is not None and name == "BACK_ARROW":
-            receipt = self.oracle.click("event-list/page/back")
+            if self.oracle.daily_precombat_visible():
+                receipt = self.oracle.click_daily_precombat_back()
+            elif self.oracle.daily_page_visible():
+                receipt = self.oracle.click_daily_control("daily/page/back")
+            else:
+                receipt = self.oracle.click("event-list/page/back")
             self._campaign_context.passive_transition_until = (
                 time.monotonic() + 20.0
             )
@@ -10385,6 +10690,9 @@ class AlasSemanticSession:
             )
             or message
             in (
+                "observer snapshot is stale",
+                "observer endpoints are not generation-coherent",
+                "campaign startup surface is not reviewed",
                 "combat fixture endpoint completeness changed",
                 "combat fixture endpoint generations disagree",
             )
@@ -10395,6 +10703,17 @@ class AlasSemanticSession:
             and adapter.campaign_combat_committed()
             and time.monotonic() <= context.passive_transition_until
         )
+
+    def campaign_is_in_map_after_combat(self) -> Optional[bool]:
+        """Return map presence, or ``None`` for one bounded mount gap."""
+
+        adapter = self.open()
+        try:
+            return adapter.oracle.campaign_is_in_map()
+        except SemanticGateClosed as exc:
+            if self._campaign_combat_transition_error(exc):
+                return None
+            raise
 
     def combat_is_loading(self) -> bool:
         if self.open().oracle.daily_combat_visible():
@@ -10947,6 +11266,9 @@ class AlasSemanticSession:
     def campaign_map_achievement_state(self) -> CampaignMapAchievementState:
         return self.open().campaign_map_achievement_state()
 
+    def campaign_map_clear_percentage(self) -> float:
+        return self.open().campaign_map_clear_percentage()
+
     def campaign_auto_search_selected(self) -> bool:
         return self.open().campaign_auto_search_selected()
 
@@ -11089,6 +11411,9 @@ class AlasSemanticSession:
     def campaign_camera_target_node(self) -> Optional[str]:
         return self.open().campaign_camera_target_node()
 
+    def handle_campaign_ambush(self, *, evade: bool) -> bool:
+        return self.open().handle_campaign_ambush(evade=evade)
+
     def recheck_campaign_combat_target_after_camera_view(
         self, state: CampaignMapState
     ) -> CampaignMapTargetRecheckProof:
@@ -11114,6 +11439,9 @@ class AlasSemanticSession:
 
     def campaign_fleet_row_allowed(self, row_key: str) -> bool:
         return self.open().campaign_fleet_row_allowed(row_key)
+
+    def prepare_campaign_hard_fleets(self) -> CampaignFleetSelectionState:
+        return self.open().prepare_campaign_hard_fleets()
 
     def campaign_fleet_operator_is_hard(self, row_key: str) -> bool:
         return self.open().campaign_fleet_operator_is_hard(row_key)
@@ -11546,6 +11874,9 @@ class AlasSemanticSession:
 
     def complete_daily_battle_result(self) -> Tuple[ActionReceipt, ...]:
         return self.open().complete_daily_battle_result()
+
+    def daily_execution_active(self) -> bool:
+        return self.open().daily_execution_active()
 
     def click_daily_back(self) -> ActionReceipt:
         self.refresh_frame()

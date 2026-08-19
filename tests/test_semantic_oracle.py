@@ -758,6 +758,45 @@ class SemanticOracleTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "ambiguous"):
             make_oracle(backend).campaign_auto_search_role_state()
 
+    def test_campaign_hard_auto_search_proves_game_managed_9710_surface(self):
+        prefix = (
+            "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/"
+            "panel/"
+        )
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "机动总值大于1250（1458）",
+                    prefix
+                    + "Fixed/limit_list/limit_elite/limit_list/condition/Text",
+                ),
+                make_text("编队", prefix + "Fixed/RightTabs/formation_btn/text"),
+                make_text("指挥喵", prefix + "Fixed/RightTabs/commander_btn/text"),
+                make_text(
+                    "编队调整", prefix + "Fixed/RightTabs/adjustment_btn/text"
+                ),
+            ],
+            toggles=[
+                make_toggle(
+                    prefix + "Fixed/RightTabs/formation_btn", checked=True
+                ),
+                make_toggle(
+                    prefix + "Fixed/RightTabs/commander_btn", checked=False
+                ),
+                make_toggle(
+                    prefix + "Fixed/RightTabs/adjustment_btn", checked=False
+                ),
+            ],
+        )
+
+        state = make_oracle(backend).campaign_auto_search_role_state()
+
+        self.assertEqual(
+            (state.fleet1_role, state.fleet2_role),
+            ("game-managed", "game-managed"),
+        )
+
     def test_campaign_official_combat_auto_state_requires_exact_checked_toggle(self):
         backend = FakeBackend([])
         backend.ui = make_ui(
@@ -2475,6 +2514,10 @@ class SemanticOracleTests(unittest.TestCase):
         backend.ui["texts"][3]["text"] = "100%"
         backend.ui["images"].pop()
         backend.ui["image_count"] -= 1
+        self.assertEqual(
+            make_oracle(backend).campaign_map_clear_percentage("12-4"),
+            1.0,
+        )
         with self.assertRaisesRegex(SemanticGateClosed, "absent or incomplete"):
             make_oracle(backend).campaign_map_achievement_state("12-4")
 
@@ -2545,6 +2588,40 @@ class SemanticOracleTests(unittest.TestCase):
         backend.buttons["buttons"][2]["raycast_top"] = False
         with self.assertRaisesRegex(SemanticGateClosed, "sortie is not proven"):
             make_oracle(backend).campaign_fleet_preparation_state("12-4")
+
+    def test_campaign_fleet_preparation_accepts_exact_hard_stage_underlay(self):
+        fleet = (
+            "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/"
+        )
+        stage = (
+            "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/float/levels/"
+            "items/Chapter_11204/main"
+        )
+        backend = FakeBackend(
+            [
+                make_button("main", stage, raycast_top=False),
+                make_button("btnBack", fleet + "btnBack", 1196, 97),
+                make_button(
+                    "start_button",
+                    fleet + "start_button",
+                    1078,
+                    585,
+                    raycast_top=True,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("舰队选择", fleet + "title/Image/text"),
+                make_text("12-4", stage + "/info/bk/title_form/title_index"),
+                make_text("TF58，翱翔于天际", stage + "/info/bk/title_form/title"),
+            ]
+        )
+
+        state = make_oracle(backend).campaign_fleet_preparation_state("12-4")
+
+        self.assertEqual(state.stage_code, "12-4")
+        self.assertTrue(state.proceed_button.actionable)
 
     def test_campaign_fleet_selection_reads_exact_rows_and_summary(self):
         fleet = "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/"
@@ -3003,6 +3080,9 @@ class SemanticOracleTests(unittest.TestCase):
         backend.ui["images"][1]["sprite"] = "sea_benningdun_2"
         event_b_state = make_oracle(backend).campaign_map_entry_state()
         self.assertEqual(event_b_state.root_path, map_root)
+        backend.ui["images"][1]["sprite"] = "sea_YW"
+        hard_11_state = make_oracle(backend).campaign_map_entry_state()
+        self.assertEqual(hard_11_state.root_path, map_root)
 
         backend.buttons["buttons"].append(
             make_button(
@@ -3023,6 +3103,38 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertIn(
             map_root + "/DragLayer/op1/retreat/retreat",
             dual_state.image_paths,
+        )
+
+    def test_campaign_auto_search_requires_owned_battle_surface_not_map_root(self):
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    "root/LevelCamera/Canvas/UIMain/LevelGrid/"
+                    "DragLayer/plane/display/mask/sea",
+                    "sea_day",
+                )
+            ],
+        )
+
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "official auto-search surface"
+        ):
+            make_oracle(backend).campaign_auto_search_active_state()
+
+        combat_root = (
+            "root/UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn"
+        )
+        backend.ui = make_ui(
+            [make_text("自动", combat_root + "/Text")],
+            generation=21,
+        )
+        active = make_oracle(backend).campaign_auto_search_active_state()
+        self.assertEqual(active.generation, 21)
+        self.assertEqual(
+            active.root_path,
+            "root/UICamera/Canvas/UIMain/CombatUIStandard(Clone)",
         )
 
     def test_campaign_map_model_is_complete_stable_and_uses_alas_topology(self):
@@ -3457,6 +3569,33 @@ class SemanticOracleTests(unittest.TestCase):
             (("srhm3", "Carrier", 3, False),),
         )
 
+    def test_campaign_map_maps_transport_piece_to_alas_treasure_genre(self):
+        backend = make_campaign_map_backend()
+        enemy_root = (
+            "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+            "chapter_cell_1_1/attachment/enemy_1001"
+        )
+        for payload in (*backend.ui_sequence, backend.ui):
+            icon = next(
+                image
+                for image in payload["images"]
+                if image["path"] == enemy_root + "/icon"
+            )
+            icon["sprite"] = "ys1"
+
+        state = make_oracle(backend).campaign_map_state(
+            "11-4",
+            columns=3,
+            rows=2,
+            land_cells=((1, 0),),
+            expected_fleet_count=2,
+        )
+
+        self.assertEqual(
+            tuple((enemy.sprite, enemy.genre, enemy.scale) for enemy in state.enemies),
+            (("ys1", "Treasure", 1),),
+        )
+
     def test_campaign_map_accepts_exact_zero_ammo_rich_text(self):
         backend = make_campaign_map_backend()
         for payload in (*backend.ui_sequence, backend.ui):
@@ -3562,6 +3701,46 @@ class SemanticOracleTests(unittest.TestCase):
 
         self.assertEqual(backend.taps, [])
 
+    def test_campaign_map_enemy_click_allows_only_exact_expected_enemy_coverage(self):
+        backend = make_campaign_map_backend()
+        oracle = make_oracle(backend)
+        state = oracle.campaign_map_state(
+            "12-4",
+            columns=3,
+            rows=2,
+            land_cells=((1, 0),),
+            expected_fleet_count=2,
+        )
+        backend.snapshot = make_snapshot(generation=12)
+        backend.buttons["generation"] = 12
+        target = next(
+            button
+            for button in backend.buttons["buttons"]
+            if button["path"].endswith("chapter_cell_quad_1_1")
+        )
+        target["raycast_top"] = False
+
+        receipt = oracle.click_campaign_map_cell(
+            state, "A1", allow_expected_enemy_coverage=True
+        )
+
+        self.assertEqual(receipt.semantic_id, "campaign/map/grid/A1")
+        self.assertEqual(backend.taps, [(100, 100)])
+
+        empty_node = next(
+            cell.node
+            for cell in state.cells
+            if cell.node not in {enemy.node for enemy in state.enemies}
+        )
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "lacks one exact enemy"
+        ):
+            oracle.click_campaign_map_cell(
+                state,
+                empty_node,
+                allow_expected_enemy_coverage=True,
+            )
+
     def test_campaign_map_cell_click_rejects_geometry_drift_and_blockers(self):
         backend = make_campaign_map_backend()
         oracle = make_oracle(backend)
@@ -3594,6 +3773,51 @@ class SemanticOracleTests(unittest.TestCase):
             oracle.click_campaign_map_cell(state, "A1")
         self.assertEqual(backend.taps, [])
 
+    def test_campaign_ambush_uses_only_exact_evade_or_fight_action(self):
+        root = "root/OverlayCamera/Overlay/UIMain/LevelAmbushView(Clone)"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "LevelAmbushView(Clone)", root, raycast_top=None
+                ),
+                make_button(
+                    "dodge_button",
+                    root + "/window/dodge_button",
+                    430,
+                    520,
+                    raycast_top=None,
+                ),
+                make_button(
+                    "fight_button",
+                    root + "/window/fight_button",
+                    850,
+                    520,
+                    raycast_top=True,
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.campaign_ambush_visible(evade=True))
+        evade = oracle.click_campaign_ambush(evade=True)
+        fight = oracle.click_campaign_ambush(evade=False)
+        self.assertEqual(evade.semantic_id, "campaign/ambush/evade")
+        self.assertEqual(fight.semantic_id, "campaign/ambush/fight")
+        self.assertEqual(backend.taps, [(430, 520), (850, 520)])
+
+        backend.buttons["buttons"][1]["raycast_top"] = False
+        with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
+            make_oracle(backend).campaign_ambush_visible(evade=True)
+
+        backend.buttons["buttons"].append(
+            make_button("loading", "root/UIOverlay/Loading(Clone)/mask")
+        )
+        backend.buttons["button_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
+            make_oracle(backend).campaign_ambush_visible(evade=False)
+
+        self.assertFalse(make_oracle(FakeBackend([])).campaign_ambush_visible(evade=True))
+
     def test_campaign_map_cell_viewport_target_allows_bounded_easing_only(self):
         backend = make_campaign_map_backend()
         oracle = make_oracle(backend)
@@ -3615,6 +3839,10 @@ class SemanticOracleTests(unittest.TestCase):
         target["adb_point"]["y"] += 0.9
         target["adb_bounds"]["top"] += 0.9
         target["adb_bounds"]["bottom"] += 0.9
+        backend.buttons["buttons"].append(
+            make_button("loading", "root/UIOverlay/Loading(Clone)/mask")
+        )
+        backend.buttons["button_count"] += 1
 
         observed = oracle.campaign_map_cell_viewport_target(state, "A1")
         self.assertEqual(observed.path, state.cells[0].button_path)
@@ -3631,6 +3859,7 @@ class SemanticOracleTests(unittest.TestCase):
         covered=True,
         nonuniform=False,
         boss_appears=False,
+        no_move=False,
     ):
         before_buttons = copy.deepcopy(backend.buttons["buttons"])
         before_ui = copy.deepcopy(backend.ui)
@@ -3646,8 +3875,16 @@ class SemanticOracleTests(unittest.TestCase):
                     continue
                 x = button["adb_point"]["x"]
                 y = button["adb_point"]["y"]
-                delta_x = 150 + 0.25 * (y - 360) if nonuniform else 200
-                delta_y = 20 + 0.05 * (x - 640) if nonuniform else 0
+                delta_x = (
+                    0
+                    if no_move
+                    else 150 + 0.25 * (y - 360) if nonuniform else 200
+                )
+                delta_y = (
+                    0
+                    if no_move
+                    else 20 + 0.05 * (x - 640) if nonuniform else 0
+                )
                 if incoherent:
                     delta_x += (80, -70, 100, -90, 45)[cell_index % 5]
                     delta_y += (45, -35, 55, -50, 30)[cell_index % 5]
@@ -3748,6 +3985,71 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(proof.target_after_point, Point(300.0, 100.0))
         self.assertGreater(proof.post_generation, proof.input_generation)
 
+    def test_campaign_map_viewport_accepts_edge_noop_for_exposed_target(self):
+        backend = make_campaign_map_backend()
+        oracle = make_oracle(backend)
+        state = oracle.campaign_map_state(
+            "12-4",
+            columns=3,
+            rows=2,
+            land_cells=((1, 0),),
+            expected_fleet_count=2,
+        )
+        self._arm_campaign_viewport_backend(
+            backend, covered=False, no_move=True
+        )
+
+        proof = oracle.campaign_map_viewport_swipe(
+            state,
+            "A1",
+            self._campaign_viewport_intent(),
+            start=(500, 400),
+            end=(700, 400),
+            duration_ms=375,
+            columns=3,
+            rows=2,
+            land_cells=((1, 0),),
+            expected_fleet_count=2,
+        )
+
+        self.assertEqual(proof.median_cell_delta, (0.0, 0.0))
+        self.assertEqual(proof.target_before_point, proof.target_after_point)
+
+    def test_campaign_map_viewport_accepts_edge_noop_at_current_fleet(self):
+        backend = make_campaign_map_backend()
+        oracle = make_oracle(backend)
+        state = oracle.campaign_map_state(
+            "12-4",
+            columns=3,
+            rows=2,
+            land_cells=((1, 0),),
+            expected_fleet_count=2,
+        )
+        next(
+            button
+            for button in backend.buttons["buttons"]
+            if button["path"].endswith("chapter_cell_quad_2_1")
+        )["raycast_top"] = False
+        self._arm_campaign_viewport_backend(
+            backend, covered=True, no_move=True
+        )
+
+        proof = oracle.campaign_map_viewport_swipe(
+            state,
+            "A2",
+            self._campaign_viewport_intent(),
+            start=(500, 400),
+            end=(700, 400),
+            duration_ms=375,
+            columns=3,
+            rows=2,
+            land_cells=((1, 0),),
+            expected_fleet_count=2,
+        )
+
+        self.assertEqual(proof.median_cell_delta, (0.0, 0.0))
+        self.assertEqual(proof.target_before_point, proof.target_after_point)
+
     def test_campaign_map_viewport_allows_exact_additive_boss_appearance(self):
         backend = make_campaign_map_backend()
         oracle = make_oracle(backend)
@@ -3776,6 +4078,35 @@ class SemanticOracleTests(unittest.TestCase):
             rows=2,
             land_cells=((1, 0),),
             expected_fleet_count=2,
+        )
+
+        self.assertEqual(proof.semantic_id, "campaign/map/viewport/A1")
+
+    def test_campaign_map_viewport_allows_additive_wave_only_when_authorized(self):
+        backend = make_campaign_map_backend()
+        oracle = make_oracle(backend)
+        state = oracle.campaign_map_state(
+            "12-4",
+            columns=3,
+            rows=2,
+            land_cells=((1, 0),),
+            expected_fleet_count=2,
+        )
+        state = dataclasses.replace(state, enemies=())
+        self._arm_campaign_viewport_backend(backend, covered=False)
+
+        proof = oracle.campaign_map_viewport_swipe(
+            state,
+            "A1",
+            self._campaign_viewport_intent(),
+            start=(500, 400),
+            end=(700, 400),
+            duration_ms=375,
+            columns=3,
+            rows=2,
+            land_cells=((1, 0),),
+            expected_fleet_count=2,
+            allow_enemy_additions=True,
         )
 
         self.assertEqual(proof.semantic_id, "campaign/map/viewport/A1")

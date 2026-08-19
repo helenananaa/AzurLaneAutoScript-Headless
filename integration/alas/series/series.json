@@ -33,7 +33,7 @@
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "007b3d625da3880ea48bd0d91850b6ab1977529191b52179cc6c99737d2e8c69"
+      "sha256": "c589afcec77b303cf31d75a5842814de2de447514d1c62af50f64b73cefd0c8d"
     },
     {
       "order": 8,
@@ -203,7 +203,7 @@
     {
       "order": 41,
       "path": "integration/alas/series/0340-campaign-auto-search-port.patch",
-      "sha256": "af24fcc8c7dfb2f6d86382aa2ed21d94f65735a1c6449c056849df47ff9b93a3"
+      "sha256": "1491d156292b0dfa9e54fa3f6b3d87dc46b566fd4f7c47a64092fc2e865fd698"
     },
     {
       "order": 42,
@@ -214,6 +214,11 @@
       "order": 43,
       "path": "integration/alas/series/0360-guild-flow-port.patch",
       "sha256": "8a559a95f3e047442a5a9d83654b628c32da546896ff9c829ea2c5547a9dde57"
+    },
+    {
+      "order": 44,
+      "path": "integration/alas/series/0370-hard-11-4-semantic-clear-port.patch",
+      "sha256": "0b1d69fd47ab08dc1dda5185df2be9d83945b9381d9cdb38aad578907a0372c1"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

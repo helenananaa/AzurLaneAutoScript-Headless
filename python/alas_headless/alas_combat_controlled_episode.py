@@ -537,9 +537,11 @@ def _validate_map_transition(
     ammo_before = combat_input["ammo_before"]
     if (
         before_fleets[0].get("ammo") != ammo_before
-        or after_fleets[0].get("ammo") != ammo_before - 1
+        or after_fleets[0].get("ammo") != max(0, ammo_before - 1)
     ):
-        raise SemanticGateClosed("controlled combat ammunition did not decrement once")
+        raise SemanticGateClosed(
+            "controlled combat ammunition did not apply one bounded decrement"
+        )
     if (
         after["generation"] <= last_action_generation
         or after["current_fleet_marker"] != marker

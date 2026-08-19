@@ -1,0 +1,242 @@
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+index 88b5f629..aaea500f 100644
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -177,6 +177,12 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+         return result
+ 
+     def execute_a_battle(self):
++        # Urgent-commission information can be raised after the previous
++        # result has already returned to the campaign map.  In semantic mode
++        # it must be dismissed through the reviewed GET_MISSION mapping before
++        # the next battle preview asks for an unobstructed grid.
++        if getattr(getattr(self, 'device', None), 'semantic_adapter', None) is not None:
++            self.handle_popup_single(name='CAMPAIGN_MAP')
+         self.semantic_prepare_a_battle()
+         logger.hr(f'{self.FUNCTION_NAME_BASE}{self.battle_count}', level=2)
+         prev = self.battle_count
+diff --git a/module/handler/ambush.py b/module/handler/ambush.py
+index 61651fd0..719d8054 100644
+--- a/module/handler/ambush.py
++++ b/module/handler/ambush.py
+@@ -120,8 +120,15 @@ class AmbushHandler(Combat):
+             return self._handle_ambush_attack()
+ 
+     def handle_ambush(self):
+-        if getattr(self.device, 'semantic_adapter', None) is not None:
+-            return False
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            if not self.config.MAP_HAS_AMBUSH:
++                return False
++            handled = semantic_adapter.handle_campaign_ambush(
++                evade=bool(self.config.Campaign_AmbushEvade))
++            if handled:
++                logger.info('Semantic campaign ambush handled')
++            return handled
+         if not self.config.MAP_HAS_AMBUSH:
+             return False
+ 
+diff --git a/module/hard/hard.py b/module/hard/hard.py
+index dbf43838..8dce810c 100644
+--- a/module/hard/hard.py
++++ b/module/hard/hard.py
+@@ -1,4 +1,5 @@
+ import importlib
++import os
+ 
+ from alas_headless import validate_alas_hard_config
+ 
+@@ -38,10 +39,12 @@ class CampaignHard(CampaignRun):
+                 semantic_adapter.end_campaign_pre_sortie()
+ 
+     def _run_hard(self, name, *, hard_stage, hard_fleet):
++        semantic_manual_clear = (
++            os.environ.get('ALAS_SEMANTIC_HARD_MANUAL_CLEAR') == '1')
+         self.config.override(
+             Campaign_Mode='hard',
+             Campaign_UseFleetLock=True,
+-            Campaign_UseAutoSearch=True,
++            Campaign_UseAutoSearch=not semantic_manual_clear,
+             Fleet_FleetOrder='fleet1_all_fleet2_standby' if hard_fleet == 1 else 'fleet1_standby_fleet2_all',
+             Emotion_Mode='nothing',  # Dont calculate and dont ignore
+         )
+@@ -52,18 +55,67 @@ class CampaignHard(CampaignRun):
+         self.load_campaign(name='campaign_hard', folder='campaign_hard')  # Load campaign file
+         module = importlib.import_module('.' + name, 'campaign.campaign_main')  # Load map from normal mode.
+         self.campaign.MAP = module.MAP
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+ 
+         # UI ensure
+-        self.device.screenshot()
+-        self.campaign.device.image = self.device.image
+-        self.campaign.ensure_campaign_ui(
+-            name=hard_stage,
+-            mode='hard'
+-        )
++        semantic_resume = False
++        if semantic_adapter is not None:
++            semantic_resume = self.campaign.is_in_map()
++        if semantic_resume or semantic_manual_clear:
++            if hard_stage != '11-4' or hard_fleet != 1:
++                raise RuntimeError(
++                    'Semantic hard-map resume is qualified only for 11-4 fleet 1')
++            logger.info('Use exact semantic hard 11-4 manual-clear mode')
++            if semantic_resume:
++                semantic_adapter.handle_campaign_ambush(
++                    evade=bool(self.config.Campaign_AmbushEvade))
++            # The first-clear recovery uses the two already-deployed fleets in
++            # their conventional roles: fleet 1 clears mobs and fleet 2, with
++            # its untouched ammunition, owns the boss.  This also matches the
++            # user's accepted "one mob fleet, one boss fleet" contract.
++            self.config.override(
++                Fleet_FleetOrder='fleet1_mob_fleet2_boss',
++                Fleet_Fleet1=1,
++                Fleet_Fleet2=2,
++            )
++            self.config.FLEET_BOSS = 2
++            self.campaign.config.override(
++                Fleet_FleetOrder='fleet1_mob_fleet2_boss',
++                Fleet_Fleet1=1,
++                Fleet_Fleet2=2,
++            )
++            self.campaign.config.FLEET_BOSS = 2
++            if semantic_resume:
++                resume_state = self.campaign.semantic_campaign_map_state()
++                self.campaign.semantic_resume_fleet_index = (
++                    resume_state.displayed_fleet_index)
++            self.campaign.map_is_auto_search = False
++            self.campaign.map_is_clear_mode = False
++            # CampaignHard assumes a previously cleared stage and therefore
++            # treats every combat as the boss returning to stage selection.
++            # This bounded first-clear recovery instead keeps mob victories
++            # on the map; only an ALAS-selected boss may end the campaign.
++            self.campaign._expected_end = lambda expected: (
++                'in_stage' if 'boss' in expected else 'with_searching')
++            # CampaignHard normally relies on official auto-search and does
++            # not inherit the normal-map battle_6 implementation.  The
++            # semantic first-clear path is manual, so install only this
++            # stage's exact boss branch on the process-local hard campaign
++            # class.  Class binding is required so decision-preview copies
++            # execute against their sandbox rather than the live instance.
++            setattr(type(self.campaign), 'battle_6', module.Campaign.battle_6)
++        if not semantic_resume:
++            self.device.screenshot()
++            self.campaign.device.image = self.device.image
++            self.campaign.ensure_campaign_ui(
++                name=hard_stage,
++                mode='hard'
++            )
+ 
+         # Run
+-        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if semantic_adapter is not None:
++        if semantic_resume or semantic_manual_clear:
++            remain = 1
++        elif semantic_adapter is not None:
+             remain = semantic_adapter.campaign_hard_remain()
+         else:
+             remain = OCR_HARD_REMAIN.ocr(self.device.image)
+@@ -71,6 +123,9 @@ class CampaignHard(CampaignRun):
+         for n in range(remain):
+             self.campaign.run()
+ 
++        if semantic_resume or semantic_manual_clear:
++            return True
++
+         self.campaign.ensure_auto_search_exit()
+         # self.campaign.equipment_take_off_when_finished()
+ 
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+index 4d802f14..59006d46 100644
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -906,7 +906,16 @@ class Fleet(Camera, AmbushHandler):
+         Such as select strategy, calculate hp and level, init camera position, do first map scan.
+         """
+         self.update()
+-        if not self.handle_fleet_reverse():
++        semantic_resume_fleet_index = getattr(
++            self, 'semantic_resume_fleet_index', None)
++        if semantic_resume_fleet_index in (1, 2):
++            # A semantic hard-map resume has independently read the exact
++            # currently displayed fleet before map initialization.  Preserve
++            # that identity without input; map_data_init() otherwise resets
++            # the internal index to 1 before combat authorization exists.
++            self.fleet_show_index = semantic_resume_fleet_index
++            self.fleet_current_index = semantic_resume_fleet_index
++        elif not self.handle_fleet_reverse():
+             self.fleet_set(index=1)
+         self.handle_strategy(index=self.fleet_show_index)
+         self.hp_reset()
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+index 6202206a..6ac31ed4 100644
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -1,4 +1,5 @@
+ import cv2
++import os
+ 
+ from module.base.timer import Timer
+ from module.exception import CampaignEnd, RequestHumanTakeover, ScriptEnd
+@@ -279,25 +280,47 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                     if self.appear(MAP_PREPARATION, offset=(20, 20)):
+                         logger.info('Semantic pre-sortie: map preparation active')
+                         if self.config.Campaign_UseAutoSearch:
+-                            # The typed AutoFight control itself proves that
+-                            # this cleared stage supports the official clear-
+-                            # mode auto-search path.  The original pixel
+-                            # map_get_info() is intentionally unavailable in
+-                            # semantic mode, so initialize the same ALAS state
+-                            # from that exact control and the reviewed config.
+-                            self.map_has_clear_mode = True
+-                            self.map_is_clear_mode = True
+-                            self.map_is_auto_search = True
++                            self.map_clear_percentage = (
++                                semantic_adapter.campaign_map_clear_percentage()
++                            )
++                            self.map_is_100_percent_clear = (
++                                self.map_clear_percentage > 0.95)
++                            self.map_has_clear_mode = self.map_is_100_percent_clear
++                            self.map_is_clear_mode = self.map_has_clear_mode
++                            self.map_is_auto_search = self.map_has_clear_mode
+                             self.map_is_2x_book = False
++                            logger.attr(
++                                'SemanticMapClear',
++                                f'{self.map_clear_percentage:.2%}')
++                            if not self.map_has_clear_mode:
++                                raise RuntimeError(
++                                    'Official auto-search is locked until the '
++                                    'stage is fully cleared: '
++                                    f'{self.map_clear_percentage:.2%}')
+                         auto_search_selected = (
+                             semantic_adapter.campaign_auto_search_selected()
+                         )
+                         logger.attr('SemanticAutoSearch', auto_search_selected)
+                         if auto_search_selected != self.map_is_auto_search:
+-                            self.handle_auto_search()
+-                            # Re-enter the ALAS observation loop and require a
+-                            # fresh typed postcondition before proceeding.
+-                            continue
++                            if (
++                                os.environ.get(
++                                    'ALAS_SEMANTIC_HARD_MANUAL_CLEAR') == '1'
++                                and auto_search_selected
++                                and not self.map_is_auto_search
++                            ):
++                                # On a not-yet-cleared Hard stage this shared
++                                # AutoFight control enables official automation
++                                # inside each battle; it does not grant map
++                                # auto-search. Preserve it while ALAS owns map
++                                # movement manually.
++                                logger.info(
++                                    'Preserve official battle AutoFight for '
++                                    'manual hard-map clear')
++                            else:
++                                self.handle_auto_search()
++                                # Re-enter the ALAS observation loop and require a
++                                # fresh typed postcondition before proceeding.
++                                continue
+                         logger.info('Semantic pre-sortie: click map preparation')
+                         self.device.click(MAP_PREPARATION)
+                         map_click += 1

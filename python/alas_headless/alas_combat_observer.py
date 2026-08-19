@@ -1343,8 +1343,10 @@ def _map_flags(
         matching_fleet = next(
             fleet for fleet in target_fleets if fleet.marker == admission.fleet_marker
         )
-        if matching_fleet.ammo != admission.ammo_before - 1:
-            raise SemanticGateClosed("combat target fleet ammo did not decrement")
+        if matching_fleet.ammo != max(0, admission.ammo_before - 1):
+            raise SemanticGateClosed(
+                "combat target fleet ammo did not apply one bounded decrement"
+            )
     return True, fleet_on_target, current_on_target
 
 

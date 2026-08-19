@@ -1,0 +1,17 @@
+{
+  "schema": "alas-headless.hard-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-08-19T15:01:39.659755Z",
+  "finished_at": "2026-08-19T15:06:26.639734Z",
+  "stage": "11-4",
+  "hard_fleet": 1,
+  "serial": "emulator-5580",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "sortie_budget": 1,
+  "manual_resume": true,
+  "manual_clear_start": false,
+  "scheduler_enabled_after": true,
+  "scheduler_next_run_after": "2020-01-01 00:00:00",
+  "auto_search_completion": null,
+  "raw_input_fallback_used": false
+}

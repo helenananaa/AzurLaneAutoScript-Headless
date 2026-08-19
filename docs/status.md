@@ -4,6 +4,27 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-19
 
+### Hard 11-4 manual-map clear reached 100%
+
+- Three live API 32 x86_64 Hard 11-4 runs advanced the stage to an exact typed
+  `100%`. Fleet 1 cleared all six mob battles, including the last at zero ammo;
+  fleet 2 retained `5/5` ammo and defeated the boss at A8. Every combat used
+  the game's official auto-battle control.
+- The bounded semantic path covered map projection and recovery, fleet-role
+  preservation, a random ambush evade, an urgent-commission popup, partial
+  routes, and battle-status/item/experience result pages. The two retained
+  success receipts report no raw-input fallback.
+- Official map auto-search is now admitted only when the exact stage progress
+  is greater than 95%; an ordinary map root no longer counts as proof that the
+  official auto-search started. The stage reached 100% only after consuming
+  today's third and final Hard attempt, so the end-to-end official map-auto run
+  remains pending the next daily reset.
+- Support is intentionally limited to 11-4 with HardFleet=1 and the exact
+  fleet-1-mob/fleet-2-boss role split. HardFleet=2 remains rejected because the
+  current client has removed DutySelect, and no other Hard stage is inferred.
+  Patch member `0370-hard-11-4-semantic-clear-port.patch` raises Hard from `B`
+  to `L`; live evidence is in the two `hard-11-4-*-receipt.json` files.
+
 ### Guild ordinary-member main path
 
 - The API 32 x86_64 CN client completed the ordinary-member Guild path with

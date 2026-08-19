@@ -272,13 +272,14 @@ def preview_alas_campaign_decision(
     campaign: Any,
     projection: AlasCampaignMapProjection,
 ) -> AlasCampaignDecisionPreview:
-    """Run ALAS's original battle branch until its first public ``goto``.
+    """Run ALAS's original battle branch until its first exact goto boundary.
 
     ``synchronize_alas_campaign_map()`` must have populated ``campaign.map``
     and attached the exact projection first.  The preview uses a shallow
     campaign shell, copied config, transactionally overlaid native map grids,
     and hard guards on every known input boundary.  It never invokes ALAS's
-    public ``goto`` implementation or any lower-level movement method.
+    public ``goto`` or protected ``_goto`` implementation.  The latter is a
+    reviewed selection boundary used directly by CampaignHard.clear_boss().
     """
 
     if not isinstance(projection, AlasCampaignMapProjection):
@@ -429,6 +430,7 @@ def preview_alas_campaign_decision(
             return True
 
         sandbox.goto = capture_goto
+        sandbox._goto = capture_goto
         sandbox.fleet_ensure = MethodType(preview_fleet_ensure, sandbox)
         with _reject_emotion_sleep(emotion):
             try:

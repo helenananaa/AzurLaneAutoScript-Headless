@@ -1044,6 +1044,8 @@ class CampaignFleetRowState:
     ship_levels: Tuple[int, ...]
     select_button: Optional[ButtonState]
     clear_button: Optional[ButtonState]
+    required_slots: int = 0
+    empty_required_slots: int = 0
 
     @property
     def available(self) -> bool:
@@ -1052,6 +1054,28 @@ class CampaignFleetRowState:
     @property
     def in_use(self) -> bool:
         return bool(self.ship_levels)
+
+    @property
+    def hard_satisfied(self) -> Optional[bool]:
+        if self.required_slots == 0:
+            return None
+        return self.in_use and self.empty_required_slots == 0
+
+
+@dataclass(frozen=True)
+class CampaignHardRequirementState:
+    label: str
+    comparator: str
+    target: int
+    actual: int
+
+    @property
+    def satisfied(self) -> bool:
+        if self.comparator == "大于":
+            return self.actual >= self.target
+        if self.comparator == "小于":
+            return self.actual <= self.target
+        return False
 
 
 @dataclass(frozen=True)
@@ -1066,6 +1090,8 @@ class CampaignFleetSelectionState:
     submarine_oil_cost: int
     rows: Tuple[CampaignFleetRowState, ...]
     sortie_button: ButtonState
+    hard_mode: bool = False
+    hard_requirements: Tuple[CampaignHardRequirementState, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -2121,6 +2147,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/btn_clear",
     ),
     SemanticTarget(
+        "campaign/fleet-preparation/fleet/1/recommend",
+        "btn_recom",
+        "LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/btn_recom",
+    ),
+    SemanticTarget(
         "campaign/fleet-preparation/fleet/2/select",
         "btn_select",
         "LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/btn_select",
@@ -2129,6 +2160,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "campaign/fleet-preparation/fleet/2/clear",
         "btn_clear",
         "LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/btn_clear",
+    ),
+    SemanticTarget(
+        "campaign/fleet-preparation/fleet/2/recommend",
+        "btn_recom",
+        "LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/btn_recom",
     ),
     SemanticTarget(
         "campaign/fleet-preparation/submarine/1/select",
@@ -2575,6 +2611,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "ButtonExit",
         "LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
     ),
+    SemanticTarget(
+        "reward/campaign-total/continue",
+        "ButtonContinue",
+        "LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonContinue",
+    ),
 )
 
 
@@ -2795,8 +2836,10 @@ _CAMPAIGN_FLEET_INPUT_TARGETS = tuple(
     for suffix in (
         "fleet/1/select",
         "fleet/1/clear",
+        "fleet/1/recommend",
         "fleet/2/select",
         "fleet/2/clear",
+        "fleet/2/recommend",
         "submarine/1/select",
         "submarine/1/clear",
         "roles/open",
@@ -2850,7 +2893,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "campaign-total-reward",
         "/LevelStageTotalRewardPanel(Clone)/",
-        ("reward/campaign-total/exit",),
+        ("reward/campaign-total/exit", "reward/campaign-total/continue"),
     ),
     BlockerRule(
         "mail-manager",
@@ -3031,6 +3074,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "campaign/map-preparation/cancel",
             "campaign/fleet-preparation/cancel",
             "reward/campaign-total/exit",
+            "reward/campaign-total/continue",
             *_CAMPAIGN_FLEET_INPUT_TARGETS,
         ),
     ),
@@ -12561,39 +12605,39 @@ class SemanticOracle:
     def campaign_auto_search_active_state(
         self,
     ) -> CampaignAutoSearchActiveState:
-        """Prove the official auto-search map or battle surface read-only."""
+        """Prove official auto-search has reached an owned battle surface.
 
-        try:
-            entered = self.campaign_map_entry_state()
-        except SemanticGateClosed:
-            ui_state = self.read_ui_state()
-            markers = (
-                "ChapterPreCombatUI(Clone)",
-                "CombatUIStandard(Clone)",
-                "NewBattleResultEmptyUI(Clone)",
-            )
-            paths = tuple(
-                item.path
-                for item in (*ui_state.texts, *ui_state.images)
-                if item.active_in_hierarchy
-                and item.active_and_enabled
-                and any(("/" + marker + "/") in item.path for marker in markers)
-            )
-            roots = {
-                path[: path.index("(Clone)") + len("(Clone)")]
-                for path in paths
-            }
-            if len(roots) != 1:
-                raise SemanticGateClosed(
-                    "campaign official auto-search surface is not proven"
-                )
-            return CampaignAutoSearchActiveState(
-                generation=ui_state.generation,
-                root_path=next(iter(roots)),
+        A plain ``LevelGrid`` only proves that the sortie entered a campaign
+        map; manual map control presents the same root.  Accepting it here can
+        therefore turn a disabled/ignored auto-search toggle into a false
+        positive.  The official flow must advance to one exact pre-combat,
+        combat, or result root before ownership is proven.
+        """
+
+        ui_state = self.read_ui_state()
+        markers = (
+            "ChapterPreCombatUI(Clone)",
+            "CombatUIStandard(Clone)",
+            "NewBattleResultEmptyUI(Clone)",
+        )
+        paths = tuple(
+            item.path
+            for item in (*ui_state.texts, *ui_state.images)
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and any(("/" + marker + "/") in item.path for marker in markers)
+        )
+        roots = {
+            path[: path.index("(Clone)") + len("(Clone)")]
+            for path in paths
+        }
+        if len(roots) != 1:
+            raise SemanticGateClosed(
+                "campaign official auto-search surface is not proven"
             )
         return CampaignAutoSearchActiveState(
-            generation=entered.generation,
-            root_path=entered.root_path,
+            generation=ui_state.generation,
+            root_path=next(iter(roots)),
         )
 
     def campaign_official_combat_auto_state(
@@ -12649,6 +12693,7 @@ class SemanticOracle:
                 "sea_day",
                 "sea_benningdun_1",
                 "sea_benningdun_2",
+                "sea_YW",
             ),
         }
         retreat_variants = (
@@ -12944,12 +12989,23 @@ class SemanticOracle:
         read.  The separate one-use viewport lease controls movement.
         """
 
-        return self._campaign_map_cell_target(state, node, require_top_raycast=False)
+        # This is a geometry-only read used to plan a separately leased
+        # viewport swipe.  Enemy/fleet models legitimately cover their cell
+        # quads, so blocker admission belongs to the later exact input target,
+        # not to this read-only coordinate lookup.
+        return self._campaign_map_cell_target(
+            state,
+            node,
+            require_top_raycast=False,
+            require_unblocked=False,
+        )
 
     def campaign_map_cell_input(
         self,
         state: CampaignMapState,
         node: str,
+        *,
+        allow_expected_enemy_coverage: bool = False,
     ) -> ButtonState:
         """Revalidate one exact actionable map cell without injecting input.
 
@@ -12959,7 +13015,32 @@ class SemanticOracle:
         by the owning ALAS camera state machine before it can be clicked.
         """
 
-        return self._campaign_map_cell_target(state, node, require_top_raycast=True)
+        if not allow_expected_enemy_coverage:
+            return self._campaign_map_cell_target(
+                state, node, require_top_raycast=True
+            )
+
+        # A live enemy's typed map object normally owns the top raycast at the
+        # centre of its cell.  Permit that one covered quad only after the
+        # caller has already admitted the exact combat node.  This does not
+        # weaken ordinary map-cell input: the node must still contain exactly
+        # one non-fighting enemy, the quad identity/geometry must be exact,
+        # and all campaign blockers remain fail-closed.
+        enemies = tuple(
+            enemy
+            for enemy in state.enemies
+            if enemy.node == node and not enemy.fighting
+        )
+        if len(enemies) != 1:
+            raise SemanticGateClosed(
+                "campaign enemy-covered input lacks one exact enemy"
+            )
+        return self._campaign_map_cell_target(
+            state,
+            node,
+            require_top_raycast=False,
+            require_unblocked=True,
+        )
 
     @staticmethod
     def _median(values: Sequence[float]) -> float:
@@ -13156,6 +13237,7 @@ class SemanticOracle:
         rows: int,
         land_cells: Sequence[Tuple[int, int]],
         expected_fleet_count: int,
+        allow_enemy_additions: bool = False,
     ) -> CampaignMapViewportSwipeProof:
         """Inject and prove one typed ALAS-requested campaign viewport swipe."""
 
@@ -13206,7 +13288,18 @@ class SemanticOracle:
             and len(added_enemies) == 1
             and added_enemies[0].genre == "Boss"
         )
-        if post_signature != before_signature and not boss_appeared:
+        post_combat_wave_appeared = bool(
+            allow_enemy_additions
+            and same_non_enemy_state
+            and not removed_enemies
+            and added_enemies
+            and all(not enemy.fighting for enemy in added_enemies)
+        )
+        if (
+            post_signature != before_signature
+            and not boss_appeared
+            and not post_combat_wave_appeared
+        ):
             raise SemanticGateClosed("campaign map viewport changed logical map state")
         before_cells = {cell.node: cell for cell in state.cells}
         after_cells = {cell.node: cell for cell in post_state.cells}
@@ -13229,8 +13322,65 @@ class SemanticOracle:
         finger_dx = float(end[0] - start[0])
         finger_dy = float(end[1] - start[1])
         finger_norm = math.hypot(finger_dx, finger_dy)
-        if finger_norm < 10.0 or median_norm < 10.0:
+        if finger_norm < 10.0:
             raise SemanticGateClosed("campaign map viewport did not move")
+        if median_norm < 10.0:
+            # Unity clamps an ALAS-requested gesture to a true no-op at the
+            # map edge even when the destination cell is already exposed.
+            # Admit only that exact case: every projected cell is stationary
+            # and the independently re-read destination is still the unique
+            # top raycast at the identical path, point and bounds.  A covered
+            # target or any partial displacement remains fail-closed.
+            post_target = self.campaign_map_cell_viewport_target(
+                post_state, target_node
+            )
+            target_fleets = tuple(
+                fleet for fleet in post_state.fleets if fleet.node == target_node
+            )
+            current_fleet_covers_target = bool(
+                len(target_fleets) == 1
+                and target_fleets[0].marker == post_state.current_fleet_marker
+                and not any(enemy.node == target_node for enemy in post_state.enemies)
+            )
+            assert before_target.point is not None
+            assert before_target.bounds is not None
+            if (
+                any(math.hypot(dx, dy) > 1.0 for dx, dy in deltas)
+                or (
+                    not current_fleet_covers_target
+                    and (
+                        before_target.raycast_top is not True
+                        or post_target.raycast_top is not True
+                    )
+                )
+                or post_target.path != before_target.path
+                or post_target.point != before_target.point
+                or post_target.bounds != before_target.bounds
+            ):
+                raise SemanticGateClosed("campaign map viewport did not move")
+            return CampaignMapViewportSwipeProof(
+                semantic_id="campaign/map/viewport/" + target_node,
+                target_node=target_node,
+                pre_generation=state.generation,
+                input_generation=input_generation,
+                post_generation=post_state.generation,
+                name=intent.name,
+                grid_vector=intent.grid_vector,
+                pixel_vector=intent.pixel_vector,
+                start=start,
+                end=end,
+                duration_ms=duration_ms,
+                coherent_cell_count=len(deltas),
+                median_cell_delta=(median_dx, median_dy),
+                maximum_delta_residual=max(
+                    (math.hypot(dx, dy) for dx, dy in deltas), default=0.0
+                ),
+                target_path=post_target.path,
+                target_before_point=before_target.point,
+                target_after_point=post_target.point,
+                target_after_bounds=post_target.bounds,
+                post_state=post_state,
+            )
         alignment = (median_dx * finger_dx + median_dy * finger_dy) / (
             median_norm * finger_norm
         )
@@ -13304,10 +13454,16 @@ class SemanticOracle:
         self,
         state: CampaignMapState,
         node: str,
+        *,
+        allow_expected_enemy_coverage: bool = False,
     ) -> ActionReceipt:
         """Inject one exact map-cell tap after a fresh typed revalidation."""
 
-        target = self.campaign_map_cell_input(state, node)
+        target = self.campaign_map_cell_input(
+            state,
+            node,
+            allow_expected_enemy_coverage=allow_expected_enemy_coverage,
+        )
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
         assert target.point is not None and target.bounds is not None
@@ -13315,6 +13471,69 @@ class SemanticOracle:
         return ActionReceipt(
             semantic_id="campaign/map/grid/" + node,
             generation=self._last_generation or state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _campaign_ambush_target(self, *, evade: bool) -> Optional[ButtonState]:
+        """Return the exact live ambush action, including delegated Buttons."""
+
+        state = self.read_state()
+        root_suffix = "/LevelAmbushView(Clone)"
+        roots = tuple(
+            button
+            for button in state.buttons
+            if button.name == "LevelAmbushView(Clone)"
+            and button.path.endswith(root_suffix)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+        )
+        if not roots:
+            return None
+        if len(roots) != 1:
+            raise SemanticGateClosed("campaign ambush root is ambiguous")
+        name = "dodge_button" if evade else "fight_button"
+        suffix = root_suffix + "/window/" + name
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == name and button.path.endswith(suffix)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("campaign ambush action is absent or ambiguous")
+        target = matches[0]
+        if (
+            not target.active_in_hierarchy
+            or not target.active_and_enabled
+            or not target.interactable
+            or target.raycast_top is False
+            or target.point is None
+            or target.bounds is None
+            or not target.bounds.contains(target.point)
+            or not (0 <= target.point.x < self.fingerprint.width)
+            or not (0 <= target.point.y < self.fingerprint.height)
+            or self._blocking_rules(state, "campaign/ambush/action")
+        ):
+            raise SemanticGateClosed("campaign ambush action is not actionable")
+        return target
+
+    def campaign_ambush_visible(self, *, evade: bool) -> bool:
+        return self._campaign_ambush_target(evade=evade) is not None
+
+    def click_campaign_ambush(self, *, evade: bool) -> ActionReceipt:
+        target = self._campaign_ambush_target(evade=evade)
+        if target is None:
+            raise SemanticTargetMissing("campaign ambush action is absent")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=(
+                "campaign/ambush/evade" if evade else "campaign/ambush/fight"
+            ),
+            generation=self._last_generation or 0,
             point=target.point,
             bounds=target.bounds,
             path=target.path,
@@ -13461,6 +13680,7 @@ class SemanticOracle:
             "qz": "Light",
             "zl": "Main",
             "hm": "Carrier",
+            "ys": "Treasure",
         }
         enemies = []
         enemy_roots = set()
@@ -13481,10 +13701,10 @@ class SemanticOracle:
             # ``srhm3`` on static and movable Carrier nodes).  Siren identity
             # remains a separate typed-node contract; this prefix alone must
             # never set ``is_siren``.
-            sprite_match = re.fullmatch(r"(?:sr)?(qx|qz|zl|hm)([123])", image.sprite)
-            emotion_match = re.fullmatch(r"emotion_(qx|qz|zl|hm)", image.sprite)
+            sprite_match = re.fullmatch(r"(?:sr)?(qx|qz|zl|hm|ys)([123])", image.sprite)
+            emotion_match = re.fullmatch(r"emotion_(qx|qz|zl|hm|ys)", image.sprite)
             cleared_sprite_match = re.fullmatch(
-                r"(?:(?:sr)?(?:qx|qz|zl|hm)[123]|emotion_(?:qx|qz|zl|hm))_d_blue",
+                r"(?:(?:sr)?(?:qx|qz|zl|hm|ys)[123]|emotion_(?:qx|qz|zl|hm|ys))_d_blue",
                 image.sprite,
             )
             boss_title_images = tuple(
@@ -15254,6 +15474,49 @@ class SemanticOracle:
             lambda: self._campaign_map_achievement_state_once(stage_code)
         )
 
+    def campaign_map_clear_percentage(self, stage_code: str) -> float:
+        """Read only the progress bar when a client omits star Image records."""
+
+        def read_once() -> float:
+            preparation = self.campaign_map_preparation_state(stage_code)
+            ui_state = self.read_ui_state()
+            if (
+                ui_state.generation < preparation.generation
+                or ui_state.generation > preparation.generation + 2
+            ):
+                raise SemanticGateClosed(
+                    "campaign achievement snapshots are not coherent"
+                )
+            if "LevelStageInfoView(Clone)/panel/" in preparation.proceed_button.path:
+                root = "LevelStageInfoView(Clone)/panel/"
+            elif "LevelInfoSPUI(Clone)/panel/" in preparation.proceed_button.path:
+                root = "LevelInfoSPUI(Clone)/panel/"
+            else:
+                raise SemanticGateClosed(
+                    "campaign achievement layer identity is not reviewed"
+                )
+            values = tuple(
+                item
+                for item in ui_state.texts
+                if item.path.endswith(root + "progress/Text/value")
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if len(values) != 1:
+                raise SemanticGateClosed(
+                    "campaign achievement progress is absent or ambiguous"
+                )
+            match = re.fullmatch(r"([0-9]{1,3})%", values[0].text.strip())
+            if match is None or not 0 <= int(match.group(1)) <= 100:
+                raise SemanticGateClosed(
+                    "campaign achievement progress is malformed"
+                )
+            return int(match.group(1)) / 100.0
+
+        return self._retry_transition_read(read_once)
+
     def _campaign_map_achievement_state_once(
         self, stage_code: str
     ) -> CampaignMapAchievementState:
@@ -15554,20 +15817,27 @@ class SemanticOracle:
         ):
             raise SemanticGateClosed("campaign fleet-preparation sortie is not proven")
         if stage_id is not None:
-            stage_path = (
+            # The CN client offsets hard-mode chapter object ids by 10000 while
+            # retaining the same visible stage code (for example, hard 11-4 is
+            # `Chapter_11104`).  Accept only the exact normal or hard identity;
+            # the surrounding campaign flow separately proves the requested
+            # mode before entering this overlay.
+            stage_paths = tuple(
                 "LevelMainScene(Clone)/float/levels/items/Chapter_{0}/main".format(
-                    stage_id
+                    candidate
                 )
+                for candidate in (stage_id, stage_id + 10000)
             )
             stage_buttons = tuple(
                 button
                 for button in button_state.buttons
                 if button.name == "main"
-                and button.path.endswith(stage_path)
+                and button.path.endswith(stage_paths)
                 and button.active_in_hierarchy
                 and button.active_and_enabled
                 and button.bounds is not None
             )
+            stage_path = stage_buttons[0].path if len(stage_buttons) == 1 else ""
         else:
             prefix = "LevelSelectSPFullUI(Clone)/Battle/Nodes/Chapter_"
             candidates = tuple(
@@ -15722,6 +15992,66 @@ class SemanticOracle:
         tabs = self._toggle_matches(
             ui_state, "campaign/fleet-preparation/roles/tab"
         )
+        if not tabs:
+            hard_requirements = tuple(
+                item
+                for item in ui_state.texts
+                if "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/"
+                "limit_elite/limit_list/" in item.path
+                and item.path.endswith("/Text")
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            right_tab_root = (
+                "LevelFleetSelectView(Clone)/panel/Fixed/RightTabs/"
+            )
+            expected_tabs = {
+                "formation_btn": "编队",
+                "commander_btn": "指挥喵",
+                "adjustment_btn": "编队调整",
+            }
+            right_tabs = tuple(
+                toggle
+                for toggle in ui_state.toggles
+                if toggle.name in expected_tabs
+                and toggle.path.endswith(right_tab_root + toggle.name)
+                and toggle.active_in_hierarchy
+                and toggle.active_and_enabled
+                and toggle.interactable
+            )
+            labels = {
+                item.path.rsplit("/", 2)[-2]: item.text.strip()
+                for item in ui_state.texts
+                if (
+                    "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/"
+                    "Fixed/RightTabs/"
+                ) in item.path
+                and item.path.endswith("/text")
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            }
+            legacy_duty_objects = tuple(
+                item
+                for item in (*button_state.buttons, *ui_state.toggles, *ui_state.images)
+                if "/DutySelect/" in item.path or item.name == "duty_btn"
+            )
+            if (
+                not hard_requirements
+                or len(right_tabs) != 3
+                or sum(toggle.checked for toggle in right_tabs) != 1
+                or labels != expected_tabs
+                or legacy_duty_objects
+            ):
+                raise SemanticGateClosed(
+                    "campaign hard game-managed auto-search surface is not proven"
+                )
+            return CampaignAutoSearchRoleState(
+                generation=button_state.generation,
+                fleet1_role="game-managed",
+                fleet2_role="game-managed",
+            )
         if len(tabs) != 1 or not tabs[0].checked:
             raise SemanticGateClosed(
                 "campaign auto-search role tab is not selected"
@@ -15824,22 +16154,61 @@ class SemanticOracle:
                 raise SemanticGateClosed("campaign fleet summary text is malformed")
             return match
 
-        surface = exact_text(
-            "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/limit/number",
-            r"([0-9]+)/([0-9]+)",
+        hard_requirement_texts = tuple(
+            item
+            for item in ui_state.texts
+            if "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/"
+            "limit_elite/limit_list/" in item.path
+            and item.path.endswith("/Text")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
         )
-        submarine = exact_text(
-            "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/limit/number_sub",
-            r"([0-9]+)/([0-9]+)",
-        )
-        surface_counts = tuple(map(int, surface.groups()))
-        submarine_counts = tuple(map(int, submarine.groups()))
-        if (
-            not (0 <= surface_counts[0] <= surface_counts[1] <= 2)
-            or not (0 <= submarine_counts[0] <= submarine_counts[1] <= 1)
-            or surface_counts[1] < 1
-        ):
-            raise SemanticGateClosed("campaign fleet capacity is outside reviewed bounds")
+        hard_mode = bool(hard_requirement_texts)
+        hard_requirements = []
+        if hard_mode:
+            for item in hard_requirement_texts:
+                requirement = re.fullmatch(
+                    r"(.+?)(大于|小于)([0-9]+)[（(]([0-9]+)[）)]",
+                    re.sub(r"\s+", "", item.text),
+                )
+                if requirement is None:
+                    raise SemanticGateClosed(
+                        "hard campaign fleet requirement is malformed"
+                    )
+                hard_requirements.append(
+                    CampaignHardRequirementState(
+                        label=requirement.group(1),
+                        comparator=requirement.group(2),
+                        target=int(requirement.group(3)),
+                        actual=int(requirement.group(4)),
+                    )
+                )
+            if len(hard_requirements) > 8:
+                raise SemanticGateClosed(
+                    "hard campaign fleet requirements exceed reviewed bounds"
+                )
+            surface_counts = (0, 2)
+            submarine_counts = (0, 0)
+        else:
+            surface = exact_text(
+                "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/limit/number",
+                r"([0-9]+)/([0-9]+)",
+            )
+            submarine = exact_text(
+                "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/limit/number_sub",
+                r"([0-9]+)/([0-9]+)",
+            )
+            surface_counts = tuple(map(int, surface.groups()))
+            submarine_counts = tuple(map(int, submarine.groups()))
+            if (
+                not (0 <= surface_counts[0] <= surface_counts[1] <= 2)
+                or not (0 <= submarine_counts[0] <= submarine_counts[1] <= 1)
+                or surface_counts[1] < 1
+            ):
+                raise SemanticGateClosed(
+                    "campaign fleet capacity is outside reviewed bounds"
+                )
 
         numerals = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6}
         rows = []
@@ -15854,6 +16223,19 @@ class SemanticOracle:
             }[row_key]
             select_matches = self._matches(button_state, semantic_root + "/select")
             clear_matches = self._matches(button_state, semantic_root + "/clear")
+            recommend_matches = (
+                self._matches(button_state, semantic_root + "/recommend")
+                if row_kind == "surface"
+                else ()
+            )
+            if hard_mode and row_kind == "surface":
+                available = bool(recommend_matches or clear_matches)
+                if len(recommend_matches) != 1 or len(clear_matches) != 1:
+                    raise SemanticGateClosed(
+                        "hard campaign fleet row controls are absent or ambiguous: "
+                        + row_key
+                    )
+                select_matches = recommend_matches
             if available:
                 if len(select_matches) != 1 or len(clear_matches) != 1:
                     raise SemanticGateClosed(
@@ -15865,9 +16247,20 @@ class SemanticOracle:
                     (semantic_root + "/select", select_button),
                     (semantic_root + "/clear", clear_button),
                 ):
-                    if not button.actionable or self._blocking_rules(
-                        button_state, semantic_id
-                    ):
+                    delegated_hard_recommend = (
+                        hard_mode
+                        and button.name == "btn_recom"
+                        and button.active_in_hierarchy
+                        and button.active_and_enabled
+                        and button.interactable
+                        and button.raycast_top is None
+                        and button.point is not None
+                        and button.bounds is not None
+                    )
+                    if (
+                        not button.actionable
+                        and not delegated_hard_recommend
+                    ) or self._blocking_rules(button_state, semantic_id):
                         raise SemanticGateClosed(
                             "campaign fleet row input is not proven: " + row_key
                         )
@@ -15945,6 +16338,22 @@ class SemanticOracle:
                         "campaign fleet row selection name is malformed: " + row_key
                     )
                 selected_fleet = numerals[match.group(1)]
+            empty_slots = tuple(
+                image
+                for image in ui_state.images
+                if "/" + path_root + "/" in image.path
+                and "/emptytpl(Clone)/" in image.path
+                and image.path.endswith("/icon_bg")
+                and image.sprite == "tianjia_icon"
+                and image.active_in_hierarchy
+                and image.active_and_enabled
+                and not image.truncated
+            )
+            required_slots = len(icons) + len(empty_slots) if hard_mode else 0
+            if hard_mode and row_kind == "surface" and required_slots != 6:
+                raise SemanticGateClosed(
+                    "hard campaign fleet slot identity is incomplete: " + row_key
+                )
             rows.append(
                 CampaignFleetRowState(
                     row_key=row_key,
@@ -15952,8 +16361,14 @@ class SemanticOracle:
                     ship_levels=levels,
                     select_button=select_button,
                     clear_button=clear_button,
+                    required_slots=required_slots,
+                    empty_required_slots=len(empty_slots),
                 )
             )
+
+        if hard_mode:
+            surface_counts = (sum(row.in_use for row in rows[:2]), 2)
+            submarine_counts = (int(rows[2].in_use), int(rows[2].available))
 
         cost_root = "LevelFleetSelectView(Clone)/panel/Fixed/limit_list/cost_limit/"
         cost_texts = {
@@ -16010,6 +16425,8 @@ class SemanticOracle:
             submarine_oil_cost=costs[2],
             rows=tuple(rows),
             sortie_button=preparation.proceed_button,
+            hard_mode=hard_mode,
+            hard_requirements=tuple(hard_requirements),
         )
 
     def campaign_fleet_dropdown_state(
@@ -16097,6 +16514,55 @@ class SemanticOracle:
             raise SemanticGateClosed("campaign fleet row action is not reviewed")
         semantic_root, _, _ = self._campaign_fleet_row_definition(row_key)
         return self.click(semantic_root + "/" + action)
+
+    def click_campaign_hard_recommend(
+        self, stage_code: str, row_key: str
+    ) -> ActionReceipt:
+        """Apply the game's own recommendation to one empty hard-mode fleet."""
+
+        if row_key not in ("fleet1", "fleet2"):
+            raise SemanticGateClosed("hard campaign recommendation row is invalid")
+        observed = self.campaign_fleet_selection_state(stage_code)
+        if not observed.hard_mode:
+            raise SemanticGateClosed("hard campaign fleet surface is not active")
+        rows = {row.row_key: row for row in observed.rows}
+        target = rows[row_key].select_button
+        expected_suffix = (
+            "LevelFleetSelectView(Clone)/panel/ShipList/fleet/{0}/btn_recom"
+        ).format(1 if row_key == "fleet1" else 2)
+        if (
+            target is None
+            or target.name != "btn_recom"
+            or not target.path.endswith(expected_suffix)
+            or not target.active_in_hierarchy
+            or not target.active_and_enabled
+            or not target.interactable
+            or target.raycast_top is not None
+            or target.point is None
+            or target.bounds is None
+            or self._blocking_rules(
+                self.read_state(),
+                "campaign/fleet-preparation/{0}/recommend".format(
+                    "fleet/1" if row_key == "fleet1" else "fleet/2"
+                ),
+            )
+        ):
+            raise SemanticGateClosed(
+                "hard campaign recommendation target is not proven"
+            )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        semantic_id = "campaign/fleet-preparation/{0}/recommend".format(
+            "fleet/1" if row_key == "fleet1" else "fleet/2"
+        )
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=observed.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
 
     def click_campaign_fleet_option(self, index: int) -> ActionReceipt:
         if index not in range(1, 7):
@@ -19102,7 +19568,8 @@ class SemanticOracle:
         candidates = tuple(
             toggle
             for toggle in state.toggles
-            if toggle.name == target.name and toggle.path.endswith(suffixes)
+            if toggle.name == target.name
+            and toggle.path.endswith(suffixes)
         )
         if target.expected_child_sprite is None:
             return candidates

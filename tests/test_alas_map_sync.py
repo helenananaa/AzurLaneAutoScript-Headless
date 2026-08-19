@@ -19,6 +19,7 @@ from alas_headless import (
     canonical_alas_campaign_combat_replay,
     commit_alas_campaign_goto_input_for_evidence,
     prepare_alas_campaign_combat_admission,
+    prove_alas_campaign_combat_transition,
     preview_alas_campaign_decision,
     preview_alas_campaign_goto_input,
     replay_alas_campaign_combat_state_machine,
@@ -716,6 +717,38 @@ class AlasCampaignDecisionPreviewTests(unittest.TestCase):
         self.assertEqual(decision.target_node, "A1")
         self.assertEqual(decision.route_nodes, ("A2", "A1"))
 
+    def test_captures_hard_boss_protected_goto_without_executing_it(self):
+        class HardBossCampaign(FakeCampaign):
+            def battle_function(self):
+                self._goto(self.map[(0, 0)], expected="boss")
+
+        campaign = HardBossCampaign()
+        campaign.MAP[(0, 0)].may_boss = True
+        state = make_state()
+        state = replace(
+            state,
+            enemies=(
+                replace(
+                    state.enemies[0],
+                    sprite="bossicon",
+                    scale=0,
+                    genre="Boss",
+                ),
+            ),
+        )
+        projection = synchronize_alas_campaign_map(campaign, state)
+
+        decision = preview_alas_campaign_decision(campaign, projection)
+        decision = replace(decision, goto_nodes=(decision.target_node,))
+        admission = prepare_alas_campaign_combat_admission(
+            decision, state, input_generation=state.generation
+        )
+
+        self.assertEqual(decision.target_node, "A1")
+        self.assertEqual(decision.expected, "boss")
+        self.assertEqual(decision.route_nodes, ("A2", "A1"))
+        self.assertEqual(admission.enemy_sprite, "bossicon")
+
     def test_rejects_timed_emotion_path_before_goto(self):
         class EmotionCampaign(FakeCampaign):
             def battle_function(self):
@@ -1109,6 +1142,34 @@ class AlasCampaignGotoInputPreviewTests(unittest.TestCase):
 
         self.assertEqual(admission.target_node, "A1")
         self.assertEqual(admission.enemy_object_id, 1001)
+
+    def test_zero_ammo_combat_is_admitted_and_proves_saturated_post_state(self):
+        campaign = FakeGotoCampaign()
+        state = make_zero_distance_state()
+        state = replace(
+            state,
+            fleets=(replace(state.fleets[0], ammo=0), state.fleets[1]),
+        )
+        projection = synchronize_alas_campaign_map(campaign, state)
+        decision = preview_alas_campaign_decision(campaign, projection)
+        admission = prepare_alas_campaign_combat_admission(
+            decision, state, input_generation=state.generation
+        )
+        post_state = replace(
+            state,
+            generation=state.generation + 2,
+            enemies=(),
+        )
+
+        proof = prove_alas_campaign_combat_transition(
+            admission,
+            post_state,
+            battle_count_after=decision.battle_count + 1,
+            input_path=admission.cell_path,
+        )
+
+        self.assertEqual(admission.ammo_before, 0)
+        self.assertEqual(proof.ammo_after, 0)
 
     def test_evidence_commit_uses_same_original_goto_and_exact_one_input(self):
         campaign, state, projection, decision, admission = self.prepare()

@@ -4132,11 +4132,17 @@
       },
       "evidence": [
         "tests/test_alas_hard_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_hard_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0370-hard-11-4-semantic-clear-port.patch",
+        "scripts/python/run_alas_hard_live_validation.py",
+        "integration/alas/hard-11-4-second-clear-manual-recovery-receipt.json",
+        "integration/alas/hard-11-4-third-clear-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
         "Hard"
@@ -4156,11 +4162,17 @@
       },
       "evidence": [
         "tests/test_alas_hard_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_hard_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0370-hard-11-4-semantic-clear-port.patch",
+        "scripts/python/run_alas_hard_live_validation.py",
+        "integration/alas/hard-11-4-second-clear-manual-recovery-receipt.json",
+        "integration/alas/hard-11-4-third-clear-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=input; display=default",
       "panels": [
         "Hard"
@@ -8107,8 +8119,8 @@
         "Hard"
       ],
       "name": "Hard",
-      "note": "能进入 11-4；当前账号进度和自动寻敌锁定，尚无战斗/结算证据",
-      "status": "B"
+      "note": "困难 11-4 已在真实 API 32 x86_64 AVD 上完成三次首通推进并达到 100%：固定舰队 1 清理 6 队道中、舰队 2 击破 Boss，全部战斗使用游戏官方自动战斗；覆盖零弹药道中、随机伏击规避、紧急委托弹窗、地图恢复、胜利/掉落/经验结算，且无 raw-input fallback。两份成功凭证见 integration/alas/hard-11-4-second-clear-manual-recovery-receipt.json 与 integration/alas/hard-11-4-third-clear-receipt.json。官方地图自律现仅在精确进度大于 95% 时放行；达到 100% 后因当日困难次数已耗尽，完整官方地图自律仍待次日复验。HardFleet=2 因当前游戏已移除 DutySelect，继续明确拒绝；其他困难关卡未外推",
+      "status": "L"
     },
     {
       "groups": [
@@ -11127,9 +11139,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "8a311f95ded2e45cc7fe758fffbada7e8f458702151530390e69bb48bd064297",
-      "manifest_sha256": "3b4065c4a333b5b4bf41681c9423203be38d30e75bb1800c67daff47a0fdf906",
-      "member_count": 43
+      "combined_sha256": "80a47e2766b28161f32302667eda17ae3e06348bea5df31938e3f47fdcff1be1",
+      "manifest_sha256": "d442421becb58f5f89c52e025e323e9d49011c874ed0a55cc23aff29f6eff814",
+      "member_count": 44
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

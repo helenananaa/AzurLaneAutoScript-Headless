@@ -6,6 +6,7 @@ from alas_headless import (
     Bounds,
     CampaignMapCellState,
     CampaignMapEnemyState,
+    CampaignMapFleetState,
     CampaignMapState,
     Point,
     SemanticGateClosed,
@@ -154,6 +155,41 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
 
         self.assertEqual(before.predict_swipe(after), (5, 0))
 
+    def test_predict_swipe_accepts_bounded_fractional_edge_clamp(self):
+        before = build_alas_campaign_camera_view(
+            make_state(generation=10), screen_center=(350.0, 300.0)
+        )
+        after = build_alas_campaign_camera_view(
+            make_state(generation=12, dy=25.0), screen_center=(350.0, 300.0)
+        )
+
+        self.assertEqual(before.predict_swipe(after), (0, 0))
+
+        unchanged = build_alas_campaign_camera_view(
+            make_state(generation=13), screen_center=(350.0, 300.0)
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "outside limits"):
+            before.predict_swipe(unchanged)
+
+        before_target = build_alas_campaign_camera_view(
+            make_state(generation=10),
+            screen_center=(350.0, 300.0),
+            target_node="E3",
+        )
+        unchanged_target = build_alas_campaign_camera_view(
+            make_state(generation=13),
+            screen_center=(350.0, 300.0),
+            target_node="E3",
+        )
+        self.assertEqual(before_target.predict_swipe(unchanged_target), (0, 0))
+
+        newly_targeted = build_alas_campaign_camera_view(
+            make_state(generation=14),
+            screen_center=(350.0, 300.0),
+            target_node="E3",
+        )
+        self.assertEqual(before.predict_swipe(newly_targeted), (0, 0))
+
     def test_predict_swipe_allows_only_exact_additive_boss_transition(self):
         before_state = make_state(generation=10)
         before = build_alas_campaign_camera_view(
@@ -185,6 +221,46 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(SemanticGateClosed, "changed map"):
             before.predict_swipe(changed)
+
+    def test_predict_swipe_allows_exact_post_combat_wave_transition(self):
+        defeated = CampaignMapEnemyState(
+            row=3,
+            column=3,
+            node="C3",
+            object_id=1001,
+            sprite="enemyicon",
+            scale=1,
+            genre="Main",
+            level=2,
+            fighting=False,
+        )
+        spawned = replace(defeated, row=4, column=4, node="D4", object_id=1002)
+        fleet_before = CampaignMapFleetState("fleet", "B3", 5, 5)
+        fleet_after = CampaignMapFleetState("fleet", "C3", 4, 5)
+        before_state = replace(
+            make_state(generation=10),
+            fleets=(fleet_before,),
+            enemies=(defeated,),
+        )
+        after_state = replace(
+            make_state(generation=12, dy=-80.0),
+            fleets=(fleet_after,),
+            enemies=(spawned,),
+        )
+        before = build_alas_campaign_camera_view(
+            before_state, screen_center=(350.0, 300.0)
+        )
+        after = build_alas_campaign_camera_view(
+            after_state, screen_center=(350.0, 300.0)
+        )
+
+        self.assertEqual(before.predict_swipe(after), (0, 1))
+
+        edge_after = build_alas_campaign_camera_view(
+            replace(after_state, generation=13, cells=before_state.cells),
+            screen_center=(350.0, 300.0),
+        )
+        self.assertEqual(before.predict_swipe(edge_after), (0, 0))
 
     def test_rejects_incoherent_projection_and_unqualified_edge(self):
         with self.assertRaisesRegex(SemanticGateClosed, "incoherent"):

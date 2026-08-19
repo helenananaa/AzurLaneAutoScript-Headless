@@ -2,13 +2,16 @@ diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
 index 3232fe5e..88b5f629 100644
 --- a/module/campaign/campaign_base.py
 +++ b/module/campaign/campaign_base.py
-@@ -210,6 +210,22 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+@@ -210,6 +210,25 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
          self.ENTRANCE.area = self.ENTRANCE.button
          self.enter_map(self.ENTRANCE, mode=self.config.Campaign_Mode)
  
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if self.map_is_auto_search and semantic_adapter is not None:
-+            semantic_stage = self.config.Campaign_Name
++            if self.config.Campaign_Mode == 'hard':
++                semantic_stage = self.config.Hard_HardStage
++            else:
++                semantic_stage = self.config.Campaign_Name
 +            if semantic_stage == 'campaign_12_4':
 +                semantic_stage = '12-4'
 +            proof = semantic_adapter.wait_campaign_auto_search_completion(

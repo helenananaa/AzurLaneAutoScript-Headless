@@ -118,6 +118,7 @@ def prepare_alas_campaign_combat_admission(
         raise SemanticGateClosed("campaign combat stage identity changed")
     if decision.target_kind != "enemy" or decision.expected not in (
         "combat",
+        "boss",
         "combat_boss",
         "combat_siren",
     ):
@@ -217,10 +218,18 @@ def prepare_alas_campaign_combat_admission(
         raise SemanticGateClosed(
             "campaign combat target kind disagrees with the enemy identity"
         )
+    if (decision.expected in ("boss", "combat_boss")) != (
+        enemies[0].genre == "Boss"
+    ):
+        raise SemanticGateClosed(
+            "campaign combat boss expectation disagrees with the enemy identity"
+        )
     if len(fleets) != 1:
         raise SemanticGateClosed("campaign combat fleet identity changed")
-    if fleets[0].ammo <= 0:
-        raise SemanticGateClosed("campaign combat requires positive fleet ammunition")
+    # Azur Lane permits a fleet at zero ammunition to keep fighting with the
+    # documented damage penalty.  The semantic map already proves that ammo
+    # is a bounded non-negative value, so zero is a valid (and observable)
+    # combat pre-state rather than an admission failure.
     route_cells = tuple(
         cell for cell in state.cells if cell.node in decision.route_nodes
     )
@@ -313,8 +322,11 @@ def prove_alas_campaign_combat_transition(
     if len(fleets) != 1 or state.current_fleet_marker != admission.fleet_marker:
         raise SemanticGateClosed("campaign combat fleet did not remain on target")
     ammo_after = fleets[0].ammo
-    if ammo_after != admission.ammo_before - 1:
-        raise SemanticGateClosed("campaign combat ammunition did not decrease once")
+    expected_ammo_after = max(0, admission.ammo_before - 1)
+    if ammo_after != expected_ammo_after:
+        raise SemanticGateClosed(
+            "campaign combat ammunition did not apply one bounded decrement"
+        )
     if input_path != admission.cell_path:
         raise SemanticGateClosed("campaign combat input path changed")
 

@@ -1,6 +1,6 @@
 # ALAS Headless 配置项级支持矩阵
 
-更新日期：2026-08-18
+更新日期：2026-08-19
 Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 固定 ALAS 上游基线：`81ccf63b4540f00241628c82a58c02c7a2bb11af`
 
@@ -44,10 +44,10 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **7 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **12 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Main、Main2、Main3、Research、Tactical |
+| 🟢 主路径已完成、全配置未完成（`L`） | **13 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **7 / 60** | Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
-| 🧱 已到边界、尚未完成（`B`） | **18 / 60** | Hard、Meowfficer、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
+| 🧱 已到边界、尚未完成（`B`） | **17 / 60** | Meowfficer、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **2 / 60** | GemsFarming、OpsiStronghold |
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
@@ -415,7 +415,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 28 | Reward | Scheduler, Reward | P | 五个领取开关及 RaidDaily 共享入口已离线完成；资源气泡可领取，任务领取部分可用，周常、红点、数字行、空页面和舰船奖励仍未完整闭环 |
 | 29 | Awaken | Scheduler, Awaken | F | 原始任务已实机闭环收藏开关、阵列优先/芯片回退、精确资源门、单次授权、完成弹窗、实际等级、无候选退出与主页恢复 |
 | 30 | Daily | Scheduler, Daily | L | 原 Daily 状态机已实机闭环 Tactical Training 第二关/舰队 2 与 Fierce Assault 第一关/舰队 1，并覆盖 `UseDailySkip=true` 在当前无快速跳过资格时回退官方自动战斗；其余星期类型、难度、舰队及快速跳过可用分支仍未完整覆盖 |
-| 31 | Hard | Scheduler, Hard | B | 64 关目录与两舰队离线契约已完成；实机仍只到 11-4 进入边界，当前账号进度和自动寻敌锁定，尚无战斗/结算证据 |
+| 31 | Hard | Scheduler, Hard | L | 困难 11-4 已实机完成三次首通推进并达到 100%：舰队 1 清 6 队道中、舰队 2 击破 Boss，战斗均使用官方自动；零弹药、伏击、紧急委托、地图恢复和三类结算均已覆盖且无 raw fallback。达到 100% 后因当日次数耗尽，官方地图自律待次日复验；HardFleet=2 与其他困难关卡不外推 |
 | 32 | Exercise | Scheduler, Exercise | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 上游零读取，真实对手/时段/血量观察、刷新持久化、战斗结算和失败恢复未闭环 |
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | ConsumeCoins、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；购买、余额观察与确认仍未完成 |
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | GuildShop 14 字段与 MedalShop2 7 字段入口已离线等价；其余商店与真实操作未闭环 |
@@ -512,7 +512,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
 | Daily | `EscortMission`, `AdvanceMission`, `TacticalTraining`, `SupplyLineDisruption`, `FierceAssault`=`skip/first/second/third`; `ModuleDevelopment`, `EmergencyModuleDevelopment`=`skip/first/second`; `EscortMissionFleet`, `AdvanceMissionFleet`, `TacticalTrainingFleet`, `FierceAssaultFleet`, `ModuleDevelopmentFleet`, `EmergencyModuleDevelopmentFleet`=1..6；`UseDailySkip` | L | 全值域、两种排列、skip、次数耗尽及 SupplyLine fleet=0 已离线覆盖；仍缺非默认任务/难度/舰队、快速跳过不可用和战斗结算的实机收据 |
-| Hard | `HardStage`; `HardFleet`=1/2 | B | 固定上游 64 关目录、两舰队、次数为 0/3 和非法值已离线覆盖；仍缺未解锁页、非默认关卡/舰队、真实战斗和结算收据 |
+| Hard | `HardStage`; `HardFleet`=1/2 | L | 固定上游 64 关目录、两舰队、次数 0/3 和非法值已离线覆盖；11-4 的舰队 1 道中/舰队 2 Boss、官方自动战斗、地图恢复与结算已有两份实机成功收据，进度已达 100%。仍缺次日官方地图自律复验；当前游戏已移除 DutySelect，HardFleet=2 明确拒绝，其他关卡未外推 |
 | Exercise | `ExerciseStrategy`=`aggressive/fri18/sat0/sat12/sat18/sun0/sun12/sun18`; `OpponentChooseMode`=`max_exp/easiest/leftmost/easiest_else_exp`; `OpponentRefreshValue`; `OpponentRefreshRecord`; `OpponentTrial`; `LowHpThreshold`; `LowHpConfirmWait` | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 零读取且明确不支持，真实对手/时段/血量观察、刷新持久化、失败重开和赛季边界仍需闭环 |
 | GeneralShop | `Filter`; `Refresh`; `UseGems`; `ConsumeCoins`; `BuySkinBox` | B | ConsumeCoins 550,000 阈值、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；真实商品命中、刷新、余额观察和购买确认仍缺 |
 | GuildShop | `Filter`; `Refresh`; `BOOK_T2`; `BOOK_T3`; `BOX_T3`; `BOX_T4`; `PLATE_T2`; `PLATE_T3`; `PLATE_T4`; `RETROFIT_T2`; `RETROFIT_T3`; `PR1`; `PR2`; `PR3` | P | 14 字段入口、语法与枚举已离线等价；真实商品/货币/库存、PR 系列判别、选择确认与购买仍缺 |
@@ -822,8 +822,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `GuildShop.RETROFIT_T2` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildShop.RETROFIT_T3` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildShop.Refresh` | ShopOnce | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Hard.HardFleet` | Hard | type=select; display=default | options: 1, 2; default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Hard.HardStage` | Hard | type=input; display=default | input/default: "11-4" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Hard.HardFleet` | Hard | type=select; display=default | options: 1, 2; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Hard.HardStage` | Hard | type=input; display=default | input/default: "11-4" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Hospital.UseRecommendFleet` | Hospital | type=checkbox; display=default | input/default: true | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `HpControl.HpBalanceThreshold` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: 0.2 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `HpControl.HpBalanceWeight` | Main, Main2, Main3, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=input; display=default | input/default: "1000, 1000, 1000" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
