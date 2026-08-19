@@ -44,8 +44,8 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **6 / 60** | Benchmark、Commission、GameManager、Minigame、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **11 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Main、Main2、Main3、Research、Tactical |
-| 🧪 仅离线完成（`O`） | **9 / 60** | Awaken、Coalition、CoalitionSp、EventB、Guild、Hospital、PrivateQuarters、Raid、RaidDaily |
+| 🟢 主路径已完成、全配置未完成（`L`） | **12 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Main、Main2、Main3、Research、Tactical |
+| 🧪 仅离线完成（`O`） | **8 / 60** | Awaken、Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
 | 🧱 已到边界、尚未完成（`B`） | **18 / 60** | Hard、Meowfficer、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **2 / 60** | GemsFarming、OpsiStronghold |
@@ -662,9 +662,9 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **28 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ✅ 五维完整支持 | **31 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
 | ◐ 有实机当前值/分支证据 | **136 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **92 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| 🧪 只有离线路径证据 | **89 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
@@ -797,12 +797,12 @@ python scripts/python/verify_alas_support_matrix.py `
 | `GeneralShop.Filter` | ShopFrequent | type=textarea; display=default | input/default: "BookRedT3 > BookYellowT3 > BookBlueT3 > BookRedT2\n> Cube\n> FoodT6 > FoodT5" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GeneralShop.Refresh` | ShopFrequent | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GeneralShop.UseGems` | ShopFrequent | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `GuildLogistics.Enable` | Guild | type=checkbox; display=default | input/default: true | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GuildLogistics.ExchangeFilter` | Guild | type=textarea; display=default | input/default: <long default in args.json> | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildLogistics.Enable` | Guild | type=checkbox; display=default | input/default: true | `L`/🟢 主路径已完成 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `GuildLogistics.ExchangeFilter` | Guild | type=textarea; display=default | input/default: <long default in args.json> | `L`/🟢 主路径已完成 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `GuildLogistics.SelectNewMission` | Guild | type=checkbox; display=default | input/default: false | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildOperation.AttackBoss` | Guild | type=checkbox; display=default | input/default: true | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildOperation.BossFleetRecommend` | Guild | type=checkbox; display=default | input/default: false | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GuildOperation.Enable` | Guild | type=checkbox; display=default | input/default: true | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GuildOperation.Enable` | Guild | type=checkbox; display=default | input/default: true | `L`/🟢 主路径已完成 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `GuildOperation.JoinThreshold` | Guild | type=input; display=default | input/default: 1 | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildOperation.NewOperationMaxDate` | Guild | type=input; display=default | input/default: 15 | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildOperation.SelectNewOperation` | Guild | type=checkbox; display=default | input/default: false | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |

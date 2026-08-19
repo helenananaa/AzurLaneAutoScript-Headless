@@ -1,0 +1,49 @@
+{
+  "schema": "alas-headless.guild-main-path-live-validation/v1",
+  "passed": true,
+  "date": "2026-08-19",
+  "serial": "emulator-5580",
+  "avd": "H:\\AndroidAVD\\alas_game_api32_x64.avd",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "account_role": "ordinary-member",
+  "lobby": {
+    "report_count_before": 20,
+    "claim_all_receipt_capability": "guild.claim",
+    "report_tip_after": false
+  },
+  "logistics": {
+    "supply_before": "1/3",
+    "supply_after": "0/3",
+    "mission_progress": "100/100",
+    "mission_finished_before_run": true,
+    "exchange_remaining_before": 3,
+    "exchange_remaining_after": 0,
+    "selected_icons": [
+      "mizhilengqueshui",
+      "exploit",
+      "17023"
+    ],
+    "selected_names": [
+      "Coolant",
+      "Merit",
+      "PlateTorpedoT3"
+    ]
+  },
+  "operations": {
+    "mode": "active",
+    "node": "7-1",
+    "members_before": 1,
+    "members_after": 2,
+    "effect_before": 246,
+    "effect_after": 494,
+    "recommended_fleet_effect": 158,
+    "dispatch_receipt_capability": "guild.dispatch",
+    "postcondition_button_sprite": "doing_btn"
+  },
+  "final_surface": "main",
+  "raw_input_fallback_used": false,
+  "boss_combat_tested": false,
+  "new_operation_tested": false,
+  "new_mission_selection_tested": false
+}

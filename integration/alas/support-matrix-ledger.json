@@ -3534,49 +3534,53 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_guild_config.py",
         "python/alas_headless/alas_guild_config_replay.py",
         "integration/alas/series/0185-guild-config-contract.patch",
+        "integration/alas/series/0360-guild-flow-port.patch",
+        "integration/alas/guild-main-path-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "O",
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildLogistics.Enable",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "🟢 主路径已完成",
       "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_guild_config.py",
         "python/alas_headless/alas_guild_config_replay.py",
         "integration/alas/series/0185-guild-config-contract.patch",
+        "integration/alas/series/0360-guild-flow-port.patch",
+        "integration/alas/guild-main-path-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "O",
+      "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildLogistics.ExchangeFilter",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "🟢 主路径已完成",
       "support": "supported",
       "values": "input/default: <long default in args.json>"
     },
@@ -3654,25 +3658,27 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_guild_config.py",
         "python/alas_headless/alas_guild_config_replay.py",
         "integration/alas/series/0185-guild-config-contract.patch",
+        "integration/alas/series/0360-guild-flow-port.patch",
+        "integration/alas/guild-main-path-live-validation-receipt.json",
         "docs/status.md"
       ],
-      "group_code": "O",
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Guild"
       ],
       "path": "GuildOperation.Enable",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "🟢 主路径已完成",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -8060,8 +8066,8 @@
         "GuildOperation"
       ],
       "name": "Guild",
-      "note": "9 项设置有固定上游门禁与任务入口离线回放；观察、页面、兑换、派遣、Boss 和输入闭环仍缺",
-      "status": "O"
+      "note": "普通成员实机主路径已闭环：大厅 20/20 报告全领、后勤补给领取与 3 次按过滤器兑换、7-1 推荐编队并派遣；新任务选择、加入阈值、新行动创建、Boss 攻击与 Boss 推荐仍待对应角色和页面状态验证",
+      "status": "L"
     },
     {
       "groups": [
@@ -11034,9 +11040,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "98a1b1f14e7ee32ec790111405e73160ca425ef38d369e63f8ce415f284d7fae",
-      "manifest_sha256": "d5011a69c2fb18ee56a6aba04d9b558567c24dce284841e3fbd791550b081048",
-      "member_count": 42
+      "combined_sha256": "3323df895cafe7aa62c7e151983ed7425bfcca386a2a35b7167423b29be153d0",
+      "manifest_sha256": "d8eb09dd235685367b1f37085a497ca9ff735ca52db5587dd7f26eb32c03d0e6",
+      "member_count": 43
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

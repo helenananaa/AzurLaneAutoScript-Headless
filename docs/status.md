@@ -2,6 +2,32 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-19
+
+### Guild ordinary-member main path
+
+- The API 32 x86_64 CN client completed the ordinary-member Guild path with
+  exact typed navigation across lobby, logistics, and operations. The lobby
+  report store was claimed from `20/20`; logistics supply changed from `1/3`
+  to `0/3`; the already-finished `100/100` weekly mission was correctly
+  treated as non-claimable; and all three daily exchanges followed the
+  configured priority (`Coolant`, `Merit`, then `PlateTorpedoT3`) before the
+  observer proved zero remaining and all submit controls disabled.
+- Operation node `7-1` opened its exact dispatch detail and formation pages.
+  Official recommendation filled four empty slots, effect became 158, and one
+  independently budgeted `guild.dispatch` confirmation changed participation
+  from `1/33` to `2/33`, total effect from 246 to 494, and the action control
+  from `formationBtn` to `doing_btn`.
+- Patch member `0360-guild-flow-port.patch` retains `RewardGuild.run()`'s
+  lobby-to-logistics-to-operations order and replaces Guild pixel mechanics
+  with typed state and action boundaries. `guild.claim`, `guild.exchange`, and
+  `guild.dispatch` have separate integer grants. New-mission selection,
+  join-threshold behavior, officer-only new-operation creation, and Boss combat
+  remain fail-closed until their corresponding live states are available.
+- Guild is promoted from `O` to `L`, not `F`. The authoritative series now has
+  43 members and applies cleanly to pinned upstream. Live evidence is recorded
+  in `integration/alas/guild-main-path-live-validation-receipt.json`.
+
 ## 2026-08-18
 
 ### Main 12-4 official auto-search

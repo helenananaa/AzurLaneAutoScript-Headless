@@ -1,0 +1,220 @@
+diff --git a/module/guild/base.py b/module/guild/base.py
+--- a/module/guild/base.py
++++ b/module/guild/base.py
+@@ -58,6 +58,35 @@ class GuildBase(UI):
+         Returns:
+             bool: if side_navbar set ensured
+         """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            adapter = semantic_session.open()
++            ui_state = adapter.oracle.read_ui_state()
++            nav_names = {
++                toggle.name for toggle in ui_state.toggles
++                if toggle.path.endswith('/' + toggle.name)
++                and '/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/' in toggle.path
++                and toggle.name in {'main', 'member', 'apply', 'office', 'technology', 'battle'}
++                and toggle.active_in_hierarchy
++            }
++            total = len(nav_names)
++            if total not in (5, 6):
++                return False
++            by_upper = {
++                1: 'lobby', 2: 'member', total - 2: 'logistics',
++                total - 1: 'technology', total: 'operations',
++            }
++            by_bottom = {
++                1: 'operations', 2: 'technology', 3: 'logistics',
++                total - 1: 'member', total: 'lobby',
++            }
++            section = by_upper.get(upper) if upper is not None else by_bottom.get(bottom)
++            if section is None:
++                logger.warning('Transitions to "apply" is not supported')
++                return False
++            adapter.ensure_guild_section(section)
++            return True
++
+         if self._guild_side_navbar.get_total(main=self) == 6:
+             if upper == 3 or bottom == 4:
+                 logger.warning('Transitions to "apply" is not supported')
+diff --git a/module/guild/lobby.py b/module/guild/lobby.py
+--- a/module/guild/lobby.py
++++ b/module/guild/lobby.py
+@@ -93,5 +93,39 @@ class GuildLobby(GuildBase):
+             out: GUILD_LOBBY
+         """
+         logger.hr('Guild lobby', level=1)
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            adapter = semantic_session.open()
++            adapter.ensure_guild_section('lobby')
++            for _ in range(20):
++                if adapter.oracle.toggle_selected('guild/nav/lobby'):
++                    break
++                self.device.sleep(0.2)
++            if adapter.oracle.enabled('guild/lobby/report'):
++                adapter.oracle.click('guild/lobby/report')
++                for _ in range(20):
++                    try:
++                        count = adapter.guild_report_count()
++                        break
++                    except Exception:
++                        self.device.sleep(0.2)
++                else:
++                    raise RuntimeError('Guild report page did not become observable')
++                if count:
++                    adapter.claim_all_guild_reports()
++                    for _ in range(30):
++                        closed = False
++                        for target in ('reward/award-info/close', 'reward/award-info1/close'):
++                            if adapter.oracle.enabled(target):
++                                adapter.oracle.click(target)
++                                closed = True
++                                break
++                        if not closed:
++                            break
++                        self.device.sleep(0.2)
++                if adapter.oracle.enabled('guild/report/close'):
++                    adapter.oracle.click('guild/report/close')
++            logger.info('Guild lobby collect finished (semantic)')
++            return
+         self._guild_lobby_collect()
+         logger.info('Guild lobby collect finished')
+diff --git a/module/guild/logistics.py b/module/guild/logistics.py
+--- a/module/guild/logistics.py
++++ b/module/guild/logistics.py
+@@ -457,6 +457,57 @@ class GuildLogistics(GuildBase):
+             out: page_guild, GUILD_LOGISTICS
+         """
+         logger.hr('Guild logistics', level=1)
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            adapter = semantic_session.open()
++            adapter.ensure_guild_section('logistics')
++            for _ in range(30):
++                try:
++                    state = adapter.guild_logistics_state()
++                    break
++                except Exception:
++                    self.device.sleep(0.2)
++            else:
++                raise RuntimeError('Guild logistics did not become observable')
++
++            def close_awards():
++                for _ in range(30):
++                    target = next((name for name in (
++                        'reward/award-info/close', 'reward/award-info1/close')
++                        if adapter.oracle.enabled(name)), None)
++                    if target is None:
++                        self.device.sleep(0.2)
++                        continue
++                    adapter.oracle.click(target)
++                    return
++
++            if state.supply_claimable:
++                adapter.claim_guild_supply()
++                close_awards()
++                state = adapter.guild_logistics_state()
++            if state.mission_claimable:
++                adapter.claim_guild_mission()
++                close_awards()
++
++            for _ in range(5):
++                state = adapter.guild_logistics_state()
++                if state.exchange_remaining <= 0:
++                    break
++                item = adapter.select_guild_exchange_item(
++                    self.config.GuildLogistics_ExchangeFilter)
++                if item is None:
++                    logger.warning('No guild exchange item satisfies current filter')
++                    break
++                adapter.exchange_guild_item(item)
++                for _ in range(30):
++                    if adapter.oracle.enabled('guild/exchange/confirm'):
++                        break
++                    self.device.sleep(0.2)
++                adapter.confirm_guild_exchange()
++                close_awards()
++            result = adapter.guild_logistics_state().exchange_remaining == 0
++            logger.info(f'Guild logistics run success: {result} (semantic)')
++            return result
+         self.guild_side_navbar_ensure(bottom=3)
+         self._guild_logistics_ensure()
+ 
+diff --git a/module/guild/operations.py b/module/guild/operations.py
+--- a/module/guild/operations.py
++++ b/module/guild/operations.py
+@@ -592,6 +592,73 @@ class GuildOperations(GuildBase):
+             operation_boss_fleet_recommend=self.config.GuildOperation_BossFleetRecommend,
+         )
+         logger.hr('Guild operations', level=1)
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            adapter = semantic_session.open()
++            adapter.ensure_guild_section('operations')
++            for _ in range(30):
++                try:
++                    state = adapter.guild_operations_state()
++                    break
++                except Exception:
++                    self.device.sleep(0.2)
++            else:
++                raise RuntimeError('Guild operations did not become observable')
++            if state.mode == 'inactive':
++                return True
++            if state.mode == 'boss':
++                if guild_config.operation_attack_boss:
++                    raise RuntimeError('Semantic guild boss combat is not qualified')
++                return True
++            if state.mode != 'active':
++                return False
++            if state.active_node_path is None:
++                return True
++            adapter.oracle.click_guild_active_operation(state.active_node_path)
++            for _ in range(30):
++                if adapter.oracle.enabled('guild/operations/dispatch/open'):
++                    adapter.oracle.click('guild/operations/dispatch/open')
++                    break
++                self.device.sleep(0.2)
++            else:
++                return False
++            for _ in range(30):
++                if adapter.oracle.enabled('guild/dispatch-detail/formation'):
++                    adapter.oracle.click('guild/dispatch-detail/formation')
++                    break
++                if adapter.oracle.enabled('guild/dispatch-detail/close'):
++                    adapter.oracle.click('guild/dispatch-detail/close')
++                    return True
++                self.device.sleep(0.2)
++            else:
++                return False
++            for _ in range(30):
++                try:
++                    formation = adapter.guild_formation_state()
++                    break
++                except Exception:
++                    self.device.sleep(0.2)
++            else:
++                return False
++            if formation.empty_slots:
++                adapter.oracle.click('guild/formation/recommend')
++                for _ in range(30):
++                    self.device.sleep(0.2)
++                    if adapter.guild_formation_state().empty_slots == 0:
++                        break
++            adapter.oracle.click('guild/formation/go')
++            for _ in range(30):
++                if adapter.oracle.enabled('guild/dispatch/confirm'):
++                    break
++                self.device.sleep(0.2)
++            adapter.confirm_guild_dispatch()
++            for _ in range(30):
++                if adapter.oracle.enabled('guild/dispatch-detail/close'):
++                    adapter.oracle.click('guild/dispatch-detail/close')
++                    logger.info('Guild operation run success: True (semantic)')
++                    return True
++                self.device.sleep(0.2)
++            return False
+         self.guild_side_navbar_ensure(bottom=1)
+         entered = self._guild_operations_ensure()
+         if not entered:

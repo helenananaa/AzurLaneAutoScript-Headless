@@ -40,6 +40,9 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_DORM_FEED_BUDGET",
         "ALAS_SEMANTIC_DRIVER_REVISION",
         "ALAS_SEMANTIC_ENHANCEMENT_BUDGET",
+        "ALAS_SEMANTIC_GUILD_CLAIM_BUDGET",
+        "ALAS_SEMANTIC_GUILD_DISPATCH_BUDGET",
+        "ALAS_SEMANTIC_GUILD_EXCHANGE_BUDGET",
         "ALAS_SEMANTIC_MODE",
         "ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET",
         "ALAS_SEMANTIC_RESEARCH_START_BUDGET",
@@ -103,6 +106,15 @@ LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
         "ALAS_SEMANTIC_ENHANCEMENT_BUDGET": (
             "enhancement.execute",
             "enhancement",
+        ),
+        "ALAS_SEMANTIC_GUILD_CLAIM_BUDGET": ("guild.claim", "guild claim"),
+        "ALAS_SEMANTIC_GUILD_DISPATCH_BUDGET": (
+            "guild.dispatch",
+            "guild dispatch",
+        ),
+        "ALAS_SEMANTIC_GUILD_EXCHANGE_BUDGET": (
+            "guild.exchange",
+            "guild exchange",
         ),
         "ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET": ("build.submit", "build submit"),
         "ALAS_SEMANTIC_RETIREMENT_BUDGET": (

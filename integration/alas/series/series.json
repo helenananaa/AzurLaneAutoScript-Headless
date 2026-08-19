@@ -209,6 +209,11 @@
       "order": 42,
       "path": "integration/alas/series/0350-meowfficer-dock-training-port.patch",
       "sha256": "440ee4c47cf831b27f152e62d1b166273a18afbff8e36ef5d90ad35f0e426367"
+    },
+    {
+      "order": 43,
+      "path": "integration/alas/series/0360-guild-flow-port.patch",
+      "sha256": "8a559a95f3e047442a5a9d83654b628c32da546896ff9c829ea2c5547a9dde57"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

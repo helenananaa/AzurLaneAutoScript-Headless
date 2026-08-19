@@ -7759,6 +7759,119 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertTrue(state.texts[0].truncated)
 
 
+class GuildSemanticOracleTests(unittest.TestCase):
+    @staticmethod
+    def _guild_nav(selected, generation=10):
+        root = "OverlayCamera/Overlay/UIMain/blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/"
+        names = ("main", "member", "office", "technology", "battle")
+        sprites = {
+            "main": ("toggle_souye_sel", "toggle_souye_unsel"),
+            "member": ("toggle_chengyuan_sel", "toggle_chengyuan_unsel"),
+            "office": ("toggle_office_sel", "toggle_office_unsel"),
+            "technology": ("toggle_tech_sel", "toggle_tech_unsel"),
+            "battle": ("toggle_battle_sel", "toggle_battle_unsel"),
+        }
+        toggles = []
+        images = []
+        for index, name in enumerate(names):
+            path = root + name
+            bounds = {
+                "left": 0,
+                "top": 110 + index * 95,
+                "right": 104,
+                "bottom": 205 + index * 95,
+            }
+            toggles.append(
+                make_toggle(
+                    path,
+                    checked=name == selected,
+                    raycast_top=None,
+                    x=52,
+                    y=157 + index * 95,
+                    bounds=bounds,
+                )
+            )
+            images.append(
+                make_image(
+                    path + "/selected/Image",
+                    sprites[name][0 if name == selected else 1],
+                    bounds,
+                )
+            )
+        return toggles, images
+
+    def test_logistics_zero_remaining_keeps_typed_rows_but_disables_input(self):
+        page = "root/OverlayCamera/Overlay/UIMain/TaskPanel(Adapt)/TaskPanel/"
+        toggles, images = self._guild_nav("office")
+        buttons = [
+            make_button(
+                "back",
+                "root/OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back",
+                55,
+                55,
+            )
+        ]
+        texts = [
+            make_text("0/3", page + "SupplyPanel/frame/open/Text"),
+            make_text("100/<size=40>100</size>", page + "open/top/progress"),
+            make_text("今日可完成：0次", page + "SubmitPanel/cnt/Text"),
+        ]
+        for index, (sprite, owned, required) in enumerate(
+            (("gold", "707", "600"), ("oil", "15K", "200"), ("17041", "14K", "20"))
+        ):
+            left = 440 + index * 198
+            row = page + "SubmitPanel/list/" + ("tpl" if index == 0 else "tpl(Clone)")
+            button = make_button(
+                "submit",
+                row + "/submit",
+                left + 72,
+                626,
+                bounds={"left": left, "top": 607, "right": left + 144, "bottom": 646},
+                raycast_top=None,
+            )
+            button["interactable"] = False
+            buttons.append(button)
+            texts.extend(
+                (
+                    make_text(
+                        owned + "/" + required,
+                        row + "/item/Text",
+                        {"left": left + 30, "top": 530, "right": left + 114, "bottom": 553},
+                    ),
+                    make_text(
+                        "75",
+                        row + "/award/Text",
+                        {"left": left + 80, "top": 564, "right": left + 100, "bottom": 586},
+                    ),
+                )
+            )
+            images.append(
+                make_image(
+                    row + "/item/icon_bg/icon",
+                    sprite,
+                    {"left": left + 31, "top": 470, "right": left + 113, "bottom": 552},
+                )
+            )
+        images.append(make_image(page + "open/mask_all", "finish_mask1"))
+        backend = FakeBackend(buttons)
+        backend.ui = make_ui(texts, toggles=toggles, images=images)
+
+        state = make_oracle(backend).guild_logistics_state()
+
+        self.assertEqual(state.exchange_remaining, 0)
+        self.assertTrue(state.mission_finished)
+        self.assertFalse(state.mission_claimable)
+        self.assertEqual(tuple(item.icon_sprite for item in state.exchange_items), ("gold", "oil", "17041"))
+        self.assertTrue(all(not item.button.interactable for item in state.exchange_items))
+
+    def test_report_count_requires_exact_report_root_and_capacity(self):
+        root = "root/OverlayCamera/Overlay/UIMain/GuildEventReportUI(Clone)"
+        backend = FakeBackend([make_button("GuildEventReportUI(Clone)", root)])
+        backend.ui = make_ui([make_text("20/20", root + "/frame/cnt")])
+
+        self.assertEqual(make_oracle(backend).guild_report_count(), 20)
+
+
 class EnhancementSemanticOracleTests(unittest.TestCase):
     def test_dock_favourite_uses_on_layer_as_positive_state_discriminator(self):
         root = (

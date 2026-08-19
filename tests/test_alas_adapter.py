@@ -6387,6 +6387,55 @@ class AlasSemanticAdapterTests(unittest.TestCase):
                 AlasSemanticSession.from_environment("emulator-test")
 
 
+class GuildSemanticAdapterTests(unittest.TestCase):
+    def make_adapter(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            frame_observation_oracle=lambda: oracle,
+            frame_identity_provider=AlasSemanticAdapterTests.frame_identity,
+        )
+        return adapter, oracle, []
+
+    def test_exchange_filter_selects_highest_ranked_eligible_typed_item(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.guild_logistics_state = lambda: SimpleNamespace(
+            exchange_items=(
+                SimpleNamespace(
+                    index=0,
+                    icon_sprite="gold",
+                    enough=True,
+                    button=SimpleNamespace(interactable=True),
+                ),
+                SimpleNamespace(
+                    index=1,
+                    icon_sprite="17023",
+                    enough=True,
+                    button=SimpleNamespace(interactable=True),
+                ),
+                SimpleNamespace(
+                    index=2,
+                    icon_sprite="17003",
+                    enough=True,
+                    button=SimpleNamespace(interactable=True),
+                ),
+            )
+        )
+
+        selected = adapter.select_guild_exchange_item(
+            "PlateGeneralT3 > PlateTorpedoT3 > Coin"
+        )
+
+        self.assertEqual(selected.index, 2)
+
+    def test_exchange_filter_rejects_duplicate_priorities(self):
+        adapter, _, _ = self.make_adapter()
+
+        with self.assertRaisesRegex(SemanticGateClosed, "duplicates"):
+            adapter.select_guild_exchange_item("Coin > Coin")
+
+
 class ScriptedAdbBridge(AdbObserverBridge):
     def __init__(self, outputs):
         super().__init__("emulator-test", "com.bilibili.azurlane")
