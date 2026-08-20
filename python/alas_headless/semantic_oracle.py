@@ -15482,7 +15482,7 @@ class SemanticOracle:
             ui_state = self.read_ui_state()
             if (
                 ui_state.generation < preparation.generation
-                or ui_state.generation > preparation.generation + 2
+                or ui_state.generation > preparation.generation + 8
             ):
                 raise SemanticGateClosed(
                     "campaign achievement snapshots are not coherent"
@@ -15515,7 +15515,7 @@ class SemanticOracle:
                 )
             return int(match.group(1)) / 100.0
 
-        return self._retry_transition_read(read_once)
+        return self._retry_transition_read(read_once, attempts=12)
 
     def _campaign_map_achievement_state_once(
         self, stage_code: str
@@ -16381,10 +16381,46 @@ class SemanticOracle:
             and not item.truncated
         }
         if cost_texts:
-            mob = exact_text(cost_root + "cost_noraml/Text", r"道中\(([0-9]+)\)")
-            boss = exact_text(cost_root + "cost_boss/Text", r"旗舰\(([0-9]+)\)")
-            sub_cost = exact_text(cost_root + "cost_sub/Text", r"潜艇\(([0-9]+)\)")
-            costs = (int(mob.group(1)), int(boss.group(1)), int(sub_cost.group(1)))
+            def optional_cost(suffix: str, pattern: str) -> Optional[int]:
+                matches = tuple(
+                    text
+                    for text in ui_state.texts
+                    if text.path.endswith(suffix)
+                    and text.active_in_hierarchy
+                    and text.active_and_enabled
+                    and not text.truncated
+                )
+                if not matches:
+                    return None
+                if len(matches) != 1:
+                    raise SemanticGateClosed(
+                        "campaign fleet summary text is absent or ambiguous"
+                    )
+                match = re.fullmatch(pattern, matches[0].text.strip())
+                if match is None:
+                    raise SemanticGateClosed(
+                        "campaign fleet summary text is malformed"
+                    )
+                return int(match.group(1))
+
+            mob = optional_cost(cost_root + "cost_noraml/Text", r"道中\(([0-9]+)\)")
+            boss = optional_cost(cost_root + "cost_boss/Text", r"旗舰\(([0-9]+)\)")
+            sub_cost = optional_cost(cost_root + "cost_sub/Text", r"潜艇\(([0-9]+)\)")
+            if boss is None:
+                raise SemanticGateClosed(
+                    "campaign fleet boss oil cost is absent or ambiguous"
+                )
+            # Hard 周回 fleet-select on 9.7.328 may omit the 道中/潜艇 rows
+            # while still proving the boss oil cost.  Treat those rows as
+            # zero only in hard mode; normal maps still require the trio.
+            if hard_mode:
+                costs = (mob or 0, boss, sub_cost or 0)
+            else:
+                if mob is None or sub_cost is None:
+                    raise SemanticGateClosed(
+                        "campaign fleet summary text is absent or ambiguous"
+                    )
+                costs = (mob, boss, sub_cost)
         else:
             numeric_stage = re.fullmatch(
                 r"[1-9][0-9]*-[1-9][0-9]*", stage_code

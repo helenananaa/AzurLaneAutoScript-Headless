@@ -1056,7 +1056,11 @@ class FakeOracle:
         return self.click_campaign_sortie(stage_code)
 
     def campaign_auto_search_role_state(self):
-        if self.campaign_hard_mode:
+        if (
+            self.campaign_hard_mode
+            and "campaign/fleet-preparation/roles/tab"
+            not in self.toggle_selected_values
+        ):
             return SimpleNamespace(
                 generation=self.campaign_fleet_generation,
                 fleet1_role="game-managed",
@@ -3923,6 +3927,116 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "HardFleet=2"):
             adapter.ensure_campaign_auto_search_roles(
                 "fleet1_standby_fleet2_all"
+            )
+        adapter.end_campaign_pre_sortie()
+
+    def test_hard_campaign_97328_reads_duty_tab_from_fresh_immutable_frames(self):
+        oracle = FakeOracle()
+        oracle.campaign_hard_mode = True
+        oracle.campaign_fleets["submarine"] = 0
+        oracle.toggle_selected_values[
+            "campaign/fleet-preparation/roles/tab"
+        ] = False
+        refresh = Mock()
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=2,
+            campaign_sortie_budget=1,
+            frame_observation_oracle=lambda: oracle,
+            input_frame_refresher=refresh,
+        )
+        entrance = NamedButton("11-4")
+        entrance.semantic_campaign_stage_code = "11-4"
+        adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+        adapter.confirm_campaign_fleet_selection()
+
+        roles = adapter.ensure_campaign_auto_search_roles(
+            "fleet1_all_fleet2_standby"
+        )
+
+        self.assertEqual((roles.fleet1_role, roles.fleet2_role), ("all", "standby"))
+        self.assertIn(
+            "campaign/fleet-preparation/roles/tab", oracle.click_calls
+        )
+        self.assertGreaterEqual(refresh.call_count, 4)
+        adapter.end_campaign_pre_sortie()
+
+    def test_hard_campaign_97328_waits_for_duty_tab_postcondition(self):
+        oracle = FakeOracle()
+        oracle.campaign_hard_mode = True
+        oracle.campaign_fleets["submarine"] = 0
+        oracle.toggle_selected_values[
+            "campaign/fleet-preparation/roles/tab"
+        ] = False
+        original_toggle_selected = oracle.toggle_selected
+        probe_count = 0
+
+        def delayed_toggle_selected(semantic_id):
+            nonlocal probe_count
+            probe_count += 1
+            if (
+                semantic_id == "campaign/fleet-preparation/roles/tab"
+                and probe_count == 2
+            ):
+                return False
+            return original_toggle_selected(semantic_id)
+
+        oracle.toggle_selected = delayed_toggle_selected
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=2,
+            campaign_sortie_budget=1,
+            frame_observation_oracle=lambda: oracle,
+            input_frame_refresher=lambda: None,
+        )
+        entrance = NamedButton("11-4")
+        entrance.semantic_campaign_stage_code = "11-4"
+        adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+        adapter.confirm_campaign_fleet_selection()
+
+        roles = adapter.ensure_campaign_auto_search_roles(
+            "fleet1_all_fleet2_standby"
+        )
+
+        self.assertEqual((roles.fleet1_role, roles.fleet2_role), ("all", "standby"))
+        self.assertGreaterEqual(probe_count, 3)
+        self.assertEqual(
+            oracle.click_calls.count("campaign/fleet-preparation/roles/tab"), 1
+        )
+        adapter.end_campaign_pre_sortie()
+
+    def test_hard_auto_search_is_qualified_only_for_11_4(self):
+        oracle = FakeOracle()
+        oracle.campaign_hard_mode = True
+        oracle.campaign_fleets["submarine"] = 0
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=1,
+            campaign_sortie_budget=1,
+        )
+        entrance = NamedButton("11-1")
+        entrance.semantic_campaign_stage_code = "11-1"
+        adapter.begin_campaign_pre_sortie("11-1", mode="hard")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+        adapter.confirm_campaign_fleet_selection()
+
+        with self.assertRaisesRegex(SemanticGateClosed, "only for 11-4"):
+            adapter.ensure_campaign_auto_search_roles(
+                "fleet1_all_fleet2_standby"
             )
         adapter.end_campaign_pre_sortie()
 

@@ -550,10 +550,14 @@ ordered mutation plan. The qualified request `(1, 2, 0)` from live
 `(1, 2, 1)` consumed exactly three units: clear fleet 2, clear submarine 1,
 then select fleet option 2. ALAS's original `FleetPreparation` and
 `FleetOperator` loops remained the owners, and its cancel loop restored the
-original selection. Hard 11-4 is separately qualified for the exact fleet-1
-mob/fleet-2 boss manual-map clear profile; official battle auto remains enabled
-inside every combat, while other Hard stages and HardFleet=2 stay closed. One
-separately budgeted normal-mode sortie is qualified, and the
+original selection. Hard 11-4 is separately qualified both for the exact
+fleet-1-mob/fleet-2-boss manual-map clear profile and, once exact progress is
+greater than 95%, the official map-auto profile `fleet1=all/fleet2=standby`.
+The restored duty tab is read from fresh immutable frames and its selected
+postcondition must settle before its rows are trusted. The live official-auto
+receipt proves passive map/combat ownership and the exact total-reward exit;
+other Hard stages and HardFleet=2 stay closed. One separately budgeted
+normal-mode sortie is qualified, and the
 resulting map is consumed only through the read-only model described above;
 formation-layout, map movement, and battle input remain unauthorized. Complete
 patched commands return success for Tactical, Research, Dorm, and the bounded

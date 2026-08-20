@@ -1,0 +1,27 @@
+{
+  "schema": "alas-headless.hard-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-08-20T04:05:00.492527Z",
+  "finished_at": "2026-08-20T04:09:29.167047Z",
+  "stage": "11-4",
+  "hard_fleet": 1,
+  "serial": "emulator-5580",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "sortie_budget": 1,
+  "manual_resume": false,
+  "manual_clear_start": false,
+  "scheduler_enabled_after": true,
+  "scheduler_next_run_after": "2026-08-21 00:00:00",
+  "auto_search_completion": {
+    "stage": "11-4",
+    "result_generation": 102668,
+    "result_path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+    "fleet1_role": "all",
+    "fleet2_role": "standby",
+    "waited_seconds": 45.922,
+    "combat_auto_generation": 102619,
+    "combat_auto_proven": true,
+    "passive_after_sortie": true
+  },
+  "raw_input_fallback_used": false
+}

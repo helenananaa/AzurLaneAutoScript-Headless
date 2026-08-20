@@ -342,6 +342,21 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         self.assertIn("semantic_map_resume = True", self.patch_text)
         self.assertIn("logger.info('Already in map, retreating.')", self.patch_text)
 
+    def test_hard_official_auto_waits_for_typed_root_and_continues_exactly(self):
+        self.assertIn(
+            "elif self.map_is_auto_search:\n+                            if "
+            "semantic_adapter.campaign_auto_search_running():",
+            self.patch_text,
+        )
+        self.assertIn(
+            ".continue_campaign_hard_auto_search()",
+            self.patch_text,
+        )
+        self.assertIn(
+            "official-auto sortie is authorized, that typed",
+            self.patch_text,
+        )
+
     def test_campaign_stop_conditions_use_typed_progress_and_levels(self):
         self.assertIn(
             "diff --git a/module/handler/fast_forward.py",

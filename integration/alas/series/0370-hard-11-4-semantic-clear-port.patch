@@ -1,5 +1,5 @@
 diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
-index 88b5f629..aaea500f 100644
+index d7d4b66f..8326bc47 100644
 --- a/module/campaign/campaign_base.py
 +++ b/module/campaign/campaign_base.py
 @@ -177,6 +177,12 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
@@ -16,7 +16,7 @@ index 88b5f629..aaea500f 100644
          logger.hr(f'{self.FUNCTION_NAME_BASE}{self.battle_count}', level=2)
          prev = self.battle_count
 diff --git a/module/handler/ambush.py b/module/handler/ambush.py
-index 61651fd0..719d8054 100644
+index 61651fdb..719d8056 100644
 --- a/module/handler/ambush.py
 +++ b/module/handler/ambush.py
 @@ -120,8 +120,15 @@ class AmbushHandler(Combat):
@@ -38,7 +38,7 @@ index 61651fd0..719d8054 100644
              return False
  
 diff --git a/module/hard/hard.py b/module/hard/hard.py
-index dbf43838..8dce810c 100644
+index dbf43837..2dfe1ebf 100644
 --- a/module/hard/hard.py
 +++ b/module/hard/hard.py
 @@ -1,4 +1,5 @@
@@ -61,7 +61,7 @@ index dbf43838..8dce810c 100644
              Fleet_FleetOrder='fleet1_all_fleet2_standby' if hard_fleet == 1 else 'fleet1_standby_fleet2_all',
              Emotion_Mode='nothing',  # Dont calculate and dont ignore
          )
-@@ -52,18 +55,67 @@ class CampaignHard(CampaignRun):
+@@ -52,18 +55,71 @@ class CampaignHard(CampaignRun):
          self.load_campaign(name='campaign_hard', folder='campaign_hard')  # Load campaign file
          module = importlib.import_module('.' + name, 'campaign.campaign_main')  # Load map from normal mode.
          self.campaign.MAP = module.MAP
@@ -120,6 +120,10 @@ index dbf43838..8dce810c 100644
 +            # class.  Class binding is required so decision-preview copies
 +            # execute against their sandbox rather than the live instance.
 +            setattr(type(self.campaign), 'battle_6', module.Campaign.battle_6)
++        elif semantic_adapter is not None and (
++                hard_stage != '11-4' or hard_fleet != 1):
++            raise RuntimeError(
++                'Semantic hard official auto-search is qualified only for 11-4 fleet 1')
 +        if not semantic_resume:
 +            self.device.screenshot()
 +            self.campaign.device.image = self.device.image
@@ -137,7 +141,7 @@ index dbf43838..8dce810c 100644
              remain = semantic_adapter.campaign_hard_remain()
          else:
              remain = OCR_HARD_REMAIN.ocr(self.device.image)
-@@ -71,6 +123,9 @@ class CampaignHard(CampaignRun):
+@@ -71,6 +127,9 @@ class CampaignHard(CampaignRun):
          for n in range(remain):
              self.campaign.run()
  
@@ -148,7 +152,7 @@ index dbf43838..8dce810c 100644
          # self.campaign.equipment_take_off_when_finished()
  
 diff --git a/module/map/fleet.py b/module/map/fleet.py
-index 4d802f14..59006d46 100644
+index 4d802f14..59006d49 100644
 --- a/module/map/fleet.py
 +++ b/module/map/fleet.py
 @@ -906,7 +906,16 @@ class Fleet(Camera, AmbushHandler):
@@ -170,7 +174,7 @@ index 4d802f14..59006d46 100644
          self.handle_strategy(index=self.fleet_show_index)
          self.hp_reset()
 diff --git a/module/map/map_operation.py b/module/map/map_operation.py
-index 6202206a..6ac31ed4 100644
+index 454f4aa6..941b507a 100644
 --- a/module/map/map_operation.py
 +++ b/module/map/map_operation.py
 @@ -1,4 +1,5 @@
@@ -179,7 +183,79 @@ index 6202206a..6ac31ed4 100644
  
  from module.base.timer import Timer
  from module.exception import CampaignEnd, RequestHumanTakeover, ScriptEnd
-@@ -279,25 +280,47 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -174,24 +175,45 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                 ):
+                     logger.info('Semantic pre-sortie: scan fleet preparation')
+                     if semantic_adapter.campaign_sortie_committed():
+-                        if (
+-                            self.map_is_auto_search
+-                            and semantic_adapter.campaign_auto_search_running()
+-                        ):
+-                            proof = (
+-                                semantic_adapter
+-                                .confirm_campaign_auto_search_started()
+-                            )
++                        if self.is_in_auto_search_menu():
++                            if mode == 'hard':
++                                receipt = (
++                                    semantic_adapter
++                                    .continue_campaign_hard_auto_search()
++                                )
++                                logger.info(
++                                    'Semantic official auto-search continue: '
++                                    f'{receipt.semantic_id}, '
++                                    f'generation={receipt.generation}'
++                                )
++                                campaign_timer.reset()
++                                continue
+                             logger.info(
+-                                'Semantic official auto-search started: '
+-                                f'{proof.stage_code}, '
+-                                f'{proof.prepared_fleets}, '
+-                                f'{proof.sortie_generation}'
+-                                f'->{proof.map_generation}, '
+-                                f'root={proof.map_root_path}'
++                                'Semantic official auto-search result menu; '
++                                'defer to original continue/exit handling'
+                             )
+-                            break
+-                        if self.is_in_map():
++                        elif self.map_is_auto_search:
++                            if semantic_adapter.campaign_auto_search_running():
++                                proof = (
++                                    semantic_adapter
++                                    .confirm_campaign_auto_search_started()
++                                )
++                                logger.info(
++                                    'Semantic official auto-search started: '
++                                    f'{proof.stage_code}, '
++                                    f'{proof.prepared_fleets}, '
++                                    f'{proof.sortie_generation}'
++                                    f'->{proof.map_generation}, '
++                                    f'root={proof.map_root_path}'
++                                )
++                                break
++                            # The restored client can expose LevelGrid briefly
++                            # before AutoSearchBattle/AutoSearchFight. Once an
++                            # official-auto sortie is authorized, that typed
++                            # transition must never downgrade to manual-map
++                            # confirmation.
++                            continue
++                        elif self.is_in_map():
+                             proof = semantic_adapter.confirm_campaign_sortie()
+                             logger.info(
+                                 f'Semantic campaign sortie proof: '
+@@ -209,7 +231,8 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                             # map/combat/result states as well, so leave the
+                             # entry loop normally and let CampaignBase run.
+                             break
+-                        continue
++                        else:
++                            continue
+                     if self.appear(FLEET_PREPARATION, offset=(20, 50)):
+                         fleet_authorized = False
+                         sortie_clicked = False
+@@ -281,25 +304,47 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                      if self.appear(MAP_PREPARATION, offset=(20, 20)):
                          logger.info('Semantic pre-sortie: map preparation active')
                          if self.config.Campaign_UseAutoSearch:
@@ -240,3 +316,15 @@ index 6202206a..6ac31ed4 100644
                          logger.info('Semantic pre-sortie: click map preparation')
                          self.device.click(MAP_PREPARATION)
                          map_click += 1
+@@ -311,7 +356,10 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                     # unhandled transition generation fall through to the
+                     # original fleet/sortie input branches below.  Earlier
+                     # ALAS navigation and recovery states remain unchanged.
+-                    if semantic_adapter.campaign_map_preparation_committed():
++                    if (
++                        not self.is_in_auto_search_menu()
++                        and semantic_adapter.campaign_map_preparation_committed()
++                    ):
+                         continue
+ 
+                 # Accidental clicks

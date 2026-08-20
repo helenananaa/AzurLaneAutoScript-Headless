@@ -2,6 +2,28 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-20
+
+### Hard 11-4 official auto-search live-qualified
+
+- The restored 9.7.328 duty tab is read from fresh immutable frames and its
+  selected postcondition is awaited before role rows are consumed. A live API
+  32 x86_64 run proved both required fleets, exact `all/standby` duties, and a
+  100% stage before the one authorized sortie.
+- After sortie, ALAS issued no map, combat, or viewport input. The observer
+  proved the official `CombatUIStandard` auto-battle state, then accepted only
+  the exact 11-4 total-reward `ButtonExit`; the successful run waited 45.922
+  seconds and used no raw-input fallback.
+- A transient `LevelGrid` between sortie and the official auto-search roots no
+  longer downgrades into manual-map confirmation. Hard multi-run continuation
+  now consumes a separate sortie lease at the exact total-reward Continue
+  control before resetting the process-local proof context.
+- Evidence is recorded in
+  `integration/alas/hard-11-4-auto-search-live-validation-receipt.json`.
+  Qualification remains limited to 11-4 with HardFleet=1. The official Hard
+  contract is fleet 1 `all`, fleet 2 `standby`; it does not claim that both
+  fleets fight. HardFleet=2 and other Hard stages remain fail-closed.
+
 ## 2026-08-19
 
 ### Hard 11-4 manual-map clear reached 100%

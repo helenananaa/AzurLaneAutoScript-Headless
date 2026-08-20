@@ -63,7 +63,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "0" if args.manual_resume else "1"
         ),
         "ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET": (
-            "1" if args.manual_resume else "2"
+            "1" if args.manual_resume else "3"
         ),
         "ALAS_SEMANTIC_CAMPAIGN_SORTIE_BUDGET": str(args.sortie_budget),
         "ALAS_SEMANTIC_CAMPAIGN_COMBAT_BUDGET": (
@@ -91,6 +91,22 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
 
         instance = AzurLaneAutoScript(config_name)
         instance.config.init_task("Hard")
+        session = instance.device.semantic_adapter
+        startup_oracle = session.open().oracle
+        login_needed = False
+        try:
+            login_needed = bool(
+                startup_oracle.enabled("login/enter")
+                or startup_oracle.login_update_download_available()
+                or startup_oracle.login_update_in_progress()
+                or startup_oracle.login_update_restart_prompt_available()
+            )
+        except Exception:
+            login_needed = False
+        if login_needed:
+            from module.handler.login import LoginHandler
+
+            LoginHandler(instance.config, device=instance.device).handle_app_login()
         instance.run("hard")
         session = instance.device.semantic_adapter
         completion = session.last_campaign_auto_search_completion()

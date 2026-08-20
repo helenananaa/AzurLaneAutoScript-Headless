@@ -2158,6 +2158,10 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "normal campaign auto-search completion is qualified only for 12-4"
             )
+        if context.mode == "hard" and stage_code != "11-4":
+            raise SemanticGateClosed(
+                "hard campaign auto-search completion is qualified only for 11-4"
+            )
         if context.sortie_proof is None or context.auto_search_role_state is None:
             raise SemanticGateClosed(
                 "campaign auto-search completion requires sortie and role proof"
@@ -2226,6 +2230,10 @@ class AlasSemanticAdapter:
         if context.mode != "hard":
             raise SemanticGateClosed(
                 "campaign auto-search continue is qualified only for hard mode"
+            )
+        if context.stage_code != "11-4":
+            raise SemanticGateClosed(
+                "campaign auto-search continue is qualified only for hard 11-4"
             )
         if context.auto_search_completion is None:
             raise SemanticGateClosed(
@@ -2502,6 +2510,21 @@ class AlasSemanticAdapter:
     ) -> CampaignAutoSearchRoleState:
         """Ensure the exact official auto-search duties for the active mode."""
 
+        def fresh_role_oracle() -> Any:
+            # Fleet selection and the restored 9.7.328 duty tab rebuild their
+            # hierarchy independently.  Bind all read-only decisions in one
+            # step to a newly acquired immutable frame; the later mutation
+            # still performs its own exact target re-read after authority is
+            # checked.  This closes the stale-frame gap without replaying an
+            # input or weakening any identity/raycast requirement.
+            if (
+                self._input_frame_refresher is not None
+                and self._frame_observation_oracle is not None
+            ):
+                self._input_frame_refresher()
+                return self._require_frame_observation_oracle()
+            return self.oracle
+
         self._package_gate()
         context = self._require_campaign_context()
         if context.prepared_fleet_state is None or context.requested_fleets is None:
@@ -2522,25 +2545,31 @@ class AlasSemanticAdapter:
                 "fleet1_boss_fleet2_mob": ("boss", "mob"),
             }.get(fleet_order)
         elif context.mode == "hard":
-            # CN 9.7.10 removed the legacy DutySelect surface.  Its replacement
-            # third tab is ship-position adjustment and must never be clicked
-            # as though it selected all/standby duties.  Keep only the default
-            # HardFleet=1 compatibility value and prove the exact new
-            # game-managed surface read-only.
+            if context.stage_code != "11-4":
+                raise SemanticGateClosed(
+                    "hard campaign auto-search roles are qualified only for 11-4"
+                )
             if fleet_order != "fleet1_all_fleet2_standby":
                 raise SemanticGateClosed(
-                    "HardFleet=2 is not qualified on the game-managed 9.7.10 UI"
+                    "HardFleet=2 is not qualified on the current Hard 11-4 path"
                 )
-            state = self.oracle.campaign_auto_search_role_state()
-            if (state.fleet1_role, state.fleet2_role) != (
-                "game-managed",
-                "game-managed",
+            # 9.7.328 restored the 职能 duty tab.  Use it when present; keep
+            # the earlier game-managed proof only when that tab is absent.
+            role_oracle = fresh_role_oracle()
+            if not role_oracle.toggle_present(
+                "campaign/fleet-preparation/roles/tab"
             ):
-                raise SemanticGateClosed(
-                    "hard campaign game-managed auto-search proof changed"
-                )
-            context.auto_search_role_state = state
-            return state
+                state = role_oracle.campaign_auto_search_role_state()
+                if (state.fleet1_role, state.fleet2_role) != (
+                    "game-managed",
+                    "game-managed",
+                ):
+                    raise SemanticGateClosed(
+                        "hard campaign game-managed auto-search proof changed"
+                    )
+                context.auto_search_role_state = state
+                return state
+            expected = ("all", "standby")
         else:
             expected = None
         if expected is None:
@@ -2548,9 +2577,12 @@ class AlasSemanticAdapter:
                 "campaign auto-search requires one mob fleet and one boss fleet"
             )
 
-        if not self.oracle.toggle_selected(
+        role_oracle = fresh_role_oracle()
+        if not role_oracle.toggle_selected(
             "campaign/fleet-preparation/roles/tab"
         ):
+            if self._input_frame_refresher is not None:
+                self._input_frame_refresher()
             receipt = self._dispatch_mutation(
                 "campaign.fleet_mutation",
                 lambda: self.oracle.click_toggle(
@@ -2560,7 +2592,25 @@ class AlasSemanticAdapter:
             context.auto_search_role_receipts.append(receipt)
             context.passive_transition_until = time.monotonic() + 3.0
 
-        state = self.oracle.campaign_auto_search_role_state()
+            # The restored duty panel animates independently from the fleet
+            # selection view.  A successful exact tab click can therefore be
+            # followed by one or more coherent frames where the tab is still
+            # unselected.  Wait for the typed postcondition before reading the
+            # role rows; never replay the mutation while the transition is in
+            # flight.
+            deadline = time.monotonic() + 5.0
+            while True:
+                if fresh_role_oracle().toggle_selected(
+                    "campaign/fleet-preparation/roles/tab"
+                ):
+                    break
+                if time.monotonic() >= deadline:
+                    raise SemanticGateClosed(
+                        "campaign auto-search role tab transition did not settle"
+                    )
+                time.sleep(0.2)
+
+        state = fresh_role_oracle().campaign_auto_search_role_state()
         for fleet_index, (actual, target) in enumerate(
             zip((state.fleet1_role, state.fleet2_role), expected), 1
         ):
@@ -2569,6 +2619,8 @@ class AlasSemanticAdapter:
             semantic_id = (
                 "campaign/fleet-preparation/roles/fleet{0}/{1}"
             ).format(fleet_index, target)
+            if self._input_frame_refresher is not None:
+                self._input_frame_refresher()
             receipt = self._dispatch_mutation(
                 "campaign.fleet_mutation",
                 lambda semantic_id=semantic_id: self.oracle.click(semantic_id),
@@ -2577,7 +2629,7 @@ class AlasSemanticAdapter:
             context.passive_transition_until = time.monotonic() + 3.0
             deadline = time.monotonic() + 5.0
             while True:
-                state = self.oracle.campaign_auto_search_role_state()
+                state = fresh_role_oracle().campaign_auto_search_role_state()
                 observed = (
                     state.fleet1_role
                     if fleet_index == 1
@@ -2652,16 +2704,34 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed(
                     "campaign auto-search sortie is qualified only for two-fleet 12-4"
                 )
+            if (
+                context.mode == "hard"
+                and (
+                    context.stage_code != "11-4"
+                    or context.requested_fleets != (1, 2, 0)
+                )
+            ):
+                raise SemanticGateClosed(
+                    "hard campaign auto-search sortie is qualified only for two-fleet 11-4"
+                )
             expected_roles = (
                 {
                     "fleet1_mob_fleet2_boss": ("mob", "boss"),
                     "fleet1_boss_fleet2_mob": ("boss", "mob"),
                 }
                 if context.mode == "normal"
-                else {"fleet1_all_fleet2_standby": (
-                    "game-managed", "game-managed"
-                )}
+                else {"fleet1_all_fleet2_standby": ("all", "standby")}
             ).get(fleet_order)
+            if (
+                context.mode == "hard"
+                and context.auto_search_role_state is not None
+                and (
+                    context.auto_search_role_state.fleet1_role,
+                    context.auto_search_role_state.fleet2_role,
+                )
+                == ("game-managed", "game-managed")
+            ):
+                expected_roles = ("game-managed", "game-managed")
             role_state = context.auto_search_role_state
             if (
                 expected_roles is None
@@ -8424,8 +8494,12 @@ class AlasSemanticAdapter:
         ):
             destination = "normal" if name == "SWITCH_1_NORMAL" else "hard"
             receipt = self.oracle.click_campaign_mode_switch(destination)
+            # CN 9.7.10 rebuilds the chapter list after a hard/normal switch.
+            # The NULL swap observer produces no fresh ticks during that
+            # rebuild, so keep a long enough window for refresh_frame to wait
+            # for the next generation instead of treating the pause as fatal.
             self._campaign_context.passive_transition_until = (
-                time.monotonic() + 20.0
+                time.monotonic() + 45.0
             )
             return receipt
         if (
@@ -10588,6 +10662,29 @@ class AlasSemanticSession:
                     )
                     and attempt < 79
                 )
+                campaign_context = getattr(self.adapter, "_campaign_context", None)
+                in_campaign_transition = bool(
+                    campaign_context is not None
+                    and time.monotonic()
+                    <= float(campaign_context.passive_transition_until)
+                )
+                extended_campaign_retry = bool(
+                    in_campaign_transition
+                    and (
+                        isinstance(exc, (StaleFrameError, ObserverTransportError))
+                        or (
+                            isinstance(exc, SemanticGateClosed)
+                            and message
+                            in (
+                                "semantic frame mixes UI and state generations",
+                                "observer snapshot is stale",
+                                "observer endpoints are not generation-coherent",
+                                "game activity is not top-resumed",
+                            )
+                        )
+                    )
+                    and attempt < 199
+                )
                 retryable = retryable or bool(
                     in_login_transition and isinstance(exc, ObserverTransportError)
                 )
@@ -10595,11 +10692,16 @@ class AlasSemanticSession:
                     in_combat_result_transition
                     and isinstance(exc, ObserverTransportError)
                 )
+                retryable = retryable or bool(
+                    in_campaign_transition
+                    and isinstance(exc, ObserverTransportError)
+                )
                 if not retryable or (
                     attempt >= 2
                     and not extended_login_retry
                     and not stale_login_update_wait
                     and not extended_combat_result_retry
+                    and not extended_campaign_retry
                 ):
                     raise
                 attempt += 1
