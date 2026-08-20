@@ -35,6 +35,8 @@ ACTION_CAPABILITIES = frozenset(
         "dorm.collect",
         "dorm.feed",
         "enhancement.execute",
+        "exercise.execute",
+        "exercise.refresh",
         "guild.claim",
         "guild.dispatch",
         "guild.exchange",

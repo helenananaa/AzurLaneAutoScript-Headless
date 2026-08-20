@@ -289,13 +289,15 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 2026-08-16 实机补齐三字段的 live/action/observation：六个预设分别完成真实 ALAS 动态列表单轮，custom 使用 `major > daily-resource > shortest`，重大委托开关 `false/true` 各完成一轮。真实启动覆盖零油和非零油，`高阶自主训练` 精确确认 `1200` 油提示并进入运行态；运行委托完成精确取消，随后由完整 ALAS 单轮重新补位。列表重排后的目标按名称、等级、时长、状态和类型重新绑定，最终 4/4 运行且连续调度稳定指向最早完成时间。结合既有非法规则、日夜解析、空列表、奖励与无资源契约，Commission 三字段及面板提升为 `F`。
 
-### 1.28 本轮 Exercise 已消费配置与无效等待字段审计
+### 1.28 本轮 Exercise 完整语义流程适配
 
-`Exercise.ExerciseStrategy` 只接受固定上游声明的八种策略，`OpponentChooseMode` 只接受四种选敌模式，`OpponentTrial` 只接受精确正整数，`LowHpThreshold` 限定为 `0..1`，`OpponentRefreshValue` 限定为整数 `0..6`，`OpponentRefreshRecord` 限定为 2000-01-01 至 2100-01-01 的 naive datetime。六字段在原 `Exercise.run()` 第一条可执行语句统一校验，早于进入演习页、读取对手或发起战斗。零值试探、布尔伪装数值、非有限阈值、越界刷新数、带时区/越界记录、未知枚举和畸形输入均 fail-closed；原代码把零次试探修正为一次的行为仅作为不可达兼容证据记录。
+`Exercise.ExerciseStrategy` 只接受固定上游声明的八种策略，`OpponentChooseMode` 只接受四种选敌模式，`OpponentTrial` 只接受精确正整数，`LowHpThreshold` 限定为 `0..1`，`LowHpConfirmWait` 限定为有限的 `0 <= value < 300` 秒，`OpponentRefreshValue` 限定为整数 `0..6`，`OpponentRefreshRecord` 限定为 2000-01-01 至 2100-01-01 的 naive datetime。七字段在原 `Exercise.run()` 第一条可执行语句统一校验，早于进入演习页、读取对手或发起战斗；契约枚举 53,760 个代表性合法组合并拒绝 48 个非法单字段案例。
 
-固定上游回放覆盖八策略在 0..60 小时的 488 个剩余次数决策，保留 hour 0 的原始 truthiness 边界和周五至周日各消费窗口；四种模式保留原对手排序、`leftmost` 跳过舰队详情读取和运行时分派；试探次数覆盖 1/2/3 次在各成功位置及全部失败时的边界。冻结服务器日期覆盖刷新值 0..6 的同日恢复、前一天/未来一天记录归零和五次任务内递增；低血回放覆盖严格 `0.01` 下界、配置阈值包含边界、等待未到/已到/超过 300 秒及对方血条消失复位。契约枚举 10,752 个代表性合法组合并拒绝 40 个非法单字段案例。对手状态、血量计算、计时器、OCR、调度和战斗均为夹具，mutation budget 为 0，没有消耗真实演习次数、进入战斗、截图/OCR、页面输入或 Android 注入。六个实际消费字段仅提升 `offline`；真实对手战力/等级与时段观察、刷新持久化、语义血量观察、实际重试/战斗/结算及失败恢复仍未闭环。
+演习剩余次数、赛季日数/时钟、四名对手的主力/先锋战力和双方舰船等级均改为精确 typed Unity 观察。非 `leftmost` 模式逐一执行“进入对手详情→读取一至三艘真实舰船→按原 ALAS 返回点退出→等待总览稳定”，空位只在结构证明后补零，避免旧快速循环把第一名对手等级重复用于四人。执行与刷新分别使用整数 action grant；授权耗尽时原循环干净停止，刷新会先等待备战遮罩彻底消失，再点击官方刷新、持久化刷新次数并重新检查四名对手。
 
-`LowHpConfirmWait` 本轮明确判为当前无效/未适配，而不是离线完成：固定上游虽然声明并描述该字段，但 Python 运行时零读取，`_combat_execute()` 无条件创建 `Timer(1.5, count=2)`。现在接线会改变上游现有时序且缺少字段到 Timer 参数的权威映射，因此不划算也不可信。重新进入条件是上游提供业务语义，或单独评审该映射，并补冻结时钟决策回放与可信语义血量实机证据。
+胜负结算覆盖 S/D 评级、奖励、统计、物品信息和可能出现的功勋商店。低血逻辑读取对战双方 typed 血条，仅在第一次连续低血时启动 `LowHpConfirmWait`，随后严格走官方“暂停→退出战斗→二次确认→备战返回”流程。实机已通过 `easiest` 的 `7→6`、`max_exp` 的 `6→5`、强制低血退出的 `2→2`，以及 `easiest_else_exp` 的“首战退出→刷新一次→四名新对手重读→第二战 S 胜→`4→3`”；执行/刷新授权均精确归零，收据位于 `integration/alas/exercise-*-live-validation-receipt.json`。
+
+四种选敌模式均已有实机路径证据（含此前 `leftmost`）。当前只保留两类 qualification gap：七个非 `aggressive` 的自然时钟窗口没有通过修改账号时钟强行触发，`OpponentTrial > 1` 也没有为制造样本而额外消耗剩余次数；两者的配置域、原分派和边界已经离线完整覆盖，不再是运行时适配缺口。
 
 ### 1.29 本轮 Shipyard PR/DR 八字段与安全购买子域契约
 
@@ -664,10 +666,10 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **33 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **138 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **85 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
-| ⊘ 当前未适配或无效 | **22 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
+| ✅ 五维完整支持 | **38 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **135 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **84 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ⊘ 当前未适配或无效 | **21 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
@@ -689,7 +691,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Campaign.Mode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "hard", "normal"; default: "normal" | `P`/🧪 三主线常规路由 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Name` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: "12-4", "dynamic", "sp" | `P`/🧪 三主线 64 图路由 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Use2xBook` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Campaign.UseAutoSearch` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false, true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Campaign.UseAutoSearch` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false, true | `P`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `Campaign.UseClearMode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Campaign.UseFleetLock` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Coalition.Fleet` | Coalition, CoalitionSp | type=select; display=default | options: "multi", "single"; default: "single" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
@@ -768,13 +770,13 @@ python scripts/python/verify_alas_support_matrix.py `
 | `EventGeneral.PtLimit` | EventGeneral | type=input; display=default | input/default: 0 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EventGeneral.TimeLimit` | EventGeneral | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EventStory.SkipBattle` | EventStory | type=lock; display=default | options: true; default: true | `P`/◐ 实机当前值 | ◐ | ◐ | ◐ | ◐ | ◐ |
-| `Exercise.ExerciseStrategy` | Exercise | type=select; display=default | options: "aggressive", "fri18", "sat0", "sat12", "sat18", "sun0", "sun12", "sun18"; default: "aggressive" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Exercise.LowHpConfirmWait` | Exercise | type=input; display=default | input/default: 0.1 | `L`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `Exercise.LowHpThreshold` | Exercise | type=input; display=default | input/default: 0.4 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Exercise.OpponentChooseMode` | Exercise | type=select; display=default | options: "easiest_else_exp", "easiest", "leftmost", "max_exp"; default: "max_exp" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Exercise.OpponentRefreshRecord` | Exercise | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Exercise.OpponentRefreshValue` | Exercise | type=input; display=default | input/default: 0 | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Exercise.OpponentTrial` | Exercise | type=input; display=default | input/default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Exercise.ExerciseStrategy` | Exercise | type=select; display=default | options: "aggressive", "fri18", "sat0", "sat12", "sat18", "sun0", "sun12", "sun18"; default: "aggressive" | `L`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `Exercise.LowHpConfirmWait` | Exercise | type=input; display=default | input/default: 0.1 | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `Exercise.LowHpThreshold` | Exercise | type=input; display=default | input/default: 0.4 | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `Exercise.OpponentChooseMode` | Exercise | type=select; display=default | options: "easiest_else_exp", "easiest", "leftmost", "max_exp"; default: "max_exp" | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `Exercise.OpponentRefreshRecord` | Exercise | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `Exercise.OpponentRefreshValue` | Exercise | type=input; display=default | input/default: 0 | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `Exercise.OpponentTrial` | Exercise | type=input; display=default | input/default: 1 | `L`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `Fleet.Fleet1` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Fleet.Fleet1Formation` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "diamond", "double_line", "line_ahead"; default: "double_line" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Fleet.Fleet1Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: "combat_auto", "combat_manual", "hide_in_bottom_left", "hide_in_upper_left", "stand_still_in_the_middle"; default: "combat_auto" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |

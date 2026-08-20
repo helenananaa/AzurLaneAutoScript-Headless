@@ -1,0 +1,16 @@
+{
+  "schema": "alas-headless.exercise-live-validation/v1",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "passed": true,
+  "mode": "easiest",
+  "serial": "emulator-5580",
+  "remaining_before": 7,
+  "period_before": "3d10:58:31",
+  "powers_before": [[8669, 8484], [8627, 9217], [7661, 6204], [5306, 5166]],
+  "task_result": true,
+  "elapsed_seconds": 88.328,
+  "remaining_after": 6,
+  "execute_grant_remaining": 0,
+  "refresh_grant_remaining": 0,
+  "temporary_config_removed": true
+}

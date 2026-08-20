@@ -35,6 +35,7 @@ class AlasExerciseConfigSnapshot:
     opponent_mode: str
     opponent_trial: int
     low_hp_threshold: float
+    low_hp_confirm_wait: float
     opponent_refresh_value: int
     opponent_refresh_record: datetime
 
@@ -45,6 +46,7 @@ def validate_alas_exercise_config(
     opponent_mode: object,
     opponent_trial: object,
     low_hp_threshold: object,
+    low_hp_confirm_wait: object,
     opponent_refresh_value: object,
     opponent_refresh_record: object,
 ) -> AlasExerciseConfigSnapshot:
@@ -63,6 +65,15 @@ def validate_alas_exercise_config(
         or not 0 <= low_hp_threshold <= 1
     ):
         raise SemanticGateClosed("Exercise.LowHpThreshold must be between 0 and 1")
+    if (
+        isinstance(low_hp_confirm_wait, bool)
+        or not isinstance(low_hp_confirm_wait, (int, float))
+        or not math.isfinite(low_hp_confirm_wait)
+        or not 0 <= low_hp_confirm_wait < 300
+    ):
+        raise SemanticGateClosed(
+            "Exercise.LowHpConfirmWait must be between 0 and 300 seconds"
+        )
     if (
         type(opponent_refresh_value) is not int
         or not 0 <= opponent_refresh_value <= 6
@@ -83,6 +94,7 @@ def validate_alas_exercise_config(
         opponent_mode=opponent_mode,
         opponent_trial=opponent_trial,
         low_hp_threshold=float(low_hp_threshold),
+        low_hp_confirm_wait=float(low_hp_confirm_wait),
         opponent_refresh_value=opponent_refresh_value,
         opponent_refresh_record=opponent_refresh_record,
     )

@@ -25,6 +25,7 @@ from .semantic_oracle import SemanticGateClosed
 SCHEMA = "alas-headless.exercise-config-replay/v1"
 REPRESENTATIVE_TRIALS = (1, 2, 10, 2**31)
 REPRESENTATIVE_THRESHOLDS = (0.0, 0.01, 0.4, 1.0)
+REPRESENTATIVE_CONFIRM_WAITS = (0.0, 0.1, 1.0, 3.0, 299.0)
 REPRESENTATIVE_REFRESH_VALUES = tuple(range(7))
 REPRESENTATIVE_REFRESH_RECORDS = (
     datetime(2000, 1, 1),
@@ -40,6 +41,16 @@ INVALID_THRESHOLD_VALUES = (
     float("nan"),
     float("inf"),
     "0.4",
+    None,
+    [],
+)
+INVALID_CONFIRM_WAIT_VALUES = (
+    -0.01,
+    300.0,
+    True,
+    float("nan"),
+    float("inf"),
+    "0.1",
     None,
     [],
 )
@@ -160,11 +171,12 @@ def _source_flags(exercise_path: Path, combat_path: Path, hp_path: Path):
         "Exercise_LowHpThreshold": ["_exercise_easiest_else_exp"],
         "Exercise_OpponentRefreshValue": ["_get_opponent_change_count"],
         "Exercise_OpponentRefreshRecord": ["_get_opponent_change_count"],
-        "Exercise_LowHpConfirmWait": [],
+        "Exercise_LowHpConfirmWait": ["_combat_execute"],
     }
     if guard_present:
         for field in (
             "Exercise_LowHpThreshold",
+            "Exercise_LowHpConfirmWait",
             "Exercise_OpponentRefreshValue",
             "Exercise_OpponentRefreshRecord",
         ):
@@ -227,6 +239,7 @@ class _Config(SimpleNamespace):
         mode: object,
         trial: object,
         low_hp_threshold: object = 0.4,
+        low_hp_confirm_wait: object = 0.1,
         refresh_value: object = 0,
         refresh_record: object = datetime(2026, 8, 15),
     ):
@@ -235,6 +248,7 @@ class _Config(SimpleNamespace):
             Exercise_OpponentChooseMode=mode,
             Exercise_OpponentTrial=trial,
             Exercise_LowHpThreshold=low_hp_threshold,
+            Exercise_LowHpConfirmWait=low_hp_confirm_wait,
             Exercise_OpponentRefreshValue=refresh_value,
             Exercise_OpponentRefreshRecord=refresh_record,
         )
@@ -266,6 +280,7 @@ def _run_case(
     period_hours: int,
     remaining: tuple[int, ...] = (0,),
     low_hp_threshold: object = 0.4,
+    low_hp_confirm_wait: object = 0.1,
     refresh_value: object = 0,
     refresh_record: object = datetime(2026, 8, 15),
 ) -> dict[str, Any]:
@@ -275,6 +290,7 @@ def _run_case(
         mode=mode,
         trial=trial,
         low_hp_threshold=low_hp_threshold,
+        low_hp_confirm_wait=low_hp_confirm_wait,
         refresh_value=refresh_value,
         refresh_record=refresh_record,
     )
@@ -511,6 +527,7 @@ def _verify_refresh_state(exercise_module: Any) -> dict[str, Any]:
             )
             host = object.__new__(exercise_module.Exercise)
             host.config = config
+            host.device = SimpleNamespace(semantic_adapter=None)
             host.opponent_change_count = value
             host.appear_then_click = MethodType(
                 lambda self, button: events.append("new_opponent"), host
@@ -537,6 +554,14 @@ class _ConfirmTimer:
         self._reached = reached
         self._current = current
         self.reset_count = 0
+        self._started = True
+
+    def started(self):
+        return self._started
+
+    def start(self):
+        self._started = True
+        return self
 
     def reached(self):
         return self._reached
@@ -547,6 +572,12 @@ class _ConfirmTimer:
     def reset(self):
         self.reset_count += 1
         self._reached = False
+
+    def clear(self):
+        self.reset_count += 1
+        self._reached = False
+        self._started = False
+        return self
 
 
 def _verify_low_hp_threshold(combat_module: Any) -> dict[str, Any]:
@@ -564,6 +595,7 @@ def _verify_low_hp_threshold(combat_module: Any) -> dict[str, Any]:
     for name, (threshold, attacker, defender, reached, current, expected) in cases.items():
         host = object.__new__(combat_module.ExerciseCombat)
         host.config = SimpleNamespace(Exercise_LowHpThreshold=threshold)
+        host.device = SimpleNamespace(semantic_adapter=None)
         timer = _ConfirmTimer(reached=reached, current=current)
         host.low_hp_confirm_timer = timer
         percentages = iter((attacker, defender))
@@ -604,11 +636,12 @@ def _verify_mode_dispatch(module: Any):
 
 
 def _verify_contract() -> tuple[int, int]:
-    for strategy, mode, trial, threshold, refresh_value, refresh_record in itertools.product(
+    for strategy, mode, trial, threshold, confirm_wait, refresh_value, refresh_record in itertools.product(
         EXERCISE_STRATEGIES,
         EXERCISE_OPPONENT_MODES,
         REPRESENTATIVE_TRIALS,
         REPRESENTATIVE_THRESHOLDS,
+        REPRESENTATIVE_CONFIRM_WAITS,
         REPRESENTATIVE_REFRESH_VALUES,
         REPRESENTATIVE_REFRESH_RECORDS,
     ):
@@ -617,6 +650,7 @@ def _verify_contract() -> tuple[int, int]:
             opponent_mode=mode,
             opponent_trial=trial,
             low_hp_threshold=threshold,
+            low_hp_confirm_wait=confirm_wait,
             opponent_refresh_value=refresh_value,
             opponent_refresh_record=refresh_record,
         )
@@ -628,6 +662,7 @@ def _verify_contract() -> tuple[int, int]:
                 "opponent_mode": "max_exp",
                 "opponent_trial": 1,
                 "low_hp_threshold": 0.4,
+                "low_hp_confirm_wait": 0.1,
                 "opponent_refresh_value": 0,
                 "opponent_refresh_record": datetime(2026, 8, 15),
             }
@@ -645,6 +680,7 @@ def _verify_contract() -> tuple[int, int]:
                 opponent_mode="max_exp",
                 opponent_trial=value,
                 low_hp_threshold=0.4,
+                low_hp_confirm_wait=0.1,
                 opponent_refresh_value=0,
                 opponent_refresh_record=datetime(2026, 8, 15),
             )
@@ -654,6 +690,7 @@ def _verify_contract() -> tuple[int, int]:
             raise AssertionError("invalid Exercise.OpponentTrial was admitted")
     invalid_surfaces = (
         ("low_hp_threshold", INVALID_THRESHOLD_VALUES),
+        ("low_hp_confirm_wait", INVALID_CONFIRM_WAIT_VALUES),
         ("opponent_refresh_value", INVALID_REFRESH_VALUES),
         ("opponent_refresh_record", INVALID_RECORD_VALUES),
     )
@@ -664,6 +701,7 @@ def _verify_contract() -> tuple[int, int]:
                 "opponent_mode": "max_exp",
                 "opponent_trial": 1,
                 "low_hp_threshold": 0.4,
+                "low_hp_confirm_wait": 0.1,
                 "opponent_refresh_value": 0,
                 "opponent_refresh_record": datetime(2026, 8, 15),
             }
@@ -679,6 +717,7 @@ def _verify_contract() -> tuple[int, int]:
         * len(EXERCISE_OPPONENT_MODES)
         * len(REPRESENTATIVE_TRIALS)
         * len(REPRESENTATIVE_THRESHOLDS)
+        * len(REPRESENTATIVE_CONFIRM_WAITS)
         * len(REPRESENTATIVE_REFRESH_VALUES)
         * len(REPRESENTATIVE_REFRESH_RECORDS),
         invalid_count,
@@ -694,6 +733,7 @@ def _verify_invalid_entry(module: Any, guard_present: bool):
         "Exercise_OpponentChooseMode": {"mode": None},
         "Exercise_OpponentTrial": {"trial": 0},
         "Exercise_LowHpThreshold": {"low_hp_threshold": -0.01},
+        "Exercise_LowHpConfirmWait": {"low_hp_confirm_wait": 300.0},
         "Exercise_OpponentRefreshValue": {"refresh_value": 7},
         "Exercise_OpponentRefreshRecord": {
             "refresh_record": datetime(1999, 12, 31)
@@ -706,6 +746,7 @@ def _verify_invalid_entry(module: Any, guard_present: bool):
             "trial": 1,
             "period_hours": 60,
             "low_hp_threshold": 0.4,
+            "low_hp_confirm_wait": 0.1,
             "refresh_value": 0,
             "refresh_record": datetime(2026, 8, 15),
         }
@@ -738,8 +779,8 @@ def verify_exercise_config(alas_root: Path) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "passed": True,
-        "field_count": 6,
-        "declared_unused_fields": ["Exercise_LowHpConfirmWait"],
+        "field_count": 7,
+        "declared_unused_fields": [],
         "accepted_case_count": accepted_count,
         "strategy_hour_case_count": len(EXERCISE_STRATEGIES) * 61,
         "invalid_case_count": invalid_count,

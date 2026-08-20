@@ -23,13 +23,11 @@ class AlasExerciseConfigTests(unittest.TestCase):
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
         result = verify_exercise_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
-        self.assertEqual(result["field_count"], 6)
-        self.assertEqual(result["accepted_case_count"], 10_752)
+        self.assertEqual(result["field_count"], 7)
+        self.assertEqual(result["accepted_case_count"], 53_760)
         self.assertEqual(result["strategy_hour_case_count"], 488)
-        self.assertEqual(result["invalid_case_count"], 40)
-        self.assertEqual(
-            result["declared_unused_fields"], ["Exercise_LowHpConfirmWait"]
-        )
+        self.assertEqual(result["invalid_case_count"], 48)
+        self.assertEqual(result["declared_unused_fields"], [])
         self.assertEqual(result["trial_domain"], "positive_int")
         self.assertEqual(result["mutation_budget"], 0)
         self.assertFalse(result["real_exercise_attempt_consumed"])
@@ -37,11 +35,12 @@ class AlasExerciseConfigTests(unittest.TestCase):
         self.assertFalse(result["android_input_injected"])
 
     def test_all_representative_consumed_fields_are_classified(self):
-        for strategy, mode, trial, threshold, refresh_value, refresh_record in itertools.product(
+        for strategy, mode, trial, threshold, confirm_wait, refresh_value, refresh_record in itertools.product(
             EXERCISE_STRATEGIES,
             EXERCISE_OPPONENT_MODES,
             (1, 2, 10, 2**31),
             (0.0, 0.01, 0.4, 1.0),
+            (0.0, 0.1, 1.0, 3.0, 299.0),
             range(7),
             (datetime(2000, 1, 1), datetime(2026, 8, 15), datetime(2100, 1, 1)),
         ):
@@ -50,6 +49,7 @@ class AlasExerciseConfigTests(unittest.TestCase):
                 opponent_mode=mode,
                 opponent_trial=trial,
                 low_hp_threshold=threshold,
+                low_hp_confirm_wait=confirm_wait,
                 opponent_refresh_value=refresh_value,
                 opponent_refresh_record=refresh_record,
             )
@@ -59,10 +59,11 @@ class AlasExerciseConfigTests(unittest.TestCase):
                     snapshot.opponent_mode,
                     snapshot.opponent_trial,
                     snapshot.low_hp_threshold,
+                    snapshot.low_hp_confirm_wait,
                     snapshot.opponent_refresh_value,
                     snapshot.opponent_refresh_record,
                 ),
-                (strategy, mode, trial, threshold, refresh_value, refresh_record),
+                (strategy, mode, trial, threshold, confirm_wait, refresh_value, refresh_record),
             )
 
     @staticmethod
@@ -72,6 +73,7 @@ class AlasExerciseConfigTests(unittest.TestCase):
             "opponent_mode": "max_exp",
             "opponent_trial": 1,
             "low_hp_threshold": 0.4,
+            "low_hp_confirm_wait": 0.1,
             "opponent_refresh_value": 0,
             "opponent_refresh_record": datetime(2026, 8, 15),
         }
@@ -94,6 +96,7 @@ class AlasExerciseConfigTests(unittest.TestCase):
                 validate_alas_exercise_config(**case)
         invalid = {
             "low_hp_threshold": (-0.01, 1.01, True, float("nan"), float("inf"), "0.4", None, []),
+            "low_hp_confirm_wait": (-0.01, 300.0, True, float("nan"), float("inf"), "0.1", None, []),
             "opponent_refresh_value": (-1, 7, True, 1.0, "1", None, []),
             "opponent_refresh_record": (
                 datetime(1999, 12, 31),

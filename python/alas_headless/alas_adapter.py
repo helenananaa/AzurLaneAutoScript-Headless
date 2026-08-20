@@ -186,6 +186,8 @@ def _legacy_action_grants(
     commission_reward_budget: int,
     commission_start_budget: int,
     daily_execute_budget: int,
+    exercise_execute_budget: int,
+    exercise_refresh_budget: int,
     research_reward_budget: int,
     research_start_budget: int,
     dorm_collect_budget: int,
@@ -218,6 +220,8 @@ def _legacy_action_grants(
             "commission.reward": commission_reward_budget,
             "commission.start": commission_start_budget,
             "daily.execute": daily_execute_budget,
+            "exercise.execute": exercise_execute_budget,
+            "exercise.refresh": exercise_refresh_budget,
             "research.reward": research_reward_budget,
             "research.start": research_start_budget,
             "dorm.collect": dorm_collect_budget,
@@ -320,6 +324,7 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "OPPONENT_2_0": "exercise/opponent/3",
     "OPPONENT_3_0": "exercise/opponent/4",
     "EXERCISE_PREPARATION": "exercise/opponent/start",
+    "NEW_OPPONENT": "exercise/opponent/refresh",
     "CAMPAIGN_MENU_GOTO_DAILY": "campaign-menu/daily",
     "DAILY_CHECK": "daily/page/back",
     "DAILY_NEXT": "daily/next",
@@ -1062,6 +1067,8 @@ class AlasSemanticAdapter:
         commission_reward_budget: int = 0,
         commission_start_budget: int = 0,
         daily_execute_budget: int = 0,
+        exercise_execute_budget: int = 0,
+        exercise_refresh_budget: int = 0,
         research_reward_budget: int = 0,
         research_start_budget: int = 0,
         dorm_collect_budget: int = 0,
@@ -1107,6 +1114,8 @@ class AlasSemanticAdapter:
             ("commission reward", commission_reward_budget),
             ("commission start", commission_start_budget),
             ("daily execute", daily_execute_budget),
+            ("exercise execute", exercise_execute_budget),
+            ("exercise refresh", exercise_refresh_budget),
             ("research reward", research_reward_budget),
             ("research start", research_start_budget),
             ("dorm collect", dorm_collect_budget),
@@ -1150,6 +1159,8 @@ class AlasSemanticAdapter:
                 commission_reward_budget=commission_reward_budget,
                 commission_start_budget=commission_start_budget,
                 daily_execute_budget=daily_execute_budget,
+                exercise_execute_budget=exercise_execute_budget,
+                exercise_refresh_budget=exercise_refresh_budget,
                 research_reward_budget=research_reward_budget,
                 research_start_budget=research_start_budget,
                 dorm_collect_budget=dorm_collect_budget,
@@ -1199,6 +1210,8 @@ class AlasSemanticAdapter:
         self._daily_pending_stage_receipt: Optional[ActionReceipt] = None
         self._daily_stage_confirmed = False
         self._daily_transition_until = 0.0
+        self._exercise_pending = False
+        self._exercise_execution_active = False
         self._last_campaign_auto_search_completion: Optional[
             CampaignAutoSearchCompletionProof
         ] = None
@@ -3333,6 +3346,25 @@ class AlasSemanticAdapter:
         self._daily_transition_until = time.monotonic() + 20.0
         return receipt
 
+    def exercise_execute_allowed(self) -> bool:
+        self._package_gate()
+        return self._action_ledger.allowed("exercise.execute")
+
+    def exercise_refresh_allowed(self) -> bool:
+        self._package_gate()
+        return self._action_ledger.allowed("exercise.refresh")
+
+    def click_exercise_precombat_start(self) -> ActionReceipt:
+        self._package_gate()
+        if not self._exercise_pending:
+            raise SemanticGateClosed("exercise execution intent is incomplete")
+        receipt = self._dispatch_mutation(
+            "exercise.execute", self.oracle.click_daily_precombat_start
+        )
+        self._exercise_pending = False
+        self._exercise_execution_active = True
+        return replace(receipt, semantic_id="exercise/execute")
+
     def complete_daily_battle_result(self, timeout_seconds: float = 30.0) -> Tuple[ActionReceipt, ...]:
         """Drain the typed Daily result stack without full-UI frame polling."""
 
@@ -4183,6 +4215,8 @@ class AlasSemanticAdapter:
             # below proves the next ALAS state.
             return False
         if name == "BACK_ARROW":
+            if self.oracle.exercise_opponent_detail_visible():
+                return True
             if self.oracle.daily_precombat_visible():
                 return True
             if self.oracle.daily_page_visible():
@@ -4342,6 +4376,12 @@ class AlasSemanticAdapter:
                 "ALAS resource is not semantically mapped: {0}".format(name)
             )
         self._package_gate()
+        if name == "NEW_OPPONENT":
+            return self.oracle.exercise_page_visible()
+        if name == "EXERCISE_PREPARATION":
+            return self.oracle.exercise_opponent_detail_visible()
+        if semantic_id is not None and semantic_id.startswith("exercise/opponent/"):
+            return self.oracle.exercise_page_visible()
         if (
             self._campaign_context is not None
             and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
@@ -5237,7 +5277,7 @@ class AlasSemanticAdapter:
         for area in areas:
             if not isinstance(area, (tuple, list)) or len(area) != 4:
                 raise SemanticGateClosed("semantic OCR area is malformed")
-            if any(isinstance(value, bool) or not isinstance(value, (int, float)) for value in area):
+            if any(isinstance(value, bool) or not isinstance(value, Real) for value in area):
                 raise SemanticGateClosed("semantic OCR area is not numeric")
             left, top, right, bottom = (float(value) for value in area)
             if not (0 <= left < right <= 1280 and 0 <= top < bottom <= 720):
@@ -5282,6 +5322,38 @@ class AlasSemanticAdapter:
                     "typed text violates the ALAS OCR alphabet contract"
                 )
             return value
+        if (
+            len(bounds) == 1
+            and bounds[0] == Bounds(1089.0, 105.0, 1209.0, 129.0)
+            and self.oracle.exercise_page_visible()
+        ):
+            return self.oracle.exercise_period_remaining_text()
+        for index in range(4):
+            exercise_power_bounds = tuple(
+                Bounds(float(222 + 244 * index), float(257 + 30 * row),
+                       float(294 + 244 * index), float(285 + 30 * row))
+                for row in range(2)
+            )
+            if (
+                len(bounds) == 2
+                and tuple(bounds) == exercise_power_bounds
+                and self.oracle.exercise_page_visible()
+            ):
+                return [
+                    str(value)
+                    for value in self.oracle.exercise_opponent_power(index + 1)
+                ]
+        exercise_level_bounds = tuple(
+            Bounds(float(origin + 168 * index), 259.0,
+                   float(origin + 168 * index + 58), 280.0)
+            for origin in (130, 832) for index in range(3)
+        )
+        if (
+            len(bounds) == len(exercise_level_bounds)
+            and tuple(bounds) == exercise_level_bounds
+            and self.oracle.exercise_opponent_detail_visible()
+        ):
+            return [str(value) for value in self.oracle.exercise_opponent_levels()]
         if len(bounds) == 1 and bounds[0] == Bounds(133.0, 39.0, 250.0, 72.0):
             value = self.oracle.war_archives_data_key_text()
             if alphabet is not None and any(character not in alphabet for character in value):
@@ -8387,6 +8459,8 @@ class AlasSemanticAdapter:
                 self._campaign_context,
             )
         ):
+            if self.oracle.exercise_opponent_detail_visible():
+                return self.oracle.click_exercise_opponent_back()
             if self.oracle.daily_precombat_visible():
                 return self.oracle.click_daily_precombat_back()
             if self.oracle.daily_page_visible():
@@ -9417,8 +9491,18 @@ class AlasSemanticAdapter:
                 return self.oracle.click_meta_assist_start()
             if semantic_id == "campaign-menu/daily":
                 return self.oracle.click_campaign_daily_entrance()
+            if semantic_id == "daily/precombat/start" and self._exercise_pending:
+                return self.click_exercise_precombat_start()
             if semantic_id == "daily/precombat/start":
                 return self.click_daily_precombat_start()
+            if semantic_id == "exercise/opponent/start":
+                receipt = self.oracle.click(semantic_id)
+                self._exercise_pending = True
+                return receipt
+            if semantic_id == "exercise/opponent/refresh":
+                return self._dispatch_mutation(
+                    "exercise.refresh", lambda: self.oracle.click(semantic_id)
+                )
             if semantic_id in ("daily/next", "daily/prev"):
                 return self.oracle.click_daily_control(semantic_id)
             if (
@@ -10116,6 +10200,8 @@ class AlasSemanticSession:
         commission_reward_budget: int = 0,
         commission_start_budget: int = 0,
         daily_execute_budget: int = 0,
+        exercise_execute_budget: int = 0,
+        exercise_refresh_budget: int = 0,
         research_reward_budget: int = 0,
         research_start_budget: int = 0,
         dorm_collect_budget: int = 0,
@@ -10197,6 +10283,8 @@ class AlasSemanticSession:
             ("commission reward", commission_reward_budget),
             ("commission start", commission_start_budget),
             ("daily execute", daily_execute_budget),
+            ("exercise execute", exercise_execute_budget),
+            ("exercise refresh", exercise_refresh_budget),
             ("research reward", research_reward_budget),
             ("research start", research_start_budget),
             ("dorm collect", dorm_collect_budget),
@@ -10229,6 +10317,8 @@ class AlasSemanticSession:
         self.tactical_assign_budget = tactical_assign_budget
         self.commission_start_budget = commission_start_budget
         self.daily_execute_budget = daily_execute_budget
+        self.exercise_execute_budget = exercise_execute_budget
+        self.exercise_refresh_budget = exercise_refresh_budget
         self.research_reward_budget = research_reward_budget
         self.research_start_budget = research_start_budget
         self.dorm_collect_budget = dorm_collect_budget
@@ -10268,6 +10358,8 @@ class AlasSemanticSession:
             commission_reward_budget=commission_reward_budget,
             commission_start_budget=commission_start_budget,
             daily_execute_budget=daily_execute_budget,
+            exercise_execute_budget=exercise_execute_budget,
+            exercise_refresh_budget=exercise_refresh_budget,
             research_reward_budget=research_reward_budget,
             research_start_budget=research_start_budget,
             dorm_collect_budget=dorm_collect_budget,
@@ -10536,6 +10628,8 @@ class AlasSemanticSession:
                 commission_reward_budget=self.commission_reward_budget,
                 commission_start_budget=self.commission_start_budget,
                 daily_execute_budget=self.daily_execute_budget,
+                exercise_execute_budget=self.exercise_execute_budget,
+                exercise_refresh_budget=self.exercise_refresh_budget,
                 research_reward_budget=self.research_reward_budget,
                 research_start_budget=self.research_start_budget,
                 dorm_collect_budget=self.dorm_collect_budget,
@@ -11013,10 +11107,20 @@ class AlasSemanticSession:
             # stage page forever.
             return adapter.appear(button)
         if adapter.oracle.daily_battle_result_visible():
+            if (
+                getattr(adapter, "_exercise_execution_active", False)
+                and time.monotonic() <= self._combat_result_transition_until
+            ):
+                return False
             if name == "BATTLE_STATUS_S":
                 self._combat_result_observation = (name, time.monotonic())
                 return True
             return False
+        if (
+            getattr(adapter, "_exercise_execution_active", False)
+            and adapter.oracle.award_info_page_visible()
+        ):
+            return name == "GET_ITEMS_1"
         if adapter.oracle.enabled("reward/award-info/close"):
             return name == "GET_ITEMS_1"
         if adapter.oracle.daily_combat_visible():
@@ -11749,6 +11853,28 @@ class AlasSemanticSession:
             self.refresh_frame()
             return self.open().click_campaign_combat_grid(button)
         name = AlasSemanticAdapter._button_name(button)
+        if (
+            name == "PAUSE"
+            and self.open()._exercise_execution_active
+        ):
+            return self.open().oracle.click_exercise_combat_pause()
+        if name == "CLICK_SAFE_AREA":
+            adapter = self.open()
+            if adapter.oracle.exercise_reward_item_info_visible():
+                receipt = adapter.oracle.click_exercise_reward_item_info_cancel()
+                self._combat_result_transition_until = time.monotonic() + 1.5
+                return receipt
+            if (
+                getattr(adapter, "_exercise_execution_active", False)
+                and adapter.oracle.award_info_page_visible()
+            ):
+                receipt = adapter.oracle.click_exercise_award_info_close()
+                self._combat_result_transition_until = time.monotonic() + 1.5
+                return receipt
+            if adapter.oracle.daily_battle_result_visible():
+                receipt = adapter.oracle.click_daily_battle_result()
+                self._combat_result_transition_until = time.monotonic() + 2.5
+                return receipt
         shop_item_index = getattr(button, "semantic_shop_index", None)
         if shop_item_index is not None:
             self.refresh_frame()
@@ -11817,6 +11943,11 @@ class AlasSemanticSession:
         if name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3"):
             adapter = self.open()
             result_oracle = self._combat_result_action_oracle(adapter)
+            if (
+                getattr(adapter, "_exercise_execution_active", False)
+                and result_oracle.award_info_page_visible()
+            ):
+                return result_oracle.click_exercise_award_info_close()
             if result_oracle.campaign_battle_reward_visible():
                 target = (
                     "reward/award-info/close"
@@ -11979,6 +12110,127 @@ class AlasSemanticSession:
 
     def daily_execution_active(self) -> bool:
         return self.open().daily_execution_active()
+
+    def exercise_execute_allowed(self) -> bool:
+        return self.open().exercise_execute_allowed()
+
+    def exercise_refresh_allowed(self) -> bool:
+        return self.open().exercise_refresh_allowed()
+
+    def exercise_duel_hp(self) -> Tuple[float, float]:
+        return self.open().oracle.exercise_duel_hp()
+
+    def exercise_quit_low_hp(self) -> Tuple[ActionReceipt, ...]:
+        """Quit an Exercise duel through the exact official pause flow."""
+
+        oracle = self.open().oracle
+        receipts = []
+        if not oracle.exercise_combat_pause_menu_visible():
+            receipts.append(oracle.click_exercise_combat_pause())
+        deadline = time.monotonic() + 10.0
+        while time.monotonic() < deadline:
+            if oracle.exercise_combat_pause_menu_visible():
+                break
+            time.sleep(0.2)
+        else:
+            raise SemanticGateClosed("Exercise pause menu did not appear")
+        receipts.append(oracle.click_exercise_combat_leave())
+        deadline = time.monotonic() + 10.0
+        while time.monotonic() < deadline:
+            if oracle.exercise_combat_quit_confirm_visible():
+                break
+            time.sleep(0.2)
+        else:
+            raise SemanticGateClosed("Exercise quit confirmation did not appear")
+        receipts.append(oracle.click_exercise_combat_quit_confirm())
+        deadline = time.monotonic() + 15.0
+        while time.monotonic() < deadline:
+            if oracle.daily_precombat_visible() and oracle.exercise_page_visible():
+                return tuple(receipts)
+            time.sleep(0.25)
+        raise SemanticGateClosed("Exercise quit did not return to preparation")
+
+    def exercise_wait_overview(self, timeout_seconds: float = 15.0) -> None:
+        """Wait for Exercise ownership after its preparation overlay is gone."""
+
+        oracle = self.open().oracle
+        deadline = time.monotonic() + timeout_seconds
+        while time.monotonic() < deadline:
+            if (
+                oracle.exercise_page_visible()
+                and not oracle.daily_precombat_visible()
+                and not oracle.exercise_opponent_detail_visible()
+            ):
+                return
+            time.sleep(0.25)
+        raise SemanticGateClosed("Exercise overview did not stabilize")
+
+    def exercise_opponents(self) -> Tuple[Tuple[Tuple[int, int], Tuple[int, ...]], ...]:
+        """Inspect all four rivals with a fresh, closed-loop detail transition."""
+
+        adapter = self.open()
+        oracle = adapter.oracle
+        deadline = time.monotonic() + 20.0
+        while time.monotonic() < deadline:
+            try:
+                powers = tuple(
+                    oracle.exercise_opponent_power(index) for index in range(1, 5)
+                )
+                break
+            except SemanticGateClosed:
+                time.sleep(0.25)
+        else:
+            raise SemanticGateClosed("Exercise rival powers did not stabilize")
+        result = []
+        for index, power in enumerate(powers, start=1):
+            self.refresh_frame()
+            receipt = self.open().oracle.click("exercise/opponent/{0}".format(index))
+            deadline = time.monotonic() + 20.0
+            while time.monotonic() < deadline:
+                try:
+                    if oracle.exercise_opponent_detail_visible():
+                        levels = oracle.exercise_opponent_levels()
+                        break
+                except SemanticGateClosed:
+                    pass
+                time.sleep(0.25)
+            else:
+                raise SemanticGateClosed("Exercise rival detail did not appear")
+            if receipt.generation > oracle.read_ui_state().generation:
+                raise SemanticGateClosed("Exercise rival detail predates its selection")
+            oracle.click_exercise_opponent_back()
+            deadline = time.monotonic() + 20.0
+            while time.monotonic() < deadline:
+                if oracle.exercise_page_visible():
+                    break
+                time.sleep(0.25)
+            else:
+                raise SemanticGateClosed("Exercise rival detail did not close")
+            result.append((power, levels))
+        return tuple(result)
+
+    def complete_exercise_battle_result(self, timeout_seconds: float = 60.0) -> Tuple[ActionReceipt, ...]:
+        """Drain the exact Exercise grade/reward/statistics stack to its page."""
+
+        deadline = time.monotonic() + timeout_seconds
+        receipts: List[ActionReceipt] = []
+        while time.monotonic() < deadline:
+            oracle = self.open().oracle
+            if oracle.exercise_page_visible():
+                return tuple(receipts)
+            if oracle.exercise_merit_shop_visible():
+                receipts.append(oracle.click_exercise_merit_shop_close())
+            elif oracle.exercise_reward_item_info_visible():
+                receipts.append(oracle.click_exercise_reward_item_info_cancel())
+            elif oracle.award_info_page_visible():
+                receipts.append(oracle.click_exercise_award_info_close())
+            elif oracle.daily_battle_result_visible():
+                receipts.append(oracle.click_daily_battle_result())
+            else:
+                time.sleep(0.25)
+                continue
+            time.sleep(1.0)
+        raise SemanticGateClosed("Exercise result stack did not return to overview")
 
     def click_daily_back(self) -> ActionReceipt:
         self.refresh_frame()

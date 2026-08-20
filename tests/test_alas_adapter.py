@@ -731,6 +731,9 @@ class FakeOracle:
     def exercise_page_visible(self):
         return False
 
+    def exercise_opponent_detail_visible(self):
+        return False
+
     def meta_assist_sortie_prompt_visible(self):
         return False
 

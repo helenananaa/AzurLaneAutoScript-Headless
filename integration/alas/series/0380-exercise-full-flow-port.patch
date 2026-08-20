@@ -1,0 +1,240 @@
+diff --git a/module/exercise/exercise.py b/module/exercise/exercise.py
+index 0be2bab..b44971a 100644
+--- a/module/exercise/exercise.py
++++ b/module/exercise/exercise.py
+@@ -79,6 +79,12 @@ class Exercise(ExerciseCombat):
+     preserve = 0
+ 
+     def _new_opponent(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and not semantic_adapter.exercise_refresh_allowed():
++            logger.info('Exercise refresh budget exhausted')
++            return False
++        if semantic_adapter is not None:
++            semantic_adapter.exercise_wait_overview()
+         logger.info('New opponent')
+         self.appear_then_click(NEW_OPPONENT)
+         self.opponent_change_count += 1
+@@ -87,6 +93,7 @@ class Exercise(ExerciseCombat):
+         self.config.set_record(Exercise_OpponentRefreshValue=self.opponent_change_count)
+ 
+         self.ensure_no_info_bar(timeout=3)
++        return True
+ 
+     def _opponent_fleet_check_all(self):
+         if self.config.Exercise_OpponentChooseMode != 'leftmost':
+@@ -115,11 +122,15 @@ class Exercise(ExerciseCombat):
+                 success = self._combat(opponent)
+                 if success:
+                     return success
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if semantic_adapter is not None and not semantic_adapter.exercise_execute_allowed():
++                    return False
+ 
+             if self.opponent_change_count >= 5:
+                 return False
+ 
+-            self._new_opponent()
++            if not self._new_opponent():
++                return False
+             self._opponent_fleet_check_all()
+ 
+     def _exercise_easiest_else_exp(self):
+@@ -143,9 +154,15 @@ class Exercise(ExerciseCombat):
+                 self.config.override(Exercise_LowHpThreshold=restore)
+                 return success
+             else:
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if semantic_adapter is not None and not semantic_adapter.exercise_execute_allowed():
++                    self.config.override(Exercise_LowHpThreshold=restore)
++                    return False
+                 if self.opponent_change_count < 5:
+                     logger.info("Cannot beat calculated easiest opponent, refresh")
+-                    self._new_opponent()
++                    if not self._new_opponent():
++                        self.config.override(Exercise_LowHpThreshold=restore)
++                        return False
+                     self._opponent_fleet_check_all()
+                     continue
+                 else:
+@@ -201,6 +218,7 @@ class Exercise(ExerciseCombat):
+             opponent_mode=self.config.Exercise_OpponentChooseMode,
+             opponent_trial=self.config.Exercise_OpponentTrial,
+             low_hp_threshold=self.config.Exercise_LowHpThreshold,
++            low_hp_confirm_wait=self.config.Exercise_LowHpConfirmWait,
+             opponent_refresh_value=self.config.Exercise_OpponentRefreshValue,
+             opponent_refresh_record=self.config.Exercise_OpponentRefreshRecord,
+         )
+@@ -227,6 +245,10 @@ class Exercise(ExerciseCombat):
+                 logger.info(f'Preserve {self.preserve} exercise')
+ 
+         while 1:
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None and not semantic_adapter.exercise_execute_allowed():
++                logger.info('Exercise execute budget exhausted')
++                break
+             self.remain = OCR_EXERCISE_REMAIN.ocr(self.device.image)
+             if self.remain <= self.preserve:
+                 break
+diff --git a/module/exercise/combat.py b/module/exercise/combat.py
+index 754e1be..bd4e8e8 100644
+--- a/module/exercise/combat.py
++++ b/module/exercise/combat.py
+@@ -40,7 +40,9 @@ class ExerciseCombat(HpDaemon, OpponentChoose, Combat):
+         logger.info('Combat execute')
+         self.device.stuck_record_clear()
+         self.device.click_record_clear()
+-        self.low_hp_confirm_timer = Timer(1.5, count=2).start()
++        self.low_hp_confirm_timer = Timer(
++            self.config.Exercise_LowHpConfirmWait
++        ).clear()
+         show_hp_timer = Timer(5)
+         pause_interval = Timer(0.5, count=1)
+         # Pause button to identify battle UI theme
+@@ -68,14 +70,20 @@ class ExerciseCombat(HpDaemon, OpponentChoose, Combat):
+                 # Finish - S or D rank
+                 if self.appear(BATTLE_STATUS_S, interval=1):
+                     logger.info(f'{BATTLE_STATUS_S} -> {CLICK_SAFE_AREA}')
+-                    self.device.click(CLICK_SAFE_AREA)
++                    if semantic_adapter is not None:
++                        semantic_adapter.complete_exercise_battle_result()
++                    else:
++                        self.device.click(CLICK_SAFE_AREA)
+                     success = True
+                     end = True
+                     battle_status_detected = True
+                     continue
+                 if self.appear(BATTLE_STATUS_D, interval=1):
+                     logger.info(f'{BATTLE_STATUS_D} -> {CLICK_SAFE_AREA}')
+-                    self.device.click(CLICK_SAFE_AREA)
++                    if semantic_adapter is not None:
++                        semantic_adapter.complete_exercise_battle_result()
++                    else:
++                        self.device.click(CLICK_SAFE_AREA)
+                     success = True
+                     end = True
+                     battle_status_detected = True
+@@ -87,16 +95,16 @@ class ExerciseCombat(HpDaemon, OpponentChoose, Combat):
+                 logger.info(f'{GET_ITEMS_1} -> {CLICK_SAFE_AREA}')
+                 self.device.click(CLICK_SAFE_AREA)
+                 continue
+-            if self.appear(EXP_INFO_S, interval=1):
++            if semantic_adapter is None and self.appear(EXP_INFO_S, interval=1):
+                 logger.info(f'{EXP_INFO_S} -> {CLICK_SAFE_AREA}')
+                 self.device.click(CLICK_SAFE_AREA)
+                 continue
+-            if self.appear(EXP_INFO_D, interval=1):
++            if semantic_adapter is None and self.appear(EXP_INFO_D, interval=1):
+                 logger.info(f'{EXP_INFO_D} -> {CLICK_SAFE_AREA}')
+                 self.device.click(CLICK_SAFE_AREA)
+                 continue
+             # Last D rank screen
+-            if self.appear_then_click(OPTS_INFO_D, offset=(30, 30), interval=1):
++            if semantic_adapter is None and self.appear_then_click(OPTS_INFO_D, offset=(30, 30), interval=1):
+                 success = True
+                 end = True
+                 logger.info("Exercise LOST")
+@@ -113,11 +121,15 @@ class ExerciseCombat(HpDaemon, OpponentChoose, Combat):
+                     continue
+             if not end:
+                 if (
+-                    semantic_adapter is None
+-                    and p
++                    p
+                     and self._at_low_hp(image=self.device.image, pause=pause)
+                 ):
+                     logger.info('Exercise quit')
++                    if semantic_adapter is not None:
++                        semantic_adapter.exercise_quit_low_hp()
++                        success = False
++                        end = True
++                        continue
+                     if pause_interval.reached():
+                         self.device.click(p)
+                         pause_interval.reset()
+@@ -171,6 +183,11 @@ class ExerciseCombat(HpDaemon, OpponentChoose, Combat):
+ 
+     def _preparation_quit(self):
+         logger.info('Preparation quit')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.click_daily_precombat_back()
++            semantic_adapter.exercise_wait_overview()
++            return
+         self.ui_back(check_button=self._in_exercise, appear_button=BATTLE_PREPARATION, skip_first_screenshot=True)
+ 
+     def _combat(self, opponent):
+diff --git a/module/exercise/hp_daemon.py b/module/exercise/hp_daemon.py
+index d63c30a..8f19913 100644
+--- a/module/exercise/hp_daemon.py
++++ b/module/exercise/hp_daemon.py
+@@ -58,7 +58,10 @@ class HpDaemon(ModuleBase):
+         logger.info(text)
+ 
+     def _at_low_hp(self, image, pause=PAUSE):
+-        if pause == PAUSE:
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            self.attacker_hp, self.defender_hp = semantic_adapter.exercise_duel_hp()
++        elif pause == PAUSE:
+             self.attacker_hp = self._calculate_hp(image, area=ATTACKER_HP_AREA.area, reverse=True)
+             self.defender_hp = self._calculate_hp(image, area=DEFENDER_HP_AREA.area, reverse=False)
+         elif pause in [
+@@ -92,13 +95,16 @@ class HpDaemon(ModuleBase):
+ 
+         # Opponent died or HP bar get covered
+         if self.defender_hp < 0.01:
+-            self.low_hp_confirm_timer.reset()
++            self.low_hp_confirm_timer.clear()
+         if 0.01 < self.attacker_hp <= self.config.Exercise_LowHpThreshold:
++            if not self.low_hp_confirm_timer.started():
++                self.low_hp_confirm_timer.start()
++                return False
+             if self.low_hp_confirm_timer.reached() and self.low_hp_confirm_timer.current_time() < 300:
+                 self._show_hp(self.low_hp_confirm_timer.current_time())
+                 return True
+             else:
+                 return False
+         else:
+-            self.low_hp_confirm_timer.reset()
++            self.low_hp_confirm_timer.clear()
+             return False
+diff --git a/module/exercise/opponent.py b/module/exercise/opponent.py
+index 22379de..dfd2367 100644
+--- a/module/exercise/opponent.py
++++ b/module/exercise/opponent.py
+@@ -40,6 +40,20 @@ class Opponent:
+             ' '.join([power[0]] + level[:3] + ['|'] + [power[1]] + level[3:])
+         )
+ 
++    @classmethod
++    def from_semantic(cls, index, power, level):
++        self = cls.__new__(cls)
++        self.index = index
++        self.power = list(power)
++        self.level = list(level)
++        levels = [str(x).rjust(3, ' ') for x in self.level]
++        powers = ['(' + str(x).rjust(5, ' ') + ')' for x in self.power]
++        logger.attr(
++            'OPPONENT_%s' % index,
++            ' '.join([powers[0]] + levels[:3] + ['|'] + [powers[1]] + levels[3:])
++        )
++        return self
++
+     @staticmethod
+     def get_level(image):
+         """
+@@ -97,6 +111,13 @@ class OpponentChoose(UI):
+ 
+     def _opponent_fleet_check_all(self):
+         self.opponents = []
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            self.opponents = [
++                Opponent.from_semantic(index, power, level)
++                for index, (power, level) in enumerate(semantic_adapter.exercise_opponents())
++            ]
++            return
+         self.main_image = self.device.image
+ 
+         for index in range(4):

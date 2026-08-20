@@ -219,6 +219,11 @@
       "order": 44,
       "path": "integration/alas/series/0370-hard-11-4-semantic-clear-port.patch",
       "sha256": "52368bb2070fc7e6d85d0f2b54b3acadb29e8cc355c28814ec036a18662978c5"
+    },
+    {
+      "order": 45,
+      "path": "integration/alas/series/0380-exercise-full-flow-port.patch",
+      "sha256": "8e4ed513090d98f579030c2d66d3d6ca4280c45e7816e793fe3251fdd36af6be"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

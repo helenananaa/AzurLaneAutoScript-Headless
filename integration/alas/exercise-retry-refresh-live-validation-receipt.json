@@ -1,0 +1,35 @@
+{
+  "schema": "alas-headless.exercise-retry-refresh-live-validation/v1",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "serial": "emulator-5580",
+  "flow_passed": true,
+  "mode": "easiest_else_exp",
+  "execute_budget": 2,
+  "refresh_budget": 1,
+  "remaining_before": 4,
+  "remaining_after": 3,
+  "execute_grant_remaining": 0,
+  "refresh_grant_remaining": 0,
+  "events": [
+    {"at": "2026-08-20T13:26:07.190+08:00", "event": "low-hp-quit"},
+    {"at": "2026-08-20T13:26:19.853+08:00", "event": "opponent-refresh", "refresh_count": 1},
+    {
+      "at": "2026-08-20T13:26:34.124+08:00",
+      "event": "refreshed-opponents-inspected",
+      "opponents": [
+        {"power": [15710, 15937], "levels": [125, 125, 125, 125, 125, 125]},
+        {"power": [4479, 2171], "levels": [99, 71, 71, 45, 45, 45]},
+        {"power": [14697, 14330], "levels": [125, 125, 125, 125, 125, 125]},
+        {"power": [14708, 14060], "levels": [115, 114, 115, 112, 112, 112]}
+      ],
+      "order": [1, 3, 2, 0]
+    },
+    {"at": "2026-08-20T13:27:19.482+08:00", "event": "battle-status-s"},
+    {"at": "2026-08-20T13:27:28.765+08:00", "event": "combat-end"}
+  ],
+  "original_task_result": true,
+  "original_elapsed_seconds": 136.125,
+  "legacy_harness_passed": false,
+  "legacy_harness_misclassification": "The old expectation admitted only an unchanged remaining count after a low-HP quit; the valid retry victory changed 4 to 3. The corrected runner accepts either terminal outcome for retry-terminal validation.",
+  "curation": "Post-run classification from the original ALAS log and action-ledger receipt; no game action was replayed."
+}
