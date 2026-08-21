@@ -5522,19 +5522,24 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "scripts/python/run_alas_opsi_farming_live_validation.py",
+        "integration/alas/operation-siren-meowfficer-zone22-live-20260822-r12.json",
+        "integration/alas/operation-siren-hazard1-live-20260822-r22.json",
+        "integration/alas/operation-siren-meowfficer-submarine-order-live-20260822-r24.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "F",
       "metadata": "type=select; display=default",
       "panels": [
         "OpsiExplore",
@@ -5545,25 +5550,30 @@
         "OpsiHazard1Leveling"
       ],
       "path": "OpsiFleet.Fleet",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "options: 1, 2, 3, 4; default: 1"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "scripts/python/run_alas_opsi_farming_live_validation.py",
+        "integration/alas/operation-siren-meowfficer-zone22-live-20260822-r12.json",
+        "integration/alas/operation-siren-meowfficer-submarine-order-live-20260822-r24.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default/hide",
       "panels": [
         "OpsiExplore",
@@ -5574,7 +5584,7 @@
         "OpsiHazard1Leveling"
       ],
       "path": "OpsiFleet.Submarine",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -5760,97 +5770,117 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0125-operation-siren-farming-search-completion.patch",
+        "integration/alas/series/0126-operation-siren-init-offscreen-fleet.patch",
+        "integration/alas/series/0127-operation-siren-combat-interrupt.patch",
+        "scripts/python/run_alas_opsi_farming_live_validation.py",
+        "integration/alas/operation-siren-hazard1-live-20260822-r22.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "F",
       "metadata": "type=select; display=default",
       "panels": [
         "OpsiHazard1Leveling"
       ],
       "path": "OpsiHazard1Leveling.TargetZone",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "options: 0, 22, 44; default: 0"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "scripts/python/run_alas_opsi_farming_live_validation.py",
+        "integration/alas/operation-siren-meowfficer-zone22-live-20260822-r12.json",
+        "integration/alas/operation-siren-meowfficer-submarine-order-live-20260822-r24.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "F",
       "metadata": "type=input; display=default",
       "panels": [
         "OpsiMeowfficerFarming"
       ],
       "path": "OpsiMeowfficerFarming.ActionPointPreserve",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: 1000"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "scripts/python/run_alas_opsi_farming_live_validation.py",
+        "integration/alas/operation-siren-meowfficer-zone22-live-20260822-r12.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "F",
       "metadata": "type=select; display=default",
       "panels": [
         "OpsiMeowfficerFarming"
       ],
       "path": "OpsiMeowfficerFarming.HazardLevel",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "options: 10, 3, 4, 5, 6; default: 5"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0125-operation-siren-farming-search-completion.patch",
+        "scripts/python/run_alas_opsi_farming_live_validation.py",
+        "integration/alas/operation-siren-meowfficer-zone22-live-20260822-r12.json",
+        "integration/alas/operation-siren-meowfficer-submarine-order-live-20260822-r24.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "F",
       "metadata": "type=input; display=default",
       "panels": [
         "OpsiMeowfficerFarming"
       ],
       "path": "OpsiMeowfficerFarming.TargetZone",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: 0"
     },
@@ -8359,8 +8389,8 @@
         "OpsiFleet"
       ],
       "name": "OpsiHazard1Leveling",
-      "note": "TargetZone 三值、Fleet 四值与 Submarine 两值已离线等价；真实舰队/潜艇动作、选区与循环未闭环",
-      "status": "B"
+      "note": "TargetZone 三值与 Fleet 四值已离线等价；原任务实机完成 zone 44 到 zone 22 的精确选区、Fleet 2、行动力门槛、战略搜索配置、7 场真实战斗、自动搜索自然回 OFF、无残余问号、战后 HP/大修检查及有界任务结束。Submarine 为共享 OpsiFleet 字段且该上游任务不消费，true 的原始导航命令另由 Meowfficer 完整实机闭环。",
+      "status": "F"
     },
     {
       "groups": [
@@ -8369,8 +8399,8 @@
         "OpsiFleet"
       ],
       "name": "OpsiMeowfficerFarming",
-      "note": "HazardLevel 五值、Fleet 四值与 Submarine 两值已离线等价；行动力保留、自由选区、真实舰队/潜艇动作和循环未闭环",
-      "status": "B"
+      "note": "HazardLevel 五值、Fleet 四值、Submarine 两值、行动力保留与自由选区已离线等价；原任务实机完成显式 zone 22、Fleet 2、Submarine=false、自动搜索战斗和战后处理，并以独立有界原任务周期完成 Fleet 3、Submarine=true 的精确命令、确认、动画结束及四项相关任务冷却写入。",
+      "status": "F"
     },
     {
       "groups": [
@@ -11306,9 +11336,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "c13dfdfdd0eb60b5763b62ef6e4398dd30d269ba934296d66d9efcc2dac0900f",
-      "manifest_sha256": "8508b240059684ca0e4d646782434de9fc6b38f1d2c9e0758946715f6932bc46",
-      "member_count": 71
+      "combined_sha256": "8272bc2b22e47a6332b8acd7b3bd834b73fd6bcbe0a9b2e91457293fd9cb8dc8",
+      "manifest_sha256": "20f615fdd1f1c7c1f986d4263f0189141f4baf55fcd10fc59d925a60aea7fe14",
+      "member_count": 74
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

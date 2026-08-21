@@ -147,6 +147,7 @@ class FakeOracle:
             "overlay/network-reconnect/confirm": False,
         }
         self.operation_siren_order_confirmation_visible_value = True
+        self.operation_siren_page_visible_value = False
         self.operation_siren_local_map_visible_value = False
         self.exists_values = {}
         self.enable_main_after_overlay_click = False
@@ -763,6 +764,9 @@ class FakeOracle:
 
     def operation_siren_local_map_visible(self):
         return self.operation_siren_local_map_visible_value
+
+    def operation_siren_page_visible(self):
+        return self.operation_siren_page_visible_value
 
     def operation_siren_globe_state(self):
         raise SemanticGateClosed("Operation Siren globe identity is not proven")
@@ -1400,6 +1404,26 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             ["os/order/submarine", "os/order/confirm"],
         )
 
+    def test_operation_siren_order_retries_only_endpoint_coherence(self):
+        adapter, oracle, _ = self.make_adapter()
+        receipt = oracle.click_receipt("os/order/submarine")
+        oracle.click_operation_siren_order = Mock(
+            side_effect=[
+                SemanticGateClosed(
+                    "operation siren order snapshots are not coherent"
+                ),
+                receipt,
+            ]
+        )
+
+        with patch("alas_headless.alas_adapter.time.sleep") as sleep:
+            returned = adapter.click(NamedButton("ORDER_SUBMARINE"))
+
+        self.assertEqual(returned, receipt)
+        self.assertEqual(adapter._operation_siren_pending_order, "submarine")
+        self.assertEqual(oracle.click_operation_siren_order.call_count, 2)
+        sleep.assert_called_once_with(0.25)
+
     def test_operation_siren_storage_checkout_owns_exact_exit_confirmation(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.operation_siren_exit_prompt_visible = lambda: True
@@ -1441,6 +1465,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
     def test_operation_siren_fleet_hp_retries_transient_missing_portraits(self):
         adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_page_visible_value = True
         oracle.operation_siren_state = lambda: SimpleNamespace()
         calls = []
 
@@ -1460,6 +1485,20 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
         self.assertEqual(len(calls), 2)
 
+    def test_operation_siren_fleet_hp_uses_local_shell_when_summary_is_incomplete(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_page_visible_value = True
+        oracle.operation_siren_state = Mock(
+            side_effect=SemanticGateClosed("operation siren fleet summary is malformed")
+        )
+        oracle.operation_siren_fleet_hp = lambda: (0.9, 0.8, 0.7, 0.6, 0.5, 0.4)
+
+        self.assertEqual(
+            adapter.campaign_fleet_hp(),
+            (0.9, 0.8, 0.7, 0.6, 0.5, 0.4),
+        )
+        oracle.operation_siren_state.assert_not_called()
+
     def test_os_check_requires_unobstructed_local_map(self):
         adapter, oracle, _ = self.make_adapter()
 
@@ -1472,6 +1511,15 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         oracle.operation_siren_exit_prompt_visible = lambda: True
         self.assertFalse(adapter.appear(NamedButton("OS_CHECK")))
+
+    def test_in_map_is_positive_on_exact_operation_siren_local_map(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_local_map_visible_value = True
+
+        self.assertTrue(adapter.appear(NamedButton("IN_MAP")))
+
+        oracle.operation_siren_local_map_visible_value = False
+        self.assertFalse(adapter.appear(NamedButton("IN_MAP")))
 
     def test_typed_campaign_menu_hides_unrelated_pixel_page_checks(self):
         adapter, oracle, _ = self.make_adapter()
@@ -6558,6 +6606,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertTrue(adapter.appear(NamedButton("GET_ITEMS_1")))
         self.assertFalse(adapter.appear(NamedButton("IN_RETIREMENT_CHECK")))
+        self.assertTrue(adapter._operation_siren_auto_search_active)
         self.assertGreater(
             adapter._operation_siren_entry_transition_until,
             time.monotonic(),
@@ -6566,7 +6615,10 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         oracle.operation_siren_local_map_visible_value = True
         self.assertTrue(adapter.appear(NamedButton("OS_CHECK")))
         self.assertEqual(adapter._operation_siren_entry_transition_until, 0.0)
-        self.assertEqual(gate_calls, [True, True])
+        oracle.operation_siren_auto_search_state = Mock(return_value="off")
+        self.assertEqual(adapter.operation_siren_auto_search_state(), "off")
+        self.assertFalse(adapter.operation_siren_auto_search_completed_empty())
+        self.assertEqual(gate_calls, [True, True, True, True])
         self.assertEqual(oracle.click_calls, [])
 
     def test_operation_siren_reward_popup_closes_without_mission_owner(self):
@@ -6706,6 +6758,44 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertTrue(adapter.operation_siren_auto_search_transition_active())
         self.assertEqual(gate_calls, [True, True])
 
+    def test_operation_siren_auto_search_records_natural_empty_completion(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._operation_siren_auto_search_active = True
+        adapter._operation_siren_auto_search_transition_until = 0.0
+        oracle.operation_siren_auto_search_state = Mock(return_value="off")
+
+        self.assertEqual(adapter.operation_siren_auto_search_state(), "off")
+        self.assertTrue(adapter.operation_siren_auto_search_completed_empty())
+
+        oracle.enabled_values["os/map/auto-search/off"] = True
+        adapter.click(NamedButton("AUTO_SEARCH_OS_MAP_OPTION_OFF"))
+        self.assertFalse(adapter.operation_siren_auto_search_completed_empty())
+
+        adapter._operation_siren_auto_search_active = False
+        adapter.mark_operation_siren_auto_search_completed_empty()
+        self.assertTrue(adapter.operation_siren_auto_search_completed_empty())
+
+    def test_operation_siren_original_loop_can_close_settled_off_transition(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._operation_siren_auto_search_active = True
+        adapter._operation_siren_auto_search_transition_until = (
+            time.monotonic() + 30.0
+        )
+        oracle.operation_siren_auto_search_state = Mock(return_value="off")
+
+        adapter.mark_operation_siren_auto_search_completed_empty()
+
+        self.assertTrue(adapter.operation_siren_auto_search_completed_empty())
+        self.assertFalse(adapter.operation_siren_auto_search_transition_active())
+        self.assertFalse(adapter._operation_siren_auto_search_active)
+
+        adapter._operation_siren_auto_search_active = True
+        oracle.operation_siren_auto_search_state.return_value = "on"
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "transition is active"
+        ):
+            adapter.mark_operation_siren_auto_search_completed_empty()
+
     def test_operation_siren_boss_combat_requires_exact_target_and_owns_result(self):
         adapter, oracle, gate_calls = self.make_adapter()
         oracle.operation_siren_radar_targets = Mock(return_value=())
@@ -6722,6 +6812,32 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertTrue(adapter.operation_siren_combat_committed())
         self.assertEqual(gate_calls, [True, True])
         oracle.operation_siren_radar_targets.assert_called_with("boss")
+
+    def test_operation_siren_interrupt_advances_exact_pause_leave_confirm_steps(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._operation_siren_combat_active = True
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+
+        oracle.exercise_combat_quit_confirm_visible = Mock(return_value=False)
+        oracle.exercise_combat_pause_menu_visible = Mock(return_value=False)
+        oracle.combat_pause_visible = Mock(return_value=True)
+        oracle.click_combat_pause = Mock()
+        self.assertTrue(session.handle_operation_siren_combat_interrupt())
+        oracle.click_combat_pause.assert_called_once_with()
+
+        oracle.combat_pause_visible.return_value = False
+        oracle.exercise_combat_pause_menu_visible.return_value = True
+        oracle.click_exercise_combat_leave = Mock()
+        self.assertTrue(session.handle_operation_siren_combat_interrupt())
+        oracle.click_exercise_combat_leave.assert_called_once_with()
+
+        oracle.exercise_combat_pause_menu_visible.return_value = False
+        oracle.exercise_combat_quit_confirm_visible.return_value = True
+        oracle.click_exercise_combat_quit_confirm = Mock()
+        self.assertTrue(session.handle_operation_siren_combat_interrupt())
+        oracle.click_exercise_combat_quit_confirm.assert_called_once_with()
 
     def test_operation_siren_low_resolve_cancel_remembers_defeated_fleet(self):
         adapter, oracle, _ = self.make_adapter()
@@ -7233,6 +7349,23 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             SemanticGateClosed, "game activity is not top-resumed"
         ):
             adapter.appear(NamedButton("REWARD_CHECK"))
+
+    def test_operation_siren_startup_owns_passive_activity_handoff(self):
+        adapter, oracle, _ = self.make_adapter()
+
+        def not_resumed(_semantic_id):
+            raise SemanticGateClosed("game activity is not top-resumed")
+
+        oracle.enabled = not_resumed
+        adapter.begin_operation_siren_startup_recovery(timeout_seconds=60.0)
+        self.assertFalse(adapter.appear(NamedButton("SP_CHECK")))
+
+        adapter._operation_siren_auto_search_active = False
+        adapter._operation_siren_entry_transition_until = 0.0
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "game activity is not top-resumed"
+        ):
+            adapter.appear(NamedButton("SP_CHECK"))
 
     def test_reviewed_mission_transition_has_bounded_passive_scan_grace(self):
         adapter, oracle, _ = self.make_adapter()

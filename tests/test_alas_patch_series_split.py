@@ -196,6 +196,14 @@ FLOW_PATHS = {
         "module/os/map_fleet_selector.py",
         "module/os_handler/map_event.py",
     },
+    "0125-operation-siren-farming-search-completion.patch": {
+        "module/os/map.py",
+        "module/os_handler/map_event.py",
+        "module/os_handler/strategic.py",
+    },
+    "0126-operation-siren-init-offscreen-fleet.patch": {
+        "module/os/map.py",
+    },
     "0100-tool-flow-ports.patch": {
         "module/config/argument/args.json",
         "module/daemon/benchmark.py",
@@ -407,6 +415,13 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                         "module/os/map.py",
                         "module/os/map_fleet_selector.py",
                         "module/os_handler/map_event.py",
+                    },
+                    "0125-operation-siren-farming-search-completion.patch": {
+                        "module/os/map.py",
+                        "module/os_handler/map_event.py",
+                    },
+                    "0126-operation-siren-init-offscreen-fleet.patch": {
+                        "module/os/map.py",
                     },
                     "0350-meowfficer-dock-training-port.patch": {
                         "module/ui/ui.py"

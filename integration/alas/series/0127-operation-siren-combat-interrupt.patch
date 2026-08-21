@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ALAS Patch Builder <alas-patch-builder@example.invalid>
+Date: Sat, 22 Aug 2026 07:11:00 +0800
+Subject: [PATCH] operation siren combat interrupt
+
+---
+ module/os/map.py | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/module/os/map.py b/module/os/map.py
+index 92d6d75f..50136b73 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -737,6 +737,16 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 logger.info('Auto search interrupted')
+                 self.config.task_stop()
+ 
++            semantic_session = getattr(self.device, 'semantic_adapter', None)
++            if (
++                semantic_session is not None
++                and semantic_session.handle_operation_siren_combat_interrupt()
++            ):
++                self.interval_reset(MAINTENANCE_ANNOUNCE)
++                pause_interval.reset()
++                in_main_timer.reset()
++                continue
++
+             if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50), interval=3):
+                 self.interval_clear(GOTO_MAIN)
+                 in_main_timer.reset()
+-- 
+2.47.0.windows.2

@@ -29,6 +29,7 @@ from alas_headless.semantic_oracle import (
     ResearchProjectStatus,
     TacticalSlotStatus,
     enhancement_config_policy,
+    request_observer_state,
 )
 
 
@@ -245,6 +246,19 @@ def set_commission_scroll_view(
         ],
         generation=generation,
     )
+
+
+class ObserverProtocolTests(unittest.TestCase):
+    def test_exact_unavailable_status_is_not_reported_as_malformed(self):
+        with self.assertRaisesRegex(
+            ObserverTransportError, "observer is unavailable"
+        ):
+            request_observer_state(
+                lambda _request: {
+                    "protocol_schema": "alas-headless.observer/v1",
+                    "status": "unavailable",
+                }
+            )
 
 
 class FakeBackend:
@@ -6477,6 +6491,22 @@ class SemanticOracleTests(unittest.TestCase):
         )
         self.assertEqual(len(confirm_backend.taps), 1)
 
+    def test_shared_combat_pause_requires_one_exact_actionable_control(self):
+        backend = FakeBackend([
+            make_button(
+                "PauseBtn",
+                "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/PauseBtn",
+                raycast_top=None,
+            )
+        ])
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.combat_pause_visible())
+        receipt = oracle.click_combat_pause()
+
+        self.assertEqual(receipt.semantic_id, "combat/pause")
+        self.assertEqual(len(backend.taps), 1)
+
     def test_general_shop_items_use_exact_typed_cards_and_currency_sprites(self):
         page = "root/OverlayCamera/Overlay/UIMain/"
         shop = page + "ShopSupplyShopUI(Clone)/"
@@ -9281,6 +9311,36 @@ class RetirementSemanticOracleTests(unittest.TestCase):
 
 
 class OperationSirenSemanticOracleTests(unittest.TestCase):
+    def test_action_point_entry_uses_exact_stamina_resource_and_proves_popup(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "stamina",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/"
+                    "resources/WorldResPanel(Clone)/res/stamina",
+                    x=876,
+                    y=37,
+                    bounds={"left": 784, "top": 17, "right": 967, "bottom": 57},
+                )
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "33",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/"
+                    "resources/WorldResPanel(Clone)/res/stamina/value",
+                    bounds={"left": 878, "top": 28, "right": 928, "bottom": 46},
+                )
+            ]
+        )
+        oracle = make_oracle(backend)
+        with mock.patch.object(oracle, "operation_siren_state"):
+            receipt = oracle.click_operation_siren_action_point_open()
+
+        self.assertEqual(receipt.semantic_id, "os/action-point/open")
+        self.assertEqual(backend.taps, [(903, 37)])
+
     def test_map_exit_owner_unmounted_is_an_idempotent_missing_target(self):
         oracle = make_oracle(FakeBackend([]))
 
@@ -9364,6 +9424,173 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
                 make_button("on", root + "on"),
             )
 
+    def test_strategic_search_distinguishes_off_popup_and_on(self):
+        switch = "WorldMapUI(Clone)/top/adapt/right_stage/btn_list/auto_switch/"
+        oracle = make_oracle(FakeBackend([make_button("off", switch + "off")]))
+        with mock.patch.object(oracle, "operation_siren_state"):
+            self.assertEqual(oracle.operation_siren_strategic_search_state(), "off")
+
+        oracle = make_oracle(FakeBackend([make_button("on", switch + "on")]))
+        with mock.patch.object(oracle, "operation_siren_state"):
+            self.assertEqual(oracle.operation_siren_strategic_search_state(), "on")
+
+        root = (
+            "root/OverlayCamera/Overlay/UIMain/WorldSwitchPlanningUI(Clone)/"
+            "window/button_container/"
+        )
+        oracle = make_oracle(
+            FakeBackend(
+                [
+                    make_button("custom_button_1", root + "custom_button_1"),
+                    make_button("custom_button_2", root + "custom_button_2"),
+                ]
+            )
+        )
+        self.assertEqual(
+            oracle.operation_siren_strategic_search_state(), "configuring"
+        )
+
+    def test_strategic_search_toggle_accepts_exact_delegated_popup(self):
+        root = "root/OverlayCamera/Overlay/UIMain/WorldSwitchPlanningUI(Clone)/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "custom_button_1",
+                    root + "window/button_container/custom_button_1",
+                    raycast_top=None,
+                ),
+                make_button(
+                    "custom_button_2",
+                    root + "window/button_container/custom_button_2",
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [],
+            toggles=[
+                make_toggle(
+                    root + "window/content/toggles/toggle_safe",
+                    raycast_top=None,
+                    x=640,
+                    y=243,
+                )
+            ],
+        )
+
+        receipt = make_oracle(backend).click_toggle(
+            "os/strategic-search/tab/secured"
+        )
+
+        self.assertEqual(receipt.semantic_id, "os/strategic-search/tab/secured")
+        self.assertEqual(backend.taps, [(640, 243)])
+
+    def test_strategic_search_entry_and_confirm_accept_exact_delegated_buttons(self):
+        switch = (
+            "root/OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
+            "btn_list/auto_switch/off"
+        )
+        backend = FakeBackend(
+            [make_button("off", switch, x=1225, y=598, raycast_top=None)]
+        )
+        oracle = make_oracle(backend)
+        with mock.patch.object(oracle, "operation_siren_state"):
+            receipt = oracle.click("os/map/strategic-search/off")
+        self.assertEqual(receipt.semantic_id, "os/map/strategic-search/off")
+        self.assertEqual(backend.taps, [(1225, 598)])
+
+        root = (
+            "root/OverlayCamera/Overlay/UIMain/WorldSwitchPlanningUI(Clone)/"
+            "window/button_container/"
+        )
+        backend = FakeBackend(
+            [
+                make_button(
+                    "custom_button_1",
+                    root + "custom_button_1",
+                    x=783,
+                    y=528,
+                    raycast_top=None,
+                ),
+                make_button(
+                    "custom_button_2",
+                    root + "custom_button_2",
+                    x=497,
+                    y=528,
+                    raycast_top=None,
+                ),
+            ]
+        )
+        receipt = make_oracle(backend).click("os/strategic-search/confirm")
+        self.assertEqual(receipt.semantic_id, "os/strategic-search/confirm")
+        self.assertEqual(backend.taps, [(783, 528)])
+
+    def test_strategic_search_scroll_proves_auto_submit_visible(self):
+        root = "root/OverlayCamera/Overlay/UIMain/WorldSwitchPlanningUI(Clone)/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "custom_button_1",
+                    root + "window/button_container/custom_button_1",
+                    raycast_top=None,
+                ),
+                make_button(
+                    "custom_button_2",
+                    root + "window/button_container/custom_button_2",
+                    raycast_top=None,
+                ),
+            ]
+        )
+        handle = make_image(
+            root + "window/content/scrollbar/Sliding Area/Handle",
+            "scroll_bar",
+            {"left": 901, "top": 273, "right": 913, "bottom": 350},
+        )
+        handle["raycast_target"] = True
+        target_path = root + "window/content/view/content/consume/toggles/yes"
+        backend.ui = make_ui(
+            [],
+            toggles=[
+                make_toggle(
+                    target_path,
+                    raycast_top=None,
+                    x=510,
+                    y=774,
+                    bounds={"left": 480, "top": 756, "right": 540, "bottom": 792},
+                )
+            ],
+            images=[handle],
+        )
+
+        def reveal():
+            backend.ui = make_ui(
+                [],
+                toggles=[
+                    make_toggle(
+                        target_path,
+                        raycast_top=None,
+                        x=510,
+                        y=558,
+                        bounds={
+                            "left": 480,
+                            "top": 540,
+                            "right": 540,
+                            "bottom": 576,
+                        },
+                    )
+                ],
+                images=[handle],
+                generation=11,
+            )
+
+        backend.on_swipe = reveal
+        receipt = make_oracle(
+            backend
+        ).operation_siren_strategic_search_scroll_to_bottom()
+
+        self.assertEqual(receipt.semantic_id, "os/strategic-search/scroll/bottom")
+        self.assertEqual(backend.swipes, [(907, 312, 907, 430, 450)])
+
     def _local_map_oracle(self, sprite="1"):
         backend = FakeBackend(
             [
@@ -9396,8 +9623,23 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
 
     def test_local_map_shell_and_current_fleet_are_typed(self):
         oracle = self._local_map_oracle("3")
+        self.assertTrue(oracle.operation_siren_page_visible())
         self.assertTrue(oracle.operation_siren_local_map_visible())
         self.assertEqual(oracle.operation_siren_current_fleet(), 3)
+
+    def test_operation_siren_page_shell_does_not_require_fleet_panel(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                )
+            ]
+        )
+
+        oracle = make_oracle(backend)
+        self.assertTrue(oracle.operation_siren_page_visible())
+        self.assertFalse(oracle.operation_siren_local_map_visible())
 
     def test_local_map_shell_is_blocked_by_order_overlay(self):
         backend = FakeBackend(

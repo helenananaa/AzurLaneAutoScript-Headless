@@ -1,0 +1,72 @@
+diff --git a/module/os/map.py b/module/os/map.py
+index 5441dda0..5eaca1c1 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -993,7 +993,16 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+             self._solved_fleet_mechanism = False
+             if question:
+                 self.clear_question(drop=drop)
+-            if rescan:
++            semantic_empty = bool(
++                semantic_session is not None
++                and semantic_session.operation_siren_auto_search_completed_empty()
++            )
++            if rescan and semantic_empty:
++                logger.info(
++                    'Skip pixel map rescan: exact auto search was accepted, '
++                    'returned to off, and no exact question remains'
++                )
++            elif rescan:
+                 self.map_rescan(rescan_mode=rescan, drop=drop)
+ 
+             if drop.count == 1:
+@@ -1015,7 +1024,17 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+         self._solved_map_event = set()
+         self._solved_fleet_mechanism = False
+         self.clear_question()
+-        self.map_rescan()
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_session is not None
++            and semantic_session.operation_siren_auto_search_completed_empty()
++        ):
++            logger.info(
++                'Skip pixel map rescan: exact strategic search returned to '
++                'off and no exact question remains'
++            )
++        else:
++            self.map_rescan()
+ 
+     def map_rescan_current(self, drop=None):
+         """
+diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
+index 3cfc57a9..01bca30c 100644
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -260,6 +260,7 @@ class MapEventHandler(EnemySearchingHandler):
+                 'Operation Siren auto search was accepted and returned to '
+                 'off; no searchable event remains'
+             )
++            semantic_adapter.mark_operation_siren_auto_search_completed_empty()
+             self._semantic_auto_search_enable_attempted = False
+             self._semantic_auto_search_off_timer = None
+             self.device.screenshot_interval_set()
+diff --git a/module/os_handler/strategic.py b/module/os_handler/strategic.py
+index 380e12a4..faa529d8 100644
+--- a/module/os_handler/strategic.py
++++ b/module/os_handler/strategic.py
+@@ -132,6 +132,14 @@ class StrategicSearchHandler(MapEventHandler):
+             out: IN_MAP, with strategic search running
+         """
+         logger.hr('Strategic search start')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            receipts = semantic_adapter.start_operation_siren_strategic_search()
++            logger.info(
++                f'Strategic search configured through exact Unity controls '
++                f'({len(receipts)} actions)'
++            )
++            return True
+         for _ in range(3):
+             self.strategy_search_enter()
+             self.strategic_search_set_tab()

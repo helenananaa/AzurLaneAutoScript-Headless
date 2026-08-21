@@ -1,0 +1,86 @@
+{
+  "schema": "alas-headless.operation-siren-farming-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 7889,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "task": "OpsiMeowfficerFarming",
+    "TargetZone": 22,
+    "Fleet": 2,
+    "Submarine": false,
+    "ActionPointPreserve": 1,
+    "HazardLevel": 3
+  },
+  "action_point_calls": [
+    {
+      "cost": 0,
+      "keep_current_ap": true,
+      "check_rest_ap": true,
+      "total": 0,
+      "elapsed_seconds": 6.922
+    }
+  ],
+  "zone_visits": [
+    {
+      "requested": 0,
+      "name": "[0|NY City]",
+      "types": ["SAFE", "DANGEROUS"],
+      "refresh": false,
+      "entered_dangerous_zone": true,
+      "elapsed_seconds": 39.39
+    },
+    {
+      "requested": 22,
+      "name": "[22|NA Ocean SW Sector B]",
+      "types": null,
+      "refresh": true,
+      "entered_dangerous_zone": true,
+      "elapsed_seconds": 62.922
+    }
+  ],
+  "fleet_actions": [{"requested": 2, "returned": false}],
+  "order_actions": [
+    {"recon_scan": false, "submarine_call": false, "returned": null}
+  ],
+  "searches": [
+    {"kind": "run_auto_search", "returned": 1, "elapsed_seconds": 204.141}
+  ],
+  "preflight_searches": [],
+  "post_search_calls": [
+    {
+      "returned": false,
+      "associated_with_search": false,
+      "elapsed_seconds": 2.312
+    },
+    {
+      "returned": false,
+      "associated_with_search": true,
+      "elapsed_seconds": 2.609
+    }
+  ],
+  "effective_task_config": {
+    "TargetZone": "22",
+    "Fleet": 2,
+    "Submarine": false
+  },
+  "bounded_stop": "one original task cycle completed",
+  "task_result": true,
+  "elapsed_seconds": 297.5,
+  "final_config": {
+    "OS_ACTION_POINT_PRESERVE": 1,
+    "NextRun": "2020-01-01 00:00:00"
+  },
+  "validation_errors": [],
+  "validation_revision": "The original harness compared the required NY City refresh waypoint instead of the final explicit target; the final zone visit is exact zone 22.",
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "task": "6924525b62bc85dcc086764970da9aa67984602e72e8e0b1bb863d14adec9dec",
+    "map": "af2dd1650c83e6d78c707d248ebeb7be8cdb6efdd17a43f25bb8bdcad8820ea5",
+    "adapter": "cbb66da75af9479fab0f691b88ae242a67b6df36728dd5f1e637c91bb3406ee1",
+    "oracle": "f7020932b7e189b268454e21b09fa33628b45d9343f40051b914e2b3b760446e"
+  }
+}

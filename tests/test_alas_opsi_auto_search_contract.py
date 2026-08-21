@@ -82,12 +82,28 @@ SPECIAL_PIN_AP_RECOVERY_PATCH = (
     ROOT / "integration" / "alas" / "series" /
     "0123-operation-siren-special-pin-ap-recovery.patch"
 )
+FARMING_SEARCH_COMPLETION_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0125-operation-siren-farming-search-completion.patch"
+)
+INIT_OFFSCREEN_FLEET_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0126-operation-siren-init-offscreen-fleet.patch"
+)
 OBSCURE_EXIT_PASSAGE_PATCH = (
     EXACT_MAP_EXIT_CONFIRM_PATCH
 )
 
 
 class AlasOpsiAutoSearchContractTests(unittest.TestCase):
+    def test_init_defers_only_the_exact_offscreen_fleet_state(self):
+        source = INIT_OFFSCREEN_FLEET_PATCH.read_text(encoding="utf-8")
+        self.assertIn("defer_if_offscreen=True", source)
+        self.assertIn("selected-fleet map anchor is absent or '", source)
+        self.assertIn("if not (", source)
+        self.assertIn("raise", source)
+        self.assertIn("return False", source)
+
     def test_off_state_is_probed_once_instead_of_declared_locked(self):
         source = (
             OPSI_PATCH.read_text(encoding="utf-8")
@@ -119,6 +135,14 @@ class AlasOpsiAutoSearchContractTests(unittest.TestCase):
         self.assertIn("transient non-actionable frame", source)
         self.assertIn("return False", source)
         self.assertNotIn("device.click", source)
+
+    def test_farming_search_uses_typed_strategic_controls_and_exact_empty_end(self):
+        source = FARMING_SEARCH_COMPLETION_PATCH.read_text(encoding="utf-8")
+        self.assertIn("start_operation_siren_strategic_search()", source)
+        self.assertIn("Strategic search configured through exact Unity controls", source)
+        self.assertIn("operation_siren_auto_search_completed_empty()", source)
+        self.assertIn("mark_operation_siren_auto_search_completed_empty()", source)
+        self.assertIn("Skip pixel map rescan: exact strategic search returned", source)
 
     def test_explore_safe_zone_uses_typed_unpin_and_adaptive_reanchor(self):
         source = (

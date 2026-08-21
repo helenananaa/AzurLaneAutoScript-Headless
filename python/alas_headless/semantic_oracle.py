@@ -79,6 +79,12 @@ def request_observer_state(
             request("GET /v1/buttons\n"),
             False,
         )
+    if (
+        isinstance(combined, dict)
+        and combined.get("protocol_schema") == OBSERVER_SCHEMA
+        and combined.get("status") == "unavailable"
+    ):
+        raise ObserverTransportError("observer is unavailable")
     raise ObserverTransportError("combined observer response is malformed")
 
 
@@ -1999,6 +2005,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_1",
     ),
     SemanticTarget(
+        "os/action-point/open",
+        "stamina",
+        "top/adapt/top_stage/resources/WorldResPanel(Clone)/res/stamina",
+    ),
+    SemanticTarget(
         "os/action-point/cancel",
         "custom_button_2",
         "WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_2",
@@ -2113,6 +2124,26 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "os/map/auto-search/on",
         "on",
         "top/adapt/right_stage/btn_list/auto_fight/on",
+    ),
+    SemanticTarget(
+        "os/map/strategic-search/off",
+        "off",
+        "top/adapt/right_stage/btn_list/auto_switch/off",
+    ),
+    SemanticTarget(
+        "os/map/strategic-search/on",
+        "on",
+        "top/adapt/right_stage/btn_list/auto_switch/on",
+    ),
+    SemanticTarget(
+        "os/strategic-search/confirm",
+        "custom_button_1",
+        "WorldSwitchPlanningUI(Clone)/window/button_container/custom_button_1",
+    ),
+    SemanticTarget(
+        "os/strategic-search/cancel",
+        "custom_button_2",
+        "WorldSwitchPlanningUI(Clone)/window/button_container/custom_button_2",
     ),
     SemanticTarget(
         "os/map/fleet-lock/off",
@@ -2867,6 +2898,31 @@ DEFAULT_IMAGE_TARGETS: Tuple[SemanticImageTarget, ...] = tuple(
 
 DEFAULT_TOGGLE_TARGETS: Tuple[SemanticToggleTarget, ...] = (
     SemanticToggleTarget(
+        "os/strategic-search/tab/secured",
+        "toggle_safe",
+        "WorldSwitchPlanningUI(Clone)/window/content/toggles/toggle_safe",
+    ),
+    SemanticToggleTarget(
+        "os/strategic-search/zone-mode/repeat",
+        "only",
+        "WorldSwitchPlanningUI(Clone)/window/content/view/content/safe/toggles/only",
+    ),
+    SemanticToggleTarget(
+        "os/strategic-search/merchant/stop",
+        "no",
+        "WorldSwitchPlanningUI(Clone)/window/content/view/content/wait/toggles/no",
+    ),
+    SemanticToggleTarget(
+        "os/strategic-search/device/stop",
+        "no",
+        "WorldSwitchPlanningUI(Clone)/window/content/view/content/wait_2/toggles/no",
+    ),
+    SemanticToggleTarget(
+        "os/strategic-search/auto-submit/on",
+        "yes",
+        "WorldSwitchPlanningUI(Clone)/window/content/view/content/consume/toggles/yes",
+    ),
+    SemanticToggleTarget(
         "guild/nav/lobby",
         "main",
         "blur_panel/adapt/left_length/frame/scroll_rect/tagRoot/main",
@@ -3339,6 +3395,16 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "os/mission-list/close",
             "os/map/auto-search/off",
             "os/map/auto-search/on",
+            "os/map/strategic-search/off",
+            "os/map/strategic-search/on",
+            "os/strategic-search/confirm",
+            "os/strategic-search/cancel",
+            "os/strategic-search/tab/secured",
+            "os/strategic-search/zone-mode/repeat",
+            "os/strategic-search/merchant/stop",
+            "os/strategic-search/device/stop",
+            "os/strategic-search/auto-submit/on",
+            "os/action-point/open",
             "os/action-point/use",
             "os/action-point/cancel",
             "os/boss/start",
@@ -3355,6 +3421,19 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "operation-siren-action-point",
         "/WorldStaminaRecoverUI(Clone)/",
         ("os/action-point/use", "os/action-point/cancel"),
+    ),
+    BlockerRule(
+        "operation-siren-strategic-search",
+        "/WorldSwitchPlanningUI(Clone)/",
+        (
+            "os/strategic-search/confirm",
+            "os/strategic-search/cancel",
+            "os/strategic-search/tab/secured",
+            "os/strategic-search/zone-mode/repeat",
+            "os/strategic-search/merchant/stop",
+            "os/strategic-search/device/stop",
+            "os/strategic-search/auto-submit/on",
+        ),
     ),
     BlockerRule(
         "operation-siren-order",
@@ -10919,6 +10998,19 @@ class SemanticOracle:
             fleet_levels=levels,
         )
 
+    def operation_siren_page_visible(self) -> bool:
+        """Recognize the typed Operation Siren page shell without side panels."""
+
+        state = self.read_state()
+        backs = tuple(
+            button
+            for button in self._matches(state, "os/page/back")
+            if button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.bounds is not None
+        )
+        return len(backs) == 1
+
     def operation_siren_stronghold_percentage(self) -> int:
         """Read the exact Stronghold suppression percentage from WorldMap."""
 
@@ -12376,6 +12468,137 @@ class SemanticOracle:
                 "operation siren auto-search state is absent or inconsistent"
             )
         return "on" if enabled else "off"
+
+    def operation_siren_strategic_search_state(self) -> str:
+        """Return ``off``, ``configuring``, or ``on`` from exact Unity controls."""
+
+        state = self.read_state()
+
+        def present(semantic_id: str) -> bool:
+            matches = tuple(
+                target
+                for target in self._matches(state, semantic_id)
+                if target.active_in_hierarchy
+                and target.active_and_enabled
+                and target.interactable
+                and target.point is not None
+                and target.bounds is not None
+                and target.bounds.contains(target.point)
+            )
+            if len(matches) > 1:
+                raise SemanticGateClosed(
+                    "operation siren strategic-search state is ambiguous"
+                )
+            return len(matches) == 1
+
+        confirm = present("os/strategic-search/confirm")
+        cancel = present("os/strategic-search/cancel")
+        if confirm or cancel:
+            if not (confirm and cancel):
+                raise SemanticGateClosed(
+                    "operation siren strategic-search popup is incomplete"
+                )
+            return "configuring"
+
+        self.operation_siren_state()
+        enabled = present("os/map/strategic-search/on")
+        disabled = present("os/map/strategic-search/off")
+        if enabled == disabled:
+            raise SemanticGateClosed(
+                "operation siren strategic-search state is absent or inconsistent"
+            )
+        return "on" if enabled else "off"
+
+    def operation_siren_strategic_search_scroll_to_bottom(
+        self, timeout_seconds: float = 5.0
+    ) -> ActionReceipt:
+        """Expose the lower strategic-search options through the exact scrollbar."""
+
+        if self._swipe is None:
+            raise SemanticGateClosed(
+                "operation siren strategic-search swipe backend is absent"
+            )
+        if self.operation_siren_strategic_search_state() != "configuring":
+            raise SemanticGateClosed(
+                "operation siren strategic-search popup is absent"
+            )
+        before = self.read_ui_state()
+        handle_suffix = (
+            "WorldSwitchPlanningUI(Clone)/window/content/scrollbar/"
+            "Sliding Area/Handle"
+        )
+        handles = tuple(
+            image
+            for image in before.images
+            if image.name == "Handle"
+            and image.path.endswith(handle_suffix)
+            and image.sprite == "scroll_bar"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and image.raycast_target
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(handles) != 1:
+            raise SemanticGateClosed(
+                "operation siren strategic-search scrollbar is absent or ambiguous"
+            )
+        bounds = handles[0].bounds
+        assert bounds is not None
+        if not (
+            898 <= bounds.left < bounds.right <= 915
+            and 210 <= bounds.top < bounds.bottom <= 475
+        ):
+            raise SemanticGateClosed(
+                "operation siren strategic-search scrollbar geometry changed"
+            )
+        start = Point(
+            (bounds.left + bounds.right) / 2.0,
+            (bounds.top + bounds.bottom) / 2.0,
+        )
+        end = Point(start.x, 430.0)
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed(
+                "game activity changed before strategic-search scroll"
+            )
+        self._swipe(
+            int(round(start.x)),
+            int(round(start.y)),
+            int(round(end.x)),
+            int(round(end.y)),
+            450,
+        )
+        deadline = self._monotonic() + timeout_seconds
+        while self._monotonic() < deadline:
+            self._sleep(0.25)
+            after = self.read_ui_state()
+            matches = self._toggle_matches(
+                after, "os/strategic-search/auto-submit/on"
+            )
+            if len(matches) > 1:
+                raise SemanticGateClosed(
+                    "operation siren strategic-search auto-submit is ambiguous"
+                )
+            if len(matches) == 1:
+                toggle = matches[0]
+                if (
+                    after.generation > before.generation
+                    and toggle.point is not None
+                    and toggle.bounds is not None
+                    and toggle.bounds.contains(toggle.point)
+                    and 0 <= toggle.point.x < self.fingerprint.width
+                    and 0 <= toggle.point.y < self.fingerprint.height
+                ):
+                    return ActionReceipt(
+                        semantic_id="os/strategic-search/scroll/bottom",
+                        generation=after.generation,
+                        point=end,
+                        bounds=toggle.bounds,
+                        path=toggle.path,
+                    )
+        raise SemanticGateClosed(
+            "operation siren strategic-search scroll was not proven"
+        )
 
     def operation_siren_auto_search_info_count(self) -> int:
         """Count the exact paired auto-search notifications on the OS map."""
@@ -14234,6 +14457,85 @@ class SemanticOracle:
             lambda: self._operation_siren_action_point_read()[1]
         )
 
+    def operation_siren_action_point_visible(self) -> bool:
+        state = self.read_state()
+        try:
+            use = self._unique(state, "os/action-point/use")
+            cancel = self._unique(state, "os/action-point/cancel")
+        except SemanticTargetMissing:
+            return False
+        return all(
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.point is not None
+            and target.bounds is not None
+            for target in (use, cancel)
+        )
+
+    def click_operation_siren_action_point_open(self) -> ActionReceipt:
+        """Open the AP panel from the exact WorldMap stamina resource."""
+
+        # Require the complete local-map resource header, not merely a button
+        # with the same short Unity name.
+        self.operation_siren_state()
+        button_state = self.read_state()
+        target = self._unique(button_state, "os/action-point/open")
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+        ):
+            raise SemanticGateClosed(
+                "operation siren action point entry is not actionable"
+            )
+        ui_state = self.read_ui_state()
+        value_texts = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith(
+                "top/adapt/top_stage/resources/WorldResPanel(Clone)/res/"
+                "stamina/value"
+            )
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and re.fullmatch(r"[0-9]+", text.text.strip()) is not None
+        )
+        if (
+            len(value_texts) != 1
+            or not button_state.generation
+            <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed(
+                "operation siren action point value is absent or ambiguous"
+            )
+        value = value_texts[0]
+        assert value.bounds is not None
+        point = Point(
+            (value.bounds.left + value.bounds.right) / 2.0,
+            (value.bounds.top + value.bounds.bottom) / 2.0,
+        )
+        if not target.bounds.contains(point):
+            raise SemanticGateClosed(
+                "operation siren action point value left its resource control"
+            )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before action point input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="os/action-point/open",
+            generation=button_state.generation,
+            point=point,
+            bounds=value.bounds,
+            path=value.path,
+        )
+
     def click_operation_siren_action_point_item(
         self, item_index: int
     ) -> ActionReceipt:
@@ -16075,6 +16377,36 @@ class SemanticOracle:
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="exercise/combat/pause", generation=state.generation,
+            point=target.point, bounds=target.bounds, path=target.path,
+        )
+
+    def combat_pause_visible(self) -> bool:
+        """Recognize the shared actionable combat pause control."""
+
+        state = self.read_state()
+        targets = self._matches(state, "exercise/combat/pause")
+        return bool(
+            len(targets) == 1
+            and targets[0].active_in_hierarchy
+            and targets[0].active_and_enabled
+            and targets[0].interactable
+            and targets[0].raycast_top is None
+            and targets[0].point is not None
+            and targets[0].bounds is not None
+            and targets[0].bounds.contains(targets[0].point)
+        )
+
+    def click_combat_pause(self) -> ActionReceipt:
+        """Click the shared pause control after its exact typed proof."""
+
+        if not self.combat_pause_visible():
+            raise SemanticGateClosed("combat pause target is absent")
+        state = self.read_state()
+        target = self._unique(state, "exercise/combat/pause")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="combat/pause", generation=state.generation,
             point=target.point, bounds=target.bounds, path=target.path,
         )
 
@@ -23927,6 +24259,43 @@ class SemanticOracle:
                     toggle,
                 )
             )
+        strategic_toggle_ids = {
+            "os/strategic-search/tab/secured",
+            "os/strategic-search/zone-mode/repeat",
+            "os/strategic-search/merchant/stop",
+            "os/strategic-search/device/stop",
+            "os/strategic-search/auto-submit/on",
+        }
+        strategic_page_buttons = tuple(
+            button
+            for button in button_state.buttons
+            if button.path.endswith(
+                (
+                "OverlayCamera/Overlay/UIMain/WorldSwitchPlanningUI(Clone)/"
+                "window/button_container/custom_button_1",
+                "OverlayCamera/Overlay/UIMain/WorldSwitchPlanningUI(Clone)/"
+                "window/button_container/custom_button_2",
+                )
+            )
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        delegated_operation_siren_strategic = bool(
+            semantic_id in strategic_toggle_ids
+            and len(matches) == 1
+            and len(strategic_page_buttons) == 2
+            and matches[0].active_in_hierarchy
+            and matches[0].active_and_enabled
+            and matches[0].interactable
+            and matches[0].raycast_top is None
+            and matches[0].point is not None
+            and matches[0].bounds is not None
+            and matches[0].bounds.contains(matches[0].point)
+        )
         delegated_shop_nav = False
         if semantic_id == "shop/gift-pack" and len(matches) == 1:
             toggle = matches[0]
@@ -23948,6 +24317,7 @@ class SemanticOracle:
             and not delegated_build_pool
             and not delegated_campaign_auto
             and not delegated_campaign_event_auto
+            and not delegated_operation_siren_strategic
             and not delegated_shop_nav
             and not delegated_guild_nav
         ):
@@ -29022,6 +29392,10 @@ class SemanticOracle:
             in (
                 "os/map/auto-search/off",
                 "os/map/auto-search/on",
+                "os/map/strategic-search/off",
+                "os/map/strategic-search/on",
+                "os/strategic-search/confirm",
+                "os/strategic-search/cancel",
                 "os/map/mission-list",
                 "os/map/storage",
                 "os/map/order",
@@ -29055,6 +29429,8 @@ class SemanticOracle:
                 in (
                     "os/map/auto-search/off",
                     "os/map/auto-search/on",
+                    "os/map/strategic-search/off",
+                    "os/map/strategic-search/on",
                     "os/map/mission-list",
                     "os/map/storage",
                     "os/port/enter",

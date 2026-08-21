@@ -1,0 +1,84 @@
+{
+  "schema": "alas-headless.operation-siren-farming-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 6150,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "task": "OpsiHazard1Leveling",
+    "TargetZone": 22,
+    "Fleet": 2,
+    "Submarine": false,
+    "ActionPointPreserve": 0,
+    "HazardLevel": 3
+  },
+  "action_point_calls": [
+    {
+      "cost": 70,
+      "keep_current_ap": true,
+      "check_rest_ap": true,
+      "total": 0,
+      "elapsed_seconds": 10.656
+    }
+  ],
+  "zone_visits": [
+    {
+      "requested": 22,
+      "name": "[22|NA Ocean SW Sector B]",
+      "types": "SAFE",
+      "refresh": true,
+      "entered_dangerous_zone": true,
+      "elapsed_seconds": 34.453
+    }
+  ],
+  "fleet_actions": [
+    {
+      "requested": 2,
+      "returned": false
+    }
+  ],
+  "order_actions": [],
+  "searches": [
+    {
+      "kind": "run_strategic_search",
+      "returned": null,
+      "elapsed_seconds": 827.172
+    }
+  ],
+  "preflight_searches": [],
+  "post_search_calls": [
+    {
+      "returned": false,
+      "associated_with_search": false,
+      "elapsed_seconds": 1.89
+    },
+    {
+      "returned": false,
+      "associated_with_search": true,
+      "elapsed_seconds": 2.312
+    }
+  ],
+  "effective_task_config": {
+    "TargetZone": 22,
+    "Fleet": 2,
+    "Submarine": false
+  },
+  "bounded_stop": "one original task cycle completed",
+  "task_result": true,
+  "elapsed_seconds": 892.953,
+  "final_config": {
+    "OS_ACTION_POINT_PRESERVE": 200,
+    "NextRun": "2020-01-01 00:00:00"
+  },
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "task": "a8adc296d582044de76ef6931df4925ddba4674d08eb5e084c4d085d91013d5e",
+    "map": "b58b6a47f7567236c84858716ccbc4e732fa3454dcbd53746f29ce89cf32f7bf",
+    "adapter": "d8042314695cc8a321d997a47f462f9ff0987a84f383843e4776c09589fa66be",
+    "oracle": "705d6568f8909c1667dab6f31e7056aa4f5840190eb2effffead2638c626e89c"
+  }
+}

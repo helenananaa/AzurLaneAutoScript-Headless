@@ -308,6 +308,8 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "AUTO_SEARCH_OS_MAP_OPTION_OFF": "os/map/auto-search/off",
     "AUTO_SEARCH_OS_MAP_OPTION_OFF_DISABLED": "os/map/auto-search/off",
     "AUTO_SEARCH_OS_MAP_OPTION_ON": "os/map/auto-search/on",
+    "ACTION_POINT_USE": "os/action-point/use",
+    "ACTION_POINT_CANCEL": "os/action-point/cancel",
     "OS_FLEET_UNLOCKED": "os/map/fleet-lock/off",
     "OS_FLEET_LOCKED": "os/map/fleet-lock/on",
     "FLEET_CHOOSE": "os/map/fleet-selector/open",
@@ -1243,6 +1245,8 @@ class AlasSemanticAdapter:
         self._operation_siren_globe_map_receipt: Optional[ActionReceipt] = None
         self._operation_siren_auto_search_transition_until = 0.0
         self._operation_siren_auto_search_active = False
+        self._operation_siren_startup_search_provisional = False
+        self._operation_siren_auto_search_completed_empty = False
         self._operation_siren_combat_active = False
         self._operation_siren_defeated_fleets: set[int] = set()
         self._meta_beacon_active = False
@@ -3933,6 +3937,13 @@ class AlasSemanticAdapter:
         self._operation_siren_entry_transition_until = (
             time.monotonic() + float(timeout_seconds)
         )
+        # A fresh process cannot distinguish a resumed long-running search
+        # from a short page transition until the official switch is readable.
+        # Keep only passive probes owned; operation_siren_auto_search_state()
+        # clears this provisional owner as soon as exact OFF is observed.
+        self._operation_siren_auto_search_active = True
+        self._operation_siren_startup_search_provisional = True
+        self._operation_siren_auto_search_completed_empty = False
 
     def begin_operation_siren_page_remount(
         self,
@@ -4148,6 +4159,15 @@ class AlasSemanticAdapter:
                 self._observer_stale_since = stale_since
                 return result
             message = str(exc)
+            if (
+                message == "game activity is not top-resumed"
+                and self._operation_siren_allows_passive_probe()
+            ):
+                # Bilibili's welcome/announcement activities temporarily own
+                # the foreground during an explicitly owned OpSi cold start.
+                # Presence scans are passive; every mutation remains closed
+                # until the pinned game activity is top-resumed again.
+                return False
             transient = message in (
                 "observer snapshot is stale",
                 "observer endpoints are not generation-coherent",
@@ -4171,6 +4191,13 @@ class AlasSemanticAdapter:
 
     def _appear_once(self, button: Any) -> bool:
         name = self._button_name(button)
+        if name in ("ACTION_POINT_USE", "ACTION_POINT_CANCEL"):
+            self._package_gate()
+            try:
+                self.oracle.operation_siren_action_point_state()
+            except SemanticGateClosed:
+                return False
+            return True
         if name == "BATTLE_PREPARATION" and self._meta_beacon_active:
             try:
                 self.oracle.meta_current_detail_state()
@@ -4729,6 +4756,12 @@ class AlasSemanticAdapter:
             semantic_id is None
             and self._operation_siren_allows_passive_probe()
         ):
+            if name == "IN_MAP":
+                # IN_MAP is shared with campaign code, but on an exact OpSi
+                # local-map shell it is a positive typed identity.  Returning
+                # the generic passive miss here strands AP-popup and other
+                # OpSi close loops after their overlay has already unmounted.
+                return self.oracle.operation_siren_local_map_visible()
             if name == "CAMPAIGN_MENU_CHECK":
                 # Operation Siren startup legitimately begins on the campaign
                 # menu after a reconnect or a previous task returned there.
@@ -6713,9 +6746,40 @@ class AlasSemanticAdapter:
         state = self.oracle.operation_siren_auto_search_state()
         if state == "on":
             self._operation_siren_auto_search_transition_until = 0.0
+            self._operation_siren_startup_search_provisional = False
         else:
+            if (
+                self._operation_siren_auto_search_active
+                and not self._operation_siren_startup_search_provisional
+            ):
+                self._operation_siren_auto_search_completed_empty = True
             self._operation_siren_auto_search_active = False
+            self._operation_siren_startup_search_provisional = False
         return state
+
+    def operation_siren_auto_search_completed_empty(self) -> bool:
+        """Whether an exact enable attempt naturally returned to OFF."""
+
+        self._package_gate()
+        return self._operation_siren_auto_search_completed_empty
+
+    def mark_operation_siren_auto_search_completed_empty(self) -> None:
+        """Record the original ALAS loop's exact settled-OFF conclusion."""
+
+        self._package_gate()
+        if self._operation_siren_auto_search_active:
+            # The original loop owns a separate bounded unchanged-OFF timer.
+            # It can therefore prove the no-event result before our longer
+            # post-click loading allowance expires.  Re-read the exact typed
+            # switch here and collapse that transition only for settled OFF.
+            if self.oracle.operation_siren_auto_search_state() != "off":
+                raise SemanticGateClosed(
+                    "cannot complete auto search while its transition is active"
+                )
+            self._operation_siren_auto_search_transition_until = 0.0
+            self._operation_siren_auto_search_active = False
+            self._operation_siren_startup_search_provisional = False
+        self._operation_siren_auto_search_completed_empty = True
 
     def operation_siren_auto_search_transition_active(self) -> bool:
         """Report the bounded post-enable transition separately from ON."""
@@ -7274,15 +7338,22 @@ class AlasSemanticAdapter:
 
     def campaign_fleet_hp(self) -> Tuple[float, ...]:
         self._package_gate()
-        try:
-            self.oracle.operation_siren_state()
-        except SemanticGateClosed:
-            pass
-        else:
+        operation_siren_map = self.oracle.operation_siren_page_visible()
+        if not operation_siren_map:
+            try:
+                self.oracle.operation_siren_state()
+            except SemanticGateClosed:
+                pass
+            else:
+                operation_siren_map = True
+        if operation_siren_map:
             # WorldMap mounts before its left-side fleet panel.  ALAS asks
             # for HP immediately after entering the map, so wait only for the
-            # exact six-bar contract while the exact local-map identity stays
-            # present.  Never substitute synthetic HP values.
+            # exact six-bar contract while the typed local-map shell stays
+            # present.  The resource summary itself may be incomplete when
+            # Unity has evicted the left fleet panel, which is precisely the
+            # condition the upstream remount recovery needs to observe.
+            # Never substitute synthetic HP values.
             deadline = time.monotonic() + 6.0
             while True:
                 try:
@@ -7295,7 +7366,11 @@ class AlasSemanticAdapter:
                         raise
                     if time.monotonic() >= deadline:
                         raise
-                    self.oracle.operation_siren_state()
+                    if not self.oracle.operation_siren_page_visible():
+                        try:
+                            self.oracle.operation_siren_state()
+                        except SemanticGateClosed:
+                            raise exc
                     time.sleep(0.25)
         self._require_campaign_context()
         return self.oracle.campaign_fleet_hp()
@@ -7314,6 +7389,14 @@ class AlasSemanticAdapter:
     ) -> OperationSirenActionPointState:
         self._package_gate()
         return self.oracle.operation_siren_action_point_state()
+
+    def operation_siren_action_point_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.operation_siren_action_point_visible()
+
+    def click_operation_siren_action_point_open(self) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_operation_siren_action_point_open()
 
     def click_operation_siren_action_point_item(
         self, item_index: int
@@ -10760,9 +10843,21 @@ class AlasSemanticAdapter:
                 ):
                     return cached
             if semantic_id in ("os/order/scan", "os/order/submarine"):
-                receipt = self.oracle.click_operation_siren_order(
-                    semantic_id.rsplit("/", 1)[1]
-                )
+                order_kind = semantic_id.rsplit("/", 1)[1]
+                for attempt in range(12):
+                    try:
+                        receipt = self.oracle.click_operation_siren_order(
+                            order_kind
+                        )
+                        break
+                    except SemanticGateClosed as exc:
+                        if (
+                            str(exc)
+                            != "operation siren order snapshots are not coherent"
+                            or attempt == 11
+                        ):
+                            raise
+                        time.sleep(0.25)
                 self._operation_siren_pending_order = semantic_id.rsplit("/", 1)[1]
             elif semantic_id == "os/order/back":
                 receipt = self.oracle.click_operation_siren_order_back()
@@ -10773,6 +10868,8 @@ class AlasSemanticAdapter:
                     time.monotonic() + 30.0
                 )
                 self._operation_siren_auto_search_active = True
+                self._operation_siren_startup_search_provisional = False
+                self._operation_siren_auto_search_completed_empty = False
             if semantic_id == "main/task" and self._mission_context is not None:
                 self._mission_context.entry_clicked = True
                 self._mission_context.entry_receipt = receipt
@@ -11327,6 +11424,7 @@ class AlasSemanticSession:
 
     _REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
     _LOGIN_STARTUP_UPDATE_STALE_RETRY_ATTEMPTS = 2399
+    _INITIAL_GAME_STARTUP_RETRY_ATTEMPTS = 799
 
     def __init__(
         self,
@@ -11890,6 +11988,20 @@ class AlasSemanticSession:
                     )
                     and attempt < 399
                 )
+                initial_game_startup_retry = bool(
+                    previous_frame_id is None
+                    and (
+                        (
+                            isinstance(exc, ObserverTransportError)
+                            and message == "observer is unavailable"
+                        )
+                        or (
+                            isinstance(exc, SemanticGateClosed)
+                            and message == "game activity is not top-resumed"
+                        )
+                    )
+                    and attempt < self._INITIAL_GAME_STARTUP_RETRY_ATTEMPTS
+                )
                 in_combat_result_transition = bool(
                     time.monotonic() <= self._combat_result_transition_until
                 )
@@ -11992,8 +12104,10 @@ class AlasSemanticSession:
                     in_operation_siren_transition
                     and isinstance(exc, ObserverTransportError)
                 )
+                retryable = retryable or initial_game_startup_retry
                 if not retryable or (
                     attempt >= 2
+                    and not initial_game_startup_retry
                     and not extended_login_retry
                     and not stale_login_update_wait
                     and not extended_combat_result_retry
@@ -12716,6 +12830,118 @@ class AlasSemanticSession:
     def operation_siren_auto_search_state(self) -> str:
         return self.open().operation_siren_auto_search_state()
 
+    def operation_siren_strategic_search_state(self) -> str:
+        return self.open().oracle.operation_siren_strategic_search_state()
+
+    def start_operation_siren_strategic_search(self) -> Tuple[ActionReceipt, ...]:
+        """Configure and start the reviewed secured-zone strategic search."""
+
+        receipts: List[ActionReceipt] = []
+        for _attempt in range(3):
+            self.refresh_frame()
+            oracle = self.open().oracle
+            state = oracle.operation_siren_strategic_search_state()
+            if state == "on":
+                adapter = self.open()
+                adapter._operation_siren_auto_search_transition_until = (
+                    time.monotonic() + 30.0
+                )
+                adapter._operation_siren_auto_search_active = True
+                adapter._operation_siren_startup_search_provisional = False
+                adapter._operation_siren_auto_search_completed_empty = False
+                return tuple(receipts)
+            if state == "off":
+                receipts.append(oracle.click("os/map/strategic-search/off"))
+            for _ in range(24):
+                time.sleep(0.25)
+                self.refresh_frame()
+                if (
+                    self.open().oracle.operation_siren_strategic_search_state()
+                    == "configuring"
+                ):
+                    break
+            else:
+                continue
+            break
+        else:
+            raise SemanticGateClosed(
+                "operation siren strategic-search popup did not open"
+            )
+
+        for semantic_id in (
+            "os/strategic-search/tab/secured",
+            "os/strategic-search/zone-mode/repeat",
+            "os/strategic-search/merchant/stop",
+            "os/strategic-search/device/stop",
+            "os/strategic-search/auto-submit/on",
+        ):
+            selected = False
+            for _attempt in range(3):
+                self.refresh_frame()
+                oracle = self.open().oracle
+                toggle = oracle.toggle_state(semantic_id)
+                if toggle.checked:
+                    selected = True
+                    break
+                if (
+                    semantic_id == "os/strategic-search/auto-submit/on"
+                    and (
+                        toggle.point is None
+                        or not 0 <= toggle.point.x < oracle.fingerprint.width
+                        or not 0 <= toggle.point.y < oracle.fingerprint.height
+                    )
+                ):
+                    receipts.append(
+                        oracle.operation_siren_strategic_search_scroll_to_bottom()
+                    )
+                    continue
+                receipts.append(oracle.click_toggle(semantic_id))
+                for _ in range(16):
+                    time.sleep(0.25)
+                    self.refresh_frame()
+                    try:
+                        if self.open().oracle.toggle_selected(semantic_id):
+                            selected = True
+                            break
+                    except SemanticGateClosed:
+                        continue
+                if selected:
+                    break
+            if not selected:
+                raise SemanticGateClosed(
+                    "operation siren strategic-search option did not settle: "
+                    + semantic_id
+                )
+
+        self.refresh_frame()
+        oracle = self.open().oracle
+        if oracle.operation_siren_strategic_search_state() != "configuring":
+            raise SemanticGateClosed(
+                "operation siren strategic-search popup disappeared before confirm"
+            )
+        receipts.append(oracle.click("os/strategic-search/confirm"))
+        adapter = self.open()
+        adapter._operation_siren_auto_search_transition_until = (
+            time.monotonic() + 30.0
+        )
+        adapter._operation_siren_auto_search_active = True
+        adapter._operation_siren_startup_search_provisional = False
+        adapter._operation_siren_auto_search_completed_empty = False
+        for _ in range(40):
+            time.sleep(0.25)
+            self.refresh_frame()
+            try:
+                if (
+                    self.open().oracle.operation_siren_strategic_search_state()
+                    == "on"
+                ):
+                    return tuple(receipts)
+            except SemanticGateClosed:
+                continue
+        raise SemanticGateClosed(
+            "operation siren strategic-search did not reach exact on state"
+        )
+
     def begin_operation_siren_startup_recovery(
         self,
         timeout_seconds: float = 300.0,
@@ -12756,6 +12982,12 @@ class AlasSemanticSession:
     def operation_siren_auto_search_transition_active(self) -> bool:
         return self.open().operation_siren_auto_search_transition_active()
 
+    def operation_siren_auto_search_completed_empty(self) -> bool:
+        return self.open().operation_siren_auto_search_completed_empty()
+
+    def mark_operation_siren_auto_search_completed_empty(self) -> None:
+        self.open().mark_operation_siren_auto_search_completed_empty()
+
     def operation_siren_auto_search_info_count(self) -> int:
         return self.open().operation_siren_auto_search_info_count()
 
@@ -12789,6 +13021,24 @@ class AlasSemanticSession:
 
     def operation_siren_combat_committed(self) -> bool:
         return self.open().operation_siren_combat_committed()
+
+    def handle_operation_siren_combat_interrupt(self) -> bool:
+        """Advance one exact pause/leave/confirm step during task handoff."""
+
+        adapter = self.open()
+        if not adapter.operation_siren_combat_committed():
+            return False
+        oracle = adapter.oracle
+        if oracle.exercise_combat_quit_confirm_visible():
+            oracle.click_exercise_combat_quit_confirm()
+            return True
+        if oracle.exercise_combat_pause_menu_visible():
+            oracle.click_exercise_combat_leave()
+            return True
+        if oracle.combat_pause_visible():
+            oracle.click_combat_pause()
+            return True
+        return False
 
     def begin_operation_siren_boss_combat(self) -> None:
         self.open().begin_operation_siren_boss_combat()
@@ -13027,6 +13277,30 @@ class AlasSemanticSession:
     ) -> OperationSirenActionPointState:
         return self.open().operation_siren_action_point_state()
 
+    def operation_siren_action_point_visible(self) -> bool:
+        return self.open().operation_siren_action_point_visible()
+
+    def click_operation_siren_action_point_open(self) -> ActionReceipt:
+        receipt = None
+        for _attempt in range(3):
+            self.refresh_frame()
+            if receipt is not None:
+                try:
+                    self.open().operation_siren_action_point_state()
+                    return receipt
+                except SemanticGateClosed:
+                    pass
+            receipt = self.open().click_operation_siren_action_point_open()
+            for _ in range(16):
+                time.sleep(0.25)
+                self.refresh_frame()
+                try:
+                    self.open().operation_siren_action_point_state()
+                    return receipt
+                except SemanticGateClosed:
+                    continue
+        raise SemanticGateClosed("operation siren action point panel did not open")
+
     def click_operation_siren_action_point_item(
         self, item_index: int
     ) -> ActionReceipt:
@@ -13035,7 +13309,24 @@ class AlasSemanticSession:
     def click_operation_siren_action_point_control(
         self, use: bool
     ) -> ActionReceipt:
-        return self.open().click_operation_siren_action_point_control(use)
+        self.refresh_frame()
+        receipt = self.open().click_operation_siren_action_point_control(use)
+        if use:
+            self.refresh_frame()
+            return receipt
+        for _ in range(16):
+            time.sleep(0.25)
+            self.refresh_frame()
+            adapter = self.open()
+            if not adapter.operation_siren_action_point_visible():
+                if adapter.oracle.operation_siren_local_map_visible():
+                    return receipt
+                try:
+                    adapter.oracle.operation_siren_globe_state()
+                    return receipt
+                except SemanticGateClosed:
+                    pass
+        raise SemanticGateClosed("operation siren action point panel did not close")
 
     def operation_siren_port_repair_cost(self) -> Optional[int]:
         return self.open().operation_siren_port_repair_cost()
@@ -13408,6 +13699,13 @@ class AlasSemanticSession:
             self.refresh_frame()
             return self.open().click_campaign_combat_grid(button)
         name = AlasSemanticAdapter._button_name(button)
+        if name == "ACTION_POINT_REMAIN_OS":
+            return self.click_operation_siren_action_point_open()
+        if name in ("ACTION_POINT_USE", "ACTION_POINT_CANCEL"):
+            self.refresh_frame()
+            return self.open().click_operation_siren_action_point_control(
+                name == "ACTION_POINT_USE"
+            )
         if (
             name == "PAUSE"
             and self.open()._exercise_execution_active

@@ -354,6 +354,21 @@
       "order": 71,
       "path": "integration/alas/series/0124-operation-siren-month-boss-recovery.patch",
       "sha256": "1a7be60f3848ced0f26ce7226e279cd55030c1c170312a3abc2d533fbe238cc5"
+    },
+    {
+      "order": 72,
+      "path": "integration/alas/series/0125-operation-siren-farming-search-completion.patch",
+      "sha256": "55966e7d6a6df346fe159c317ec0fb7e8e6740e852f4a2266040d6bda589ba11"
+    },
+    {
+      "order": 73,
+      "path": "integration/alas/series/0126-operation-siren-init-offscreen-fleet.patch",
+      "sha256": "ebf8058d4b731c62a731d53af99ba0f127022425c9c882317f37b487533b5298"
+    },
+    {
+      "order": 74,
+      "path": "integration/alas/series/0127-operation-siren-combat-interrupt.patch",
+      "sha256": "2892aaf39bb3bdf2461de20debf92aa9120ba39228489ff5a4b3a1e3deea4f2c"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -1,0 +1,80 @@
+{
+  "schema": "alas-headless.operation-siren-farming-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 6150,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "task": "OpsiMeowfficerFarming",
+    "TargetZone": 22,
+    "Fleet": 3,
+    "Submarine": true,
+    "ActionPointPreserve": 1,
+    "HazardLevel": 3,
+    "StopAfterSubmarineOrder": true
+  },
+  "action_point_calls": [
+    {
+      "cost": 0,
+      "keep_current_ap": true,
+      "check_rest_ap": true,
+      "total": 0,
+      "elapsed_seconds": 6.39
+    }
+  ],
+  "zone_visits": [
+    {
+      "requested": 22,
+      "name": "[22|NA Ocean SW Sector B]",
+      "types": null,
+      "refresh": true,
+      "entered_dangerous_zone": true,
+      "elapsed_seconds": 24.188
+    }
+  ],
+  "fleet_actions": [
+    {
+      "requested": 3,
+      "returned": false
+    }
+  ],
+  "order_actions": [
+    {
+      "recon_scan": false,
+      "submarine_call": true,
+      "returned": null
+    }
+  ],
+  "searches": [],
+  "preflight_searches": [],
+  "post_search_calls": [
+    {
+      "returned": false,
+      "associated_with_search": false,
+      "elapsed_seconds": 1.921
+    }
+  ],
+  "effective_task_config": {
+    "TargetZone": "22",
+    "Fleet": 3,
+    "Submarine": true
+  },
+  "bounded_stop": "one original submarine order execution completed",
+  "task_result": true,
+  "elapsed_seconds": 88.797,
+  "final_config": {
+    "OS_ACTION_POINT_PRESERVE": 1,
+    "NextRun": "2026-08-22 08:30:18"
+  },
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "task": "6924525b62bc85dcc086764970da9aa67984602e72e8e0b1bb863d14adec9dec",
+    "map": "b58b6a47f7567236c84858716ccbc4e732fa3454dcbd53746f29ce89cf32f7bf",
+    "adapter": "7994fee534c844946ea02146debc1c1654796d522737dc8a948844d9231beece",
+    "oracle": "705d6568f8909c1667dab6f31e7056aa4f5840190eb2effffead2638c626e89c"
+  }
+}

@@ -13254,3 +13254,166 @@ index c339c4af..3cfc57a9 100644
          if self.is_in_map():
              return False
  
+diff --git a/module/os/map.py b/module/os/map.py
+index 5441dda0..5eaca1c1 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -993,7 +993,16 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+             self._solved_fleet_mechanism = False
+             if question:
+                 self.clear_question(drop=drop)
+-            if rescan:
++            semantic_empty = bool(
++                semantic_session is not None
++                and semantic_session.operation_siren_auto_search_completed_empty()
++            )
++            if rescan and semantic_empty:
++                logger.info(
++                    'Skip pixel map rescan: exact auto search was accepted, '
++                    'returned to off, and no exact question remains'
++                )
++            elif rescan:
+                 self.map_rescan(rescan_mode=rescan, drop=drop)
+ 
+             if drop.count == 1:
+@@ -1015,7 +1024,17 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+         self._solved_map_event = set()
+         self._solved_fleet_mechanism = False
+         self.clear_question()
+-        self.map_rescan()
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_session is not None
++            and semantic_session.operation_siren_auto_search_completed_empty()
++        ):
++            logger.info(
++                'Skip pixel map rescan: exact strategic search returned to '
++                'off and no exact question remains'
++            )
++        else:
++            self.map_rescan()
+ 
+     def map_rescan_current(self, drop=None):
+         """
+diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
+index 3cfc57a9..01bca30c 100644
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -260,6 +260,7 @@ class MapEventHandler(EnemySearchingHandler):
+                 'Operation Siren auto search was accepted and returned to '
+                 'off; no searchable event remains'
+             )
++            semantic_adapter.mark_operation_siren_auto_search_completed_empty()
+             self._semantic_auto_search_enable_attempted = False
+             self._semantic_auto_search_off_timer = None
+             self.device.screenshot_interval_set()
+diff --git a/module/os_handler/strategic.py b/module/os_handler/strategic.py
+index 380e12a4..faa529d8 100644
+--- a/module/os_handler/strategic.py
++++ b/module/os_handler/strategic.py
+@@ -132,6 +132,14 @@ class StrategicSearchHandler(MapEventHandler):
+             out: IN_MAP, with strategic search running
+         """
+         logger.hr('Strategic search start')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            receipts = semantic_adapter.start_operation_siren_strategic_search()
++            logger.info(
++                f'Strategic search configured through exact Unity controls '
++                f'({len(receipts)} actions)'
++            )
++            return True
+         for _ in range(3):
+             self.strategy_search_enter()
+             self.strategic_search_set_tab()
+diff --git a/module/os/map.py b/module/os/map.py
+index 5eaca1c1..92d6d75f 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -153,7 +153,9 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+             logger.info('Already in Operation Siren port; skip local-map fleet checks')
+         else:
+             self.handle_after_auto_search()
+-            self.handle_current_fleet_resolve(revert=False)
++            self.handle_current_fleet_resolve(
++                revert=False, defer_if_offscreen=True
++            )
+ 
+         # Exit from special zones types, only SAFE and DANGEROUS are acceptable.
+         if not in_month_boss_room and self.is_in_special_zone():
+@@ -424,18 +426,41 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                     'the low resolve debuff')
+         return False
+ 
+-    def handle_current_fleet_resolve(self, revert=False):
++    def handle_current_fleet_resolve(
++            self, revert=False, defer_if_offscreen=False):
+         """
+         Similar to handle_fleet_resolve,
+         but check current fleet only for better performance at initialization
+ 
+         Args:
+             revert (bool): If go back to previous zone.
++            defer_if_offscreen (bool): During initialization, defer the exact
++                low-resolve decision when the selected fleet map node is not
++                mounted because it is outside the current camera view.
+ 
+         Returns:
+             bool:
+         """
+-        if self.fleet_low_resolve_appear():
++        try:
++            low_resolve = self.fleet_low_resolve_appear()
++        except SemanticGateClosed as exc:
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if not (
++                defer_if_offscreen
++                and semantic_adapter is not None
++                and str(exc) == (
++                    'operation siren selected-fleet map anchor is absent or '
++                    'ambiguous'
++                )
++            ):
++                raise
++            logger.info(
++                'Defer current fleet resolve check because its exact map '
++                'anchor is outside the initialization camera view'
++            )
++            return False
++
++        if low_resolve:
+             logger.info('Current fleet is afflicted with '
+                         'the low resolve debuff')
+             self.fleet_resolve(revert)
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: ALAS Patch Builder <alas-patch-builder@example.invalid>
+Date: Sat, 22 Aug 2026 07:11:00 +0800
+Subject: [PATCH] operation siren combat interrupt
+
+---
+ module/os/map.py | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/module/os/map.py b/module/os/map.py
+index 92d6d75f..50136b73 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -737,6 +737,16 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 logger.info('Auto search interrupted')
+                 self.config.task_stop()
+ 
++            semantic_session = getattr(self.device, 'semantic_adapter', None)
++            if (
++                semantic_session is not None
++                and semantic_session.handle_operation_siren_combat_interrupt()
++            ):
++                self.interval_reset(MAINTENANCE_ANNOUNCE)
++                pause_interval.reset()
++                in_main_timer.reset()
++                continue
++
+             if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50), interval=3):
+                 self.interval_clear(GOTO_MAIN)
+                 in_main_timer.reset()
+-- 
+2.47.0.windows.2
