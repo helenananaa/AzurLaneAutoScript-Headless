@@ -1,0 +1,183 @@
+{
+  "schema": "alas-headless.operation-siren-explore-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 3759,
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "ForceRun": false,
+    "LastZone": 121,
+    "SpecialRadar": false,
+    "Fleet": 1,
+    "Submarine": false
+  },
+  "zone_visits": [
+    {
+      "requested": 72,
+      "name": "[72|Mediterranee B]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 92.172
+    },
+    {
+      "requested": 151,
+      "name": "[151|NA Ocean Depths A]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 12.797
+    },
+    {
+      "requested": 152,
+      "name": "[152|NA Ocean Depths B]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 7.828
+    },
+    {
+      "requested": 159,
+      "name": "[159|NA Ocean Depths H]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 27.86
+    },
+    {
+      "requested": 158,
+      "name": "[158|NA Ocean Depths G]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 20.984
+    },
+    {
+      "requested": 153,
+      "name": "[153|NA Ocean Depths C]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 24.656
+    },
+    {
+      "requested": 157,
+      "name": "[157|NA Ocean Depths F]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 7.782
+    },
+    {
+      "requested": 156,
+      "name": "[156|NA Ocean Depths E]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 22.906
+    },
+    {
+      "requested": 155,
+      "name": "[155|NA Ocean Depths D]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 8.219
+    }
+  ],
+  "zone_failures": [],
+  "fleet_actions": [],
+  "order_actions": [],
+  "auto_searches": [],
+  "preflight_auto_searches": [
+    {
+      "finished_combat": 0,
+      "elapsed_seconds": 32.281
+    }
+  ],
+  "explore_order": [
+    44,
+    24,
+    22,
+    31,
+    21,
+    23,
+    83,
+    43,
+    81,
+    84,
+    92,
+    93,
+    131,
+    134,
+    132,
+    122,
+    112,
+    33,
+    34,
+    32,
+    25,
+    41,
+    105,
+    95,
+    94,
+    141,
+    143,
+    133,
+    135,
+    111,
+    113,
+    114,
+    125,
+    123,
+    65,
+    62,
+    66,
+    14,
+    42,
+    85,
+    82,
+    91,
+    104,
+    103,
+    142,
+    61,
+    52,
+    51,
+    53,
+    54,
+    63,
+    64,
+    13,
+    12,
+    101,
+    102,
+    144,
+    124,
+    71,
+    73,
+    11,
+    106,
+    121,
+    72,
+    151,
+    152,
+    159,
+    158,
+    153,
+    157,
+    156,
+    155
+  ],
+  "task_result": true,
+  "elapsed_seconds": 272.563,
+  "final_config": {
+    "LastZone": 0,
+    "SpecialRadar": false,
+    "NextRun": "2026-09-01 00:00:00"
+  },
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "explore_task": "7a3f826aba75fe9ce8a63ea96eb2c00c7bd265f17d35f805bf93ddacb46ed294",
+    "globe_camera": "70e6d3f2e1d4cd71215a915abad054654c515133d378659e663a9c129f67e3fb",
+    "globe_operation": "94b0c6d383a6fb6892b47293502e0faa7adca385f120293c4a9d4f00304216fb",
+    "map_event": "89bd9dc3f9d794ac8be2ef4466ef7463a0a3cb0fe8b9a9cf44b83db1d3fefe77",
+    "adapter": "328ae617308df2dd347cc16a95cc8756a0395361e20a79142f4bca8bb925db06",
+    "oracle": "846b2aa6125d9b16d397f3e1916aade3ed337532fb71ded158236f21ae0e84a1"
+  }
+}

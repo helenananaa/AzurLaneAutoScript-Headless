@@ -8304,8 +8304,8 @@
         "OpsiFleet"
       ],
       "name": "OpsiExplore",
-      "note": "ForceRun、LastZone、SpecialRadar、Fleet 四值与 Submarine 两值已离线等价；安全区官方自动搜索已有完整实机收据，无事件返回 off 为正常结束；跨海域续跑、真实舰队/潜艇动作和清区仍未闭环",
-      "status": "B"
+      "note": "72 个常规海域已从 LastZone=0 按原顺序完整实机遍历，覆盖 typed unpin、邻区重锚、局部探针耗尽后的全局锚恢复、SAFE/要塞重叠选层、无事件自动搜索返回 off、游标逐区持久化及月度重置；Fleet=1、Submarine=false、SpecialRadar=false 已证明。危险海域调律样本实际消费、Fleet 2–4、Submarine=true、SpecialRadar=true 仍缺实机闭环",
+      "status": "L"
     },
     {
       "groups": [
@@ -11244,9 +11244,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "29f47de7aebbcfc98d436162472f42a817bc7174ff3e7e4535558db47324ef54",
-      "manifest_sha256": "8bf9b80337ed75e4afb504211bd68b2e5e6f09e298553a9faf0e3f021ecb374e",
-      "member_count": 54
+      "combined_sha256": "d72691978c86c23aec965c8e19a2160020d4918bfb8f46b6be5c892975d5ddb4",
+      "manifest_sha256": "67b2fb192cd5e2931467bc633220e65e4a319574d5bb49c76431fcdf6cdcd62f",
+      "member_count": 56
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

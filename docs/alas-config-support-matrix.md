@@ -44,10 +44,10 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **7 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **18 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiShop、OpsiStronghold、OpsiVoucher、Research、Tactical |
+| 🟢 主路径已完成、全配置未完成（`L`） | **19 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiExplore、OpsiShop、OpsiStronghold、OpsiVoucher、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **7 / 60** | Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
-| 🧱 已到边界、尚未完成（`B`） | **13 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、Shipyard、ShopFrequent、WarArchives |
+| 🧱 已到边界、尚未完成（`B`） | **12 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
@@ -431,7 +431,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 40 | OpsiGeneral | OpsiGeneral | P | 六字段均已离线等价；真实购买/维修结果、资源 postcondition 和异常恢复仍未闭环 |
 | 41 | OpsiAshBeacon | Scheduler, OpsiAshBeacon | B | 当前信标的一击模式主路径已实机闭环：200 点创建、三类求助、出击、战斗、两层结算、276085 伤害读取和 30 分钟延后；击杀领奖、档案与非一击分支仍缺独立实证 |
 | 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | Tier 等级选择已离线等价；真实目标列表、出击、战斗和领奖仍受舰队条件限制 |
-| 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | B | ForceRun、LastZone、SpecialRadar、Fleet/Submarine 已离线等价；真实地图导航、舰队/潜艇动作和清区未闭环 |
+| 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | L | 72 个常规海域已从 LastZone=0 按原顺序完整实机遍历，覆盖 typed unpin、邻区/全局重锚、SAFE/要塞重叠选层、无事件自动搜索返回 off、游标持久化及月度重置；危险海域样本消费、Fleet 2-4、Submarine=true、SpecialRadar=true 仍缺 |
 | 44 | OpsiShop | Scheduler, OpsiShop | L | 统一商店 19 卡 typed 观察与 custom 单件购买已实机闭环，余量 `3→2`、票券 `1205→1200`，并覆盖点击结果不明确后的精确恢复；黄币、其余预设、余额不足、刷新及全港口分支仍缺 |
 | 45 | OpsiVoucher | Scheduler, OpsiVoucher | L | 统一兑换页 22 卡 typed 观察、筛选命中与单件兑换已由原任务实机闭环，余量 `28→27`、凭证 `21592→21492`；石油商品、全部优先级逐值及异常恢复仍缺 |
 | 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | DoMission、UseTuningSample、Fleet/Submarine 已离线等价；真实舰队/潜艇动作和清图未闭环 |

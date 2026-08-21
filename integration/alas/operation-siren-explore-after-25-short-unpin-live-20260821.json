@@ -1,0 +1,309 @@
+{
+  "schema": "alas-headless.operation-siren-explore-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 3759,
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "ForceRun": false,
+    "LastZone": 25,
+    "SpecialRadar": false,
+    "Fleet": 1,
+    "Submarine": false
+  },
+  "zone_visits": [
+    {
+      "requested": 41,
+      "name": "[41|West Continental Shelf A]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 10.844
+    },
+    {
+      "requested": 105,
+      "name": "[105|Northwest Passage E]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 12.906
+    },
+    {
+      "requested": 95,
+      "name": "[95|NA Ocean NW Sector E]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 25.109
+    },
+    {
+      "requested": 94,
+      "name": "[94|NA Ocean NW Sector D]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 8.875
+    },
+    {
+      "requested": 141,
+      "name": "[141|Northeast Passage A]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 9.078
+    },
+    {
+      "requested": 143,
+      "name": "[143|Northeast Passage C]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 9.063
+    },
+    {
+      "requested": 133,
+      "name": "[133|NA Ocean NE Sector C]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 12.89
+    },
+    {
+      "requested": 135,
+      "name": "[135|NA Ocean NE Sector E]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 9.047
+    },
+    {
+      "requested": 111,
+      "name": "[111|NA Ocean E Sector A]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 25.422
+    },
+    {
+      "requested": 113,
+      "name": "[113|NA Ocean E Sector C]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 12.969
+    },
+    {
+      "requested": 114,
+      "name": "[114|NA Ocean E Sector D]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 9.031
+    },
+    {
+      "requested": 125,
+      "name": "[125|East Continental Shelf E]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 9.188
+    },
+    {
+      "requested": 123,
+      "name": "[123|East Continental Shelf C]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 25.593
+    },
+    {
+      "requested": 65,
+      "name": "[65|NA Ocean SE Sector E]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 34.469
+    },
+    {
+      "requested": 62,
+      "name": "[62|NA Ocean SE Sector B]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 9.187
+    },
+    {
+      "requested": 66,
+      "name": "[66|NA Ocean SE Sector F]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 10.297
+    },
+    {
+      "requested": 14,
+      "name": "[14|Caribbean Sea D]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 33.688
+    },
+    {
+      "requested": 42,
+      "name": "[42|West Continental Shelf B]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 16.875
+    },
+    {
+      "requested": 85,
+      "name": "[85|NA Ocean W Sector E]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 25.375
+    },
+    {
+      "requested": 82,
+      "name": "[82|NA Ocean W Sector B]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 9.11
+    },
+    {
+      "requested": 91,
+      "name": "[91|NA Ocean NW Sector A]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 8.938
+    },
+    {
+      "requested": 104,
+      "name": "[104|Northwest Passage D]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 34.484
+    },
+    {
+      "requested": 103,
+      "name": "[103|Northwest Passage C]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 8.875
+    },
+    {
+      "requested": 142,
+      "name": "[142|Northeast Passage B]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 14.532
+    },
+    {
+      "requested": 61,
+      "name": "[61|NA Ocean SE Sector A]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 43.829
+    },
+    {
+      "requested": 52,
+      "name": "[52|Southeast Ocean Ridge B]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 36.422
+    },
+    {
+      "requested": 51,
+      "name": "[51|Southeast Ocean Ridge A]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": false,
+      "elapsed_seconds": 25.265
+    },
+    {
+      "requested": 53,
+      "name": "[53|Southeast Ocean Ridge C]",
+      "stop_if_safe": true,
+      "entered_dangerous_zone": true,
+      "elapsed_seconds": 28.594
+    }
+  ],
+  "zone_failures": [],
+  "fleet_actions": [],
+  "order_actions": [],
+  "auto_searches": [],
+  "preflight_auto_searches": [
+    {
+      "finished_combat": 0,
+      "elapsed_seconds": 41.437
+    }
+  ],
+  "explore_order": [
+    44,
+    24,
+    22,
+    31,
+    21,
+    23,
+    83,
+    43,
+    81,
+    84,
+    92,
+    93,
+    131,
+    134,
+    132,
+    122,
+    112,
+    33,
+    34,
+    32,
+    25,
+    41,
+    105,
+    95,
+    94,
+    141,
+    143,
+    133,
+    135,
+    111,
+    113,
+    114,
+    125,
+    123,
+    65,
+    62,
+    66,
+    14,
+    42,
+    85,
+    82,
+    91,
+    104,
+    103,
+    142,
+    61,
+    52,
+    51,
+    53,
+    54,
+    63,
+    64,
+    13,
+    12,
+    101,
+    102,
+    144,
+    124,
+    71,
+    73,
+    11,
+    106,
+    121,
+    72,
+    151,
+    152,
+    159,
+    158,
+    153,
+    157,
+    156,
+    155
+  ],
+  "error": "SystemExit: 1",
+  "passed": false,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "explore_task": "7a3f826aba75fe9ce8a63ea96eb2c00c7bd265f17d35f805bf93ddacb46ed294",
+    "globe_camera": "a9da65ae218293fa5e16d4df99116e0dac1037bae42a076b4bb925e19b57ada1",
+    "globe_operation": "94b0c6d383a6fb6892b47293502e0faa7adca385f120293c4a9d4f00304216fb",
+    "map_event": "89bd9dc3f9d794ac8be2ef4466ef7463a0a3cb0fe8b9a9cf44b83db1d3fefe77",
+    "adapter": "328ae617308df2dd347cc16a95cc8756a0395361e20a79142f4bca8bb925db06",
+    "oracle": "e2be2b9c436cb9c63dbab0b5e78d8f2752e98ef8509dc39c464eda89f0c1e117"
+  }
+}

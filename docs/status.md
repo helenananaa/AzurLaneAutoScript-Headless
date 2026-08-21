@@ -2845,3 +2845,27 @@ See [G8 real ALAS reward and commission validation](g8-alas-reward-commission-va
   without relaxing unrelated stale-frame handling.
 - Boss-kill reward collection, `current_dossier`, dossier auto-attack, and the
   non-one-hit branch remain conditional rather than claimed complete.
+
+### Operation Siren exploration main path live-qualified
+
+- A single real `OpsiExplore` invocation started at `LastZone=0` and visited
+  all 72 zones in the upstream exploration order. Every visit selected the
+  SAFE layer, `zone_failures` remained empty, and no dangerous zone was
+  entered.
+- The 1605.407-second run exercised typed panel unpin, repeated neighboring
+  zone re-anchors, the bounded local-probe path, global typed-anchor recovery,
+  SAFE/stronghold overlap selection, the already-at-target branch, and the
+  accepted-auto-search-then-off outcome when no searchable event remains.
+- Completion persisted `LastZone=0`, `SpecialRadar=false`, and
+  `NextRun=2026-09-01 00:00:00`; the temporary validation configuration was
+  removed. The final 56-member patch series also applied to clean upstream
+  `81ccf63b` and compiled every changed Python file. Login, frame-clock, and
+  pixel-inventory replays passed with no raw Android input or unclassified
+  pixel access.
+- Storage now observes all six tuning-sample item identities through exact
+  typed item id and sprite pairs. Zero samples is a proven no-op; a nonzero
+  sample count still fails closed until actual typed consumption is live
+  qualified.
+- `OpsiExplore` is therefore promoted from `B` to `L`, not `F`. Remaining live
+  closures are a dangerous-zone run with tuning samples present, Fleet 2-4,
+  `Submarine=true`, and `SpecialRadar=true`.

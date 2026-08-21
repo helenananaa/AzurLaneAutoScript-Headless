@@ -12160,3 +12160,271 @@ index 53fb10d9..c339c4af 100644
                  transition_active = (
                      session.operation_siren_auto_search_transition_active()
                  )
+From 56e81ffb4bff7776d53fba28295ae52f1e9ee323 Mon Sep 17 00:00:00 2001
+From: ALAS Patch Builder <alas-patch-builder@example.invalid>
+Date: Fri, 21 Aug 2026 18:44:12 +0800
+Subject: [PATCH] operation siren explore globe recovery
+
+---
+ module/os/globe_camera.py    | 49 +++++++++++++++++++++---------------
+ module/os/globe_operation.py |  5 ++++
+ module/os/map.py             | 25 ++++++++++++++++--
+ 3 files changed, 57 insertions(+), 22 deletions(-)
+
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+index eee79868..4b16a95e 100644
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -262,6 +262,8 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
+             sight = (20, 220, 980, 620)
++            previous_anchor_name = None
++            anchor_repeat_count = 0
+             for focus_attempt in range(16):
+                 try:
+                     state = semantic_adapter.operation_siren_globe_state()
+@@ -275,6 +277,11 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+                 # The exact selected-zone name and the fixed typed panel pin
+                 # anchor the ALAS globe camera without screenshot matching.
+                 if state is not None:
++                    if state.zone_name == previous_anchor_name:
++                        anchor_repeat_count += 1
++                    else:
++                        previous_anchor_name = state.zone_name
++                        anchor_repeat_count = 0
+                     self.globe_update()
+                     try:
+                         receipt = semantic_adapter.operation_siren_globe_unpin()
+@@ -292,19 +299,9 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+                     self.globe_camera = tuple(
+                         selected.location - pinned_globe + self.globe.homo_center
+                     )
+-                    if self.config.DEVICE_CONTROL_METHOD == 'minitouch':
+-                        distance = self.config.MAP_SWIPE_MULTIPLY_MINITOUCH
+-                    elif self.config.DEVICE_CONTROL_METHOD == 'MaaTouch':
+-                        distance = self.config.MAP_SWIPE_MULTIPLY_MAATOUCH
+-                    else:
+-                        distance = self.config.MAP_SWIPE_MULTIPLY
+-                    pixel_delta = np.subtract(receipt.end, receipt.start)
+-                    unpin_vector = -pixel_delta / np.array(distance, dtype=float)
+-                    self.globe_camera = tuple(
+-                        np.array(self.globe_camera, dtype=float)
+-                        + unpin_vector
+-                        * np.array(self.config.OS_GLOBE_SWIPE_MULTIPLY)
+-                    )
++                    # The selected panel re-centers its typed pin before the
++                    # dismissal drag; do not count that UI gesture as an ALAS
++                    # globe-camera move until live evidence proves otherwise.
+                 elif not hasattr(self, 'globe_camera'):
+                     raise GameStuckError(
+                         'Semantic globe has no selected-zone camera anchor'
+@@ -336,14 +333,14 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+                 target = self.globe2screen([zone.location])[0] + (8, -5)
+                 # A proven unpin drag also moves the globe camera.  The
+                 # configured swipe multiplier is close but not exact on
+-                # every emulator, so probe a deterministic tight spiral
+-                # around ALAS' projected anchor.  Eight-pixel spacing is
+-                # needed where a normal zone lies between two port pins.
++                # every emulator, so probe a deterministic sparse spiral
++                # around ALAS' projected anchor.  A mismatch immediately
++                # supplies a stronger typed anchor for the next attempt.
+                 probe_offsets = tuple(sorted(
+                     (
+                         (x, y)
+-                        for x in range(-64, 65, 8)
+-                        for y in range(-64, 65, 8)
++                        for x in range(-160, 161, 32)
++                        for y in range(-160, 161, 32)
+                     ),
+                     key=lambda point: (
+                         max(abs(point[0]), abs(point[1])),
+@@ -352,8 +349,20 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+                         point[0],
+                     ),
+                 ))
+-                shift = focus_attempt * 17 % len(probe_offsets)
+-                probe_offsets = probe_offsets[shift:] + probe_offsets[:shift]
++                # A mismatch supplies a fresh exact typed anchor.  Retry the
++                # recalibrated projection once.  If that exact point selects
++                # the same neighboring zone again, rotate through recovery
++                # points instead of getting trapped on that pin forever.
++                center_offset = probe_offsets[0]
++                recovery_offsets = probe_offsets[1:]
++                shift = focus_attempt * 17 % len(recovery_offsets)
++                rotated_recovery = (
++                    recovery_offsets[shift:] + recovery_offsets[:shift]
++                )
++                if anchor_repeat_count == 0:
++                    probe_offsets = (center_offset,) + rotated_recovery
++                else:
++                    probe_offsets = rotated_recovery + (center_offset,)
+                 selected_mismatch = False
+                 for offset in probe_offsets:
+                     probe = target + offset
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+index 02876ef5..a40ce2c8 100644
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -105,6 +105,11 @@ class GlobeOperation(ActionPointHandler):
+             return False
+ 
+         if self.is_zone_pinned():
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None:
++                semantic_adapter.operation_siren_globe_unpin()
++                self._zone_unpin_interval.reset()
++                return True
+             # A click does not disable pinned zone, a swipe does.
+             self.device.swipe_vector(
+                 (50, -50), box=area_pad(ZONE_PINNED.area, pad=-80), random_range=(-10, -10, 10, 10),
+diff --git a/module/os/map.py b/module/os/map.py
+index 5183198f..f12eaa82 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -217,12 +217,33 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+             self.os_map_goto_globe()
+         # IN_GLOBE
+         # self.ensure_no_zone_pinned()
+-        self.globe_update()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and getattr(self, '_semantic_globe_camera_unpinned', False)
++        ):
++            if not hasattr(self, 'globe_camera'):
++                raise SemanticGateClosed(
++                    'semantic globe camera disappeared after typed unpin'
++                )
++            self._semantic_globe_camera_unpinned = False
++            logger.info(
++                'Reuse proven semantic globe camera after typed zone unpin'
++            )
++        else:
++            self.globe_update()
+         self.globe_focus_to(zone)
+         if stop_if_safe:
+             if self.zone_has_safe():
+                 logger.info('Zone is safe, stopped')
+-                self.ensure_no_zone_pinned()
++                semantic_adapter = getattr(
++                    self.device, 'semantic_adapter', None
++                )
++                if semantic_adapter is not None:
++                    semantic_adapter.operation_siren_globe_unpin()
++                    self._semantic_globe_camera_unpinned = True
++                else:
++                    self.ensure_no_zone_pinned()
+                 return False
+         self.zone_type_select(types=types)
+         self.globe_enter(zone)
+-- 
+2.47.0.windows.2
+
+From 35d32a345c0bb1514e5bdb8abf22b1bbc0a5fb7e Mon Sep 17 00:00:00 2001
+From: ALAS Patch Builder <alas-patch-builder@example.invalid>
+Date: Fri, 21 Aug 2026 19:53:22 +0800
+Subject: [PATCH] operation siren explore inventory and anchor recovery
+
+---
+ module/os/globe_camera.py    | 32 ++++++++++++++++++++++++++++----
+ module/os_handler/storage.py | 13 ++++++++++++-
+ 2 files changed, 40 insertions(+), 5 deletions(-)
+
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+index 4b16a95e..967a3e05 100644
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -264,6 +264,7 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+             sight = (20, 220, 980, 620)
+             previous_anchor_name = None
+             anchor_repeat_count = 0
++            global_recovery = False
+             for focus_attempt in range(16):
+                 try:
+                     state = semantic_adapter.operation_siren_globe_state()
+@@ -277,6 +278,7 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+                 # The exact selected-zone name and the fixed typed panel pin
+                 # anchor the ALAS globe camera without screenshot matching.
+                 if state is not None:
++                    global_recovery = False
+                     if state.zone_name == previous_anchor_name:
+                         anchor_repeat_count += 1
+                     else:
+@@ -363,9 +365,25 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+                     probe_offsets = (center_offset,) + rotated_recovery
+                 else:
+                     probe_offsets = rotated_recovery + (center_offset,)
++                if global_recovery:
++                    probe_points = tuple(sorted(
++                        (
++                            (x, y)
++                            for x in range(100, 901, 160)
++                            for y in range(260, 581, 80)
++                        ),
++                        key=lambda point: (
++                            abs(point[0] - 500) + abs(point[1] - 420),
++                            point[1],
++                            point[0],
++                        ),
++                    ))
++                else:
++                    probe_points = tuple(
++                        target + offset for offset in probe_offsets[:16]
++                    )
+                 selected_mismatch = False
+-                for offset in probe_offsets:
+-                    probe = target + offset
++                for probe in probe_points:
+                     if not point_in_area(probe, area=sight):
+                         continue
+                     try:
+@@ -384,9 +402,15 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+                     selected_mismatch = True
+                     break
+                 if not selected_mismatch:
+-                    raise GameStuckError(
+-                        'Semantic globe could not recover a selected zone'
++                    if global_recovery:
++                        raise GameStuckError(
++                            'Semantic globe could not recover a selected zone'
++                        )
++                    logger.warning(
++                        'Semantic target probes were empty; discover a global '
++                        'typed zone anchor'
+                     )
++                    global_recovery = True
+             raise GameStuckError('Semantic globe could not select the expected zone')
+ 
+         while 1:
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+index 8d3868ec..5e5516ad 100644
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -1,4 +1,4 @@
+-from alas_headless import validate_alas_opsi_storage_config
++from alas_headless import SemanticGateClosed, validate_alas_opsi_storage_config
+ 
+ from module.base.timer import Timer
+ from module.base.utils import rgb2gray
+@@ -156,6 +156,17 @@ class StorageHandler(GlobeOperation, ZoneManager):
+             in: STORAGE_CHECK
+             out: STORAGE_CHECK, scroll to bottom
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            state = semantic_adapter.operation_siren_storage_state()
++            logger.attr('Storage_sample', state.sample_count)
++            if state.sample_count:
++                raise SemanticGateClosed(
++                    'typed tuning sample consumption is not qualified'
++                )
++            logger.info('All samples in storage have been used')
++            return
++
+         sample_types = [
+             TEMPLATE_STORAGE_OFFENSE, TEMPLATE_STORAGE_SURVIVAL, TEMPLATE_STORAGE_COMBAT,
+             TEMPLATE_STORAGE_QUALITY_OFFENSE, TEMPLATE_STORAGE_QUALITY_SURVIVAL, TEMPLATE_STORAGE_QUALITY_COMBAT
+-- 
+2.47.0.windows.2
+

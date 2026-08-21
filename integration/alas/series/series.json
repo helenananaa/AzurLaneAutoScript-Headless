@@ -269,6 +269,16 @@
       "order": 54,
       "path": "integration/alas/series/0105-operation-siren-auto-search-transition-recovery.patch",
       "sha256": "f24ee9313068e3a74561206fd742f28a2c61e98c325d3d3e22d806fbd51df01f"
+    },
+    {
+      "order": 55,
+      "path": "integration/alas/series/0106-operation-siren-explore-globe-recovery.patch",
+      "sha256": "54f3e18cf6451fda1aa232065b23124442c27235cceb5835a30f44faa4c1df34"
+    },
+    {
+      "order": 56,
+      "path": "integration/alas/series/0107-operation-siren-explore-inventory-and-anchor-recover.patch",
+      "sha256": "759151fa243c290270824b9b42ed809c0b89b1cf877eee2b552e8798c35b990a"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -989,6 +989,14 @@ class OperationSirenStorageState:
     def abyssal_count(self) -> int:
         return sum(item.count for item in self.items if item.item_type == "ABYSSAL")
 
+    @property
+    def sample_count(self) -> int:
+        return sum(
+            item.count
+            for item in self.items
+            if item.item_type.startswith("SAMPLE_")
+        )
+
 
 @dataclass(frozen=True)
 class MetaEntranceState:
@@ -12262,10 +12270,10 @@ class SemanticOracle:
             raise SemanticGateClosed("operation siren globe swipe backend is absent")
         initial_generation = ui_state.generation
         for delta_x, delta_y in (
-            (-120, -80),
-            (120, -80),
-            (-120, 80),
-            (120, 80),
+            (-32, -24),
+            (32, -24),
+            (-32, 24),
+            (32, 24),
         ):
             candidate = self.read_ui_state()
             current_pins = tuple(
@@ -12407,12 +12415,35 @@ class SemanticOracle:
                 )
             display_name = re.sub(r"<[^>]*>", "", names[0].text).strip()
             count_text = counts[0].text.strip()
-            if display_name.startswith("海域坐标:"):
+            sample_types = {
+                301: ("SAMPLE_OFFENSE", "Wyangben1"),
+                302: ("SAMPLE_SURVIVAL", "Wyangben3"),
+                303: ("SAMPLE_COMBAT", "Wyangben5"),
+                304: ("SAMPLE_QUALITY_OFFENSE", "Wyangben2"),
+                305: ("SAMPLE_QUALITY_SURVIVAL", "Wyangben4"),
+                306: ("SAMPLE_QUALITY_COMBAT", "Wyangben6"),
+            }
+            if item_id in sample_types:
+                item_type, expected_sprite = sample_types[item_id]
+                icons = tuple(
+                    image
+                    for image in ui_state.images
+                    if image.path == root + "icon_bg/icon"
+                    and image.active_in_hierarchy
+                    and image.active_and_enabled
+                    and not image.truncated
+                    and image.bounds is not None
+                )
+                if len(icons) != 1 or icons[0].sprite != expected_sprite:
+                    raise SemanticGateClosed(
+                        "operation siren tuning sample identity changed"
+                    )
+            elif display_name.startswith("海域坐标:"):
                 item_type = "OBSCURE"
             elif display_name.startswith("塞壬坐标:"):
                 item_type = "ABYSSAL"
             else:
-                # Other inventory objects belong to logger/sample flows and
+                # Other inventory objects belong to logger flows and
                 # must not be inferred as a coordinate from their numeric id.
                 continue
             if re.fullmatch(r"[1-9][0-9]*", count_text) is None:
@@ -13164,7 +13195,10 @@ class SemanticOracle:
         self._tap(x, y)
         selected_name = None
         selected_generation = None
-        for _ in range(8):
+        # Globe probes deliberately cover a sparse recovery grid.  Six
+        # quarter-second typed snapshots retain an animation margin while
+        # bounding the cost of an empty coordinate.
+        for _ in range(6):
             self._sleep(0.25)
             try:
                 candidate = self.read_ui_state(check_foreground=False)
