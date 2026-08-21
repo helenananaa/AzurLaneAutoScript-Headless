@@ -32,6 +32,11 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   hierarchy reappears. Unrelated tasks do not inherit the lease. The obsolete
   source-only Stronghold skip was removed from the authoritative 48-member
   patch series; member 0098 contains the upstream runtime delta.
+- An accepted exact auto-search click now has two normal outcomes. Searchable
+  events move the switch to `on` or enter combat; an empty map emits the paired
+  start/no-event notices, or settles back to `off` after a bounded debounce,
+  and ends the map search normally. Stable `off` is no longer reported as an
+  enable failure, while the transition lease still suppresses duplicate clicks.
 - Retained order panels are closed by the exact typed back target, including a
   bounded retry when Unity remounts the panel from `LevelCamera` to
   `OverlayCamera`. Port startup question clearing now reads exact radar targets
@@ -1196,8 +1201,9 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   skipped the unavailable fleet, selected Fleet 3, and controlled exhaustion
   returned `False` instead of retrying a defeated fleet. Successful Boss
   settlement and hard difficulty remain unproven. Daily mission navigation
-  likewise reached Forward Base 154, but its exact auto-search toggle remained
-  `off`.
+  likewise reached Forward Base 154; its accepted exact auto-search toggle
+  returned to `off`, which is now correctly handled as the normal no-searchable-
+  event terminal instead of an enable failure.
 - Evidence: `integration/alas/operation-siren-live-qualification-20260820.json`;
   reproducible ALAS delta:
   `integration/alas/series/0095-operation-siren-typed-navigation.patch` and

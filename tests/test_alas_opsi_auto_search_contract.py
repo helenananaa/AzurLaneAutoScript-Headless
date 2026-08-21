@@ -18,10 +18,18 @@ STRONGHOLD_RUNTIME_PATCH = (
 
 class AlasOpsiAutoSearchContractTests(unittest.TestCase):
     def test_off_state_is_probed_once_instead_of_declared_locked(self):
-        source = OPSI_PATCH.read_text(encoding="utf-8")
+        source = (
+            OPSI_PATCH.read_text(encoding="utf-8")
+            + STRONGHOLD_RUNTIME_PATCH.read_text(encoding="utf-8")
+        )
         self.assertIn("operation_siren_auto_search_state()", source)
         self.assertIn("_semantic_auto_search_enable_attempted", source)
         self.assertIn("Allow ALAS one natural enable attempt", source)
+        self.assertIn("semantic_off_settled", source)
+        self.assertIn("Timer(\n+                            2, count=4", source)
+        self.assertIn("accepted and returned to '", source)
+        self.assertIn("'off; no searchable event remains'", source)
+        self.assertNotIn("auto search remains off after", source)
         self.assertNotIn("semantic_auto_search_locked", source)
         self.assertNotIn("auto search is locked; cannot run", source)
         self.assertNotIn("skip the initial clear", source)

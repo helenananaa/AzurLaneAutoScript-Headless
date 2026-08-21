@@ -113,6 +113,12 @@
         "当前所选舰队开始自律寻敌",
         "当前所选舰队视野内无可自律事件，无法继续自律寻敌"
       ],
+      "auto_search_off_semantics": {
+        "accepted_click_then_on_or_combat": "searchable_events_present",
+        "accepted_click_then_stable_off": "no_searchable_events_remain",
+        "stable_off_is_enable_failure": false,
+        "duplicate_enable_clicks_during_transition": false
+      },
       "submarine_exit_confirmation": true,
       "final_percentage": 0,
       "retained_order_panel_recovery": true,
@@ -138,6 +144,7 @@
   "daily": {
     "target_zone_entered": 154,
     "auto_search_after_one_exact_toggle_attempt": "off",
+    "auto_search_off_interpretation": "normal_no_searchable_events_terminal_after_an_accepted_toggle",
     "mission_clear_proven": false
   },
   "final_state": {

@@ -238,7 +238,7 @@
     {
       "order": 48,
       "path": "integration/alas/series/0098-operation-siren-stronghold-runtime.patch",
-      "sha256": "988b6dab5a59ca924bbb8c484b6c598f135f4ac1f9f93ecb3ffce14ca3935e24"
+      "sha256": "833a6244eaaeed8b94abc44c35e343b7b7aeda8625887a041ca8e7a4140680ec"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -273,7 +273,7 @@
     "module/os/tasks/stronghold.py"
   ],
   "patch_applied": true,
-  "patch_sha256": "9cace5c8b1e0ae6ddc9aeeea9a6acaf955c82f1ec6071d639c5c5e7723e71433",
+  "patch_sha256": "6db4f1be0723d8286f11c31421a296eb8eb96f188e97515fab37d76456ad8fa2",
   "plan_only": false,
   "schema": "alas-headless.patch-tree-verification/v1",
   "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"

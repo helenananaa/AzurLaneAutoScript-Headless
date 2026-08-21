@@ -618,14 +618,37 @@ index 048604ba..1e24059d 100644
          for fleet in fleets:
              logger.hr(f'Turn: {fleet}', level=2)
 diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
-index a0c3fed8..d13baf05 100644
+index a0c3fed8..a011d092 100644
 --- a/module/os_handler/map_event.py
 +++ b/module/os_handler/map_event.py
-@@ -233,23 +233,42 @@ class MapEventHandler(EnemySearchingHandler):
+@@ -233,30 +233,82 @@ class MapEventHandler(EnemySearchingHandler):
              bool: If clicked.
          """
          semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        semantic_enable_blocked = False
++
++        def semantic_off_settled():
++            """Treat reviewed OFF-after-click as a normal no-work result."""
++            if semantic_adapter is None or not getattr(
++                self, '_semantic_auto_search_enable_attempted', False
++            ):
++                return False
++            if self.info_bar_count() >= 2:
++                return True
++            timer = getattr(self, '_semantic_auto_search_off_timer', None)
++            return timer is not None and timer.reached()
++
++        def finish_semantic_no_event():
++            logger.info(
++                'Operation Siren auto search was accepted and returned to '
++                'off; no searchable event remains'
++            )
++            self._semantic_auto_search_enable_attempted = False
++            self._semantic_auto_search_off_timer = None
++            self.device.screenshot_interval_set()
++            self.os_auto_search_quit(drop=drop)
++            raise CampaignEnd
++
          if semantic_adapter is not None:
 -            state = semantic_adapter.operation_siren_auto_search_state()
 -            if state == 'on':
@@ -663,24 +686,43 @@ index a0c3fed8..d13baf05 100644
 +                    semantic_enable_blocked = enable is True
 +                elif state == 'on':
 +                    self._semantic_auto_search_enable_attempted = False
++                    self._semantic_auto_search_off_timer = None
 +                elif enable is True:
 +                    if getattr(
 +                        self, '_semantic_auto_search_enable_attempted', False
 +                    ):
-+                        logger.warning(
-+                            'Operation Siren auto search remains off after the '
-+                            'bounded enable attempt'
-+                        )
++                        if semantic_off_settled():
++                            finish_semantic_no_event()
 +                        semantic_enable_blocked = True
 +                    else:
 +                        logger.info('Allow ALAS one natural enable attempt')
 +                        self._semantic_auto_search_enable_attempted = True
++                        self._semantic_auto_search_off_timer = Timer(
++                            2, count=4
++                        ).start()
 +                        self.device.click(AUTO_SEARCH_OS_MAP_OPTION_OFF)
 +                        return True
          if self.match_template_color(AUTO_SEARCH_OS_MAP_OPTION_OFF, offset=(5, 120)):
-             if self.info_bar_count() >= 2:
+-            if self.info_bar_count() >= 2:
++            if self.info_bar_count() >= 2 or semantic_off_settled():
++                if semantic_adapter is not None and getattr(
++                    self, '_semantic_auto_search_enable_attempted', False
++                ):
++                    finish_semantic_no_event()
                  self.device.screenshot_interval_set()
-@@ -273,11 +292,15 @@ class MapEventHandler(EnemySearchingHandler):
+                 self.os_auto_search_quit(drop=drop)
+                 raise CampaignEnd
+         if self.match_template_color(AUTO_SEARCH_OS_MAP_OPTION_OFF_DISABLED, offset=(5, 120)):
+-            if self.info_bar_count() >= 2:
++            if self.info_bar_count() >= 2 or semantic_off_settled():
++                if semantic_adapter is not None and getattr(
++                    self, '_semantic_auto_search_enable_attempted', False
++                ):
++                    finish_semantic_no_event()
+                 self.device.screenshot_interval_set()
+                 self.os_auto_search_quit(drop=drop)
+                 raise CampaignEnd
+@@ -273,11 +325,15 @@ class MapEventHandler(EnemySearchingHandler):
              pass
          elif enable:
              if self.match_template_color(AUTO_SEARCH_OS_MAP_OPTION_OFF, offset=(5, 120), interval=3):
