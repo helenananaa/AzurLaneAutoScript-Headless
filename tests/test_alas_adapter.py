@@ -747,6 +747,9 @@ class FakeOracle:
     def operation_siren_exit_prompt_visible(self):
         return False
 
+    def operation_siren_abyssal_entry_prompt_visible(self):
+        return False
+
     def operation_siren_state(self):
         raise SemanticGateClosed("Operation Siren page identity is not proven")
 
@@ -6287,6 +6290,19 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(adapter._operation_siren_entry_transition_until, 0.0)
         self.assertEqual(gate_calls, [True, True])
         self.assertEqual(oracle.click_calls, [])
+
+    def test_operation_siren_reward_popup_closes_without_mission_owner(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values = {
+            "reward/award-info/close": True,
+            "reward/award-info1/close": False,
+        }
+        adapter.begin_operation_siren_startup_recovery(timeout_seconds=60.0)
+
+        receipt = adapter.click(NamedButton("GET_ITEMS_1"))
+
+        self.assertEqual(receipt.semantic_id, "reward/award-info/close")
+        self.assertEqual(oracle.click_calls, ["reward/award-info/close"])
 
     def test_operation_siren_startup_recovery_recognizes_campaign_menu(self):
         adapter, oracle, gate_calls = self.make_adapter()

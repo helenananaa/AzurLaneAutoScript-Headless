@@ -9278,6 +9278,26 @@ class RetirementSemanticOracleTests(unittest.TestCase):
 
 
 class OperationSirenSemanticOracleTests(unittest.TestCase):
+    def test_storage_controls_accept_delegated_overlay_raycast(self):
+        local_map_root = "root/OverlayCamera/Overlay/UIMain/top/adapt/"
+        inventory = make_button(
+            "inventory_button",
+            local_map_root + "right_stage/btn_list/dock/inventory_button",
+            raycast_top=None,
+        )
+        oracle = make_oracle(FakeBackend([inventory]))
+        with mock.patch.object(oracle, "operation_siren_state"):
+            self.assertTrue(oracle.enabled("os/map/storage"))
+
+        storage_back = make_button(
+            "back_btn",
+            "root/UICamera/Canvas/UIMain/WorldInventoryUI(Clone)/adapt/"
+            "blur_panel/adapt/top/back_btn",
+            raycast_top=None,
+        )
+        oracle = make_oracle(FakeBackend([storage_back]))
+        self.assertTrue(oracle.enabled("os/storage/back"))
+
     def _state(self, *buttons):
         oracle = make_oracle(FakeBackend(list(buttons)))
         with mock.patch.object(oracle, "operation_siren_state"):
@@ -9503,6 +9523,133 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         backend.ui = make_ui([make_text("是否离开？", prompt_path)])
         self.assertFalse(oracle.operation_siren_exit_prompt_visible())
 
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "是否确定从深渊海域离开？\n"
+                    "（警告：离开后将无法再次返回挑战强敌！）",
+                    prompt_path,
+                )
+            ]
+        )
+        self.assertTrue(oracle.operation_siren_exit_prompt_visible())
+
+    def test_operation_siren_abyssal_entry_prompt_is_exact_and_clickable(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "custom_button_1(Clone)",
+                    "root/Msgbox(Clone)/window/button_container/"
+                    "custom_button_1(Clone)",
+                ),
+                make_button(
+                    "custom_button_2(Clone)",
+                    "root/Msgbox(Clone)/window/button_container/"
+                    "custom_button_2(Clone)",
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "深渊海域作战难度较高且不可重复进入，\n"
+                    "请确认舰队战备后前往作战",
+                    "root/Msgbox(Clone)/window/msg_panel/content",
+                )
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.operation_siren_abyssal_entry_prompt_visible())
+        receipt = oracle.click_operation_siren_abyssal_entry(True)
+        self.assertEqual(receipt.semantic_id, "os/abyssal/entry/confirm")
+
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "深渊海域作战难度较高且不可重复进入",
+                    "root/Msgbox(Clone)/window/msg_panel/content",
+                )
+            ]
+        )
+        self.assertFalse(oracle.operation_siren_abyssal_entry_prompt_visible())
+
+    def test_operation_siren_abyssal_exit_uses_nearest_exact_floor_model(self):
+        backend = FakeBackend([])
+        title = make_text(
+            "加勒比海A-深渊海域",
+            "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/title/name",
+        )
+        locked = make_image(
+            "root/LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+            "cell_6_6/attachments/event_4100212/icon/model/"
+            "taban_jinzhi(Clone)/taban",
+            "taban01",
+            {"left": 560, "top": 700, "right": 720, "bottom": 850},
+        )
+        distant_unlocked = make_image(
+            "root/LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+            "cell_13_6/attachments/event_4100203/icon/model/"
+            "taban(Clone)/taban",
+            "taban01",
+            {"left": 530, "top": 1750, "right": 750, "bottom": 1950},
+        )
+        backend.ui = make_ui([title], images=[locked, distant_unlocked])
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.operation_siren_abyssal_exit_available())
+
+        unlocked = make_image(
+            "root/LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+            "cell_6_6/attachments/event_4100212/icon/model/"
+            "taban(Clone)/taban",
+            "taban01",
+            {"left": 572, "top": 445, "right": 708, "bottom": 565},
+        )
+        backend.ui = make_ui([title], images=[unlocked, distant_unlocked])
+        self.assertTrue(oracle.operation_siren_abyssal_exit_available())
+        receipt = oracle.click_operation_siren_abyssal_exit()
+        self.assertEqual(receipt.semantic_id, "os/abyssal/exit")
+        self.assertEqual(backend.taps, [(640, 505)])
+
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "加勒比海A-隐匿海域",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/"
+                    "top_stage/title/name",
+                )
+            ],
+            images=[unlocked],
+        )
+        self.assertFalse(oracle.operation_siren_abyssal_exit_available())
+
+    def test_operation_siren_world_overview_is_exact_and_clickable(self):
+        path = "root/OverlayCamera/Overlay/UIMain/WorldOverviewUI(Clone)/bg"
+        backend = FakeBackend(
+            [make_button("bg", path, x=640, y=360, raycast_top=None)]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "点击任意位置返回",
+                    "root/OverlayCamera/Overlay/UIMain/"
+                    "WorldOverviewUI(Clone)/tip/Text",
+                )
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.operation_siren_world_overview_visible())
+        receipt = oracle.click_operation_siren_world_overview()
+        self.assertEqual(receipt.semantic_id, "os/world-overview/close")
+        self.assertEqual(backend.taps, [(640, 360)])
+
+        backend.ui = make_ui(
+            [make_text("点击返回", "root/WorldOverviewUI(Clone)/tip/Text")]
+        )
+        self.assertFalse(oracle.operation_siren_world_overview_visible())
+
     def test_globe_unpin_drags_exact_selected_zone_point(self):
         backend = FakeBackend(
             [
@@ -9594,6 +9741,9 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         self.assertEqual(
             oracle.operation_siren_radar_targets("guidepost"), ((2, -1),)
         )
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("question"), ((2, -1),)
+        )
         receipt = oracle.click_operation_siren_relative_grid((-1, -2))
         self.assertEqual(receipt.semantic_id, "os/map/grid/relative/-1/-2")
         self.assertEqual(backend.taps, [(544, 225)])
@@ -9643,7 +9793,7 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
     def test_relative_grid_rejects_unknown_radar_kind_and_missing_center(self):
         oracle = self._local_map_oracle("1")
         with self.assertRaisesRegex(SemanticGateClosed, "not reviewed"):
-            oracle.operation_siren_radar_targets("question")
+            oracle.operation_siren_radar_targets("enemy")
         with self.assertRaisesRegex(SemanticGateClosed, "center grid"):
             oracle.click_operation_siren_relative_grid((0, 0))
 

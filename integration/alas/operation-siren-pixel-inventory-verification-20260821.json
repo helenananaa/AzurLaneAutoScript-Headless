@@ -1,9 +1,9 @@
 {
   "android_input_injected": false,
   "classified_pixel_accesses": 1,
-  "combined_patch_sha256": "e3d2d9f8f0f28b3b1b8541067b97c33a76ae7e2b6bcf8ef82ec2bd0cbe8e1fca",
+  "combined_patch_sha256": "07855fc0eab6087e3521e3880179df16088ec5e4c37a2ed74f14cc7794ca4f0d",
   "passed": true,
-  "patch_series_manifest_sha256": "7421dd8dabcb1b49593e12bbc7b13c91694248b9fb1ac56000c48231fb7a59b5",
+  "patch_series_manifest_sha256": "0a82cecb0ee6cfec13539648cbe12a6cc31b0ca9b4ed7a5e7291f3719c190331",
   "production_ready": false,
   "replay_surfaces": 7,
   "schema": "alas-headless.pixel-access-inventory-verification/v1",

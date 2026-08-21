@@ -2,6 +2,32 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-21
+
+### Operation Siren Abyssal default path live-qualified
+
+- The original ALAS Abyssal path consumed one real Siren coordinate and 100
+  action points to enter `加勒比海A-深渊海域` at corrosion level 6. Fleet 4
+  activated the exact locked guidepost, defeated the boss, and completed the
+  battle/result and repeated `AwardInfoUI` reward layers.
+- Victory is no longer inferred from HP. The nearest passage changes from
+  `taban_jinzhi(Clone)` to `taban(Clone)`; ALAS refocuses the selected fleet,
+  moves onto that exact unlocked model, confirms the irreversible Abyssal
+  exit, and dismisses the exact `WorldOverviewUI` return surface.
+- The live postcondition returned to Liverpool. Coins moved
+  `99408 -> 115743`, beacon points `100 -> 150`, daily beacon points
+  `0 -> 50`, and the standard dock repair path repaired 725 coins of damage
+  before positively returning to `WorldPortUI`.
+- Long boss effects now keep a committed Operation Siren combat alive across
+  bounded stale/coherence gaps. Reward closes no longer require an unrelated
+  mission owner, and dock repair tolerates the reviewed `UIMain -> UIOrigin`
+  remount plus a swallowed first back click.
+- Patch member `0100-operation-siren-abyssal-runtime.patch` carries the
+  upstream runtime delta. Live evidence is recorded in
+  `integration/alas/operation-siren-abyssal-live-qualification-20260821.json`.
+  The default main path is `L`; optional pre-entry `UseLogger` consumption and
+  every free-form fleet-filter permutation remain conditional.
+
 ## 2026-08-20
 
 ### Operation Siren Stronghold main path live-qualified

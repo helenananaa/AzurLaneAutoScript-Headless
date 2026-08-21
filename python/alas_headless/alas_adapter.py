@@ -3914,6 +3914,11 @@ class AlasSemanticAdapter:
             return visible
         if semantic_id == "os/map/exit":
             return self.oracle.exists(semantic_id)
+        if (
+            name == "AUTO_SEARCH_REWARD"
+            and self.oracle.operation_siren_world_overview_visible()
+        ):
+            return True
         if semantic_id in ("os/map/fleet-lock/on", "os/map/fleet-lock/off"):
             return self.oracle.operation_siren_fleet_lock_state() == semantic_id.rsplit("/", 1)[-1]
         if (
@@ -4696,6 +4701,8 @@ class AlasSemanticAdapter:
                 return False
         if name in ("POPUP_CONFIRM", "POPUP_CANCEL"):
             if self.oracle.operation_siren_exit_prompt_visible():
+                return True
+            if self.oracle.operation_siren_abyssal_entry_prompt_visible():
                 return True
             if self.oracle.meta_simulation_prompt_visible():
                 return True
@@ -6423,6 +6430,14 @@ class AlasSemanticAdapter:
     ) -> Tuple[Tuple[int, int], ...]:
         self._package_gate()
         return self.oracle.operation_siren_radar_targets(target_kind)
+
+    def operation_siren_abyssal_exit_available(self) -> bool:
+        self._package_gate()
+        return self.oracle.operation_siren_abyssal_exit_available()
+
+    def click_operation_siren_abyssal_exit(self) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_operation_siren_abyssal_exit()
 
     def click_operation_siren_relative_grid(
         self,
@@ -10004,6 +10019,15 @@ class AlasSemanticAdapter:
                         time.monotonic() + 30.0
                     )
                 return receipt
+            if self.oracle.operation_siren_abyssal_entry_prompt_visible():
+                receipt = self.oracle.click_operation_siren_abyssal_entry(
+                    confirm=name == "POPUP_CONFIRM"
+                )
+                if name == "POPUP_CONFIRM":
+                    self._operation_siren_entry_transition_until = (
+                        time.monotonic() + 30.0
+                    )
+                return receipt
             if self.oracle.meta_simulation_prompt_visible():
                 if name != "POPUP_CANCEL":
                     raise SemanticGateClosed(
@@ -10061,6 +10085,11 @@ class AlasSemanticAdapter:
                 return receipt
             if semantic_id == "os/map/exit":
                 return self.oracle.click_operation_siren_map_exit()
+            if (
+                name == "AUTO_SEARCH_REWARD"
+                and self.oracle.operation_siren_world_overview_visible()
+            ):
+                return self.oracle.click_operation_siren_world_overview()
             if semantic_id == "os/globe/map":
                 if (
                     self._operation_siren_globe_map_receipt is not None
@@ -10489,6 +10518,14 @@ class AlasSemanticAdapter:
                 target = self._award_close_target()
                 if target is None:
                     raise SemanticGateClosed("reviewed mail reward popup is absent")
+                return self.oracle.click(target)
+
+        if (
+            name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3")
+            and self._operation_siren_allows_passive_probe()
+        ):
+            target = self._award_close_target()
+            if target is not None:
                 return self.oracle.click(target)
 
         if navbar_match is not None:
@@ -11644,24 +11681,45 @@ class AlasSemanticSession:
         )
 
     def combat_is_executing(self) -> bool:
-        if getattr(
-            self.open().oracle,
-            "daily_battle_result_visible",
-            lambda: False,
-        )():
-            return False
-        if self.open().oracle.daily_combat_visible():
-            return True
-        if not (
-            self.open().campaign_combat_committed()
-            or self.open().operation_siren_combat_committed()
-        ):
-            return False
         try:
-            return "PAUSE" in self._live_combat_visible()
-        except SemanticGateClosed as exc:
-            if self._campaign_combat_transition_error(exc):
+            if getattr(
+                self.open().oracle,
+                "daily_battle_result_visible",
+                lambda: False,
+            )():
                 return False
+            if self.open().oracle.daily_combat_visible():
+                return True
+            if not (
+                self.open().campaign_combat_committed()
+                or self.open().operation_siren_combat_committed()
+            ):
+                return False
+            return "PAUSE" in self._live_combat_visible()
+        except (SemanticGateClosed, StaleFrameError, ObserverTransportError) as exc:
+            if (
+                isinstance(exc, SemanticGateClosed)
+                and self._campaign_combat_transition_error(exc)
+            ):
+                return False
+            if (
+                self.open().operation_siren_combat_committed()
+                and (
+                    isinstance(exc, (StaleFrameError, ObserverTransportError))
+                    or str(exc)
+                    in (
+                        "observer snapshot is stale",
+                        "observer endpoints are not generation-coherent",
+                        "combat fixture endpoint completeness changed",
+                        "combat fixture endpoint generations disagree",
+                    )
+                )
+            ):
+                # Unity can stop publishing fresh hierarchy snapshots during
+                # long Operation Siren boss effects.  The committed battle is
+                # still executing until a fresh typed result/map surface says
+                # otherwise; do not abort the owning combat loop on that gap.
+                return True
             raise
 
     def close_campaign_battle_fail_tip_if_present(self) -> bool:
@@ -12185,6 +12243,12 @@ class AlasSemanticSession:
         self, target_kind: str
     ) -> Tuple[Tuple[int, int], ...]:
         return self.open().operation_siren_radar_targets(target_kind)
+
+    def operation_siren_abyssal_exit_available(self) -> bool:
+        return self.open().operation_siren_abyssal_exit_available()
+
+    def click_operation_siren_abyssal_exit(self) -> ActionReceipt:
+        return self.open().click_operation_siren_abyssal_exit()
 
     def click_operation_siren_relative_grid(
         self,

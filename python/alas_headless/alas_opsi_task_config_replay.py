@@ -1483,9 +1483,9 @@ def _verify_fleet_selection(method) -> dict[str, Any]:
     if semantic != {
         "rejected": False,
         "result": True,
-        "events": [["ensure_to_be", 4]],
+        "events": [["ensure_to_be", 4], "camera_stable"],
     }:
-        raise AssertionError("semantic OpsiFleet selection waited for pixel stability")
+        raise AssertionError("semantic OpsiFleet selection skipped typed camera stability")
     return {"cases": cases, "semantic": semantic, "invalid_entry": invalid}
 
 

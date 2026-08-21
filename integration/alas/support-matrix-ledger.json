@@ -5167,25 +5167,29 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0140-scheduler-contract.patch",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "integration/alas/series/0100-operation-siren-abyssal-runtime.patch",
+        "integration/alas/operation-siren-abyssal-live-qualification-20260821.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiAbyssal"
       ],
       "path": "OpsiAbyssal.ForceRun",
-      "status_label": "◐ 实机当前值",
+      "status_label": "🟢 默认主路径",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -8225,8 +8229,8 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiAbyssal",
-      "note": "ForceRun 的潜艇调用延迟排除已离线等价；可读仓库/详情，但过滤器、坐标消耗、Boss 和结算未闭环",
-      "status": "B"
+      "note": "默认主路径已实机完成坐标消耗、100 行动力入场、问号机关、侵蚀 6 Boss、奖励、不可逆退出、世界总览关闭与利维浦大修；UseLogger 预消耗和自由舰队过滤全空间未逐项实机",
+      "status": "L"
     },
     {
       "groups": [
@@ -11210,9 +11214,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "e3d2d9f8f0f28b3b1b8541067b97c33a76ae7e2b6bcf8ef82ec2bd0cbe8e1fca",
-      "manifest_sha256": "7421dd8dabcb1b49593e12bbc7b13c91694248b9fb1ac56000c48231fb7a59b5",
-      "member_count": 49
+      "combined_sha256": "07855fc0eab6087e3521e3880179df16088ec5e4c37a2ed74f14cc7794ca4f0d",
+      "manifest_sha256": "0a82cecb0ee6cfec13539648cbe12a6cc31b0ca9b4ed7a5e7291f3719c190331",
+      "member_count": 50
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

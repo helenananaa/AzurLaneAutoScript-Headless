@@ -44,10 +44,10 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **7 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **14 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiStronghold、Research、Tactical |
+| 🟢 主路径已完成、全配置未完成（`L`） | **15 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiStronghold、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **7 / 60** | Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
-| 🧱 已到边界、尚未完成（`B`） | **17 / 60** | Meowfficer、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
+| 🧱 已到边界、尚未完成（`B`） | **16 / 60** | Meowfficer、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
@@ -434,7 +434,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 45 | OpsiVoucher | Scheduler, OpsiVoucher | B | 过滤器及重定向已离线等价；真实库存、命中、兑换、代币 postcondition 与异常恢复仍未闭环 |
 | 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | DoMission、UseTuningSample、Fleet/Submarine 已离线等价；真实舰队/潜艇动作和清图未闭环 |
 | 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | B | ForceRun、Fleet/Submarine 已离线等价；坐标消耗、真实动作、进入和清图未闭环 |
-| 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | B | ForceRun 与舰队过滤已离线等价；坐标消耗、真实舰队、Boss 和结算未闭环 |
+| 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | L | 默认主路径已实机完成坐标消耗、100 行动力入场、侵蚀 6 Boss、奖励、不可逆退出与利维浦大修；UseLogger 和自由舰队过滤全空间未逐项实机 |
 | 49 | OpsiArchive | Scheduler, OpsiFleet | B | Fleet/Submarine 已离线等价且档案商店可读；真实动作、购买、使用坐标、进入和清图未闭环 |
 | 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | L | 实机以精确世界地图标题/类型发现 93、121 两处要塞；93 区闭环 `100 -> 20 -> 0%` 舰队轮换，121 区闭环进入、战斗、0% 收束、回港大修和四队低士气复查；完整舰队过滤与 ForceRun 分支仍未逐值实机覆盖 |
 | 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通 Boss 已实机闭环战败、低士气/沉没分离、舰队轮换和全队耗尽失败返回，成功击杀结算及困难 Boss 未闭环 |
@@ -544,7 +544,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | OpsiVoucher | `Filter` | B | 过滤与 Logger/Tier/Archive 重定向已离线等价；真实代币余额、兑换结果、空列表和异常恢复仍缺 |
 | OpsiDaily | `DoMission`; `UseTuningSample` | B | 四组合、无任务、接取/进入/清图、样本有无和跨日恢复 |
 | OpsiObscure | `ForceRun` | B | 开关、坐标不存在/存在、消耗、进入、清图与奖励 |
-| OpsiAbyssal | `ForceRun` | B | 开关、坐标、Boss、多舰队、撤退/失败和奖励 |
+| OpsiAbyssal | `ForceRun` | L | 默认路径已闭环；仍缺 UseLogger、ForceRun 两值和自由舰队过滤全空间 |
 | OpsiFleetFilter | `Filter`（默认含 Fleet-4、CallSubmarine、Fleet-2/3/1） | B | 语法、顺序、潜艇、重复、不可用与非法规则已离线等价；真实舰队可用性、切换结果和战斗仍缺 |
 | OpsiStronghold | `ForceRun` | L | 默认值主路径已在 93/121 两区完成要塞识别、进入、舰队轮换、清场及战后修复；仍需补 `true/false` 两值对侦察/潜艇调度排除的独立实机对照 |
 | OpsiMonthBoss | `Mode`=`normal/normal_hard`; `CheckAdaptability`; `ForceRun` | B | 两模式与两个开关已回放；普通房间已实机完成战败、低士气/沉没分离、轮换和全队耗尽失败返回，成功击杀结算、困难战斗与奖励仍缺 |
@@ -863,7 +863,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OldRetire.SR` | General | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OldRetire.SSR` | General | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OneClickRetire.KeepLimitBreak` | General | type=select; display=default | options: "do_not_keep", "keep_limit_break"; default: "keep_limit_break" | `P`/◐ 两设置 typed；keep_limit_break 已实机 | ☑ | ☑ | ☑ | ☑ | ◐ |
-| `OpsiAbyssal.ForceRun` | OpsiAbyssal | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `OpsiAbyssal.ForceRun` | OpsiAbyssal | type=checkbox; display=default | input/default: false | `L`/🟢 默认主路径 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `OpsiAshAssist.Tier` | OpsiAshAssist | type=input; display=default | input/default: 15 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `OpsiAshBeacon.AttackMode` | OpsiAshBeacon | type=select; display=default | options: "current_dossier", "current"; default: "current" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiAshBeacon.DossierAutoAttackMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: false | `B`/☐ 未逐值 | ☑ | ◐ | ◐ | ☑ | ◐ |

@@ -244,6 +244,11 @@
       "order": 49,
       "path": "integration/alas/series/0099-operation-siren-meta-beacon-runtime.patch",
       "sha256": "ca911aa780b68f438720dacb27235bb7384f1bb62951b57291617d80799383c3"
+    },
+    {
+      "order": 50,
+      "path": "integration/alas/series/0100-operation-siren-abyssal-runtime.patch",
+      "sha256": "f9a683b2254e12405dfcebdb1ffc61ca54c3d49a1b44fa8d61d9f92e81912efb"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

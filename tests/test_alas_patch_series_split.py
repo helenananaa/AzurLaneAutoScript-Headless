@@ -164,6 +164,11 @@ FLOW_PATHS = {
         "module/combat/combat.py",
         "module/os_ash/meta.py",
     },
+    "0100-operation-siren-abyssal-runtime.patch": {
+        "module/os/fleet.py",
+        "module/os_handler/map_event.py",
+        "module/os_handler/port.py",
+    },
     "0100-tool-flow-ports.patch": {
         "module/config/argument/args.json",
         "module/daemon/benchmark.py",
@@ -347,6 +352,11 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                     "0099-operation-siren-meta-beacon-runtime.patch": {
                         "module/combat/combat.py",
                         "module/os_ash/meta.py",
+                    },
+                    "0100-operation-siren-abyssal-runtime.patch": {
+                        "module/os/fleet.py",
+                        "module/os_handler/map_event.py",
+                        "module/os_handler/port.py",
                     },
                     "0350-meowfficer-dock-training-port.patch": {
                         "module/ui/ui.py"

@@ -2008,12 +2008,18 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget(
         "os/port/dock/back",
         "back",
-        "UIMain/blur_panel/adapt/top/back",
+        (
+            "UIMain/blur_panel/adapt/top/back",
+            "UIOrigin/blur_panel/adapt/top/back",
+        ),
     ),
     SemanticTarget(
         "os/port/dock/repair-all",
         "btn_repair_all",
-        "UIMain/blur_panel/world_port_panel/btn_repair_all",
+        (
+            "UIMain/blur_panel/world_port_panel/btn_repair_all",
+            "UIOrigin/blur_panel/world_port_panel/btn_repair_all",
+        ),
     ),
     SemanticTarget(
         "os/port/dock/repair-confirm",
@@ -11135,7 +11141,7 @@ class SemanticOracle:
     ) -> Tuple[Tuple[int, int], ...]:
         """Read exact relative grid positions from the Operation Siren radar."""
 
-        if target_kind not in {"port", "task", "guidepost", "boss"}:
+        if target_kind not in {"port", "task", "guidepost", "question", "boss"}:
             raise SemanticGateClosed(
                 "operation siren radar target kind is not reviewed"
             )
@@ -11150,7 +11156,8 @@ class SemanticOracle:
             "top/adapt/right_stage/compass_panel/ring/compass/range/"
         )
         path = radar_root + "mark"
-        if target_kind in {"guidepost", "task", "boss"}:
+        sprite_kind = "guidepost" if target_kind == "question" else target_kind
+        if target_kind in {"guidepost", "question", "task", "boss"}:
             event_pattern = re.compile(r"[0-9]+$")
             matches = tuple(
                 item
@@ -11162,7 +11169,7 @@ class SemanticOracle:
                     )
                     or (target_kind == "task" and item.path.endswith(path))
                 )
-                and item.sprite == target_kind
+                and item.sprite == sprite_kind
                 and item.active_in_hierarchy
                 and item.active_and_enabled
                 and not item.truncated
@@ -11249,6 +11256,24 @@ class SemanticOracle:
             if item.bounds is not None
             and item.bounds.contains(Point(640.0, 360.0))
         )
+        if not centers:
+            occupied_center_pattern = re.compile(
+                r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                r"cell_([0-9]+)_([0-9]+)/attachments/event_[0-9]+/"
+                r"icon/model/taban\(Clone\)/taban$"
+            )
+            centers = tuple(
+                (int(match.group(1)), int(match.group(2)), item)
+                for item in state.images
+                if (match := occupied_center_pattern.fullmatch(item.path)) is not None
+                and item.name == "taban"
+                and item.sprite == "taban01"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+                and item.bounds.contains(Point(640.0, 360.0))
+            )
         if len(centers) != 1:
             raise SemanticGateClosed(
                 "operation siren camera center grid is absent or ambiguous"
@@ -11261,25 +11286,27 @@ class SemanticOracle:
             for row, column, item in grids
             if row == target_row and column == target_column
         )
-        if len(targets) != 1 or targets[0].bounds is None:
-            raise SemanticGateClosed(
-                "operation siren relative target grid is absent or ambiguous"
-            )
-        target = targets[0]
-        assert target.bounds is not None
-        click_bounds = target.bounds
-        click_path = target.path
-        if prefer_adjacent_event and abs(relative_position[0]) + abs(relative_position[1]) == 1:
+        click_bounds = None
+        click_path = None
+        if len(targets) == 1 and targets[0].bounds is not None:
+            click_bounds = targets[0].bounds
+            click_path = targets[0].path
+        if prefer_adjacent_event and abs(relative_position[0]) + abs(relative_position[1]) <= 3:
             event_pattern = re.compile(
                 r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
                 rf"cell_{target_row}_{target_column}/attachments/event_[0-9]+/"
-                r"icon/model/fubiao3\(Clone\)$"
+                r"(?:icon/model/(?:fubiao3|taban_jinzhi)\(Clone\)(?:/taban)?|"
+                r"char/shadow)$"
             )
             events = tuple(
                 item
                 for item in state.images
                 if event_pattern.fullmatch(item.path)
-                and item.sprite == "fubiao3"
+                and (
+                    (item.name == "fubiao3(Clone)" and item.sprite == "fubiao3")
+                    or (item.name == "taban" and item.sprite == "taban01")
+                    or (item.name == "shadow" and item.sprite == "shadow")
+                )
                 and item.active_in_hierarchy
                 and item.active_and_enabled
                 and not item.truncated
@@ -11293,6 +11320,10 @@ class SemanticOracle:
                 assert events[0].bounds is not None
                 click_bounds = events[0].bounds
                 click_path = events[0].path
+        if click_bounds is None or click_path is None:
+            raise SemanticGateClosed(
+                "operation siren relative target grid is absent or ambiguous"
+            )
         point = Point(
             (click_bounds.left + click_bounds.right) / 2.0,
             (click_bounds.top + click_bounds.bottom) / 2.0,
@@ -13280,6 +13311,8 @@ class SemanticOracle:
                     "需要暂时离开大型作战么？",
                     "当前海域无法通过边界区域离开。是否继续？",
                     "离开当前海域后，潜艇舰队会自动返回我方港口待命，是否离开？",
+                    "是否确定从深渊海域离开？\n"
+                    "（警告：离开后将无法再次返回挑战强敌！）",
                 }
                 or text.text.strip() in retained_progress_prompts
             )
@@ -13288,6 +13321,216 @@ class SemanticOracle:
             len(prompt) == 1
             and len(self._matches(state, "os/exit/confirm")) == 1
             and len(self._matches(state, "os/exit/cancel")) == 1
+        )
+
+    def operation_siren_abyssal_entry_prompt_visible(self) -> bool:
+        """Recognize the one-way abyssal entry warning exactly."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        prompts = tuple(
+            text.text.strip()
+            for text in ui_state.texts
+            if text.path.endswith("Msgbox(Clone)/window/msg_panel/content")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        return bool(
+            prompts
+            == (
+                "深渊海域作战难度较高且不可重复进入，\n"
+                "请确认舰队战备后前往作战",
+            )
+            and len(self._matches(state, "os/exit/confirm")) == 1
+            and len(self._matches(state, "os/exit/cancel")) == 1
+        )
+
+    def operation_siren_abyssal_exit_available(self) -> bool:
+        """Return whether the nearest abyssal passage has been unlocked.
+
+        The client replaces ``taban_jinzhi(Clone)`` with ``taban(Clone)``
+        after the boss settlement. Both models can remain in the scene graph
+        outside the viewport, so compare the event model nearest the viewport
+        centre instead of accepting any unlocked floor model in the map.
+        """
+
+        ui_state = self.read_ui_state()
+        titles = tuple(
+            text.text.strip()
+            for text in ui_state.texts
+            if text.path.endswith("/top_stage/title/name")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and text.text.strip().endswith("-深渊海域")
+        )
+        if len(titles) != 1:
+            return False
+
+        models = []
+        for image in ui_state.images:
+            if not image.active_in_hierarchy or image.bounds is None:
+                continue
+            if "/attachments/event_" not in image.path:
+                continue
+            if not image.path.endswith("/taban"):
+                continue
+            if "/icon/model/taban(Clone)/" in image.path:
+                unlocked = True
+            elif "/icon/model/taban_jinzhi(Clone)/" in image.path:
+                unlocked = False
+            else:
+                continue
+            center_x = (image.bounds.left + image.bounds.right) / 2.0
+            center_y = (image.bounds.top + image.bounds.bottom) / 2.0
+            distance = math.hypot(
+                center_x - self.fingerprint.width / 2.0,
+                center_y - self.fingerprint.height / 2.0,
+            )
+            models.append((distance, unlocked))
+
+        if not models:
+            return False
+        models.sort(key=lambda item: item[0])
+        nearest_distance, nearest_unlocked = models[0]
+        return nearest_distance <= self.fingerprint.height and nearest_unlocked
+
+    def click_operation_siren_abyssal_exit(self) -> ActionReceipt:
+        """Move onto the nearest exact unlocked abyssal passage model."""
+
+        if not self.operation_siren_abyssal_exit_available():
+            raise SemanticGateClosed("unlocked abyssal passage is absent")
+        state = self.read_ui_state()
+        candidates = []
+        for image in state.images:
+            if (
+                image.active_in_hierarchy
+                and image.active_and_enabled
+                and not image.truncated
+                and image.bounds is not None
+                and "/attachments/event_" in image.path
+                and image.path.endswith(
+                    "/icon/model/taban(Clone)/taban"
+                )
+                and image.name == "taban"
+                and image.sprite == "taban01"
+            ):
+                center_x = (image.bounds.left + image.bounds.right) / 2.0
+                center_y = (image.bounds.top + image.bounds.bottom) / 2.0
+                candidates.append(
+                    (
+                        math.hypot(
+                            center_x - self.fingerprint.width / 2.0,
+                            center_y - self.fingerprint.height / 2.0,
+                        ),
+                        image,
+                        Point(center_x, center_y),
+                    )
+                )
+        candidates.sort(key=lambda item: item[0])
+        if not candidates:
+            raise SemanticGateClosed("unlocked abyssal passage is absent")
+        _, target, point = candidates[0]
+        assert target.bounds is not None
+        if (
+            not target.bounds.contains(point)
+            or not 80.0 <= point.x <= 960.0
+            or not 100.0 <= point.y <= 620.0
+            or self._foreground_component() != self.fingerprint.component
+        ):
+            raise SemanticGateClosed("unlocked abyssal passage is not safely visible")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="os/abyssal/exit",
+            generation=state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def operation_siren_world_overview_visible(self) -> bool:
+        """Recognize the post-special-zone overview dismissal exactly."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        tips = tuple(
+            text
+            for text in ui_state.texts
+            if text.text.strip() == "点击任意位置返回"
+            and text.path.endswith("WorldOverviewUI(Clone)/tip/Text")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        backgrounds = tuple(
+            button
+            for button in state.buttons
+            if button.name == "bg"
+            and button.path.endswith("WorldOverviewUI(Clone)/bg")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        return len(tips) == 1 and len(backgrounds) == 1
+
+    def click_operation_siren_world_overview(self) -> ActionReceipt:
+        if not self.operation_siren_world_overview_visible():
+            raise SemanticGateClosed("operation siren world overview is absent")
+        state = self.read_state()
+        target = next(
+            button
+            for button in state.buttons
+            if button.name == "bg"
+            and button.path.endswith("WorldOverviewUI(Clone)/bg")
+            and button.active_in_hierarchy
+        )
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before overview dismissal")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="os/world-overview/close",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_operation_siren_abyssal_entry(self, confirm: bool) -> ActionReceipt:
+        if not self.operation_siren_abyssal_entry_prompt_visible():
+            raise SemanticGateClosed("operation siren abyssal entry prompt is absent")
+        state = self.read_state()
+        semantic_id = "os/exit/confirm" if confirm else "os/exit/cancel"
+        target = self._unique(state, semantic_id)
+        if not (
+            target.actionable
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+        ):
+            raise SemanticGateClosed(
+                "operation siren abyssal entry choice is not actionable"
+            )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=(
+                "os/abyssal/entry/confirm"
+                if confirm
+                else "os/abyssal/entry/cancel"
+            ),
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
         )
 
     def click_operation_siren_exit(self, confirm: bool) -> ActionReceipt:
@@ -27034,6 +27277,7 @@ class SemanticOracle:
             "os/map/auto-search/off",
             "os/map/auto-search/on",
             "os/map/mission-list",
+            "os/map/storage",
             "os/map/order",
             "os/order/back",
             "os/order/scan",
@@ -27049,6 +27293,7 @@ class SemanticOracle:
             "os/globe/mission-overview",
             "os/mission-list/close",
             "os/voucher/back",
+            "os/storage/back",
         ):
             return bool(
                 matches
