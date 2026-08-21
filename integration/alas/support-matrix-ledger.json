@@ -8278,7 +8278,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiDaily",
-      "note": "UseTuningSample、Fleet 四值与 Submarine 两值已离线等价；DoMission 在固定上游零读取，明确不支持；真实舰队/潜艇动作和清图未闭环",
+      "note": "DoMission、UseTuningSample、Fleet 四值与 Submarine 两值已离线等价；实机已完成任务总览、选择和进入目标海域，无可搜索事件时正常返回 off；真实舰队/潜艇动作和每日任务成功清除未闭环",
       "status": "B"
     },
     {
@@ -8288,7 +8288,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiExplore",
-      "note": "ForceRun、SpecialRadar、Fleet 四值与 Submarine 两值已离线等价；到自动寻敌锁定边界，续跑区、真实舰队/潜艇动作和清区仍未闭环",
+      "note": "ForceRun、LastZone、SpecialRadar、Fleet 四值与 Submarine 两值已离线等价；安全区官方自动搜索已有完整实机收据，无事件返回 off 为正常结束；跨海域续跑、真实舰队/潜艇动作和清区仍未闭环",
       "status": "B"
     },
     {
