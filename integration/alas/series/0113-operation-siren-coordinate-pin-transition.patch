@@ -1,0 +1,25 @@
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+index 7f3ad80..f327dab 100644
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -282,12 +282,18 @@ class StorageHandler(GlobeOperation, ZoneManager):
+                     break
+             semantic_adapter.refresh_frame()
+             semantic_adapter.click_operation_siren_storage_detail_checkout()
++            transition_timer = Timer(30, count=1).start()
+             for _ in self.loop():
+-                if self.is_zone_pinned():
+-                    break
+                 if semantic_adapter.operation_siren_storage_checkout_prompt_visible():
+                     semantic_adapter.click_operation_siren_storage_checkout_confirm()
+                     continue
++                pinned = self.get_zone_pinned()
++                if pinned is not None and self.pinned_to_name(pinned) == item:
++                    break
++                if transition_timer.reached():
++                    raise SemanticGateClosed(
++                        f'{item} checkout did not produce an exact typed zone pin'
++                    )
+             self.zone_type_select((item,))
+             self.globe_enter(zone=self.name_to_zone(72))
+             return True

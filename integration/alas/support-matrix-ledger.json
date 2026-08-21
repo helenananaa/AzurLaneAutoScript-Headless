@@ -5503,18 +5503,20 @@
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_opsi_auto_search_contract.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
         "integration/alas/series/0140-scheduler-contract.patch",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiExplore"
       ],
       "path": "OpsiExplore.SpecialRadar",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 实机主路径",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -5586,9 +5588,18 @@
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_opsi_auto_search_contract.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0112-operation-siren-exact-map-exit-confirm.patch",
+        "integration/alas/series/0121-operation-siren-coordinate-card-retry.patch",
+        "integration/alas/series/0122-operation-siren-direct-coordinate-pin.patch",
+        "integration/alas/series/0123-operation-siren-special-pin-ap-recovery.patch",
         "integration/alas/series/0140-scheduler-contract.patch",
+        "integration/alas/operation-siren-obscure-fleet4-r7-live-20260821.json",
+        "integration/alas/operation-siren-obscure-exit-passage-r49-live-20260822.json",
+        "integration/alas/operation-siren-reenter-after-driver-r47-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -5927,9 +5938,23 @@
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_opsi_auto_search_contract.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0112-operation-siren-exact-map-exit-confirm.patch",
+        "integration/alas/series/0121-operation-siren-coordinate-card-retry.patch",
+        "integration/alas/series/0122-operation-siren-direct-coordinate-pin.patch",
+        "integration/alas/series/0123-operation-siren-special-pin-ap-recovery.patch",
         "integration/alas/series/0140-scheduler-contract.patch",
+        "integration/alas/operation-siren-obscure-fleet4-r7-live-20260821.json",
+        "integration/alas/operation-siren-obscure-exit-passage-r49-live-20260822.json",
+        "integration/alas/operation-siren-reenter-after-driver-r47-live-20260822.json",
+        "integration/alas/operation-siren-obscure-fleet2-submarine-r54-live-20260822.json",
+        "integration/alas/operation-siren-scan-discount-cancel-r58-live-20260822.json",
+        "integration/alas/operation-siren-obscure-resume-fleet2-submarine-r62-live-20260822.json",
+        "integration/alas/operation-siren-obscure-fleet3-submarine-r63-live-20260822.json",
+        "integration/alas/operation-siren-obscure-fleet3-r65-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -8364,8 +8389,8 @@
         "OpsiFleet"
       ],
       "name": "OpsiObscure",
-      "note": "ForceRun、Fleet 四值与 Submarine 两值的任务决策已离线等价；坐标消耗、真实舰队/潜艇动作、进入和清图未闭环",
-      "status": "B"
+      "note": "原任务已实机闭环坐标库存、精确同类型坐标确认、Fleet 1/2/3/4、侦察与 Submarine=true 确认、隐藏海域多战、问号/延迟剧情、无事件自动搜索、战后物资格子覆盖页、唯一通行装置离场、原子退出确认及普通海域 HP/大修后置；ForceRun 连续循环及全部异常组合仍待逐值实机覆盖",
+      "status": "L"
     },
     {
       "groups": [
@@ -11281,9 +11306,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "d72691978c86c23aec965c8e19a2160020d4918bfb8f46b6be5c892975d5ddb4",
-      "manifest_sha256": "67b2fb192cd5e2931467bc633220e65e4a319574d5bb49c76431fcdf6cdcd62f",
-      "member_count": 56
+      "combined_sha256": "70ef732790f2dfd4bf01046f6b069ce55afc692fd43daaf954ba6d1bc8d020f0",
+      "manifest_sha256": "d39c96e1c8719848222395db3700c7f33eb2c455a37f56e751970d405bd680c0",
+      "member_count": 70
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

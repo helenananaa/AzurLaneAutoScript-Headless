@@ -1,0 +1,22 @@
+diff --git a/module/os/map.py b/module/os/map.py
+index ff1ba4c..e5e6061 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -835,6 +835,17 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                     self._solved_map_event.add('is_semantic_question')
+                     self.os_auto_search_run(drop=drop)
+                     return True
++                if target_kind == 'guidepost':
++                    delayed_event_timer = Timer(12, count=1).start()
++                    while not delayed_event_timer.reached():
++                        event = self.handle_map_event(drop=drop)
++                        if event == 'story_skip':
++                            logger.info('Handled delayed exact guidepost story event')
++                            self._solved_map_event.add('is_semantic_question')
++                            self.ensure_no_map_event()
++                            self.os_auto_search_run(drop=drop)
++                            return True
++                        self.device.screenshot()
+                 if target_kind == 'guidepost' and attempt + 1 < attempts:
+                     semantic_session.refresh_frame()
+                     remaining = set(

@@ -1986,13 +1986,18 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           imageCollector.objects.size());
       result.imageRecordTruncated |= imageCollector.truncated ? 1u : 0u;
       constexpr size_t kReservedFleetImages = 64;
+      constexpr size_t kReservedMapGridImages = 384;
       constexpr size_t kReservedTrailingImages = 128;
-      static_assert(kReservedFleetImages + kReservedTrailingImages <
+      static_assert(kReservedFleetImages + kReservedMapGridImages +
+                        kReservedTrailingImages <
                     kMaxObserverImages);
       const size_t ordinaryLimit =
-          result.images.size() - kReservedFleetImages - kReservedTrailingImages;
+          result.images.size() - kReservedFleetImages -
+          kReservedMapGridImages - kReservedTrailingImages;
       std::array<void *, kReservedFleetImages> fleetImages = {};
       size_t fleetImageCount = 0;
+      std::array<void *, kReservedMapGridImages> mapGridImages = {};
+      size_t mapGridImageCount = 0;
       std::array<void *, kReservedTrailingImages> trailingImages = {};
       size_t trailingImageCount = 0;
 
@@ -2116,6 +2121,13 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
             candidateGameObject != nullptr && getTransform != nullptr
                 ? invokeObject(getTransform, candidateGameObject)
                 : nullptr;
+        if (candidateTransform != nullptr &&
+            invokeString(candidateTransform) == "walk_quad") {
+          mapGridImages[mapGridImageCount % mapGridImages.size()] = image;
+          ++mapGridImageCount;
+          result.imageRecordTruncated = 1;
+          continue;
+        }
         bool fleetImage = false;
         for (int depth = 0;
              candidateTransform != nullptr && depth < 4; ++depth) {
@@ -2140,6 +2152,16 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       }
       for (size_t index = 0; index < fleetImageCount; ++index) {
         appendImageRecord(fleetImages[index]);
+      }
+      const size_t keptMapGrids =
+          std::min(mapGridImageCount, mapGridImages.size());
+      const size_t mapGridStart =
+          mapGridImageCount > mapGridImages.size()
+              ? mapGridImageCount % mapGridImages.size()
+              : 0;
+      for (size_t offset = 0; offset < keptMapGrids; ++offset) {
+        appendImageRecord(
+            mapGridImages[(mapGridStart + offset) % mapGridImages.size()]);
       }
       const size_t keptTrailing =
           std::min(trailingImageCount, trailingImages.size());

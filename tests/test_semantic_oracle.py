@@ -9571,6 +9571,17 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         )
         self.assertTrue(oracle.operation_siren_exit_prompt_visible())
 
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "是否确定从该处隐秘海域离开？\n"
+                    "（离开后将无法再次返回）",
+                    prompt_path,
+                )
+            ]
+        )
+        self.assertTrue(oracle.operation_siren_exit_prompt_visible())
+
     def test_operation_siren_abyssal_entry_prompt_is_exact_and_clickable(self):
         backend = FakeBackend(
             [
@@ -10058,6 +10069,198 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
             ((0, -1),),
         )
 
+    def test_adjacent_guidepost_uses_radar_and_selected_fleet_anchors(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/"
+                    "fleet_bar/text_selected/x",
+                    "3",
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                    "fleet_3/shadow",
+                    "shadow",
+                    {"left": 584.0, "top": 319.0, "right": 696.0, "bottom": 401.0},
+                ),
+                make_image(
+                    "OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
+                    "compass_panel/ring/compass/range/7000040",
+                    "guidepost",
+                    {"left": 1135.0, "top": 209.0, "right": 1145.0, "bottom": 219.0},
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                    "cell_4_16/attachments/event_7000040/char/shadow",
+                    "shadow",
+                    {"left": 615.0, "top": 275.0, "right": 665.0, "bottom": 305.0},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        receipt = oracle.click_operation_siren_radar_guidepost((0, -1))
+
+        self.assertEqual(receipt.semantic_id, "os/map/guidepost/relative/0/-1")
+        self.assertEqual(backend.taps, [(640, 290)])
+
+        backend.ui["images"].append(copy.deepcopy(backend.ui["images"][-1]))
+        backend.ui["image_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            oracle.click_operation_siren_radar_guidepost((0, -1))
+
+    def test_obscure_exit_passage_uses_exact_tip_portal_and_radar_step(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        root = "LevelCamera/Canvas/LevelOrigin/top/"
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "卡利比安海C-隐秘海域",
+                    root + "adapt/top_stage/title/name",
+                ),
+                make_text(
+                    "从塞壬特殊通行装置离开隐秘海域",
+                    root + "adapt/right_stage/tip_word/Text",
+                ),
+            ],
+            images=[
+                make_image(
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/"
+                    "fleet_bar/text_selected/x",
+                    "1",
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                    "fleet_1/shadow",
+                    "shadow",
+                    {"left": 584.0, "top": 319.0, "right": 696.0, "bottom": 401.0},
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                    "cell_15_14/attachments/event_1000034/icon/model/"
+                    "chuansong01(Clone)/Xyz/Ring01/01",
+                    "chuansong01",
+                ),
+                make_image(
+                    "LevelCamera/Canvas/LevelOrigin/top/adapt/right_stage/"
+                    "compass_panel/ring/compass/range/mark",
+                    "boss",
+                    {"left": 1146.7, "top": 291.2, "right": 1156.7, "bottom": 301.2},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(
+            oracle.operation_siren_obscure_exit_passage_position(), (15, 14)
+        )
+
+        portal = backend.ui["images"][2]
+        portal["adb_bounds"] = {
+            "left": -20.0, "top": 1450.0, "right": 280.0, "bottom": 1750.0
+        }
+
+        def move_portal():
+            portal["adb_bounds"] = {
+                "left": 260.0, "top": 1210.0, "right": 560.0, "bottom": 1510.0
+            }
+            backend.ui["generation"] = 11
+            backend.snapshot["generation"] = 11
+            backend.buttons["generation"] = 11
+
+        backend.on_swipe = move_portal
+        swipe = oracle.operation_siren_obscure_exit_camera_swipe()
+        self.assertEqual(swipe.semantic_id, "os/map/obscure-exit/swipe")
+        self.assertEqual(backend.swipes, [(360, 500, 640, 260, 450)])
+
+        portal["adb_bounds"] = {
+            "left": 500.0, "top": 250.0, "right": 700.0, "bottom": 450.0
+        }
+        receipt = oracle.click_operation_siren_obscure_exit_passage()
+        self.assertEqual(receipt.semantic_id, "os/map/obscure-exit/passage")
+        self.assertEqual(backend.taps, [(600, 350)])
+
+        backend.ui["texts"][1]["text"] = "离开隐秘海域"
+        with self.assertRaisesRegex(SemanticGateClosed, "incomplete"):
+            oracle.operation_siren_obscure_exit_passage_position()
+
+        backend.ui["texts"][1]["text"] = "从塞壬特殊通行装置离开隐秘海域"
+        backend.ui["images"].pop(2)
+        backend.ui["image_count"] -= 1
+        self.assertIsNone(oracle.operation_siren_obscure_exit_passage_position())
+
+    def test_special_zone_post_search_loot_back_is_exact(self):
+        root = "root/OverlayCamera/Overlay/UIMain/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    root + "top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    root + "top/adapt/left_stage/other/fleet_bar",
+                ),
+                make_button(
+                    "back_button",
+                    root + "blur_panel/adapt/top/title/back_button",
+                    x=59,
+                    y=53,
+                ),
+                make_button(
+                    "item_tpl(Clone)",
+                    root
+                    + "blur_panel/adapt/shop/frame/scrollview/view/"
+                    "item_tpl(Clone)",
+                    x=430,
+                    y=230,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "加勒比海C-隐秘海域",
+                    "root/LevelCamera/Canvas/LevelOrigin/top/adapt/"
+                    "top_stage/title/name",
+                )
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.operation_siren_post_search_loot_visible())
+        receipt = oracle.click_operation_siren_post_search_loot_back()
+        self.assertEqual(receipt.semantic_id, "os/auto-search/loot/back")
+        self.assertEqual(backend.taps, [(59, 53)])
+
+        backend.buttons["buttons"].pop()
+        backend.buttons["button_count"] -= 1
+        self.assertFalse(oracle.operation_siren_post_search_loot_visible())
+
     def test_relative_grid_rejects_unknown_radar_kind_and_missing_center(self):
         oracle = self._local_map_oracle("1")
         with self.assertRaisesRegex(SemanticGateClosed, "not reviewed"):
@@ -10199,7 +10402,8 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
             [
                 make_text("0", fov + "/cost/Text"),
                 make_text(
-                    "prompt <color=#92FC63FF>0</color> scan",
+                    "是否消耗<color=#92FC63FF>0</color>行动力，\n"
+                    "侦查当前海域的全部区域？",
                     root + "Msgbox/window/msg_panel/base/content",
                 ),
             ]
@@ -10215,11 +10419,34 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "os/order/confirm")
         self.assertEqual(backend.taps, [(790, 542)])
 
+        # The modal overlay legitimately disables the order panel behind it.
+        # Its exact back/order identities still bind the prompt to the pending
+        # typed order, while only confirm/cancel must remain actionable.
+        backend.buttons["buttons"][0]["active_and_enabled"] = False
+        backend.buttons["buttons"][0]["interactable"] = False
+        backend.buttons["buttons"][0].pop("adb_point")
+        backend.buttons["buttons"][1]["active_and_enabled"] = False
+        backend.buttons["buttons"][1]["interactable"] = False
+        backend.buttons["buttons"][1].pop("adb_point")
+        self.assertTrue(
+            oracle.operation_siren_order_confirmation_visible("scan")
+        )
+
         backend.ui["texts"][1]["text"] = (
-            "prompt <color=#92FC63FF>10</color> scan"
+            "是否消耗<color=#92FC63FF>10</color>行动力，\n"
+            "侦查当前海域的全部区域？"
         )
         with self.assertRaisesRegex(SemanticGateClosed, "cost changed"):
             oracle.operation_siren_order_confirmation_visible("scan")
+
+        backend.ui["texts"][0]["text"] = "5"
+        backend.ui["texts"][1]["text"] = (
+            "是否消耗<color=#92FC63FF>4</color>行动力，\n"
+            "侦查当前海域的全部区域？"
+        )
+        self.assertTrue(
+            oracle.operation_siren_order_confirmation_visible("scan")
+        )
 
 
 if __name__ == "__main__":

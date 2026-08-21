@@ -279,6 +279,76 @@
       "order": 56,
       "path": "integration/alas/series/0107-operation-siren-explore-inventory-and-anchor-recover.patch",
       "sha256": "759151fa243c290270824b9b42ed809c0b89b1cf877eee2b552e8798c35b990a"
+    },
+    {
+      "order": 57,
+      "path": "integration/alas/series/0108-operation-siren-obscure-special-zone-rescan.patch",
+      "sha256": "585a3567c5a59706a4b76213d07d4c0753604b865e03cc5be2cbafe7f388b7ec"
+    },
+    {
+      "order": 58,
+      "path": "integration/alas/series/0109-operation-siren-coordinate-checkout-recovery.patch",
+      "sha256": "ef0c0d17aa4e803c847e087f1749073de5f1157b1a11a70c398ae350846df8d4"
+    },
+    {
+      "order": 59,
+      "path": "integration/alas/series/0110-operation-siren-special-zone-exit-transition.patch",
+      "sha256": "a2c38079675da63d9323f3cc3b8ad6e6c10be8ac786ccec6ebd1d09939f06428"
+    },
+    {
+      "order": 60,
+      "path": "integration/alas/series/0111-operation-siren-guidepost-direct-target.patch",
+      "sha256": "3f6e1c432979faa222b2fd2c63c57191da58cc54173b9ec83c494c2055b223b8"
+    },
+    {
+      "order": 61,
+      "path": "integration/alas/series/0112-operation-siren-exact-map-exit-confirm.patch",
+      "sha256": "2b5d6d22f7c6dcd5c112da6517fe11c5e47621b53ca2bf3ca77120c0cc17db18"
+    },
+    {
+      "order": 62,
+      "path": "integration/alas/series/0113-operation-siren-coordinate-pin-transition.patch",
+      "sha256": "a857815d54beebe98b9684c6a8931ef380d1ab63f9d5287394556da2611c179b"
+    },
+    {
+      "order": 63,
+      "path": "integration/alas/series/0114-operation-siren-guidepost-retry.patch",
+      "sha256": "c5a68b722883a075effcd7cd7ea602240b785d33e417eb5de775be5ac038def1"
+    },
+    {
+      "order": 64,
+      "path": "integration/alas/series/0116-operation-siren-guidepost-delayed-story.patch",
+      "sha256": "e9f1f776007b2fbf06f89689ce5c96c3900b87c46c290cec7b9027591cc55c8b"
+    },
+    {
+      "order": 65,
+      "path": "integration/alas/series/0118-operation-siren-page-remount.patch",
+      "sha256": "d109e0a7ea25c0435d3e0ef51c9ac4fce8c9b0a75e76758f75b0fed6d1da5079"
+    },
+    {
+      "order": 66,
+      "path": "integration/alas/series/0119-operation-siren-coordinate-confirm-proof.patch",
+      "sha256": "aa45d840ef363e83ef1a7592b64266f1e8d691bce00947980c336c413098f255"
+    },
+    {
+      "order": 67,
+      "path": "integration/alas/series/0120-operation-siren-page-remount-owner.patch",
+      "sha256": "6a99c2fc790dc4244c21a4ce179c0d8dd0ca98b64d83b8ff6503dfb931448a1e"
+    },
+    {
+      "order": 68,
+      "path": "integration/alas/series/0121-operation-siren-coordinate-card-retry.patch",
+      "sha256": "ea113ba1f1663ae199b181bc0f9c0e5f71cd383e1af32ea37179170d2f5f347c"
+    },
+    {
+      "order": 69,
+      "path": "integration/alas/series/0122-operation-siren-direct-coordinate-pin.patch",
+      "sha256": "fc63a30b30bb3135037b25839d0e0aa2d928b46172941a096a40a3822b936648"
+    },
+    {
+      "order": 70,
+      "path": "integration/alas/series/0123-operation-siren-special-pin-ap-recovery.patch",
+      "sha256": "3347947cb7b430dd9f42ece9716916884c8dab3359fbe21d9ed08a7c2c26aecc"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

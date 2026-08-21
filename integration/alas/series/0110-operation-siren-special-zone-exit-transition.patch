@@ -1,0 +1,12 @@
+diff --git a/module/os/map_operation.py b/module/os/map_operation.py
+index 1f9ea56..07a1c9e 100644
+--- a/module/os/map_operation.py
++++ b/module/os/map_operation.py
+@@ -257,6 +257,7 @@ class OSMapOperation(MapOrderHandler, MissionHandler, PortHandler, StorageHandle
+                 continue
+             if self.handle_popup_confirm('MAP_EXIT'):
+                 self.interval_reset(MAP_EXIT)
++                changed = True
+                 continue
+             if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50)):
+                 # Sometimes appeared

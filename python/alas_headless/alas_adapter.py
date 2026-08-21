@@ -1238,6 +1238,7 @@ class AlasSemanticAdapter:
         self._daily_stage_confirmed = False
         self._daily_transition_until = 0.0
         self._operation_siren_entry_transition_until = 0.0
+        self._operation_siren_page_remount_until = 0.0
         self._operation_siren_entry_receipt: Optional[ActionReceipt] = None
         self._operation_siren_globe_map_receipt: Optional[ActionReceipt] = None
         self._operation_siren_auto_search_transition_until = 0.0
@@ -3811,6 +3812,7 @@ class AlasSemanticAdapter:
         if now <= max(
             self._operation_siren_entry_transition_until,
             self._operation_siren_auto_search_transition_until,
+            self._operation_siren_page_remount_until,
         ):
             return True
         if (
@@ -3930,6 +3932,30 @@ class AlasSemanticAdapter:
         self._operation_siren_entry_transition_until = (
             time.monotonic() + float(timeout_seconds)
         )
+
+    def begin_operation_siren_page_remount(
+        self,
+        timeout_seconds: float = 300.0,
+    ) -> None:
+        """Own one bounded OS map -> main -> OS lifecycle remount."""
+
+        self._package_gate()
+        if (
+            isinstance(timeout_seconds, bool)
+            or not isinstance(timeout_seconds, (int, float))
+            or not math.isfinite(float(timeout_seconds))
+            or float(timeout_seconds) <= 0.0
+            or float(timeout_seconds) > 600.0
+        ):
+            raise ValueError(
+                "Operation Siren page remount timeout must be in (0, 600]"
+            )
+        self._operation_siren_page_remount_until = (
+            time.monotonic() + float(timeout_seconds)
+        )
+
+    def end_operation_siren_page_remount(self) -> None:
+        self._operation_siren_page_remount_until = 0.0
 
     def begin_meta_beacon(self) -> None:
         """Own one complete META beacon task until its explicit finally block."""
@@ -6742,6 +6768,33 @@ class AlasSemanticAdapter:
         self._package_gate()
         return self.oracle.operation_siren_radar_targets(target_kind)
 
+    def click_operation_siren_radar_guidepost(
+        self, relative_position: Tuple[int, int]
+    ) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_operation_siren_radar_guidepost(
+            relative_position
+        )
+
+    def operation_siren_obscure_exit_passage_position(
+        self,
+    ) -> Optional[Tuple[int, int]]:
+        return self.oracle.operation_siren_obscure_exit_passage_position()
+
+    def operation_siren_post_search_loot_visible(self) -> bool:
+        return self.oracle.operation_siren_post_search_loot_visible()
+
+    def click_operation_siren_post_search_loot_back(self) -> ActionReceipt:
+        return self.oracle.click_operation_siren_post_search_loot_back()
+
+    def operation_siren_obscure_exit_camera_swipe(
+        self,
+    ) -> OperationSirenGlobeSwipeReceipt:
+        return self.oracle.operation_siren_obscure_exit_camera_swipe()
+
+    def click_operation_siren_obscure_exit_passage(self) -> ActionReceipt:
+        return self.oracle.click_operation_siren_obscure_exit_passage()
+
     def operation_siren_abyssal_exit_available(self) -> bool:
         self._package_gate()
         return self.oracle.operation_siren_abyssal_exit_available()
@@ -6855,6 +6908,38 @@ class AlasSemanticAdapter:
             "operation_siren.coordinate_checkout",
             self.oracle.click_operation_siren_storage_detail_checkout,
         )
+
+    def operation_siren_storage_checkout_prompt_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.operation_siren_exit_prompt_visible()
+
+    def click_operation_siren_storage_checkout_confirm(self) -> ActionReceipt:
+        self._package_gate()
+        receipt = self.oracle.click_operation_siren_exit(True)
+        self._operation_siren_entry_transition_until = time.monotonic() + 30.0
+        return receipt
+
+    def operation_siren_map_exit_prompt_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.operation_siren_exit_prompt_visible()
+
+    def click_operation_siren_map_exit_confirm(self) -> ActionReceipt:
+        self._package_gate()
+        receipt = self.oracle.click_operation_siren_exit(True)
+        self._operation_siren_entry_transition_until = time.monotonic() + 30.0
+        return receipt
+
+    def try_click_operation_siren_map_exit_confirm(
+        self,
+    ) -> Optional[ActionReceipt]:
+        """Atomically confirm the exact exit prompt, or report it absent."""
+
+        try:
+            return self.click_operation_siren_map_exit_confirm()
+        except SemanticGateClosed as exc:
+            if str(exc) == "operation siren exit prompt is absent":
+                return None
+            raise
 
     def click_operation_siren_globe_zone(
         self, expected_zone_name: str, point: Tuple[float, float]
@@ -7135,8 +7220,9 @@ class AlasSemanticAdapter:
                 try:
                     return self.oracle.operation_siren_fleet_hp()
                 except SemanticGateClosed as exc:
-                    if str(exc) != (
-                        "Operation Siren fleet HP bars are absent or incomplete"
+                    if str(exc) not in (
+                        "Operation Siren fleet portraits are absent or incomplete",
+                        "Operation Siren fleet HP bars are absent or incomplete",
                     ):
                         raise
                     if time.monotonic() >= deadline:
@@ -11797,6 +11883,13 @@ class AlasSemanticSession:
                                 0.0,
                             )
                         ),
+                        float(
+                            getattr(
+                                semantic_adapter,
+                                "_operation_siren_page_remount_until",
+                                0.0,
+                            )
+                        ),
                     )
                 )
                 extended_operation_siren_retry = bool(
@@ -12561,6 +12654,16 @@ class AlasSemanticSession:
     ) -> None:
         self.open().begin_operation_siren_startup_recovery(timeout_seconds)
 
+    def begin_operation_siren_page_remount(
+        self,
+        timeout_seconds: float = 300.0,
+    ) -> None:
+        self.open().begin_operation_siren_page_remount(timeout_seconds)
+
+    def end_operation_siren_page_remount(self) -> None:
+        if self.adapter is not None:
+            self.adapter.end_operation_siren_page_remount()
+
     def begin_meta_beacon(self) -> None:
         self._meta_beacon_active = True
         self.open().begin_meta_beacon()
@@ -12616,6 +12719,32 @@ class AlasSemanticSession:
         self, target_kind: str
     ) -> Tuple[Tuple[int, int], ...]:
         return self.open().operation_siren_radar_targets(target_kind)
+
+    def click_operation_siren_radar_guidepost(
+        self, relative_position: Tuple[int, int]
+    ) -> ActionReceipt:
+        return self.open().click_operation_siren_radar_guidepost(
+            relative_position
+        )
+
+    def operation_siren_obscure_exit_passage_position(
+        self,
+    ) -> Optional[Tuple[int, int]]:
+        return self.open().operation_siren_obscure_exit_passage_position()
+
+    def operation_siren_post_search_loot_visible(self) -> bool:
+        return self.open().operation_siren_post_search_loot_visible()
+
+    def click_operation_siren_post_search_loot_back(self) -> ActionReceipt:
+        return self.open().click_operation_siren_post_search_loot_back()
+
+    def operation_siren_obscure_exit_camera_swipe(
+        self,
+    ) -> OperationSirenGlobeSwipeReceipt:
+        return self.open().operation_siren_obscure_exit_camera_swipe()
+
+    def click_operation_siren_obscure_exit_passage(self) -> ActionReceipt:
+        return self.open().click_operation_siren_obscure_exit_passage()
 
     def operation_siren_abyssal_exit_available(self) -> bool:
         return self.open().operation_siren_abyssal_exit_available()
@@ -12685,6 +12814,23 @@ class AlasSemanticSession:
 
     def click_operation_siren_storage_detail_checkout(self) -> ActionReceipt:
         return self.open().click_operation_siren_storage_detail_checkout()
+
+    def operation_siren_storage_checkout_prompt_visible(self) -> bool:
+        return self.open().operation_siren_storage_checkout_prompt_visible()
+
+    def click_operation_siren_storage_checkout_confirm(self) -> ActionReceipt:
+        return self.open().click_operation_siren_storage_checkout_confirm()
+
+    def operation_siren_map_exit_prompt_visible(self) -> bool:
+        return self.open().operation_siren_map_exit_prompt_visible()
+
+    def click_operation_siren_map_exit_confirm(self) -> ActionReceipt:
+        return self.open().click_operation_siren_map_exit_confirm()
+
+    def try_click_operation_siren_map_exit_confirm(
+        self,
+    ) -> Optional[ActionReceipt]:
+        return self.open().try_click_operation_siren_map_exit_confirm()
 
     def click_operation_siren_globe_zone(
         self, expected_zone_name: str, point: Tuple[float, float]

@@ -1,0 +1,33 @@
+diff --git a/module/os/tasks/obscure.py b/module/os/tasks/obscure.py
+index 0cff30e..6c0724d 100644
+--- a/module/os/tasks/obscure.py
++++ b/module/os/tasks/obscure.py
+@@ -1,4 +1,4 @@
+-from alas_headless import validate_alas_opsi_obscure_config
++from alas_headless import SemanticGateClosed, validate_alas_opsi_obscure_config
+ 
+ from module.config.utils import get_os_reset_remain
+ from module.logger import logger
+@@ -39,7 +39,21 @@ class OpsiObscure(OSMap):
+         self.os_order_execute(
+             recon_scan=True,
+             submarine_call=self.config.OpsiFleet_Submarine)
+-        self.run_auto_search(rescan='current')
++        rescan = 'current'
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            if not self.is_in_special_zone():
++                raise SemanticGateClosed(
++                    'obscure coordinate did not enter an exact special zone'
++                )
++            # The generic rescan path rebuilds a regular Campaign camera.  An
++            # obscure coordinate is a special zone and upstream explicitly
++            # excludes special tasks from that path.  Auto-search itself has
++            # already cleared the coordinate, so preserve the documented
++            # no-rescan contract under the typed runtime.
++            logger.info('Skip Campaign map rescan in typed obscure special zone')
++            rescan = False
++        self.run_auto_search(rescan=rescan)
+ 
+         self.map_exit()
+         self.handle_after_auto_search()

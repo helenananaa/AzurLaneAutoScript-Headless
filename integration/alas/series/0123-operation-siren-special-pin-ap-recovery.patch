@@ -1,0 +1,41 @@
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -1,3 +1,5 @@
++from alas_headless import SemanticOracleError
++
+ from module.base.timer import Timer
+ from module.base.utils import *
+ from module.logger import logger
+@@ -397,7 +399,29 @@ class GlobeOperation(ActionPointHandler):
+                 if self.handle_action_point(zone=zone, pinned=pinned):
+                     # The AP panel dismisses the selected-zone float panel.
+-                    # Re-pin through the still-valid modeled globe camera,
+-                    # then submit the exact entrance again.
++                    # A special-coordinate panel is restored asynchronously;
++                    # re-prove its exact type instead of selecting the normal
++                    # base zone and thereby overwriting the coordinate pin.
++                    special_types = {
++                        'OBSCURE': '隐秘海域',
++                        'ABYSSAL': '深渊海域',
++                    }
++                    if pinned in special_types:
++                        for _ in range(20):
++                            self.device.sleep(0.25)
++                            try:
++                                state = semantic_adapter.operation_siren_globe_state()
++                            except SemanticOracleError:
++                                continue
++                            if state.zone_type == special_types[pinned]:
++                                semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
++                                break
++                        else:
++                            raise OSExploreError(
++                                f'Unable to restore typed {pinned} coordinate pin'
++                            )
++                        continue
++                    # Normal zones can be selected again through the modeled
++                    # globe camera after the AP panel closes.
+                     self.globe_focus_to(zone)
+                     semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
+                     continue

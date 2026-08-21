@@ -1,0 +1,21 @@
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -302,9 +302,15 @@ class StorageHandler(OSMapOperation, StorageLogger):
+                     continue
+                 pinned = self.get_zone_pinned()
+                 if (
+-                    checkout_confirmed
+-                    and pinned is not None
++                    pinned is not None
+                     and self.pinned_to_name(pinned) == item
++                    and (
++                        checkout_confirmed
++                        or (
++                            not semantic_adapter.operation_siren_storage_visible()
++                            and semantic_adapter.operation_siren_globe_visible()
++                        )
++                    )
+                 ):
+                     break
+                 if transition_timer.reached():

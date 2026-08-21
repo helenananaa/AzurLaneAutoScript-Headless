@@ -115,9 +115,14 @@ if ! grep -Fq 'kLoadedImageObjectCapacity = 16384' \
   echo "Complete long-session Image source collector is missing" >&2
   exit 1
 fi
-if ! grep -Fq 'kMaxObserverImages = 1024' \
+if ! grep -Fq 'kMaxObserverImages = 1408' \
     "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.h"; then
   echo "Complete campaign-map Image capacity is missing" >&2
+  exit 1
+fi
+if ! grep -Fq 'kReservedMapGridImages = 384' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
+  echo "Operation Siren world-grid Image reserve is missing" >&2
   exit 1
 fi
 if ! grep -Fq 'static thread_local UiProbeResult result' \

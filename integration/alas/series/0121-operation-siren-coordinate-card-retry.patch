@@ -1,0 +1,25 @@
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -276,9 +276,21 @@ class StorageHandler(OSMapOperation, StorageLogger):
+                 semantic_adapter.operation_siren_storage_scroll_for_abyssal()
+             semantic_adapter.refresh_frame()
+             semantic_adapter.click_operation_siren_storage_item(item)
++            detail_timer = Timer(3, count=3).start()
++            detail_timeout = Timer(20, count=1).start()
+             for _ in self.loop():
+                 if semantic_adapter.operation_siren_storage_detail() is not None:
+                     break
++                if detail_timeout.reached():
++                    raise SemanticGateClosed(
++                        f'{item} coordinate detail did not become exact and actionable'
++                    )
++                if detail_timer.reached():
++                    # The inventory entrance animation can swallow the first
++                    # exact card tap. Re-prove the typed card before retrying.
++                    semantic_adapter.refresh_frame()
++                    semantic_adapter.click_operation_siren_storage_item(item)
++                    detail_timer.reset()
+             semantic_adapter.refresh_frame()
+             semantic_adapter.click_operation_siren_storage_detail_checkout()
+             transition_timer = Timer(30, count=1).start()

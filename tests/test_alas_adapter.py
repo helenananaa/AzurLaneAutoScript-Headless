@@ -750,6 +750,11 @@ class FakeOracle:
     def operation_siren_exit_prompt_visible(self):
         return False
 
+    def click_operation_siren_exit(self, confirm):
+        if not self.operation_siren_exit_prompt_visible():
+            raise SemanticGateClosed("operation siren exit prompt is absent")
+        return self.click("os/exit/confirm" if confirm else "os/exit/cancel")
+
     def operation_siren_abyssal_entry_prompt_visible(self):
         return False
 
@@ -1394,6 +1399,66 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             oracle.click_calls,
             ["os/order/submarine", "os/order/confirm"],
         )
+
+    def test_operation_siren_storage_checkout_owns_exact_exit_confirmation(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_exit_prompt_visible = lambda: True
+
+        self.assertTrue(adapter.operation_siren_storage_checkout_prompt_visible())
+        receipt = adapter.click_operation_siren_storage_checkout_confirm()
+
+        self.assertEqual(receipt.semantic_id, "os/exit/confirm")
+        self.assertEqual(oracle.click_calls, ["os/exit/confirm"])
+        self.assertGreater(adapter._operation_siren_entry_transition_until, 0.0)
+
+        oracle.operation_siren_exit_prompt_visible = lambda: False
+        with self.assertRaisesRegex(
+            SemanticGateClosed,
+            "operation siren exit prompt is absent",
+        ):
+            adapter.click_operation_siren_storage_checkout_confirm()
+
+    def test_operation_siren_map_exit_owns_exact_exit_confirmation(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_exit_prompt_visible = lambda: True
+
+        self.assertTrue(adapter.operation_siren_map_exit_prompt_visible())
+        receipt = adapter.click_operation_siren_map_exit_confirm()
+
+        self.assertEqual(receipt.semantic_id, "os/exit/confirm")
+        self.assertEqual(oracle.click_calls, ["os/exit/confirm"])
+        self.assertGreater(adapter._operation_siren_entry_transition_until, 0.0)
+
+        oracle.operation_siren_exit_prompt_visible = lambda: False
+        self.assertIsNone(
+            adapter.try_click_operation_siren_map_exit_confirm()
+        )
+        with self.assertRaisesRegex(
+            SemanticGateClosed,
+            "operation siren exit prompt is absent",
+        ):
+            adapter.click_operation_siren_map_exit_confirm()
+
+    def test_operation_siren_fleet_hp_retries_transient_missing_portraits(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_state = lambda: SimpleNamespace()
+        calls = []
+
+        def fleet_hp():
+            calls.append(None)
+            if len(calls) == 1:
+                raise SemanticGateClosed(
+                    "Operation Siren fleet portraits are absent or incomplete"
+                )
+            return (1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+
+        oracle.operation_siren_fleet_hp = fleet_hp
+
+        self.assertEqual(
+            adapter.campaign_fleet_hp(),
+            (1.0, 1.0, 1.0, 1.0, 1.0, 1.0),
+        )
+        self.assertEqual(len(calls), 2)
 
     def test_os_check_requires_unobstructed_local_map(self):
         adapter, oracle, _ = self.make_adapter()
@@ -6516,6 +6581,35 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "reward/award-info/close")
         self.assertEqual(oracle.click_calls, ["reward/award-info/close"])
+
+    def test_operation_siren_page_remount_keeps_exact_reward_owner(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values = {
+            "reward/award-info/close": True,
+            "reward/award-info1/close": False,
+        }
+        oracle.operation_siren_local_map_visible_value = True
+
+        adapter.begin_operation_siren_page_remount(timeout_seconds=60.0)
+        self.assertTrue(adapter.appear(NamedButton("OS_CHECK")))
+        self.assertGreater(
+            adapter._operation_siren_page_remount_until,
+            time.monotonic(),
+        )
+        self.assertTrue(adapter.appear(NamedButton("GET_ITEMS_1")))
+        receipt = adapter.click(NamedButton("GET_ITEMS_1"))
+        adapter.end_operation_siren_page_remount()
+
+        self.assertEqual(receipt.semantic_id, "reward/award-info/close")
+        self.assertEqual(adapter._operation_siren_page_remount_until, 0.0)
+
+    def test_operation_siren_page_remount_timeout_is_bounded(self):
+        adapter, _, _ = self.make_adapter()
+
+        for value in (True, 0, -1, 601, float("inf")):
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    adapter.begin_operation_siren_page_remount(value)
 
     def test_operation_siren_startup_recovery_recognizes_campaign_menu(self):
         adapter, oracle, gate_calls = self.make_adapter()

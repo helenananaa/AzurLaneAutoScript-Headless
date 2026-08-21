@@ -12428,3 +12428,489 @@ index 8d3868ec..5e5516ad 100644
 -- 
 2.47.0.windows.2
 
+diff --git a/module/os/tasks/obscure.py b/module/os/tasks/obscure.py
+index 0cff30e..6c0724d 100644
+--- a/module/os/tasks/obscure.py
++++ b/module/os/tasks/obscure.py
+@@ -1,4 +1,4 @@
+-from alas_headless import validate_alas_opsi_obscure_config
++from alas_headless import SemanticGateClosed, validate_alas_opsi_obscure_config
+ 
+ from module.config.utils import get_os_reset_remain
+ from module.logger import logger
+@@ -39,7 +39,21 @@ class OpsiObscure(OSMap):
+         self.os_order_execute(
+             recon_scan=True,
+             submarine_call=self.config.OpsiFleet_Submarine)
+-        self.run_auto_search(rescan='current')
++        rescan = 'current'
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            if not self.is_in_special_zone():
++                raise SemanticGateClosed(
++                    'obscure coordinate did not enter an exact special zone'
++                )
++            # The generic rescan path rebuilds a regular Campaign camera.  An
++            # obscure coordinate is a special zone and upstream explicitly
++            # excludes special tasks from that path.  Auto-search itself has
++            # already cleared the coordinate, so preserve the documented
++            # no-rescan contract under the typed runtime.
++            logger.info('Skip Campaign map rescan in typed obscure special zone')
++            rescan = False
++        self.run_auto_search(rescan=rescan)
+ 
+         self.map_exit()
+         self.handle_after_auto_search()
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+index a40ce2c..80887f1 100644
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -392,7 +392,7 @@ class GlobeOperation(ActionPointHandler):
+             pinned = self.get_zone_pinned_name()
+             logger.info(f'Enter pinned zone {zone} (typed {pinned})')
+             semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
+-            for _ in range(80):
++            for attempt in range(80):
+                 self.device.sleep(0.25)
+                 if semantic_adapter.operation_siren_map_visible():
+                     return
+@@ -403,6 +403,13 @@ class GlobeOperation(ActionPointHandler):
+                     self.globe_focus_to(zone)
+                     semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
+                     continue
++                if attempt and attempt % 20 == 0:
++                    # The client can swallow the first exact entrance click
++                    # while closing the previous special-zone transition.
++                    # Match the bounded retry semantics of the legacy path,
++                    # but re-prove the pinned typed control before every tap.
++                    logger.info('Retry exact typed zone entrance')
++                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
+             raise OSExploreError(f'Unable to enter typed zone {zone}')
+ 
+         click_timer = Timer(10)
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+index 5e5516a..7f3ad80 100644
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -285,7 +285,8 @@ class StorageHandler(GlobeOperation, ZoneManager):
+             for _ in self.loop():
+                 if self.is_zone_pinned():
+                     break
+-                if self.handle_popup_confirm('STORAGE_CHECKOUT'):
++                if semantic_adapter.operation_siren_storage_checkout_prompt_visible():
++                    semantic_adapter.click_operation_siren_storage_checkout_confirm()
+                     continue
+             self.zone_type_select((item,))
+             self.globe_enter(zone=self.name_to_zone(72))
+diff --git a/module/os/map_operation.py b/module/os/map_operation.py
+index 1f9ea56..07a1c9e 100644
+--- a/module/os/map_operation.py
++++ b/module/os/map_operation.py
+@@ -257,6 +257,7 @@ class OSMapOperation(MapOrderHandler, MissionHandler, PortHandler, StorageHandle
+                 continue
+             if self.handle_popup_confirm('MAP_EXIT'):
+                 self.interval_reset(MAP_EXIT)
++                changed = True
+                 continue
+             if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50)):
+                 # Sometimes appeared
+diff --git a/module/os/map.py b/module/os/map.py
+index f12eaa8..4976dd5 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -788,17 +788,28 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 ports.update(
+                     semantic_session.operation_siren_radar_targets('port')
+                 )
+-            target = next(
+-                (location for location in preferred if location in guideposts or location in ports),
++            selected = next(
++                (
++                    (location, 'guidepost' if location in guideposts else 'port')
++                    for location in preferred
++                    if location in guideposts or location in ports
++                ),
+                 None,
+             )
+-            if target is None:
++            if selected is None:
+                 logger.info('No exact question mark above current fleet on this radar')
+                 return False
++            target, target_kind = selected
+ 
+             logger.info(f'Found exact question mark on {target}')
+             self.handle_info_bar()
+-            semantic_session.click_operation_siren_relative_grid(target)
++            if target_kind == 'guidepost':
++                semantic_session.click_operation_siren_radar_guidepost(target)
++            else:
++                semantic_session.click_operation_siren_relative_grid(
++                    target,
++                    prefer_adjacent_event=True,
++                )
+             with self.config.temporary(STORY_ALLOW_SKIP=False):
+                 result = self.wait_until_walk_stable(
+                     drop=drop,
+diff --git a/module/os/map_operation.py b/module/os/map_operation.py
+index 07a1c9e..e196960 100644
+--- a/module/os/map_operation.py
++++ b/module/os/map_operation.py
+@@ -239,6 +239,47 @@ class OSMapOperation(MapOrderHandler, MissionHandler, PortHandler, StorageHandle
+             out: is_in_map, zone that you came from
+         """
+         logger.hr('Map exit')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.operation_siren_post_search_loot_visible()
++        ):
++            semantic_adapter.click_operation_siren_post_search_loot_back()
++            for _ in range(20):
++                self.device.sleep(0.25)
++                semantic_adapter.refresh_frame()
++                if not semantic_adapter.operation_siren_post_search_loot_visible():
++                    break
++            else:
++                from alas_headless import SemanticGateClosed
++                raise SemanticGateClosed(
++                    'operation siren post-search loot overlay did not close'
++                )
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.operation_siren_obscure_exit_passage_position()
++            is not None
++        ):
++            from alas_headless import SemanticGateClosed
++
++            self.handle_os_map_fleet_lock(enable=False)
++            for _ in range(8):
++                try:
++                    semantic_adapter.click_operation_siren_obscure_exit_passage()
++                except SemanticGateClosed as exc:
++                    if 'outside safe view' not in str(exc):
++                        raise
++                    semantic_adapter.operation_siren_obscure_exit_camera_swipe()
++                    continue
++                self.wait_until_walk_stable(
++                    confirm_timer=Timer(1.5, count=4),
++                    walk_out_of_step=False,
++                )
++                break
++            else:
++                raise SemanticGateClosed(
++                    'operation siren obscure exit passage did not become actionable'
++                )
+         confirm_timer = Timer(1, count=2)
+         changed = False
+         for _ in self.loop():
+@@ -255,14 +296,32 @@ class OSMapOperation(MapOrderHandler, MissionHandler, PortHandler, StorageHandle
+             # Click
+             if self.appear_then_click(MAP_EXIT, offset=(20, 20), interval=3):
+                 continue
+-            if self.handle_popup_confirm('MAP_EXIT'):
+-                self.interval_reset(MAP_EXIT)
+-                changed = True
+-                continue
++            if semantic_adapter is not None:
++                semantic_adapter.refresh_frame()
++                receipt = (
++                    semantic_adapter
++                    .try_click_operation_siren_map_exit_confirm()
++                )
++                if receipt is not None:
++                    self.interval_reset(MAP_EXIT)
++                    changed = True
++                    continue
++            else:
++                if self.handle_popup_confirm('MAP_EXIT'):
++                    self.interval_reset(MAP_EXIT)
++                    changed = True
++                    continue
+             if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50)):
+                 # Sometimes appeared
+                 self.device.screenshot_interval_set()
+                 continue
++            if (
++                semantic_adapter is not None
++                and semantic_adapter.operation_siren_post_search_loot_visible()
++            ):
++                semantic_adapter.click_operation_siren_post_search_loot_back()
++                self.interval_reset(MAP_EXIT)
++                continue
+             if self.handle_map_event():
+                 self.interval_reset(MAP_EXIT)
+                 changed = True
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+index 7f3ad80..f327dab 100644
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -282,12 +282,18 @@ class StorageHandler(GlobeOperation, ZoneManager):
+                     break
+             semantic_adapter.refresh_frame()
+             semantic_adapter.click_operation_siren_storage_detail_checkout()
++            transition_timer = Timer(30, count=1).start()
+             for _ in self.loop():
+-                if self.is_zone_pinned():
+-                    break
+                 if semantic_adapter.operation_siren_storage_checkout_prompt_visible():
+                     semantic_adapter.click_operation_siren_storage_checkout_confirm()
+                     continue
++                pinned = self.get_zone_pinned()
++                if pinned is not None and self.pinned_to_name(pinned) == item:
++                    break
++                if transition_timer.reached():
++                    raise SemanticGateClosed(
++                        f'{item} checkout did not produce an exact typed zone pin'
++                    )
+             self.zone_type_select((item,))
+             self.globe_enter(zone=self.name_to_zone(72))
+             return True
+diff --git a/module/os/map.py b/module/os/map.py
+index 4976dd5..835149a 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -803,29 +803,42 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+ 
+             logger.info(f'Found exact question mark on {target}')
+             self.handle_info_bar()
+-            if target_kind == 'guidepost':
+-                semantic_session.click_operation_siren_radar_guidepost(target)
+-            else:
+-                semantic_session.click_operation_siren_relative_grid(
+-                    target,
+-                    prefer_adjacent_event=True,
+-                )
+-            with self.config.temporary(STORY_ALLOW_SKIP=False):
+-                result = self.wait_until_walk_stable(
+-                    drop=drop,
+-                    walk_out_of_step=False,
+-                    confirm_timer=Timer(1.5, count=4),
++            attempts = 3 if target_kind == 'guidepost' else 1
++            for attempt in range(attempts):
++                if target_kind == 'guidepost':
++                    semantic_session.click_operation_siren_radar_guidepost(target)
++                else:
++                    semantic_session.click_operation_siren_relative_grid(
++                        target,
++                        prefer_adjacent_event=True,
++                    )
++                with self.config.temporary(STORY_ALLOW_SKIP=False):
++                    result = self.wait_until_walk_stable(
++                        drop=drop,
++                        walk_out_of_step=False,
++                        confirm_timer=Timer(1.5, count=4),
++                    )
++                if 'akashi' in result:
++                    self._solved_map_event.add('is_akashi')
++                    return True
++                if 'event' in result:
++                    self._solved_map_event.add('is_semantic_question')
++                    self.os_auto_search_run(drop=drop)
++                    return True
++                if target_kind == 'guidepost' and attempt + 1 < attempts:
++                    semantic_session.refresh_frame()
++                    remaining = set(
++                        semantic_session.operation_siren_radar_targets('guidepost')
++                    )
++                    if target in remaining:
++                        logger.warning(
++                            f'Exact guidepost click was swallowed; retry {attempt + 2}/{attempts}'
++                        )
++                        continue
++                logger.warning(
++                    f'Arrive exact question with unexpected result: {result}, expected: {target}'
+                 )
+-            if 'akashi' in result:
+-                self._solved_map_event.add('is_akashi')
+-                return True
+-            if 'event' in result:
+-                self._solved_map_event.add('is_semantic_question')
+-                self.os_auto_search_run(drop=drop)
+-                return True
+-            logger.warning(
+-                f'Arrive exact question with unexpected result: {result}, expected: {target}'
+-            )
++                break
+             return False
+ 
+         for _ in range(3):
+diff --git a/module/os/map.py b/module/os/map.py
+index ff1ba4c..e5e6061 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -835,6 +835,17 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                     self._solved_map_event.add('is_semantic_question')
+                     self.os_auto_search_run(drop=drop)
+                     return True
++                if target_kind == 'guidepost':
++                    delayed_event_timer = Timer(12, count=1).start()
++                    while not delayed_event_timer.reached():
++                        event = self.handle_map_event(drop=drop)
++                        if event == 'story_skip':
++                            logger.info('Handled delayed exact guidepost story event')
++                            self._solved_map_event.add('is_semantic_question')
++                            self.ensure_no_map_event()
++                            self.os_auto_search_run(drop=drop)
++                            return True
++                        self.device.screenshot()
+                 if target_kind == 'guidepost' and attempt + 1 < attempts:
+                     semantic_session.refresh_frame()
+                     remaining = set(
+diff --git a/module/os/map.py b/module/os/map.py
+index e65ea37..3055a85 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -532,7 +532,19 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+         logger.hr('After auto search', level=2)
+         solved = False
+         solved |= self.handle_fleet_emp_debuff()
+-        solved |= self.handle_fleet_repair(revert=False)
++        try:
++            solved |= self.handle_fleet_repair(revert=False)
++        except SemanticGateClosed as exc:
++            if str(exc) != 'Operation Siren fleet portraits are absent or incomplete':
++                raise
++            logger.warning(
++                'Operation Siren fleet panel was evicted from the typed Image slice; '
++                'remount the complete OS page once and retry exact HP state'
++            )
++            self.ui_goto_main()
++            self.ui_ensure(page_os)
++            self.zone_init()
++            solved |= self.handle_fleet_repair(revert=False)
+         logger.info(f'Handle after auto search finished, solved={solved}')
+         return solved
+
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+index d52ca5c..4798e42 100644
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -283,12 +283,18 @@ class StorageHandler(OSMapOperation, StorageLogger):
+             semantic_adapter.refresh_frame()
+             semantic_adapter.click_operation_siren_storage_detail_checkout()
+             transition_timer = Timer(30, count=1).start()
++            checkout_confirmed = False
+             for _ in self.loop():
+                 if semantic_adapter.operation_siren_storage_checkout_prompt_visible():
+                     semantic_adapter.click_operation_siren_storage_checkout_confirm()
++                    checkout_confirmed = True
+                     continue
+                 pinned = self.get_zone_pinned()
+-                if pinned is not None and self.pinned_to_name(pinned) == item:
++                if (
++                    checkout_confirmed
++                    and pinned is not None
++                    and self.pinned_to_name(pinned) == item
++                ):
+                     break
+                 if transition_timer.reached():
+                     raise SemanticGateClosed(
+diff --git a/module/os/map.py b/module/os/map.py
+index 3055a85..a0d15ad 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -543,9 +543,14 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 'Operation Siren fleet panel was evicted from the typed Image slice; '
+                 'remount the complete OS page once and retry exact HP state'
+             )
+-            self.ui_goto_main()
+-            self.ui_ensure(page_os)
+-            self.zone_init()
++            semantic_adapter = self.device.semantic_adapter
++            semantic_adapter.begin_operation_siren_page_remount()
++            try:
++                self.ui_goto_main()
++                self.ui_ensure(page_os)
++                self.zone_init()
++            finally:
++                semantic_adapter.end_operation_siren_page_remount()
+             solved |= self.handle_fleet_repair(revert=False)
+         logger.info(f'Handle after auto search finished, solved={solved}')
+         return solved
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -276,9 +276,21 @@ class StorageHandler(OSMapOperation, StorageLogger):
+                 semantic_adapter.operation_siren_storage_scroll_for_abyssal()
+             semantic_adapter.refresh_frame()
+             semantic_adapter.click_operation_siren_storage_item(item)
++            detail_timer = Timer(3, count=3).start()
++            detail_timeout = Timer(20, count=1).start()
+             for _ in self.loop():
+                 if semantic_adapter.operation_siren_storage_detail() is not None:
+                     break
++                if detail_timeout.reached():
++                    raise SemanticGateClosed(
++                        f'{item} coordinate detail did not become exact and actionable'
++                    )
++                if detail_timer.reached():
++                    # The inventory entrance animation can swallow the first
++                    # exact card tap. Re-prove the typed card before retrying.
++                    semantic_adapter.refresh_frame()
++                    semantic_adapter.click_operation_siren_storage_item(item)
++                    detail_timer.reset()
+             semantic_adapter.refresh_frame()
+             semantic_adapter.click_operation_siren_storage_detail_checkout()
+             transition_timer = Timer(30, count=1).start()
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -302,9 +302,15 @@ class StorageHandler(OSMapOperation, StorageLogger):
+                     continue
+                 pinned = self.get_zone_pinned()
+                 if (
+-                    checkout_confirmed
+-                    and pinned is not None
++                    pinned is not None
+                     and self.pinned_to_name(pinned) == item
++                    and (
++                        checkout_confirmed
++                        or (
++                            not semantic_adapter.operation_siren_storage_visible()
++                            and semantic_adapter.operation_siren_globe_visible()
++                        )
++                    )
+                 ):
+                     break
+                 if transition_timer.reached():
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -1,3 +1,5 @@
++from alas_headless import SemanticOracleError
++
+ from module.base.timer import Timer
+ from module.base.utils import *
+ from module.logger import logger
+@@ -397,7 +399,29 @@ class GlobeOperation(ActionPointHandler):
+                 if self.handle_action_point(zone=zone, pinned=pinned):
+                     # The AP panel dismisses the selected-zone float panel.
+-                    # Re-pin through the still-valid modeled globe camera,
+-                    # then submit the exact entrance again.
++                    # A special-coordinate panel is restored asynchronously;
++                    # re-prove its exact type instead of selecting the normal
++                    # base zone and thereby overwriting the coordinate pin.
++                    special_types = {
++                        'OBSCURE': '隐秘海域',
++                        'ABYSSAL': '深渊海域',
++                    }
++                    if pinned in special_types:
++                        for _ in range(20):
++                            self.device.sleep(0.25)
++                            try:
++                                state = semantic_adapter.operation_siren_globe_state()
++                            except SemanticOracleError:
++                                continue
++                            if state.zone_type == special_types[pinned]:
++                                semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
++                                break
++                        else:
++                            raise OSExploreError(
++                                f'Unable to restore typed {pinned} coordinate pin'
++                            )
++                        continue
++                    # Normal zones can be selected again through the modeled
++                    # globe camera after the AP panel closes.
+                     self.globe_focus_to(zone)
+                     semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
+                     continue

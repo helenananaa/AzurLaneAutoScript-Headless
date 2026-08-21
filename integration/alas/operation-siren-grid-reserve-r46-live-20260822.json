@@ -1,0 +1,51 @@
+{
+  "schema": "alas-headless.operation-siren-obscure-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 7889,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "ForceRun": false,
+    "Fleet": 1,
+    "Submarine": false,
+    "UseLogger": false,
+    "coordinate_budget": 0,
+    "probe_only": false,
+    "map_probe_only": true,
+    "order_confirm_probe": null,
+    "order_confirm_cancel": null,
+    "resume_current_zone": false
+  },
+  "storage_snapshots": [],
+  "checkout_results": [],
+  "fleet_actions": [],
+  "order_actions": [],
+  "auto_searches": [],
+  "map_exits": [],
+  "obscure_exit_steps": [],
+  "after_auto_search": [],
+  "task_switch_checks": 0,
+  "map_ui": {
+    "generation": 566,
+    "method_mask": 15,
+    "skipped_count": 0,
+    "image_truncated": false,
+    "image_source_count": 1082,
+    "image_source_capacity": 16384,
+    "images": [],
+    "buttons": [],
+    "texts": []
+  },
+  "task_result": true,
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "obscure_task": "d96ee3da919f7c094e4f67b19dcd17c750c241c38969c5655bc5fd16903fd254",
+    "storage_handler": "67bb26cd62e25e7bf38b76bc3432b12058c3c7ce1d068e7b691dee6c6722556a",
+    "adapter": "5794195c29b407f4e33c877a65f2fab1756c23786350a7574191eff451ef73a8",
+    "oracle": "6e81e73a7cfbf694c996911cdcaa9b711f4846ddd1f17d1f5cf8a85fd5a09ac7"
+  }
+}

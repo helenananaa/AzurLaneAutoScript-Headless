@@ -1,0 +1,41 @@
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+index a40ce2c..80887f1 100644
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -392,7 +392,7 @@ class GlobeOperation(ActionPointHandler):
+             pinned = self.get_zone_pinned_name()
+             logger.info(f'Enter pinned zone {zone} (typed {pinned})')
+             semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
+-            for _ in range(80):
++            for attempt in range(80):
+                 self.device.sleep(0.25)
+                 if semantic_adapter.operation_siren_map_visible():
+                     return
+@@ -403,6 +403,13 @@ class GlobeOperation(ActionPointHandler):
+                     self.globe_focus_to(zone)
+                     semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
+                     continue
++                if attempt and attempt % 20 == 0:
++                    # The client can swallow the first exact entrance click
++                    # while closing the previous special-zone transition.
++                    # Match the bounded retry semantics of the legacy path,
++                    # but re-prove the pinned typed control before every tap.
++                    logger.info('Retry exact typed zone entrance')
++                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
+             raise OSExploreError(f'Unable to enter typed zone {zone}')
+ 
+         click_timer = Timer(10)
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+index 5e5516a..7f3ad80 100644
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -285,7 +285,8 @@ class StorageHandler(GlobeOperation, ZoneManager):
+             for _ in self.loop():
+                 if self.is_zone_pinned():
+                     break
+-                if self.handle_popup_confirm('STORAGE_CHECKOUT'):
++                if semantic_adapter.operation_siren_storage_checkout_prompt_visible():
++                    semantic_adapter.click_operation_siren_storage_checkout_confirm()
+                     continue
+             self.zone_type_select((item,))
+             self.globe_enter(zone=self.name_to_zone(72))

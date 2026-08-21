@@ -187,6 +187,9 @@ FLOW_PATHS = {
         "module/os/globe_camera.py",
         "module/os_handler/storage.py",
     },
+    "0112-operation-siren-exact-map-exit-confirm.patch": {
+        "module/os/map_operation.py",
+    },
     "0100-tool-flow-ports.patch": {
         "module/config/argument/args.json",
         "module/daemon/benchmark.py",

@@ -1,0 +1,25 @@
+diff --git a/module/os/map.py b/module/os/map.py
+index e65ea37..3055a85 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -532,7 +532,19 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+         logger.hr('After auto search', level=2)
+         solved = False
+         solved |= self.handle_fleet_emp_debuff()
+-        solved |= self.handle_fleet_repair(revert=False)
++        try:
++            solved |= self.handle_fleet_repair(revert=False)
++        except SemanticGateClosed as exc:
++            if str(exc) != 'Operation Siren fleet portraits are absent or incomplete':
++                raise
++            logger.warning(
++                'Operation Siren fleet panel was evicted from the typed Image slice; '
++                'remount the complete OS page once and retry exact HP state'
++            )
++            self.ui_goto_main()
++            self.ui_ensure(page_os)
++            self.zone_init()
++            solved |= self.handle_fleet_repair(revert=False)
+         logger.info(f'Handle after auto search finished, solved={solved}')
+         return solved
+

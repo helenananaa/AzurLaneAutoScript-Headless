@@ -20,7 +20,9 @@ constexpr size_t kMaxObserverToggles = 128;
 // Combat result pages keep the underlying damage-number Text objects active.
 // Preserve completeness instead of truncating the result overlay at 192.
 constexpr size_t kMaxObserverTexts = 512;
-constexpr size_t kMaxObserverImages = 1024;
+// Preserve the established 1024-record page/fleet/tail budget and add a
+// dedicated rolling slice for dense Operation Siren world-grid Images.
+constexpr size_t kMaxObserverImages = 1408;
 constexpr size_t kLoadedObjectCapacity = 4096;
 // Long-lived game sessions retain well over 4096 inactive Image components.
 // Image enumeration therefore needs a larger, thread-local source pool before

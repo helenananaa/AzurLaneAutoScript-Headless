@@ -1,0 +1,45 @@
+{
+  "schema": "alas-headless.operation-siren-obscure-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 7889,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "ForceRun": false,
+    "Fleet": 1,
+    "Submarine": false,
+    "UseLogger": false,
+    "coordinate_budget": 0,
+    "probe_only": false,
+    "map_probe_only": false,
+    "order_confirm_probe": null,
+    "order_confirm_cancel": "scan",
+    "resume_current_zone": false
+  },
+  "storage_snapshots": [],
+  "checkout_results": [],
+  "checkout_prompt_diagnostics": [],
+  "fleet_actions": [],
+  "order_actions": [],
+  "auto_searches": [],
+  "map_exits": [],
+  "obscure_exit_steps": [],
+  "after_auto_search": [],
+  "task_switch_checks": 0,
+  "order_confirmation_cancel": {
+    "semantic_id": "os/order/cancel",
+    "generation": 40543
+  },
+  "task_result": true,
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "obscure_task": "d96ee3da919f7c094e4f67b19dcd17c750c241c38969c5655bc5fd16903fd254",
+    "storage_handler": "af717122f8452ada60b4cd984310a7b9fe191d83fa17b93e9aa1ffc23747856f",
+    "adapter": "8ae1df1ca9210a19a79596da9675259e48268d5e9b33dd9e38617248e9d12b8b",
+    "oracle": "34861950c5c255d5df9e063f9516d6f6c33fae8a5cc8b0261ac77b454ee0a40e"
+  }
+}

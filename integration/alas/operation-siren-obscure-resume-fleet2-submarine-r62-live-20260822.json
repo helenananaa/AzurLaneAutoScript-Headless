@@ -1,0 +1,57 @@
+{
+  "schema": "alas-headless.operation-siren-obscure-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 7889,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "ForceRun": false,
+    "Fleet": 2,
+    "Submarine": true,
+    "UseLogger": false,
+    "coordinate_budget": 0,
+    "probe_only": false,
+    "map_probe_only": false,
+    "order_confirm_probe": null,
+    "order_confirm_cancel": null,
+    "resume_current_zone": true
+  },
+  "storage_snapshots": [],
+  "checkout_results": [],
+  "checkout_prompt_diagnostics": [],
+  "fleet_actions": [],
+  "order_actions": [],
+  "auto_searches": [],
+  "map_exits": [
+    {
+      "returned": null
+    }
+  ],
+  "obscure_exit_steps": [
+    {
+      "semantic_id": "os/map/obscure-exit/passage"
+    }
+  ],
+  "after_auto_search": [
+    {
+      "returned": false
+    }
+  ],
+  "task_switch_checks": 0,
+  "task_result": true,
+  "elapsed_seconds": 116.469,
+  "final_config": {
+    "NextRun": "2020-01-01 00:00:00"
+  },
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "obscure_task": "d96ee3da919f7c094e4f67b19dcd17c750c241c38969c5655bc5fd16903fd254",
+    "storage_handler": "af717122f8452ada60b4cd984310a7b9fe191d83fa17b93e9aa1ffc23747856f",
+    "adapter": "b2ebac257532cb566bfe3570b31339e6ac44d436fb33b6c922fc1b90d2228890",
+    "oracle": "466f8a29a0ded4e45c55d379a7998786252510bc00c23376873954f45c6d9e60"
+  }
+}

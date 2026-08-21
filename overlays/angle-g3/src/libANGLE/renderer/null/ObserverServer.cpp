@@ -32,7 +32,7 @@
 namespace rx::alas {
 namespace {
 constexpr char kProtocolSchema[] = "alas-headless.observer/v1";
-constexpr char kDriverRevision[] = "be80ce591a481c12d60c50d6040d40c035b40a2b";
+constexpr char kDriverRevision[] = "506b76f698b5089aaa29c4e7908b48edb8532a44";
 
 #if defined(ANGLE_PLATFORM_ANDROID)
 std::string ReadProcessPackage() {

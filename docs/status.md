@@ -2887,3 +2887,40 @@ See [G8 real ALAS reward and commission validation](g8-alas-reward-commission-va
   `UseTuningSample` remains `B` with stronger two-value evidence. Actual daily
   mission combat, nonzero sample consumption, Fleet 2-4, and
   `Submarine=true` remain unqualified.
+
+### Operation Siren obscure-zone main path live-qualified
+
+- The native observer image capacity is now `1408`. In addition to the existing
+  ordinary, fleet and trailing budgets, a 384-entry rolling `walk_quad` reserve
+  retains dense local-map grids and the unique obscure-zone passage on large
+  maps. The rebuilt driver revision is
+  `506b76f698b5089aaa29c4e7908b48edb8532a44`; the installed APK SHA-256 is
+  `585b197a485c597249892047ff080ca0b4aaeeb3c7ac81ca9d74a2d3835353e6`.
+- Real original-ALAS runs consumed typed obscure coordinates, selected the exact
+  `OBSCURE` pin, exercised Fleets 1/2/3/4, confirmed reconnaissance and
+  `Submarine=true`, completed multi-combat auto-search with submarine support,
+  and separated low resolve from the left-side sunk/repair marker.
+- Inventory entrance taps now retry only after re-proving an actionable typed
+  coordinate card. Checkout accepts both the exact confirmation branch and the
+  observed no-confirm direct globe transition, while requiring the storage page
+  to disappear, the globe to be visible, and the pinned type to remain exact.
+- Closing an action-point panel no longer reselects the normal base zone over an
+  obscure or abyssal coordinate. The runtime waits for the same special-zone
+  type to remount and fails closed if it does not. A live run with displayed scan
+  base cost 5 and discounted confirmation cost 4 also established that the
+  prompt cost is dynamic; its full order-specific text remains mandatory and the
+  confirmed cost may not exceed the displayed base cost.
+- Cleared obscure maps identify the unique
+  `event_1000034/chuansong01(Clone)` passage, move it into the safe viewport,
+  click it, settle walking, confirm exact exit prompts atomically, and return to
+  an ordinary zone. An uncleared map's persistent title and exit hint no longer
+  masquerade as a malformed passage when the passage model has not spawned.
+- The post-search loot grid can remain mounted above the still-active local-map
+  hierarchy. It is now recognized by the exact special-zone title, loot item
+  grid and unique overlay back button, then dismissed before any passage input.
+  Exit confirmation is attempted from one fresh coherent snapshot; a prompt
+  that disappears between loop iterations is treated as absent and re-probed,
+  never clicked through stale coordinates.
+- `OpsiObscure` is promoted from `B` to `L`. `ForceRun=true` continuous looping
+  and the complete abnormal-state/value matrix remain open, so this is not an
+  `F` claim.

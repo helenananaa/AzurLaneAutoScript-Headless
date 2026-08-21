@@ -1,0 +1,37 @@
+diff --git a/module/os/map.py b/module/os/map.py
+index f12eaa8..4976dd5 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -788,17 +788,28 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 ports.update(
+                     semantic_session.operation_siren_radar_targets('port')
+                 )
+-            target = next(
+-                (location for location in preferred if location in guideposts or location in ports),
++            selected = next(
++                (
++                    (location, 'guidepost' if location in guideposts else 'port')
++                    for location in preferred
++                    if location in guideposts or location in ports
++                ),
+                 None,
+             )
+-            if target is None:
++            if selected is None:
+                 logger.info('No exact question mark above current fleet on this radar')
+                 return False
++            target, target_kind = selected
+ 
+             logger.info(f'Found exact question mark on {target}')
+             self.handle_info_bar()
+-            semantic_session.click_operation_siren_relative_grid(target)
++            if target_kind == 'guidepost':
++                semantic_session.click_operation_siren_radar_guidepost(target)
++            else:
++                semantic_session.click_operation_siren_relative_grid(
++                    target,
++                    prefer_adjacent_event=True,
++                )
+             with self.config.temporary(STORY_ALLOW_SKIP=False):
+                 result = self.wait_until_walk_stable(
+                     drop=drop,

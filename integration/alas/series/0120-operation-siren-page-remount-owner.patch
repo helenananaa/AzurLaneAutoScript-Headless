@@ -1,0 +1,22 @@
+diff --git a/module/os/map.py b/module/os/map.py
+index 3055a85..a0d15ad 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -543,9 +543,14 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 'Operation Siren fleet panel was evicted from the typed Image slice; '
+                 'remount the complete OS page once and retry exact HP state'
+             )
+-            self.ui_goto_main()
+-            self.ui_ensure(page_os)
+-            self.zone_init()
++            semantic_adapter = self.device.semantic_adapter
++            semantic_adapter.begin_operation_siren_page_remount()
++            try:
++                self.ui_goto_main()
++                self.ui_ensure(page_os)
++                self.zone_init()
++            finally:
++                semantic_adapter.end_operation_siren_page_remount()
+             solved |= self.handle_fleet_repair(revert=False)
+         logger.info(f'Handle after auto search finished, solved={solved}')
+         return solved

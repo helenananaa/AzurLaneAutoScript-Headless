@@ -1,0 +1,266 @@
+{
+  "schema": "alas-headless.operation-siren-obscure-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 7889,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "ForceRun": false,
+    "Fleet": 1,
+    "Submarine": false,
+    "UseLogger": false,
+    "coordinate_budget": 0,
+    "probe_only": false,
+    "map_probe_only": false,
+    "order_confirm_probe": null,
+    "order_confirm_cancel": null,
+    "resume_current_zone": false
+  },
+  "storage_snapshots": [
+    {
+      "generation": 3199,
+      "obscure_count": 34,
+      "abyssal_count": 5,
+      "sample_count": 0,
+      "items": [
+        {
+          "item_id": 100013,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:卡利..",
+          "count": 2,
+          "actionable": true
+        },
+        {
+          "item_id": 100014,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:卡利..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100031,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:西南..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100033,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:西南..",
+          "count": 3,
+          "actionable": true
+        },
+        {
+          "item_id": 100034,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:西南..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100051,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:东南..",
+          "count": 2,
+          "actionable": true
+        },
+        {
+          "item_id": 100064,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:NA海..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100065,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:NA海..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100071,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:陆间..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100081,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:NA海..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100085,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:NA海..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100095,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:NA海..",
+          "count": 2,
+          "actionable": true
+        },
+        {
+          "item_id": 100101,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:西北..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100102,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:西北..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100104,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:西北..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100106,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:西北..",
+          "count": 3,
+          "actionable": true
+        },
+        {
+          "item_id": 100111,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:NA海..",
+          "count": 2,
+          "actionable": true
+        },
+        {
+          "item_id": 100121,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:东大..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100123,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:东大..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100124,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:东大..",
+          "count": 2,
+          "actionable": true
+        },
+        {
+          "item_id": 100132,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:NA海..",
+          "count": 1,
+          "actionable": true
+        },
+        {
+          "item_id": 100153,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:NA海..",
+          "count": 1,
+          "actionable": false
+        },
+        {
+          "item_id": 100156,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:NA海..",
+          "count": 2,
+          "actionable": false
+        },
+        {
+          "item_id": 100159,
+          "item_type": "OBSCURE",
+          "display_name": "海域坐标:NA海..",
+          "count": 1,
+          "actionable": false
+        },
+        {
+          "item_id": 110013,
+          "item_type": "ABYSSAL",
+          "display_name": "塞壬坐标:卡利..",
+          "count": 1,
+          "actionable": false
+        },
+        {
+          "item_id": 110014,
+          "item_type": "ABYSSAL",
+          "display_name": "塞壬坐标:卡利..",
+          "count": 1,
+          "actionable": false
+        },
+        {
+          "item_id": 110052,
+          "item_type": "ABYSSAL",
+          "display_name": "塞壬坐标:东南..",
+          "count": 2,
+          "actionable": false
+        },
+        {
+          "item_id": 110073,
+          "item_type": "ABYSSAL",
+          "display_name": "塞壬坐标:陆间..",
+          "count": 1,
+          "actionable": false
+        }
+      ]
+    }
+  ],
+  "checkout_results": [
+    {
+      "item": "OBSCURE",
+      "available_before": 34,
+      "returned": false,
+      "elapsed_seconds": 0.954
+    }
+  ],
+  "fleet_actions": [],
+  "order_actions": [],
+  "auto_searches": [
+    {
+      "rescan": false,
+      "finished_combat": 0,
+      "elapsed_seconds": 46.156
+    }
+  ],
+  "map_exits": [],
+  "obscure_exit_steps": [],
+  "after_auto_search": [
+    {
+      "returned": false
+    }
+  ],
+  "task_switch_checks": 0,
+  "task_result": true,
+  "elapsed_seconds": 206.641,
+  "final_config": {
+    "NextRun": "2026-08-23 00:00:00"
+  },
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "obscure_task": "d96ee3da919f7c094e4f67b19dcd17c750c241c38969c5655bc5fd16903fd254",
+    "storage_handler": "67bb26cd62e25e7bf38b76bc3432b12058c3c7ce1d068e7b691dee6c6722556a",
+    "adapter": "5794195c29b407f4e33c877a65f2fab1756c23786350a7574191eff451ef73a8",
+    "oracle": "6e81e73a7cfbf694c996911cdcaa9b711f4846ddd1f17d1f5cf8a85fd5a09ac7"
+  }
+}

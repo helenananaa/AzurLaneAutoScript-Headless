@@ -26,6 +26,65 @@ EXPLORE_INVENTORY_RECOVERY_PATCH = (
     ROOT / "integration" / "alas" / "series" /
     "0107-operation-siren-explore-inventory-and-anchor-recover.patch"
 )
+OBSCURE_SPECIAL_ZONE_RESCAN_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0108-operation-siren-obscure-special-zone-rescan.patch"
+)
+COORDINATE_CHECKOUT_RECOVERY_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0109-operation-siren-coordinate-checkout-recovery.patch"
+)
+SPECIAL_ZONE_EXIT_TRANSITION_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0110-operation-siren-special-zone-exit-transition.patch"
+)
+GUIDEPOST_DIRECT_TARGET_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0111-operation-siren-guidepost-direct-target.patch"
+)
+EXACT_MAP_EXIT_CONFIRM_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0112-operation-siren-exact-map-exit-confirm.patch"
+)
+COORDINATE_PIN_TRANSITION_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0113-operation-siren-coordinate-pin-transition.patch"
+)
+GUIDEPOST_RETRY_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0114-operation-siren-guidepost-retry.patch"
+)
+GUIDEPOST_DELAYED_STORY_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0116-operation-siren-guidepost-delayed-story.patch"
+)
+PAGE_REMOUNT_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0118-operation-siren-page-remount.patch"
+)
+COORDINATE_CONFIRM_PROOF_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0119-operation-siren-coordinate-confirm-proof.patch"
+)
+PAGE_REMOUNT_OWNER_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0120-operation-siren-page-remount-owner.patch"
+)
+COORDINATE_CARD_RETRY_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0121-operation-siren-coordinate-card-retry.patch"
+)
+DIRECT_COORDINATE_PIN_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0122-operation-siren-direct-coordinate-pin.patch"
+)
+SPECIAL_PIN_AP_RECOVERY_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0123-operation-siren-special-pin-ap-recovery.patch"
+)
+OBSCURE_EXIT_PASSAGE_PATCH = (
+    EXACT_MAP_EXIT_CONFIRM_PATCH
+)
 
 
 class AlasOpsiAutoSearchContractTests(unittest.TestCase):
@@ -87,6 +146,113 @@ class AlasOpsiAutoSearchContractTests(unittest.TestCase):
         self.assertIn("state.sample_count", source)
         self.assertIn("typed tuning sample consumption is not qualified", source)
         self.assertNotIn("rgb2gray(self.device.image)", source)
+
+    def test_obscure_typed_runtime_skips_campaign_rescan_only_in_special_zone(self):
+        source = OBSCURE_SPECIAL_ZONE_RESCAN_PATCH.read_text(encoding="utf-8")
+        self.assertIn("semantic_adapter = getattr(self.device, 'semantic_adapter', None)", source)
+        self.assertIn("if not self.is_in_special_zone():", source)
+        self.assertIn("raise SemanticGateClosed(", source)
+        self.assertIn("rescan = False", source)
+        self.assertIn("self.run_auto_search(rescan=rescan)", source)
+        self.assertIn("rescan = 'current'", source)
+
+    def test_coordinate_checkout_owns_exit_prompt_and_retries_exact_entry(self):
+        source = (
+            COORDINATE_CHECKOUT_RECOVERY_PATCH.read_text(encoding="utf-8")
+            + COORDINATE_CARD_RETRY_PATCH.read_text(encoding="utf-8")
+            + SPECIAL_PIN_AP_RECOVERY_PATCH.read_text(encoding="utf-8")
+        )
+        self.assertIn("operation_siren_storage_checkout_prompt_visible()", source)
+        self.assertIn("click_operation_siren_storage_checkout_confirm()", source)
+        self.assertIn("-                if self.handle_popup_confirm('STORAGE_CHECKOUT'):", source)
+        self.assertIn("for attempt in range(80):", source)
+        self.assertIn("attempt % 20 == 0", source)
+        self.assertIn("Retry exact typed zone entrance", source)
+        self.assertIn("detail_timeout = Timer(20, count=1).start()", source)
+        self.assertIn("Re-prove the typed card before retrying", source)
+        self.assertIn("click_operation_siren_storage_item(item)", source)
+        self.assertIn("'OBSCURE': '隐秘海域'", source)
+        self.assertIn("state.zone_type == special_types[pinned]", source)
+        self.assertIn("Unable to restore typed {pinned} coordinate pin", source)
+
+    def test_coordinate_checkout_rejects_a_stale_pin_of_the_wrong_type(self):
+        source = (
+            COORDINATE_PIN_TRANSITION_PATCH.read_text(encoding="utf-8")
+            + DIRECT_COORDINATE_PIN_PATCH.read_text(encoding="utf-8")
+        )
+        self.assertIn("self.pinned_to_name(pinned) == item", source)
+        self.assertIn("transition_timer = Timer(30, count=1).start()", source)
+        self.assertIn("checkout did not produce an exact typed zone pin", source)
+        self.assertIn("-                if self.is_zone_pinned():", source)
+        self.assertIn("not semantic_adapter.operation_siren_storage_visible()", source)
+        self.assertIn("semantic_adapter.operation_siren_globe_visible()", source)
+
+    def test_special_zone_exit_confirmation_marks_transition_complete(self):
+        source = SPECIAL_ZONE_EXIT_TRANSITION_PATCH.read_text(encoding="utf-8")
+        self.assertIn("if self.handle_popup_confirm('MAP_EXIT'):", source)
+        self.assertIn("self.interval_reset(MAP_EXIT)\n+                changed = True", source)
+
+    def test_semantic_map_exit_owns_exact_confirmation(self):
+        source = EXACT_MAP_EXIT_CONFIRM_PATCH.read_text(encoding="utf-8")
+        self.assertIn("try_click_operation_siren_map_exit_confirm()", source)
+        self.assertIn("if receipt is not None:", source)
+        self.assertNotIn("operation_siren_map_exit_prompt_visible()", source)
+        self.assertIn("semantic_adapter.refresh_frame()", source)
+        self.assertIn("else:\n+                if self.handle_popup_confirm('MAP_EXIT'):", source)
+
+    def test_guidepost_uses_exact_radar_event_without_campaign_camera(self):
+        source = GUIDEPOST_DIRECT_TARGET_PATCH.read_text(encoding="utf-8")
+        self.assertIn("(location, 'guidepost' if location in guideposts else 'port')", source)
+        self.assertIn("click_operation_siren_radar_guidepost(target)", source)
+        self.assertIn("prefer_adjacent_event=True", source)
+
+    def test_guidepost_retries_only_while_the_exact_target_remains(self):
+        source = GUIDEPOST_RETRY_PATCH.read_text(encoding="utf-8")
+        self.assertIn("attempts = 3 if target_kind == 'guidepost' else 1", source)
+        self.assertIn("operation_siren_radar_targets('guidepost')", source)
+        self.assertIn("if target in remaining:", source)
+        self.assertIn("Exact guidepost click was swallowed", source)
+
+    def test_guidepost_waits_for_delayed_exact_story_before_retry(self):
+        source = GUIDEPOST_DELAYED_STORY_PATCH.read_text(encoding="utf-8")
+        self.assertIn("delayed_event_timer = Timer(12, count=1).start()", source)
+        self.assertIn("event == 'story_skip'", source)
+        self.assertIn("self.ensure_no_map_event()", source)
+        self.assertIn("Handled delayed exact guidepost story event", source)
+
+    def test_evicted_fleet_panel_remounts_complete_os_page_once(self):
+        source = PAGE_REMOUNT_PATCH.read_text(encoding="utf-8")
+        self.assertIn("fleet portraits are absent or incomplete", source)
+        self.assertIn("self.ui_goto_main()", source)
+        self.assertIn("self.ui_ensure(page_os)", source)
+        self.assertIn("self.zone_init()", source)
+        self.assertNotIn("fleet_reset_view", source)
+
+    def test_coordinate_pin_is_accepted_only_after_exact_checkout_confirm(self):
+        source = COORDINATE_CONFIRM_PROOF_PATCH.read_text(encoding="utf-8")
+        self.assertIn("checkout_confirmed = False", source)
+        self.assertIn("checkout_confirmed = True", source)
+        self.assertIn("checkout_confirmed\n+                    and pinned is not None", source)
+
+    def test_page_remount_declares_bounded_operation_siren_owner(self):
+        source = PAGE_REMOUNT_OWNER_PATCH.read_text(encoding="utf-8")
+        self.assertIn("begin_operation_siren_page_remount()", source)
+        self.assertIn("finally:", source)
+        self.assertIn("end_operation_siren_page_remount()", source)
+
+    def test_obscure_exit_uses_exact_passage_before_map_exit(self):
+        source = OBSCURE_EXIT_PASSAGE_PATCH.read_text(encoding="utf-8")
+        self.assertIn(
+            "operation_siren_obscure_exit_passage_position()", source
+        )
+        self.assertIn("handle_os_map_fleet_lock(enable=False)", source)
+        self.assertIn("operation_siren_obscure_exit_camera_swipe()", source)
+        self.assertIn("click_operation_siren_obscure_exit_passage()", source)
+        self.assertIn("operation_siren_post_search_loot_visible()", source)
+        self.assertIn("click_operation_siren_post_search_loot_back()", source)
+        self.assertIn("try_click_operation_siren_map_exit_confirm()", source)
+        self.assertIn("outside safe view", source)
+        self.assertNotIn("click_operation_siren_obscure_exit_step", source)
 
     def test_opsi_startup_owns_interrupted_auto_search_and_fleet_states_split(self):
         source = STRONGHOLD_RUNTIME_PATCH.read_text(encoding="utf-8")

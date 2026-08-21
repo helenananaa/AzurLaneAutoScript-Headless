@@ -62,6 +62,17 @@ class RuntimeObserverContractTests(unittest.TestCase):
         self.assertIn("image_source_capacity", self.server)
 
     def test_opsi_overlay_images_survive_large_stronghold_maps(self):
+        self.assertIn("kMaxObserverImages = 1408", self.probe_header)
+        self.assertIn("kReservedMapGridImages = 384", self.probe_source)
+        self.assertIn('invokeString(candidateTransform) == "walk_quad"', self.probe_source)
+        self.assertIn(
+            "std::array<void *, kReservedMapGridImages> mapGridImages",
+            self.probe_source,
+        )
+        self.assertIn(
+            "mapGridImages[mapGridImageCount % mapGridImages.size()]",
+            self.probe_source,
+        )
         self.assertIn(
             "kReservedFleetImages = 64", self.probe_source
         )

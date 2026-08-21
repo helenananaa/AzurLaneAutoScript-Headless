@@ -11096,7 +11096,19 @@ class SemanticOracle:
         if order_kind not in ("scan", "submarine"):
             raise ValueError("operation siren order kind is unsupported")
         state = self.read_state()
-        required = {
+        background = {
+            semantic_id: tuple(
+                button
+                for button in self._matches(state, semantic_id)
+                if button.active_in_hierarchy
+                and button.bounds is not None
+            )
+            for semantic_id in (
+                "os/order/back",
+                "os/order/" + order_kind,
+            )
+        }
+        actions = {
             semantic_id: tuple(
                 button
                 for button in self._matches(state, semantic_id)
@@ -11108,13 +11120,12 @@ class SemanticOracle:
                 and button.bounds.contains(button.point)
             )
             for semantic_id in (
-                "os/order/back",
-                "os/order/" + order_kind,
                 "os/order/confirm",
                 "os/order/cancel",
             )
         }
-        if not any(required.values()):
+        required = {**background, **actions}
+        if not any(actions.values()):
             return False
         if any(len(matches) != 1 for matches in required.values()):
             raise SemanticGateClosed(
@@ -11154,10 +11165,20 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "operation siren order confirmation text is incomplete"
             )
-        marker = "<color=#92FC63FF>{0}</color>".format(
-            costs[0].text.strip()
+        prompt_suffix = (
+            "侦查当前海域的全部区域？"
+            if order_kind == "scan"
+            else "向当前海域派遣潜艇舰队？"
         )
-        if prompts[0].text.count(marker) != 1:
+        prompt_match = re.fullmatch(
+            r"是否消耗<color=#92FC63FF>([0-9]{1,3})</color>行动力，\n"
+            + re.escape(prompt_suffix),
+            prompts[0].text.strip(),
+        )
+        if (
+            prompt_match is None
+            or int(prompt_match.group(1)) > int(costs[0].text.strip())
+        ):
             raise SemanticGateClosed(
                 "operation siren order confirmation cost changed"
             )
@@ -11597,6 +11618,304 @@ class SemanticOracle:
             raise SemanticGateClosed("operation siren radar targets are ambiguous")
         return tuple(targets)
 
+    def operation_siren_obscure_exit_passage_position(
+        self,
+    ) -> Optional[Tuple[int, int]]:
+        """Return the exact absolute grid of an obscure-zone exit passage."""
+
+        if not self.operation_siren_local_map_visible():
+            raise SemanticGateClosed("operation siren local-map identity is absent")
+        state = self.read_ui_state()
+        titles = tuple(
+            item
+            for item in state.texts
+            if item.path.endswith("top/adapt/top_stage/title/name")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+            and item.text.endswith("-隐秘海域")
+        )
+        tips = tuple(
+            item
+            for item in state.texts
+            if item.path.endswith("top/adapt/right_stage/tip_word/Text")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+            and item.text == "从塞壬特殊通行装置离开隐秘海域"
+        )
+        portal_pattern = re.compile(
+            r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+            r"cell_([0-9]+)_([0-9]+)/attachments/event_1000034/icon/model/"
+            r"chuansong01\(Clone\)/Xyz/Ring01/01$"
+        )
+        portals = tuple(
+            item
+            for item in state.images
+            if portal_pattern.fullmatch(item.path)
+            and item.name == "01"
+            and item.sprite == "chuansong01"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        # The title and exit hint are present throughout an uncleared obscure
+        # zone. The passage model itself is the transition-ready marker.
+        if not portals:
+            return None
+        evidence = (titles, tips, portals)
+        if any(len(items) != 1 for items in evidence):
+            raise SemanticGateClosed(
+                "operation siren obscure exit passage is incomplete or ambiguous"
+            )
+        match = portal_pattern.fullmatch(portals[0].path)
+        assert match is not None
+        return (int(match.group(1)), int(match.group(2)))
+
+    def operation_siren_post_search_loot_visible(self) -> bool:
+        """Recognize the loot inventory that can cover a cleared special map."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        back_suffix = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/title/"
+            "back_button"
+        )
+        backs = tuple(
+            button
+            for button in state.buttons
+            if button.name == "back_button"
+            and button.path.endswith(back_suffix)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        item_pattern = re.compile(
+            r".*OverlayCamera/Overlay/UIMain/blur_panel/adapt/shop/frame/"
+            r"scrollview/view/item_tpl(?:\(Clone\))?$"
+        )
+        items = tuple(
+            button
+            for button in state.buttons
+            if item_pattern.fullmatch(button.path)
+            and button.name in {"item_tpl", "item_tpl(Clone)"}
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+        )
+        titles = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith("top/adapt/top_stage/title/name")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and text.text.endswith(
+                ("-隐秘海域", "-深渊海域", "-塞壬要塞海域")
+            )
+        )
+        return len(backs) == 1 and bool(items) and len(titles) == 1
+
+    def click_operation_siren_post_search_loot_back(self) -> ActionReceipt:
+        """Dismiss the exact post-search loot inventory through its back button."""
+
+        if not self.operation_siren_post_search_loot_visible():
+            raise SemanticGateClosed(
+                "operation siren post-search loot overlay is absent"
+            )
+        state = self.read_state()
+        suffix = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/title/"
+            "back_button"
+        )
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == "back_button"
+            and button.path.endswith(suffix)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed(
+                "operation siren post-search loot back is ambiguous"
+            )
+        target = matches[0]
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed(
+                "foreground changed before post-search loot dismissal"
+            )
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="os/auto-search/loot/back",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def operation_siren_obscure_exit_camera_swipe(
+        self,
+    ) -> OperationSirenGlobeSwipeReceipt:
+        """Move the proven obscure exit object toward the safe viewport."""
+
+        if self._swipe is None:
+            raise SemanticGateClosed("operation siren swipe backend is absent")
+        if self.operation_siren_obscure_exit_passage_position() is None:
+            raise SemanticGateClosed("operation siren obscure exit passage is absent")
+        pattern = re.compile(
+            r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+            r"cell_[0-9]+_[0-9]+/attachments/event_1000034/icon/model/"
+            r"chuansong01\(Clone\)/Xyz/Ring01/01$"
+        )
+
+        def portal(state: UiState) -> ImageState:
+            matches = tuple(
+                item
+                for item in state.images
+                if pattern.fullmatch(item.path)
+                and item.name == "01"
+                and item.sprite == "chuansong01"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "operation siren obscure exit object is ambiguous"
+                )
+            return matches[0]
+
+        state = self.read_ui_state()
+        target = portal(state)
+        bounds = target.bounds
+        assert bounds is not None
+        center = Point(
+            (bounds.left + bounds.right) / 2.0,
+            (bounds.top + bounds.bottom) / 2.0,
+        )
+        delta_x = max(-280, min(280, int(round(640.0 - center.x))))
+        delta_y = max(-240, min(240, int(round(360.0 - center.y))))
+        if abs(delta_x) < 24 and abs(delta_y) < 24:
+            raise SemanticGateClosed(
+                "operation siren obscure exit object is already in view"
+            )
+        # Keep the gesture origin away from the selected fleet chibi and leave
+        # enough room in the requested direction for the bounded drag.
+        start = (
+            360 if delta_x >= 0 else 640,
+            300 if delta_y >= 0 else 500,
+        )
+        end = (start[0] + delta_x, start[1] + delta_y)
+        if not (
+            160 <= end[0] <= 840
+            and 140 <= end[1] <= 620
+            and self._foreground_component() == self.fingerprint.component
+        ):
+            raise SemanticGateClosed(
+                "operation siren obscure exit camera swipe is not safe"
+            )
+        before_distance = math.hypot(center.x - 640.0, center.y - 360.0)
+        pre_generation = state.generation
+        self._swipe(start[0], start[1], end[0], end[1], 450)
+        post_generation = None
+        last_center = center
+        for _ in range(12):
+            self._sleep(0.25)
+            candidate = self.read_ui_state()
+            moved = portal(candidate)
+            moved_bounds = moved.bounds
+            assert moved_bounds is not None
+            moved_center = Point(
+                (moved_bounds.left + moved_bounds.right) / 2.0,
+                (moved_bounds.top + moved_bounds.bottom) / 2.0,
+            )
+            last_center = moved_center
+            if (
+                candidate.generation > pre_generation
+                and math.hypot(
+                    moved_center.x - 640.0, moved_center.y - 360.0
+                )
+                < before_distance - 20.0
+            ):
+                post_generation = candidate.generation
+                break
+        if post_generation is None:
+            raise SemanticGateClosed(
+                "operation siren obscure exit camera did not approach passage "
+                f"({center.x:.1f},{center.y:.1f})->"
+                f"({last_center.x:.1f},{last_center.y:.1f})"
+            )
+        return OperationSirenGlobeSwipeReceipt(
+            semantic_id="os/map/obscure-exit/swipe",
+            pre_generation=pre_generation,
+            post_generation=post_generation,
+            start=start,
+            end=end,
+            duration_ms=450,
+        )
+
+    def click_operation_siren_obscure_exit_passage(self) -> ActionReceipt:
+        """Click the exact obscure exit object after it enters safe view."""
+
+        if self.operation_siren_obscure_exit_passage_position() is None:
+            raise SemanticGateClosed("operation siren obscure exit passage is absent")
+        state = self.read_ui_state()
+        pattern = re.compile(
+            r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+            r"cell_[0-9]+_[0-9]+/attachments/event_1000034/icon/model/"
+            r"chuansong01\(Clone\)/Xyz/Ring01/01$"
+        )
+        matches = tuple(
+            item
+            for item in state.images
+            if pattern.fullmatch(item.path)
+            and item.name == "01"
+            and item.sprite == "chuansong01"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed(
+                "operation siren obscure exit object is ambiguous"
+            )
+        bounds = matches[0].bounds
+        assert bounds is not None
+        point = Point(
+            (bounds.left + bounds.right) / 2.0,
+            (bounds.top + bounds.bottom) / 2.0,
+        )
+        if (
+            not 80.0 <= point.x <= 960.0
+            or not 100.0 <= point.y <= 620.0
+            or self._foreground_component() != self.fingerprint.component
+        ):
+            raise SemanticGateClosed(
+                "operation siren obscure exit object is outside safe view"
+            )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="os/map/obscure-exit/passage",
+            generation=state.generation,
+            point=point,
+            bounds=bounds,
+            path=matches[0].path,
+        )
+
     def click_operation_siren_relative_grid(
         self,
         relative_position: Tuple[int, int],
@@ -11735,6 +12054,102 @@ class SemanticOracle:
             point=point,
             bounds=click_bounds,
             path=click_path,
+        )
+
+    def click_operation_siren_radar_guidepost(
+        self, relative_position: Tuple[int, int]
+    ) -> ActionReceipt:
+        """Click an adjacent guidepost from exact radar and fleet anchors."""
+
+        if (
+            not isinstance(relative_position, tuple)
+            or len(relative_position) != 2
+            or any(type(value) is not int for value in relative_position)
+            or relative_position not in {
+                (0, 1), (-1, 0), (1, 0), (0, -1), (0, -2), (0, -3)
+            }
+        ):
+            raise SemanticGateClosed(
+                "operation siren guidepost position is malformed"
+            )
+        if relative_position not in self.operation_siren_radar_targets("guidepost"):
+            raise SemanticGateClosed(
+                "operation siren guidepost changed before input"
+            )
+        state = self.read_ui_state()
+        fleet = self._operation_siren_current_fleet_from_ui_state(state)
+        fleet_path = (
+            f"/LevelGrid/DragLayer/plane/cells/fleet_{fleet}/shadow"
+        )
+        fleet_anchors = tuple(
+            item
+            for item in state.images
+            if item.name == "shadow"
+            and item.sprite == "shadow"
+            and item.path.endswith(fleet_path)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(fleet_anchors) != 1:
+            raise SemanticGateClosed(
+                "operation siren selected-fleet guidepost anchor is ambiguous"
+            )
+        fleet_bounds = fleet_anchors[0].bounds
+        assert fleet_bounds is not None
+        fleet_x = (fleet_bounds.left + fleet_bounds.right) / 2.0
+        fleet_y = (fleet_bounds.top + fleet_bounds.bottom) / 2.0
+        expected_x = fleet_x + relative_position[0] * 99.0
+        expected_y = fleet_y + relative_position[1] * 70.0
+        guidepost_pattern = re.compile(
+            r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+            r"cell_[0-9]+_[0-9]+/attachments/event_[0-9]+/char/shadow$"
+        )
+        candidates = []
+        for item in state.images:
+            if (
+                not guidepost_pattern.fullmatch(item.path)
+                or item.name != "shadow"
+                or item.sprite != "shadow"
+                or not item.active_in_hierarchy
+                or not item.active_and_enabled
+                or item.truncated
+                or item.bounds is None
+            ):
+                continue
+            center_x = (item.bounds.left + item.bounds.right) / 2.0
+            center_y = (item.bounds.top + item.bounds.bottom) / 2.0
+            if (
+                abs(center_x - expected_x) <= 24.0
+                and abs(center_y - expected_y) <= 24.0
+            ):
+                candidates.append((item, Point(center_x, center_y)))
+        if len(candidates) != 1:
+            raise SemanticGateClosed(
+                "operation siren adjacent guidepost is absent or ambiguous"
+            )
+        target, point = candidates[0]
+        assert target.bounds is not None
+        if (
+            not target.bounds.contains(point)
+            or not 80.0 <= point.x <= 960.0
+            or not 100.0 <= point.y <= 620.0
+            or self._foreground_component() != self.fingerprint.component
+        ):
+            raise SemanticGateClosed(
+                "operation siren adjacent guidepost click is not safe"
+            )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id=(
+                "os/map/guidepost/relative/"
+                f"{relative_position[0]}/{relative_position[1]}"
+            ),
+            generation=state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
         )
 
     def operation_siren_auto_search_state(self) -> str:
@@ -13787,7 +14202,9 @@ class SemanticOracle:
             path=target.path,
         )
 
-    def operation_siren_exit_prompt_visible(self) -> bool:
+    def _operation_siren_exit_prompt_state(self) -> Optional[OracleState]:
+        """Return one button snapshot only when its exact exit text is coherent."""
+
         state = self.read_state()
         ui_state = self.read_ui_state()
         zone_titles = tuple(
@@ -13819,17 +14236,22 @@ class SemanticOracle:
                     "需要暂时离开大型作战么？",
                     "当前海域无法通过边界区域离开。是否继续？",
                     "离开当前海域后，潜艇舰队会自动返回我方港口待命，是否离开？",
+                    "是否确定从该处隐秘海域离开？\n"
+                    "（离开后将无法再次返回）",
                     "是否确定从深渊海域离开？\n"
                     "（警告：离开后将无法再次返回挑战强敌！）",
                 }
                 or text.text.strip() in retained_progress_prompts
             )
         )
-        return bool(
+        return state if (
             len(prompt) == 1
             and len(self._matches(state, "os/exit/confirm")) == 1
             and len(self._matches(state, "os/exit/cancel")) == 1
-        )
+        ) else None
+
+    def operation_siren_exit_prompt_visible(self) -> bool:
+        return self._operation_siren_exit_prompt_state() is not None
 
     def operation_siren_abyssal_entry_prompt_visible(self) -> bool:
         """Recognize the one-way abyssal entry warning exactly."""
@@ -14042,9 +14464,9 @@ class SemanticOracle:
         )
 
     def click_operation_siren_exit(self, confirm: bool) -> ActionReceipt:
-        if not self.operation_siren_exit_prompt_visible():
+        state = self._operation_siren_exit_prompt_state()
+        if state is None:
             raise SemanticGateClosed("operation siren exit prompt is absent")
-        state = self.read_state()
         semantic_id = "os/exit/confirm" if confirm else "os/exit/cancel"
         target = self._unique(state, semantic_id)
         if not (

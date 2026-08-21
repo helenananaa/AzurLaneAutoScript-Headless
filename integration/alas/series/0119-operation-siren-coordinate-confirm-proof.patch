@@ -1,0 +1,24 @@
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+index d52ca5c..4798e42 100644
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -283,12 +283,18 @@ class StorageHandler(OSMapOperation, StorageLogger):
+             semantic_adapter.refresh_frame()
+             semantic_adapter.click_operation_siren_storage_detail_checkout()
+             transition_timer = Timer(30, count=1).start()
++            checkout_confirmed = False
+             for _ in self.loop():
+                 if semantic_adapter.operation_siren_storage_checkout_prompt_visible():
+                     semantic_adapter.click_operation_siren_storage_checkout_confirm()
++                    checkout_confirmed = True
+                     continue
+                 pinned = self.get_zone_pinned()
+-                if pinned is not None and self.pinned_to_name(pinned) == item:
++                if (
++                    checkout_confirmed
++                    and pinned is not None
++                    and self.pinned_to_name(pinned) == item
++                ):
+                     break
+                 if transition_timer.reached():
+                     raise SemanticGateClosed(

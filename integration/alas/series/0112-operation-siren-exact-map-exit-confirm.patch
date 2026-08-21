@@ -1,0 +1,89 @@
+diff --git a/module/os/map_operation.py b/module/os/map_operation.py
+index 07a1c9e..e196960 100644
+--- a/module/os/map_operation.py
++++ b/module/os/map_operation.py
+@@ -239,6 +239,47 @@ class OSMapOperation(MapOrderHandler, MissionHandler, PortHandler, StorageHandle
+             out: is_in_map, zone that you came from
+         """
+         logger.hr('Map exit')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.operation_siren_post_search_loot_visible()
++        ):
++            semantic_adapter.click_operation_siren_post_search_loot_back()
++            for _ in range(20):
++                self.device.sleep(0.25)
++                semantic_adapter.refresh_frame()
++                if not semantic_adapter.operation_siren_post_search_loot_visible():
++                    break
++            else:
++                from alas_headless import SemanticGateClosed
++                raise SemanticGateClosed(
++                    'operation siren post-search loot overlay did not close'
++                )
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.operation_siren_obscure_exit_passage_position()
++            is not None
++        ):
++            from alas_headless import SemanticGateClosed
++
++            self.handle_os_map_fleet_lock(enable=False)
++            for _ in range(8):
++                try:
++                    semantic_adapter.click_operation_siren_obscure_exit_passage()
++                except SemanticGateClosed as exc:
++                    if 'outside safe view' not in str(exc):
++                        raise
++                    semantic_adapter.operation_siren_obscure_exit_camera_swipe()
++                    continue
++                self.wait_until_walk_stable(
++                    confirm_timer=Timer(1.5, count=4),
++                    walk_out_of_step=False,
++                )
++                break
++            else:
++                raise SemanticGateClosed(
++                    'operation siren obscure exit passage did not become actionable'
++                )
+         confirm_timer = Timer(1, count=2)
+         changed = False
+         for _ in self.loop():
+@@ -255,14 +296,32 @@ class OSMapOperation(MapOrderHandler, MissionHandler, PortHandler, StorageHandle
+             # Click
+             if self.appear_then_click(MAP_EXIT, offset=(20, 20), interval=3):
+                 continue
+-            if self.handle_popup_confirm('MAP_EXIT'):
+-                self.interval_reset(MAP_EXIT)
+-                changed = True
+-                continue
++            if semantic_adapter is not None:
++                semantic_adapter.refresh_frame()
++                receipt = (
++                    semantic_adapter
++                    .try_click_operation_siren_map_exit_confirm()
++                )
++                if receipt is not None:
++                    self.interval_reset(MAP_EXIT)
++                    changed = True
++                    continue
++            else:
++                if self.handle_popup_confirm('MAP_EXIT'):
++                    self.interval_reset(MAP_EXIT)
++                    changed = True
++                    continue
+             if self.appear_then_click(AUTO_SEARCH_REWARD, offset=(50, 50)):
+                 # Sometimes appeared
+                 self.device.screenshot_interval_set()
+                 continue
++            if (
++                semantic_adapter is not None
++                and semantic_adapter.operation_siren_post_search_loot_visible()
++            ):
++                semantic_adapter.click_operation_siren_post_search_loot_back()
++                self.interval_reset(MAP_EXIT)
++                continue
+             if self.handle_map_event():
+                 self.interval_reset(MAP_EXIT)
+                 changed = True

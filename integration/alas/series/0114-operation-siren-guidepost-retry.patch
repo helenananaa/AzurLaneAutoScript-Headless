@@ -1,0 +1,69 @@
+diff --git a/module/os/map.py b/module/os/map.py
+index 4976dd5..835149a 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -803,29 +803,42 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+ 
+             logger.info(f'Found exact question mark on {target}')
+             self.handle_info_bar()
+-            if target_kind == 'guidepost':
+-                semantic_session.click_operation_siren_radar_guidepost(target)
+-            else:
+-                semantic_session.click_operation_siren_relative_grid(
+-                    target,
+-                    prefer_adjacent_event=True,
+-                )
+-            with self.config.temporary(STORY_ALLOW_SKIP=False):
+-                result = self.wait_until_walk_stable(
+-                    drop=drop,
+-                    walk_out_of_step=False,
+-                    confirm_timer=Timer(1.5, count=4),
++            attempts = 3 if target_kind == 'guidepost' else 1
++            for attempt in range(attempts):
++                if target_kind == 'guidepost':
++                    semantic_session.click_operation_siren_radar_guidepost(target)
++                else:
++                    semantic_session.click_operation_siren_relative_grid(
++                        target,
++                        prefer_adjacent_event=True,
++                    )
++                with self.config.temporary(STORY_ALLOW_SKIP=False):
++                    result = self.wait_until_walk_stable(
++                        drop=drop,
++                        walk_out_of_step=False,
++                        confirm_timer=Timer(1.5, count=4),
++                    )
++                if 'akashi' in result:
++                    self._solved_map_event.add('is_akashi')
++                    return True
++                if 'event' in result:
++                    self._solved_map_event.add('is_semantic_question')
++                    self.os_auto_search_run(drop=drop)
++                    return True
++                if target_kind == 'guidepost' and attempt + 1 < attempts:
++                    semantic_session.refresh_frame()
++                    remaining = set(
++                        semantic_session.operation_siren_radar_targets('guidepost')
++                    )
++                    if target in remaining:
++                        logger.warning(
++                            f'Exact guidepost click was swallowed; retry {attempt + 2}/{attempts}'
++                        )
++                        continue
++                logger.warning(
++                    f'Arrive exact question with unexpected result: {result}, expected: {target}'
+                 )
+-            if 'akashi' in result:
+-                self._solved_map_event.add('is_akashi')
+-                return True
+-            if 'event' in result:
+-                self._solved_map_event.add('is_semantic_question')
+-                self.os_auto_search_run(drop=drop)
+-                return True
+-            logger.warning(
+-                f'Arrive exact question with unexpected result: {result}, expected: {target}'
+-            )
++                break
+             return False
+ 
+         for _ in range(3):
