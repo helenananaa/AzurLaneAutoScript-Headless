@@ -22,6 +22,7 @@ from alas_headless.semantic_oracle import (
     ObserverTransportError,
     SemanticGateClosed,
     SemanticOracle,
+    SemanticTargetMissing,
     SemanticTextTarget,
     SemanticToggleTarget,
     RetirementNoCandidateReceipt,
@@ -9280,6 +9281,14 @@ class RetirementSemanticOracleTests(unittest.TestCase):
 
 
 class OperationSirenSemanticOracleTests(unittest.TestCase):
+    def test_map_exit_owner_unmounted_is_an_idempotent_missing_target(self):
+        oracle = make_oracle(FakeBackend([]))
+
+        with self.assertRaisesRegex(
+            SemanticTargetMissing, "local-map identity is absent"
+        ):
+            oracle.click_operation_siren_map_exit()
+
     def test_storage_controls_accept_delegated_overlay_raycast(self):
         local_map_root = "root/OverlayCamera/Overlay/UIMain/top/adapt/"
         inventory = make_button(
@@ -9494,6 +9503,97 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(SemanticGateClosed, "map anchor"):
             make_oracle(backend).operation_siren_current_fleet_defeated()
+
+    def test_low_resolve_prompt_requires_exact_message_and_cancel(self):
+        path = (
+            "root/UICamera/Canvas/UIMain/Msgbox(Clone)/window/"
+            "button_container/custom_button_2(Clone)"
+        )
+        backend = FakeBackend(
+            [make_button("custom_button_2(Clone)", path, x=640, y=526)]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "当前舰队士气过低，无法与强敌战斗！\n"
+                    "提示：取得任意战斗胜利均可恢复舰队的士气。",
+                    "root/UICamera/Canvas/UIMain/Msgbox(Clone)/window/"
+                    "msg_panel/content",
+                )
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.operation_siren_low_resolve_prompt_visible())
+        receipt = oracle.click_operation_siren_low_resolve_cancel()
+
+        self.assertEqual(receipt.semantic_id, "os/combat/low-resolve/cancel")
+        self.assertEqual(backend.taps, [(640, 526)])
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "当前舰队状态异常。",
+                    "root/UICamera/Canvas/UIMain/Msgbox(Clone)/window/"
+                    "msg_panel/content",
+                )
+            ]
+        )
+        self.assertFalse(oracle.operation_siren_low_resolve_prompt_visible())
+
+    def test_radar_boss_click_accepts_exact_overlapped_shadow(self):
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/"
+                    "other/fleet_bar/text_selected/x",
+                    "4",
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/"
+                    "cells/cell_8_8/attachments/enemy_9/live/char/shadow",
+                    "shadow",
+                    {"left": 600, "top": 310, "right": 680, "bottom": 390},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+        oracle.operation_siren_radar_targets = mock.Mock(return_value=((0, 0),))
+
+        receipt = oracle.click_operation_siren_radar_boss((0, 0))
+
+        self.assertEqual(receipt.semantic_id, "os/map/boss/relative/0/0")
+        self.assertEqual(backend.taps, [(640, 350)])
+
+    def test_radar_boss_click_rejects_ambiguous_overlapped_shadows(self):
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/"
+                    "other/fleet_bar/text_selected/x",
+                    "4",
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/"
+                    "cells/cell_8_8/attachments/enemy_9/live/char/shadow",
+                    "shadow",
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/"
+                    "cells/cell_9_8/attachments/enemy_10/live/char/shadow",
+                    "shadow",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+        oracle.operation_siren_radar_targets = mock.Mock(return_value=((0, 0),))
+
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            oracle.click_operation_siren_radar_boss((0, 0))
+        self.assertEqual(backend.taps, [])
 
     def test_current_fleet_repair_uses_left_portrait_agony(self):
         backend = FakeBackend(

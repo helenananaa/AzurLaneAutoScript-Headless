@@ -2924,3 +2924,28 @@ See [G8 real ALAS reward and commission validation](g8-alas-reward-commission-va
 - `OpsiObscure` is promoted from `B` to `L`. `ForceRun=true` continuous looping
   and the complete abnormal-state/value matrix remain open, so this is not an
   `F` claim.
+
+### Operation Siren monthly-boss defeat recovery hardened
+
+- The normal Arbiter room now uses the unique typed boss radar target for
+  direct attacks and exact typed grid steps while the target is outside the
+  safe viewport. It no longer converts a stale legacy radar coordinate into a
+  boss click.
+- A defeated fleet is recognized independently through the exact low-resolve
+  prompt/map marker or the left portrait repair marker. The one-button prompt
+  is cancelled atomically and the fleet is remembered unavailable for the
+  remainder of the session, so timeout and flagship-loss defeats do not depend
+  on HP reaching zero.
+- Real runs rotated Fleet 4, 2, 3, and 1 after each became unavailable and
+  reached the all-fleets-exhausted branch. A separate passed bounded receipt
+  re-entered the normal room, exited it, returned to the ordinary map, and
+  preserved the failed-attempt scheduling branch. Full port recovery was also
+  observed live, including typed Gibraltar repair and four-fleet low-resolve
+  rechecks.
+- Patch member `0124-operation-siren-month-boss-recovery.patch` applies to clean
+  upstream `81ccf63b`; all changed upstream Python files compile. The focused
+  adapter/oracle/series/matrix suite passes 596 tests, and the pixel inventory
+  reports zero unclassified accesses and no Android input injection.
+- `OpsiMonthBoss` remains `B`: this account still cannot prove a successful
+  normal kill/reward stack or the hard-mode combat path, so those conditions
+  are not promoted to `F`.

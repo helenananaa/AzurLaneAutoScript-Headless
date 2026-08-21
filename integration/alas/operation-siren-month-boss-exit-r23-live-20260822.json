@@ -1,0 +1,70 @@
+{
+  "schema": "alas-headless.operation-siren-month-boss-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 7889,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "Mode": "normal",
+    "CheckAdaptability": true,
+    "ForceRun": true,
+    "Filter": "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1"
+  },
+  "mission_difficulties": [
+    "normal"
+  ],
+  "adaptability": [],
+  "globe_targets": [
+    {
+      "zone": 154,
+      "returned": true
+    }
+  ],
+  "room_entries": [
+    {
+      "is_normal": true,
+      "returned": null,
+      "elapsed_seconds": 13.078
+    }
+  ],
+  "fleet_selections": [],
+  "boss_clear_results": [
+    {
+      "returned": false,
+      "kwargs": {
+        "has_fleet_step": true,
+        "is_month": true
+      },
+      "elapsed_seconds": 61.172
+    }
+  ],
+  "repair_results": [
+    {
+      "returned": null
+    }
+  ],
+  "resolve_results": [
+    {
+      "returned": null
+    }
+  ],
+  "delay_calls": [
+    {
+      "args": [],
+      "kwargs": {
+        "is_normal": true,
+        "result": false
+      }
+    }
+  ],
+  "task_result": true,
+  "elapsed_seconds": 180.843,
+  "final_config": {
+    "NextRun": "2020-01-01 00:00:00"
+  },
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true
+}

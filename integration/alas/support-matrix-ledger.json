@@ -8379,7 +8379,7 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiMonthBoss",
-      "note": "Mode、CheckAdaptability、ForceRun 运行时消费与舰队过滤已离线等价；实机已闭环普通 Boss 进入、预战、战败结算，并将地图小人旁 damage/1 低士气与左栏 agony 沉没大修分离，完成舰队轮换及全队耗尽返回；成功击杀结算和困难 Boss 未闭环",
+      "note": "模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通 Boss 已实机闭环精确雷达分步接敌、战败、低士气/沉没分离、四队轮换、全队耗尽、退出与恢复调度，成功击杀结算及困难 Boss 未闭环",
       "status": "B"
     },
     {
@@ -11306,9 +11306,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "70ef732790f2dfd4bf01046f6b069ce55afc692fd43daaf954ba6d1bc8d020f0",
-      "manifest_sha256": "d39c96e1c8719848222395db3700c7f33eb2c455a37f56e751970d405bd680c0",
-      "member_count": 70
+      "combined_sha256": "c13dfdfdd0eb60b5763b62ef6e4398dd30d269ba934296d66d9efcc2dac0900f",
+      "manifest_sha256": "8508b240059684ca0e4d646782434de9fc6b38f1d2c9e0758946715f6932bc46",
+      "member_count": 71
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

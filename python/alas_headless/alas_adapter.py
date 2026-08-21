@@ -1244,6 +1244,7 @@ class AlasSemanticAdapter:
         self._operation_siren_auto_search_transition_until = 0.0
         self._operation_siren_auto_search_active = False
         self._operation_siren_combat_active = False
+        self._operation_siren_defeated_fleets: set[int] = set()
         self._meta_beacon_active = False
         self._operation_siren_pending_order: Optional[str] = None
         self._exercise_pending = False
@@ -6735,6 +6736,9 @@ class AlasSemanticAdapter:
 
     def operation_siren_current_fleet_defeated(self) -> bool:
         self._package_gate()
+        fleet = self.oracle.operation_siren_current_fleet()
+        if fleet in self._operation_siren_defeated_fleets:
+            return True
         return self.oracle.operation_siren_current_fleet_defeated()
 
     def operation_siren_current_fleet_needs_repair(self) -> bool:
@@ -6749,6 +6753,17 @@ class AlasSemanticAdapter:
         self._package_gate()
         return self.oracle.operation_siren_precombat_info_visible()
 
+    def operation_siren_low_resolve_prompt_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.operation_siren_low_resolve_prompt_visible()
+
+    def click_operation_siren_low_resolve_cancel(self) -> ActionReceipt:
+        self._package_gate()
+        fleet = self.oracle.operation_siren_current_fleet()
+        receipt = self.oracle.click_operation_siren_low_resolve_cancel()
+        self._operation_siren_defeated_fleets.add(fleet)
+        return receipt
+
     def click_operation_siren_precombat_info(self) -> ActionReceipt:
         self._package_gate()
         return self.oracle.click_operation_siren_precombat_info()
@@ -6761,6 +6776,53 @@ class AlasSemanticAdapter:
 
     def operation_siren_combat_committed(self) -> bool:
         return self._operation_siren_combat_active
+
+    def begin_operation_siren_boss_combat(self) -> None:
+        """Own a boss encounter reached directly from the local map.
+
+        Operation Siren bosses can enter CombatUI without mounting a
+        pre-combat start button.  Require an exact typed boss radar target
+        before arming result ownership so the shared combat result hierarchy
+        cannot fall through to the Daily task handler.
+        """
+
+        self._package_gate()
+        if not self.oracle.operation_siren_radar_targets("boss"):
+            raise SemanticGateClosed(
+                "operation siren boss combat requires an exact boss target"
+            )
+        self._operation_siren_combat_active = True
+
+    def operation_siren_reward_visible(self) -> bool:
+        """Return whether a standalone exact AwardInfo stack covers the map."""
+
+        self._package_gate()
+        return self.oracle.award_info_page_visible()
+
+    def click_operation_siren_reward_close(self) -> ActionReceipt:
+        """Close one exact standalone boss reward without pixel fallbacks."""
+
+        self._package_gate()
+        if not self._operation_siren_allows_passive_probe():
+            raise SemanticGateClosed("operation siren reward owner is absent")
+        if not self.oracle.award_info_page_visible():
+            raise SemanticGateClosed("operation siren reward page is absent")
+        targets = tuple(
+            semantic_id
+            for semantic_id in (
+                "reward/award-info/close",
+                "reward/award-info1/close",
+            )
+            if self.oracle.enabled(semantic_id)
+        )
+        if len(targets) != 1:
+            raise SemanticGateClosed(
+                "operation siren reward close target is absent or ambiguous"
+            )
+        return replace(
+            self.oracle.click(targets[0]),
+            semantic_id="os/combat/reward/close",
+        )
 
     def operation_siren_radar_targets(
         self, target_kind: str
@@ -6775,6 +6837,12 @@ class AlasSemanticAdapter:
         return self.oracle.click_operation_siren_radar_guidepost(
             relative_position
         )
+
+    def click_operation_siren_radar_boss(
+        self, relative_position: Tuple[int, int]
+    ) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_operation_siren_radar_boss(relative_position)
 
     def operation_siren_obscure_exit_passage_position(
         self,
@@ -12706,6 +12774,13 @@ class AlasSemanticSession:
     def operation_siren_precombat_info_visible(self) -> bool:
         return self.open().operation_siren_precombat_info_visible()
 
+    def operation_siren_low_resolve_prompt_visible(self) -> bool:
+        return self.open().operation_siren_low_resolve_prompt_visible()
+
+    def click_operation_siren_low_resolve_cancel(self) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().click_operation_siren_low_resolve_cancel()
+
     def click_operation_siren_precombat_info(self) -> ActionReceipt:
         return self.open().click_operation_siren_precombat_info()
 
@@ -12715,10 +12790,33 @@ class AlasSemanticSession:
     def operation_siren_combat_committed(self) -> bool:
         return self.open().operation_siren_combat_committed()
 
+    def begin_operation_siren_boss_combat(self) -> None:
+        self.open().begin_operation_siren_boss_combat()
+
+    def operation_siren_reward_visible(self) -> bool:
+        return self.open().operation_siren_reward_visible()
+
+    def click_operation_siren_reward_close(self) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().click_operation_siren_reward_close()
+
+    def try_click_operation_siren_reward_close(self) -> Optional[ActionReceipt]:
+        """Atomically re-observe and close, or accept a passive unmount."""
+
+        self.refresh_frame()
+        if not self.open().operation_siren_reward_visible():
+            return None
+        return self.open().click_operation_siren_reward_close()
+
     def operation_siren_radar_targets(
         self, target_kind: str
     ) -> Tuple[Tuple[int, int], ...]:
         return self.open().operation_siren_radar_targets(target_kind)
+
+    def click_operation_siren_radar_boss(
+        self, relative_position: Tuple[int, int]
+    ) -> ActionReceipt:
+        return self.open().click_operation_siren_radar_boss(relative_position)
 
     def click_operation_siren_radar_guidepost(
         self, relative_position: Tuple[int, int]

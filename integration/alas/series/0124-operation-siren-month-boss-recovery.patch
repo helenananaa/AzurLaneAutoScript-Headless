@@ -1,0 +1,340 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+index 0ec58a0f..6ffeda35 100644
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -3,6 +3,8 @@ import re
+ import inflection
+ import numpy as np
+ 
++from alas_headless import SemanticGateClosed
++
+ from module.base.button import Button, ButtonGrid
+ from module.base.filter import Filter
+ from module.base.timer import Timer
+@@ -67,7 +69,9 @@ FLEET_LOW_RESOLVE = Button(
+ 
+ 
+ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+-    def semantic_current_fleet_unavailable(self, attempts=5):
++    def semantic_current_fleet_unavailable(
++        self, attempts=5, clear_samples_required=3
++    ):
+         """Return ``(needs_repair, low_resolve)`` in semantic mode.
+ 
+         Fleet selection publishes its selected number before the left portrait
+@@ -80,6 +84,7 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+ 
+         from alas_headless import SemanticGateClosed
+ 
++        clear_samples = 0
+         for attempt in range(attempts):
+             needs_repair = (
+                 semantic_session.operation_siren_current_fleet_needs_repair()
+@@ -87,16 +92,26 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             if needs_repair:
+                 return True, False
+             try:
+-                return (
+-                    False,
+-                    semantic_session.operation_siren_current_fleet_defeated(),
++                low_resolve = (
++                    semantic_session.operation_siren_current_fleet_defeated()
+                 )
++                if low_resolve:
++                    return False, True
++                clear_samples += 1
++                if clear_samples >= clear_samples_required:
++                    return False, False
+             except SemanticGateClosed:
+                 if attempt >= attempts - 1:
+                     raise
++                clear_samples = 0
++            if attempt < attempts - 1:
+                 self.device.sleep(0.5)
+                 semantic_session.refresh_frame()
+ 
++        raise SemanticGateClosed(
++            'Operation Siren fleet availability did not become stable'
++        )
++
+     def _goto(self, location, expected=''):
+         super()._goto(location, expected)
+         self.predict_radar()
+@@ -349,7 +364,13 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             # it does not need the legacy pixel/homography stability loop.
+             # Keep the same bounded confirmation delay for ordinary movement,
+             # and hand a boss encounter to the existing combat state machine.
++            from alas_headless import SemanticGateClosed
++            self.device.stuck_record_clear()
+             for _ in self.loop(skip_first=skip_first_screenshot):
++                if semantic_session.operation_siren_low_resolve_prompt_visible():
++                    semantic_session.click_operation_siren_low_resolve_cancel()
++                    result.add('fleet_unavailable')
++                    break
+                 if self.combat_appear():
+                     self.combat(
+                         expected_end=abyssal_expected_end,
+@@ -358,6 +379,26 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                     )
+                     result.add('event')
+                     break
++                unavailable = False
++                if self.appear(MAP_EXIT, offset=(20, 20)):
++                    try:
++                        unavailable = any(
++                            self.semantic_current_fleet_unavailable(
++                                attempts=1, clear_samples_required=1
++                            )
++                        )
++                    except SemanticGateClosed as exc:
++                        if str(exc) != (
++                            'operation siren selected-fleet map anchor is '
++                            'absent or ambiguous'
++                        ):
++                            raise
++                if unavailable:
++                    logger.warning(
++                        'Fleet became unavailable while approaching locked boss'
++                    )
++                    result.add('fleet_unavailable')
++                    break
+                 if semantic_session.operation_siren_map_visible():
+                     if confirm_timer.reached():
+                         break
+@@ -887,22 +928,64 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+ 
+         if semantic_session is not None:
+             while 1:
++                unavailable = False
++                if is_month:
++                    try:
++                        unavailable = any(
++                            self.semantic_current_fleet_unavailable()
++                        )
++                    except SemanticGateClosed as exc:
++                        if str(exc) != (
++                            'operation siren selected-fleet map anchor is '
++                            'absent or ambiguous'
++                        ):
++                            raise
++                        logger.info(
++                            'Defer overlapped fleet state to exact boss prompt'
++                        )
++                if unavailable:
++                    logger.warning(
++                        'Current fleet became unavailable before boss movement'
++                    )
++                    return
+                 grids = list(
+                     semantic_session.operation_siren_radar_targets('boss')
+                 )
+                 if not grids:
+                     logger.info('No boss to goto, stop')
+                     break
+-                grid = np.add(location_ensure(grids[0]), location)
+-                grid = point_limit(grid, area=(-4, -2, 3, 2))
+-                if has_fleet_step:
+-                    grid = limit_walk(grid)
+-                if tuple(grid) == (0, 0):
+-                    logger.info(f'Arrive destination: boss {location}')
+-                    break
+-                semantic_session.click_operation_siren_relative_grid(
+-                    tuple(int(value) for value in grid),
+-                    prefer_adjacent_event=True,
++                if len(grids) != 1:
++                    raise SemanticGateClosed(
++                        'Operation Siren boss target is ambiguous'
++                    )
++                target = tuple(
++                    int(value)
++                    for value in np.add(location_ensure(grids[0]), location)
++                )
++                if not (-4 <= target[0] <= 3 and -2 <= target[1] <= 2):
++                    step = point_limit(target, area=(-4, -2, 3, 2))
++                    if has_fleet_step:
++                        step = limit_walk(step)
++                    logger.info(
++                        f'Boss target {target} is outside the safe viewport; '
++                        f'move by exact grid {tuple(step)}'
++                    )
++                    semantic_session.click_operation_siren_relative_grid(
++                        tuple(int(value) for value in step)
++                    )
++                    self.wait_until_walk_stable(
++                        confirm_timer=Timer(4, count=6),
++                        walk_out_of_step=False,
++                        drop=drop,
++                    )
++                    continue
++                if target == (0, 0):
++                    logger.info(
++                        f'Boss shares the fleet cell; click its exact event {location}'
++                    )
++                semantic_session.begin_operation_siren_boss_combat()
++                semantic_session.click_operation_siren_radar_boss(
++                    target
+                 )
+                 self.wait_until_walk_stable(
+                     confirm_timer=Timer(4, count=6),
+@@ -1090,9 +1173,20 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                 if not in_semantic_boss_room:
+                     self.handle_os_map_fleet_lock(enable=False)
+                 if in_semantic_boss_room:
+-                    fleet_defeated = any(
+-                        self.semantic_current_fleet_unavailable()
+-                    )
++                    try:
++                        fleet_defeated = any(
++                            self.semantic_current_fleet_unavailable()
++                        )
++                    except SemanticGateClosed as exc:
++                        if str(exc) != (
++                            'operation siren selected-fleet map anchor is '
++                            'absent or ambiguous'
++                        ):
++                            raise
++                        logger.info(
++                            'Defer overlapped fleet state to exact boss prompt'
++                        )
++                        fleet_defeated = False
+                 else:
+                     fleet_defeated = self.fleet_low_resolve_appear()
+                 if fleet_defeated:
+@@ -1182,6 +1276,12 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+ 
+         logger.critical('Unable to clear boss, fleets exhausted')
+         semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            # The fourth defeat can return to the ordinary map between the
++            # last walk-stable sample and this cleanup branch.  Revalidate the
++            # exact local-map shell before deciding that a retained-room exit
++            # click is still owned.
++            semantic_session.refresh_frame()
+         if (
+             semantic_session is not None
+             and self.appear(MAP_EXIT, offset=(20, 20))
+diff --git a/module/os/map.py b/module/os/map.py
+index 0430ac23..5441dda0 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -104,6 +104,26 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 self.ui_goto_main()
+             self.ui_ensure(page_os)
+ 
++        if semantic_adapter is not None:
++            if semantic_adapter.operation_siren_low_resolve_prompt_visible():
++                logger.info('Recover retained Operation Siren low-resolve prompt')
++                semantic_adapter.click_operation_siren_low_resolve_cancel()
++                self.device.sleep(0.5)
++                semantic_adapter.refresh_frame()
++            for _ in range(8):
++                if not semantic_adapter.operation_siren_reward_visible():
++                    break
++                if not self.handle_map_get_items():
++                    raise SemanticGateClosed(
++                        'Operation Siren retained reward was not handled'
++                    )
++                self.device.sleep(0.5)
++                semantic_adapter.refresh_frame()
++            else:
++                raise SemanticGateClosed(
++                    'Operation Siren retained reward did not close'
++                )
++
+         # Init
+         self.zone_init()
+ 
+diff --git a/module/os/map_fleet_selector.py b/module/os/map_fleet_selector.py
+index 666b4790..a262a515 100644
+--- a/module/os/map_fleet_selector.py
++++ b/module/os/map_fleet_selector.py
+@@ -170,7 +170,7 @@ class FleetSelector:
+         Returns:
+             bool: If fleet switched.
+         """
+-        from alas_headless import current_semantic_session
++        from alas_headless import SemanticGateClosed, current_semantic_session
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
+             semantic_session.refresh_frame()
+@@ -178,17 +178,51 @@ class FleetSelector:
+             if current == index:
+                 logger.info(f'It is fleet {index} already')
+                 return False
+-            if not semantic_session.operation_siren_fleet_selector_open():
+-                semantic_session.click_operation_siren_fleet_bar()
+-                for _ in self.main.loop():
++
++            def refresh_selector_state():
++                self.main.device.sleep(0.5)
++                semantic_session.refresh_frame()
++                return (
++                    semantic_session.operation_siren_fleet_selector_open(),
++                    semantic_session.operation_siren_current_fleet(),
++                )
++
++            def open_selector():
++                for attempt in range(3):
+                     if semantic_session.operation_siren_fleet_selector_open():
++                        return
++                    semantic_session.click_operation_siren_fleet_bar()
++                    for _ in range(6):
++                        opened, selected = refresh_selector_state()
++                        if opened:
++                            return
++                        if selected != current:
++                            raise SemanticGateClosed(
++                                'Operation Siren fleet changed while opening selector'
++                            )
++                    logger.warning(
++                        f'Fleet selector open click was swallowed, retry {attempt + 1}/3'
++                    )
++                raise SemanticGateClosed(
++                    'Operation Siren fleet selector did not open after bounded retries'
++                )
++
++            for attempt in range(3):
++                open_selector()
++                semantic_session.click_operation_siren_fleet_selector(index)
++                for _ in range(6):
++                    opened, selected = refresh_selector_state()
++                    if not opened:
++                        if selected == index:
++                            logger.info(f'Ensure fleet to be {index}')
++                            return True
+                         break
+-            semantic_session.click_operation_siren_fleet_selector(index)
+-            for _ in self.main.loop():
+-                if not semantic_session.operation_siren_fleet_selector_open():
+-                    break
+-            logger.info(f'Ensure fleet to be {index}')
+-            return True
++                logger.warning(
++                    f'Fleet {index} selection was not confirmed, retry {attempt + 1}/3'
++                )
++            raise SemanticGateClosed(
++                f'Operation Siren fleet {index} was not selected after bounded retries'
++            )
+ 
+         confirm_timer = Timer(1.5, count=5).start()
+         main = self.main
+diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
+index c339c4af..3cfc57a9 100644
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -28,6 +28,15 @@ class MapEventHandler(EnemySearchingHandler):
+     ash_popup_canceled = False
+ 
+     def handle_map_get_items(self, interval=2, drop=None):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.operation_siren_reward_visible()
++        ):
++            logger.info('Exact Operation Siren reward -> close')
++            semantic_adapter.try_click_operation_siren_reward_close()
++            return True
++
+         if self.is_in_map():
+             return False
+ 

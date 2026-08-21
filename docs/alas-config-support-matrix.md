@@ -439,7 +439,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | L | 默认主路径已实机完成坐标消耗、100 行动力入场、侵蚀 6 Boss、奖励、不可逆退出与利维浦大修；UseLogger 和自由舰队过滤全空间未逐项实机 |
 | 49 | OpsiArchive | Scheduler, OpsiFleet | L | T2 既有 9 任务与 T4 购买/全链实机闭环；Fleet=1、Submarine=false 已证明，其他舰队/潜艇值与异常全空间仍缺 |
 | 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | L | 实机以精确世界地图标题/类型发现 93、121 两处要塞；93 区闭环 `100 -> 20 -> 0%` 舰队轮换，121 区闭环进入、战斗、0% 收束、回港大修和四队低士气复查；完整舰队过滤与 ForceRun 分支仍未逐值实机覆盖 |
-| 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通 Boss 已实机闭环战败、低士气/沉没分离、舰队轮换和全队耗尽失败返回，成功击杀结算及困难 Boss 未闭环 |
+| 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通 Boss 已实机闭环精确雷达分步接敌、战败、低士气/沉没分离、四队轮换、全队耗尽、退出与恢复调度，成功击杀结算及困难 Boss 未闭环 |
 | 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | B | HazardLevel、Fleet/Submarine 已离线等价；行动力保留、选区、真实动作和循环未闭环 |
 | 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | B | TargetZone、Fleet/Submarine 已离线等价；真实动作、选区和循环未闭环 |
 | 54 | OpsiCrossMonth | Scheduler | B | 非月末安全跳过；月末执行、重置和跨月恢复未验证 |
@@ -549,7 +549,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | OpsiAbyssal | `ForceRun` | L | 默认路径已闭环；仍缺 UseLogger、ForceRun 两值和自由舰队过滤全空间 |
 | OpsiFleetFilter | `Filter`（默认含 Fleet-4、CallSubmarine、Fleet-2/3/1） | B | 语法、顺序、潜艇、重复、不可用与非法规则已离线等价；真实舰队可用性、切换结果和战斗仍缺 |
 | OpsiStronghold | `ForceRun` | L | 默认值主路径已在 93/121 两区完成要塞识别、进入、舰队轮换、清场及战后修复；仍需补 `true/false` 两值对侦察/潜艇调度排除的独立实机对照 |
-| OpsiMonthBoss | `Mode`=`normal/normal_hard`; `CheckAdaptability`; `ForceRun` | B | 两模式与两个开关已回放；普通房间已实机完成战败、低士气/沉没分离、轮换和全队耗尽失败返回，成功击杀结算、困难战斗与奖励仍缺 |
+| OpsiMonthBoss | `Mode`=`normal/normal_hard`; `CheckAdaptability`; `ForceRun` | B | 两模式与两个开关已回放；普通房间已实机完成精确雷达分步接敌、战败、低士气/沉没分离、四队轮换、全队耗尽、退出与失败调度，成功击杀结算、困难战斗与奖励仍缺 |
 | OpsiMeowfficerFarming | `HazardLevel`=3/4/5/6/10; `TargetZone`; `ActionPointPreserve` | B | 五危险等级、自动/显式区域、行动力边界、舰队/潜艇、循环与停止 |
 | OpsiHazard1Leveling | `TargetZone`=0/44/22 | B | 三目标值、不可用区域、舰队/潜艇、自动寻敌和循环停止 |
 | OpsiArchive | 无独立组，复用 Scheduler 与 OpsiFleet | L | T2/T4 主路径、真实购买、任务创建、进入与清图已闭环；其余舰队/潜艇值和异常分支仍缺 |

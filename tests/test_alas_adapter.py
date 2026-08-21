@@ -6706,6 +6706,70 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertTrue(adapter.operation_siren_auto_search_transition_active())
         self.assertEqual(gate_calls, [True, True])
 
+    def test_operation_siren_boss_combat_requires_exact_target_and_owns_result(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.operation_siren_radar_targets = Mock(return_value=())
+
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "requires an exact boss target"
+        ):
+            adapter.begin_operation_siren_boss_combat()
+        self.assertFalse(adapter.operation_siren_combat_committed())
+
+        oracle.operation_siren_radar_targets.return_value = ((0, -2),)
+        adapter.begin_operation_siren_boss_combat()
+
+        self.assertTrue(adapter.operation_siren_combat_committed())
+        self.assertEqual(gate_calls, [True, True])
+        oracle.operation_siren_radar_targets.assert_called_with("boss")
+
+    def test_operation_siren_low_resolve_cancel_remembers_defeated_fleet(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_current_fleet = Mock(return_value=4)
+        receipt = oracle.click_receipt("os/combat/low-resolve/cancel")
+        oracle.click_operation_siren_low_resolve_cancel = Mock(
+            return_value=receipt
+        )
+        oracle.operation_siren_current_fleet_defeated = Mock(
+            side_effect=AssertionError("remembered fleet must not be re-probed")
+        )
+
+        self.assertEqual(
+            adapter.click_operation_siren_low_resolve_cancel(), receipt
+        )
+        self.assertTrue(adapter.operation_siren_current_fleet_defeated())
+        oracle.click_operation_siren_low_resolve_cancel.assert_called_once_with()
+
+    def test_operation_siren_reward_close_requires_owner_and_exact_target(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.award_info_page_visible = Mock(return_value=True)
+        oracle.enabled_values = {
+            "reward/award-info/close": True,
+            "reward/award-info1/close": False,
+        }
+
+        with self.assertRaisesRegex(SemanticGateClosed, "owner is absent"):
+            adapter.click_operation_siren_reward_close()
+
+        adapter._operation_siren_combat_active = True
+        receipt = adapter.click_operation_siren_reward_close()
+
+        self.assertEqual(receipt.semantic_id, "os/combat/reward/close")
+        self.assertEqual(oracle.click_calls, ["reward/award-info/close"])
+
+    def test_operation_siren_reward_close_rejects_ambiguous_targets(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._operation_siren_combat_active = True
+        oracle.award_info_page_visible = Mock(return_value=True)
+        oracle.enabled_values = {
+            "reward/award-info/close": True,
+            "reward/award-info1/close": True,
+        }
+
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            adapter.click_operation_siren_reward_close()
+        self.assertEqual(oracle.click_calls, [])
+
     def test_operation_siren_globe_swipe_accepts_unobstructed_map_strip(self):
         adapter, oracle, gate_calls = self.make_adapter()
         oracle.operation_siren_globe_state = Mock(

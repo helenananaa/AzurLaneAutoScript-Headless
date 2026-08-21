@@ -4507,7 +4507,13 @@ class SemanticOracle:
         if value.get("package") != self.fingerprint.package:
             raise SemanticGateClosed("observer package mismatch")
         if value.get("driver_revision") != self.fingerprint.driver_revision:
-            raise SemanticGateClosed("observer driver revision mismatch")
+            raise SemanticGateClosed(
+                "observer driver revision mismatch: observed={0!r}, "
+                "expected={1!r}".format(
+                    value.get("driver_revision"),
+                    self.fingerprint.driver_revision,
+                )
+            )
         if (
             self._integer(value.get("peer_uid"), "peer_uid")
             != self.fingerprint.peer_uid
@@ -11428,6 +11434,90 @@ class SemanticOracle:
             path=target.path,
         )
 
+    def operation_siren_low_resolve_prompt_visible(self) -> bool:
+        """Recognize the exact one-button prompt that forbids another fight."""
+
+        state = self.read_state()
+        suffix = (
+            "Msgbox(Clone)/window/button_container/custom_button_2(Clone)"
+        )
+        cancels = tuple(
+            button
+            for button in state.buttons
+            if button.name == "custom_button_2(Clone)"
+            and button.path.endswith(suffix)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is True
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(cancels) != 1:
+            return False
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed(
+                "operation siren low-resolve prompt snapshots are not coherent"
+            )
+        messages = tuple(
+            item.text.strip()
+            for item in ui_state.texts
+            if item.path.endswith("Msgbox(Clone)/window/msg_panel/content")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        return bool(
+            len(messages) == 1
+            and "舰队士气过低" in messages[0]
+            and "无法与强敌战斗" in messages[0]
+            and "取得任意战斗胜利均可恢复舰队的士气" in messages[0]
+        )
+
+    def click_operation_siren_low_resolve_cancel(self) -> ActionReceipt:
+        if not self.operation_siren_low_resolve_prompt_visible():
+            raise SemanticGateClosed(
+                "operation siren low-resolve prompt is absent"
+            )
+        state = self.read_state()
+        suffix = (
+            "Msgbox(Clone)/window/button_container/custom_button_2(Clone)"
+        )
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == "custom_button_2(Clone)"
+            and button.path.endswith(suffix)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is True
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed(
+                "operation siren low-resolve cancel is ambiguous"
+            )
+        target = matches[0]
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed(
+                "foreground changed before low-resolve cancellation"
+            )
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="os/combat/low-resolve/cancel",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     @staticmethod
     def _operation_siren_current_fleet_from_ui_state(state: UiState) -> int:
         path = (
@@ -12152,6 +12242,103 @@ class SemanticOracle:
             path=target.path,
         )
 
+    def click_operation_siren_radar_boss(
+        self, relative_position: Tuple[int, int]
+    ) -> ActionReceipt:
+        """Click the exact boss shadow relative to the selected fleet anchor."""
+
+        if (
+            not isinstance(relative_position, tuple)
+            or len(relative_position) != 2
+            or any(type(value) is not int for value in relative_position)
+            or max(abs(value) for value in relative_position) > 4
+        ):
+            raise SemanticGateClosed(
+                "operation siren boss position is malformed"
+            )
+        if relative_position not in self.operation_siren_radar_targets("boss"):
+            raise SemanticGateClosed(
+                "operation siren boss target changed before input"
+            )
+        state = self.read_ui_state()
+        fleet = self._operation_siren_current_fleet_from_ui_state(state)
+        fleet_path = f"/LevelGrid/DragLayer/plane/cells/fleet_{fleet}/shadow"
+        anchors = tuple(
+            item
+            for item in state.images
+            if item.name == "shadow"
+            and item.sprite == "shadow"
+            and item.path.endswith(fleet_path)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(anchors) > 1 or (not anchors and relative_position != (0, 0)):
+            raise SemanticGateClosed(
+                "operation siren selected-fleet boss anchor is ambiguous"
+            )
+        expected_x = None
+        expected_y = None
+        if anchors:
+            fleet_bounds = anchors[0].bounds
+            assert fleet_bounds is not None
+            fleet_x = (fleet_bounds.left + fleet_bounds.right) / 2.0
+            fleet_y = (fleet_bounds.top + fleet_bounds.bottom) / 2.0
+            expected_x = fleet_x + relative_position[0] * 99.0
+            expected_y = fleet_y + relative_position[1] * 70.0
+        pattern = re.compile(
+            r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+            r"cell_[0-9]+_[0-9]+/attachments/enemy_[0-9]+/live/char/shadow$"
+        )
+        candidates = []
+        for item in state.images:
+            if (
+                not pattern.fullmatch(item.path)
+                or item.name != "shadow"
+                or item.sprite != "shadow"
+                or not item.active_in_hierarchy
+                or not item.active_and_enabled
+                or item.truncated
+                or item.bounds is None
+            ):
+                continue
+            point = Point(
+                (item.bounds.left + item.bounds.right) / 2.0,
+                (item.bounds.top + item.bounds.bottom) / 2.0,
+            )
+            if expected_x is None or (
+                abs(point.x - expected_x) <= 24.0
+                and abs(point.y - expected_y) <= 24.0
+            ):
+                candidates.append((item, point))
+        if len(candidates) != 1:
+            raise SemanticGateClosed(
+                "operation siren exact boss shadow is absent or ambiguous"
+            )
+        target, point = candidates[0]
+        assert target.bounds is not None
+        if (
+            not target.bounds.contains(point)
+            or not 80.0 <= point.x <= 960.0
+            or not 100.0 <= point.y <= 620.0
+            or self._foreground_component() != self.fingerprint.component
+        ):
+            raise SemanticGateClosed(
+                "operation siren exact boss click is not safe"
+            )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id=(
+                "os/map/boss/relative/"
+                f"{relative_position[0]}/{relative_position[1]}"
+            ),
+            generation=state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def operation_siren_auto_search_state(self) -> str:
         """Return the exact local-map auto-search switch state.
 
@@ -12452,7 +12639,13 @@ class SemanticOracle:
         """Leave a locked special-zone room through its exact exit control."""
 
         if not self.operation_siren_local_map_visible():
-            raise SemanticGateClosed("operation siren local-map identity is absent")
+            # A prior accepted exit can unmount this owner between ALAS'
+            # presence probe and the final target re-read.  Classify that
+            # atomic transition as a missing target so idempotent callers do
+            # not issue a duplicate tap on the ordinary map.
+            raise SemanticTargetMissing(
+                "operation siren local-map identity is absent"
+            )
         state = self.read_state()
         target = self._unique(state, "os/map/exit")
         if not (

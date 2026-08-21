@@ -190,6 +190,12 @@ FLOW_PATHS = {
     "0112-operation-siren-exact-map-exit-confirm.patch": {
         "module/os/map_operation.py",
     },
+    "0124-operation-siren-month-boss-recovery.patch": {
+        "module/os/fleet.py",
+        "module/os/map.py",
+        "module/os/map_fleet_selector.py",
+        "module/os_handler/map_event.py",
+    },
     "0100-tool-flow-ports.patch": {
         "module/config/argument/args.json",
         "module/daemon/benchmark.py",
@@ -395,6 +401,12 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                     "0107-operation-siren-explore-inventory-and-anchor-recover.patch": {
                         "module/os/globe_camera.py",
                         "module/os_handler/storage.py",
+                    },
+                    "0124-operation-siren-month-boss-recovery.patch": {
+                        "module/os/fleet.py",
+                        "module/os/map.py",
+                        "module/os/map_fleet_selector.py",
+                        "module/os_handler/map_event.py",
                     },
                     "0350-meowfficer-dock-training-port.patch": {
                         "module/ui/ui.py"

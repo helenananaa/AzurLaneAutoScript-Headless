@@ -349,6 +349,11 @@
       "order": 70,
       "path": "integration/alas/series/0123-operation-siren-special-pin-ap-recovery.patch",
       "sha256": "3347947cb7b430dd9f42ece9716916884c8dab3359fbe21d9ed08a7c2c26aecc"
+    },
+    {
+      "order": 71,
+      "path": "integration/alas/series/0124-operation-siren-month-boss-recovery.patch",
+      "sha256": "1a7be60f3848ced0f26ce7226e279cd55030c1c170312a3abc2d533fbe238cc5"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",
