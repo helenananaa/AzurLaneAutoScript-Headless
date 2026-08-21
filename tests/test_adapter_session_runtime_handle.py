@@ -607,7 +607,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
 
         self.assertIs(actual, expected)
         self.assertEqual(session._frame_clock.acquire.call_count, 4)
-        self.assertEqual(session._combat_result_transition_until, 0.0)
+        self.assertEqual(session._combat_result_transition_until, 112.0)
 
     def test_combat_automation_switch_is_bound_to_last_exact_state_probe(self):
         session = AlasSemanticSession(

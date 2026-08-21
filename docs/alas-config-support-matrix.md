@@ -427,7 +427,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 38 | Minigame | Scheduler | F | 固定源代码仅声明抚顺挑战；无用户字段，单票实机任务已完整进入、结算、退出、预算耗尽停止并返回主界面 |
 | 39 | PrivateQuarters | Scheduler, PrivateQuarters | M | 蛋糕、玫瑰、互动和 7 个舰船选项均缺适配 |
 | 40 | OpsiGeneral | OpsiGeneral | P | 六字段均已离线等价；真实购买/维修结果、资源 postcondition 和异常恢复仍未闭环 |
-| 41 | OpsiAshBeacon | Scheduler, OpsiAshBeacon | B | 五字段均已离线等价；自动攻击、一击、求助、完整领取和 Boss 结束的实机动作仍未闭环 |
+| 41 | OpsiAshBeacon | Scheduler, OpsiAshBeacon | B | 当前信标的一击模式主路径已实机闭环：200 点创建、三类求助、出击、战斗、两层结算、276085 伤害读取和 30 分钟延后；击杀领奖、档案与非一击分支仍缺独立实证 |
 | 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | Tier 等级选择已离线等价；真实目标列表、出击、战斗和领奖仍受舰队条件限制 |
 | 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | B | ForceRun、LastZone、SpecialRadar、Fleet/Submarine 已离线等价；真实地图导航、舰队/潜艇动作和清区未闭环 |
 | 44 | OpsiShop | Scheduler, OpsiShop | B | 5 个预设和自定义过滤已离线等价；真实购买、刷新、货币 postcondition 与异常恢复仍未闭环 |
@@ -536,7 +536,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
 | OpsiGeneral | `DoRandomMapEvent`; `AkashiShopFilter`; `BuyActionPointLimit`=0..5; `OilLimit`; `RepairThreshold`; `UseLogger` | P | 六字段均已离线等价；真实维修/购买确认、资源 postcondition 与异常恢复仍缺 |
-| OpsiAshBeacon | `AttackMode`=`current/current_dossier`; `DossierAutoAttackMode`; `EnsureFullyCollected`; `OneHitMode`; `RequestAssist` | B | 五字段均已离线等价；点数不足/满、生成、攻击、求助、领取和 Boss 结束的实机闭环仍缺 |
+| OpsiAshBeacon | `AttackMode`=`current/current_dossier`; `DossierAutoAttackMode`; `EnsureFullyCollected`; `OneHitMode`; `RequestAssist` | B | `current + OneHitMode + RequestAssist` 已实机完成生成、求助、攻击、结算、伤害读取和延后；击杀领取、档案自动攻击、非一击与完整领取边界仍缺 |
 | OpsiAshAssist | `Tier` | B | 整数阈值、五次轮换和兜底已离线等价；真实无目标、舰队不可用、出击、战斗和奖励仍缺 |
 | OpsiExplore | `ForceRun`; `LastZone`; `SpecialRadar` | B | 三字段已离线等价；真实地图重置、导航、舰队动作和清区仍缺 |
 | OpsiFleet | `Fleet`=1..4; `Submarine` | B | 四舰队和潜艇真假已在原最终边界离线等价；舰队不可用、真实选中结果、潜艇调用结果及隐藏字段 override 仍需实机闭环 |

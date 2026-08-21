@@ -11383,3 +11383,98 @@ index 624b4021..89692d85 100644
          if not self.map_cat_attack_timer.reached():
              return False
          if np.sum(color_similarity_2d(self.image_crop(MAP_CAT_ATTACK, copy=False), (255, 231, 123)) > 221) > 100:
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+index 8652e53..e9fbfb9 100644
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -262,6 +262,10 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+             semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+             if semantic_adapter is not None:
+                 oracle = semantic_adapter.open().oracle
++                if semantic_adapter.meta_beacon_active() \
++                        and oracle.meta_assist_sortie_prompt_visible():
++                    semantic_adapter.click_meta_beacon_sortie_confirm()
++                    continue
+                 if oracle.daily_precombat_visible():
+                     semantic_adapter.click_daily_precombat_start()
+                     semantic_daily_start_at = time.time()
+diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
+index 2cc669b..a52c968 100644
+--- a/module/os_ash/meta.py
++++ b/module/os_ash/meta.py
+@@ -230,6 +230,10 @@ class OpsiAshBeacon(Meta):
+         """
+         Get the damage the from current meta
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            state = semantic_adapter.meta_current_detail_state()
++            return state.max_hp - state.current_hp
+         self._ensure_meta_inner_page_damage()
+         return OCR_META_DAMAGE.ocr(self.device.image)
+ 
+@@ -443,12 +447,23 @@ class OpsiAshBeacon(Meta):
+             return True
+ 
+     def _check_beacon_point(self) -> bool:
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            if self.appear(BEACON_LIST, offset=(20, 20)):
++                current, _ = semantic_adapter.meta_current_empty_points()
++                return current >= 100
++            state = semantic_adapter.meta_entrance_state()
++            return state.current_points >= state.consume_points
+         if self.appear(META_BEACON_FLAG, offset=(180, 20)):
+             META_BEACON_DATA.load_offset(META_BEACON_FLAG)
+             return self.digit_ocr_point_and_check(META_BEACON_DATA.button, 100)
+         return False
+ 
+     def _check_dossier_point(self) -> bool:
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            state = semantic_adapter.meta_entrance_state()
++            return state.dossier_points >= state.consume_points
+         if self.appear(META_DOSSIER_FLAG, offset=(180, 20)):
+             META_DOSSIER_DATA.load_offset(META_DOSSIER_FLAG)
+             return self.digit_ocr_point_and_check(META_DOSSIER_DATA.button, 100)
+@@ -518,14 +533,32 @@ class OpsiAshBeacon(Meta):
+         self._attack_meta()
+ 
+     def run(self):
+-        self.ui_ensure(page_reward)
+-        self._begin_beacon()
+-
+-        with self.config.multi_set():
+-            for meta in self._meta_receive:
+-                MetaReward(self.config, self.device).run(category=meta)
+-            self._meta_receive = []
+-            self.config.task_delay(server_update=True)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # Ash beacon is an Operation Siren task even though it starts from
++            # the main Reward/META pages instead of OSMap.os_init().  Declare
++            # an explicit task owner before generic map-event probes run.
++            semantic_adapter.begin_meta_beacon()
++        try:
++            if semantic_adapter is None or not (
++                    semantic_adapter.meta_page_visible()
++                    or semantic_adapter.meta_precombat_visible()):
++                self.ui_ensure(page_reward)
++            if semantic_adapter is not None \
++                    and semantic_adapter.meta_precombat_visible():
++                # Resume an interrupted own-beacon sortie at the shared fleet
++                # preparation page through AshCombat's normal execution loop.
++                self._make_an_attack()
++            self._begin_beacon()
++
++            with self.config.multi_set():
++                for meta in self._meta_receive:
++                    MetaReward(self.config, self.device).run(category=meta)
++                self._meta_receive = []
++                self.config.task_delay(server_update=True)
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_meta_beacon()
+ 
+ 
+ class AshBeaconAssist(Meta):

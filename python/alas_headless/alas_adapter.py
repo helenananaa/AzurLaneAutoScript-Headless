@@ -139,6 +139,7 @@ from .semantic_oracle import (
     MissionDisposition,
     MetaEntranceState,
     MetaAssistState,
+    MetaCurrentDetailState,
     Point,
     SemanticGateClosed,
     SemanticOracleError,
@@ -388,10 +389,17 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "REWARD_GOTO_MAIN": "reward/page/back",
     "META_ENTRANCE": "reward/meta/enter",
     "META_CHECK": "meta/page/back",
+    "ASH_SHOWDOWN": "meta/page/back",
     "META_MAIN_BEACON_ENTRANCE": "meta/current/open",
     "META_MAIN_DOSSIER_ENTRANCE": "meta/dossier/open",
     "BEACON_LIST": "meta/current/list",
+    "META_BEGIN_ENTRANCE": "meta/current/create",
     "ASH_START": "meta/assist/start",
+    "HELP_ENTER": "meta/current/help",
+    "HELP_CONFIRM": "meta/help/confirm",
+    "HELP_1": "meta/help/friend",
+    "HELP_2": "meta/help/guild",
+    "HELP_3": "meta/help/world",
     "OIL": "reward/resource/oil",
     "COIN": "reward/resource/coin",
     "EXP": "reward/resource/exp",
@@ -1235,6 +1243,7 @@ class AlasSemanticAdapter:
         self._operation_siren_auto_search_transition_until = 0.0
         self._operation_siren_auto_search_active = False
         self._operation_siren_combat_active = False
+        self._meta_beacon_active = False
         self._operation_siren_pending_order: Optional[str] = None
         self._exercise_pending = False
         self._exercise_execution_active = False
@@ -3482,6 +3491,8 @@ class AlasSemanticAdapter:
 
     def _operation_siren_allows_passive_probe(self) -> bool:
         now = time.monotonic()
+        if self._meta_beacon_active:
+            return True
         if self._operation_siren_combat_active:
             return True
         if self._operation_siren_auto_search_active:
@@ -3609,6 +3620,26 @@ class AlasSemanticAdapter:
             time.monotonic() + float(timeout_seconds)
         )
 
+    def begin_meta_beacon(self) -> None:
+        """Own one complete META beacon task until its explicit finally block."""
+
+        self._package_gate()
+        self._meta_beacon_active = True
+
+    def end_meta_beacon(self) -> None:
+        self._meta_beacon_active = False
+
+    def meta_beacon_active(self) -> bool:
+        return self._meta_beacon_active
+
+    def click_meta_beacon_sortie_confirm(self) -> ActionReceipt:
+        self._package_gate()
+        if not self._meta_beacon_active:
+            raise SemanticGateClosed("META beacon task owner is absent")
+        receipt = self.oracle.click_meta_assist_sortie(True)
+        self._operation_siren_combat_active = True
+        return receipt
+
     def _shipyard_page_visible(self) -> bool:
         """Read the optional shipyard probe without breaking narrow test ports."""
 
@@ -3686,6 +3717,10 @@ class AlasSemanticAdapter:
             pass
         else:
             targets.append("os/page/back")
+        if self.oracle.meta_page_visible():
+            # META's top-right option control is ALAS' GOTO_MAIN link on every
+            # reviewed landing/current-beacon child surface.
+            targets.append("meta/home")
         if self.oracle.exists("event-list/page/back"):
             # ActivityMainUI can open asynchronously at the server-day
             # rollover. Its exact back control is the reviewed recovery path.
@@ -3798,12 +3833,18 @@ class AlasSemanticAdapter:
 
     def _appear_once(self, button: Any) -> bool:
         name = self._button_name(button)
+        if name == "BATTLE_PREPARATION" and self._meta_beacon_active:
+            try:
+                self.oracle.meta_current_detail_state()
+                # AshCombat probes the generic fleet-preparation button before
+                # its own ASH_START control.  On the META detail page the
+                # similarly placed start button is not DailyLevelUI.
+                return False
+            except SemanticGateClosed:
+                pass
         if (
-            (
-                self._operation_siren_auto_search_active
-                or time.monotonic()
-                <= self._operation_siren_entry_transition_until
-            )
+            not self._login_flow.active
+            and self._operation_siren_allows_passive_probe()
             and name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3")
         ):
             self._package_gate()
@@ -3863,6 +3904,8 @@ class AlasSemanticAdapter:
                 pending_order
             )
         if name == "OS_CHECK" and semantic_id == "os/page/back":
+            if self.oracle.operation_siren_exit_prompt_visible():
+                return False
             visible = self.oracle.operation_siren_local_map_visible()
             if visible:
                 self._operation_siren_entry_transition_until = 0.0
@@ -3982,6 +4025,8 @@ class AlasSemanticAdapter:
             # Unity may retain the old LevelOrigin hierarchy briefly after
             # leaving Operation Siren.  A proven main page wins over that
             # stale back button so ALAS does not click it repeatedly.
+            if self.oracle.operation_siren_exit_prompt_visible():
+                return False
             if self.oracle.main_page_visible():
                 return False
             try:
@@ -4121,6 +4166,8 @@ class AlasSemanticAdapter:
                 REWARD_RESOURCE_FIELDS[name]
             )
         if semantic_id == "meta/page/back":
+            if name == "META_CHECK":
+                return self.oracle.meta_page_visible()
             try:
                 self.oracle.meta_entrance_state()
                 return True
@@ -4133,8 +4180,36 @@ class AlasSemanticAdapter:
             except SemanticGateClosed:
                 return False
         if semantic_id == "meta/current/list":
-            return self.oracle.enabled("meta/current/list")
+            try:
+                self.oracle.meta_current_detail_state()
+                return True
+            except SemanticGateClosed:
+                pass
+            try:
+                self.oracle.meta_current_empty_points()
+                return True
+            except SemanticGateClosed:
+                return False
+        if semantic_id == "meta/current/create":
+            try:
+                self.oracle.meta_current_empty_points()
+                return True
+            except SemanticGateClosed:
+                return False
+        if semantic_id == "meta/current/help":
+            try:
+                self.oracle.meta_current_detail_state()
+                return True
+            except SemanticGateClosed:
+                return False
+        if semantic_id is not None and semantic_id.startswith("meta/help/"):
+            return self.oracle.meta_help_visible()
         if semantic_id == "meta/assist/start":
+            try:
+                self.oracle.meta_current_detail_state()
+                return True
+            except SemanticGateClosed:
+                pass
             try:
                 self.oracle.meta_assist_state()
                 return True
@@ -4246,6 +4321,15 @@ class AlasSemanticAdapter:
             # its flow context (for example immediately after a cold login).
             # Page enumeration must see every underlying page probe as false
             # until ui_additional() reaches the exact close target.
+            return False
+        if (
+            name not in ("GUILD_POPUP_CONFIRM", "GUILD_POPUP_CANCEL")
+            and self.oracle.enabled("overlay/guild-message/close")
+        ):
+            # GuildMsgBoxUI is a global overlay that may appear while a task
+            # is navigating between unrelated pages.  Hide every underlying
+            # page identity until ui_additional() reaches the reviewed close
+            # target; do not infer or click through the overlay.
             return False
         if (
             not self._login_flow.active
@@ -4424,6 +4508,15 @@ class AlasSemanticAdapter:
             and name not in BUILD_VIRTUAL_RESOURCES
             and name not in TACTICAL_VIRTUAL_RESOURCES
         ):
+            if (
+                self.oracle.main_page_visible()
+                or self.oracle.campaign_menu_is_entry()
+            ):
+                # Page.iter_pages() probes legacy pixel-only identities such
+                # as FLEET_CHECK before it reaches the exact main/campaign
+                # menu check.  Either typed root proves those unrelated page
+                # identities absent; inputs remain fail closed.
+                return False
             if (
                 self.oracle.daily_page_visible()
                 or self.oracle.daily_precombat_visible()
@@ -4604,6 +4697,8 @@ class AlasSemanticAdapter:
         if name in ("POPUP_CONFIRM", "POPUP_CANCEL"):
             if self.oracle.operation_siren_exit_prompt_visible():
                 return True
+            if self.oracle.meta_simulation_prompt_visible():
+                return True
             if self.oracle.meta_assist_sortie_prompt_visible():
                 return True
         if name in PAGE_VIRTUAL_RESOURCES:
@@ -4617,9 +4712,17 @@ class AlasSemanticAdapter:
                 if self.oracle.exercise_page_visible():
                     return True
                 if (
+                    self.oracle.main_page_visible()
+                    or self.oracle.enabled("reward/page/back")
+                    or self.oracle.enabled("reward/meta/enter")
+                    or
                     self.oracle.daily_page_visible()
                     or self.oracle.daily_precombat_visible()
                 ):
+                    # Page.iter_pages() checks Exercise before the exact main
+                    # and reward-page identities.  Those typed roots remain
+                    # mounted while Main's More panel opens, so they prove the
+                    # unrelated Exercise page absent without pixel inference.
                     return False
                 if self.oracle.campaign_menu_is_entry():
                     # ui_goto(page_campaign_menu) probes Exercise first.
@@ -6453,9 +6556,39 @@ class AlasSemanticAdapter:
         self._package_gate()
         return self.oracle.meta_entrance_state()
 
+    def meta_page_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.meta_page_visible()
+
     def meta_assist_state(self) -> MetaAssistState:
         self._package_gate()
         return self.oracle.meta_assist_state()
+
+    def meta_current_empty_points(self) -> Tuple[int, int]:
+        self._package_gate()
+        return self.oracle.meta_current_empty_points()
+
+    def meta_current_detail_state(self) -> MetaCurrentDetailState:
+        self._package_gate()
+        return self.oracle.meta_current_detail_state()
+
+    def meta_precombat_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.daily_precombat_visible()
+
+    def click_meta_precombat_start(self) -> ActionReceipt:
+        self._package_gate()
+        if not self.oracle.meta_precombat_fleet_ready():
+            raise SemanticGateClosed(
+                "META precombat requires non-empty main and vanguard fleets"
+            )
+        receipt = self.oracle.click_daily_precombat_start()
+        self._operation_siren_combat_active = True
+        return receipt
+
+    def click_meta_precombat_back(self) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_daily_precombat_back()
 
     def dorm_feed_state(self) -> DormFeedState:
         self._package_gate()
@@ -8650,6 +8783,11 @@ class AlasSemanticAdapter:
         if self._campaign_grid_location(button) is not None:
             return self.click_campaign_combat_grid(button)
         name = self._button_name(button)
+        if self._meta_beacon_active and self.oracle.daily_precombat_visible():
+            if name == "BATTLE_PREPARATION":
+                return self.click_meta_precombat_start()
+            if name == "BACK_ARROW":
+                return self.click_meta_precombat_back()
         if (
             self._login_flow.active
             and name in ("GET_ITEMS_1", "GET_ITEMS_2")
@@ -9794,6 +9932,8 @@ class AlasSemanticAdapter:
                 return self._record_mission_transition(
                     self.oracle.click_operation_siren_back()
                 )
+            if target == "meta/home":
+                return self._record_mission_transition(self.oracle.click_meta_home())
             if (
                 self._research_context is not None
                 and target in ("research/page/back", "research-menu/page/back")
@@ -9864,7 +10004,20 @@ class AlasSemanticAdapter:
                         time.monotonic() + 30.0
                     )
                 return receipt
+            if self.oracle.meta_simulation_prompt_visible():
+                if name != "POPUP_CANCEL":
+                    raise SemanticGateClosed(
+                        "META simulation is not an authorized beacon action"
+                    )
+                return self.oracle.click_meta_simulation_cancel()
             if self.oracle.meta_assist_sortie_prompt_visible():
+                if self._meta_beacon_active:
+                    receipt = self.oracle.click_meta_assist_sortie(
+                        name == "POPUP_CONFIRM"
+                    )
+                    if name == "POPUP_CONFIRM":
+                        self._operation_siren_combat_active = True
+                    return receipt
                 if name == "POPUP_CONFIRM":
                     return self._dispatch_mutation(
                         "meta.assist",
@@ -9946,8 +10099,28 @@ class AlasSemanticAdapter:
                     dossier=semantic_id == "meta/dossier/open"
                 )
             if semantic_id == "meta/current/list":
+                try:
+                    self.oracle.meta_current_detail_state()
+                except SemanticGateClosed:
+                    pass
+                else:
+                    return self.oracle.click_meta_current_detail_list()
                 return self.oracle.click_meta_current_list()
+            if semantic_id == "meta/current/create":
+                return self.oracle.click_meta_current_create()
+            if semantic_id == "meta/current/help":
+                return self.oracle.click_meta_current_help()
+            if semantic_id is not None and semantic_id.startswith("meta/help/"):
+                return self.oracle.click_meta_help_control(
+                    semantic_id.rsplit("/", 1)[1]
+                )
             if semantic_id == "meta/assist/start":
+                try:
+                    self.oracle.meta_current_detail_state()
+                except SemanticGateClosed:
+                    pass
+                else:
+                    return self.oracle.click_meta_current_start()
                 return self.oracle.click_meta_assist_start()
             if semantic_id == "campaign-menu/daily":
                 return self.oracle.click_campaign_daily_entrance()
@@ -10924,6 +11097,10 @@ class AlasSemanticSession:
                 trace=trace,
             )
         self.adapter: Optional[AlasSemanticAdapter] = None
+        # META owns a complete task rather than one observer frame.  Keep the
+        # ownership lease on the session so rebuilding the Oracle/adapter does
+        # not silently turn an own-beacon confirmation into an assist action.
+        self._meta_beacon_active = False
         self._combat_manifest: Optional[AlasCombatObserverManifest] = None
         self._combat_last_generation = 0
         self._combat_automation_source: Optional[str] = None
@@ -11130,6 +11307,8 @@ class AlasSemanticSession:
                 tactical_input_frame_refresher=self.refresh_tactical_input_frame,
                 action_ledger=self.action_ledger,
             )
+            if self._meta_beacon_active:
+                self.adapter.begin_meta_beacon()
             if self.trace is not None:
                 self.trace.emit(
                     "semantic.session.open",
@@ -11315,10 +11494,10 @@ class AlasSemanticSession:
                     raise
                 attempt += 1
                 time.sleep(0.15)
-        if time.monotonic() <= self._combat_result_transition_until:
-            # One coherent post-action frame closes this exact transition.
-            # A later result-page action must arm its own window again.
-            self._combat_result_transition_until = 0.0
+        # Keep an exact result-action transition lease until its short deadline.
+        # META and other multi-page result stacks can expose one coherent page
+        # between two transient hierarchy rebuilds; clearing on that first page
+        # made the following rebuild fail as an unrelated stale frame.
         if self.trace is not None:
             self.trace.emit(
                 "semantic.frame.refresh",
@@ -11646,9 +11825,11 @@ class AlasSemanticSession:
             # stage page forever.
             return adapter.appear(button)
         result_owner_active = bool(
-            adapter.daily_execution_active()
+            getattr(adapter, "daily_execution_active", lambda: False)()
             or adapter.campaign_combat_committed()
-            or adapter.operation_siren_combat_committed()
+            or getattr(
+                adapter, "operation_siren_combat_committed", lambda: False
+            )()
             or getattr(adapter, "_exercise_execution_active", False)
         )
         if result_owner_active and adapter.oracle.daily_battle_result_visible():
@@ -11949,6 +12130,27 @@ class AlasSemanticSession:
     ) -> None:
         self.open().begin_operation_siren_startup_recovery(timeout_seconds)
 
+    def begin_meta_beacon(self) -> None:
+        self._meta_beacon_active = True
+        self.open().begin_meta_beacon()
+
+    def end_meta_beacon(self) -> None:
+        self._meta_beacon_active = False
+        if self.adapter is not None:
+            self.adapter.end_meta_beacon()
+
+    def meta_beacon_active(self) -> bool:
+        return self._meta_beacon_active
+
+    def click_meta_beacon_sortie_confirm(self) -> ActionReceipt:
+        self.refresh_tactical_input_frame()
+        adapter = self.open()
+        if not self._meta_beacon_active:
+            raise SemanticGateClosed("META beacon task owner is absent")
+        if not adapter.meta_beacon_active():
+            adapter.begin_meta_beacon()
+        return adapter.click_meta_beacon_sortie_confirm()
+
     def operation_siren_auto_search_transition_active(self) -> bool:
         return self.open().operation_siren_auto_search_transition_active()
 
@@ -12068,8 +12270,26 @@ class AlasSemanticSession:
     def meta_entrance_state(self) -> MetaEntranceState:
         return self.open().meta_entrance_state()
 
+    def meta_page_visible(self) -> bool:
+        return self.open().meta_page_visible()
+
     def meta_assist_state(self) -> MetaAssistState:
         return self.open().meta_assist_state()
+
+    def meta_current_empty_points(self) -> Tuple[int, int]:
+        return self.open().meta_current_empty_points()
+
+    def meta_current_detail_state(self) -> MetaCurrentDetailState:
+        return self.open().meta_current_detail_state()
+
+    def meta_precombat_visible(self) -> bool:
+        return self.open().meta_precombat_visible()
+
+    def click_meta_precombat_start(self) -> ActionReceipt:
+        return self.open().click_meta_precombat_start()
+
+    def click_meta_precombat_back(self) -> ActionReceipt:
+        return self.open().click_meta_precombat_back()
 
     def dorm_feed_state(self) -> DormFeedState:
         return self.open().dorm_feed_state()
@@ -12766,7 +12986,12 @@ class AlasSemanticSession:
 
     def click_daily_precombat_start(self) -> ActionReceipt:
         self.refresh_tactical_input_frame()
-        return self.open().click_daily_precombat_start()
+        adapter = self.open()
+        if self._meta_beacon_active:
+            if not adapter.meta_beacon_active():
+                adapter.begin_meta_beacon()
+            return adapter.click_meta_precombat_start()
+        return adapter.click_daily_precombat_start()
 
     def daily_execution_receipts(self) -> Tuple[ActionReceipt, ...]:
         return self.open().daily_execution_receipts()

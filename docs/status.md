@@ -2765,3 +2765,20 @@ separate patches so each compatibility behavior remains auditable.
   matrix promotes Commission from `L` to the repository's first `F` panel.
 
 See [G8 real ALAS reward and commission validation](g8-alas-reward-commission-validation-report.md).
+### Operation Siren META beacon one-hit path live-qualified
+
+- Created one Bristol META Lv15 beacon from exact typed `200/200` points and
+  observed the post-create `100/200`, `1600000` HP, and `3/3` attempt state.
+- The runtime requested world, guild, and friend assistance, preserved explicit
+  own-beacon task ownership across adapter refreshes, confirmed the saved META
+  formation, entered automatic combat, drained both result pages, and returned
+  to the exact current-beacon detail page.
+- The typed HP delta reported `276085` damage and the original OneHitMode logic
+  delayed the next check by 30 minutes. A saved formation with zero main or
+  vanguard power now fails closed before sortie instead of repeatedly accepting
+  an unactionable confirmation.
+- The exact result-action transition lease now survives an intermediate stable
+  result page until its bounded deadline, covering multi-page META results
+  without relaxing unrelated stale-frame handling.
+- Boss-kill reward collection, `current_dossier`, dossier auto-attack, and the
+  non-one-hit branch remain conditional rather than claimed complete.

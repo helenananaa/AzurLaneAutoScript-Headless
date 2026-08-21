@@ -158,11 +158,13 @@ class FakeOracle:
         self.mail_confirmation_kind_value = None
         self.mail_surface_kind_value = None
         self.main_page_visible_value = False
+        self.meta_page_visible_value = False
         self.event_campaign_page_visible_value = False
         self.game_room_page_visible_value = False
         self.daily_page_visible_value = False
         self.daily_detail_visible_value = False
         self.daily_precombat_visible_value = False
+        self.meta_precombat_fleet_ready_value = True
         self.daily_selected_stage_visible_value = False
         self.daily_run_choices = set()
         self.research_project_values = []
@@ -332,7 +334,15 @@ class FakeOracle:
         self.enabled_calls.append(semantic_id)
         if semantic_id in self.enabled_values:
             return self.enabled_values[semantic_id]
-        if semantic_id in ("login/enter", "overlay/bulletin/close"):
+        if semantic_id in (
+            "login/enter",
+            "overlay/bulletin/close",
+            "overlay/guild-message/close",
+            "overlay/network-reconnect/cancel",
+            "overlay/network-reconnect/confirm",
+            "reward/page/back",
+            "reward/meta/enter",
+        ):
             return False
         return True
 
@@ -447,6 +457,16 @@ class FakeOracle:
 
     def main_page_visible(self):
         return self.main_page_visible_value
+
+    def meta_page_visible(self):
+        return self.meta_page_visible_value
+
+    def meta_current_detail_state(self):
+        raise SemanticGateClosed("META current detail identity is absent")
+
+    def click_meta_home(self):
+        self.click_calls.append("meta/home")
+        return self.click_receipt("meta/home")
 
     def research_projects(self):
         if not self.research_projects_visible_value:
@@ -700,6 +720,12 @@ class FakeOracle:
     def click_daily_precombat_back(self):
         return self.click("daily/precombat/back")
 
+    def click_daily_precombat_start(self):
+        return self.click("daily/precombat/start")
+
+    def meta_precombat_fleet_ready(self):
+        return self.meta_precombat_fleet_ready_value
+
     def daily_detail_visible(self):
         return self.daily_detail_visible_value
 
@@ -751,6 +777,12 @@ class FakeOracle:
         return False
 
     def meta_assist_sortie_prompt_visible(self):
+        return False
+
+    def meta_simulation_prompt_visible(self):
+        return False
+
+    def meta_help_visible(self):
         return False
 
     def campaign_map_entry_state(self):
@@ -1313,6 +1345,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             oracle.enabled_calls,
             [
                 "overlay/bulletin/close",
+                "overlay/guild-message/close",
                 "login/enter",
                 "overlay/bulletin/close",
                 "main/battle",
@@ -1365,6 +1398,95 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         oracle.operation_siren_local_map_visible_value = True
         self.assertTrue(adapter.appear(NamedButton("OS_CHECK")))
+
+        oracle.operation_siren_exit_prompt_visible = lambda: True
+        self.assertFalse(adapter.appear(NamedButton("OS_CHECK")))
+
+    def test_typed_campaign_menu_hides_unrelated_pixel_page_checks(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_menu_value = True
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+
+    def test_typed_main_or_reward_page_hides_exercise_page_check(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.main_page_visible_value = True
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+
+        oracle.main_page_visible_value = False
+        oracle.enabled_values["reward/meta/enter"] = True
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+
+    def test_meta_landing_alias_uses_typed_entrance_state(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.meta_entrance_state = Mock(return_value=SimpleNamespace())
+
+        self.assertTrue(adapter.appear(NamedButton("ASH_SHOWDOWN")))
+        self.assertEqual(adapter.semantic_id_for("ASH_SHOWDOWN"), "meta/page/back")
+
+        oracle.meta_page_visible_value = True
+        adapter.click(NamedButton("GOTO_MAIN"))
+        self.assertEqual(oracle.click_calls, ["meta/home"])
+
+    def test_meta_empty_beacon_page_maps_list_and_create_controls(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.meta_current_empty_points = Mock(return_value=(200, 200))
+        oracle.click_meta_current_create = Mock(
+            return_value=oracle.click_receipt("meta/current/create")
+        )
+
+        self.assertTrue(adapter.appear(NamedButton("BEACON_LIST")))
+        self.assertTrue(adapter.appear(NamedButton("META_BEGIN_ENTRANCE")))
+        receipt = adapter.click(NamedButton("META_BEGIN_ENTRANCE"))
+
+        self.assertEqual(receipt.semantic_id, "meta/current/create")
+        oracle.click_meta_current_create.assert_called_once_with()
+
+    def test_meta_beacon_owner_keeps_generic_reward_probe_passive(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values["reward/award-info/close"] = False
+        oracle.enabled_values["reward/award-info1/close"] = False
+        adapter.begin_meta_beacon()
+
+        self.assertTrue(adapter._operation_siren_allows_passive_probe())
+        self.assertFalse(adapter.appear(NamedButton("GET_ITEMS_1")))
+
+        adapter.end_meta_beacon()
+        self.assertFalse(adapter._meta_beacon_active)
+
+    def test_meta_precombat_refuses_an_empty_saved_fleet(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.meta_precombat_fleet_ready_value = False
+
+        with self.assertRaisesRegex(SemanticGateClosed, "non-empty"):
+            adapter.click_meta_precombat_start()
+
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_meta_task_owner_survives_adapter_replacement(self):
+        first, _, _ = self.make_adapter()
+        replacement, replacement_oracle, _ = self.make_adapter()
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = first
+        session._meta_beacon_active = False
+        session.open = lambda: session.adapter
+        session.refresh_tactical_input_frame = lambda: None
+
+        session.begin_meta_beacon()
+        session.adapter = replacement
+        receipt = session.click_daily_precombat_start()
+
+        self.assertTrue(session.meta_beacon_active())
+        self.assertTrue(replacement.meta_beacon_active())
+        self.assertEqual(receipt.semantic_id, "daily/precombat/start")
+        self.assertEqual(replacement_oracle.click_calls, ["daily/precombat/start"])
+
+    def test_global_guild_overlay_hides_underlying_page_checks(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values["overlay/guild-message/close"] = True
+
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("GUILD_POPUP_CANCEL")))
 
     def test_meowfficer_check_color_only_matches_the_dock_page(self):
         adapter, oracle, gate_calls = self.make_adapter()
