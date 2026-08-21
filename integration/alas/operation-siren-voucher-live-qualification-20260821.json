@@ -1,0 +1,38 @@
+{
+  "schema": "alas-headless.operation-siren-voucher-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 3759,
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured_filter": "HECombatPlan",
+  "transaction_budget": 1,
+  "transactions": [
+    {
+      "index": 1,
+      "canonical_name": "HECombatPlan",
+      "icon_sprite": "tebiezuozhan",
+      "price": 100,
+      "currency": "Voucher",
+      "remaining_before": 28,
+      "remaining_after": 27,
+      "balance_before": 21592,
+      "balance_after": 21492,
+      "receipt": "os/voucher/purchase/confirm",
+      "capability": "shop.purchase",
+      "policy_sha256": "f84714aa262af2f57474aad74fdf12034c1097a232a752380a2347d5f0736ed5",
+      "path": "OverlayCamera/Overlay/UIMain/ShopsUIMsgbox(Clone)/actions/confirm_button"
+    }
+  ],
+  "task_result": true,
+  "elapsed_seconds": 64.844,
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "voucher_shop": "f29e8e7f2361d02f5e5bbd5f751d994571e44c576ba79efd025d4ca9758f529d",
+    "voucher_task": "50ab13b7b9baf0e92173c872b89710f45fcab812402a9b26f04d61bd1bfabac0",
+    "adapter": "328ae617308df2dd347cc16a95cc8756a0395361e20a79142f4bca8bb925db06",
+    "oracle": "bfb5c47411b54c9135b4a81c769acff2f5a90ba3d8ad21c162077ecf4fe90444"
+  }
+}

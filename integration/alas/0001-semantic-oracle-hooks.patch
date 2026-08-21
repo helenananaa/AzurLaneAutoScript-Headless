@@ -11845,3 +11845,96 @@ index c7bf38d..08e3272 100644
              return True
          self.os_shop_get_coins()
          skip_get_coins = True
+diff --git a/module/shop/shop_voucher.py b/module/shop/shop_voucher.py
+index fef529e..04c4296 100644
+--- a/module/shop/shop_voucher.py
++++ b/module/shop/shop_voucher.py
+@@ -8,7 +8,7 @@ from module.map_detection.utils import Points
+ from module.ocr.ocr import DigitYuv
+ from module.shop.assets import *
+ from alas_headless import validate_alas_opsi_voucher_filter
+-from module.shop.base import FILTER, ShopItemGrid
++from module.shop.base import FILTER, FILTER_REGEX, ShopItemGrid
+ from module.shop.clerk import ShopClerk
+ from module.shop.shop_status import ShopStatus
+ from module.ui.assets import BACK_ARROW
+@@ -26,6 +26,35 @@ class VoucherShop(ShopClerk, ShopStatus):
+             return None
+         return semantic_adapter.operation_siren_voucher_items()
+ 
++    def _semantic_voucher_item_to_buy(self, records, balance):
++        """Apply the original ordered filter to typed, voucher-cost records."""
++
++        FILTER.load(self.shop_filter)
++        parsed = []
++        for record in records:
++            match = FILTER_REGEX.fullmatch(record.canonical_name)
++            if match is None:
++                continue
++            parsed.append((record, tuple(
++                value.lower() if value is not None else None
++                for value in match.groups()
++            )))
++        for wanted in FILTER.filter:
++            for record, actual in parsed:
++                if any(
++                    value is not None and value != candidate
++                    for value, candidate in zip(wanted, actual)
++                ):
++                    continue
++                if (
++                    record.currency == 'Voucher'
++                    and not record.sold_out
++                    and record.remaining > 0
++                    and record.price <= balance
++                ):
++                    return record
++        return None
++
+     @cached_property
+     def shop_filter(self):
+         """
+@@ -272,9 +301,21 @@ class VoucherShop(ShopClerk, ShopStatus):
+             if not semantic_adapter.shop_purchase_allowed():
+                 logger.info('Unified OpsiVoucher scan finished; purchase budget is 0')
+                 return
+-            raise RuntimeError(
+-                'Unified OpsiVoucher purchase is not adapted for a positive budget'
++            item = self._semantic_voucher_item_to_buy(records, balance)
++            if item is None:
++                logger.info('No affordable unified OpsiVoucher item matched the filter')
++                return
++            logger.info(
++                f'Unified OpsiVoucher exchange: {item.canonical_name}_x{item.amount}'
++                f'_{item.currency}_x{item.price}_{item.remaining}/{item.total}'
+             )
++            semantic_adapter.purchase_operation_siren_voucher_item_once(
++                item.index,
++                item.canonical_name,
++                item.price,
++                item.currency,
++            )
++            return
+ 
+         # Execute buy operations
+         VOUCHER_SHOP_SCROLL.set_top(main=self)
+@@ -334,9 +375,17 @@ class VoucherShop(ShopClerk, ShopStatus):
+                     'leave vouchers unchanged'
+                 )
+                 return False
+-            raise RuntimeError(
+-                'Unified OpsiArchive purchase is not adapted for a positive budget'
++            item = archives[0]
++            if item.currency != 'Voucher' or item.price > balance:
++                logger.info('No affordable unified OpsiArchive logger is available')
++                return False
++            semantic_adapter.purchase_operation_siren_voucher_item_once(
++                item.index,
++                item.canonical_name,
++                item.price,
++                item.currency,
+             )
++            return True
+ 
+         # Execute buy operations
+         items = self.shop_get_items()

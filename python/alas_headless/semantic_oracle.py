@@ -9715,6 +9715,207 @@ class SemanticOracle:
             raise SemanticGateClosed("Operation Siren voucher balance is ambiguous")
         return int(matches[0].text.strip())
 
+    def click_operation_siren_voucher_item(
+        self,
+        index: int,
+        expected_name: str,
+        expected_price: int,
+        expected_currency: str,
+    ) -> ActionReceipt:
+        """Open one exact, visible Operation Siren voucher card."""
+
+        if isinstance(index, bool) or not isinstance(index, int) or not 0 <= index < 22:
+            raise SemanticGateClosed("Operation Siren voucher item index is invalid")
+        items = self._retry_transition_read(
+            self.operation_siren_voucher_items,
+            attempts=8,
+            interval_seconds=0.2,
+        )
+        item = next((candidate for candidate in items if candidate.index == index), None)
+        if item is None or item.bounds is None:
+            raise SemanticGateClosed("Operation Siren voucher item is absent")
+        if (
+            item.canonical_name != expected_name
+            or item.price != expected_price
+            or item.currency != expected_currency
+        ):
+            raise SemanticGateClosed("Operation Siren voucher item identity changed")
+        if item.sold_out or item.remaining <= 0:
+            raise SemanticGateClosed("Operation Siren voucher item is sold out")
+        if not 0.0 <= item.bounds.left < item.bounds.right <= 1280.0 or not (
+            0.0 <= item.bounds.top < item.bounds.bottom <= 720.0
+        ):
+            raise SemanticGateClosed("Operation Siren voucher item is outside viewport")
+
+        state = self.read_state()
+        root = "OverlayCamera/Overlay/UIMain/WorldShopUI(Clone)/adapt/middle/content/world_shop/content/"
+        controls = tuple(
+            button
+            for button in state.buttons
+            if button.path.startswith(root)
+            and button.name in ("item_tpl", "item_tpl(Clone)")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds == item.bounds
+        )
+        if len(controls) != 1:
+            raise SemanticGateClosed(
+                "Operation Siren voucher item control is absent or ambiguous"
+            )
+        bounds = item.bounds
+        point = Point(
+            x=(bounds.left + bounds.right) / 2.0,
+            y=(bounds.top + bounds.bottom) / 2.0,
+        )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id=f"os/voucher/item/{index}/{expected_name}",
+            generation=state.generation,
+            point=point,
+            bounds=bounds,
+            path=controls[0].path,
+        )
+
+    def operation_siren_voucher_purchase_dialog_quantity(
+        self,
+        expected_display_name: str,
+        expected_icon_sprite: str,
+    ) -> Optional[int]:
+        """Read an exact voucher exchange dialog without trusting localized labels."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed(
+                "Operation Siren voucher dialog snapshots are not coherent"
+            )
+        root = "OverlayCamera/Overlay/UIMain/ShopsUIMsgbox(Clone)"
+        control_paths = (
+            root + "/actions/confirm_button",
+            root + "/actions/cancel_button",
+        )
+        controls = tuple(
+            tuple(button for button in state.buttons if button.path == path)
+            for path in control_paths
+        )
+        name_path = root + "/item/panel_bg/display_panel/name_container/name/Text"
+        names = tuple(text for text in ui_state.texts if text.path == name_path)
+        if not names and not any(controls):
+            return None
+        if any(len(matches) != 1 for matches in controls):
+            raise SemanticGateClosed(
+                "Operation Siren voucher dialog controls are ambiguous"
+            )
+        for button in (matches[0] for matches in controls):
+            if not (
+                button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.raycast_top is None
+                and button.bounds is not None
+            ):
+                raise SemanticGateClosed(
+                    "Operation Siren voucher dialog control is not actionable"
+                )
+        names = tuple(
+            text
+            for text in names
+            if text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        if len(names) != 1 or not (
+            names[0].text.strip() == expected_display_name
+            or (
+                expected_display_name.endswith("..")
+                and names[0].text.strip().startswith(expected_display_name[:-2])
+            )
+        ):
+            raise SemanticGateClosed(
+                "Operation Siren voucher dialog item name changed"
+            )
+        icon_paths = (
+            root + "/item/panel_bg/left/IconTpl/icon_bg/icon",
+            root + "/got/panel_bg/list/item/icon_bg/icon",
+        )
+        for path in icon_paths:
+            matches = tuple(
+                image
+                for image in ui_state.images
+                if image.path == path
+                and image.active_in_hierarchy
+                and image.active_and_enabled
+                and not image.truncated
+                and image.sprite == expected_icon_sprite
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "Operation Siren voucher dialog item icon changed"
+                )
+        values = tuple(
+            text
+            for text in ui_state.texts
+            if text.path == root + "/count/number_panel/value"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and re.fullmatch(r"[1-9][0-9]*", text.text.strip())
+        )
+        if len(values) != 1:
+            raise SemanticGateClosed(
+                "Operation Siren voucher dialog quantity is ambiguous"
+            )
+        return int(values[0].text.strip())
+
+    def click_operation_siren_voucher_purchase_confirm(
+        self,
+        expected_display_name: str,
+        expected_icon_sprite: str,
+        expected_quantity: int,
+    ) -> ActionReceipt:
+        quantity = self.operation_siren_voucher_purchase_dialog_quantity(
+            expected_display_name, expected_icon_sprite
+        )
+        if quantity != expected_quantity:
+            raise SemanticGateClosed("Operation Siren voucher quantity changed")
+        state = self.read_state()
+        path = "OverlayCamera/Overlay/UIMain/ShopsUIMsgbox(Clone)/actions/confirm_button"
+        buttons = tuple(button for button in state.buttons if button.path == path)
+        if len(buttons) != 1:
+            raise SemanticGateClosed(
+                "Operation Siren voucher confirmation is ambiguous"
+            )
+        button = buttons[0]
+        if not (
+            button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is None
+            and button.bounds is not None
+        ):
+            raise SemanticGateClosed(
+                "Operation Siren voucher confirmation is not actionable"
+            )
+        bounds = button.bounds
+        point = Point(
+            (bounds.left + bounds.right) / 2.0,
+            (bounds.top + bounds.bottom) / 2.0,
+        )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="os/voucher/purchase/confirm",
+            generation=state.generation,
+            point=point,
+            bounds=bounds,
+            path=button.path,
+        )
+
     def click_shop_item(self, index: int) -> ActionReceipt:
         if isinstance(index, bool) or not isinstance(index, int) or not 0 <= index < 10:
             raise SemanticGateClosed("shop item index is invalid")

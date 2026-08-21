@@ -1,6 +1,6 @@
 # ALAS Headless 配置项级支持矩阵
 
-更新日期：2026-08-20
+更新日期：2026-08-21
 Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 固定 ALAS 上游基线：`81ccf63b4540f00241628c82a58c02c7a2bb11af`
 
@@ -37,17 +37,17 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | `M` | 🔴 尚未完成 | 缺少任务级适配或关键语义端口 |
 | `R` | ⚙️ 运行时待验收 | ALAS 内部/运行时管理字段；仍需验证调度与恢复契约 |
 
-### 1.1 完成度汇总（2026-08-16 标注）
+### 1.1 完成度汇总（2026-08-21 标注）
 
 这里的“完成”严格指整块面板的全部配置值和必要异常分支均已闭环，不能用“默认路径跑过”替代。
 
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **7 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **16 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiShop、OpsiStronghold、Research、Tactical |
+| 🟢 主路径已完成、全配置未完成（`L`） | **17 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiShop、OpsiStronghold、OpsiVoucher、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **7 / 60** | Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
-| 🧱 已到边界、尚未完成（`B`） | **15 / 60** | Meowfficer、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
+| 🧱 已到边界、尚未完成（`B`） | **14 / 60** | Meowfficer、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
@@ -365,7 +365,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiShop.PresetFilter` 的五个声明值直接绑定固定上游 `OS_SHOP`，`CustomFilter` 保留自定义顺序及空值回退默认预设。回放继续执行原 `Selector.items_filter_in_os_shop()`，覆盖 CL1 紫币排除和商品数量耗尽；未知预设、错误类型、未知及空 token 均在商品预处理前 fail-closed。2026-08-21，新版统一港口商店以实际 19 张卡片完成 typed 库存与特别兑换凭证读取，原任务的 `custom` 路径命中 `DevelopmentMaterialT2` 并完成单件购买：余量 `3→2`、票券 `1205→1200`。动作在输入前复核商品身份、价格、余量及币种，在 ADB 点击结果不明确时仅凭精确数量对话框恢复并最终复核资源差，未重复购买。黄币购买、其余四预设逐值、余额不足、刷新及全部港口分支仍缺，因此两个字段提升到 `L` 的实机部分支持，不提升到 `F`。
 
-`OpsiVoucher.Filter` 直接执行固定上游 `voucher_redirect()` 与通用商店 `FILTER_REGEX/Filter`，保留 Logger 双类型展开、T1..T6 展开、档案/解锁 Logger 删除、Unicode 分隔符和空过滤器安全跳过。未知 token、尾随空 token 和错误类型在代币商店页面动作前拒绝；没有滚动、兑换、读取或改变真实代币，也没有 Android 输入。
+`OpsiVoucher.Filter` 直接执行固定上游 `voucher_redirect()` 与通用商店 `FILTER_REGEX/Filter`，保留 Logger 双类型展开、T1..T6 展开、档案/解锁 Logger 删除、Unicode 分隔符和空过滤器安全跳过。未知 token、尾随空 token 和错误类型在代币商店页面动作前拒绝。新版兑换页已类型化读取 22 卡库存、两种货币、售罄和凭证余额；原 `OpsiVoucher` 任务以 `HECombatPlan` 命中并实兑一件，余量 `28→27`、凭证 `21592→21492`，随后回图并完成月度调度。石油商品、全部过滤优先级逐值及异常恢复仍未全部实机闭环，因此面板提升到 `L`，不虚报为 `F`。
 
 `OpsiAshAssist.Tier` 直接回放固定上游原 `_ensure_meta_level()`，精确整数保持等级显示等待、OCR 比较、最多五次向后轮换及找不到时使用当前信标的兜底行为。错误类型在首次页面观察或点击前 fail-closed。固定 ALAS 配置没有声明等级范围，因此不虚构 `1..15` 约束；负数、0 和高于当前等级的整数仍按原比较和兜底语义执行。
 
@@ -431,7 +431,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | Tier 等级选择已离线等价；真实目标列表、出击、战斗和领奖仍受舰队条件限制 |
 | 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | B | ForceRun、LastZone、SpecialRadar、Fleet/Submarine 已离线等价；真实地图导航、舰队/潜艇动作和清区未闭环 |
 | 44 | OpsiShop | Scheduler, OpsiShop | L | 统一商店 19 卡 typed 观察与 custom 单件购买已实机闭环，余量 `3→2`、票券 `1205→1200`，并覆盖点击结果不明确后的精确恢复；黄币、其余预设、余额不足、刷新及全港口分支仍缺 |
-| 45 | OpsiVoucher | Scheduler, OpsiVoucher | B | 过滤器及重定向已离线等价；真实库存、命中、兑换、代币 postcondition 与异常恢复仍未闭环 |
+| 45 | OpsiVoucher | Scheduler, OpsiVoucher | L | 统一兑换页 22 卡 typed 观察、筛选命中与单件兑换已由原任务实机闭环，余量 `28→27`、凭证 `21592→21492`；石油商品、全部优先级逐值及异常恢复仍缺 |
 | 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | DoMission、UseTuningSample、Fleet/Submarine 已离线等价；真实舰队/潜艇动作和清图未闭环 |
 | 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | B | ForceRun、Fleet/Submarine 已离线等价；坐标消耗、真实动作、进入和清图未闭环 |
 | 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | L | 默认主路径已实机完成坐标消耗、100 行动力入场、侵蚀 6 Boss、奖励、不可逆退出与利维浦大修；UseLogger 和自由舰队过滤全空间未逐项实机 |
@@ -897,7 +897,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiShop.CustomFilter` | OpsiShop | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 实机当前值 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `OpsiShop.PresetFilter` | OpsiShop | type=select; display=default | options: "all", "custom", "max_benefit_meta", "max_benefit", "no_meta"; default: "max_benefit_meta" | `L`/◐ 实机当前值 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `OpsiStronghold.ForceRun` | OpsiStronghold | type=checkbox; display=default | input/default: false | `L`/🟢 默认主路径 | ☑ | ☑ | ☑ | ☑ | ◐ |
-| `OpsiVoucher.Filter` | OpsiVoucher | type=textarea; display=default | input/default: "LoggerAbyssal > LoggerObscure > Book > Coin > Fragment" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `OpsiVoucher.Filter` | OpsiVoucher | type=textarea; display=default | input/default: "LoggerAbyssal > LoggerObscure > Book > Coin > Fragment" | `L`/◐ 实机当前值 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `Optimization.CombatScreenshotInterval` | Alas | type=input; display=default | input/default: 1.0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Optimization.ScreenshotInterval` | Alas | type=input; display=default | input/default: 0.3 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Optimization.TaskHoardingDuration` | Alas | type=input; display=default | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |

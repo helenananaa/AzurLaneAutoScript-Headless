@@ -1732,6 +1732,144 @@ class AlasSemanticAdapter:
                 )
             time.sleep(0.25)
 
+    def purchase_operation_siren_voucher_item_once(
+        self,
+        index: int,
+        expected_name: str,
+        expected_price: int,
+        expected_currency: str = "Voucher",
+    ) -> ActionReceipt:
+        """Exchange exactly one proven Operation Siren voucher item."""
+
+        if not self._action_ledger.allowed("shop.purchase"):
+            raise SemanticGateClosed(
+                "Operation Siren voucher exchange requires a positive transaction budget"
+            )
+        if expected_currency != "Voucher":
+            raise SemanticGateClosed(
+                "Operation Siren voucher Oil exchange is not qualified"
+            )
+        before_items = self.oracle._retry_transition_read(
+            self.oracle.operation_siren_voucher_items,
+            attempts=8,
+            interval_seconds=0.2,
+        )
+        before = next((item for item in before_items if item.index == index), None)
+        if before is None:
+            raise SemanticGateClosed("selected Operation Siren voucher item is absent")
+        if (
+            before.canonical_name != expected_name
+            or before.price != expected_price
+            or before.currency != expected_currency
+        ):
+            raise SemanticGateClosed(
+                "selected Operation Siren voucher item identity changed"
+            )
+        if before.sold_out or before.remaining <= 0:
+            raise SemanticGateClosed("selected Operation Siren voucher item is sold out")
+        before_currency = self.oracle._retry_transition_read(
+            self.oracle.operation_siren_voucher_currency,
+            attempts=8,
+            interval_seconds=0.2,
+        )
+        if before_currency < before.price:
+            raise SemanticGateClosed(
+                "Operation Siren voucher currency is insufficient"
+            )
+
+        try:
+            self.oracle.click_operation_siren_voucher_item(
+                index, expected_name, expected_price, expected_currency
+            )
+        except ObserverTransportError:
+            if self.oracle.operation_siren_voucher_purchase_dialog_quantity(
+                before.display_name, before.icon_sprite
+            ) != 1:
+                raise
+        deadline = time.monotonic() + 5.0
+        while True:
+            try:
+                quantity = (
+                    self.oracle.operation_siren_voucher_purchase_dialog_quantity(
+                        before.display_name, before.icon_sprite
+                    )
+                )
+            except SemanticGateClosed:
+                if time.monotonic() >= deadline:
+                    raise
+                time.sleep(0.2)
+                continue
+            if quantity is not None:
+                break
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed(
+                    "Operation Siren voucher exchange dialog did not open"
+                )
+            time.sleep(0.2)
+        if quantity != 1:
+            raise SemanticGateClosed(
+                "Operation Siren voucher exchange did not default to one item"
+            )
+        receipt = self._dispatch_mutation(
+            "shop.purchase",
+            lambda: self.oracle.click_operation_siren_voucher_purchase_confirm(
+                before.display_name, before.icon_sprite, 1
+            ),
+        )
+        deadline = time.monotonic() + 120.0
+        while True:
+            try:
+                dialog_quantity = (
+                    self.oracle.operation_siren_voucher_purchase_dialog_quantity(
+                        before.display_name, before.icon_sprite
+                    )
+                )
+            except SemanticGateClosed:
+                if time.monotonic() >= deadline:
+                    raise
+                time.sleep(0.25)
+                continue
+            if dialog_quantity is None:
+                if self.oracle.award_info_page_visible():
+                    self.oracle.click_exercise_award_info_close()
+                    time.sleep(0.5)
+                try:
+                    after_items = self.oracle._retry_transition_read(
+                        self.oracle.operation_siren_voucher_items,
+                        attempts=8,
+                        interval_seconds=0.2,
+                    )
+                    after_currency = self.oracle._retry_transition_read(
+                        self.oracle.operation_siren_voucher_currency,
+                        attempts=8,
+                        interval_seconds=0.2,
+                    )
+                except SemanticGateClosed:
+                    if time.monotonic() >= deadline:
+                        raise
+                    time.sleep(0.25)
+                    continue
+                after = next(
+                    (item for item in after_items if item.index == index), None
+                )
+                if (
+                    after is None
+                    or after.canonical_name != before.canonical_name
+                    or after.price != before.price
+                    or after.currency != before.currency
+                    or after.remaining != before.remaining - 1
+                    or after_currency != before_currency - before.price
+                ):
+                    raise SemanticGateClosed(
+                        "Operation Siren voucher exchange postcondition changed"
+                    )
+                return receipt
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed(
+                    "Operation Siren voucher exchange confirmation did not settle"
+                )
+            time.sleep(0.25)
+
     def _require_frame_observation_oracle(self) -> Any:
         provider = self._frame_observation_oracle
         if provider is None:
@@ -12239,6 +12377,21 @@ class AlasSemanticSession:
 
     def operation_siren_voucher_currency(self) -> int:
         return self.open().oracle.operation_siren_voucher_currency()
+
+    def purchase_operation_siren_voucher_item_once(
+        self,
+        index: int,
+        expected_name: str,
+        expected_price: int,
+        expected_currency: str = "Voucher",
+    ) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().purchase_operation_siren_voucher_item_once(
+            index,
+            expected_name,
+            expected_price,
+            expected_currency,
+        )
 
     def shop_purchase_allowed(self) -> bool:
         return self.open()._action_ledger.allowed("shop.purchase")

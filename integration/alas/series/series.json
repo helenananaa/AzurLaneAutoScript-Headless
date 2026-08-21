@@ -254,6 +254,11 @@
       "order": 51,
       "path": "integration/alas/series/0102-operation-siren-shop-runtime.patch",
       "sha256": "ac1c628db22b3be10f5facc886a3b5948d06fb9748d232321b16d75fe0d4dc1a"
+    },
+    {
+      "order": 52,
+      "path": "integration/alas/series/0103-operation-siren-voucher-runtime.patch",
+      "sha256": "b6e5179bd141cb1ed9f21e56f9ce5b52feaf5d066b75d8968eeb6ce57c7b8670"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

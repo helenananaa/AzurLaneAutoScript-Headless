@@ -1300,7 +1300,20 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - `OpsiVoucher.Filter` runs pinned `voucher_redirect()` and the original shop
   grammar, preserving Logger expansion, tier expansion, archive-token removal,
   Unicode separators, and intentional empty skip. Invalid tokens and types fail
-  before voucher-page work; no exchange, scrolling, or Android input occurs.
+  before voucher-page work. The unified `WorldShopUI` exposes exactly 22 typed
+  cards with canonical icon identity, amount, remaining/total, price, Oil or
+  Voucher currency, sold-out state, and a typed Voucher balance. On 2026-08-21
+  the original `OpsiVoucher` task used `HECombatPlan` as its reviewed filter,
+  entered from the Operation Siren map, selected the exact visible card, and
+  committed one quantity-one exchange: remaining `28 -> 27` and Voucher balance
+  `21592 -> 21492`. The confirmation re-proves the item name and both item-icon
+  copies, and the atomic action requires both resource deltas before success;
+  transient dialog projections are retried within a bound and never cause a
+  second item tap. The task then returned to the map and scheduled the next
+  monthly reset. Evidence is
+  `integration/alas/operation-siren-voucher-live-qualification-20260821.json`.
+  Oil-cost items and exhaustive live priority/insufficient-balance variants
+  remain open, so this is `L`, not `F`.
 - `OpsiAshAssist.Tier` preserves the original tier-visibility wait, OCR
   comparison, up to five beacon rotations, and current-beacon fallback for
   exact integer thresholds. Malformed values fail before the first page
