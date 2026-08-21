@@ -259,6 +259,16 @@
       "order": 52,
       "path": "integration/alas/series/0103-operation-siren-voucher-runtime.patch",
       "sha256": "b6e5179bd141cb1ed9f21e56f9ce5b52feaf5d066b75d8968eeb6ce57c7b8670"
+    },
+    {
+      "order": 53,
+      "path": "integration/alas/series/0104-operation-siren-archive-runtime.patch",
+      "sha256": "8ab2e0127eb77dfcf1774f164132405366c81b5a2cb19f11f7bed2fb53ae1067"
+    },
+    {
+      "order": 54,
+      "path": "integration/alas/series/0105-operation-siren-auto-search-transition-recovery.patch",
+      "sha256": "f24ee9313068e3a74561206fd742f28a2c61e98c325d3d3e22d806fbd51df01f"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

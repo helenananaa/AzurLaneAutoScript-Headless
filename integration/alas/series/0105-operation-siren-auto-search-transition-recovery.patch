@@ -1,0 +1,25 @@
+diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
+index 53fb10d9..c339c4af 100644
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -263,10 +263,18 @@ class MapEventHandler(EnemySearchingHandler):
+             # frame; leave the map-option switch untouched until map return.
+             if not semantic_adapter.operation_siren_map_visible():
+                 return False
+-            from alas_headless import current_semantic_session
++            from alas_headless import SemanticGateClosed, current_semantic_session
+             session = current_semantic_session()
+             if session is not None:
+-                state = session.operation_siren_auto_search_state()
++                try:
++                    state = session.operation_siren_auto_search_state()
++                except SemanticGateClosed:
++                    # The local-map scene can become visible one projection
++                    # before its auto-search controls are mounted after
++                    # combat.  This is a transient non-actionable frame: wait
++                    # for the exact on/off control instead of treating it as
++                    # a stable unknown state or injecting input.
++                    return False
+                 transition_active = (
+                     session.operation_siren_auto_search_transition_active()
+                 )

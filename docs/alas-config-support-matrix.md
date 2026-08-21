@@ -44,10 +44,10 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **7 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **17 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiShop、OpsiStronghold、OpsiVoucher、Research、Tactical |
+| 🟢 主路径已完成、全配置未完成（`L`） | **18 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiShop、OpsiStronghold、OpsiVoucher、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **7 / 60** | Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
-| 🧱 已到边界、尚未完成（`B`） | **14 / 60** | Meowfficer、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、Shipyard、ShopFrequent、WarArchives |
+| 🧱 已到边界、尚未完成（`B`） | **13 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
@@ -367,6 +367,8 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiVoucher.Filter` 直接执行固定上游 `voucher_redirect()` 与通用商店 `FILTER_REGEX/Filter`，保留 Logger 双类型展开、T1..T6 展开、档案/解锁 Logger 删除、Unicode 分隔符和空过滤器安全跳过。未知 token、尾随空 token 和错误类型在代币商店页面动作前拒绝。新版兑换页已类型化读取 22 卡库存、两种货币、售罄和凭证余额；原 `OpsiVoucher` 任务以 `HECombatPlan` 命中并实兑一件，余量 `28→27`、凭证 `21592→21492`，随后回图并完成月度调度。石油商品、全部过滤优先级逐值及异常恢复仍未全部实机闭环，因此面板提升到 `L`，不虚报为 `F`。
 
+原 `OpsiArchive` 已用 `Fleet=1`、`Submarine=false` 实机清完 T2 既有 9 任务链；随后从统一兑换页购买 `LoggerArchiveT4`，库存 `1→0`、凭证 `20692→19892`，并在一次战后控件延迟挂载故障修复后继续完成 T4 剩余 8 任务链。任务列表逐轮类型化排除普通月度 Boss；选区、档案海域进入、单任务多战、自动搜索结束、回兑换页和周三调度均闭环。过渡帧只等待精确 on/off 控件重新挂载，不注入输入。`Fleet=2..4`、`Submarine=true`、余额不足及完整异常矩阵仍缺，因此面板从 `B` 提升到 `L`，不提升到 `F`。
+
 `OpsiAshAssist.Tier` 直接回放固定上游原 `_ensure_meta_level()`，精确整数保持等级显示等待、OCR 比较、最多五次向后轮换及找不到时使用当前信标的兜底行为。错误类型在首次页面观察或点击前 fail-closed。固定 ALAS 配置没有声明等级范围，因此不虚构 `1..15` 约束；负数、0 和高于当前等级的整数仍按原比较和兜底语义执行。
 
 `OpsiAshBeacon.EnsureFullyCollected` 只回放两个既有刷图循环的行动力保留分支：在任务已启用且存在未完整领取的信标时，`false` 保留原 200/1,000 点限制，`true` 临时置零；其他条件仍保留正常限制。错误类型在配置 override、调度调用或地图输入前 fail-closed。该字段不生成、攻击、求助或领取信标，因此没有把高风险信标动作外推为已适配。
@@ -435,7 +437,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | DoMission、UseTuningSample、Fleet/Submarine 已离线等价；真实舰队/潜艇动作和清图未闭环 |
 | 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | B | ForceRun、Fleet/Submarine 已离线等价；坐标消耗、真实动作、进入和清图未闭环 |
 | 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | L | 默认主路径已实机完成坐标消耗、100 行动力入场、侵蚀 6 Boss、奖励、不可逆退出与利维浦大修；UseLogger 和自由舰队过滤全空间未逐项实机 |
-| 49 | OpsiArchive | Scheduler, OpsiFleet | B | Fleet/Submarine 已离线等价且档案商店可读；真实动作、购买、使用坐标、进入和清图未闭环 |
+| 49 | OpsiArchive | Scheduler, OpsiFleet | L | T2 既有 9 任务与 T4 购买/全链实机闭环；Fleet=1、Submarine=false 已证明，其他舰队/潜艇值与异常全空间仍缺 |
 | 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | L | 实机以精确世界地图标题/类型发现 93、121 两处要塞；93 区闭环 `100 -> 20 -> 0%` 舰队轮换，121 区闭环进入、战斗、0% 收束、回港大修和四队低士气复查；完整舰队过滤与 ForceRun 分支仍未逐值实机覆盖 |
 | 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通 Boss 已实机闭环战败、低士气/沉没分离、舰队轮换和全队耗尽失败返回，成功击杀结算及困难 Boss 未闭环 |
 | 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | B | HazardLevel、Fleet/Submarine 已离线等价；行动力保留、选区、真实动作和循环未闭环 |
@@ -550,7 +552,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | OpsiMonthBoss | `Mode`=`normal/normal_hard`; `CheckAdaptability`; `ForceRun` | B | 两模式与两个开关已回放；普通房间已实机完成战败、低士气/沉没分离、轮换和全队耗尽失败返回，成功击杀结算、困难战斗与奖励仍缺 |
 | OpsiMeowfficerFarming | `HazardLevel`=3/4/5/6/10; `TargetZone`; `ActionPointPreserve` | B | 五危险等级、自动/显式区域、行动力边界、舰队/潜艇、循环与停止 |
 | OpsiHazard1Leveling | `TargetZone`=0/44/22 | B | 三目标值、不可用区域、舰队/潜艇、自动寻敌和循环停止 |
-| OpsiArchive | 无独立组，复用 Scheduler 与 OpsiFleet | B | 档案商店购买、坐标使用、舰队/潜艇、进入/清图与奖励 |
+| OpsiArchive | 无独立组，复用 Scheduler 与 OpsiFleet | L | T2/T4 主路径、真实购买、任务创建、进入与清图已闭环；其余舰队/潜艇值和异常分支仍缺 |
 | OpsiCrossMonth | 无独立组，仅 Scheduler | B | 月末前后、服务器时区、重置完成/失败、重启续跑和幂等性 |
 
 ### 3.7 工具任务

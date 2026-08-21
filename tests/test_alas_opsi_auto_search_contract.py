@@ -14,6 +14,10 @@ STRONGHOLD_RUNTIME_PATCH = (
     ROOT / "integration" / "alas" / "series" /
     "0098-operation-siren-stronghold-runtime.patch"
 )
+TRANSITION_RECOVERY_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0105-operation-siren-auto-search-transition-recovery.patch"
+)
 
 
 class AlasOpsiAutoSearchContractTests(unittest.TestCase):
@@ -41,6 +45,13 @@ class AlasOpsiAutoSearchContractTests(unittest.TestCase):
         self.assertNotIn("auto_search_locked", opsi)
         self.assertNotIn("auto_search_locked", daemon)
         self.assertNotIn("oracle.exists('os/map/auto-search/off')", daemon)
+
+    def test_post_combat_map_projection_waits_for_exact_toggle_mount(self):
+        source = TRANSITION_RECOVERY_PATCH.read_text(encoding="utf-8")
+        self.assertIn("except SemanticGateClosed:", source)
+        self.assertIn("transient non-actionable frame", source)
+        self.assertIn("return False", source)
+        self.assertNotIn("device.click", source)
 
     def test_opsi_startup_owns_interrupted_auto_search_and_fleet_states_split(self):
         source = STRONGHOLD_RUNTIME_PATCH.read_text(encoding="utf-8")

@@ -1,0 +1,197 @@
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+index 6daefb67..eee79868 100644
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -354,31 +354,27 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+                 ))
+                 shift = focus_attempt * 17 % len(probe_offsets)
+                 probe_offsets = probe_offsets[shift:] + probe_offsets[:shift]
+-                selected = None
++                selected_mismatch = False
+                 for offset in probe_offsets:
+                     probe = target + offset
+                     if not point_in_area(probe, area=sight):
+                         continue
+                     try:
+-                        semantic_adapter.click_operation_siren_globe_zone(
++                        receipt = semantic_adapter.click_operation_siren_globe_zone(
+                             zone.cn, (float(probe[0]), float(probe[1])))
+                     except SemanticGateClosed:
+-                        pass
+-                    try:
+-                        selected = semantic_adapter.operation_siren_globe_state()
+-                    except SemanticGateClosed:
+-                        selected = None
+                         continue
+-                    if selected.zone_name == zone.cn:
++                    if receipt.semantic_id == 'os/globe/zone/select':
+                         self.globe_update()
+                         logger.attr('Globe_pinned', zone)
+                         return
+                     logger.warning(
+-                        f'Semantic globe probe {tuple(probe)} selected '
+-                        f'{selected.zone_name}; re-anchor and retry'
++                        f'Semantic globe probe {tuple(probe)} selected another '
++                        f'zone; re-anchor and retry'
+                     )
++                    selected_mismatch = True
+                     break
+-                if selected is None:
++                if not selected_mismatch:
+                     raise GameStuckError(
+                         'Semantic globe could not recover a selected zone'
+                     )
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+index fe133663..02876ef5 100644
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -37,13 +37,24 @@ class GlobeOperation(ActionPointHandler):
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
+             try:
+-                semantic_adapter.operation_siren_globe_state()
++                state = semantic_adapter.operation_siren_globe_state()
+             except Exception:
+                 return None
+-            # The typed SVFloatPanel proves a zone is pinned.  The exact
+-            # selected zone name is resolved by get_globe_pinned_zone(); for
+-            # the common port/ordinary route there is no alternate zone type.
+-            return ZONE_DANGEROUS
++            zone_types = {
++                '危险海域': ZONE_DANGEROUS,
++                # Cleared mission targets use the ordinary-zone label while
++                # retaining the same base globe entrance semantics.
++                '普通海域': ZONE_DANGEROUS,
++                '安全海域': ZONE_SAFE,
++                '隐秘海域': ZONE_OBSCURE,
++                '深渊海域': ZONE_ABYSSAL,
++                '塞壬要塞': ZONE_STRONGHOLD,
++                '档案海域': ZONE_ARCHIVE,
++                # The monthly Arbiter marker uses the ordinary entrance
++                # semantics even though its typed panel calls it unknown.
++                '未知海域': ZONE_DANGEROUS,
++            }
++            return zone_types.get(state.zone_type)
+ 
+         for zone in ZONE_TYPES:
+             if self.appear(zone, offset=(20, 20)):
+@@ -371,6 +382,24 @@ class GlobeOperation(ActionPointHandler):
+             in: is_zone_pinned
+             out: is_in_map
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            pinned = self.get_zone_pinned_name()
++            logger.info(f'Enter pinned zone {zone} (typed {pinned})')
++            semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
++            for _ in range(80):
++                self.device.sleep(0.25)
++                if semantic_adapter.operation_siren_map_visible():
++                    return
++                if self.handle_action_point(zone=zone, pinned=pinned):
++                    # The AP panel dismisses the selected-zone float panel.
++                    # Re-pin through the still-valid modeled globe camera,
++                    # then submit the exact entrance again.
++                    self.globe_focus_to(zone)
++                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
++                    continue
++            raise OSExploreError(f'Unable to enter typed zone {zone}')
++
+         click_timer = Timer(10)
+         click_count = 0
+         pinned = None
+diff --git a/module/os/tasks/archive.py b/module/os/tasks/archive.py
+index 0a7d8dcc..ec7e0839 100644
+--- a/module/os/tasks/archive.py
++++ b/module/os/tasks/archive.py
+@@ -12,6 +12,15 @@ class OpsiArchive(OSMap):
+                       offset=(200, 20), retry_wait=3, skip_first_screenshot=True)
+ 
+     def _os_voucher_exit(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
++            semantic_adapter.open().oracle.click('os/voucher/back')
++            for _ in self.loop():
++                if self.appear(EXCHANGE_ENTER, offset=(200, 20)):
++                    break
++            self.os_globe_goto_map()
++            return
+         self.ui_back(check_button=EXCHANGE_ENTER, appear_button=EXCHANGE_CHECK,
+                      offset=(200, 20), retry_wait=3, skip_first_screenshot=True)
+         self.os_globe_goto_map()
+diff --git a/module/os_handler/mission.py b/module/os_handler/mission.py
+index 7296840d..d976067c 100644
+--- a/module/os_handler/mission.py
++++ b/module/os_handler/mission.py
+@@ -116,12 +116,31 @@ class MissionHandler(GlobeOperation, ZoneManager):
+         self.os_mission_enter()
+ 
+         checkout_offset = (20, 20)
+-        if self.appear(MISSION_MONTHLY_BOSS, offset=(20, 20)):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        semantic_oracle = (
++            semantic_adapter.open().oracle
++            if semantic_adapter is not None else None
++        )
++        exclude_monthly_boss = False
++        if semantic_oracle is not None:
++            exclude_monthly_boss = (
++                semantic_oracle.operation_siren_month_boss_difficulty()
++                is not None
++            )
++        if exclude_monthly_boss or self.appear(MISSION_MONTHLY_BOSS, offset=(20, 20)):
+             # If monthly BOSS hasn't been killed, there is always a task.
+             logger.info('Monthly BOSS mission found, checking missions bellow it')
+             checkout_offset = (-20, 100, 20, 150)
+ 
+-        if not self.match_template_color(MISSION_CHECKOUT, offset=checkout_offset):
++        if semantic_oracle is not None:
++            checkout_available = (
++                semantic_oracle.operation_siren_mission_checkout_available(
++                    exclude_monthly_boss=exclude_monthly_boss)
++            )
++        else:
++            checkout_available = self.match_template_color(
++                MISSION_CHECKOUT, offset=checkout_offset)
++        if not checkout_available:
+             # If not having enough items to claim a mission,
+             # there will still be MISSION_CHECKOUT, but button is transparent.
+             # So here needs to use both template matching and color detection.
+@@ -135,7 +154,6 @@ class MissionHandler(GlobeOperation, ZoneManager):
+             return False
+ 
+         logger.info('Checkout os mission')
+-        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         for _ in self.loop():
+             # End
+             if self.is_zone_pinned():
+@@ -151,7 +169,18 @@ class MissionHandler(GlobeOperation, ZoneManager):
+                 logger.info('Already at mission zone')
+                 return 'already_at_mission_zone'
+ 
+-            if self.appear_then_click(MISSION_CHECKOUT, offset=checkout_offset, interval=2):
++            if semantic_oracle is not None:
++                checkout_available = (
++                    semantic_oracle.operation_siren_mission_checkout_available(
++                        exclude_monthly_boss=exclude_monthly_boss)
++                )
++                if checkout_available:
++                    semantic_oracle.click_operation_siren_mission_checkout(
++                        exclude_monthly_boss=exclude_monthly_boss)
++            else:
++                checkout_available = self.appear_then_click(
++                    MISSION_CHECKOUT, offset=checkout_offset, interval=2)
++            if checkout_available:
+                 if semantic_adapter is not None:
+                     for _ in self.loop():
+                         if semantic_adapter.open().oracle.operation_siren_mission_list_visible():
+@@ -164,7 +193,7 @@ class MissionHandler(GlobeOperation, ZoneManager):
+                             logger.info('Pinned at mission zone')
+                             self.globe_enter(zone=self.name_to_zone(72))
+                             return 'pinned_at_mission_zone'
+-                        if self.is_in_map():
++                        if self.is_in_map() and self.info_bar_count():
+                             logger.info('Already at mission zone')
+                             return 'already_at_mission_zone'
+                 continue

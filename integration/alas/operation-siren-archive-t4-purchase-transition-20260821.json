@@ -1,0 +1,44 @@
+{
+  "schema": "alas-headless.operation-siren-archive-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 3759,
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "Fleet": 1,
+    "Submarine": false
+  },
+  "transaction_budget": 1,
+  "transactions": [
+    {
+      "index": 4,
+      "canonical_name": "LoggerArchiveT4",
+      "icon_sprite": "Wdanganluopan4",
+      "price": 800,
+      "remaining_before": 1,
+      "remaining_after": 0,
+      "balance_before": 20692,
+      "balance_after": 19892,
+      "receipt": "os/voucher/purchase/confirm",
+      "capability": "shop.purchase"
+    }
+  ],
+  "mission_passes": [
+    {
+      "completed_count": 0,
+      "transaction_count_before": 0,
+      "elapsed_seconds": 4.672
+    }
+  ],
+  "error": "SystemExit: 1",
+  "passed": false,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "archive_task": "81d6b8793b6fc54af7bcd92c85bfaa131f600baa9788141cea64987652413525",
+    "voucher_shop": "f29e8e7f2361d02f5e5bbd5f751d994571e44c576ba79efd025d4ca9758f529d",
+    "adapter": "328ae617308df2dd347cc16a95cc8756a0395361e20a79142f4bca8bb925db06",
+    "oracle": "002fbf7c0ca227bc9a9df4aa44f080f63cb6e8d296f6af663abd547236a524d5"
+  }
+}

@@ -8250,8 +8250,8 @@
         "OpsiFleet"
       ],
       "name": "OpsiArchive",
-      "note": "Fleet 四值与 Submarine 两值的最终边界已离线等价；可读档案商店，但真实舰队/潜艇动作、购买、使用坐标、进入和清图未闭环",
-      "status": "B"
+      "note": "原 OpsiArchive 已以 Fleet=1、Submarine=false 实机清完 T2 既有 9 任务链，随后购买 LoggerArchiveT4（库存 1→0、凭证 20692→19892）并完成 T4 全链；月度 Boss 行被逐轮排除，战后 auto-search 控件延迟挂载可无输入等待恢复。Fleet=2..4、Submarine=true、购买不足与异常恢复全空间仍缺",
+      "status": "L"
     },
     {
       "groups": [
@@ -11244,9 +11244,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "0ea27840e404b6a4328c98ad4ebfdcdab68cd8f398ba5e4d034817ad539839f7",
-      "manifest_sha256": "5022a8eae7cb83b32749fd6135a2a57c33665ecf9aaf8a8faad940385294b419",
-      "member_count": 52
+      "combined_sha256": "29f47de7aebbcfc98d436162472f42a817bc7174ff3e7e4535558db47324ef54",
+      "manifest_sha256": "8bf9b80337ed75e4afb504211bd68b2e5e6f09e298553a9faf0e3f021ecb374e",
+      "member_count": 54
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

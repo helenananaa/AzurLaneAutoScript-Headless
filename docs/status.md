@@ -1314,6 +1314,19 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `integration/alas/operation-siren-voucher-live-qualification-20260821.json`.
   Oil-cost items and exhaustive live priority/insufficient-balance variants
   remain open, so this is `L`, not `F`.
+- `OpsiArchive` now completes the original purchase-and-clear loop instead of
+  stopping at a read-only logger inventory. A zero-budget run cleared the
+  pre-existing T2 chain with 9 committed missions. The next bounded run bought
+  `LoggerArchiveT4`: stock `1 -> 0`, Voucher balance `20692 -> 19892`, exact
+  icon `Wdanganluopan4`, and capability `shop.purchase`. Its first pass exposed
+  a real post-combat frame where the local map was visible before either
+  auto-search control mounted; member 0105 now treats that as non-actionable
+  and waits without input. A recovery run then committed the remaining 8 T4
+  missions, including multi-battle maps, and the postcondition probe found only
+  the normal monthly Arbiter row. Evidence is in the three archive live
+  receipts and the typed mission-list probes dated 2026-08-21. Fleet 2-4,
+  `Submarine=true`, insufficient balance, and the complete failure matrix are
+  still open, so `OpsiArchive` is promoted from `B` to `L`, not `F`.
 - `OpsiAshAssist.Tier` preserves the original tier-visibility wait, OCR
   comparison, up to five beacon rotations, and current-beacon fallback for
   exact integer thresholds. Malformed values fail before the first page

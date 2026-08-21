@@ -255,6 +255,7 @@ class FakeBackend:
         self.ui = make_ui([])
         self.ui_sequence = []
         self.foreground = COMPONENT
+        self.foreground_requests = 0
         self.taps = []
         self.swipes = []
         self.on_tap = None
@@ -308,6 +309,7 @@ class FakeBackend:
         raise AssertionError("unexpected request")
 
     def foreground_component(self):
+        self.foreground_requests += 1
         return self.foreground
 
     def tap(self, x, y):
@@ -9669,7 +9671,7 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
 
         def unpin():
             backend.buttons = make_buttons(
-                backend.buttons["buttons"], generation=11
+                backend.buttons["buttons"], generation=12
             )
             backend.ui = make_ui([], images=[], generation=12)
 
@@ -9680,6 +9682,184 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "os/globe/zone/unpin")
         self.assertEqual(backend.swipes, [(508, 426, 388, 346, 150)])
+
+    def test_globe_unpin_has_a_four_gesture_fail_closed_bound(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/"
+                    "top_chapter/back_button",
+                )
+            ]
+        )
+        pin = make_image(
+            "root/OverlayCamera/Overlay/UIMain/top/SVFloatPanel(Clone)/point",
+            "click_point_safe",
+            {"left": 470, "top": 396, "right": 546, "bottom": 455},
+        )
+        backend.ui = make_ui([], images=[pin], generation=10)
+        oracle = make_oracle(backend)
+        with mock.patch.object(oracle, "operation_siren_globe_state"):
+            with self.assertRaisesRegex(SemanticGateClosed, "unpin was not proven"):
+                oracle.operation_siren_globe_unpin()
+
+        self.assertEqual(len(backend.swipes), 4)
+        self.assertEqual(backend.requests.count("GET /v1/ui\n"), 13)
+
+    def test_globe_zone_click_proves_lightweight_typed_mismatch(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/"
+                    "top_chapter/back_button",
+                )
+            ]
+        )
+        title_path = (
+            "root/OverlayCamera/Overlay/UIMain/top/SVFloatPanel(Clone)/point/"
+            "line/bg/title/name/subText"
+        )
+        backend.ui = make_ui(
+            [make_text("利维浦-安全海域", title_path)], generation=10
+        )
+
+        def select_other_zone():
+            backend.ui = make_ui(
+                [make_text("东大陆架D-普通海域", title_path)], generation=11
+            )
+
+        backend.on_tap = select_other_zone
+        oracle = make_oracle(backend)
+        receipt = oracle.click_operation_siren_globe_zone(
+            "圣彼得堡", (944.0, 363.0)
+        )
+
+        self.assertEqual(receipt.semantic_id, "os/globe/zone/select-mismatch")
+        self.assertEqual(receipt.generation, 11)
+        self.assertEqual(backend.taps, [(944, 363)])
+        self.assertEqual(backend.requests.count("GET /v1/state\n"), 1)
+        self.assertEqual(backend.requests.count("GET /v1/ui\n"), 2)
+        self.assertEqual(backend.foreground_requests, 2)
+
+    def test_mission_checkout_can_exclude_the_monthly_boss_row(self):
+        row_root = (
+            "root/OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/"
+            "right_panel/main/viewport/content/"
+        )
+        monthly_row = make_button(
+            "btn_go",
+            row_root + "task_tpl/base_panel/btn_go",
+            x=1070,
+            y=220,
+            bounds={"left": 1024, "top": 203, "right": 1116, "bottom": 238},
+            raycast_top=None,
+        )
+        daily_row = make_button(
+            "btn_go",
+            row_root + "task_tpl(Clone)/base_panel/btn_go",
+            x=1070,
+            y=350,
+            bounds={"left": 1024, "top": 333, "right": 1116, "bottom": 368},
+            raycast_top=None,
+        )
+        close = make_button(
+            "close_btn",
+            "root/OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/"
+            "right_panel/title/close_btn",
+            raycast_top=None,
+        )
+        backend = FakeBackend([close, monthly_row, daily_row])
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "任务总汇",
+                    "root/OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/"
+                    "adapt/right_panel/title/task_all",
+                ),
+                make_text(
+                    "普通作战·仲裁机关",
+                    row_root + "task_tpl/base_panel/base_show/title/Text",
+                    bounds={"left": 568, "top": 181, "right": 775, "bottom": 212},
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.operation_siren_month_boss_difficulty(), "normal")
+        self.assertTrue(oracle.operation_siren_mission_checkout_available())
+        self.assertTrue(
+            oracle.operation_siren_mission_checkout_available(
+                exclude_monthly_boss=True
+            )
+        )
+        receipt = oracle.click_operation_siren_mission_checkout(
+            exclude_monthly_boss=True
+        )
+        self.assertEqual(receipt.semantic_id, "os/mission-list/checkout")
+        self.assertEqual(backend.taps, [(1070, 350)])
+
+        backend.buttons = make_buttons([close, monthly_row])
+        self.assertFalse(
+            oracle.operation_siren_mission_checkout_available(
+                exclude_monthly_boss=True
+            )
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "mission row is absent"):
+            oracle.click_operation_siren_mission_checkout(
+                exclude_monthly_boss=True
+            )
+
+    def test_voucher_archive_singlebox_is_exact_and_confirmable(self):
+        root = "OverlayCamera/Overlay/UIMain/ShopsUISinglebox(Clone)/window"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "confirm_btn",
+                    root + "/actions/confirm_btn",
+                    x=786,
+                    y=513,
+                    raycast_top=None,
+                ),
+                make_button(
+                    "cancel_btn",
+                    root + "/actions/cancel_btn",
+                    x=494,
+                    y=513,
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "档案坐标记录仪2",
+                    root + "/item/display_panel/name_container/name/Text",
+                ),
+                make_text("1", root + "/item/left/IconTpl/icon_bg/count"),
+            ],
+            images=[
+                make_image(
+                    root + "/item/left/IconTpl/icon_bg/icon",
+                    "Wdanganluopan2",
+                )
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(
+            oracle.operation_siren_voucher_purchase_dialog_quantity(
+                "档案坐标记录..", "Wdanganluopan2"
+            ),
+            1,
+        )
+        receipt = oracle.click_operation_siren_voucher_purchase_confirm(
+            "档案坐标记录..", "Wdanganluopan2", 1
+        )
+        self.assertEqual(receipt.semantic_id, "os/voucher/purchase/confirm")
+        self.assertTrue(receipt.path.endswith("actions/confirm_btn"))
+        self.assertEqual(backend.taps, [(786, 513)])
 
     def test_typed_radar_port_and_relative_grid_click(self):
         backend = FakeBackend(

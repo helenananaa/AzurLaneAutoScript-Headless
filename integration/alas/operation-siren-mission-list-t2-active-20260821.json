@@ -1,0 +1,323 @@
+{
+  "schema": "alas-headless.operation-siren-mission-list-probe/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 3759,
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "generation": {
+    "buttons": 100707,
+    "ui": 100707
+  },
+  "monthly_boss_difficulty": "normal",
+  "buttons": [
+    {
+      "name": "btn_go",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl(Clone)/base_panel/btn_go",
+      "canvas": "Overlay",
+      "flags": 1535,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": null,
+      "canvas_render_mode": 1,
+      "world_position": {
+        "x": 9.556,
+        "y": 0.578,
+        "z": -390.0
+      },
+      "local_rect": {
+        "x": -136.5,
+        "y": -50.5,
+        "width": 273.0,
+        "height": 101.0
+      },
+      "screen_point": {
+        "x": 1070.0,
+        "y": 386.0
+      },
+      "adb_point": {
+        "x": 1070.0,
+        "y": 334.0
+      },
+      "screen_bounds": {
+        "left": 1024.5,
+        "bottom": 369.167,
+        "right": 1115.5,
+        "top": 402.833
+      },
+      "adb_bounds": {
+        "left": 1024.5,
+        "top": 317.167,
+        "right": 1115.5,
+        "bottom": 350.833
+      }
+    },
+    {
+      "name": "btn_go",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/btn_go",
+      "canvas": "Overlay",
+      "flags": 1535,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": null,
+      "canvas_render_mode": 1,
+      "world_position": {
+        "x": 9.556,
+        "y": 3.096,
+        "z": -390.0
+      },
+      "local_rect": {
+        "x": -136.5,
+        "y": -50.5,
+        "width": 273.0,
+        "height": 101.0
+      },
+      "screen_point": {
+        "x": 1070.0,
+        "y": 499.333
+      },
+      "adb_point": {
+        "x": 1070.0,
+        "y": 220.667
+      },
+      "screen_bounds": {
+        "left": 1024.5,
+        "bottom": 482.5,
+        "right": 1115.5,
+        "top": 516.167
+      },
+      "adb_bounds": {
+        "left": 1024.5,
+        "top": 203.833,
+        "right": 1115.5,
+        "bottom": 237.5
+      }
+    },
+    {
+      "name": "IconTpl(Clone)",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/base_show/award/IconTpl(Clone)",
+      "canvas": "Overlay",
+      "flags": 1535,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": null,
+      "canvas_render_mode": 1,
+      "world_position": {
+        "x": 7.556,
+        "y": 3.17,
+        "z": -390.0
+      },
+      "local_rect": {
+        "x": -102.0,
+        "y": -103.0,
+        "width": 204.0,
+        "height": 206.0
+      },
+      "screen_point": {
+        "x": 980.0,
+        "y": 502.667
+      },
+      "adb_point": {
+        "x": 980.0,
+        "y": 217.333
+      },
+      "screen_bounds": {
+        "left": 947.667,
+        "bottom": 470.016,
+        "right": 1012.333,
+        "top": 535.317
+      },
+      "adb_bounds": {
+        "left": 947.667,
+        "top": 184.683,
+        "right": 1012.333,
+        "bottom": 249.984
+      }
+    },
+    {
+      "name": "IconTpl(Clone)",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/base_show/award/IconTpl(Clone)",
+      "canvas": "Overlay",
+      "flags": 1535,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": null,
+      "canvas_render_mode": 1,
+      "world_position": {
+        "x": 5.97,
+        "y": 3.17,
+        "z": -390.0
+      },
+      "local_rect": {
+        "x": -102.0,
+        "y": -103.0,
+        "width": 204.0,
+        "height": 206.0
+      },
+      "screen_point": {
+        "x": 908.667,
+        "y": 502.667
+      },
+      "adb_point": {
+        "x": 908.667,
+        "y": 217.333
+      },
+      "screen_bounds": {
+        "left": 876.333,
+        "bottom": 470.016,
+        "right": 941.0,
+        "top": 535.317
+      },
+      "adb_bounds": {
+        "left": 876.333,
+        "top": 184.683,
+        "right": 941.0,
+        "bottom": 249.984
+      }
+    }
+  ],
+  "texts": [
+    {
+      "kind": "ugui-text",
+      "name": "count",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/base_show/award/IconTpl(Clone)/icon_bg/count",
+      "text": "2",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 1001.556,
+        "top": 233.975,
+        "right": 1007.261,
+        "bottom": 247.765
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "count",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/base_show/award/IconTpl(Clone)/icon_bg/count",
+      "text": "1",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 931.649,
+        "top": 233.975,
+        "right": 935.928,
+        "bottom": 247.765
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl(Clone)/base_panel/btn_go/Text",
+      "text": "查看",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 1026.167,
+        "top": 317.167,
+        "right": 1113.833,
+        "bottom": 347.167
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "desc",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl(Clone)/base_panel/base_show/desc",
+      "text": "前往NA海域中心，击破来袭的仲裁者量产型机体",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 561.4,
+        "top": 334.0,
+        "right": 828.067,
+        "bottom": 374.0
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl(Clone)/base_panel/base_show/title/Text",
+      "text": "普通作战：仲裁机关",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 568.067,
+        "top": 294.667,
+        "right": 774.733,
+        "bottom": 325.333
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/btn_go/Text",
+      "text": "查看",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 1026.167,
+        "top": 203.833,
+        "right": 1113.833,
+        "bottom": 233.833
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "desc",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/base_show/desc",
+      "text": "前往指定海域，回收海域中的战利品。",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 561.4,
+        "top": 220.667,
+        "right": 828.067,
+        "bottom": 260.667
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/base_show/title/Text",
+      "text": "档案任务142-6",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 568.067,
+        "top": 181.333,
+        "right": 774.733,
+        "bottom": 212.0
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "task_all",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/title/task_all",
+      "text": "任务总汇",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 478.667,
+        "top": 130.333,
+        "right": 562.0,
+        "bottom": 157.0
+      }
+    }
+  ],
+  "input_injected": true,
+  "mission_action_injected": false,
+  "passed": true,
+  "mission_list_closed": true
+}

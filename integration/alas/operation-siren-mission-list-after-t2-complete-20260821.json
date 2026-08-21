@@ -1,0 +1,122 @@
+{
+  "schema": "alas-headless.operation-siren-mission-list-probe/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 3759,
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "generation": {
+    "buttons": 137338,
+    "ui": 137338
+  },
+  "monthly_boss_difficulty": "normal",
+  "buttons": [
+    {
+      "name": "btn_go",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/btn_go",
+      "canvas": "Overlay",
+      "flags": 1535,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": null,
+      "canvas_render_mode": 1,
+      "world_position": {
+        "x": 9.556,
+        "y": 3.096,
+        "z": -390.0
+      },
+      "local_rect": {
+        "x": -136.5,
+        "y": -50.5,
+        "width": 273.0,
+        "height": 101.0
+      },
+      "screen_point": {
+        "x": 1070.0,
+        "y": 499.333
+      },
+      "adb_point": {
+        "x": 1070.0,
+        "y": 220.667
+      },
+      "screen_bounds": {
+        "left": 1024.5,
+        "bottom": 482.5,
+        "right": 1115.5,
+        "top": 516.167
+      },
+      "adb_bounds": {
+        "left": 1024.5,
+        "top": 203.833,
+        "right": 1115.5,
+        "bottom": 237.5
+      }
+    }
+  ],
+  "texts": [
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/btn_go/Text",
+      "text": "查看",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 1026.167,
+        "top": 203.833,
+        "right": 1113.833,
+        "bottom": 233.833
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "desc",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/base_show/desc",
+      "text": "前往NA海域中心，击破来袭的仲裁者量产型机体",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 561.4,
+        "top": 220.667,
+        "right": 828.067,
+        "bottom": 260.667
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/task_tpl/base_panel/base_show/title/Text",
+      "text": "普通作战：仲裁机关",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 568.067,
+        "top": 181.333,
+        "right": 774.733,
+        "bottom": 212.0
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "task_all",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/title/task_all",
+      "text": "任务总汇",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 478.667,
+        "top": 130.333,
+        "right": 562.0,
+        "bottom": 157.0
+      }
+    }
+  ],
+  "input_injected": true,
+  "mission_action_injected": false,
+  "passed": true,
+  "mission_list_closed": true
+}

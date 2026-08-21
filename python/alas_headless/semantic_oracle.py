@@ -4752,8 +4752,11 @@ class SemanticOracle:
             buttons=buttons,
         )
 
-    def read_ui_state(self) -> UiState:
-        if self._foreground_component() != self.fingerprint.component:
+    def read_ui_state(self, *, check_foreground: bool = True) -> UiState:
+        if (
+            check_foreground
+            and self._foreground_component() != self.fingerprint.component
+        ):
             raise SemanticGateClosed("game activity is not top-resumed")
         ui_snapshot = self._request("GET /v1/ui\n")
         if not isinstance(ui_snapshot, dict):
@@ -9792,6 +9795,86 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "Operation Siren voucher dialog snapshots are not coherent"
             )
+        single_root = "OverlayCamera/Overlay/UIMain/ShopsUISinglebox(Clone)/window"
+        single_control_paths = (
+            single_root + "/actions/confirm_btn",
+            single_root + "/actions/cancel_btn",
+        )
+        single_controls = tuple(
+            tuple(button for button in state.buttons if button.path == path)
+            for path in single_control_paths
+        )
+        single_names = tuple(
+            text
+            for text in ui_state.texts
+            if text.path
+            == single_root + "/item/display_panel/name_container/name/Text"
+        )
+        if single_names or any(single_controls):
+            if any(len(matches) != 1 for matches in single_controls):
+                raise SemanticGateClosed(
+                    "Operation Siren voucher single exchange controls are ambiguous"
+                )
+            for button in (matches[0] for matches in single_controls):
+                if not (
+                    button.active_in_hierarchy
+                    and button.active_and_enabled
+                    and button.interactable
+                    and button.raycast_top is None
+                    and button.bounds is not None
+                ):
+                    raise SemanticGateClosed(
+                        "Operation Siren voucher single exchange control is not actionable"
+                    )
+            single_names = tuple(
+                text
+                for text in single_names
+                if text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.bounds is not None
+            )
+            if len(single_names) != 1 or not (
+                single_names[0].text.strip() == expected_display_name
+                or (
+                    expected_display_name.endswith("..")
+                    and single_names[0].text.strip().startswith(
+                        expected_display_name[:-2]
+                    )
+                )
+            ):
+                raise SemanticGateClosed(
+                    "Operation Siren voucher single exchange item name changed"
+                )
+            single_icons = tuple(
+                image
+                for image in ui_state.images
+                if image.path
+                == single_root + "/item/left/IconTpl/icon_bg/icon"
+                and image.active_in_hierarchy
+                and image.active_and_enabled
+                and not image.truncated
+                and image.sprite == expected_icon_sprite
+            )
+            if len(single_icons) != 1:
+                raise SemanticGateClosed(
+                    "Operation Siren voucher single exchange item icon changed"
+                )
+            single_counts = tuple(
+                text
+                for text in ui_state.texts
+                if text.path == single_root + "/item/left/IconTpl/icon_bg/count"
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and re.fullmatch(r"[1-9][0-9]*", text.text.strip())
+            )
+            if len(single_counts) != 1:
+                raise SemanticGateClosed(
+                    "Operation Siren voucher single exchange quantity is ambiguous"
+                )
+            return int(single_counts[0].text.strip())
+
         root = "OverlayCamera/Overlay/UIMain/ShopsUIMsgbox(Clone)"
         control_paths = (
             root + "/actions/confirm_button",
@@ -9883,8 +9966,11 @@ class SemanticOracle:
         if quantity != expected_quantity:
             raise SemanticGateClosed("Operation Siren voucher quantity changed")
         state = self.read_state()
-        path = "OverlayCamera/Overlay/UIMain/ShopsUIMsgbox(Clone)/actions/confirm_button"
-        buttons = tuple(button for button in state.buttons if button.path == path)
+        paths = (
+            "OverlayCamera/Overlay/UIMain/ShopsUIMsgbox(Clone)/actions/confirm_button",
+            "OverlayCamera/Overlay/UIMain/ShopsUISinglebox(Clone)/window/actions/confirm_btn",
+        )
+        buttons = tuple(button for button in state.buttons if button.path in paths)
         if len(buttons) != 1:
             raise SemanticGateClosed(
                 "Operation Siren voucher confirmation is ambiguous"
@@ -11966,6 +12052,28 @@ class SemanticOracle:
             path=target.path,
         )
 
+    @staticmethod
+    def _operation_siren_globe_zone_name_from_ui(ui_state: UiState) -> str:
+        path = "SVFloatPanel(Clone)/point/line/bg/title/name/subText"
+        matches = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith(path)
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed(
+                "operation siren selected-zone title is absent or ambiguous"
+            )
+        decorated = re.sub(r"<[^>]*>", "", matches[0].text).strip()
+        zone_name = re.split(r"\s*[-—–－]\s*", decorated, maxsplit=1)[0].strip()
+        if not zone_name:
+            raise SemanticGateClosed("operation siren selected-zone title is empty")
+        return zone_name
+
     def operation_siren_globe_state(self) -> OperationSirenGlobeState:
         """Read the selected zone and global exploration summary."""
 
@@ -11981,7 +12089,10 @@ class SemanticOracle:
             and back.bounds.contains(back.point)
         ):
             raise SemanticGateClosed("operation siren globe identity is absent")
-        ui_state = self.read_ui_state()
+        # ``read_state`` just proved the foreground component and package-pinned
+        # observer identity.  Read the adjacent UI projection without another
+        # expensive dumpsys call, then enforce generation coherence below.
+        ui_state = self.read_ui_state(check_foreground=False)
         if not (
             button_state.generation
             <= ui_state.generation
@@ -12005,13 +12116,12 @@ class SemanticOracle:
                 )
             return re.sub(r"<[^>]*>", "", matches[0].text).strip()
 
-        zone_name = suffix("SVFloatPanel(Clone)/point/line/bg/title/name/subText")
+        zone_name = self._operation_siren_globe_zone_name_from_ui(ui_state)
         # The globe pin decorates the canonical zone name with its current
         # state (for example ``NA海域西北D-安全海域``).  ALAS owns
         # zone resolution and its Zone table contains the undecorated name,
         # just like the local-map OCR path after it removes the same suffix.
         # Keep the typed boundary equivalent by exposing only that base name.
-        zone_name = re.split(r"\s*[-—–－]\s*", zone_name, maxsplit=1)[0].strip()
         zone_type = suffix("SVFloatPanel(Clone)/point/line/bg/icon/marking/Text")
         danger = suffix("SVFloatPanel(Clone)/point/line/bg/danger_text")
         zone_progress = suffix(
@@ -12130,7 +12240,7 @@ class SemanticOracle:
         """Dismiss one exact selected-zone pin with its required short drag."""
 
         self.operation_siren_globe_state()
-        ui_state = self.read_ui_state()
+        ui_state = self.read_ui_state(check_foreground=False)
         pin_path = "SVFloatPanel(Clone)/point"
         pins = tuple(
             image
@@ -12151,7 +12261,7 @@ class SemanticOracle:
         if self._swipe is None:
             raise SemanticGateClosed("operation siren globe swipe backend is absent")
         initial_generation = ui_state.generation
-        for delta_x, delta_y in 2 * (
+        for delta_x, delta_y in (
             (-120, -80),
             (120, -80),
             (-120, 80),
@@ -12189,13 +12299,11 @@ class SemanticOracle:
                 )
             self._swipe(start[0], start[1], end[0], end[1], 150)
             post_generation = None
-            for _ in range(12):
+            for _ in range(2):
                 self._sleep(0.25)
                 try:
-                    button_state = self.read_state()
-                    back = self._unique(button_state, "os/globe/map")
-                    after = self.read_ui_state()
-                except (SemanticGateClosed, SemanticTargetMissing):
+                    after = self.read_ui_state(check_foreground=False)
+                except SemanticGateClosed:
                     continue
                 remaining = tuple(
                     image
@@ -12205,12 +12313,15 @@ class SemanticOracle:
                 )
                 if (
                     after.generation > candidate.generation
-                    and back.active_in_hierarchy
                     and not remaining
                 ):
                     post_generation = after.generation
                     break
             if post_generation is not None:
+                if not self.operation_siren_globe_visible():
+                    raise SemanticGateClosed(
+                        "operation siren globe disappeared after selected-zone unpin"
+                    )
                 return OperationSirenGlobeSwipeReceipt(
                     semantic_id="os/globe/zone/unpin",
                     pre_generation=initial_generation,
@@ -12794,7 +12905,11 @@ class SemanticOracle:
     def _operation_siren_mission_list_state(
         self,
     ) -> Tuple[
-        OracleState, ButtonState, Tuple[ButtonState, ...], Tuple[ButtonState, ...]
+        OracleState,
+        UiState,
+        ButtonState,
+        Tuple[ButtonState, ...],
+        Tuple[ButtonState, ...],
     ]:
         state = self.read_state()
         close = self._unique(state, "os/mission-list/close")
@@ -12852,6 +12967,7 @@ class SemanticOracle:
         )
         return (
             state,
+            ui_state,
             close,
             tuple(sorted(go_rows, key=key)),
             tuple(sorted(finish_rows, key=key)),
@@ -12884,8 +13000,48 @@ class SemanticOracle:
             and 0 <= row.point.y < height
         )
 
-    def operation_siren_mission_checkout_available(self) -> bool:
-        _, _, rows, _ = self._operation_siren_mission_list_state()
+    @staticmethod
+    def _operation_siren_monthly_boss_rows(
+        ui_state: UiState, rows: Sequence[ButtonState]
+    ) -> Tuple[ButtonState, ...]:
+        title_suffix = "/base_panel/base_show/title/Text"
+        titles = tuple(
+            text
+            for text in ui_state.texts
+            if "WorldInformationUI(Clone)/adapt/right_panel/main/viewport/content/"
+            in text.path
+            and text.path.endswith(title_suffix)
+            and "仲裁机关" in re.sub(r"<[^>]*>", "", text.text)
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        monthly_rows = []
+        for title in titles:
+            assert title.bounds is not None
+            candidates = tuple(
+                row
+                for row in rows
+                if row.bounds is not None
+                and row.bounds.bottom >= title.bounds.top
+                and row.bounds.top <= title.bounds.bottom
+            )
+            if len(candidates) != 1:
+                raise SemanticGateClosed(
+                    "operation siren monthly boss row is absent or ambiguous"
+                )
+            if candidates[0] not in monthly_rows:
+                monthly_rows.append(candidates[0])
+        return tuple(monthly_rows)
+
+    def operation_siren_mission_checkout_available(
+        self, *, exclude_monthly_boss: bool = False
+    ) -> bool:
+        _, ui_state, _, rows, _ = self._operation_siren_mission_list_state()
+        if exclude_monthly_boss:
+            monthly_rows = self._operation_siren_monthly_boss_rows(ui_state, rows)
+            rows = tuple(row for row in rows if row not in monthly_rows)
         return bool(
             self._operation_siren_actionable_rows(
                 rows, self.fingerprint.width, self.fingerprint.height
@@ -12893,7 +13049,7 @@ class SemanticOracle:
         )
 
     def operation_siren_mission_finish_available(self) -> bool:
-        _, _, _, rows = self._operation_siren_mission_list_state()
+        _, _, _, _, rows = self._operation_siren_mission_list_state()
         return bool(
             self._operation_siren_actionable_rows(
                 rows, self.fingerprint.width, self.fingerprint.height
@@ -12903,8 +13059,7 @@ class SemanticOracle:
     def operation_siren_month_boss_difficulty(self) -> Optional[str]:
         """Read the monthly Arbiter task title from the mounted mission list."""
 
-        self._operation_siren_mission_list_state()
-        ui_state = self.read_text_state()
+        _, ui_state, _, _, _ = self._operation_siren_mission_list_state()
         title_suffix = "/base_panel/base_show/title/Text"
         titles = tuple(
             re.sub(r"<[^>]*>", "", text.text).strip()
@@ -12929,11 +13084,18 @@ class SemanticOracle:
             return "hard"
         raise SemanticGateClosed("operation siren monthly boss difficulty is unknown")
 
-    def _click_operation_siren_mission_row(self, action: str) -> ActionReceipt:
+    def _click_operation_siren_mission_row(
+        self, action: str, *, exclude_monthly_boss: bool = False
+    ) -> ActionReceipt:
         if action not in ("checkout", "finish"):
             raise ValueError("operation siren mission action is unsupported")
-        state, _, go_rows, finish_rows = self._operation_siren_mission_list_state()
+        state, ui_state, _, go_rows, finish_rows = (
+            self._operation_siren_mission_list_state()
+        )
         rows = go_rows if action == "checkout" else finish_rows
+        if action == "checkout" and exclude_monthly_boss:
+            monthly_rows = self._operation_siren_monthly_boss_rows(ui_state, rows)
+            rows = tuple(row for row in rows if row not in monthly_rows)
         actionable = self._operation_siren_actionable_rows(
             rows, self.fingerprint.width, self.fingerprint.height
         )
@@ -12953,8 +13115,12 @@ class SemanticOracle:
             path=target.path,
         )
 
-    def click_operation_siren_mission_checkout(self) -> ActionReceipt:
-        return self._click_operation_siren_mission_row("checkout")
+    def click_operation_siren_mission_checkout(
+        self, *, exclude_monthly_boss: bool = False
+    ) -> ActionReceipt:
+        return self._click_operation_siren_mission_row(
+            "checkout", exclude_monthly_boss=exclude_monthly_boss
+        )
 
     def click_operation_siren_mission_finish(self) -> ActionReceipt:
         return self._click_operation_siren_mission_row("finish")
@@ -12968,9 +13134,10 @@ class SemanticOracle:
 
         if not self.operation_siren_globe_visible():
             raise SemanticGateClosed("operation siren globe identity is absent")
+        before_ui = self.read_ui_state(check_foreground=False)
         before_name = None
         try:
-            before_name = self.operation_siren_globe_state().zone_name
+            before_name = self._operation_siren_globe_zone_name_from_ui(before_ui)
         except SemanticGateClosed:
             # A camera drag intentionally unpins the previous zone.  The new
             # target is still proven below by its exact typed detail title.
@@ -12995,24 +13162,33 @@ class SemanticOracle:
             )
 
         self._tap(x, y)
-        after = None
         selected_name = None
-        for _ in range(12):
+        selected_generation = None
+        for _ in range(8):
             self._sleep(0.25)
             try:
-                candidate = self.operation_siren_globe_state()
+                candidate = self.read_ui_state(check_foreground=False)
+                candidate_name = self._operation_siren_globe_zone_name_from_ui(
+                    candidate
+                )
             except SemanticGateClosed:
                 continue
-            if candidate.zone_name == expected_zone_name:
-                after = candidate
+            if candidate.generation <= before_ui.generation:
+                continue
+            if candidate_name == expected_zone_name:
+                selected_generation = candidate.generation
                 break
-            if candidate.zone_name != before_name:
-                after = candidate
-                selected_name = candidate.zone_name
+            if candidate_name != before_name:
+                selected_generation = candidate.generation
+                selected_name = candidate_name
                 break
-        if after is None:
+        if selected_generation is None:
             raise SemanticGateClosed(
                 "operation siren globe zone selection was not proven"
+            )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed(
+                "game activity changed after operation siren globe zone input"
             )
         return ActionReceipt(
             semantic_id=(
@@ -13020,7 +13196,7 @@ class SemanticOracle:
                 if selected_name is None
                 else "os/globe/zone/select-mismatch"
             ),
-            generation=self._last_generation or 0,
+            generation=selected_generation,
             point=target_point,
             bounds=Bounds(float(x - 8), float(y - 8), float(x + 8), float(y + 8)),
             path="operation-siren/globe/zone/" + expected_zone_name,

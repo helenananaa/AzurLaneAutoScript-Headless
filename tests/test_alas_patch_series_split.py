@@ -169,6 +169,15 @@ FLOW_PATHS = {
         "module/os_handler/map_event.py",
         "module/os_handler/port.py",
     },
+    "0104-operation-siren-archive-runtime.patch": {
+        "module/os/globe_camera.py",
+        "module/os/globe_operation.py",
+        "module/os/tasks/archive.py",
+        "module/os_handler/mission.py",
+    },
+    "0105-operation-siren-auto-search-transition-recovery.patch": {
+        "module/os_handler/map_event.py",
+    },
     "0100-tool-flow-ports.patch": {
         "module/config/argument/args.json",
         "module/daemon/benchmark.py",
@@ -357,6 +366,14 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                         "module/os/fleet.py",
                         "module/os_handler/map_event.py",
                         "module/os_handler/port.py",
+                    },
+                    "0104-operation-siren-archive-runtime.patch": {
+                        "module/os/globe_camera.py",
+                        "module/os/globe_operation.py",
+                        "module/os_handler/mission.py",
+                    },
+                    "0105-operation-siren-auto-search-transition-recovery.patch": {
+                        "module/os_handler/map_event.py",
                     },
                     "0350-meowfficer-dock-training-port.patch": {
                         "module/ui/ui.py"
