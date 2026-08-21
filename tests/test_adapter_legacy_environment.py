@@ -55,6 +55,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             "ALAS_SEMANTIC_META_ASSIST_BUDGET",
             "ALAS_SEMANTIC_MINIGAME_PLAY_BUDGET",
             "ALAS_SEMANTIC_OPSI_COORDINATE_CHECKOUT_BUDGET",
+            "ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS",
             "ALAS_SEMANTIC_ALLOW_MISSION_CLAIM_ONCE",
             "ALAS_SEMANTIC_ALLOW_TACTICAL_REWARDS",
             "ALAS_SEMANTIC_AWAKEN_BUDGET",
@@ -89,6 +90,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             "ALAS_SEMANTIC_DRIVER_REVISION",
             "ALAS_SEMANTIC_ADB",
             "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS",
+            "ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS",
             "ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS",
             *LEGACY_BOOLEAN_GRANTS,
             *LEGACY_BUDGET_GRANTS,
@@ -101,6 +103,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             ("ALAS_SEMANTIC_DRIVER_REVISION", REVISION.upper(), "revision", REVISION),
             ("ALAS_SEMANTIC_ADB", "safe-adb", "adb", "safe-adb"),
             ("ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS", "30", "timeout", 30),
+            ("ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS", "60000", "max_age", 60000),
             ("ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS", "0", "reject", None),
         ]
         cases.extend(
@@ -128,6 +131,8 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
                     self.assertEqual(result.adb, expected)
                 elif behavior == "timeout":
                     self.assertEqual(result.adb_command_timeout_seconds, expected)
+                elif behavior == "max_age":
+                    self.assertEqual(result.observer_max_age_ms, expected)
                 else:
                     self.assertEqual(result.grant(expected), int(value))
 
@@ -143,6 +148,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
     def test_integer_variables_reject_noncanonical_values(self):
         variables = [
             "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS",
+            "ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS",
             *LEGACY_BUDGET_GRANTS,
         ]
         for variable in variables:
@@ -158,6 +164,12 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             with self.subTest(timeout=timeout):
                 environment = dict(BASE_ENVIRONMENT)
                 environment["ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS"] = timeout
+                with self.assertRaises(SemanticGateClosed):
+                    translate_legacy_semantic_environment(environment)
+        for max_age in ("0", "300001"):
+            with self.subTest(max_age=max_age):
+                environment = dict(BASE_ENVIRONMENT)
+                environment["ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS"] = max_age
                 with self.assertRaises(SemanticGateClosed):
                     translate_legacy_semantic_environment(environment)
         environment = dict(BASE_ENVIRONMENT)

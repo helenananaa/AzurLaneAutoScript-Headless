@@ -26,6 +26,7 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_META_ASSIST_BUDGET",
         "ALAS_SEMANTIC_MINIGAME_PLAY_BUDGET",
         "ALAS_SEMANTIC_OPSI_COORDINATE_CHECKOUT_BUDGET",
+        "ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS",
         "ALAS_SEMANTIC_ALLOW_MISSION_CLAIM_ONCE",
         "ALAS_SEMANTIC_ALLOW_TACTICAL_REWARDS",
         "ALAS_SEMANTIC_AWAKEN_BUDGET",
@@ -186,6 +187,7 @@ class LegacyEnvironmentTranslation:
     driver_revision: str
     adb: str
     adb_command_timeout_seconds: int
+    observer_max_age_ms: int
     grants: Mapping[str, int]
     explicit_policy: RunPolicy | None
     legacy_grant_variables_present: int
@@ -233,6 +235,7 @@ class LegacyEnvironmentTranslation:
                 "campaign_combat_budget": self.grant("campaign.grid_click"),
                 "campaign_viewport_swipe_budget": self.grant("campaign.viewport_swipe"),
                 "adb_command_timeout_seconds": self.adb_command_timeout_seconds,
+                "observer_max_age_ms": self.observer_max_age_ms,
             }
         )
 
@@ -280,6 +283,20 @@ def translate_legacy_semantic_environment(
     if not 1 <= timeout <= 120:
         raise SemanticGateClosed("semantic ALAS ADB timeout must be in [1, 120]")
 
+    raw_max_age = environment.get("ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS", "10000")
+    if (
+        not isinstance(raw_max_age, str)
+        or _CANONICAL_NON_NEGATIVE_INTEGER.fullmatch(raw_max_age) is None
+    ):
+        raise SemanticGateClosed(
+            "observer maximum age must be a canonical non-negative integer"
+        )
+    max_age = int(raw_max_age)
+    if not 1 <= max_age <= 300000:
+        raise SemanticGateClosed(
+            "semantic ALAS observer maximum age must be in [1, 300000]"
+        )
+
     revision = environment.get("ALAS_SEMANTIC_DRIVER_REVISION", "").lower()
     if _PINNED_REVISION.fullmatch(revision) is None:
         raise SemanticGateClosed("semantic ALAS mode requires a pinned ANGLE revision")
@@ -304,6 +321,7 @@ def translate_legacy_semantic_environment(
         driver_revision=revision,
         adb=environment.get("ALAS_SEMANTIC_ADB", "adb"),
         adb_command_timeout_seconds=timeout,
+        observer_max_age_ms=max_age,
         grants=grants,
         explicit_policy=explicit_policy,
         legacy_grant_variables_present=present,

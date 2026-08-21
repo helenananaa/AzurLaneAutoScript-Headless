@@ -9238,6 +9238,17 @@ class SemanticOracle:
             "纳米陶铝合金": "NanoceramicAlloy",
             "结晶化热强钢": "CrystallizedHeatResistantSteel",
         }
+        sprite_names = {
+            "Wdashijiezhaungbeibi": "PurpleCoins",
+            "Wsucaixiang1": "DevelopmentMaterialT1",
+            "Wsucaixiang2": "DevelopmentMaterialT2",
+            "Wsucaixiang3": "DevelopmentMaterialT3",
+            "Wxingdonglihuifu1": "ActionPoint20",
+            "Wxingdonglihuifu2": "ActionPoint50",
+            "Wxingdonglihuifu3": "ActionPoint100",
+        }
+        if icon_sprite in sprite_names:
+            return sprite_names[icon_sprite]
         if display_name in names:
             return names[display_name]
         if display_name.startswith("META通用战术") and icon_sprite in (
@@ -9296,23 +9307,33 @@ class SemanticOracle:
                 "unified Operation Siren shop identity is not proven"
             )
 
-        cards = sorted(
-            (
-                button
-                for button in state.buttons
-                if button.path.startswith(root)
-                and button.name in ("item_tpl", "item_tpl(Clone)")
-                and "/container/item_tpl" in button.path
+        anchors = {}
+        for button in state.buttons:
+            if not (
+                button.path.startswith(root)
                 and button.active_in_hierarchy
                 and button.active_and_enabled
-                and button.interactable
                 and button.bounds is not None
-            ),
-            key=lambda button: (button.bounds.top, button.bounds.left),
+                and (
+                    (
+                        button.name in ("item_tpl", "item_tpl(Clone)")
+                        and "/container/item_tpl" in button.path
+                    )
+                    or (
+                        button.name == "mask"
+                        and "/container/item_tpl" in button.path
+                        and button.path.endswith("/mask")
+                    )
+                )
+            ):
+                continue
+            anchors.setdefault(button.bounds, button)
+        cards = sorted(
+            anchors.values(), key=lambda button: (button.bounds.top, button.bounds.left)
         )
-        if len(cards) != 20:
+        if not 4 <= len(cards) <= 20:
             raise SemanticGateClosed(
-                "unified Operation Siren shop must expose 20 cards"
+                "unified Operation Siren shop card count is outside 4..20"
             )
 
         def centered_text(card: ButtonState, suffix: str, pattern: str) -> str:
@@ -9369,7 +9390,11 @@ class SemanticOracle:
             if remaining > total:
                 raise SemanticGateClosed("Operation Siren shop counter is inconsistent")
             currency_sprite = centered_icon(card, "/consume/contain/icon")
-            if currency_sprite != "Wdashijiezhaungbeibi":
+            currency_names = {
+                "Wdashijiezhaungbeibi": "SpecialExchangeTicket",
+                "Wdashijiehuobi": "YellowCoins",
+            }
+            if currency_sprite not in currency_names:
                 raise SemanticGateClosed("Operation Siren shop currency is unknown")
             icon_sprite = centered_icon(card, "/IconTpl/icon_bg/icon")
             result.append(
@@ -9384,7 +9409,7 @@ class SemanticOracle:
                     remaining=remaining,
                     total=total,
                     price=price,
-                    currency="SpecialExchangeTicket",
+                    currency=currency_names[currency_sprite],
                     icon_sprite=icon_sprite,
                     bounds=card.bounds,
                 )
@@ -9392,7 +9417,11 @@ class SemanticOracle:
         return tuple(result)
 
     def operation_siren_shop_currency(self) -> int:
-        self.operation_siren_shop_items()
+        self._retry_transition_read(
+            self.operation_siren_shop_items,
+            attempts=8,
+            interval_seconds=0.2,
+        )
         ui_state = self.read_ui_state()
         matches = tuple(
             text
@@ -9406,6 +9435,62 @@ class SemanticOracle:
         if len(matches) != 1:
             raise SemanticGateClosed("Operation Siren shop currency is ambiguous")
         return int(matches[0].text.strip())
+
+    def click_operation_siren_shop_item(
+        self,
+        index: int,
+        expected_name: str,
+        expected_price: int,
+    ) -> ActionReceipt:
+        """Open one exact item on the unified Operation Siren exchange page."""
+
+        if isinstance(index, bool) or not isinstance(index, int) or not 0 <= index < 20:
+            raise SemanticGateClosed("Operation Siren shop item index is invalid")
+        items = self._retry_transition_read(
+            self.operation_siren_shop_items,
+            attempts=8,
+            interval_seconds=0.2,
+        )
+        item = next((candidate for candidate in items if candidate.index == index), None)
+        if item is None or item.bounds is None:
+            raise SemanticGateClosed("Operation Siren shop item is absent")
+        if item.canonical_name != expected_name or item.price != expected_price:
+            raise SemanticGateClosed("Operation Siren shop item identity changed")
+        if item.remaining <= 0:
+            raise SemanticGateClosed("Operation Siren shop item is sold out")
+
+        state = self.read_state()
+        root = "OverlayCamera/Overlay/UIMain/blur_panel/adapt/new_shop/"
+        controls = tuple(
+            button
+            for button in state.buttons
+            if button.path.startswith(root)
+            and button.name in ("item_tpl", "item_tpl(Clone)")
+            and "/container/item_tpl" in button.path
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds == item.bounds
+        )
+        if len(controls) != 1:
+            raise SemanticGateClosed(
+                "Operation Siren shop item control is absent or ambiguous"
+            )
+        bounds = item.bounds
+        point = Point(
+            x=(bounds.left + bounds.right) / 2,
+            y=(bounds.top + bounds.bottom) / 2,
+        )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id=f"os/shop/item/{index}/{expected_name}",
+            generation=state.generation,
+            point=point,
+            bounds=bounds,
+            path=controls[0].path,
+        )
 
     @staticmethod
     def _canonical_operation_siren_voucher_name(icon_sprite: str) -> str:
@@ -9728,7 +9813,15 @@ class SemanticOracle:
             len(confirm) != 1
             or len(cancel) != 1
             or len(names) != 1
-            or names[0].text.strip() != expected_display_name
+            or not (
+                names[0].text.strip() == expected_display_name
+                or (
+                    expected_display_name.endswith("..")
+                    and names[0].text.strip().startswith(
+                        expected_display_name[:-2]
+                    )
+                )
+            )
             or len(values) != 1
             or re.fullmatch(r"[1-9][0-9]*", values[0].text.strip()) is None
         ):

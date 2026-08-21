@@ -650,6 +650,21 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             scheduler_patch.count("validate_alas_opsi_fleet_filter("), 1
         )
 
+    def test_shop_runtime_patch_owns_typed_entry_and_atomic_purchase(self):
+        patch = ROOT.joinpath(
+            "integration/alas/series/0102-operation-siren-shop-runtime.patch"
+        ).read_text(encoding="utf-8")
+        self.assertIn("semantic_adapter.operation_siren_shop_items()", patch)
+        self.assertIn("oracle.click('os/port/supply')", patch)
+        self.assertIn("skip initial auto search", patch)
+        self.assertIn("item.semantic_index = record.index", patch)
+        self.assertIn(
+            "semantic_adapter.purchase_operation_siren_shop_item_once(",
+            patch,
+        )
+        self.assertIn("item.price > currency", patch)
+        self.assertIn("Unified OpsiShop purchase budget exhausted", patch)
+
     def test_sources_compile(self):
         for relative in (
             "python/alas_headless/alas_opsi_task_config_contract.py",

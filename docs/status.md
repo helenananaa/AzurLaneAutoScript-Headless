@@ -1283,9 +1283,20 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   pretreatment; filtering and coin checks are record-only with no purchase.
 - `OpsiShop.PresetFilter` covers all five declared presets from pinned
   `OS_SHOP`; `CustomFilter` preserves custom priority and blank fallback.
-  CL1 and exhausted-count exclusions remain original. Unknown presets,
-  malformed types, and invalid tokens fail before item pretreatment, with no
-  purchase, refresh, currency mutation, or Android input.
+  The current unified port shop is now read as 19 typed cards rather than a
+  fixed 20-slot assumption, including canonical item/currency identity, price,
+  remaining count, and balance. On 2026-08-21 the original `OpsiShop` task used
+  the custom filter to buy exactly one `DevelopmentMaterialT2`: remaining count
+  `3 -> 2` and Special Exchange Tickets `1205 -> 1200`. The atomic action
+  re-proved the selected card before input and both resource postconditions
+  afterward; when ADB reported an ambiguous tap timeout, it resumed only after
+  the exact quantity-one dialog proved the tap had landed, avoiding a duplicate
+  purchase. Retained shop state no longer runs initial auto search, and the
+  supply entry requires typed shop identity rather than conflating the port
+  supply button with an open shop. Evidence is
+  `integration/alas/operation-siren-shop-live-qualification-20260821.json`.
+  Yellow-coin purchases, the other four presets live, insufficient balance,
+  refresh, and all-port branches remain open, so this is `L`, not `F`.
 - `OpsiVoucher.Filter` runs pinned `voucher_redirect()` and the original shop
   grammar, preserving Logger expansion, tier expansion, archive-token removal,
   Unicode separators, and intentional empty skip. Invalid tokens and types fail

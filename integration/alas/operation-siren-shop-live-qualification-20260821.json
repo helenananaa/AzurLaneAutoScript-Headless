@@ -1,0 +1,39 @@
+{
+  "schema": "alas-headless.operation-siren-shop-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "PresetFilter": "custom",
+    "CustomFilter": "DevelopmentMaterialT1 > DevelopmentMaterialT2 > DevelopmentMaterialT3 > METARedBook > CrystallizedHeatResistantSteel > NanoceramicAlloy > NeuroplasticProstheticArm > SupercavitationGenerator"
+  },
+  "transaction_budget": 1,
+  "transactions": [
+    {
+      "index": 2,
+      "canonical_name": "DevelopmentMaterialT2",
+      "display_name": "装备研发物资..",
+      "price": 5,
+      "remaining_before": 3,
+      "remaining_after": 2,
+      "currency_before": 1205,
+      "currency_after": 1200,
+      "receipt": "shop/purchase/confirm",
+      "capability": "shop.purchase",
+      "reward_close_receipt": "exercise/reward/close",
+      "recovered_postcondition_after_confirmation_timeout": true
+    }
+  ],
+  "task_result": "recovered_completed_transaction",
+  "elapsed_seconds": 24.953,
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "port_shop": "885809655c8b9120406069dea7ae1f53ea9bb5d279ebfc155050312a4e171119",
+    "shop": "42157484c805f204f780181d288db204422183d4149db8ffbc28af57f11853ac",
+    "adapter": "294d62917da9842beb6621feeb4d7db7d619be06cc4c73d159f947c00abe806f",
+    "oracle": "23af69e29d1fb000bb76aa98ffe73b58992c9001e196a6290f432ea63641259c"
+  }
+}

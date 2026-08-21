@@ -330,6 +330,9 @@ class FakeOracle:
             pickups=(SimpleNamespace(node="F2"),),
         )
 
+    def _retry_transition_read(self, reader, **_kwargs):
+        return reader()
+
     def enabled(self, semantic_id):
         self.enabled_calls.append(semantic_id)
         if semantic_id in self.enabled_values:
@@ -2399,6 +2402,79 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(adapter._action_ledger.remaining("shop.purchase"), 0)
         with self.assertRaises(SemanticGateClosed):
             adapter.buy_dorm_furniture_with_gold()
+
+    def test_operation_siren_shop_purchase_is_atomic_and_postconditioned(self):
+        oracle = FakeOracle()
+        state = {"remaining": 3, "currency": 1200, "dialog": False}
+
+        def items():
+            return (
+                SimpleNamespace(
+                    index=7,
+                    canonical_name="METARedBook",
+                    display_name="META通用战术教材",
+                    price=100,
+                    remaining=state["remaining"],
+                    currency="SpecialExchangeTicket",
+                ),
+            )
+
+        oracle.operation_siren_shop_items = items
+        oracle.operation_siren_shop_currency = lambda: state["currency"]
+        oracle.click_operation_siren_shop_item = (
+            lambda index, name, price: state.update(dialog=True)
+        )
+        oracle.shop_purchase_dialog_quantity = (
+            lambda _name: 1 if state["dialog"] else None
+        )
+
+        def confirm(_name, _quantity):
+            state["dialog"] = False
+            state["remaining"] -= 1
+            state["currency"] -= 100
+            return oracle.click_receipt("shop/purchase/confirm")
+
+        oracle.click_shop_purchase_confirm = confirm
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            shop_purchase_budget=1,
+        )
+
+        receipt = adapter.purchase_operation_siren_shop_item_once(
+            7, "METARedBook", 100
+        )
+
+        self.assertEqual(receipt.capability_id, "shop.purchase")
+        self.assertEqual(state, {"remaining": 2, "currency": 1100, "dialog": False})
+        self.assertEqual(adapter._action_ledger.remaining("shop.purchase"), 0)
+
+    def test_operation_siren_shop_purchase_refuses_insufficient_currency(self):
+        oracle = FakeOracle()
+        oracle.operation_siren_shop_items = lambda: (
+            SimpleNamespace(
+                index=7,
+                canonical_name="METARedBook",
+                display_name="META通用战术教材",
+                price=100,
+                remaining=3,
+                currency="SpecialExchangeTicket",
+            ),
+        )
+        oracle.operation_siren_shop_currency = lambda: 99
+        oracle.click_operation_siren_shop_item = Mock()
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            shop_purchase_budget=1,
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "currency is insufficient"):
+            adapter.purchase_operation_siren_shop_item_once(
+                7, "METARedBook", 100
+            )
+
+        oracle.click_operation_siren_shop_item.assert_not_called()
 
     def test_dorm_furniture_theme_purchase_uses_shop_authority(self):
         oracle = FakeOracle()

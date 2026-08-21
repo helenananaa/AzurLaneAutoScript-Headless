@@ -5932,19 +5932,23 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0102-operation-siren-shop-runtime.patch",
+        "scripts/python/run_alas_opsi_shop_live_validation.py",
+        "integration/alas/operation-siren-shop-live-qualification-20260821.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
         "OpsiShop"
@@ -5956,19 +5960,23 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0102-operation-siren-shop-runtime.patch",
+        "scripts/python/run_alas_opsi_shop_live_validation.py",
+        "integration/alas/operation-siren-shop-live-qualification-20260821.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
         "OpsiShop"
@@ -8349,8 +8357,8 @@
         "OpsiShop"
       ],
       "name": "OpsiShop",
-      "note": "可读取并零购买停止；5 个预设、自定义过滤、购买/刷新/货币链路未闭环",
-      "status": "B"
+      "note": "新版统一港口商店已完成类型化 19 卡库存、票券余额、精确商品身份/价格/余量及单件购买后置闭环；自定义过滤实机命中并完成 DevelopmentMaterialT2 的 3→2、票券 1205→1200，含输入超时后按精确对话框恢复；黄币购买、五预设逐值实机、余额不足、刷新及全港口分支仍未闭环",
+      "status": "L"
     },
     {
       "groups": [
@@ -8544,29 +8552,43 @@
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0102-operation-siren-shop-runtime.patch",
+        "scripts/python/run_alas_opsi_shop_live_validation.py",
+        "integration/alas/operation-siren-shop-live-qualification-20260821.json",
         "docs/status.md"
       ],
       "field": "OpsiShop.CustomFilter",
-      "note": "Custom priority and blank fallback execute the pinned selector and grammar; malformed types and tokens fail before item pretreatment, while CL1 and exhausted-count exclusions remain original and no purchase occurs."
+      "note": "Custom priority and blank fallback execute the pinned selector and grammar; malformed types and tokens fail before item pretreatment. The live custom filter selected DevelopmentMaterialT2 from the unified inventory and committed one exact ticket purchase with quantity and balance postconditions; yellow-coin, insufficient-balance, refresh, and all-port branches remain partial."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0102-operation-siren-shop-runtime.patch",
+        "scripts/python/run_alas_opsi_shop_live_validation.py",
+        "integration/alas/operation-siren-shop-live-qualification-20260821.json",
         "docs/status.md"
       ],
       "field": "OpsiShop.PresetFilter",
-      "note": "All five declared presets are source-bound to pinned OS_SHOP definitions and preserve original candidate ordering and count filters; unknown presets fail before item pretreatment and no purchase occurs."
+      "note": "All five declared presets are source-bound to pinned OS_SHOP definitions and preserve original candidate ordering and count filters; unknown presets fail before item pretreatment. The declared custom route completed one exact live unified-shop purchase, while the other four preset values and remaining currency and refresh branches still require live closure."
     },
     {
       "dimensions": {
@@ -11214,9 +11236,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "07855fc0eab6087e3521e3880179df16088ec5e4c37a2ed74f14cc7794ca4f0d",
-      "manifest_sha256": "0a82cecb0ee6cfec13539648cbe12a6cc31b0ca9b4ed7a5e7291f3719c190331",
-      "member_count": 50
+      "combined_sha256": "e5a12d373a989a50b92fbebfad9b557e12f61068af3c37b3e0d4efc98751ffb9",
+      "manifest_sha256": "dcb090f0d8339bf9cc4bc7df5b0b5a24762bf9aa3ed068b79abc6985a2517500",
+      "member_count": 51
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

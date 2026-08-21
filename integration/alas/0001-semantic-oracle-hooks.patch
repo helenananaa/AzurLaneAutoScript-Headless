@@ -11726,3 +11726,122 @@ index ff27df84..d2d72e97 100644
          self.ui_click(PORT_GOTO_DOCK, appear_button=PORT_CHECK, check_button=PORT_DOCK_CHECK,
                        skip_first_screenshot=True)
  
+diff --git a/module/os/map.py b/module/os/map.py
+index 6332539..5183198 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -113,9 +113,23 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+             semantic_adapter is not None
+             and semantic_adapter.appear(MAP_EXIT)
+         )
++        in_shop = False
++        if semantic_adapter is not None:
++            try:
++                semantic_adapter.operation_siren_shop_items()
++                in_shop = True
++            except SemanticGateClosed:
++                pass
++        in_port = bool(
++            in_shop
++            or (
++                semantic_adapter is not None
++                and semantic_adapter.appear(PORT_GOTO_SUPPLY)
++            )
++        )
+         if in_month_boss_room:
+             logger.info('Resume retained Operation Siren Month Boss room')
+-        elif semantic_adapter is not None and semantic_adapter.appear(PORT_GOTO_SUPPLY):
++        elif in_port:
+             logger.info('Already in Operation Siren port; skip local-map fleet checks')
+         else:
+             self.handle_after_auto_search()
+@@ -139,7 +153,9 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 )
+             except SemanticGateClosed:
+                 pass
+-        if cleared_stronghold:
++        if in_port:
++            logger.info('Already in Operation Siren port; skip initial auto search')
++        elif cleared_stronghold:
+             logger.info('Stronghold is already 0%, skip initial auto search')
+         elif self.zone.zone_id in [22, 44, 154]:
+             logger.info('In zone 22, 44, 154, skip running first auto search')
+diff --git a/module/os_handler/port.py b/module/os_handler/port.py
+index d2d72e9..136f664 100644
+--- a/module/os_handler/port.py
++++ b/module/os_handler/port.py
+@@ -1,3 +1,5 @@
++from alas_headless import SemanticGateClosed
++
+ from module.base.timer import Timer
+ from module.logger import logger
+ from module.os_handler.assets import *
+@@ -95,6 +97,24 @@ class PortHandler(OSShop):
+             in: PORT_CHECK
+             out: PORT_SUPPLY_CHECK
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            oracle = semantic_adapter.open().oracle
++            try:
++                semantic_adapter.operation_siren_shop_items()
++                return
++            except SemanticGateClosed:
++                pass
++            semantic_adapter.refresh_frame()
++            oracle.click('os/port/supply')
++            for _ in range(24):
++                self.device.sleep(0.5)
++                try:
++                    semantic_adapter.operation_siren_shop_items()
++                    return
++                except SemanticGateClosed:
++                    continue
++            raise RuntimeError('Typed Operation Siren shop did not open')
+         if self.appear(PORT_SUPPLY_CHECK, offset=(20, 20)):
+             return
+         self.ui_click(PORT_GOTO_SUPPLY, appear_button=PORT_CHECK, check_button=PORT_SUPPLY_CHECK,
+diff --git a/module/os_shop/port_shop.py b/module/os_shop/port_shop.py
+index 9cebc1c..60b3f8d 100644
+--- a/module/os_shop/port_shop.py
++++ b/module/os_shop/port_shop.py
+@@ -153,6 +153,7 @@ class PortShop(OSStatus, OSShopUI, Selector, MapEventHandler):
+                 item.price = record.price
+                 item.shop_index = record.index // 5
+                 item.scroll_pos = float(record.index // 5)
++                item.semantic_index = record.index
+                 items.append(item)
+             logger.info(f'Unified OpsiShop currency: {getattr(self.device, "semantic_adapter").operation_siren_shop_currency()}')
+             logger.info(f'Unified OpsiShop items: {[str(item) for item in items]}')
+diff --git a/module/os_shop/shop.py b/module/os_shop/shop.py
+index c7bf38d..08e3272 100644
+--- a/module/os_shop/shop.py
++++ b/module/os_shop/shop.py
+@@ -217,8 +217,25 @@ class OSShop(PortShop, AkashiShop):
+         if not len(items):
+             logger.warning('Nothing to buy.')
+             return False
+-        if semantic_adapter is not None and not semantic_adapter.shop_purchase_allowed():
+-            logger.info('Unified OpsiShop scan finished; purchase budget is 0')
++        if semantic_adapter is not None:
++            currency = semantic_adapter.operation_siren_shop_currency()
++            bought = 0
++            for item in items:
++                if item.count <= 0 or item.price > currency:
++                    continue
++                if not semantic_adapter.shop_purchase_allowed():
++                    logger.info('Unified OpsiShop purchase budget exhausted')
++                    break
++                logger.info(
++                    f'Buying unified OpsiShop item: {item.name}, '
++                    f'index={item.semantic_index}, price={item.price}'
++                )
++                semantic_adapter.purchase_operation_siren_shop_item_once(
++                    item.semantic_index, item.name, item.price
++                )
++                currency -= item.price
++                bought += 1
++            logger.info(f'Bought {bought} unified OpsiShop items')
+             return True
+         self.os_shop_get_coins()
+         skip_get_coins = True

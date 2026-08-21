@@ -1559,6 +1559,179 @@ class AlasSemanticAdapter:
             time.sleep(0.2)
         return receipt
 
+    def purchase_operation_siren_shop_item_once(
+        self,
+        index: int,
+        expected_name: str,
+        expected_price: int,
+    ) -> ActionReceipt:
+        """Purchase exactly one proven unified Operation Siren shop item."""
+
+        if not self._action_ledger.allowed("shop.purchase"):
+            raise SemanticGateClosed(
+                "Operation Siren shop purchase requires a positive transaction budget"
+            )
+        before_items = self.oracle._retry_transition_read(
+            self.oracle.operation_siren_shop_items,
+            attempts=8,
+            interval_seconds=0.2,
+        )
+        matches = tuple(item for item in before_items if item.index == index)
+        if len(matches) != 1:
+            raise SemanticGateClosed("selected Operation Siren shop item is absent")
+        before = matches[0]
+        if before.canonical_name != expected_name or before.price != expected_price:
+            raise SemanticGateClosed("selected Operation Siren shop item identity changed")
+        if before.currency != "SpecialExchangeTicket":
+            raise SemanticGateClosed(
+                "selected Operation Siren shop currency is not qualified"
+            )
+        if before.remaining <= 0:
+            raise SemanticGateClosed("selected Operation Siren shop item is sold out")
+        before_currency = self.oracle._retry_transition_read(
+            self.oracle.operation_siren_shop_currency,
+            attempts=8,
+            interval_seconds=0.2,
+        )
+        if before_currency < expected_price:
+            raise SemanticGateClosed("Operation Siren shop currency is insufficient")
+
+        try:
+            self.oracle.click_operation_siren_shop_item(
+                index, expected_name, expected_price
+            )
+        except ObserverTransportError:
+            # ``adb shell input tap`` can execute on-device while its host
+            # acknowledgement times out.  Continue only when the exact
+            # quantity-one dialog proves that this item click committed.
+            if self.oracle.shop_purchase_dialog_quantity(before.display_name) != 1:
+                raise
+        deadline = time.monotonic() + 5.0
+        while True:
+            quantity = self.oracle.shop_purchase_dialog_quantity(before.display_name)
+            if quantity is not None:
+                break
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed(
+                    "Operation Siren shop purchase dialog did not open"
+                )
+            time.sleep(0.2)
+        if quantity != 1:
+            raise SemanticGateClosed(
+                "Operation Siren shop purchase did not default to one item"
+            )
+        receipt = self._dispatch_mutation(
+            "shop.purchase",
+            lambda: self.oracle.click_shop_purchase_confirm(before.display_name, 1),
+        )
+        deadline = time.monotonic() + 120.0
+        while True:
+            if self.oracle.shop_purchase_dialog_quantity(before.display_name) is None:
+                if self.oracle.award_info_page_visible():
+                    self.oracle.click_exercise_award_info_close()
+                    time.sleep(0.5)
+                try:
+                    after_items = self.oracle._retry_transition_read(
+                        self.oracle.operation_siren_shop_items,
+                        attempts=8,
+                        interval_seconds=0.2,
+                    )
+                    after_currency = self.oracle._retry_transition_read(
+                        self.oracle.operation_siren_shop_currency,
+                        attempts=8,
+                        interval_seconds=0.2,
+                    )
+                except SemanticGateClosed:
+                    if time.monotonic() >= deadline:
+                        raise
+                    time.sleep(0.25)
+                    continue
+                after = next(
+                    (item for item in after_items if item.index == index), None
+                )
+                if after is None:
+                    raise SemanticGateClosed(
+                        "purchased Operation Siren shop item disappeared"
+                    )
+                if (
+                    after.canonical_name != before.canonical_name
+                    or after.price != before.price
+                    or after.remaining != before.remaining - 1
+                    or after_currency != before_currency - before.price
+                ):
+                    raise SemanticGateClosed(
+                        "Operation Siren shop purchase postcondition changed"
+                    )
+                return receipt
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed(
+                    "Operation Siren shop purchase confirmation did not settle"
+                )
+            time.sleep(0.25)
+
+    def resume_operation_siren_shop_purchase_once(
+        self,
+        index: int,
+        expected_name: str,
+        expected_display_name: str,
+        expected_price: int,
+        before_remaining: int,
+        before_currency: int,
+    ) -> ActionReceipt:
+        """Resume an exact quantity-one dialog after an ambiguous item tap."""
+
+        if not self._action_ledger.allowed("shop.purchase"):
+            raise SemanticGateClosed(
+                "Operation Siren shop recovery requires a positive transaction budget"
+            )
+        if self.oracle.shop_purchase_dialog_quantity(expected_display_name) != 1:
+            raise SemanticGateClosed(
+                "Operation Siren shop recovery dialog is absent or changed"
+            )
+        receipt = self._dispatch_mutation(
+            "shop.purchase",
+            lambda: self.oracle.click_shop_purchase_confirm(expected_display_name, 1),
+        )
+        deadline = time.monotonic() + 120.0
+        while True:
+            if self.oracle.shop_purchase_dialog_quantity(expected_display_name) is None:
+                if self.oracle.award_info_page_visible():
+                    self.oracle.click_exercise_award_info_close()
+                    time.sleep(0.5)
+                try:
+                    items = self.oracle._retry_transition_read(
+                        self.oracle.operation_siren_shop_items,
+                        attempts=8,
+                        interval_seconds=0.2,
+                    )
+                    currency = self.oracle._retry_transition_read(
+                        self.oracle.operation_siren_shop_currency,
+                        attempts=8,
+                        interval_seconds=0.2,
+                    )
+                except SemanticGateClosed:
+                    if time.monotonic() >= deadline:
+                        raise
+                    time.sleep(0.25)
+                    continue
+                after = next((item for item in items if item.index == index), None)
+                if (
+                    after is None
+                    or after.canonical_name != expected_name
+                    or after.price != expected_price
+                    or after.remaining != before_remaining - 1
+                    or currency != before_currency - expected_price
+                ):
+                    raise SemanticGateClosed(
+                        "Operation Siren shop recovery postcondition changed"
+                    )
+                return receipt
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed(
+                    "Operation Siren shop recovery confirmation did not settle"
+                )
+            time.sleep(0.25)
+
     def _require_frame_observation_oracle(self) -> Any:
         provider = self._frame_observation_oracle
         if provider is None:
@@ -12009,10 +12182,57 @@ class AlasSemanticSession:
         return self.open().oracle.general_shop_items()
 
     def operation_siren_shop_items(self):
-        return self.open().oracle.operation_siren_shop_items()
+        for attempt in range(8):
+            try:
+                return self.open().oracle.operation_siren_shop_items()
+            except SemanticGateClosed as exc:
+                if (
+                    str(exc) != "Operation Siren shop snapshots are not coherent"
+                    or attempt == 7
+                ):
+                    raise
+                time.sleep(0.2)
+        raise AssertionError("unreachable Operation Siren shop retry")
 
     def operation_siren_shop_currency(self) -> int:
-        return self.open().oracle.operation_siren_shop_currency()
+        for attempt in range(8):
+            try:
+                return self.open().oracle.operation_siren_shop_currency()
+            except SemanticGateClosed as exc:
+                if (
+                    str(exc) != "Operation Siren shop snapshots are not coherent"
+                    or attempt == 7
+                ):
+                    raise
+                time.sleep(0.2)
+        raise AssertionError("unreachable Operation Siren shop retry")
+
+    def purchase_operation_siren_shop_item_once(
+        self, index: int, expected_name: str, expected_price: int
+    ) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().purchase_operation_siren_shop_item_once(
+            index, expected_name, expected_price
+        )
+
+    def resume_operation_siren_shop_purchase_once(
+        self,
+        index: int,
+        expected_name: str,
+        expected_display_name: str,
+        expected_price: int,
+        before_remaining: int,
+        before_currency: int,
+    ) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().resume_operation_siren_shop_purchase_once(
+            index,
+            expected_name,
+            expected_display_name,
+            expected_price,
+            before_remaining,
+            before_currency,
+        )
 
     def operation_siren_voucher_items(self):
         return self.open().oracle.operation_siren_voucher_items()
