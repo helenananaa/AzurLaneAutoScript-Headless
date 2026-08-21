@@ -17,10 +17,18 @@ try:
         AlasPatchSeriesError,
         check_generated_patch,
     )
+    from .verify_alas_patch_tree import (
+        AlasPatchVerificationError,
+        inspect_patched_upstream,
+    )
 except ImportError:  # Direct script execution.
     from build_alas_patch_series import (  # type: ignore[no-redef]
         AlasPatchSeriesError,
         check_generated_patch,
+    )
+    from verify_alas_patch_tree import (  # type: ignore[no-redef]
+        AlasPatchVerificationError,
+        inspect_patched_upstream,
     )
 
 
@@ -194,22 +202,16 @@ def verify(
         "upstream_commit"
     ]:
         raise PixelInventoryVerificationError("pixel upstream commit drifted")
-    reverse = subprocess.run(
-        (
-            "git",
-            "-C",
-            str(patched_upstream),
-            "apply",
-            "--reverse",
-            "--check",
-            str(PATCH_PATH),
-        ),
-        capture_output=True,
-        text=True,
-        timeout=30,
-    )
-    if reverse.returncode != 0:
-        raise PixelInventoryVerificationError("canonical patch is not applied")
+    try:
+        inspect_patched_upstream(
+            patched_upstream,
+            PATCH_PATH,
+            expected_commit=inventory["upstream_commit"],
+        )
+    except AlasPatchVerificationError as exc:
+        raise PixelInventoryVerificationError(
+            "canonical patch surface is not applied"
+        ) from exc
 
     login = _read_json(login_replay_path)
     frame_clock = _read_json(frame_clock_path)

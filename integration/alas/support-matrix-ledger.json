@@ -5239,10 +5239,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
@@ -5383,25 +5383,26 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "missing",
+        "observation": "missing",
+        "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "O",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiDaily"
       ],
       "path": "OpsiDaily.DoMission",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "🧪 离线回放",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
@@ -5852,25 +5853,28 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "partial",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0140-scheduler-contract.patch",
+        "integration/alas/series/0095-operation-siren-typed-navigation.patch",
+        "integration/alas/operation-siren-live-qualification-20260820.json",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiMonthBoss"
       ],
       "path": "OpsiMonthBoss.ForceRun",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 实机部分",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
@@ -5972,29 +5976,29 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0140-scheduler-contract.patch",
-        "tests/test_alas_opsi_stronghold_source_only.py",
-        "python/alas_headless/alas_opsi_stronghold_source_audit.py",
-        "integration/alas/opsi-stronghold-source-only-audit.json",
-        "integration/alas/series/0200-opsi-stronghold-source-only-gate.patch",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "integration/alas/series/0098-operation-siren-stronghold-runtime.patch",
+        "integration/alas/operation-siren-live-qualification-20260820.json",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "OpsiStronghold"
       ],
       "path": "OpsiStronghold.ForceRun",
-      "status_label": "⛔ Headless 跳过",
+      "status_label": "🟢 默认主路径",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -8322,7 +8326,7 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiMonthBoss",
-      "note": "Mode 与 CheckAdaptability 已离线等价；ForceRun 在固定上游零读取，明确不支持；过滤器和普通/困难 Boss 实机未闭环",
+      "note": "Mode、CheckAdaptability、ForceRun 运行时消费与舰队过滤已离线等价；实机已闭环普通 Boss 进入、预战、战败结算，并将地图小人旁 damage/1 低士气与左栏 agony 沉没大修分离，完成舰队轮换及全队耗尽返回；成功击杀结算和困难 Boss 未闭环",
       "status": "B"
     },
     {
@@ -8351,8 +8355,8 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiStronghold",
-      "note": "ForceRun 的侦察/潜艇延迟排除已离线等价；原版要塞会进入真实舰队/战斗路径，但 3D 漩涡无可靠语义观察，Headless 在 campaign 创建前 fail-closed 跳过，存在检测、进入、战斗和结算均未闭环",
-      "status": "M"
+      "note": "默认值实机以精确世界地图标题、塞壬要塞类型和专属标记识别 93/121 区；93 区闭环进入、侦察、自律、潜艇离场、不可用舰队跳过、轮换及 100→20→0% 清场，121 区再次闭环进入、0% 收束、回港大修和四队低士气复查；ForceRun 两值与完整舰队过滤仍未逐值实机覆盖",
+      "status": "L"
     },
     {
       "groups": [
@@ -10770,7 +10774,7 @@
         "docs/status.md"
       ],
       "field": "OpsiStronghold.ForceRun",
-      "note": "Both exact booleans preserve the original recon and submarine delay exclusion decision; invalid values fail before scheduler mutation while the Stronghold task itself remains unsupported."
+      "note": "Both exact booleans preserve the original recon and submarine delay exclusion decision; invalid values fail before scheduler mutation. The default-value live path now completes exact Stronghold discovery, entry, fleet rotation, and 0% settlement; the true-value scheduling contrast remains live-partial."
     },
     {
       "dimensions": {
@@ -11206,9 +11210,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "3786336a1b5c828d207f160f85978a8cc18fda8fa661e5d156c5c0bbf20b2da1",
-      "manifest_sha256": "e3418a0063a1f3ac2138e843710497d9934b6e9ba8dbd88fbd5f8fb6e3683f3d",
-      "member_count": 45
+      "combined_sha256": "9cace5c8b1e0ae6ddc9aeeea9a6acaf955c82f1ec6071d639c5c5e7723e71433",
+      "manifest_sha256": "2ff1de416e41a8e208fd422c78773d5a5c985dc419baaf3d1f3d03db3bef4f49",
+      "member_count": 48
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

@@ -1,0 +1,150 @@
+{
+  "schema": "alas-headless.operation-siren-live-qualification/v1",
+  "date": "2026-08-20",
+  "continued_date": "2026-08-21",
+  "serial": "emulator-5580",
+  "tasks": ["OpsiMonthBoss", "OpsiStronghold"],
+  "qualification": "partial",
+  "driver_mode": "typed-semantic-only",
+  "raw_input_fallback_used": false,
+  "proven": {
+    "safe_zone_auto_search": {
+      "completed": true,
+      "action_point_before": 200,
+      "action_point_after": 196,
+      "coins_before": 58943,
+      "coins_after": 59074,
+      "beacon_before": 110,
+      "beacon_after": 120,
+      "daily_before": 0,
+      "daily_after": 10,
+      "fleet_hp_after": [98, 100, 100, 98, 100, 94]
+    },
+    "month_boss": {
+      "difficulty": "normal",
+      "force_run_runtime_consumer": true,
+      "adaptability_bypass_when_forced": true,
+      "zone": 154,
+      "typed_port_route": [[-4, -2], [-3, 0], [-3, 2]],
+      "entrance_marker": {
+        "event": "event_7000010",
+        "model": "chongdong",
+        "radar_sprite": "task"
+      },
+      "room_transition_postcondition": "exit_button",
+      "room_event_prefix": "703",
+      "retained_room_resume": true,
+      "fleet_lock_on_to_off": true,
+      "fleet_selector_open": true,
+      "selected_fleet": 4,
+      "boss_radar": {
+        "event": "7032007",
+        "sprite": "boss"
+      },
+      "boss_preparation_target": "OverlayCamera/Overlay/UIMain/fixed/battle",
+      "world_precombat_started": true,
+      "first_entry_information_confirmed": true,
+      "combat_started": true,
+      "battle_result": "BATTLE_STATUS_D",
+      "low_resolve_state": {
+        "fleet": 4,
+        "hierarchy": "LevelGrid/DragLayer/plane/cells/fleet_4/marks/damage/1",
+        "exact_name": "1",
+        "exact_sprite": "200",
+        "location": "beside the selected map chibi",
+        "remaining_hp_observed": true,
+        "hp_used_as_defeat_signal": false
+      },
+      "port_repair_state": {
+        "exact_button_name": "agony",
+        "location": "left fleet status portraits",
+        "meaning": "sunk ship requiring port overhaul",
+        "used_as_low_resolve_signal": false
+      },
+      "fleet_rotation": {
+        "defeated_fleet_4_skipped": true,
+        "fleet_3_selected": true,
+        "fleet_3_marker_before_boss_approach": false,
+        "controlled_exhaustion_filter": [4, 3],
+        "controlled_exhaustion_returned_false": true,
+        "repeated_defeated_fleet_attack": false
+      }
+    },
+    "stronghold": {
+      "completed": true,
+      "globe_candidates": [
+        {"zone_id": 93, "zone_name": "NA海域西北C", "zone_type": "塞壬要塞"},
+        {"zone_id": 121, "zone_name": "东大陆架A", "zone_type": "塞壬要塞"}
+      ],
+      "detection": {
+        "exact_zone_title": true,
+        "exact_zone_type": true,
+        "stronghold_marker_sprite_set": true,
+        "framebuffer_or_hsv_used": false
+      },
+      "globe_round_trip_anchor": "Liverpool",
+      "target_zone": {"zone_id": 93, "zone_name": "NA海域西北C"},
+      "second_target_zone": {
+        "zone_id": 121,
+        "zone_name": "东大陆架A",
+        "typed_local_title": "东大陆架A-塞壬要塞海域",
+        "final_percentage": 0
+      },
+      "globe_navigation": {
+        "actual_float_panel_pin_anchor": true,
+        "eight_pixel_local_probe": true,
+        "dense_port_boundary_zone_proven": {
+          "zone_id": 125,
+          "zone_name": "东大陆架E",
+          "zone_type": "安全海域",
+          "between_ports": ["利维浦", "布勒斯特"]
+        },
+        "wrong_adjacent_zone_never_accepted": true
+      },
+      "suppression_percentage": [100, 20, 0],
+      "fleet_rotation": {
+        "fleet_4_needs_port_repair": true,
+        "fleet_4_was_not_reclassified_as_low_resolve": true,
+        "fleet_2_selected": true,
+        "fleet_2_low_resolve": false,
+        "fleet_2_needs_port_repair": false
+      },
+      "auto_search_notifications": [
+        "当前所选舰队开始自律寻敌",
+        "当前所选舰队视野内无可自律事件，无法继续自律寻敌"
+      ],
+      "submarine_exit_confirmation": true,
+      "final_percentage": 0,
+      "retained_order_panel_recovery": true,
+      "unavailable_order_exact_back": true,
+      "cleared_before_fleet_rotation": true,
+      "post_clear": {
+        "port": "Liverpool",
+        "repair_cost": 750,
+        "fleets_checked": [1, 2, 3, 4],
+        "all_fleets_low_resolve": false,
+        "complete": true
+      },
+      "port_question_clear": {
+        "exact_radar_target_absent": true,
+        "pixel_radar_used": false
+      }
+    }
+  },
+  "blocked": {
+    "month_boss_settlement_proven": false,
+    "reason": "Stronghold is fully cleared. Month Boss low-resolve and port-repair separation, rotation, and all-fleets-exhausted failure return are qualified, but a successful final Month Boss settlement and hard difficulty were not available in this retained attempt."
+  },
+  "daily": {
+    "target_zone_entered": 154,
+    "auto_search_after_one_exact_toggle_attempt": "off",
+    "mission_clear_proven": false
+  },
+  "final_state": {
+    "game_surface": "Liverpool local map after post-stronghold repair and resolve check",
+    "fleet": 4,
+    "fleet_state": "healthy",
+    "stronghold_percentage": 0,
+    "OpsiMonthBoss.ForceRun": false
+  }
+}

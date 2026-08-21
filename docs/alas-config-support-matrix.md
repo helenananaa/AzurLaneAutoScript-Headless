@@ -1,6 +1,6 @@
 # ALAS Headless 配置项级支持矩阵
 
-更新日期：2026-08-19
+更新日期：2026-08-20
 Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 固定 ALAS 上游基线：`81ccf63b4540f00241628c82a58c02c7a2bb11af`
 
@@ -44,11 +44,11 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **7 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **13 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、Research、Tactical |
+| 🟢 主路径已完成、全配置未完成（`L`） | **14 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiStronghold、Research、Tactical |
 | 🧪 仅离线完成（`O`） | **7 / 60** | Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
 | 🧱 已到边界、尚未完成（`B`） | **17 / 60** | Meowfficer、OpsiAbyssal、OpsiArchive、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiExplore、OpsiHazard1Leveling、OpsiMeowfficerFarming、OpsiMonthBoss、OpsiObscure、OpsiShop、OpsiVoucher、Shipyard、ShopFrequent、WarArchives |
-| 🔴 尚未完成（`M`） | **2 / 60** | GemsFarming、OpsiStronghold |
+| 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
 
 当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
 
@@ -355,7 +355,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 ### 1.36 本轮 Operation Siren 任务配置契约
 
-`OpsiMonthBoss.Mode` 精确接受 `normal/normal_hard`，`CheckAdaptability` 精确接受布尔值。回放直接编译并执行固定上游 `clear_month_boss()` 与 `month_boss_delay()`，保留普通/困难入口选择、普通完成后继续困难、困难已完成跳过、`203/203/156` 适应性阈值及不足时延迟停止的原顺序。非法值在任务、地图或战斗状态前 fail-closed。
+`OpsiMonthBoss.Mode` 精确接受 `normal/normal_hard`，`CheckAdaptability` 与 `ForceRun` 精确接受布尔值。回放直接编译并执行固定上游 `clear_month_boss()` 与 `month_boss_delay()`，保留普通/困难入口选择、普通完成后继续困难、困难已完成跳过、`203/203/156` 适应性阈值及不足时延迟停止的原顺序；`ForceRun=true` 只绕过适应性预检。实机已证明端口雷达导航、普通 Boss 房进入、舰队锁定关闭、舰队选择、战败返回、地图小人旁低士气与左栏沉没大修分离，以及全队不可用的挑战失败退出；安全区胜利可清除低士气。成功击杀结算和困难难度尚未实机闭环。非法值在任务、地图或战斗状态前 fail-closed。
 
 `OpsiObscure.ForceRun` 的真假分支直接执行原 `clear_obscure()` 与 `os_obscure()`：关闭时维持一次安全停止，开启时进入原任务切换检查。`OpsiDaily.UseTuningSample` 的真假分支直接执行原 `os_daily()`，只改变调律样本使用步骤，后续接任务、区域初始化、清任务与次日延迟顺序保持不变。`OpsiHazard1Leveling.TargetZone` 覆盖声明的 `0/22/44`：`0` 保持原逻辑映射到 22，另外两值进入对应安全区，回放在原 `run_strategic_search()` 边界停止。`OpsiMeowfficerFarming.HazardLevel` 覆盖 `3/4/5/6/10`，逐值保留原 `zone_select(hazard_level=...)` 参数和后续舰队、指令、自动搜索、后处理、任务切换顺序。`ActionPointPreserve` 接受非负整数，保持 0 时关闭潜艇及有效值上限裁剪到 2000 的原行为；负数和错误类型在日志、配置覆写、行动力检查或设备状态前拒绝。`TargetZone` 直接执行固定上游原 `ZoneManager.name_to_zone()`，数字 ID、数字文本及中/英/日/台名称均解析到同一原生海域；未知名称保持原人工接管结果，但已前移至行动力检查和设备动作之前。
 
@@ -377,9 +377,9 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `OpsiFleetFilter.Filter` 直接使用固定上游 `FLEET_FILTER/Filter` 并回放原 `OSFleet.parse_fleet_filter()` 与 `AzurLaneConfig.opsi_task_delay()`。舰队顺序、`CallSubmarine`、Unicode 分隔符和连字符、重复去重、前三舰队待机位、不可用舰队形成空选择，以及潜艇任务延迟均保持原语义；未知或空 token、错误类型在过滤器状态、调度写入、舰队选择或任务输入前 fail-closed。调度器对没有该配置组的任务继续把缺省空值解释为“不调用潜艇”，不把缺省字段误判为非法用户配置。
 
-共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 31 个字段、136 个合法类并拒绝 234 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗、兑换或 Android 输入，因此只提升 `offline=complete`。
+共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 31 个字段、170 个合法类并拒绝 246 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗、兑换或 Android 输入，因此只提升 `offline=complete`。
 
-此前只检查属性加载的 AST 审计漏掉了动态拼接的 `deep_get()` 字符串路径，因而错误地把 Explore/Abyssal/Stronghold 的 `ForceRun` 记为零读取；本轮已用源码绑定回放纠正。固定上游真正没有运行时消费者的仍只有 `OpsiMonthBoss.ForceRun` 与 `OpsiDaily.DoMission`，两者继续明确标为 `unsupported`。导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板不会因此提升为完整支持。
+此前只检查属性加载的 AST 审计漏掉了动态拼接的 `deep_get()` 字符串路径，因而错误地把 Explore/Abyssal/Stronghold 的 `ForceRun` 记为零读取；本轮已用源码绑定回放纠正。Headless 现为固定上游原先零读取的 `OpsiMonthBoss.ForceRun` 补上调度延迟排除语义，并让 `OpsiDaily.DoMission=false` 在使用可选调律样本后跳过每日任务接取/清理、直接延迟到下次服务器更新；两个字段都在任何任务状态写入前做严格布尔校验。导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板不会因此提升为完整支持。
 
 ## 2. 60 个面板总表
 
@@ -432,12 +432,12 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | B | ForceRun、LastZone、SpecialRadar、Fleet/Submarine 已离线等价；真实地图导航、舰队/潜艇动作和清区未闭环 |
 | 44 | OpsiShop | Scheduler, OpsiShop | B | 5 个预设和自定义过滤已离线等价；真实购买、刷新、货币 postcondition 与异常恢复仍未闭环 |
 | 45 | OpsiVoucher | Scheduler, OpsiVoucher | B | 过滤器及重定向已离线等价；真实库存、命中、兑换、代币 postcondition 与异常恢复仍未闭环 |
-| 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | UseTuningSample、Fleet/Submarine 已离线等价；DoMission 无消费者，真实舰队/潜艇动作和清图未闭环 |
+| 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | DoMission、UseTuningSample、Fleet/Submarine 已离线等价；真实舰队/潜艇动作和清图未闭环 |
 | 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | B | ForceRun、Fleet/Submarine 已离线等价；坐标消耗、真实动作、进入和清图未闭环 |
 | 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | B | ForceRun 与舰队过滤已离线等价；坐标消耗、真实舰队、Boss 和结算未闭环 |
 | 49 | OpsiArchive | Scheduler, OpsiFleet | B | Fleet/Submarine 已离线等价且档案商店可读；真实动作、购买、使用坐标、进入和清图未闭环 |
-| 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | M | 舰队过滤已离线等价；3D 漩涡无可靠观察，进入、真实舰队、战斗和结算未闭环 |
-| 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 模式、适应性检查和舰队过滤已离线等价；ForceRun 无消费者，普通/困难 Boss 未闭环 |
+| 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | L | 实机以精确世界地图标题/类型发现 93、121 两处要塞；93 区闭环 `100 -> 20 -> 0%` 舰队轮换，121 区闭环进入、战斗、0% 收束、回港大修和四队低士气复查；完整舰队过滤与 ForceRun 分支仍未逐值实机覆盖 |
+| 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通 Boss 已实机闭环战败、低士气/沉没分离、舰队轮换和全队耗尽失败返回，成功击杀结算及困难 Boss 未闭环 |
 | 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | B | HazardLevel、Fleet/Submarine 已离线等价；行动力保留、选区、真实动作和循环未闭环 |
 | 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | B | TargetZone、Fleet/Submarine 已离线等价；真实动作、选区和循环未闭环 |
 | 54 | OpsiCrossMonth | Scheduler | B | 非月末安全跳过；月末执行、重置和跨月恢复未验证 |
@@ -546,8 +546,8 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | OpsiObscure | `ForceRun` | B | 开关、坐标不存在/存在、消耗、进入、清图与奖励 |
 | OpsiAbyssal | `ForceRun` | B | 开关、坐标、Boss、多舰队、撤退/失败和奖励 |
 | OpsiFleetFilter | `Filter`（默认含 Fleet-4、CallSubmarine、Fleet-2/3/1） | B | 语法、顺序、潜艇、重复、不可用与非法规则已离线等价；真实舰队可用性、切换结果和战斗仍缺 |
-| OpsiStronghold | `ForceRun` | M | 先补足 3D 漩涡存在性观察；再验证开关、进入、舰队选择、战斗、撤退和结算 |
-| OpsiMonthBoss | `Mode`=`normal/normal_hard`; `CheckAdaptability`; `ForceRun` | B | 两模式、两个开关组合、适应性不足/足够、普通/困难切换、战斗和奖励 |
+| OpsiStronghold | `ForceRun` | L | 默认值主路径已在 93/121 两区完成要塞识别、进入、舰队轮换、清场及战后修复；仍需补 `true/false` 两值对侦察/潜艇调度排除的独立实机对照 |
+| OpsiMonthBoss | `Mode`=`normal/normal_hard`; `CheckAdaptability`; `ForceRun` | B | 两模式与两个开关已回放；普通房间已实机完成战败、低士气/沉没分离、轮换和全队耗尽失败返回，成功击杀结算、困难战斗与奖励仍缺 |
 | OpsiMeowfficerFarming | `HazardLevel`=3/4/5/6/10; `TargetZone`; `ActionPointPreserve` | B | 五危险等级、自动/显式区域、行动力边界、舰队/潜艇、循环与停止 |
 | OpsiHazard1Leveling | `TargetZone`=0/44/22 | B | 三目标值、不可用区域、舰队/潜艇、自动寻敌和循环停止 |
 | OpsiArchive | 无独立组，复用 Scheduler 与 OpsiFleet | B | 档案商店购买、坐标使用、舰队/潜艇、进入/清图与奖励 |
@@ -577,7 +577,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 剧情选择 | 动态选项未完整观察 | EventStory、普通/活动地图 | 识别选项数量和选择结果；未知剧情 fail-closed |
 | 公会/任务上下文弹窗 | 语义动作不完整 | Reward、Guild、Campaign | 区分确认/取消/前往，不得用通用坐标误点 |
 | 白色确认框 | 变体未完整观察 | 购买、维修、活动、退役 | 确认内容与动作绑定，不能只看“有白框” |
-| 大世界要塞 3D 漩涡 | UI 树不可见 | OpsiStronghold | 明确采用新增语义来源或受控局部视觉；无可靠存在性信号时保持 fail-closed |
+| 大世界要塞候选 | 精确世界地图区域标题、`塞壬要塞` 类型与专属图标组合 | OpsiStronghold | 已实机识别 93/121 区并均确认 0%；121 区另完成回港大修和四队低士气复查。未知或不完整组合继续 fail-closed，不回退 3D HSV/framebuffer |
 
 ## 5. 验收与维护规则
 
@@ -667,9 +667,9 @@ python scripts/python/verify_alas_support_matrix.py `
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
 | ✅ 五维完整支持 | **38 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **135 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **84 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
-| ⊘ 当前未适配或无效 | **21 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
+| ◐ 有实机当前值/分支证据 | **138 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **83 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ⊘ 当前未适配或无效 | **19 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
@@ -866,13 +866,13 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiAbyssal.ForceRun` | OpsiAbyssal | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiAshAssist.Tier` | OpsiAshAssist | type=input; display=default | input/default: 15 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `OpsiAshBeacon.AttackMode` | OpsiAshBeacon | type=select; display=default | options: "current_dossier", "current"; default: "current" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `OpsiAshBeacon.DossierAutoAttackMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: false | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `OpsiAshBeacon.DossierAutoAttackMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: false | `B`/☐ 未逐值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `OpsiAshBeacon.EnsureFullyCollected` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `OpsiAshBeacon.OneHitMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `OpsiAshBeacon.RequestAssist` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `OpsiDaemon.RepairShip` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiDaemon.SelectEnemy` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `OpsiDaily.DoMission` | OpsiDaily | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `OpsiDaily.DoMission` | OpsiDaily | type=checkbox; display=default | input/default: true | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `OpsiDaily.UseTuningSample` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiExplore.ForceRun` | OpsiExplore | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiExplore.LastZone` | OpsiExplore | type=input; display=default | input/default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
@@ -891,12 +891,12 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiMeowfficerFarming.HazardLevel` | OpsiMeowfficerFarming | type=select; display=default | options: 10, 3, 4, 5, 6; default: 5 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiMeowfficerFarming.TargetZone` | OpsiMeowfficerFarming | type=input; display=default | input/default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiMonthBoss.CheckAdaptability` | OpsiMonthBoss | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `OpsiMonthBoss.ForceRun` | OpsiMonthBoss | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `OpsiMonthBoss.ForceRun` | OpsiMonthBoss | type=checkbox; display=default | input/default: false | `B`/◐ 实机部分 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `OpsiMonthBoss.Mode` | OpsiMonthBoss | type=select; display=default | options: "normal_hard", "normal"; default: "normal" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiObscure.ForceRun` | OpsiObscure | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiShop.CustomFilter` | OpsiShop | type=textarea; display=default | input/default: <long default in args.json> | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiShop.PresetFilter` | OpsiShop | type=select; display=default | options: "all", "custom", "max_benefit_meta", "max_benefit", "no_meta"; default: "max_benefit_meta" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `OpsiStronghold.ForceRun` | OpsiStronghold | type=checkbox; display=default | input/default: false | `M`/⛔ Headless 跳过 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `OpsiStronghold.ForceRun` | OpsiStronghold | type=checkbox; display=default | input/default: false | `L`/🟢 默认主路径 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `OpsiVoucher.Filter` | OpsiVoucher | type=textarea; display=default | input/default: "LoggerAbyssal > LoggerObscure > Book > Coin > Fragment" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Optimization.CombatScreenshotInterval` | Alas | type=input; display=default | input/default: 1.0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Optimization.ScreenshotInterval` | Alas | type=input; display=default | input/default: 0.3 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |

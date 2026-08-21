@@ -816,6 +816,43 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         self.assertEqual(session._frame_clock.acquire.call_count, 3)
         self.assertEqual(update_surface.call_count, 3)
 
+    def test_operation_siren_transition_extends_only_typed_stale_retry(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        expected = mock.Mock(generation=11, frame_id="frame-11")
+        session.adapter = SimpleNamespace(
+            _login_flow=SimpleNamespace(
+                snapshot=lambda: SimpleNamespace(
+                    active=False,
+                    passive_transition_until=0.0,
+                )
+            ),
+            oracle=SimpleNamespace(
+                stale_login_update_in_progress=mock.Mock(return_value=False),
+            ),
+            _campaign_context=None,
+            _operation_siren_entry_transition_until=30.0,
+            _operation_siren_auto_search_transition_until=0.0,
+        )
+        session._frame_clock = mock.Mock(current_frame_id=None)
+        session._frame_clock.acquire.side_effect = (
+            SemanticGateClosed("observer snapshot is stale"),
+            SemanticGateClosed("observer endpoints are not generation-coherent"),
+            expected,
+        )
+
+        with mock.patch(
+            "alas_headless.alas_adapter.time.monotonic",
+            return_value=10.0,
+        ), mock.patch("alas_headless.alas_adapter.time.sleep") as sleep:
+            actual = session.refresh_frame()
+
+        self.assertIs(actual, expected)
+        self.assertEqual(session._frame_clock.acquire.call_count, 3)
+        self.assertEqual(sleep.call_count, 2)
+
     def test_session_close_clears_current_frame(self):
         handle = FrameRuntimeHandle()
         session = AlasSemanticSession(

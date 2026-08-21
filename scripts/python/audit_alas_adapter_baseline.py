@@ -132,8 +132,18 @@ def require_clean_repository(root: Path) -> str:
 
 def tracked_source_paths(root: Path) -> tuple[Path, ...]:
     output = _git(root, "ls-files", "--", "*.py", "*.patch")
+    deleted = set(
+        _git(root, "ls-files", "--deleted", "--", "*.py", "*.patch")
+        .splitlines()
+    )
     paths = []
     for value in output.splitlines():
+        # An intentional tracked deletion is already explicit in the Git
+        # diff and will disappear from ls-files after commit. Do not make a
+        # baseline inventory impossible to refresh merely because a retired
+        # source or patch member is being removed in the current change.
+        if value in deleted:
+            continue
         normalized = PurePosixPath(value)
         if normalized.is_absolute() or ".." in normalized.parts:
             raise AdapterBaselineError("tracked baseline path is unsafe")

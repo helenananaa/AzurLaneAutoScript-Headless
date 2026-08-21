@@ -88,10 +88,6 @@ from .alas_gems_farming_config_contract import (
     GEMS_FARMING_COMMON_DDS,
     validate_alas_gems_farming_config,
 )
-from .alas_opsi_stronghold_admission import (
-    OPSI_STRONGHOLD_BLOCK_REASON,
-    block_alas_opsi_stronghold_headless,
-)
 from .alas_private_quarters_config_contract import (
     AlasPrivateQuartersConfigSnapshot,
     PRIVATE_QUARTERS_SHIPS,
@@ -932,8 +928,6 @@ __all__ = (
     "GEMS_FARMING_COMMON_CVS",
     "GEMS_FARMING_COMMON_DDS",
     "validate_alas_gems_farming_config",
-    "OPSI_STRONGHOLD_BLOCK_REASON",
-    "block_alas_opsi_stronghold_headless",
     "AlasGuildConfigSnapshot",
     "validate_alas_guild_config",
     "AlasPrivateQuartersConfigSnapshot",

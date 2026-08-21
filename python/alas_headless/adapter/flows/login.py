@@ -92,8 +92,6 @@ LOGIN_UNSUPPORTED_PRESENCE_RESOURCES = frozenset(
         "MONTHLY_PASS_NOTICE",
         "PLAYER_CHECK",
         "SHIPYARD_CHECK",
-        "GUILD_POPUP_CONFIRM",
-        "GUILD_POPUP_CANCEL",
         "GET_MISSION",
         "POPUP_SINGLE_WHITE",
     }
@@ -264,6 +262,11 @@ class LoginFlow:
         if target is None:
             raise UnknownObservationError()
         self._package_gate()
+        if resource in ("MAIN_GOTO_CAMPAIGN_WHITE", "MAIN_GOTO_FLEET"):
+            # Main-page skins do not guarantee that either legacy navigation
+            # button is currently enabled. The exact root identity is the
+            # stable login-completion contract for both ALAS aliases.
+            return self._reader().main_page_visible()
         if resource == "LOGIN_CHECK":
             return self._entry_observer()
         return self._reader().enabled(target)
@@ -309,6 +312,7 @@ class LoginFlow:
             if reader.enabled("build/page/back"):
                 targets.append("build/page/back")
         for identity, target in (
+            ("event-list/page/back", "event-list/page/back"),
             ("task/page/back", "task/page/back"),
             ("build/page/start", "build/page/back"),
             ("research-menu/page/back", "research-menu/page/back"),

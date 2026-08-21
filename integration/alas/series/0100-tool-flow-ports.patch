@@ -333,15 +333,7 @@ diff --git a/module/daemon/os_daemon.py b/module/daemon/os_daemon.py
 index 6fdc403a..ed67e8ae 100644
 --- a/module/daemon/os_daemon.py
 +++ b/module/daemon/os_daemon.py
-@@ -7,6 +7,7 @@ from module.os.fleet import OSFleet
- from module.os_combat.combat import ContinuousCombat
- from module.os_handler.assets import AUTO_SEARCH_REWARD
- from module.os_handler.port import PORT_ENTER, PortHandler
-+from alas_headless import SemanticGateClosed
- 
- 
- class AzurLaneDaemon(DaemonBase, OSFleet, PortHandler):
-@@ -16,51 +17,78 @@ class AzurLaneDaemon(DaemonBase, OSFleet, PortHandler):
+@@ -16,51 +16,63 @@ class AzurLaneDaemon(DaemonBase, OSFleet, PortHandler):
  
          return super()._os_combat_expected_end()
  
@@ -358,26 +350,11 @@ index 6fdc403a..ed67e8ae 100644
 -        while 1:
 -            self.device.screenshot()
 +        self.device.screenshot()
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if semantic_adapter is not None:
-+            oracle = semantic_adapter.open().oracle
-+            try:
-+                if oracle.operation_siren_state() and oracle.exists(
-+                        'os/map/auto-search/off'):
-+                    logger.warning(
-+                        'Operation Siren auto search is locked; daemon waits '
-+                        'without selecting or moving to a target'
-+                    )
-+                    return 'auto_search_locked'
-+            except SemanticGateClosed:
-+                # Only absence of the OS local-map surface is admitted here;
-+                # other semantic failures still reach the normal handlers.
-+                pass
  
 -            # If is running a combat, do nothing.
++        # If is running a combat, do nothing.
 -            if self.is_combat_executing():
 -                continue
-+        # If is running a combat, do nothing.
 +        if self.is_combat_executing():
 +            return 'combat_executing'
  

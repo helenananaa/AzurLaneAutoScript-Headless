@@ -940,6 +940,14 @@ class OperationSirenState:
 
 
 @dataclass(frozen=True)
+class OperationSirenActionPointState:
+    generation: int
+    current: int
+    item_counts: Tuple[int, int, int, int]
+    selected_index: int
+
+
+@dataclass(frozen=True)
 class OperationSirenGlobeState:
     zone_name: str
     zone_type: str
@@ -1947,9 +1955,64 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "top/adapt/right_stage/btn_list/dock/port_button",
     ),
     SemanticTarget(
+        "os/map/exit",
+        "exit_button",
+        "top/adapt/right_stage/btn_list/dock/exit_button",
+    ),
+    SemanticTarget(
+        "os/boss/start",
+        "battle",
+        "UIMain/fixed/battle",
+    ),
+    SemanticTarget(
+        "os/precombat/start",
+        "start",
+        "WorldPreCombatUI(Clone)/adapt/right/start",
+    ),
+    SemanticTarget(
+        "os/precombat/info/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "os/action-point/use",
+        "custom_button_1",
+        "WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_1",
+    ),
+    SemanticTarget(
+        "os/action-point/cancel",
+        "custom_button_2",
+        "WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_2",
+    ),
+    SemanticTarget(
         "os/port/supply",
         "supply",
         "WorldPortUI(Clone)/blur_panel/adapt/top/bottom_stage/btn/supply",
+    ),
+    SemanticTarget(
+        "os/port/dock",
+        "dockyard",
+        "WorldPortUI(Clone)/blur_panel/adapt/top/bottom_stage/btn/dockyard",
+    ),
+    SemanticTarget(
+        "os/port/dock/back",
+        "back",
+        "UIMain/blur_panel/adapt/top/back",
+    ),
+    SemanticTarget(
+        "os/port/dock/repair-all",
+        "btn_repair_all",
+        "UIMain/blur_panel/world_port_panel/btn_repair_all",
+    ),
+    SemanticTarget(
+        "os/port/dock/repair-confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "os/port/dock/repair-cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
     ),
     SemanticTarget(
         "os/port/back",
@@ -1965,6 +2028,31 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "os/map/order",
         "btn_order",
         "top/adapt/right_stage/compass_panel/btn_order",
+    ),
+    SemanticTarget(
+        "os/order/back",
+        "back",
+        "SVOrderPanel(Clone)/adapt/back",
+    ),
+    SemanticTarget(
+        "os/order/scan",
+        "type_enable",
+        "SVOrderPanel(Clone)/adapt/order_list/fov/type_enable",
+    ),
+    SemanticTarget(
+        "os/order/submarine",
+        "type_enable",
+        "SVOrderPanel(Clone)/adapt/order_list/submarine/type_enable",
+    ),
+    SemanticTarget(
+        "os/order/confirm",
+        "btn_confirm",
+        "Msgbox/window/button_container/btn_confirm",
+    ),
+    SemanticTarget(
+        "os/order/cancel",
+        "btn_cancel",
+        "Msgbox/window/button_container/btn_cancel",
     ),
     SemanticTarget(
         "os/map/mission-list",
@@ -2000,6 +2088,26 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "os/map/auto-search/on",
         "on",
         "top/adapt/right_stage/btn_list/auto_fight/on",
+    ),
+    SemanticTarget(
+        "os/map/fleet-lock/off",
+        "off",
+        "top/adapt/right_stage/btn_list/lock_fleet/off",
+    ),
+    SemanticTarget(
+        "os/map/fleet-lock/on",
+        "on",
+        "top/adapt/right_stage/btn_list/lock_fleet/on",
+    ),
+    SemanticTarget(
+        "os/map/fleet-selector/open",
+        "fleet_bar",
+        "top/adapt/left_stage/other/fleet_bar",
+    ),
+    SemanticTarget(
+        "os/auto-search/reward/close",
+        "ButtonExit",
+        "WorldAutoFightRewardUI(Clone)/Window/Fixed/ButtonExit",
     ),
     SemanticTarget(
         "os/help/close",
@@ -2040,6 +2148,26 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "os/globe/zone-enter",
         "enter",
         "SVFloatPanel(Clone)/point/line/bg/enter",
+    ),
+    SemanticTarget(
+        "os/globe/zone-return",
+        "return",
+        "SVFloatPanel(Clone)/point/line/bg/return",
+    ),
+    SemanticTarget(
+        "os/globe/zone-back",
+        "back",
+        "SVFloatPanel(Clone)/point/line/bg/back",
+    ),
+    SemanticTarget(
+        "os/globe/zone-switch",
+        "switch",
+        "SVFloatPanel(Clone)/point/line/bg/switch",
+    ),
+    SemanticTarget(
+        "os/globe/zone-type-mask",
+        "bg",
+        "SVFloatPanel(Clone)/select_mask/bg",
     ),
     SemanticTarget(
         "os/exit/confirm",
@@ -3131,9 +3259,17 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "os/map/globe",
             "os/port/enter",
             "os/port/supply",
+            "os/port/dock",
+            "os/port/dock/back",
+            "os/port/dock/repair-all",
             "os/port/back",
             "os/shop/back",
             "os/map/order",
+            "os/order/back",
+            "os/order/scan",
+            "os/order/submarine",
+            "os/order/confirm",
+            "os/order/cancel",
             "os/map/mission-list",
             "os/map/storage",
             "os/storage/back",
@@ -3142,9 +3278,32 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "os/mission-list/close",
             "os/map/auto-search/off",
             "os/map/auto-search/on",
+            "os/action-point/use",
+            "os/action-point/cancel",
+            "os/boss/start",
+            "os/precombat/start",
+            "os/precombat/info/confirm",
             "os/help/close",
+            "reward/award-info/close",
+            "reward/award-info1/close",
             "os/exit/confirm",
             "os/exit/cancel",
+        ),
+    ),
+    BlockerRule(
+        "operation-siren-action-point",
+        "/WorldStaminaRecoverUI(Clone)/",
+        ("os/action-point/use", "os/action-point/cancel"),
+    ),
+    BlockerRule(
+        "operation-siren-order",
+        "/SVOrderPanel(Clone)/",
+        (
+            "os/order/back",
+            "os/order/scan",
+            "os/order/submarine",
+            "os/order/confirm",
+            "os/order/cancel",
         ),
     ),
     BlockerRule(
@@ -3437,6 +3596,9 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "guild/dispatch/confirm",
             "guild/exchange/cancel",
             "guild/exchange/confirm",
+            "os/precombat/info/confirm",
+            "os/port/dock/repair-confirm",
+            "os/port/dock/repair-cancel",
         ),
     ),
     BlockerRule(
@@ -10310,6 +10472,1050 @@ class SemanticOracle:
             fleet_levels=levels,
         )
 
+    def operation_siren_stronghold_percentage(self) -> int:
+        """Read the exact Stronghold suppression percentage from WorldMap."""
+
+        button_state = self.read_state()
+        back = self._unique(button_state, "os/page/back")
+        progress_path = (
+            "top/adapt/top_stage/features/status_field/poison_rate"
+        )
+        progress_buttons = tuple(
+            button
+            for button in button_state.buttons
+            if button.name == "poison_rate"
+            and button.path.endswith(progress_path)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.bounds is not None
+        )
+        if (
+            not back.active_in_hierarchy
+            or not back.active_and_enabled
+            or back.bounds is None
+            or len(progress_buttons) != 1
+        ):
+            raise SemanticGateClosed("operation siren stronghold identity is absent")
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation
+            <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed(
+                "operation siren stronghold snapshots are not coherent"
+            )
+        title = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith("top/adapt/top_stage/title/name")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and re.fullmatch(r".+-塞壬要塞海域", text.text.strip())
+        )
+        percentage = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith(progress_path + "/bg/Text")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and re.fullmatch(r"(?:100|[1-9]?[0-9])%", text.text.strip())
+        )
+        if len(title) != 1 or len(percentage) != 1:
+            raise SemanticGateClosed(
+                "operation siren stronghold percentage is absent or ambiguous"
+            )
+        return int(percentage[0].text.strip().rstrip("%"))
+
+    def click_operation_siren_order(self, order_kind: str) -> ActionReceipt:
+        """Execute one exact enabled navigation order from SVOrderPanel."""
+
+        if order_kind not in ("scan", "submarine"):
+            raise ValueError("operation siren order kind is unsupported")
+        semantic_id = "os/order/" + order_kind
+        state = self.read_state()
+        back = self._unique(state, "os/order/back")
+        target = self._unique(state, semantic_id)
+        if not all(
+            item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.bounds is not None
+            for item in (back, target)
+        ):
+            raise SemanticGateClosed("operation siren order panel is incomplete")
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed(
+                "operation siren order snapshots are not coherent"
+            )
+        root = (
+            "SVOrderPanel(Clone)/adapt/order_list/"
+            + ("fov" if order_kind == "scan" else "submarine")
+            + "/type_enable/"
+        )
+        cost = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith(root + "cost/Text")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and re.fullmatch(r"[0-9]{1,3}", text.text.strip())
+        )
+        sprite = "fov_icon" if order_kind == "scan" else "submarine_icon"
+        icon = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith(root + "light/icon")
+            and image.sprite == sprite
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(cost) != 1 or len(icon) != 1:
+            raise SemanticGateClosed(
+                "operation siren enabled order identity is incomplete"
+            )
+        assert target.bounds is not None and icon[0].bounds is not None
+        point = Point(
+            (icon[0].bounds.left + icon[0].bounds.right) / 2.0,
+            (icon[0].bounds.top + icon[0].bounds.bottom) / 2.0,
+        )
+        if not target.bounds.contains(point):
+            raise SemanticGateClosed("operation siren order point left its button")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before operation siren order")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_operation_siren_order_back(self) -> ActionReceipt:
+        """Close SVOrderPanel through its exact visible back image."""
+
+        state = self.read_state()
+        target = self._unique(state, "os/order/back")
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed(
+                "operation siren order-back snapshots are not coherent"
+            )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == target.path
+            and image.name == "back"
+            and image.sprite == "btn_back"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(images) != 1:
+            raise SemanticGateClosed(
+                "operation siren order back is absent or ambiguous"
+            )
+        bounds = images[0].bounds
+        assert bounds is not None
+        point = Point(
+            (bounds.left + bounds.right) / 2.0,
+            (bounds.top + bounds.bottom) / 2.0,
+        )
+        if target.bounds is None or not target.bounds.contains(point):
+            raise SemanticGateClosed("operation siren order-back point changed")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed(
+                "foreground changed before operation siren order back"
+            )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="os/order/back",
+            generation=state.generation,
+            point=point,
+            bounds=bounds,
+            path=target.path,
+        )
+
+    def operation_siren_order_confirmation_visible(
+        self, order_kind: str
+    ) -> bool:
+        """Prove the AP confirmation mounted by one exact navigation order."""
+
+        if order_kind not in ("scan", "submarine"):
+            raise ValueError("operation siren order kind is unsupported")
+        state = self.read_state()
+        required = {
+            semantic_id: tuple(
+                button
+                for button in self._matches(state, semantic_id)
+                if button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
+            )
+            for semantic_id in (
+                "os/order/back",
+                "os/order/" + order_kind,
+                "os/order/confirm",
+                "os/order/cancel",
+            )
+        }
+        if not any(required.values()):
+            return False
+        if any(len(matches) != 1 for matches in required.values()):
+            raise SemanticGateClosed(
+                "operation siren order confirmation is incomplete"
+            )
+
+        text_state = self.read_text_state()
+        if not state.generation <= text_state.generation <= state.generation + 2:
+            raise SemanticGateClosed(
+                "operation siren order confirmation snapshots are not coherent"
+            )
+        order_root = (
+            "SVOrderPanel(Clone)/adapt/order_list/"
+            + ("fov" if order_kind == "scan" else "submarine")
+            + "/type_enable/cost/Text"
+        )
+        costs = tuple(
+            text
+            for text in text_state.texts
+            if text.path.endswith(order_root)
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and re.fullmatch(r"[0-9]{1,3}", text.text.strip())
+        )
+        prompts = tuple(
+            text
+            for text in text_state.texts
+            if text.path.endswith("Msgbox/window/msg_panel/base/content")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        if len(costs) != 1 or len(prompts) != 1:
+            raise SemanticGateClosed(
+                "operation siren order confirmation text is incomplete"
+            )
+        marker = "<color=#92FC63FF>{0}</color>".format(
+            costs[0].text.strip()
+        )
+        if prompts[0].text.count(marker) != 1:
+            raise SemanticGateClosed(
+                "operation siren order confirmation cost changed"
+            )
+        return True
+
+    def click_operation_siren_order_confirmation(
+        self, order_kind: str, *, confirm: bool
+    ) -> ActionReceipt:
+        """Confirm or cancel the proven AP prompt for one navigation order."""
+
+        if not self.operation_siren_order_confirmation_visible(order_kind):
+            raise SemanticGateClosed(
+                "operation siren order confirmation is absent"
+            )
+        state = self.read_state()
+        semantic_id = "os/order/" + ("confirm" if confirm else "cancel")
+        target = self._unique(state, semantic_id)
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and self._foreground_component() == self.fingerprint.component
+        ):
+            raise SemanticGateClosed(
+                "operation siren order confirmation is not actionable"
+            )
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def operation_siren_local_map_visible(self) -> bool:
+        """Recognize the mounted local-map shell without requiring its texts."""
+
+        state = self.read_state()
+        order_backs = tuple(
+            button
+            for button in self._matches(state, "os/order/back")
+            if button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if order_backs:
+            # The local map remains mounted under SVOrderPanel.  Do not let
+            # ALAS accept that background shell as the postcondition of
+            # order_quit(), or its next fleet-bar click lands behind the
+            # still-blocking order overlay.
+            return False
+        backs = self._matches(state, "os/page/back")
+        fleet_bars = tuple(
+            button
+            for button in state.buttons
+            if button.name == "fleet_bar"
+            and button.path.endswith(
+                "top/adapt/left_stage/other/fleet_bar"
+            )
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.bounds is not None
+        )
+        return len(backs) == 1 and len(fleet_bars) == 1
+
+    def operation_siren_boss_preparation_visible(self) -> bool:
+        """Recognize the exact in-map Siren boss challenge panel."""
+
+        button_state = self.read_state()
+        targets = self._matches(button_state, "os/boss/start")
+        if len(targets) != 1:
+            return False
+        target = targets[0]
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+        ):
+            return False
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation
+            <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed(
+                "operation siren boss-preparation snapshots are not coherent"
+            )
+        boss_icons = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith(
+                "OverlayCamera/Overlay/UIMain/fixed/bossname/name/banner/Type/Icon"
+            )
+            and image.sprite.startswith("battle_")
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        return len(boss_icons) == 1
+
+    def operation_siren_precombat_visible(self) -> bool:
+        """Recognize the exact WorldPreCombatUI used by Siren bosses."""
+
+        button_state = self.read_state()
+        starts = self._matches(button_state, "os/precombat/start")
+        backs = tuple(
+            button
+            for button in button_state.buttons
+            if button.name == "back_btn"
+            and button.path.endswith(
+                "WorldPreCombatUI(Clone)/adapt/top/back_btn"
+            )
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.bounds is not None
+        )
+        if len(starts) != 1 or len(backs) != 1:
+            return False
+        start = starts[0]
+        if not (
+            start.active_in_hierarchy
+            and start.active_and_enabled
+            and start.interactable
+            and start.raycast_top is None
+            and start.point is not None
+            and start.bounds is not None
+            and start.bounds.contains(start.point)
+        ):
+            return False
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation
+            <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed(
+                "operation siren precombat snapshots are not coherent"
+            )
+        start_images = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith(
+                "WorldPreCombatUI(Clone)/adapt/right/start"
+            )
+            and image.sprite == "battle"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        fleet_levels = tuple(
+            text
+            for text in ui_state.texts
+            if "/WorldPreCombatUI(Clone)/adapt/middle/fleet/" in text.path
+            and text.path.endswith("/icon_bg/lv/Text")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and re.fullmatch(r"[0-9]{1,3}", text.text.strip())
+        )
+        return len(start_images) == 1 and 1 <= len(fleet_levels) <= 6
+
+    def operation_siren_precombat_info_visible(self) -> bool:
+        """Recognize the one-button first-entry information prompt."""
+
+        if not self.operation_siren_precombat_visible():
+            return False
+        button_state = self.read_state()
+        confirms = self._matches(button_state, "os/precombat/info/confirm")
+        cancels = tuple(
+            button
+            for button in button_state.buttons
+            if button.path.endswith(
+                "Msgbox(Clone)/window/button_container/custom_button_2(Clone)"
+            )
+            and button.active_in_hierarchy
+        )
+        if len(confirms) != 1 or cancels:
+            return False
+        confirm = confirms[0]
+        if not confirm.actionable:
+            return False
+        ui_state = self.read_ui_state()
+        help_rows = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith(
+                "Msgbox(Clone)/window/help_panel/list/help_tpl"
+            )
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and bool(text.text.strip())
+        )
+        return len(help_rows) == 1
+
+    def click_operation_siren_precombat_info(self) -> ActionReceipt:
+        if not self.operation_siren_precombat_info_visible():
+            raise SemanticGateClosed(
+                "operation siren precombat information prompt is absent"
+            )
+        return self.click("os/precombat/info/confirm")
+
+    def click_operation_siren_precombat_start(self) -> ActionReceipt:
+        if not self.operation_siren_precombat_visible():
+            raise SemanticGateClosed("operation siren precombat is absent")
+        if self.operation_siren_precombat_info_visible():
+            raise SemanticGateClosed(
+                "operation siren precombat information prompt is blocking"
+            )
+        state = self.read_state()
+        target = self._unique(state, "os/precombat/start")
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and self._foreground_component() == self.fingerprint.component
+        ):
+            raise SemanticGateClosed(
+                "operation siren precombat start is not actionable"
+            )
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="os/precombat/start",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    @staticmethod
+    def _operation_siren_current_fleet_from_ui_state(state: UiState) -> int:
+        path = (
+            "top/adapt/left_stage/other/fleet_bar/text_selected/x"
+        )
+        matches = tuple(
+            item
+            for item in state.images
+            if item.name == "x"
+            and item.path.endswith(path)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(matches) != 1 or matches[0].sprite not in {"1", "2", "3", "4"}:
+            raise SemanticGateClosed(
+                "operation siren current fleet is absent or ambiguous"
+            )
+        return int(matches[0].sprite)
+
+    def operation_siren_current_fleet(self) -> int:
+        """Read the selected Operation Siren fleet from its exact sprite."""
+
+        if not self.operation_siren_local_map_visible():
+            raise SemanticGateClosed("operation siren local-map identity is absent")
+        return self._operation_siren_current_fleet_from_ui_state(
+            self.read_ui_state()
+        )
+
+    def operation_siren_current_fleet_defeated(self) -> bool:
+        """Return the exact low-resolve marker beside the selected map fleet."""
+
+        if not self.operation_siren_local_map_visible():
+            raise SemanticGateClosed("operation siren local-map identity is absent")
+        state = self.read_ui_state()
+        fleet = self._operation_siren_current_fleet_from_ui_state(state)
+        fleet_root = (
+            f"/LevelGrid/DragLayer/plane/cells/fleet_{fleet}"
+        )
+        markers = tuple(
+            image
+            for image in state.images
+            if image.path.endswith(fleet_root + "/marks/damage/1")
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(markers) > 1:
+            raise SemanticGateClosed(
+                "operation siren selected-fleet low-resolve marker is ambiguous"
+            )
+        if markers:
+            marker = markers[0]
+            if marker.name != "1" or marker.sprite != "200":
+                raise SemanticGateClosed(
+                    "operation siren selected-fleet low-resolve marker is not reviewed"
+                )
+            return True
+
+        anchors = tuple(
+            image
+            for image in state.images
+            if image.name == "shadow"
+            and image.path.endswith(fleet_root + "/shadow")
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(anchors) != 1:
+            raise SemanticGateClosed(
+                "operation siren selected-fleet map anchor is absent or ambiguous"
+            )
+        return False
+
+    def operation_siren_current_fleet_needs_repair(self) -> bool:
+        """Return whether the selected fleet has a sunk ship in the left panel."""
+
+        if not self.operation_siren_local_map_visible():
+            raise SemanticGateClosed("operation siren local-map identity is absent")
+        state = self.read_state()
+        pattern = re.compile(
+            r".+/top/adapt/left_stage/bg/fleet/(?:main|vanguard)/"
+            r"shiptpl\(Clone\)/agony$"
+        )
+        markers = tuple(
+            button
+            for button in state.buttons
+            if button.name == "agony"
+            and pattern.fullmatch(button.path)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(markers) > 6:
+            raise SemanticGateClosed(
+                "operation siren repair markers are ambiguous"
+            )
+        signatures = {
+            (
+                round(marker.bounds.left, 3),
+                round(marker.bounds.top, 3),
+                round(marker.bounds.right, 3),
+                round(marker.bounds.bottom, 3),
+            )
+            for marker in markers
+            if marker.bounds is not None
+        }
+        if len(signatures) != len(markers):
+            raise SemanticGateClosed("operation siren repair markers overlap")
+        return bool(markers)
+
+    def operation_siren_radar_targets(
+        self, target_kind: str
+    ) -> Tuple[Tuple[int, int], ...]:
+        """Read exact relative grid positions from the Operation Siren radar."""
+
+        if target_kind not in {"port", "task", "guidepost", "boss"}:
+            raise SemanticGateClosed(
+                "operation siren radar target kind is not reviewed"
+            )
+        if not self.operation_siren_local_map_visible():
+            raise SemanticGateClosed("operation siren local-map identity is absent")
+        state = self.read_ui_state()
+        # Local maps routinely exceed the observer's bounded Image slice.
+        # These radar targets are positive, exact hierarchy/sprite matches;
+        # truncation may make an absent target unknowable, but it does not
+        # invalidate a target that is present in the typed slice.
+        radar_root = (
+            "top/adapt/right_stage/compass_panel/ring/compass/range/"
+        )
+        path = radar_root + "mark"
+        if target_kind in {"guidepost", "task", "boss"}:
+            event_pattern = re.compile(r"[0-9]+$")
+            matches = tuple(
+                item
+                for item in state.images
+                if (
+                    (
+                        item.path.endswith(radar_root + item.name)
+                        and event_pattern.fullmatch(item.name)
+                    )
+                    or (target_kind == "task" and item.path.endswith(path))
+                )
+                and item.sprite == target_kind
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+        else:
+            matches = tuple(
+                item
+                for item in state.images
+                if item.name == "mark"
+                and item.path.endswith(path)
+                and item.sprite == target_kind
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+        targets = []
+        for item in matches:
+            assert item.bounds is not None
+            center_x = (item.bounds.left + item.bounds.right) / 2.0
+            center_y = (item.bounds.top + item.bounds.bottom) / 2.0
+            raw_x = (center_x - 1140.0) / 11.7
+            raw_y = (center_y - 226.0) / 11.7
+            grid_x = int(round(raw_x))
+            grid_y = int(round(raw_y))
+            if (
+                abs(raw_x - grid_x) > 0.35
+                or abs(raw_y - grid_y) > 0.35
+                or max(abs(grid_x), abs(grid_y)) > 7
+            ):
+                raise SemanticGateClosed(
+                    "operation siren radar target is not grid-aligned"
+                )
+            targets.append((grid_x, grid_y))
+        if len(set(targets)) != len(targets):
+            raise SemanticGateClosed("operation siren radar targets are ambiguous")
+        return tuple(targets)
+
+    def click_operation_siren_relative_grid(
+        self,
+        relative_position: Tuple[int, int],
+        *,
+        prefer_adjacent_event: bool = False,
+    ) -> ActionReceipt:
+        """Click one exact typed world grid relative to the camera center."""
+
+        if (
+            not isinstance(relative_position, tuple)
+            or len(relative_position) != 2
+            or any(type(value) is not int for value in relative_position)
+            or any(abs(value) > 4 for value in relative_position)
+        ):
+            raise SemanticGateClosed(
+                "operation siren relative grid position is malformed"
+            )
+        if not self.operation_siren_local_map_visible():
+            raise SemanticGateClosed("operation siren local-map identity is absent")
+        state = self.read_ui_state()
+        # As above, world-grid navigation relies only on positive exact paths.
+        # The map Image slice can be truncated while the center and requested
+        # grid are both fully represented.
+        pattern = re.compile(
+            r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/"
+            r"world_quad_([0-9]+)_([0-9]+)/walk_quad$"
+        )
+        grids = []
+        for item in state.images:
+            match = pattern.fullmatch(item.path)
+            if (
+                match is None
+                or item.name != "walk_quad"
+                or item.sprite != "cell_white"
+                or not item.active_in_hierarchy
+                or not item.active_and_enabled
+                or item.truncated
+                or item.bounds is None
+            ):
+                continue
+            grids.append((int(match.group(1)), int(match.group(2)), item))
+        centers = tuple(
+            (row, column, item)
+            for row, column, item in grids
+            if item.bounds is not None
+            and item.bounds.contains(Point(640.0, 360.0))
+        )
+        if len(centers) != 1:
+            raise SemanticGateClosed(
+                "operation siren camera center grid is absent or ambiguous"
+            )
+        center_row, center_column, _ = centers[0]
+        target_row = center_row + relative_position[1]
+        target_column = center_column + relative_position[0]
+        targets = tuple(
+            item
+            for row, column, item in grids
+            if row == target_row and column == target_column
+        )
+        if len(targets) != 1 or targets[0].bounds is None:
+            raise SemanticGateClosed(
+                "operation siren relative target grid is absent or ambiguous"
+            )
+        target = targets[0]
+        assert target.bounds is not None
+        click_bounds = target.bounds
+        click_path = target.path
+        if prefer_adjacent_event and abs(relative_position[0]) + abs(relative_position[1]) == 1:
+            event_pattern = re.compile(
+                r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                rf"cell_{target_row}_{target_column}/attachments/event_[0-9]+/"
+                r"icon/model/fubiao3\(Clone\)$"
+            )
+            events = tuple(
+                item
+                for item in state.images
+                if event_pattern.fullmatch(item.path)
+                and item.sprite == "fubiao3"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if len(events) > 1:
+                raise SemanticGateClosed(
+                    "operation siren adjacent event target is ambiguous"
+                )
+            if len(events) == 1:
+                assert events[0].bounds is not None
+                click_bounds = events[0].bounds
+                click_path = events[0].path
+        point = Point(
+            (click_bounds.left + click_bounds.right) / 2.0,
+            (click_bounds.top + click_bounds.bottom) / 2.0,
+        )
+        if (
+            not click_bounds.contains(point)
+            or not 80.0 <= point.x <= 960.0
+            or not 100.0 <= point.y <= 620.0
+            or self._foreground_component() != self.fingerprint.component
+        ):
+            raise SemanticGateClosed(
+                "operation siren relative target click is not safe"
+            )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id=(
+                "os/map/grid/relative/"
+                f"{relative_position[0]}/{relative_position[1]}"
+            ),
+            generation=state.generation,
+            point=point,
+            bounds=click_bounds,
+            path=click_path,
+        )
+
+    def operation_siren_auto_search_state(self) -> str:
+        """Return the exact local-map auto-search switch state.
+
+        The visible ``off`` control is not proof that auto-search is locked:
+        the same Unity button is used for an unlocked switch that the player
+        has simply turned off.  Callers may attempt that reviewed button once
+        and must use the subsequent state transition, rather than the initial
+        appearance, to decide whether the account can start auto-search.
+        """
+
+        self.operation_siren_state()
+        state = self.read_state()
+
+        def actionable(semantic_id: str) -> bool:
+            matches = tuple(
+                target
+                for target in self._matches(state, semantic_id)
+                if target.active_in_hierarchy
+                and target.active_and_enabled
+                and target.interactable
+                and target.point is not None
+                and target.bounds is not None
+                and target.bounds.contains(target.point)
+            )
+            if len(matches) > 1:
+                raise SemanticGateClosed(
+                    "operation siren auto-search state is ambiguous"
+                )
+            return len(matches) == 1
+
+        enabled = actionable("os/map/auto-search/on")
+        disabled = actionable("os/map/auto-search/off")
+        if enabled == disabled:
+            raise SemanticGateClosed(
+                "operation siren auto-search state is absent or inconsistent"
+            )
+        return "on" if enabled else "off"
+
+    def operation_siren_auto_search_info_count(self) -> int:
+        """Count the exact paired auto-search notifications on the OS map."""
+
+        state = self.read_ui_state()
+        path = (
+            "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/"
+            "toolTip(Clone)/Text"
+        )
+        reviewed = {
+            "<color=white>当前所选舰队开始自律寻敌</color>",
+            "<color=white>当前所选舰队视野内无可自律事件，无法继续自律寻敌</color>",
+        }
+        matches = tuple(
+            item
+            for item in state.texts
+            if item.path.endswith(path)
+            and item.text.strip() in reviewed
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        return len(matches)
+
+    def operation_siren_fleet_lock_state(self) -> str:
+        """Read the exact image-only fleet-lock switch state."""
+
+        if not self.operation_siren_local_map_visible():
+            raise SemanticGateClosed("operation siren local-map identity is absent")
+        state = self.read_ui_state()
+        root = (
+            "LevelCamera/Canvas/LevelOrigin/top/adapt/right_stage/btn_list/"
+            "auto_switch/"
+        )
+        matches = tuple(
+            item
+            for item in state.images
+            if item.path in {root + "on", root + "off"}
+            and item.name in {"on", "off"}
+            and item.sprite in {"auto_switch_on", "auto_switch_off"}
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed(
+                "operation siren fleet-lock state is absent or ambiguous"
+            )
+        return matches[0].name
+
+    def click_operation_siren_fleet_lock(self, expected_state: str) -> ActionReceipt:
+        """Toggle the image-only fleet lock after proving its exact state."""
+
+        if expected_state not in {"on", "off"}:
+            raise SemanticGateClosed("operation siren fleet-lock state is malformed")
+        if self.operation_siren_fleet_lock_state() != expected_state:
+            raise SemanticGateClosed("operation siren fleet-lock state changed")
+        state = self.read_ui_state()
+        path = (
+            "LevelCamera/Canvas/LevelOrigin/top/adapt/right_stage/btn_list/"
+            f"auto_switch/{expected_state}"
+        )
+        matches = tuple(
+            item
+            for item in state.images
+            if item.path == path
+            and item.name == expected_state
+            and item.bounds is not None
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("operation siren fleet-lock target changed")
+        target = matches[0]
+        assert target.bounds is not None
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before fleet-lock input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id=f"os/map/fleet-lock/{expected_state}",
+            generation=state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_operation_siren_fleet_bar(self) -> ActionReceipt:
+        """Open the exact fleet bar whose Unity button has no raycast-top bit."""
+
+        if not self.operation_siren_local_map_visible():
+            raise SemanticGateClosed("operation siren local-map identity is absent")
+        state = self.read_state()
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == "fleet_bar"
+            and button.path.endswith(
+                "top/adapt/left_stage/other/fleet_bar"
+            )
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("operation siren fleet bar is absent or ambiguous")
+        target = matches[0]
+        assert target.point is not None and target.bounds is not None
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed(
+                "operation siren fleet-bar snapshots are not coherent"
+            )
+        controls = tuple(
+            image
+            for image in ui_state.images
+            if image.name == "fleet_bar"
+            and image.path == target.path
+            and image.sprite == "btn_switch"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds == target.bounds
+        )
+        if len(controls) != 1:
+            raise SemanticGateClosed(
+                "operation siren fleet-bar control is absent or ambiguous"
+            )
+        # Use the exact Unity Button's own event point.  The stronghold layout
+        # consumes the whole fleet_bar component even though the legacy CN
+        # screenshot asset highlighted only its right-hand decoration.
+        point = target.point
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before fleet-bar input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="os/map/fleet-selector/open",
+            generation=state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def operation_siren_fleet_selector_open(self) -> bool:
+        """Return whether the exact four-row fleet selector is mounted."""
+
+        state = self.read_state()
+        root = "top/adapt/left_stage/mask/list/"
+        expected = {"item", *(f"item ({index})" for index in range(1, 4))}
+        matches = {
+            button.name
+            for button in state.buttons
+            if button.name in expected
+            and button.path.endswith(root + button.name)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        }
+        if matches and matches != expected:
+            raise SemanticGateClosed("operation siren fleet selector is incomplete")
+        return matches == expected
+
+    def click_operation_siren_fleet_selector(self, fleet_index: int) -> ActionReceipt:
+        """Select fleet 1..4 from the exact expanded selector row."""
+
+        if type(fleet_index) is not int or fleet_index not in range(1, 5):
+            raise SemanticGateClosed("operation siren fleet index is malformed")
+        if not self.operation_siren_fleet_selector_open():
+            raise SemanticGateClosed("operation siren fleet selector is closed")
+        state = self.read_state()
+        suffix = "item" if fleet_index == 1 else f"item ({fleet_index - 1})"
+        path = "top/adapt/left_stage/mask/list/" + suffix
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.path.endswith(path)
+            and button.name == suffix
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("operation siren fleet selector row changed")
+        target = matches[0]
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before fleet selection")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=f"os/map/fleet-selector/{fleet_index}",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def click_operation_siren_back(self) -> ActionReceipt:
         """Leave the proven local Operation Siren map through its top back."""
 
@@ -10355,6 +11561,33 @@ class SemanticOracle:
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="os/map/globe",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_operation_siren_map_exit(self) -> ActionReceipt:
+        """Leave a locked special-zone room through its exact exit control."""
+
+        if not self.operation_siren_local_map_visible():
+            raise SemanticGateClosed("operation siren local-map identity is absent")
+        state = self.read_state()
+        target = self._unique(state, "os/map/exit")
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+        ):
+            raise SemanticGateClosed("operation siren map exit is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before map exit input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="os/map/exit",
             generation=state.generation,
             point=target.point,
             bounds=target.bounds,
@@ -10447,12 +11680,49 @@ class SemanticOracle:
         )
         if (
             not zone_name
-            or not zone_type
+            or zone_type
+            not in {
+                "危险海域",
+                "普通海域",
+                "安全海域",
+                "隐秘海域",
+                "深渊海域",
+                "塞壬要塞",
+                "档案海域",
+                "未知海域",
+            }
             or world_capacity == 0
             or reset_match is None
             or any(re.fullmatch(r"[0-9]+", value) is None for value in integer_values)
         ):
             raise SemanticGateClosed("operation siren globe summary is malformed")
+        if zone_type == "塞壬要塞":
+            stronghold_images = {
+                "SVFloatPanel(Clone)/point/line/bg/icon": "daxuanwo",
+                "SVFloatPanel(Clone)/point/line/bg/icon/marking": "mark_danger",
+                "SVFloatPanel(Clone)/point/line/bg/icon/marking/mark_bg": (
+                    "mark_bg_danger"
+                ),
+                "SVFloatPanel(Clone)/point/line/bg/sairen": "sairen_mask",
+                "SVFloatPanel(Clone)/point/line/bg": "bg_danger",
+                "SVFloatPanel(Clone)/point/line": "click_point_danger",
+                "SVFloatPanel(Clone)/point": "click_point_danger",
+            }
+            for path, sprite in stronghold_images.items():
+                matches = tuple(
+                    image
+                    for image in ui_state.images
+                    if image.path.endswith(path)
+                    and image.sprite == sprite
+                    and image.active_in_hierarchy
+                    and image.active_and_enabled
+                    and not image.truncated
+                    and image.bounds is not None
+                )
+                if len(matches) != 1:
+                    raise SemanticGateClosed(
+                        "operation siren stronghold marker is absent or ambiguous"
+                    )
         return OperationSirenGlobeState(
             zone_name=zone_name,
             zone_type=zone_type,
@@ -10482,6 +11752,103 @@ class SemanticOracle:
             back.active_in_hierarchy
             and back.active_and_enabled
             and back.bounds is not None
+        )
+
+    def operation_siren_globe_unpin(self) -> OperationSirenGlobeSwipeReceipt:
+        """Dismiss one exact selected-zone pin with its required short drag."""
+
+        self.operation_siren_globe_state()
+        ui_state = self.read_ui_state()
+        pin_path = "SVFloatPanel(Clone)/point"
+        pins = tuple(
+            image
+            for image in ui_state.images
+            if image.name == "point"
+            and image.path.endswith(pin_path)
+            and image.sprite
+            in {"click_point_safe", "click_point_danger", "click_point_normal"}
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(pins) != 1:
+            raise SemanticGateClosed(
+                "operation siren selected-zone pin is absent or ambiguous"
+            )
+        if self._swipe is None:
+            raise SemanticGateClosed("operation siren globe swipe backend is absent")
+        initial_generation = ui_state.generation
+        for delta_x, delta_y in 2 * (
+            (-120, -80),
+            (120, -80),
+            (-120, 80),
+            (120, 80),
+        ):
+            candidate = self.read_ui_state()
+            current_pins = tuple(
+                image
+                for image in candidate.images
+                if image.name == "point"
+                and image.path.endswith(pin_path)
+                and image.sprite
+                in {"click_point_safe", "click_point_danger", "click_point_normal"}
+                and image.active_in_hierarchy
+                and image.active_and_enabled
+                and not image.truncated
+                and image.bounds is not None
+            )
+            if len(current_pins) != 1:
+                raise SemanticGateClosed(
+                    "operation siren selected-zone pin changed before unpin"
+                )
+            bounds = current_pins[0].bounds
+            assert bounds is not None
+            start = (
+                int(round((bounds.left + bounds.right) / 2.0)),
+                int(round((bounds.top + bounds.bottom) / 2.0)),
+            )
+            end = (start[0] + delta_x, start[1] + delta_y)
+            if not Bounds(20.0, 220.0, 980.0, 620.0).contains(Point(*end)):
+                continue
+            if self._foreground_component() != self.fingerprint.component:
+                raise SemanticGateClosed(
+                    "foreground changed before operation siren selected-zone unpin"
+                )
+            self._swipe(start[0], start[1], end[0], end[1], 150)
+            post_generation = None
+            for _ in range(12):
+                self._sleep(0.25)
+                try:
+                    button_state = self.read_state()
+                    back = self._unique(button_state, "os/globe/map")
+                    after = self.read_ui_state()
+                except (SemanticGateClosed, SemanticTargetMissing):
+                    continue
+                remaining = tuple(
+                    image
+                    for image in after.images
+                    if image.path.endswith(pin_path)
+                    and image.active_in_hierarchy
+                )
+                if (
+                    after.generation > candidate.generation
+                    and back.active_in_hierarchy
+                    and not remaining
+                ):
+                    post_generation = after.generation
+                    break
+            if post_generation is not None:
+                return OperationSirenGlobeSwipeReceipt(
+                    semantic_id="os/globe/zone/unpin",
+                    pre_generation=initial_generation,
+                    post_generation=post_generation,
+                    start=start,
+                    end=end,
+                    duration_ms=150,
+                )
+        raise SemanticGateClosed(
+            "operation siren selected-zone unpin was not proven"
         )
 
     def operation_siren_storage_visible(self) -> bool:
@@ -11345,7 +12712,21 @@ class SemanticOracle:
 
         self.operation_siren_globe_state()
         state = self.read_state()
-        target = self._unique(state, "os/globe/zone-enter")
+        targets = tuple(
+            semantic_id
+            for semantic_id in (
+                "os/globe/zone-enter",
+                "os/globe/zone-return",
+                "os/globe/zone-back",
+            )
+            if len(self._matches(state, semantic_id)) == 1
+        )
+        if len(targets) != 1:
+            raise SemanticGateClosed(
+                "operation siren globe zone entrance is absent or ambiguous"
+            )
+        semantic_id = targets[0]
+        target = self._unique(state, semantic_id)
         if not (
             target.active_in_hierarchy
             and target.active_and_enabled
@@ -11362,9 +12743,460 @@ class SemanticOracle:
         )
         self._tap(int(round(point.x)), int(round(point.y)))
         return ActionReceipt(
-            semantic_id="os/globe/zone-enter",
+            semantic_id=semantic_id,
             generation=state.generation,
             point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_operation_siren_globe_zone_switch(self) -> ActionReceipt:
+        """Open the exact zone-type selector on the currently pinned zone."""
+
+        self.operation_siren_globe_state()
+        state = self.read_state()
+        target = self._unique(state, "os/globe/zone-switch")
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+        ):
+            raise SemanticGateClosed(
+                "operation siren globe zone switch is not actionable"
+            )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before zone switch input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="os/globe/zone-switch",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def operation_siren_globe_zone_types(self) -> Tuple[str, ...]:
+        """Return the exact ALAS zone types offered by the open selector."""
+
+        state = self.read_state()
+        mask = self._unique(state, "os/globe/zone-type-mask")
+        if not (
+            mask.active_in_hierarchy
+            and mask.active_and_enabled
+            and mask.interactable
+            and mask.bounds is not None
+        ):
+            raise SemanticGateClosed("operation siren zone-type selector is absent")
+        ui_state = self.read_ui_state()
+        root = "SVFloatPanel(Clone)/select_mask/marking/toggles/"
+        display_to_type = {
+            "普通海域": "DANGEROUS",
+            "危险海域": "DANGEROUS",
+            "安全海域": "SAFE",
+            "隐秘海域": "OBSCURE",
+            "深渊海域": "ABYSSAL",
+            "塞壬要塞": "STRONGHOLD",
+            "档案海域": "ARCHIVE",
+            "未知海域": "UNKNOWN",
+        }
+        labels = tuple(
+            text
+            for text in ui_state.texts
+            if root in text.path
+            and text.path.endswith("/Text")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        if not labels or any(text.text.strip() not in display_to_type for text in labels):
+            raise SemanticGateClosed("operation siren zone-type label is unknown")
+        normalized = tuple(display_to_type[text.text.strip()] for text in labels)
+        if len(set(normalized)) != len(normalized):
+            raise SemanticGateClosed("operation siren zone-type selector is ambiguous")
+        return normalized
+
+    def click_operation_siren_globe_zone_type(
+        self, expected_type: str
+    ) -> ActionReceipt:
+        """Select one exact typed alternative from the open zone selector."""
+
+        if expected_type not in {
+            "DANGEROUS", "SAFE", "OBSCURE", "ABYSSAL", "STRONGHOLD", "ARCHIVE"
+        }:
+            raise SemanticGateClosed("operation siren zone type is malformed")
+        if expected_type not in self.operation_siren_globe_zone_types():
+            raise SemanticGateClosed("operation siren zone type is unavailable")
+        ui_state = self.read_ui_state()
+        type_to_labels = {
+            "DANGEROUS": {"普通海域", "危险海域"},
+            "SAFE": {"安全海域"},
+            "OBSCURE": {"隐秘海域"},
+            "ABYSSAL": {"深渊海域"},
+            "STRONGHOLD": {"塞壬要塞"},
+            "ARCHIVE": {"档案海域"},
+        }
+        root = "SVFloatPanel(Clone)/select_mask/marking/toggles/"
+        targets = tuple(
+            text
+            for text in ui_state.texts
+            if root in text.path
+            and text.path.endswith("/Text")
+            and text.text.strip() in type_to_labels[expected_type]
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        if len(targets) != 1:
+            raise SemanticGateClosed("operation siren zone-type target is ambiguous")
+        target = targets[0]
+        assert target.bounds is not None
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before zone-type input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        for _ in range(12):
+            self._sleep(0.25)
+            try:
+                after = self.operation_siren_globe_state()
+            except SemanticGateClosed:
+                continue
+            if after.zone_type in type_to_labels[expected_type]:
+                break
+        else:
+            raise SemanticGateClosed("operation siren zone-type selection was not proven")
+        return ActionReceipt(
+            semantic_id="os/globe/zone-type/" + expected_type.lower(),
+            generation=ui_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _operation_siren_action_point_read(
+        self,
+    ) -> Tuple[
+        OracleState,
+        OperationSirenActionPointState,
+        Tuple[ImageState, ...],
+    ]:
+        button_state = self.read_state()
+        use = self._unique(button_state, "os/action-point/use")
+        cancel = self._unique(button_state, "os/action-point/cancel")
+        if not all(
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            for target in (use, cancel)
+        ):
+            raise SemanticGateClosed(
+                "operation siren action point controls are incomplete"
+            )
+
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation
+            <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed(
+                "operation siren action point snapshots are not coherent"
+            )
+        root = (
+            "WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/"
+        )
+        current_text = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith(root + "tip_bg/stamina/value")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and re.fullmatch(r"[0-9]{1,3}", text.text.strip())
+        )
+        if len(current_text) != 1:
+            raise SemanticGateClosed(
+                "operation siren current action points are absent or ambiguous"
+            )
+
+        item_suffix = "item(Clone)/IconTpl/icon_bg/icon"
+        expected_sprites = (
+            "oil",
+            "Wxingdonglihuifu1",
+            "Wxingdonglihuifu2",
+            "Wxingdonglihuifu3",
+        )
+        icons = tuple(
+            sorted(
+                (
+                    image
+                    for image in ui_state.images
+                    if image.path.endswith(root + "item_list/" + item_suffix)
+                    and image.sprite in expected_sprites
+                    and image.active_in_hierarchy
+                    and image.active_and_enabled
+                    and not image.truncated
+                    and image.bounds is not None
+                ),
+                key=lambda image: image.bounds.left if image.bounds else math.inf,
+            )
+        )
+        if (
+            len(icons) != 4
+            or tuple(image.sprite for image in icons) != expected_sprites
+        ):
+            raise SemanticGateClosed(
+                "operation siren action point item icons are incomplete"
+            )
+        count_texts = tuple(
+            sorted(
+                (
+                    text
+                    for text in ui_state.texts
+                    if text.path.endswith(
+                        root + "item_list/item(Clone)/IconTpl/icon_bg/count"
+                    )
+                    and text.active_in_hierarchy
+                    and text.active_and_enabled
+                    and not text.truncated
+                    and text.bounds is not None
+                    and re.fullmatch(r"[0-9]+", text.text.strip())
+                ),
+                key=lambda text: text.bounds.left if text.bounds else math.inf,
+            )
+        )
+        if len(count_texts) != 4:
+            raise SemanticGateClosed(
+                "operation siren action point item counts are incomplete"
+            )
+        for icon, count in zip(icons, count_texts):
+            assert icon.bounds is not None and count.bounds is not None
+            if abs(
+                (icon.bounds.left + icon.bounds.right) / 2.0
+                - (count.bounds.left + count.bounds.right) / 2.0
+            ) > 60.0:
+                raise SemanticGateClosed(
+                    "operation siren action point item pairing changed"
+                )
+
+        selected = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith(root + "item_list/item(Clone)/select")
+            and image.sprite == "selected"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(selected) != 1:
+            raise SemanticGateClosed(
+                "operation siren selected action point item is ambiguous"
+            )
+        assert selected[0].bounds is not None
+        selected_center = (
+            selected[0].bounds.left + selected[0].bounds.right
+        ) / 2.0
+        icon_centers = tuple(
+            (image.bounds.left + image.bounds.right) / 2.0
+            for image in icons
+            if image.bounds is not None
+        )
+        selected_index = min(
+            range(4), key=lambda index: abs(icon_centers[index] - selected_center)
+        )
+        if abs(icon_centers[selected_index] - selected_center) > 25.0:
+            raise SemanticGateClosed(
+                "operation siren selected action point item is unbound"
+            )
+        return (
+            button_state,
+            OperationSirenActionPointState(
+                generation=ui_state.generation,
+                current=int(current_text[0].text.strip()),
+                item_counts=tuple(
+                    int(text.text.strip()) for text in count_texts
+                ),
+                selected_index=selected_index,
+            ),
+            icons,
+        )
+
+    def operation_siren_action_point_state(
+        self,
+    ) -> OperationSirenActionPointState:
+        return self._retry_transition_read(
+            lambda: self._operation_siren_action_point_read()[1]
+        )
+
+    def click_operation_siren_action_point_item(
+        self, item_index: int
+    ) -> ActionReceipt:
+        if item_index not in range(4):
+            raise ValueError("operation siren action point item must be 0 through 3")
+        button_state, before, icons = self._operation_siren_action_point_read()
+        if before.selected_index == item_index:
+            raise SemanticGateClosed(
+                "operation siren action point item is already selected"
+            )
+        target = icons[item_index]
+        assert target.bounds is not None
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before action point input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        for _ in range(12):
+            self._sleep(0.25)
+            after = self.operation_siren_action_point_state()
+            if (
+                after.selected_index == item_index
+                and after.current == before.current
+                and after.item_counts == before.item_counts
+            ):
+                break
+        else:
+            raise SemanticGateClosed(
+                "operation siren action point selection was not proven"
+            )
+        return ActionReceipt(
+            semantic_id=f"os/action-point/item/{item_index}",
+            generation=button_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_operation_siren_action_point_control(
+        self, use: bool
+    ) -> ActionReceipt:
+        button_state, _, _ = self._operation_siren_action_point_read()
+        semantic_id = "os/action-point/use" if use else "os/action-point/cancel"
+        target = self._unique(button_state, semantic_id)
+        if target.point is None or target.bounds is None:
+            raise SemanticGateClosed(
+                "operation siren action point control is not actionable"
+            )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before action point input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _operation_siren_port_repair_cost_in_state(
+        self, state: OracleState
+    ) -> Optional[int]:
+        """Bind the dock-wide repair prompt to its exact typed cost."""
+
+        confirm = self._matches(state, "os/port/dock/repair-confirm")
+        cancel = self._matches(state, "os/port/dock/repair-cancel")
+        if len(confirm) > 1 or len(cancel) > 1:
+            raise SemanticGateClosed("operation siren repair prompt is ambiguous")
+        if not confirm and not cancel:
+            return None
+        if (
+            len(confirm) != 1
+            or len(cancel) != 1
+            or not confirm[0].actionable
+            or not cancel[0].actionable
+        ):
+            raise SemanticGateClosed("operation siren repair prompt is incomplete")
+
+        before_signature = self._msgbox_button_signature(state)
+        text_state = self.read_text_state()
+        after = self.read_state()
+        if not (
+            state.generation <= text_state.generation <= after.generation
+            and state.scene_handle == after.scene_handle
+            and before_signature == self._msgbox_button_signature(after)
+        ):
+            raise SemanticGateClosed(
+                "operation siren repair prompt snapshots are not coherent"
+            )
+
+        def exact_text(suffix: str) -> Optional[str]:
+            matches = tuple(
+                text
+                for text in text_state.texts
+                if text.path.endswith(suffix)
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.bounds is not None
+            )
+            if len(matches) > 1:
+                raise SemanticGateClosed(
+                    "operation siren repair prompt text is ambiguous"
+                )
+            return matches[0].text if matches else None
+
+        content = exact_text("Msgbox(Clone)/window/msg_panel/content")
+        cancel_text = exact_text(
+            "Msgbox(Clone)/window/button_container/custom_button_2(Clone)/pic"
+        )
+        confirm_text = exact_text(
+            "Msgbox(Clone)/window/button_container/custom_button_1(Clone)/pic"
+        )
+        if content is None or cancel_text is None or confirm_text is None:
+            raise SemanticGateClosed("operation siren repair prompt text is incomplete")
+        plain = re.sub(r"<[^>]*>", "", content).strip()
+        match = re.fullmatch(r"修复所有舰船需要：\s*\*([1-9][0-9]*)", plain)
+        if (
+            match is None
+            or "".join(cancel_text.split()) != "取消"
+            or "".join(confirm_text.split()) != "确定"
+        ):
+            raise SemanticGateClosed("operation siren repair prompt is unknown")
+        return int(match.group(1))
+
+    def operation_siren_port_repair_cost(self) -> Optional[int]:
+        return self._retry_transition_read(
+            lambda: self._operation_siren_port_repair_cost_in_state(
+                self.read_state()
+            )
+        )
+
+    def click_operation_siren_port_repair(
+        self, confirm: bool
+    ) -> ActionReceipt:
+        state = self.read_state()
+        if self._operation_siren_port_repair_cost_in_state(state) is None:
+            raise SemanticGateClosed("operation siren repair prompt is absent")
+        semantic_id = (
+            "os/port/dock/repair-confirm"
+            if confirm
+            else "os/port/dock/repair-cancel"
+        )
+        target = self._unique(state, semantic_id)
+        if not target.actionable or target.point is None or target.bounds is None:
+            raise SemanticGateClosed(
+                "operation siren repair choice is not actionable"
+            )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before repair input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=state.generation,
+            point=target.point,
             bounds=target.bounds,
             path=target.path,
         )
@@ -11372,6 +13204,21 @@ class SemanticOracle:
     def operation_siren_exit_prompt_visible(self) -> bool:
         state = self.read_state()
         ui_state = self.read_ui_state()
+        zone_titles = tuple(
+            text.text.strip()
+            for text in ui_state.texts
+            if text.path.endswith("/top_stage/title/name")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and text.text.strip()
+        )
+        retained_progress_prompts = {
+            f"是否确定从{title}中离开？\n"
+            "（离开后当前作战进度将会保留，本月内再次进入可继续挑战）"
+            for title in zone_titles
+        }
         prompt = tuple(
             text
             for text in ui_state.texts
@@ -11380,7 +13227,15 @@ class SemanticOracle:
             and text.active_and_enabled
             and not text.truncated
             and text.bounds is not None
-            and text.text.strip() == "需要暂时离开大型作战么？"
+            and (
+                text.text.strip()
+                in {
+                    "需要暂时离开大型作战么？",
+                    "当前海域无法通过边界区域离开。是否继续？",
+                    "离开当前海域后，潜艇舰队会自动返回我方港口待命，是否离开？",
+                }
+                or text.text.strip() in retained_progress_prompts
+            )
         )
         return bool(
             len(prompt) == 1
@@ -12047,7 +13902,7 @@ class SemanticOracle:
 
     def daily_battle_result_visible(self) -> bool:
         state = self.read_state()
-        return any(
+        if any(
             (
                 button.path.endswith(
                     "/NewBattleResultEmptyUI(Clone)/NewBattleResultGradePage(Clone)"
@@ -12060,6 +13915,61 @@ class SemanticOracle:
             and button.active_and_enabled
             and button.interactable
             for button in state.buttons
+        ):
+            return True
+
+        # Operation Siren's result grade page is an EventTrigger surface, not
+        # a Unity Button.  Prove that exact typed stack instead of allowing the
+        # still-mounted CombatUI underneath to win the surface classification.
+        ui_state = self.read_ui_state()
+        active_images = tuple(
+            item
+            for item in ui_state.images
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        active_texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        result_root = tuple(
+            item
+            for item in active_images
+            if item.path.endswith("/NewBattleResultEmptyUI(Clone)")
+            and item.sprite == "bg_mask"
+        )
+        result_effect = tuple(
+            item
+            for item in active_images
+            if item.path.endswith("/NewBattleResultEmptyUI(Clone)/Effect")
+            and item.sprite == "jiesuan_bg02"
+        )
+        continue_text = tuple(
+            item
+            for item in active_texts
+            if item.path.endswith(
+                "/NewBattleResultGradePage(Clone)/bg/ResultEffect/Tips/"
+                "dianjijixu/bg20"
+            )
+            and item.text.strip() == "点击继续"
+        )
+        grade_text = tuple(
+            item
+            for item in active_texts
+            if item.path.endswith("/NewBattleResultEmptyUI(Clone)/Effect/bg03/Text")
+            and item.text.strip() in {"VICTORY", "DEFEAT"}
+        )
+        return bool(
+            len(result_root) == 1
+            and len(result_effect) == 1
+            and len(continue_text) == 1
+            and len(grade_text) == 1
         )
 
     def campaign_battle_reward_visible(self) -> bool:
@@ -15597,15 +17507,25 @@ class SemanticOracle:
 
         Operation Siren reuses the campaign HP balancer, but mounts its fleet
         panel below ``left_stage/bg/fleet`` instead of the normal campaign
-        hierarchy.  Require the exact local-map identity and all six typed
-        ``Image`` fill bars so a collapsed panel, dead ship, overlay, or
-        partially collected observer frame fails closed instead of being
-        reported as healthy.
+        hierarchy.  A sunk ship removes its HP fill and mounts the exact
+        portrait ``agony`` Button; require exactly one of those two states in
+        each of the six ordered portrait slots.
         """
 
         self.operation_siren_state()
+        button_state = self.read_state()
         state = self.read_ui_state()
         suffix = "/left_stage/bg/fleet/"
+        portraits = tuple(
+            item
+            for item in state.images
+            if suffix in item.path
+            and item.path.endswith("/icon_bg/icon")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
         bars = tuple(
             item
             for item in state.images
@@ -15616,11 +17536,27 @@ class SemanticOracle:
             and not item.truncated
             and item.bounds is not None
         )
-        if len(bars) != 6:
+        agony_pattern = re.compile(
+            r".+/top/adapt/left_stage/bg/fleet/(?:main|vanguard)/"
+            r"shiptpl\(Clone\)/agony$"
+        )
+        agony = tuple(
+            item
+            for item in button_state.buttons
+            if item.name == "agony"
+            and agony_pattern.fullmatch(item.path)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.point is not None
+            and item.bounds is not None
+            and item.bounds.contains(item.point)
+        )
+        if len(portraits) != 6:
             raise SemanticGateClosed(
-                "Operation Siren fleet HP bars are absent or incomplete"
+                "Operation Siren fleet portraits are absent or incomplete"
             )
-        ordered = tuple(sorted(bars, key=lambda item: item.bounds.top))
+        ordered = tuple(sorted(portraits, key=lambda item: item.bounds.top))
         top_values = tuple(item.bounds.top for item in ordered)
         if any(
             not 95.0 <= later - earlier <= 105.0
@@ -15628,81 +17564,47 @@ class SemanticOracle:
         ):
             raise SemanticGateClosed("Operation Siren fleet HP slot order is invalid")
         full_width = 66.333
-        values = tuple(
-            max(
-                0.0,
-                min(1.0, (item.bounds.right - item.bounds.left) / full_width),
+        values = []
+        for portrait in ordered:
+            assert portrait.bounds is not None
+            slot_bars = tuple(
+                item
+                for item in bars
+                if item.bounds is not None
+                and abs(item.bounds.top - (portrait.bounds.top + 79.8)) <= 5.0
             )
-            for item in ordered
-        )
-        if any(value <= 0.0 for value in values):
-            raise SemanticGateClosed(
-                "Operation Siren dead-ship repair state needs an exact marker"
+            slot_agony = tuple(
+                item
+                for item in agony
+                if item.bounds is not None
+                and abs(item.bounds.top - (portrait.bounds.top - 3.334)) <= 5.0
             )
-        return values
+            if bool(slot_bars) == bool(slot_agony) or len(slot_bars) > 1 or len(slot_agony) > 1:
+                raise SemanticGateClosed(
+                    "Operation Siren fleet HP slot state is absent or ambiguous"
+                )
+            if slot_agony:
+                values.append(0.0)
+            else:
+                bar = slot_bars[0]
+                assert bar.bounds is not None
+                values.append(
+                    max(
+                        0.0,
+                        min(1.0, (bar.bounds.right - bar.bounds.left) / full_width),
+                    )
+                )
+        return tuple(values)
 
     def operation_siren_need_repair(self) -> Tuple[bool, ...]:
-        """Return the proven non-repair state for the six visible ships.
+        """Return exact repair requirements for the six visible ships."""
 
-        A dead ship replaces the normal HP presentation with a wrench marker.
-        Until that rare state is captured and typed, only a complete set of
-        positive HP bars proves that no repair is needed; the rare branch stays
-        fail-closed rather than silently treating a dead ship as healthy.
-        """
-
-        self.operation_siren_fleet_hp()
-        return (False, False, False, False, False, False)
+        return tuple(value == 0.0 for value in self.operation_siren_fleet_hp())
 
     def operation_siren_low_resolve_visible(self) -> bool:
-        """Read the dedicated low-resolve status slot on the local OS map.
+        """Read the exact low-resolve marker beside the selected map fleet."""
 
-        CN ALAS checks the reserved 45x45 slot between the three global
-        adaptability icons and the command-skill icon.  Typed image bounds let
-        us preserve that contract without sampling framebuffer colours.  Any
-        image occupying the slot is treated conservatively as the debuff; more
-        than one occupant is ambiguous and fails closed.
-        """
-
-        self.operation_siren_state()
-        state = self.read_ui_state()
-        prefix = "/top_stage/features/"
-        images = tuple(
-            item
-            for item in state.images
-            if prefix in item.path
-            and item.active_in_hierarchy
-            and item.active_and_enabled
-            and not item.truncated
-            and item.bounds is not None
-        )
-        global_icons = tuple(
-            item
-            for item in images
-            if "/status_field/global_buffs/" in item.path
-            and item.path.endswith("/icon")
-        )
-        command_icons = tuple(
-            item
-            for item in images
-            if "/fleet_field/cmd_skills/" in item.path and item.path.endswith("/icon")
-        )
-        if len(global_icons) != 2 or len(command_icons) != 1:
-            raise SemanticGateClosed(
-                "Operation Siren status-slot anchors are absent or ambiguous"
-            )
-        occupants = tuple(
-            item
-            for item in images
-            if item.bounds.left < 339.5
-            and item.bounds.right > 293.5
-            and item.bounds.top < 121.5
-            and item.bounds.bottom > 75.5
-        )
-        if len(occupants) > 1:
-            raise SemanticGateClosed(
-                "Operation Siren low-resolve status slot is ambiguous"
-            )
-        return bool(occupants)
+        return self.operation_siren_current_fleet_defeated()
 
     def campaign_page_is_normal(self) -> bool:
         if self.campaign_menu_is_entry():
@@ -23547,6 +25449,7 @@ class SemanticOracle:
                 and (
                     semantic_id.startswith("enhancement/dock/")
                     or semantic_id.startswith("awaken/")
+                    or semantic_id.startswith("os/port/dock/")
                 )
             )
             and not (
@@ -24443,6 +26346,8 @@ class SemanticOracle:
 
     def _enabled_once(self, semantic_id: str) -> bool:
         state = self.read_state()
+        if semantic_id == "os/boss/start":
+            return self.operation_siren_boss_preparation_visible()
         if semantic_id == "reward/new-ship/continue":
             return self._new_ship_reward_visible_in_state(state)
         if semantic_id == "meowfficer/get/continue":
@@ -24706,8 +26611,15 @@ class SemanticOracle:
             "os/map/auto-search/off",
             "os/map/auto-search/on",
             "os/map/mission-list",
+            "os/map/order",
+            "os/order/back",
+            "os/order/scan",
+            "os/order/submarine",
             "os/port/enter",
             "os/port/supply",
+            "os/port/dock",
+            "os/port/dock/back",
+            "os/port/dock/repair-all",
             "os/port/back",
             "os/shop/back",
             "os/globe/voucher",
@@ -25321,8 +27233,15 @@ class SemanticOracle:
                 "os/map/auto-search/on",
                 "os/map/mission-list",
                 "os/map/storage",
+                "os/map/order",
+                "os/order/back",
+                "os/order/scan",
+                "os/order/submarine",
                 "os/port/enter",
                 "os/port/supply",
+                "os/port/dock",
+                "os/port/dock/back",
+                "os/port/dock/repair-all",
                 "os/port/back",
                 "os/shop/back",
                 "os/globe/voucher",
@@ -25351,6 +27270,10 @@ class SemanticOracle:
                 )
                 else True
             )
+        )
+        delegated_operation_siren_boss_start = bool(
+            semantic_id == "os/boss/start"
+            and self.operation_siren_boss_preparation_visible()
         )
         delegated_operation_siren_help = bool(
             semantic_id == "os/help/close"
@@ -25505,6 +27428,7 @@ class SemanticOracle:
                 and not delegated_game_room_back
                 and not delegated_shipyard_series
                 and not delegated_operation_siren_control
+                and not delegated_operation_siren_boss_start
                 and not delegated_operation_siren_help
                 and not dorm_back_delegated
                 and not dorm_empty_food_cancel
@@ -25539,6 +27463,15 @@ class SemanticOracle:
             # Guild controls commonly expose an edge pivot while their exact
             # typed Button and matching Image cover a much larger visible
             # rectangle.  Use the centre of that proven rectangle.
+            point = Point(
+                (target.bounds.left + target.bounds.right) / 2.0,
+                (target.bounds.top + target.bounds.bottom) / 2.0,
+            )
+        if semantic_id == "os/order/back":
+            # SVOrderPanel anchors this wide back hit area at its left edge.
+            # Use the centre of the exact visible bounds so the tap is not
+            # delivered on the boundary shared with the panel background.
+            assert target.bounds is not None
             point = Point(
                 (target.bounds.left + target.bounds.right) / 2.0,
                 (target.bounds.top + target.bounds.bottom) / 2.0,

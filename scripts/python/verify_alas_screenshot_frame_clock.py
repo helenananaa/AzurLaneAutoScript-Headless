@@ -14,8 +14,16 @@ from typing import Any, Mapping, Sequence
 
 try:
     from .build_alas_patch_series import check_generated_patch
+    from .verify_alas_patch_tree import (
+        AlasPatchVerificationError,
+        inspect_patched_upstream,
+    )
 except ImportError:  # Direct script execution.
     from build_alas_patch_series import check_generated_patch
+    from verify_alas_patch_tree import (  # type: ignore[no-redef]
+        AlasPatchVerificationError,
+        inspect_patched_upstream,
+    )
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -423,22 +431,16 @@ def verify(patched_upstream: Path) -> Mapping[str, Any]:
     expected_commit = json.loads(LOCK_PATH.read_text(encoding="utf-8"))["commit"]
     if _git(patched_upstream, "rev-parse", "HEAD").lower() != expected_commit:
         raise ScreenshotFrameClockVerificationError("patched upstream HEAD drifted")
-    reverse = subprocess.run(
-        (
-            "git",
-            "-C",
-            str(patched_upstream),
-            "apply",
-            "--reverse",
-            "--check",
-            str(PATCH_PATH),
-        ),
-        capture_output=True,
-        text=True,
-        timeout=30,
-    )
-    if reverse.returncode != 0:
-        raise ScreenshotFrameClockVerificationError("canonical patch is not applied")
+    try:
+        inspect_patched_upstream(
+            patched_upstream,
+            PATCH_PATH,
+            expected_commit=expected_commit,
+        )
+    except AlasPatchVerificationError as exc:
+        raise ScreenshotFrameClockVerificationError(
+            "canonical patch surface is not applied"
+        ) from exc
 
     screenshot_path = patched_upstream / "module" / "device" / "screenshot.py"
     device_path = patched_upstream / "module" / "device" / "device.py"

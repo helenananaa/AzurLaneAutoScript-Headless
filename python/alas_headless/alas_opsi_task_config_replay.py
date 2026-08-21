@@ -55,16 +55,14 @@ from .semantic_oracle import SemanticGateClosed
 SCHEMA = "alas-headless.opsi-task-config-replay/v1"
 INVALID_BOOLEANS = (0, 1, "true", None, [], {})
 INVALID_MODES = ("", "hard", None, 0, True, [], {})
-DEAD_FIELDS = (
-    "OpsiMonthBoss_ForceRun",
-    "OpsiDaily_DoMission",
-)
+DEAD_FIELDS: tuple[str, ...] = ()
 
 DYNAMIC_DELAY_FIELDS = (
     "OpsiExplore_ForceRun",
     "OpsiObscure_ForceRun",
     "OpsiAbyssal_ForceRun",
     "OpsiStronghold_ForceRun",
+    "OpsiMonthBoss_ForceRun",
     "OpsiExplore_SpecialRadar",
 )
 
@@ -475,6 +473,8 @@ class _Config(SimpleNamespace):
         mode: object,
         check: object,
         force: object = False,
+        month_boss_force_run: object = False,
+        do_mission: object = True,
         use_tuning_sample: object = True,
         hazard_target_zone: object = 0,
         meowfficer_action_point_preserve: object = 1000,
@@ -491,8 +491,9 @@ class _Config(SimpleNamespace):
         super().__init__(
             OpsiMonthBoss_Mode=mode,
             OpsiMonthBoss_CheckAdaptability=check,
-            OpsiMonthBoss_ForceRun=False,
+            OpsiMonthBoss_ForceRun=month_boss_force_run,
             OpsiObscure_ForceRun=force,
+            OpsiDaily_DoMission=do_mission,
             OpsiDaily_UseTuningSample=use_tuning_sample,
             OpsiHazard1Leveling_TargetZone=hazard_target_zone,
             OpsiMeowfficerFarming_HazardLevel=meowfficer_hazard_level,
@@ -544,22 +545,31 @@ def _month_clear_case(
     *,
     mode: object,
     check: object,
+    force_run: object = False,
     difficulty: str = "normal",
     adaptability: tuple[int, int, int] = (203, 203, 156),
+    retained_room: bool = False,
 ) -> dict[str, Any]:
-    config = _Config(mode=mode, check=check)
+    config = _Config(
+        mode=mode,
+        check=check,
+        month_boss_force_run=force_run,
+    )
     events = config.events
     host = SimpleNamespace(config=config)
     host.is_in_opsi_explore = lambda: events.append("explore_probe") or False
     host.os_mission_enter = lambda: events.append("mission_enter")
     host.os_mission_quit = lambda: events.append("mission_quit")
     host.appear = lambda button, **_kwargs: events.append(["appear", button]) or (
-        button == difficulty
+        retained_room if button == "map-exit" else button == difficulty
     )
     host.month_boss_delay = lambda **kwargs: events.append(["month_boss_delay", kwargs])
     host.os_map_goto_globe = lambda **kwargs: events.append(["goto_globe", kwargs])
     host.get_adaptability = lambda: events.append("adaptability") or adaptability
     host.globe_goto = lambda zone: events.append(["globe_goto", zone])
+    host.handle_os_map_fleet_lock = lambda **kwargs: events.append(
+        ["fleet_lock", kwargs]
+    )
     host.go_month_boss_room = lambda **kwargs: events.append(["boss_room", kwargs])
     host.boss_clear = lambda **kwargs: events.append(["boss_clear", kwargs]) or True
     host.fleet_repair = lambda **kwargs: events.append(["fleet_repair", kwargs])
@@ -609,6 +619,19 @@ def _verify_month(method, delay_method) -> dict[str, Any]:
             check=True,
             adaptability=(202, 203, 156),
         ),
+        "force_run_low": _month_clear_case(
+            method,
+            mode="normal",
+            check=True,
+            force_run=True,
+            adaptability=(1, 1, 1),
+        ),
+        "retained_room": _month_clear_case(
+            method,
+            mode="normal",
+            check=False,
+            retained_room=True,
+        ),
         "absent": _month_clear_case(
             method, mode="normal", check=False, difficulty="absent"
         ),
@@ -629,6 +652,16 @@ def _verify_month(method, delay_method) -> dict[str, Any]:
         "adaptability_low"
     ]["events"]:
         raise AssertionError("low adaptability reached combat")
+    if "adaptability" in cases["force_run_low"]["events"]:
+        raise AssertionError("Month Boss ForceRun did not bypass adaptability")
+    if ["boss_clear", {"has_fleet_step": True, "is_month": True}] not in cases[
+        "force_run_low"
+    ]["events"]:
+        raise AssertionError("Month Boss ForceRun did not reach combat dispatch")
+    if ["fleet_lock", {"enable": False}] not in cases["normal"]["events"]:
+        raise AssertionError("Month Boss entry did not disable fleet lock")
+    if ["fleet_lock", {"enable": False}] in cases["retained_room"]["events"]:
+        raise AssertionError("retained Month Boss room changed fleet lock")
     delays = {
         f"{mode}:{int(normal)}:{int(result)}": _month_delay_case(
             delay_method,
@@ -675,10 +708,13 @@ def _verify_obscure(clear_method, run_method) -> dict[str, Any]:
     return {"cases": cases, "invalid_entry_events": invalid_events}
 
 
-def _daily_case(method, *, use_tuning_sample: object) -> dict[str, Any]:
+def _daily_case(
+    method, *, do_mission: object, use_tuning_sample: object
+) -> dict[str, Any]:
     config = _Config(
         mode="normal",
         check=False,
+        do_mission=do_mission,
         use_tuning_sample=use_tuning_sample,
     )
     events = config.events
@@ -698,8 +734,12 @@ def _daily_case(method, *, use_tuning_sample: object) -> dict[str, Any]:
 
 def _verify_daily(method) -> dict[str, Any]:
     cases = {
-        str(value).lower(): _daily_case(method, use_tuning_sample=value)
-        for value in (False, True)
+        f"mission={do_mission},tuning={use_tuning_sample}": _daily_case(
+            method,
+            do_mission=do_mission,
+            use_tuning_sample=use_tuning_sample,
+        )
+        for do_mission, use_tuning_sample in product((False, True), repeat=2)
     }
     suffix = [
         "mission_accept",
@@ -708,17 +748,40 @@ def _verify_daily(method) -> dict[str, Any]:
         "explore_probe",
         ["task_delay", {"server_update": True}],
     ]
-    if cases["false"] != {"rejected": False, "events": suffix}:
-        raise AssertionError("disabled daily tuning-sample branch drifted")
-    if cases["true"] != {
+    if cases["mission=True,tuning=False"] != {
+        "rejected": False,
+        "events": suffix,
+    }:
+        raise AssertionError("daily mission branch drifted")
+    if cases["mission=True,tuning=True"] != {
         "rejected": False,
         "events": ["tuning_sample_use", *suffix],
     }:
         raise AssertionError("enabled daily tuning-sample branch drifted")
-    invalid = _daily_case(method, use_tuning_sample=None)
+    disabled_suffix = [["task_delay", {"server_update": True}]]
+    if cases["mission=False,tuning=False"] != {
+        "rejected": False,
+        "events": disabled_suffix,
+    }:
+        raise AssertionError("disabled daily mission branch drifted")
+    if cases["mission=False,tuning=True"] != {
+        "rejected": False,
+        "events": ["tuning_sample_use", *disabled_suffix],
+    }:
+        raise AssertionError("disabled daily mission tuning branch drifted")
+    invalid = _daily_case(method, do_mission=True, use_tuning_sample=None)
+    invalid_do_mission = _daily_case(
+        method, do_mission=None, use_tuning_sample=True
+    )
     if invalid != {"rejected": True, "events": []}:
         raise AssertionError("invalid daily tuning-sample config touched task state")
-    return {"cases": cases, "invalid_entry": invalid}
+    if invalid_do_mission != {"rejected": True, "events": []}:
+        raise AssertionError("invalid daily mission config touched task state")
+    return {
+        "cases": cases,
+        "invalid_entry": invalid,
+        "invalid_do_mission_entry": invalid_do_mission,
+    }
 
 
 def _hazard_case(
@@ -1072,6 +1135,7 @@ def _delay_data(overrides: dict[str, object] | None = None) -> dict[str, Any]:
             "OpsiObscure": {"ForceRun": False},
             "OpsiAbyssal": {"ForceRun": False},
             "OpsiStronghold": {"ForceRun": False},
+            "OpsiMonthBoss": {"ForceRun": False},
             "OpsiFleet": {"Submarine": False},
             "OpsiFleetFilter": {"Filter": ""},
         }
@@ -1177,6 +1241,25 @@ def _verify_delay(method) -> dict[str, Any]:
     )
     if cases["abyssal_force"]["modified"] or cases["abyssal_force"]["rejected"]:
         raise AssertionError("OpsiAbyssal.ForceRun delay exclusion drifted")
+    cases["month_boss_submarine"] = _delay_case(
+        method,
+        submarine_call=True,
+        overrides={"OpsiMonthBoss.OpsiFleet.Submarine": True},
+    )
+    if cases["month_boss_submarine"]["modified"] != [
+        "OpsiMonthBoss.Scheduler.NextRun"
+    ]:
+        raise AssertionError("OpsiMonthBoss submarine delay drifted")
+    cases["month_boss_force"] = _delay_case(
+        method,
+        submarine_call=True,
+        overrides={
+            "OpsiMonthBoss.OpsiFleet.Submarine": True,
+            "OpsiMonthBoss.OpsiMonthBoss.ForceRun": True,
+        },
+    )
+    if cases["month_boss_force"]["modified"] or cases["month_boss_force"]["rejected"]:
+        raise AssertionError("OpsiMonthBoss.ForceRun delay exclusion drifted")
 
     invalid_cases = {}
     invalid_paths = (
@@ -1184,12 +1267,14 @@ def _verify_delay(method) -> dict[str, Any]:
         ("OpsiObscure.OpsiObscure.ForceRun", True, False),
         ("OpsiAbyssal.OpsiAbyssal.ForceRun", False, True),
         ("OpsiStronghold.OpsiStronghold.ForceRun", True, False),
+        ("OpsiMonthBoss.OpsiMonthBoss.ForceRun", False, True),
         ("OpsiExplore.OpsiExplore.SpecialRadar", True, False),
     )
     for path, recon, submarine in invalid_paths:
         overrides = {path: None}
         if submarine:
-            overrides["OpsiAbyssal.OpsiFleet.Submarine"] = True
+            task = path.split(".", 1)[0]
+            overrides[f"{task}.OpsiFleet.Submarine"] = True
         case = _delay_case(
             method,
             overrides=overrides,
@@ -1197,7 +1282,9 @@ def _verify_delay(method) -> dict[str, Any]:
             submarine_call=submarine,
         )
         if case != {"rejected": True, "modified": [], "updates": []}:
-            raise AssertionError(f"invalid {path} touched scheduler state")
+            raise AssertionError(
+                f"invalid {path} touched scheduler state: {case!r}"
+            )
         invalid_cases[path] = case
     invalid_filter = _delay_case(
         method,
@@ -1356,12 +1443,17 @@ def _verify_explore(method, resolver_method, zone_fixtures) -> dict[str, Any]:
     }
 
 
-def _fleet_selection_case(method, *, fleet: object) -> dict[str, Any]:
+def _fleet_selection_case(
+    method, *, fleet: object, semantic: bool = False
+) -> dict[str, Any]:
     events: list[Any] = []
     selector = SimpleNamespace(
         ensure_to_be=lambda index: events.append(["ensure_to_be", index]) or True
     )
-    host = SimpleNamespace(fleet_selector=selector)
+    host = SimpleNamespace(
+        fleet_selector=selector,
+        device=SimpleNamespace(semantic_adapter=object() if semantic else None),
+    )
     host.wait_until_camera_stable = lambda: events.append("camera_stable")
     rejected = False
     try:
@@ -1387,7 +1479,14 @@ def _verify_fleet_selection(method) -> dict[str, Any]:
     invalid = _fleet_selection_case(method, fleet=0)
     if invalid != {"rejected": True, "result": None, "events": []}:
         raise AssertionError("invalid OpsiFleet.Fleet touched selector state")
-    return {"cases": cases, "invalid_entry": invalid}
+    semantic = _fleet_selection_case(method, fleet=4, semantic=True)
+    if semantic != {
+        "rejected": False,
+        "result": True,
+        "events": [["ensure_to_be", 4]],
+    }:
+        raise AssertionError("semantic OpsiFleet selection waited for pixel stability")
+    return {"cases": cases, "semantic": semantic, "invalid_entry": invalid}
 
 
 def _fleet_filter_case(method, value: object) -> dict[str, Any]:
@@ -2613,8 +2712,11 @@ def _verify_contract(
     for force in (False, True):
         validate_alas_opsi_obscure_config(force_run=force)
         accepted += 1
-    for use_tuning_sample in (False, True):
-        validate_alas_opsi_daily_config(use_tuning_sample=use_tuning_sample)
+    for do_mission, use_tuning_sample in product((False, True), repeat=2):
+        validate_alas_opsi_daily_config(
+            do_mission=do_mission,
+            use_tuning_sample=use_tuning_sample,
+        )
         accepted += 1
     for target_zone in OPSI_HAZARD1_TARGET_ZONES:
         validate_alas_opsi_hazard1_config(target_zone=target_zone)
@@ -2700,15 +2802,16 @@ def _verify_contract(
             target_zone=target_zone,
         )
         accepted += 1
-    for values in product((False, True), repeat=5):
+    for values in product((False, True), repeat=6):
         validate_alas_opsi_delay_task_config(
             explore_force_run=values[0],
             obscure_force_run=values[1],
             abyssal_force_run=values[2],
             stronghold_force_run=values[3],
-            special_radar=values[4],
+            month_boss_force_run=values[4],
+            special_radar=values[5],
         )
-        validate_alas_opsi_explore_config(special_radar=values[4])
+        validate_alas_opsi_explore_config(special_radar=values[5])
         accepted += 1
     for fleet in OPSI_FLEET_INDEXES:
         validate_alas_opsi_fleet_selection(fleet=fleet)
@@ -2784,7 +2887,7 @@ def _verify_contract(
         else:
             raise AssertionError("invalid OpsiMonthBoss.Mode was admitted")
     for value in INVALID_BOOLEANS:
-        for field in ("month", "obscure", "daily"):
+        for field in ("month", "obscure", "daily_tuning", "daily_mission"):
             try:
                 if field == "month":
                     validate_alas_opsi_month_boss_config(
@@ -2792,8 +2895,14 @@ def _verify_contract(
                     )
                 elif field == "obscure":
                     validate_alas_opsi_obscure_config(force_run=value)
+                elif field == "daily_tuning":
+                    validate_alas_opsi_daily_config(
+                        do_mission=True, use_tuning_sample=value
+                    )
                 else:
-                    validate_alas_opsi_daily_config(use_tuning_sample=value)
+                    validate_alas_opsi_daily_config(
+                        do_mission=value, use_tuning_sample=True
+                    )
             except SemanticGateClosed:
                 invalid += 1
             else:
@@ -2847,6 +2956,7 @@ def _verify_contract(
         "obscure_force_run",
         "abyssal_force_run",
         "stronghold_force_run",
+        "month_boss_force_run",
         "special_radar",
     )
     for value in INVALID_BOOLEANS:
@@ -3012,7 +3122,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
     daily_consumers = _consumer_methods(
         daily_path,
         "OpsiDaily",
-        ("OpsiDaily_UseTuningSample",),
+        ("OpsiDaily_DoMission", "OpsiDaily_UseTuningSample"),
     )
     hazard_consumers = _consumer_methods(
         hazard_path,
@@ -3142,6 +3252,8 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         ],
         "OpsiAbyssal_ForceRun": ["AzurLaneConfig.opsi_task_delay"],
         "OpsiStronghold_ForceRun": ["AzurLaneConfig.opsi_task_delay"],
+        "OpsiMonthBoss_ForceRun": ["AzurLaneConfig.opsi_task_delay"],
+        "OpsiDaily_DoMission": ["os_daily"],
         "OpsiDaily_UseTuningSample": ["os_daily"],
         "OpsiHazard1Leveling_TargetZone": ["os_hazard1_leveling"],
         "OpsiAshBeacon_EnsureFullyCollected": [
@@ -3186,6 +3298,7 @@ def verify_opsi_task_config(alas_root: Path) -> dict[str, Any]:
         "logger": _Logger(),
         "OS_MONTHBOSS_NORMAL": "normal",
         "OS_MONTHBOSS_HARD": "hard",
+        "MAP_EXIT": "map-exit",
         "get_os_next_reset": lambda: "next-reset",
         "validate_alas_opsi_month_boss_config": validate_alas_opsi_month_boss_config,
         "validate_alas_opsi_obscure_config": validate_alas_opsi_obscure_config,

@@ -4,6 +4,66 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-20
 
+### Operation Siren Stronghold main path live-qualified
+
+- The globe observer now identifies a Stronghold from the exact selected-zone
+  title, `塞壬要塞` type, and reviewed Stronghold sprite set. It does not use
+  the legacy 3D red-vortex HSV search, screenshots, OCR, or framebuffer data.
+  The live globe found `NA海域西北C` (zone 93) and `东大陆架A` (zone 121).
+- Zone 93 completed the original ALAS Stronghold path: globe focus and unpin,
+  entry, recon order, official auto-search, the exact paired start/no-event
+  notifications, submarine-return confirmation, fleet selection, and combat.
+  Exact suppression progress moved `100 -> 20 -> 0%`.
+- Zone 121 then completed the second live path. The globe focus now anchors
+  from the exact `SVFloatPanel/.../point` position and uses a bounded 8-pixel
+  local probe, including the dense East Continental Shelf E boundary between
+  Liverpool and Brest. Adjacent-zone titles are rejected rather than accepted
+  as the requested zone. The exact `东大陆架A-塞壬要塞海域` title reached `0%`;
+  the zero-percent precheck ended fleet rotation, returned to Liverpool,
+  repaired the post-combat damage for 750 coins, and verified fleets 1-4 were
+  all free of low resolve.
+- Fleet availability is now two independent states. The selected map chibi's
+  `fleet_N/marks/damage/1` image (`name=1`, `sprite=200`) is low resolve. Left
+  portrait `agony` controls mean a sunk ship needs port overhaul. Fleet 4's
+  repair state short-circuited the chibi check and was skipped; healthy Fleet
+  2 completed the remaining Stronghold combat.
+- A bounded startup lease lets a newly started Operation Siren task recover an
+  already-running auto-search transition until an exact local-map or globe
+  hierarchy reappears. Unrelated tasks do not inherit the lease. The obsolete
+  source-only Stronghold skip was removed from the authoritative 48-member
+  patch series; member 0098 contains the upstream runtime delta.
+- Retained order panels are closed by the exact typed back target, including a
+  bounded retry when Unity remounts the panel from `LevelCamera` to
+  `OverlayCamera`. Port startup question clearing now reads exact radar targets
+  and returns empty without invoking the legacy radar pixel mask. Active combat
+  frames no longer call the local-map auto-search switch reader.
+- Evidence is recorded in
+  `integration/alas/operation-siren-live-qualification-20260820.json`.
+  The 48-member combined patch was separately applied and compiled on a clean
+  `81ccf63b` worktree; the ALAS-focused suite passed `715/715`, followed by a
+  `26/26` focused rerun after verifier updates. Login/frame-clock replay and
+  the pixel inventory report zero unclassified pixel accesses; the inventory's
+  one classified access remains the pre-existing denied defensive branch, not
+  an Operation Siren runtime path.
+  OpsiStronghold is promoted to `L`, not `F`: the default main path is live,
+  while both ForceRun values and the full free-form fleet-filter space have
+  not each received independent live coverage.
+
+### Operation Siren Month Boss failure semantics corrected
+
+- Month Boss no longer equates low resolve with the left portrait `agony`
+  control or with zero HP. A timeout/flagship-loss defeat can retain HP and is
+  read from the exact selected-chibi damage marker; a sunk ship is separately
+  classified as requiring port repair.
+- Inside a non-retreatable Boss room, either state makes that fleet
+  unavailable. The original fleet order rotates without issuing another boss
+  movement to the defeated fleet. If every configured fleet is exhausted, the
+  client return is challenge failure rather than victory; a retained room is
+  left before port repair and low-resolve recovery begin.
+- A normal safe-zone victory was live-observed clearing low resolve. Successful
+  Month Boss settlement and hard difficulty remain unproven, so Month Boss is
+  still evidence-scoped partial support.
+
 ### Exercise full semantic flow live-qualified
 
 - Patch member `0380-exercise-full-flow-port.patch` completes typed opponent
@@ -1115,6 +1175,36 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   would require a defined semantic-frame preprocessing contract, not hidden
   fallback to rendered pixels or OpenCV.
 
+### Operation Siren Month Boss: defeated-fleet rotation qualified
+
+- On `emulator-5580`, the normal Month Boss route now uses typed radar/grid
+  observations from port coordinates `(-4, -2) -> (-3, 0) -> (-3, 2)`, then
+  identifies `event_7000010` / `chongdong` as the exact `task` entrance. The
+  transition is accepted only after `MAP_EXIT` appears and event IDs move to
+  the `703` room namespace.
+- `OpsiMonthBoss.ForceRun` is now a real runtime consumer: exact booleans are
+  replayed, the enabled branch bypasses only the adaptability precheck, and
+  the live configuration was restored to `false` after qualification.
+- Fleet lock `on -> off`, retained-room recovery, the exact four-row fleet
+  selector, Boss radar event `7032007/boss`, the challenge panel, first-entry
+  information prompt, precombat start, combat, and defeat result
+  `BATTLE_STATUS_D` were live-proven without framebuffer or raw-input fallback.
+- Defeat no longer uses HP. Low resolve is the exact selected map-chibi
+  `fleet_N/marks/damage/1` image (`name=1`, `sprite=200`); left portrait
+  `agony` controls are a separate needs-port-repair signal. Fleet 4 retained
+  nonzero HP while low resolve was present. The original `boss_clear` loop
+  skipped the unavailable fleet, selected Fleet 3, and controlled exhaustion
+  returned `False` instead of retrying a defeated fleet. Successful Boss
+  settlement and hard difficulty remain unproven. Daily mission navigation
+  likewise reached Forward Base 154, but its exact auto-search toggle remained
+  `off`.
+- Evidence: `integration/alas/operation-siren-live-qualification-20260820.json`;
+  reproducible ALAS delta:
+  `integration/alas/series/0095-operation-siren-typed-navigation.patch` and
+  `integration/alas/series/0096-operation-siren-boss-resolve.patch`,
+  `integration/alas/series/0097-operation-siren-special-zone-recovery.patch`,
+  and `integration/alas/series/0098-operation-siren-stronghold-runtime.patch`.
+
 ### Operation Siren task configuration: offline original-method replay passed
 
 - `OpsiMonthBoss.Mode` admits exactly `normal` and `normal_hard`, while
@@ -1212,7 +1302,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   duplicate suppression, standby positions, unavailable-fleet empty results,
   and scheduler submarine delays. Invalid rules fail before parser state,
   scheduler mutation, fleet selection, or task input.
-- One hundred thirty-six valid classes pass and 234 malformed values fail before task,
+- One hundred seventy valid classes pass and 246 malformed values fail before task,
   scheduler, map, combat, coordinate, or inventory state changes. Mutation
   budget is `0`; all effects are recorders, with no combat, item consumption,
   or Android input. Thirty-one fields now have complete offline classification.
@@ -1327,10 +1417,15 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 - The previous AST-only audit incorrectly treated dynamically constructed
   `deep_get()` paths as absent consumers. Source-bound replay now verifies
-  those string consumers explicitly. Only `OpsiMonthBoss.ForceRun` and
-  `OpsiDaily.DoMission` remain zero-read in pinned upstream and explicitly
-  unsupported; Headless does not invent behavior for them.
-- Real coordinate use, navigation, fleet filtering, combat, rewards, and
+  those string consumers explicitly. Headless gives the pinned-upstream
+  zero-read `OpsiMonthBoss.ForceRun` field both scheduler-delay exclusion and a
+  narrow runtime meaning: when enabled it bypasses only the adaptability
+  precheck. `OpsiDaily.DoMission=false` retains optional tuning-sample use but
+  skips mission acceptance/clearing until server update. Both are
+  exact-boolean, fail-closed boundaries.
+- Month Boss coordinate navigation, fleet selection, low-resolve/repair
+  separation, combat defeat, fleet rotation, and all-fleets-exhausted failure
+  are live capabilities. Successful settlement, hard difficulty, and reward
   postconditions remain incomplete, so OpsiMonthBoss and OpsiObscure stay `B`.
 
 ### Commission preset, custom filter, and major switch: offline contract passed

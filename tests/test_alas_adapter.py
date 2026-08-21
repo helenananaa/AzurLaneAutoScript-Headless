@@ -146,6 +146,8 @@ class FakeOracle:
             "overlay/network-reconnect/cancel": False,
             "overlay/network-reconnect/confirm": False,
         }
+        self.operation_siren_order_confirmation_visible_value = True
+        self.operation_siren_local_map_visible_value = False
         self.exists_values = {}
         self.enable_main_after_overlay_click = False
         self.text_groups = ()
@@ -722,11 +724,25 @@ class FakeOracle:
     def operation_siren_state(self):
         raise SemanticGateClosed("Operation Siren page identity is not proven")
 
+    def operation_siren_local_map_visible(self):
+        return self.operation_siren_local_map_visible_value
+
     def operation_siren_globe_state(self):
         raise SemanticGateClosed("Operation Siren globe identity is not proven")
 
     def operation_siren_mission_list_visible(self):
         return False
+
+    def click_operation_siren_order(self, order_kind):
+        return self.click("os/order/" + order_kind)
+
+    def operation_siren_order_confirmation_visible(self, order_kind):
+        return self.operation_siren_order_confirmation_visible_value
+
+    def click_operation_siren_order_confirmation(self, order_kind, *, confirm):
+        return self.click(
+            "os/order/" + ("confirm" if confirm else "cancel")
+        )
 
     def exercise_page_visible(self):
         return False
@@ -1306,6 +1322,50 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "main/formation")
         self.assertEqual(len(gate_calls), 2)
 
+    def test_operation_siren_order_owns_its_confirmation_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+
+        order = adapter.click(NamedButton("ORDER_SCAN"))
+        self.assertEqual(order.semantic_id, "os/order/scan")
+        self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
+        confirmation = adapter.click(NamedButton("POPUP_CONFIRM"))
+
+        self.assertEqual(confirmation.semantic_id, "os/order/confirm")
+        self.assertIsNone(adapter._operation_siren_pending_order)
+        self.assertEqual(
+            oracle.click_calls,
+            ["os/order/scan", "os/order/confirm"],
+        )
+
+    def test_operation_siren_order_accepts_alas_scoped_confirmation_name(self):
+        adapter, oracle, _ = self.make_adapter()
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+
+        session.click(NamedButton("ORDER_SUBMARINE"))
+        confirm = NamedButton("POPUP_CONFIRM_ORDER_SUBMARINE")
+        self.assertTrue(adapter.appear(confirm))
+        confirmation = session.click(confirm)
+
+        self.assertEqual(confirmation.semantic_id, "os/order/confirm")
+        self.assertIsNone(adapter._operation_siren_pending_order)
+        self.assertEqual(
+            oracle.click_calls,
+            ["os/order/submarine", "os/order/confirm"],
+        )
+
+    def test_os_check_requires_unobstructed_local_map(self):
+        adapter, oracle, _ = self.make_adapter()
+
+        oracle.enabled_values["os/page/back"] = True
+        oracle.operation_siren_local_map_visible_value = False
+        self.assertFalse(adapter.appear(NamedButton("OS_CHECK")))
+
+        oracle.operation_siren_local_map_visible_value = True
+        self.assertTrue(adapter.appear(NamedButton("OS_CHECK")))
+
     def test_meowfficer_check_color_only_matches_the_dock_page(self):
         adapter, oracle, gate_calls = self.make_adapter()
         oracle.enabled_values.update(
@@ -1362,6 +1422,57 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         oracle.enabled_values["login/enter"] = False
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.appear(NamedButton("ANDROID_NO_RESPOND"))
+
+    def test_login_closes_exact_post_sign_in_award_once(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values["reward/award-info/close"] = True
+        oracle.enabled_values["reward/award-info1/close"] = False
+        adapter.begin_login()
+
+        self.assertTrue(adapter.appear(NamedButton("GET_ITEMS_1")))
+        self.assertFalse(adapter.appear(NamedButton("GET_ITEMS_2")))
+        receipt = adapter.click(NamedButton("GET_ITEMS_1"))
+
+        self.assertEqual(receipt.semantic_id, "reward/award-info/close")
+        self.assertEqual(oracle.click_calls, ["reward/award-info/close"])
+        self.assertGreater(
+            adapter._login_flow.snapshot().passive_transition_until,
+            time.monotonic(),
+        )
+
+    def test_login_leaves_month_sign_page_through_exact_back(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["event-list/page/back"] = True
+        oracle.enabled_values["event-list/page/back"] = True
+        adapter.begin_login()
+
+        self.assertTrue(adapter.appear(NamedButton("GOTO_MAIN")))
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "event-list/page/back")
+        self.assertEqual(oracle.click_calls, ["event-list/page/back"])
+
+    def test_login_accepts_exact_main_identity_across_main_skins(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.main_page_visible_value = True
+        oracle.enabled_values["main/formation"] = False
+        oracle.enabled_values["main/battle"] = False
+        adapter.begin_login()
+
+        self.assertTrue(adapter.appear(NamedButton("MAIN_GOTO_FLEET")))
+        self.assertTrue(adapter.appear(NamedButton("MAIN_GOTO_CAMPAIGN_WHITE")))
+
+    def test_login_closes_global_guild_message_overlay(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values["overlay/guild-message/close"] = True
+        adapter.begin_login()
+
+        self.assertTrue(adapter.appear(NamedButton("GUILD_POPUP_CONFIRM")))
+        self.assertTrue(adapter.appear(NamedButton("GUILD_POPUP_CANCEL")))
+        receipt = adapter.click(NamedButton("GUILD_POPUP_CANCEL"))
+
+        self.assertEqual(receipt.semantic_id, "overlay/guild-message/close")
+        self.assertEqual(oracle.click_calls, ["overlay/guild-message/close"])
 
     def test_login_check_registry_route_preserves_frozen_read_contract(self):
         for expected in (False, True):
@@ -2892,6 +3003,15 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(duplicate, receipt)
         self.assertEqual(oracle.click_calls, ["tactical/page/back"])
         self.assertFalse(adapter.appear(NamedButton("SP_CHECK")))
+
+    def test_generic_back_leaves_exercise_page_through_exact_typed_target(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exercise_page_visible = lambda: True
+
+        receipt = adapter.click(NamedButton("BACK_ARROW"))
+
+        self.assertEqual(receipt.semantic_id, "exercise/page/back")
+        self.assertEqual(oracle.click_calls, ["exercise/page/back"])
 
     def test_tactical_check_precedes_unrelated_global_page_classification(self):
         adapter, oracle, _ = self.make_adapter()
@@ -6008,6 +6128,161 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(gate_calls, [])
         self.assertEqual(oracle.click_calls, [])
+
+    def test_operation_siren_entry_transition_makes_page_probes_passive(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        adapter._operation_siren_entry_transition_until = time.monotonic() + 1.0
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertEqual(gate_calls, [])
+
+        adapter._operation_siren_entry_transition_until = 0.0
+        adapter._operation_siren_auto_search_transition_until = (
+            time.monotonic() + 1.0
+        )
+        self.assertFalse(adapter.appear(NamedButton("RETIRE_APPEAR_1")))
+        self.assertEqual(gate_calls, [])
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_operation_siren_startup_recovery_owns_reward_and_clears_on_map(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.enabled_values = {
+            "reward/award-info/close": True,
+            "reward/award-info1/close": False,
+        }
+
+        adapter.begin_operation_siren_startup_recovery(timeout_seconds=60.0)
+
+        self.assertTrue(adapter.appear(NamedButton("GET_ITEMS_1")))
+        self.assertFalse(adapter.appear(NamedButton("IN_RETIREMENT_CHECK")))
+        self.assertGreater(
+            adapter._operation_siren_entry_transition_until,
+            time.monotonic(),
+        )
+
+        oracle.operation_siren_local_map_visible_value = True
+        self.assertTrue(adapter.appear(NamedButton("OS_CHECK")))
+        self.assertEqual(adapter._operation_siren_entry_transition_until, 0.0)
+        self.assertEqual(gate_calls, [True, True])
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_operation_siren_startup_recovery_recognizes_campaign_menu(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.campaign_menu_value = True
+
+        adapter.begin_operation_siren_startup_recovery(timeout_seconds=60.0)
+
+        self.assertTrue(adapter.appear(NamedButton("CAMPAIGN_MENU_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertEqual(gate_calls, [True])
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_operation_siren_startup_recovery_keeps_global_guild_close(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values["overlay/guild-message/close"] = True
+        adapter.begin_operation_siren_startup_recovery(timeout_seconds=60.0)
+
+        self.assertTrue(adapter.appear(NamedButton("GUILD_POPUP_CONFIRM")))
+        self.assertTrue(adapter.appear(NamedButton("GUILD_POPUP_CANCEL")))
+        receipt = adapter.click(NamedButton("GUILD_POPUP_CANCEL"))
+
+        self.assertEqual(receipt.semantic_id, "overlay/guild-message/close")
+        self.assertEqual(oracle.click_calls, ["overlay/guild-message/close"])
+
+    def test_operation_siren_campaign_entry_commit_is_idempotent(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_os_entrance_available = Mock(return_value=True)
+        receipt = oracle.click_receipt("campaign-menu/os")
+        oracle.click_campaign_os_entrance = Mock(return_value=receipt)
+
+        self.assertTrue(adapter.appear(NamedButton("CAMPAIGN_MENU_GOTO_OS")))
+        first = adapter.click(NamedButton("CAMPAIGN_MENU_GOTO_OS"))
+        self.assertFalse(adapter.appear(NamedButton("CAMPAIGN_MENU_GOTO_OS")))
+        duplicate = adapter.click(NamedButton("CAMPAIGN_MENU_GOTO_OS"))
+
+        self.assertEqual(first, receipt)
+        self.assertEqual(duplicate, receipt)
+        oracle.click_campaign_os_entrance.assert_called_once_with()
+
+    def test_operation_siren_globe_navigation_owns_loading_gap(self):
+        adapter, oracle, _ = self.make_adapter()
+        receipt = oracle.click_receipt("os/map/globe")
+        oracle.click_operation_siren_globe = Mock(return_value=receipt)
+
+        self.assertEqual(adapter.click(NamedButton("MAP_GOTO_GLOBE")), receipt)
+        self.assertFalse(adapter.appear(NamedButton("GET_MISSION")))
+
+        oracle.operation_siren_globe_visible = Mock(return_value=True)
+        self.assertTrue(adapter.operation_siren_globe_visible())
+        self.assertEqual(adapter._operation_siren_entry_transition_until, 0.0)
+
+    def test_operation_siren_globe_return_commit_is_idempotent(self):
+        adapter, oracle, _ = self.make_adapter()
+        receipt = oracle.click_receipt("os/globe/map")
+        oracle.click_operation_siren_globe_map = Mock(return_value=receipt)
+
+        first = adapter.click(NamedButton("GLOBE_GOTO_MAP"))
+        self.assertFalse(adapter.appear(NamedButton("GLOBE_GOTO_MAP")))
+        duplicate = adapter.click(NamedButton("GLOBE_GOTO_MAP"))
+
+        self.assertEqual(first, receipt)
+        self.assertEqual(duplicate, receipt)
+        oracle.click_operation_siren_globe_map.assert_called_once_with()
+
+    def test_operation_siren_startup_recovery_timeout_is_bounded(self):
+        adapter, _, _ = self.make_adapter()
+
+        for value in (True, 0, -1, 601, float("inf")):
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    adapter.begin_operation_siren_startup_recovery(value)
+
+    def test_operation_siren_map_rejects_passive_pixel_probes_before_build_scan(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.operation_siren_local_map_visible_value = True
+        oracle.build_queue_timers = Mock(
+            side_effect=AssertionError("construction probe must not run")
+        )
+
+        self.assertFalse(adapter.appear(NamedButton("WITHDRAW")))
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertEqual(gate_calls, [])
+
+    def test_operation_siren_auto_search_commit_owns_loading_transition(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        adapter._operation_siren_auto_search_transition_until = (
+            time.monotonic() + 30.0
+        )
+        oracle.operation_siren_auto_search_state = Mock(
+            side_effect=AssertionError("loading surface must not be queried")
+        )
+
+        self.assertEqual(adapter.operation_siren_auto_search_state(), "on")
+        self.assertTrue(adapter.operation_siren_auto_search_transition_active())
+        self.assertEqual(gate_calls, [True, True])
+
+    def test_operation_siren_globe_swipe_accepts_unobstructed_map_strip(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.operation_siren_globe_state = Mock(
+            return_value=SimpleNamespace(zone_name="NA海域西南C")
+        )
+        oracle.operation_siren_globe_visible = Mock(return_value=True)
+
+        intent = adapter.begin_operation_siren_globe_swipe_vector(
+            (100, -100),
+            box=(600, 220, 980, 620),
+            random_range=(0, 0, 0, 0),
+            padding=15,
+            duration=(0.1, 0.2),
+            whitelist_area=None,
+            blacklist_area=None,
+            name="GLOBE_SWIPE_100_-100",
+            distance_check=True,
+        )
+
+        self.assertEqual(intent.box, (600, 220, 980, 620))
+        self.assertEqual(gate_calls, [True])
+        adapter.end_operation_siren_globe_swipe_vector(intent)
 
     def test_missing_stable_name_fails_closed(self):
         adapter, _, gate_calls = self.make_adapter()

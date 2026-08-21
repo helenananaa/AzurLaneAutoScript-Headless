@@ -113,7 +113,6 @@ FLOW_PATHS = {
         "module/os/globe_camera.py",
         "module/os/globe_operation.py",
         "module/os/map.py",
-        "module/os/tasks/archive.py",
         "module/os/tasks/daily.py",
         "module/os/tasks/explore.py",
         "module/os/tasks/hazard_leveling.py",
@@ -134,6 +133,32 @@ FLOW_PATHS = {
         "module/os_shop/shop.py",
         "module/shop/shop_voucher.py",
         "module/ui/scroll.py",
+    },
+    "0095-operation-siren-typed-navigation.patch": {
+        "module/os/fleet.py",
+        "module/os/map.py",
+        "module/os/map_fleet_selector.py",
+        "module/os/tasks/month_boss.py",
+    },
+    "0096-operation-siren-boss-resolve.patch": {
+        "module/combat/combat.py",
+        "module/os/fleet.py",
+        "module/os_combat/combat.py",
+    },
+    "0097-operation-siren-special-zone-recovery.patch": {
+        "module/os/fleet.py",
+        "module/os/map.py",
+        "module/os/tasks/stronghold.py",
+    },
+    "0098-operation-siren-stronghold-runtime.patch": {
+        "module/handler/info_handler.py",
+        "module/os/fleet.py",
+        "module/os/globe_camera.py",
+        "module/os/map.py",
+        "module/os/map_fleet_selector.py",
+        "module/os/tasks/stronghold.py",
+        "module/os_handler/map_event.py",
+        "module/os_handler/map_order.py",
     },
     "0100-tool-flow-ports.patch": {
         "module/config/argument/args.json",
@@ -292,6 +317,29 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                 actual = set(target_blobs(SERIES / name))
                 self.assertEqual(actual, expected_paths)
                 expected_overlap = {
+                    "0095-operation-siren-typed-navigation.patch": {
+                        "module/os/fleet.py",
+                        "module/os/map.py",
+                        "module/os/tasks/month_boss.py",
+                    },
+                    "0096-operation-siren-boss-resolve.patch": {
+                        "module/combat/combat.py",
+                        "module/os/fleet.py",
+                    },
+                    "0097-operation-siren-special-zone-recovery.patch": {
+                        "module/os/fleet.py",
+                        "module/os/map.py",
+                    },
+                    "0098-operation-siren-stronghold-runtime.patch": {
+                        "module/handler/info_handler.py",
+                        "module/os/fleet.py",
+                        "module/os/globe_camera.py",
+                        "module/os/map.py",
+                        "module/os/map_fleet_selector.py",
+                        "module/os/tasks/stronghold.py",
+                        "module/os_handler/map_event.py",
+                        "module/os_handler/map_order.py",
+                    },
                     "0350-meowfficer-dock-training-port.patch": {
                         "module/ui/ui.py"
                     },

@@ -1985,26 +1985,26 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       result.imageSourceCapacity = static_cast<uint32_t>(
           imageCollector.objects.size());
       result.imageRecordTruncated |= imageCollector.truncated ? 1u : 0u;
-      for (size_t index = 0; index < imageCollector.count; ++index) {
-        void *image = imageCollector.objects[index];
-        bool active = false;
-        if (image == nullptr ||
-            !invokeBoolean(getImageActiveAndEnabled, image, &active)) {
-          ++result.uiRecordSkipped;
-          continue;
-        }
-        if (!active) {
-          continue;
-        }
+      constexpr size_t kReservedFleetImages = 64;
+      constexpr size_t kReservedTrailingImages = 128;
+      static_assert(kReservedFleetImages + kReservedTrailingImages <
+                    kMaxObserverImages);
+      const size_t ordinaryLimit =
+          result.images.size() - kReservedFleetImages - kReservedTrailingImages;
+      std::array<void *, kReservedFleetImages> fleetImages = {};
+      size_t fleetImageCount = 0;
+      std::array<void *, kReservedTrailingImages> trailingImages = {};
+      size_t trailingImageCount = 0;
+
+      auto appendImageRecord = [&](void *image) {
         if (result.imageRecordCount >= result.images.size()) {
           result.imageRecordTruncated = 1;
-          continue;
+          return;
         }
-
         ObserverButtonRecord geometry;
         if (!populateControlRecord(image, false, &geometry)) {
           ++result.uiRecordErrors;
-          continue;
+          return;
         }
         bool raycastTarget = false;
         Color color = {};
@@ -2015,7 +2015,7 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
             !invokeValue(getImageFillAmount, image, nullptr, &fillAmount,
                          sizeof(fillAmount))) {
           ++result.uiRecordErrors;
-          continue;
+          return;
         }
 
         ObserverImageRecord &record = result.images[result.imageRecordCount++];
@@ -2087,6 +2087,72 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
             record.flags |= 0x200u;
             record.flags |= raycastMatches ? 0x400u : 0u;
           }
+        }
+      };
+
+      for (size_t index = 0; index < imageCollector.count; ++index) {
+        void *image = imageCollector.objects[index];
+        bool active = false;
+        if (image == nullptr ||
+            !invokeBoolean(getImageActiveAndEnabled, image, &active)) {
+          ++result.uiRecordSkipped;
+          continue;
+        }
+        if (!active) {
+          continue;
+        }
+        if (result.imageRecordCount < ordinaryLimit) {
+          appendImageRecord(image);
+          continue;
+        }
+        // A defeated Operation Siren fleet publishes its low-resolve marker
+        // beside the map chibi, below a direct ``fleet_N`` ancestor.  Walk at
+        // most four local ancestors for this tiny reviewed subtree; never
+        // construct full paths for the thousands of discarded map Images.
+        void *candidateGameObject = getGameObject != nullptr
+                                        ? invokeObject(getGameObject, image)
+                                        : nullptr;
+        void *candidateTransform =
+            candidateGameObject != nullptr && getTransform != nullptr
+                ? invokeObject(getTransform, candidateGameObject)
+                : nullptr;
+        bool fleetImage = false;
+        for (int depth = 0;
+             candidateTransform != nullptr && depth < 4; ++depth) {
+          const std::string ancestorName = invokeString(candidateTransform);
+          if (ancestorName.rfind("fleet_", 0) == 0) {
+            fleetImage = true;
+            break;
+          }
+          candidateTransform = getParent != nullptr
+                                   ? invokeObject(getParent, candidateTransform)
+                                   : nullptr;
+        }
+        if (fleetImage && fleetImageCount < fleetImages.size()) {
+          fleetImages[fleetImageCount++] = image;
+        }
+        // Unity enumerates the dense Stronghold grid before its current map
+        // and overlay state.  Preserve a raw rolling tail without walking
+        // transform ancestry for thousands of discarded Images.
+        trailingImages[trailingImageCount % trailingImages.size()] = image;
+        ++trailingImageCount;
+        result.imageRecordTruncated = 1;
+      }
+      for (size_t index = 0; index < fleetImageCount; ++index) {
+        appendImageRecord(fleetImages[index]);
+      }
+      const size_t keptTrailing =
+          std::min(trailingImageCount, trailingImages.size());
+      const size_t trailingStart = trailingImageCount > trailingImages.size()
+                                       ? trailingImageCount % trailingImages.size()
+                                       : 0;
+      for (size_t offset = 0; offset < keptTrailing; ++offset) {
+        void *image =
+            trailingImages[(trailingStart + offset) % trailingImages.size()];
+        if (std::find(fleetImages.begin(),
+                      fleetImages.begin() + fleetImageCount,
+                      image) == fleetImages.begin() + fleetImageCount) {
+          appendImageRecord(image);
         }
       }
     }

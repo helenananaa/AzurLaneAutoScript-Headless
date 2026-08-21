@@ -49,18 +49,23 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
     def test_exact_live_tree_replay_when_available(self):
         if not LIVE_ALAS.joinpath("module/os/tasks/month_boss.py").is_file():
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")
+        daily_source = LIVE_ALAS.joinpath("module/os/tasks/daily.py").read_text(
+            encoding="utf-8"
+        )
+        scheduler_source = LIVE_ALAS.joinpath("module/config/config.py").read_text(
+            encoding="utf-8"
+        )
+        if (
+            "OpsiDaily_DoMission" not in daily_source
+            or "OpsiMonthBoss.ForceRun" not in scheduler_source
+        ):
+            self.skipTest("local patched ALAS tree predates current Opsi contract")
         result = verify_opsi_task_config(LIVE_ALAS)
         self.assertTrue(result["passed"])
         self.assertEqual(result["field_count"], 31)
-        self.assertEqual(result["accepted_case_count"], 136)
-        self.assertEqual(result["invalid_case_count"], 234)
-        self.assertEqual(
-            result["zero_runtime_consumers"],
-            {
-                "OpsiMonthBoss_ForceRun": [],
-                "OpsiDaily_DoMission": [],
-            },
-        )
+        self.assertEqual(result["accepted_case_count"], 170)
+        self.assertEqual(result["invalid_case_count"], 246)
+        self.assertEqual(result["zero_runtime_consumers"], {})
         self.assertEqual(result["mutation_budget"], 0)
         self.assertFalse(result["android_input_injected"])
         self.assertEqual(
@@ -154,22 +159,32 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             )
         for mode in OPSI_MONTH_BOSS_MODES:
             for check in (False, True):
-                snapshot = validate_alas_opsi_month_boss_config(
-                    mode=mode, check_adaptability=check
-                )
-                self.assertEqual((snapshot.mode, snapshot.check_adaptability), (mode, check))
+                for force in (False, True):
+                    snapshot = validate_alas_opsi_month_boss_config(
+                        mode=mode,
+                        check_adaptability=check,
+                        force_run=force,
+                    )
+                    self.assertEqual(
+                        (
+                            snapshot.mode,
+                            snapshot.check_adaptability,
+                            snapshot.force_run,
+                        ),
+                        (mode, check, force),
+                    )
         for force in (False, True):
             self.assertEqual(
                 validate_alas_opsi_obscure_config(force_run=force).force_run,
                 force,
             )
-        for use_tuning_sample in (False, True):
-            self.assertEqual(
-                validate_alas_opsi_daily_config(
-                    use_tuning_sample=use_tuning_sample
-                ).use_tuning_sample,
-                use_tuning_sample,
+        for do_mission, use_tuning_sample in product((False, True), repeat=2):
+            snapshot = validate_alas_opsi_daily_config(
+                do_mission=do_mission,
+                use_tuning_sample=use_tuning_sample,
             )
+            self.assertEqual(snapshot.do_mission, do_mission)
+            self.assertEqual(snapshot.use_tuning_sample, use_tuning_sample)
         for target_zone in OPSI_HAZARD1_TARGET_ZONES:
             self.assertEqual(
                 validate_alas_opsi_hazard1_config(
@@ -217,21 +232,22 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             "obscure_force_run",
             "abyssal_force_run",
             "stronghold_force_run",
+            "month_boss_force_run",
             "special_radar",
         )
-        for values in product((False, True), repeat=5):
+        for values in product((False, True), repeat=6):
             kwargs = dict(zip(fields, values, strict=True))
             snapshot = validate_alas_opsi_delay_task_config(**kwargs)
             self.assertEqual(
                 snapshot.force_run,
-                any(values[:4]),
+                any(values[:5]),
             )
-            self.assertEqual(snapshot.special_radar, values[4])
+            self.assertEqual(snapshot.special_radar, values[5])
             self.assertEqual(
                 validate_alas_opsi_explore_config(
-                    special_radar=values[4]
+                    special_radar=values[5]
                 ).special_radar,
-                values[4],
+                values[5],
             )
         for fleet in OPSI_FLEET_INDEXES:
             self.assertEqual(
@@ -415,10 +431,26 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
                 SemanticGateClosed
             ):
                 validate_alas_opsi_obscure_config(force_run=value)
-            with self.subTest(field="daily", value=value), self.assertRaises(
+            with self.subTest(field="month_force", value=value), self.assertRaises(
                 SemanticGateClosed
             ):
-                validate_alas_opsi_daily_config(use_tuning_sample=value)
+                validate_alas_opsi_month_boss_config(
+                    mode="normal",
+                    check_adaptability=True,
+                    force_run=value,
+                )
+            with self.subTest(field="daily_tuning", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_daily_config(
+                    do_mission=True, use_tuning_sample=value
+                )
+            with self.subTest(field="daily_mission", value=value), self.assertRaises(
+                SemanticGateClosed
+            ):
+                validate_alas_opsi_daily_config(
+                    do_mission=value, use_tuning_sample=True
+                )
         for value in (-1, 1, 23, 45, None, True, "22", 22.0, [], {}):
             with self.subTest(field="hazard_target", value=value), self.assertRaises(
                 SemanticGateClosed
@@ -456,6 +488,7 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             "obscure_force_run",
             "abyssal_force_run",
             "stronghold_force_run",
+            "month_boss_force_run",
             "special_radar",
         )
         for value in (0, 1, "true", None, [], {}):
@@ -563,6 +596,8 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_opsi_month_boss_config("), 2)
         self.assertEqual(patch.count("validate_alas_opsi_obscure_config("), 2)
         self.assertEqual(patch.count("validate_alas_opsi_daily_config("), 1)
+        self.assertIn("do_mission=self.config.OpsiDaily_DoMission", patch)
+        self.assertIn("if not daily_config.do_mission:", patch)
         self.assertEqual(patch.count("validate_alas_opsi_hazard1_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_meowfficer_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_explore_config("), 1)
@@ -607,6 +642,9 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertEqual(
             scheduler_patch.count("validate_alas_opsi_delay_task_config("), 1
+        )
+        self.assertIn(
+            'keys=f"{task}.OpsiMonthBoss.ForceRun"', scheduler_patch
         )
         self.assertEqual(
             scheduler_patch.count("validate_alas_opsi_fleet_filter("), 1

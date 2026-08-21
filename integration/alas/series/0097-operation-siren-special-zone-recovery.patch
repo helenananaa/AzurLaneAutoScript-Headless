@@ -1,0 +1,109 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+index f386894d..1b3cbe99 100644
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -1006,6 +1006,15 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+ 
+                 # End
+                 if in_semantic_boss_room:
++                    if not self.appear(MAP_EXIT, offset=(20, 20)):
++                        # A failed fourth attempt is the one retained-room
++                        # transition that removes MAP_EXIT: the client has
++                        # already returned to the ordinary map.  Boss absence
++                        # there is challenge failure, not victory.
++                        logger.critical(
++                            'Boss challenge failed and returned after all fleets were defeated'
++                        )
++                        return False
+                     boss_remaining = bool(
+                         semantic_session.operation_siren_radar_targets('boss')
+                     )
+@@ -1037,6 +1046,16 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                     break
+ 
+         logger.critical('Unable to clear boss, fleets exhausted')
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_session is not None
++            and self.appear(MAP_EXIT, offset=(20, 20))
++        ):
++            # Monthly Arbiter and abyssal rooms retain their progress after a
++            # failed challenge.  Leaving here is required before the caller
++            # can reach a port, repair sunk ships, and cure low resolve.
++            logger.info('Leave retained boss room before fleet recovery')
++            self.map_exit()
+         return False
+ 
+     def run_abyssal(self):
+diff --git a/module/os/map.py b/module/os/map.py
+index 498ad375..f4c58ed1 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -573,8 +573,17 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 if result:
+                     finished_combat += 1
+                 else:
+-                    self.hp_get()
+-                    if any(self.need_repair):
++                    semantic_session = getattr(
++                        self.device, 'semantic_adapter', None
++                    )
++                    if semantic_session is not None:
++                        fleet_defeated = (
++                            semantic_session.operation_siren_current_fleet_defeated()
++                        )
++                    else:
++                        self.hp_get()
++                        fleet_defeated = any(self.need_repair)
++                    if fleet_defeated:
+                         success = False
+                         logger.warning('Fleet died, stop auto search')
+                         continue
+@@ -785,7 +794,17 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 drop.add(self.device.image)
+ 
+                 self.hp_reset()
+-                self.hp_get()
++                semantic_session = getattr(self.device, 'semantic_adapter', None)
++                if not (
++                    semantic_session is not None
++                    and self.is_in_special_zone()
++                ):
++                    self.hp_get()
++                else:
++                    logger.info(
++                        'Use exact defeated marker instead of truncated HP images '
++                        'inside the special zone'
++                    )
+                 if after_auto_search:
+                     if self.is_in_task_explore and not self.zone.is_port:
+                         prev = self.zone
+diff --git a/module/os/tasks/stronghold.py b/module/os/tasks/stronghold.py
+index ed26e716..048604ba 100644
+--- a/module/os/tasks/stronghold.py
++++ b/module/os/tasks/stronghold.py
+@@ -57,14 +57,21 @@ class OpsiStronghold(OSMap):
+             # Attack
+             self.fleet_set(fleet.fleet_index)
+             self.run_auto_search(question=False, rescan=False)
+-            self.hp_reset()
+-            self.hp_get()
++            semantic_session = getattr(self.device, 'semantic_adapter', None)
++            if semantic_session is not None:
++                fleet_defeated = (
++                    semantic_session.operation_siren_current_fleet_defeated()
++                )
++            else:
++                self.hp_reset()
++                self.hp_get()
++                fleet_defeated = any(self.need_repair)
+ 
+             # End
+             if self.get_stronghold_percentage() == '0':
+                 logger.info('BOSS clear')
+                 return True
+-            elif any(self.need_repair):
++            elif fleet_defeated:
+                 logger.info('Auto search stopped, because fleet died')
+                 # Re-enter to reset fleet position
+                 prev = self.zone

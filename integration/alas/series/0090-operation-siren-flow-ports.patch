@@ -246,54 +246,21 @@ index 9a900aa3..92380ab0 100644
          if self.is_in_map():
              logger.info('Already in os map')
          elif self.is_in_globe():
-@@ -65,8 +97,21 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+@@ -65,8 +97,11 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
  
          # self.map_init()
          self.hp_reset()
 -        self.handle_after_auto_search()
 -        self.handle_current_fleet_resolve(revert=False)
-+        semantic_auto_search_locked = bool(
-+            semantic_adapter is not None
-+            and self.config.task.command != 'OpsiExplore'
-+            and semantic_adapter.open().oracle.exists('os/map/auto-search/off')
-+        )
 +        if semantic_adapter is not None and semantic_adapter.appear(PORT_GOTO_SUPPLY):
 +            logger.info('Already in Operation Siren port; skip local-map fleet checks')
-+        elif semantic_auto_search_locked:
-+            logger.warning(
-+                'Operation Siren auto search is locked; skip the initial '
-+                'local-map fleet checks for this non-exploration task'
-+            )
 +        else:
 +            self.handle_after_auto_search()
 +            self.handle_current_fleet_resolve(revert=False)
  
          # Exit from special zones types, only SAFE and DANGEROUS are acceptable.
          if self.is_in_special_zone():
-@@ -78,8 +123,20 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
-             logger.info('In zone 22, 44, 154, skip running first auto search')
-             self.handle_ash_beacon_attack()
-         else:
--            self.run_auto_search(rescan=False)
--            self.handle_after_auto_search()
-+            from alas_headless import current_semantic_session
-+            semantic_session = current_semantic_session()
-+            if (
-+                semantic_session is not None
-+                and self.config.task.command != 'OpsiExplore'
-+                and semantic_session.open().oracle.exists('os/map/auto-search/off')
-+            ):
-+                logger.warning(
-+                    'Operation Siren auto search is locked; skip the initial '
-+                    'clear for this non-exploration task'
-+                )
-+            else:
-+                self.run_auto_search(rescan=False)
-+                self.handle_after_auto_search()
- 
-     def get_current_zone_from_globe(self):
-         """
-@@ -225,25 +282,28 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+@@ -225,25 +272,28 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
          Returns:
              bool: If repaired.
          """
@@ -326,7 +293,7 @@ index 9a900aa3..92380ab0 100644
                          'continue OS exploration')
              self.hp_reset()
              return False
-@@ -719,7 +779,10 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+@@ -719,7 +769,10 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
              int: Number of finished combat
          """
          if rescan is None:
@@ -338,30 +305,6 @@ index 9a900aa3..92380ab0 100644
          if rescan is True:
              rescan = 'full'
          self.handle_ash_beacon_attack()
-diff --git a/module/os/tasks/archive.py b/module/os/tasks/archive.py
-index 0a7d8dcc..7769f5a0 100644
---- a/module/os/tasks/archive.py
-+++ b/module/os/tasks/archive.py
-@@ -34,7 +34,18 @@ class OpsiArchive(OSMap):
-         while True:
-             # In case logger bought manually,
-             # finish pre-existing archive zone
--            self.os_finish_daily_mission(question=False, rescan=False)
-+            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+            semantic_auto_search_locked = bool(
-+                semantic_adapter is not None
-+                and semantic_adapter.open().oracle.exists('os/map/auto-search/off')
-+            )
-+            if semantic_auto_search_locked:
-+                logger.warning(
-+                    'Operation Siren auto search is locked; skip clearing the '
-+                    'pre-existing mission before archive purchase'
-+                )
-+            else:
-+                self.os_finish_daily_mission(question=False, rescan=False)
- 
-             logger.hr('OS voucher', level=1)
-             self._os_voucher_enter()
 diff --git a/module/os/tasks/daily.py b/module/os/tasks/daily.py
 index 51f17b9a..8fac8f34 100644
 --- a/module/os/tasks/daily.py
@@ -374,11 +317,12 @@ index 51f17b9a..8fac8f34 100644
  from module.logger import logger
  from module.os.map import OSMap
  
-@@ -59,12 +61,15 @@ class OpsiDaily(OSMap):
+@@ -59,12 +61,21 @@ class OpsiDaily(OSMap):
          return count
  
      def os_daily(self):
 +        daily_config = validate_alas_opsi_daily_config(
++            do_mission=self.config.OpsiDaily_DoMission,
 +            use_tuning_sample=self.config.OpsiDaily_UseTuningSample,
 +        )
          # Finish existing missions first
@@ -390,12 +334,17 @@ index 51f17b9a..8fac8f34 100644
 +        if daily_config.use_tuning_sample:
              self.tuning_sample_use()
  
++        if not daily_config.do_mission:
++            logger.info('OpsiDaily.DoMission is disabled; skip daily missions')
++            self.config.task_delay(server_update=True)
++            return
++
          while True:
 diff --git a/module/os/tasks/hazard_leveling.py b/module/os/tasks/hazard_leveling.py
 index 03501dc8..e93faa43 100644
 --- a/module/os/tasks/hazard_leveling.py
 +++ b/module/os/tasks/hazard_leveling.py
-@@ -1,10 +1,36 @@
+@@ -1,10 +1,25 @@
 +from alas_headless import (
 +    validate_alas_opsi_ash_beacon_ensure_fully_collected,
 +    validate_alas_opsi_hazard1_config,
@@ -418,21 +367,10 @@ index 03501dc8..e93faa43 100644
 +            )
 +        )
          logger.hr('OS hazard 1 leveling', level=1)
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if (
-+            semantic_adapter is not None
-+            and semantic_adapter.open().oracle.exists('os/map/auto-search/off')
-+        ):
-+            logger.warning(
-+                'Operation Siren auto search is locked; cannot run hazard-1 '
-+                'strategic search on this account'
-+            )
-+            self.config.task_delay(server_update=True)
-+            self.config.task_stop()
          # Without these enabled, CL1 gains 0 profits
          self.config.override(
              OpsiGeneral_DoRandomMapEvent=True,
-@@ -17,7 +43,7 @@ class OpsiHazard1Leveling(OSMap):
+@@ -17,7 +32,7 @@ class OpsiHazard1Leveling(OSMap):
              self.config.OS_ACTION_POINT_PRESERVE = 200
              if self.config.is_task_enabled('OpsiAshBeacon') \
                      and not self._ash_fully_collected \
@@ -441,7 +379,7 @@ index 03501dc8..e93faa43 100644
                  logger.info('Ash beacon not fully collected, ignore action point limit temporarily')
                  self.config.OS_ACTION_POINT_PRESERVE = 0
              logger.attr('OS_ACTION_POINT_PRESERVE', self.config.OS_ACTION_POINT_PRESERVE)
-@@ -45,8 +71,8 @@ class OpsiHazard1Leveling(OSMap):
+@@ -45,8 +60,8 @@ class OpsiHazard1Leveling(OSMap):
                          self.config.task_call('OpsiMeowfficerFarming')
                  self.config.task_stop()
  
@@ -499,22 +437,10 @@ index 43d629c5..ebd2b8c8 100644
          if preserve == 0:
              self.config.override(OpsiFleet_Submarine=False)
          if self.is_cl1_enabled:
-@@ -38,12 +62,24 @@ class OpsiMeowfficerFarming(OSMap):
+@@ -38,12 +62,12 @@ class OpsiMeowfficerFarming(OSMap):
              self.config.task_delay(server_update=True)
              self.config.task_stop()
  
-+        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
-+        if (
-+            semantic_adapter is not None
-+            and semantic_adapter.open().oracle.exists('os/map/auto-search/off')
-+        ):
-+            logger.warning(
-+                'Operation Siren auto search is locked; cannot run '
-+                'meowfficer farming on this account'
-+            )
-+            self.config.task_delay(server_update=True)
-+            self.config.task_stop()
-+
          ap_checked = False
          while True:
              self.config.OS_ACTION_POINT_PRESERVE = preserve
@@ -525,7 +451,7 @@ index 43d629c5..ebd2b8c8 100644
                  logger.info('Ash beacon not fully collected, ignore action point limit temporarily')
                  self.config.OS_ACTION_POINT_PRESERVE = 0
              logger.attr('OS_ACTION_POINT_PRESERVE', self.config.OS_ACTION_POINT_PRESERVE)
-@@ -60,24 +96,18 @@ class OpsiMeowfficerFarming(OSMap):
+@@ -60,24 +84,18 @@ class OpsiMeowfficerFarming(OSMap):
                  ap_checked = True
  
              # (1252, 1012) is the coordinate of zone 134 (the center zone) in os_globe_map.png
@@ -891,24 +817,28 @@ index 51bf64f1..284cd05a 100644
          if self.handle_map_get_items(drop=drop):
              return 'map_get_items'
          if self.handle_os_game_tips():
-@@ -215,6 +232,20 @@ class MapEventHandler(EnemySearchingHandler):
+@@ -215,6 +232,24 @@ class MapEventHandler(EnemySearchingHandler):
          Returns:
              bool: If clicked.
          """
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if semantic_adapter is not None:
-+            # The current CN client exposes the locked auto-search switch as
-+            # an interactable Unity Button, but ignores clicks until OpSi
-+            # story progression unlocks it.  One ignored input must not become
-+            # ALAS' repeated three-second click loop.  Treat the persistent
-+            # off state as unavailable and let the existing unlock timer report
-+            # the account condition without scheduling a game restart.
-+            from alas_headless import current_semantic_session
-+            session = current_semantic_session()
-+            if session is not None and session.open().oracle.exists(
-+                'os/map/auto-search/off'
-+            ):
-+                return False
++            state = semantic_adapter.operation_siren_auto_search_state()
++            if state == 'on':
++                self._semantic_auto_search_enable_attempted = False
++            elif enable is True:
++                # The same reviewed Unity button represents both a normal
++                # off switch and an account whose auto-search is not unlocked.
++                # Allow ALAS one natural enable attempt.  If the next frame is
++                # still off, stop retrying instead of turning an unavailable
++                # feature into an unbounded three-second click loop.
++                if getattr(self, '_semantic_auto_search_enable_attempted', False):
++                    logger.warning(
++                        'Operation Siren auto search stayed off after one '
++                        'semantic enable attempt'
++                    )
++                    return False
++                self._semantic_auto_search_enable_attempted = True
          if self.match_template_color(AUTO_SEARCH_OS_MAP_OPTION_OFF, offset=(5, 120)):
              if self.info_bar_count() >= 2:
                  self.device.screenshot_interval_set()
@@ -1291,7 +1221,6 @@ index f3821a36..c3925742 100644
 +        items = self.pretreatment(items)
          FILTER.load(parser)
          return FILTER.applys(items, funcs=[self.check_cl1_purple_coins, self.check_item_count])
- 
 diff --git a/module/os_shop/shop.py b/module/os_shop/shop.py
 index b97f0c0d..c7bf38d3 100644
 --- a/module/os_shop/shop.py

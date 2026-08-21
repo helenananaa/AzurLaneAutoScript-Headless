@@ -61,6 +61,35 @@ class RuntimeObserverContractTests(unittest.TestCase):
         self.assertIn("image_source_count", self.server)
         self.assertIn("image_source_capacity", self.server)
 
+    def test_opsi_overlay_images_survive_large_stronghold_maps(self):
+        self.assertIn(
+            "kReservedFleetImages = 64", self.probe_source
+        )
+        self.assertIn(
+            "kReservedTrailingImages = 128", self.probe_source
+        )
+        self.assertIn(
+            'ancestorName.rfind("fleet_", 0) == 0', self.probe_source
+        )
+        self.assertIn(
+            "std::array<void *, kReservedTrailingImages> trailingImages",
+            self.probe_source,
+        )
+        self.assertIn(
+            "trailingImages[trailingImageCount % trailingImages.size()]",
+            self.probe_source,
+        )
+        self.assertIn(
+            "without walking\n"
+            "        // transform ancestry for thousands of discarded Images",
+            self.probe_source,
+        )
+        append_record = self.probe_source.index("auto appendImageRecord")
+        rolling_tail = self.probe_source.index(
+            "trailingImages[trailingImageCount % trailingImages.size()]"
+        )
+        self.assertLess(append_record, rolling_tail)
+
     def test_large_observer_responses_do_not_use_server_thread_stack(self):
         self.assertIn(
             "static thread_local ObserverSemanticSnapshot snapshot", self.server

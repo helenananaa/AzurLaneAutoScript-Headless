@@ -1,0 +1,735 @@
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+index e7b4038b..0ac68979 100644
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -44,10 +44,13 @@ class InfoHandler(ModuleBase):
+         """
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
+-            # The top info bar is an optional legacy pixel signal. Semantic
+-            # task flows prove their own destination and mutation
+-            # postconditions from typed Unity state, so never inspect guarded
+-            # frame pixels merely to count transient notifications.
++            from alas_headless import current_semantic_session
++            session = current_semantic_session()
++            if session is not None:
++                count = session.operation_siren_auto_search_info_count()
++                if count:
++                    return count
++            # Other top info bars remain optional legacy pixel signals.
+             return 0
+         image = self.image_crop(INFO_BAR_AREA, copy=False)
+         line = cv2.reduce(image, 1, cv2.REDUCE_AVG)
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+index 1b3cbe99..1e30446c 100644
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -67,6 +67,36 @@ FLEET_LOW_RESOLVE = Button(
+ 
+ 
+ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
++    def semantic_current_fleet_unavailable(self, attempts=5):
++        """Return ``(needs_repair, low_resolve)`` in semantic mode.
++
++        Fleet selection publishes its selected number before the left portrait
++        and map chibi finish remounting.  Retry only that exact incomplete-map
++        observation; repair remains a separate, higher-priority state.
++        """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is None:
++            return None
++
++        from alas_headless import SemanticGateClosed
++
++        for attempt in range(attempts):
++            needs_repair = (
++                semantic_session.operation_siren_current_fleet_needs_repair()
++            )
++            if needs_repair:
++                return True, False
++            try:
++                return (
++                    False,
++                    semantic_session.operation_siren_current_fleet_defeated(),
++                )
++            except SemanticGateClosed:
++                if attempt >= attempts - 1:
++                    raise
++                self.device.sleep(0.5)
++                semantic_session.refresh_frame()
++
+     def _goto(self, location, expected=''):
+         super()._goto(location, expected)
+         self.predict_radar()
+@@ -479,6 +509,31 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             MapWalkError: If unable to goto such grid.
+                 Probably clicking at land, center of port, or fleet itself.
+         """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            for _ in range(24):
++                self.device.screenshot()
++                if allow_port_arrive and self.appear(PORT_ENTER, offset=(20, 20)):
++                    logger.info('Arrive port (typed port entrance)')
++                    return
++                targets = semantic_session.operation_siren_radar_targets('port')
++                if len(targets) != 1:
++                    raise MapWalkError('typed port radar target is absent or ambiguous')
++                grid = targets[0]
++                logger.info(f'Typed port route at {grid}')
++                if grid == (0, 0):
++                    if allow_port_arrive:
++                        self.device.sleep(0.5)
++                        continue
++                    return
++                step = (
++                    max(-4, min(3, grid[0])),
++                    max(-2, min(2, grid[1])),
++                )
++                semantic_session.click_operation_siren_relative_grid(step)
++                self.wait_until_walk_stable()
++            raise MapWalkError('typed port route did not reach the entrance')
++
+         confirm_timer = Timer(3, count=6).start()
+         while 1:
+             # Calculate destination
+@@ -801,9 +856,9 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                 # clicking the same boss again.
+                 if (
+                     is_month
+-                    and semantic_session.operation_siren_current_fleet_defeated()
++                    and any(self.semantic_current_fleet_unavailable())
+                 ):
+-                    logger.warning('Current fleet is defeated; rotate to the next fleet')
++                    logger.warning('Current fleet is unavailable; rotate to the next fleet')
+                     return
+             return
+ 
+@@ -941,7 +996,14 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             for fleet in fleets:
+                 logger.hr(f'Turn: {fleet}', level=2)
+                 if not isinstance(fleet, BossFleet):
+-                    self.os_order_execute(recon_scan=False, submarine_call=True)
++                    semantic_session = getattr(self.device, 'semantic_adapter', None)
++                    if (
++                        semantic_session is not None
++                        and self.appear(MAP_EXIT, offset=(20, 20))
++                    ):
++                        logger.info('Skip submarine order inside a locked boss room')
++                    else:
++                        self.os_order_execute(recon_scan=False, submarine_call=True)
+                     continue
+ 
+                 # Switch fleet
+@@ -967,8 +1029,8 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                 if not in_semantic_boss_room:
+                     self.handle_os_map_fleet_lock(enable=False)
+                 if in_semantic_boss_room:
+-                    fleet_defeated = (
+-                        semantic_session.operation_siren_current_fleet_defeated()
++                    fleet_defeated = any(
++                        self.semantic_current_fleet_unavailable()
+                     )
+                 else:
+                     fleet_defeated = self.fleet_low_resolve_appear()
+@@ -1098,6 +1160,14 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+         Returns:
+             str: Usually in ['100', '80', '60', '40', '20', '0']
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            result = str(
++                semantic_adapter.operation_siren_stronghold_percentage()
++            )
++            logger.attr('STRONGHOLD_PERCENTAGE', result)
++            return result
++
+         ocr = PercentageOcr(STRONGHOLD_PERCENTAGE, letter=(255, 255, 255), threshold=128, name='STRONGHOLD_PERCENTAGE')
+         result = ocr.ocr(self.device.image)
+         result = result.rstrip('7Kk')
+diff --git a/module/os/globe_camera.py b/module/os/globe_camera.py
+index 12d5cac5..6daefb67 100644
+--- a/module/os/globe_camera.py
++++ b/module/os/globe_camera.py
+@@ -9,6 +9,8 @@ from module.os.globe_zone import Zone, ZoneManager
+ from module.os_ash.assets import ASH_QUIT, ASH_SHOWDOWN
+ from module.os_handler.assets import ACTION_POINT_CANCEL, ACTION_POINT_USE, AUTO_SEARCH_REWARD
+ 
++from alas_headless import SemanticGateClosed
++
+ 
+ class GlobeCamera(GlobeOperation, ZoneManager):
+     globe: GlobeDetection
+@@ -103,6 +105,13 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+             bool: if camera moved.
+         """
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # Keep the generated start/end pair inside the reviewed globe box;
++            # long inter-region moves are performed as several proven drags.
++            vector = tuple(
++                np.min([np.abs(vector), (300, 300)], axis=0)
++                * np.sign(vector)
++            )
+         name = 'GLOBE_SWIPE_' + '_'.join([str(int(round(x))) for x in vector])
+         if np.linalg.norm(vector) <= 25:
+             logger.warning(f'Globe swipe to short: {vector}')
+@@ -252,27 +261,127 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
+-            for _ in range(5):
+-                if semantic_adapter.operation_siren_globe_state().zone_name == zone.cn:
++            sight = (20, 220, 980, 620)
++            for focus_attempt in range(16):
++                try:
++                    state = semantic_adapter.operation_siren_globe_state()
++                except SemanticGateClosed:
++                    state = None
++                if state is not None and state.zone_name == zone.cn:
+                     self.globe_update()
+                     logger.attr('Globe_pinned', zone)
+                     return
+-                self.globe_in_sight(zone)
+-                # Match ``zone_to_button()`` below: ALAS represents a zone by
+-                # the pin's lower-left anchor, then clicks the centre of its
+-                # (0, -10, 16, 0) button area.
+-                point = tuple(self.globe2screen([zone.location])[0] + (8, -5))
+-                logger.info(f'Semantic globe zone point: {point}')
+-                receipt = semantic_adapter.click_operation_siren_globe_zone(
+-                    zone.cn, point)
+-                self.globe_update()
+-                if self.get_globe_pinned_zone() == zone:
+-                    logger.attr('Globe_pinned', zone)
+-                    return
+-                logger.warning(
+-                    f'Semantic globe selected an adjacent zone via '
+-                    f'{receipt.semantic_id}; recalibrate and retry'
+-                )
++
++                # The exact selected-zone name and the fixed typed panel pin
++                # anchor the ALAS globe camera without screenshot matching.
++                if state is not None:
++                    self.globe_update()
++                    try:
++                        receipt = semantic_adapter.operation_siren_globe_unpin()
++                    except SemanticGateClosed:
++                        logger.warning(
++                            'Semantic globe unpin did not settle; retry anchor'
++                        )
++                        continue
++                    # The selected-zone panel flips horizontally near screen
++                    # edges.  Anchor the camera with the exact typed pin point
++                    # used for this unpin receipt instead of the legacy fixed
++                    # ZONE_PINNED template coordinate.
++                    selected = self.name_to_zone(state.zone_name)
++                    pinned_globe = self.globe.screen2globe([receipt.start])[0]
++                    self.globe_camera = tuple(
++                        selected.location - pinned_globe + self.globe.homo_center
++                    )
++                    if self.config.DEVICE_CONTROL_METHOD == 'minitouch':
++                        distance = self.config.MAP_SWIPE_MULTIPLY_MINITOUCH
++                    elif self.config.DEVICE_CONTROL_METHOD == 'MaaTouch':
++                        distance = self.config.MAP_SWIPE_MULTIPLY_MAATOUCH
++                    else:
++                        distance = self.config.MAP_SWIPE_MULTIPLY
++                    pixel_delta = np.subtract(receipt.end, receipt.start)
++                    unpin_vector = -pixel_delta / np.array(distance, dtype=float)
++                    self.globe_camera = tuple(
++                        np.array(self.globe_camera, dtype=float)
++                        + unpin_vector
++                        * np.array(self.config.OS_GLOBE_SWIPE_MULTIPLY)
++                    )
++                elif not hasattr(self, 'globe_camera'):
++                    raise GameStuckError(
++                        'Semantic globe has no selected-zone camera anchor'
++                    )
++
++                for _ in range(8):
++                    target = self.globe2screen([zone.location])[0]
++                    if point_in_area(target, area=sight):
++                        break
++                    area = (
++                        400, 200,
++                        GLOBE_MAP_SHAPE[0] - 400,
++                        GLOBE_MAP_SHAPE[1] - 250,
++                    )
++                    loca = point_limit(zone.location, area=area)
++                    vector = (
++                        np.array(loca) - np.array(self.globe_camera, dtype=float)
++                    ) / self.config.OS_GLOBE_SWIPE_MULTIPLY
++                    vector = tuple(
++                        np.min([np.abs(vector), (620, 340)], axis=0)
++                        * np.sign(vector)
++                    )
++                    self.globe_swipe(vector)
++                else:
++                    raise GameStuckError(
++                        'Semantic globe target did not enter the safe sight area'
++                    )
++
++                target = self.globe2screen([zone.location])[0] + (8, -5)
++                # A proven unpin drag also moves the globe camera.  The
++                # configured swipe multiplier is close but not exact on
++                # every emulator, so probe a deterministic tight spiral
++                # around ALAS' projected anchor.  Eight-pixel spacing is
++                # needed where a normal zone lies between two port pins.
++                probe_offsets = tuple(sorted(
++                    (
++                        (x, y)
++                        for x in range(-64, 65, 8)
++                        for y in range(-64, 65, 8)
++                    ),
++                    key=lambda point: (
++                        max(abs(point[0]), abs(point[1])),
++                        abs(point[0]) + abs(point[1]),
++                        point[1],
++                        point[0],
++                    ),
++                ))
++                shift = focus_attempt * 17 % len(probe_offsets)
++                probe_offsets = probe_offsets[shift:] + probe_offsets[:shift]
++                selected = None
++                for offset in probe_offsets:
++                    probe = target + offset
++                    if not point_in_area(probe, area=sight):
++                        continue
++                    try:
++                        semantic_adapter.click_operation_siren_globe_zone(
++                            zone.cn, (float(probe[0]), float(probe[1])))
++                    except SemanticGateClosed:
++                        pass
++                    try:
++                        selected = semantic_adapter.operation_siren_globe_state()
++                    except SemanticGateClosed:
++                        selected = None
++                        continue
++                    if selected.zone_name == zone.cn:
++                        self.globe_update()
++                        logger.attr('Globe_pinned', zone)
++                        return
++                    logger.warning(
++                        f'Semantic globe probe {tuple(probe)} selected '
++                        f'{selected.zone_name}; re-anchor and retry'
++                    )
++                    break
++                if selected is None:
++                    raise GameStuckError(
++                        'Semantic globe could not recover a selected zone'
++                    )
+             raise GameStuckError('Semantic globe could not select the expected zone')
+ 
+         while 1:
+@@ -358,7 +467,7 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+         logger.info('Find siren stronghold finished')
+         return None
+ 
+-    def find_siren_stronghold(self):
++    def find_siren_stronghold(self, excluded_zone_ids=()):
+         """
+         Returns:
+             zone: Zone that has siren stronghold, or None if not found.
+@@ -368,6 +477,35 @@ class GlobeCamera(GlobeOperation, ZoneManager):
+             out: in_globe, is_zone_pinned() if found.
+         """
+         logger.hr(f'Find siren stronghold', level=1)
++        excluded_zone_ids = frozenset(excluded_zone_ids)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            current = semantic_adapter.operation_siren_globe_state()
++            if current.zone_type == '塞壬要塞':
++                zone = self.name_to_zone(current.zone_name)
++                if zone.zone_id not in excluded_zone_ids:
++                    logger.info(f'Current zone {zone.zone_id} is a siren stronghold')
++                    return zone
++                logger.info(f'Skip cleared stronghold zone {zone.zone_id}')
++
++            region = self.name_to_zone(current.zone_name).region
++            order = [1, 2, 4, 3]
++            index = order.index(region) if region in order else 0
++            order = (order * 2)[index:index + 4]
++            for region in order:
++                logger.hr(f'Find siren stronghold in region {region}', level=2)
++                zones = self.zones.select(region=region, is_port=False)
++                zones = zones.sort_by_camera_distance(self.globe_camera)
++                for zone in zones:
++                    if zone.zone_id in excluded_zone_ids:
++                        continue
++                    self.globe_focus_to(zone)
++                    if self.get_zone_pinned_name() == 'STRONGHOLD':
++                        logger.info(f'Confirm zone {zone.zone_id} is a siren stronghold')
++                        return zone
++            logger.info('No more siren stronghold')
++            return None
++
+         region = self.camera_to_zone(self.globe_camera).region
+         order = [1, 2, 4, 3]
+         if region not in order:
+diff --git a/module/os/map.py b/module/os/map.py
+index f4c58ed1..6332539a 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -2,7 +2,7 @@ import time
+ 
+ import inflection
+ 
+-from alas_headless import validate_alas_opsi_repair_config, validate_alas_opsi_rescan_config
++from alas_headless import SemanticGateClosed, validate_alas_opsi_repair_config, validate_alas_opsi_rescan_config
+ 
+ from module.base.timer import Timer
+ from module.config.utils import get_os_reset_remain
+@@ -15,7 +15,7 @@ from module.os.fleet import OSFleet
+ from module.os.globe_camera import GlobeCamera
+ from module.os.globe_operation import RewardUncollectedError
+ from module.os_handler.assets import AUTO_SEARCH_OS_MAP_OPTION_OFF, AUTO_SEARCH_OS_MAP_OPTION_OFF_DISABLED, \
+-    AUTO_SEARCH_OS_MAP_OPTION_ON, AUTO_SEARCH_REWARD, EXCHANGE_CHECK, PORT_GOTO_SUPPLY
++    AUTO_SEARCH_OS_MAP_OPTION_ON, AUTO_SEARCH_REWARD, EXCHANGE_CHECK, ORDER_CHECK, PORT_GOTO_SUPPLY
+ from module.os_handler.strategic import StrategicSearchHandler
+ from module.ui.assets import GOTO_MAIN
+ from module.ui.page import page_os
+@@ -32,6 +32,13 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+         """
+         logger.hr('OS init', level=1)
+         kwargs = dict()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            # A task process may restart while an already-enabled auto search
++            # is loading or fighting. Declare the exact task owner before
++            # ALAS' generic popup probes run; the semantic adapter drops this
++            # bounded lease as soon as the local map or globe is proven.
++            semantic_adapter.begin_operation_siren_startup_recovery()
+         if self.config.task.command.__contains__('iM'):
+             for key in self.config.bound.keys():
+                 value = self.config.__getattribute__(key)
+@@ -53,7 +60,6 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+         )
+ 
+         # UI switching
+-        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if (
+             semantic_adapter is not None
+             and semantic_adapter.open().oracle.operation_siren_mission_list_visible()
+@@ -83,6 +89,12 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                 if self.is_in_globe():
+                     break
+             self.os_globe_goto_map()
++        if semantic_adapter is not None and semantic_adapter.appear(ORDER_CHECK):
++            logger.info('Recover retained Operation Siren order panel')
++            self.device.click(ORDER_CHECK)
++            for _ in self.loop():
++                if not semantic_adapter.appear(ORDER_CHECK) and self.is_in_map():
++                    break
+         if self.is_in_map():
+             logger.info('Already in os map')
+         elif self.is_in_globe():
+@@ -114,8 +126,22 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+             logger.warning('OS is in a special zone type, while SAFE and DANGEROUS are acceptable')
+             self.map_exit()
+ 
+-        # Clear current zone
+-        if self.zone.zone_id in [22, 44, 154]:
++        # Clear current zone. A completed Stronghold can keep its typed title
++        # and percentage at 0 while removing MAP_EXIT. Re-running auto-search
++        # there leaves the official switch off forever, so hand the exact
++        # cleared room directly to the owning Stronghold task instead.
++        cleared_stronghold = False
++        if semantic_adapter is not None:
++            try:
++                cleared_stronghold = (
++                    semantic_adapter.operation_siren_stronghold_percentage()
++                    == 0
++                )
++            except SemanticGateClosed:
++                pass
++        if cleared_stronghold:
++            logger.info('Stronghold is already 0%, skip initial auto search')
++        elif self.zone.zone_id in [22, 44, 154]:
+             logger.info('In zone 22, 44, 154, skip running first auto search')
+             self.handle_ash_beacon_attack()
+         else:
+@@ -577,8 +603,8 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+                         self.device, 'semantic_adapter', None
+                     )
+                     if semantic_session is not None:
+-                        fleet_defeated = (
+-                            semantic_session.operation_siren_current_fleet_defeated()
++                        fleet_defeated = any(
++                            self.semantic_current_fleet_unavailable()
+                         )
+                     else:
+                         self.hp_get()
+@@ -714,6 +740,46 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+             bool: If cleared
+         """
+         logger.hr('Clear question', level=2)
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            preferred = ((0, 1), (-1, 0), (1, 0), (0, -1), (0, -2), (0, -3))
++            guideposts = set(
++                semantic_session.operation_siren_radar_targets('guidepost')
++            )
++            ports = set()
++            if not self.zone.is_port:
++                ports.update(
++                    semantic_session.operation_siren_radar_targets('port')
++                )
++            target = next(
++                (location for location in preferred if location in guideposts or location in ports),
++                None,
++            )
++            if target is None:
++                logger.info('No exact question mark above current fleet on this radar')
++                return False
++
++            logger.info(f'Found exact question mark on {target}')
++            self.handle_info_bar()
++            semantic_session.click_operation_siren_relative_grid(target)
++            with self.config.temporary(STORY_ALLOW_SKIP=False):
++                result = self.wait_until_walk_stable(
++                    drop=drop,
++                    walk_out_of_step=False,
++                    confirm_timer=Timer(1.5, count=4),
++                )
++            if 'akashi' in result:
++                self._solved_map_event.add('is_akashi')
++                return True
++            if 'event' in result:
++                self._solved_map_event.add('is_semantic_question')
++                self.os_auto_search_run(drop=drop)
++                return True
++            logger.warning(
++                f'Arrive exact question with unexpected result: {result}, expected: {target}'
++            )
++            return False
++
+         for _ in range(3):
+             grid = self.radar.predict_question(self.device.image, in_port=self.zone.is_port)
+             if grid is None:
+diff --git a/module/os/map_fleet_selector.py b/module/os/map_fleet_selector.py
+index 5466e194..666b4790 100644
+--- a/module/os/map_fleet_selector.py
++++ b/module/os/map_fleet_selector.py
+@@ -173,6 +173,11 @@ class FleetSelector:
+         from alas_headless import current_semantic_session
+         semantic_session = current_semantic_session()
+         if semantic_session is not None:
++            semantic_session.refresh_frame()
++            current = semantic_session.operation_siren_current_fleet()
++            if current == index:
++                logger.info(f'It is fleet {index} already')
++                return False
+             if not semantic_session.operation_siren_fleet_selector_open():
+                 semantic_session.click_operation_siren_fleet_bar()
+                 for _ in self.main.loop():
+diff --git a/module/os/tasks/stronghold.py b/module/os/tasks/stronghold.py
+index 048604ba..1e24059d 100644
+--- a/module/os/tasks/stronghold.py
++++ b/module/os/tasks/stronghold.py
+@@ -2,6 +2,8 @@ from module.logger import logger
+ from module.os.fleet import BossFleet
+ from module.os.map import OSMap
+ 
++from alas_headless import SemanticGateClosed
++
+ 
+ class OpsiStronghold(OSMap):
+     def clear_stronghold(self):
+@@ -18,9 +20,21 @@ class OpsiStronghold(OSMap):
+         logger.hr('OS clear stronghold', level=1)
+         self.cl1_ap_preserve()
+ 
++        excluded_zone_ids = set()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            try:
++                if semantic_adapter.operation_siren_stronghold_percentage() == 0:
++                    excluded_zone_ids.add(self.zone.zone_id)
++                    logger.info(
++                        f'Exclude cleared current stronghold zone {self.zone.zone_id}'
++                    )
++            except SemanticGateClosed:
++                pass
++
+         self.os_map_goto_globe()
+         self.globe_update()
+-        zone = self.find_siren_stronghold()
++        zone = self.find_siren_stronghold(excluded_zone_ids=excluded_zone_ids)
+         if zone is None:
+             # No siren stronghold, delay next run to tomorrow.
+             self.config.task_delay(server_update=True)
+@@ -52,27 +66,38 @@ class OpsiStronghold(OSMap):
+             HOMO_EDGE_DETECT=False,
+             STORY_OPTION=0
+         )
++
++        def current_fleet_unavailable():
++            semantic_state = self.semantic_current_fleet_unavailable()
++            if semantic_state is not None:
++                return semantic_state
++
++            self.hp_reset()
++            self.hp_get()
++            return any(self.need_repair), False
++
+         # Try 3 times, because fleet may stuck in fog.
+         for _ in range(3):
+             # Attack
+             self.fleet_set(fleet.fleet_index)
++            fleet_needs_repair, fleet_low_resolve = current_fleet_unavailable()
++            fleet_unavailable = fleet_needs_repair or fleet_low_resolve
++            if fleet_unavailable:
++                reason = 'needs port repair' if fleet_needs_repair else 'has low resolve'
++                logger.info(f'Skip unavailable fleet because it {reason}')
++                return False
++
+             self.run_auto_search(question=False, rescan=False)
+-            semantic_session = getattr(self.device, 'semantic_adapter', None)
+-            if semantic_session is not None:
+-                fleet_defeated = (
+-                    semantic_session.operation_siren_current_fleet_defeated()
+-                )
+-            else:
+-                self.hp_reset()
+-                self.hp_get()
+-                fleet_defeated = any(self.need_repair)
++            fleet_needs_repair, fleet_low_resolve = current_fleet_unavailable()
++            fleet_unavailable = fleet_needs_repair or fleet_low_resolve
+ 
+             # End
+             if self.get_stronghold_percentage() == '0':
+                 logger.info('BOSS clear')
+                 return True
+-            elif fleet_defeated:
+-                logger.info('Auto search stopped, because fleet died')
++            elif fleet_unavailable:
++                reason = 'needs port repair' if fleet_needs_repair else 'has low resolve'
++                logger.info(f'Auto search stopped, because fleet {reason}')
+                 # Re-enter to reset fleet position
+                 prev = self.zone
+                 self.globe_goto(self.zone_nearest_azur_port(self.zone))
+@@ -101,6 +126,9 @@ class OpsiStronghold(OSMap):
+                 If failed, still in abyssal.
+         """
+         logger.hr(f'Stronghold clear', level=1)
++        if self.get_stronghold_percentage() == '0':
++            logger.info('BOSS clear before fleet rotation')
++            return True
+         fleets = self.parse_fleet_filter()
+         for fleet in fleets:
+             logger.hr(f'Turn: {fleet}', level=2)
+diff --git a/module/os_handler/map_event.py b/module/os_handler/map_event.py
+index a0c3fed8..d13baf05 100644
+--- a/module/os_handler/map_event.py
++++ b/module/os_handler/map_event.py
+@@ -233,23 +233,42 @@ class MapEventHandler(EnemySearchingHandler):
+             bool: If clicked.
+         """
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        semantic_enable_blocked = False
+         if semantic_adapter is not None:
+-            state = semantic_adapter.operation_siren_auto_search_state()
+-            if state == 'on':
+-                self._semantic_auto_search_enable_attempted = False
+-            elif enable is True:
+-                # The same reviewed Unity button represents both a normal
+-                # off switch and an account whose auto-search is not unlocked.
+-                # Allow ALAS one natural enable attempt.  If the next frame is
+-                # still off, stop retrying instead of turning an unavailable
+-                # feature into an unbounded three-second click loop.
+-                if getattr(self, '_semantic_auto_search_enable_attempted', False):
+-                    logger.warning(
+-                        'Operation Siren auto search stayed off after one '
+-                        'semantic enable attempt'
+-                    )
+-                    return False
+-                self._semantic_auto_search_enable_attempted = True
++            # During an active battle the local-map shell and its back button
++            # are intentionally unmounted.  The exact combat UI owns this
++            # frame; leave the map-option switch untouched until map return.
++            if not semantic_adapter.operation_siren_map_visible():
++                return False
++            from alas_headless import current_semantic_session
++            session = current_semantic_session()
++            if session is not None:
++                state = session.operation_siren_auto_search_state()
++                transition_active = (
++                    session.operation_siren_auto_search_transition_active()
++                )
++                if transition_active:
++                    # The exact OFF control was committed once and owns this
++                    # loading interval.  Suppress legacy template branches
++                    # until ON or a bounded unchanged-OFF postcondition is
++                    # observed; never inject duplicate enable taps.
++                    semantic_enable_blocked = enable is True
++                elif state == 'on':
++                    self._semantic_auto_search_enable_attempted = False
++                elif enable is True:
++                    if getattr(
++                        self, '_semantic_auto_search_enable_attempted', False
++                    ):
++                        logger.warning(
++                            'Operation Siren auto search remains off after the '
++                            'bounded enable attempt'
++                        )
++                        semantic_enable_blocked = True
++                    else:
++                        logger.info('Allow ALAS one natural enable attempt')
++                        self._semantic_auto_search_enable_attempted = True
++                        self.device.click(AUTO_SEARCH_OS_MAP_OPTION_OFF)
++                        return True
+         if self.match_template_color(AUTO_SEARCH_OS_MAP_OPTION_OFF, offset=(5, 120)):
+             if self.info_bar_count() >= 2:
+                 self.device.screenshot_interval_set()
+@@ -273,11 +292,15 @@ class MapEventHandler(EnemySearchingHandler):
+             pass
+         elif enable:
+             if self.match_template_color(AUTO_SEARCH_OS_MAP_OPTION_OFF, offset=(5, 120), interval=3):
++                if semantic_enable_blocked:
++                    return False
+                 self.device.click(AUTO_SEARCH_OS_MAP_OPTION_OFF)
+                 self.interval_reset(AUTO_SEARCH_OS_MAP_OPTION_OFF_DISABLED)
+                 return True
+             # Game client bugged sometimes, AUTO_SEARCH_OS_MAP_OPTION_OFF grayed out but still functional
+             if self.match_template_color(AUTO_SEARCH_OS_MAP_OPTION_OFF_DISABLED, offset=(5, 120), interval=3):
++                if semantic_enable_blocked:
++                    return False
+                 self.device.click(AUTO_SEARCH_OS_MAP_OPTION_OFF_DISABLED)
+                 self.interval_reset(AUTO_SEARCH_OS_MAP_OPTION_OFF)
+                 return True
+diff --git a/module/os_handler/map_order.py b/module/os_handler/map_order.py
+index 624b4021..89692d85 100644
+--- a/module/os_handler/map_order.py
++++ b/module/os_handler/map_order.py
+@@ -44,6 +44,20 @@ class MapOrderHandler(MapOperation, ActionPointHandler, MapEventHandler, ZoneMan
+             out: is_in_map
+         """
+         logger.info('Order quit')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            if not self.is_in_map_order():
++                return
++            self.device.click(ORDER_CHECK)
++            retry = Timer(2, count=4).start()
++            for _ in self.loop():
++                in_order = self.is_in_map_order()
++                if not in_order and self.is_in_map():
++                    return
++                if in_order and retry.reached():
++                    logger.info('Retry exact Operation Siren order back')
++                    self.device.click(ORDER_CHECK)
++                    retry.reset()
+         self.ui_click(ORDER_CHECK, appear_button=self.is_in_map_order, check_button=self.is_in_map,
+                       skip_first_screenshot=True)
+ 
+@@ -155,6 +169,11 @@ class MapOrderHandler(MapOperation, ActionPointHandler, MapEventHandler, ZoneMan
+         Overridden as button position matches with
+         MAP_EXIT for OpSi
+         """
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            # The transient cat-attack sparkle is optional and has no typed
++            # control.  Let the exact order/map postcondition settle without
++            # reading pixels or injecting a blind skip tap.
++            return False
+         if not self.map_cat_attack_timer.reached():
+             return False
+         if np.sum(color_similarity_2d(self.image_crop(MAP_CAT_ATTACK, copy=False), (255, 231, 123)) > 221) > 100:

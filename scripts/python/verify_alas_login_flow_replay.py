@@ -17,8 +17,16 @@ from typing import Any, Mapping, Sequence
 
 try:
     from .build_alas_patch_series import check_generated_patch
+    from .verify_alas_patch_tree import (
+        AlasPatchVerificationError,
+        inspect_patched_upstream,
+    )
 except ImportError:  # Direct script execution.
     from build_alas_patch_series import check_generated_patch
+    from verify_alas_patch_tree import (  # type: ignore[no-redef]
+        AlasPatchVerificationError,
+        inspect_patched_upstream,
+    )
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -209,6 +217,12 @@ class ReplayOracle:
 
     def server_maintenance_visible(self) -> bool:
         return False
+
+    def main_page_visible(self) -> bool:
+        return bool(
+            self.enabled_values["main/battle"]
+            or self.enabled_values["main/formation"]
+        )
 
     def login_update_in_progress(self) -> bool:
         return False
@@ -489,14 +503,16 @@ def verify(upstream: Path) -> Mapping[str, Any]:
     expected_commit = lock["commit"]
     if _git(upstream, "rev-parse", "HEAD").lower() != expected_commit:
         raise LoginReplayError("patched upstream commit does not match the lock")
-    reverse = subprocess.run(
-        ["git", "-C", str(upstream), "apply", "--reverse", "--check", str(PATCH_PATH)],
-        capture_output=True,
-        text=True,
-        timeout=30,
-    )
-    if reverse.returncode != 0:
-        raise LoginReplayError("canonical patch is not applied to the replay tree")
+    try:
+        inspect_patched_upstream(
+            upstream,
+            PATCH_PATH,
+            expected_commit=expected_commit,
+        )
+    except AlasPatchVerificationError as exc:
+        raise LoginReplayError(
+            "canonical patch surface is not applied to the replay tree"
+        ) from exc
     if _sha256(login_source) != PATCHED_LOGIN_SHA256:
         raise LoginReplayError("patched upstream login source identity changed")
 

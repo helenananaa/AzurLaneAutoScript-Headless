@@ -29,7 +29,7 @@ index 97631fca..6b26dd61 100644
          kv = dict_to_kv(
              {
                  "recon_scan": recon_scan,
-@@ -473,32 +486,43 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
+@@ -473,32 +486,46 @@ class AzurLaneConfig(ConfigUpdater, ManualConfig, GeneratedConfig, ConfigWatcher
                      self.modified[keys] = next_run
  
          def is_submarine_call(task):
@@ -72,6 +72,9 @@ index 97631fca..6b26dd61 100644
 +                stronghold_force_run=deep_get(
                      self.data, keys=f"{task}.OpsiStronghold.ForceRun", default=False
 -                )
++                ),
++                month_boss_force_run=deep_get(
++                    self.data, keys=f"{task}.OpsiMonthBoss.ForceRun", default=False
 +                ),
 +                special_radar=deep_get(
 +                    self.data, keys=f"{task}.OpsiExplore.SpecialRadar", default=False

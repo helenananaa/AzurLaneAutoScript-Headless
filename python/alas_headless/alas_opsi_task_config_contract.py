@@ -23,6 +23,7 @@ OPSI_FLEET_FILTER_PRESETS = ("callsubmarine",)
 class AlasOpsiMonthBossConfigSnapshot:
     mode: str
     check_adaptability: bool
+    force_run: bool
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,7 @@ class AlasOpsiObscureConfigSnapshot:
 
 @dataclass(frozen=True)
 class AlasOpsiDailyConfigSnapshot:
+    do_mission: bool
     use_tuning_sample: bool
 
 
@@ -58,6 +60,7 @@ class AlasOpsiDelayTaskConfigSnapshot:
     obscure_force_run: bool
     abyssal_force_run: bool
     stronghold_force_run: bool
+    month_boss_force_run: bool
     special_radar: bool
 
     @property
@@ -67,6 +70,7 @@ class AlasOpsiDelayTaskConfigSnapshot:
             or self.obscure_force_run
             or self.abyssal_force_run
             or self.stronghold_force_run
+            or self.month_boss_force_run
         )
 
 
@@ -103,7 +107,7 @@ class AlasOpsiRescanConfigSnapshot:
 
 
 def validate_alas_opsi_month_boss_config(
-    *, mode: object, check_adaptability: object
+    *, mode: object, check_adaptability: object, force_run: object = False
 ) -> AlasOpsiMonthBossConfigSnapshot:
     if type(mode) is not str or mode not in OPSI_MONTH_BOSS_MODES:
         raise SemanticGateClosed(
@@ -111,9 +115,12 @@ def validate_alas_opsi_month_boss_config(
         )
     if type(check_adaptability) is not bool:
         raise SemanticGateClosed("OpsiMonthBoss.CheckAdaptability must be a bool")
+    if type(force_run) is not bool:
+        raise SemanticGateClosed("OpsiMonthBoss.ForceRun must be a bool")
     return AlasOpsiMonthBossConfigSnapshot(
         mode=mode,
         check_adaptability=check_adaptability,
+        force_run=force_run,
     )
 
 
@@ -160,11 +167,16 @@ def validate_alas_opsi_obscure_config(
 
 
 def validate_alas_opsi_daily_config(
-    *, use_tuning_sample: object
+    *, do_mission: object, use_tuning_sample: object
 ) -> AlasOpsiDailyConfigSnapshot:
+    if type(do_mission) is not bool:
+        raise SemanticGateClosed("OpsiDaily.DoMission must be a bool")
     if type(use_tuning_sample) is not bool:
         raise SemanticGateClosed("OpsiDaily.UseTuningSample must be a bool")
-    return AlasOpsiDailyConfigSnapshot(use_tuning_sample=use_tuning_sample)
+    return AlasOpsiDailyConfigSnapshot(
+        do_mission=do_mission,
+        use_tuning_sample=use_tuning_sample,
+    )
 
 
 def validate_alas_opsi_hazard1_config(
@@ -221,6 +233,7 @@ def validate_alas_opsi_delay_task_config(
     obscure_force_run: object,
     abyssal_force_run: object,
     stronghold_force_run: object,
+    month_boss_force_run: object,
     special_radar: object,
 ) -> AlasOpsiDelayTaskConfigSnapshot:
     fields = {
@@ -228,6 +241,7 @@ def validate_alas_opsi_delay_task_config(
         "OpsiObscure.ForceRun": obscure_force_run,
         "OpsiAbyssal.ForceRun": abyssal_force_run,
         "OpsiStronghold.ForceRun": stronghold_force_run,
+        "OpsiMonthBoss.ForceRun": month_boss_force_run,
         "OpsiExplore.SpecialRadar": special_radar,
     }
     for field, value in fields.items():
@@ -238,6 +252,7 @@ def validate_alas_opsi_delay_task_config(
         obscure_force_run=obscure_force_run,
         abyssal_force_run=abyssal_force_run,
         stronghold_force_run=stronghold_force_run,
+        month_boss_force_run=month_boss_force_run,
         special_radar=special_radar,
     )
 

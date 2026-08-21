@@ -162,6 +162,42 @@ def inspect_upstream(upstream: Path, *, expected_commit: str) -> None:
         raise AlasPatchVerificationError("upstream working tree must be clean")
 
 
+def inspect_patched_upstream(
+    upstream: Path,
+    patch: Path,
+    *,
+    expected_commit: str,
+) -> None:
+    """Prove that a patched tree owns the canonical final file surface.
+
+    The generated patch is an ordered series whose members can touch the same
+    file more than once.  ``git apply --reverse --check`` evaluates those
+    members in the wrong order for a final tree and eventually reports
+    ``wrong type`` for delete/recreate transitions.  The authoritative series
+    check plus the exact final changed-file surface is stable across those
+    legitimate overlaps; replay verifiers then pin their consumed sources by
+    content hash.
+    """
+    if not upstream.is_dir() or not (upstream / ".git").exists():
+        raise AlasPatchVerificationError("patched upstream is not a Git working tree")
+    if _git(upstream, "rev-parse", "HEAD").lower() != expected_commit:
+        raise AlasPatchVerificationError("patched upstream HEAD does not match lock")
+    expected_paths = tuple(sorted(parse_patch_paths(patch)))
+    status = _git(upstream, "status", "--porcelain", "--untracked-files=all")
+    actual_paths = []
+    for line in status.splitlines():
+        if len(line) <= 3:
+            raise AlasPatchVerificationError("patched worktree status is malformed")
+        path = line[3:].replace("\\", "/")
+        parts = PurePosixPath(path).parts
+        if "__pycache__" in parts or path.endswith(".pyc"):
+            continue
+        actual_paths.append(path)
+    if tuple(sorted(actual_paths)) != expected_paths:
+        raise AlasPatchVerificationError("patched worktree file surface changed")
+    _git(upstream, "diff", "--check")
+
+
 def check_patch_applies(upstream: Path, patch: Path) -> None:
     try:
         subprocess.run(

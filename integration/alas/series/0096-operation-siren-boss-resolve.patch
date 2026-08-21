@@ -1,0 +1,245 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+index 4112b31d..f386894d 100644
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -299,6 +299,31 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                 return False
+             return self.is_in_map()
+ 
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            # The semantic runtime has explicit map and combat identities, so
++            # it does not need the legacy pixel/homography stability loop.
++            # Keep the same bounded confirmation delay for ordinary movement,
++            # and hand a boss encounter to the existing combat state machine.
++            for _ in self.loop(skip_first=skip_first_screenshot):
++                if self.combat_appear():
++                    self.combat(
++                        expected_end=abyssal_expected_end,
++                        fleet_index=self.fleet_show_index,
++                        save_get_items=drop,
++                    )
++                    result.add('event')
++                    break
++                if semantic_session.operation_siren_map_visible():
++                    if confirm_timer.reached():
++                        break
++                else:
++                    confirm_timer.reset()
++            result = '_'.join(result)
++            logger.info(f'Walk stabled, result: {result}')
++            self.device.screenshot_interval_set()
++            return result
++
+         for _ in self.loop(skip_first=skip_first_screenshot):
+             # Map event
+             event = self.handle_map_event(drop=drop)
+@@ -549,6 +574,11 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             reviewed_kinds = {
+                 'is_port': 'port',
+                 'is_exclamation': 'task',
++                # Month-boss rooms expose the legacy radar ``question``
++                # mechanism as exact Unity guidepost events (7030010 /
++                # 7030050).  Keep ALAS' route planning and only replace the
++                # observation port.
++                'is_question': 'guidepost',
+             }
+             selected = [
+                 kind for flag, kind in reviewed_kinds.items()
+@@ -736,9 +766,47 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+     def boss_goto(self, location=(0, 0), has_fleet_step=False, drop=None, is_month=False):
+         logger.hr('BOSS goto')
+ 
+-        if is_month:
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if is_month and semantic_session is None:
+             self.month_boss_goto_additional(location=location, has_fleet_step=has_fleet_step, drop=drop)
+ 
++        if semantic_session is not None:
++            while 1:
++                grids = list(
++                    semantic_session.operation_siren_radar_targets('boss')
++                )
++                if not grids:
++                    logger.info('No boss to goto, stop')
++                    break
++                grid = np.add(location_ensure(grids[0]), location)
++                grid = point_limit(grid, area=(-4, -2, 3, 2))
++                if has_fleet_step:
++                    grid = limit_walk(grid)
++                if tuple(grid) == (0, 0):
++                    logger.info(f'Arrive destination: boss {location}')
++                    break
++                semantic_session.click_operation_siren_relative_grid(
++                    tuple(int(value) for value in grid)
++                )
++                self.wait_until_walk_stable(
++                    confirm_timer=Timer(4, count=6),
++                    walk_out_of_step=False,
++                    drop=drop,
++                )
++                # A Month Boss attempt can end in timeout or flagship loss
++                # while the fleet still has HP.  The exact ``agony`` controls
++                # are the game's defeated/low-resolve state; once present the
++                # fleet cannot re-enter this non-retreatable battle.  Return to
++                # boss_clear so it can rotate to the next fleet instead of
++                # clicking the same boss again.
++                if (
++                    is_month
++                    and semantic_session.operation_siren_current_fleet_defeated()
++                ):
++                    logger.warning('Current fleet is defeated; rotate to the next fleet')
++                    return
++            return
++
+         while 1:
+             # Update local view
+             # Not screenshots taking, reuse the old one
+@@ -891,17 +959,41 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                         pass
+ 
+                 # Check fleet
+-                if not self.appear(MAP_EXIT, offset=(20, 20)):
++                semantic_session = getattr(self.device, 'semantic_adapter', None)
++                in_semantic_boss_room = bool(
++                    semantic_session is not None
++                    and self.appear(MAP_EXIT, offset=(20, 20))
++                )
++                if not in_semantic_boss_room:
+                     self.handle_os_map_fleet_lock(enable=False)
+-                if self.fleet_low_resolve_appear():
++                if in_semantic_boss_room:
++                    fleet_defeated = (
++                        semantic_session.operation_siren_current_fleet_defeated()
++                    )
++                else:
++                    fleet_defeated = self.fleet_low_resolve_appear()
++                if fleet_defeated:
+                     logger.warning('Skip using current fleet because of the low resolve debuff')
+-                    self.boss_goto(location=fleet.standby_loca, has_fleet_step=has_fleet_step, drop=drop,
+-                                   is_month=is_month)
++                    # Selecting the next fleet is sufficient in the retained
++                    # semantic boss room.  A defeated fleet cannot move out of
++                    # the boss cell, so do not send it another movement order.
++                    if not in_semantic_boss_room:
++                        self.boss_goto(location=fleet.standby_loca, has_fleet_step=has_fleet_step, drop=drop,
++                                       is_month=is_month)
+                     continue
+ 
+                 # Ensure boss is appear
+                 if is_month:
+-                    while not self.radar.select(is_enemy=True):
++                    def month_boss_visible():
++                        if semantic_session is not None:
++                            return bool(
++                                semantic_session.operation_siren_radar_targets(
++                                    'boss'
++                                )
++                            )
++                        return bool(self.radar.select(is_enemy=True))
++
++                    while not month_boss_visible():
+                         self.relative_goto(has_fleet_step=True, is_question=True, relative_position=(1, -6), index=0)
+                         try:
+                             self.relative_goto(has_fleet_step=True, is_question=True, index=1)
+@@ -913,6 +1005,20 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                 self.boss_goto(location=(0, 0), has_fleet_step=has_fleet_step, drop=drop, is_month=is_month)
+ 
+                 # End
++                if in_semantic_boss_room:
++                    boss_remaining = bool(
++                        semantic_session.operation_siren_radar_targets('boss')
++                    )
++                    if not boss_remaining:
++                        logger.info('BOSS clear')
++                        self.map_exit()
++                        return True
++                    # The boss remains after this attempt.  Keep the defeated
++                    # fleet in place and select the next configured fleet.
++                    # If every fleet is defeated the loop exhausts and reports
++                    # challenge failure below.
++                    continue
++
+                 self.predict_radar()
+                 if self.radar.select(is_question=True):
+                     logger.info('BOSS clear')
+diff --git a/module/os_combat/combat.py b/module/os_combat/combat.py
+index fa5fdef4..cce3eca1 100644
+--- a/module/os_combat/combat.py
++++ b/module/os_combat/combat.py
+@@ -43,6 +43,7 @@ class Combat(Combat_, MapEventHandler):
+         self.device.stuck_record_clear()
+         self.device.click_record_clear()
+         skip_first_screenshot = True
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
+ 
+         # if emotion_reduce:
+         #     self.emotion.wait(fleet=fleet_index)
+@@ -51,6 +52,30 @@ class Combat(Combat_, MapEventHandler):
+ 
+         for _ in self.loop():
+ 
++            if semantic_session is not None:
++                if semantic_session.open().oracle.daily_battle_result_visible():
++                    return
++                pause = self.is_combat_executing()
++                if pause:
++                    logger.attr('BattleUI', pause)
++                    return
++                if semantic_session.operation_siren_precombat_info_visible():
++                    semantic_session.click_operation_siren_precombat_info()
++                    continue
++                if semantic_session.operation_siren_precombat_visible():
++                    semantic_session.click_operation_siren_precombat_start()
++                    for _ in range(90):
++                        self.device.screenshot()
++                        pause = self.is_combat_executing()
++                        if pause:
++                            logger.attr('BattleUI', pause)
++                            return
++                        self.device.sleep(0.25)
++                    from alas_headless import SemanticGateClosed
++                    raise SemanticGateClosed(
++                        'Operation Siren combat did not start after precombat'
++                    )
++
+             if self.appear(BATTLE_PREPARATION):
+                 if self.handle_combat_automation_set(auto=auto == 'combat_auto'):
+                     continue
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+index ba14821c..8652e538 100644
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -457,6 +457,7 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+             semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+             if (
+                 semantic_adapter is not None
++                and semantic_adapter.daily_execution_active()
+                 and semantic_adapter.open().oracle.daily_battle_result_visible()
+             ):
+                 semantic_adapter.complete_daily_battle_result()
+@@ -608,6 +609,7 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+             if (
+                 semantic_adapter is not None
+                 and not semantic_adapter.open().campaign_combat_committed()
++                and not semantic_adapter.open().operation_siren_combat_committed()
+             ):
+                 oracle = semantic_adapter.open().oracle
+                 if oracle.daily_battle_result_visible():
+@@ -627,10 +629,13 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+                 and battle_status
+                 and semantic_adapter.open().campaign_combat_committed()
+             )
+-            semantic_campaign_map_stable = bool(
+-                semantic_campaign_result_wait
+-                and semantic_adapter.open().oracle.campaign_is_in_map()
++            semantic_campaign_map_state = (
++                semantic_adapter.campaign_is_in_map_after_combat()
++                if semantic_campaign_result_wait else False
+             )
++            if semantic_campaign_map_state is None:
++                continue
++            semantic_campaign_map_stable = bool(semantic_campaign_map_state)
+             if semantic_campaign_map_stable:
+                 # Typed observer reads can be slower than the brief enemy
+                 # searching animation. Once the exact result was clicked and

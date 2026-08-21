@@ -53,12 +53,12 @@
     {
       "order": 11,
       "path": "integration/alas/series/0090-operation-siren-flow-ports.patch",
-      "sha256": "bbce1234f30b0a03a9a0c74b817fb458d77e8fac03b12b47dbdafd7ea36dc9dd"
+      "sha256": "8e19e4265c8460026c7915bafba6d6e6af8eb0963c504f40a3984152936e9617"
     },
     {
       "order": 12,
       "path": "integration/alas/series/0100-tool-flow-ports.patch",
-      "sha256": "4fa227893fe203b58e52db1e036de9ce43ac06d0eea7a84d1d7ede7ef87e6ef8"
+      "sha256": "5c96089739dd319b2fc1b1acc4590a10817421869d5fa96b12429e1d4a81450b"
     },
     {
       "order": 13,
@@ -78,7 +78,7 @@
     {
       "order": 16,
       "path": "integration/alas/series/0140-scheduler-contract.patch",
-      "sha256": "bdb91801b079701b4d57020d20a125dd28ce35d66359fa767ed6f3d8649687ae"
+      "sha256": "d4b4192ed52ffd03fb7faf28263ba329a436682579d1545c36f532ca3a1d4723"
     },
     {
       "order": 17,
@@ -127,103 +127,118 @@
     },
     {
       "order": 26,
-      "path": "integration/alas/series/0200-opsi-stronghold-source-only-gate.patch",
-      "sha256": "6296ebb0196a40d2092337cef97d0413406f5c03be2306ef99e77af798b83e4a"
-    },
-    {
-      "order": 27,
       "path": "integration/alas/series/0210-restart-scheduler-flow-port.patch",
       "sha256": "4c70a2c5d136d3b8bfe228ef6a2e2a77e577079bca9cd23bb00d0299dd48bb46"
     },
     {
-      "order": 28,
+      "order": 27,
       "path": "integration/alas/series/0220-gacha-multi-order-flow-port.patch",
       "sha256": "48640210ed613c8082c4f5de1ab07f9ea2dc1462e4933773976e3ea6b11443d4"
     },
     {
-      "order": 29,
+      "order": 28,
       "path": "integration/alas/series/0230-gacha-queue-finish-flow-port.patch",
       "sha256": "1f0d68d31c40072594c80d08216eb43cc9b2a1627d02916051c42c2a30eb865a"
     },
     {
-      "order": 30,
+      "order": 29,
       "path": "integration/alas/series/0240-gacha-result-wait-port.patch",
       "sha256": "ce0d6c37d16acd0309fd34db634abef94716d16414f5347267e3d39e5160bd9f"
     },
     {
-      "order": 31,
+      "order": 30,
       "path": "integration/alas/series/0250-benchmark-return-main-flow-port.patch",
       "sha256": "d1ac316501d89ac94ea54c1dd53e1a58d73e6f3e99c360badb02fcdf4b638544"
     },
     {
-      "order": 32,
+      "order": 31,
       "path": "integration/alas/series/0260-minigame-budget-exhaustion-flow-port.patch",
       "sha256": "50279457231ca66b443f4b4f2eed813dbeb23e7fa6c0f64429a665d9d578dc05"
     },
     {
-      "order": 33,
+      "order": 32,
       "path": "integration/alas/series/0270-dorm-current-furniture-flow-port.patch",
       "sha256": "37eaa7e2aa1b5beefa1f7052e22f4b7113e1fc3c30bf1ed7834af5ff48a7e847"
     },
     {
-      "order": 34,
+      "order": 33,
       "path": "integration/alas/series/0275-reward-claim-budget-exhaustion-flow-port.patch",
       "sha256": "a6727879655e913e15defaf52dcc2da61af096e6c648c909b04926089c472107"
     },
     {
-      "order": 35,
+      "order": 34,
       "path": "integration/alas/series/0280-weekly-mission-progress-flow-port.patch",
       "sha256": "f5c2969d0aec7d797b49490500818cf245a2e0ab8fc75b476ca08af861452546"
     },
     {
-      "order": 36,
+      "order": 35,
       "path": "integration/alas/series/0290-dorm-collect-empty-food-flow-port.patch",
       "sha256": "34a2156a5512d382c94653ed70992c5022e94ac3bf85e95bb0e7b6e69cd35714"
     },
     {
-      "order": 37,
+      "order": 36,
       "path": "integration/alas/series/0300-research-selected-detail-entry-port.patch",
       "sha256": "d66d2aa8165116430725e69786fd18029996926ddb99db429a7c584a431dff67"
     },
     {
-      "order": 38,
+      "order": 37,
       "path": "integration/alas/series/0310-research-queue-entry-port.patch",
       "sha256": "07d638c1865d4ee16e416943a2b0bddac2667c9e82ac1056fa6b57c0afb582c4"
     },
     {
-      "order": 39,
+      "order": 38,
       "path": "integration/alas/series/0320-research-code-selection-port.patch",
       "sha256": "04d0e525fe66e3280c430025445f0f9b05f84036757524ced0244eb9f2844555"
     },
     {
-      "order": 40,
+      "order": 39,
       "path": "integration/alas/series/0330-research-atomic-start-port.patch",
       "sha256": "b8f0730af27ba557f952dd1a2ab6354fe72a3c0a98ae30ffb0d9c645bbf8b030"
     },
     {
-      "order": 41,
+      "order": 40,
       "path": "integration/alas/series/0340-campaign-auto-search-port.patch",
       "sha256": "1491d156292b0dfa9e54fa3f6b3d87dc46b566fd4f7c47a64092fc2e865fd698"
     },
     {
-      "order": 42,
+      "order": 41,
       "path": "integration/alas/series/0350-meowfficer-dock-training-port.patch",
       "sha256": "440ee4c47cf831b27f152e62d1b166273a18afbff8e36ef5d90ad35f0e426367"
     },
     {
-      "order": 43,
+      "order": 42,
       "path": "integration/alas/series/0360-guild-flow-port.patch",
       "sha256": "8a559a95f3e047442a5a9d83654b628c32da546896ff9c829ea2c5547a9dde57"
     },
     {
-      "order": 44,
+      "order": 43,
       "path": "integration/alas/series/0370-hard-11-4-semantic-clear-port.patch",
       "sha256": "52368bb2070fc7e6d85d0f2b54b3acadb29e8cc355c28814ec036a18662978c5"
     },
     {
-      "order": 45,
+      "order": 44,
       "path": "integration/alas/series/0380-exercise-full-flow-port.patch",
       "sha256": "8e4ed513090d98f579030c2d66d3d6ca4280c45e7816e793fe3251fdd36af6be"
+    },
+    {
+      "order": 45,
+      "path": "integration/alas/series/0095-operation-siren-typed-navigation.patch",
+      "sha256": "457d432b8211f4bab728bcc54b988dc6223aeccd48b4f7770aac22e082c6ce8e"
+    },
+    {
+      "order": 46,
+      "path": "integration/alas/series/0096-operation-siren-boss-resolve.patch",
+      "sha256": "29037819a940ab9e4948faf0da4e9fb60eb1a3b3148f00439311fcdee58e45e9"
+    },
+    {
+      "order": 47,
+      "path": "integration/alas/series/0097-operation-siren-special-zone-recovery.patch",
+      "sha256": "a6660b51a7734ff03f51260d1107bd42cd33f84a2018bdc15628215172b2fcc1"
+    },
+    {
+      "order": 48,
+      "path": "integration/alas/series/0098-operation-siren-stronghold-runtime.patch",
+      "sha256": "988b6dab5a59ca924bbb8c484b6c598f135f4ac1f9f93ecb3ffce14ca3935e24"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -1,0 +1,234 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+index aedae5a6..4112b31d 100644
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -509,7 +509,8 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+         index = fleet_config.fleet
+         logger.hr(f'Fleet set to {index}')
+         if self.fleet_selector.ensure_to_be(index):
+-            self.wait_until_camera_stable()
++            if getattr(self.device, 'semantic_adapter', None) is None:
++                self.wait_until_camera_stable()
+             return True
+         else:
+             return False
+@@ -542,6 +543,68 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+         logger.hr('Relative goto')
+         logger.info(f'Relative goto, {dict_to_kv(kwargs)}')
+ 
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is not None:
++            from alas_headless import SemanticGateClosed
++            reviewed_kinds = {
++                'is_port': 'port',
++                'is_exclamation': 'task',
++            }
++            selected = [
++                kind for flag, kind in reviewed_kinds.items()
++                if kwargs.get(flag) is True
++            ]
++            if len(selected) != 1:
++                raise SemanticGateClosed(
++                    'Operation Siren relative target is absent or ambiguous'
++                )
++            grids = list(
++                semantic_session.operation_siren_radar_targets(selected[0])
++            )
++            if near_by:
++                grids.sort(key=lambda grid: np.linalg.norm(grid))
++            if not 0 <= index < len(grids):
++                logger.info('No position to goto, stop')
++            else:
++                grid = np.add(location_ensure(grids[index]), relative_position)
++                grid = point_limit(grid, area=(-4, -2, 3, 2))
++                if has_fleet_step:
++                    grid = limit_walk(grid)
++                semantic_session.click_operation_siren_relative_grid(
++                    tuple(int(value) for value in grid)
++                )
++            stable = Timer(1.5, count=4).start()
++            timeout = Timer(30, count=80).start()
++            previous = None
++            while 1:
++                self.device.screenshot()
++                try:
++                    current = tuple(
++                        semantic_session.operation_siren_radar_targets(selected[0])
++                    )
++                except SemanticGateClosed:
++                    if selected[0] == 'task':
++                        transition = Timer(15, count=40).start()
++                        while not transition.reached():
++                            self.device.screenshot()
++                            if self.appear(MAP_EXIT, offset=(20, 20)):
++                                return
++                        raise SemanticGateClosed(
++                            'Operation Siren room transition did not expose exit'
++                        )
++                    raise
++                if current == previous:
++                    if stable.reached():
++                        break
++                else:
++                    previous = current
++                    stable.reset()
++                if timeout.reached():
++                    raise SemanticGateClosed(
++                        'Operation Siren typed walk did not become stable'
++                    )
++            return
++
+         # Update local view
+         # Not screenshots taking, reuse the old one
+         self.update_os()
+@@ -578,6 +641,14 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             # 2 grids below the entrance
+             self.relative_goto(has_fleet_step=True, near_by=True, relative_position=(3, -2), is_port=True)
+ 
++            semantic_session = getattr(self.device, 'semantic_adapter', None)
++            if semantic_session is not None:
++                ports = semantic_session.operation_siren_radar_targets('port')
++                if (-3, 2) in ports:
++                    logger.info('At room entrance')
++                    break
++                continue
++
+             self.update_os()
+             self.predict()
+             self.predict_radar()
+@@ -820,7 +891,8 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                         pass
+ 
+                 # Check fleet
+-                self.handle_os_map_fleet_lock(enable=False)
++                if not self.appear(MAP_EXIT, offset=(20, 20)):
++                    self.handle_os_map_fleet_lock(enable=False)
+                 if self.fleet_low_resolve_appear():
+                     logger.warning('Skip using current fleet because of the low resolve debuff')
+                     self.boss_goto(location=fleet.standby_loca, has_fleet_step=has_fleet_step, drop=drop,
+diff --git a/module/os/map.py b/module/os/map.py
+index 30ccfd13..498ad379 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -10,7 +10,7 @@ from module.exception import CampaignEnd, GameTooManyClickError, MapWalkError, R
+ from module.handler.login import LoginHandler, MAINTENANCE_ANNOUNCE
+ from module.logger import logger
+ from module.map.map import Map
+-from module.os.assets import FLEET_EMP_DEBUFF, MAP_GOTO_GLOBE_FOG
++from module.os.assets import FLEET_EMP_DEBUFF, MAP_EXIT, MAP_GOTO_GLOBE_FOG
+ from module.os.fleet import OSFleet
+ from module.os.globe_camera import GlobeCamera
+ from module.os.globe_operation import RewardUncollectedError
+@@ -97,14 +97,20 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+ 
+         # self.map_init()
+         self.hp_reset()
+-        if semantic_adapter is not None and semantic_adapter.appear(PORT_GOTO_SUPPLY):
++        in_month_boss_room = bool(
++            semantic_adapter is not None
++            and semantic_adapter.appear(MAP_EXIT)
++        )
++        if in_month_boss_room:
++            logger.info('Resume retained Operation Siren Month Boss room')
++        elif semantic_adapter is not None and semantic_adapter.appear(PORT_GOTO_SUPPLY):
+             logger.info('Already in Operation Siren port; skip local-map fleet checks')
+         else:
+             self.handle_after_auto_search()
+             self.handle_current_fleet_resolve(revert=False)
+ 
+         # Exit from special zones types, only SAFE and DANGEROUS are acceptable.
+-        if self.is_in_special_zone():
++        if not in_month_boss_room and self.is_in_special_zone():
+             logger.warning('OS is in a special zone type, while SAFE and DANGEROUS are acceptable')
+             self.map_exit()
+ 
+diff --git a/module/os/map_fleet_selector.py b/module/os/map_fleet_selector.py
+index 02e81ab2..5466e193 100644
+--- a/module/os/map_fleet_selector.py
++++ b/module/os/map_fleet_selector.py
+@@ -28,6 +28,11 @@ class FleetSelector:
+         Returns:
+             int: Index of current fleet, 1 to 4. return 0 if unrecognized.
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.operation_siren_current_fleet()
++
+         for index, button in enumerate([FLEET_1, FLEET_2, FLEET_3, FLEET_4]):
+             if self.main.appear(button, offset=(20, 20), similarity=0.75):
+                 return index + 1
+@@ -165,6 +170,21 @@ class FleetSelector:
+         Returns:
+             bool: If fleet switched.
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            if not semantic_session.operation_siren_fleet_selector_open():
++                semantic_session.click_operation_siren_fleet_bar()
++                for _ in self.main.loop():
++                    if semantic_session.operation_siren_fleet_selector_open():
++                        break
++            semantic_session.click_operation_siren_fleet_selector(index)
++            for _ in self.main.loop():
++                if not semantic_session.operation_siren_fleet_selector_open():
++                    break
++            logger.info(f'Ensure fleet to be {index}')
++            return True
++
+         confirm_timer = Timer(1.5, count=5).start()
+         main = self.main
+         for _ in main.loop():
+diff --git a/module/os/tasks/month_boss.py b/module/os/tasks/month_boss.py
+index 168e3abc..7b9e8c56 100644
+--- a/module/os/tasks/month_boss.py
++++ b/module/os/tasks/month_boss.py
+@@ -4,6 +4,7 @@ from alas_headless import validate_alas_opsi_month_boss_config
+ 
+ from module.config.utils import get_os_next_reset
+ from module.logger import logger
++from module.os.assets import MAP_EXIT
+ from module.os.map import OSMap
+ from module.os_handler.action_point import OCR_OS_ADAPTABILITY
+ from module.os_handler.assets import OS_MONTHBOSS_NORMAL, OS_MONTHBOSS_HARD
+@@ -37,6 +38,7 @@ class OpsiMonthBoss(OSMap):
+         month_boss_config = validate_alas_opsi_month_boss_config(
+             mode=self.config.OpsiMonthBoss_Mode,
+             check_adaptability=self.config.OpsiMonthBoss_CheckAdaptability,
++            force_run=self.config.OpsiMonthBoss_ForceRun,
+         )
+         if self.is_in_opsi_explore():
+             logger.info('OpsiExplore is under scheduling, stop OpsiMonthBoss')
+@@ -66,7 +68,7 @@ class OpsiMonthBoss(OSMap):
+             self.config.task_stop()
+             return True
+ 
+-        if month_boss_config.check_adaptability:
++        if month_boss_config.check_adaptability and not month_boss_config.force_run:
+             self.os_map_goto_globe(unpin=False)
+             adaptability = self.get_adaptability()
+             if (np.array(adaptability) < (203, 203, 156)).any():
+@@ -75,10 +77,14 @@ class OpsiMonthBoss(OSMap):
+                 self.config.task_stop()
+             # No need to exit, reuse
+             # self.os_globe_goto_map()
++        elif month_boss_config.force_run:
++            logger.warning('ForceRun enabled, bypass Month Boss adaptability precheck')
+ 
+         # combat
+         logger.hr("Month Boss goto", level=2)
+         self.globe_goto(154)
++        if not self.appear(MAP_EXIT, offset=(20, 20)):
++            self.handle_os_map_fleet_lock(enable=False)
+         self.go_month_boss_room(is_normal=is_normal)
+         result = self.boss_clear(has_fleet_step=True, is_month=True)
+ 
+@@ -97,6 +103,7 @@ class OpsiMonthBoss(OSMap):
+         month_boss_config = validate_alas_opsi_month_boss_config(
+             mode=self.config.OpsiMonthBoss_Mode,
+             check_adaptability=self.config.OpsiMonthBoss_CheckAdaptability,
++            force_run=self.config.OpsiMonthBoss_ForceRun,
+         )
+         if is_normal:
+             if result:

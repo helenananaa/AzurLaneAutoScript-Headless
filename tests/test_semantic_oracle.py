@@ -9277,5 +9277,532 @@ class RetirementSemanticOracleTests(unittest.TestCase):
         self.assertEqual(len(backend.taps), 9)
 
 
+class OperationSirenSemanticOracleTests(unittest.TestCase):
+    def _state(self, *buttons):
+        oracle = make_oracle(FakeBackend(list(buttons)))
+        with mock.patch.object(oracle, "operation_siren_state"):
+            return oracle.operation_siren_auto_search_state()
+
+    def test_auto_search_distinguishes_normal_off_from_on(self):
+        root = "WorldMapUI(Clone)/top/adapt/right_stage/btn_list/auto_fight/"
+        self.assertEqual(self._state(make_button("off", root + "off")), "off")
+        self.assertEqual(self._state(make_button("on", root + "on")), "on")
+
+    def test_auto_search_rejects_absent_or_ambiguous_state(self):
+        root = "WorldMapUI(Clone)/top/adapt/right_stage/btn_list/auto_fight/"
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or inconsistent"):
+            self._state()
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or inconsistent"):
+            self._state(
+                make_button("off", root + "off"),
+                make_button("on", root + "on"),
+            )
+
+    def _local_map_oracle(self, sprite="1"):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/"
+                    "fleet_bar/text_selected/x",
+                    sprite,
+                ),
+                make_image(
+                    f"root/LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/"
+                    f"cells/fleet_{sprite}/shadow",
+                    "shadow",
+                ),
+            ],
+        )
+        return make_oracle(backend)
+
+    def test_local_map_shell_and_current_fleet_are_typed(self):
+        oracle = self._local_map_oracle("3")
+        self.assertTrue(oracle.operation_siren_local_map_visible())
+        self.assertEqual(oracle.operation_siren_current_fleet(), 3)
+
+    def test_local_map_shell_is_blocked_by_order_overlay(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "LevelCamera/Canvas/LevelOrigin/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "LevelCamera/Canvas/LevelOrigin/top/adapt/left_stage/other/fleet_bar",
+                ),
+                make_button(
+                    "back",
+                    "OverlayCamera/Overlay/UIMain/SVOrderPanel(Clone)/adapt/back",
+                ),
+            ]
+        )
+
+        self.assertFalse(
+            make_oracle(backend).operation_siren_local_map_visible()
+        )
+
+    def test_current_fleet_rejects_unknown_sprite(self):
+        oracle = self._local_map_oracle("fleet_unknown")
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            oracle.operation_siren_current_fleet()
+
+    def test_selected_fleet_low_resolve_uses_exact_map_marker(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "LevelCamera/Canvas/LevelOrigin/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "LevelCamera/Canvas/LevelOrigin/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    "LevelCamera/Canvas/LevelOrigin/top/adapt/left_stage/other/"
+                    "fleet_bar/text_selected/x",
+                    "4",
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                    "fleet_4/shadow",
+                    "shadow",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.operation_siren_current_fleet_defeated())
+        backend.ui = make_ui(
+            [],
+            images=backend.ui["images"]
+            + [
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                    "fleet_4/marks/damage/1",
+                    "200",
+                )
+            ],
+        )
+        self.assertTrue(oracle.operation_siren_current_fleet_defeated())
+        self.assertTrue(oracle.operation_siren_low_resolve_visible())
+
+    def test_selected_fleet_low_resolve_requires_complete_map_anchor(self):
+        oracle = self._local_map_oracle("2")
+        state = oracle.read_ui_state()
+        self.assertEqual(
+            SemanticOracle._operation_siren_current_fleet_from_ui_state(state),
+            2,
+        )
+
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/"
+                    "fleet_bar/text_selected/x",
+                    "2",
+                )
+            ],
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "map anchor"):
+            make_oracle(backend).operation_siren_current_fleet_defeated()
+
+    def test_current_fleet_repair_uses_left_portrait_agony(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+        self.assertFalse(oracle.operation_siren_current_fleet_needs_repair())
+        agony_path = (
+            "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/bg/fleet/"
+            "vanguard/shiptpl(Clone)/agony"
+        )
+        backend.buttons = make_buttons(
+            backend.buttons["buttons"]
+            + [make_button("agony", agony_path, x=238, y=414)]
+        )
+        self.assertTrue(oracle.operation_siren_current_fleet_needs_repair())
+
+        backend.buttons = make_buttons(
+            backend.buttons["buttons"]
+            + [
+                make_button("agony", agony_path, x=238, y=414),
+            ]
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "overlap"):
+            oracle.operation_siren_current_fleet_needs_repair()
+
+    def test_operation_siren_submarine_return_exit_prompt_is_exact(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "custom_button_1(Clone)",
+                    "root/Msgbox(Clone)/window/button_container/"
+                    "custom_button_1(Clone)",
+                ),
+                make_button(
+                    "custom_button_2(Clone)",
+                    "root/Msgbox(Clone)/window/button_container/"
+                    "custom_button_2(Clone)",
+                ),
+            ]
+        )
+        prompt_path = "root/Msgbox(Clone)/window/msg_panel/content"
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "离开当前海域后，潜艇舰队会自动返回我方港口待命，是否离开？",
+                    prompt_path,
+                )
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.operation_siren_exit_prompt_visible())
+
+        backend.ui = make_ui([make_text("是否离开？", prompt_path)])
+        self.assertFalse(oracle.operation_siren_exit_prompt_visible())
+
+    def test_globe_unpin_drags_exact_selected_zone_point(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/"
+                    "top_chapter/back_button",
+                )
+            ]
+        )
+        pin = make_image(
+            "root/OverlayCamera/Overlay/UIMain/top/SVFloatPanel(Clone)/point",
+            "click_point_safe",
+            {"left": 470, "top": 396, "right": 546, "bottom": 455},
+        )
+        backend.ui = make_ui([], images=[pin], generation=10)
+
+        def unpin():
+            backend.buttons = make_buttons(
+                backend.buttons["buttons"], generation=11
+            )
+            backend.ui = make_ui([], images=[], generation=12)
+
+        backend.on_swipe = unpin
+        oracle = make_oracle(backend)
+        with mock.patch.object(oracle, "operation_siren_globe_state"):
+            receipt = oracle.operation_siren_globe_unpin()
+
+        self.assertEqual(receipt.semantic_id, "os/globe/zone/unpin")
+        self.assertEqual(backend.swipes, [(508, 426, 388, 346, 150)])
+
+    def test_typed_radar_port_and_relative_grid_click(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
+                    "compass_panel/ring/compass/range/mark",
+                    "port",
+                    {"left": 1083.6, "top": 192.1, "right": 1105.067, "bottom": 214.967},
+                ),
+                make_image(
+                    "OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
+                    "compass_panel/ring/compass/range/7000040",
+                    "guidepost",
+                    {"left": 1159.433, "top": 207.5, "right": 1169.233, "bottom": 222.9},
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/"
+                    "world_quad_8_6/walk_quad",
+                    "cell_white",
+                    {"left": 587.85, "top": 324.41, "right": 692.15, "bottom": 396.876},
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/"
+                    "world_quad_6_5/walk_quad",
+                    "cell_white",
+                    {"left": 494.09, "top": 193.648, "right": 592.949, "bottom": 256.826},
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/"
+                    "world_quad_8_7/walk_quad",
+                    "cell_white",
+                    {"left": 690.332, "top": 324.41, "right": 796.451, "bottom": 396.876},
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                    "cell_8_7/attachments/event_7000040/icon/model/fubiao3(Clone)",
+                    "fubiao3",
+                    {"left": 700.0, "top": 300.0, "right": 790.0, "bottom": 390.0},
+                ),
+            ],
+        )
+
+        self.assertEqual(oracle.operation_siren_radar_targets("port"), ((-4, -2),))
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("guidepost"), ((2, -1),)
+        )
+        receipt = oracle.click_operation_siren_relative_grid((-1, -2))
+        self.assertEqual(receipt.semantic_id, "os/map/grid/relative/-1/-2")
+        self.assertEqual(backend.taps, [(544, 225)])
+        adjacent = oracle.click_operation_siren_relative_grid(
+            (1, 0), prefer_adjacent_event=True
+        )
+        self.assertTrue(adjacent.path.endswith("fubiao3(Clone)"))
+        self.assertEqual(backend.taps[-1], (745, 345))
+
+    def test_typed_boss_radar_survives_bounded_image_slice(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    "LevelCamera/Canvas/LevelOrigin/top/adapt/right_stage/"
+                    "compass_panel/ring/compass/range/7032007",
+                    "boss",
+                    {
+                        "left": 1134.1,
+                        "top": 208.45,
+                        "right": 1145.9,
+                        "bottom": 220.15,
+                    },
+                )
+            ],
+        )
+        backend.ui["image_truncated"] = True
+
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("boss"),
+            ((0, -1),),
+        )
+
+    def test_relative_grid_rejects_unknown_radar_kind_and_missing_center(self):
+        oracle = self._local_map_oracle("1")
+        with self.assertRaisesRegex(SemanticGateClosed, "not reviewed"):
+            oracle.operation_siren_radar_targets("question")
+        with self.assertRaisesRegex(SemanticGateClosed, "center grid"):
+            oracle.click_operation_siren_relative_grid((0, 0))
+
+    def test_fleet_lock_state_and_click_are_exact(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+        path = (
+            "LevelCamera/Canvas/LevelOrigin/top/adapt/right_stage/btn_list/"
+            "auto_switch/on"
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    path,
+                    "auto_switch_on",
+                    {"left": 1110, "top": 560, "right": 1170, "bottom": 620},
+                )
+            ],
+        )
+
+        self.assertEqual(oracle.operation_siren_fleet_lock_state(), "on")
+        receipt = oracle.click_operation_siren_fleet_lock("on")
+        self.assertEqual(receipt.semantic_id, "os/map/fleet-lock/on")
+        self.assertEqual(backend.taps, [(1140, 590)])
+        with self.assertRaisesRegex(SemanticGateClosed, "changed"):
+            oracle.click_operation_siren_fleet_lock("off")
+
+    def test_auto_search_info_count_accepts_only_reviewed_os_messages(self):
+        backend = FakeBackend([])
+        path = (
+            "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/"
+            "toolTip(Clone)/Text"
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "<color=white>当前所选舰队开始自律寻敌</color>",
+                    path,
+                ),
+                make_text(
+                    "<color=white>当前所选舰队视野内无可自律事件，无法继续自律寻敌</color>",
+                    path,
+                ),
+                make_text("其他提示", path),
+            ]
+        )
+
+        self.assertEqual(
+            make_oracle(backend).operation_siren_auto_search_info_count(),
+            2,
+        )
+
+    def test_fleet_selector_open_and_exact_fourth_row_click(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+        root = "OverlayCamera/Overlay/UIMain/top/adapt/left_stage/mask/list/"
+        rows = ["item", "item (1)", "item (2)", "item (3)"]
+        backend.buttons = make_buttons(
+            backend.buttons["buttons"]
+            + [
+                make_button(name, root + name, x=180, y=610 - index * 80)
+                for index, name in enumerate(rows)
+            ]
+        )
+
+        self.assertTrue(oracle.operation_siren_fleet_selector_open())
+        receipt = oracle.click_operation_siren_fleet_selector(4)
+        self.assertEqual(receipt.semantic_id, "os/map/fleet-selector/4")
+        self.assertEqual(backend.taps, [(180, 370)])
+        backend.buttons["buttons"].pop()
+        backend.buttons["button_count"] -= 1
+        with self.assertRaisesRegex(SemanticGateClosed, "incomplete"):
+            oracle.operation_siren_fleet_selector_open()
+
+    def test_auto_search_reward_close_is_exact_and_actionable(self):
+        path = (
+            "root/OverlayCamera/Overlay/UIMain/WorldAutoFightRewardUI(Clone)/"
+            "Window/Fixed/ButtonExit"
+        )
+        backend = FakeBackend(
+            [make_button("ButtonExit", path, x=640, y=600, raycast_top=True)]
+        )
+        oracle = make_oracle(backend)
+        self.assertTrue(oracle.enabled("os/auto-search/reward/close"))
+        receipt = oracle.click("os/auto-search/reward/close")
+        self.assertEqual(receipt.semantic_id, "os/auto-search/reward/close")
+        self.assertEqual(backend.taps, [(640, 600)])
+
+    def test_operation_siren_order_confirmation_uses_exact_cost_prompt(self):
+        root = "root/OverlayCamera/Overlay/UIMain/"
+        panel = root + "SVOrderPanel(Clone)/adapt/"
+        fov = panel + "order_list/fov/type_enable"
+        backend = FakeBackend(
+            [
+                make_button("back", panel + "back", x=60, y=60),
+                make_button("type_enable", fov, x=1070, y=423),
+                make_button(
+                    "btn_confirm",
+                    root + "Msgbox/window/button_container/btn_confirm",
+                    x=790,
+                    y=542,
+                ),
+                make_button(
+                    "btn_cancel",
+                    root + "Msgbox/window/button_container/btn_cancel",
+                    x=490,
+                    y=542,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0", fov + "/cost/Text"),
+                make_text(
+                    "prompt <color=#92FC63FF>0</color> scan",
+                    root + "Msgbox/window/msg_panel/base/content",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(
+            oracle.operation_siren_order_confirmation_visible("scan")
+        )
+        receipt = oracle.click_operation_siren_order_confirmation(
+            "scan", confirm=True
+        )
+        self.assertEqual(receipt.semantic_id, "os/order/confirm")
+        self.assertEqual(backend.taps, [(790, 542)])
+
+        backend.ui["texts"][1]["text"] = (
+            "prompt <color=#92FC63FF>10</color> scan"
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "cost changed"):
+            oracle.operation_siren_order_confirmation_visible("scan")
+
+
 if __name__ == "__main__":
     unittest.main()
