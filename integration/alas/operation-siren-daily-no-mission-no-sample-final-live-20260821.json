@@ -1,0 +1,41 @@
+{
+  "schema": "alas-headless.operation-siren-daily-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 3759,
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "DoMission": false,
+    "UseTuningSample": false,
+    "Fleet": 1,
+    "Submarine": false
+  },
+  "tuning_sample_calls": [],
+  "overview_accepts": [],
+  "mission_finish_counts": [],
+  "fleet_actions": [],
+  "order_actions": [],
+  "auto_searches": [
+    {
+      "finished_combat": 0,
+      "elapsed_seconds": 30.953
+    }
+  ],
+  "task_result": true,
+  "elapsed_seconds": 44.5,
+  "final_config": {
+    "NextRun": "2026-08-22 00:00:00"
+  },
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "daily_task": "a1a5f6516b142cfd7fc816873bc8227a2987ee7c34e9e5544e69568fa1627785",
+    "mission_handler": "d6667dd584f89c94cb4709231b2eea4f8fe9ec99a457b3b0a022616024525eb3",
+    "storage_handler": "ac240bdea108002857e6297750b5f8541e6c2eae7ae97325654d1b99ae9d9660",
+    "adapter": "328ae617308df2dd347cc16a95cc8756a0395361e20a79142f4bca8bb925db06",
+    "oracle": "5b78040b6b8444df0c4b3e6ea2cb59a6a2caf165beefa96cfab7211e8726dfb9"
+  }
+}

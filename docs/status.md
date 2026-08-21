@@ -2869,3 +2869,21 @@ See [G8 real ALAS reward and commission validation](g8-alas-reward-commission-va
 - `OpsiExplore` is therefore promoted from `B` to `L`, not `F`. Remaining live
   closures are a dangerous-zone run with tuning samples present, Fleet 2-4,
   `Submarine=true`, and `SpecialRadar=true`.
+
+### Operation Siren daily empty-day branches live-qualified
+
+- `DoMission/UseTuningSample` completed all four boolean combinations on the
+  same final semantic-oracle revision. Each real task returned normally,
+  scheduled `NextRun=2026-08-22 00:00:00`, and removed its temporary config.
+- `DoMission=false` never opened the mission overview; `DoMission=true`
+  entered and left it, excluded the persistent monthly-boss row, and observed
+  zero executable daily missions. `UseTuningSample=true` entered storage and
+  proved a typed zero-sample no-op; false bypassed storage exactly.
+- The first no-sample mission run exposed an incorrect selected-zone
+  prerequisite on the globe-level mission-overview button. The fixed oracle
+  still requires the exact globe page, unique actionable button, valid bounds,
+  top raycast, and no blocker, but correctly permits an unpinned globe.
+- `OpsiDaily.DoMission` moves from offline-only `O` to live-boundary `B`;
+  `UseTuningSample` remains `B` with stronger two-value evidence. Actual daily
+  mission combat, nonzero sample consumption, Fleet 2-4, and
+  `Submarine=true` remain unqualified.

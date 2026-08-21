@@ -5387,31 +5387,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
-        "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
-        "offline": "complete"
-      },
-      "evidence": [
-        "tests/test_alas_opsi_task_config.py",
-        "python/alas_headless/alas_opsi_task_config_replay.py",
-        "integration/alas/series/0090-operation-siren-flow-ports.patch",
-        "docs/status.md"
-      ],
-      "group_code": "O",
-      "metadata": "type=checkbox; display=default",
-      "panels": [
-        "OpsiDaily"
-      ],
-      "path": "OpsiDaily.DoMission",
-      "status_label": "🧪 离线回放",
-      "support": "supported",
-      "values": "input/default: true"
-    },
-    {
-      "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -5421,6 +5397,42 @@
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "tests/test_semantic_oracle.py",
+        "scripts/python/run_alas_opsi_daily_live_validation.py",
+        "integration/alas/operation-siren-daily-current-final-live-20260821.json",
+        "integration/alas/operation-siren-daily-mission-no-sample-retry2-live-20260821.json",
+        "integration/alas/operation-siren-daily-no-mission-use-sample-final-live-20260821.json",
+        "integration/alas/operation-siren-daily-no-mission-no-sample-final-live-20260821.json",
+        "docs/status.md"
+      ],
+      "group_code": "B",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "OpsiDaily"
+      ],
+      "path": "OpsiDaily.DoMission",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
+      "values": "input/default: true"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "python/alas_headless/alas_opsi_task_config_replay.py",
+        "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "tests/test_semantic_oracle.py",
+        "scripts/python/run_alas_opsi_daily_live_validation.py",
+        "integration/alas/operation-siren-daily-current-final-live-20260821.json",
+        "integration/alas/operation-siren-daily-mission-no-sample-retry2-live-20260821.json",
+        "integration/alas/operation-siren-daily-no-mission-use-sample-final-live-20260821.json",
+        "integration/alas/operation-siren-daily-no-mission-no-sample-final-live-20260821.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -8294,7 +8306,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiDaily",
-      "note": "DoMission、UseTuningSample、Fleet 四值与 Submarine 两值已离线等价；实机已完成任务总览、选择和进入目标海域，无可搜索事件时正常返回 off；真实舰队/潜艇动作和每日任务成功清除未闭环",
+      "note": "DoMission/UseTuningSample 四组合已在同一最终 oracle 版本逐项实机闭环：DoMission=false 精确跳过总览，true 可在无海域选中时进入总览并排除月度 Boss；UseTuningSample=true 读取 0 样本并安全空操作，false 精确跳过仓库；四组合均延迟到次日 00:00。真实每日任务清除、非零样本消费、Fleet 2-4 与 Submarine=true 仍未闭环",
       "status": "B"
     },
     {
@@ -10860,19 +10872,6 @@
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
         "docs/status.md"
       ],
-      "field": "OpsiDaily.UseTuningSample",
-      "note": "Both exact booleans preserve the original tuning-sample use versus skip branch and the remaining daily mission order; invalid values fail before task state is touched."
-    },
-    {
-      "dimensions": {
-        "offline": "complete"
-      },
-      "evidence": [
-        "tests/test_alas_opsi_task_config.py",
-        "python/alas_headless/alas_opsi_task_config_replay.py",
-        "integration/alas/series/0090-operation-siren-flow-ports.patch",
-        "docs/status.md"
-      ],
       "field": "OpsiHazard1Leveling.TargetZone",
       "note": "All three declared values preserve the original default-to-zone-22 and explicit zone 22 or 44 selection before the strategic-search boundary; invalid values fail before semantic observation or task state mutation."
     },
@@ -11199,6 +11198,44 @@
       ],
       "field": "Scheduler.SuccessInterval",
       "note": "Original durable success writes were exercised across all 15 declared Scheduler equivalence classes before the live Restart path overwrote the Restart-specific outcome with its upstream server-update schedule."
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "tests/test_semantic_oracle.py",
+        "scripts/python/run_alas_opsi_daily_live_validation.py",
+        "integration/alas/operation-siren-daily-current-final-live-20260821.json",
+        "integration/alas/operation-siren-daily-mission-no-sample-retry2-live-20260821.json",
+        "integration/alas/operation-siren-daily-no-mission-use-sample-final-live-20260821.json",
+        "integration/alas/operation-siren-daily-no-mission-no-sample-final-live-20260821.json",
+        "docs/status.md"
+      ],
+      "field": "OpsiDaily.DoMission",
+      "note": "Both booleans completed real empty-day runs on one final oracle revision: true entered and left the mission overview, excluded the monthly boss, observed zero executable dailies, and scheduled the next server update; false skipped the overview and scheduled the same update. Successful daily mission combat remains live-unproven."
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial"
+      },
+      "evidence": [
+        "tests/test_alas_opsi_task_config.py",
+        "tests/test_semantic_oracle.py",
+        "scripts/python/run_alas_opsi_daily_live_validation.py",
+        "integration/alas/operation-siren-daily-current-final-live-20260821.json",
+        "integration/alas/operation-siren-daily-mission-no-sample-retry2-live-20260821.json",
+        "integration/alas/operation-siren-daily-no-mission-use-sample-final-live-20260821.json",
+        "integration/alas/operation-siren-daily-no-mission-no-sample-final-live-20260821.json",
+        "docs/status.md"
+      ],
+      "field": "OpsiDaily.UseTuningSample",
+      "note": "Both booleans completed real empty-storage runs on one final oracle revision: true entered storage and proved an exact zero-sample no-op, while false bypassed storage. Nonzero tuning-sample consumption remains fail-closed and live-unproven."
     },
     {
       "dimensions": {

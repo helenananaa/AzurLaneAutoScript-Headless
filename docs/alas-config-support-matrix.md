@@ -434,7 +434,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | L | 72 个常规海域已从 LastZone=0 按原顺序完整实机遍历，覆盖 typed unpin、邻区/全局重锚、SAFE/要塞重叠选层、无事件自动搜索返回 off、游标持久化及月度重置；危险海域样本消费、Fleet 2-4、Submarine=true、SpecialRadar=true 仍缺 |
 | 44 | OpsiShop | Scheduler, OpsiShop | L | 统一商店 19 卡 typed 观察与 custom 单件购买已实机闭环，余量 `3→2`、票券 `1205→1200`，并覆盖点击结果不明确后的精确恢复；黄币、其余预设、余额不足、刷新及全港口分支仍缺 |
 | 45 | OpsiVoucher | Scheduler, OpsiVoucher | L | 统一兑换页 22 卡 typed 观察、筛选命中与单件兑换已由原任务实机闭环，余量 `28→27`、凭证 `21592→21492`；石油商品、全部优先级逐值及异常恢复仍缺 |
-| 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | DoMission、UseTuningSample、Fleet/Submarine 已离线等价；真实舰队/潜艇动作和清图未闭环 |
+| 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | DoMission/UseTuningSample 四组合已在同一最终 oracle 版本实机闭环，覆盖未选中海域直接打开总览、月度 Boss 排除、0 样本空操作/跳过及次日调度；真实清任务、非零样本消费、Fleet 2-4 与 Submarine=true 仍缺 |
 | 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | B | ForceRun、Fleet/Submarine 已离线等价；坐标消耗、真实动作、进入和清图未闭环 |
 | 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | L | 默认主路径已实机完成坐标消耗、100 行动力入场、侵蚀 6 Boss、奖励、不可逆退出与利维浦大修；UseLogger 和自由舰队过滤全空间未逐项实机 |
 | 49 | OpsiArchive | Scheduler, OpsiFleet | L | T2 既有 9 任务与 T4 购买/全链实机闭环；Fleet=1、Submarine=false 已证明，其他舰队/潜艇值与异常全空间仍缺 |
@@ -544,7 +544,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | OpsiFleet | `Fleet`=1..4; `Submarine` | B | 四舰队和潜艇真假已在原最终边界离线等价；舰队不可用、真实选中结果、潜艇调用结果及隐藏字段 override 仍需实机闭环 |
 | OpsiShop | `PresetFilter`=`max_benefit/max_benefit_meta/no_meta/all/custom`; `CustomFilter` | L | 五预设与自定义过滤已离线等价；custom 已实机完成 typed 库存、票券与单件购买后置条件，仍缺黄币、其余四预设逐值、余额不足、刷新和全部港口分支 |
 | OpsiVoucher | `Filter` | B | 过滤与 Logger/Tier/Archive 重定向已离线等价；真实代币余额、兑换结果、空列表和异常恢复仍缺 |
-| OpsiDaily | `DoMission`; `UseTuningSample` | B | 四组合、无任务、接取/进入/清图、样本有无和跨日恢复 |
+| OpsiDaily | `DoMission`; `UseTuningSample` | B | 四组合及无任务/0 样本/次日调度已实机闭环；仍缺真实任务接取后清图、非零样本消费和异常恢复 |
 | OpsiObscure | `ForceRun` | B | 开关、坐标不存在/存在、消耗、进入、清图与奖励 |
 | OpsiAbyssal | `ForceRun` | L | 默认路径已闭环；仍缺 UseLogger、ForceRun 两值和自由舰队过滤全空间 |
 | OpsiFleetFilter | `Filter`（默认含 Fleet-4、CallSubmarine、Fleet-2/3/1） | B | 语法、顺序、潜艇、重复、不可用与非法规则已离线等价；真实舰队可用性、切换结果和战斗仍缺 |
@@ -669,8 +669,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
 | ✅ 五维完整支持 | **38 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **138 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **83 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ◐ 有实机当前值/分支证据 | **139 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **82 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **19 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
@@ -874,8 +874,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OpsiAshBeacon.RequestAssist` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `OpsiDaemon.RepairShip` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiDaemon.SelectEnemy` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `OpsiDaily.DoMission` | OpsiDaily | type=checkbox; display=default | input/default: true | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `OpsiDaily.UseTuningSample` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `OpsiDaily.DoMission` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `OpsiDaily.UseTuningSample` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `OpsiExplore.ForceRun` | OpsiExplore | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiExplore.LastZone` | OpsiExplore | type=input; display=default | input/default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiExplore.SpecialRadar` | OpsiExplore | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |

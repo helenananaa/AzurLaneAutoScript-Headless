@@ -12771,7 +12771,11 @@ class SemanticOracle:
     def click_operation_siren_mission_overview(self) -> ActionReceipt:
         """Open the daily-mission overview from the proven world-map footer."""
 
-        self.operation_siren_globe_state()
+        # The overview is a globe-level action and remains available while no
+        # zone detail panel is pinned.  Require the exact globe surface and
+        # entrance target, but do not fabricate a selected-zone prerequisite.
+        if not self.operation_siren_globe_visible():
+            raise SemanticGateClosed("operation siren globe is not visible")
         state = self.read_state()
         target = self._unique(state, "os/globe/mission-overview")
         if not (

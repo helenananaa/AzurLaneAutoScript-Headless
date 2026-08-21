@@ -9801,6 +9801,36 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         self.assertEqual(backend.taps, [(647, 355)])
         self.assertEqual(backend.requests.count("GET /v1/ui\n"), 7)
 
+    def test_mission_overview_is_actionable_without_a_selected_zone_panel(self):
+        globe_back = make_button(
+            "back_button",
+            "root/OverlayCamera/Overlay/UIMain/top/adapt/"
+            "top_chapter/back_button",
+            raycast_top=None,
+        )
+        overview = make_button(
+            "btn_daily",
+            "root/OverlayCamera/Overlay/UIMain/top/adapt/"
+            "bottom_chapter/button/btn_daily",
+            x=1073,
+            y=675,
+            raycast_top=None,
+        )
+        backend = FakeBackend([globe_back, overview])
+        backend.ui = make_ui([], generation=10)
+        oracle = make_oracle(backend)
+
+        receipt = oracle.click_operation_siren_mission_overview()
+
+        self.assertEqual(receipt.semantic_id, "os/globe/mission-overview")
+        self.assertEqual(backend.taps, [(1073, 675)])
+
+        backend.buttons = make_buttons([overview])
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "operation siren globe is not visible"
+        ):
+            oracle.click_operation_siren_mission_overview()
+
     def test_mission_checkout_can_exclude_the_monthly_boss_row(self):
         row_root = (
             "root/OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/"
