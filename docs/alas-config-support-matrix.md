@@ -1,7 +1,7 @@
 # ALAS Headless 配置项级支持矩阵
 
 更新日期：2026-08-22
-Headless 适配证据提交：`2f60aab7ff609614506321112efc7c4765b5ebf2`
+Headless 适配证据提交：`73433ccbac00be4c0fb367803d4affa7cb1ea599`
 固定 ALAS 上游基线：`81ccf63b4540f00241628c82a58c02c7a2bb11af`
 当前 ALAS `master` 观察：`d816310324bf686dff3252b37efbb997d9a328a4`（仅作差异盘点，尚未成为适配锁）
 
@@ -51,7 +51,7 @@ Headless 适配证据提交：`2f60aab7ff609614506321112efc7c4765b5ebf2`
 | 🧱 已到边界、尚未完成（`B`） | **9 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiMonthBoss、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
 
-当前账本的前一已提交功能证据基线为 `2f60aab`；2026-08-22 的月度 Boss 证据已纳入本轮提交，但 r61 资格收据本身仍为未通过，因此不会伪装成完整任务验收。矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线或仓库测试通过不会自动提升任何实机复核栏。
+当前账本的已提交功能证据基线为 `73433cc`；2026-08-22 的月度 Boss 证据已纳入该提交，但 r61 资格收据本身仍为未通过，因此不会伪装成完整任务验收。矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线或仓库测试通过不会自动提升任何实机复核栏。
 
 ### 1.1A 当前上游配置差异（2026-08-22）
 

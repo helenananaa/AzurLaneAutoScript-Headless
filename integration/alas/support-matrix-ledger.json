@@ -11333,7 +11333,7 @@
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
   "source": {
-    "adapter_evidence_commit": "2f60aab7ff609614506321112efc7c4765b5ebf2",
+    "adapter_evidence_commit": "73433ccbac00be4c0fb367803d4affa7cb1ea599",
     "config_sha256": {
       "config/template.json": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
       "module/config/argument/args.json": "94a4e553e857e7e3bada215e08b8963f46d287ac530f32a02b7daf6b7533ad90",
