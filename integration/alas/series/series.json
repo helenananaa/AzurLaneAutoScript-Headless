@@ -414,6 +414,11 @@
       "order": 83,
       "path": "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
       "sha256": "304544dcccd358e0868884ab59917b90010f63fe48522ba7159dafe43fd2ab42"
+    },
+    {
+      "order": 84,
+      "path": "integration/alas/series/0401-shop-transactions-runtime.patch",
+      "sha256": "ffadbe02125fa071090c7b0cd4c13c99a787f7214097250e92f6af4589418c7b"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

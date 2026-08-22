@@ -45,10 +45,10 @@ Headless 适配证据提交：`73433ccbac00be4c0fb367803d4affa7cb1ea599`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **9 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、OpsiHazard1Leveling、OpsiMeowfficerFarming、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **20 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiExplore、OpsiObscure、OpsiShop、OpsiStronghold、OpsiVoucher、Research、Tactical |
+| 🟢 主路径已完成、全配置未完成（`L`） | **22 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiExplore、OpsiObscure、OpsiShop、OpsiStronghold、OpsiVoucher、Research、ShopFrequent、ShopOnce、Tactical |
 | 🧪 仅离线完成（`O`） | **7 / 60** | Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
-| 🟡 部分完成（`P`） | **14 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、ShopOnce |
-| 🧱 已到边界、尚未完成（`B`） | **9 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiMonthBoss、Shipyard、ShopFrequent、WarArchives |
+| 🟡 部分完成（`P`） | **13 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral |
+| 🧱 已到边界、尚未完成（`B`） | **8 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiMonthBoss、Shipyard、WarArchives |
 | 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
 
 当前账本的已提交功能证据基线为 `73433cc`；2026-08-22 的月度 Boss 证据已纳入该提交，但 r61 资格收据本身仍为未通过，因此不会伪装成完整任务验收。矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线或仓库测试通过不会自动提升任何实机复核栏。
@@ -430,8 +430,8 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 30 | Daily | Scheduler, Daily | L | 原 Daily 状态机已实机闭环 Tactical Training 第二关/舰队 2 与 Fierce Assault 第一关/舰队 1；新版展开层的普通、单次快速和批量快速控件已 typed 区分，普通模式实机通过，UseDailySkip=true 的批量快速动作仅完成有界实现而未实耗验收；其余星期类型、难度和舰队仍未完整覆盖 |
 | 31 | Hard | Scheduler, Hard | L | 困难 11-4 已在真实 API 32 x86_64 AVD 上完成三次首通推进并达到 100%：舰队 1 清理 6 队道中、舰队 2 击破 Boss，全部战斗使用官方自动战斗；覆盖零弹药、伏击、紧急委托、地图恢复和三类结算。刷新额度后，ALAS 原 Hard 入口又完成官方地图自律实机闭环：9.7.328 职能页签精确设置 fleet1=all/fleet2=standby，出击后游戏接管地图与战斗，观察器证明官方自动战斗并被动验收合计奖励页，随后精确退出；三份凭证均无 raw-input fallback。官方地图自律仅在精确进度大于 95% 时放行。HardFleet=2 与其他困难关卡未外推 |
 | 32 | Exercise | Scheduler, Exercise | L | 演习主流程、四种选敌、对手刷新、结构化血量、低血退出、胜负结算与七字段入口契约均已适配并实机闭环；仅非 aggressive 时段边界及 OpponentTrial 大于 1 的自然实机样本未逐值触发 |
-| 33 | ShopFrequent | Scheduler, GeneralShop | B | ConsumeCoins、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；购买、余额观察与确认仍未完成 |
-| 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | GuildShop 14 字段与 MedalShop2 7 字段入口已离线等价；其余商店与真实操作未闭环 |
+| 33 | ShopFrequent | Scheduler, GeneralShop | L | 原 ShopFrequent 已实机完成当前过滤器的十卡读取、金币/钻石余额与零购买安全退出；普通商店共用单件购买事务已有真实余额/库存后置条件，General 正向金币购买仍因触控重连在点击前失败关闭，刷新、钻石与自定义消费未逐值 |
+| 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | L | 军需、舰队、核心月度、勋章四页已由原 ShopOnce 实机贯通；勋章 DR 单件购买与舰队商店一次刷新均以精确余额和库存后置条件闭环，二级品类选择及非当前过滤分支未逐值 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝 |
 | 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，UseDrill 两值均已完成原任务闭环；票券、祈愿池、其余卡池和数量仍未闭环 |
 | 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环 |
@@ -527,11 +527,11 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Daily | `EscortMission`, `AdvanceMission`, `TacticalTraining`, `SupplyLineDisruption`, `FierceAssault`=`skip/first/second/third`; `ModuleDevelopment`, `EmergencyModuleDevelopment`=`skip/first/second`; `EscortMissionFleet`, `AdvanceMissionFleet`, `TacticalTrainingFleet`, `FierceAssaultFleet`, `ModuleDevelopmentFleet`, `EmergencyModuleDevelopmentFleet`=1..6；`UseDailySkip` | L | 全值域、两种排列、skip、次数耗尽及 SupplyLine fleet=0 已离线覆盖；仍缺非默认任务/难度/舰队、快速跳过不可用和战斗结算的实机收据 |
 | Hard | `HardStage`; `HardFleet`=1/2 | L | 固定上游 64 关目录、两舰队、次数 0/3 和非法值已离线覆盖；11-4 首通已由舰队 1 道中/舰队 2 Boss 推进至 100%，随后在恢复的职能页签上以 `all/standby` 完成官方地图自律实机闭环。HardFleet=2 明确拒绝，其他关卡未外推 |
 | Exercise | `ExerciseStrategy`=`aggressive/fri18/sat0/sat12/sat18/sun0/sun12/sun18`; `OpponentChooseMode`=`max_exp/easiest/leftmost/easiest_else_exp`; `OpponentRefreshValue`; `OpponentRefreshRecord`; `OpponentTrial`; `LowHpThreshold`; `LowHpConfirmWait` | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 零读取且明确不支持，真实对手/时段/血量观察、刷新持久化、失败重开和赛季边界仍需闭环 |
-| GeneralShop | `Filter`; `Refresh`; `UseGems`; `ConsumeCoins`; `BuySkinBox` | B | ConsumeCoins 550,000 阈值、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；真实商品命中、刷新、余额观察和购买确认仍缺 |
-| GuildShop | `Filter`; `Refresh`; `BOOK_T2`; `BOOK_T3`; `BOX_T3`; `BOX_T4`; `PLATE_T2`; `PLATE_T3`; `PLATE_T4`; `RETROFIT_T2`; `RETROFIT_T3`; `PR1`; `PR2`; `PR3` | P | 14 字段入口、语法与枚举已离线等价；真实商品/货币/库存、PR 系列判别、选择确认与购买仍缺 |
-| MedalShop2 | `Filter`; `PLATE_T1`; `PLATE_T2`; `PLATE_T3`; `RETROFIT_T1`; `RETROFIT_T2`; `RETROFIT_T3` | L | 7 字段入口、语法与枚举已离线等价；真实商品/货币/库存、选择确认与购买仍缺 |
-| MeritShop | `Filter`; `Refresh` | M | 规则命中、刷新真假、功勋不足和购买确认 |
-| CoreShop | `Filter` | M | 规则命中/无命中、核心不足、月限购和确认 |
+| GeneralShop | `Filter`; `Refresh`; `UseGems`; `ConsumeCoins`; `BuySkinBox` | L | 当前默认过滤器已在十张真实卡片、`35709` 金币/`5022` 钻石上安全无命中退出；共用数量 1 事务已有真实余额/库存后置条件。General 正向金币探针因触控重连在点击前失败关闭，刷新、钻石、自定义消费及同名歧义仍未逐值 |
+| GuildShop | `Filter`; `Refresh`; `BOOK_T2`; `BOOK_T3`; `BOX_T3`; `BOX_T4`; `PLATE_T2`; `PLATE_T3`; `PLATE_T4`; `RETROFIT_T2`; `RETROFIT_T3`; `PR1`; `PR2`; `PR3` | L | 默认过滤器/无命中及一次真实刷新已闭环：舰队币 `110600→110550`、库存改变、刷新可用 `true→false`；12 个二级品类选择、PR 系列判别与正向购买仍缺 |
+| MedalShop2 | `Filter`; `PLATE_T1`; `PLATE_T2`; `PLATE_T3`; `RETROFIT_T1`; `RETROFIT_T2`; `RETROFIT_T3` | L | 默认过滤器真实命中 `DR` 并完成数量 1 兑换：勋章 `3626→3606`、库存 `4/5→3/5`；六个二级品类选择、余额不足与售罄仍未逐值 |
+| MeritShop | `Filter`; `Refresh` | L | 严格过滤器/布尔入口已接入，当前 `Cube` 无命中和 `Refresh=false` 以功勋 `350245` 实机安全退出；正向购买、刷新可用与功勋不足仍缺 |
+| CoreShop | `Filter` | L | 严格过滤器入口已接入，当前 `Array` 无命中并以核心 `27692` 实机安全退出；正向命中、核心不足、月限购和确认仍缺 |
 | ShipyardDr | `ResearchSeries`=2..5; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；数量边界、每日去重、蓝图不足、达到上限和实际购买仍需闭环 |
 | Shipyard | `ResearchSeries`=1..6; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；其余同上，且 PR/DR 页面切换不能串页 |
 | Gacha | `Amount`=1..10; `Pool`=`light/heavy/special/event/wishing_well`; `UseDrill`; `UseTicket` | L | 200 个配置组合已离线等价；`UseDrill` 两值已实机完整，仍缺其他卡池、多单、票券、队列满、资源不足和领取 |
@@ -677,10 +677,10 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **51 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **128 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **52 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **130 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **80 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
-| ⊘ 当前未适配或无效 | **19 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
+| ⊘ 当前未适配或无效 | **16 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
@@ -715,7 +715,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `ControlExpOverflow.T2Allow` | Tactical | type=input; display=default | input/default: 200 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `ControlExpOverflow.T3Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `ControlExpOverflow.T4Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
-| `CoreShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Array" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `CoreShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Array" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Daemon.EnterMap` | Daemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Daily.AdvanceMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.AdvanceMissionFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
@@ -807,11 +807,11 @@ python scripts/python/verify_alas_support_matrix.py `
 | `GemsFarming.CommissionLimit` | GemsFarming | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GemsFarming.CommonCV` | GemsFarming | type=select; display=default | options: "any", "bogue", "hermes", "langley", "ranger"; default: "any" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GemsFarming.CommonDD` | GemsFarming | type=select; display=default | options: "any", "aulick_or_foote", "cassin_or_downes", "favourite", "z20_or_z21"; default: "any" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GeneralShop.BuySkinBox` | ShopFrequent | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `GeneralShop.ConsumeCoins` | ShopFrequent | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `GeneralShop.Filter` | ShopFrequent | type=textarea; display=default | input/default: "BookRedT3 > BookYellowT3 > BookBlueT3 > BookRedT2\n> Cube\n> FoodT6 > FoodT5" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `GeneralShop.Refresh` | ShopFrequent | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `GeneralShop.UseGems` | ShopFrequent | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `GeneralShop.BuySkinBox` | ShopFrequent | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `GeneralShop.ConsumeCoins` | ShopFrequent | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `GeneralShop.Filter` | ShopFrequent | type=textarea; display=default | input/default: "BookRedT3 > BookYellowT3 > BookBlueT3 > BookRedT2\n> Cube\n> FoodT6 > FoodT5" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `GeneralShop.Refresh` | ShopFrequent | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `GeneralShop.UseGems` | ShopFrequent | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GuildLogistics.Enable` | Guild | type=checkbox; display=default | input/default: true | `L`/🟢 主路径已完成 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `GuildLogistics.ExchangeFilter` | Guild | type=textarea; display=default | input/default: <long default in args.json> | `L`/🟢 主路径已完成 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `GuildLogistics.SelectNewMission` | Guild | type=checkbox; display=default | input/default: false | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
@@ -825,7 +825,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `GuildShop.BOOK_T3` | ShopOnce | type=select; display=default | options: "blue", "red", "yellow"; default: "red" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildShop.BOX_T3` | ShopOnce | type=select; display=default | options: "eagle", "ironblood", "royal", "sakura"; default: "ironblood" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildShop.BOX_T4` | ShopOnce | type=select; display=default | options: "eagle", "ironblood", "royal", "sakura"; default: "ironblood" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GuildShop.Filter` | ShopOnce | type=textarea; display=default | input/default: <long default in args.json> | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `GuildShop.Filter` | ShopOnce | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 实机当前值 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `GuildShop.PLATE_T2` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildShop.PLATE_T3` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildShop.PLATE_T4` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "gun" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
@@ -834,7 +834,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `GuildShop.PR3` | ShopOnce | type=select; display=default | options: "champagne", "cheshire", "mainz", "odin"; default: "cheshire" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildShop.RETROFIT_T2` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `GuildShop.RETROFIT_T3` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GuildShop.Refresh` | ShopOnce | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `GuildShop.Refresh` | ShopOnce | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Hard.HardFleet` | Hard | type=select; display=default | options: 1, 2; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Hard.HardStage` | Hard | type=input; display=default | input/default: "11-4" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Hospital.UseRecommendFleet` | Hospital | type=checkbox; display=default | input/default: true | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
@@ -850,7 +850,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Mail.ClaimMerit` | Freebies | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Mail.ClaimTradeLicense` | Freebies | type=checkbox; display=default | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Mail.DeleteCollected` | Freebies | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `MedalShop2.Filter` | ShopOnce | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `MedalShop2.Filter` | ShopOnce | type=textarea; display=default | input/default: <long default in args.json> | `L`/🟢 主路径已完成 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `MedalShop2.PLATE_T1` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MedalShop2.PLATE_T2` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MedalShop2.PLATE_T3` | ShopOnce | type=select; display=default | options: "antiair", "general", "gun", "plane", "torpedo"; default: "general" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
@@ -866,8 +866,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `MeowfficerTrain.Mode` | Meowfficer | type=select; display=default | options: "once_a_day", "seamlessly"; default: "seamlessly" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `MeowfficerTrain.RetainTalentedGold` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MeowfficerTrain.RetainTalentedPurple` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `MeritShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Cube" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `MeritShop.Refresh` | ShopOnce | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `MeritShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Cube" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `MeritShop.Refresh` | ShopOnce | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OldRetire.N` | General | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OldRetire.R` | General | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OldRetire.RetireAmount` | General | type=select; display=default | options: "retire_10", "retire_all"; default: "retire_all" | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |

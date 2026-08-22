@@ -1,0 +1,97 @@
+diff --git a/module/shop/shop_core.py b/module/shop/shop_core.py
+index cebf31f3..1720ca4c 100644
+--- a/module/shop/shop_core.py
++++ b/module/shop/shop_core.py
+@@ -1,7 +1,7 @@
+ from module.base.decorator import cached_property
+ from module.logger import logger
+ from module.shop.assets import *
+-from module.shop.base import ShopItemGrid, ShopItemGrid_250814
++from module.shop.base import FILTER, ShopItemGrid, ShopItemGrid_250814
+ from module.shop.clerk import ShopClerk
+ from module.shop.shop_status import ShopStatus
+ 
+@@ -15,7 +15,12 @@ class CoreShop_250814(ShopClerk, ShopStatus):
+         Returns:
+             str:
+         """
+-        return self.config.CoreShop_Filter.strip()
++        from alas_headless import validate_alas_core_shop_filter
++
++        return validate_alas_core_shop_filter(
++            filter_=FILTER,
++            value=self.config.CoreShop_Filter,
++        ).strip()
+ 
+     # New UI in 2025-08-14
+     @cached_property
+diff --git a/module/shop/shop_merit.py b/module/shop/shop_merit.py
+index 5b1085bf..c5fabf90 100644
+--- a/module/shop/shop_merit.py
++++ b/module/shop/shop_merit.py
+@@ -1,6 +1,6 @@
+ from module.base.decorator import cached_property
+ from module.logger import logger
+-from module.shop.base import ShopItemGrid, ShopItemGrid_250814
++from module.shop.base import FILTER, ShopItemGrid, ShopItemGrid_250814
+ from module.shop.clerk import ShopClerk
+ from module.shop.shop_status import ShopStatus
+ from module.shop.ui import ShopUI
+@@ -15,7 +15,12 @@ class MeritShop_250814(ShopClerk, ShopUI, ShopStatus):
+         Returns:
+             str:
+         """
+-        return self.config.MeritShop_Filter.strip()
++        from alas_headless import validate_alas_merit_shop_filter
++
++        return validate_alas_merit_shop_filter(
++            filter_=FILTER,
++            value=self.config.MeritShop_Filter,
++        ).strip()
+ 
+     # New UI in 2025-08-14
+     @cached_property
+@@ -66,6 +71,11 @@ class MeritShop_250814(ShopClerk, ShopUI, ShopStatus):
+         """
+         Run Merit Shop
+         """
++        from alas_headless import validate_alas_merit_shop_refresh
++
++        refresh = validate_alas_merit_shop_refresh(
++            refresh=self.config.MeritShop_Refresh,
++        )
+         # Base case; exit run if filter empty
+         if not self.shop_filter:
+             return
+@@ -76,7 +86,6 @@ class MeritShop_250814(ShopClerk, ShopUI, ShopStatus):
+ 
+         # Execute buy operations
+         # Refresh if enabled and available
+-        refresh = self.config.MeritShop_Refresh
+         for _ in range(2):
+             success = self.shop_buy()
+             if not success:
+diff --git a/module/shop/ui.py b/module/shop/ui.py
+index cd28a37f..98816179 100644
+--- a/module/shop/ui.py
++++ b/module/shop/ui.py
+@@ -78,9 +78,16 @@ class ShopUI(UI):
+         """
+         logger.info('Shop refresh')
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if semantic_adapter is not None and not semantic_adapter.shop_refresh_available():
+-            logger.info('Refresh not available')
+-            return False
++        if semantic_adapter is not None:
++            if not semantic_adapter.shop_refresh_available():
++                logger.info('Refresh not available')
++                return False
++            if not semantic_adapter.shop_purchase_allowed():
++                logger.info('Semantic shop mutation budget exhausted; skip refresh')
++                return False
++            receipt = semantic_adapter.refresh_shop_once()
++            logger.info(f'Semantic shop refresh qualified: {receipt.semantic_id}')
++            return True
+         refreshed = False
+ 
+         # SHOP_REFRESH -> POPUP_CONFIRM

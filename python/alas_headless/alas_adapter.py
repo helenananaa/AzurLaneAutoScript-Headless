@@ -1537,7 +1537,18 @@ class AlasSemanticAdapter:
             or item.price != expected_price
         ):
             raise SemanticGateClosed("selected shop item identity changed")
-        self.oracle.click_shop_item(index)
+        if item.canonical_name == "DefaultItem":
+            raise SemanticGateClosed("unknown shop item cannot be purchased")
+        if item.remaining is not None and item.remaining <= 0:
+            raise SemanticGateClosed("selected shop item is sold out")
+        before_balance = self.oracle.shop_currency_balance(item.cost)
+        if before_balance < item.price:
+            raise SemanticGateClosed("shop currency is insufficient")
+        try:
+            self.oracle.click_shop_item(index)
+        except ObserverTransportError:
+            if self.oracle.shop_purchase_dialog_quantity(item.display_name) != 1:
+                raise
         deadline = time.monotonic() + 5.0
         while True:
             try:
@@ -1560,12 +1571,133 @@ class AlasSemanticAdapter:
             "shop.purchase",
             lambda: self.oracle.click_shop_purchase_confirm(item.display_name, 1),
         )
-        deadline = time.monotonic() + 8.0
-        while self.oracle.shop_purchase_dialog_quantity(item.display_name) is not None:
+        deadline = time.monotonic() + 30.0
+        while True:
+            if self.oracle.shop_purchase_dialog_quantity(item.display_name) is None:
+                if self.oracle.award_info_page_visible():
+                    self.oracle.click_exercise_award_info_close()
+                    time.sleep(0.5)
+                    continue
+                try:
+                    after_items = self.oracle.general_shop_items()
+                    after_balance = self.oracle.shop_currency_balance(item.cost)
+                except SemanticGateClosed:
+                    if time.monotonic() >= deadline:
+                        raise
+                    time.sleep(0.25)
+                    continue
+                after = next(
+                    (candidate for candidate in after_items if candidate.index == index),
+                    None,
+                )
+                if (
+                    after is None
+                    or after.canonical_name != item.canonical_name
+                    or after.cost != item.cost
+                    or after.price != item.price
+                    or after_balance != before_balance - item.price
+                ):
+                    raise SemanticGateClosed("shop purchase postcondition changed")
+                if item.remaining is not None and (
+                    after.remaining != item.remaining - 1
+                    or after.total != item.total
+                ):
+                    raise SemanticGateClosed("shop item stock did not decrease by one")
+                return receipt
             if time.monotonic() >= deadline:
-                raise SemanticGateClosed("shop purchase confirmation did not close")
+                raise SemanticGateClosed("shop purchase confirmation did not settle")
+            time.sleep(0.25)
+
+    def refresh_shop_once(self) -> ActionReceipt:
+        """Spend one bounded grant on the exact current GuildShop refresh."""
+
+        if not self._action_ledger.allowed("shop.purchase"):
+            raise SemanticGateClosed(
+                "shop refresh requires a positive transaction budget"
+            )
+        if self.oracle.shop_selected_nav_label() != "补给商店":
+            raise SemanticGateClosed("shop refresh navigation changed")
+        if self.oracle.shop_selected_tab_label() != "舰队":
+            raise SemanticGateClosed("only GuildShop refresh is qualified")
+        before_items = self.oracle.general_shop_items()
+        before_balance = self.oracle.shop_currency_balance("GuildCoins")
+        if not self.oracle.shop_refresh_available():
+            raise SemanticGateClosed("GuildShop refresh is unavailable")
+        self.oracle.click_shop_refresh()
+        deadline = time.monotonic() + 5.0
+        while True:
+            try:
+                prompt = self.oracle.shop_refresh_prompt()
+            except SemanticGateClosed:
+                if time.monotonic() >= deadline:
+                    raise
+                time.sleep(0.2)
+                continue
+            if prompt is not None:
+                break
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed("shop refresh prompt did not open")
             time.sleep(0.2)
-        return receipt
+        currency, price = prompt
+        if currency != "GuildCoins" or price != 50:
+            raise SemanticGateClosed("GuildShop refresh cost changed")
+        if before_balance < price:
+            raise SemanticGateClosed("GuildShop currency is insufficient")
+        receipt = self._dispatch_mutation(
+            "shop.purchase",
+            lambda: self.oracle.click_shop_refresh_confirm(currency, price),
+        )
+        deadline = time.monotonic() + 30.0
+        before_signature = tuple(
+            (
+                item.display_name,
+                item.canonical_name,
+                item.amount,
+                item.cost,
+                item.price,
+                item.remaining,
+                item.total,
+            )
+            for item in before_items
+        )
+        while True:
+            try:
+                prompt = self.oracle.shop_refresh_prompt()
+            except SemanticGateClosed:
+                if time.monotonic() >= deadline:
+                    raise
+                time.sleep(0.25)
+                continue
+            if prompt is None:
+                try:
+                    after_items = self.oracle.general_shop_items()
+                    after_balance = self.oracle.shop_currency_balance("GuildCoins")
+                    refresh_available = self.oracle.shop_refresh_available()
+                except SemanticGateClosed:
+                    if time.monotonic() >= deadline:
+                        raise
+                    time.sleep(0.25)
+                    continue
+                after_signature = tuple(
+                    (
+                        item.display_name,
+                        item.canonical_name,
+                        item.amount,
+                        item.cost,
+                        item.price,
+                        item.remaining,
+                        item.total,
+                    )
+                    for item in after_items
+                )
+                if after_balance != before_balance - price:
+                    raise SemanticGateClosed("shop refresh balance did not decrease")
+                if after_signature == before_signature and refresh_available:
+                    raise SemanticGateClosed("shop refresh inventory did not change")
+                return receipt
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed("shop refresh confirmation did not settle")
+            time.sleep(0.25)
 
     def purchase_operation_siren_shop_item_once(
         self,
@@ -4781,13 +4913,13 @@ class AlasSemanticAdapter:
             # beyond its initial 30-second loading lease during long battles,
             # so retirement/page checks must not become unmapped mid-combat.
             return False
-        if (
-            (self._minigame_context is not None or self._dorm_context is not None)
-            and self.oracle.exists("dorm-menu/page/root")
-        ):
+        if self.oracle.exists("dorm-menu/page/root"):
             # MainLiveAreaUI is an overlay above the still-mounted main page.
             # The underlying main/build button is not evidence of BuildShipUI;
             # during live-area routes the exact overlay owns page discovery.
+            # This also applies to callers such as RewardShop which use the
+            # shared ALAS page graph without first opening a dorm/minigame
+            # flow context.
             return name == "DORMMENU_CHECK"
         if (
             semantic_id is None
@@ -5117,13 +5249,25 @@ class AlasSemanticAdapter:
             if name == "ACADEMY_CHECK":
                 return self.oracle.academy_page_visible()
             if name == "MUNITIONS_CHECK":
-                return self.oracle.munitions_page_visible()
+                try:
+                    return self.oracle.munitions_page_visible()
+                except SemanticGateClosed:
+                    return False
             if name == "NAV_GENERAL":
-                return self.oracle.shop_general_nav_selected()
+                try:
+                    return self.oracle.shop_general_nav_selected()
+                except SemanticGateClosed:
+                    return False
             if name == "NAV_MONTHLY":
-                return self.oracle.shop_selected_nav_label() == "月度商店"
+                try:
+                    return self.oracle.shop_selected_nav_label() == "月度商店"
+                except SemanticGateClosed:
+                    return False
             if name == "TAB_GENERAL":
-                return self.oracle.shop_general_tab_selected()
+                try:
+                    return self.oracle.shop_general_tab_selected()
+                except SemanticGateClosed:
+                    return False
             shop_tab_labels = {
                 "TAB_MERIT": "军需",
                 "TAB_GUILD": "舰队",
@@ -5135,7 +5279,10 @@ class AlasSemanticAdapter:
                 "TAB_PROTOTYPE": "原型",
             }
             if name in shop_tab_labels:
-                return self.oracle.shop_selected_tab_label() == shop_tab_labels[name]
+                try:
+                    return self.oracle.shop_selected_tab_label() == shop_tab_labels[name]
+                except SemanticGateClosed:
+                    return False
             if name == "DAILY_CHECK":
                 return bool(
                     self.oracle.daily_page_visible()
@@ -12855,6 +13002,10 @@ class AlasSemanticSession:
 
     def shop_purchase_allowed(self) -> bool:
         return self.open()._action_ledger.allowed("shop.purchase")
+
+    def refresh_shop_once(self) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().refresh_shop_once()
 
     def retirement_allowed(self) -> bool:
         return self.open().retirement_allowed()

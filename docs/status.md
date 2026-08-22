@@ -1532,10 +1532,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     grammar before the original property trims it. Replay preserves the default,
     Unicode separators, and intentional blank-filter skip; unknown or trailing
     tokens and non-text input fail before filtering.
-  - Recorder calls replace `shop_buy` and `shop_refresh`; no real purchase,
-    refresh, currency mutation, confirmation, receipt, or Android input occurs.
-    These five fields move only to `offline=complete`; real item/balance
-    observation, purchase/refresh confirmation, and receipts remain unverified.
+  - This recorder suite remains the exhaustive predicate proof. The later
+    reward-shop live qualification below adds typed inventory/balance reads and
+    the bounded shared transaction port; it does not retroactively claim every
+    GeneralShop mutation branch.
 
 ### GuildShop entry choices: offline predicate contract passed
 
@@ -1550,10 +1550,9 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     `argument.yaml` options and generated defaults before the loop can reach
     `ShopClerk.shop_get_choice()`. Every allowed option is replayed; invalid
     text and type values fail before any recorder call.
-  - `shop_buy` and `shop_refresh` are recorders only. No real item choice,
-    purchase, refresh, currency mutation, confirmation, receipt, or Android
-    input occurs; real item-to-choice mapping and selection confirmation remain
-    unverified.
+  - These tests remain recorder-only. The later live qualification proves the
+    default filter/no-match path and one exact GuildShop refresh, while the 12
+    secondary-choice dialogs remain unverified.
 
 ### MedalShop2 entry choices: offline predicate contract passed
 
@@ -1565,10 +1564,32 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
     `argument.yaml` options and generated defaults before the shop loop can
     reach `ShopClerk.shop_get_choice()`. Every allowed value is replayed;
     malformed text and types fail before any recorder call.
-  - The semantic branch records only `shop_buy`; it performs no real item
-    selection, purchase, currency mutation, confirmation, receipt, refresh, or
-    Android input. Item-to-choice mapping, live stock/medal observation, and
-    purchase confirmation remain unverified.
+  - This suite remains the all-values parser proof. The later live qualification
+    proves the default filter selecting `DR` and one exact purchase; the six
+    secondary-choice dialogs remain unverified.
+
+### Reward-shop transactions: bounded live qualification passed
+
+- The original `ShopFrequent` flow entered the current GeneralShop, classified
+  ten typed cards, read `35709` Coins and `5022` Gems, found no default-filter
+  match, and exited with a zero transaction budget. A separate low-risk
+  `BoxT2` positive probe was rejected before click when a MaaTouch reconnect
+  made the exact Coins balance ambiguous; Coins and Gems stayed unchanged.
+- The original `ShopOnce` flow traversed Merit, Guild, Core monthly, and Medal
+  tabs with exact selected-tab ownership. Zero-budget execution completed with
+  balances `350245 / 110550 / 27692 / 3606` and no purchase or refresh.
+- One bounded MedalShop2 purchase selected the exact index-6 `DR` card at price
+  20. Medal balance changed `3626 -> 3606`, stock changed `4/5 -> 3/5`, the
+  award overlay was closed once, and no second purchase was attempted.
+- One bounded GuildShop refresh matched the exact 50-GuildCoins prompt and
+  dispatched only `shop/refresh/confirm`. Balance changed
+  `110600 -> 110550`, inventory changed, and refresh availability changed
+  `true -> false`.
+- Merit/Core filter entry and Merit refresh now have strict contracts in the
+  pinned upstream path. Unknown tokens and non-booleans fail before shop input.
+  `shop.purchase` remains an integer budget; identity, currency, balance,
+  quantity-one, stock, and postcondition drift all fail closed. Evidence is in
+  `integration/alas/reward-shop-live-20260822.json`.
 
 ### Screenshot error-capture settings: offline predicate contract passed
 

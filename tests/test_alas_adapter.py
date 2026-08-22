@@ -2610,6 +2610,92 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(state, {"remaining": 2, "currency": 1100, "dialog": False})
         self.assertEqual(adapter._action_ledger.remaining("shop.purchase"), 0)
 
+    def test_regular_shop_purchase_is_atomic_and_postconditioned(self):
+        oracle = FakeOracle()
+        state = {"remaining": 4, "balance": 3626, "dialog": False}
+
+        def items():
+            return (
+                SimpleNamespace(
+                    index=6,
+                    canonical_name="DR",
+                    display_name="高级定向蓝图・八期",
+                    amount=1,
+                    cost="Medal",
+                    price=20,
+                    remaining=state["remaining"],
+                    total=5,
+                ),
+            )
+
+        oracle.general_shop_items = items
+        oracle.shop_currency_balance = lambda _currency: state["balance"]
+        oracle.click_shop_item = lambda _index: state.update(dialog=True)
+        oracle.shop_purchase_dialog_quantity = (
+            lambda _name: 1 if state["dialog"] else None
+        )
+
+        def confirm(_name, _quantity):
+            state["dialog"] = False
+            state["remaining"] -= 1
+            state["balance"] -= 20
+            return oracle.click_receipt("shop/purchase/confirm")
+
+        oracle.click_shop_purchase_confirm = confirm
+        adapter = AlasSemanticAdapter(oracle, lambda: None, shop_purchase_budget=1)
+
+        receipt = adapter.purchase_shop_item_once(6, "DR", "Medal", 20)
+
+        self.assertEqual(receipt.capability_id, "shop.purchase")
+        self.assertEqual(state, {"remaining": 3, "balance": 3606, "dialog": False})
+        self.assertEqual(adapter._action_ledger.remaining("shop.purchase"), 0)
+
+    def test_guild_shop_refresh_is_atomic_and_postconditioned(self):
+        oracle = FakeOracle()
+        state = {"balance": 110600, "prompt": False, "refreshed": False}
+
+        def items():
+            name = "BookT3" if state["refreshed"] else "PlateT4"
+            return (
+                SimpleNamespace(
+                    index=0,
+                    display_name=name,
+                    canonical_name=name,
+                    amount=1,
+                    cost="GuildCoins",
+                    price=80 if state["refreshed"] else 60,
+                    remaining=None,
+                    total=None,
+                ),
+            )
+
+        oracle.shop_selected_nav_label = lambda: "补给商店"
+        oracle.shop_selected_tab_label = lambda: "舰队"
+        oracle.general_shop_items = items
+        oracle.shop_currency_balance = lambda _currency: state["balance"]
+        oracle.shop_refresh_available = lambda: not state["refreshed"]
+        oracle.click_shop_refresh = lambda: state.update(prompt=True)
+        oracle.shop_refresh_prompt = (
+            lambda: ("GuildCoins", 50) if state["prompt"] else None
+        )
+
+        def confirm(_currency, _price):
+            state["prompt"] = False
+            state["refreshed"] = True
+            state["balance"] -= 50
+            return oracle.click_receipt("shop/refresh/confirm")
+
+        oracle.click_shop_refresh_confirm = confirm
+        adapter = AlasSemanticAdapter(oracle, lambda: None, shop_purchase_budget=1)
+
+        receipt = adapter.refresh_shop_once()
+
+        self.assertEqual(receipt.capability_id, "shop.purchase")
+        self.assertEqual(
+            state, {"balance": 110550, "prompt": False, "refreshed": True}
+        )
+        self.assertEqual(adapter._action_ledger.remaining("shop.purchase"), 0)
+
     def test_operation_siren_shop_purchase_refuses_insufficient_currency(self):
         oracle = FakeOracle()
         oracle.operation_siren_shop_items = lambda: (
@@ -7699,6 +7785,13 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         oracle.enabled_values["main/formation"] = True
 
         self.assertFalse(adapter.appear(NamedButton("MAIN_GOTO_FLEET")))
+        self.assertTrue(adapter.appear(NamedButton("DORMMENU_CHECK")))
+
+    def test_dorm_menu_overlay_owns_shared_page_discovery_without_flow_context(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["dorm-menu/page/root"] = True
+
+        self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
         self.assertTrue(adapter.appear(NamedButton("DORMMENU_CHECK")))
 
     def test_dorm_generic_reward_probe_requires_exact_award_popup(self):

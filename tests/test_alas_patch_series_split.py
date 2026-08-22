@@ -239,6 +239,11 @@ FLOW_PATHS = {
         "module/exercise/hp_daemon.py",
         "module/exercise/opponent.py",
     },
+    "0401-shop-transactions-runtime.patch": {
+        "module/shop/shop_core.py",
+        "module/shop/shop_merit.py",
+        "module/shop/ui.py",
+    },
 }
 
 OVERRIDE_PATHS = {
@@ -429,6 +434,9 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                     "0380-exercise-full-flow-port.patch": {
                         "module/exercise/combat.py",
                         "module/exercise/exercise.py",
+                    },
+                    "0401-shop-transactions-runtime.patch": {
+                        "module/shop/ui.py",
                     },
                 }.get(name, set())
                 self.assertEqual(promoted & actual, expected_overlap)

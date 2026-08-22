@@ -6599,6 +6599,8 @@ class SemanticOracleTests(unittest.TestCase):
         ]
         texts = [
             make_text("商店", page + "buttonList/top/title/Text"),
+            make_text("35709", page + "buttonList/top/resources/gold/Text"),
+            make_text("5022", page + "buttonList/top/resources/gem/Text"),
             make_text(
                 "补给商店",
                 page + "buttonList/shop1List/supplyShop/shop2List/"
@@ -6626,6 +6628,9 @@ class SemanticOracleTests(unittest.TestCase):
                     ),
                 ]
             )
+        texts.append(
+            make_text("可兑换次数4/5", shop + "scroll/content/1/count_contain/label")
+        )
         backend = FakeBackend(buttons)
         backend.ui = make_ui(texts, images=images)
         oracle = make_oracle(backend)
@@ -6636,12 +6641,58 @@ class SemanticOracleTests(unittest.TestCase):
         items = oracle.general_shop_items()
         self.assertEqual(len(items), 10)
         self.assertEqual(items[1].canonical_name, "BoxT3")
+        self.assertEqual((items[1].remaining, items[1].total), (4, 5))
         self.assertEqual(items[9].canonical_name, "BookRedT3")
         self.assertEqual((items[9].cost, items[9].price), ("Gems", 80))
+        self.assertEqual(oracle.shop_currency_balance("Coins"), 35709)
+        self.assertEqual(oracle.shop_currency_balance("Gems"), 5022)
 
         backend.ui["images"][-2]["sprite"] = "unknown"
         with self.assertRaisesRegex(SemanticGateClosed, "currency is unknown"):
             oracle.general_shop_items()
+
+    def test_guild_shop_refresh_prompt_is_exact_and_confirmable(self):
+        page = "root/OverlayCamera/Overlay/UIMain/"
+        shop = page + "ShopSupplyShopUI(Clone)/"
+        popup = page + "Msgbox(Clone)/window/"
+        confirm = popup + "button_container/custom_button_1(Clone)"
+        cancel = popup + "button_container/custom_button_2(Clone)"
+        backend = FakeBackend(
+            [
+                make_button("closeBtn", page + "buttonList/top/closeBtn", raycast_top=None),
+                make_button("homeBtn", page + "buttonList/top/homeBtn", raycast_top=None),
+                *[
+                    make_button(str(index), shop + f"scroll/content/{index}", raycast_top=None)
+                    for index in range(10)
+                ],
+                make_button("custom_button_1(Clone)", confirm),
+                make_button("custom_button_2(Clone)", cancel),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("商店", page + "buttonList/top/title/Text"),
+                make_text(
+                    "补给商店",
+                    page + "buttonList/shop1List/supplyShop/shop2List/"
+                    "supplyShop/selected/name",
+                ),
+                make_text("舰队", shop + "toggleGroup/Toggle/selected/Label"),
+                make_text("确 定", confirm + "/pic"),
+                make_text("取 消", cancel + "/pic"),
+                make_text(
+                    "是否花费50<color=#92fc63>舰队币</color>刷新商品列表",
+                    popup + "msg_panel/content",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.shop_refresh_prompt(), ("GuildCoins", 50))
+        receipt = oracle.click_shop_refresh_confirm("GuildCoins", 50)
+
+        self.assertEqual(receipt.semantic_id, "shop/refresh/confirm")
+        self.assertEqual(len(backend.taps), 1)
 
     def test_shop_navigation_and_refresh_use_typed_toggle_and_button_state(self):
         page = "root/OverlayCamera/Overlay/UIMain/"

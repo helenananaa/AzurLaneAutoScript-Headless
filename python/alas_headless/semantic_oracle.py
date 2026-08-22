@@ -254,6 +254,8 @@ class GeneralShopItemState:
     price: int
     icon_sprite: str
     bounds: Bounds
+    remaining: Optional[int] = None
+    total: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -9205,7 +9207,7 @@ class SemanticOracle:
         if book is not None:
             genre = {"攻击": "Red", "防御": "Blue", "辅助": "Yellow"}[book.group(1)]
             return f"Book{genre}T{book.group(2)}"
-        box = re.fullmatch(r".+科技箱T([1-5])", display_name)
+        box = re.fullmatch(r"(?:.+)?科技箱T([1-5])", display_name)
         if box is not None:
             return f"BoxT{box.group(1)}"
         plate = re.fullmatch(
@@ -9242,10 +9244,19 @@ class SemanticOracle:
             return "FoodT5"
         if display_name == "快速完成工具":
             return "Drill"
+        generic_book = re.fullmatch(r"舰艇教材T([1-4])", display_name)
+        if generic_book is not None:
+            return f"BookT{generic_book.group(1)}"
+        generic_plate = re.fullmatch(r"强化部件T([1-4])", display_name)
+        if generic_plate is not None:
+            return f"PlateT{generic_plate.group(1)}"
+        generic_retrofit = re.fullmatch(r"改造图纸T([1-4])", display_name)
+        if generic_retrofit is not None:
+            return f"RetrofitT{generic_retrofit.group(1)}"
         return "DefaultItem"
 
     def general_shop_items(self) -> Tuple[GeneralShopItemState, ...]:
-        """Return the ten exact selected Supply Shop cards from typed records."""
+        """Return the ten exact cards from the selected Supply Shop tab."""
 
         if not self.munitions_page_visible():
             raise SemanticGateClosed("supply shop is not selected")
@@ -9324,6 +9335,28 @@ class SemanticOracle:
             if cost_sprite not in cost_names:
                 raise SemanticGateClosed("general-shop item currency is unknown")
             icon_sprite = one_image(root + "/itemBg/item/icon_bg/icon").sprite
+            stock = tuple(
+                text
+                for text in ui_state.texts
+                if text.path.endswith(root + "/count_contain/label")
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+                and text.bounds is not None
+            )
+            if len(stock) > 1:
+                raise SemanticGateClosed("shop item stock is ambiguous")
+            remaining = total = None
+            if stock:
+                match = re.fullmatch(
+                    r"(?:可兑换次数)?([0-9]+)/([1-9][0-9]*)",
+                    "".join(stock[0].text.split()),
+                )
+                if match is None:
+                    raise SemanticGateClosed("shop item stock is malformed")
+                remaining, total = map(int, match.groups())
+                if remaining > total:
+                    raise SemanticGateClosed("shop item stock exceeds its limit")
             items.append(
                 GeneralShopItemState(
                     generation=ui_state.generation,
@@ -9335,9 +9368,184 @@ class SemanticOracle:
                     price=price,
                     icon_sprite=icon_sprite,
                     bounds=buttons[0].bounds,
+                    remaining=remaining,
+                    total=total,
                 )
             )
         return tuple(items)
+
+    def shop_currency_balance(self, currency: str) -> int:
+        """Read the exact balance for the selected ordinary shop currency."""
+
+        if not self.munitions_page_visible():
+            raise SemanticGateClosed("shop page identity is absent")
+        nav = self.shop_selected_nav_label()
+        tab = self.shop_selected_tab_label()
+        allowed = {
+            "Coins": ("补给商店", "军火"),
+            "Gems": ("补给商店", "军火"),
+            "Merit": ("补给商店", "军需"),
+            "GuildCoins": ("补给商店", "舰队"),
+            "Core": ("月度商店", "核心月度"),
+            "Medal": ("月度商店", "勋章"),
+        }
+        if allowed.get(currency) != (nav, tab):
+            raise SemanticGateClosed("shop currency does not match the selected tab")
+        paths = {
+            "Coins": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gold/Text",
+            "Gems": "OverlayCamera/Overlay/UIMain/buttonList/top/resources/gem/Text",
+            "Merit": "OverlayCamera/Overlay/UIMain/ShopSupplyShopUI(Clone)/bg/resList/res(Clone)/Text",
+            "GuildCoins": "OverlayCamera/Overlay/UIMain/ShopSupplyShopUI(Clone)/bg/resList/res(Clone)/Text",
+            "Core": "OverlayCamera/Overlay/UIMain/ShopSupplyShopUI(Clone)/bg/resList/res(Clone)/Text",
+            "Medal": "OverlayCamera/Overlay/UIMain/ShopSupplyShopUI(Clone)/bg/resList/res(Clone)/Text",
+        }
+        state = self.read_ui_state()
+        matches = tuple(
+            text
+            for text in state.texts
+            if text.path.endswith(paths[currency])
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and re.fullmatch(r"[0-9]+", text.text.strip()) is not None
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("shop currency balance is absent or ambiguous")
+        return int(matches[0].text.strip())
+
+    def click_shop_refresh(self) -> ActionReceipt:
+        """Open the exact selected shop's refresh confirmation."""
+
+        if not self.shop_refresh_available():
+            raise SemanticGateClosed("shop refresh is not available")
+        state = self.read_state()
+        path = "OverlayCamera/Overlay/UIMain/ShopSupplyShopUI(Clone)/timeBtn"
+        buttons = tuple(
+            button
+            for button in state.buttons
+            if button.path == path
+            and button.name == "timeBtn"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is not False
+            and button.bounds is not None
+        )
+        if len(buttons) != 1:
+            raise SemanticGateClosed("shop refresh control is absent or ambiguous")
+        bounds = buttons[0].bounds
+        assert bounds is not None
+        point = Point(
+            (bounds.left + bounds.right) / 2.0,
+            (bounds.top + bounds.bottom) / 2.0,
+        )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="shop/refresh/open",
+            generation=state.generation,
+            point=point,
+            bounds=bounds,
+            path=buttons[0].path,
+        )
+
+    def shop_refresh_prompt(self) -> Optional[Tuple[str, int]]:
+        """Return the exact currency and price from a supported refresh prompt."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("shop refresh prompt snapshots are not coherent")
+        root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+        controls = {
+            "confirm": root + "button_container/custom_button_1(Clone)",
+            "cancel": root + "button_container/custom_button_2(Clone)",
+        }
+        buttons = {
+            key: tuple(button for button in state.buttons if button.path.endswith(path))
+            for key, path in controls.items()
+        }
+        contents = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith(root + "msg_panel/content")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        if not contents and not any(buttons.values()):
+            return None
+        if any(len(value) != 1 for value in buttons.values()) or len(contents) != 1:
+            raise SemanticGateClosed("shop refresh prompt is incomplete or ambiguous")
+        labels = {
+            key: tuple(
+                text
+                for text in ui_state.texts
+                if text.path.endswith(path + "/pic")
+                and text.active_in_hierarchy
+                and text.active_and_enabled
+                and not text.truncated
+            )
+            for key, path in controls.items()
+        }
+        if (
+            any(len(value) != 1 for value in labels.values())
+            or "".join(labels["confirm"][0].text.split()) != "确定"
+            or "".join(labels["cancel"][0].text.split()) != "取消"
+        ):
+            raise SemanticGateClosed("shop refresh prompt labels changed")
+        for button in (value[0] for value in buttons.values()):
+            if not (
+                button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.bounds is not None
+            ):
+                raise SemanticGateClosed("shop refresh prompt is not actionable")
+        message = "".join(contents[0].text.split())
+        match = re.fullmatch(
+            r"是否花费([1-9][0-9]*)<color=#[0-9A-Fa-f]{6}>([^<]+)</color>刷新商品列表",
+            message,
+        )
+        if match is None:
+            raise SemanticGateClosed("shop refresh prompt cost is malformed")
+        currency_names = {"舰队币": "GuildCoins"}
+        currency = currency_names.get(match.group(2))
+        if currency is None:
+            raise SemanticGateClosed("shop refresh currency is unsupported")
+        if self.shop_selected_tab_label() != "舰队":
+            raise SemanticGateClosed("shop refresh prompt is on an unsupported tab")
+        return currency, int(match.group(1))
+
+    def click_shop_refresh_confirm(
+        self, expected_currency: str, expected_price: int
+    ) -> ActionReceipt:
+        if self.shop_refresh_prompt() != (expected_currency, expected_price):
+            raise SemanticGateClosed("shop refresh prompt changed")
+        state = self.read_state()
+        path = (
+            "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+            "button_container/custom_button_1(Clone)"
+        )
+        buttons = tuple(button for button in state.buttons if button.path.endswith(path))
+        if len(buttons) != 1 or not buttons[0].actionable:
+            raise SemanticGateClosed("shop refresh confirmation is not actionable")
+        bounds = buttons[0].bounds
+        point = buttons[0].point
+        assert bounds is not None and point is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="shop/refresh/confirm",
+            generation=state.generation,
+            point=point,
+            bounds=bounds,
+            path=buttons[0].path,
+        )
 
     @staticmethod
     def _canonical_operation_siren_shop_name(

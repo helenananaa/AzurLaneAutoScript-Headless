@@ -117,6 +117,11 @@ from .alas_medal_shop_config_contract import (
     validate_alas_medal_shop_filter,
     validate_alas_medal_shop_secondary_choices,
 )
+from .alas_reward_shop_config_contract import (
+    validate_alas_core_shop_filter,
+    validate_alas_merit_shop_filter,
+    validate_alas_merit_shop_refresh,
+)
 from .alas_screenshot_error_config_contract import (
     AlasScreenshotCaptureConfigSnapshot,
     validate_alas_error_screenshot_length,

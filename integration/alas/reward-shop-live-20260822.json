@@ -1,0 +1,88 @@
+{
+  "schema": "alas-headless.reward-shop-live/v1",
+  "captured_date": "2026-08-22",
+  "passed": true,
+  "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "device": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "purchase": {
+    "shop": "MedalShop2",
+    "item_index": 6,
+    "canonical_name": "DR",
+    "currency": "Medal",
+    "unit_price": 20,
+    "quantity": 1,
+    "balance_before": 3626,
+    "balance_after": 3606,
+    "stock_before": 4,
+    "stock_after": 3,
+    "stock_total": 5,
+    "award_overlay_closed": true,
+    "second_purchase_attempted": false,
+    "postcondition_proven": true
+  },
+  "general_shop_readonly": {
+    "coin_balance": 35709,
+    "gem_balance": 5022,
+    "items": [
+      "Coins_x7000",
+      "BoxT2_x1_Coins_x400",
+      "BoxT3_x1_Coins_x2000",
+      "BookRedT2_x1_Gems_x40",
+      "PlateGeneralT3_x5_Coins_x3000",
+      "Drill_x1_Coins_x1200",
+      "PlateTorpedoT3_x5_Coins_x3000",
+      "BoxT1_x5_Coins_x400",
+      "PlateAntiairT1_x5_Coins_x750",
+      "BookYellowT2_x1_Coins_x1200"
+    ],
+    "positive_purchase_target": "BoxT2_x1_Coins_x400",
+    "positive_purchase_dispatched": false,
+    "positive_purchase_gap": "MaaTouch reconnect left the exact Coins balance observation absent or ambiguous; the adapter failed closed before click",
+    "coin_delta": 0,
+    "gem_delta": 0
+  },
+  "refresh": {
+    "shop": "GuildShop",
+    "selected_tab": "舰队",
+    "currency": "GuildCoins",
+    "price": 50,
+    "balance_before": 110600,
+    "balance_after": 110550,
+    "available_before": true,
+    "available_after": false,
+    "inventory_changed": true,
+    "semantic_id": "shop/refresh/confirm",
+    "capability_id": "shop.purchase",
+    "policy_sha256": "f9ec23bf9ca12cb7174616f258386d5f4d58ecfcd78be2d2085bcb3197af35d4",
+    "postcondition_proven": true
+  },
+  "zero_budget": {
+    "purchase_budget": 0,
+    "ShopFrequent": {
+      "completed": true,
+      "coin_balance": 35709,
+      "gem_balance": 5022,
+      "purchase_count": 0,
+      "refresh_count": 0
+    },
+    "ShopOnce": {
+      "completed": true,
+      "merit_balance": 350245,
+      "guild_coin_balance": 110550,
+      "core_balance": 27692,
+      "medal_balance": 3606,
+      "purchase_count": 0,
+      "refresh_count": 0
+    }
+  },
+  "resources_consumed": {
+    "Medal": 20,
+    "GuildCoins": 50,
+    "Gems": 0,
+    "Coins": 0
+  },
+  "live_config_restored": true,
+  "excluded_flows_triggered": []
+}

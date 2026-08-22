@@ -509,6 +509,7 @@ $env:ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET = '1'
 $env:ALAS_SEMANTIC_RESEARCH_START_BUDGET = '1'
 $env:ALAS_SEMANTIC_DORM_COLLECT_BUDGET = '1'
 $env:ALAS_SEMANTIC_DORM_FEED_BUDGET = '1'
+$env:ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET = '1'
 $env:ALAS_SEMANTIC_BUILD_SUBMIT_BUDGET = '1'
 $env:ALAS_SEMANTIC_CAMPAIGN_STAGE_ENTRY_BUDGET = '1'
 $env:ALAS_SEMANTIC_CAMPAIGN_FLEET_MUTATION_BUDGET = '3'
@@ -565,6 +566,19 @@ campaign slice. A
 full Gacha attempt submitted one exact Light order but returned
 false after exposing the now-fixed warning/order phase alias; its corrected
 full replay remains gated by the resulting natural nonempty queue.
+
+Ordinary reward-shop mutation uses one shared `shop.purchase` unit per exact
+single-item purchase or GuildShop refresh. Before dispatch, the adapter requires
+the selected tab, card index, canonical item, currency, price, available stock,
+exact balance, and quantity-one dialog to agree. After dispatch it requires the
+balance decrement and, when exposed, the stock decrement; a reward overlay is
+closed once before re-reading. GuildShop refresh additionally requires the exact
+50-GuildCoins prompt, changed inventory, and refresh availability to become
+false. The live qualification purchased one MedalShop2 `DR` (`3626 -> 3606`,
+`4/5 -> 3/5`) and refreshed GuildShop once (`110600 -> 110550`). The current
+GeneralShop positive probe failed closed before click when the exact balance was
+temporarily ambiguous, so General refresh, gem purchases, and custom-item
+consumption remain unqualified.
 
 Daily execution is separately bounded by
 `ALAS_SEMANTIC_DAILY_EXECUTE_BUDGET`. The adapter identifies the centered

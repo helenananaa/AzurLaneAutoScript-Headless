@@ -939,21 +939,29 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_reward_shop_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "python/alas_headless/alas_reward_shop_config_contract.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
+        "docs/status.md"
+      ],
+      "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
         "ShopOnce"
       ],
       "path": "CoreShop.Filter",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
       "values": "input/default: \"Array\""
     },
     {
@@ -3472,9 +3480,13 @@
         "tests/test_alas_general_shop_config.py",
         "python/alas_headless/alas_general_shop_config_replay.py",
         "integration/alas/series/0060-shop-flow-ports.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "ShopFrequent"
@@ -3496,9 +3508,13 @@
         "tests/test_alas_general_shop_config.py",
         "python/alas_headless/alas_general_shop_config_replay.py",
         "integration/alas/series/0060-shop-flow-ports.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "ShopFrequent"
@@ -3510,7 +3526,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -3520,9 +3536,13 @@
         "tests/test_alas_general_shop_config.py",
         "python/alas_headless/alas_general_shop_config_replay.py",
         "integration/alas/series/0060-shop-flow-ports.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
         "ShopFrequent"
@@ -3544,9 +3564,13 @@
         "tests/test_alas_general_shop_config.py",
         "python/alas_headless/alas_general_shop_config_replay.py",
         "integration/alas/series/0060-shop-flow-ports.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "ShopFrequent"
@@ -3568,9 +3592,13 @@
         "tests/test_alas_general_shop_config.py",
         "python/alas_headless/alas_general_shop_config_replay.py",
         "integration/alas/series/0060-shop-flow-ports.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
         "docs/status.md"
       ],
-      "group_code": "B",
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "ShopFrequent"
@@ -3900,19 +3928,23 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_guild_shop_config.py",
         "python/alas_headless/alas_guild_shop_config_replay.py",
         "integration/alas/series/0060-shop-flow-ports.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
         "docs/status.md"
       ],
-      "group_code": "P",
+      "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
         "ShopOnce"
@@ -4116,25 +4148,30 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_guild_shop_config.py",
         "python/alas_headless/alas_guild_shop_config_replay.py",
         "integration/alas/series/0060-shop-flow-ports.patch",
+        "tests/test_alas_reward_shop_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
         "docs/status.md"
       ],
-      "group_code": "P",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "ShopOnce"
       ],
       "path": "GuildShop.Refresh",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -4609,13 +4646,17 @@
         "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_medal_shop_config.py",
         "python/alas_headless/alas_medal_shop_config_replay.py",
         "integration/alas/series/0060-shop-flow-ports.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -4624,7 +4665,7 @@
         "ShopOnce"
       ],
       "path": "MedalShop2.Filter",
-      "status_label": "◐ 实机当前值",
+      "status_label": "🟢 主路径已完成",
       "support": "supported",
       "values": "input/default: <long default in args.json>"
     },
@@ -5010,40 +5051,56 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_reward_shop_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "python/alas_headless/alas_reward_shop_config_contract.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
+        "docs/status.md"
+      ],
+      "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
         "ShopOnce"
       ],
       "path": "MeritShop.Filter",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
       "values": "input/default: \"Cube\""
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "missing",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_reward_shop_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "python/alas_headless/alas_reward_shop_config_contract.py",
+        "integration/alas/series/0401-shop-transactions-runtime.patch",
+        "integration/alas/reward-shop-live-20260822.json",
+        "docs/status.md"
+      ],
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "ShopOnce"
       ],
       "path": "MeritShop.Refresh",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ 实机当前值",
+      "support": "supported",
       "values": "input/default: false"
     },
     {
@@ -8580,8 +8637,8 @@
         "GeneralShop"
       ],
       "name": "ShopFrequent",
-      "note": "ConsumeCoins、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；购买、余额观察与确认仍未完成",
-      "status": "B"
+      "note": "原 ShopFrequent 已实机完成当前过滤器的十卡读取、金币/钻石余额与零购买安全退出；普通商店共用单件购买事务已有真实余额/库存后置条件，General 正向金币购买仍因触控重连在点击前失败关闭，刷新、钻石与自定义消费未逐值",
+      "status": "L"
     },
     {
       "groups": [
@@ -8592,8 +8649,8 @@
         "CoreShop"
       ],
       "name": "ShopOnce",
-      "note": "GuildShop 14 字段与 MedalShop2 7 字段入口已离线等价；其余商店与真实操作未闭环",
-      "status": "P"
+      "note": "军需、舰队、核心月度、勋章四页已由原 ShopOnce 实机贯通；勋章 DR 单件购买与舰队商店一次刷新均以精确余额和库存后置条件闭环，二级品类选择及非当前过滤分支未逐值",
+      "status": "L"
     },
     {
       "groups": [
@@ -11459,9 +11516,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "d514d4ac2b552b0476ec8506f8b6afaf928d55de3a261ae1d994772dcbefd339",
-      "manifest_sha256": "eab00da8e25f48f5ffa4affd14642faaafe67f50c304238eb1af8c89630d29ad",
-      "member_count": 83
+      "combined_sha256": "415e64b9f1f48fbb4f836484c7f5c49c828e1fcdf3e74034b3596677009dd975",
+      "manifest_sha256": "c32218eba6ac7a6e25f8ac1fdc0bbd0038801ce389817f8be633cb358821027e",
+      "member_count": 84
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }
