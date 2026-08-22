@@ -1248,6 +1248,7 @@ class AlasSemanticAdapter:
         self._operation_siren_startup_search_provisional = False
         self._operation_siren_auto_search_completed_empty = False
         self._operation_siren_combat_active = False
+        self._operation_siren_combat_fleet: Optional[int] = None
         self._operation_siren_defeated_fleets: set[int] = set()
         self._meta_beacon_active = False
         self._operation_siren_pending_order: Optional[str] = None
@@ -6801,9 +6802,24 @@ class AlasSemanticAdapter:
     def operation_siren_current_fleet_defeated(self) -> bool:
         self._package_gate()
         fleet = self.oracle.operation_siren_current_fleet()
-        if fleet in self._operation_siren_defeated_fleets:
-            return True
-        return self.oracle.operation_siren_current_fleet_defeated()
+        # Skip only a fleet that already lost its own Month Boss attempt.
+        # Map-chibi ``marks/damage/1`` can appear on a stacked neighbour
+        # while another fleet walks, and is not original ALAS' left HUD.
+        return self.operation_siren_fleet_already_defeated(fleet)
+
+    def operation_siren_fleet_already_defeated(self, fleet: int) -> bool:
+        """Return whether this exact fleet already lost its own Month Boss attempt.
+
+        Boss-room clicks can remount the left ``fleet_bar`` onto a stacked
+        neighbour.  Callers that already know the turn's fleet must not read
+        that HUD number.
+        """
+
+        if type(fleet) is not int or fleet not in {1, 2, 3, 4}:
+            raise SemanticGateClosed(
+                "operation siren defeated-fleet index is malformed"
+            )
+        return fleet in self._operation_siren_defeated_fleets
 
     def operation_siren_current_fleet_needs_repair(self) -> bool:
         self._package_gate()
@@ -6823,6 +6839,10 @@ class AlasSemanticAdapter:
 
     def click_operation_siren_low_resolve_cancel(self) -> ActionReceipt:
         self._package_gate()
+        # The prompt belongs to the fleet the client currently has selected.
+        # A stacked neighbour can remount fleet_bar after a boss click; using
+        # a stale combat-fleet snapshot would mark the next turn as already
+        # lost.
         fleet = self.oracle.operation_siren_current_fleet()
         receipt = self.oracle.click_operation_siren_low_resolve_cancel()
         self._operation_siren_defeated_fleets.add(fleet)
@@ -6840,6 +6860,20 @@ class AlasSemanticAdapter:
 
     def operation_siren_combat_committed(self) -> bool:
         return self._operation_siren_combat_active
+
+    def operation_siren_battle_result_visible(self) -> bool:
+        self._package_gate()
+        return self.oracle.operation_siren_battle_result_visible()
+
+    def operation_siren_battle_result_grade(self) -> str:
+        self._package_gate()
+        return self.oracle.operation_siren_battle_result_grade()
+
+    def click_operation_siren_battle_result(self) -> ActionReceipt:
+        self._package_gate()
+        if not self.oracle.operation_siren_battle_result_visible():
+            raise SemanticGateClosed("operation siren battle result is absent")
+        return self.oracle.click_daily_battle_result()
 
     def complete_operation_siren_combat_if_map_restored(self) -> bool:
         """Release combat ownership on an exact unobstructed OS map."""
@@ -6871,7 +6905,20 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "operation siren boss combat requires an exact boss target"
             )
+        self._operation_siren_combat_fleet = self.oracle.operation_siren_current_fleet()
         self._operation_siren_combat_active = True
+
+    def mark_operation_siren_combat_fleet_defeated(self) -> None:
+        """Remember the fleet that just received a Month Boss D-rank result.
+
+        Later fleets must still take their turn.  Approach-time map-chibi
+        damage marks are not this signal.
+        """
+
+        fleet = self._operation_siren_combat_fleet
+        if fleet is None:
+            fleet = self.oracle.operation_siren_current_fleet()
+        self._operation_siren_defeated_fleets.add(fleet)
 
     def operation_siren_reward_visible(self) -> bool:
         """Return whether a standalone exact AwardInfo stack covers the map."""
@@ -12245,6 +12292,13 @@ class AlasSemanticSession:
             self._live_combat_snapshot(), self._live_combat_manifest()
         )
 
+    _OPERATION_SIREN_COMBAT_OBSERVER_GAP_MESSAGES = (
+        "observer snapshot is stale",
+        "observer endpoints are not generation-coherent",
+        "combat fixture endpoint completeness changed",
+        "combat fixture endpoint generations disagree",
+    )
+
     def _campaign_combat_transition_error(self, exc: Exception) -> bool:
         adapter = self.adapter
         context = None if adapter is None else adapter._campaign_context
@@ -12268,6 +12322,17 @@ class AlasSemanticSession:
             and adapter.campaign_combat_committed()
             and time.monotonic() <= context.passive_transition_until
         )
+
+    def _operation_siren_combat_observer_gap(self, exc: Exception) -> bool:
+        adapter = self.adapter
+        committed = getattr(
+            adapter, "operation_siren_combat_committed", lambda: False
+        )
+        if adapter is None or not committed():
+            return False
+        if isinstance(exc, (StaleFrameError, ObserverTransportError)):
+            return True
+        return str(exc) in self._OPERATION_SIREN_COMBAT_OBSERVER_GAP_MESSAGES
 
     def campaign_is_in_map_after_combat(self) -> Optional[bool]:
         """Return map presence, or ``None`` for one bounded mount gap."""
@@ -12296,12 +12361,20 @@ class AlasSemanticSession:
             return False
         try:
             visible = set(self._live_combat_visible())
-        except SemanticGateClosed as exc:
-            if self._campaign_combat_transition_error(exc):
+        except (SemanticGateClosed, StaleFrameError, ObserverTransportError) as exc:
+            if (
+                isinstance(exc, SemanticGateClosed)
+                and self._campaign_combat_transition_error(exc)
+            ):
                 # The target grid input is committed and ChapterPreCombatUI
                 # exists, but its start control is still mounting. Report the
                 # bounded state as loading so ALAS enters its own preparation
                 # loop instead of re-reading the covered map underneath it.
+                return True
+            if self._operation_siren_combat_observer_gap(exc):
+                # Month-boss CombatLoadUI and long boss effects can stall
+                # observer completeness before PAUSE is published. Keep the
+                # original ALAS loading loop instead of aborting the battle.
                 return True
             raise
         return bool(
@@ -12337,19 +12410,7 @@ class AlasSemanticSession:
                 and self._campaign_combat_transition_error(exc)
             ):
                 return False
-            if (
-                self.open().operation_siren_combat_committed()
-                and (
-                    isinstance(exc, (StaleFrameError, ObserverTransportError))
-                    or str(exc)
-                    in (
-                        "observer snapshot is stale",
-                        "observer endpoints are not generation-coherent",
-                        "combat fixture endpoint completeness changed",
-                        "combat fixture endpoint generations disagree",
-                    )
-                )
-            ):
+            if self._operation_siren_combat_observer_gap(exc):
                 # Unity can stop publishing fresh hierarchy snapshots during
                 # long Operation Siren boss effects.  The committed battle is
                 # still executing until a fresh typed result/map surface says
@@ -12521,6 +12582,16 @@ class AlasSemanticSession:
             adapter, "operation_siren_combat_committed", lambda: False
         )():
             adapter.complete_operation_siren_combat_if_map_restored()
+        if (
+            getattr(adapter, "operation_siren_combat_committed", lambda: False)()
+            and adapter.oracle.operation_siren_battle_result_visible()
+        ):
+            grade = adapter.oracle.operation_siren_battle_result_grade()
+            observed = (
+                "BATTLE_STATUS_S" if grade == "VICTORY" else "BATTLE_STATUS_D"
+            )
+            self._combat_result_observation = (observed, time.monotonic())
+            return name == observed
         result_owner_active = bool(
             getattr(adapter, "daily_execution_active", lambda: False)()
             or adapter.campaign_combat_committed()
@@ -12592,6 +12663,11 @@ class AlasSemanticSession:
                     # control becomes the exact top raycast.  This is a
                     # bounded post-grid transition only; outside it the same
                     # mismatch remains fail-closed.
+                    return False
+                if self._operation_siren_combat_observer_gap(exc):
+                    # Keep optional combat probes absent across an OS observer
+                    # gap.  combat_is_executing() remains the owner of whether
+                    # the committed battle is still running.
                     return False
                 raise
         try:
@@ -13050,6 +13126,9 @@ class AlasSemanticSession:
     def operation_siren_current_fleet_defeated(self) -> bool:
         return self.open().operation_siren_current_fleet_defeated()
 
+    def operation_siren_fleet_already_defeated(self, fleet: int) -> bool:
+        return self.open().operation_siren_fleet_already_defeated(fleet)
+
     def operation_siren_current_fleet_needs_repair(self) -> bool:
         return self.open().operation_siren_current_fleet_needs_repair()
 
@@ -13071,6 +13150,16 @@ class AlasSemanticSession:
 
     def click_operation_siren_precombat_start(self) -> ActionReceipt:
         return self.open().click_operation_siren_precombat_start()
+
+    def operation_siren_battle_result_visible(self) -> bool:
+        return self.open().operation_siren_battle_result_visible()
+
+    def operation_siren_battle_result_grade(self) -> str:
+        return self.open().operation_siren_battle_result_grade()
+
+    def click_operation_siren_battle_result(self) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().click_operation_siren_battle_result()
 
     def operation_siren_combat_committed(self) -> bool:
         return self.open().operation_siren_combat_committed()
@@ -13095,6 +13184,9 @@ class AlasSemanticSession:
 
     def begin_operation_siren_boss_combat(self) -> None:
         self.open().begin_operation_siren_boss_combat()
+
+    def mark_operation_siren_combat_fleet_defeated(self) -> None:
+        self.open().mark_operation_siren_combat_fleet_defeated()
 
     def operation_siren_reward_visible(self) -> bool:
         return self.open().operation_siren_reward_visible()
@@ -13817,11 +13909,22 @@ class AlasSemanticSession:
             # The frame-bound oracle performs the same semantic checks without
             # hidden refreshes, and the final tap still invalidates that lease.
             result_oracle = self._combat_result_action_oracle(adapter)
-            if result_oracle.daily_battle_result_visible():
+            if (
+                result_oracle.daily_battle_result_visible()
+                or getattr(
+                    result_oracle,
+                    "operation_siren_battle_result_visible",
+                    lambda: False,
+                )()
+            ):
                 receipt = result_oracle.click_daily_battle_result()
                 self._combat_result_observation = None
                 self._combat_last_result_receipt = receipt
                 if adapter.campaign_combat_committed():
+                    self._arm_combat_result_transition(adapter)
+                if getattr(
+                    adapter, "operation_siren_combat_committed", lambda: False
+                )():
                     self._arm_combat_result_transition(adapter)
                 return receipt
             observation = self._combat_result_observation

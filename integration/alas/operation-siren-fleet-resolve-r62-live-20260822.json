@@ -1,0 +1,28 @@
+{
+  "schema": "alas-headless.operation-siren-fleet-resolve-live/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 1953,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "fleet_selections": [
+    {
+      "requested": 1,
+      "returned": true
+    },
+    {
+      "requested": 2,
+      "returned": true
+    },
+    {
+      "requested": 3,
+      "returned": true
+    },
+    {
+      "requested": 4,
+      "returned": true
+    }
+  ],
+  "resolve_returned": false,
+  "elapsed_seconds": 77.531,
+  "passed": true
+}

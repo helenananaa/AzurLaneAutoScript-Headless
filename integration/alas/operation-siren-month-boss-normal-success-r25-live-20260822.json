@@ -1,0 +1,55 @@
+{
+  "schema": "alas-headless.operation-siren-month-boss-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 6150,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "Mode": "normal",
+    "CheckAdaptability": true,
+    "ForceRun": true,
+    "Filter": "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1"
+  },
+  "mission_difficulties": [
+    "normal"
+  ],
+  "adaptability": [],
+  "globe_targets": [
+    {
+      "zone": 154,
+      "returned": true
+    }
+  ],
+  "room_entries": [
+    {
+      "is_normal": true,
+      "returned": null,
+      "elapsed_seconds": 15.032
+    }
+  ],
+  "fleet_selections": [
+    {
+      "requested": 4,
+      "returned": true
+    }
+  ],
+  "boss_clear_results": [
+    {
+      "returned": null,
+      "kwargs": {
+        "has_fleet_step": true,
+        "is_month": true
+      },
+      "raised": "SemanticGateClosed: observer driver revision mismatch: observed='506b76f698b5089aaa29c4e7908b48edb8532a44', expected='be80ce591a481c12d60c50d6040d40c035b40a2b'",
+      "elapsed_seconds": 47.5
+    }
+  ],
+  "repair_results": [],
+  "resolve_results": [],
+  "delay_calls": [],
+  "error": "SystemExit: 1",
+  "passed": false,
+  "temporary_config_removed": true
+}

@@ -1,0 +1,76 @@
+{
+  "schema": "alas-headless.operation-siren-month-boss-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 1953,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "configured": {
+    "Mode": "normal_hard",
+    "CheckAdaptability": true,
+    "ForceRun": true,
+    "Filter": "Fleet-4 > CallSubmarine > Fleet-2 > Fleet-3 > Fleet-1"
+  },
+  "mission_difficulties": [],
+  "adaptability": [],
+  "globe_targets": [
+    {
+      "zone": 154,
+      "returned": false
+    },
+    {
+      "zone": {
+        "type": "Zone",
+        "zone_id": 2,
+        "name": "[2|Gibraltar]"
+      },
+      "returned": true
+    }
+  ],
+  "room_entries": [
+    {
+      "is_normal": false,
+      "returned": null,
+      "elapsed_seconds": 0.64
+    }
+  ],
+  "fleet_selections": [
+    {
+      "requested": 4,
+      "returned": false
+    },
+    {
+      "requested": 2,
+      "returned": true
+    },
+    {
+      "requested": 4,
+      "returned": true
+    },
+    {
+      "requested": 1,
+      "returned": true
+    }
+  ],
+  "boss_clear_results": [
+    {
+      "returned": true,
+      "kwargs": {
+        "has_fleet_step": true,
+        "is_month": true
+      },
+      "elapsed_seconds": 82.532
+    }
+  ],
+  "repair_results": [
+    {
+      "returned": null
+    }
+  ],
+  "resolve_results": [],
+  "delay_calls": [],
+  "error": "SystemExit: 1",
+  "passed": false,
+  "temporary_config_removed": true
+}

@@ -2,6 +2,95 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-22
+
+### Month Boss hard kill is live
+
+- Hard 仲裁者·司特莲库斯·VIII was killed. Fleet 4 skipped on 士气过低, fleet 2
+  took a real fight and DEFEAT, fleet 3 entered CombatUI and the OS grade
+  page (`点击继续`) plus `AwardInfoUI` rewards. r61 then saw an empty boss
+  radar in the retained room, logged `BOSS clear`, `MAP EXIT` to 核心区前哨站,
+  and dock-repaired at Gibraltar for 1250.
+- OS grade pages are EventTrigger surfaces, not campaign `BATTLE_STATUS_S`.
+  Appear/click now use VICTORY→S / DEFEAT→D and tap 点击继续. AwardInfo is
+  not a story dialogue. A retained locked room skips the mission list.
+- `boss_clear` returned true. Dock repair at Gibraltar cost 1250. The
+  follow-up `handle_fleet_resolve` no longer dies on a post-dock fleet-bar
+  remount: `click_operation_siren_fleet_bar` retries bounded incoherent
+  observer generations, then live-switched fleets 1-4 at Gibraltar.
+  None needed the zone-22 cure. Evidence:
+  `integration/alas/operation-siren-month-boss-hard-r61-live-20260822.json`
+  and
+  `integration/alas/operation-siren-fleet-resolve-r62-live-20260822.json`.
+  `OpsiMonthBoss` hard kill, reward, exit, repair, and resolve check are live.
+- Evidence scope remains narrower than a clean task acceptance: r61 records
+  `boss_clear_results[0].returned=true`, but its overall receipt ends as
+  `passed=false` / `SystemExit: 1`; r62 independently passes the post-dock
+  fleet-selection check. The panel therefore remains `B` until a clean
+  end-to-end rerun plus the remaining `CheckAdaptability=false`,
+  `ForceRun=false`, normal-success, and non-default fleet-filter branches.
+- After the matrix refresh and patch-series repair, the full repository suite
+  passes `1365/1365` with 50 warnings. The authoritative 81-member combined
+  patch applies cleanly to the locked `81ccf63` upstream, and the support
+  matrix plus pixel-inventory hash gates pass against the rebuilt artifact.
+  This closes the repository-test blocker only; it does not widen r61's live
+  evidence scope or promote `OpsiMonthBoss` above `B`.
+
+### Current upstream configuration delta is recorded
+
+- GitHub `master` was re-read at
+  `d816310324bf686dff3252b37efbb997d9a328a4`: its raw configuration surface is
+  68 panels, 315 unique non-Storage fields, and 1,296 panel-field instances.
+  Relative to the locked 60/278/1,217 baseline, eight panels, 37 fields, and 79
+  instances were added; none were removed.
+- All additions belong to EventShop or Island panels. Operation Siren remains
+  16 panels, 41 unique fields, and 131 instances with zero structural delta.
+  The new panels are recorded as out-of-lock/unadapted rather than folded into
+  the authoritative pinned ledger. Evidence:
+  `integration/alas/upstream-config-delta-20260822.json`.
+
+### Month Boss hard: repair first, then a later fleet actually fights
+
+- Gibraltar dock repair is live: all six HP bars 100%, repair icons false,
+  agony false. Low resolve is a separate 士气过低 prompt and is not cleared
+  by the dock.
+- A skipped fleet sitting on the boss shadow remounts `fleet_bar` onto that
+  neighbour. Skip now keys the remembered SET by the turn's fleet index, not
+  the stacked HUD number. The skipped fleet is walked off the boss cell
+  before the next turn. Live r57: fleet 4 took 士气过低, moved off by
+  `(1, 0)`, fleet 2 entered CombatUI (`Combat preparation` / `Combat execute`).
+- The OS grade page then fail-closed on `BATTLE_STATUS_S` (`combat action
+  resource is not visible`) while `NewBattleResultGradePage` showed
+  `点击继续` plus both `VICTORY` and `DEFEAT` assets. Kill/reward is not
+  claimed. `OpsiMonthBoss` remains `B`.
+
+### Operation Siren monthly-boss entrance is the upper compass wormhole
+
+- The monthly-boss compass can show two white `?` icons. The upper one is the
+  wormhole entrance; the right one is a buoy. Normal and hard use that same
+  entrance: original ALAS walks the yellow `!` when it is still on the
+  wormhole, otherwise the white `?` that belongs to `chongdong02`, never the
+  nearby `fubiao3`.
+- `operation_siren_radar_targets("question")` joins radar `guidepost` ids to
+  `chongdong02(Clone)` even when that model is truncated in the Image slice.
+  Adjacent-route crossings now join only to `taban_jinzhi`, so a buoy sitting
+  next to the fleet cannot steal the wormhole click. Hard-room entry still
+  uses original `go_month_boss_room`, with the stale pixel
+  `radar.select(is_exclamation)` replaced by typed `task` targets.
+- Live hard entry was not re-run in this turn: the qualification AVD was on
+  `LoginUI2` with 您在别处登录 after the previous process died. No hard-room
+  combat or reward is claimed. `OpsiMonthBoss` remains `B`.
+
+### Month Boss fleet rotation no longer treats a neighbour's map mark as defeat
+
+- Hard-room entry via the upper wormhole `?` is live. Fleet 4 then took a real
+  D-rank. Fleets 2/3/1 were skipped while walking because a one-frame map-chibi
+  `marks/damage/1` sample treated stacked neighbours as already defeated.
+- Original ALAS does not inspect that map mark while walking. Skip now remembers
+  only the fleet that just received the D-rank (or the exact 士气过低 prompt).
+  Left portrait `agony` remains sunk/repair. Later fleets still take their turn.
+  Hard kill/reward is not claimed. `OpsiMonthBoss` remains `B`.
+
 ## 2026-08-21
 
 ### Operation Siren Abyssal default path live-qualified

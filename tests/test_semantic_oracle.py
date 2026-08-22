@@ -1041,6 +1041,15 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "operation-siren/battle/result")
         self.assertEqual(receipt.path, continue_path)
         self.assertEqual(backend.taps, [(212, 630)])
+        self.assertEqual(oracle.operation_siren_battle_result_grade(), "VICTORY")
+
+        backend.taps.clear()
+        backend.ui["texts"][1]["text"] = "DEFEAT"
+        self.assertTrue(oracle.operation_siren_battle_result_visible())
+        self.assertEqual(oracle.operation_siren_battle_result_grade(), "DEFEAT")
+        receipt = oracle.click_daily_battle_result()
+        self.assertEqual(receipt.semantic_id, "operation-siren/battle/result")
+        self.assertEqual(backend.taps, [(212, 630)])
 
         backend.taps.clear()
         backend.ui["texts"][1]["text"] = "UNKNOWN"
@@ -6039,6 +6048,9 @@ class SemanticOracleTests(unittest.TestCase):
         receipt = oracle.click("overlay/login-data-expired/confirm")
         self.assertEqual(receipt.semantic_id, "overlay/login-data-expired/confirm")
 
+        backend.ui["texts"][0]["text"] = "您在别处登录"
+        self.assertTrue(oracle.enabled("overlay/login-data-expired/confirm"))
+
         backend.ui["texts"][0]["text"] = "是否购买资源？"
         self.assertFalse(oracle.enabled("overlay/login-data-expired/confirm"))
 
@@ -9665,6 +9677,80 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         self.assertTrue(oracle.operation_siren_local_map_visible())
         self.assertEqual(oracle.operation_siren_current_fleet(), 3)
 
+    def test_fleet_bar_click_retries_incoherent_observer_snapshots(self):
+        bar_path = (
+            "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/"
+            "fleet_bar"
+        )
+        bounds = {"left": 620.0, "top": 340.0, "right": 660.0, "bottom": 380.0}
+        buttons = [
+            make_button(
+                "back_button",
+                "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/"
+                "back_button",
+            ),
+            make_button(
+                "fleet_bar",
+                bar_path,
+                x=640.0,
+                y=360.0,
+                bounds=bounds,
+            ),
+        ]
+        backend = FakeBackend(buttons)
+        control = make_image(bar_path, "btn_switch", bounds)
+        backend.snapshot_sequence = [
+            make_snapshot(generation=10),
+            make_snapshot(generation=10),
+            make_snapshot(generation=20),
+        ]
+        backend.ui_sequence = [
+            make_ui([], images=[control], generation=20),
+            make_ui([], images=[control], generation=21),
+        ]
+        oracle = make_oracle(backend)
+
+        receipt = oracle.click_operation_siren_fleet_bar()
+
+        self.assertEqual(receipt.semantic_id, "os/map/fleet-selector/open")
+        self.assertEqual(backend.taps, [(640, 360)])
+
+    def test_fleet_bar_click_still_fails_closed_when_snapshots_never_settle(self):
+        bar_path = (
+            "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/"
+            "fleet_bar"
+        )
+        bounds = {"left": 620.0, "top": 340.0, "right": 660.0, "bottom": 380.0}
+        buttons = [
+            make_button(
+                "back_button",
+                "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/"
+                "back_button",
+            ),
+            make_button(
+                "fleet_bar",
+                bar_path,
+                x=640.0,
+                y=360.0,
+                bounds=bounds,
+            ),
+        ]
+        backend = FakeBackend(buttons)
+        control = make_image(bar_path, "btn_switch", bounds)
+        backend.snapshot_sequence = [
+            make_snapshot(generation=generation)
+            for generation in (10, 10, 20, 30, 40, 50)
+        ]
+        backend.ui_sequence = [
+            make_ui([], images=[control], generation=generation)
+            for generation in (20, 30, 40, 50, 60)
+        ]
+        oracle = make_oracle(backend)
+
+        with self.assertRaisesRegex(SemanticGateClosed, "not coherent"):
+            oracle.click_operation_siren_fleet_bar()
+        self.assertEqual(backend.taps, [])
+
     def test_operation_siren_page_shell_does_not_require_fleet_panel(self):
         backend = FakeBackend(
             [
@@ -10445,8 +10531,9 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
                 ),
                 make_image(
                     "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
-                    "cell_8_7/attachments/event_7000040/icon/model/fubiao3(Clone)",
-                    "fubiao3",
+                    "cell_8_7/attachments/event_7000040/icon/model/"
+                    "chongdong02(Clone)",
+                    "chongdong42",
                     {"left": 700.0, "top": 300.0, "right": 790.0, "bottom": 390.0},
                 ),
             ],
@@ -10465,10 +10552,10 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         adjacent = oracle.click_operation_siren_relative_grid(
             (1, 0), prefer_adjacent_event=True
         )
-        self.assertTrue(adjacent.path.endswith("fubiao3(Clone)"))
+        self.assertTrue(adjacent.path.endswith("chongdong02(Clone)"))
         self.assertEqual(backend.taps[-1], (745, 345))
 
-    def test_typed_question_radar_excludes_non_buoy_guidepost_and_orders_like_alas(self):
+    def test_typed_question_radar_is_the_alas_question_wormhole_not_other_guideposts(self):
         backend = FakeBackend(
             [
                 make_button(
@@ -10504,8 +10591,8 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
                 make_image(
                     world
                     + "cell_12_5/attachments/event_7030011/icon/model/"
-                    "fubiao3(Clone)",
-                    "fubiao3",
+                    "chongdong02(Clone)",
+                    "chongdong42",
                 ),
                 make_image(
                     world
@@ -10524,6 +10611,143 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         self.assertEqual(
             oracle.operation_siren_radar_targets("question"),
             ((-1, 4),),
+        )
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("switch"),
+            ((0, -1),),
+        )
+
+    def test_typed_question_radar_keeps_the_upper_wormhole_not_the_right_buoy(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        root = (
+            "OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
+            "compass_panel/ring/compass/range/"
+        )
+        world = (
+            "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+        )
+        wormhole = make_image(
+            world
+            + "cell_12_4/attachments/event_7000011/icon/model/"
+            "chongdong02(Clone)",
+            "chongdong42",
+        )
+        wormhole["flags"] |= 0x10
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    root + "7000011",
+                    "guidepost",
+                    {
+                        "left": 1135.1,
+                        "top": 186.0,
+                        "right": 1144.9,
+                        "bottom": 195.8,
+                    },
+                ),
+                make_image(
+                    root + "7000040",
+                    "guidepost",
+                    {
+                        "left": 1170.2,
+                        "top": 221.1,
+                        "right": 1180.0,
+                        "bottom": 230.9,
+                    },
+                ),
+                wormhole,
+                make_image(
+                    world
+                    + "cell_9_6/attachments/event_7000040/icon/model/"
+                    "fubiao3(Clone)",
+                    "fubiao3",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("guidepost"),
+            ((0, -3), (3, 0)),
+        )
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("question"),
+            ((0, -3),),
+        )
+        self.assertEqual(oracle.operation_siren_radar_targets("switch"), ())
+
+    def test_typed_question_radar_falls_back_to_room_waypoints_without_a_wormhole(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        root = (
+            "OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
+            "compass_panel/ring/compass/range/"
+        )
+        world = (
+            "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    root + "7030051",
+                    "guidepost",
+                    {"left": 1136.1, "top": 207.5, "right": 1145.9, "bottom": 222.9},
+                ),
+                make_image(
+                    root + "7030011",
+                    "guidepost",
+                    {"left": 1124.433, "top": 265.833, "right": 1134.233, "bottom": 281.233},
+                ),
+                make_image(
+                    world
+                    + "cell_7_6/attachments/event_7030051/icon/model/"
+                    "taban_jinzhi(Clone)/taban",
+                    "taban01",
+                ),
+                make_image(
+                    world
+                    + "cell_12_5/attachments/event_7030011/icon/model/"
+                    "fubiao3(Clone)",
+                    "fubiao3",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("guidepost"),
+            ((-1, 4), (0, -1)),
+        )
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("question"),
+            ((-1, 4), (0, -1)),
+        )
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("switch"),
+            ((0, -1),),
         )
 
     def test_month_boss_room_difficulty_uses_exact_retained_title(self):

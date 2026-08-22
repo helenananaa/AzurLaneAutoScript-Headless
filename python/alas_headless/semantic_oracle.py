@@ -11663,7 +11663,14 @@ class SemanticOracle:
         )
 
     def operation_siren_current_fleet_defeated(self) -> bool:
-        """Return the exact low-resolve marker beside the selected map fleet."""
+        """Return whether the selected fleet already lost its Month Boss attempt.
+
+        Original ALAS ``FLEET_LOW_RESOLVE`` is a left HUD color check, not a
+        map-chibi classifier.  The map ``marks/damage/1`` icon is only a
+        post-combat remainder on that fleet's own model; stacked fleets in a
+        locked room can show another fleet's mark while walking, so callers
+        must not use a one-frame map sample to skip a fresh fleet.
+        """
 
         if not self.operation_siren_local_map_visible():
             raise SemanticGateClosed("operation siren local-map identity is absent")
@@ -11754,7 +11761,14 @@ class SemanticOracle:
     ) -> Tuple[Tuple[int, int], ...]:
         """Read exact relative grid positions from the Operation Siren radar."""
 
-        if target_kind not in {"port", "task", "guidepost", "question", "boss"}:
+        if target_kind not in {
+            "port",
+            "task",
+            "guidepost",
+            "question",
+            "switch",
+            "boss",
+        }:
             raise SemanticGateClosed(
                 "operation siren radar target kind is not reviewed"
             )
@@ -11769,32 +11783,51 @@ class SemanticOracle:
             "top/adapt/right_stage/compass_panel/ring/compass/range/"
         )
         path = radar_root + "mark"
-        sprite_kind = "guidepost" if target_kind == "question" else target_kind
-        question_event_ids = None
-        if target_kind == "question":
-            # The observer intentionally groups several white radar event
-            # sprites as ``guidepost``.  Legacy ALAS' ``is_question`` pixel
-            # classifier is narrower: in Arbiter rooms the fubiao buoy is a
-            # question waypoint, while the taban_jinzhi plate is not.  Join
-            # the radar marker to its exact mounted world event so the two do
-            # not make month-boss routing oscillate between teleports.
-            buoy_pattern = re.compile(
-                r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
-                r"cell_[0-9]+_[0-9]+/attachments/event_([0-9]+)/icon/model/"
-                r"fubiao3\(Clone\)$"
-            )
-            question_event_ids = {
+        sprite_kind = (
+            "guidepost" if target_kind in {"question", "switch"} else target_kind
+        )
+        join_event_ids = None
+        if target_kind in {"question", "switch"}:
+            # Original RadarGrid.predict_question() is a white ``?`` on the
+            # radar, not a world-model classifier.  The observer groups those
+            # white radar icons as sprite ``guidepost``.  The monthly-boss
+            # compass can show two: the upper wormhole is the same entrance
+            # normal uses, and the right buoy is not.  Join radar ids to the
+            # world model ALAS actually walks onto.  Taban plates remain the
+            # adjacent hard-room switch, not a second question class.
+            # Identity join does not need clickable bounds; a truncated
+            # wormhole still names the radar icon that is the entrance.
+            if target_kind == "question":
+                model_pattern = re.compile(
+                    r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                    r"cell_[0-9]+_[0-9]+/attachments/event_([0-9]+)/icon/model/"
+                    r"chongdong02\(Clone\)$"
+                )
+                model_name = "chongdong02(Clone)"
+                model_sprite = "chongdong42"
+            else:
+                model_pattern = re.compile(
+                    r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+                    r"cell_[0-9]+_[0-9]+/attachments/event_([0-9]+)/icon/model/"
+                    r"taban_jinzhi\(Clone\)/taban$"
+                )
+                model_name = "taban"
+                model_sprite = "taban01"
+            join_event_ids = {
                 match.group(1)
                 for item in state.images
-                if (match := buoy_pattern.fullmatch(item.path)) is not None
-                and item.name == "fubiao3(Clone)"
-                and item.sprite == "fubiao3"
+                if (match := model_pattern.fullmatch(item.path)) is not None
+                and item.name == model_name
+                and item.sprite == model_sprite
                 and item.active_in_hierarchy
                 and item.active_and_enabled
-                and not item.truncated
-                and item.bounds is not None
             }
-        if target_kind in {"guidepost", "question", "task", "boss"}:
+            # Inside the monthly-boss room there is no wormhole.  Original
+            # ALAS still walks the remaining white ``?`` waypoints, so fall
+            # back to every radar guidepost when no chongdong join exists.
+            if target_kind == "question" and not join_event_ids:
+                join_event_ids = None
+        if target_kind in {"guidepost", "question", "switch", "task", "boss"}:
             event_pattern = re.compile(r"[0-9]+$")
             matches = tuple(
                 item
@@ -11808,8 +11841,8 @@ class SemanticOracle:
                 )
                 and item.sprite == sprite_kind
                 and (
-                    question_event_ids is None
-                    or item.name in question_event_ids
+                    join_event_ids is None
+                    or item.name in join_event_ids
                 )
                 and item.active_in_hierarchy
                 and item.active_and_enabled
@@ -12237,7 +12270,8 @@ class SemanticOracle:
             event_pattern = re.compile(
                 r"LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
                 rf"cell_{target_row}_{target_column}/attachments/event_[0-9]+/"
-                r"(?:icon/model/(?:fubiao3|taban_jinzhi)\(Clone\)(?:/taban)?|"
+                r"(?:icon/model/(?:fubiao3|taban_jinzhi|chongdong02)\(Clone\)"
+                r"(?:/taban)?|"
                 r"char/shadow)$"
             )
             events = tuple(
@@ -12246,6 +12280,10 @@ class SemanticOracle:
                 if event_pattern.fullmatch(item.path)
                 and (
                     (item.name == "fubiao3(Clone)" and item.sprite == "fubiao3")
+                    or (
+                        item.name == "chongdong02(Clone)"
+                        and item.sprite == "chongdong42"
+                    )
                     or (item.name == "taban" and item.sprite == "taban01")
                     or (item.name == "shadow" and item.sprite == "shadow")
                 )
@@ -12774,59 +12812,71 @@ class SemanticOracle:
 
         if not self.operation_siren_local_map_visible():
             raise SemanticGateClosed("operation siren local-map identity is absent")
-        state = self.read_state()
-        matches = tuple(
-            button
-            for button in state.buttons
-            if button.name == "fleet_bar"
-            and button.path.endswith(
-                "top/adapt/left_stage/other/fleet_bar"
+        last_error: Optional[SemanticGateClosed] = None
+        for attempt in range(5):
+            state = self.read_state()
+            matches = tuple(
+                button
+                for button in state.buttons
+                if button.name == "fleet_bar"
+                and button.path.endswith(
+                    "top/adapt/left_stage/other/fleet_bar"
+                )
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
             )
-            and button.active_in_hierarchy
-            and button.active_and_enabled
-            and button.interactable
-            and button.point is not None
-            and button.bounds is not None
-            and button.bounds.contains(button.point)
-        )
-        if len(matches) != 1:
-            raise SemanticGateClosed("operation siren fleet bar is absent or ambiguous")
-        target = matches[0]
-        assert target.point is not None and target.bounds is not None
-        ui_state = self.read_ui_state()
-        if not state.generation <= ui_state.generation <= state.generation + 2:
-            raise SemanticGateClosed(
-                "operation siren fleet-bar snapshots are not coherent"
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "operation siren fleet bar is absent or ambiguous"
+                )
+            target = matches[0]
+            assert target.point is not None and target.bounds is not None
+            ui_state = self.read_ui_state()
+            if not state.generation <= ui_state.generation <= state.generation + 2:
+                last_error = SemanticGateClosed(
+                    "operation siren fleet-bar snapshots are not coherent"
+                )
+                if attempt < 4:
+                    self._sleep(0.3)
+                    continue
+                raise last_error
+            controls = tuple(
+                image
+                for image in ui_state.images
+                if image.name == "fleet_bar"
+                and image.path == target.path
+                and image.sprite == "btn_switch"
+                and image.active_in_hierarchy
+                and image.active_and_enabled
+                and not image.truncated
+                and image.bounds == target.bounds
             )
-        controls = tuple(
-            image
-            for image in ui_state.images
-            if image.name == "fleet_bar"
-            and image.path == target.path
-            and image.sprite == "btn_switch"
-            and image.active_in_hierarchy
-            and image.active_and_enabled
-            and not image.truncated
-            and image.bounds == target.bounds
-        )
-        if len(controls) != 1:
-            raise SemanticGateClosed(
-                "operation siren fleet-bar control is absent or ambiguous"
+            if len(controls) != 1:
+                raise SemanticGateClosed(
+                    "operation siren fleet-bar control is absent or ambiguous"
+                )
+            # Use the exact Unity Button's own event point.  The stronghold layout
+            # consumes the whole fleet_bar component even though the legacy CN
+            # screenshot asset highlighted only its right-hand decoration.
+            point = target.point
+            if self._foreground_component() != self.fingerprint.component:
+                raise SemanticGateClosed(
+                    "foreground changed before fleet-bar input"
+                )
+            self._tap(int(round(point.x)), int(round(point.y)))
+            return ActionReceipt(
+                semantic_id="os/map/fleet-selector/open",
+                generation=state.generation,
+                point=point,
+                bounds=target.bounds,
+                path=target.path,
             )
-        # Use the exact Unity Button's own event point.  The stronghold layout
-        # consumes the whole fleet_bar component even though the legacy CN
-        # screenshot asset highlighted only its right-hand decoration.
-        point = target.point
-        if self._foreground_component() != self.fingerprint.component:
-            raise SemanticGateClosed("foreground changed before fleet-bar input")
-        self._tap(int(round(point.x)), int(round(point.y)))
-        return ActionReceipt(
-            semantic_id="os/map/fleet-selector/open",
-            generation=state.generation,
-            point=point,
-            bounds=target.bounds,
-            path=target.path,
-        )
+        assert last_error is not None
+        raise last_error
 
     def operation_siren_fleet_selector_open(self) -> bool:
         """Return whether the exact four-row fleet selector is mounted."""
@@ -16075,17 +16125,48 @@ class SemanticOracle:
         return self._daily_combat_visible(self.read_state())
 
     @staticmethod
-    def _operation_siren_battle_result_continue(ui_state: UiState) -> Optional[TextState]:
-        """Return the exact EventTrigger continue text for an OS grade page."""
+    def _operation_siren_battle_result_grade(ui_state: UiState) -> Optional[str]:
+        """Return VICTORY or DEFEAT from the Operation Siren grade title."""
 
-        active_images = tuple(
+        titles = tuple(
             item
-            for item in ui_state.images
+            for item in ui_state.texts
             if item.active_in_hierarchy
             and item.active_and_enabled
             and not item.truncated
             and item.bounds is not None
+            and "/NewBattleResultEmptyUI(Clone)/" in item.path
+            and item.text.strip() in {"VICTORY", "DEFEAT"}
         )
+        if not titles:
+            return None
+        preferred = tuple(
+            item
+            for item in titles
+            if item.path.endswith("/NewBattleResultEmptyUI(Clone)/Effect/bg03/Text")
+        )
+        candidates = preferred or titles
+        grades = {item.text.strip() for item in candidates}
+        if len(grades) != 1:
+            on_screen = tuple(
+                item
+                for item in candidates
+                if item.bounds.right > 0
+                and item.bounds.bottom > 0
+                and item.bounds.left < 1280
+                and item.bounds.top < 720
+            )
+            grades = {item.text.strip() for item in on_screen}
+            if len(grades) != 1:
+                raise SemanticGateClosed(
+                    "operation siren battle result grade is ambiguous"
+                )
+        return next(iter(grades))
+
+    @staticmethod
+    def _operation_siren_battle_result_continue(ui_state: UiState) -> Optional[TextState]:
+        """Return the exact EventTrigger continue text for an OS grade page."""
+
         active_texts = tuple(
             item
             for item in ui_state.texts
@@ -16093,18 +16174,6 @@ class SemanticOracle:
             and item.active_and_enabled
             and not item.truncated
             and item.bounds is not None
-        )
-        result_root = tuple(
-            item
-            for item in active_images
-            if item.path.endswith("/NewBattleResultEmptyUI(Clone)")
-            and item.sprite == "bg_mask"
-        )
-        result_effect = tuple(
-            item
-            for item in active_images
-            if item.path.endswith("/NewBattleResultEmptyUI(Clone)/Effect")
-            and item.sprite == "jiesuan_bg02"
         )
         continue_text = tuple(
             item
@@ -16115,18 +16184,9 @@ class SemanticOracle:
             )
             and item.text.strip() == "点击继续"
         )
-        grade_text = tuple(
-            item
-            for item in active_texts
-            if item.path.endswith("/NewBattleResultEmptyUI(Clone)/Effect/bg03/Text")
-            and item.text.strip() in {"VICTORY", "DEFEAT"}
-        )
-        if not (
-            len(result_root) == 1
-            and len(result_effect) == 1
-            and len(continue_text) == 1
-            and len(grade_text) == 1
-        ):
+        if len(continue_text) != 1:
+            return None
+        if SemanticOracle._operation_siren_battle_result_grade(ui_state) is None:
             return None
         return continue_text[0]
 
@@ -16153,6 +16213,25 @@ class SemanticOracle:
         # still-mounted CombatUI underneath to win the surface classification.
         ui_state = self.read_ui_state()
         return self._operation_siren_battle_result_continue(ui_state) is not None
+
+    def operation_siren_battle_result_visible(self) -> bool:
+        """True when the shared grade page belongs to an Operation Siren fight."""
+
+        return (
+            self._operation_siren_battle_result_continue(self.read_ui_state())
+            is not None
+        )
+
+    def operation_siren_battle_result_grade(self) -> str:
+        """Return VICTORY or DEFEAT for the exact Operation Siren grade page."""
+
+        ui_state = self.read_ui_state()
+        if self._operation_siren_battle_result_continue(ui_state) is None:
+            raise SemanticGateClosed("operation siren battle result is absent")
+        grade = self._operation_siren_battle_result_grade(ui_state)
+        if grade is None:
+            raise SemanticGateClosed("operation siren battle result grade is absent")
+        return grade
 
     def campaign_battle_reward_visible(self) -> bool:
         """Prove an award popup belongs to the active battle-result stack."""
@@ -27949,7 +28028,7 @@ class SemanticOracle:
         buttons = self._matches(state, "overlay/login-data-expired/confirm")
         return bool(
             len(content) == 1
-            and content[0].text.strip() == "登录数据失效"
+            and content[0].text.strip() in {"登录数据失效", "您在别处登录"}
             and len(confirm) == 1
             and "".join(confirm[0].text.split()) == "确定"
             and not cancel

@@ -1,14 +1,15 @@
 # ALAS Headless 配置项级支持矩阵
 
-更新日期：2026-08-21
-Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
+更新日期：2026-08-22
+Headless 适配证据提交：`2f60aab7ff609614506321112efc7c4765b5ebf2`
 固定 ALAS 上游基线：`81ccf63b4540f00241628c82a58c02c7a2bb11af`
+当前 ALAS `master` 观察：`d816310324bf686dff3252b37efbb997d9a328a4`（仅作差异盘点，尚未成为适配锁）
 
 ## 1. 目的与口径
 
 本文档把 ALAS 设置侧栏中的全部配置面板、配置组和字段纳入 Headless 适配范围。它既是当前支持情况的盘点，也是后续补齐与验收的检查表。
 
-当前快照共有：
+当前可验证的固定适配基线共有：
 
 - 60 个配置面板；
 - 278 个唯一的非 `Storage` 配置字段路径；
@@ -37,7 +38,7 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | `M` | 🔴 尚未完成 | 缺少任务级适配或关键语义端口 |
 | `R` | ⚙️ 运行时待验收 | ALAS 内部/运行时管理字段；仍需验证调度与恢复契约 |
 
-### 1.1 完成度汇总（2026-08-21 标注）
+### 1.1 完成度汇总（2026-08-22 标注）
 
 这里的“完成”严格指整块面板的全部配置值和必要异常分支均已闭环，不能用“默认路径跑过”替代。
 
@@ -50,7 +51,15 @@ Headless 适配证据提交：`266a77f6ce760b2aed3c05739e0e78d77a9f88dc`
 | 🧱 已到边界、尚未完成（`B`） | **9 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiMonthBoss、Shipyard、ShopFrequent、WarArchives |
 | 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
 
-当前账本的功能证据基线为 `3d0f60c`，矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线通过不会自动提升任何实机复核栏。
+当前账本的前一已提交功能证据基线为 `2f60aab`；2026-08-22 的月度 Boss 证据已纳入本轮提交，但 r61 资格收据本身仍为未通过，因此不会伪装成完整任务验收。矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线或仓库测试通过不会自动提升任何实机复核栏。
+
+### 1.1A 当前上游配置差异（2026-08-22）
+
+2026-08-22 重新读取 GitHub `master` 的 `task.yaml`、`args.json` 与 `template.json`，远端提交为 `d816310324bf686dff3252b37efbb997d9a328a4`。原始上游配置面为 **68 个面板、315 个唯一非 `Storage` 字段、1,296 个面板字段实例**；相对当前适配锁 `81ccf63` 的 60/278/1,217，新增 **8 个面板、37 个唯一字段和 79 个实例**，没有删除。
+
+新增面板为 `EventShop`、`IslandBusiness`、`IslandCollect`、`IslandFreebie`、`IslandOrder`、`IslandProduction`、`IslandProductionPlanner`、`IslandSeasonTask`。它们尚未进入当前补丁锁、语义观察、输入闭环或实机验收，因此明确属于“超出锁定基线/未适配”，不能塞进下方 60 面板账本后伪装成已有支持。
+
+大世界 `Opsi*` 配置面单独比较的结果是 **16 个面板、41 个唯一字段、131 个面板字段实例，增删均为 0**。因此大世界字段清单在结构上没有落后当前上游；本次需要更新的是实机证据、月度 Boss 结论和工作树验收状态。源码哈希、37 个新增字段及零 Opsi 增量见 `integration/alas/upstream-config-delta-20260822.json`。运行时代码语义仍固定在 `81ccf63`，字段未变化不等于补丁已对当前 `master` 兼容。
 
 ### 1.1B 配置交互攻击矩阵（2026-08-15）
 
@@ -355,7 +364,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 ### 1.36 本轮 Operation Siren 任务配置契约
 
-`OpsiMonthBoss.Mode` 精确接受 `normal/normal_hard`，`CheckAdaptability` 与 `ForceRun` 精确接受布尔值。回放直接编译并执行固定上游 `clear_month_boss()` 与 `month_boss_delay()`，保留普通/困难入口选择、普通完成后继续困难、困难已完成跳过、`203/203/156` 适应性阈值及不足时延迟停止的原顺序；`ForceRun=true` 只绕过适应性预检。实机已证明端口雷达导航、普通 Boss 房进入、舰队锁定关闭、舰队选择、战败返回、地图小人旁低士气与左栏沉没大修分离，以及全队不可用的挑战失败退出；安全区胜利可清除低士气。成功击杀结算和困难难度尚未实机闭环。非法值在任务、地图或战斗状态前 fail-closed。
+`OpsiMonthBoss.Mode` 精确接受 `normal/normal_hard`，`CheckAdaptability` 与 `ForceRun` 精确接受布尔值。回放直接编译并执行固定上游 `clear_month_boss()` 与 `month_boss_delay()`，保留普通/困难入口选择、普通完成后继续困难、困难已完成跳过、`203/203/156` 适应性阈值及不足时延迟停止的原顺序；`ForceRun=true` 只绕过适应性预检。实机已证明普通房进入、战败返回、低士气/沉没分离、舰队轮换和全队耗尽恢复；2026-08-22 又完成困难 Boss 的舰队跳过/战败/胜利、专用胜负页、`AwardInfoUI`、空 Boss 雷达、离场、直布罗陀大修和舰队 1–4 恢复复核。该证据只把困难主链从“未闭环”更新为“已有实机闭环证据”：r61 的 `boss_clear` 返回 true，但整份资格收据仍以 `passed=false / SystemExit: 1` 结束。普通成功结算、`CheckAdaptability=false`、`ForceRun=false`、非默认舰队过滤器和干净端到端重跑仍缺，故面板保持 `B`。非法值继续在任务、地图或战斗状态前 fail-closed。
 
 `OpsiObscure.ForceRun` 的真假分支直接执行原 `clear_obscure()` 与 `os_obscure()`：关闭时维持一次安全停止，开启时进入原任务切换检查。`OpsiDaily.UseTuningSample` 的真假分支直接执行原 `os_daily()`，只改变调律样本使用步骤，后续接任务、区域初始化、清任务与次日延迟顺序保持不变。`OpsiHazard1Leveling.TargetZone` 覆盖声明的 `0/22/44`：`0` 保持原逻辑映射到 22，另外两值进入对应安全区，回放在原 `run_strategic_search()` 边界停止。`OpsiMeowfficerFarming.HazardLevel` 覆盖 `3/4/5/6/10`，逐值保留原 `zone_select(hazard_level=...)` 参数和后续舰队、指令、自动搜索、后处理、任务切换顺序。`ActionPointPreserve` 接受非负整数，保持 0 时关闭潜艇及有效值上限裁剪到 2000 的原行为；负数和错误类型在日志、配置覆写、行动力检查或设备状态前拒绝。`TargetZone` 直接执行固定上游原 `ZoneManager.name_to_zone()`，数字 ID、数字文本及中/英/日/台名称均解析到同一原生海域；未知名称保持原人工接管结果，但已前移至行动力检查和设备动作之前。
 
@@ -381,7 +390,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 共享 `OpsiFleet.Fleet` 的四个声明值直接回放原 `OSFleet.fleet_set()`，保留 selector 与相机稳定等待；非法值在 selector 或设备状态前拒绝。`OpsiFleet.Submarine` 的真假值直接回放原 `MapOrderHandler.os_order_execute()`，保留侦察/潜艇指令、潜艇完成等待与调度延迟参数；同时把非布尔 `recon_scan` 也挡在同一最终指令边界。连同此前字段，本契约共覆盖 31 个字段、170 个合法类并拒绝 246 个非法值，mutation budget 为 0；没有真实舰队切换、潜艇调用、行动力购买、维修、战斗、仓库消耗、兑换或 Android 输入，因此只提升 `offline=complete`。
 
-此前只检查属性加载的 AST 审计漏掉了动态拼接的 `deep_get()` 字符串路径，因而错误地把 Explore/Abyssal/Stronghold 的 `ForceRun` 记为零读取；本轮已用源码绑定回放纠正。Headless 现为固定上游原先零读取的 `OpsiMonthBoss.ForceRun` 补上调度延迟排除语义，并让 `OpsiDaily.DoMission=false` 在使用可选调律样本后跳过每日任务接取/清理、直接延迟到下次服务器更新；两个字段都在任何任务状态写入前做严格布尔校验。导航、坐标、舰队过滤、战斗和奖励 live 闭环仍未完成，相关面板不会因此提升为完整支持。
+此前只检查属性加载的 AST 审计漏掉了动态拼接的 `deep_get()` 字符串路径，因而错误地把 Explore/Abyssal/Stronghold 的 `ForceRun` 记为零读取；本轮已用源码绑定回放纠正。Headless 现为固定上游原先零读取的 `OpsiMonthBoss.ForceRun` 补上调度延迟排除语义，并让 `OpsiDaily.DoMission=false` 在使用可选调律样本后跳过每日任务接取/清理、直接延迟到下次服务器更新；两个字段都在任何任务状态写入前做严格布尔校验。大世界导航、困难 Boss 战斗/奖励子链已有实机证据，但全配置逐值、干净任务终态和非默认舰队过滤仍未闭环，相关面板不会因此提升为完整支持。
 
 ## 2. 60 个面板总表
 
@@ -439,7 +448,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | L | 默认主路径已实机完成坐标消耗、100 行动力入场、侵蚀 6 Boss、奖励、不可逆退出与利维浦大修；UseLogger 和自由舰队过滤全空间未逐项实机 |
 | 49 | OpsiArchive | Scheduler, OpsiFleet | L | T2 既有 9 任务与 T4 购买/全链实机闭环；Fleet=1、Submarine=false 已证明，其他舰队/潜艇值与异常全空间仍缺 |
 | 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | L | 实机以精确世界地图标题/类型发现 93、121 两处要塞；93 区闭环 `100 -> 20 -> 0%` 舰队轮换，121 区闭环进入、战斗、0% 收束、回港大修和四队低士气复查；完整舰队过滤与 ForceRun 分支仍未逐值实机覆盖 |
-| 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通 Boss 已实机闭环精确雷达分步接敌、战败、低士气/沉没分离、四队轮换、全队耗尽、退出与恢复调度，成功击杀结算及困难 Boss 未闭环 |
+| 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通房进入/失败恢复与困难 Boss 击杀、专用结算、奖励、离场、大修和舰队恢复已有实机证据，但 r61 整体收据未通过，普通成功结算、两个布尔值的剩余实机分支和非默认过滤器仍未闭环 |
 | 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | B | HazardLevel、Fleet/Submarine 已离线等价；行动力保留、选区、真实动作和循环未闭环 |
 | 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | B | TargetZone、Fleet/Submarine 已离线等价；真实动作、选区和循环未闭环 |
 | 54 | OpsiCrossMonth | Scheduler | B | 非月末安全跳过；月末执行、重置和跨月恢复未验证 |
@@ -549,7 +558,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | OpsiAbyssal | `ForceRun` | L | 默认路径已闭环；仍缺 UseLogger、ForceRun 两值和自由舰队过滤全空间 |
 | OpsiFleetFilter | `Filter`（默认含 Fleet-4、CallSubmarine、Fleet-2/3/1） | B | 语法、顺序、潜艇、重复、不可用与非法规则已离线等价；真实舰队可用性、切换结果和战斗仍缺 |
 | OpsiStronghold | `ForceRun` | L | 默认值主路径已在 93/121 两区完成要塞识别、进入、舰队轮换、清场及战后修复；仍需补 `true/false` 两值对侦察/潜艇调度排除的独立实机对照 |
-| OpsiMonthBoss | `Mode`=`normal/normal_hard`; `CheckAdaptability`; `ForceRun` | B | 两模式与两个开关已回放；普通房间已实机完成精确雷达分步接敌、战败、低士气/沉没分离、四队轮换、全队耗尽、退出与失败调度，成功击杀结算、困难战斗与奖励仍缺 |
+| OpsiMonthBoss | `Mode`=`normal/normal_hard`; `CheckAdaptability`; `ForceRun` | B | 两模式与两个开关已回放；普通失败恢复和困难 Boss 击杀/结算/奖励/离场/大修子链已有实机证据，但资格收据整体未通过，普通成功结算、`CheckAdaptability=false`、`ForceRun=false`、非默认过滤器和干净重跑仍缺 |
 | OpsiMeowfficerFarming | `HazardLevel`=3/4/5/6/10; `TargetZone`; `ActionPointPreserve` | B | 五危险等级、自动/显式区域、行动力边界、舰队/潜艇、循环与停止 |
 | OpsiHazard1Leveling | `TargetZone`=0/44/22 | B | 三目标值、不可用区域、舰队/潜艇、自动寻敌和循环停止 |
 | OpsiArchive | 无独立组，复用 Scheduler 与 OpsiFleet | L | T2/T4 主路径、真实购买、任务创建、进入与清图已闭环；其余舰队/潜艇值和异常分支仍缺 |

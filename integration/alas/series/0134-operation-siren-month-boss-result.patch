@@ -1,0 +1,66 @@
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+index 6eb0cb2..d45d4cf 100644
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -453,6 +453,22 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         """
+         if self.is_combat_executing():
+             return False
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and semantic_adapter.operation_siren_combat_committed()
++            and semantic_adapter.operation_siren_battle_result_visible()
++        ):
++            grade = semantic_adapter.operation_siren_battle_result_grade()
++            if drop:
++                drop.handle_add(self)
++            else:
++                self.device.sleep((0.25, 0.5))
++            semantic_adapter.click_operation_siren_battle_result()
++            if grade == 'DEFEAT':
++                logger.warning('Battle Status D')
++                semantic_adapter.mark_operation_siren_combat_fleet_defeated()
++            return True
+         if self.appear(BATTLE_STATUS_S, interval=self.battle_status_click_interval):
+             if drop:
+                 drop.handle_add(self)
+diff --git a/module/os/map.py b/module/os/map.py
+index 50136b7..ed7fa76 100644
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -39,6 +39,34 @@ class OSMap(OSFleet, Map, GlobeCamera, StrategicSearchHandler):
+             # ALAS' generic popup probes run; the semantic adapter drops this
+             # bounded lease as soon as the local map or globe is proven.
+             semantic_adapter.begin_operation_siren_startup_recovery()
++            for _ in range(8):
++                if semantic_adapter.operation_siren_battle_result_visible():
++                    logger.info('Recover retained Operation Siren battle result')
++                    grade = semantic_adapter.operation_siren_battle_result_grade()
++                    semantic_adapter.click_operation_siren_battle_result()
++                    if grade == 'DEFEAT':
++                        try:
++                            semantic_adapter.mark_operation_siren_combat_fleet_defeated()
++                        except SemanticGateClosed:
++                            logger.info(
++                                'Retained OS defeat has no fighting-fleet owner'
++                            )
++                elif semantic_adapter.open().oracle.daily_battle_result_visible():
++                    logger.info('Recover retained Operation Siren battle statistics')
++                    semantic_adapter.open().oracle.click_daily_battle_result()
++                elif semantic_adapter.operation_siren_reward_visible():
++                    if not self.handle_map_get_items():
++                        raise SemanticGateClosed(
++                            'Operation Siren retained reward was not handled'
++                        )
++                else:
++                    break
++                self.device.sleep(0.5)
++                semantic_adapter.refresh_frame()
++            else:
++                raise SemanticGateClosed(
++                    'Operation Siren retained battle result did not close'
++                )
+         if self.config.task.command.__contains__('iM'):
+             for key in self.config.bound.keys():
+                 value = self.config.__getattribute__(key)

@@ -1,0 +1,249 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+index d227570..f72fb50 100644
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -112,6 +112,42 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             'Operation Siren fleet availability did not become stable'
+         )
+ 
++    def semantic_month_boss_leave_boss_cell(self, drop=None):
++        """Walk the selected fleet off the boss event cell.
++
++        A skipped fleet sitting on the boss shadow steals the next fleet's
++        boss click and remounts ``fleet_bar`` onto that neighbour.
++        """
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if semantic_session is None:
++            return
++        semantic_session.refresh_frame()
++        if semantic_session.operation_siren_low_resolve_prompt_visible():
++            semantic_session.click_operation_siren_low_resolve_cancel()
++            semantic_session.refresh_frame()
++        bosses = set(semantic_session.operation_siren_radar_targets('boss'))
++        for step in (
++            (-1, 0), (1, 0), (0, 1), (0, -1),
++            (-1, -1), (1, -1), (-1, 1), (1, 1),
++        ):
++            if step in bosses:
++                continue
++            logger.info(f'Move unavailable fleet off boss cell by {step}')
++            semantic_session.click_operation_siren_relative_grid(step)
++            result = self.wait_until_walk_stable(
++                confirm_timer=Timer(4, count=6),
++                walk_out_of_step=False,
++                drop=drop,
++            )
++            if 'fleet_unavailable' in str(result):
++                semantic_session.refresh_frame()
++                bosses = set(semantic_session.operation_siren_radar_targets('boss'))
++                continue
++            return
++        raise SemanticGateClosed(
++            'Operation Siren unavailable fleet has no adjacent cell off the boss'
++        )
++
+     def _goto(self, location, expected=''):
+         super()._goto(location, expected)
+         self.predict_radar()
+@@ -379,9 +415,11 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                     )
+                     result.add('event')
+                     break
+-                # Approach-time map-chibi damage is not that fleet's defeat.
+-                # Original ALAS only skips after the fleet's own fight; the
+-                # exact 士气过低 prompt above remains the in-walk stop.
++                # Do not treat a one-frame map-chibi damage mark as defeat
++                # while walking.  Stacked fleets in a locked room can show
++                # another fleet's mark; original ALAS only skips after that
++                # fleet's own fight.  The exact 士气过低 prompt above remains
++                # the in-walk stop.
+                 if semantic_session.operation_siren_map_visible():
+                     if confirm_timer.reached():
+                         break
+@@ -680,7 +718,8 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             reviewed_kinds = {
+                 'is_port': 'port',
+                 'is_exclamation': 'task',
+-                # Translate RadarGrid.predict_question() (white ``?``).
++                # Translate original RadarGrid.predict_question() (white ``?``)
++                # rather than inventing a second radar taxonomy.
+                 'is_question': 'question',
+             }
+             selected = [
+@@ -749,10 +788,20 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                 clicked_before = tuple(
+                     tuple(int(value) for value in item) for item in grids
+                 )
+-                semantic_session.click_operation_siren_relative_grid(
+-                    tuple(int(value) for value in grid),
+-                    prefer_adjacent_event=prefer_adjacent_event,
+-                )
++                click_target = tuple(int(value) for value in grid)
++                try:
++                    semantic_session.click_operation_siren_relative_grid(
++                        click_target,
++                        prefer_adjacent_event=prefer_adjacent_event,
++                    )
++                except SemanticGateClosed as exc:
++                    if 'relative target grid is absent' not in str(exc):
++                        raise
++                    self.device.screenshot()
++                    semantic_session.click_operation_siren_relative_grid(
++                        click_target,
++                        prefer_adjacent_event=prefer_adjacent_event,
++                    )
+                 moved = Timer(12, count=30).start()
+                 while 1:
+                     self.device.screenshot()
+@@ -773,6 +822,8 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                             'Typed relative click did not move the fleet'
+                         )
+                         if selected[0] == 'question':
++                            # Selecting the event cell without walking locks
++                            # later OS movement until the fleet is clicked.
+                             semantic_session.click_operation_siren_relative_grid(
+                                 (0, 0)
+                             )
+@@ -1022,22 +1058,47 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             self.month_boss_goto_additional(location=location, has_fleet_step=has_fleet_step, drop=drop)
+ 
+         if semantic_session is not None:
++            # Capture the fleet this turn selected.  Clicking a stacked boss
++            # cell can remount fleet_bar onto a neighbour that already lost;
++            # that HUD number must not skip the remaining fleets.
++            intended_fleet = semantic_session.operation_siren_current_fleet()
++            restores = 0
+             while 1:
+                 unavailable = False
+                 if is_month:
+                     try:
+-                        unavailable = any(
+-                            self.semantic_current_fleet_unavailable()
+-                        )
++                        current = semantic_session.operation_siren_current_fleet()
+                     except SemanticGateClosed as exc:
+-                        if str(exc) != (
++                        if str(exc) not in (
+                             'operation siren selected-fleet map anchor is '
+-                            'absent or ambiguous'
++                            'absent or ambiguous',
++                            'operation siren current fleet is absent or ambiguous',
+                         ):
+                             raise
+                         logger.info(
+                             'Defer overlapped fleet state to exact boss prompt'
+                         )
++                    else:
++                        if current != intended_fleet:
++                            restores += 1
++                            if restores > 3:
++                                raise SemanticGateClosed(
++                                    'Operation Siren month-boss fleet drifted '
++                                    'after bounded restores'
++                                )
++                            logger.info(
++                                f'Covering fleet {current} stole the boss click; '
++                                f'move it off then restore fleet {intended_fleet}'
++                            )
++                            self.semantic_month_boss_leave_boss_cell(drop=drop)
++                            self.fleet_set(intended_fleet)
++                            continue
++                        unavailable = (
++                            semantic_session.operation_siren_fleet_already_defeated(
++                                intended_fleet
++                            )
++                            or semantic_session.operation_siren_current_fleet_needs_repair()
++                        )
+                 if unavailable:
+                     logger.warning(
+                         'Current fleet became unavailable before boss movement'
+@@ -1064,25 +1140,34 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                         f'Boss shares the fleet cell; click its exact event {location}'
+                     )
+                 semantic_session.begin_operation_siren_boss_combat()
+-                semantic_session.click_operation_siren_radar_boss(
+-                    target
+-                )
+-                self.wait_until_walk_stable(
++                try:
++                    semantic_session.click_operation_siren_radar_boss(
++                        target
++                    )
++                except SemanticGateClosed as exc:
++                    if 'boss target changed before input' not in str(exc):
++                        raise
++                    # The radar walk after a question waypoint can still be
++                    # settling when the first boss snapshot is taken.  Re-read
++                    # the exact remaining boss instead of clicking a stale
++                    # relative cell.
++                    logger.info(
++                        'Boss radar moved before input, re-prove the target'
++                    )
++                    self.device.screenshot()
++                    continue
++                walk_result = self.wait_until_walk_stable(
+                     confirm_timer=Timer(4, count=6),
+                     walk_out_of_step=False,
+                     drop=drop,
+                 )
+-                # A Month Boss attempt can end in timeout or flagship loss
+-                # while the fleet still has HP.  The exact ``agony`` controls
+-                # are the game's defeated/low-resolve state; once present the
+-                # fleet cannot re-enter this non-retreatable battle.  Return to
+-                # boss_clear so it can rotate to the next fleet instead of
+-                # clicking the same boss again.
+-                if (
+-                    is_month
+-                    and any(self.semantic_current_fleet_unavailable())
+-                ):
++                # Only the exact 士气过低 prompt (recorded as fleet_unavailable)
++                # means this fleet already lost.  Map-chibi or stacked-fleet
++                # HUD reads after a boss click must not skip the remaining
++                # fleets before they fight.
++                if is_month and 'fleet_unavailable' in str(walk_result):
+                     logger.warning('Current fleet is unavailable; rotate to the next fleet')
++                    self.semantic_month_boss_leave_boss_cell(drop=drop)
+                     return
+             return
+
+@@ -1277,13 +1339,22 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                     self.handle_os_map_fleet_lock(enable=False)
+                 if in_semantic_boss_room:
+                     try:
+-                        fleet_defeated = any(
+-                            self.semantic_current_fleet_unavailable()
++                        fleet_defeated = (
++                            semantic_session.operation_siren_fleet_already_defeated(
++                                fleet.fleet_index
++                            )
+                         )
++                        if not fleet_defeated:
++                            current = semantic_session.operation_siren_current_fleet()
++                            if current == fleet.fleet_index:
++                                fleet_defeated = (
++                                    semantic_session.operation_siren_current_fleet_needs_repair()
++                                )
+                     except SemanticGateClosed as exc:
+-                        if str(exc) != (
++                        if str(exc) not in (
+                             'operation siren selected-fleet map anchor is '
+-                            'absent or ambiguous'
++                            'absent or ambiguous',
++                            'operation siren current fleet is absent or ambiguous',
+                         ):
+                             raise
+                         logger.info(
+@@ -1290,6 +1384,13 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                             )
+                         return bool(self.radar.select(is_enemy=True))
+ 
++                    if in_semantic_boss_room and not month_boss_visible():
++                        # Compass radar still lists a live Month Boss even when
++                        # the model is off-screen.  An empty boss set after
++                        # rewards means the previous fleet already killed it.
++                        logger.info('BOSS clear')
++                        self.map_exit()
++                        return True
+                     while not month_boss_visible():
+                         self.relative_goto(has_fleet_step=True, is_question=True, relative_position=(1, -6), index=0)
+                         try:

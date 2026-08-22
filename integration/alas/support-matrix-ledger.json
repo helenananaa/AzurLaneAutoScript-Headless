@@ -5610,6 +5610,7 @@
         "integration/alas/operation-siren-obscure-fleet4-r7-live-20260821.json",
         "integration/alas/operation-siren-obscure-exit-passage-r49-live-20260822.json",
         "integration/alas/operation-siren-reenter-after-driver-r47-live-20260822.json",
+        "integration/alas/operation-siren-month-boss-hard-r61-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -5896,6 +5897,7 @@
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/operation-siren-month-boss-hard-r61-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -5922,6 +5924,7 @@
         "integration/alas/series/0140-scheduler-contract.patch",
         "integration/alas/series/0095-operation-siren-typed-navigation.patch",
         "integration/alas/operation-siren-live-qualification-20260820.json",
+        "integration/alas/operation-siren-month-boss-hard-r61-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -5946,6 +5949,8 @@
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/operation-siren-month-boss-normal-success-r25-live-20260822.json",
+        "integration/alas/operation-siren-month-boss-hard-r61-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -8409,7 +8414,7 @@
         "OpsiFleetFilter"
       ],
       "name": "OpsiMonthBoss",
-      "note": "模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通 Boss 已实机闭环精确雷达分步接敌、战败、低士气/沉没分离、四队轮换、全队耗尽、退出与恢复调度，成功击杀结算及困难 Boss 未闭环",
+      "note": "模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通房进入/失败恢复与困难 Boss 击杀、专用结算、奖励、离场、大修和舰队恢复已有实机证据，但 r61 整体收据未通过，普通成功结算、两个布尔值的剩余实机分支和非默认过滤器仍未闭环",
       "status": "B"
     },
     {
@@ -11328,7 +11333,7 @@
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
   "source": {
-    "adapter_evidence_commit": "266a77f6ce760b2aed3c05739e0e78d77a9f88dc",
+    "adapter_evidence_commit": "2f60aab7ff609614506321112efc7c4765b5ebf2",
     "config_sha256": {
       "config/template.json": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
       "module/config/argument/args.json": "94a4e553e857e7e3bada215e08b8963f46d287ac530f32a02b7daf6b7533ad90",
@@ -11336,9 +11341,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "ffa8a0bf9fa4013d8edafbfd853f94f3ddc874c11cfd1a736202bb3a8fb4b188",
-      "manifest_sha256": "ffe0de2226eb64beb1225e4c14609651872dce1cda7080e3d929956934143555",
-      "member_count": 79
+      "combined_sha256": "594b7ad666450dc8c1c0a6f40d18e69257a6d15cb79b68f587fb0650c9cdcc99",
+      "manifest_sha256": "7976a577d2b16715b228423b1acdf36ed375c5f76aafa5114e29f914b689c3e1",
+      "member_count": 81
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

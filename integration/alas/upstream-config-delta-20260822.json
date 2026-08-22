@@ -1,0 +1,95 @@
+{
+  "adapter_lock": {
+    "commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af",
+    "config_sha256": {
+      "config/template.json": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+      "module/config/argument/args.json": "722bbac03fa73f7395e8a674d337180a6ccdb0bd561c5bb26241f968009b7037",
+      "module/config/argument/task.yaml": "19e6464aaa1e92913ba9f31de590096a09b101638969c41e14c70dd1a4eb6c5a"
+    },
+    "field_count": 278,
+    "panel_count": 60,
+    "panel_field_instance_count": 1217
+  },
+  "captured_date": "2026-08-22",
+  "delta": {
+    "fields_added": [
+      "EventShop.BuyURShip",
+      "EventShop.CustomFilter",
+      "EventShop.PresetFilter",
+      "EventShop.UnlockSSRShip",
+      "IslandFreebie.Share",
+      "IslandOrder.StuckSeasonOrderId",
+      "IslandProduction.DailyBufferItems",
+      "IslandProduction.HardFloorItems",
+      "IslandProduction.IdleAccumulatingItems",
+      "IslandProduction.ReserveItems",
+      "IslandProductionPlanner.DailyBufferSafetyMargin",
+      "IslandProductionPlanner.DailyProfitLowerLimit",
+      "IslandProductionPlanner.FieldsEfficiency",
+      "IslandProductionPlanner.NurseryEfficiency",
+      "IslandProductionPlanner.OrchardEfficiency",
+      "IslandProductionPlanner.RescanIslandTechnology",
+      "IslandRestaurant.BearGrade",
+      "IslandRestaurant.BearMenu",
+      "IslandRestaurant.BearWaitress1",
+      "IslandRestaurant.BearWaitress2",
+      "IslandRestaurant.CafeGrade",
+      "IslandRestaurant.CafeMenu",
+      "IslandRestaurant.CafeWaitress1",
+      "IslandRestaurant.CafeWaitress2",
+      "IslandRestaurant.EateryGrade",
+      "IslandRestaurant.EateryMenu",
+      "IslandRestaurant.EateryWaitress1",
+      "IslandRestaurant.EateryWaitress2",
+      "IslandRestaurant.GrillGrade",
+      "IslandRestaurant.GrillMenu",
+      "IslandRestaurant.GrillWaitress1",
+      "IslandRestaurant.GrillWaitress2",
+      "IslandRestaurant.KoiGrade",
+      "IslandRestaurant.KoiMenu",
+      "IslandRestaurant.KoiWaitress1",
+      "IslandRestaurant.KoiWaitress2",
+      "IslandSeasonTask.TaskTarget"
+    ],
+    "fields_added_count": 37,
+    "fields_removed": [],
+    "panel_field_instances_added_count": 79,
+    "panel_field_instances_removed_count": 0,
+    "panels_added": [
+      "EventShop",
+      "IslandBusiness",
+      "IslandCollect",
+      "IslandFreebie",
+      "IslandOrder",
+      "IslandProduction",
+      "IslandProductionPlanner",
+      "IslandSeasonTask"
+    ],
+    "panels_removed": []
+  },
+  "operation_siren_delta": {
+    "field_instances_added": 0,
+    "field_instances_removed": 0,
+    "fields_added": [],
+    "fields_removed": [],
+    "locked_field_count": 41,
+    "locked_panel_count": 16,
+    "locked_panel_field_instance_count": 131,
+    "remote_field_count": 41,
+    "remote_panel_count": 16,
+    "remote_panel_field_instance_count": 131
+  },
+  "remote_master": {
+    "commit": "d816310324bf686dff3252b37efbb997d9a328a4",
+    "config_sha256": {
+      "config/template.json": "3cedde1c345612074a3bc42625a53b4e1ce4d2a86df17a47809db7e846aad810",
+      "module/config/argument/args.json": "fb9c0e091eff54c39391dc3b4cab3beaba65092750c4045bbd8d5dd83afdc0a8",
+      "module/config/argument/task.yaml": "69877c3c90b1d8dd2ce4a5bc8491f4d8c61f640c7a6275b4bc55821cb05212bb"
+    },
+    "field_count": 315,
+    "panel_count": 68,
+    "panel_field_instance_count": 1296
+  },
+  "repository": "https://github.com/LmeSzinc/AzurLaneAutoScript",
+  "schema": "alas-headless.upstream-config-delta/v1"
+}

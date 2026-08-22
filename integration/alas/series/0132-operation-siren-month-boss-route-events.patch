@@ -2,7 +2,7 @@ diff --git a/module/os/fleet.py b/module/os/fleet.py
 index 6ac4a0b..e155e44 100644
 --- a/module/os/fleet.py
 +++ b/module/os/fleet.py
-@@ -697,11 +697,10 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+@@ -697,11 +697,8 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
              reviewed_kinds = {
                  'is_port': 'port',
                  'is_exclamation': 'task',
@@ -11,14 +11,12 @@ index 6ac4a0b..e155e44 100644
 -                # 7030050).  Keep ALAS' route planning and only replace the
 -                # observation port.
 -                'is_question': 'guidepost',
-+                # Preserve the narrower legacy radar ``question`` class.
-+                # The semantic oracle separates fubiao buoys from other
-+                # exact Unity guidepost events in month-boss rooms.
++                # Translate RadarGrid.predict_question() (white ``?``).
 +                'is_question': 'question',
              }
              selected = [
                  kind for flag, kind in reviewed_kinds.items()
-@@ -714,17 +713,58 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+@@ -714,17 +711,88 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
              grids = list(
                  semantic_session.operation_siren_radar_targets(selected[0])
              )
@@ -40,17 +38,20 @@ index 6ac4a0b..e155e44 100644
                  grid = point_limit(grid, area=(-4, -2, 3, 2))
                  if has_fleet_step:
                      grid = limit_walk(grid)
-+                prefer_adjacent_event = False
++                # Monthly-boss hard uses the same wormhole entrance as
++                # normal.  Click that owned chongdong event rather than a
++                # bare cell or the nearby right-hand buoy.
++                prefer_adjacent_event = selected[0] == 'question'
 +                if selected[0] == 'question':
-+                    guideposts = set(
++                    switches = set(
 +                        semantic_session.operation_siren_radar_targets(
-+                            'guidepost'
++                            'switch'
 +                        )
 +                    )
 +                    question_waypoints = set(grids)
 +                    crossings = []
 +                    grid_x, grid_y = (int(grid[0]), int(grid[1]))
-+                    for candidate in guideposts - question_waypoints:
++                    for candidate in switches - question_waypoints:
 +                        x, y = candidate
 +                        if (
 +                                abs(x) + abs(y) == 1
@@ -72,14 +73,41 @@ index 6ac4a0b..e155e44 100644
 +                        grid = np.array(crossings[0])
 +                        prefer_adjacent_event = True
 +                logger.info(f'Typed relative click grid={tuple(grid)}')
++                clicked_before = tuple(
++                    tuple(int(value) for value in item) for item in grids
++                )
                  semantic_session.click_operation_siren_relative_grid(
 -                    tuple(int(value) for value in grid)
 +                    tuple(int(value) for value in grid),
 +                    prefer_adjacent_event=prefer_adjacent_event,
                  )
++                moved = Timer(12, count=30).start()
++                while 1:
++                    self.device.screenshot()
++                    if self.appear(MAP_EXIT, offset=(20, 20)):
++                        return
++                    try:
++                        current = tuple(
++                            semantic_session.operation_siren_radar_targets(
++                                selected[0]
++                            )
++                        )
++                    except SemanticGateClosed:
++                        break
++                    if current != clicked_before:
++                        break
++                    if moved.reached():
++                        logger.info(
++                            'Typed relative click did not move the fleet'
++                        )
++                        if selected[0] == 'question':
++                            semantic_session.click_operation_siren_relative_grid(
++                                (0, 0)
++                            )
++                        break
              stable = Timer(1.5, count=4).start()
              timeout = Timer(30, count=80).start()
-@@ -736,13 +776,13 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+@@ -736,13 +804,13 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
                          semantic_session.operation_siren_radar_targets(selected[0])
                      )
                  except SemanticGateClosed:
@@ -95,7 +123,7 @@ index 6ac4a0b..e155e44 100644
                                  try:
                                      current = tuple(
                                          semantic_session.operation_siren_radar_targets(
-@@ -756,7 +796,7 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+@@ -756,7 +824,7 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
                              raise SemanticGateClosed(
                                  'Operation Siren room transition did not expose exit'
                              )
@@ -104,3 +132,25 @@ index 6ac4a0b..e155e44 100644
                              continue
                          raise SemanticGateClosed(
                              'Operation Siren room transition did not expose exit'
+@@ -831,8 +899,20 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             if is_normal:
+                 self.relative_goto(has_fleet_step=True, near_by=True, is_exclamation=True)
+             else:
+-                if self.radar.select(is_exclamation=True).count:
++                # Same entrance as normal.  Original ALAS prefers the yellow
++                # ``!`` when it is still on that wormhole; otherwise the
++                # white ``?`` that joins to the wormhole, not the right buoy.
++                semantic_session = getattr(self.device, 'semantic_adapter', None)
++                if semantic_session is not None:
++                    has_exclamation = bool(
++                        semantic_session.operation_siren_radar_targets('task')
++                    )
++                else:
++                    has_exclamation = bool(
++                        self.radar.select(is_exclamation=True).count
++                    )
++                if has_exclamation:
+                     logger.warning('Trying to enter month boss hard mode but is_exclamation exists')
+                     self.relative_goto(has_fleet_step=True, near_by=True, is_exclamation=True)
+                 else:
+                     self.relative_goto(has_fleet_step=True, near_by=True, is_question=True)

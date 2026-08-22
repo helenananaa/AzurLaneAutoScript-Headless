@@ -746,6 +746,12 @@ class FakeOracle:
     def daily_battle_result_visible(self):
         return False
 
+    def operation_siren_battle_result_visible(self):
+        return False
+
+    def operation_siren_battle_result_grade(self):
+        raise SemanticGateClosed("operation siren battle result is absent")
+
     def server_maintenance_visible(self):
         return False
 
@@ -768,6 +774,9 @@ class FakeOracle:
 
     def operation_siren_page_visible(self):
         return self.operation_siren_page_visible_value
+
+    def operation_siren_current_fleet(self):
+        return 1
 
     def operation_siren_globe_state(self):
         raise SemanticGateClosed("Operation Siren globe identity is not proven")
@@ -6833,6 +6842,38 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertTrue(adapter.complete_operation_siren_combat_if_map_restored())
         self.assertFalse(adapter.operation_siren_combat_committed())
 
+    def test_operation_siren_combat_observer_gap_keeps_loading_and_execution(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._operation_siren_combat_active = True
+        oracle.operation_siren_local_map_visible = Mock(return_value=False)
+        oracle.enabled_values["reward/award-info/close"] = False
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+
+        def incomplete():
+            raise SemanticGateClosed(
+                "combat fixture endpoint completeness changed"
+            )
+
+        session._live_combat_visible = incomplete
+
+        self.assertTrue(session.combat_is_loading())
+        self.assertTrue(session.combat_is_executing())
+        self.assertFalse(session.appear(NamedButton("BATTLE_PREPARATION")))
+
+        adapter._operation_siren_combat_active = False
+        self.assertFalse(session.combat_is_loading())
+        self.assertFalse(session.combat_is_executing())
+        self.assertFalse(
+            session._operation_siren_combat_observer_gap(
+                SemanticGateClosed(
+                    "combat fixture endpoint completeness changed"
+                )
+            )
+        )
+
     def test_operation_siren_interrupt_advances_exact_pause_leave_confirm_steps(self):
         adapter, oracle, _ = self.make_adapter()
         adapter._operation_siren_combat_active = True
@@ -6875,6 +6916,83 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
         self.assertTrue(adapter.operation_siren_current_fleet_defeated())
         oracle.click_operation_siren_low_resolve_cancel.assert_called_once_with()
+
+    def test_month_boss_d_rank_remembers_only_the_fighting_fleet(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_radar_targets = Mock(return_value=((0, -1),))
+        oracle.operation_siren_current_fleet = Mock(return_value=4)
+        oracle.operation_siren_current_fleet_defeated = Mock(
+            side_effect=AssertionError("map-chibi damage is not a skip signal")
+        )
+
+        adapter.begin_operation_siren_boss_combat()
+        oracle.operation_siren_current_fleet = Mock(return_value=2)
+        adapter.mark_operation_siren_combat_fleet_defeated()
+
+        oracle.operation_siren_current_fleet = Mock(return_value=4)
+        self.assertTrue(adapter.operation_siren_current_fleet_defeated())
+        self.assertTrue(adapter.operation_siren_fleet_already_defeated(4))
+        self.assertFalse(adapter.operation_siren_fleet_already_defeated(2))
+        oracle.operation_siren_current_fleet = Mock(return_value=2)
+        self.assertFalse(adapter.operation_siren_current_fleet_defeated())
+
+    def test_operation_siren_defeat_grade_is_not_s_rank(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._operation_siren_combat_active = True
+        oracle.operation_siren_battle_result_visible = Mock(return_value=True)
+        oracle.operation_siren_battle_result_grade = Mock(return_value="DEFEAT")
+        receipt = oracle.click_receipt("operation-siren/battle/result")
+        oracle.click_daily_battle_result = Mock(return_value=receipt)
+
+        self.assertEqual(adapter.operation_siren_battle_result_grade(), "DEFEAT")
+        self.assertEqual(adapter.click_operation_siren_battle_result(), receipt)
+        oracle.click_daily_battle_result.assert_called_once_with()
+
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+        session._combat_result_observation = None
+        session._combat_last_result_receipt = None
+        session._arm_combat_result_transition = Mock()
+        session._combat_result_action_oracle = lambda _adapter: oracle
+        session._frame_clock = None
+
+        self.assertTrue(session.appear(NamedButton("BATTLE_STATUS_D")))
+        self.assertFalse(session.appear(NamedButton("BATTLE_STATUS_S")))
+        self.assertEqual(
+            session.click(NamedButton("BATTLE_STATUS_D")), receipt
+        )
+
+    def test_month_boss_skip_ignores_stacked_neighbour_hud(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_radar_targets = Mock(return_value=((0, -1),))
+        oracle.operation_siren_current_fleet = Mock(return_value=4)
+        adapter.begin_operation_siren_boss_combat()
+        adapter.mark_operation_siren_combat_fleet_defeated()
+
+        oracle.operation_siren_current_fleet = Mock(return_value=4)
+        self.assertTrue(adapter.operation_siren_current_fleet_defeated())
+        self.assertFalse(adapter.operation_siren_fleet_already_defeated(2))
+        self.assertFalse(adapter.operation_siren_fleet_already_defeated(3))
+        self.assertFalse(adapter.operation_siren_fleet_already_defeated(1))
+
+    def test_low_resolve_cancel_remembers_hud_fleet_not_stale_combat_snapshot(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.operation_siren_radar_targets = Mock(return_value=((0, -1),))
+        oracle.operation_siren_current_fleet = Mock(return_value=2)
+        adapter.begin_operation_siren_boss_combat()
+        oracle.operation_siren_current_fleet = Mock(return_value=4)
+        receipt = oracle.click_receipt("os/combat/low-resolve/cancel")
+        oracle.click_operation_siren_low_resolve_cancel = Mock(
+            return_value=receipt
+        )
+
+        self.assertEqual(
+            adapter.click_operation_siren_low_resolve_cancel(), receipt
+        )
+        self.assertTrue(adapter.operation_siren_fleet_already_defeated(4))
+        self.assertFalse(adapter.operation_siren_fleet_already_defeated(2))
+        self.assertTrue(adapter.operation_siren_current_fleet_defeated())
 
     def test_operation_siren_reward_close_requires_owner_and_exact_target(self):
         adapter, oracle, _ = self.make_adapter()

@@ -90,6 +90,18 @@ INIT_OFFSCREEN_FLEET_PATCH = (
     ROOT / "integration" / "alas" / "series" /
     "0126-operation-siren-init-offscreen-fleet.patch"
 )
+MONTH_BOSS_ROUTE_EVENTS_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0132-operation-siren-month-boss-route-events.patch"
+)
+MONTH_BOSS_FLEET_RESTORE_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0133-operation-siren-month-boss-fleet-restore.patch"
+)
+MONTH_BOSS_RESULT_PATCH = (
+    ROOT / "integration" / "alas" / "series" /
+    "0134-operation-siren-month-boss-result.patch"
+)
 OBSCURE_EXIT_PASSAGE_PATCH = (
     EXACT_MAP_EXIT_CONFIRM_PATCH
 )
@@ -230,6 +242,14 @@ class AlasOpsiAutoSearchContractTests(unittest.TestCase):
         self.assertIn("click_operation_siren_radar_guidepost(target)", source)
         self.assertIn("prefer_adjacent_event=True", source)
 
+    def test_month_boss_question_routes_click_the_owned_world_event(self):
+        source = MONTH_BOSS_ROUTE_EVENTS_PATCH.read_text(encoding="utf-8")
+        self.assertIn("prefer_adjacent_event=prefer_adjacent_event", source)
+        self.assertIn("'is_question': 'question'", source)
+        self.assertIn("operation_siren_radar_targets(\n+                            'switch'", source)
+        self.assertIn("operation_siren_radar_targets('task')", source)
+        self.assertIn("switches = set(", source)
+
     def test_guidepost_retries_only_while_the_exact_target_remains(self):
         source = GUIDEPOST_RETRY_PATCH.read_text(encoding="utf-8")
         self.assertIn("attempts = 3 if target_kind == 'guidepost' else 1", source)
@@ -299,6 +319,26 @@ class AlasOpsiAutoSearchContractTests(unittest.TestCase):
         self.assertIn("range(-64, 65, 8)", source)
         self.assertIn("BOSS clear before fleet rotation", source)
         self.assertIn("operation_siren_map_visible()", source)
+
+    def test_month_boss_restores_turn_fleet_instead_of_stacked_hud_skip(self):
+        source = MONTH_BOSS_FLEET_RESTORE_PATCH.read_text(encoding="utf-8")
+        self.assertIn("intended_fleet = semantic_session.operation_siren_current_fleet()", source)
+        self.assertIn("Covering fleet {current} stole the boss click", source)
+        self.assertIn("semantic_month_boss_leave_boss_cell", source)
+        self.assertIn("operation_siren_fleet_already_defeated(", source)
+        self.assertIn("fleet.fleet_index", source)
+        self.assertNotIn(
+            "unavailable = any(\n+                            self.semantic_current_fleet_unavailable()",
+            source,
+        )
+
+    def test_month_boss_result_clicks_event_trigger_continue(self):
+        source = MONTH_BOSS_RESULT_PATCH.read_text(encoding="utf-8")
+        self.assertIn("operation_siren_battle_result_visible()", source)
+        self.assertIn("click_operation_siren_battle_result()", source)
+        self.assertIn("Recover retained Operation Siren battle result", source)
+        self.assertIn("Recover retained Operation Siren battle statistics", source)
+        self.assertIn("grade == 'DEFEAT'", source)
 
 
 if __name__ == "__main__":

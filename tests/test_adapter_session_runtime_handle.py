@@ -210,6 +210,33 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         ), self.assertRaises(SemanticGateClosed):
             session.combat_is_loading()
 
+    def test_operation_siren_loading_keeps_observer_completeness_gaps(self):
+        session = AlasSemanticSession(
+            driver_revision=REVISION,
+            runtime_handle=FakeRuntimeHandle(),
+        )
+        session.adapter = SimpleNamespace(
+            oracle=SimpleNamespace(
+                daily_combat_visible=lambda: False,
+                daily_battle_result_visible=lambda: False,
+            ),
+            campaign_combat_committed=lambda: False,
+            operation_siren_combat_committed=lambda: True,
+            _campaign_context=None,
+        )
+        error = SemanticGateClosed(
+            "combat fixture endpoint completeness changed"
+        )
+
+        with mock.patch.object(
+            session,
+            "_live_combat_visible",
+            side_effect=error,
+        ):
+            self.assertTrue(session.combat_is_loading())
+            self.assertTrue(session.combat_is_executing())
+            self.assertTrue(session._operation_siren_combat_observer_gap(error))
+
     def test_battle_start_commit_extends_its_own_passive_transition_window(self):
         session = AlasSemanticSession(
             driver_revision=REVISION,

@@ -353,7 +353,7 @@
     {
       "order": 71,
       "path": "integration/alas/series/0124-operation-siren-month-boss-recovery.patch",
-      "sha256": "1a7be60f3848ced0f26ce7226e279cd55030c1c170312a3abc2d533fbe238cc5"
+      "sha256": "2e8777110212afe9580fdca822eca609d0ad4e6e7f1b81bdb73bf9b5adba824a"
     },
     {
       "order": 72,
@@ -393,7 +393,17 @@
     {
       "order": 79,
       "path": "integration/alas/series/0132-operation-siren-month-boss-route-events.patch",
-      "sha256": "3086852780c338cc74acbc2812d8dd2c8da84485a5cee8e9107d2f632f0576b9"
+      "sha256": "4f5c8d97194ef7456e071852115084b907028eb64cd6da00f9edef029c949657"
+    },
+    {
+      "order": 80,
+      "path": "integration/alas/series/0133-operation-siren-month-boss-fleet-restore.patch",
+      "sha256": "b5567b5894bbbef20142555a497c39e61b79c8a2d0fe552d57ffdcfa04195264"
+    },
+    {
+      "order": 81,
+      "path": "integration/alas/series/0134-operation-siren-month-boss-result.patch",
+      "sha256": "843a93a986f58e25cd8a9e566d6ad1c84b0b4d20217000d8b34027312bc54f2b"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

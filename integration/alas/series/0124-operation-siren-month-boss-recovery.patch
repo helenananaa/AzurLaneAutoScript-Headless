@@ -74,30 +74,13 @@ index 0ec58a0f..6ffeda35 100644
                  if self.combat_appear():
                      self.combat(
                          expected_end=abyssal_expected_end,
-@@ -358,6 +379,26 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+@@ -358,6 +379,9 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
                      )
                      result.add('event')
                      break
-+                unavailable = False
-+                if self.appear(MAP_EXIT, offset=(20, 20)):
-+                    try:
-+                        unavailable = any(
-+                            self.semantic_current_fleet_unavailable(
-+                                attempts=1, clear_samples_required=1
-+                            )
-+                        )
-+                    except SemanticGateClosed as exc:
-+                        if str(exc) != (
-+                            'operation siren selected-fleet map anchor is '
-+                            'absent or ambiguous'
-+                        ):
-+                            raise
-+                if unavailable:
-+                    logger.warning(
-+                        'Fleet became unavailable while approaching locked boss'
-+                    )
-+                    result.add('fleet_unavailable')
-+                    break
++                # Approach-time map-chibi damage is not that fleet's defeat.
++                # Original ALAS only skips after the fleet's own fight; the
++                # exact 士气过低 prompt above remains the in-walk stop.
                  if semantic_session.operation_siren_map_visible():
                      if confirm_timer.reached():
                          break
