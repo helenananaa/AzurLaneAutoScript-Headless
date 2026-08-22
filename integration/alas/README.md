@@ -105,6 +105,15 @@ visible campaign chapter/stage labels. The pinned patch changes those ALAS
 observation and input ports while leaving ALAS responsible for filtering,
 selection, retry loops, queue filling, popup loops, and scheduling.
 
+The three normal-campaign entries also share a strict pre-navigation config
+boundary. `Main`, `Main2`, and `Main3` have the same nine groups and 54 fields;
+only their required `Scheduler.Command` identities differ. After the existing
+normal-route check, all six StopCondition values are validated before any
+semantic scope or navigation is opened. This classifies configuration only:
+the original ALAS stop-condition methods still own oil/level comparisons,
+run-count decrement and persistence, map progression, and scheduling. Other
+campaign families are not constrained by this Main-only boundary.
+
 When ALAS is already on a normal campaign map, the patch now passes ALAS's own
 map shape, land cells, and enabled fleet count to the read-only semantic map
 model. The returned stable cells, fleets, enemies, and pickups are validated

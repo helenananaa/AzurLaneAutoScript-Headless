@@ -7512,6 +7512,10 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -7536,7 +7540,7 @@
         "RaidDaily"
       ],
       "path": "StopCondition.GetNewShip",
-      "status_label": "🧱 首次获得跳过",
+      "status_label": "🧱 三主线严校，首次获得跳过",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -7551,6 +7555,10 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "tests/test_alas_integration_patch.py",
         "docs/status.md"
       ],
@@ -7576,7 +7584,7 @@
         "RaidDaily"
       ],
       "path": "StopCondition.MapAchievement",
-      "status_label": "◐ typed 主线夹具",
+      "status_label": "◐ 三主线严校 + typed 夹具",
       "support": "supported",
       "values": "options: \"100_percent_clear\", \"map_3_stars\", \"non_stop\", \"threat_safe_without_3_stars\", \"threat_safe\"; default: \"non_stop\""
     },
@@ -7591,6 +7599,10 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "tests/test_alas_integration_patch.py",
         "docs/status.md"
       ],
@@ -7616,7 +7628,7 @@
         "RaidDaily"
       ],
       "path": "StopCondition.OilLimit",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 三主线严校 + 实机当前值",
       "support": "supported",
       "values": "input/default: 1000"
     },
@@ -7631,6 +7643,10 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "tests/test_alas_integration_patch.py",
         "docs/status.md"
       ],
@@ -7656,7 +7672,7 @@
         "RaidDaily"
       ],
       "path": "StopCondition.ReachLevel",
-      "status_label": "◐ typed 六舰等级",
+      "status_label": "◐ 三主线严校 + typed 六舰等级",
       "support": "supported",
       "values": "input/default: 0"
     },
@@ -7671,6 +7687,10 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "tests/test_alas_integration_patch.py",
         "docs/status.md"
       ],
@@ -7696,7 +7716,7 @@
         "RaidDaily"
       ],
       "path": "StopCondition.RunCount",
-      "status_label": "🧪 三主线实例回放",
+      "status_label": "🧪 三主线严校 + 循环回放",
       "support": "supported",
       "values": "input/default: 0"
     },
@@ -7711,6 +7731,10 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "tests/test_alas_integration_patch.py",
         "docs/status.md"
       ],
@@ -7736,7 +7760,7 @@
         "RaidDaily"
       ],
       "path": "StopCondition.StageIncrease",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 三主线严校 + 实机当前值",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -8379,10 +8403,11 @@
         "Submarine",
         "Emotion",
         "HpControl",
-        "EnemyPriority"
+        "EnemyPriority",
+        "Storage"
       ],
       "name": "Main",
-      "note": "普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；Main 已在真实 API 32 x86_64 AVD 上完成 normal 1-1 的手动地图闭环，以及 normal 12-4 的官方自律寻敌闭环。12-4 使用舰队 1/2、禁用潜艇，精确设置一队道中/二队 Boss，出击后由游戏官方承担全部地图和战斗，ALAS 的 combat/viewport 预算均为 0；官方 AutoBtn checked、总奖励页、RunCount 归零、Scheduler 关闭及无 raw fallback 均有实机证明，凭证见 integration/alas/main-12-4-auto-search-live-validation-receipt.json。反向的一队 Boss/二队道中走同一类型化路径并有确定性测试；12-4 之外的自动寻敌、舰队锁定、潜艇、其他舰队编号、困难/活动图未提升",
+      "note": "三实例 9 组、54 字段（合计 162 个面板字段实例）已证明除 Scheduler.Command 外结构和默认值完全等价；六个 StopCondition 字段共 60 个合法类与 45 个非法类在任何导航前统一严校。普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；Main 已在真实 API 32 x86_64 AVD 上完成 normal 1-1 的手动地图闭环，以及 normal 12-4 的官方自律寻敌闭环。12-4 使用舰队 1/2、禁用潜艇，精确设置一队道中/二队 Boss，出击后由游戏官方承担全部地图和战斗，ALAS 的 combat/viewport 预算均为 0；官方 AutoBtn checked、总奖励页、RunCount 归零、Scheduler 关闭及无 raw fallback 均有实机证明，凭证见 integration/alas/main-12-4-auto-search-live-validation-receipt.json。反向的一队 Boss/二队道中走同一类型化路径并有确定性测试；12-4 之外的自动寻敌、舰队锁定、潜艇、其他舰队编号、困难/活动图未提升",
       "status": "L"
     },
     {
@@ -8394,10 +8419,11 @@
         "Submarine",
         "Emotion",
         "HpControl",
-        "EnemyPriority"
+        "EnemyPriority",
+        "Storage"
       ],
       "name": "Main2",
-      "note": "已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main2 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、阵型策略、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main2-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升",
+      "note": "已纳入三实例 9 组、54 字段共享等价类，除 Scheduler.Command 外无差异；六个 StopCondition 字段在导航前严校。已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main2 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、阵型策略、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main2-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升",
       "status": "L"
     },
     {
@@ -8409,10 +8435,11 @@
         "Submarine",
         "Emotion",
         "HpControl",
-        "EnemyPriority"
+        "EnemyPriority",
+        "Storage"
       ],
       "name": "Main3",
-      "note": "已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main3 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main3-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升",
+      "note": "已纳入三实例 9 组、54 字段共享等价类，除 Scheduler.Command 外无差异；六个 StopCondition 字段在导航前严校。已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main3 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main3-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升",
       "status": "L"
     },
     {
@@ -9312,10 +9339,14 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "docs/status.md"
       ],
       "field": "StopCondition.GetNewShip",
-      "note": "Only ordinary GET_SHIP continuation is replayed; NEW_SHIP remains partial and cannot be promoted live."
+      "note": "Main/Main2/Main3 now reject non-boolean configuration before navigation; only ordinary GET_SHIP continuation is replayed, so NEW_SHIP remains partial and cannot be promoted live."
     },
     {
       "dimensions": {
@@ -9326,11 +9357,15 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "tests/test_alas_integration_patch.py",
         "docs/status.md"
       ],
       "field": "StopCondition.MapAchievement",
-      "note": "All five public values share a 40-case truth table over typed progress, stars, and threat state."
+      "note": "Main/Main2/Main3 admit only the five pinned values before navigation; all five then share a 40-case truth table over typed progress, stars, and threat state."
     },
     {
       "dimensions": {
@@ -9341,11 +9376,15 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "tests/test_alas_integration_patch.py",
         "docs/status.md"
       ],
       "field": "StopCondition.OilLimit",
-      "note": "Boundary classes cover the hard 500 floor and strict comparison in the pinned ALAS method."
+      "note": "Main/Main2/Main3 reject booleans, strings, and negative values before navigation; boundary classes cover the hard 500 floor and strict comparison in the pinned ALAS method."
     },
     {
       "dimensions": {
@@ -9356,11 +9395,15 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "tests/test_alas_integration_patch.py",
         "docs/status.md"
       ],
       "field": "StopCondition.ReachLevel",
-      "note": "Sorted six-ship levels, threshold crossings, invalid levels, and implausible gaps fail closed."
+      "note": "Main/Main2/Main3 reject booleans, strings, and negative thresholds before navigation; sorted six-ship levels, threshold crossings, invalid levels, and implausible gaps fail closed."
     },
     {
       "dimensions": {
@@ -9371,11 +9414,15 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "tests/test_alas_integration_patch.py",
         "docs/status.md"
       ],
       "field": "StopCondition.RunCount",
-      "note": "Zero, positive, negative clamp, decrement ordering, and interruption boundaries are deterministic."
+      "note": "Main/Main2/Main3 reject booleans, floats, and negative values before navigation; zero, positive, decrement ordering, and interruption boundaries remain deterministic in the pinned loop."
     },
     {
       "dimensions": {
@@ -9386,11 +9433,15 @@
       "evidence": [
         "tests/test_alas_stop_condition_replay.py",
         "python/alas_headless/alas_stop_condition_replay.py",
+        "tests/test_alas_main_shared_config.py",
+        "python/alas_headless/alas_main_shared_config_replay.py",
+        "integration/alas/main-shared-config-equivalence-20260822.json",
+        "integration/alas/series/0410-main-shared-config-runtime.patch",
         "tests/test_alas_integration_patch.py",
         "docs/status.md"
       ],
       "field": "StopCondition.StageIncrease",
-      "note": "Main, custom, A/B boundary, terminal, disabled, and recovery classes reuse pinned ALAS progression."
+      "note": "Main/Main2/Main3 reject non-boolean values before navigation; main, custom, A/B boundary, terminal, disabled, and recovery classes reuse pinned ALAS progression."
     },
     {
       "dimensions": {
@@ -11614,9 +11665,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "84e9b6a6f1cbdfc0e3b51c99119f0e0603a4671beb13b05bbb902797af0e2c8a",
-      "manifest_sha256": "fd6646c2b5f432fd18a48d68e6c6c5f9d5fef66efa3bf5669d3d2b1cb5204aeb",
-      "member_count": 85
+      "combined_sha256": "0a730a596817b7235249a9db749ffe88064564923408e4b40c870c604081de66",
+      "manifest_sha256": "59cc0578f92d512da67b7bc801273aa0e4271a072a023ba693f4f8a02703e8d5",
+      "member_count": 86
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

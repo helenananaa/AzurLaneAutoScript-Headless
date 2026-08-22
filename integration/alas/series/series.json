@@ -424,6 +424,11 @@
       "order": 85,
       "path": "integration/alas/series/0402-research-six-field-runtime.patch",
       "sha256": "76a042155c00ae2dce067a18cffde235497548d63ddff98e49ffd915038bd245"
+    },
+    {
+      "order": 86,
+      "path": "integration/alas/series/0410-main-shared-config-runtime.patch",
+      "sha256": "860e06840728d1e211b5b10a9904b7ef57c74b721132026f8d2825946e220fe4"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

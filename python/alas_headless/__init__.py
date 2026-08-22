@@ -55,6 +55,12 @@ from .alas_campaign_route_config_contract import (
     MAIN_TASKS,
     validate_alas_main_campaign_route_config,
 )
+from .alas_main_shared_config_contract import (
+    AlasMainStopConditionConfigSnapshot,
+    MAIN_SHARED_GROUPS,
+    STOP_CONDITION_MAP_ACHIEVEMENTS,
+    validate_alas_main_stop_condition_config,
+)
 from .alas_research_config_contract import (
     AlasResearchConfigSnapshot,
     RESEARCH_PRESET_FILTERS,
@@ -642,6 +648,10 @@ __all__ = (
     "MAIN_CAMPAIGN_MODES",
     "MAIN_TASKS",
     "validate_alas_main_campaign_route_config",
+    "AlasMainStopConditionConfigSnapshot",
+    "MAIN_SHARED_GROUPS",
+    "STOP_CONDITION_MAP_ACHIEVEMENTS",
+    "validate_alas_main_stop_condition_config",
     "AlasSchedulerTaskSnapshot",
     "SCHEDULER_FIELDS",
     "validate_alas_scheduler_config",

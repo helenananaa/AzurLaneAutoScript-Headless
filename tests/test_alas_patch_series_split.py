@@ -248,6 +248,9 @@ FLOW_PATHS = {
         "module/research/research.py",
         "module/research/selector.py",
     },
+    "0410-main-shared-config-runtime.patch": {
+        "module/campaign/run.py",
+    },
 }
 
 OVERRIDE_PATHS = {
@@ -445,6 +448,9 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                     "0402-research-six-field-runtime.patch": {
                         "module/research/research.py",
                         "module/research/selector.py",
+                    },
+                    "0410-main-shared-config-runtime.patch": {
+                        "module/campaign/run.py",
                     },
                 }.get(name, set())
                 self.assertEqual(promoted & actual, expected_overlap)

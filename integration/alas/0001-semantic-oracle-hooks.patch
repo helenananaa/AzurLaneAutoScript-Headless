@@ -14342,3 +14342,30 @@ index 05146c33..19327b62 100644
          # Load filter string
          preset = self.config.Research_PresetFilter
          if preset == 'custom':
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+index 00743e77..ab6288a9 100644
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -385,8 +385,22 @@ class CampaignRun(CampaignEvent):
+             ambush_evade=self.config.Campaign_AmbushEvade,
+         )
+ 
++    def _validate_main_stop_condition_config(self):
++        from alas_headless import validate_alas_main_stop_condition_config
++
++        return validate_alas_main_stop_condition_config(
++            task=self.config.Scheduler_Command,
++            oil_limit=self.config.StopCondition_OilLimit,
++            run_count=self.config.StopCondition_RunCount,
++            map_achievement=self.config.StopCondition_MapAchievement,
++            stage_increase=self.config.StopCondition_StageIncrease,
++            get_new_ship=self.config.StopCondition_GetNewShip,
++            reach_level=self.config.StopCondition_ReachLevel,
++        )
++
+     def run(self, name, folder='campaign_main', mode='normal', total=0):
+         self._validate_main_campaign_route_config(name, folder, mode)
++        self._validate_main_stop_condition_config()
+         self._validate_campaign_switch_config()
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)

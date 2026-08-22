@@ -4,6 +4,40 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-22
 
+### Main/Main2/Main3 shared configuration is closed at the L boundary
+
+- The three pinned normal-campaign panels expose the same ordered nine groups
+  and 54 fields, for 162 panel-field instances. Their argument declarations,
+  template values, and `AzurLaneAutoScript.main/main2/main3` dispatch wrappers
+  are structurally identical after normalizing the one intentional difference,
+  `Scheduler.Command`; each wrapper preserves its own config/device identity
+  and forwards its own stage through `campaign_main/normal`.
+- `0410-main-shared-config-runtime.patch` validates all six StopCondition
+  values for `Main`, `Main2`, and `Main3` after the existing route guard and
+  before switch validation, semantic scope creation, navigation, or input.
+  Integers must be non-boolean and nonnegative, map achievement must be one of
+  the five pinned values, and both switches must be real booleans. Event and
+  other campaign families retain their prior behavior.
+- Deterministic evidence admits 60 legal configuration rows and rejects 45
+  malformed rows across the three instances with mutation budget zero and no
+  Android input. The original ALAS stop-condition methods remain responsible
+  for comparison, decrement, persistence, stage progression, and scheduling.
+  Existing 192-route and 15-loop replay evidence remains authoritative.
+- The authoritative series now has 86 members. Its combined SHA-256 is
+  `0a730a59...81de66`; a clean pinned-upstream replay applies 140 changed files
+  and compiles all 139 changed Python files. Login/frame-clock and pixel
+  inventory replays pass with zero unclassified pixel accesses and no Android
+  input injection. The focused suite passes 60 tests, and the full repository
+  suite passes 1,408 tests with 50 warnings. Evidence is in
+  `integration/alas/main-shared-config-equivalence-20260822.json` and
+  `integration/alas/main-shared-config-patch-tree-verification-20260822/`.
+- This closes shared configuration equivalence, not every live action branch.
+  Main/Main2/Main3 therefore remain `L`: existing normal 1-1 receipts bind all
+  three task entries and Main has a 12-4 official-auto-search receipt, while
+  fleet lock, submarines, other fleet numbers, and broader stage/action
+  combinations still need natural live coverage. `GetNewShip` remains
+  explicitly skipped until a real first-acquisition trigger exists.
+
 ### Research six-field runtime contract is closed at the L boundary
 
 - Patch member `0402-research-six-field-runtime.patch` validates the original
@@ -34,7 +68,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   free-form filter live coverage is intentionally non-exhaustive; and the
   insufficient-resource delay branch remains account-condition dependent.
   Research therefore stays `L`, not `F`. No research-list refresh was used.
-- The authoritative series now has 85 members. Its combined SHA-256 is
+- At the Research phase boundary the authoritative series had 85 members. Its combined SHA-256 was
   `84e9b6a6...0e2c8a`; a clean pinned-upstream replay applied all 140 changed
   files and compiled all 139 changed Python files. Current login/frame-clock
   replays and the pixel inventory pass with zero unclassified pixel accesses
