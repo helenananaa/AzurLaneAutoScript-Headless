@@ -1,0 +1,13 @@
+{
+  "android_input_injected": false,
+  "classified_pixel_accesses": 1,
+  "combined_patch_sha256": "933bf331e30047a00824a0cb8c93f6f5e91fe9d8dfe680c68adf4c80d643e476",
+  "passed": true,
+  "patch_series_manifest_sha256": "bd0d6478a39758ea36f8e9c330b42540355d9ad816810987dd8777fc014a7aa4",
+  "production_ready": false,
+  "replay_surfaces": 7,
+  "schema": "alas-headless.pixel-access-inventory-verification/v1",
+  "triggered_consumers": 2,
+  "unclassified_pixel_accesses": 0,
+  "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+}

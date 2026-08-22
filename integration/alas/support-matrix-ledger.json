@@ -399,6 +399,11 @@
         "tests/test_alas_main_campaign_routes.py",
         "python/alas_headless/alas_campaign_route_config_contract.py",
         "python/alas_headless/alas_campaign_route_config_replay.py",
+        "tests/test_alas_event_shared_entry.py",
+        "python/alas_headless/alas_event_shared_entry_contract.py",
+        "python/alas_headless/alas_event_shared_entry_replay.py",
+        "integration/alas/event-shared-entry-equivalence-20260822.json",
+        "integration/alas/series/0420-event-shared-entry-runtime.patch",
         "integration/alas/series/0050-combat-flow-ports.patch",
         "docs/status.md"
       ],
@@ -423,7 +428,7 @@
         "RaidDaily"
       ],
       "path": "Campaign.Event",
-      "status_label": "🧪 三主线常规路由",
+      "status_label": "🧪 三主线路由 + 七活动入口",
       "support": "supported",
       "values": "options: \"campaign_main\", \"coalition_20260723\", \"event_20260625_cn\", \"event_20260813_cn\", \"raid_20260212\", \"war_archives_20180607_cn\", \"war_archives_20180726_cn\", \"war_archives_20181020_en\", \"war_archives_20181026_en\", \"war_archives_20181227_cn\", \"war_archives_20190221_en\", \"war_archives_20190314_en\", \"war_archives_20190321_en\", \"war_archives_20190620_en\", \"war_archives_20190911_cn\", \"war_archives_20191010_en\", \"war_archives_20191031_en\", \"war_archives_20200312_cn\", \"war_archives_20200507_cn\", \"war_archives_20200603_cn\", \"war_archives_20200806_cn\", \"war_archives_20200820_cn\", \"war_archives_20200903_cn\", \"war_archives_20200917_cn\", \"war_archives_20201012_cn\", \"war_archives_20201029_cn\", \"war_archives_20201229_cn\", \"war_archives_20210225_cn\", \"war_archives_20210325_cn\", \"war_archives_20210422_cn\", \"war_archives_20210527_cn\", \"war_archives_20210624_cn\", \"war_archives_20210819_cn\", \"war_archives_20210916_cn\", \"war_archives_20211014_cn\", \"war_archives_20211028_cn\", \"war_archives_20211111_cn\", \"war_archives_20211229_cn\", \"war_archives_20220210_cn\", \"war_archives_20220224_cn\", \"war_archives_20220324_cn\", \"war_archives_20220414_cn\", \"war_archives_20220428_cn\", \"war_archives_20220526_cn\", \"war_archives_20220728_cn\", \"war_archives_20220818_cn\", \"war_archives_20220915_cn\", \"war_archives_20221222_cn\", \"war_archives_20230223_cn\", \"war_archives_20230525_cn\", \"war_archives_20230803_cn\", \"war_archives_20231026_cn\", \"war_archives_20240725_cn\"; default: \"campaign_main\""
     },
@@ -439,6 +444,11 @@
         "tests/test_alas_main_campaign_routes.py",
         "python/alas_headless/alas_campaign_route_config_contract.py",
         "python/alas_headless/alas_campaign_route_config_replay.py",
+        "tests/test_alas_event_shared_entry.py",
+        "python/alas_headless/alas_event_shared_entry_contract.py",
+        "python/alas_headless/alas_event_shared_entry_replay.py",
+        "integration/alas/event-shared-entry-equivalence-20260822.json",
+        "integration/alas/series/0420-event-shared-entry-runtime.patch",
         "integration/alas/series/0050-combat-flow-ports.patch",
         "docs/status.md"
       ],
@@ -463,7 +473,7 @@
         "RaidDaily"
       ],
       "path": "Campaign.Mode",
-      "status_label": "🧪 三主线常规路由",
+      "status_label": "🧪 三主线路由 + 七活动入口",
       "support": "supported",
       "values": "options: \"hard\", \"normal\"; default: \"normal\""
     },
@@ -479,6 +489,11 @@
         "tests/test_alas_main_campaign_routes.py",
         "python/alas_headless/alas_campaign_route_config_contract.py",
         "python/alas_headless/alas_campaign_route_config_replay.py",
+        "tests/test_alas_event_shared_entry.py",
+        "python/alas_headless/alas_event_shared_entry_contract.py",
+        "python/alas_headless/alas_event_shared_entry_replay.py",
+        "integration/alas/event-shared-entry-equivalence-20260822.json",
+        "integration/alas/series/0420-event-shared-entry-runtime.patch",
         "integration/alas/series/0050-combat-flow-ports.patch",
         "docs/status.md"
       ],
@@ -503,7 +518,7 @@
         "RaidDaily"
       ],
       "path": "Campaign.Name",
-      "status_label": "🧪 三主线 64 图路由",
+      "status_label": "🧪 三主线 64 图 + 七活动入口",
       "support": "supported",
       "values": "input/default: \"12-4\", \"dynamic\", \"sp\""
     },
@@ -8183,10 +8198,11 @@
         "Submarine",
         "Emotion",
         "HpControl",
-        "EnemyPriority"
+        "EnemyPriority",
+        "Storage"
       ],
       "name": "Event",
-      "note": "当前 A1 默认路径闭环；其他关卡和全部共用地图配置仍按字段验收",
+      "note": "七活动入口共享 9 组 54 字段，Event/Event2 包装结构等价；活动目录、关卡名与模式现于语义导航前严校。当前 A1 默认路径闭环；其他关卡和全部共用地图配置仍按字段验收",
       "status": "L"
     },
     {
@@ -8198,10 +8214,11 @@
         "Submarine",
         "Emotion",
         "HpControl",
-        "EnemyPriority"
+        "EnemyPriority",
+        "Storage"
       ],
       "name": "Event2",
-      "note": "与 Event 共用逻辑，但第二活动配置实例没有独立验收",
+      "note": "已证明与 Event 共享同一 9 组 54 字段、入口包装和前置门禁；第二活动配置实例仍没有独立实机验收",
       "status": "P"
     },
     {
@@ -8214,10 +8231,11 @@
         "Submarine",
         "Emotion",
         "HpControl",
-        "EnemyPriority"
+        "EnemyPriority",
+        "Storage"
       ],
       "name": "EventA",
-      "note": "A-D StageFilter/LastStage 离线轮转契约已完成；当前仅 A1-A3 默认路径有实机闭环，其余分区和共用地图配置仍未完整覆盖",
+      "note": "A-D 共享 9 组 54 字段并各加 2 个 EventDaily 字段；入口门禁早于目录枚举，既有 StageFilter/LastStage 跨日顺序不变。当前仅 A1-A3 默认路径有实机闭环，其余分区和共用地图配置仍未完整覆盖",
       "status": "L"
     },
     {
@@ -8230,10 +8248,11 @@
         "Submarine",
         "Emotion",
         "HpControl",
-        "EnemyPriority"
+        "EnemyPriority",
+        "Storage"
       ],
       "name": "EventB",
-      "note": "B1 普通 `GET_SHIP` 已离线适配；因概率掉落停止实跑，B1 尚未完整闭环，B2/B3 未验证，首次获得 `NEW_SHIP` 未适配",
+      "note": "共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；B1 普通 `GET_SHIP` 已离线适配。因概率掉落停止实跑，B1 尚未完整闭环，B2/B3 未验证，首次获得 `NEW_SHIP` 未适配",
       "status": "O"
     },
     {
@@ -8246,10 +8265,11 @@
         "Submarine",
         "Emotion",
         "HpControl",
-        "EnemyPriority"
+        "EnemyPriority",
+        "Storage"
       ],
       "name": "EventC",
-      "note": "C1-C3 地图脚本存在，无实机闭环",
+      "note": "共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；C1-C3 地图脚本存在，无实机闭环",
       "status": "P"
     },
     {
@@ -8262,10 +8282,11 @@
         "Submarine",
         "Emotion",
         "HpControl",
-        "EnemyPriority"
+        "EnemyPriority",
+        "Storage"
       ],
       "name": "EventD",
-      "note": "D1-D3 地图脚本存在，无实机闭环",
+      "note": "共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；D1-D3 地图脚本存在，无实机闭环",
       "status": "P"
     },
     {
@@ -8286,10 +8307,11 @@
         "Submarine",
         "Emotion",
         "HpControl",
-        "EnemyPriority"
+        "EnemyPriority",
+        "Storage"
       ],
       "name": "EventSp",
-      "note": "SP 地图脚本存在，无实机闭环",
+      "note": "共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；SP 地图脚本存在，无实机闭环",
       "status": "P"
     },
     {
@@ -11665,9 +11687,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "0a730a596817b7235249a9db749ffe88064564923408e4b40c870c604081de66",
-      "manifest_sha256": "59cc0578f92d512da67b7bc801273aa0e4271a072a023ba693f4f8a02703e8d5",
-      "member_count": 86
+      "combined_sha256": "933bf331e30047a00824a0cb8c93f6f5e91fe9d8dfe680c68adf4c80d643e476",
+      "manifest_sha256": "bd0d6478a39758ea36f8e9c330b42540355d9ad816810987dd8777fc014a7aa4",
+      "member_count": 87
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

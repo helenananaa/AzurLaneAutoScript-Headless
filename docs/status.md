@@ -4,6 +4,41 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-22
 
+### Event/Event2/EventA-D/EventSp shared entry is closed offline
+
+- The seven pinned event panels share nine groups and 54 base fields. EventA-D
+  each add the two existing EventDaily fields, producing 386 panel-field
+  instances in total. Event/Event2 dispatch wrappers are structurally
+  identical, EventA-D dispatch wrappers are structurally identical, and all
+  seven preserve their own config/device identity and intended original runner.
+- `0420-event-shared-entry-runtime.patch` adds one task-family entry contract.
+  Event folders must be exact repository-local `event_YYYYMMDD_region` names;
+  direct Event stages must be safe map names; A-D admit only their own logical
+  A/B/C/D stages or the pinned T/HT aliases; EventSp admits only `sp`; A-D/SP
+  retain normal entry mode. The guard runs before semantic scope creation,
+  A-D directory enumeration, and SP path probing.
+- The existing EventDaily contract still owns StageFilter and LastStage. In
+  particular, stale LastStage values are still reset at the server-day boundary
+  before validation, so this phase does not reorder ALAS persistence or
+  scheduling behavior.
+- Deterministic replay admits 81 valid entry rows and rejects 80 malformed
+  rows. The fully patched old-upstream tree contains the exact current
+  `event_20260813_cn` A1-D3/SP inventory of 13 scripts; the clean pinned tree
+  also proves the older A-D-to-T/HT alias family. Mutation budget is zero and
+  no Android input is injected.
+- The authoritative series now has 87 members. Its combined SHA-256 is
+  `933bf331...43e476`; a clean pinned-upstream replay applies 141 changed files
+  and compiles all 140 changed Python files. Login/frame-clock and pixel
+  inventory replays pass with zero unclassified pixel accesses and no Android
+  input injection. The focused suite passes 70 tests, and the full repository
+  suite passes 1,413 tests with 50 warnings. Evidence is in
+  `integration/alas/event-shared-entry-equivalence-20260822.json` and
+  `integration/alas/event-shared-entry-patch-tree-verification-20260822/`.
+- No battle was started for this structural phase. Existing live scope remains
+  honest: Event and EventA stay `L`; Event2 lacks an independent instance
+  receipt; EventB-D and EventSp still require their own live closures; first
+  acquisition `NEW_SHIP` remains explicitly skipped until naturally triggered.
+
 ### Main/Main2/Main3 shared configuration is closed at the L boundary
 
 - The three pinned normal-campaign panels expose the same ordered nine groups
@@ -23,7 +58,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   Android input. The original ALAS stop-condition methods remain responsible
   for comparison, decrement, persistence, stage progression, and scheduling.
   Existing 192-route and 15-loop replay evidence remains authoritative.
-- The authoritative series now has 86 members. Its combined SHA-256 is
+- At the Main shared-config phase boundary the authoritative series had 86 members. Its combined SHA-256 was
   `0a730a59...81de66`; a clean pinned-upstream replay applies 140 changed files
   and compiles all 139 changed Python files. Login/frame-clock and pixel
   inventory replays pass with zero unclassified pixel accesses and no Android

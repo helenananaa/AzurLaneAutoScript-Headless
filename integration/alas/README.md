@@ -114,6 +114,15 @@ the original ALAS stop-condition methods still own oil/level comparisons,
 run-count decrement and persistence, map progression, and scheduling. Other
 campaign families are not constrained by this Main-only boundary.
 
+Event entry has a parallel task-family boundary. Event/Event2, EventA-D, and
+EventSp share the same nine groups and 54 base fields; A-D retain their two
+EventDaily rotation fields. Before any semantic scope, daily directory
+enumeration, or SP path probe, the runtime validates an exact event folder,
+the task-specific stage family (including the pinned T/HT aliases), and the
+allowed entry mode. The existing EventDaily validator still owns filter and
+cursor semantics, including server-day reset ordering. This gate classifies
+entry configuration only and does not claim live battle coverage for B-D/SP.
+
 When ALAS is already on a normal campaign map, the patch now passes ALAS's own
 map shape, land cells, and enabled fleet count to the read-only semantic map
 model. The returned stable cells, fleets, enemies, and pickups are validated

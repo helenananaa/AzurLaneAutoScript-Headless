@@ -109,7 +109,9 @@ class ReplayConfig:
         last_stage: object,
         next_run: datetime,
     ):
-        self.Campaign_Event = "event_fixture"
+        self.Campaign_Name = "dynamic"
+        self.Campaign_Event = "event_20260813_cn"
+        self.Campaign_Mode = "normal"
         self.EventDaily_StageFilter = stage_filter
         self.EventDaily_LastStage = last_stage
         self.Scheduler_Command = command

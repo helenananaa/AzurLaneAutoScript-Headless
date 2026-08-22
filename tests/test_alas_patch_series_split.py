@@ -251,6 +251,11 @@ FLOW_PATHS = {
     "0410-main-shared-config-runtime.patch": {
         "module/campaign/run.py",
     },
+    "0420-event-shared-entry-runtime.patch": {
+        "module/campaign/run.py",
+        "module/event/campaign_abcd.py",
+        "module/event/campaign_sp.py",
+    },
 }
 
 OVERRIDE_PATHS = {
@@ -451,6 +456,10 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                     },
                     "0410-main-shared-config-runtime.patch": {
                         "module/campaign/run.py",
+                    },
+                    "0420-event-shared-entry-runtime.patch": {
+                        "module/campaign/run.py",
+                        "module/event/campaign_abcd.py",
                     },
                 }.get(name, set())
                 self.assertEqual(promoted & actual, expected_overlap)

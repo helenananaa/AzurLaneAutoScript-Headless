@@ -429,6 +429,11 @@
       "order": 86,
       "path": "integration/alas/series/0410-main-shared-config-runtime.patch",
       "sha256": "860e06840728d1e211b5b10a9904b7ef57c74b721132026f8d2825946e220fe4"
+    },
+    {
+      "order": 87,
+      "path": "integration/alas/series/0420-event-shared-entry-runtime.patch",
+      "sha256": "19aaaabd083de10a36a08988346b970479f91adfb0967d4995a5486af6768770"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

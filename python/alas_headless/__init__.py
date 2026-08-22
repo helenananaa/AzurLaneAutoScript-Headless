@@ -76,6 +76,14 @@ from .alas_event_daily_config_contract import (
     validate_alas_event_daily_last_stage,
     validate_alas_event_daily_stage_filter,
 )
+from .alas_event_shared_entry_contract import (
+    AlasEventSharedEntrySnapshot,
+    EVENT_COMMANDS,
+    EVENT_DIRECT_COMMANDS,
+    EVENT_SHARED_GROUPS,
+    EVENT_SP_COMMANDS,
+    validate_alas_event_shared_entry_config,
+)
 from .alas_daily_config_contract import (
     AlasDailyConfigSnapshot,
     validate_alas_daily_config,
@@ -652,6 +660,12 @@ __all__ = (
     "MAIN_SHARED_GROUPS",
     "STOP_CONDITION_MAP_ACHIEVEMENTS",
     "validate_alas_main_stop_condition_config",
+    "AlasEventSharedEntrySnapshot",
+    "EVENT_COMMANDS",
+    "EVENT_DIRECT_COMMANDS",
+    "EVENT_SHARED_GROUPS",
+    "EVENT_SP_COMMANDS",
+    "validate_alas_event_shared_entry_config",
     "AlasSchedulerTaskSnapshot",
     "SCHEDULER_FIELDS",
     "validate_alas_scheduler_config",

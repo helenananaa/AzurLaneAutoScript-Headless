@@ -1,0 +1,65 @@
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+index ab6288a9..83a74403 100644
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -398,9 +398,20 @@ class CampaignRun(CampaignEvent):
+             reach_level=self.config.StopCondition_ReachLevel,
+         )
+ 
++    def _validate_event_shared_entry_config(self, name, folder, mode):
++        from alas_headless import validate_alas_event_shared_entry_config
++
++        return validate_alas_event_shared_entry_config(
++            task=self.config.Scheduler_Command,
++            stage=name,
++            event=folder,
++            mode=mode,
++        )
++
+     def run(self, name, folder='campaign_main', mode='normal', total=0):
+         self._validate_main_campaign_route_config(name, folder, mode)
+         self._validate_main_stop_condition_config()
++        self._validate_event_shared_entry_config(name, folder, mode)
+         self._validate_campaign_switch_config()
+ 
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+diff --git a/module/event/campaign_abcd.py b/module/event/campaign_abcd.py
+index c4cc77ef..973b15d6 100644
+--- a/module/event/campaign_abcd.py
++++ b/module/event/campaign_abcd.py
+@@ -9,7 +9,16 @@ from module.logger import logger
+ 
+ class CampaignABCD(EventBase):
+     def run(self, *args, **kwargs):
+-        from alas_headless import validate_alas_event_daily_stage_filter
++        from alas_headless import (
++            validate_alas_event_daily_stage_filter,
++            validate_alas_event_shared_entry_config,
++        )
++        validate_alas_event_shared_entry_config(
++            task=self.config.Scheduler_Command,
++            stage=self.config.Campaign_Name,
++            event=self.config.Campaign_Event,
++            mode=self.config.Campaign_Mode,
++        )
+         stage_filter = validate_alas_event_daily_stage_filter(
+             self.config.EventDaily_StageFilter,
+             task_command=self.config.Scheduler_Command,
+diff --git a/module/event/campaign_sp.py b/module/event/campaign_sp.py
+index 20f700db..1fb9e441 100644
+--- a/module/event/campaign_sp.py
++++ b/module/event/campaign_sp.py
+@@ -7,6 +7,13 @@ from module.logger import logger
+ 
+ class CampaignSP(EventBase):
+     def run(self, *args, **kwargs):
++        from alas_headless import validate_alas_event_shared_entry_config
++        validate_alas_event_shared_entry_config(
++            task=self.config.Scheduler_Command,
++            stage=self.config.Campaign_Name,
++            event=self.config.Campaign_Event,
++            mode=self.config.Campaign_Mode,
++        )
+         if not os.path.exists(f'./campaign/{self.config.Campaign_Event}/sp.py'):
+             logger.info(f'./campaign/{self.config.Campaign_Event}/sp.py not exists')
+             logger.info(f'This event do not have SP, skip')

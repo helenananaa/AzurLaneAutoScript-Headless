@@ -1,0 +1,145 @@
+{
+  "schema": "alas-headless.event-shared-entry-equivalence/v1",
+  "passed": true,
+  "tasks": [
+    "Event",
+    "Event2",
+    "EventA",
+    "EventB",
+    "EventC",
+    "EventD",
+    "EventSp"
+  ],
+  "shared_group_count": 9,
+  "shared_field_count": 54,
+  "panel_field_instance_count": 386,
+  "panels": {
+    "Event": {
+      "group_count": 9,
+      "field_count": 54
+    },
+    "Event2": {
+      "group_count": 9,
+      "field_count": 54
+    },
+    "EventA": {
+      "group_count": 10,
+      "field_count": 56
+    },
+    "EventB": {
+      "group_count": 10,
+      "field_count": 56
+    },
+    "EventC": {
+      "group_count": 10,
+      "field_count": 56
+    },
+    "EventD": {
+      "group_count": 10,
+      "field_count": 56
+    },
+    "EventSp": {
+      "group_count": 9,
+      "field_count": 54
+    }
+  },
+  "intentional_differences": [
+    "Scheduler.Command",
+    "Scheduler.SuccessInterval and FailureInterval",
+    "Campaign.Name value and display",
+    "Campaign.Use2xBook display",
+    "five StopCondition display flags",
+    "EventSp Submarine.AutoSearchMode display",
+    "EventDaily presence and A-D defaults"
+  ],
+  "dispatches": {
+    "Event": {
+      "runner": "CampaignRun",
+      "arguments": {
+        "name": "D3",
+        "folder": "event_20260813_cn",
+        "mode": "normal"
+      },
+      "config_identity_preserved": true,
+      "device_identity_preserved": true
+    },
+    "Event2": {
+      "runner": "CampaignRun",
+      "arguments": {
+        "name": "D3",
+        "folder": "event_20260813_cn",
+        "mode": "normal"
+      },
+      "config_identity_preserved": true,
+      "device_identity_preserved": true
+    },
+    "EventA": {
+      "runner": "CampaignABCD",
+      "arguments": {},
+      "config_identity_preserved": true,
+      "device_identity_preserved": true
+    },
+    "EventB": {
+      "runner": "CampaignABCD",
+      "arguments": {},
+      "config_identity_preserved": true,
+      "device_identity_preserved": true
+    },
+    "EventC": {
+      "runner": "CampaignABCD",
+      "arguments": {},
+      "config_identity_preserved": true,
+      "device_identity_preserved": true
+    },
+    "EventD": {
+      "runner": "CampaignABCD",
+      "arguments": {},
+      "config_identity_preserved": true,
+      "device_identity_preserved": true
+    },
+    "EventSp": {
+      "runner": "CampaignSP",
+      "arguments": {},
+      "config_identity_preserved": true,
+      "device_identity_preserved": true
+    }
+  },
+  "accepted_entry_rows": 81,
+  "rejected_entry_rows": 80,
+  "event_inventory": {
+    "folder": "event_20260813_cn",
+    "script_family": "A-D",
+    "script_count": 13,
+    "scripts": [
+      "a1",
+      "a2",
+      "a3",
+      "b1",
+      "b2",
+      "b3",
+      "c1",
+      "c2",
+      "c3",
+      "d1",
+      "d2",
+      "d3",
+      "sp"
+    ]
+  },
+  "guard_order": {
+    "runtime_guard_present": true,
+    "before_semantic_scope": true,
+    "before_daily_directory_enumeration": true,
+    "before_sp_path_probe": true
+  },
+  "source_sha256": {
+    "args": "762ff3b65fda4597d25c27ea442ecc31ff4b40184e5e56f3f2ca5ac5a9cf3d29",
+    "template": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+    "alas": "d3e3f868744083b3bb672a6c49ae7f5cb6438aeec0769e5ac13965627cf41e20",
+    "run": "af12b41d2a3eb36e9dba141a9fe64a70cd7c8f74f23fe98e1a54931c6a5dfa69",
+    "campaign_abcd": "e919389b81522795079b0348c16b38bfd94bfbb2ee48ca21cdfd6aa2039d46d8",
+    "campaign_sp": "a2766daf4c979016308a37b5e053fccbe2c25c0689069f78b80b6625486b986b"
+  },
+  "mutation_budget": 0,
+  "android_input_injected": false
+}
