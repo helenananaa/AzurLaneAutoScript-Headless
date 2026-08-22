@@ -409,6 +409,11 @@
       "order": 82,
       "path": "integration/alas/series/0390-meta-assist-tier-runtime.patch",
       "sha256": "f98cfd30c407c7d7d1b93141c09f938a468b927e05b0095c8fb30d2db42328c7"
+    },
+    {
+      "order": 83,
+      "path": "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+      "sha256": "304544dcccd358e0868884ab59917b90010f63fe48522ba7159dafe43fd2ab42"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -5349,7 +5349,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -5357,8 +5357,13 @@
       },
       "evidence": [
         "tests/test_alas_daemon_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daemon_config_replay.py",
         "integration/alas/series/0100-tool-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+        "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -5373,7 +5378,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -5381,8 +5386,13 @@
       },
       "evidence": [
         "tests/test_alas_daemon_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daemon_config_replay.py",
         "integration/alas/series/0100-tool-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+        "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -5637,7 +5647,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -5645,8 +5655,12 @@
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0102-operation-siren-shop-runtime.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -5661,16 +5675,24 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_alas_daemon_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+        "scripts/python/verify_alas_opsi_action_point_transition.py",
+        "integration/alas/opsi-general-daemon-oil-transition-proof-20260822.json",
+        "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -5685,7 +5707,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -5693,8 +5715,11 @@
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "integration/alas/operation-siren-hazard1-live-20260822-r22.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -5709,16 +5734,24 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_alas_daemon_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+        "scripts/python/verify_alas_opsi_action_point_transition.py",
+        "integration/alas/opsi-general-daemon-oil-transition-proof-20260822.json",
+        "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -5733,7 +5766,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -5741,8 +5774,13 @@
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+        "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -5757,7 +5795,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -5765,8 +5803,10 @@
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0109-operation-siren-coordinate-checkout-recovery.patch",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -8366,7 +8406,7 @@
         "OpsiDaemon"
       ],
       "name": "OpsiDaemon",
-      "note": "修船/选敌四组合与最终边界已离线等价；真实港口修复、最近目标 postcondition 和长期恢复仍未闭环",
+      "note": "修船/选敌四组合保持原优先级；新增默认零预算、一次性 typed 修理/移动能力，实机证明满血港口无修理及无目标等待均不改资源。受损舰确认、最近目标正向移动、远距 EMP 与长期恢复仍未闭环",
       "status": "P"
     },
     {
@@ -8394,7 +8434,7 @@
         "OpsiGeneral"
       ],
       "name": "OpsiGeneral",
-      "note": "六字段均已离线等价；真实购买/维修结果、资源 postcondition 和异常恢复仍未闭环",
+      "note": "六字段继续保持离线等价；BuyActionPointLimit/OilLimit 已读取当前渐进式原生条款并以一次性预算证明行动力 240→340、石油 16077→15077、周次数 4→3，默认零预算复跑不再变化。满血无修、Akashi 出现、非空 Logger、随机事件全结果与异常恢复仍未闭环",
       "status": "P"
     },
     {
@@ -8690,81 +8730,125 @@
     },
     {
       "dimensions": {
+        "action": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0102-operation-siren-shop-runtime.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
         "docs/status.md"
       ],
       "field": "OpsiGeneral.AkashiShopFilter",
-      "note": "Pinned upstream filter grammar preserves default fallback, Unicode separators, priority, CL1 PurpleCoins exclusion, and exact coin sufficiency; malformed rules fail before item pretreatment and no purchase input occurs."
+      "note": "Pinned upstream filter grammar preserves default fallback, Unicode separators, priority, CL1 PurpleCoins exclusion, and exact coin sufficiency; malformed rules fail before item pretreatment. The final purchase is budgeted through the typed shop transaction boundary, but a live Akashi spawn and filter-selected purchase remain unavailable."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "integration/alas/operation-siren-hazard1-live-20260822-r22.json",
         "docs/status.md"
       ],
       "field": "OpsiGeneral.DoRandomMapEvent",
-      "note": "Both booleans preserve no-rescan and full-rescan branches while explicit current/full API arguments remain independent; invalid config fails before ash, combat, drop, HP, or map state."
+      "note": "Both booleans preserve no-rescan and full-rescan branches while explicit current/full API arguments remain independent; invalid config fails before ash, combat, drop, HP, or map state. Typed auto-search and map-event paths have real task coverage, but this shared boolean has not been toggled through every random-event outcome."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0109-operation-siren-coordinate-checkout-recovery.patch",
         "docs/status.md"
       ],
       "field": "OpsiGeneral.UseLogger",
-      "note": "Both booleans preserve storage entry, optional logger use, and coordinate checkout ordering; malformed values fail before storage state."
+      "note": "Both booleans preserve storage entry, optional logger use, and coordinate checkout ordering; malformed values fail before storage state. Typed storage identity and checkout actions exist, while a non-empty live logger inventory needed for the enabled branch is currently unavailable."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_alas_daemon_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+        "scripts/python/verify_alas_opsi_action_point_transition.py",
+        "integration/alas/opsi-general-daemon-oil-transition-proof-20260822.json",
+        "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
         "docs/status.md"
       ],
       "field": "OpsiGeneral.BuyActionPointLimit",
-      "note": "All six declared limits preserve the original weekly count boundary; invalid values fail before the purchase button boundary."
+      "note": "All six declared limits preserve the original weekly count boundary; invalid values fail before input. The original handler now reads exact progressive live terms and one budgeted purchase proved AP 240->340, oil 16077->15077, and weekly remaining 4->3; the following offer changed to 2000 oil for 200 AP without relying on the stale upstream price table."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_alas_daemon_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+        "scripts/python/verify_alas_opsi_action_point_transition.py",
+        "integration/alas/opsi-general-daemon-oil-transition-proof-20260822.json",
+        "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
         "docs/status.md"
       ],
       "field": "OpsiGeneral.OilLimit",
-      "note": "Non-negative integer reserves retain the original exact cost plus reserve purchase boundary; malformed values fail before any purchase input."
+      "note": "Non-negative integer reserves retain the exact typed offer cost plus reserve boundary; malformed values fail before input. A single-use live grant proved the 1000-oil deduction and unchanged coins, while the next progressive offer was observed as 2000 oil for 200 AP."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+        "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
         "docs/status.md"
       ],
       "field": "OpsiGeneral.RepairThreshold",
-      "note": "Finite thresholds up to 1 preserve disabled, boundary repair, and no-repair branches; invalid values fail before HP observation or port navigation."
+      "note": "Finite thresholds up to 1 preserve disabled, boundary repair, and no-repair branches; invalid values fail before HP observation or port navigation. Exact HP and repair-prompt ports plus a budgeted confirm boundary exist; the current six-ship full-HP fleet proved no-repair behavior, while a damaged-fleet OpsiDaemon trigger remains unavailable."
     },
     {
       "dimensions": {
@@ -10784,29 +10868,45 @@
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_daemon_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daemon_config_replay.py",
         "integration/alas/series/0100-tool-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+        "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
         "docs/status.md"
       ],
       "field": "OpsiDaemon.RepairShip",
-      "note": "Both booleans preserve the original port probe and ordered enter, repair, quit and interval-reset boundary; all port actions are recorders and invalid values fail before OSConfig merge."
+      "note": "Both booleans preserve the original port probe and ordered enter, repair, quit and interval-reset boundary. The live full-HP branch entered the exact port/dock path and returned without coin or HP change; default-zero repair authorization closes before port entry, while a damaged-fleet confirmation remains conditional."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_daemon_config.py",
+        "tests/test_adapter_action_ledger_wiring.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_daemon_config_replay.py",
         "integration/alas/series/0100-tool-flow-ports.patch",
+        "integration/alas/series/0400-opsi-general-daemon-runtime.patch",
+        "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+        "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
         "docs/status.md"
       ],
       "field": "OpsiDaemon.SelectEnemy",
-      "note": "Both booleans preserve the original nearest-object probe after repair handling, including repair precedence; selection is a recorder and invalid values fail before OSConfig merge."
+      "note": "Both booleans preserve the original nearest-object probe after repair handling, including repair precedence. Reviewed radar sprites, unique nearest selection, port-adjacent question fixup and stale target input are typed; Gibraltar currently had no target, and the untyped long-distance EMP branch remains fail-closed."
     },
     {
       "dimensions": {
@@ -11359,9 +11459,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "d83b59be0e1aea548b47068f4c95545939bd91d07362913f7946d27d8f7d5c3e",
-      "manifest_sha256": "53feb46068973d7cd811f9c3b471634725637948f397946d4f4f2c3979aeeb48",
-      "member_count": 82
+      "combined_sha256": "d514d4ac2b552b0476ec8506f8b6afaf928d55de3a261ae1d994772dcbefd339",
+      "manifest_sha256": "eab00da8e25f48f5ffa4affd14642faaafe67f50c304238eb1af8c89630d29ad",
+      "member_count": 83
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

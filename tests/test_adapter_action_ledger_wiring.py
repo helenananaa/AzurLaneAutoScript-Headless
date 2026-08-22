@@ -8,8 +8,17 @@ from alas_headless import (
     Point,
     SemanticGateClosed,
 )
-from alas_headless.adapter import ACTION_CAPABILITIES, StaleFrameError
+from alas_headless.adapter import (
+    ACTION_CAPABILITIES,
+    ActionLedger,
+    DEFAULT_CAPABILITY_INVENTORY,
+    RecoveryPolicy,
+    StaleFrameError,
+    compatibility_policy_sha256,
+    compatibility_profile,
+)
 from alas_headless.alas_adapter import AlasSemanticAdapter
+from alas_headless.semantic_oracle import OperationSirenDaemonTarget
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,6 +77,137 @@ class ActionLedgerWiringTests(unittest.TestCase):
             if consumes_budget and not dispatches:
                 uncovered.append(function.name)
         self.assertEqual(uncovered, [])
+
+    @staticmethod
+    def _opsi_adapter(oracle, grants=None):
+        if grants is None:
+            return AlasSemanticAdapter(oracle, lambda: None)
+        profile = compatibility_profile("opsi-runtime", grants)
+        ledger = ActionLedger(
+            profile=profile,
+            inventory=DEFAULT_CAPABILITY_INVENTORY,
+            grants=grants,
+            recovery_policy=RecoveryPolicy.QUALIFICATION_STOP,
+            policy_sha256=compatibility_policy_sha256(
+                "opsi-runtime", grants
+            ),
+        )
+        return AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            action_ledger=ledger,
+        )
+
+    def test_opsi_resource_and_daemon_actions_default_to_zero_authority(self):
+        class Oracle:
+            calls = []
+
+            def click_operation_siren_action_point_control(self, use):
+                self.calls.append(("action_point", use))
+                return self.receipt("os/action-point/use")
+
+            def click_operation_siren_port_repair(self, confirm):
+                self.calls.append(("port_repair", confirm))
+                return self.receipt("os/port/dock/repair-confirm")
+
+            def click_operation_siren_daemon_target(self, target):
+                self.calls.append(("daemon_move", target.relative_position))
+                return self.receipt("os/map/grid/relative/-1/0")
+
+            @staticmethod
+            def receipt(semantic_id):
+                return ActionReceipt(
+                    semantic_id=semantic_id,
+                    generation=7,
+                    point=Point(640.0, 360.0),
+                    bounds=Bounds(600.0, 320.0, 680.0, 400.0),
+                    path="root/target",
+                )
+
+        oracle = Oracle()
+        adapter = self._opsi_adapter(oracle)
+        target = OperationSirenDaemonTarget(
+            generation=7,
+            target_kind="enemy",
+            source_position=(-1, 0),
+            relative_position=(-1, 0),
+        )
+
+        self.assertFalse(adapter.operation_siren_action_point_use_allowed())
+        self.assertFalse(adapter.operation_siren_port_repair_allowed())
+        self.assertFalse(adapter.operation_siren_daemon_move_allowed())
+        with self.assertRaisesRegex(SemanticGateClosed, "action point use"):
+            adapter.click_operation_siren_action_point_control(True)
+        with self.assertRaisesRegex(SemanticGateClosed, "port repair"):
+            adapter.click_operation_siren_port_repair(True)
+        with self.assertRaisesRegex(SemanticGateClosed, "daemon movement"):
+            adapter.click_operation_siren_daemon_target(target)
+        self.assertEqual(oracle.calls, [])
+
+        adapter.click_operation_siren_action_point_control(False)
+        adapter.click_operation_siren_port_repair(False)
+        self.assertEqual(
+            oracle.calls,
+            [("action_point", False), ("port_repair", False)],
+        )
+
+    def test_opsi_resource_and_daemon_actions_consume_single_typed_grants(self):
+        class Oracle:
+            calls = []
+
+            @staticmethod
+            def receipt(semantic_id):
+                return ActionReceipt(
+                    semantic_id=semantic_id,
+                    generation=8,
+                    point=Point(640.0, 360.0),
+                    bounds=Bounds(600.0, 320.0, 680.0, 400.0),
+                    path="root/target",
+                )
+
+            def click_operation_siren_action_point_control(self, use):
+                self.calls.append("action_point")
+                return self.receipt("os/action-point/use")
+
+            def click_operation_siren_port_repair(self, confirm):
+                self.calls.append("port_repair")
+                return self.receipt("os/port/dock/repair-confirm")
+
+            def click_operation_siren_daemon_target(self, target):
+                self.calls.append("daemon_move")
+                return self.receipt("os/map/grid/relative/-1/0")
+
+        oracle = Oracle()
+        grants = {
+            "operation_siren.action_point_use": 1,
+            "operation_siren.port_repair": 1,
+            "operation_siren.daemon_move": 1,
+        }
+        adapter = self._opsi_adapter(oracle, grants)
+        target = OperationSirenDaemonTarget(
+            generation=8,
+            target_kind="enemy",
+            source_position=(-1, 0),
+            relative_position=(-1, 0),
+        )
+
+        receipts = (
+            adapter.click_operation_siren_action_point_control(True),
+            adapter.click_operation_siren_port_repair(True),
+            adapter.click_operation_siren_daemon_target(target),
+        )
+        self.assertEqual(
+            tuple(receipt.capability_id for receipt in receipts),
+            tuple(grants),
+        )
+        self.assertEqual(oracle.calls, ["action_point", "port_repair", "daemon_move"])
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click_operation_siren_action_point_control(True)
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click_operation_siren_port_repair(True)
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click_operation_siren_daemon_target(target)
+        self.assertEqual(oracle.calls, ["action_point", "port_repair", "daemon_move"])
 
     def test_daily_start_is_single_use_and_produces_typed_receipt(self):
         class Oracle:

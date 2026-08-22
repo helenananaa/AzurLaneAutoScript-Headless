@@ -1370,6 +1370,45 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   preserves blank fallback, Unicode separators, priority, CL1 PurpleCoins
   exclusion, and exact coin sufficiency. Invalid tokens fail before item
   pretreatment; filtering and coin checks are record-only with no purchase.
+
+### Operation Siren shared OpsiGeneral/OpsiDaemon runtime: bounded live closure
+
+- `operation_siren.action_point_use`, `operation_siren.port_repair`, and
+  `operation_siren.daemon_move` are explicit ledger capabilities. Every grant
+  defaults to zero, a positive grant is single-use, and the resulting receipt
+  is stamped with the capability and policy hash. Cancel actions remain safe
+  and do not consume a grant.
+- The original `ActionPointHandler.handle_action_point()` now uses typed AP,
+  four exact item identities/counts, selected identity, and the native oil
+  offer text. It no longer trusts the pinned upstream progressive-price table:
+  the live offer changed after purchase from `1000 oil / 100 AP` to
+  `2000 oil / 200 AP`. The bounded proof joined the exact pre/post snapshots:
+  AP `240 -> 340`, oil `16077 -> 15077`, and weekly remaining `4 -> 3`.
+  The subsequent zero-budget run held all three values fixed and recorded no
+  pixel fallback. Qualification used two explicitly authorized weekly oil
+  purchases in total; no coins were spent.
+- AP above `MAX:200` is valid after boxes or oil purchases. The typed world
+  summary now follows legacy ALAS's defensive `>600` rejection boundary rather
+  than incorrectly treating the natural-regeneration capacity as a hard cap.
+- `OpsiDaemon.RepairShip` now closes before port entry when no repair grant is
+  present. With authorization, the exact port/dock path is available; the live
+  six-ship fleet was already full HP, so it returned without a repair prompt,
+  coin change, or HP change. A damaged-fleet confirmation remains conditional.
+- `OpsiDaemon.SelectEnemy` replaces the pixel radar prediction path with typed
+  reviewed sprites, original port-adjacent question fixup, unique Manhattan
+  nearest selection, camera clamp, stale-state recheck, and a budgeted relative
+  grid input. Gibraltar exposed no target and returned `waiting`; tied,
+  unknown, truncated, and long-distance EMP-dependent states fail closed.
+- `UseLogger`, `DoRandomMapEvent`, and `AkashiShopFilter` retain their original
+  offline-equivalent branches and now point at existing typed storage,
+  auto-search/map-event, and shop transaction boundaries. Their enabling live
+  conditions were not present, so they remain partial rather than being
+  promoted from implementation evidence alone.
+- Evidence: `integration/alas/series/0400-opsi-general-daemon-runtime.patch`,
+  `integration/alas/opsi-general-daemon-zero-budget-live-20260822.json`,
+  `integration/alas/opsi-general-daemon-oil-transition-proof-20260822.json`,
+  and `integration/alas/opsi-general-daemon-patch-tree-verification-20260822/result.json`.
+
 - `OpsiShop.PresetFilter` covers all five declared presets from pinned
   `OS_SHOP`; `CustomFilter` preserves custom priority and blank fallback.
   The current unified port shop is now read as 19 typed cards rather than a

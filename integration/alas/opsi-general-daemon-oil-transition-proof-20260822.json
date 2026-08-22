@@ -1,0 +1,50 @@
+{
+  "schema": "alas-headless.opsi-action-point-transition-proof/v1",
+  "sources": [
+    {
+      "path": "integration/alas/opsi-general-daemon-oil-consume-live-20260822.json",
+      "sha256": "04725d10a51a71989b47c0f53bafd6282855a1ab8e7503d13d41b05c37c50afc",
+      "passed": false,
+      "terminal_observation": "SemanticGateClosed: operation siren oil purchase terms changed"
+    },
+    {
+      "path": "integration/alas/opsi-general-daemon-zero-budget-live-20260822.json",
+      "sha256": "40c2d327c3cf9ca339370326f0afb145eb8fa7e9e914e152a6dc911c4095c228",
+      "passed": true
+    }
+  ],
+  "transition": {
+    "action_points": {
+      "before": 240,
+      "after": 340
+    },
+    "oil": {
+      "before": 16077,
+      "after": 15077
+    },
+    "weekly_remaining": {
+      "before": 4,
+      "after": 3
+    },
+    "ap_purchase_terms_before": {
+      "cost": 1000,
+      "points": 100,
+      "limit": 5
+    },
+    "ap_purchase_terms_after": {
+      "cost": 2000,
+      "points": 200,
+      "limit": 5
+    }
+  },
+  "checks": {
+    "same_live_process": true,
+    "explicit_single_use_budget": true,
+    "post_snapshot_is_zero_budget": true,
+    "action_points_incremented_by_typed_terms": true,
+    "oil_decremented_by_typed_terms": true,
+    "weekly_remaining_decremented_once": true,
+    "no_pixel_fallback_after_transition": true
+  },
+  "passed": true
+}

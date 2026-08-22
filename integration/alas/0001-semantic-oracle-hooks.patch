@@ -14007,3 +14007,203 @@ diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
 +            logger.info('Find a beacon in level:' + str(current))
 +            return
          for n in range(10):
+diff --git a/module/daemon/os_daemon.py b/module/daemon/os_daemon.py
+--- a/module/daemon/os_daemon.py
++++ b/module/daemon/os_daemon.py
+@@ -53,6 +53,15 @@ class AzurLaneDaemon(DaemonBase, OSFleet, PortHandler):
+         # Port repair
+         if self.config.OpsiDaemon_RepairShip:
+             if self.appear(PORT_ENTER, offset=(20, 20), interval=30):
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if (
++                    semantic_adapter is not None
++                    and not semantic_adapter.operation_siren_port_repair_allowed()
++                ):
++                    from alas_headless import SemanticGateClosed
++                    raise SemanticGateClosed(
++                        'OpsiDaemon port repair requires an explicit action budget'
++                    )
+                 self.port_enter()
+                 self.port_dock_repair()
+                 self.port_quit()
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -1598,6 +1598,16 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+         if self.appear(PORT_ENTER, offset=(20, 20)):
+             return False
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            target = semantic_adapter.operation_siren_nearest_daemon_target()
++            if target is None:
++                self._nearest_object_click_timer.reset()
++                return False
++            semantic_adapter.click_operation_siren_daemon_target(target)
++            self._nearest_object_click_timer.reset()
++            return
++
+         self.update_os()
+         self.view.predict()
+         self.radar.predict(self.device.image)
+diff --git a/module/os_handler/port.py b/module/os_handler/port.py
+--- a/module/os_handler/port.py
++++ b/module/os_handler/port.py
+@@ -20,6 +20,16 @@ class PortHandler(OSShop):
+             out: PORT_CHECK
+         """
+         logger.info('Port enter')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.refresh_frame()
++            semantic_adapter.open().oracle.click('os/port/enter')
++            for _ in range(24):
++                self.device.sleep(0.5)
++                semantic_adapter.refresh_frame()
++                if semantic_adapter.open().oracle.exists('os/port/supply'):
++                    return
++            raise RuntimeError('Typed Operation Siren port did not open')
+         for _ in self.loop():
+             if self.appear(PORT_SUPPLY_CHECK, offset=(20, 20)):
+                 break
+diff --git a/module/os_handler/action_point.py b/module/os_handler/action_point.py
+--- a/module/os_handler/action_point.py
++++ b/module/os_handler/action_point.py
+@@ -1,6 +1,6 @@
+ from datetime import datetime
+ 
+-from alas_headless import validate_alas_opsi_action_point_purchase
++from alas_headless import SemanticOracleError, validate_alas_opsi_action_point_purchase
+ 
+ import module.config.server as server
+ from module.base.button import ButtonGrid
+@@ -358,6 +358,129 @@ class ActionPointHandler(UI, MapEventHandler):
+         Pages:
+             in: ACTION_POINT_USE
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            try:
++                state = semantic_adapter.operation_siren_action_point_state()
++            except SemanticOracleError:
++                return False
++
++            if cost is None:
++                cost = self.action_point_get_cost(zone, pinned)
++            values = (0, 20, 50, 100)
++            purchase_config = validate_alas_opsi_action_point_purchase(
++                buy_limit=self.config.OpsiGeneral_BuyActionPointLimit,
++                oil_limit=self.config.OpsiGeneral_OilLimit,
++            )
++
++            def total_points(current_state):
++                if not self.config.OS_ACTION_POINT_BOX_USE:
++                    return current_state.current
++                return current_state.current + sum(
++                    count * value
++                    for count, value in zip(current_state.item_counts, values)
++                )
++
++            if keep_current_ap and total_points(state) <= self.config.OS_ACTION_POINT_PRESERVE:
++                logger.info(
++                    f'Reach the limit of action points, preserve='
++                    f'{self.config.OS_ACTION_POINT_PRESERVE}'
++                )
++                semantic_adapter.click_operation_siren_action_point_control(False)
++                raise ActionPointLimit
++
++            buy_checked = False
++            for _ in range(12):
++                if state.current >= cost:
++                    logger.info('Having enough action points (typed)')
++                    semantic_adapter.click_operation_siren_action_point_control(False)
++                    return True
++                if purchase_config.buy_limit > 0 and not buy_checked:
++                    if state.selected_index != 0:
++                        semantic_adapter.click_operation_siren_action_point_item(0)
++                        state = semantic_adapter.operation_siren_action_point_state()
++                    if any(value is None for value in (
++                        state.oil_purchase_cost,
++                        state.oil_purchase_points,
++                        state.oil_purchase_remaining,
++                        state.oil_purchase_limit,
++                    )):
++                        raise RuntimeError('Typed oil purchase terms are incomplete')
++                    buy_count = (
++                        state.oil_purchase_limit - state.oil_purchase_remaining
++                    )
++                    if buy_count >= purchase_config.buy_limit:
++                        logger.info('Reach the limit to buy action points this week')
++                        buy_checked = True
++                    elif state.oil_purchase_remaining <= 0:
++                        logger.info('No action point purchases remain this week')
++                        buy_checked = True
++                    elif (
++                        state.item_counts[0]
++                        >= state.oil_purchase_cost + purchase_config.oil_limit
++                    ):
++                        before = state
++                        semantic_adapter.click_operation_siren_action_point_control(True)
++                        for _ in range(20):
++                            self.device.sleep(0.25)
++                            state = semantic_adapter.operation_siren_action_point_state()
++                            if (
++                                state.current
++                                == before.current + before.oil_purchase_points
++                                and state.item_counts[0]
++                                == before.item_counts[0] - before.oil_purchase_cost
++                                and state.oil_purchase_remaining
++                                == before.oil_purchase_remaining - 1
++                            ):
++                                break
++                        else:
++                            raise RuntimeError(
++                                'Typed oil action point purchase was not proven'
++                            )
++                        continue
++                    else:
++                        logger.info('Not enough oil to buy action points (typed)')
++                        buy_checked = True
++                if total_points(state) < cost:
++                    logger.info('Not having enough action points (typed)')
++                    semantic_adapter.click_operation_siren_action_point_control(False)
++                    raise ActionPointLimit
++
++                candidates = [
++                    index
++                    for index in (1, 2, 3)
++                    if state.item_counts[index] > 0
++                ]
++                if not candidates or not self.config.OS_ACTION_POINT_BOX_USE:
++                    logger.info('No usable action point boxes (typed)')
++                    semantic_adapter.click_operation_siren_action_point_control(False)
++                    raise ActionPointLimit
++                candidates.sort(
++                    key=lambda index: (
++                        state.current + values[index] < cost,
++                        state.current + values[index] > 200,
++                        values[index],
++                    )
++                )
++                selected = candidates[0]
++                if state.selected_index != selected:
++                    semantic_adapter.click_operation_siren_action_point_item(selected)
++                    state = semantic_adapter.operation_siren_action_point_state()
++                before = state
++                semantic_adapter.click_operation_siren_action_point_control(True)
++                for _ in range(20):
++                    self.device.sleep(0.25)
++                    state = semantic_adapter.operation_siren_action_point_state()
++                    if (
++                        state.current > before.current
++                        and state.item_counts[selected]
++                        == before.item_counts[selected] - 1
++                    ):
++                        break
++                else:
++                    raise RuntimeError('Typed action point use was not proven')
++            raise RuntimeError('Typed action point recovery did not converge')
++
+         if not self._is_in_action_point():
+             return False
+ 

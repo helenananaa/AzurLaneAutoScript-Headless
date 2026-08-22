@@ -149,6 +149,7 @@ from .semantic_oracle import (
     OracleFingerprint,
     OperationSirenState,
     OperationSirenActionPointState,
+    OperationSirenDaemonTarget,
     OperationSirenGlobeState,
     OperationSirenGlobeSwipeReceipt,
     OperationSirenStorageState,
@@ -7014,6 +7015,28 @@ class AlasSemanticAdapter:
             prefer_adjacent_event=prefer_adjacent_event,
         )
 
+    def operation_siren_daemon_move_allowed(self) -> bool:
+        return self._action_ledger.allowed("operation_siren.daemon_move")
+
+    def operation_siren_nearest_daemon_target(
+        self,
+    ) -> Optional[OperationSirenDaemonTarget]:
+        self._package_gate()
+        return self.oracle.operation_siren_nearest_daemon_target()
+
+    def click_operation_siren_daemon_target(
+        self, expected: OperationSirenDaemonTarget
+    ) -> ActionReceipt:
+        self._package_gate()
+        if not self.operation_siren_daemon_move_allowed():
+            raise SemanticGateClosed(
+                "Operation Siren daemon movement requires a positive action budget"
+            )
+        return self._dispatch_mutation(
+            "operation_siren.daemon_move",
+            lambda: self.oracle.click_operation_siren_daemon_target(expected),
+        )
+
     def click_operation_siren_fleet_bar(self) -> ActionReceipt:
         self._package_gate()
         return self.oracle.click_operation_siren_fleet_bar()
@@ -7484,7 +7507,19 @@ class AlasSemanticAdapter:
         self, use: bool
     ) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_operation_siren_action_point_control(use)
+        if not use:
+            return self.oracle.click_operation_siren_action_point_control(False)
+        if not self.operation_siren_action_point_use_allowed():
+            raise SemanticGateClosed(
+                "Operation Siren action point use requires a positive action budget"
+            )
+        return self._dispatch_mutation(
+            "operation_siren.action_point_use",
+            lambda: self.oracle.click_operation_siren_action_point_control(True),
+        )
+
+    def operation_siren_action_point_use_allowed(self) -> bool:
+        return self._action_ledger.allowed("operation_siren.action_point_use")
 
     def operation_siren_port_repair_cost(self) -> Optional[int]:
         self._package_gate()
@@ -7494,7 +7529,19 @@ class AlasSemanticAdapter:
         self, confirm: bool
     ) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_operation_siren_port_repair(confirm)
+        if not confirm:
+            return self.oracle.click_operation_siren_port_repair(False)
+        if not self.operation_siren_port_repair_allowed():
+            raise SemanticGateClosed(
+                "Operation Siren port repair requires a positive action budget"
+            )
+        return self._dispatch_mutation(
+            "operation_siren.port_repair",
+            lambda: self.oracle.click_operation_siren_port_repair(True),
+        )
+
+    def operation_siren_port_repair_allowed(self) -> bool:
+        return self._action_ledger.allowed("operation_siren.port_repair")
 
     def operation_siren_low_resolve_visible(self) -> bool:
         self._package_gate()
@@ -13268,6 +13315,19 @@ class AlasSemanticSession:
             prefer_adjacent_event=prefer_adjacent_event,
         )
 
+    def operation_siren_daemon_move_allowed(self) -> bool:
+        return self.open().operation_siren_daemon_move_allowed()
+
+    def operation_siren_nearest_daemon_target(
+        self,
+    ) -> Optional[OperationSirenDaemonTarget]:
+        return self.open().operation_siren_nearest_daemon_target()
+
+    def click_operation_siren_daemon_target(
+        self, expected: OperationSirenDaemonTarget
+    ) -> ActionReceipt:
+        return self.open().click_operation_siren_daemon_target(expected)
+
     def click_operation_siren_fleet_bar(self) -> ActionReceipt:
         return self.open().click_operation_siren_fleet_bar()
 
@@ -13493,6 +13553,9 @@ class AlasSemanticSession:
                     pass
         raise SemanticGateClosed("operation siren action point panel did not close")
 
+    def operation_siren_action_point_use_allowed(self) -> bool:
+        return self.open().operation_siren_action_point_use_allowed()
+
     def operation_siren_port_repair_cost(self) -> Optional[int]:
         return self.open().operation_siren_port_repair_cost()
 
@@ -13500,6 +13563,9 @@ class AlasSemanticSession:
         self, confirm: bool
     ) -> ActionReceipt:
         return self.open().click_operation_siren_port_repair(confirm)
+
+    def operation_siren_port_repair_allowed(self) -> bool:
+        return self.open().operation_siren_port_repair_allowed()
 
     def operation_siren_low_resolve_visible(self) -> bool:
         return self.open().operation_siren_low_resolve_visible()

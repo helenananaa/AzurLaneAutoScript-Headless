@@ -951,6 +951,20 @@ class OperationSirenActionPointState:
     current: int
     item_counts: Tuple[int, int, int, int]
     selected_index: int
+    oil_purchase_cost: Optional[int]
+    oil_purchase_points: Optional[int]
+    oil_purchase_remaining: Optional[int]
+    oil_purchase_limit: Optional[int]
+
+
+@dataclass(frozen=True)
+class OperationSirenDaemonTarget:
+    """Exact reviewed radar identity selected by original OpsiDaemon rules."""
+
+    generation: int
+    target_kind: str
+    source_position: Tuple[int, int]
+    relative_position: Tuple[int, int]
 
 
 @dataclass(frozen=True)
@@ -10981,8 +10995,11 @@ class SemanticOracle:
         daily_points, daily_capacity = map(int, daily_match.groups())
         action_value = int(action_points)
         action_limit = int(capacity_match.group(1))
+        # ``MAX`` is the natural-regeneration ceiling, not a hard inventory
+        # ceiling: boxes and the weekly oil purchase may legitimately take AP
+        # above 200.  Keep the same defensive upper bound as legacy ALAS.
         if (
-            action_value > action_limit
+            action_value > 600
             or beacon_points > beacon_capacity
             or daily_points > daily_capacity
         ):
@@ -11886,6 +11903,146 @@ class SemanticOracle:
         # ordering because original task code deliberately addresses index 0
         # and index 1 for multi-waypoint rooms.
         return tuple(sorted(targets))
+
+    def operation_siren_nearest_daemon_target(
+        self,
+    ) -> Optional[OperationSirenDaemonTarget]:
+        """Select the nearest reviewed non-port radar object without pixels.
+
+        Original ``Radar.nearest_object()`` considers enemies, resources,
+        meowfficers, exclamation marks, questions, and archives.  Current
+        semantic evidence has exact Unity sprite identities only for enemies,
+        exclamation marks, and questions.  Any other direct radar-object
+        sprite therefore closes the gate instead of being guessed.  Targets
+        farther than the original three-step radius also close the gate until
+        the EMP one-step condition has a typed observation.
+        """
+
+        if not self.operation_siren_local_map_visible():
+            raise SemanticGateClosed("operation siren local-map identity is absent")
+        state = self.read_ui_state()
+        radar_root = (
+            "top/adapt/right_stage/compass_panel/ring/compass/range/"
+        )
+        event_name = re.compile(r"(?:mark|[0-9]+)$")
+        reviewed = {
+            "battle": "enemy",
+            "boss": "enemy",
+            "task": "event",
+            "guidepost": "question",
+        }
+        objects = []
+        ports = set()
+        for item in state.images:
+            if not (
+                item.path.endswith(radar_root + item.name)
+                and event_name.fullmatch(item.name)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            ):
+                continue
+            assert item.bounds is not None
+            center_x = (item.bounds.left + item.bounds.right) / 2.0
+            center_y = (item.bounds.top + item.bounds.bottom) / 2.0
+            raw_x = (center_x - 1140.0) / 11.7
+            raw_y = (center_y - 226.0) / 11.7
+            grid_x = int(round(raw_x))
+            grid_y = int(round(raw_y))
+            if (
+                abs(raw_x - grid_x) > 0.35
+                or abs(raw_y - grid_y) > 0.35
+                or math.hypot(grid_x, grid_y) > 5.15
+            ):
+                raise SemanticGateClosed(
+                    "operation siren daemon radar target is not grid-aligned"
+                )
+            position = (grid_x, grid_y)
+            if item.sprite == "port":
+                ports.add(position)
+                continue
+            kind = reviewed.get(item.sprite)
+            if kind is None:
+                raise SemanticGateClosed(
+                    "operation siren daemon radar target kind is not reviewed"
+                )
+            objects.append((position, kind))
+
+        # Mirror Radar.predict(): a white question directly beside a port is
+        # the port glyph's edge, not an independent object.
+        objects = [
+            (position, kind)
+            for position, kind in objects
+            if not (
+                kind == "question"
+                and any(
+                    abs(position[0] - port[0])
+                    + abs(position[1] - port[1])
+                    == 1
+                    for port in ports
+                )
+            )
+        ]
+        positions = [position for position, _ in objects]
+        if len(set(positions)) != len(positions):
+            raise SemanticGateClosed(
+                "operation siren daemon radar targets are ambiguous"
+            )
+        if not objects:
+            if state.image_truncated:
+                raise SemanticGateClosed(
+                    "operation siren daemon radar absence is not observable"
+                )
+            return None
+
+        distance = min(abs(x) + abs(y) for (x, y), _ in objects)
+        nearest = [
+            (position, kind)
+            for position, kind in objects
+            if abs(position[0]) + abs(position[1]) == distance
+        ]
+        if len(nearest) != 1:
+            raise SemanticGateClosed(
+                "operation siren nearest daemon target is ambiguous"
+            )
+        source_position, target_kind = nearest[0]
+        # point_limit(camera_sight=(-4, -3, 3, 3)) from Radar.nearest_object.
+        relative_position = (
+            max(-4, min(3, source_position[0])),
+            max(-3, min(3, source_position[1])),
+        )
+        if math.hypot(*relative_position) > 3.0:
+            raise SemanticGateClosed(
+                "operation siren daemon move requires typed EMP step state"
+            )
+        return OperationSirenDaemonTarget(
+            generation=state.generation,
+            target_kind=target_kind,
+            source_position=source_position,
+            relative_position=relative_position,
+        )
+
+    def click_operation_siren_daemon_target(
+        self, expected: OperationSirenDaemonTarget
+    ) -> ActionReceipt:
+        """Recheck one daemon target identity immediately before its click."""
+
+        if not isinstance(expected, OperationSirenDaemonTarget):
+            raise TypeError("operation siren daemon target is not typed")
+        current = self.operation_siren_nearest_daemon_target()
+        if current is None or (
+            current.target_kind != expected.target_kind
+            or current.source_position != expected.source_position
+            or current.relative_position != expected.relative_position
+            or current.generation < expected.generation
+        ):
+            raise SemanticGateClosed(
+                "operation siren daemon target changed before input"
+            )
+        return self.click_operation_siren_relative_grid(
+            expected.relative_position
+        )
 
     def operation_siren_obscure_exit_passage_position(
         self,
@@ -14565,6 +14722,56 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "operation siren selected action point item is unbound"
             )
+
+        purchase_cost: Optional[int] = None
+        purchase_points: Optional[int] = None
+        purchase_remaining: Optional[int] = None
+        purchase_limit: Optional[int] = None
+        purchase_texts = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith(root + "Text")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+        )
+        if selected_index == 0:
+            if len(purchase_texts) != 1:
+                raise SemanticGateClosed(
+                    "operation siren oil purchase terms are absent or ambiguous"
+                )
+            purchase_plain = re.sub(
+                r"</?color(?:=#[0-9A-Fa-f]{6})?>",
+                "",
+                purchase_texts[0].text,
+            )
+            purchase_values = tuple(
+                int(value) for value in re.findall(r"[0-9]+", purchase_plain)
+            )
+            if (
+                len(purchase_values) != 4
+                or "<" in purchase_plain
+                or ">" in purchase_plain
+            ):
+                raise SemanticGateClosed(
+                    "operation siren oil purchase terms are malformed"
+                )
+            (
+                purchase_cost,
+                purchase_points,
+                purchase_remaining,
+                purchase_limit,
+            ) = purchase_values
+            if (
+                purchase_cost <= 0
+                or purchase_points not in range(1, 601)
+                or purchase_limit != 5
+                or purchase_remaining not in range(6)
+            ):
+                raise SemanticGateClosed(
+                    "operation siren oil purchase terms changed"
+                )
         return (
             button_state,
             OperationSirenActionPointState(
@@ -14574,6 +14781,10 @@ class SemanticOracle:
                     int(text.text.strip()) for text in count_texts
                 ),
                 selected_index=selected_index,
+                oil_purchase_cost=purchase_cost,
+                oil_purchase_points=purchase_points,
+                oil_purchase_remaining=purchase_remaining,
+                oil_purchase_limit=purchase_limit,
             ),
             icons,
         )

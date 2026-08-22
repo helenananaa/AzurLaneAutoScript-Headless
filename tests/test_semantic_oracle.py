@@ -20,6 +20,7 @@ from alas_headless.semantic_oracle import (
     OracleFingerprint,
     Point,
     ObserverTransportError,
+    OperationSirenDaemonTarget,
     SemanticGateClosed,
     SemanticOracle,
     SemanticTargetMissing,
@@ -9362,6 +9363,123 @@ class RetirementSemanticOracleTests(unittest.TestCase):
 
 class OperationSirenSemanticOracleTests(unittest.TestCase):
     @staticmethod
+    def _operation_siren_header_backend(action_points):
+        root = "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/"
+        backend = FakeBackend(
+            [make_button("back_button", root + "back_button")]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("直布罗特", root + "title/name"),
+                make_text(
+                    "170804",
+                    root + "resources/WorldResPanel(Clone)/res/Whuobi/value",
+                ),
+                make_text(
+                    str(action_points),
+                    root + "resources/WorldResPanel(Clone)/res/stamina/value",
+                ),
+                make_text(
+                    "MAX:200",
+                    root + "resources/WorldResPanel(Clone)/res/stamina/max_value",
+                ),
+                make_text(
+                    "100/200",
+                    root
+                    + "resources/WorldResPanel(Clone)/res/boss_progress/value",
+                ),
+                make_text(
+                    "DAILY:0/200",
+                    root
+                    + "resources/WorldResPanel(Clone)/res/boss_progress/max_value",
+                ),
+                make_text(
+                    "125",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/"
+                    "bg/fleet/1/icon_bg/lv/Text",
+                ),
+            ]
+        )
+        return backend
+
+    @staticmethod
+    def _action_point_backend(*, selected_index=0, purchase_text=None):
+        panel = (
+            "root/OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/"
+            "window/"
+        )
+        content = panel + "world_stamina_panel/content/"
+        buttons = [
+            make_button(
+                "custom_button_1",
+                panel + "button_container/custom_button_1",
+                x=780,
+                y=530,
+            ),
+            make_button(
+                "custom_button_2",
+                panel + "button_container/custom_button_2",
+                x=500,
+                y=530,
+            ),
+        ]
+        backend = FakeBackend(buttons)
+        sprites = (
+            "oil",
+            "Wxingdonglihuifu1",
+            "Wxingdonglihuifu2",
+            "Wxingdonglihuifu3",
+        )
+        images = []
+        texts = [
+            make_text("139", content + "tip_bg/stamina/value"),
+        ]
+        for index, sprite in enumerate(sprites):
+            center = 323 + index * 173
+            bounds = {
+                "left": center - 55,
+                "top": 274,
+                "right": center + 55,
+                "bottom": 389,
+            }
+            images.append(
+                make_image(
+                    content + "item_list/item(Clone)/IconTpl/icon_bg/icon",
+                    sprite,
+                    bounds,
+                )
+            )
+            texts.append(
+                make_text(
+                    str((17077, 92, 0, 0)[index]),
+                    content + "item_list/item(Clone)/IconTpl/icon_bg/count",
+                    bounds={
+                        "left": center - 24,
+                        "top": 360,
+                        "right": center + 24,
+                        "bottom": 386,
+                    },
+                )
+            )
+        selected_center = 323 + selected_index * 173
+        images.append(
+            make_image(
+                content + "item_list/item(Clone)/select",
+                "selected",
+                {
+                    "left": selected_center - 57,
+                    "top": 272,
+                    "right": selected_center + 57,
+                    "bottom": 391,
+                },
+            )
+        )
+        if purchase_text is not None:
+            texts.append(make_text(purchase_text, content + "Text"))
+        backend.ui = make_ui(texts, images=images)
+        return backend
+
+    @staticmethod
     def _meta_assist_backend(selected_index=2):
         root = (
             "root/UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/"
@@ -9475,6 +9593,76 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "os/action-point/open")
         self.assertEqual(backend.taps, [(903, 37)])
+
+    def test_action_point_state_types_exact_oil_purchase_terms(self):
+        backend = self._action_point_backend(
+            purchase_text=(
+                "花费<color=#92fc63>1000</color>石油购买行动力"
+                "<color=#92fc63>100</color>点，本周剩余"
+                "<color=#92fc63>5/5</color>次"
+            )
+        )
+
+        state = make_oracle(backend).operation_siren_action_point_state()
+
+        self.assertEqual(state.current, 139)
+        self.assertEqual(state.item_counts, (17077, 92, 0, 0))
+        self.assertEqual(state.selected_index, 0)
+        self.assertEqual(state.oil_purchase_cost, 1000)
+        self.assertEqual(state.oil_purchase_points, 100)
+        self.assertEqual(state.oil_purchase_remaining, 5)
+        self.assertEqual(state.oil_purchase_limit, 5)
+
+    def test_action_point_state_accepts_current_progressive_purchase_terms(self):
+        state = make_oracle(
+            self._action_point_backend(
+                purchase_text=(
+                    "花费<color=#92fc63>2000</color>石油购买行动力"
+                    "<color=#92fc63>200</color>点，本周剩余"
+                    "<color=#92fc63>3/5</color>次"
+                )
+            )
+        ).operation_siren_action_point_state()
+
+        self.assertEqual(state.oil_purchase_cost, 2000)
+        self.assertEqual(state.oil_purchase_points, 200)
+        self.assertEqual(state.oil_purchase_remaining, 3)
+
+    def test_action_point_state_omits_purchase_terms_for_box_selection(self):
+        state = make_oracle(
+            self._action_point_backend(selected_index=1)
+        ).operation_siren_action_point_state()
+
+        self.assertIsNone(state.oil_purchase_cost)
+        self.assertIsNone(state.oil_purchase_points)
+        self.assertIsNone(state.oil_purchase_remaining)
+        self.assertIsNone(state.oil_purchase_limit)
+
+    def test_action_point_state_rejects_changed_purchase_amount(self):
+        backend = self._action_point_backend(
+            purchase_text=(
+                "花费<color=#92fc63>1000</color>石油购买行动力"
+                "<color=#92fc63>0</color>点，本周剩余"
+                "<color=#92fc63>5/5</color>次"
+            )
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "terms changed"):
+            make_oracle(backend).operation_siren_action_point_state()
+
+    def test_operation_siren_header_allows_ap_above_regeneration_capacity(self):
+        state = make_oracle(
+            self._operation_siren_header_backend(340)
+        ).operation_siren_state()
+
+        self.assertEqual(state.action_points, 340)
+        self.assertEqual(state.action_point_capacity, 200)
+
+    def test_operation_siren_header_rejects_ap_above_legacy_safety_bound(self):
+        with self.assertRaisesRegex(SemanticGateClosed, "summary is inconsistent"):
+            make_oracle(
+                self._operation_siren_header_backend(601)
+            ).operation_siren_state()
 
     def test_map_exit_owner_unmounted_is_an_idempotent_missing_target(self):
         oracle = make_oracle(FakeBackend([]))
@@ -10639,6 +10827,146 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         )
         self.assertTrue(adjacent.path.endswith("chongdong02(Clone)"))
         self.assertEqual(backend.taps[-1], (745, 345))
+
+    def test_daemon_target_uses_reviewed_nearest_object_and_port_fixup(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        root = (
+            "root/OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
+            "compass_panel/ring/compass/range/"
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    root + "1001",
+                    "battle",
+                    {"left": 1111.7, "top": 231.85, "right": 1121.7, "bottom": 243.55},
+                ),
+                make_image(
+                    root + "1002",
+                    "task",
+                    {"left": 1170.1, "top": 231.85, "right": 1180.1, "bottom": 243.55},
+                ),
+                make_image(
+                    root + "mark",
+                    "port",
+                    {"left": 1146.7, "top": 221.0, "right": 1156.7, "bottom": 231.0},
+                ),
+                make_image(
+                    root + "1003",
+                    "guidepost",
+                    {"left": 1135.0, "top": 221.0, "right": 1145.0, "bottom": 231.0},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        target = oracle.operation_siren_nearest_daemon_target()
+
+        self.assertEqual(target.target_kind, "enemy")
+        self.assertEqual(target.source_position, (-2, 1))
+        self.assertEqual(target.relative_position, (-2, 1))
+
+    def test_daemon_target_rejects_ties_unknown_kinds_and_untyped_emp_step(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        root = (
+            "root/OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
+            "compass_panel/ring/compass/range/"
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    root + "1001",
+                    "battle",
+                    {"left": 1146.7, "top": 221.0, "right": 1156.7, "bottom": 231.0},
+                ),
+                make_image(
+                    root + "1002",
+                    "task",
+                    {"left": 1135.0, "top": 232.7, "right": 1145.0, "bottom": 242.7},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+        with self.assertRaisesRegex(SemanticGateClosed, "nearest.*ambiguous"):
+            oracle.operation_siren_nearest_daemon_target()
+
+        backend.ui["images"] = [
+            make_image(
+                root + "1004",
+                "archive",
+                {"left": 1146.7, "top": 221.0, "right": 1156.7, "bottom": 231.0},
+            )
+        ]
+        backend.ui["image_count"] = 1
+        with self.assertRaisesRegex(SemanticGateClosed, "kind is not reviewed"):
+            oracle.operation_siren_nearest_daemon_target()
+
+        backend.ui["images"] = [
+            make_image(
+                root + "1005",
+                "battle",
+                {"left": 1181.8, "top": 232.7, "right": 1191.8, "bottom": 242.7},
+            )
+        ]
+        with self.assertRaisesRegex(SemanticGateClosed, "typed EMP"):
+            oracle.operation_siren_nearest_daemon_target()
+
+    def test_daemon_target_click_rejects_stale_identity_without_input(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+        expected = OperationSirenDaemonTarget(
+            generation=10,
+            target_kind="enemy",
+            source_position=(-1, 0),
+            relative_position=(-1, 0),
+        )
+        with mock.patch.object(
+            oracle,
+            "operation_siren_nearest_daemon_target",
+            return_value=OperationSirenDaemonTarget(
+                generation=11,
+                target_kind="event",
+                source_position=(-1, 0),
+                relative_position=(-1, 0),
+            ),
+        ), self.assertRaisesRegex(SemanticGateClosed, "changed before input"):
+            oracle.click_operation_siren_daemon_target(expected)
+        self.assertEqual(backend.taps, [])
 
     def test_typed_question_radar_is_the_alas_question_wormhole_not_other_guideposts(self):
         backend = FakeBackend(

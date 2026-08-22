@@ -1,5 +1,6 @@
 import ast
 import itertools
+import json
 import unittest
 from pathlib import Path
 
@@ -67,11 +68,55 @@ class AlasDaemonConfigTests(unittest.TestCase):
         self.assertEqual(patch.count("validate_alas_daemon_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_daemon_config("), 1)
 
+    def test_phase2_runtime_patch_owns_typed_mutation_boundaries(self):
+        patch = ROOT.joinpath(
+            "integration/alas/series/0400-opsi-general-daemon-runtime.patch"
+        ).read_text(encoding="utf-8")
+        for marker in (
+            "operation_siren_port_repair_allowed",
+            "operation_siren_nearest_daemon_target",
+            "click_operation_siren_daemon_target",
+            "operation_siren_action_point_state",
+            "oil_purchase_cost",
+            "oil_purchase_points",
+            "oil_purchase_remaining",
+            "click_operation_siren_action_point_control(True)",
+            "Typed oil action point purchase was not proven",
+        ):
+            self.assertIn(marker, patch)
+        self.assertNotIn("ACTION_POINTS_BUY[current]", patch)
+
+    def test_live_oil_transition_proof_is_exact(self):
+        proof = json.loads(
+            ROOT.joinpath(
+                "integration/alas/opsi-general-daemon-oil-transition-proof-20260822.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertTrue(proof["passed"])
+        self.assertTrue(all(proof["checks"].values()))
+        transition = proof["transition"]
+        self.assertEqual(
+            transition["action_points"]["after"]
+            - transition["action_points"]["before"],
+            transition["ap_purchase_terms_before"]["points"],
+        )
+        self.assertEqual(
+            transition["oil"]["before"] - transition["oil"]["after"],
+            transition["ap_purchase_terms_before"]["cost"],
+        )
+        self.assertEqual(
+            transition["weekly_remaining"]["before"]
+            - transition["weekly_remaining"]["after"],
+            1,
+        )
+
     def test_sources_compile(self):
         for relative in (
             "python/alas_headless/alas_daemon_config_contract.py",
             "python/alas_headless/alas_daemon_config_replay.py",
             "scripts/python/verify_alas_daemon_config.py",
+            "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
+            "scripts/python/verify_alas_opsi_action_point_transition.py",
         ):
             ast.parse(ROOT.joinpath(relative).read_text(encoding="utf-8"))
 

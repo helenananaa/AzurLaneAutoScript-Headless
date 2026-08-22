@@ -1,0 +1,681 @@
+{
+  "schema": "alas-headless.opsi-general-daemon-live/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 1953,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "consume_authorized": true,
+  "consume_kind": "oil",
+  "budgets": {
+    "operation_siren.action_point_use": 1,
+    "operation_siren.port_repair": 1,
+    "operation_siren.daemon_move": 1
+  },
+  "typed_actions": [],
+  "daemon_cases": {},
+  "os_init": "already-local-map",
+  "before": {
+    "zone_name": "直布罗特",
+    "coins": 170804,
+    "action_points": 240,
+    "action_point_capacity": 200,
+    "fleet_hp": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "needs_repair": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "port_visible": true,
+  "daemon_target": null,
+  "action_point_before": {
+    "generation": 363003,
+    "current": 240,
+    "item_counts": [
+      16077,
+      92,
+      0,
+      0
+    ],
+    "selected_index": 1,
+    "oil_purchase_cost": null,
+    "oil_purchase_points": null,
+    "oil_purchase_remaining": null,
+    "oil_purchase_limit": null,
+    "texts": [
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name/Text",
+        "text": "能源补给箱.."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/count",
+        "text": "0"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name/Text",
+        "text": "能源补给箱.."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/count",
+        "text": "0"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name/Text",
+        "text": "能源补给箱.."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/count",
+        "text": "92"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name/Text",
+        "text": "石油"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/count",
+        "text": "16077"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_1/pic",
+        "text": "使 用"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_2/pic",
+        "text": "取 消"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/Text",
+        "text": "使用<color=#92fc63>能源补给箱（小）</color>后恢复行动力<color=#92fc63>20</color>点"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg/stamina/value",
+        "text": "240"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg/stamina/title",
+        "text": "行动力"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg/tip",
+        "text": "※行动力小于200时，每 <color=#92fc63>10分钟</color> 恢复<color=#92fc63>1</color>点行动力"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/top/bg/infomation/title_en",
+        "text": "INFORMATION"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/top/bg/infomation/title",
+        "text": "信息"
+      }
+    ],
+    "images": [
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name",
+        "name": "name",
+        "sprite": "name_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/icon",
+        "name": "icon",
+        "sprite": "Wxingdonglihuifu3"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg4"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/bg",
+        "name": "bg",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl",
+        "name": "IconTpl",
+        "sprite": "icon_frame_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name",
+        "name": "name",
+        "sprite": "name_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/icon",
+        "name": "icon",
+        "sprite": "Wxingdonglihuifu2"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg3"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/bg",
+        "name": "bg",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl",
+        "name": "IconTpl",
+        "sprite": "icon_frame_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name",
+        "name": "name",
+        "sprite": "name_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/icon",
+        "name": "icon",
+        "sprite": "Wxingdonglihuifu1"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg2"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/bg",
+        "name": "bg",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl",
+        "name": "IconTpl",
+        "sprite": "icon_frame_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/select",
+        "name": "select",
+        "sprite": "selected"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name",
+        "name": "name",
+        "sprite": "name_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/icon",
+        "name": "icon",
+        "sprite": "oil"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg1"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/bg",
+        "name": "bg",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl",
+        "name": "IconTpl",
+        "sprite": "icon_frame_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_1",
+        "name": "custom_button_1",
+        "sprite": "btn_big_blue"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_2",
+        "name": "custom_button_2",
+        "sprite": "btn_big_grey"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg/stamina/icon",
+        "name": "icon",
+        "sprite": "res_stamina"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg/stamina",
+        "name": "stamina",
+        "sprite": "stamina_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg",
+        "name": "tip_bg",
+        "sprite": "z52_3"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel",
+        "name": "world_stamina_panel",
+        "sprite": "msg_content_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/top/btnBack",
+        "name": "btnBack",
+        "sprite": "close_btn"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/top/bg/infomation",
+        "name": "infomation",
+        "sprite": "title_print"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/top/bg",
+        "name": "bg",
+        "sprite": "title_frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/Image",
+        "name": "Image",
+        "sprite": "message"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/line1",
+        "name": "line1",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/line3",
+        "name": "line3",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/line2",
+        "name": "line2",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/decorateCenter/decoratebtm",
+        "name": "decoratebtm",
+        "sprite": "decorate2_1920"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/decorateCenter/decorateTop",
+        "name": "decorateTop",
+        "sprite": "decorate2_1920"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/decorateCenter",
+        "name": "decorateCenter",
+        "sprite": "decorate1_1920"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/print_i/line",
+        "name": "line",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/print_i/point",
+        "name": "point",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/leg",
+        "name": "leg",
+        "sprite": "print_right_down"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg",
+        "name": "bg",
+        "sprite": "msg_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/bg",
+        "name": "bg",
+        "sprite": "add"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)",
+        "name": "WorldStaminaRecoverUI(Clone)",
+        "sprite": "white_dot"
+      }
+    ]
+  },
+  "action_point_oil_selection": {
+    "generation": 363017,
+    "current": 240,
+    "item_counts": [
+      16077,
+      92,
+      0,
+      0
+    ],
+    "selected_index": 0,
+    "oil_purchase_cost": 1000,
+    "oil_purchase_points": 100,
+    "oil_purchase_remaining": 4,
+    "oil_purchase_limit": 5,
+    "texts": [
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name/Text",
+        "text": "能源补给箱.."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/count",
+        "text": "0"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name/Text",
+        "text": "能源补给箱.."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/count",
+        "text": "0"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name/Text",
+        "text": "能源补给箱.."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/count",
+        "text": "92"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name/Text",
+        "text": "石油"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/count",
+        "text": "16077"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_1/pic",
+        "text": "使 用"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_2/pic",
+        "text": "取 消"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/Text",
+        "text": "花费<color=#92fc63>1000</color>石油购买行动力<color=#92fc63>100</color>点，本周剩余<color=#92fc63>4/5</color>次"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg/stamina/value",
+        "text": "240"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg/stamina/title",
+        "text": "行动力"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg/tip",
+        "text": "※行动力小于200时，每 <color=#92fc63>10分钟</color> 恢复<color=#92fc63>1</color>点行动力"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/top/bg/infomation/title_en",
+        "text": "INFORMATION"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/top/bg/infomation/title",
+        "text": "信息"
+      }
+    ],
+    "images": [
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name",
+        "name": "name",
+        "sprite": "name_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/icon",
+        "name": "icon",
+        "sprite": "Wxingdonglihuifu3"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg4"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/bg",
+        "name": "bg",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl",
+        "name": "IconTpl",
+        "sprite": "icon_frame_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name",
+        "name": "name",
+        "sprite": "name_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/icon",
+        "name": "icon",
+        "sprite": "Wxingdonglihuifu2"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg3"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/bg",
+        "name": "bg",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl",
+        "name": "IconTpl",
+        "sprite": "icon_frame_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name",
+        "name": "name",
+        "sprite": "name_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/icon",
+        "name": "icon",
+        "sprite": "Wxingdonglihuifu1"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg2"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/bg",
+        "name": "bg",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl",
+        "name": "IconTpl",
+        "sprite": "icon_frame_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/name",
+        "name": "name",
+        "sprite": "name_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg/icon",
+        "name": "icon",
+        "sprite": "oil"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg1"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl/bg",
+        "name": "bg",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/IconTpl",
+        "name": "IconTpl",
+        "sprite": "icon_frame_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/item_list/item(Clone)/select",
+        "name": "select",
+        "sprite": "selected"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_1",
+        "name": "custom_button_1",
+        "sprite": "btn_big_blue"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/button_container/custom_button_2",
+        "name": "custom_button_2",
+        "sprite": "btn_big_grey"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg/stamina/icon",
+        "name": "icon",
+        "sprite": "res_stamina"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg/stamina",
+        "name": "stamina",
+        "sprite": "stamina_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel/content/tip_bg",
+        "name": "tip_bg",
+        "sprite": "z52_3"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/world_stamina_panel",
+        "name": "world_stamina_panel",
+        "sprite": "msg_content_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/top/btnBack",
+        "name": "btnBack",
+        "sprite": "close_btn"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/top/bg/infomation",
+        "name": "infomation",
+        "sprite": "title_print"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/top/bg",
+        "name": "bg",
+        "sprite": "title_frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/Image",
+        "name": "Image",
+        "sprite": "message"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/line1",
+        "name": "line1",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/line3",
+        "name": "line3",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/line2",
+        "name": "line2",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/decorateCenter/decoratebtm",
+        "name": "decoratebtm",
+        "sprite": "decorate2_1920"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/decorateCenter/decorateTop",
+        "name": "decorateTop",
+        "sprite": "decorate2_1920"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/decorateCenter",
+        "name": "decorateCenter",
+        "sprite": "decorate1_1920"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/print_i/line",
+        "name": "line",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/print_i/point",
+        "name": "point",
+        "sprite": "white_dot"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg/bg_decorations/leg",
+        "name": "leg",
+        "sprite": "print_right_down"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/window/bg",
+        "name": "bg",
+        "sprite": "msg_bg"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)/bg",
+        "name": "bg",
+        "sprite": "add"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/WorldStaminaRecoverUI(Clone)",
+        "name": "WorldStaminaRecoverUI(Clone)",
+        "sprite": "white_dot"
+      }
+    ]
+  },
+  "error": "SemanticGateClosed: operation siren oil purchase terms changed",
+  "passed": false
+}

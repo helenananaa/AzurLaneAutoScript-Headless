@@ -25,7 +25,10 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_MAIL_MUTATION_BUDGET",
         "ALAS_SEMANTIC_META_ASSIST_BUDGET",
         "ALAS_SEMANTIC_MINIGAME_PLAY_BUDGET",
+        "ALAS_SEMANTIC_OPSI_ACTION_POINT_USE_BUDGET",
         "ALAS_SEMANTIC_OPSI_COORDINATE_CHECKOUT_BUDGET",
+        "ALAS_SEMANTIC_OPSI_DAEMON_MOVE_BUDGET",
+        "ALAS_SEMANTIC_OPSI_PORT_REPAIR_BUDGET",
         "ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS",
         "ALAS_SEMANTIC_ALLOW_MISSION_CLAIM_ONCE",
         "ALAS_SEMANTIC_ALLOW_TACTICAL_REWARDS",
@@ -86,6 +89,18 @@ LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
         "ALAS_SEMANTIC_OPSI_COORDINATE_CHECKOUT_BUDGET": (
             "operation_siren.coordinate_checkout",
             "Operation Siren coordinate checkout",
+        ),
+        "ALAS_SEMANTIC_OPSI_ACTION_POINT_USE_BUDGET": (
+            "operation_siren.action_point_use",
+            "Operation Siren action point use",
+        ),
+        "ALAS_SEMANTIC_OPSI_DAEMON_MOVE_BUDGET": (
+            "operation_siren.daemon_move",
+            "Operation Siren daemon move",
+        ),
+        "ALAS_SEMANTIC_OPSI_PORT_REPAIR_BUDGET": (
+            "operation_siren.port_repair",
+            "Operation Siren port repair",
         ),
         "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET": (
             "tactical.assign",
