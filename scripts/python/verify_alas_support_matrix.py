@@ -70,6 +70,8 @@ SYMBOLS = {
 }
 PANEL_CODES = frozenset(("F", "L", "O", "P", "B", "M", "R"))
 FIELD_HEADING = "### 7.1 字段级审计结论"
+PANEL_TABLE_HEADER = "| # | 面板 | 配置组 | 当前 | 尚未闭环的配置范围与验收重点 |"
+PANEL_TABLE_SEPARATOR = "|---:|---|---|:---:|---|"
 
 
 class SupportMatrixError(RuntimeError):
@@ -139,7 +141,10 @@ def _field_class(field: Mapping[str, Any]) -> str:
     dimensions = field["dimensions"]
     if field["support"] == "unsupported":
         return "unsupported"
-    if all(dimensions[dimension] == "complete" for dimension in DIMENSIONS):
+    if all(
+        dimensions[dimension] in ("complete", "not_applicable")
+        for dimension in DIMENSIONS
+    ):
         return "complete"
     if dimensions["live"] in ("complete", "partial"):
         return "live_partial"
@@ -498,6 +503,58 @@ def _render_panel_summary(ledger: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _render_panel_table(ledger: Mapping[str, Any], current: str) -> str:
+    """Render the duplicated human-readable panel table from the ledger.
+
+    The table keeps the upstream UI order already recorded in the document,
+    while status, groups, and notes come only from the canonical ledger.  This
+    prevents a promoted panel from drifting between the summary and detail
+    sections without forcing the canonical JSON to abandon sorted keys.
+    """
+
+    lines = current.splitlines()
+    try:
+        start = lines.index(PANEL_TABLE_HEADER)
+    except ValueError as exc:
+        raise SupportMatrixError("matrix panel table heading is missing") from exc
+    if start + 1 >= len(lines) or lines[start + 1] != PANEL_TABLE_SEPARATOR:
+        raise SupportMatrixError("matrix panel table separator is malformed")
+    end = start + 2
+    rows: list[tuple[int, str]] = []
+    while end < len(lines) and lines[end].startswith("|"):
+        match = re.match(r"^\|\s*(\d+)\s*\|\s*([^|]+?)\s*\|", lines[end])
+        if match is None:
+            raise SupportMatrixError("matrix panel table row is malformed")
+        rows.append((int(match.group(1)), match.group(2).strip()))
+        end += 1
+
+    panel_map = {panel["name"]: panel for panel in ledger["panels"]}
+    if [number for number, _name in rows] != list(range(1, len(rows) + 1)):
+        raise SupportMatrixError("matrix panel table order is malformed")
+    row_names = [name for _number, name in rows]
+    if len(row_names) != len(set(row_names)) or set(row_names) != set(panel_map):
+        raise SupportMatrixError("matrix panel table differs from ledger panels")
+
+    rendered = [PANEL_TABLE_HEADER, PANEL_TABLE_SEPARATOR]
+    for number, name in rows:
+        panel = panel_map[name]
+        rendered.append(
+            "| "
+            + " | ".join(
+                (
+                    str(number),
+                    name,
+                    ", ".join(panel["groups"]),
+                    panel["status"],
+                    panel["note"],
+                )
+            )
+            + " |"
+        )
+    updated = "\n".join(lines[:start] + rendered + lines[end:])
+    return updated + ("\n" if current.endswith("\n") else "")
+
+
 def _render_field_section(ledger: Mapping[str, Any]) -> str:
     fields = ledger["fields"]
     counts = Counter(_field_class(field) for field in fields)
@@ -534,6 +591,7 @@ def _render_field_section(ledger: Mapping[str, Any]) -> str:
 def render_matrix(ledger: Mapping[str, Any], current: str) -> str:
     if FIELD_HEADING not in current:
         raise SupportMatrixError("matrix field heading is missing")
+    current = _render_panel_table(ledger, current)
     prefix = current.split(FIELD_HEADING, 1)[0].rstrip() + "\n\n"
     rendered = prefix + _render_field_section(ledger)
     source = ledger["source"]

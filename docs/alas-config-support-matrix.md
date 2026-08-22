@@ -401,61 +401,61 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 1 | Alas | Emulator, EmulatorInfo, Error, Optimization, DropRecord | P | 三项 Optimization 运行字段和 TaskHoardingDuration 已离线等价；语义截图仍不执行 Dedithering，传统方法/包名矩阵、错误截图、掉落上传与通知未完整验收 |
 | 2 | General | Retirement, OneClickRetire, Enhance, OldRetire | P | 三种 `RetireMode` 已离线分类，旧退役在 Headless 页面事件前拒绝；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级语义事务 |
 | 3 | Restart | Scheduler | F | 50 Scheduler 实例、15 等价类、首次启动跳过、禁包失败、冷恢复、运行中 PID 切换、登录、持久化与零 forward 遗留均已实机闭环；`AdbRestart` 属于 Alas 面板 |
-| 4 | Main | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | 12-4 已由原始 ALAS 完成入口、舰队、完整正交寻路、普通战、Boss 战、D 级败北结算、提示关闭和回图；Boss 胜利受当前账号战力限制，全部共用地图配置分支见 3.2 |
-| 5 | Main2 | 同 Main | P | 已独立验证 Scheduler 命令、campaign_main 路由及 RunCount 五类循环；尚无 Main2 实机任务启动与地图闭环，不能沿用 Main 的运行记录提升为 L |
-| 6 | Main3 | 同 Main | P | 已独立验证 Scheduler 命令、campaign_main 路由及 RunCount 五类循环；尚无 Main3 实机任务启动与地图闭环，不能沿用 Main 的运行记录提升为 L |
+| 4 | Main | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | 普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；Main 已在真实 API 32 x86_64 AVD 上完成 normal 1-1 的手动地图闭环，以及 normal 12-4 的官方自律寻敌闭环。12-4 使用舰队 1/2、禁用潜艇，精确设置一队道中/二队 Boss，出击后由游戏官方承担全部地图和战斗，ALAS 的 combat/viewport 预算均为 0；官方 AutoBtn checked、总奖励页、RunCount 归零、Scheduler 关闭及无 raw fallback 均有实机证明，凭证见 integration/alas/main-12-4-auto-search-live-validation-receipt.json。反向的一队 Boss/二队道中走同一类型化路径并有确定性测试；12-4 之外的自动寻敌、舰队锁定、潜艇、其他舰队编号、困难/活动图未提升 |
+| 5 | Main2 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | 已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main2 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、阵型策略、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main2-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升 |
+| 6 | Main3 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | 已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main3 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main3-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升 |
 | 7 | GemsFarming | Scheduler, GemsFarming, EquipmentCode, Campaign, StopCondition, Fleet, Submarine, Emotion | M | 换旗舰/前排、常用舰选择、装备导入导出和换船后的强化衔接缺失；只有委托限制可复用 |
 | 8 | EventGeneral | EventGeneral, TaskBalancer | P | 五字段离线决策已完整；仍缺 typed PT/金币实机观察、时间相关性、真实任务切换恢复和防调度环证据 |
-| 9 | Coalition | Scheduler, Campaign, Coalition, StopCondition, Emotion | M | 共斗入口、难度、单/多舰队、战斗和结算缺适配 |
+| 9 | Coalition | Scheduler, Campaign, Coalition, StopCondition, Emotion | O | 难度与单/多舰队已离线回放；共斗入口、战斗和结算未适配 |
 | 10 | Event | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | 当前 A1 默认路径闭环；其他关卡和全部共用地图配置仍按字段验收 |
-| 11 | Event2 | 同 Event | P | 与 Event 共用逻辑，但第二活动配置实例没有独立验收 |
-| 12 | Raid | Scheduler, Raid, Campaign, StopCondition, Emotion | M | 难度、票券、活动入口、次数和结算缺适配 |
+| 11 | Event2 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | P | 与 Event 共用逻辑，但第二活动配置实例没有独立验收 |
+| 12 | Raid | Scheduler, Raid, Campaign, StopCondition, Emotion | O | 难度和票券的声明值及票券确认最终按钮已离线回放；活动入口、次数和结算未适配 |
 | 13 | Hospital | Scheduler, Hospital, StopCondition, Emotion | O | 推荐舰队开关已在医院入口与战斗准备入口离线回放并提前 fail-closed；医院页面、候选、推荐动作、战斗和结算观察/输入仍缺适配 |
 | 14 | WarArchives | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | B | 能观察入口/Data Key；48 个档案值的进入、消耗、地图和结算均未形成覆盖台账 |
-| 15 | CoalitionSp | Scheduler, Campaign, Coalition, StopCondition, Emotion | M | SP 共斗专用状态机缺适配 |
+| 15 | CoalitionSp | Scheduler, Campaign, Coalition, StopCondition, Emotion | O | SP 强制多舰队和共享配置已离线回放；SP 状态机、战斗和结算未适配 |
 | 16 | EventA | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | A-D StageFilter/LastStage 离线轮转契约已完成；当前仅 A1-A3 默认路径有实机闭环，其余分区和共用地图配置仍未完整覆盖 |
-| 17 | EventB | 同 EventA | O | B1 普通 `GET_SHIP` 已离线适配；因概率掉落停止实跑，B1 尚未完整闭环，B2/B3 未验证，首次获得 `NEW_SHIP` 未适配 |
-| 18 | EventC | 同 EventA | P | C1-C3 地图脚本存在，无实机闭环 |
-| 19 | EventD | 同 EventA | P | D1-D3 地图脚本存在，无实机闭环 |
+| 17 | EventB | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | O | B1 普通 `GET_SHIP` 已离线适配；因概率掉落停止实跑，B1 尚未完整闭环，B2/B3 未验证，首次获得 `NEW_SHIP` 未适配 |
+| 18 | EventC | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | P | C1-C3 地图脚本存在，无实机闭环 |
+| 19 | EventD | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | P | D1-D3 地图脚本存在，无实机闭环 |
 | 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | P | SP 地图脚本存在，无实机闭环 |
-| 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | M | 难度过滤、每日次数、战斗和领奖缺适配 |
+| 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | O | 难度过滤的 64 个无重复排列及 EX 奖励路由已离线回放；每日次数、战斗和领奖未适配 |
 | 22 | Commission | Scheduler, Commission | F | 六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环 |
-| 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | AddNewStudent 三字段及 TacticalFilter 已完成真实库存观察、选书、确认和运行后置条件；经验溢出、四槽快速学习及其他 Tactical 分支仍未闭环 |
-| 24 | Research | Scheduler, Research | L | 一个金币项目闭环；魔方/零件、延迟、重置、26 个预设和自定义规则未完整覆盖 |
-| 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取、喂食、食物过滤与活动家具 set 实买均已闭环；all 因 set 后当前活动候选消失，尚缺另一未购买活动主题的最终实买回执 |
-| 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | B | 已用 typed 状态完成购买次数已满与训练 10/10 已满的原 ALAS 无资源变化实机闭环；正向购买、自动领取/排队、指挥喵宿舍、增强及天赋保留仍未闭环 |
-| 27 | Guild | Scheduler, GuildLogistics, GuildOperation | M | 后勤兑换、新任务、作战、Boss 和推荐舰队均缺适配 |
-| 28 | Reward | Scheduler, Reward | P | 五个领取开关及 RaidDaily 共享入口已离线完成；资源气泡可领取，任务领取部分可用，周常、红点、数字行、空页面和舰船奖励仍未完整闭环 |
-| 29 | Awaken | Scheduler, Awaken | F | 原始任务已实机闭环收藏开关、阵列优先/芯片回退、精确资源门、单次授权、完成弹窗、实际等级、无候选退出与主页恢复 |
-| 30 | Daily | Scheduler, Daily | L | 原 Daily 状态机已实机闭环 Tactical Training 第二关/舰队 2 与 Fierce Assault 第一关/舰队 1，并覆盖 `UseDailySkip=true` 在当前无快速跳过资格时回退官方自动战斗；其余星期类型、难度、舰队及快速跳过可用分支仍未完整覆盖 |
-| 31 | Hard | Scheduler, Hard | L | 困难 11-4 已实机完成三次首通推进并达到 100%，刷新后又完成官方地图自律闭环：职能为舰队 1 `all`、舰队 2 `standby`，游戏接管地图与战斗，最终被动验收合计奖励页；全链路无 raw fallback。HardFleet=2 与其他困难关卡不外推 |
-| 32 | Exercise | Scheduler, Exercise | L | 六个实际消费字段已离线等价；`LowHpConfirmWait` 上游零读取，真实对手/时段/血量观察、刷新持久化、战斗结算和失败恢复未闭环 |
+| 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 新学员、选书过滤与经验溢出均已实机闭环；快速学习因当前非活动期仍未闭环 |
+| 24 | Research | Scheduler, Research | L | 三资源 always/do_not、队列容量、部件映射和重名卡已实机；最终哈希全策略、资源不足延迟、重置、26 预设及跨轮仍未闭环 |
+| 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取、喂食与食物过滤均已完整闭环；BuyFurniture 已完成活动主题 set 实买、家具币扣款、LastRun、调度与主页恢复，all 原生路径已实现但因 set 后活动候选从当前账号消失，尚缺另一未购买活动主题的最终实买回执 |
+| 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | B | 已用 typed 状态完成购买次数已满无操作、训练 10/10 已满无资源变化的原 ALAS 实机闭环；训练领取与排队控件已完成一次受控实机侦察。正向购买、自动领取/排队、指挥喵宿舍、增强与紫/金天赋保留全分支仍未闭环 |
+| 27 | Guild | Scheduler, GuildLogistics, GuildOperation | L | 普通成员实机主路径已闭环：大厅 20/20 报告全领、后勤补给领取与 3 次按过滤器兑换、7-1 推荐编队并派遣；新任务选择、加入阈值、新行动创建、Boss 攻击与 Boss 推荐仍待对应角色和页面状态验证 |
+| 28 | Reward | Scheduler, Reward | F | 五个 Reward 领取开关均已在原始 ALAS 流程中完成开启与关闭的实机闭环 |
+| 29 | Awaken | Scheduler, Awaken | F | 原始 Awaken 任务已实机覆盖收藏开关、阵列优先与芯片回退、精确候选过滤、资源充足门、单次授权、完成弹窗、实际等级与上限分离、无候选退出及恢复主页。 |
+| 30 | Daily | Scheduler, Daily | L | 原 Daily 状态机已实机闭环 Tactical Training 第二关/舰队 2 与 Fierce Assault 第一关/舰队 1；新版展开层的普通、单次快速和批量快速控件已 typed 区分，普通模式实机通过，UseDailySkip=true 的批量快速动作仅完成有界实现而未实耗验收；其余星期类型、难度和舰队仍未完整覆盖 |
+| 31 | Hard | Scheduler, Hard | L | 困难 11-4 已在真实 API 32 x86_64 AVD 上完成三次首通推进并达到 100%：舰队 1 清理 6 队道中、舰队 2 击破 Boss，全部战斗使用官方自动战斗；覆盖零弹药、伏击、紧急委托、地图恢复和三类结算。刷新额度后，ALAS 原 Hard 入口又完成官方地图自律实机闭环：9.7.328 职能页签精确设置 fleet1=all/fleet2=standby，出击后游戏接管地图与战斗，观察器证明官方自动战斗并被动验收合计奖励页，随后精确退出；三份凭证均无 raw-input fallback。官方地图自律仅在精确进度大于 95% 时放行。HardFleet=2 与其他困难关卡未外推 |
+| 32 | Exercise | Scheduler, Exercise | L | 演习主流程、四种选敌、对手刷新、结构化血量、低血退出、胜负结算与七字段入口契约均已适配并实机闭环；仅非 aggressive 时段边界及 OpponentTrial 大于 1 的自然实机样本未逐值触发 |
 | 33 | ShopFrequent | Scheduler, GeneralShop | B | ConsumeCoins、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；购买、余额观察与确认仍未完成 |
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | P | GuildShop 14 字段与 MedalShop2 7 字段入口已离线等价；其余商店与真实操作未闭环 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝 |
 | 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，UseDrill 两值均已完成原任务闭环；票券、祈愿池、其余卡池和数量仍未闭环 |
 | 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环 |
 | 38 | Minigame | Scheduler | F | 固定源代码仅声明抚顺挑战；无用户字段，单票实机任务已完整进入、结算、退出、预算耗尽停止并返回主界面 |
-| 39 | PrivateQuarters | Scheduler, PrivateQuarters | M | 蛋糕、玫瑰、互动和 7 个舰船选项均缺适配 |
+| 39 | PrivateQuarters | Scheduler, PrivateQuarters | O | 四项设置有固定上游的严格门禁和原方法离线回放；页面、货币、互动与输入闭环仍缺 |
 | 40 | OpsiGeneral | OpsiGeneral | P | 六字段均已离线等价；真实购买/维修结果、资源 postcondition 和异常恢复仍未闭环 |
 | 41 | OpsiAshBeacon | Scheduler, OpsiAshBeacon | B | 当前信标的一击模式主路径已实机闭环：200 点创建、三类求助、出击、战斗、两层结算、276085 伤害读取和 30 分钟延后；击杀领奖、档案与非一击分支仍缺独立实证 |
 | 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | Tier 等级选择已离线等价；真实目标列表、出击、战斗和领奖仍受舰队条件限制 |
-| 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | L | 72 个常规海域已从 LastZone=0 按原顺序完整实机遍历，覆盖 typed unpin、邻区/全局重锚、SAFE/要塞重叠选层、无事件自动搜索返回 off、游标持久化及月度重置；危险海域样本消费、Fleet 2-4、Submarine=true、SpecialRadar=true 仍缺 |
-| 44 | OpsiShop | Scheduler, OpsiShop | L | 统一商店 19 卡 typed 观察与 custom 单件购买已实机闭环，余量 `3→2`、票券 `1205→1200`，并覆盖点击结果不明确后的精确恢复；黄币、其余预设、余额不足、刷新及全港口分支仍缺 |
-| 45 | OpsiVoucher | Scheduler, OpsiVoucher | L | 统一兑换页 22 卡 typed 观察、筛选命中与单件兑换已由原任务实机闭环，余量 `28→27`、凭证 `21592→21492`；石油商品、全部优先级逐值及异常恢复仍缺 |
-| 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | DoMission/UseTuningSample 四组合已在同一最终 oracle 版本实机闭环，覆盖未选中海域直接打开总览、月度 Boss 排除、0 样本空操作/跳过及次日调度；真实清任务、非零样本消费、Fleet 2-4 与 Submarine=true 仍缺 |
-| 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | B | ForceRun、Fleet/Submarine 已离线等价；坐标消耗、真实动作、进入和清图未闭环 |
-| 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | L | 默认主路径已实机完成坐标消耗、100 行动力入场、侵蚀 6 Boss、奖励、不可逆退出与利维浦大修；UseLogger 和自由舰队过滤全空间未逐项实机 |
-| 49 | OpsiArchive | Scheduler, OpsiFleet | L | T2 既有 9 任务与 T4 购买/全链实机闭环；Fleet=1、Submarine=false 已证明，其他舰队/潜艇值与异常全空间仍缺 |
-| 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | L | 实机以精确世界地图标题/类型发现 93、121 两处要塞；93 区闭环 `100 -> 20 -> 0%` 舰队轮换，121 区闭环进入、战斗、0% 收束、回港大修和四队低士气复查；完整舰队过滤与 ForceRun 分支仍未逐值实机覆盖 |
+| 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | L | 72 个常规海域已从 LastZone=0 按原顺序完整实机遍历，覆盖 typed unpin、邻区重锚、局部探针耗尽后的全局锚恢复、SAFE/要塞重叠选层、无事件自动搜索返回 off、游标逐区持久化及月度重置；Fleet=1、Submarine=false、SpecialRadar=false 已证明。危险海域调律样本实际消费、Fleet 2–4、Submarine=true、SpecialRadar=true 仍缺实机闭环 |
+| 44 | OpsiShop | Scheduler, OpsiShop | L | 新版统一港口商店已完成类型化 19 卡库存、票券余额、精确商品身份/价格/余量及单件购买后置闭环；自定义过滤实机命中并完成 DevelopmentMaterialT2 的 3→2、票券 1205→1200，含输入超时后按精确对话框恢复；黄币购买、五预设逐值实机、余额不足、刷新及全港口分支仍未闭环 |
+| 45 | OpsiVoucher | Scheduler, OpsiVoucher | L | 新版兑换页 22 卡 typed 观察、凭证余额、筛选命中和单件兑换已由原任务实机闭环；HECombatPlan 余量 28→27、凭证 21592→21492，默认过滤器售罄分支安全停止；石油商品、所有过滤优先级逐值及异常恢复仍未全部实机闭环 |
+| 46 | OpsiDaily | Scheduler, OpsiDaily, OpsiFleet | B | DoMission/UseTuningSample 四组合已在同一最终 oracle 版本逐项实机闭环：DoMission=false 精确跳过总览，true 可在无海域选中时进入总览并排除月度 Boss；UseTuningSample=true 读取 0 样本并安全空操作，false 精确跳过仓库；四组合均延迟到次日 00:00。真实每日任务清除、非零样本消费、Fleet 2-4 与 Submarine=true 仍未闭环 |
+| 47 | OpsiObscure | Scheduler, OpsiObscure, OpsiFleet | L | 原任务已实机闭环坐标库存、精确同类型坐标确认、Fleet 1/2/3/4、侦察与 Submarine=true 确认、隐藏海域多战、问号/延迟剧情、无事件自动搜索、战后物资格子覆盖页、唯一通行装置离场、原子退出确认及普通海域 HP/大修后置；ForceRun 连续循环及全部异常组合仍待逐值实机覆盖 |
+| 48 | OpsiAbyssal | Scheduler, OpsiAbyssal, OpsiFleetFilter | L | 默认主路径已实机完成坐标消耗、100 行动力入场、问号机关、侵蚀 6 Boss、奖励、不可逆退出、世界总览关闭与利维浦大修；UseLogger 预消耗和自由舰队过滤全空间未逐项实机 |
+| 49 | OpsiArchive | Scheduler, OpsiFleet | L | 原 OpsiArchive 已以 Fleet=1、Submarine=false 实机清完 T2 既有 9 任务链，随后购买 LoggerArchiveT4（库存 1→0、凭证 20692→19892）并完成 T4 全链；月度 Boss 行被逐轮排除，战后 auto-search 控件延迟挂载可无输入等待恢复。Fleet=2..4、Submarine=true、购买不足与异常恢复全空间仍缺 |
+| 50 | OpsiStronghold | Scheduler, OpsiStronghold, OpsiFleetFilter | L | 默认值实机以精确世界地图标题、塞壬要塞类型和专属标记识别 93/121 区；93 区闭环进入、侦察、自律、潜艇离场、不可用舰队跳过、轮换及 100→20→0% 清场，121 区再次闭环进入、0% 收束、回港大修和四队低士气复查；ForceRun 两值与完整舰队过滤仍未逐值实机覆盖 |
 | 51 | OpsiMonthBoss | Scheduler, OpsiMonthBoss, OpsiFleetFilter | B | 模式、适应性检查、ForceRun 运行时消费和舰队过滤已离线等价；普通房进入/失败恢复与困难 Boss 击杀、专用结算、奖励、离场、大修和舰队恢复已有实机证据，但 r61 整体收据未通过，普通成功结算、两个布尔值的剩余实机分支和非默认过滤器仍未闭环 |
-| 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | B | HazardLevel、Fleet/Submarine 已离线等价；行动力保留、选区、真实动作和循环未闭环 |
-| 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | B | TargetZone、Fleet/Submarine 已离线等价；真实动作、选区和循环未闭环 |
+| 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | F | HazardLevel 五值、Fleet 四值、Submarine 两值、行动力保留与自由选区已离线等价；原任务实机完成显式 zone 22、Fleet 2、Submarine=false、自动搜索战斗和战后处理，并以独立有界原任务周期完成 Fleet 3、Submarine=true 的精确命令、确认、动画结束及四项相关任务冷却写入。 |
+| 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | F | TargetZone 三值与 Fleet 四值已离线等价；原任务实机完成 zone 44 到 zone 22 的精确选区、Fleet 2、行动力门槛、战略搜索配置、7 场真实战斗、自动搜索自然回 OFF、无残余问号、战后 HP/大修检查及有界任务结束。Submarine 为共享 OpsiFleet 字段且该上游任务不消费，true 的原始导航命令另由 Meowfficer 完整实机闭环。 |
 | 54 | OpsiCrossMonth | Scheduler | B | 非月末安全跳过；月末执行、重置和跨月恢复未验证 |
 | 55 | Daemon | Daemon | P | EnterMap 双值与单轮地图/编队分派已离线等价；真实进入 postcondition、长期值守和稀有恢复仍未闭环 |
 | 56 | OpsiDaemon | OpsiDaemon | P | 修船/选敌四组合与最终边界已离线等价；真实港口修复、最近目标 postcondition 和长期恢复仍未闭环 |
 | 57 | EventStory | EventStory | P | `SkipBattle` 在固定上游锁为 true 且无运行时消费者；false 需要新的剧情战斗状态机和多活动观察，当前仅一条入口路径，战斗转场及其他故事结构未闭环 |
-| 58 | Benchmark | Benchmark | F | 五种 DeviceType 与三种 TestScene 已逐组实机运行；每组保留原 15 次计时、确认回主页并清理临时配置。DeviceType 是已验证的 Headless semantic 配置来源，不宣称旧云/VMOS 传输 |
+| 58 | Benchmark | Benchmark | F | 五种 DeviceType 与三种 TestScene 已逐组实机执行；每组保留原 15 次计时、确认回到主页并清理临时配置。DeviceType 在 Headless semantic 后端是已验证的配置来源，不宣称旧云/VMOS 传输。 |
 | 59 | AzurLaneUncensored | AzurLaneUncensored | P | 本地 localization 路径可用；`Repository` 对应的远端同步在上游被注释，配置与能力不一致 |
 | 60 | GameManager | GameManager | F | 真假双值、已停止幂等、连续 PID 冷启动、登录、停止/启动/断网/600 秒 observer 超时、恢复及零 forward 遗留均已闭环 |
 
@@ -677,9 +677,9 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **44 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **133 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **82 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ✅ 五维完整支持 | **50 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **129 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **80 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **19 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
@@ -876,11 +876,11 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OneClickRetire.KeepLimitBreak` | General | type=select; display=default | options: "do_not_keep", "keep_limit_break"; default: "keep_limit_break" | `P`/◐ 两设置 typed；keep_limit_break 已实机 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `OpsiAbyssal.ForceRun` | OpsiAbyssal | type=checkbox; display=default | input/default: false | `L`/🟢 默认主路径 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `OpsiAshAssist.Tier` | OpsiAshAssist | type=input; display=default | input/default: 15 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `OpsiAshBeacon.AttackMode` | OpsiAshBeacon | type=select; display=default | options: "current_dossier", "current"; default: "current" | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `OpsiAshBeacon.AttackMode` | OpsiAshBeacon | type=select; display=default | options: "current_dossier", "current"; default: "current" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `OpsiAshBeacon.DossierAutoAttackMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: false | `B`/☐ 未逐值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `OpsiAshBeacon.EnsureFullyCollected` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `OpsiAshBeacon.OneHitMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `OpsiAshBeacon.RequestAssist` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `OpsiAshBeacon.OneHitMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `OpsiAshBeacon.RequestAssist` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `OpsiDaemon.RepairShip` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiDaemon.SelectEnemy` | OpsiDaemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OpsiDaily.DoMission` | OpsiDaily | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |

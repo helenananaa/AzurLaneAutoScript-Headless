@@ -33,7 +33,16 @@ class AlasSupportMatrixTests(unittest.TestCase):
             },
         )
         self.assertEqual(sum(result["field_classes"].values()), 278)
-        self.assertEqual(result["field_classes"]["complete"], 44)
+        self.assertEqual(
+            result["field_classes"],
+            {
+                "complete": 50,
+                "live_partial": 129,
+                "offline_only": 80,
+                "unsupported": 19,
+                "declared_only": 0,
+            },
+        )
         self.assertEqual(result["patch_series"]["member_count"], 81)
         ledger = validate_ledger()
         document = MATRIX.read_text(encoding="utf-8")
@@ -133,6 +142,41 @@ class AlasSupportMatrixTests(unittest.TestCase):
             1,
         )
         self.assertNotEqual(render_matrix(ledger, drifted), drifted)
+
+    def test_panel_detail_status_and_note_are_rendered_from_ledger(self):
+        ledger = validate_ledger()
+        document = MATRIX.read_text(encoding="utf-8")
+        panel = next(
+            item
+            for item in ledger["panels"]
+            if item["name"] == "OpsiMeowfficerFarming"
+        )
+        expected = (
+            "| 52 | OpsiMeowfficerFarming | "
+            + ", ".join(panel["groups"])
+            + " | "
+            + panel["status"]
+            + " | "
+            + panel["note"]
+            + " |"
+        )
+        self.assertIn(expected, render_matrix(ledger, document))
+
+        drifted = document.replace(expected, expected.replace(" | F | ", " | B | "))
+        self.assertNotEqual(render_matrix(ledger, drifted), drifted)
+
+    def test_missing_panel_detail_row_is_rejected(self):
+        ledger = validate_ledger()
+        document = MATRIX.read_text(encoding="utf-8")
+        row = next(
+            line
+            for line in document.splitlines()
+            if line.startswith("| 52 | OpsiMeowfficerFarming |")
+        )
+        with self.assertRaisesRegex(
+            SupportMatrixError, "order is malformed|differs from ledger"
+        ):
+            render_matrix(ledger, document.replace(row + "\n", "", 1))
 
     def test_write_and_patch_refresh_are_explicit_exclusive_modes(self):
         self.assertTrue(parse_args(("--write",)).write)

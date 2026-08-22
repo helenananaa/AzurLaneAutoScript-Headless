@@ -5219,7 +5219,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -5229,7 +5229,9 @@
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
-        "docs/status.md"
+        "integration/alas/series/0099-operation-siren-meta-beacon-runtime.patch",
+        "docs/status.md",
+        "docs/alas-topdown-roadmap.md"
       ],
       "group_code": "B",
       "metadata": "type=select; display=default",
@@ -5291,17 +5293,19 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
-        "docs/status.md"
+        "integration/alas/series/0099-operation-siren-meta-beacon-runtime.patch",
+        "docs/status.md",
+        "docs/alas-topdown-roadmap.md"
       ],
       "group_code": "B",
       "metadata": "type=checkbox; display=default",
@@ -5309,23 +5313,25 @@
         "OpsiAshBeacon"
       ],
       "path": "OpsiAshBeacon.OneHitMode",
-      "status_label": "☐ 未逐值",
+      "status_label": "◐ 实机当前值",
       "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
-        "docs/status.md"
+        "integration/alas/series/0099-operation-siren-meta-beacon-runtime.patch",
+        "docs/status.md",
+        "docs/alas-topdown-roadmap.md"
       ],
       "group_code": "B",
       "metadata": "type=checkbox; display=default",
@@ -5333,7 +5339,7 @@
         "OpsiAshBeacon"
       ],
       "path": "OpsiAshBeacon.RequestAssist",
-      "status_label": "☐ 未逐值",
+      "status_label": "◐ 实机当前值",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -8066,7 +8072,7 @@
         "EnemyPriority"
       ],
       "name": "EventA",
-      "note": "A1-A3 默认路径闭环；StageFilter 异常值及全部共用地图配置未完整覆盖",
+      "note": "A-D StageFilter/LastStage 离线轮转契约已完成；当前仅 A1-A3 默认路径有实机闭环，其余分区和共用地图配置仍未完整覆盖",
       "status": "L"
     },
     {
@@ -8123,7 +8129,7 @@
         "TaskBalancer"
       ],
       "name": "EventGeneral",
-      "note": "`PtLimit`、`TimeLimit`、任务切换和金币阈值没有完整调度证据",
+      "note": "五字段离线决策已完整；仍缺 typed PT/金币实机观察、时间相关性、真实任务切换恢复和防调度环证据",
       "status": "P"
     },
     {
@@ -8146,7 +8152,7 @@
         "EventStory"
       ],
       "name": "EventStory",
-      "note": "46 个故事中只跑过一条入口路径；战斗转场、跳过战斗及其他故事结构未闭环",
+      "note": "`SkipBattle` 在固定上游锁为 true 且无运行时消费者；false 需要新的剧情战斗状态机和多活动观察，当前仅一条入口路径，战斗转场及其他故事结构未闭环",
       "status": "P"
     },
     {
@@ -8167,7 +8173,7 @@
         "SupplyPack"
       ],
       "name": "Freebies",
-      "note": "BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线等价；真实战令奖励、Data Key 容量、免费补给及领取收据仍未闭环",
+      "note": "BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环",
       "status": "P"
     },
     {
@@ -8210,7 +8216,7 @@
         "OldRetire"
       ],
       "name": "General",
-      "note": "官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级适配",
+      "note": "三种 `RetireMode` 已离线分类，旧退役在 Headless 页面事件前拒绝；官方一键退役和 `keep_limit_break` 已实机闭环；强化三项详细配置、ALAS 正式任务入口、语义筛选/选舰导航、官方推荐、真实强化、容量差及装备入仓已闭环；完整 `favourite` 破坏性任务和自然无素材分支未额外消耗舰船复测，`do_not_keep` 仅设置级验证，旧退役仍缺任务级语义事务",
       "status": "P"
     },
     {
@@ -8331,7 +8337,7 @@
         "OpsiAshAssist"
       ],
       "name": "OpsiAshAssist",
-      "note": "可到列表/开始提示；受舰队条件限制，Tier、出击、战斗和领奖未闭环",
+      "note": "Tier 等级选择已离线等价；真实目标列表、出击、战斗和领奖仍受舰队条件限制",
       "status": "B"
     },
     {
@@ -8340,7 +8346,7 @@
         "OpsiAshBeacon"
       ],
       "name": "OpsiAshBeacon",
-      "note": "入口/状态可读；受点数限制，当前/档案、自动攻击、一击、求助和完整领取未闭环",
+      "note": "当前信标的一击模式主路径已实机闭环：200 点创建、三类求助、出击、战斗、两层结算、276085 伤害读取和 30 分钟延后；击杀领奖、档案与非一击分支仍缺独立实证",
       "status": "B"
     },
     {
@@ -8384,7 +8390,7 @@
         "OpsiGeneral"
       ],
       "name": "OpsiGeneral",
-      "note": "共享页面可读；随机事件、明石过滤、行动力购买、维修阈值、油量和 Logger 未完整覆盖",
+      "note": "六字段均已离线等价；真实购买/维修结果、资源 postcondition 和异常恢复仍未闭环",
       "status": "P"
     },
     {
@@ -8530,7 +8536,7 @@
         "GeneralShop"
       ],
       "name": "ShopFrequent",
-      "note": "可读页面并安全跳过；购买、过滤、刷新、金币/钻石和皮肤箱均未完成",
+      "note": "ConsumeCoins、BuySkinBox、UseGems、Filter 与 Refresh 已离线等价；购买、余额观察与确认仍未完成",
       "status": "B"
     },
     {
@@ -8542,7 +8548,7 @@
         "CoreShop"
       ],
       "name": "ShopOnce",
-      "note": "只有勋章商店一次 DR 图纸购买；其他商店、过滤/子选项和刷新未闭环",
+      "note": "GuildShop 14 字段与 MedalShop2 7 字段入口已离线等价；其余商店与真实操作未闭环",
       "status": "P"
     },
     {
