@@ -6841,6 +6841,22 @@ class AlasSemanticAdapter:
     def operation_siren_combat_committed(self) -> bool:
         return self._operation_siren_combat_active
 
+    def complete_operation_siren_combat_if_map_restored(self) -> bool:
+        """Release combat ownership on an exact unobstructed OS map."""
+
+        if not self._operation_siren_combat_active:
+            return False
+        # The map hierarchy remains mounted under grade and reward overlays.
+        # Do not release ownership until those exact result surfaces are gone.
+        if self.oracle.daily_battle_result_visible():
+            return False
+        if self.oracle.award_info_page_visible():
+            return False
+        if not self.oracle.operation_siren_local_map_visible():
+            return False
+        self._operation_siren_combat_active = False
+        return True
+
     def begin_operation_siren_boss_combat(self) -> None:
         """Own a boss encounter reached directly from the local map.
 
@@ -6893,6 +6909,10 @@ class AlasSemanticAdapter:
     ) -> Tuple[Tuple[int, int], ...]:
         self._package_gate()
         return self.oracle.operation_siren_radar_targets(target_kind)
+
+    def operation_siren_month_boss_room_difficulty(self) -> str:
+        self._package_gate()
+        return self.oracle.operation_siren_month_boss_room_difficulty()
 
     def click_operation_siren_radar_guidepost(
         self, relative_position: Tuple[int, int]
@@ -11425,6 +11445,14 @@ class AlasSemanticSession:
     _REVISION_PATTERN = re.compile(r"^[0-9a-f]{40}$")
     _LOGIN_STARTUP_UPDATE_STALE_RETRY_ATTEMPTS = 2399
     _INITIAL_GAME_STARTUP_RETRY_ATTEMPTS = 799
+    _LIVE_COMBAT_DRIVER_COMPATIBILITY = frozenset(
+        {
+            (
+                "be80ce591a481c12d60c50d6040d40c035b40a2b",
+                "506b76f698b5089aaa29c4e7908b48edb8532a44",
+            ),
+        }
+    )
 
     def __init__(
         self,
@@ -12164,7 +12192,28 @@ class AlasSemanticSession:
                 / "alas"
                 / "combat-observer-manifest.json"
             )
-            self._combat_manifest = load_alas_combat_observer_manifest(path)
+            manifest = load_alas_combat_observer_manifest(path)
+            if manifest.driver_revision != self.driver_revision:
+                compatibility = (
+                    manifest.driver_revision,
+                    self.driver_revision,
+                )
+                if compatibility not in self._LIVE_COMBAT_DRIVER_COMPATIBILITY:
+                    raise SemanticGateClosed(
+                        "combat observer manifest is not qualified for the "
+                        "active driver revision"
+                    )
+                # 506b is the reviewed image-capacity successor of the G27
+                # driver.  It retains the endpoint schemas and Unity selector
+                # contract, while increasing the rolling image reserve needed
+                # by large Operation Siren maps.  Rebind only this exact,
+                # checked compatibility edge so raw endpoint identity remains
+                # pinned to the active runtime below.
+                manifest = replace(
+                    manifest,
+                    driver_revision=self.driver_revision,
+                )
+            self._combat_manifest = manifest
         return self._combat_manifest
 
     def _live_combat_snapshot(self) -> Any:
@@ -12468,6 +12517,10 @@ class AlasSemanticSession:
             # combat observer's empty visible-resource set masks the restored
             # stage page forever.
             return adapter.appear(button)
+        if getattr(
+            adapter, "operation_siren_combat_committed", lambda: False
+        )():
+            adapter.complete_operation_siren_combat_if_map_restored()
         result_owner_active = bool(
             getattr(adapter, "daily_execution_active", lambda: False)()
             or adapter.campaign_combat_committed()
@@ -13062,6 +13115,9 @@ class AlasSemanticSession:
         self, target_kind: str
     ) -> Tuple[Tuple[int, int], ...]:
         return self.open().operation_siren_radar_targets(target_kind)
+
+    def operation_siren_month_boss_room_difficulty(self) -> str:
+        return self.open().operation_siren_month_boss_room_difficulty()
 
     def click_operation_siren_radar_boss(
         self, relative_position: Tuple[int, int]
@@ -13977,6 +14033,65 @@ class AlasSemanticSession:
 
     def complete_daily_battle_result(self) -> Tuple[ActionReceipt, ...]:
         return self.open().complete_daily_battle_result()
+
+    def orphan_combat_result_visible(self) -> bool:
+        """Detect an exact result stack that has no surviving task owner."""
+
+        adapter = self.open()
+        if (
+            adapter.daily_execution_active()
+            or adapter.campaign_combat_committed()
+            or adapter.operation_siren_combat_committed()
+            or getattr(adapter, "_exercise_execution_active", False)
+        ):
+            return False
+        oracle = adapter.oracle
+        return bool(
+            oracle.daily_battle_result_visible()
+            or oracle.campaign_battle_reward_visible()
+        )
+
+    def recover_orphan_combat_result(
+        self,
+        timeout_seconds: float = 45.0,
+    ) -> Tuple[ActionReceipt, ...]:
+        """Drain one exact ownerless result stack to a reviewed stable page."""
+
+        if not self.orphan_combat_result_visible():
+            raise SemanticGateClosed("orphan combat result is absent")
+        deadline = time.monotonic() + timeout_seconds
+        self._combat_result_transition_until = max(
+            self._combat_result_transition_until,
+            deadline,
+        )
+        receipts: List[ActionReceipt] = []
+        while time.monotonic() < deadline:
+            self.refresh_frame()
+            adapter = self.open()
+            oracle = adapter._require_frame_observation_oracle()
+            if oracle.daily_battle_result_visible():
+                receipts.append(oracle.click_daily_battle_result())
+                time.sleep(0.75)
+                continue
+            if oracle.campaign_battle_reward_visible():
+                target = (
+                    "reward/award-info/close"
+                    if oracle.enabled("reward/award-info/close")
+                    else "reward/award-info1/close"
+                )
+                receipts.append(oracle.click(target))
+                time.sleep(0.75)
+                continue
+            if (
+                oracle.operation_siren_page_visible()
+                or oracle.daily_page_visible()
+                or oracle.main_page_visible()
+            ):
+                return tuple(receipts)
+            time.sleep(0.25)
+        raise SemanticGateClosed(
+            "orphan combat result did not return to a reviewed stable page"
+        )
 
     def daily_execution_active(self) -> bool:
         return self.open().daily_execution_active()

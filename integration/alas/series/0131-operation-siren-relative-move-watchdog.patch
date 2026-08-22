@@ -1,0 +1,12 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+index 2939d36d..f7ac100a 100644
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -696,6 +696,7 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+         semantic_session = getattr(self.device, 'semantic_adapter', None)
+         if semantic_session is not None:
+             from alas_headless import SemanticGateClosed
++            self.device.stuck_record_clear()
+             reviewed_kinds = {
+                 'is_port': 'port',
+                 'is_exclamation': 'task',

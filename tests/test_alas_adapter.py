@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from alas_headless import (
+    AlasCombatObserverManifest,
     AlasSemanticAdapter,
     AlasSemanticSession,
     AlasSemanticUnmapped,
@@ -6813,6 +6814,25 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(gate_calls, [True, True])
         oracle.operation_siren_radar_targets.assert_called_with("boss")
 
+    def test_operation_siren_combat_owner_releases_only_on_unobstructed_map(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter._operation_siren_combat_active = True
+        oracle.daily_battle_result_visible = Mock(return_value=True)
+        oracle.award_info_page_visible = Mock(return_value=False)
+        oracle.operation_siren_local_map_visible = Mock(return_value=True)
+
+        self.assertFalse(adapter.complete_operation_siren_combat_if_map_restored())
+        self.assertTrue(adapter.operation_siren_combat_committed())
+
+        oracle.daily_battle_result_visible.return_value = False
+        oracle.award_info_page_visible.return_value = True
+        self.assertFalse(adapter.complete_operation_siren_combat_if_map_restored())
+        self.assertTrue(adapter.operation_siren_combat_committed())
+
+        oracle.award_info_page_visible.return_value = False
+        self.assertTrue(adapter.complete_operation_siren_combat_if_map_restored())
+        self.assertFalse(adapter.operation_siren_combat_committed())
+
     def test_operation_siren_interrupt_advances_exact_pause_leave_confirm_steps(self):
         adapter, oracle, _ = self.make_adapter()
         adapter._operation_siren_combat_active = True
@@ -7826,6 +7846,46 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             session.click(NamedButton("UNREVIEWED_CLICK"))
 
         self.assertIsNone(session.runtime_handle)
+
+    def test_live_combat_manifest_rebinds_only_reviewed_capacity_successor(self):
+        base_revision = "be80ce591a481c12d60c50d6040d40c035b40a2b"
+        live_revision = "506b76f698b5089aaa29c4e7908b48edb8532a44"
+        manifest = AlasCombatObserverManifest(
+            package="com.bilibili.azurlane",
+            driver_revision=base_revision,
+            game_fingerprint="reviewed-game",
+            resources=(),
+        )
+        session = AlasSemanticSession("emulator-test", live_revision)
+
+        with patch(
+            "alas_headless.alas_adapter.load_alas_combat_observer_manifest",
+            return_value=manifest,
+        ):
+            rebound = session._live_combat_manifest()
+
+        self.assertEqual(rebound.driver_revision, live_revision)
+        self.assertEqual(manifest.driver_revision, base_revision)
+        self.assertIs(session._live_combat_manifest(), rebound)
+
+    def test_live_combat_manifest_rejects_unknown_driver_transition(self):
+        manifest = AlasCombatObserverManifest(
+            package="com.bilibili.azurlane",
+            driver_revision="be80ce591a481c12d60c50d6040d40c035b40a2b",
+            game_fingerprint="reviewed-game",
+            resources=(),
+        )
+        session = AlasSemanticSession("emulator-test", "a" * 40)
+
+        with patch(
+            "alas_headless.alas_adapter.load_alas_combat_observer_manifest",
+            return_value=manifest,
+        ):
+            with self.assertRaisesRegex(
+                SemanticGateClosed,
+                "not qualified",
+            ):
+                session._live_combat_manifest()
 
     def test_environment_factory_requires_explicit_opt_in(self):
         environment = {

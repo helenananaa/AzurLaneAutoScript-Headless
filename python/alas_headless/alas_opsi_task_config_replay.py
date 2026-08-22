@@ -556,7 +556,10 @@ def _month_clear_case(
         month_boss_force_run=force_run,
     )
     events = config.events
-    host = SimpleNamespace(config=config)
+    host = SimpleNamespace(
+        config=config,
+        device=SimpleNamespace(semantic_adapter=None),
+    )
     host.is_in_opsi_explore = lambda: events.append("explore_probe") or False
     host.os_mission_enter = lambda: events.append("mission_enter")
     host.os_mission_quit = lambda: events.append("mission_quit")

@@ -1,0 +1,34 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+index 6ffeda35..2939d36d 100644
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -735,12 +735,28 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                         semantic_session.operation_siren_radar_targets(selected[0])
+                     )
+                 except SemanticGateClosed:
+-                    if selected[0] == 'task':
++                    if selected[0] in ('task', 'guidepost'):
+                         transition = Timer(15, count=40).start()
+                         while not transition.reached():
+                             self.device.screenshot()
+                             if self.appear(MAP_EXIT, offset=(20, 20)):
+                                 return
++                            if selected[0] == 'guidepost':
++                                try:
++                                    current = tuple(
++                                        semantic_session.operation_siren_radar_targets(
++                                            selected[0]
++                                        )
++                                    )
++                                    break
++                                except SemanticGateClosed:
++                                    continue
++                        else:
++                            raise SemanticGateClosed(
++                                'Operation Siren room transition did not expose exit'
++                            )
++                        if selected[0] == 'guidepost':
++                            continue
+                         raise SemanticGateClosed(
+                             'Operation Siren room transition did not expose exit'
+                         )

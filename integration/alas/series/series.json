@@ -369,6 +369,31 @@
       "order": 74,
       "path": "integration/alas/series/0127-operation-siren-combat-interrupt.patch",
       "sha256": "2892aaf39bb3bdf2461de20debf92aa9120ba39228489ff5a4b3a1e3deea4f2c"
+    },
+    {
+      "order": 75,
+      "path": "integration/alas/series/0128-orphan-combat-result-recovery.patch",
+      "sha256": "e01e363c856043e87cbff245943a70dd637dea28bbaa6a88c0f1b7dafea38f3b"
+    },
+    {
+      "order": 76,
+      "path": "integration/alas/series/0129-operation-siren-month-boss-room-mode.patch",
+      "sha256": "d29ddfa685912ee48bb25efd4d2e361077fb0a7fc8981e0900403d53e5217c5f"
+    },
+    {
+      "order": 77,
+      "path": "integration/alas/series/0130-operation-siren-room-transition-remount.patch",
+      "sha256": "0ecf2fef1041a13b39e4ce9a4a80e90b1123cf4d5e7c114759f5fcc07378674b"
+    },
+    {
+      "order": 78,
+      "path": "integration/alas/series/0131-operation-siren-relative-move-watchdog.patch",
+      "sha256": "5b4c278fb77b9ddafce0846da32208dbb0993cd5f76a0730b0364ac6425c3734"
+    },
+    {
+      "order": 79,
+      "path": "integration/alas/series/0132-operation-siren-month-boss-route-events.patch",
+      "sha256": "3086852780c338cc74acbc2812d8dd2c8da84485a5cee8e9107d2f632f0576b9"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

@@ -1,0 +1,106 @@
+diff --git a/module/os/fleet.py b/module/os/fleet.py
+index 6ac4a0b..e155e44 100644
+--- a/module/os/fleet.py
++++ b/module/os/fleet.py
+@@ -697,11 +697,10 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             reviewed_kinds = {
+                 'is_port': 'port',
+                 'is_exclamation': 'task',
+-                # Month-boss rooms expose the legacy radar ``question``
+-                # mechanism as exact Unity guidepost events (7030010 /
+-                # 7030050).  Keep ALAS' route planning and only replace the
+-                # observation port.
+-                'is_question': 'guidepost',
++                # Preserve the narrower legacy radar ``question`` class.
++                # The semantic oracle separates fubiao buoys from other
++                # exact Unity guidepost events in month-boss rooms.
++                'is_question': 'question',
+             }
+             selected = [
+                 kind for flag, kind in reviewed_kinds.items()
+@@ -714,17 +713,58 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+             grids = list(
+                 semantic_session.operation_siren_radar_targets(selected[0])
+             )
++            logger.info(
++                f'Typed relative targets kind={selected[0]}, grids={grids}, '
++                f'index={index}, offset={relative_position}'
++            )
+             if near_by:
+                 grids.sort(key=lambda grid: np.linalg.norm(grid))
+-            if not 0 <= index < len(grids):
++            if not grids:
+                 logger.info('No position to goto, stop')
++            elif not 0 <= index < len(grids):
++                # Match SelectedGrids.__getitem__: month-boss routing uses
++                # this IndexError to select its single-waypoint fallback.
++                raise IndexError(index)
+             else:
+                 grid = np.add(location_ensure(grids[index]), relative_position)
+                 grid = point_limit(grid, area=(-4, -2, 3, 2))
+                 if has_fleet_step:
+                     grid = limit_walk(grid)
++                prefer_adjacent_event = False
++                if selected[0] == 'question':
++                    guideposts = set(
++                        semantic_session.operation_siren_radar_targets(
++                            'guidepost'
++                        )
++                    )
++                    question_waypoints = set(grids)
++                    crossings = []
++                    grid_x, grid_y = (int(grid[0]), int(grid[1]))
++                    for candidate in guideposts - question_waypoints:
++                        x, y = candidate
++                        if (
++                                abs(x) + abs(y) == 1
++                                and grid_x * y == grid_y * x
++                                and grid_x * x + grid_y * y > 0
++                        ):
++                            crossings.append(candidate)
++                    if len(crossings) > 1:
++                        raise SemanticGateClosed(
++                            'Operation Siren adjacent route event is ambiguous'
++                        )
++                    if crossings:
++                        # Arbiter hard rooms place an exact taban_jinzhi
++                        # switch between the fleet and the requested grid.
++                        # Clicking the grid beyond the closed switch is
++                        # ignored by the game; activate the owned adjacent
++                        # event instead, then let the normal radar loop prove
++                        # that the boss became reachable.
++                        grid = np.array(crossings[0])
++                        prefer_adjacent_event = True
++                logger.info(f'Typed relative click grid={tuple(grid)}')
+                 semantic_session.click_operation_siren_relative_grid(
+-                    tuple(int(value) for value in grid)
++                    tuple(int(value) for value in grid),
++                    prefer_adjacent_event=prefer_adjacent_event,
+                 )
+             stable = Timer(1.5, count=4).start()
+             timeout = Timer(30, count=80).start()
+@@ -736,13 +776,13 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                         semantic_session.operation_siren_radar_targets(selected[0])
+                     )
+                 except SemanticGateClosed:
+-                    if selected[0] in ('task', 'guidepost'):
++                    if selected[0] in ('task', 'guidepost', 'question'):
+                         transition = Timer(15, count=40).start()
+                         while not transition.reached():
+                             self.device.screenshot()
+                             if self.appear(MAP_EXIT, offset=(20, 20)):
+                                 return
+-                            if selected[0] == 'guidepost':
++                            if selected[0] in ('guidepost', 'question'):
+                                 try:
+                                     current = tuple(
+                                         semantic_session.operation_siren_radar_targets(
+@@ -756,7 +796,7 @@ class OSFleet(OSCamera, Combat, Fleet, OSAsh):
+                             raise SemanticGateClosed(
+                                 'Operation Siren room transition did not expose exit'
+                             )
+-                        if selected[0] == 'guidepost':
++                        if selected[0] in ('guidepost', 'question'):
+                             continue
+                         raise SemanticGateClosed(
+                             'Operation Siren room transition did not expose exit'

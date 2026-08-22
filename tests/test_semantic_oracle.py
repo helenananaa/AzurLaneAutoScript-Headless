@@ -1011,6 +1011,44 @@ class SemanticOracleTests(unittest.TestCase):
         backend.ui = make_ui([make_text("奖励", "root/ordinary/reward/title")])
         self.assertFalse(oracle.campaign_battle_reward_visible())
 
+    def test_operation_siren_event_trigger_result_click_is_exact(self):
+        root = "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)"
+        continue_path = (
+            root
+            + "/NewBattleResultGradePage(Clone)/bg/ResultEffect/Tips/"
+            "dianjijixu/bg20"
+        )
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "点击继续",
+                    continue_path,
+                    {"left": 160.0, "top": 617.0, "right": 264.0, "bottom": 643.0},
+                ),
+                make_text("VICTORY", root + "/Effect/bg03/Text"),
+            ],
+            images=[
+                make_image(root, "bg_mask"),
+                make_image(root + "/Effect", "jiesuan_bg02"),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.daily_battle_result_visible())
+        receipt = oracle.click_daily_battle_result()
+
+        self.assertEqual(receipt.semantic_id, "operation-siren/battle/result")
+        self.assertEqual(receipt.path, continue_path)
+        self.assertEqual(backend.taps, [(212, 630)])
+
+        backend.taps.clear()
+        backend.ui["texts"][1]["text"] = "UNKNOWN"
+        self.assertFalse(oracle.daily_battle_result_visible())
+        with self.assertRaisesRegex(SemanticGateClosed, "absent"):
+            oracle.click_daily_battle_result()
+        self.assertEqual(backend.taps, [])
+
     def test_war_archives_page_counter_and_uncollected_state_are_exact(self):
         root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)"
         backend = FakeBackend(
@@ -9808,6 +9846,47 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "os/map/boss/relative/0/0")
         self.assertEqual(backend.taps, [(640, 350)])
 
+    def test_radar_boss_click_accepts_exact_month_boss_event_shadow(self):
+        radar = (
+            "OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
+            "compass_panel/ring/compass/range/7032027"
+        )
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/"
+                    "other/fleet_bar/text_selected/x",
+                    "4",
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/"
+                    "cells/fleet_4/shadow",
+                    "shadow",
+                    {"left": 584, "top": 319, "right": 696, "bottom": 401},
+                ),
+                make_image(
+                    radar,
+                    "boss",
+                    {"left": 1132, "top": 206, "right": 1150, "bottom": 225},
+                ),
+                make_image(
+                    "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/"
+                    "cells/cell_4_6/attachments/event_7032027/char/shadow",
+                    "shadow",
+                    {"left": 588, "top": 187, "right": 692, "bottom": 263},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+        oracle.operation_siren_radar_targets = mock.Mock(return_value=((0, -1),))
+
+        receipt = oracle.click_operation_siren_radar_boss((0, -1))
+
+        self.assertEqual(receipt.semantic_id, "os/map/boss/relative/0/-1")
+        self.assertEqual(backend.taps, [(640, 225)])
+
     def test_radar_boss_click_rejects_ambiguous_overlapped_shadows(self):
         backend = FakeBackend([])
         backend.ui = make_ui(
@@ -9920,6 +9999,21 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
                     "（离开后将无法再次返回）",
                     prompt_path,
                 )
+            ]
+        )
+        self.assertTrue(oracle.operation_siren_exit_prompt_visible())
+
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "困难难度：仲裁者·司特莲库斯·VIII",
+                    "root/top/adapt/top_stage/title/name",
+                ),
+                make_text(
+                    "是否确定从困难难度：仲裁者·司特莲库斯·VIII中离开？\n"
+                    "（离开后当前作战进度将会重置，已获得的奖励无法重复领取）",
+                    prompt_path,
+                ),
             ]
         )
         self.assertTrue(oracle.operation_siren_exit_prompt_visible())
@@ -10373,6 +10467,100 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         )
         self.assertTrue(adjacent.path.endswith("fubiao3(Clone)"))
         self.assertEqual(backend.taps[-1], (745, 345))
+
+    def test_typed_question_radar_excludes_non_buoy_guidepost_and_orders_like_alas(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        root = (
+            "OverlayCamera/Overlay/UIMain/top/adapt/right_stage/"
+            "compass_panel/ring/compass/range/"
+        )
+        world = (
+            "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/"
+        )
+        backend.ui = make_ui(
+            [],
+            images=[
+                make_image(
+                    root + "7030051",
+                    "guidepost",
+                    {"left": 1136.1, "top": 207.5, "right": 1145.9, "bottom": 222.9},
+                ),
+                make_image(
+                    root + "7030011",
+                    "guidepost",
+                    {"left": 1124.433, "top": 265.833, "right": 1134.233, "bottom": 281.233},
+                ),
+                make_image(
+                    world
+                    + "cell_12_5/attachments/event_7030011/icon/model/"
+                    "fubiao3(Clone)",
+                    "fubiao3",
+                ),
+                make_image(
+                    world
+                    + "cell_7_6/attachments/event_7030051/icon/model/"
+                    "taban_jinzhi(Clone)/taban",
+                    "taban01",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("guidepost"),
+            ((-1, 4), (0, -1)),
+        )
+        self.assertEqual(
+            oracle.operation_siren_radar_targets("question"),
+            ((-1, 4),),
+        )
+
+    def test_month_boss_room_difficulty_uses_exact_retained_title(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/back_button",
+                ),
+                make_button(
+                    "fleet_bar",
+                    "root/OverlayCamera/Overlay/UIMain/top/adapt/left_stage/other/fleet_bar",
+                ),
+            ]
+        )
+        title_path = (
+            "root/OverlayCamera/Overlay/UIMain/top/adapt/top_stage/title/name"
+        )
+        backend.ui = make_ui(
+            [make_text("普通难度：仲裁者·司特劳斯·VIII", title_path)]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(
+            oracle.operation_siren_month_boss_room_difficulty(),
+            "normal",
+        )
+        backend.ui = make_ui(
+            [make_text("困难难度：仲裁者·司特劳斯·VIII", title_path)]
+        )
+        self.assertEqual(
+            oracle.operation_siren_month_boss_room_difficulty(),
+            "hard",
+        )
+        backend.ui = make_ui([make_text("NA海域西南B-安全海域", title_path)])
+        with self.assertRaisesRegex(SemanticGateClosed, "title"):
+            oracle.operation_siren_month_boss_room_difficulty()
 
     def test_typed_boss_radar_survives_bounded_image_slice(self):
         backend = FakeBackend(

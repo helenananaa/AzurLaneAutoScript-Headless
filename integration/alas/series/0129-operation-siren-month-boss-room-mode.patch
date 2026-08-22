@@ -1,0 +1,26 @@
+diff --git a/module/os/tasks/month_boss.py b/module/os/tasks/month_boss.py
+index 7b9e8c5d..096114b1 100644
+--- a/module/os/tasks/month_boss.py
++++ b/module/os/tasks/month_boss.py
+@@ -83,6 +83,21 @@ class OpsiMonthBoss(OSMap):
+         # combat
+         logger.hr("Month Boss goto", level=2)
+         self.globe_goto(154)
++        semantic_session = getattr(self.device, 'semantic_adapter', None)
++        if (
++                semantic_session is not None
++                and self.appear(MAP_EXIT, offset=(20, 20))
++        ):
++            retained = (
++                semantic_session.operation_siren_month_boss_room_difficulty()
++            )
++            requested = 'normal' if is_normal else 'hard'
++            if retained != requested:
++                logger.info(
++                    f'Leave retained {retained} Month Boss room before '
++                    f'entering {requested}'
++                )
++                self.map_exit()
+         if not self.appear(MAP_EXIT, offset=(20, 20)):
+             self.handle_os_map_fleet_lock(enable=False)
+         self.go_month_boss_room(is_normal=is_normal)
