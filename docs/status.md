@@ -1420,7 +1420,16 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   comparison, up to five beacon rotations, and current-beacon fallback for
   exact integer thresholds. Malformed values fail before the first page
   observation or click. No artificial level range is imposed because pinned
-  ALAS declares none.
+  ALAS declares none. The live semantic path now binds the exact selected
+  candidate index, level, HP, candidate count, and remaining attempts before
+  every next-candidate tap, then rejects stale or ambiguous identity. A bounded
+  live run covered `-1`, `0`, and `15` with zero input and `16` with the
+  original five rotations (`7→8→1→2→3→4`) plus fallback. Attempts remained
+  `3/3`, selected HP remained `1600000`, no sortie was started, and no account
+  resource changed. Evidence is
+  `integration/alas/opsi-ash-assist-tier-live-20260822.json`; the field is now
+  five-dimension complete, while the OpsiAshAssist task panel still lacks the
+  no-target, unavailable-fleet, sortie, combat, and reward chains.
 - `OpsiAshBeacon.EnsureFullyCollected` preserves both original action-point
   reserve branches in `os_hazard1_leveling()` and `os_meowfficer_farming()`.
   With an enabled, uncollected beacon, `false` retains the normal 200/1,000

@@ -1,0 +1,136 @@
+{
+  "schema": "alas-headless.opsi-ash-assist-tier-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 1953,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "2d01e7f9b560ef166c2edf57bc364f30dbe6aafcee67250add5e779b70a155f9",
+  "cases": [
+    {
+      "tier": -1,
+      "before": {
+        "remaining_attempts": 3,
+        "attempt_capacity": 3,
+        "selected_level": 15,
+        "selected_hp": 1600000,
+        "candidate_count": 8,
+        "selected_candidate_index": 7
+      },
+      "after": {
+        "remaining_attempts": 3,
+        "attempt_capacity": 3,
+        "selected_level": 15,
+        "selected_hp": 1600000,
+        "candidate_count": 8,
+        "selected_candidate_index": 7
+      },
+      "input_semantic_ids": [],
+      "elapsed_seconds": 0.5
+    },
+    {
+      "tier": 0,
+      "before": {
+        "remaining_attempts": 3,
+        "attempt_capacity": 3,
+        "selected_level": 15,
+        "selected_hp": 1600000,
+        "candidate_count": 8,
+        "selected_candidate_index": 7
+      },
+      "after": {
+        "remaining_attempts": 3,
+        "attempt_capacity": 3,
+        "selected_level": 15,
+        "selected_hp": 1600000,
+        "candidate_count": 8,
+        "selected_candidate_index": 7
+      },
+      "input_semantic_ids": [],
+      "elapsed_seconds": 0.688
+    },
+    {
+      "tier": 15,
+      "before": {
+        "remaining_attempts": 3,
+        "attempt_capacity": 3,
+        "selected_level": 15,
+        "selected_hp": 1600000,
+        "candidate_count": 8,
+        "selected_candidate_index": 7
+      },
+      "after": {
+        "remaining_attempts": 3,
+        "attempt_capacity": 3,
+        "selected_level": 15,
+        "selected_hp": 1600000,
+        "candidate_count": 8,
+        "selected_candidate_index": 7
+      },
+      "input_semantic_ids": [],
+      "elapsed_seconds": 0.437
+    },
+    {
+      "tier": 16,
+      "before": {
+        "remaining_attempts": 3,
+        "attempt_capacity": 3,
+        "selected_level": 15,
+        "selected_hp": 1600000,
+        "candidate_count": 8,
+        "selected_candidate_index": 7
+      },
+      "after": {
+        "remaining_attempts": 3,
+        "attempt_capacity": 3,
+        "selected_level": 15,
+        "selected_hp": 1600000,
+        "candidate_count": 8,
+        "selected_candidate_index": 4
+      },
+      "input_semantic_ids": [
+        "meta/assist/candidate/8",
+        "meta/assist/candidate/1",
+        "meta/assist/candidate/2",
+        "meta/assist/candidate/3",
+        "meta/assist/candidate/4"
+      ],
+      "elapsed_seconds": 7.515
+    }
+  ],
+  "input_semantic_ids": [
+    "meta/assist/candidate/8",
+    "meta/assist/candidate/1",
+    "meta/assist/candidate/2",
+    "meta/assist/candidate/3",
+    "meta/assist/candidate/4"
+  ],
+  "final_action_semantic_ids": [],
+  "sortie_started": false,
+  "account_resource_mutations": [],
+  "navigation": [],
+  "initial_state": {
+    "remaining_attempts": 3,
+    "attempt_capacity": 3,
+    "selected_level": 15,
+    "selected_hp": 1600000,
+    "candidate_count": 8,
+    "selected_candidate_index": 7
+  },
+  "final_state": {
+    "remaining_attempts": 3,
+    "attempt_capacity": 3,
+    "selected_level": 15,
+    "selected_hp": 1600000,
+    "candidate_count": 8,
+    "selected_candidate_index": 4
+  },
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "meta_task": "c8547f694c5159a933a72f7f401bf0bf1b97fc54ecd757f8a1ccb82f5e8ce5f0",
+    "adapter": "6c26aa4f340b234874a3f6b5b9d17fa294a7db9251bac1b818f8cfad218bd1a5",
+    "oracle": "7e4a6f7d807dc803142df569f8c294e9ab182e95533287db033ed5c418b25fb6"
+  }
+}

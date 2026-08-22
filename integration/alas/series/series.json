@@ -404,6 +404,11 @@
       "order": 81,
       "path": "integration/alas/series/0134-operation-siren-month-boss-result.patch",
       "sha256": "843a93a986f58e25cd8a9e566d6ad1c84b0b4d20217000d8b34027312bc54f2b"
+    },
+    {
+      "order": 82,
+      "path": "integration/alas/series/0390-meta-assist-tier-runtime.patch",
+      "sha256": "f98cfd30c407c7d7d1b93141c09f938a468b927e05b0095c8fb30d2db42328c7"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

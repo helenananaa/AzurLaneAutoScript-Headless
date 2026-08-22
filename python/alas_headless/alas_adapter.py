@@ -7174,6 +7174,15 @@ class AlasSemanticAdapter:
         self._package_gate()
         return self.oracle.meta_assist_state()
 
+    def click_meta_assist_next_candidate(
+        self, *, expected_index: int, expected_level: int
+    ) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_meta_assist_next_candidate(
+            expected_index=expected_index,
+            expected_level=expected_level,
+        )
+
     def meta_current_empty_points(self) -> Tuple[int, int]:
         self._package_gate()
         return self.oracle.meta_current_empty_points()
@@ -13354,6 +13363,14 @@ class AlasSemanticSession:
 
     def meta_assist_state(self) -> MetaAssistState:
         return self.open().meta_assist_state()
+
+    def click_meta_assist_next_candidate(
+        self, *, expected_index: int, expected_level: int
+    ) -> ActionReceipt:
+        return self.open().click_meta_assist_next_candidate(
+            expected_index=expected_index,
+            expected_level=expected_level,
+        )
 
     def meta_current_empty_points(self) -> Tuple[int, int]:
         return self.open().meta_current_empty_points()

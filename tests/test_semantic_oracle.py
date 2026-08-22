@@ -9361,6 +9361,91 @@ class RetirementSemanticOracleTests(unittest.TestCase):
 
 
 class OperationSirenSemanticOracleTests(unittest.TestCase):
+    @staticmethod
+    def _meta_assist_backend(selected_index=2):
+        root = (
+            "root/UICamera/Canvas/UIMain/WorldBossUI(Clone)/pages/"
+            "CurrentWorldBossChallengeUI(Clone)/"
+        )
+        buttons = [
+            make_button(
+                "start_btn",
+                root + "main/start_btn",
+                x=1050,
+                y=630,
+                raycast_top=None,
+            )
+        ]
+        for index, y in ((1, 120), (2, 260), (3, 400)):
+            buttons.append(
+                make_button(
+                    str(index),
+                    root + "list_panel/mask/bg/container/{0}".format(index),
+                    x=260,
+                    y=y,
+                    bounds={
+                        "left": 80,
+                        "top": y - 40,
+                        "right": 440,
+                        "bottom": y + 40,
+                    },
+                    raycast_top=None,
+                )
+            )
+        backend = FakeBackend(buttons)
+        backend.ui = make_ui(
+            [
+                make_text("3/3", root + "point/Text"),
+                make_text("HP:1600000", root + "main/hp/Text"),
+                make_text("15", root + "main/hp/level/Text"),
+                make_text(
+                    "",
+                    root
+                    + "list_panel/mask/bg/container/{0}/selected/"
+                    "challenging/Text".format(selected_index),
+                ),
+            ]
+        )
+        return backend
+
+    def test_meta_assist_state_binds_selected_candidate_and_next_input(self):
+        backend = self._meta_assist_backend(selected_index=2)
+        oracle = make_oracle(backend)
+
+        state = oracle.meta_assist_state()
+        self.assertEqual(state.remaining_attempts, 3)
+        self.assertEqual(state.selected_level, 15)
+        self.assertEqual(state.candidate_count, 3)
+        self.assertEqual(state.selected_candidate_index, 2)
+
+        receipt = oracle.click_meta_assist_next_candidate(
+            expected_index=2,
+            expected_level=15,
+        )
+        self.assertEqual(receipt.semantic_id, "meta/assist/candidate/3")
+        self.assertEqual(backend.taps, [(260, 400)])
+
+    def test_meta_assist_next_candidate_rejects_stale_selection(self):
+        backend = self._meta_assist_backend(selected_index=2)
+        oracle = make_oracle(backend)
+
+        with self.assertRaisesRegex(SemanticGateClosed, "changed before selection"):
+            oracle.click_meta_assist_next_candidate(
+                expected_index=1,
+                expected_level=15,
+            )
+        self.assertEqual(backend.taps, [])
+
+    def test_meta_assist_state_rejects_missing_selected_identity(self):
+        backend = self._meta_assist_backend(selected_index=2)
+        backend.ui["texts"].pop()
+        backend.ui["text_count"] -= 1
+        oracle = make_oracle(backend)
+
+        with self.assertRaisesRegex(SemanticGateClosed, "selected.*ambiguous"):
+            oracle.meta_assist_state()
+        self.assertEqual(backend.taps, [])
+
     def test_action_point_entry_uses_exact_stamina_resource_and_proves_popup(self):
         backend = FakeBackend(
             [

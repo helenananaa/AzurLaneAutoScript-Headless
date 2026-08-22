@@ -38,6 +38,7 @@ from alas_headless import (
 from alas_headless.semantic_oracle import (
     ActionReceipt,
     AdbObserverBridge,
+    MetaAssistState,
     ObserverTransportError,
 )
 from alas_headless.adapter import SemanticFrameIdentity
@@ -161,6 +162,14 @@ class FakeOracle:
         self.mail_surface_kind_value = None
         self.main_page_visible_value = False
         self.meta_page_visible_value = False
+        self.meta_assist_state_value = MetaAssistState(
+            remaining_attempts=3,
+            attempt_capacity=3,
+            selected_level=15,
+            selected_hp=1600000,
+            candidate_count=8,
+            selected_candidate_index=2,
+        )
         self.event_campaign_page_visible_value = False
         self.game_room_page_visible_value = False
         self.daily_page_visible_value = False
@@ -468,6 +477,18 @@ class FakeOracle:
 
     def meta_current_detail_state(self):
         raise SemanticGateClosed("META current detail identity is absent")
+
+    def meta_assist_state(self):
+        return self.meta_assist_state_value
+
+    def click_meta_assist_next_candidate(self, *, expected_index, expected_level):
+        if (
+            expected_index != self.meta_assist_state_value.selected_candidate_index
+            or expected_level != self.meta_assist_state_value.selected_level
+        ):
+            raise SemanticGateClosed("META assist candidate changed before selection")
+        self.click_calls.append("meta/assist/candidate/3")
+        return self.click_receipt("meta/assist/candidate/3")
 
     def click_meta_home(self):
         self.click_calls.append("meta/home")
@@ -1570,6 +1591,23 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "meta/current/create")
         oracle.click_meta_current_create.assert_called_once_with()
+
+    def test_meta_assist_candidate_port_preserves_typed_expectations_through_session(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+
+        state = session.meta_assist_state()
+        receipt = session.click_meta_assist_next_candidate(
+            expected_index=state.selected_candidate_index,
+            expected_level=state.selected_level,
+        )
+
+        self.assertEqual(state, oracle.meta_assist_state_value)
+        self.assertEqual(receipt.semantic_id, "meta/assist/candidate/3")
+        self.assertEqual(oracle.click_calls, ["meta/assist/candidate/3"])
+        self.assertEqual(gate_calls, [True, True])
 
     def test_meta_beacon_owner_keeps_generic_reward_probe_passive(self):
         adapter, oracle, _ = self.make_adapter()

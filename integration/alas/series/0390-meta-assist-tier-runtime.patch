@@ -1,0 +1,45 @@
+diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
+--- a/module/os_ash/meta.py
++++ b/module/os_ash/meta.py
+@@ -624,12 +624,40 @@ class AshBeaconAssist(Meta):
+         """
+         Select an meta whose level satisfies
+         """
+-        from alas_headless import validate_alas_opsi_ash_assist_tier
++        from alas_headless import SemanticGateClosed, validate_alas_opsi_ash_assist_tier
+ 
+         # Ensure BEACON_TIER shown up
+         # When entering beacon list, tier number wasn't shown immediately.
+         tier = validate_alas_opsi_ash_assist_tier(
+             tier=self.config.OpsiAshAssist_Tier,
+         )
+         logger.info('Begin find a level ' + str(tier) + ' meta')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            current = -1
++            for _ in range(5):
++                state = semantic_adapter.meta_assist_state()
++                current = state.selected_level
++                if current >= tier:
++                    break
++                receipt = semantic_adapter.click_meta_assist_next_candidate(
++                    expected_index=state.selected_candidate_index,
++                    expected_level=current,
++                )
++                expected_index = int(receipt.semantic_id.rsplit('/', 1)[-1])
++                for _wait in range(20):
++                    self.device.sleep(0.25)
++                    updated = semantic_adapter.meta_assist_state()
++                    if updated.selected_candidate_index == expected_index:
++                        break
++                else:
++                    raise SemanticGateClosed(
++                        'META assist candidate did not change after typed input'
++                    )
++            if current < tier:
++                logger.info(
++                    f'Tier {tier} beacon not found after 5 trial, use current beacon'
++                )
++            logger.info('Find a beacon in level:' + str(current))
++            return
+         for n in range(10):

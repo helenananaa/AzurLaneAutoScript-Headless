@@ -5195,16 +5195,20 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
-        "observation": "partial",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0390-meta-assist-tier-runtime.patch",
+        "scripts/python/run_alas_opsi_ash_assist_tier_live_validation.py",
+        "integration/alas/opsi-ash-assist-tier-live-20260822.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -5213,7 +5217,7 @@
         "OpsiAshAssist"
       ],
       "path": "OpsiAshAssist.Tier",
-      "status_label": "◐ 实机当前值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: 15"
     },
@@ -8337,7 +8341,7 @@
         "OpsiAshAssist"
       ],
       "name": "OpsiAshAssist",
-      "note": "Tier 等级选择已离线等价；真实目标列表、出击、战斗和领奖仍受舰队条件限制",
+      "note": "Tier 已以 typed 候选身份和 stale-state gate 完成整数等价类及五次轮换实机闭环；助战次数 3/3 未变且未出击。面板仍缺无目标、舰队不可用、出击、战斗和领奖主链",
       "status": "B"
     },
     {
@@ -8595,16 +8599,24 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_opsi_task_config.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_opsi_task_config_replay.py",
         "integration/alas/series/0090-operation-siren-flow-ports.patch",
+        "integration/alas/series/0390-meta-assist-tier-runtime.patch",
+        "scripts/python/run_alas_opsi_ash_assist_tier_live_validation.py",
+        "integration/alas/opsi-ash-assist-tier-live-20260822.json",
         "docs/status.md"
       ],
       "field": "OpsiAshAssist.Tier",
-      "note": "Exact integer thresholds preserve the original visibility wait, OCR comparison, up to five beacon rotations, and current-beacon fallback; malformed values fail before page observation or input. No level range is invented because pinned ALAS declares none."
+      "note": "Exact integer thresholds preserve the original comparison, up to five beacon rotations, and current-beacon fallback through typed candidate identity and stale-state gates. Live -1, 0, and 15 emitted no input; 16 selected five exact candidates without changing 3/3 attempts or starting a sortie. Malformed values fail before observation or input, and no undeclared level range is invented."
     },
     {
       "dimensions": {
@@ -11347,9 +11359,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "594b7ad666450dc8c1c0a6f40d18e69257a6d15cb79b68f587fb0650c9cdcc99",
-      "manifest_sha256": "7976a577d2b16715b228423b1acdf36ed375c5f76aafa5114e29f914b689c3e1",
-      "member_count": 81
+      "combined_sha256": "d83b59be0e1aea548b47068f4c95545939bd91d07362913f7946d27d8f7d5c3e",
+      "manifest_sha256": "53feb46068973d7cd811f9c3b471634725637948f397946d4f4f2c3979aeeb48",
+      "member_count": 82
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

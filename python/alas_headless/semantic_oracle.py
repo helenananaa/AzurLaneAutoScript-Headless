@@ -1023,6 +1023,7 @@ class MetaAssistState:
     selected_level: int
     selected_hp: int
     candidate_count: int
+    selected_candidate_index: int
 
 
 @dataclass(frozen=True)
@@ -15549,6 +15550,20 @@ class SemanticOracle:
             <= button_state.generation + 2
         ):
             raise SemanticGateClosed("META assist snapshots are not coherent")
+        selected_pattern = re.compile(
+            r".*/"
+            + re.escape(root)
+            + r"list_panel/mask/bg/container/([1-9][0-9]*)/selected(?:/.*)?$"
+        )
+        selected_indices = {
+            int(match.group(1))
+            for text in ui_state.texts
+            if text.active_in_hierarchy
+            and text.active_and_enabled
+            and (match := selected_pattern.fullmatch(text.path)) is not None
+        }
+        if len(selected_indices) != 1:
+            raise SemanticGateClosed("META selected assist candidate is ambiguous")
 
         def exact(path: str) -> str:
             matches = tuple(
@@ -15579,14 +15594,84 @@ class SemanticOracle:
         ):
             raise SemanticGateClosed("META assist summary is malformed")
         attempts, capacity = map(int, attempts_match.groups())
+        selected_candidate_index = next(iter(selected_indices))
+        candidate_indices = {int(candidate.name) for candidate in candidates}
         if attempts > capacity:
             raise SemanticGateClosed("META assist attempts are inconsistent")
+        if selected_candidate_index not in candidate_indices:
+            raise SemanticGateClosed("META selected assist candidate is inconsistent")
         return MetaAssistState(
             remaining_attempts=attempts,
             attempt_capacity=capacity,
             selected_level=int(level),
             selected_hp=int(hp_match.group(1)),
             candidate_count=len(candidates),
+            selected_candidate_index=selected_candidate_index,
+        )
+
+    def click_meta_assist_next_candidate(
+        self,
+        *,
+        expected_index: int,
+        expected_level: int,
+    ) -> ActionReceipt:
+        """Select the next mounted assist candidate with exact stale-state guards."""
+
+        if (
+            isinstance(expected_index, bool)
+            or not isinstance(expected_index, int)
+            or expected_index < 1
+            or isinstance(expected_level, bool)
+            or not isinstance(expected_level, int)
+            or expected_level < 1
+        ):
+            raise SemanticGateClosed("META assist candidate expectation is invalid")
+        summary = self.meta_assist_state()
+        if (
+            summary.selected_candidate_index != expected_index
+            or summary.selected_level != expected_level
+        ):
+            raise SemanticGateClosed("META assist candidate changed before selection")
+
+        state = self.read_state()
+        root = "WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/"
+        candidate_pattern = re.compile(
+            r".*/" + re.escape(root) + r"list_panel/mask/bg/container/([1-9][0-9]*)$"
+        )
+        candidates = []
+        for button in state.buttons:
+            match = candidate_pattern.fullmatch(button.path)
+            if match is None or button.name != match.group(1):
+                continue
+            candidates.append((int(match.group(1)), button))
+        candidates.sort(key=lambda item: item[0])
+        indices = tuple(index for index, _button in candidates)
+        if len(candidates) < 2 or expected_index not in indices:
+            raise SemanticGateClosed("META next assist candidate is absent")
+        selected_position = indices.index(expected_index)
+        next_index, target = candidates[(selected_position + 1) % len(candidates)]
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and 0 <= target.point.x < self.fingerprint.width
+            and 0 <= target.point.y < self.fingerprint.height
+            and not self._blocking_rules(state, "meta/assist/start")
+        ):
+            raise SemanticGateClosed("META next assist candidate is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before META candidate input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="meta/assist/candidate/{0}".format(next_index),
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
         )
 
     def click_meta_assist_start(self) -> ActionReceipt:

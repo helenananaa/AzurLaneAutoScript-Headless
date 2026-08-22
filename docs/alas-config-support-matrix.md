@@ -439,7 +439,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 39 | PrivateQuarters | Scheduler, PrivateQuarters | O | 四项设置有固定上游的严格门禁和原方法离线回放；页面、货币、互动与输入闭环仍缺 |
 | 40 | OpsiGeneral | OpsiGeneral | P | 六字段均已离线等价；真实购买/维修结果、资源 postcondition 和异常恢复仍未闭环 |
 | 41 | OpsiAshBeacon | Scheduler, OpsiAshBeacon | B | 当前信标的一击模式主路径已实机闭环：200 点创建、三类求助、出击、战斗、两层结算、276085 伤害读取和 30 分钟延后；击杀领奖、档案与非一击分支仍缺独立实证 |
-| 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | Tier 等级选择已离线等价；真实目标列表、出击、战斗和领奖仍受舰队条件限制 |
+| 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | Tier 已以 typed 候选身份和 stale-state gate 完成整数等价类及五次轮换实机闭环；助战次数 3/3 未变且未出击。面板仍缺无目标、舰队不可用、出击、战斗和领奖主链 |
 | 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | L | 72 个常规海域已从 LastZone=0 按原顺序完整实机遍历，覆盖 typed unpin、邻区重锚、局部探针耗尽后的全局锚恢复、SAFE/要塞重叠选层、无事件自动搜索返回 off、游标逐区持久化及月度重置；Fleet=1、Submarine=false、SpecialRadar=false 已证明。危险海域调律样本实际消费、Fleet 2–4、Submarine=true、SpecialRadar=true 仍缺实机闭环 |
 | 44 | OpsiShop | Scheduler, OpsiShop | L | 新版统一港口商店已完成类型化 19 卡库存、票券余额、精确商品身份/价格/余量及单件购买后置闭环；自定义过滤实机命中并完成 DevelopmentMaterialT2 的 3→2、票券 1205→1200，含输入超时后按精确对话框恢复；黄币购买、五预设逐值实机、余额不足、刷新及全港口分支仍未闭环 |
 | 45 | OpsiVoucher | Scheduler, OpsiVoucher | L | 新版兑换页 22 卡 typed 观察、凭证余额、筛选命中和单件兑换已由原任务实机闭环；HECombatPlan 余量 28→27、凭证 21592→21492，默认过滤器售罄分支安全停止；石油商品、所有过滤优先级逐值及异常恢复仍未全部实机闭环 |
@@ -677,8 +677,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **50 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **129 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **51 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **128 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **80 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **19 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -875,7 +875,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `OldRetire.SSR` | General | type=checkbox; display=default | input/default: false | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
 | `OneClickRetire.KeepLimitBreak` | General | type=select; display=default | options: "do_not_keep", "keep_limit_break"; default: "keep_limit_break" | `P`/◐ 两设置 typed；keep_limit_break 已实机 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `OpsiAbyssal.ForceRun` | OpsiAbyssal | type=checkbox; display=default | input/default: false | `L`/🟢 默认主路径 | ☑ | ☑ | ☑ | ☑ | ◐ |
-| `OpsiAshAssist.Tier` | OpsiAshAssist | type=input; display=default | input/default: 15 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `OpsiAshAssist.Tier` | OpsiAshAssist | type=input; display=default | input/default: 15 | `B`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `OpsiAshBeacon.AttackMode` | OpsiAshBeacon | type=select; display=default | options: "current_dossier", "current"; default: "current" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `OpsiAshBeacon.DossierAutoAttackMode` | OpsiAshBeacon | type=checkbox; display=default | input/default: false | `B`/☐ 未逐值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `OpsiAshBeacon.EnsureFullyCollected` | OpsiAshBeacon | type=checkbox; display=default | input/default: true | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
