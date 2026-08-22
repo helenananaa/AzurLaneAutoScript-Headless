@@ -6353,7 +6353,11 @@ class AlasSemanticAdapter:
         normalized = code.strip() if isinstance(code, str) else ""
         if not normalized:
             raise SemanticGateClosed("research project code is absent")
-        projects = self.oracle.research_projects()
+        # Reuse the immediately preceding five-card decision snapshot when a
+        # cross-endpoint transition makes the duplicate-resolution read
+        # momentarily incoherent.  The final input path still refreshes and
+        # re-proves the selected slot/code against the live hierarchy.
+        projects = self.research_projects()
         if position is None:
             matches = tuple(
                 project for project in projects if project.code == normalized
@@ -6375,6 +6379,12 @@ class AlasSemanticAdapter:
                 )
         if project.status == ResearchProjectStatus.FINISHED:
             raise SemanticGateClosed("research policy cannot select a finished project")
+        # The original selector can spend longer than one immutable ALAS frame
+        # parsing and ordering all five cards.  Re-acquire immediately before
+        # the exact card transaction; ``click_research_project`` still re-reads
+        # the same slot/code and invalidates this fresh lease at the tap.
+        if self._input_frame_refresher is not None:
+            self._input_frame_refresher()
         receipt = self.oracle.click_research_project(project.slot)
         context = self._research_context
         context.selected_slot = project.slot
@@ -10448,7 +10458,22 @@ class AlasSemanticAdapter:
                     and time.monotonic() <= context.passive_transition_until
                 ):
                     return cached
-                receipt = self._record_mission_transition(self.oracle.click(target))
+                deadline = time.monotonic() + 6.0
+                while True:
+                    if self._input_frame_refresher is not None:
+                        self._input_frame_refresher()
+                    try:
+                        receipt = self._record_mission_transition(
+                            self.oracle.click(target)
+                        )
+                        break
+                    except SemanticGateClosed as exc:
+                        if (
+                            str(exc) != "semantic target is not actionable"
+                            or time.monotonic() >= deadline
+                        ):
+                            raise
+                        time.sleep(0.25)
                 context.navigation_receipts[target] = receipt
                 return receipt
             if name == "RESEARCH_DETAIL_QUIT":

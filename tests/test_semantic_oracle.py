@@ -5073,6 +5073,47 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(projects[2].duration_seconds, 24 * 60 + 43)
         self.assertTrue(all(item.series == 9 for item in projects))
 
+    def test_research_projects_retry_read_only_generation_transition(self):
+        page = "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)"
+        content = page + "/main/base_page/srcoll_rect/content/"
+        buttons = [make_button("back", page + "/blur_panel/adapt/top/back", 58, 54)]
+        texts = []
+        images = []
+        for index in range(1, 6):
+            root = content + str(index)
+            buttons.append(make_button(str(index), root, index * 180, 360))
+            frame = root + "/frame/"
+            texts.extend(
+                [
+                    make_text("S9 H-{0:03d}-MI".format(index), frame + "name_bg/Text"),
+                    make_text("小型项目", frame + "sub_name"),
+                    make_text("查看详情", frame + "marks/Text"),
+                    make_text("01:00:00", frame + "marks/time"),
+                ]
+            )
+            images.append(make_image(frame + "top/label/version", "version_9"))
+        backend = FakeBackend(buttons)
+        backend.snapshot_sequence = [
+            make_snapshot(generation=generation) for generation in (20, 26, 32)
+        ]
+        backend.buttons_sequence = [
+            make_buttons(buttons, generation=generation)
+            for generation in (20, 26, 32)
+        ]
+        backend.ui_sequence = [
+            make_ui(texts, images=images, generation=generation)
+            for generation in (25, 31, 32)
+        ]
+
+        projects = make_oracle(backend).research_projects()
+
+        self.assertEqual(len(projects), 5)
+        self.assertEqual(
+            backend.requests.count("GET /v1/ui\n"),
+            3,
+        )
+        self.assertEqual(backend.taps, [])
+
     def test_research_detail_and_queue_expose_typed_alas_inputs(self):
         selected = (
             "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"
@@ -5192,6 +5233,23 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(state.empty_slots, 4)
         self.assertEqual(state.entries[0].code, "G-236")
         self.assertEqual(state.entries[0].status, ResearchProjectStatus.WAITING)
+
+    def test_research_queue_retries_a_transitional_identity_without_input(self):
+        backend = FakeBackend([])
+        oracle = make_oracle(backend)
+        expected = mock.sentinel.research_queue_state
+        with mock.patch.object(
+            oracle,
+            "_research_queue_state_once",
+            side_effect=[
+                SemanticGateClosed("research queue identity is not proven"),
+                expected,
+            ],
+        ) as reader, mock.patch.object(oracle, "_sleep") as sleep:
+            self.assertIs(oracle.research_queue_state(), expected)
+
+        self.assertEqual(reader.call_count, 2)
+        sleep.assert_called_once_with(0.25)
 
     def test_running_research_detail_has_no_start_resource(self):
         selected = (
@@ -5357,6 +5415,45 @@ class SemanticOracleTests(unittest.TestCase):
             ]
         )
         self.assertFalse(oracle.research_queue_add_available())
+
+    def test_research_queue_add_retries_read_only_image_transition(self):
+        selected = (
+            "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"
+            "main/base_page/selecte_panel/"
+        )
+        card = selected + "technology_card/frame/"
+        join_path = card + "btns/join_btn"
+        join_bounds = {"left": 514, "top": 559, "right": 681, "bottom": 608}
+        buttons = [
+            make_button("selecte_panel", selected.rstrip("/")),
+            make_button("stop_btn", card + "btns/stop_btn", x=407, y=583),
+            make_button(
+                "join_btn",
+                join_path,
+                x=597,
+                y=583,
+                bounds=join_bounds,
+                raycast_top=None,
+            ),
+        ]
+        backend = FakeBackend(buttons)
+        join_image = make_image(join_path, "join_btn", bounds=join_bounds)
+        join_image["raycast_target"] = True
+        backend.snapshot_sequence = [
+            make_snapshot(generation=generation) for generation in (20, 26, 32)
+        ]
+        backend.buttons_sequence = [
+            make_buttons(buttons, generation=generation)
+            for generation in (20, 26, 32)
+        ]
+        backend.ui_sequence = [
+            make_ui([], images=[join_image], generation=generation)
+            for generation in (25, 31, 32)
+        ]
+
+        self.assertTrue(make_oracle(backend).research_queue_add_available())
+        self.assertEqual(backend.requests.count("GET /v1/ui\n"), 3)
+        self.assertEqual(backend.taps, [])
 
     def test_dorm_back_accepts_only_reviewed_delegated_raycast(self):
         path = (

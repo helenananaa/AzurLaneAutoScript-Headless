@@ -55,6 +55,13 @@ from .alas_campaign_route_config_contract import (
     MAIN_TASKS,
     validate_alas_main_campaign_route_config,
 )
+from .alas_research_config_contract import (
+    AlasResearchConfigSnapshot,
+    RESEARCH_PRESET_FILTERS,
+    RESEARCH_RESOURCE_STRATEGIES,
+    validate_alas_research_allow_delay,
+    validate_alas_research_selector_config,
+)
 from .alas_tactical_config_contract import (
     AlasTacticalConfigSnapshot,
     validate_alas_tactical_config,
@@ -625,6 +632,11 @@ from .runtime_qualification import (
 )
 
 __all__ = (
+    "AlasResearchConfigSnapshot",
+    "RESEARCH_PRESET_FILTERS",
+    "RESEARCH_RESOURCE_STRATEGIES",
+    "validate_alas_research_allow_delay",
+    "validate_alas_research_selector_config",
     "AlasMainCampaignRouteConfig",
     "MAIN_CAMPAIGN_EVENT",
     "MAIN_CAMPAIGN_MODES",

@@ -1,0 +1,86 @@
+{
+  "schema": "alas-headless.research-resource-policy-recovery/v1",
+  "captured_at": "2026-08-22T21:08:57+08:00",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "passed": true,
+  "purpose": "Bind two one-shot resource confirmations to their later exact queue postconditions without rewriting the original failed runner receipts.",
+  "raw_attempts": [
+    {
+      "receipt": "integration/alas/research-use-coin-only-no-project-current-final-r1-live-validation-receipt.json",
+      "sha256": "911983971bdc7ae5eca5c0fedee72527721701b9c327e2d7194941591eeb5084",
+      "configured_field": "Research.UseCoin",
+      "configured_value": "only_no_project",
+      "selected_code": "D-737-MI",
+      "confirmed_cost": {
+        "resource_id": "gold",
+        "required": 3000
+      },
+      "runner_result": "failed_after_dispatch",
+      "dispatch_count": 1
+    },
+    {
+      "receipt": "integration/alas/research-use-cube-only-no-project-current-final-r1-live-validation-receipt.json",
+      "sha256": "f889b02f8df7bc5911230e4d3ebee211c809590218cbf3fe5ea9cf321b6e6b27",
+      "configured_field": "Research.UseCube",
+      "configured_value": "only_no_project",
+      "selected_code": "H-387-MI",
+      "confirmed_cost": {
+        "resource_id": "20001",
+        "required": 3
+      },
+      "runner_result": "failed_after_dispatch",
+      "dispatch_count": 1
+    }
+  ],
+  "recovery_actions": [
+    {
+      "semantic_id": "research/queue/confirm",
+      "generation": 21832,
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+      "reason": "Complete the already-started H-387-MI queue-add transaction; no resource confirmation was repeated."
+    },
+    {
+      "semantic_id": "research/queue/enter",
+      "generation": 21917,
+      "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/blur_panel/adapt/left/btn_queue",
+      "reason": "Read the exact final queue state."
+    }
+  ],
+  "queue_postcondition": {
+    "empty_slots": 2,
+    "finished_count": 0,
+    "reward_claimable": false,
+    "entries": [
+      {
+        "slot": 1,
+        "code": "D-781-MI",
+        "status": "running",
+        "remaining_seconds": 7917
+      },
+      {
+        "slot": 2,
+        "code": "D-737-MI",
+        "status": "waiting",
+        "remaining_seconds": 9000
+      },
+      {
+        "slot": 3,
+        "code": "H-387-MI",
+        "status": "waiting",
+        "remaining_seconds": 3600
+      }
+    ]
+  },
+  "source_sha256": {
+    "adapter": "711e321333ae79bfb329df54e3ef61ec08e1d5b557308ca88629ae2cdbe9ca78",
+    "oracle": "d78b641d641405332fbb82ad70839fffafbb6dd923229a87a22d2a0879160f38",
+    "runner": "fc8778ea28acd3ca0c848df2b225d3e114cde8f5c27e48e103869d609dae1121"
+  },
+  "limitations": [
+    "The raw runner receipts remain passed=false because their post-dispatch transition reads failed.",
+    "The recovery proves exact selected-code queue placement; it does not independently measure account balance deltas.",
+    "No Research list refresh was requested or dispatched."
+  ]
+}

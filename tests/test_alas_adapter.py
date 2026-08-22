@@ -2085,6 +2085,8 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
     def test_research_code_selection_tracks_the_current_card_position(self):
         adapter, oracle, _ = self.make_adapter()
+        refreshed = []
+        adapter._input_frame_refresher = lambda: refreshed.append(True)
         adapter.begin_research()
         oracle.research_project_values = [
             SimpleNamespace(
@@ -2106,6 +2108,36 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "research/project/1")
         self.assertEqual(adapter._research_context.selected_slot, 1)
         self.assertEqual(adapter._research_context.selected_code, "G-236-MI")
+        self.assertEqual(oracle.click_calls, ["research/project/1"])
+        self.assertEqual(refreshed, [True])
+
+    def test_research_code_selection_uses_recent_decision_cache_then_rechecks(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=1,
+                unity_index=1,
+                code="D-737-MI",
+                status=ResearchProjectStatus.DETAIL,
+            )
+        ]
+        self.assertEqual(adapter.research_projects()[0].code, "D-737-MI")
+        original_projects = oracle.research_projects
+        reads = 0
+
+        def transitional_projects():
+            nonlocal reads
+            reads += 1
+            if reads == 1:
+                raise SemanticGateClosed("research snapshots are not coherent")
+            return original_projects()
+
+        oracle.research_projects = transitional_projects
+        receipt = adapter.click_research_project_code("D-737-MI")
+
+        self.assertEqual(receipt.semantic_id, "research/project/1")
+        self.assertEqual(reads, 1)
         self.assertEqual(oracle.click_calls, ["research/project/1"])
 
     def test_research_code_selection_uses_upstream_position_for_duplicates(self):
@@ -2137,6 +2169,30 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         with self.assertRaisesRegex(SemanticGateClosed, "no longer matches"):
             adapter.click_research_project_code("G-236-MI", position=1)
+
+    def test_research_queue_entry_retries_only_before_one_exact_input(self):
+        adapter, oracle, _ = self.make_adapter()
+        refreshed = []
+        adapter._input_frame_refresher = lambda: refreshed.append(True)
+        adapter.begin_research()
+        original_click = oracle.click
+        attempts = 0
+
+        def transitional_click(semantic_id):
+            nonlocal attempts
+            attempts += 1
+            if attempts == 1:
+                raise SemanticGateClosed("semantic target is not actionable")
+            return original_click(semantic_id)
+
+        oracle.click = transitional_click
+        with patch("alas_headless.alas_adapter.time.sleep") as sleep:
+            receipt = adapter.click(NamedButton("RESEARCH_GOTO_QUEUE"))
+
+        self.assertEqual(receipt.semantic_id, "research/queue/enter")
+        self.assertEqual(refreshed, [True, True])
+        self.assertEqual(oracle.click_calls, ["research/queue/enter"])
+        sleep.assert_called_once_with(0.25)
 
     def test_research_atomic_start_confirms_the_selected_exact_cost(self):
         oracle = FakeOracle()

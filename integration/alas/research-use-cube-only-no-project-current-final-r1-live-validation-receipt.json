@@ -1,0 +1,177 @@
+{
+  "schema": "alas-headless.research-resource-policy-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "Research.PresetFilter": "custom",
+    "Research.CustomFilter": "S9-H",
+    "Research.AllowDelay": false,
+    "Research.UseCoin": "do_not_use",
+    "Research.UseCube": "only_no_project",
+    "Research.UsePart": "do_not_use"
+  },
+  "target_resource": "cube",
+  "strategy": "only_no_project",
+  "source_sha256": {
+    "research": "60c8fb8521390fc94ce53fdd60358de8334b3edd42e092e16cbabe33caf787a9",
+    "selector": "d1b2387c59b4d275db1a562ccd5ef8f4ac3ee821984ba30b9b19cccc56ec15d7",
+    "adapter": "711e321333ae79bfb329df54e3ef61ec08e1d5b557308ca88629ae2cdbe9ca78",
+    "oracle": "d7847a973ee3b57bf82d42cc4319868e3635f4e2079037e4c8ba3809ecc80528",
+    "runner": "fc8778ea28acd3ca0c848df2b225d3e114cde8f5c27e48e103869d609dae1121"
+  },
+  "passed": false,
+  "dispatches": [
+    {
+      "capability": "research.start",
+      "selected_code": "H-387-MI",
+      "expected_prompt_cost": {
+        "resource_id": "20001",
+        "required": 3
+      },
+      "semantic_id": "research/start/confirm",
+      "generation": 20412,
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+      "point": {
+        "x": 790.0,
+        "y": 515.0
+      }
+    }
+  ],
+  "reward_dispatches": [],
+  "selector_calls": [
+    {
+      "enforce": false,
+      "projects": [
+        {
+          "code": "S9 G-531-MI",
+          "series": "S9",
+          "genre": "G",
+          "duration": "4",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S6 H-387-MI",
+          "series": "S6",
+          "genre": "H",
+          "duration": "1",
+          "need_coin": false,
+          "need_cube": true,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 D-781-MI",
+          "series": "S9",
+          "genre": "D",
+          "duration": "2.5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 D-332-MI",
+          "series": "S9",
+          "genre": "D",
+          "duration": "5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 G-412-MI",
+          "series": "S9",
+          "genre": "G",
+          "duration": "1.5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        }
+      ],
+      "priority": []
+    },
+    {
+      "enforce": true,
+      "projects": [
+        {
+          "code": "S9 G-531-MI",
+          "series": "S9",
+          "genre": "G",
+          "duration": "4",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S6 H-387-MI",
+          "series": "S6",
+          "genre": "H",
+          "duration": "1",
+          "need_coin": false,
+          "need_cube": true,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 D-781-MI",
+          "series": "S9",
+          "genre": "D",
+          "duration": "2.5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 D-332-MI",
+          "series": "S9",
+          "genre": "D",
+          "duration": "5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 G-412-MI",
+          "series": "S9",
+          "genre": "G",
+          "duration": "1.5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        }
+      ],
+      "priority": [
+        {
+          "sentinel": "reset"
+        },
+        {
+          "code": "S6 H-387-MI",
+          "series": "S6",
+          "genre": "H",
+          "duration": "1",
+          "need_coin": false,
+          "need_cube": true,
+          "need_part": false,
+          "valid": true
+        }
+      ]
+    }
+  ],
+  "error": "SemanticGateClosed: research queue-add snapshots are incomplete",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\scripts\\python\\run_alas_research_resource_policy_live_validation.py\", line 257, in validate\n    result[\"task_return\"] = task.run()\n                            ^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\research.py\", line 647, in run\n    return self._run_alas_state_machine()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\research.py\", line 617, in _run_alas_state_machine\n    self.research_fill_queue()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\research.py\", line 518, in research_fill_queue\n    success = self.research_queue_append(drop=drop)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\scripts\\python\\run_alas_research_resource_policy_live_validation.py\", line 253, in run_one_queue_append\n    return original_queue_append(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\research.py\", line 490, in research_queue_append\n    result = self.research_select(priority, drop=drop, add_queue=add_queue)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\research.py\", line 109, in research_select\n    return self.research_enforce(drop=drop, add_queue=add_queue)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\research.py\", line 91, in research_enforce\n    return self.research_select(self.research_sort_filter(self.enforce),\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\research.py\", line 133, in research_select\n    ret = self.research_project_start_with_requirements(project, add_queue=add_queue)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\research.py\", line 311, in research_project_start_with_requirements\n    return self.research_project_start(project, add_queue=add_queue)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\research.py\", line 209, in research_project_start\n    self.research_queue_add()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\rqueue.py\", line 41, in research_queue_add\n    if self._research_queue_add_available():\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\research\\rqueue.py\", line 65, in _research_queue_add_available\n    return semantic_session.research_detail_can_queue()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\python\\alas_headless\\alas_adapter.py\", line 13131, in research_detail_can_queue\n    return self.open().research_detail_can_queue()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\python\\alas_headless\\alas_adapter.py\", line 6581, in research_detail_can_queue\n    return self.oracle.research_queue_add_available()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\python\\alas_headless\\semantic_oracle.py\", line 24128, in research_queue_add_available\n    return self._research_queue_add_proven(state)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-alas-adapter-v2-plan\\python\\alas_headless\\semantic_oracle.py\", line 24109, in _research_queue_add_proven\n    raise SemanticGateClosed(\"research queue-add snapshots are incomplete\")\nalas_headless.semantic_oracle.SemanticGateClosed: research queue-add snapshots are incomplete\n",
+  "research_start_grant_remaining": 0,
+  "research_reward_grant_remaining": 2,
+  "temporary_config_removed": true
+}

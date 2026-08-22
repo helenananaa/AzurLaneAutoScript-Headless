@@ -6496,10 +6496,14 @@
       },
       "evidence": [
         "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
         "python/alas_headless/alas_research_config_replay.py",
         "tests/test_alas_adapter.py",
+        "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json",
+        "integration/alas/research-use-coin-only-05-hour-current-final-r1-live-validation-receipt.json",
+        "integration/alas/research-resource-policy-recovery-20260822.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -6508,7 +6512,7 @@
         "Research"
       ],
       "path": "Research.AllowDelay",
-      "status_label": "◐ 双值读取/真值回退",
+      "status_label": "◐ 双值严校/延迟待条件",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -6517,17 +6521,20 @@
         "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
         "python/alas_headless/alas_research_config_replay.py",
         "tests/test_alas_adapter.py",
         "integration/alas/series/0320-research-code-selection-port.patch",
         "integration/alas/series/0330-research-atomic-start-port.patch",
+        "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json",
+        "integration/alas/research-resource-policy-recovery-20260822.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -6536,7 +6543,7 @@
         "Research"
       ],
       "path": "Research.CustomFilter",
-      "status_label": "◐ 当前规则/重名闭环",
+      "status_label": "◐ 自定义语法实机子集",
       "support": "supported",
       "values": "input/default: <long default in args.json>"
     },
@@ -6545,14 +6552,16 @@
         "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
         "python/alas_headless/alas_research_config_replay.py",
         "tests/test_alas_adapter.py",
-        "tests/test_alas_integration_patch.py"
+        "tests/test_alas_integration_patch.py",
+        "integration/alas/series/0402-research-six-field-runtime.patch"
       ],
       "group_code": "L",
       "metadata": "type=select; display=default",
@@ -6560,26 +6569,31 @@
         "Research"
       ],
       "path": "Research.PresetFilter",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 26 预设严校/实机子集",
       "support": "supported",
       "values": "options: \"custom\", \"series_2_457_only\", \"series_2_blueprint_457\", \"series_2_blueprint_only\", \"series_2_than_3_457_234\", \"series_3_234_only\", \"series_3_blueprint_234\", \"series_3_blueprint_only\", \"series_4_blueprint_only\", \"series_4_blueprint_tenrai\", \"series_4_tenrai_only\", \"series_5_152_only\", \"series_5_blueprint_152\", \"series_5_blueprint_only\", \"series_6_203_only\", \"series_6_blueprint_203\", \"series_6_blueprint_only\", \"series_7_blueprint_la9\", \"series_7_blueprint_only\", \"series_7_la9_only\", \"series_8_305_only\", \"series_8_blueprint_305\", \"series_8_blueprint_only\", \"series_9_blueprint_only\", \"series_9_blueprint_ta152\", \"series_9_ta152_only\"; default: \"series_9_blueprint_ta152\""
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
         "python/alas_headless/alas_research_config_replay.py",
         "tests/test_alas_adapter.py",
+        "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-use-coin-always-use-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-coin-always-use-current-r2-live-validation-receipt.json",
-        "integration/alas/research-use-coin-do-not-use-current-r1-live-validation-receipt.json"
+        "integration/alas/research-use-coin-do-not-use-current-r1-live-validation-receipt.json",
+        "integration/alas/research-use-coin-only-05-hour-current-final-r1-live-validation-receipt.json",
+        "integration/alas/research-use-coin-only-no-project-current-final-r1-live-validation-receipt.json",
+        "integration/alas/research-resource-policy-recovery-20260822.json"
       ],
       "group_code": "L",
       "metadata": "type=select; display=default",
@@ -6587,7 +6601,7 @@
         "Research"
       ],
       "path": "Research.UseCoin",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 四策略实机/一项分段恢复",
       "support": "supported",
       "values": "options: \"always_use\", \"do_not_use\", \"only_05_hour\", \"only_no_project\"; default: \"always_use\""
     },
@@ -6596,17 +6610,21 @@
         "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
         "python/alas_headless/alas_research_config_replay.py",
         "tests/test_alas_adapter.py",
+        "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-use-cube-always-use-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-cube-do-not-use-current-r1-live-validation-receipt.json",
-        "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json"
+        "integration/alas/research-use-cube-only-no-project-current-final-r1-live-validation-receipt.json",
+        "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json",
+        "integration/alas/research-resource-policy-recovery-20260822.json"
       ],
       "group_code": "L",
       "metadata": "type=select; display=default",
@@ -6614,7 +6632,7 @@
         "Research"
       ],
       "path": "Research.UseCube",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 三策略实机/半小时待卡",
       "support": "supported",
       "values": "options: \"always_use\", \"do_not_use\", \"only_05_hour\", \"only_no_project\"; default: \"only_05_hour\""
     },
@@ -6623,13 +6641,15 @@
         "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
         "python/alas_headless/alas_research_config_replay.py",
         "tests/test_alas_adapter.py",
+        "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-use-part-always-use-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-part-do-not-use-current-r1-live-validation-receipt.json"
@@ -6640,7 +6660,7 @@
         "Research"
       ],
       "path": "Research.UsePart",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 两策略实机/条件待卡",
       "support": "supported",
       "values": "options: \"always_use\", \"do_not_use\", \"only_05_hour\", \"only_no_project\"; default: \"always_use\""
     },
@@ -11479,31 +11499,109 @@
       },
       "evidence": [
         "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
         "tests/test_alas_adapter.py",
+        "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json",
+        "integration/alas/research-use-coin-only-05-hour-current-final-r1-live-validation-receipt.json",
+        "integration/alas/research-resource-policy-recovery-20260822.json",
         "docs/status.md"
       ],
       "field": "Research.AllowDelay",
-      "note": "Both booleans remain complete offline. The current-source live true run reached the original selector twice, recorded AllowDelay=true, preserved the exact no-resource policy, resolved duplicate project codes by upstream position, started one resource-free fallback, and restored scheduling. The actual insufficient-resource delay decision remains account-blocked and live-partial."
+      "note": "The pinned runtime now rejects non-boolean values before the original delay branch, and both booleans are complete offline. Current live runs exercised true and false through the original selector and exact start path. The actual insufficient-resource delay decision remains account-blocked and live-partial."
     },
     {
       "dimensions": {
         "action": "partial",
         "live": "partial",
-        "observation": "partial"
+        "observation": "complete"
       },
       "evidence": [
         "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
         "tests/test_alas_adapter.py",
         "integration/alas/series/0320-research-code-selection-port.patch",
         "integration/alas/series/0330-research-atomic-start-port.patch",
+        "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json",
+        "integration/alas/research-resource-policy-recovery-20260822.json",
         "docs/status.md"
       ],
       "field": "Research.CustomFilter",
-      "note": "The current-source live run proves an exact custom S9-H no-match, original enforced fallback, and safe selection of one of two duplicate C-153-MI cards by upstream position plus fresh code verification. The full free-form syntax and invalid/fallback matrix remains offline-complete but not exhaustively live-qualified."
+      "note": "The pinned runtime now rejects non-text or empty custom filters before the original selector. Current-source live runs prove S9-H and S9-G > S9-D rules, no-match enforcement, duplicate-code position ownership, fresh code verification, and exact resource starts. The full free-form syntax remains non-exhaustive live evidence."
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
+        "integration/alas/series/0402-research-six-field-runtime.patch",
+        "docs/status.md"
+      ],
+      "field": "Research.PresetFilter",
+      "note": "All 26 pinned preset identifiers plus the old-upstream nonempty custom fallback are exact offline contract cases and are validated at the original selector boundary. Live evidence covers custom rules and the account default only; the other presets are not claimed live-complete."
+    },
+    {
+      "dimensions": {
+        "action": "complete",
+        "live": "partial",
+        "observation": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
+        "scripts/python/run_alas_research_resource_policy_live_validation.py",
+        "integration/alas/research-use-coin-always-use-current-r1-live-validation-receipt.json",
+        "integration/alas/research-use-coin-do-not-use-current-r1-live-validation-receipt.json",
+        "integration/alas/research-use-coin-only-05-hour-current-final-r1-live-validation-receipt.json",
+        "integration/alas/research-use-coin-only-no-project-current-final-r1-live-validation-receipt.json",
+        "integration/alas/research-resource-policy-recovery-20260822.json",
+        "docs/status.md"
+      ],
+      "field": "Research.UseCoin",
+      "note": "All four declared strategies are exact offline contract cases and have current live selector/action evidence. only_no_project dispatched one exact 3000-gold confirmation and was later proven waiting as D-737-MI; its original runner receipt remains failed because the post-dispatch transition read closed before queue proof, so the field remains live-partial rather than F."
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
+        "scripts/python/run_alas_research_resource_policy_live_validation.py",
+        "integration/alas/research-use-cube-always-use-current-r1-live-validation-receipt.json",
+        "integration/alas/research-use-cube-do-not-use-current-r1-live-validation-receipt.json",
+        "integration/alas/research-use-cube-only-no-project-current-final-r1-live-validation-receipt.json",
+        "integration/alas/research-resource-policy-recovery-20260822.json",
+        "docs/status.md"
+      ],
+      "field": "Research.UseCube",
+      "note": "All four values are exact offline contract cases. Current live evidence covers always_use, do_not_use, and only_no_project; the latter confirmed 3 cubes and was later proven waiting as H-387-MI. No natural half-hour cube card was available, so only_05_hour remains live-unproven."
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_research_config_replay.py",
+        "python/alas_headless/alas_research_config_contract.py",
+        "scripts/python/run_alas_research_resource_policy_live_validation.py",
+        "integration/alas/research-use-part-always-use-current-r1-live-validation-receipt.json",
+        "integration/alas/research-use-part-do-not-use-current-r1-live-validation-receipt.json",
+        "docs/status.md"
+      ],
+      "field": "Research.UsePart",
+      "note": "All four values are exact offline contract cases, while current live evidence covers always_use and do_not_use. No qualifying part-consuming card was available for only_05_hour or only_no_project, so those action branches remain live-unproven."
     }
   ],
   "schema": "alas-headless.support-matrix-ledger/v1",
@@ -11516,9 +11614,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "415e64b9f1f48fbb4f836484c7f5c49c828e1fcdf3e74034b3596677009dd975",
-      "manifest_sha256": "c32218eba6ac7a6e25f8ac1fdc0bbd0038801ce389817f8be633cb358821027e",
-      "member_count": 84
+      "combined_sha256": "84e9b6a6f1cbdfc0e3b51c99119f0e0603a4671beb13b05bbb902797af0e2c8a",
+      "manifest_sha256": "fd6646c2b5f432fd18a48d68e6c6c5f9d5fef66efa3bf5669d3d2b1cb5204aeb",
+      "member_count": 85
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

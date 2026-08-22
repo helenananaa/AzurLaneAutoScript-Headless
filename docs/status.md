@@ -4,6 +4,43 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-22
 
+### Research six-field runtime contract is closed at the L boundary
+
+- Patch member `0402-research-six-field-runtime.patch` validates the original
+  ALAS selector's `PresetFilter`, `CustomFilter`, `UseCoin`, `UseCube`, and
+  `UsePart` values, plus the original delay branch's `AllowDelay`, before the
+  values affect selection. The contract is exact for all 26 pinned presets,
+  all four resource strategies, nonempty text, and real booleans; malformed
+  types or values fail closed without changing the upstream state machine.
+- The offline replay covers all 26 presets, 36 resource-policy rows, both
+  delay booleans, reset ordering, sufficient/insufficient resources, and
+  queue-full behavior. Read-only Unity transition retries now cover the
+  five-card view and delegated queue-add image without injecting input or
+  weakening the final coherent snapshot requirement.
+- A current live `UseCoin=only_05_hour, AllowDelay=true` run passed end to end
+  and started `D-781-MI` with one exact 3000-gold confirmation. Separate
+  `only_no_project` runs issued one exact 3000-gold confirmation for
+  `D-737-MI` and one exact 3-cube confirmation for `H-387-MI`.
+- Those latter two raw receipts remain honestly `passed=false`: each had
+  already exhausted its one-shot start grant when a post-dispatch transition
+  read failed. Recovery did not repeat either resource confirmation; it
+  completed the pending queue-add confirmation and proved the final exact
+  queue as `D-781-MI` running, then `D-737-MI` and `H-387-MI` waiting, with
+  two slots free. The split proof is recorded in
+  `integration/alas/research-resource-policy-recovery-20260822.json`.
+- `UseCoin` now has action evidence for all four strategies. `UseCube` still
+  lacks a naturally available half-hour card for `only_05_hour`; `UsePart`
+  lacks qualifying cards for its two conditional strategies; preset and
+  free-form filter live coverage is intentionally non-exhaustive; and the
+  insufficient-resource delay branch remains account-condition dependent.
+  Research therefore stays `L`, not `F`. No research-list refresh was used.
+- The authoritative series now has 85 members. Its combined SHA-256 is
+  `84e9b6a6...0e2c8a`; a clean pinned-upstream replay applied all 140 changed
+  files and compiled all 139 changed Python files. Current login/frame-clock
+  replays and the pixel inventory pass with zero unclassified pixel accesses
+  and no Android input injection. The focused suite passes 681 tests and the
+  full repository suite passes 1,403 tests with 50 warnings.
+
 ### Month Boss hard kill is live
 
 - Hard 仲裁者·司特莲库斯·VIII was killed. Fleet 4 skipped on 士气过低, fleet 2

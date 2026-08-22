@@ -14304,3 +14304,41 @@ index cd28a37f..98816179 100644
          refreshed = False
  
          # SHOP_REFRESH -> POPUP_CONFIRM
+diff --git a/module/research/research.py b/module/research/research.py
+index 6ffd45ee..145d4d11 100644
+--- a/module/research/research.py
++++ b/module/research/research.py
+@@ -149,7 +149,11 @@ class RewardResearch(ResearchSelector, ResearchQueue, StorageHandler):
+         Returns:
+             bool: If conditions allow to delay research.
+         """
+-        if self.config.Research_AllowDelay:
++        from alas_headless import validate_alas_research_allow_delay
++        allow_delay = validate_alas_research_allow_delay(
++            self.config.Research_AllowDelay
++        )
++        if allow_delay:
+             slot = self.get_queue_slot()
+             if slot < 4:
+                 return True
+diff --git a/module/research/selector.py b/module/research/selector.py
+index 05146c33..19327b62 100644
+--- a/module/research/selector.py
++++ b/module/research/selector.py
+@@ -150,6 +150,16 @@ class ResearchSelector(ResearchUI):
+             list: A list of ResearchProject objects and preset strings,
+                 such as [object, object, object, 'reset']
+         """
++        from alas_headless import validate_alas_research_selector_config
++        validate_alas_research_selector_config(
++            preset_filter=self.config.Research_PresetFilter,
++            custom_filter=self.config.Research_CustomFilter,
++            allow_delay=self.config.Research_AllowDelay,
++            use_coin=self.config.Research_UseCoin,
++            use_cube=self.config.Research_UseCube,
++            use_part=self.config.Research_UsePart,
++        )
++
+         # Load filter string
+         preset = self.config.Research_PresetFilter
+         if preset == 'custom':

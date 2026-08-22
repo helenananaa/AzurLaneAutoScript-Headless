@@ -244,6 +244,10 @@ FLOW_PATHS = {
         "module/shop/shop_merit.py",
         "module/shop/ui.py",
     },
+    "0402-research-six-field-runtime.patch": {
+        "module/research/research.py",
+        "module/research/selector.py",
+    },
 }
 
 OVERRIDE_PATHS = {
@@ -437,6 +441,10 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                     },
                     "0401-shop-transactions-runtime.patch": {
                         "module/shop/ui.py",
+                    },
+                    "0402-research-six-field-runtime.patch": {
+                        "module/research/research.py",
+                        "module/research/selector.py",
                     },
                 }.get(name, set())
                 self.assertEqual(promoted & actual, expected_overlap)

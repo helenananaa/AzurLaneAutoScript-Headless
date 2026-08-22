@@ -520,7 +520,11 @@ course-start state machine. The budget is consumed only by the exact final
 course confirmation. Research keeps ALAS's project filter, queue/reward loops,
 and scheduler; visual card positions are dynamically revalidated and the
 start budget is consumed only when the exact resource prompt matches the
-selected project. Dorm keeps ALAS's food filter and count choice, but clicks
+selected project. Member `0402-research-six-field-runtime.patch` additionally
+validates all six public Research selector/delay values at their original
+runtime boundaries. Read-only retries may wait for a coherent five-card or
+delegated queue-add view, but the final snapshot must still satisfy every
+exact identity check and no retry injects input. Dorm keeps ALAS's food filter and count choice, but clicks
 the exact food-card Image rather than the adjacent purchase `+`, and proves
 inventory `-1` plus food `+value` per budget unit. Construction admits only one
 order and cross-checks typed cube/coin costs before the final confirmation.

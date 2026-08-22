@@ -23754,6 +23754,15 @@ class SemanticOracle:
     def research_projects(self) -> Tuple[ResearchProjectState, ...]:
         """Read the five visible research cards from typed Unity state."""
 
+        return self._retry_transition_read(
+            self._research_projects_once,
+            attempts=12,
+            interval_seconds=0.5,
+        )
+
+    def _research_projects_once(self) -> Tuple[ResearchProjectState, ...]:
+        """Read one exact, internally coherent five-card snapshot."""
+
         button_state = self.read_state()
         back = self._unique(button_state, "research/page/back")
         if not back.actionable or self._blocking_rules(
@@ -24115,14 +24124,29 @@ class SemanticOracle:
         return len(images) == 1
 
     def research_queue_add_available(self) -> bool:
+        return self._retry_transition_read(
+            self._research_queue_add_available_once,
+            attempts=12,
+            interval_seconds=0.5,
+        )
+
+    def _research_queue_add_available_once(self) -> bool:
         state = self.read_state()
         return self._research_queue_add_proven(state)
 
     def click_research_queue_add(self) -> ActionReceipt:
-        state = self.read_state()
+        def exact_state() -> OracleState:
+            state = self.read_state()
+            if not self._research_queue_add_proven(state):
+                raise SemanticGateClosed("research queue-add input is not proven")
+            return state
+
+        state = self._retry_transition_read(
+            exact_state,
+            attempts=12,
+            interval_seconds=0.5,
+        )
         target = self._unique(state, "research/detail/queue")
-        if not self._research_queue_add_proven(state):
-            raise SemanticGateClosed("research queue-add input is not proven")
         assert target.point is not None
         assert target.bounds is not None
         if self._foreground_component() != self.fingerprint.component:
@@ -24370,6 +24394,11 @@ class SemanticOracle:
 
     def research_queue_state(self) -> ResearchQueueState:
         """Read all non-empty queue slots and the reviewed claim control."""
+
+        return self._retry_transition_read(self._research_queue_state_once)
+
+    def _research_queue_state_once(self) -> ResearchQueueState:
+        """Read one coherent Research queue snapshot without relaxing gates."""
 
         button_state = self.read_state()
         back = self._unique(button_state, "research/page/back")

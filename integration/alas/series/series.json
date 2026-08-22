@@ -419,6 +419,11 @@
       "order": 84,
       "path": "integration/alas/series/0401-shop-transactions-runtime.patch",
       "sha256": "ffadbe02125fa071090c7b0cd4c13c99a787f7214097250e92f6af4589418c7b"
+    },
+    {
+      "order": 85,
+      "path": "integration/alas/series/0402-research-six-field-runtime.patch",
+      "sha256": "76a042155c00ae2dce067a18cffde235497548d63ddff98e49ffd915038bd245"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",
