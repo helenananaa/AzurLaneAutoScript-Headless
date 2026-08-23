@@ -11,8 +11,6 @@ namespace Alas.Headless.Contract.Editor
     public static class BuildAndroidPlayer
     {
         private const string ScenePath = "Assets/Scenes/ContractBootstrap.unity";
-        private const string OutputPath = "Build/HeadlessContract.apk";
-
         public static void Build()
         {
             if (Application.unityVersion != "2022.3.62f3")
@@ -23,35 +21,90 @@ namespace Alas.Headless.Contract.Editor
             }
 
             EnsureBootstrapScene();
-            ConfigurePlayer();
-
-            Directory.CreateDirectory(Path.GetDirectoryName(OutputPath) ?? "Build");
-            var options = new BuildPlayerOptions
+            string targetCpu = TargetCpu();
+            AndroidArchitecture targetArchitecture = TargetArchitecture(targetCpu);
+            string outputPath = targetCpu == "x64"
+                ? "Build/HeadlessContract.apk"
+                : "Build/HeadlessContract-arm64.apk";
+            AndroidArchitecture originalArchitecture =
+                PlayerSettings.Android.targetArchitectures;
+            try
             {
-                scenes = new[] { ScenePath },
-                locationPathName = OutputPath,
-                target = BuildTarget.Android,
-                options = BuildOptions.Development
-            };
-            BuildReport report = BuildPipeline.BuildPlayer(options);
-            if (report.summary.result != BuildResult.Succeeded)
+                ConfigurePlayer(targetArchitecture);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? "Build");
+                var options = new BuildPlayerOptions
+                {
+                    scenes = new[] { ScenePath },
+                    locationPathName = outputPath,
+                    target = BuildTarget.Android,
+                    options = BuildOptions.Development
+                };
+                BuildReport report = BuildPipeline.BuildPlayer(options);
+                if (report.summary.result != BuildResult.Succeeded)
+                {
+                    throw new InvalidOperationException(
+                        "Android contract build failed: " + report.summary.result +
+                        " errors=" + report.summary.totalErrors);
+                }
+
+                Debug.Log("ALAS_UNITY_BUILD " + JsonUtility.ToJson(new BuildEvidence
+                {
+                    unity = Application.unityVersion,
+                    targetCpu = targetCpu,
+                    output = Path.GetFullPath(outputPath),
+                    bytes = report.summary.totalSize,
+                    durationSeconds = report.summary.totalTime.TotalSeconds
+                }));
+            }
+            finally
+            {
+                PlayerSettings.Android.targetArchitectures = originalArchitecture;
+            }
+        }
+
+        private static string TargetCpu()
+        {
+            string value = Environment.GetEnvironmentVariable("ALAS_UNITY_TARGET_CPU");
+            if (String.IsNullOrWhiteSpace(value))
+            {
+                return "x64";
+            }
+            value = value.Trim().ToLowerInvariant();
+            if (value != "x64" && value != "arm64")
             {
                 throw new InvalidOperationException(
-                    "Android contract build failed: " + report.summary.result +
-                    " errors=" + report.summary.totalErrors);
+                    "ALAS_UNITY_TARGET_CPU must be x64 or arm64; found " + value + ".");
             }
+            return value;
+        }
 
-            Debug.Log("ALAS_UNITY_BUILD " + JsonUtility.ToJson(new BuildEvidence
-            {
-                unity = Application.unityVersion,
-                output = Path.GetFullPath(OutputPath),
-                bytes = report.summary.totalSize,
-                durationSeconds = report.summary.totalTime.TotalSeconds
-            }));
+        private static AndroidArchitecture TargetArchitecture(string targetCpu)
+        {
+            return targetCpu == "arm64"
+                ? AndroidArchitecture.ARM64
+                : AndroidArchitecture.X86_64;
         }
 
         private static void EnsureBootstrapScene()
         {
+            if (File.Exists(ScenePath))
+            {
+                Scene existing = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+                GameObject existingMarker = GameObject.Find("ContractBootstrapMarker");
+                if (!existing.IsValid() || existingMarker == null ||
+                    existingMarker.GetComponent<SemanticMarker>() == null)
+                {
+                    throw new InvalidOperationException(
+                        "Existing bootstrap scene does not contain the semantic marker.");
+                }
+                EditorBuildSettings.scenes = new[]
+                {
+                    new EditorBuildSettingsScene(ScenePath, true)
+                };
+                return;
+            }
+
             Directory.CreateDirectory("Assets/Scenes");
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var marker = new GameObject("ContractBootstrapMarker");
@@ -63,7 +116,7 @@ namespace Alas.Headless.Contract.Editor
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
         }
 
-        private static void ConfigurePlayer()
+        private static void ConfigurePlayer(AndroidArchitecture targetArchitecture)
         {
             if (!EditorUserBuildSettings.SwitchActiveBuildTarget(
                     BuildTargetGroup.Android, BuildTarget.Android))
@@ -78,7 +131,7 @@ namespace Alas.Headless.Contract.Editor
                 BuildTargetGroup.Android, "io.github.alasheadless.unitycontract");
             PlayerSettings.SetScriptingBackend(
                 BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
-            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.X86_64;
+            PlayerSettings.Android.targetArchitectures = targetArchitecture;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
             PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
             PlayerSettings.Android.bundleVersionCode = 1;
@@ -90,6 +143,7 @@ namespace Alas.Headless.Contract.Editor
         private sealed class BuildEvidence
         {
             public string unity;
+            public string targetCpu;
             public string output;
             public ulong bytes;
             public double durationSeconds;

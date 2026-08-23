@@ -1,0 +1,53 @@
+plugins {
+    id "com.android.application"
+}
+
+def requestedCompileSdk = findProperty("alasCompileSdk") ?: "android-35"
+def requestedBuildTools = findProperty("alasBuildTools") ?: "36.0.0"
+def requestedTargetSdk = (findProperty("alasTargetSdk") ?: "32").toInteger()
+def requestedVersionCode = (findProperty("alasLabVersionCode") ?: "1").toInteger()
+def requestedVersionName = findProperty("alasLabVersionName") ?: "1.0"
+def requestedNdkPath = findProperty("alasNdkPath")
+def requestedNdkVersion = findProperty("alasNdkVersion") ?: "23.1.7779620"
+
+android {
+    namespace "io.github.alasheadless.updatelab"
+    compileSdkVersion requestedCompileSdk
+    buildToolsVersion requestedBuildTools
+
+    defaultConfig {
+        applicationId "io.github.alasheadless.updatelab"
+        minSdk 29
+        targetSdk requestedTargetSdk
+        versionCode requestedVersionCode
+        versionName requestedVersionName
+
+        ndk {
+            abiFilters "x86_64", "arm64-v8a"
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    if (requestedNdkPath) {
+        ndkPath requestedNdkPath
+    }
+    ndkVersion requestedNdkVersion
+
+    externalNativeBuild {
+        ndkBuild {
+            path file("src/main/jni/Android.mk")
+        }
+    }
+}

@@ -1,0 +1,96 @@
+{
+  "schema": "alas-headless.android-image-policy/v1",
+  "policy_id": "compat-foundation-v1",
+  "game_delivery": {
+    "package": "com.bilibili.azurlane",
+    "mode": "external-install",
+    "supported_update_paths": [
+      "package-replace",
+      "split-package-replace",
+      "in-app-resource-download"
+    ],
+    "preserve_userdata": true,
+    "public_release_allowed": false
+  },
+  "architectures": [
+    {
+      "target_id": "x86_64-compat",
+      "abi": "x86_64",
+      "backends": [
+        "kvm",
+        "redroid"
+      ]
+    },
+    {
+      "target_id": "arm64-compat",
+      "abi": "arm64-v8a",
+      "backends": [
+        "redroid",
+        "arm64-qemu"
+      ]
+    }
+  ],
+  "protected_capabilities": [
+    "android-framework",
+    "art-runtime",
+    "audio-framework",
+    "credential-encrypted-storage",
+    "device-encrypted-storage",
+    "dns",
+    "download-provider",
+    "external-app-storage",
+    "hwui-egl",
+    "input",
+    "keystore",
+    "logging-crash-evidence",
+    "low-storage-signals",
+    "network",
+    "package-installer",
+    "package-manager",
+    "settings-provider",
+    "surfaceflinger",
+    "time-sync",
+    "tls-ca-store",
+    "webview"
+  ],
+  "optimization_scope": {
+    "allowed_without_alas_data": [
+      "build-reproducibility",
+      "deterministic-packaging",
+      "image-size",
+      "cold-boot-time",
+      "idle-footprint",
+      "package-update-compatibility",
+      "resource-update-compatibility",
+      "restart-recovery",
+      "rollback",
+      "protected-capability-pruning"
+    ],
+    "deferred_until_alas_data": [
+      "cpu-affinity",
+      "cpuset",
+      "governor",
+      "instance-density",
+      "null-refresh-rate",
+      "pgo-with-alas-workload",
+      "unity-worker-count",
+      "vcpu-count"
+    ]
+  },
+  "qualification": {
+    "required_gates": [
+      "source-lock",
+      "unit-tests",
+      "cold-boot",
+      "gles-contract",
+      "unity-contract",
+      "observer-contract",
+      "package-update-lab",
+      "resource-update-lab",
+      "userdata-persistence",
+      "restart-recovery",
+      "rollback-drill"
+    ],
+    "promotion_ceiling": "platform-and-update-qualified"
+  }
+}

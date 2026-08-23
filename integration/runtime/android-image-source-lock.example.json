@@ -1,0 +1,135 @@
+{
+  "schema": "alas-headless.android-image-source-lock/v1",
+  "platform": {
+    "manifest_url": "https://android.googlesource.com/platform/manifest",
+    "revision": "android-14.0.0_r75",
+    "tag_object": "c49a52c108f10a64f6122af27fd27f96b8d45424",
+    "commit": "e3b1a5113daede938922ed29c36806e0aac2ecb3"
+  },
+  "redroid": {
+    "local_manifests_url": "https://github.com/remote-android/local_manifests.git",
+    "local_manifests_revision": "14.0.0",
+    "local_manifests_commit": "d801ec2ab62b45b920bada57260701d2b1c60321",
+    "patches_url": "https://github.com/remote-android/redroid-patches.git",
+    "patches_revision": "master",
+    "patches_commit": "a5c70c0dd89c12b5027c902ab4182f31d38f3bb7",
+    "patch_set": "android-14.0.0_r75",
+    "projects": [
+      {
+        "name": "device_redroid",
+        "path": "device/redroid",
+        "revision": "redroid-14.0.0",
+        "commit": "6321a200f47f5bdb3265378db46b34965821a08a"
+      },
+      {
+        "name": "device_redroid-prebuilts",
+        "path": "device/redroid-prebuilts",
+        "revision": "master",
+        "commit": "6248d6a71db7222d1b1c4545b90e3850dffca55f"
+      },
+      {
+        "name": "redroid-c2",
+        "path": "hardware/redroid/c2",
+        "revision": "master",
+        "commit": "98c7c28bb134ea05e020fc29440c809672b6eb3e"
+      },
+      {
+        "name": "redroid-omx",
+        "path": "hardware/redroid/omx",
+        "revision": "master",
+        "commit": "c1917368fdc999f67574d070488245d357d06dd7"
+      },
+      {
+        "name": "vendor_redroid",
+        "path": "vendor/redroid",
+        "revision": "master",
+        "commit": "1686c1825c146891d06004e35e7c362b58d3f1bc"
+      }
+    ],
+    "webview_projects": [
+      {
+        "name": "chromium-webview-stub",
+        "path": "external/chromium-webview",
+        "url": "https://github.com/remote-android/chromium-webview-stub.git",
+        "revision": "redroid-14.0.0",
+        "commit": "5072dfbb967078fb872ef2d7a4ee9c37a02d5a05"
+      },
+      {
+        "name": "android_external_chromium-webview_prebuilt_arm",
+        "path": "external/chromium-webview/prebuilt/arm",
+        "url": "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_arm.git",
+        "revision": "main",
+        "commit": "2f2702a1b5c4614c19fdc992da5f85abd735d199"
+      },
+      {
+        "name": "android_external_chromium-webview_prebuilt_arm64",
+        "path": "external/chromium-webview/prebuilt/arm64",
+        "url": "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_arm64.git",
+        "revision": "main",
+        "commit": "a04c6d4ccf0994efe32409446c4297b0e129ddcc"
+      },
+      {
+        "name": "android_external_chromium-webview_prebuilt_x86",
+        "path": "external/chromium-webview/prebuilt/x86",
+        "url": "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_x86.git",
+        "revision": "main",
+        "commit": "f57ab0fd6a19fb57d27fac8efbcd31d4c0893933"
+      },
+      {
+        "name": "android_external_chromium-webview_prebuilt_x86_64",
+        "path": "external/chromium-webview/prebuilt/x86_64",
+        "url": "https://github.com/LineageOS/android_external_chromium-webview_prebuilt_x86_64.git",
+        "revision": "main",
+        "commit": "74bc304c32135220898a0f9a8c8661d9747a60b8"
+      }
+    ]
+  },
+  "project_patches": [
+    {
+      "project": "frameworks/base",
+      "path": "integration/runtime/aosp-patches/0001-protolog-deterministic-generation-hash.patch",
+      "sha256": "56452119114c2677513cf78b0b8d80df4b4170b2cc2c8de2212118d59ae499e7",
+      "commit_message": "ALAS: make ProtoLog generation reproducible"
+    },
+    {
+      "project": "build/make",
+      "path": "integration/runtime/aosp-patches/0002-build-image-source-date-epoch.patch",
+      "sha256": "1b5030f3851974d3892741f5a19cbe05fb3df96a241d306f6a09cc98d27efb79",
+      "commit_message": "ALAS: make filesystem image timestamps reproducible"
+    }
+  ],
+  "products": [
+    {
+      "abi": "x86_64",
+      "lunch": "redroid_x86_64_only-trunk_staging-userdebug",
+      "product_out": "redroid_x86_64_only"
+    },
+    {
+      "abi": "arm64-v8a",
+      "lunch": "redroid_arm64_only-trunk_staging-userdebug",
+      "product_out": "redroid_arm64_only"
+    }
+  ],
+  "build": {
+    "host_os": "linux",
+    "host_arch": "x86_64",
+    "minimum_free_disk_gib": 400,
+    "minimum_ram_gib": 64,
+    "commands": [
+      "m",
+      "m sbom"
+    ],
+    "source_date_epoch": 1731467710,
+    "build_number": "alas-android-14-r75",
+    "build_username": "alas-builder",
+    "build_hostname": "alas-builder",
+    "git_identity": {
+      "name": "ALAS Android Builder",
+      "email": "alas-android-builder@invalid.example"
+    },
+    "timezone": "UTC",
+    "locale": "C",
+    "resolved_manifest_required": true,
+    "game_artifact_allowed": false
+  }
+}

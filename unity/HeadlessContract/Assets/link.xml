@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<linker>
+  <!-- The native observer invokes the fixed Resources.FindObjectsOfTypeAll
+       contract through IL2CPP metadata; keep that reviewed type available. -->
+  <assembly fullname="UnityEngine.CoreModule">
+    <type fullname="UnityEngine.Resources" preserve="all" />
+  </assembly>
+</linker>
