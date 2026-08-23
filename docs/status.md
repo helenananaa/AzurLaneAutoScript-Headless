@@ -2,6 +2,26 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-23
+
+### Apple Silicon Mac reaches the typed G4 login boundary under HVF
+
+- A real M1 MacBook Air runs Android Emulator 37.1.11 with an API 32 ARM64
+  guest, `-no-window`, and `-accel on`; a fresh read-only check reports
+  `Hypervisor.Framework OS X Version 26.6` available.
+- The ARM64 CN 9.7.10 game is the resumed foreground Activity and is explicitly
+  routed through the ARM64 ANGLE observer driver. The retained observer snapshot
+  reports `status=ok`, generation 1421, `age_ms=52`, Unity-main-thread access,
+  and the exact `LoginUI2(Clone)` root.
+- The active semantic slices contain 11 Buttons, 5 Text records, and 25 Images
+  without truncation or observer errors. Exact login paths include current
+  server, licence, privacy, repair, opening, and login-page roots.
+- This promotes Apple Silicon Mac + Android Emulator/HVF from future candidate
+  to a real G4 login-page/typed-observer exploration. It does not prove account
+  login, the main page, an ALAS workload, recovery, cleanup, soak, or a dedicated
+  `macos-hvf` backend. Evidence hashes and the retained-host boundary are in the
+  [Mac/HVF login validation report](mac-apple-silicon-hvf-login-validation-report.md).
+
 ## 2026-08-22
 
 ### Event/Event2/EventA-D/EventSp shared entry is closed offline

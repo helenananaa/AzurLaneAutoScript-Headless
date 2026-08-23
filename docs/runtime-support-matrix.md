@@ -1,7 +1,8 @@
 # 运行时支持矩阵与探索状态
 
 本文记录 AzurLaneAutoScript Headless 在不同宿主架构、Android 运行方式和
-物理设备上的当前证据边界。状态快照日期为 **2026-08-13**。
+物理设备上的当前证据边界。服务器/物理设备基线快照日期为 **2026-08-13**；
+Apple Silicon Mac / HVF 登录页证据已补充至 **2026-08-23**。
 
 这里的“通过”只对表格中写明的范围有效。Android 能启动、ANGLE NULL 合同
 通过、游戏到达登录前，以及完整 ALAS 长期运行是四个不同结论。目前没有任一
@@ -116,18 +117,20 @@ Apple 设备当前全部属于后续支持或实验研究，不计入已支持�
 
 | Mac 路径 | 当前状态 | 可行性与边界 |
 | --- | --- | --- |
-| Intel x86_64 Mac + Android Emulator | **后续候选。** | Android Emulator 可在 macOS 上使用 Hypervisor.Framework，并运行同架构 x86/x86_64 guest。可复用现有 x86_64 Android 经验，但当前 `kvm` 后端是 Linux `/dev/kvm` 专用，本仓库没有 macOS 生命周期或真实游戏证据。 |
-| Apple Silicon Mac + Android Emulator | **后续候选；Mac 主线首选。** | Android Emulator 可使用 Hypervisor.Framework 运行 ARM64 guest。需要独立验证 ARM64 游戏、ANGLE NULL、observer、恢复和 ALAS；现有 ARM64 Android 相邻证据不能直接覆盖 Mac。 |
+| Intel x86_64 Mac + Android Emulator | **后续候选。** | Android Emulator 可在 macOS 上使用 Hypervisor.Framework，并运行同架构 x86/x86_64 guest。可复用现有 x86_64 Android 经验，但当前 `kvm` 后端是 Linux `/dev/kvm` 专用，本仓库没有 Intel Mac 生命周期或真实游戏证据。 |
+| Apple Silicon Mac + Android Emulator | **真实探索：G4 登录页与 typed observer 已通过。** | 真实 M1 MacBook Air 上的 Android Emulator 37.1.11 以 `-no-window -accel on` 运行 API 32 ARM64 guest；`-accel-check` 确认 Hypervisor.Framework。国服 9.7.10 ARM64 游戏经 ANGLE NULL observer 到达 `LoginUI2`，快照 `status=ok`、`age_ms=52`，并读出精确登录页 Button/Text/Image 路径。仍缺账号登录、主页面、ALAS workload、recovery、cleanup、soak 和独立 `macos-hvf` backend；见 [Mac/HVF 登录页验证报告](mac-apple-silicon-hvf-login-validation-report.md)。 |
 | Apple Silicon Mac + MuMu Pro | **上游真实探索，本仓库未验证。** | 上游 ALAS 已合并 macOS MuMu Pro 设备识别修复并报告真实截图方向验证；本仓库仍固定在较早的 ALAS revision，尚未吸收或复验该路径。 |
 | Apple Silicon Mac + PlayCover | **实验性上游候选。** | 上游有开放中的 PlayCover 支持 PR，通过修改版 PlayCover/PlayTools 提供截图、触控和应用控制并绕过 ADB；仍有字体、抗锯齿、模板及 ADB 专属功能差异，不能视为正式支持。 |
 | Intel Mac + PlayCover/iOS 应用 | **不作为候选。** | macOS 直接运行兼容 iPhone/iPad 应用是 Apple Silicon 路径，不能推广到 Intel Mac。 |
 | Mac + Redroid | **暂不支持。** | Redroid 依赖 Linux Binder/BinderFS 等宿主内核能力；Docker Desktop 的 Linux VM 不能等同于原生可控的 Redroid 宿主。 |
 | Mac + QEMU TCG | **低优先级 fallback。** | 理论上可运行，但 Mac 已有 Hypervisor.Framework；在 HVF 路径未验证前不投入 TCG 性能和产品化工作。 |
 
-Mac Android 第一阶段应复用 `external-adb`，只附着到宿主直接启动的 Android
-Emulator 或已知模拟器，验证设备身份、ANGLE、Unity、observer、游戏边界和
-ALAS workload。通过后再实现独立 `macos-hvf` 后端，负责 AVD 启停、ready、
-recovery、cleanup 和 runtime lock；不得把 Hypervisor.Framework 冒充 Linux KVM。
+Mac Android 第一阶段已经通过真实 Apple Silicon Mac 上的 Android Emulator/HVF、
+ARM64 guest、ANGLE NULL observer 和游戏 `LoginUI2` 边界。下一阶段仍应复用
+`external-adb`，补齐账号登录/主页面、observer freshness、game/Android recovery
+和一个有界 ALAS workload。通过后再实现独立 `macos-hvf` 后端，负责 AVD 启停、
+ready、recovery、cleanup 和 runtime lock；不得把 Hypervisor.Framework 冒充
+Linux KVM。
 
 参考外部状态：
 
@@ -181,13 +184,11 @@ source lock、确定性 OCI、SBOM/NOTICE、userdata、restart 和 rollback 门�
 
 ## 当前代码和开发分支
 
-快照时的代码状态：
+当前主分支代码状态（2026-08-23）：
 
 | 分支 | 快照提交 | 状态与范围 |
 | --- | --- | --- |
-| main | a580b2d | 可执行后端只有 kvm 和 external-adb。redroid、tcg、arm64-qemu 为 fail-closed plan-only。 |
-| codex/android-image-foundation | 0421d69 | 27 个主线外提交，工作树干净；当前全量测试 506/506。包含双 ABI 镜像、Redroid OCI、userdata/FBE、更新、重启、回退和 reproducibility 门。尚未合并主线。 |
-| codex/alas-topdown | 52968f9 | 43 个主线外提交并继续开发 G36/主线战斗适配；快照时仍有未提交修改。尚未合并主线。 |
+| main | ce68bc5 | `codex/android-image-foundation` 与 ALAS top-down 工作均已进入主线。可执行 lifecycle backend 仍只有 `kvm` 和 `external-adb`；`redroid`、`tcg`、`arm64-qemu` 继续由 `DeferredRuntimeBackend` fail-closed。当前 ALAS series 有 88 个成员并锁定上游 `81ccf63b4540f00241628c82a58c02c7a2bb11af`；本机全量套件通过 1518/1518。 |
 
 旧的 platform-qualification、redroid-qualification、tcg-optimization、
 arm64-qemu-qualification 和 arm64-venus-qualification 分支是证据与实现参考，
@@ -202,10 +203,11 @@ arm64-qemu-qualification 和 arm64-venus-qualification 分支是证据与实现�
 5. 获得真实 ARM64 KVM 服务器后，从 host Q0 开始建立独立 ARM KVM 证据。
 6. TCG 保持 fallback；在有可重复 ALAS trace 前不继续 MTTCG、密度或主机特化调优。
 7. 无 root 设备直接路由 release 游戏不作为当前主产品方向。
-8. 核心 Android 主线稳定后，在真实 Apple Silicon Mac 上以 external-adb 启动
-   ARM64 Android Emulator，建立独立的 Mac Q0-G4 与 recovery 证据。
-9. Mac external-adb 资格通过后再实现 `macos-hvf` 后端；Intel Mac 仅在有真实
-   设备和维护价值时补充 x86_64 对照。
+8. Apple Silicon Mac 的 Android Emulator/HVF、ARM64 guest、ANGLE NULL
+   observer 和 G4 `LoginUI2` 已通过；下一步以 external-adb 补账号登录/主页面、
+   freshness、game/Android recovery 和一个有界 ALAS workload。
+9. 上述 Mac external-adb 生命周期与 workload 资格通过后再实现 `macos-hvf`
+   后端；Intel Mac 仅在有真实设备和维护价值时补充 x86_64 对照。
 10. PlayCover 只跟踪上游并保持实验隔离；iPhone/iPad 实机只做有停止条件的 WDA
     spike，越狱与 iOS Simulator 不进入当前路线图。
 

@@ -1,217 +1,149 @@
 # AzurLaneAutoScript Headless
 
-Research runtime for running the native x86_64 Azur Lane Unity client on an Android 10+ guest without a hardware GPU. The project combines a pinned ANGLE NULL-only GLES driver, explicit Android window/frame-pacing behavior, contract probes, and a fail-closed semantic observation provider.
+**简体中文** | [English](README.en.md)
 
-This repository does **not** claim complete ALAS task coverage. The pinned game
-now reaches the main UI under NULL, exports typed Button paths and RectTransform
-bounds, and has passed a harmless login -> bulletin close -> settings -> back
-loop. The controller and ALAS bridge remain opt-in and reject every unmapped
-action instead of falling back to black-screen image matching or old
-coordinates.
+干掉图像渲染，让 ALAS 以更低开销运行在更广泛的设备上。
 
-## Current scope
+AzurLaneAutoScript Headless 使用 ANGLE NULL 渲染器运行《碧蓝航线》Unity
+客户端，跳过真实图像渲染及其 GPU、显存和帧数据开销；同时直接读取类型化的
+Unity UI 状态，提供给锁定版本的 ALAS。这样不仅改变了自动化的观察方式，也让
+没有硬件 GPU、没有 KVM 或资源受限的设备获得可行的运行路径。
 
-- `G0`: capture a reproducible, read-only Android/game/runtime fingerprint.
-- `G1`: build a pinned ANGLE APK with only the NULL backend and run a GLES contract probe.
-- `G2`: run an exact Unity `2022.3.62f3` IL2CPP contract project.
-- `G3`: validate a main-thread, typed, local semantic observer contract.
-- `G4`: route the game only after G3, then validate a harmless closed loop.
-- `G5`: replace one ALAS task flow at a time with stable, fail-closed semantics.
+项目中的每一种观察和输入都必须经过显式映射；未知、歧义、过期或未经审阅的
+状态会直接拒绝，而不会偷偷回退到像素识别。
 
-See [acceptance gates](docs/acceptance-gates.md) and [architecture](docs/architecture.md).
-ALAS 产品功能按侧栏顺序推进，当前从普通主线“出击”开始；精简的交付顺序和
-单项完成标准见 [ALAS 自上而下适配路线](docs/alas-topdown-roadmap.md)。
-The host/ABI coverage, physical-device boundaries, current evidence, and open
-blockers are tracked in the
-[runtime support matrix](docs/runtime-support-matrix.md).
-The backend-neutral lifecycle, immutable artifact lock, bounded trace, and
-exact-fingerprint evidence index are documented in the
-[runtime foundation](docs/runtime-foundation.md). This foundation is offline
-infrastructure with executable reference adapters for external ADB and Linux
-KVM. Redroid, TCG, and ARM64 QEMU remain explicit plan-only adapters; none of
-this claims a validated long-running ALAS workload.
-The step-by-step, no-ALAS-workload phase for reproducible x86_64/ARM64 Android
-images, external game updates, safe pruning, and rollback is documented in the
-[Android image foundation runbook](docs/android-image-foundation-runbook.zh-CN.md).
-The latest evidence-scoped result is recorded in [validation status](docs/status.md).
-The completed Android NULL contract run is documented in the
-[G1 validation report](docs/g1-validation-report.md).
-The Unity IL2CPP functional run is documented in the
-[G2 validation report](docs/g2-validation-report.md).
-The in-process typed observer contract is documented in the
-[G3 validation report](docs/g3-validation-report.md).
-The first task-specific ALAS slice is documented in the
-[G5 mission validation report](docs/g5-mission-validation-report.md). The
-bounded typed UI layer and mission-sidebar closure are documented in the
-[G6 semantic UI report](docs/g6-semantic-ui-report.md). The broader typed
-reward/task surfaces and read-only campaign slice are documented in the
-[G7 adaptation report](docs/g7-task-campaign-adaptation-report.md). The real
-ALAS reward double run, bounded commission starts, clean one-budget commission
-reward, and typed multipage scan are documented in the
-[G8 validation report](docs/g8-alas-reward-commission-validation-report.md).
-The bounded patched-ALAS task replays are documented in the
-[G9 validation report](docs/g9-alas-task-replay-validation-report.md), and the
-reversible campaign entry through fleet preparation is documented in the
-[G10 validation report](docs/g10-campaign-pre-sortie-validation-report.md).
-The bounded ALAS-owned fleet-selection pass is documented in the
-[G11 validation report](docs/g11-campaign-fleet-preparation-validation-report.md).
-The separately budgeted single-sortie and real map-entry proof are documented
-in the [G12 validation report](docs/g12-campaign-sortie-validation-report.md).
-The complete read-only ALAS-backed map model is documented in the
-[G13 validation report](docs/g13-campaign-map-model-validation-report.md). Its
-transactional projection into native ALAS map objects and read-only path
-planning are documented in the
-[G14 validation report](docs/g14-alas-map-sync-validation-report.md). The
-passive semantic-marker to ALAS fleet-index reconciliation is documented in
-the [G15 validation report](docs/g15-campaign-fleet-index-validation-report.md).
-The original-ALAS decision preview, separately budgeted combat admission, and
-captured original `_goto()` input prefix are documented in the
-[G16 validation report](docs/g16-alas-campaign-decision-preview-validation-report.md)
-and [G17 validation report](docs/g17-campaign-combat-admission-validation-report.md),
-plus the [G18 validation report](docs/g18-alas-goto-input-preview-validation-report.md).
-The Device-free replay of ALAS's complete ordinary-combat/result/arrival chain
-is documented in the
-[G19 validation report](docs/g19-alas-combat-state-replay-validation-report.md).
-Its exact raw-Unity input contract and intentionally unqualified live mapping
-manifest are documented in the
-[G20 validation report](docs/g20-alas-combat-observer-contract-validation-report.md).
-The input-free raw trace, candidate-diff, and frozen-fixture acquisition
-pipeline is documented in the
-[G21 validation report](docs/g21-alas-combat-trace-pipeline-validation-report.md).
-The first evidence-bound mapping promotion and compound blocker contract are
-documented in the
-[G22 validation report](docs/g22-alas-combat-mapping-promotion-validation-report.md).
-Controlled combat acquisition and result handling are documented in the
-[G23 validation report](docs/g23-alas-controlled-combat-acquisition-validation-report.md),
-combat preparation in the
-[G24 validation report](docs/g24-alas-combat-preparation-observer-validation-report.md),
-and automation switching, radar search, and ordered fleet statistics in the
-[G25 validation report](docs/g25-alas-combat-input-closure-validation-report.md).
+> **项目状态：**目前属于研究级运行时，已经可以执行通过资格验证的任务路径，
+> 但还不是普通 ALAS 安装的一键替代品，也不代表全部任务都能长期无人值守运行。
 
-G1, G2, G3, and the formal G4 harmless closed loop passed. G4 includes
-EventSystem top-raycast proof for every injected target, not only object state
-and RectTransform bounds. G5a passed the real ALAS mission-reward no-claim
-branch. G5b then passed one controlled `GetAllButton` claim: three claimable
-rows became zero, the exact `AwardInfoUI` close target was verified, five
-unfinished rows remained stable, and main returned. Automatic mission claiming
-requires a second explicit environment opt-in. Commission now has bounded live
-mutation slices: independent integer budgets admitted bounded zero-oil starts
-and one clean same-context finished reward proof. The earlier reward's original
-command remains recovery-qualified after an observer-capacity failure. The
-exact commission scrollbar also passed a five-row ALAS multipage scan without
-enabling generic gestures. Tactical course assignment and bounded research
-reward/start now have live passes while preserving the original ALAS state
-machines. Dorm collect and corrected food-card input have live passes, as does
-one bounded heavy-pool construction submit with a typed queue countdown. All
-of these mutations remain default-closed and single-invocation qualified.
-Complete patched commands now pass for Tactical, Research, and Dorm. Gacha's
-warning/order phases are separately typed after a first full replay exposed a
-phase-alias bug; its corrected full replay still requires an empty queue.
-Campaign stage entry and fleet selection have independent default-zero
-budgets. The live G11 pass preserved ALAS's original fleet-preparation state
-machine, reconciled `(1, 2, 1) -> (1, 2, 0)` with exactly three mutations,
-then canceled and independently proved `(1, 2, 1)` restored. G12 separately
-admits exactly one default-closed sortie after typed fleet/settings/oil proof,
-then stops at the real read-only `LevelGrid` map identity. G13 builds a stable
-`11x8` model from ALAS topology plus complete Unity Button/Image/Text state,
-including both fleets, enemies, and the ammunition pickup. ALAS consumes that
-model at its existing already-in-map checkpoint and returns before retreat;
-there is still no map input. G14 validates that model against a deep-copied
-native ALAS `CampaignMap`, reuses `map_data_init()` and the native path finder,
-and emits deterministic per-marker reachability summaries. G15 then proves the
-displayed marker from the exact top-stage fleet number and current roster,
-including ALAS's reversed-fleet rule, and populates native indexed locations.
-Movement remains structurally closed because the patched runner stops before
-`goto()`. G17 defines a default-zero, decision-bound exact grid-input lease and
-post-battle proof. G18 now runs ALAS's original `_goto()` retreat/fleet/camera/
-conversion prefix on an isolated shell and captures its own
-`device.click(grid)` call without spending that lease or injecting input. The
-G19 qualification then drives ALAS's original combat preparation, execution,
-status, enemy-searching, arrival, and native-map mutation logic with six
-strict typed replay phases and four virtual actions. G20 can reconstruct those
-phases only from six complete, hash-bound raw Unity snapshots and an exact
-38-resource mapping; it rejects fixture phase labels. G21 makes that gap
-operationally fillable through a versioned mapping manifest, package-verified
-raw trace recorder, exact six-generation selection, and offline map/fixture
-compilation. G22 evidence-binds the first real `IN_MAP` mapping and an exact
-compound `network_down` blocker across three complete raw frames. G23-G25 then
-qualify the ordinary result chain, automation confirmation/switching, battle
-start, radar search, and ordered six-ship HP/levels while original ALAS remains
-the behavioral owner. G26 then separates the canonical path from the defensive
-input union. G27 closes two omitted true-branch queries, supports mutually
-exclusive Unity variants for one original-ALAS action target, and pins ambush,
-retirement, and story branch roots without replacing their handlers. Current
-coverage is canonical `16/41`, defensive `18/54`, actions `12/38`, and blockers
-`1/4`; branch and blocker review remain incomplete, so production remains at
-the G18 capture boundary. G28 separately replays 16 rare result, popup,
-retirement, story, and ambush paths through their original ALAS methods with
-virtual inputs and source-hash binding. It confirms control-flow ownership but
-does not promote live Unity mappings. G29 adds a zero-input, three-frame
-rare-dialog watcher for guild and mission button pairs. Its first real map run
-is a verified negative observation, so it emits no review draft and changes no
-mapping. G30 extends the same non-applying acquisition boundary to passive A-D
-battle grades and A/B experience pages, with their structure bound to the
-qualified S mappings. Its fresh six-profile map scan is also negative, so
-coverage is unchanged. G31 combines those eight dialog/result profiles into a
-single non-applying watcher with deterministic one-match dispatch and
-multi-match rejection. G32 adds a hash-bound controlled-episode verifier,
-same-PID process leases, checked S-result positive controls, and original-login
-bracketing. Its first live acquisition correctly remains incomplete: an ALAS
-selected B3 center was covered by the map HUD, and accepting its non-top
-raycast coordinate opened the air-supremacy information panel. Map cells now
-fail closed again. G33 now qualifies one typed ALAS-requested viewport movement:
-the original camera path requested `(1, -2)`, the adapter translated only its
-final swipe, all 68 logical cells moved coherently under a projective model,
-and F6 ended exact top-raycast. G34 now supplies a typed Unity `View` only at
-ALAS's existing `_update_view()` input boundary. The original `Camera.update()`
-then updates F4 to F6 and the original `_goto()` rechecks the fresh target,
-centers it, converts global to local, and reaches its own `device.click(grid)`
-statement. That final click is captured without injection, so production stays
-disabled. G35 now closes the natural out-of-sight branch: an isolated
-qualification-only empty-cell setup puts the camera at F3, ALAS independently
-selects F6 again, and original `_goto(F6)` itself owns
-`in_sight -> focus_to(F4) -> Camera.update` before reaching its intercepted
-grid-click statement. The setup budget has no environment opt-in and is closed
-before the fresh decision. Lua/game-state coverage,
-formation-layout changes, campaign movement execution, battle state,
-weekly-only end-to-end
-coverage, repeated sorties, and full unattended ALAS task coverage remain
-open.
+[任务支持情况](docs/alas-config-support-matrix.md) ·
+[运行环境支持](docs/runtime-support-matrix.md) ·
+[系统架构](docs/architecture.md) ·
+[最新验证状态](docs/status.md) ·
+[ALAS 集成说明](integration/alas/README.md)
 
-## Repository layout
+## 两条核心主线
 
-- `ANGLE_REVISION` pins the upstream ANGLE checkout used by every build.
-- `patches/angle` contains the base NULL-renderer compatibility patch series.
-- `patches/angle-g3` and `overlays/angle-g3` contain the observer patch series
-  and the new source files installed before that series is applied.
-- `probes/gles-contract` and `unity/HeadlessContract` are the Android GLES and
-  Unity IL2CPP contract workloads.
-- `python/alas_headless` is the fail-closed controller library;
-  `scripts/python` contains live probes and `tests` contains its unit tests.
-- `scripts/wsl` owns ANGLE bootstrap/build steps, while `scripts/windows` owns
-  ADB execution, capture, and comparison steps.
-- `integration/alas` is the opt-in, commit-pinned upstream ALAS integration
-  patch. `docs` contains contracts, validation reports, and current status.
+这个仓库主要解决两个互相依赖的问题。
 
-Generated APKs, extracted game files, raw captures, and Unity/Gradle build state
-stay local under ignored paths such as `artifacts`, `evidence`, `Build`, and
-`Library`. Durable results belong in `docs` with hashes and evidence paths, not
-as large binaries committed to Git.
+### 1. 不再渲染和识别画面
 
-## Host layout
+传统游戏自动化先把每一帧完整渲染出来，再截图、传输并使用 OCR、模板匹配和
+预先记录的坐标执行操作。这条链路同时消耗 GPU、显存、内存带宽和 CPU，也可能
+把外观相似、被遮挡或尚未加载完成的页面误判为目标状态。
 
-ANGLE must be built on Linux. On Windows, the supported path is WSL2:
+本项目直接从 Unity 获取结构化界面状态：
+
+- 使用锁定版本的 ANGLE NULL-only 驱动，跳过真实图像渲染；
+- 直接从 Unity 读取 Button、Text、Image、Toggle 和布局信息；
+- 保留上游 ALAS 原有的任务状态机，而不是另写一套自动化逻辑；
+- 只允许上下文明确、经过审阅且带有新鲜后置条件的动作；
+- 遇到未知状态时拒绝继续，不回退到截图、OCR 或旧坐标。
+
+### 2. 把 ALAS 带到更多设备
+
+不再要求设备持续生成可见画面后，运行时可以面向远比传统模拟器更广的硬件：
+
+- 有 KVM 的 x86_64 Linux 服务器和 Android Emulator；
+- 没有嵌套虚拟化的云主机与 Redroid 容器路径；
+- 只能使用 QEMU TCG 的低配或受限环境；
+- ARM64 Linux、已 root Android 设备，以及由普通 ARM 设备托管的 guest；
+- Apple Silicon Mac 上通过 Hypervisor.Framework 加速的 ARM64 Emulator；
+- 通过 external ADB 接入、由外部负责生命周期的明确设备。
+
+这并不表示所有组合现在都已经达到同一级别的 ALAS 生产支持。跨设备运行本身是
+项目的一条核心主线，因此每个平台都分别记录运行、observer、游戏、恢复和 ALAS
+工作负载证据，而不是简单写成“支持”或“不支持”。
+
+## 目前能做什么
+
+当前锁定的 ALAS 配置面共有 60 个。项目按面板和配置分支分别记录支持程度，
+不会因为某一次任务成功就把整类功能标记为完成。
+
+| 等级 | 面板数量 | 含义 |
+|---|---:|---|
+| 完整支持（`F`） | 9 / 60 | 在已验证环境中，必要配置值和异常分支均已闭环。 |
+| 实机主路径完成（`L`） | 26 / 60 | 至少一条真实设备主路径已闭环，但并非所有配置值都已验证。 |
+| 仅离线完成（`O`） | 6 / 60 | 已有契约、回放或桩验证，但还没有实机任务闭环。 |
+| 部分完成（`P`） | 10 / 60 | 已实现或可以到达部分流程，仍有重要分支未完成。 |
+| 到达明确边界（`B`） | 8 / 60 | 已安全到达账号、资源、日期或观察能力边界。 |
+| 尚未完成（`M`） | 1 / 60 | 仍缺少任务级语义适配。 |
+
+具有代表性的已验证工作包括：
+
+- 通过原始 ALAS 路由运行普通主线和活动关卡；
+- 奖励、委托、重启、科研、后宅、战术学院和建造等有界实机任务路径；
+- 多条大型作战导航、刷取、商店、档案和 Boss 路径；
+- 类型化读取地图、舰队、敌人、资源、弹窗和战斗结果；
+- 默认关闭的动作预算、精确目标检查和后置条件证明；
+- 确定性回放、锁定补丁序列验证和失败路径测试。
+
+这些结果不代表所有任务、服务器、账号状态、地图布局或配置组合都已经支持。
+完整口径和待完成项以
+[配置项级支持矩阵](docs/alas-config-support-matrix.md)为准；最新实验证据、失败和
+回归记录在[验证状态](docs/status.md)中。
+
+## 工作原理
+
+运行时把观察、决策所有权和输入分开：
 
 ```text
-Windows workspace: H:\program\AzurLaneAutoScript-Headless
-WSL build cache:   ~/src/alas-headless-angle
+锁定版本的《碧蓝航线》Unity 客户端
+        |
+        v
+ANGLE NULL 渲染器 + 进程内语义观察器
+        |
+        | 带 generation 的类型化 UI 快照
+        v
+Fail-closed ALAS 适配层
+        |
+        | 经过审阅的状态查询和有界动作
+        v
+原始 ALAS 任务状态机
 ```
 
-Bootstrap and build commands are run from WSL, while APK installation and evidence capture may be run through Windows ADB.
+语义观察器在 Unity 主线程读取对象并输出本地类型化快照。适配层只翻译已经审阅
+的 ALAS 资源和动作。输入发出前，可以要求目标页面上下文、active/interactable
+状态、精确几何范围、EventSystem 顶层射线命中、新鲜 generation、显式输入预算
+以及可验证的后置条件全部成立。
 
-## Quick start
+任务选择、筛选、重试、调度、导航逻辑和恢复仍由 ALAS 负责。适配层提供的是
+受约束的观察与输入边界，不是第二套自动化引擎。
 
-From WSL:
+组件边界见[系统架构](docs/architecture.md)，证据口径见
+[验收门槛](docs/acceptance-gates.md)。
+
+## 安全模型
+
+Headless 模式有意采用 fail-closed 设计：
+
+- 语义会话中不会自动回退到截图、OCR、模板匹配或旧素材坐标；
+- 没有显式审阅映射时，不开放通用点击、滑动、拖拽或确认动作；
+- 可能改变账号状态的资格验证使用有上限、默认值为零的输入预算；
+- 过期、不完整、不一致、被遮挡或存在歧义的 UI 状态会被拒绝；
+- 任务支持范围绑定精确的游戏、运行时、ALAS 和证据版本；
+- 离线回放成功不会自动提升为实机支持。
+
+这些约束可以减少误操作，但无法消除在真实游戏账号上运行自动化的风险。实机
+运行前应查看支持矩阵、使用受控环境，并确认每一个被启用的输入预算。
+
+## 从这里开始
+
+请选择与你要验证的目标对应的入口。
+
+### 检查控制器和契约
+
+Python 控制器测试不需要安装游戏，也不需要准备 ALAS checkout：
+
+```powershell
+$env:PYTHONPATH = 'python'
+python -m unittest discover -s tests -p 'test_*.py'
+```
+
+### 构建 ANGLE NULL 运行时
+
+ANGLE 必须在 Linux 上构建。Windows 环境下，当前支持的开发路径使用 WSL2。
+下面的脚本会拉取锁定的上游版本、应用已审阅补丁，并构建基础驱动和 observer
+驱动 APK：
 
 ```bash
 cd /mnt/h/program/AzurLaneAutoScript-Headless
@@ -223,14 +155,11 @@ cd /mnt/h/program/AzurLaneAutoScript-Headless
 ./scripts/wsl/build-angle-null-observer.sh
 ```
 
-The bootstrap and build scripts do not route a game package. The separate G4
-runner does so only when explicitly invoked, requires the pinned game
-fingerprint, refuses to restart an already-running game by default, and restores
-all ANGLE settings afterward. Input is disabled unless exact semantic target and
-postcondition arguments are supplied.
+这些命令只构建运行时基础，不会安装或路由游戏包，也不会启动 ALAS 工作负载。
 
-The Unity contract is version-locked and intentionally refuses any editor other than
-`2022.3.62f3`. Build it with that editor's executable:
+### 验证 Unity observer 契约
+
+契约项目锁定 Unity `2022.3.62f3`，请使用该版本编辑器构建 Android player：
 
 ```powershell
 Unity.exe -batchmode -quit `
@@ -239,14 +168,9 @@ Unity.exe -batchmode -quit `
   -logFile -
 ```
 
-The default player is x86_64, IL2CPP, and is written to
-`unity/HeadlessContract/Build/HeadlessContract.apk`. Set
-`ALAS_UNITY_TARGET_CPU=arm64` before the same build invocation to produce the
-ARM64-only `unity/HeadlessContract/Build/HeadlessContract-arm64.apk`; any other
-value fails before the build starts.
-
-The G3 runner launches the contract with Unity's supported `unity` Intent extra
-and `-force-gfx-st`, then validates the typed local socket and negative gates:
+默认输出为 x86_64 IL2CPP APK：
+`unity/HeadlessContract/Build/HeadlessContract.apk`。在准备好的 Android guest 上
+运行 observer 契约：
 
 ```powershell
 .\scripts\windows\run-g3-observer.ps1 `
@@ -255,76 +179,87 @@ and `-force-gfx-st`, then validates the typed local socket and negative gates:
   -UnityApk .\unity\HeadlessContract\Build\HeadlessContract.apk
 ```
 
-The G4 runner expects an already installed, pinned Chinese 9.7.10 package. A
-read-only sustained run is still the default:
+设备序列号和制品路径只是环境相关示例。不要在未核对 runtime lock 的情况下
+直接复制到其他模拟器环境。
 
-```powershell
-.\scripts\windows\run-g4-game-init.ps1 `
-  -Serial emulator-5580 `
-  -AngleApk <observer-AngleLibraries.apk>
-```
+### 集成锁定版本的 ALAS
 
-Semantic clicks require exact name/path mappings and expected postconditions;
-unknown or ambiguous targets fail closed. See the
-[G4 validation report](docs/g4-preflight-report.md) for the tested harmless loop
-and evidence scope.
+当前集成目标是上游 ALAS 提交
+`81ccf63b4540f00241628c82a58c02c7a2bb11af`。集成采用有序、哈希校验的补丁
+序列，并且默认不启用；只有显式应用并开启集成后，ALAS 行为才会改变。
 
-The controller package and its tests are independent of ALAS:
+按照 [ALAS 集成说明](integration/alas/README.md)构建和验证补丁序列。各个任务的
+实机 runner 是资格验证工具，不是通用启动器；每个 runner 都有自己的设备指纹、
+配置、输入预算和恢复要求。
 
-```powershell
-$env:PYTHONPATH = 'python'
-python -m unittest discover -s tests -v
-```
+## 运行环境支持
 
-The staged ALAS integration overlay targets upstream commit
-`81ccf63b4540f00241628c82a58c02c7a2bb11af`; see
-[integration instructions](integration/alas/README.md). The reviewed mission
-inputs now feed ALAS's original reward state machine rather than replacing it.
-Claiming remains disabled by default; one `GetAllButton` mission claim per ALAS
-invocation is available only through the separate controlled-claim opt-in. The
-observer now also exposes typed Toggle, Text, TextMesh Pro, and Image records
-through `GET /v1/ui`. Exact task-sidebar selected sprites and top-raycast input
-have a live adapter-level pass. Reward summary counts, commission rows,
-tactical slots/books/skills, research cards/detail/queue, construction
-navigation/pool/cost/queue, dorm summary/feed, and visible campaign labels use
-typed state rather than OCR. A real patched ALAS
-checkout also passed reward twice with zero claims, a commission dry run, two
-separately budgeted zero-oil starts, and zero-budget idempotency passes. The
-first commission reward remains recovery-qualified after a fail-closed
-64-record observer-capacity fault. A later natural completion cleanly produced
-an in-context `1 -> 0` proof with the reviewed popup chain and a second
-dual-budget-zero replay. The five-row daily list also passed exact typed
-scrollbar scanning and stable row-index deduplication. Complete unattended ALAS
-execution awaits task-by-task live qualification.
+移除硬件 GPU 依赖后，项目已经在服务器、容器、纯软件虚拟化和物理设备上验证
+了多条运行路径。这里的每一格都按实际证据标注；“能启动 Android”“ANGLE NULL
+通过”“游戏到达登录前”和“长期运行 ALAS”是四个不同结论。
 
-The campaign slice now also has a decision-only pinned pass: the typed indexed
-map is given to ALAS's original `battle_function()`, and the first public
-`goto()` is recorded and aborted. For the qualified `12-4` state ALAS selected
-`battle_0`, fleet `1`, and the fighting enemy at `D6`; no movement, combat,
-retreat, or map reward input is enabled. See the
-[G16 validation report](docs/g16-alas-campaign-decision-preview-validation-report.md).
-G17 binds that decision to one exact default-closed D6 combat lease, and G18
-runs the original `_goto()` prefix through its exact click statement using
-typed fleet/camera/grid observations. The click is captured before dispatch,
-so this remains a zero-input preflight rather than a movement or battle pass.
-G19 separately replays the full original combat chain without a Device:
-ALAS advances battle `0 -> 1`, ammunition `5 -> 4`, clears D6, confirms arrival,
-and rebuilds paths while all four intended actions remain virtual records.
+| 宿主与 Android 路径 | 当前状态 | 已验证范围 | 主要边界 |
+|---|---|---|---|
+| x86_64 Linux + KVM / Android Emulator | **主线可执行，当前最成熟** | API 32 x86_64、ANGLE NULL、Unity、observer、游戏与 Android recovery；当前 ALAS 任务有独立实机证据 | 仍需长期 soak、容量和多实例密度验证 |
+| External ADB | **主线可执行** | 附着到精确指定设备，执行身份、生命周期和恢复合同 | 不负责设备 provisioning、root、升级或持久化 |
+| x86_64 Linux + Redroid | **真实探索** | 无 `/dev/kvm` 云主机上的 Binder、容器、ANGLE NULL、observer、完整资源、重启持久化和登录界面 | 主线 backend、当前 OCI 回退和 ALAS 工作负载尚未闭环 |
+| ARM64 Linux + Redroid | **平台与更新探索较完整** | 双 ABI 制品、G1/G2/G3、APK/资源更新、restart、持久化和真实 OCI rollback | 尚无真实游戏和 ALAS 证据；主线 backend 仍为 plan-only |
+| x86_64 QEMU TCG | **部分通过，fallback** | Q1/Q2/Q3、Unity 长运行、observer freshness，游戏到达隐私协议边界 | WebView 黑屏与 System UI ANR 阻塞更深游戏验证，性能低于 KVM |
+| 已 root ARM64 Android 设备 | **真实工具链探索** | systemless ANGLE 安装、验证、移除和回滚；G1 NULL renderer 合同 | 未验证当前游戏、完整 observer、ALAS、温控和长期运行 |
+| 无 root ARM64 手机/平板作为 QEMU 宿主 | **实验性部分通过** | 普通应用权限托管 ARM64 guest、ANGLE NULL、Unity，游戏到达无输入登录前 | 无硬件加速且很慢；没有 observer、ALAS 和恢复闭环 |
+| 无 root 设备直接路由 release 游戏 | **当前不支持** | debug/queryable GLES probe 可以加载调试 ANGLE | locked user build 不能把 side-loaded debug ANGLE 直接路由给 release 游戏 |
+| Apple Silicon Mac + Android Emulator/HVF | **真实探索：G4 登录页与 typed observer 已通过** | M1、Emulator 37.1.11、API 32 ARM64、`-accel on`；ANGLE NULL observer 读取到国服 9.7.10 的 `LoginUI2` 精确路径 | 未完成账号登录、主页面、ALAS workload、recovery、soak 和独立 `macos-hvf` backend |
+| Intel Mac + Android Emulator/HVF | **后续候选** | 同架构 x86/x86_64 guest 路径可行 | 本仓库尚无真实 Intel Mac 生命周期或游戏证据 |
 
-## License and third-party boundaries
+这张表展示的是跨设备路线，而不是用一个模糊的“全平台支持”标签掩盖成熟度差异。
+当前正式候选从 x86_64 KVM 起步，但 Redroid、TCG、ARM64 和物理设备不是旁支：
+它们共同验证了移除真实渲染以后，ALAS 可以逐步进入传统图形自动化难以覆盖的
+运行环境。
 
-Except where a file or directory has an explicit different notice, this
-project is licensed under the GNU General Public License v3.0 only
-(`GPL-3.0-only`); see [LICENSE](LICENSE). The pinned ALAS integration patch is
-GPL-covered. ANGLE patches and overlay sources retain ANGLE's BSD-style
-license. The complete attribution and distribution boundary is recorded in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+准确的 host、ABI、Android、backend、恢复能力和未解决问题见
+[运行环境支持矩阵](docs/runtime-support-matrix.md)。可复现镜像构建和回滚流程见
+[Android 镜像基础运行手册](docs/android-image-foundation-runbook.zh-CN.md)，Mac
+实机证据见 [Apple Silicon Mac / HVF 登录页验证报告](docs/mac-apple-silicon-hvf-login-validation-report.md)。
 
-The Git repository intentionally excludes built APKs, Android images, game
-packages/resources, account data, and local `artifacts/` or `evidence/`.
-Publishing this source repository does not authorize redistributing those
-outputs. Binary releases require a separate provenance, license-notice,
-corresponding-source, and privacy review.
+## 仓库结构
 
-This is an unofficial research project and is not affiliated with or endorsed
-by the Azur Lane rights holders, ALAS maintainers, Google/ANGLE, or Unity.
+- `python/alas_headless` — fail-closed 控制器和语义适配库。
+- `integration/alas` — 锁定上游提交的 ALAS 补丁序列、profile、manifest 和证据。
+- `patches/angle` — ANGLE NULL 渲染器基础兼容补丁。
+- `patches/angle-g3`、`overlays/angle-g3` — 语义观察器补丁和新增源码。
+- `probes/gles-contract` — Android GLES 契约工作负载。
+- `unity/HeadlessContract` — 锁定版本的 Unity IL2CPP observer 契约项目。
+- `scripts/wsl` — ANGLE 初始化、补丁和构建脚本。
+- `scripts/windows` — Android 执行、采集和比较脚本。
+- `scripts/python` — 回放、验证、证据和有界实机 runner。
+- `tests` — 控制器、适配层、补丁序列、契约和回归测试。
+- `docs` — 架构、支持矩阵、运行手册和验证报告。
+
+生成的 APK、Android 镜像、游戏文件、账号数据、原始采集结果以及 Unity/Gradle
+构建状态保存在 `artifacts`、`evidence`、`Build`、`Library` 等已忽略的本地路径。
+仓库内只保留紧凑的 receipt、manifest、哈希和报告，不提交大型二进制文件。
+
+## 文档导航
+
+- [配置项级支持矩阵](docs/alas-config-support-matrix.md) — 60 个面板的权威支持范围和待完成分支。
+- [运行环境支持矩阵](docs/runtime-support-matrix.md) — host、ABI、Android 和 backend 的支持与实验状态。
+- [Apple Silicon Mac / HVF 登录页验证](docs/mac-apple-silicon-hvf-login-validation-report.md) — Mac ARM64 Emulator、ANGLE NULL、游戏登录页与 typed observer 的实机证据。
+- [系统架构](docs/architecture.md) — observer、adapter、controller 和 fail-closed 边界。
+- [验证状态](docs/status.md) — 按时间记录、限定证据范围的验证结果。
+- [运行时基础](docs/runtime-foundation.md) — 生命周期、制品锁、trace、恢复和清理契约。
+- [ALAS 自上而下路线](docs/alas-topdown-roadmap.md) — 任务顺序和单项完成标准。
+- [ALAS 集成说明](integration/alas/README.md) — 锁定补丁序列的构建和集成细节。
+
+## 许可证与第三方边界
+
+除非文件或目录另有声明，本项目采用 GNU GPL v3.0 only（`GPL-3.0-only`），见
+[LICENSE](LICENSE)。锁定的 ALAS 集成补丁受 GPL 约束；ANGLE 补丁和 overlay
+源码保留 ANGLE 的 BSD-style 许可证。完整署名和分发边界见
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+仓库有意排除构建后的 APK、Android 镜像、游戏包和资源、账号数据以及本地证据
+采集结果。公开本源码仓库不代表获得重新分发这些内容的授权。发布二进制制品前，
+需要单独完成来源、许可证声明、对应源码和隐私审查。
+
+本项目为非官方研究项目，与《碧蓝航线》权利方、ALAS 维护者、Google/ANGLE
+或 Unity 均无隶属、授权或背书关系。
