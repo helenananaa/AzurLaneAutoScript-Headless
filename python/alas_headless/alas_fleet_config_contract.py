@@ -126,6 +126,9 @@ def validate_alas_fleet_config(
     reviewed_order = snapshot.fleet_order == "fleet1_mob_fleet2_boss" or (
         snapshot.fleet2 == 0
         and snapshot.fleet_order == "fleet1_all_fleet2_standby"
+    ) or (
+        snapshot.fleet2 != 0
+        and snapshot.fleet_order == "fleet1_standby_fleet2_all"
     )
     if not reviewed_order:
         raise SemanticGateClosed(

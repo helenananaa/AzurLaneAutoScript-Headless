@@ -78,6 +78,18 @@ class AlasFleetConfigTests(unittest.TestCase):
         with self.assertRaises(SemanticGateClosed):
             validate_alas_fleet_config(**config)
 
+    def test_hardfleet_two_reversed_all_order_requires_two_fleets(self):
+        config = defaults()
+        config["fleet_order"] = "fleet1_standby_fleet2_all"
+        self.assertEqual(
+            validate_alas_fleet_config(**config).fleet_order,
+            "fleet1_standby_fleet2_all",
+        )
+
+        config["fleet2"] = 0
+        with self.assertRaises(SemanticGateClosed):
+            validate_alas_fleet_config(**config)
+
     def test_invalid_values_fail_closed(self):
         for field, value in (
             ("fleet1", 0),

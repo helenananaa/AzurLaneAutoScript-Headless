@@ -1,0 +1,45 @@
+{
+  "schema": "alas-headless.hard-live-boundary/v1",
+  "passed": false,
+  "capability_promotion": false,
+  "task": "Hard",
+  "stage": "11-4",
+  "hard_fleet": 2,
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "sortie_budget": 1,
+  "sortie_committed": false,
+  "hard_attempt_consumed": false,
+  "raw_input_fallback_used": false,
+  "implementation_ready": true,
+  "offline_evidence": {
+    "pytest": "1444 passed, 50 warnings",
+    "patch_tree": "hard-fleet2-patch-tree-verification-20260823-r3/result.json",
+    "patch_applied": true,
+    "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+  },
+  "live_attempts": [
+    {
+      "result": "fail_closed_before_input",
+      "reason": "The original semantic Hard gate admitted only 11-4 fleet 1."
+    },
+    {
+      "result": "fail_closed_before_sortie",
+      "reason": "The retained event page lost its one-shot back target during the passive transition."
+    },
+    {
+      "result": "observer_unavailable",
+      "reason": "After a cold app start and Android emulator reboot, the game remained on a black rendered frame and the semantic observer reported unavailable."
+    }
+  ],
+  "screenshots": [
+    "hard-startup-after-cold-restart-20260823.png",
+    "hard-startup-after-avd-reboot-20260823.png"
+  ],
+  "missing_proof": [
+    "hard_fleet2_preparation",
+    "sortie",
+    "auto_search_completion"
+  ],
+  "reason": "HardFleet=2 is implemented and regression-qualified, but the emulator graphics and observer failure prevented a live preparation or sortie receipt. The Hard panel status is unchanged."
+}

@@ -4169,6 +4169,33 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "event-list/page/back")
         self.assertEqual(oracle.click_calls, ["event-list/page/back"])
 
+    def test_campaign_event_identity_is_hidden_after_back_commit(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.event_campaign_page_visible_value = True
+        oracle.exists_values["event-list/page/back"] = True
+        oracle.enabled_values["event-list/page/back"] = True
+
+        adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+        receipt = adapter.click(NamedButton("BACK_ARROW"))
+
+        self.assertIs(adapter._campaign_context.event_page_back_receipt, receipt)
+        self.assertFalse(adapter.appear(NamedButton("EVENT_CHECK")))
+        self.assertEqual(oracle.click_calls, ["event-list/page/back"])
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_event_identity_requires_actionable_back(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.event_campaign_page_visible_value = True
+        oracle.campaign_preparation_value = None
+        oracle.enabled_values["event-list/page/back"] = False
+        adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+
+        self.assertFalse(adapter.appear(NamedButton("EVENT_CHECK")))
+
+        oracle.enabled_values["event-list/page/back"] = True
+        self.assertTrue(adapter.appear(NamedButton("EVENT_CHECK")))
+        adapter.end_campaign_pre_sortie()
+
     def test_campaign_startup_leaves_daily_page_through_exact_typed_back(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.daily_page_visible_value = True
@@ -5093,10 +5120,47 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.authorize_campaign_fleet_preparation(1, 2, 0)
         adapter.confirm_campaign_fleet_selection()
 
-        with self.assertRaisesRegex(SemanticGateClosed, "HardFleet=2"):
+        with self.assertRaisesRegex(SemanticGateClosed, "typed campaign duty tab"):
             adapter.ensure_campaign_auto_search_roles(
                 "fleet1_standby_fleet2_all"
             )
+        adapter.end_campaign_pre_sortie()
+
+    def test_hard_campaign_97328_proves_hardfleet_two_reversed_duties(self):
+        oracle = FakeOracle()
+        oracle.campaign_hard_mode = True
+        oracle.campaign_fleets["submarine"] = 0
+        oracle.toggle_selected_values[
+            "campaign/fleet-preparation/roles/tab"
+        ] = False
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=3,
+            campaign_sortie_budget=1,
+        )
+        entrance = NamedButton("11-4")
+        entrance.semantic_campaign_stage_code = "11-4"
+        adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+        adapter.confirm_campaign_fleet_selection()
+
+        roles = adapter.ensure_campaign_auto_search_roles(
+            "fleet1_standby_fleet2_all"
+        )
+
+        self.assertEqual((roles.fleet1_role, roles.fleet2_role), ("standby", "all"))
+        self.assertTrue(
+            adapter.authorize_campaign_sortie(
+                use_auto_search=True,
+                use_2x_book=False,
+                submarine_mode="do_not_use",
+                fleet_order="fleet1_standby_fleet2_all",
+            )
+        )
         adapter.end_campaign_pre_sortie()
 
     def test_hard_campaign_97328_reads_duty_tab_from_fresh_immutable_frames(self):

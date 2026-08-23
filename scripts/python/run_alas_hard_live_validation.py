@@ -42,6 +42,9 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
     alas_root = args.alas_root.resolve()
     seed = _load(alas_root / "config" / f"{args.seed_config}.json")
     payload = copy.deepcopy(seed)
+    payload["Alas"]["Emulator"].update(
+        {"Serial": args.serial, "ScreenshotMethod": "ADB"}
+    )
     payload["Hard"]["Scheduler"].update(
         {"Command": "Hard", "Enable": True}
     )

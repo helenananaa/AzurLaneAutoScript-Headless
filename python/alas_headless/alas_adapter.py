@@ -1036,6 +1036,7 @@ class _CampaignFlowContext:
     map_preparation_oil_cost: Optional[int] = None
     preparation_kind: Optional[str] = None
     cancel_receipt: Optional[ActionReceipt] = None
+    event_page_back_receipt: Optional[ActionReceipt] = None
     proof: Optional[CampaignPreSortieProof] = None
     initial_fleet_state: Optional[CampaignFleetSelectionState] = None
     prepared_fleet_state: Optional[CampaignFleetSelectionState] = None
@@ -3263,18 +3264,27 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed(
                     "hard campaign auto-search roles are qualified only for 11-4"
                 )
-            elif fleet_order != "fleet1_all_fleet2_standby":
-                raise SemanticGateClosed(
-                    "HardFleet=2 is not qualified on the current Hard 11-4 path"
-                )
             else:
+                expected = {
+                    "fleet1_all_fleet2_standby": ("all", "standby"),
+                    "fleet1_standby_fleet2_all": ("standby", "all"),
+                }.get(fleet_order)
+                if expected is None:
+                    raise SemanticGateClosed(
+                        "hard campaign requires one all-duty fleet and one standby fleet"
+                    )
                 # 9.7.328 restored the 职能 duty tab.  Use it when present;
                 # keep the earlier game-managed proof only on the reviewed
-                # main Hard 11-4 path where that tab can be absent.
+                # HardFleet=1 path where that tab can be absent. HardFleet=2
+                # requires the typed tab so its reversed ownership is proven.
                 role_oracle = fresh_role_oracle()
                 if not role_oracle.toggle_present(
                     "campaign/fleet-preparation/roles/tab"
                 ):
+                    if expected != ("all", "standby"):
+                        raise SemanticGateClosed(
+                            "HardFleet=2 requires the typed campaign duty tab"
+                        )
                     state = role_oracle.campaign_auto_search_role_state()
                     if (state.fleet1_role, state.fleet2_role) != (
                         "game-managed",
@@ -3285,7 +3295,6 @@ class AlasSemanticAdapter:
                         )
                     context.auto_search_role_state = state
                     return state
-                expected = ("all", "standby")
         else:
             expected = None
         if expected is None:
@@ -3451,7 +3460,10 @@ class AlasSemanticAdapter:
                     "fleet1_boss_fleet2_mob": ("boss", "mob"),
                 }
                 if context.mode == "normal" or hard_event_stage
-                else {"fleet1_all_fleet2_standby": ("all", "standby")}
+                else {
+                    "fleet1_all_fleet2_standby": ("all", "standby"),
+                    "fleet1_standby_fleet2_all": ("standby", "all"),
+                }
             ).get(fleet_order)
             if (
                 context.mode == "hard"
@@ -4810,6 +4822,17 @@ class AlasSemanticAdapter:
                 raise SemanticGateClosed("commission start oil cost changed")
             return self._commission_context.start_confirm_receipt is None
         if name == "EVENT_CHECK" and self._campaign_context is not None:
+            if (
+                self._campaign_context.event_page_back_receipt is not None
+                and time.monotonic()
+                <= self._campaign_context.passive_transition_until
+            ):
+                # LevelSelectSPFullUI can retain its event-page identity for
+                # several frames after the exact back control has committed.
+                # Hide that stale source page so ui_goto() waits for the
+                # destination instead of submitting the one-shot back input
+                # a second time.
+                return False
             try:
                 if self.oracle.campaign_preparation_state(
                     self._campaign_context.stage_code
@@ -4951,7 +4974,10 @@ class AlasSemanticAdapter:
             return self.oracle.enabled("campaign-menu/event")
         if semantic_id == "event/mode/story":
             if name == "EVENT_CHECK":
-                return self.oracle.event_campaign_page_visible()
+                return bool(
+                    self.oracle.event_campaign_page_visible()
+                    and self.oracle.enabled("event-list/page/back")
+                )
             return self.oracle.exists("event/mode/battle")
         if semantic_id == "event/mode/battle":
             return self.oracle.exists("event/mode/story")
@@ -10692,6 +10718,7 @@ class AlasSemanticAdapter:
                 receipt = self.oracle.click_daily_control("daily/page/back")
             else:
                 receipt = self.oracle.click("event-list/page/back")
+                self._campaign_context.event_page_back_receipt = receipt
             self._campaign_context.passive_transition_until = (
                 time.monotonic() + 20.0
             )

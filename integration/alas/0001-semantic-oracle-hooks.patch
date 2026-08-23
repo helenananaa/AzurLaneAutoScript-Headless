@@ -9512,7 +9512,7 @@ index dbf43837..2dfe1ebf 100644
              Fleet_FleetOrder='fleet1_all_fleet2_standby' if hard_fleet == 1 else 'fleet1_standby_fleet2_all',
              Emotion_Mode='nothing',  # Dont calculate and dont ignore
          )
-@@ -52,18 +55,71 @@ class CampaignHard(CampaignRun):
+@@ -52,18 +55,70 @@ class CampaignHard(CampaignRun):
          self.load_campaign(name='campaign_hard', folder='campaign_hard')  # Load campaign file
          module = importlib.import_module('.' + name, 'campaign.campaign_main')  # Load map from normal mode.
          self.campaign.MAP = module.MAP
@@ -9571,10 +9571,9 @@ index dbf43837..2dfe1ebf 100644
 +            # class.  Class binding is required so decision-preview copies
 +            # execute against their sandbox rather than the live instance.
 +            setattr(type(self.campaign), 'battle_6', module.Campaign.battle_6)
-+        elif semantic_adapter is not None and (
-+                hard_stage != '11-4' or hard_fleet != 1):
++        elif semantic_adapter is not None and hard_stage != '11-4':
 +            raise RuntimeError(
-+                'Semantic hard official auto-search is qualified only for 11-4 fleet 1')
++                'Semantic hard official auto-search is qualified only for 11-4')
 +        if not semantic_resume:
 +            self.device.screenshot()
 +            self.campaign.device.image = self.device.image

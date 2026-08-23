@@ -151,7 +151,13 @@ def verify_fleet_config(alas_root: Path) -> Mapping[str, object]:
         check(
             f"fleet-order-{value}",
             classify("fleet_order", value)
-            is (value == "fleet1_mob_fleet2_boss"),
+            is (
+                value
+                in (
+                    "fleet1_mob_fleet2_boss",
+                    "fleet1_standby_fleet2_all",
+                )
+            ),
         )
     for field, value in (
         ("fleet1", 0),
