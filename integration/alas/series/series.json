@@ -33,7 +33,7 @@
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "c589afcec77b303cf31d75a5842814de2de447514d1c62af50f64b73cefd0c8d"
+      "sha256": "895d7597e999df8eddf59561fee1b2f00011a44bebbb5c91354f87bbf0bc9bb0"
     },
     {
       "order": 8,
@@ -434,6 +434,11 @@
       "order": 87,
       "path": "integration/alas/series/0420-event-shared-entry-runtime.patch",
       "sha256": "19aaaabd083de10a36a08988346b970479f91adfb0967d4995a5486af6768770"
+    },
+    {
+      "order": 88,
+      "path": "integration/alas/series/0430-event-boss-stage-return-runtime.patch",
+      "sha256": "5339fc32acfe9ece492c12a94cbbb2bafce3e93138f784f5019318528b008ed0"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

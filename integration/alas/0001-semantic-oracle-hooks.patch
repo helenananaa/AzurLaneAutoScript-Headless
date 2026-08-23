@@ -3241,7 +3241,7 @@ index c44e0996..78c9d812 100644
                  # Check errors
                  if campaign_click > 5:
                      logger.critical(f"Failed to enter {button}, too many click on {button}")
-@@ -150,6 +166,117 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -150,6 +166,118 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                  else:
                      checked_in_map = True
  
@@ -3287,7 +3287,8 @@ index c44e0996..78c9d812 100644
 +                                if self.config.Campaign_Mode == 'hard':
 +                                    semantic_adapter.prepare_campaign_hard_fleets()
 +                                self.handle_2x_book_setting(mode='prep')
-+                                self.fleet_preparation()
++                                if semantic_adapter.campaign_fleet_preparation_required():
++                                    self.fleet_preparation()
 +                                semantic_adapter.confirm_campaign_fleet_selection()
 +                                self.handle_auto_submarine_call_disable()
 +                                self.handle_auto_search_setting()
@@ -14434,3 +14435,187 @@ index 20f700db..1fb9e441 100644
          if not os.path.exists(f'./campaign/{self.config.Campaign_Event}/sp.py'):
              logger.info(f'./campaign/{self.config.Campaign_Event}/sp.py not exists')
              logger.info(f'This event do not have SP, skip')
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+index d45d4cf..7b79aa2 100644
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -32,5 +32,7 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
++            if semantic_adapter.campaign_result_ready():
++                return True
+             if semantic_adapter.combat_is_loading():
+                 return True
+ 
+@@ -240,9 +242,12 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+     def combat_preparation(self, balance_hp=False, emotion_reduce=False, auto='combat_auto', fleet_index=1):
+         """
+         Args:
+             balance_hp (bool):
+             emotion_reduce (bool):
+             auto (str):
+             fleet_index (int):
++
++        Returns:
++            bool: Campaign result already appeared before preparation was polled.
+         """
+         logger.info('Combat preparation.')
+@@ -262,3 +267,5 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+             semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+             if semantic_adapter is not None:
++                if semantic_adapter.campaign_result_ready():
++                    return True
+                 oracle = semantic_adapter.open().oracle
+@@ -311,5 +318,6 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+                 if not interval_set:
+                     self.device.screenshot_interval_set('combat')
+                 break
++        return False
+ 
+     def handle_battle_preparation(self):
+@@ -655,24 +663,40 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+             semantic_campaign_result_wait = bool(
+                 semantic_adapter is not None
+                 and expected_end in ('with_searching', 'no_searching')
+                 and battle_status
+                 and semantic_adapter.open().campaign_combat_committed()
+             )
++            semantic_campaign_stage_wait = bool(
++                semantic_adapter is not None
++                and expected_end == 'in_stage'
++                and battle_status
++                and semantic_adapter.open().campaign_combat_committed()
++            )
+             semantic_campaign_map_state = (
+                 semantic_adapter.campaign_is_in_map_after_combat()
+-                if semantic_campaign_result_wait else False
++                if semantic_campaign_result_wait or semantic_campaign_stage_wait
++                else False
+             )
+             if semantic_campaign_map_state is None:
+                 continue
+             semantic_campaign_map_stable = bool(semantic_campaign_map_state)
+-            if semantic_campaign_map_stable:
++            if semantic_campaign_result_wait and semantic_campaign_map_stable:
+                 # Typed observer reads can be slower than the brief enemy
+                 # searching animation. Once the exact result was clicked and
+                 # all result overlays are gone, do not enter the legacy inner
+                 # searching loop: the adapter proves target removal and ammo
+                 # consumption after combat() returns.
+                 logger.info(
+                     'Semantic combat result returned to stable campaign map'
+                 )
+                 break
++            if semantic_campaign_stage_wait:
++                if semantic_campaign_map_stable:
++                    continue
++                if semantic_adapter.open().oracle.campaign_page_is_normal():
++                    logger.info(
++                        'Semantic boss result returned to stable campaign stage'
++                    )
++                    break
++                continue
+             if isinstance(expected_end, str):
+@@ -792,14 +816,22 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+         with self.stat.new(
+                 genre=self.config.campaign_name, method=self.config.DropRecord_CombatRecord
+         ) as drop:
+             if save_get_items is False:
+                 drop = None
+             elif isinstance(save_get_items, DropImage):
+                 drop = save_get_items
+-            self.combat_preparation(
+-                balance_hp=balance_hp, emotion_reduce=emotion_reduce, auto=auto_mode, fleet_index=fleet_index)
+-            self.combat_execute(
+-                auto=auto_mode, submarine=submarine_mode, drop=drop)
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            semantic_campaign_result_ready = bool(
++                semantic_adapter is not None
++                and semantic_adapter.campaign_result_ready()
++            )
++            if not semantic_campaign_result_ready:
++                semantic_campaign_result_ready = self.combat_preparation(
++                    balance_hp=balance_hp, emotion_reduce=emotion_reduce,
++                    auto=auto_mode, fleet_index=fleet_index)
++                if not semantic_campaign_result_ready:
++                    self.combat_execute(
++                        auto=auto_mode, submarine=submarine_mode, drop=drop)
+             self.combat_status(
+                 drop=drop, expected_end=expected_end)
+             # self.handle_map_after_combat_story()
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+index 59006d4..deb7841 100644
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -332,6 +332,19 @@ class Fleet(Camera, AmbushHandler):
+                         fleet_index=self.fleet_show_index,
+                         submarine_mode=self._submarine_mode(expected)
+                     )
++                    if (
++                        semantic_adapter is not None
++                        and expected == 'combat_boss'
++                        and semantic_adapter.campaign_boss_returned_to_stage()
++                    ):
++                        result = 'combat'
++                        self.battle_count += 1
++                        self.fleet_ammo -= 1
++                        self.map[location].is_cleared = True
++                        logger.info(
++                            'Semantic boss walk completed on stable campaign stage'
++                        )
++                        return
+                     self.hp_get()
+                     self.lv_get(after_battle=True)
+                     arrived = True if not self.config.MAP_HAS_MOVABLE_ENEMY else False
+diff --git a/module/map/map.py b/module/map/map.py
+index 307fe59..9dd442c 100644
+--- a/module/map/map.py
++++ b/module/map/map.py
+@@ -30,6 +30,15 @@ class Map(Fleet):
+             self.emotion.wait(fleet_index=self.fleet_current_index)
+         self.goto(grid, expected=expected)
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and expected == 'combat_boss'
++            and semantic_adapter.campaign_boss_returned_to_stage()
++        ):
++            logger.info('Semantic boss clear skips map-only post scan')
++            return self.battle_count >= battle_count
++
+         self.full_scan()
+         self.find_path_initial()
+         self.map.show_cost()
+@@ -339,6 +348,12 @@ class Map(Fleet):
+             grids = grids.sort('weight', 'cost')
+             logger.info('Grids: %s' % str(grids))
+             self.clear_chosen_enemy(grids[0], expected='boss')
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if (
++                semantic_adapter is not None
++                and semantic_adapter.campaign_boss_returned_to_stage()
++            ):
++                return True
+ 
+         logger.warning('BOSS not detected, trying all boss spawn point.')
+         return self.clear_potential_boss()
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+index 8326bc4..68a63f2 100644
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -190,6 +190,14 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+         for _ in range(10):
+             try:
+                 result = self.battle_function()
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if (
++                    result
++                    and semantic_adapter is not None
++                    and semantic_adapter.campaign_boss_returned_to_stage()
++                ):
++                    logger.info('Semantic campaign boss completion is stable')
++                    raise CampaignEnd
+                 break
+             except MapEnemyMoved:
+                 if self.battle_count > prev:

@@ -256,6 +256,12 @@ FLOW_PATHS = {
         "module/event/campaign_abcd.py",
         "module/event/campaign_sp.py",
     },
+    "0430-event-boss-stage-return-runtime.patch": {
+        "module/campaign/campaign_base.py",
+        "module/combat/combat.py",
+        "module/map/fleet.py",
+        "module/map/map.py",
+    },
 }
 
 OVERRIDE_PATHS = {
@@ -460,6 +466,11 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                     "0420-event-shared-entry-runtime.patch": {
                         "module/campaign/run.py",
                         "module/event/campaign_abcd.py",
+                    },
+                    "0430-event-boss-stage-return-runtime.patch": {
+                        "module/campaign/campaign_base.py",
+                        "module/combat/combat.py",
+                        "module/map/fleet.py",
                     },
                 }.get(name, set())
                 self.assertEqual(promoted & actual, expected_overlap)

@@ -1,0 +1,53 @@
+{
+  "schema": "alas-headless.event-task-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-08-23T10:11:35.944265Z",
+  "finished_at": "2026-08-23T10:16:54.791005Z",
+  "task": "EventB",
+  "stage": "B1",
+  "event": "event_20260813_cn",
+  "mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "scheduler_command": "EventB",
+  "effective_config": {
+    "event": "event_20260813_cn",
+    "name": "dynamic",
+    "mode": "normal",
+    "use_auto_search": true,
+    "run_count": 1
+  },
+  "run_result": true,
+  "run_count_before": 1,
+  "run_count_after": 0,
+  "scheduler_enabled_after": true,
+  "event_daily_last_stage_after": "b1",
+  "use_auto_search": true,
+  "login_recovery_performed": false,
+  "orphan_result_recovery_count": 0,
+  "preparation_recovery_count": 0,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "event_page": true,
+    "generation": 47217
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 6,
+    "sortie": 1,
+    "combat": 12,
+    "viewport_swipe": 4
+  },
+  "observer": {
+    "generation": 53015,
+    "scene_handle": -76,
+    "button_count": 17
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "event_page": true
+  },
+  "raw_input_fallback_used": false
+}

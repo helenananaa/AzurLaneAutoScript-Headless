@@ -57,7 +57,6 @@ class AlasFleetConfigTests(unittest.TestCase):
             ("fleet2_formation", "line_ahead"),
             ("fleet1_mode", "combat_manual"),
             ("fleet2_mode", "hide_in_upper_left"),
-            ("fleet_order", "fleet1_all_fleet2_standby"),
         ):
             with self.subTest(field=field, value=value), self.assertRaises(
                 SemanticGateClosed
@@ -65,6 +64,19 @@ class AlasFleetConfigTests(unittest.TestCase):
                 config = defaults()
                 config[field] = value
                 validate_alas_fleet_config(**config)
+
+    def test_single_fleet_all_order_requires_an_empty_second_fleet(self):
+        config = defaults()
+        config["fleet2"] = 0
+        config["fleet_order"] = "fleet1_all_fleet2_standby"
+        self.assertEqual(
+            validate_alas_fleet_config(**config).fleet_order,
+            "fleet1_all_fleet2_standby",
+        )
+
+        config["fleet2"] = 2
+        with self.assertRaises(SemanticGateClosed):
+            validate_alas_fleet_config(**config)
 
     def test_invalid_values_fail_closed(self):
         for field, value in (

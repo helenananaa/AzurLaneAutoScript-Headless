@@ -154,7 +154,10 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         )
         context = SimpleNamespace(passive_transition_until=120.0)
         session.adapter = SimpleNamespace(
-            oracle=SimpleNamespace(daily_combat_visible=lambda: False),
+            oracle=SimpleNamespace(
+                daily_combat_visible=lambda: False,
+                campaign_is_in_map=lambda: True,
+            ),
             campaign_combat_committed=lambda: True,
             _campaign_context=context,
         )

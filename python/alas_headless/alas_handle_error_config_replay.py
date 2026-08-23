@@ -183,6 +183,7 @@ def _verify_campaign(method: ast.FunctionDef) -> dict[str, object]:
         del events[:]
         campaign = campaign_type()
         campaign.config = type("Config", (), {"Error_HandleError": value})()
+        campaign.device = type("Device", (), {"semantic_adapter": None})()
         campaign.FUNCTION_NAME_BASE = "battle_"
         campaign.battle_count = 0
         campaign.semantic_prepare_a_battle = lambda: events.append("prepare")

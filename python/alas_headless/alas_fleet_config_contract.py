@@ -123,7 +123,11 @@ def validate_alas_fleet_config(
         raise SemanticGateClosed(
             "manual Fleet modes require unqualified directional or weapon input"
         )
-    if snapshot.fleet_order != "fleet1_mob_fleet2_boss":
+    reviewed_order = snapshot.fleet_order == "fleet1_mob_fleet2_boss" or (
+        snapshot.fleet2 == 0
+        and snapshot.fleet_order == "fleet1_all_fleet2_standby"
+    )
+    if not reviewed_order:
         raise SemanticGateClosed(
             "campaign Fleet order is not semantically qualified"
         )

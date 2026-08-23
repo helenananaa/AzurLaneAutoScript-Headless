@@ -2378,6 +2378,33 @@ class SemanticOracleTests(unittest.TestCase):
         receipt = oracle.click_campaign_stage("a1")
         self.assertEqual(receipt.semantic_id, "campaign/stage/a1")
         self.assertEqual(backend.taps, [(450, 266)])
+        mixed_root = root + "Battle/Nodes/Chapter_2050002"
+        backend.buttons["buttons"].extend(
+            [
+                make_button("main", mixed_root + "/main", 650, 266),
+                make_button(
+                    "Chapter_2050002", mixed_root, 522, 343, raycast_top=None
+                ),
+            ]
+        )
+        backend.buttons["button_count"] += 2
+        backend.ui["texts"].extend(
+            [
+                make_text(
+                    "C1", mixed_root + "/main/info/bk/title_form/title_index"
+                ),
+                make_text(
+                    "已开放困难关",
+                    mixed_root + "/main/info/bk/title_form/title",
+                ),
+            ]
+        )
+        backend.ui["text_count"] += 2
+        mixed = make_oracle(backend).campaign_page_state()
+        self.assertEqual(mixed.chapter_name, "a/c")
+        self.assertEqual(
+            [stage.stage_code for stage in mixed.stages], ["a1", "c1"]
+        )
         backend.ui["texts"].append(
             make_text(
                 "9504",
@@ -2592,6 +2619,13 @@ class SemanticOracleTests(unittest.TestCase):
             [
                 make_button("start_button", root + "start_button", 949, 521),
                 make_button("btnBack", root + "btnBack", 1065, 148),
+                make_button(
+                    "Switch",
+                    root + "Difficulty/Normal/Switch",
+                    392,
+                    598,
+                    raycast_top=None,
+                ),
             ]
         )
         backend.ui = make_ui(
@@ -2606,9 +2640,15 @@ class SemanticOracleTests(unittest.TestCase):
         state = oracle.campaign_map_preparation_state("a1")
         self.assertEqual(state.stage_code, "a1")
         self.assertEqual(state.oil_cost, 10)
+        self.assertEqual(oracle.campaign_map_preparation_mode_state("a1"), "normal")
+        mode_receipt = oracle.click_campaign_map_preparation_mode("a1", "hard")
+        self.assertEqual(
+            mode_receipt.semantic_id,
+            "campaign/map-preparation/mode/hard",
+        )
         receipt = oracle.cancel_campaign_map_preparation("a1")
         self.assertEqual(receipt.semantic_id, "campaign/map-preparation/cancel")
-        self.assertEqual(backend.taps, [(1065, 148)])
+        self.assertEqual(backend.taps, [(392, 598), (1065, 148)])
 
     def test_campaign_fleet_preparation_exposes_exact_cancel_and_sortie(self):
         fleet = (
@@ -2821,6 +2861,66 @@ class SemanticOracleTests(unittest.TestCase):
             ),
             (500, 500, 0),
         )
+
+    def test_event_hard_fleet_selection_types_one_sided_selected_submarine(self):
+        fleet = "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/"
+        stage = (
+            "root/UICamera/Canvas/UIMain/LevelSelectSPFullUI(Clone)/Battle/"
+            "Nodes/Chapter_101/main"
+        )
+        buttons = [
+            make_button("main", stage, raycast_top=False),
+            make_button("btnBack", fleet + "Fixed/btnBack", 1196, 97),
+            make_button(
+                "start_button",
+                fleet + "Fixed/start_button",
+                1078,
+                585,
+                raycast_top=True,
+            ),
+        ]
+        for index in (1, 2):
+            row = fleet + "ShipList/fleet/{0}/".format(index)
+            buttons.extend(
+                [
+                    make_button("btn_recom", row + "btn_recom", raycast_top=None),
+                    make_button("btn_clear", row + "btn_clear"),
+                ]
+            )
+        buttons.append(
+            make_button("btn_clear", fleet + "ShipList/sub/1/btn_clear")
+        )
+        texts = [
+            make_text("舰队选择", fleet + "Fixed/title/Image/text"),
+            make_text("C1", stage + "/info/bk/title_form/title_index"),
+            make_text("困难作战", stage + "/info/bk/title_form/title"),
+            make_text(
+                "平均等级大于70（125）",
+                fleet + "Fixed/limit_list/limit_elite/limit_list/1/Text",
+            ),
+            make_text("第一舰队", fleet + "ShipList/fleet/1/bg/name"),
+            make_text("第二舰队", fleet + "ShipList/fleet/2/bg/name"),
+            make_text("潜艇编队一", fleet + "ShipList/sub/1/bg/name"),
+        ]
+        images = []
+        for row, count in (("fleet/1", 6), ("fleet/2", 6), ("sub/1", 1)):
+            for index in range(count):
+                ship = fleet + "ShipList/" + row + "/main/ship{0}/icon_bg/".format(index)
+                images.append(make_image(ship + "icon", "ship_{0}".format(index)))
+                texts.append(make_text("125", ship + "lv/Text"))
+        backend = FakeBackend(buttons)
+        backend.ui = make_ui(texts, images=images)
+
+        state = make_oracle(backend).campaign_fleet_selection_state(
+            "c1", fallback_oil_cost=10
+        )
+
+        submarine = next(row for row in state.rows if row.row_key == "submarine")
+        self.assertTrue(state.hard_mode)
+        self.assertTrue(submarine.available)
+        self.assertEqual(submarine.selected_fleet, 1)
+        self.assertIsNone(submarine.select_button)
+        self.assertEqual(submarine.clear_button.name, "btn_clear")
 
     def test_campaign_fleet_dropdown_requires_six_exact_toggle_options(self):
         root = "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/"
@@ -3925,6 +4025,7 @@ class SemanticOracleTests(unittest.TestCase):
         nonuniform=False,
         boss_appears=False,
         no_move=False,
+        orthogonal=False,
     ):
         before_buttons = copy.deepcopy(backend.buttons["buttons"])
         before_ui = copy.deepcopy(backend.ui)
@@ -3942,13 +4043,17 @@ class SemanticOracleTests(unittest.TestCase):
                 y = button["adb_point"]["y"]
                 delta_x = (
                     0
-                    if no_move
+                    if no_move or orthogonal
                     else 150 + 0.25 * (y - 360) if nonuniform else 200
                 )
                 delta_y = (
                     0
                     if no_move
-                    else 20 + 0.05 * (x - 640) if nonuniform else 0
+                    else 200
+                    if orthogonal
+                    else 20 + 0.05 * (x - 640)
+                    if nonuniform
+                    else 0
                 )
                 if incoherent:
                     delta_x += (80, -70, 100, -90, 45)[cell_index % 5]
@@ -4175,6 +4280,39 @@ class SemanticOracleTests(unittest.TestCase):
         )
 
         self.assertEqual(proof.semantic_id, "campaign/map/viewport/A1")
+
+    def test_campaign_map_viewport_allows_wave_auto_focus_on_other_axis(self):
+        backend = make_campaign_map_backend()
+        oracle = make_oracle(backend)
+        state = oracle.campaign_map_state(
+            "12-4",
+            columns=3,
+            rows=2,
+            land_cells=((1, 0),),
+            expected_fleet_count=2,
+        )
+        state = dataclasses.replace(state, enemies=())
+        self._arm_campaign_viewport_backend(
+            backend,
+            covered=False,
+            orthogonal=True,
+        )
+
+        proof = oracle.campaign_map_viewport_swipe(
+            state,
+            "A1",
+            self._campaign_viewport_intent(),
+            start=(500, 400),
+            end=(700, 400),
+            duration_ms=375,
+            columns=3,
+            rows=2,
+            land_cells=((1, 0),),
+            expected_fleet_count=2,
+            allow_enemy_additions=True,
+        )
+
+        self.assertEqual(proof.median_cell_delta, (0.0, 200.0))
 
     def test_campaign_map_viewport_allows_opposed_axis_during_boss_auto_focus(self):
         backend = make_campaign_map_backend()

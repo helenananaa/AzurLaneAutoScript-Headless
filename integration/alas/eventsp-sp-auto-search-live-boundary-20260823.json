@@ -1,0 +1,30 @@
+{
+  "schema": "alas-headless.event-sp-live-boundary/v1",
+  "passed": false,
+  "capability_promotion": false,
+  "task": "EventSp",
+  "stage": "SP",
+  "event": "event_20260813_cn",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "requested_fleets": [
+    1,
+    2,
+    0
+  ],
+  "fleet_mutation_count": 0,
+  "auto_search_roles": {
+    "fleet1": "mob",
+    "fleet2": "boss"
+  },
+  "sortie_semantic_id": "campaign/fleet-preparation/sortie",
+  "final_surface": "event_page",
+  "final_attempt_text": "0/1",
+  "raw_input_fallback_used": false,
+  "missing_proof": [
+    "map_entry",
+    "combat",
+    "result"
+  ],
+  "reason": "The semantic sortie was consumed and the game returned to the event page, but the controller was interrupted while a retained fleet-preparation root masked the passive transition. No in-process map, combat, or result receipt exists, so EventSp remains partial."
+}

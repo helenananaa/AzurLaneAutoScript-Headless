@@ -566,6 +566,17 @@ CAMPAIGN_FLEET_ROW_RESOURCES: Mapping[str, Tuple[str, str]] = {
 CAMPAIGN_FLEET_BAR_PATTERN = re.compile(
     r"^(FLEET_1|FLEET_2|SUBMARINE)_BAR_INDEX_([1-6])$"
 )
+
+# Recent event pages share the visible A/B stage entrance with the C/D hard
+# variant.  Old ALAS deliberately renames that entrance to the requested hard
+# stage, then selects hard mode on the typed map-preparation panel.  Keep the
+# alias one-way so an unreviewed button cannot silently change task identity.
+CAMPAIGN_SHARED_HARD_STAGE_ENTRANCES: Mapping[str, str] = MappingProxyType(
+    {
+        **{"c{0}".format(index): "a{0}".format(index) for index in range(1, 4)},
+        **{"d{0}".format(index): "b{0}".format(index) for index in range(1, 4)},
+    }
+)
 CAMPAIGN_AUTO_SEARCH_ON_RESOURCES = frozenset(
     {"AUTO_SEARCH_ON", "AUTO_SEARCH_ON2", "AUTO_SEARCH_ON3", "AUTO_SEARCH_ON4"}
 )
@@ -2506,12 +2517,18 @@ class AlasSemanticAdapter:
 
         self._package_gate()
         if re.fullmatch(
-            r"(?:[1-9][0-9]*-[1-9][0-9]*|[A-Z][1-9][0-9]*)",
+            r"(?:[1-9][0-9]*-[1-9][0-9]*|[A-Z]+[0-9]*)",
             stage_code.upper(),
         ) is None:
             raise SemanticGateClosed("campaign stage code is not canonical")
         if mode not in ("normal", "hard"):
             raise SemanticGateClosed("campaign mode is not reviewed")
+        if mode == "normal" and re.fullmatch(r"[CD][1-9][0-9]*", stage_code.upper()):
+            # EventC/EventD are the hard counterparts of the shared A/B
+            # entrances.  Old ALAS switches Campaign_Mode only after opening
+            # the stage, so bind the semantic transaction to the effective
+            # game mode from its canonical stage identity.
+            mode = "hard"
         if self._login_flow.active or any(
             context is not None
             for context in (
@@ -2543,6 +2560,9 @@ class AlasSemanticAdapter:
 
     def campaign_pre_sortie_active(self) -> bool:
         return self._campaign_context is not None
+
+    def campaign_pre_sortie_stage_code(self) -> str:
+        return self._require_campaign_context().stage_code
 
     def validate_campaign_fleet_config(
         self, **values: object
@@ -2593,6 +2613,106 @@ class AlasSemanticAdapter:
         except SemanticGateClosed:
             return False
         return True
+
+    def campaign_inherited_auto_search_visible(self) -> bool:
+        """Recognize an official auto-search owned by an earlier process."""
+
+        context = self._require_campaign_context()
+        if any(
+            item is not None
+            for item in (
+                context.entry_receipt,
+                context.sortie_receipt,
+                context.sortie_proof,
+            )
+        ):
+            return False
+        try:
+            self.oracle.campaign_auto_search_active_state()
+        except SemanticGateClosed:
+            return False
+        return True
+
+    def recover_inherited_campaign_auto_search(
+        self,
+        stage_code: str,
+        fleet_order: str,
+        timeout_seconds: float = 1800.0,
+    ) -> CampaignAutoSearchCompletionProof:
+        """Passively finish one already-running official auto-search."""
+
+        self._package_gate()
+        context = self._require_campaign_context()
+        if stage_code.lower() != context.stage_code:
+            raise SemanticGateClosed(
+                "inherited campaign auto-search stage identity changed"
+            )
+        roles = {
+            "fleet1_mob_fleet2_boss": ("mob", "boss"),
+            "fleet1_boss_fleet2_mob": ("boss", "mob"),
+        }.get(fleet_order)
+        if roles is None:
+            raise SemanticGateClosed(
+                "inherited campaign auto-search roles are not reviewed"
+            )
+        if not self.campaign_inherited_auto_search_visible():
+            raise SemanticGateClosed("inherited campaign auto-search is absent")
+        started = time.monotonic()
+        deadline = started + float(timeout_seconds)
+        combat_auto_generation: Optional[int] = None
+        while time.monotonic() < deadline:
+            self._package_gate()
+            combat_auto = self.oracle.campaign_official_combat_auto_state()
+            if combat_auto is not None:
+                generation, enabled = combat_auto
+                if not enabled:
+                    raise SemanticGateClosed(
+                        "official combat automation is disabled"
+                    )
+                combat_auto_generation = generation
+            if self.oracle.enabled("reward/campaign-total/exit"):
+                if combat_auto_generation is None:
+                    raise SemanticGateClosed(
+                        "inherited auto-search result has no active-run proof"
+                    )
+                if self._input_frame_refresher is not None:
+                    self._input_frame_refresher()
+                if not self.oracle.enabled("reward/campaign-total/exit"):
+                    continue
+                result_state = self.oracle.read_state()
+                self.oracle.click("reward/campaign-total/exit")
+                stage_deadline = time.monotonic() + 30.0
+                while time.monotonic() < stage_deadline:
+                    try:
+                        if self.oracle.campaign_page_is_normal():
+                            proof = CampaignAutoSearchCompletionProof(
+                                stage_code=context.stage_code,
+                                result_generation=result_state.generation,
+                                result_path=(
+                                    "LevelStageTotalRewardPanel(Clone)/"
+                                    "Window/Fixed/ButtonExit"
+                                ),
+                                fleet1_role=roles[0],
+                                fleet2_role=roles[1],
+                                waited_seconds=round(
+                                    time.monotonic() - started,
+                                    3,
+                                ),
+                                combat_auto_generation=combat_auto_generation,
+                            )
+                            context.auto_search_completion = proof
+                            self._last_campaign_auto_search_completion = proof
+                            return proof
+                    except SemanticGateClosed:
+                        pass
+                    time.sleep(0.5)
+                raise SemanticGateClosed(
+                    "inherited auto-search result did not return to stage"
+                )
+            time.sleep(1.0)
+        raise SemanticGateClosed(
+            "inherited campaign auto-search did not complete in time"
+        )
 
     def confirm_campaign_auto_search_started(self) -> CampaignSortieProof:
         """Prove official auto-search took ownership after the sortie input."""
@@ -2653,13 +2773,23 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "campaign auto-search completion identity changed"
             )
-        if context.mode == "normal" and stage_code != "12-4":
+        if (
+            context.mode == "normal"
+            and stage_code != "12-4"
+            and re.fullmatch(r"(?:[abcd][1-3]|sp)", stage_code) is None
+        ):
             raise SemanticGateClosed(
-                "normal campaign auto-search completion is qualified only for 12-4"
+                "normal campaign auto-search completion is not qualified for "
+                + stage_code
             )
-        if context.mode == "hard" and stage_code != "11-4":
+        if (
+            context.mode == "hard"
+            and stage_code != "11-4"
+            and re.fullmatch(r"[cd][1-3]", stage_code) is None
+        ):
             raise SemanticGateClosed(
-                "hard campaign auto-search completion is qualified only for 11-4"
+                "hard campaign auto-search completion is not qualified for "
+                + stage_code
             )
         if context.sortie_proof is None or context.auto_search_role_state is None:
             raise SemanticGateClosed(
@@ -2689,6 +2819,13 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed(
                         "official combat automation was not proven"
                     )
+                # Auto-search can run for minutes.  The result action must be
+                # re-proved from a newly acquired immutable frame instead of
+                # trying to reuse the input lease captured before sortie.
+                if self._input_frame_refresher is not None:
+                    self._input_frame_refresher()
+                if not self.oracle.enabled("reward/campaign-total/exit"):
+                    continue
                 state = self.oracle.read_state()
                 targets = tuple(
                     button
@@ -2713,12 +2850,44 @@ class AlasSemanticAdapter:
                     waited_seconds=round(time.monotonic() - started, 3),
                     combat_auto_generation=combat_auto_generation,
                 )
-                context.auto_search_completion = proof
-                self._last_campaign_auto_search_completion = proof
-                return proof
+                self.oracle.click("reward/campaign-total/exit")
+                stage_deadline = time.monotonic() + 30.0
+                while time.monotonic() < stage_deadline:
+                    try:
+                        if self.oracle.campaign_page_is_normal():
+                            context.auto_search_completion = proof
+                            self._last_campaign_auto_search_completion = proof
+                            return proof
+                    except SemanticGateClosed:
+                        pass
+                    time.sleep(0.5)
+                raise SemanticGateClosed(
+                    "campaign auto-search result did not return to stage"
+                )
             time.sleep(1.0)
         raise SemanticGateClosed(
             "campaign auto-search did not reach the total-reward panel in time"
+        )
+
+    def close_orphan_campaign_auto_search_result(self) -> bool:
+        """Close an unowned total-reward panel without claiming a task run."""
+
+        self._package_gate()
+        if self._input_frame_refresher is not None:
+            self._input_frame_refresher()
+        if not self.oracle.enabled("reward/campaign-total/exit"):
+            return False
+        self.oracle.click("reward/campaign-total/exit")
+        deadline = time.monotonic() + 30.0
+        while time.monotonic() < deadline:
+            try:
+                if self.oracle.campaign_page_is_normal():
+                    return True
+            except SemanticGateClosed:
+                pass
+            time.sleep(0.5)
+        raise SemanticGateClosed(
+            "orphan campaign auto-search result did not return to stage"
         )
 
     def continue_campaign_hard_auto_search(self) -> ActionReceipt:
@@ -2808,17 +2977,21 @@ class AlasSemanticAdapter:
             rows = {row.row_key: row for row in initial.rows}
             if set(rows) != {"fleet1", "fleet2", "submarine"}:
                 raise SemanticGateClosed("hard campaign fleet rows are incomplete")
-            if rows["submarine"].in_use:
-                raise SemanticGateClosed(
-                    "hard campaign qualification requires no submarine fleet"
-                )
-            operations = tuple(
+            operations = list(
                 "campaign/fleet-preparation/fleet/{0}/recommend".format(index)
                 for index, row_key in ((1, "fleet1"), (2, "fleet2"))
                 if rows[row_key].hard_satisfied is not True
             )
+            if rows["submarine"].in_use:
+                if rows["submarine"].clear_button is None:
+                    raise SemanticGateClosed(
+                        "hard campaign submarine clear target is absent"
+                    )
+                operations.append(
+                    "campaign/fleet-preparation/submarine/1/clear"
+                )
             context.required_fleet_mutations = len(operations)
-            context.expected_fleet_mutations = operations
+            context.expected_fleet_mutations = tuple(operations)
             remaining = self._action_ledger.remaining("campaign.fleet_mutation")
             if remaining < len(operations):
                 raise SemanticGateClosed(
@@ -2830,6 +3003,17 @@ class AlasSemanticAdapter:
             return True
         if context.mode != "normal":
             raise SemanticGateClosed("campaign fleet mode is not reviewed")
+
+        requested = (fleet1, fleet2, submarine)
+        if self._campaign_fleet_tuple(initial) == requested:
+            # The old ALAS preparation loop clears and reselects fleet 2 even
+            # when every typed row already matches.  Besides being needless,
+            # some event SP panels remount after that clear.  Prove the exact
+            # no-op here so the upstream state machine can skip only its row
+            # reconciliation while retaining every later setting/sortie gate.
+            context.required_fleet_mutations = 0
+            context.expected_fleet_mutations = ()
+            return True
 
         values = dict(
             zip(("fleet1", "fleet2", "submarine"), self._campaign_fleet_tuple(initial))
@@ -2891,6 +3075,25 @@ class AlasSemanticAdapter:
             )
         return True
 
+    def campaign_fleet_preparation_required(self) -> bool:
+        """Whether old ALAS must reconcile the already-authorized fleet rows."""
+
+        context = self._require_campaign_context()
+        if context.initial_fleet_state is None or context.requested_fleets is None:
+            raise SemanticGateClosed("campaign fleet preparation was not authorized")
+        if context.mode == "hard":
+            return True
+        if context.mode != "normal":
+            raise SemanticGateClosed("campaign fleet mode is not reviewed")
+        initial = self._campaign_fleet_tuple(context.initial_fleet_state)
+        if initial == context.requested_fleets:
+            if context.required_fleet_mutations != 0 or context.expected_fleet_mutations:
+                raise SemanticGateClosed("campaign fleet no-op proof changed")
+            return False
+        if context.required_fleet_mutations <= 0:
+            raise SemanticGateClosed("campaign fleet mutation proof is absent")
+        return True
+
     def prepare_campaign_hard_fleets(self) -> CampaignFleetSelectionState:
         """Apply only the preflighted official hard-fleet recommendations."""
 
@@ -2902,6 +3105,8 @@ class AlasSemanticAdapter:
                 "hard campaign fleet recommendations were already attempted"
             )
         for semantic_id in context.expected_fleet_mutations:
+            if not semantic_id.endswith("/recommend"):
+                continue
             row_key = "fleet1" if "/fleet/1/" in semantic_id else "fleet2"
             receipt = self._dispatch_mutation(
                 "campaign.fleet_mutation",
@@ -3035,40 +3240,52 @@ class AlasSemanticAdapter:
                 "campaign auto-search roles require fleet 1 and fleet 2 only"
             )
         if context.mode == "normal":
-            if context.stage_code != "12-4":
+            if (
+                context.stage_code != "12-4"
+                and re.fullmatch(r"(?:[abcd][1-3]|sp)", context.stage_code)
+                is None
+            ):
                 raise SemanticGateClosed(
-                    "normal campaign auto-search roles are qualified only for 12-4"
+                    "normal campaign auto-search roles are not qualified for "
+                    + context.stage_code
                 )
             expected = {
                 "fleet1_mob_fleet2_boss": ("mob", "boss"),
                 "fleet1_boss_fleet2_mob": ("boss", "mob"),
             }.get(fleet_order)
         elif context.mode == "hard":
-            if context.stage_code != "11-4":
+            if re.fullmatch(r"[cd][1-3]", context.stage_code):
+                expected = {
+                    "fleet1_mob_fleet2_boss": ("mob", "boss"),
+                    "fleet1_boss_fleet2_mob": ("boss", "mob"),
+                }.get(fleet_order)
+            elif context.stage_code != "11-4":
                 raise SemanticGateClosed(
                     "hard campaign auto-search roles are qualified only for 11-4"
                 )
-            if fleet_order != "fleet1_all_fleet2_standby":
+            elif fleet_order != "fleet1_all_fleet2_standby":
                 raise SemanticGateClosed(
                     "HardFleet=2 is not qualified on the current Hard 11-4 path"
                 )
-            # 9.7.328 restored the 职能 duty tab.  Use it when present; keep
-            # the earlier game-managed proof only when that tab is absent.
-            role_oracle = fresh_role_oracle()
-            if not role_oracle.toggle_present(
-                "campaign/fleet-preparation/roles/tab"
-            ):
-                state = role_oracle.campaign_auto_search_role_state()
-                if (state.fleet1_role, state.fleet2_role) != (
-                    "game-managed",
-                    "game-managed",
+            else:
+                # 9.7.328 restored the 职能 duty tab.  Use it when present;
+                # keep the earlier game-managed proof only on the reviewed
+                # main Hard 11-4 path where that tab can be absent.
+                role_oracle = fresh_role_oracle()
+                if not role_oracle.toggle_present(
+                    "campaign/fleet-preparation/roles/tab"
                 ):
-                    raise SemanticGateClosed(
-                        "hard campaign game-managed auto-search proof changed"
-                    )
-                context.auto_search_role_state = state
-                return state
-            expected = ("all", "standby")
+                    state = role_oracle.campaign_auto_search_role_state()
+                    if (state.fleet1_role, state.fleet2_role) != (
+                        "game-managed",
+                        "game-managed",
+                    ):
+                        raise SemanticGateClosed(
+                            "hard campaign game-managed auto-search proof changed"
+                        )
+                    context.auto_search_role_state = state
+                    return state
+                expected = ("all", "standby")
         else:
             expected = None
         if expected is None:
@@ -3193,32 +3410,47 @@ class AlasSemanticAdapter:
         if use_2x_book is not False:
             raise SemanticGateClosed("campaign sortie requires 2x book disabled")
         if use_auto_search:
+            hard_event_stage = bool(
+                context.mode == "hard"
+                and re.fullmatch(r"[cd][1-3]", context.stage_code)
+            )
             if (
                 context.mode == "normal"
                 and (
-                    context.stage_code != "12-4"
+                    (
+                        context.stage_code != "12-4"
+                        and re.fullmatch(
+                            r"(?:[abcd][1-3]|sp)",
+                            context.stage_code,
+                        )
+                        is None
+                    )
                     or context.requested_fleets != (1, 2, 0)
                 )
             ):
                 raise SemanticGateClosed(
-                    "campaign auto-search sortie is qualified only for two-fleet 12-4"
+                    "campaign auto-search sortie is not qualified for the "
+                    "active stage/fleet profile"
                 )
             if (
                 context.mode == "hard"
                 and (
-                    context.stage_code != "11-4"
+                    (
+                        context.stage_code != "11-4"
+                        and not hard_event_stage
+                    )
                     or context.requested_fleets != (1, 2, 0)
                 )
             ):
                 raise SemanticGateClosed(
-                    "hard campaign auto-search sortie is qualified only for two-fleet 11-4"
+                    "hard campaign auto-search sortie is not qualified for the active stage"
                 )
             expected_roles = (
                 {
                     "fleet1_mob_fleet2_boss": ("mob", "boss"),
                     "fleet1_boss_fleet2_mob": ("boss", "mob"),
                 }
-                if context.mode == "normal"
+                if context.mode == "normal" or hard_event_stage
                 else {"fleet1_all_fleet2_standby": ("all", "standby")}
             ).get(fleet_order)
             if (
@@ -3399,7 +3631,7 @@ class AlasSemanticAdapter:
     def _campaign_preparation_kind(self) -> Optional[str]:
         context = self._require_campaign_context()
         try:
-            state = self.oracle.campaign_preparation_state(context.stage_code)
+            state, _stage_code = self._campaign_preparation_state_with_stage()
         except SemanticGateClosed:
             if (
                 (
@@ -3418,6 +3650,62 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign preparation kind is invalid")
         context.preparation_kind = state.kind
         return state.kind
+
+    def _campaign_preparation_state_with_stage(
+        self,
+    ) -> Tuple[Optional[Any], str]:
+        """Resolve an event hard stage through its reviewed shared entrance."""
+
+        context = self._require_campaign_context()
+        candidates = [context.stage_code]
+        shared = CAMPAIGN_SHARED_HARD_STAGE_ENTRANCES.get(context.stage_code)
+        if shared is not None:
+            candidates.append(shared)
+        last_identity_error: Optional[SemanticGateClosed] = None
+        for stage_code in candidates:
+            try:
+                return self.oracle.campaign_preparation_state(stage_code), stage_code
+            except SemanticGateClosed as exc:
+                if not str(exc).endswith("stage identity changed"):
+                    raise
+                last_identity_error = exc
+        assert last_identity_error is not None
+        raise last_identity_error
+
+    def campaign_map_preparation_mode_state(self) -> str:
+        self._package_gate()
+        state, stage_code = self._campaign_preparation_state_with_stage()
+        if state is None or state.kind != "map":
+            raise SemanticGateClosed(
+                "campaign map-preparation mode requires the map detail layer"
+            )
+        return self.oracle.campaign_map_preparation_mode_state(stage_code)
+
+    def set_campaign_map_preparation_mode(self, destination: str) -> ActionReceipt:
+        self._package_gate()
+        if destination not in ("normal", "hard"):
+            raise SemanticGateClosed(
+                "campaign map-preparation mode destination is invalid"
+            )
+        current = self.campaign_map_preparation_mode_state()
+        if current == destination:
+            raise SemanticGateClosed(
+                "campaign map-preparation mode already matches destination"
+            )
+        if self._input_frame_refresher is not None:
+            self._input_frame_refresher()
+        state, stage_code = self._campaign_preparation_state_with_stage()
+        if state is None or state.kind != "map":
+            raise SemanticGateClosed(
+                "campaign map-preparation mode layer changed before input"
+            )
+        receipt = self.oracle.click_campaign_map_preparation_mode(
+            stage_code, destination
+        )
+        self._require_campaign_context().passive_transition_until = (
+            time.monotonic() + 20.0
+        )
+        return receipt
 
     def confirm_campaign_pre_sortie(self) -> CampaignPreSortieProof:
         """Prove entry, fleet-preparation cancel, and exact stage restoration."""
@@ -4354,10 +4642,14 @@ class AlasSemanticAdapter:
         if campaign_stage_code is not None:
             self._package_gate()
             context = self._require_campaign_context()
+            shared_hard_entrance = CAMPAIGN_SHARED_HARD_STAGE_ENTRANCES.get(
+                context.stage_code
+            )
             if (
                 not isinstance(campaign_stage_code, str)
-                or campaign_stage_code != context.stage_code
-                or name != campaign_stage_code
+                or name != context.stage_code
+                or campaign_stage_code
+                not in (context.stage_code, shared_hard_entrance)
             ):
                 raise SemanticGateClosed("campaign stage identity changed")
             try:
@@ -4858,10 +5150,7 @@ class AlasSemanticAdapter:
         if event_campaign_selector_visible and self._campaign_context is not None:
             try:
                 event_campaign_selector_visible = (
-                    self.oracle.campaign_preparation_state(
-                        self._campaign_context.stage_code
-                    )
-                    is None
+                    self._campaign_preparation_state_with_stage()[0] is None
                 )
             except (SemanticGateClosed, SemanticTargetMissing):
                 pass
@@ -7546,6 +7835,37 @@ class AlasSemanticAdapter:
                     self._campaign_context.passive_transition_until = (
                         time.monotonic() + 20.0
                     )
+                    requested = self._campaign_context.stage_code
+                    if re.fullmatch(r"[a-z]+[0-9]*", requested):
+                        requested_chapter = SemanticOracle._campaign_stage_chapter(
+                            requested
+                        )
+                        preferred = tuple(
+                            stage
+                            for stage in state.stages
+                            if SemanticOracle._campaign_stage_chapter(stage.stage_code)
+                            == requested_chapter
+                        )
+                        shared_chapter = {"c": "a", "d": "b"}.get(
+                            requested_chapter
+                        )
+                        if not preferred and shared_chapter is not None:
+                            preferred = tuple(
+                                stage
+                                for stage in state.stages
+                                if SemanticOracle._campaign_stage_chapter(
+                                    stage.stage_code
+                                )
+                                == shared_chapter
+                            )
+                        if preferred:
+                            state = CampaignPageState(
+                                generation=state.generation,
+                                chapter_name=SemanticOracle._campaign_stage_chapter(
+                                    preferred[0].stage_code
+                                ),
+                                stages=preferred,
+                            )
                 return state
             except SemanticGateClosed as exc:
                 if str(exc) not in (
@@ -7563,13 +7883,44 @@ class AlasSemanticAdapter:
 
     def campaign_map_achievement_state(self) -> CampaignMapAchievementState:
         self._package_gate()
-        context = self._require_campaign_context()
-        return self.oracle.campaign_map_achievement_state(context.stage_code)
+        state, stage_code = self._campaign_preparation_state_with_stage()
+        if state is None or state.kind != "map":
+            raise SemanticGateClosed(
+                "campaign achievement requires the map-preparation layer"
+            )
+        return self.oracle.campaign_map_achievement_state(stage_code)
 
     def campaign_map_clear_percentage(self) -> float:
         self._package_gate()
-        context = self._require_campaign_context()
-        return self.oracle.campaign_map_clear_percentage(context.stage_code)
+        state, stage_code = self._campaign_preparation_state_with_stage()
+        if state is None or state.kind != "map":
+            raise SemanticGateClosed(
+                "campaign clear percentage requires the map-preparation layer"
+            )
+        try:
+            return self.oracle.campaign_map_clear_percentage(stage_code)
+        except SemanticGateClosed as exc:
+            if (
+                stage_code != "sp"
+                or str(exc)
+                != "campaign achievement progress is absent or ambiguous"
+            ):
+                raise
+            toggle = self.oracle.toggle_state(
+                "campaign/map-preparation/auto-search"
+            )
+            if (
+                not toggle.active_in_hierarchy
+                or not toggle.active_and_enabled
+                or not toggle.interactable
+                or toggle.point is None
+                or toggle.bounds is None
+                or not toggle.bounds.contains(toggle.point)
+            ):
+                raise SemanticGateClosed(
+                    "SP auto-search unlock target is not proven"
+                )
+            return 1.0
 
     def campaign_auto_search_selected(self) -> bool:
         self._package_gate()
@@ -8004,7 +8355,6 @@ class AlasSemanticAdapter:
             and context.camera_positioning_admission is None
             and context.map_state is not None
             and self._campaign_post_combat_state_proven(context, context.map_state)
-            and len(context.post_combat_viewport_proofs) < 2
         )
         if (
             sum((combat_ready, positioning_ready, post_combat_ready)) != 1
@@ -8085,16 +8435,11 @@ class AlasSemanticAdapter:
             ),
             distance_check=True,
         )
-        if post_combat_ready and context.post_combat_viewport_proofs:
-            previous = context.post_combat_viewport_proofs[-1]
-            if (
-                len(context.post_combat_viewport_proofs) != 1
-                or tuple(abs(value) for value in intent.grid_vector)
-                != tuple(abs(value) for value in previous.grid_vector)
-            ):
-                raise SemanticGateClosed(
-                    "campaign post-combat refocus changed its edge-swipe axis"
-                )
+        # ALAS full_scan() may traverse two different clamped axes while it
+        # reconciles newly spawned enemies after a battle.  Every gesture is
+        # still independently bound to the canonical source vector, exact
+        # endpoints, a proven post-combat map and the finite viewport ledger;
+        # do not add an artificial same-axis pair restriction here.
         context.viewport_swipe_intent = intent
         return intent
 
@@ -8758,6 +9103,7 @@ class AlasSemanticAdapter:
         if route_index >= len(admission.input_nodes):
             raise SemanticGateClosed("campaign target recheck has no remaining input")
         target_node = admission.input_nodes[route_index]
+        allow_enemy_coverage = target_node == admission.target_node
         expected_path = next(
             cell.button_path for cell in state.cells if cell.node == target_node
         )
@@ -8777,7 +9123,7 @@ class AlasSemanticAdapter:
         target = self.oracle.campaign_map_cell_input(
             state,
             target_node,
-            allow_expected_enemy_coverage=True,
+            allow_expected_enemy_coverage=allow_enemy_coverage,
         )
         if target.path != expected_path:
             raise SemanticGateClosed("campaign target recheck changed cell path")
@@ -9033,6 +9379,7 @@ class AlasSemanticAdapter:
         self._validate_campaign_combat_route_state(
             context, state, for_next_input=True
         )
+        allow_enemy_coverage = node == admission.target_node
         if context.viewport_swipe_required:
             # The admitted frame can observe the destination under a passing
             # fleet animation even though ALAS reaches its click several
@@ -9041,18 +9388,24 @@ class AlasSemanticAdapter:
             # actionable top raycast; otherwise this exact read still fails
             # closed and no input is sent.
             target = self.oracle.campaign_map_cell_input(
-                state, node, allow_expected_enemy_coverage=True
+                state,
+                node,
+                allow_expected_enemy_coverage=allow_enemy_coverage,
             )
             context.viewport_swipe_required = False
         else:
             target = self.oracle.campaign_map_cell_input(
-                state, node, allow_expected_enemy_coverage=True
+                state,
+                node,
+                allow_expected_enemy_coverage=allow_enemy_coverage,
             )
         assert target.point is not None and target.bounds is not None
         receipt = self._dispatch_mutation(
             "campaign.grid_click",
             lambda: self.oracle.click_campaign_map_cell(
-                state, node, allow_expected_enemy_coverage=True
+                state,
+                node,
+                allow_expected_enemy_coverage=allow_enemy_coverage,
             ),
         )
         # The ADB tap has happened.  Consume and record the lease before any
@@ -9935,10 +10288,14 @@ class AlasSemanticAdapter:
         self._package_gate()
         if campaign_stage_code is not None:
             context = self._require_campaign_context()
+            shared_hard_entrance = CAMPAIGN_SHARED_HARD_STAGE_ENTRANCES.get(
+                context.stage_code
+            )
             if (
                 not isinstance(campaign_stage_code, str)
-                or campaign_stage_code != context.stage_code
-                or name != campaign_stage_code
+                or name != context.stage_code
+                or campaign_stage_code
+                not in (context.stage_code, shared_hard_entrance)
             ):
                 raise SemanticGateClosed("campaign stage identity changed")
             if (
@@ -10265,8 +10622,8 @@ class AlasSemanticAdapter:
             # The oracle action below performs a fresh, exact page/stage/
             # raycast proof immediately before input, so let that final proof
             # decide rather than failing on the advisory pre-read.
-            observed_preparation = self.oracle.campaign_preparation_state(
-                context.stage_code
+            observed_preparation, stage_code = (
+                self._campaign_preparation_state_with_stage()
             )
             if (
                 observed_preparation is not None
@@ -10276,7 +10633,7 @@ class AlasSemanticAdapter:
                     observed_preparation, "oil_cost", None
                 )
             receipt = self.oracle.click_campaign_map_preparation(
-                context.stage_code
+                stage_code
             )
             context.map_preparation_receipt = receipt
             context.passive_transition_until = time.monotonic() + 60.0
@@ -12573,18 +12930,51 @@ class AlasSemanticSession:
                 return None
             raise
 
+    def campaign_result_ready(self) -> bool:
+        """Report an exact campaign result that arrived before ALAS polled it."""
+
+        adapter = self.open()
+        oracle = adapter.oracle
+        return bool(
+            adapter.campaign_combat_committed()
+            and oracle.daily_battle_result_visible()
+            and not oracle.operation_siren_battle_result_visible()
+        )
+
+    def campaign_boss_returned_to_stage(self) -> bool:
+        """Report the typed stage page reached after a committed boss combat."""
+
+        adapter = self.open()
+        oracle = adapter.oracle
+        return bool(
+            adapter.campaign_combat_committed()
+            and not oracle.daily_battle_result_visible()
+            and not oracle.operation_siren_battle_result_visible()
+            and oracle.campaign_page_is_normal()
+        )
+
     def combat_is_loading(self) -> bool:
+        adapter = self.open()
+        oracle = adapter.oracle
         if getattr(
-            self.open().oracle,
+            oracle,
             "daily_battle_result_visible",
             lambda: False,
         )():
             return False
-        if self.open().oracle.daily_combat_visible():
+        if oracle.daily_combat_visible():
             return True
+        if adapter.campaign_combat_committed():
+            try:
+                if not oracle.campaign_is_in_map():
+                    return True
+            except SemanticGateClosed as exc:
+                if self._campaign_combat_transition_error(exc):
+                    return True
+                raise
         if not (
-            self.open().campaign_combat_committed()
-            or self.open().operation_siren_combat_committed()
+            adapter.campaign_combat_committed()
+            or adapter.operation_siren_combat_committed()
         ):
             return False
         try:
@@ -13658,6 +14048,14 @@ class AlasSemanticSession:
     def campaign_map_clear_percentage(self) -> float:
         return self.open().campaign_map_clear_percentage()
 
+    def campaign_map_preparation_mode_state(self) -> str:
+        return self.open().campaign_map_preparation_mode_state()
+
+    def set_campaign_map_preparation_mode(
+        self, destination: str
+    ) -> ActionReceipt:
+        return self.open().set_campaign_map_preparation_mode(destination)
+
     def campaign_auto_search_selected(self) -> bool:
         return self.open().campaign_auto_search_selected()
 
@@ -13896,6 +14294,9 @@ class AlasSemanticSession:
             fleet1, fleet2, submarine
         )
 
+    def campaign_fleet_preparation_required(self) -> bool:
+        return self.open().campaign_fleet_preparation_required()
+
     def campaign_fleet_row_allowed(self, row_key: str) -> bool:
         return self.open().campaign_fleet_row_allowed(row_key)
 
@@ -13934,6 +14335,24 @@ class AlasSemanticSession:
 
     def campaign_auto_search_running(self) -> bool:
         return self.open().campaign_auto_search_running()
+
+    def campaign_inherited_auto_search_visible(self) -> bool:
+        return self.open().campaign_inherited_auto_search_visible()
+
+    def recover_inherited_campaign_auto_search(
+        self,
+        stage_code: str,
+        fleet_order: str,
+        timeout_seconds: float = 1800.0,
+    ) -> CampaignAutoSearchCompletionProof:
+        return self.open().recover_inherited_campaign_auto_search(
+            stage_code,
+            fleet_order,
+            timeout_seconds=timeout_seconds,
+        )
+
+    def close_orphan_campaign_auto_search_result(self) -> bool:
+        return self.open().close_orphan_campaign_auto_search_result()
 
     def confirm_campaign_auto_search_started(self) -> CampaignSortieProof:
         return self.open().confirm_campaign_auto_search_started()
@@ -14133,7 +14552,14 @@ class AlasSemanticSession:
                 return receipt
             if adapter.oracle.daily_battle_result_visible():
                 receipt = adapter.oracle.click_daily_battle_result()
-                self._combat_result_transition_until = time.monotonic() + 2.5
+                # ChapterMap can take well over the generic overlay-close
+                # interval to remount after the typed result action.  Keep
+                # only the exact committed campaign owner tolerant during
+                # that bounded Unity transition.
+                self._arm_combat_result_transition(
+                    adapter,
+                    transition_seconds=20.0,
+                )
                 return receipt
         shop_item_index = getattr(button, "semantic_shop_index", None)
         if shop_item_index is not None:
@@ -14448,8 +14874,18 @@ class AlasSemanticSession:
                 oracle.operation_siren_page_visible()
                 or oracle.daily_page_visible()
                 or oracle.main_page_visible()
+                or oracle.event_campaign_page_visible()
             ):
                 return tuple(receipts)
+            try:
+                if oracle.campaign_is_in_map():
+                    return tuple(receipts)
+            except SemanticGateClosed as exc:
+                if str(exc) not in {
+                    "campaign startup surface is not reviewed",
+                    "campaign map-scene identity is absent",
+                }:
+                    raise
             time.sleep(0.25)
         raise SemanticGateClosed(
             "orphan combat result did not return to a reviewed stable page"
@@ -14767,6 +15203,9 @@ class AlasSemanticSession:
         self, stage_code: str, mode: str = "normal"
     ) -> None:
         self.open().begin_campaign_pre_sortie(stage_code, mode=mode)
+
+    def campaign_pre_sortie_stage_code(self) -> str:
+        return self.open().campaign_pre_sortie_stage_code()
 
     def end_campaign_pre_sortie(self) -> None:
         if self.adapter is not None:

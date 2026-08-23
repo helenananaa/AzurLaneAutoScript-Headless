@@ -1,6 +1,6 @@
 # ALAS Headless 配置项级支持矩阵
 
-更新日期：2026-08-22
+更新日期：2026-08-23
 Headless 适配证据提交：`73433ccbac00be4c0fb367803d4affa7cb1ea599`
 固定 ALAS 上游基线：`81ccf63b4540f00241628c82a58c02c7a2bb11af`
 当前 ALAS `master` 观察：`d816310324bf686dff3252b37efbb997d9a328a4`（仅作差异盘点，尚未成为适配锁）
@@ -38,16 +38,16 @@ Headless 适配证据提交：`73433ccbac00be4c0fb367803d4affa7cb1ea599`
 | `M` | 🔴 尚未完成 | 缺少任务级适配或关键语义端口 |
 | `R` | ⚙️ 运行时待验收 | ALAS 内部/运行时管理字段；仍需验证调度与恢复契约 |
 
-### 1.1 完成度汇总（2026-08-22 标注）
+### 1.1 完成度汇总（2026-08-23 标注）
 
 这里的“完成”严格指整块面板的全部配置值和必要异常分支均已闭环，不能用“默认路径跑过”替代。
 
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **9 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、OpsiHazard1Leveling、OpsiMeowfficerFarming、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **22 / 60** | Daily、Dorm、Event、EventA、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiExplore、OpsiObscure、OpsiShop、OpsiStronghold、OpsiVoucher、Research、ShopFrequent、ShopOnce、Tactical |
-| 🧪 仅离线完成（`O`） | **7 / 60** | Coalition、CoalitionSp、EventB、Hospital、PrivateQuarters、Raid、RaidDaily |
-| 🟡 部分完成（`P`） | **13 / 60** | Alas、AzurLaneUncensored、Daemon、Event2、EventC、EventD、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral |
+| 🟢 主路径已完成、全配置未完成（`L`） | **26 / 60** | Daily、Dorm、Event、Event2、EventA、EventB、EventC、EventD、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiExplore、OpsiObscure、OpsiShop、OpsiStronghold、OpsiVoucher、Research、ShopFrequent、ShopOnce、Tactical |
+| 🧪 仅离线完成（`O`） | **6 / 60** | Coalition、CoalitionSp、Hospital、PrivateQuarters、Raid、RaidDaily |
+| 🟡 部分完成（`P`） | **10 / 60** | Alas、AzurLaneUncensored、Daemon、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral |
 | 🧱 已到边界、尚未完成（`B`） | **8 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiMonthBoss、Shipyard、WarArchives |
 | 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
 
@@ -408,16 +408,16 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 8 | EventGeneral | EventGeneral, TaskBalancer | P | 五字段离线决策已完整；仍缺 typed PT/金币实机观察、时间相关性、真实任务切换恢复和防调度环证据 |
 | 9 | Coalition | Scheduler, Campaign, Coalition, StopCondition, Emotion | O | 难度与单/多舰队已离线回放；共斗入口、战斗和结算未适配 |
 | 10 | Event | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 七活动入口共享 9 组 54 字段，Event/Event2 包装结构等价；活动目录、关卡名与模式现于语义导航前严校。当前 A1 默认路径闭环；其他关卡和全部共用地图配置仍按字段验收 |
-| 11 | Event2 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | P | 已证明与 Event 共享同一 9 组 54 字段、入口包装和前置门禁；第二活动配置实例仍没有独立实机验收 |
+| 11 | Event2 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 已证明与 Event 共享同一 9 组 54 字段、入口包装和前置门禁；Event2 已用 A1 自动寻敌完成独立原任务实机闭环，RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/event2-a1-auto-search-live-validation-receipt-20260823-r3.json。其他关卡和共用地图配置仍未完整覆盖 |
 | 12 | Raid | Scheduler, Raid, Campaign, StopCondition, Emotion | O | 难度和票券的声明值及票券确认最终按钮已离线回放；活动入口、次数和结算未适配 |
 | 13 | Hospital | Scheduler, Hospital, StopCondition, Emotion | O | 推荐舰队开关已在医院入口与战斗准备入口离线回放并提前 fail-closed；医院页面、候选、推荐动作、战斗和结算观察/输入仍缺适配 |
 | 14 | WarArchives | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | B | 能观察入口/Data Key；48 个档案值的进入、消耗、地图和结算均未形成覆盖台账 |
 | 15 | CoalitionSp | Scheduler, Campaign, Coalition, StopCondition, Emotion | O | SP 强制多舰队和共享配置已离线回放；SP 状态机、战斗和结算未适配 |
 | 16 | EventA | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | A-D 共享 9 组 54 字段并各加 2 个 EventDaily 字段；入口门禁早于目录枚举，既有 StageFilter/LastStage 跨日顺序不变。当前仅 A1-A3 默认路径有实机闭环，其余分区和共用地图配置仍未完整覆盖 |
-| 17 | EventB | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | O | 共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；B1 普通 `GET_SHIP` 已离线适配。因概率掉落停止实跑，B1 尚未完整闭环，B2/B3 未验证，首次获得 `NEW_SHIP` 未适配 |
-| 18 | EventC | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | P | 共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；C1-C3 地图脚本存在，无实机闭环 |
-| 19 | EventD | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | P | 共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；D1-D3 地图脚本存在，无实机闭环 |
-| 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | P | 共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；SP 地图脚本存在，无实机闭环 |
+| 17 | EventB | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；EventB 已用 B1 自动寻敌完成原任务实机闭环，LastStage 写回 b1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventb-b1-auto-search-live-validation-receipt-20260823-r2.json。普通 `GET_SHIP` 可继续，首次获得 `NEW_SHIP` 仍未适配，B2/B3 未验证 |
+| 18 | EventC | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；EventC 已通过原 normal 入口选择共享 C1 困难脚本并完成自动寻敌实机闭环，LastStage 写回 c1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventc-c1-auto-search-live-validation-receipt-20260823-r14.json。C2/C3 未验证 |
+| 19 | EventD | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；EventD 已通过原 normal 入口选择共享 D1 困难脚本并完成自动寻敌实机闭环，LastStage 写回 d1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventd-d1-auto-search-live-validation-receipt-20260823.json。D2/D3 未验证 |
+| 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | P | 共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；实机已证明初始 (1,2,0) 舰队配置可零变更保留、自动寻敌职责与语义出击，且今日次数变为 0/1 并返回活动页。但控制器未在进程内捕获完整地图/战斗/结算收据，边界凭证见 integration/alas/eventsp-sp-auto-search-live-boundary-20260823.json；仍保持 P，不升级为主路径闭环 |
 | 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | O | 难度过滤的 64 个无重复排列及 EX 奖励路由已离线回放；每日次数、战斗和领奖未适配 |
 | 22 | Commission | Scheduler, Commission | F | 六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环 |
 | 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 新学员、选书过滤与经验溢出均已实机闭环；快速学习因当前非活动期仍未闭环 |

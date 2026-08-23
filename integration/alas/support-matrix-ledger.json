@@ -8218,8 +8218,8 @@
         "Storage"
       ],
       "name": "Event2",
-      "note": "已证明与 Event 共享同一 9 组 54 字段、入口包装和前置门禁；第二活动配置实例仍没有独立实机验收",
-      "status": "P"
+      "note": "已证明与 Event 共享同一 9 组 54 字段、入口包装和前置门禁；Event2 已用 A1 自动寻敌完成独立原任务实机闭环，RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/event2-a1-auto-search-live-validation-receipt-20260823-r3.json。其他关卡和共用地图配置仍未完整覆盖",
+      "status": "L"
     },
     {
       "groups": [
@@ -8252,8 +8252,8 @@
         "Storage"
       ],
       "name": "EventB",
-      "note": "共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；B1 普通 `GET_SHIP` 已离线适配。因概率掉落停止实跑，B1 尚未完整闭环，B2/B3 未验证，首次获得 `NEW_SHIP` 未适配",
-      "status": "O"
+      "note": "共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；EventB 已用 B1 自动寻敌完成原任务实机闭环，LastStage 写回 b1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventb-b1-auto-search-live-validation-receipt-20260823-r2.json。普通 `GET_SHIP` 可继续，首次获得 `NEW_SHIP` 仍未适配，B2/B3 未验证",
+      "status": "L"
     },
     {
       "groups": [
@@ -8269,8 +8269,8 @@
         "Storage"
       ],
       "name": "EventC",
-      "note": "共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；C1-C3 地图脚本存在，无实机闭环",
-      "status": "P"
+      "note": "共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；EventC 已通过原 normal 入口选择共享 C1 困难脚本并完成自动寻敌实机闭环，LastStage 写回 c1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventc-c1-auto-search-live-validation-receipt-20260823-r14.json。C2/C3 未验证",
+      "status": "L"
     },
     {
       "groups": [
@@ -8286,8 +8286,8 @@
         "Storage"
       ],
       "name": "EventD",
-      "note": "共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；D1-D3 地图脚本存在，无实机闭环",
-      "status": "P"
+      "note": "共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；EventD 已通过原 normal 入口选择共享 D1 困难脚本并完成自动寻敌实机闭环，LastStage 写回 d1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventd-d1-auto-search-live-validation-receipt-20260823.json。D2/D3 未验证",
+      "status": "L"
     },
     {
       "groups": [
@@ -8311,7 +8311,7 @@
         "Storage"
       ],
       "name": "EventSp",
-      "note": "共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；SP 地图脚本存在，无实机闭环",
+      "note": "共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；实机已证明初始 (1,2,0) 舰队配置可零变更保留、自动寻敌职责与语义出击，且今日次数变为 0/1 并返回活动页。但控制器未在进程内捕获完整地图/战斗/结算收据，边界凭证见 integration/alas/eventsp-sp-auto-search-live-boundary-20260823.json；仍保持 P，不升级为主路径闭环",
       "status": "P"
     },
     {
@@ -11687,9 +11687,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "933bf331e30047a00824a0cb8c93f6f5e91fe9d8dfe680c68adf4c80d643e476",
-      "manifest_sha256": "bd0d6478a39758ea36f8e9c330b42540355d9ad816810987dd8777fc014a7aa4",
-      "member_count": 87
+      "combined_sha256": "d87b9e3c06dce8d89580daab3a35c026c11f14205c256d476b699b455b01be3d",
+      "manifest_sha256": "bf02b326d6c8ce4081ac122c3ece44bd3923514447126ad93a936035cca95e7e",
+      "member_count": 88
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

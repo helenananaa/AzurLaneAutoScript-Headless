@@ -1099,7 +1099,7 @@ class CampaignFleetRowState:
 
     @property
     def available(self) -> bool:
-        return self.select_button is not None and self.clear_button is not None
+        return self.select_button is not None or self.clear_button is not None
 
     @property
     def in_use(self) -> bool:
@@ -3367,6 +3367,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "campaign/chapter/previous",
             "campaign/chapter/next",
             "campaign/map-preparation/auto-search",
+            "campaign/map-preparation/mode/normal",
+            "campaign/map-preparation/mode/hard",
             "campaign/map-preparation/proceed",
             "campaign/map-preparation/cancel",
             "campaign/fleet-preparation/cancel",
@@ -3502,6 +3504,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "/LevelStageInfoView(Clone)/",
         (
             "campaign/map-preparation/auto-search",
+            "campaign/map-preparation/mode/normal",
+            "campaign/map-preparation/mode/hard",
             "campaign/map-preparation/proceed",
             "campaign/map-preparation/cancel",
         ),
@@ -3511,6 +3515,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "/LevelInfoSPUI(Clone)/",
         (
             "campaign/map-preparation/auto-search",
+            "campaign/map-preparation/mode/normal",
+            "campaign/map-preparation/mode/hard",
             "campaign/map-preparation/proceed",
             "campaign/map-preparation/cancel",
         ),
@@ -18441,12 +18447,17 @@ class SemanticOracle:
         alignment = (median_dx * finger_dx + median_dy * finger_dy) / (
             median_norm * finger_norm
         )
-        # Boss appearance can trigger Unity's own camera animation while the
-        # ALAS gesture is in flight.  Depending on which movement dominates,
-        # coherent map content may follow or oppose the finger.  It must still
-        # move on the same axis; the subsequent typed ALAS camera observation
-        # proves the signed logical delta.
-        if abs(alignment) < 0.75:
+        # A boss or authorized post-combat wave can trigger Unity's own camera
+        # focus while the ALAS gesture is in flight.  The independently read
+        # map is otherwise identical/additive and its cell displacement must
+        # remain projectively coherent below; the subsequent typed ALAS camera
+        # observation proves the signed logical delta.  Without that exact
+        # spawn transition, retain the physical gesture-axis requirement.
+        if (
+            not boss_appeared
+            and not post_combat_wave_appeared
+            and abs(alignment) < 0.75
+        ):
             raise SemanticGateClosed(
                 "campaign map viewport did not align with the physical gesture axis"
             )
@@ -19430,11 +19441,14 @@ class SemanticOracle:
                 )
             )
         chapters = {self._campaign_stage_chapter(stage.stage_code) for stage in stages}
-        if len(chapters) != 1:
-            raise SemanticGateClosed("event campaign chapter is ambiguous")
+        # A partially unlocked event hard page can legitimately expose C1
+        # beside the still-normal A2/A3 nodes (and likewise D beside B).  The
+        # nodes remain individually typed and unambiguous; the active semantic
+        # campaign context performs the one-way target/entrance projection.
+        chapter_name = "/".join(sorted(chapters))
         return CampaignPageState(
             generation=button_state.generation,
-            chapter_name=chapters.pop(),
+            chapter_name=chapter_name,
             stages=tuple(stages),
         )
 
@@ -20507,6 +20521,101 @@ class SemanticOracle:
             lambda: self._campaign_map_preparation_state_once(stage_code)
         )
 
+    def campaign_map_preparation_mode_state(self, stage_code: str) -> str:
+        """Return the exact normal/hard state on a shared event-stage detail."""
+
+        preparation = self.campaign_map_preparation_state(stage_code)
+        if "LevelInfoSPUI(Clone)/panel/" not in preparation.proceed_button.path:
+            raise SemanticGateClosed(
+                "campaign map-preparation mode switch is not on an event stage"
+            )
+        state = self.read_state()
+        observed = []
+        for mode in ("normal", "hard"):
+            suffix = (
+                "LevelInfoSPUI(Clone)/panel/Difficulty/"
+                + mode.capitalize()
+                + "/Switch"
+            )
+            matches = tuple(
+                button
+                for button in state.buttons
+                if button.name == "Switch"
+                and button.path.endswith(suffix)
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.point is not None
+                and button.bounds is not None
+            )
+            if len(matches) > 1:
+                raise SemanticGateClosed(
+                    "campaign map-preparation mode switch is ambiguous"
+                )
+            if matches:
+                observed.append(mode)
+        if len(observed) != 1:
+            raise SemanticGateClosed(
+                "campaign map-preparation mode switch is absent or ambiguous"
+            )
+        return observed[0]
+
+    def click_campaign_map_preparation_mode(
+        self, stage_code: str, destination: str
+    ) -> ActionReceipt:
+        """Switch one shared event-stage detail to the requested difficulty."""
+
+        if destination not in ("normal", "hard"):
+            raise SemanticGateClosed(
+                "campaign map-preparation mode destination is invalid"
+            )
+        current = self.campaign_map_preparation_mode_state(stage_code)
+        if current == destination:
+            raise SemanticGateClosed(
+                "campaign map-preparation mode already matches destination"
+            )
+        state = self.read_state()
+        suffix = (
+            "LevelInfoSPUI(Clone)/panel/Difficulty/"
+            + current.capitalize()
+            + "/Switch"
+        )
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == "Switch"
+            and button.path.endswith(suffix)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed(
+                "campaign map-preparation mode target is absent or ambiguous"
+            )
+        target = matches[0]
+        semantic_id = "campaign/map-preparation/mode/" + destination
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed(
+                "campaign map-preparation mode switch is blocked"
+            )
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def campaign_map_achievement_state(
         self, stage_code: str
     ) -> CampaignMapAchievementState:
@@ -21014,7 +21123,11 @@ class SemanticOracle:
             lambda: self._campaign_fleet_selection_state_once(
                 stage_code, fallback_oil_cost=fallback_oil_cost
             ),
-            attempts=12,
+            # SP rebuilds LevelFleetSelectView from Overlay to UIOrigin after
+            # clearing one row; its exact btnBack/raycast identity can remain
+            # transitional for several seconds.  Retry only the full typed
+            # read and retain every original final-frame input gate.
+            attempts=32,
         )
 
     def campaign_auto_search_role_state(self) -> CampaignAutoSearchRoleState:
@@ -21285,17 +21398,33 @@ class SemanticOracle:
                         + row_key
                     )
                 select_matches = recommend_matches
+            hard_submarine = hard_mode and row_kind == "submarine"
+            if hard_submarine:
+                # Event hard maps keep the optional submarine row while the
+                # ordinary 0/1 capacity summary is replaced by hard-mode
+                # requirements.  This client can retain only btn_clear even
+                # after the row is empty.  Accept that exact one-sided typed
+                # operator, never an inferred or synthetic input target.
+                if len(select_matches) > 1 or len(clear_matches) > 1:
+                    raise SemanticGateClosed(
+                        "hard campaign submarine controls are ambiguous"
+                    )
+                available = bool(select_matches or clear_matches)
             if available:
-                if len(select_matches) != 1 or len(clear_matches) != 1:
+                if not hard_submarine and (
+                    len(select_matches) != 1 or len(clear_matches) != 1
+                ):
                     raise SemanticGateClosed(
                         "campaign fleet row controls are absent or ambiguous: " + row_key
                     )
-                select_button = select_matches[0]
-                clear_button = clear_matches[0]
+                select_button = select_matches[0] if select_matches else None
+                clear_button = clear_matches[0] if clear_matches else None
                 for semantic_id, button in (
                     (semantic_root + "/select", select_button),
                     (semantic_root + "/clear", clear_button),
                 ):
+                    if button is None:
+                        continue
                     delegated_hard_recommend = (
                         hard_mode
                         and button.name == "btn_recom"
@@ -21387,6 +21516,11 @@ class SemanticOracle:
                         "campaign fleet row selection name is malformed: " + row_key
                     )
                 selected_fleet = numerals[match.group(1)]
+            if hard_submarine and available:
+                if levels and clear_button is None:
+                    raise SemanticGateClosed(
+                        "selected hard campaign submarine has no clear control"
+                    )
             empty_slots = tuple(
                 image
                 for image in ui_state.images

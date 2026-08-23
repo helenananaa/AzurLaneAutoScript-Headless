@@ -837,7 +837,7 @@ index c44e0996..78c9d812 100644
                  # Check errors
                  if campaign_click > 5:
                      logger.critical(f"Failed to enter {button}, too many click on {button}")
-@@ -150,6 +166,117 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -150,6 +166,118 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                  else:
                      checked_in_map = True
  
@@ -883,7 +883,8 @@ index c44e0996..78c9d812 100644
 +                                if self.config.Campaign_Mode == 'hard':
 +                                    semantic_adapter.prepare_campaign_hard_fleets()
 +                                self.handle_2x_book_setting(mode='prep')
-+                                self.fleet_preparation()
++                                if semantic_adapter.campaign_fleet_preparation_required():
++                                    self.fleet_preparation()
 +                                semantic_adapter.confirm_campaign_fleet_selection()
 +                                self.handle_auto_submarine_call_disable()
 +                                self.handle_auto_search_setting()

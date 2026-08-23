@@ -134,6 +134,13 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         self.assertIn("self._view_init()", self.patch_text)
         self.assertNotIn("def update(self, camera=True", self.patch_text)
 
+    def test_campaign_boss_stage_return_ends_before_another_map_round(self):
+        stable = self.patch_text.index(
+            "semantic_adapter.campaign_boss_returned_to_stage()"
+        )
+        campaign_end = self.patch_text.index("raise CampaignEnd", stable)
+        self.assertLess(stable, campaign_end)
+
     def test_login_hook_brackets_original_handler_state_machine(self):
         self.assertIn(
             "diff --git a/module/handler/login.py",
@@ -281,7 +288,11 @@ class AlasIntegrationPatchTests(unittest.TestCase):
             self.patch_text,
         )
         self.assertIn(
-            "+                                self.fleet_preparation()",
+            "+                                if semantic_adapter.campaign_fleet_preparation_required():",
+            self.patch_text,
+        )
+        self.assertIn(
+            "+                                    self.fleet_preparation()",
             self.patch_text,
         )
         self.assertIn(
