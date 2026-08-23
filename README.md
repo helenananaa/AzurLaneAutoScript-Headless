@@ -21,6 +21,9 @@ coordinates.
 See [acceptance gates](docs/acceptance-gates.md) and [architecture](docs/architecture.md).
 ALAS 产品功能按侧栏顺序推进，当前从普通主线“出击”开始；精简的交付顺序和
 单项完成标准见 [ALAS 自上而下适配路线](docs/alas-topdown-roadmap.md)。
+The host/ABI coverage, physical-device boundaries, current evidence, and open
+blockers are tracked in the
+[runtime support matrix](docs/runtime-support-matrix.md).
 The backend-neutral lifecycle, immutable artifact lock, bounded trace, and
 exact-fingerprint evidence index are documented in the
 [runtime foundation](docs/runtime-foundation.md). This foundation is offline
