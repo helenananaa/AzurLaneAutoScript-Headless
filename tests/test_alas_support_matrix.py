@@ -81,7 +81,10 @@ class AlasSupportMatrixTests(unittest.TestCase):
                     "menu": "collapse",
                     "page": "setting",
                     "tasks": {
-                        panel["name"]: panel["groups"] for panel in ledger["panels"]
+                        panel["name"]: [
+                            group for group in panel["groups"] if group != "Storage"
+                        ]
+                        for panel in ledger["panels"]
                     },
                 }
             }

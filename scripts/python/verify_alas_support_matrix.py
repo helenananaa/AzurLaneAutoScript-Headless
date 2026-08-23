@@ -423,8 +423,18 @@ def validate_configuration_source(
     source: Path,
 ) -> Mapping[str, Any]:
     surface = _configuration_surface(source)
-    expected_panels = {panel["name"]: panel["groups"] for panel in ledger["panels"]}
-    if surface["panels"] != expected_panels:
+    # Storage is an args/template-only bookkeeping group on the pinned source.
+    # Keep it in the rendered ledger, but do not require task.yaml to advertise
+    # it as a runnable task group.  Field usage already excludes Storage below.
+    expected_panels = {
+        panel["name"]: [group for group in panel["groups"] if group != "Storage"]
+        for panel in ledger["panels"]
+    }
+    actual_panels = {
+        panel: [group for group in groups if group != "Storage"]
+        for panel, groups in surface["panels"].items()
+    }
+    if actual_panels != expected_panels:
         raise SupportMatrixError("task panel surface differs from ledger")
     expected_usage = {
         field["path"]: sorted(field["panels"]) for field in ledger["fields"]
