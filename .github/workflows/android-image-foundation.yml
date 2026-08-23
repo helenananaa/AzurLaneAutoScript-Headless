@@ -13,6 +13,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Install Python dependencies
+        run: python -m pip install --disable-pip-version-check -r .github/requirements/android-image-foundation.txt
       - name: Compile Python entrypoints
         run: python -m compileall -q python scripts/python
       - name: Parse Redroid build entrypoint

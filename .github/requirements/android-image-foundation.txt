@@ -1,0 +1,3 @@
+# Dependencies imported by alas_headless and the repository test suite.
+numpy==2.2.1
+PyYAML==6.0.1
