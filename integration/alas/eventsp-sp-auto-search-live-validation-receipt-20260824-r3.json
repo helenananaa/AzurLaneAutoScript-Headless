@@ -1,0 +1,81 @@
+{
+  "schema": "alas-headless.event-task-live-validation/v1",
+  "passed": false,
+  "executed": false,
+  "capability_promotion": false,
+  "task": "EventSp",
+  "stage": "SP",
+  "event": "event_20260813_cn",
+  "run_result": false,
+  "run_error": {
+    "type": "WorkerResultError",
+    "message": "runner.worker_result_missing_or_malformed",
+    "classification": "runner.worker_result_missing_or_malformed"
+  },
+  "validation_errors": [
+    "runner.worker_result_missing_or_malformed"
+  ],
+  "raw_input_fallback_used": false,
+  "supervision": {
+    "binding": {
+      "schema": "alas-headless.runner-worker-binding/v1",
+      "run_id": "f41e5aeb7ce94763999c3023e035cc3a",
+      "token": "ade52d51c1bb4385b9322a4aac9a11e329907cc7c15044fda2706f731fd0cb8c",
+      "task": "EventSp",
+      "stage": "SP",
+      "event": "event_20260813_cn",
+      "deadline_seconds": 900,
+      "parent_pid": 49200,
+      "parent_identity": "49200:134319877339202928",
+      "worker_pid": 24664,
+      "config_path": "H:\\program\\AzurLaneAutoScript-alas-topdown-live\\config\\_codex_event_live_eventsp_f41e5aeb7ce94763999c3023e035cc3a.json",
+      "result_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-86uqhv0p\\worker-result.json",
+      "cleanup_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-86uqhv0p\\worker-cleanup.json",
+      "lease_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-86uqhv0p\\forward-lease.json"
+    },
+    "run_id": "f41e5aeb7ce94763999c3023e035cc3a",
+    "total_deadline_seconds": 900,
+    "deadline_triggered": false,
+    "interrupted": false,
+    "termination_mode": "completed",
+    "worker_returncode": 1,
+    "cooperative_stop_requested": false,
+    "forced_worker_terminate": false,
+    "forced_worker_kill": false,
+    "termination_confirmed": true,
+    "lifecycle_errors": [],
+    "worker_cleanup": {
+      "actions": [
+        "semantic_session_close",
+        "cwd_restore",
+        "temp_config_deferred_to_parent",
+        "environment_restore"
+      ],
+      "completed": true,
+      "errors": [],
+      "temp_config_path": "H:\\program\\AzurLaneAutoScript-alas-topdown-live\\config\\_codex_event_live_eventsp_f41e5aeb7ce94763999c3023e035cc3a.json",
+      "temp_config_present_after": true
+    },
+    "parent_cleanup": {
+      "completed": true,
+      "actions": [
+        "observer_forward_already_absent",
+        "config_removed",
+        "control_removed",
+        "result_removed",
+        "cleanup_removed",
+        "lease_removed",
+        "internal_control_directory_removed"
+      ],
+      "blockers": [],
+      "details": {
+        "config_path": "H:\\program\\AzurLaneAutoScript-alas-topdown-live\\config\\_codex_event_live_eventsp_f41e5aeb7ce94763999c3023e035cc3a.json",
+        "forward": {
+          "source": "lease",
+          "already_absent": true,
+          "record": null
+        }
+      }
+    }
+  }
+}

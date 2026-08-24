@@ -1,0 +1,200 @@
+{
+  "schema": "alas-headless.event-task-live-validation/v1",
+  "passed": false,
+  "executed": null,
+  "execution_state": "started",
+  "capability_promotion": false,
+  "task": "EventSp",
+  "stage": "SP",
+  "event": "event_20260813_cn",
+  "run_result": false,
+  "run_error": {
+    "type": "SystemExit",
+    "message": "runner.worker_system_exit",
+    "classification": "runner.worker_system_exit",
+    "phase": "task_run",
+    "exit_code": 1,
+    "traceback_digest": "7a751c4def30de619dba7be895042d7d85792765df6d7763a6d0aa289ddb625e"
+  },
+  "validation_errors": [
+    "runner.worker_system_exit"
+  ],
+  "raw_input_fallback_used": false,
+  "worker_cleanup": {
+    "actions": [
+      "semantic_session_close",
+      "cwd_restore",
+      "temp_config_deferred_to_parent",
+      "environment_restore",
+      "temp_config_state_captured"
+    ],
+    "completed": true,
+    "config_state": {
+      "attributes": 32,
+      "exists": true,
+      "identity": {
+        "file_id": 34339947158983474,
+        "volume_serial": 136308236
+      },
+      "is_directory": false,
+      "is_reparse_point": false,
+      "link_count": 1,
+      "marker_error": null,
+      "marker_verified": true,
+      "size": 50641
+    },
+    "errors": [],
+    "temp_config_path": "H:\\program\\AzurLaneAutoScript-alas-topdown-live-r5-20260824\\config\\_codex_event_live_eventsp_6d813c0350ea422f895845393fa5c420.json",
+    "temp_config_present_after": true
+  },
+  "worker_terminal": {
+    "schema": "alas-headless.runner-worker-terminal/v1",
+    "terminal_kind": "fatal",
+    "phase": "task_run",
+    "execution_state": "started",
+    "classification": "runner.worker_system_exit",
+    "passed": false,
+    "capability_promotion": false,
+    "exit_code": 1,
+    "exception_type": "SystemExit",
+    "message": "runner.worker_system_exit",
+    "traceback_digest": "7a751c4def30de619dba7be895042d7d85792765df6d7763a6d0aa289ddb625e",
+    "cleanup_status": "complete",
+    "cleanup_digest": "d37b44d1bba43dad54a6328612999fd30d6ddf401cb746c75775ba4bb8af12ca"
+  },
+  "supervision": {
+    "binding": {
+      "schema": "alas-headless.runner-worker-binding/v2",
+      "run_id": "6d813c0350ea422f895845393fa5c420",
+      "token_digest": "d94f2d6b5940bd9b6e3a08c0b4f83d9fc9c1418b374b3ac88dd728aab03be358",
+      "task": "EventSp",
+      "stage": "SP",
+      "event": "event_20260813_cn",
+      "deadline_seconds": 900,
+      "parent_pid": 39916,
+      "parent_identity": "39916:134320114718312057",
+      "worker_pid": 50396,
+      "config_path": "H:\\program\\AzurLaneAutoScript-alas-topdown-live-r5-20260824\\config\\_codex_event_live_eventsp_6d813c0350ea422f895845393fa5c420.json",
+      "control_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-ro5c9zyf\\worker-control.json",
+      "result_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-ro5c9zyf\\worker-result.json",
+      "cleanup_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-ro5c9zyf\\worker-cleanup.json",
+      "lease_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-ro5c9zyf\\forward-lease.json"
+    },
+    "run_id": "6d813c0350ea422f895845393fa5c420",
+    "total_deadline_seconds": 900,
+    "deadline_triggered": false,
+    "interrupted": false,
+    "termination_mode": "completed",
+    "worker_returncode": 1,
+    "cooperative_stop_requested": false,
+    "forced_worker_terminate": false,
+    "forced_worker_kill": false,
+    "termination_confirmed": true,
+    "lifecycle_errors": [],
+    "worker_cleanup": {
+      "actions": [
+        "semantic_session_close",
+        "cwd_restore",
+        "temp_config_deferred_to_parent",
+        "environment_restore",
+        "temp_config_state_captured"
+      ],
+      "completed": true,
+      "config_state": {
+        "attributes": 32,
+        "exists": true,
+        "identity": {
+          "file_id": 34339947158983474,
+          "volume_serial": 136308236
+        },
+        "is_directory": false,
+        "is_reparse_point": false,
+        "link_count": 1,
+        "marker_error": null,
+        "marker_verified": true,
+        "size": 50641
+      },
+      "errors": [],
+      "temp_config_path": "H:\\program\\AzurLaneAutoScript-alas-topdown-live-r5-20260824\\config\\_codex_event_live_eventsp_6d813c0350ea422f895845393fa5c420.json",
+      "temp_config_present_after": true
+    },
+    "parent_cleanup": {
+      "completed": true,
+      "actions": [
+        "observer_forward_already_absent",
+        "config_removed_by_validated_handle",
+        "result_removed",
+        "cleanup_removed",
+        "lease_removed",
+        "control_removed_after_config",
+        "internal_control_directory_removed"
+      ],
+      "blockers": [],
+      "details": {
+        "config_path": "H:\\program\\AzurLaneAutoScript-alas-topdown-live-r5-20260824\\config\\_codex_event_live_eventsp_6d813c0350ea422f895845393fa5c420.json",
+        "forward": {
+          "source": "lease",
+          "already_absent": true,
+          "record": null
+        },
+        "config_state": {
+          "exists": true,
+          "identity": {
+            "volume_serial": 136308236,
+            "file_id": 34339947158983474
+          },
+          "attributes": 32,
+          "link_count": 1,
+          "size": 50641,
+          "is_directory": false,
+          "is_reparse_point": false,
+          "marker_verified": true,
+          "marker_error": null
+        }
+      }
+    },
+    "materialization_control": {
+      "schema": "alas-headless.materialized-alas-control/v3",
+      "run_id": "6d813c0350ea422f895845393fa5c420",
+      "token_digest": "d94f2d6b5940bd9b6e3a08c0b4f83d9fc9c1418b374b3ac88dd728aab03be358",
+      "task": "EventSp",
+      "stage": "SP",
+      "event": "event_20260813_cn",
+      "deadline_seconds": 900,
+      "parent_pid": 39916,
+      "alas_root": "H:\\program\\AzurLaneAutoScript-alas-topdown-live-r5-20260824",
+      "proof": {
+        "schema": "alas-headless.materialized-alas-proof/v3",
+        "capability_id": "alas.eventsp.materialized-fleet-noop-guard/v3",
+        "relative_path": "module/map/map_operation.py",
+        "canonical_source_sha256": "d890a45505a7491eea73368295096d634f1acee2a85507ccfcc94e083664510a",
+        "semantic_branch_sha256": "c391f5dbb986e6482bbd6cc14245007cfe2aa8bffc2eb1d57d662fe3396bcf4a"
+      },
+      "auth_tag": "4869df8bc1e3c3a036f471bf731126a66365fcbc76d02b0cb7d698068ef1944d"
+    },
+    "seed_source": {
+      "schema": "alas-headless.runner-seed-source/v1",
+      "capability": "alas.eventsp.pinned-template/v1",
+      "seed_name": "template",
+      "path": "H:\\program\\AzurLaneAutoScript-alas-topdown-live-r5-20260824\\config\\template.json",
+      "root_path": "H:\\program\\AzurLaneAutoScript-alas-topdown-live-r5-20260824\\config",
+      "root_identity": {
+        "volume_serial": 136308236,
+        "file_id": 35465847065825056
+      },
+      "identity": {
+        "volume_serial": 136308236,
+        "file_id": 37436171902799658
+      },
+      "size": 50013,
+      "sha256": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced"
+    }
+  },
+  "materialized_alas_admission": {
+    "schema": "alas-headless.materialized-alas-proof/v3",
+    "capability_id": "alas.eventsp.materialized-fleet-noop-guard/v3",
+    "relative_path": "module/map/map_operation.py",
+    "canonical_source_sha256": "d890a45505a7491eea73368295096d634f1acee2a85507ccfcc94e083664510a",
+    "semantic_branch_sha256": "c391f5dbb986e6482bbd6cc14245007cfe2aa8bffc2eb1d57d662fe3396bcf4a"
+  }
+}

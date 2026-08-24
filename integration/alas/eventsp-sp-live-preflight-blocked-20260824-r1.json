@@ -1,0 +1,110 @@
+{
+  "schema": "alas-headless.event-sp-live-preflight/v1",
+  "passed": false,
+  "executed": false,
+  "capability_promotion": false,
+  "observed_at_utc": "2026-08-23T17:32:27.1974624Z",
+  "task": "EventSp",
+  "stage": "SP",
+  "requested_event": "event_20260813_cn",
+  "result": "blocked_before_input",
+  "classification": "event_sp.preflight_runner_budget_not_expressible",
+  "device": {
+    "avd_path": "H:\\AndroidAVD\\alas_game_api32_x64.avd",
+    "avd_path_exists": true,
+    "serial": "emulator-5580",
+    "serial_discovery": "unique_online_device",
+    "package": "com.bilibili.azurlane",
+    "pid": 2703,
+    "adb_pid": 2703,
+    "foreground_component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "existing_forward": "tcp:2078 -> localabstract:alas.g3.2703"
+  },
+  "observer": {
+    "protocol_schema": "alas-headless.observer/v1",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "generation": 58155,
+    "button_generation": 58155,
+    "age_ms": 45,
+    "flags": 15,
+    "main_thread": true,
+    "ui_stage": 100,
+    "ui_method_mask": 15,
+    "button_truncated": false,
+    "button_error_count": 0
+  },
+  "typed_surface": {
+    "page": "main",
+    "main_page_proof_generation": 59091,
+    "main_battle_button_count": 1,
+    "main_formation_button_count": 1,
+    "main_event_button_count": 1,
+    "main_event_button_path": "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/act/MainActMapBtn",
+    "oil_before": 8632
+  },
+  "required_preflight": {
+    "event_directory": "event_20260813_cn",
+    "event_sp_unlocked": true,
+    "daily_attempt": "1/1",
+    "fleets": [
+      1,
+      2,
+      0
+    ],
+    "official_auto_search_available": true
+  },
+  "preflight_status": {
+    "package": "proven",
+    "foreground_activity": "proven",
+    "pid_and_driver_coherent": "proven",
+    "event_directory": "not_proven_from_current_typed_main_surface",
+    "event_sp_unlocked": "not_proven_from_current_typed_main_surface",
+    "daily_attempt": "not_proven_from_current_typed_main_surface",
+    "fleet_identity": "configured_but_not_live_proven",
+    "official_auto_search_available": "not_proven_from_current_typed_main_surface"
+  },
+  "required_budgets": {
+    "stage_entry": 1,
+    "sortie": 1,
+    "fleet_mutation": 0,
+    "viewport_swipe": 0,
+    "combat": "minimum_safely_expressible_after_typed_preflight",
+    "recovery_total": "explicit_and_bounded"
+  },
+  "runner": {
+    "path": "scripts/python/run_alas_event_task_live_validation.py",
+    "sha256": "e033f1d602f5e3940f9b4b0d2f6499156cd7222407fbdb617a1038353790cb5a",
+    "stage_entry_budget": 1,
+    "sortie_budget": 1,
+    "fleet_mutation_budget": 6,
+    "fleet_mutation_budget_cli_override": false,
+    "viewport_swipe_budget_cli_override": true,
+    "combat_budget_cli_override": true,
+    "recovery_total_budget": null,
+    "preflight_only_mode": false,
+    "unbudgeted_recovery_paths": [
+      "login_recovery",
+      "orphan_combat_result_recovery",
+      "inherited_preparation_recovery"
+    ]
+  },
+  "blockers": [
+    "The runner hard-codes fleet mutation budget 6, but this qualification requires 0.",
+    "The runner has no explicit total recovery budget for login, orphan-result, or inherited-preparation recovery.",
+    "The runner has no preflight-only mode that can prove the event directory, SP unlock, exact 1/1 attempt, live fleet identity, and official auto-search availability before starting the original ALAS task."
+  ],
+  "input_and_resources": {
+    "semantic_inputs": 0,
+    "raw_inputs": 0,
+    "sp_attempts_consumed": 0,
+    "oil_before": 8632,
+    "oil_after": 8632,
+    "premium_currency_consumed": 0,
+    "purchases": 0,
+    "fleet_mutations": 0,
+    "game_or_emulator_restarts": 0
+  },
+  "temporary_alas_config_created": false,
+  "raw_input_fallback_used": false,
+  "reentry_condition": "Use a runner that accepts fleet_mutation=0 and an explicit total recovery budget, and that first records typed proof of event_20260813_cn, unlocked SP, exact 1/1 attempt, fleets (1,2,0), and official auto-search availability before the one permitted sortie."
+}
