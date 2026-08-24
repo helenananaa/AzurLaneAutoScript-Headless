@@ -705,6 +705,7 @@ class RunnerSupervisionTests(unittest.TestCase):
             with self.assertRaises((OSError, RuntimeError)):
                 worker_control_from_activation(environment)
 
+    @unittest.skipUnless(os.name == "nt", "Windows exact-handle activation contract")
     def test_one_shot_activation_binds_parent_identity_and_paths(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()
@@ -1075,6 +1076,7 @@ class RunnerSupervisionTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "root identity changed"):
                 validate_worker_control_root(control)
 
+    @unittest.skipUnless(os.name == "nt", "Windows inherited-handle contract")
     def test_worker_rejects_bound_control_after_real_root_replacement(self):
         with tempfile.TemporaryDirectory() as directory:
             parent = Path(directory).resolve()
