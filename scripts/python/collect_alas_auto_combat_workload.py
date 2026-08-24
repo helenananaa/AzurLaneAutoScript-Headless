@@ -41,9 +41,14 @@ from alas_headless import (  # noqa: E402
     summarize_runtime_trace,
 )
 from alas_headless.adb_device import resolve_adb_serial  # noqa: E402
+from alas_headless.workload_capture import (  # noqa: E402
+    AUTO_COMBAT_WORKLOAD_CAPTURE_SCHEMA,
+    build_auto_combat_baseline_summary,
+    build_auto_combat_resource_receipt,
+)
 
 
-SCHEMA = "alas-headless.auto-combat-workload-capture/v1"
+SCHEMA = AUTO_COMBAT_WORKLOAD_CAPTURE_SCHEMA
 PACKAGE = "com.bilibili.azurlane"
 _SERIAL_PORT = re.compile(r"^emulator-([1-9][0-9]*)$")
 _MEMINFO_TOTAL = re.compile(
@@ -561,6 +566,12 @@ def collect(args: argparse.Namespace) -> Mapping[str, Any]:
         "raw_input_fallback_used": False,
     }
     _write_json(output / "result.json", result)
+    receipt_path = output / "resource-receipt.json"
+    _write_json(receipt_path, build_auto_combat_resource_receipt(result))
+    _write_json(
+        output / "baseline-summary.json",
+        build_auto_combat_baseline_summary(result, receipt_path),
+    )
     if failure is not None:
         raise failure
     return result

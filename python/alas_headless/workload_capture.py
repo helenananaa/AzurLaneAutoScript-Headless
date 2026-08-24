@@ -38,6 +38,18 @@ LIVE_WORKLOAD_BASELINE_SCHEMA = "alas-headless.live-workload-baseline/v1"
 LIVE_WORKLOAD_RESOURCE_RECEIPT_SCHEMA = (
     "alas-headless.live-workload-resource-receipt/v1"
 )
+AUTO_COMBAT_WORKLOAD_CAPTURE_SCHEMA = (
+    "alas-headless.auto-combat-workload-capture/v1"
+)
+AUTO_COMBAT_WORKLOAD_BASELINE_SCHEMA = (
+    "alas-headless.auto-combat-workload-baseline/v1"
+)
+AUTO_COMBAT_RESOURCE_RECEIPT_SCHEMA = (
+    "alas-headless.auto-combat-resource-receipt/v1"
+)
+WORKLOAD_VERIFICATION_MANIFEST_SCHEMA = (
+    "alas-headless.workload-verification-manifest/v1"
+)
 LIVE_WORKLOAD_VERIFICATION_SCHEMA = "alas-headless.live-workload-verification/v1"
 DEFAULT_TRACED_ACTION_METHODS = (
     "click",
@@ -781,6 +793,97 @@ def build_baseline_summary(
     }
 
 
+def build_auto_combat_resource_receipt(
+    result: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    """Record one bounded official-auto sortie without inventing counters."""
+
+    runner_result = result.get("runner_result")
+    if not isinstance(runner_result, Mapping):
+        runner_result = {}
+    completion = runner_result.get("auto_search_completion")
+    if not isinstance(completion, Mapping):
+        completion = {}
+    successful_sorties = int(
+        bool(result.get("passed"))
+        and bool(completion.get("combat_auto_proven"))
+        and bool(completion.get("passive_after_sortie"))
+    )
+    device = result.get("device")
+    if not isinstance(device, Mapping):
+        device = {}
+    return {
+        "schema": AUTO_COMBAT_RESOURCE_RECEIPT_SCHEMA,
+        "run_id": result["run_id"],
+        "serial": device.get("serial"),
+        "package": device.get("package"),
+        "driver_revision": device.get("driver_revision"),
+        "before": {
+            "oil": None,
+            "evidence_basis": "no typed pre-sortie oil counter was captured",
+        },
+        "after": {
+            "oil": None,
+            "evidence_basis": "no typed post-sortie oil counter was captured",
+        },
+        "delta": {
+            "oil": None,
+            "successful_sorties": successful_sorties,
+            "premium_currency_consumed": 0,
+            "purchases": 0,
+        },
+        "notes": [
+            "The original Main runner authorized at most one sortie.",
+            "Oil is reported as unobserved rather than a synthetic value.",
+            "Combat and viewport input budgets remained zero after sortie.",
+        ],
+    }
+
+
+def build_auto_combat_baseline_summary(
+    result: Mapping[str, Any], resource_receipt_path: Path
+) -> Mapping[str, Any]:
+    """Build the hash-bound baseline envelope for official-auto capture."""
+
+    baseline = dict(build_baseline_summary(result, resource_receipt_path))
+    baseline["schema"] = AUTO_COMBAT_WORKLOAD_BASELINE_SCHEMA
+    return baseline
+
+
+def build_workload_verification_manifest(
+    output_directory: Path,
+) -> Mapping[str, Any]:
+    """Seal retained legacy capture files without rewriting their contents."""
+
+    output = output_directory.resolve()
+    paths = {
+        name: output / name
+        for name in (
+            "result.json",
+            "runtime-trace.jsonl",
+            "resource-receipt.json",
+            "baseline-summary.json",
+        )
+    }
+    missing = tuple(name for name, path in paths.items() if not path.is_file())
+    if missing:
+        raise ValueError(
+            "cannot seal incomplete workload capture: " + ", ".join(missing)
+        )
+    result = _read_json_object(paths["result.json"])
+    run_id = result.get("run_id")
+    if not isinstance(run_id, str) or not run_id:
+        raise ValueError("cannot seal workload capture without a run_id")
+    return {
+        "schema": WORKLOAD_VERIFICATION_MANIFEST_SCHEMA,
+        "created_at": utc_now(),
+        "run_id": run_id,
+        "artifacts": {
+            name: sha256_file(path) for name, path in sorted(paths.items())
+        },
+    }
+
+
 def _read_json_object(path: Path) -> Mapping[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -796,6 +899,7 @@ def verify_workload_capture(output_directory: Path) -> Mapping[str, Any]:
     trace_path = output / "runtime-trace.jsonl"
     receipt_path = output / "resource-receipt.json"
     baseline_path = output / "baseline-summary.json"
+    verification_manifest_path = output / "verification-manifest.json"
     missing = tuple(
         path.name
         for path in (result_path, trace_path, receipt_path, baseline_path)
@@ -814,6 +918,11 @@ def verify_workload_capture(output_directory: Path) -> Mapping[str, Any]:
         receipt = _read_json_object(receipt_path)
         baseline = _read_json_object(baseline_path)
         records = load_trace_records(trace_path)
+        verification_manifest = (
+            _read_json_object(verification_manifest_path)
+            if verification_manifest_path.is_file()
+            else None
+        )
     except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
         return {
             "schema": LIVE_WORKLOAD_VERIFICATION_SCHEMA,
@@ -822,12 +931,26 @@ def verify_workload_capture(output_directory: Path) -> Mapping[str, Any]:
             "errors": ["artifact parse failed: " + str(exc)],
         }
     errors = []
-    if result.get("schema") != LIVE_WORKLOAD_CAPTURE_SCHEMA:
-        errors.append("result schema changed")
-    if receipt.get("schema") != LIVE_WORKLOAD_RESOURCE_RECEIPT_SCHEMA:
-        errors.append("resource receipt schema changed")
-    if baseline.get("schema") != LIVE_WORKLOAD_BASELINE_SCHEMA:
-        errors.append("baseline schema changed")
+    result_schema = result.get("schema")
+    schema_contracts = {
+        LIVE_WORKLOAD_CAPTURE_SCHEMA: (
+            LIVE_WORKLOAD_RESOURCE_RECEIPT_SCHEMA,
+            LIVE_WORKLOAD_BASELINE_SCHEMA,
+        ),
+        AUTO_COMBAT_WORKLOAD_CAPTURE_SCHEMA: (
+            AUTO_COMBAT_RESOURCE_RECEIPT_SCHEMA,
+            AUTO_COMBAT_WORKLOAD_BASELINE_SCHEMA,
+        ),
+    }
+    contract = schema_contracts.get(result_schema)
+    if contract is None:
+        errors.append("result schema is unsupported")
+    else:
+        expected_receipt_schema, expected_baseline_schema = contract
+        if receipt.get("schema") != expected_receipt_schema:
+            errors.append("resource receipt schema changed")
+        if baseline.get("schema") != expected_baseline_schema:
+            errors.append("baseline schema changed")
     run_ids = {result.get("run_id"), receipt.get("run_id"), baseline.get("run_id")}
     if None in run_ids or len(run_ids) != 1:
         errors.append("artifact run_id correlation failed")
@@ -838,11 +961,34 @@ def verify_workload_capture(output_directory: Path) -> Mapping[str, Any]:
         expected_hashes = {
             "result_sha256": sha256_file(result_path),
             "runtime_trace_sha256": sha256_file(trace_path),
-            "resource_receipt_sha256": sha256_file(receipt_path),
         }
         for field, actual in expected_hashes.items():
             if source.get(field) != actual:
                 errors.append(field + " mismatch")
+        receipt_sha256 = sha256_file(receipt_path)
+        if "resource_receipt_sha256" in source:
+            if source.get("resource_receipt_sha256") != receipt_sha256:
+                errors.append("resource_receipt_sha256 mismatch")
+        elif verification_manifest is None:
+            errors.append("resource receipt is not hash-bound")
+
+    if verification_manifest is not None:
+        if (
+            verification_manifest.get("schema")
+            != WORKLOAD_VERIFICATION_MANIFEST_SCHEMA
+        ):
+            errors.append("verification manifest schema changed")
+        if verification_manifest.get("run_id") != result.get("run_id"):
+            errors.append("verification manifest run_id correlation failed")
+        manifest_artifacts = verification_manifest.get("artifacts")
+        expected_manifest_artifacts = {
+            "baseline-summary.json": sha256_file(baseline_path),
+            "resource-receipt.json": sha256_file(receipt_path),
+            "result.json": sha256_file(result_path),
+            "runtime-trace.jsonl": sha256_file(trace_path),
+        }
+        if manifest_artifacts != expected_manifest_artifacts:
+            errors.append("verification manifest artifact hashes changed")
 
     trace_close = result.get("trace", {}).get("after_close", {})
     integrity = baseline.get("integrity", {})
@@ -871,11 +1017,50 @@ def verify_workload_capture(output_directory: Path) -> Mapping[str, Any]:
         "zero_resource_contract_passed"
     ):
         errors.append("zero-resource contract did not pass")
+    if result_schema == AUTO_COMBAT_WORKLOAD_CAPTURE_SCHEMA:
+        runner_result = result.get("runner_result")
+        if not isinstance(runner_result, Mapping):
+            runner_result = {}
+        budgets = runner_result.get("budgets")
+        if not isinstance(budgets, Mapping):
+            budgets = {}
+        completion = runner_result.get("auto_search_completion")
+        if not isinstance(completion, Mapping):
+            completion = {}
+        delta = receipt.get("delta")
+        if not isinstance(delta, Mapping):
+            delta = {}
+        if budgets.get("sortie") != 1:
+            errors.append("official-auto sortie budget is not one")
+        if budgets.get("combat") != 0 or budgets.get("viewport_swipe") != 0:
+            errors.append("official-auto post-sortie input budget is not zero")
+        if not completion.get("combat_auto_proven") or not completion.get(
+            "passive_after_sortie"
+        ):
+            errors.append("official-auto passive completion is unproven")
+        if delta.get("successful_sorties") != 1:
+            errors.append("resource receipt does not record one successful sortie")
+        if delta.get("premium_currency_consumed") != 0:
+            errors.append("premium currency consumption is nonzero or unknown")
+        if delta.get("purchases") != 0:
+            errors.append("purchase count is nonzero or unknown")
+        device = result.get("device")
+        if not isinstance(device, Mapping):
+            device = {}
+        for field in ("serial", "package", "driver_revision"):
+            if receipt.get(field) != device.get(field):
+                errors.append("resource receipt device identity differs: " + field)
+        if result.get("raw_input_fallback_used") is not False:
+            errors.append("auto-combat raw input fallback is not false")
     return {
         "schema": LIVE_WORKLOAD_VERIFICATION_SCHEMA,
         "passed": not errors,
         "directory": str(output),
-        "profile": result.get("workload", {}).get("id"),
+        "profile": (
+            result.get("workload", {}).get("id")
+            if result_schema == LIVE_WORKLOAD_CAPTURE_SCHEMA
+            else "main-12-4-official-auto"
+        ),
         "run_id": result.get("run_id"),
         "capture_passed": bool(result.get("passed")),
         "trace_records": len(records),
@@ -884,6 +1069,9 @@ def verify_workload_capture(output_directory: Path) -> Mapping[str, Any]:
 
 
 __all__ = (
+    "AUTO_COMBAT_RESOURCE_RECEIPT_SCHEMA",
+    "AUTO_COMBAT_WORKLOAD_BASELINE_SCHEMA",
+    "AUTO_COMBAT_WORKLOAD_CAPTURE_SCHEMA",
     "DEFAULT_TRACED_ACTION_METHODS",
     "LIVE_WORKLOAD_BASELINE_SCHEMA",
     "LIVE_WORKLOAD_CAPTURE_SCHEMA",
@@ -892,7 +1080,10 @@ __all__ = (
     "ProcessSampler",
     "ProcessSamplerSummary",
     "build_baseline_summary",
+    "build_auto_combat_baseline_summary",
+    "build_auto_combat_resource_receipt",
     "build_resource_receipt",
+    "build_workload_verification_manifest",
     "capture_live_workload",
     "discover_host_runtime_pid",
     "emulator_port",
@@ -906,5 +1097,6 @@ __all__ = (
     "summarize_workload_records",
     "utc_now",
     "verify_workload_capture",
+    "WORKLOAD_VERIFICATION_MANIFEST_SCHEMA",
     "write_json",
 )

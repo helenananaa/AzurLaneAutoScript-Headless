@@ -4,10 +4,16 @@ import unittest
 from pathlib import Path
 
 from alas_headless.workload_capture import (
+    AUTO_COMBAT_WORKLOAD_BASELINE_SCHEMA,
+    AUTO_COMBAT_WORKLOAD_CAPTURE_SCHEMA,
+    AUTO_COMBAT_RESOURCE_RECEIPT_SCHEMA,
     LIVE_WORKLOAD_BASELINE_SCHEMA,
     LIVE_WORKLOAD_CAPTURE_SCHEMA,
     LIVE_WORKLOAD_RESOURCE_RECEIPT_SCHEMA,
+    build_auto_combat_baseline_summary,
+    build_auto_combat_resource_receipt,
     build_resource_receipt,
+    build_workload_verification_manifest,
     emulator_port,
     parse_guest_process_sample,
     parse_meminfo_totals,
@@ -203,6 +209,169 @@ class WorkloadCaptureTests(unittest.TestCase):
             verification = verify_workload_capture(output)
             self.assertFalse(verification["passed"])
             self.assertIn("runtime_trace_sha256 mismatch", verification["errors"])
+
+    def test_auto_combat_capture_is_hash_bound_and_budget_checked(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            trace_path = output / "runtime-trace.jsonl"
+            trace_path.write_text(
+                json.dumps(
+                    {
+                        "event": "alas.phase",
+                        "monotonic_ns": 1,
+                        "fields": {"phase": "official-auto-complete"},
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            result = {
+                "schema": AUTO_COMBAT_WORKLOAD_CAPTURE_SCHEMA,
+                "run_id": "auto-verifier",
+                "passed": True,
+                "duration_ns": 1,
+                "workload": {
+                    "task": "Main",
+                    "stage": "12-4",
+                    "use_auto_search": True,
+                },
+                "device": {
+                    "serial": "emulator-5580",
+                    "package": "com.bilibili.azurlane",
+                    "driver_revision": "a" * 40,
+                },
+                "runner_result": {
+                    "budgets": {"sortie": 1, "combat": 0, "viewport_swipe": 0},
+                    "auto_search_completion": {
+                        "combat_auto_proven": True,
+                        "passive_after_sortie": True,
+                    },
+                },
+                "sampling": {
+                    "screenshots_captured": False,
+                    "observer_sidecar_used": False,
+                    "process_sampler": {},
+                },
+                "trace": {
+                    "path": str(trace_path),
+                    "after_close": {
+                        "recorded": 1,
+                        "dropped": 0,
+                        "invalid": 0,
+                        "writer_error": None,
+                    },
+                },
+                "raw_input_fallback_used": False,
+            }
+            result_path = output / "result.json"
+            receipt_path = output / "resource-receipt.json"
+            write_json(result_path, result)
+            receipt = build_auto_combat_resource_receipt(result)
+            self.assertEqual(receipt["schema"], AUTO_COMBAT_RESOURCE_RECEIPT_SCHEMA)
+            write_json(receipt_path, receipt)
+            baseline = build_auto_combat_baseline_summary(result, receipt_path)
+            self.assertEqual(
+                baseline["schema"], AUTO_COMBAT_WORKLOAD_BASELINE_SCHEMA
+            )
+            write_json(output / "baseline-summary.json", baseline)
+
+            verification = verify_workload_capture(output)
+            self.assertTrue(verification["passed"], verification["errors"])
+            receipt["notes"].append("tampered")
+            write_json(receipt_path, receipt)
+            verification = verify_workload_capture(output)
+            self.assertFalse(verification["passed"])
+            self.assertIn(
+                "resource_receipt_sha256 mismatch", verification["errors"]
+            )
+
+    def test_legacy_auto_capture_can_be_sealed_without_rewriting_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            trace_path = output / "runtime-trace.jsonl"
+            trace_path.write_text(
+                json.dumps(
+                    {
+                        "event": "alas.phase",
+                        "monotonic_ns": 1,
+                        "fields": {"phase": "official-auto-complete"},
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            result = {
+                "schema": AUTO_COMBAT_WORKLOAD_CAPTURE_SCHEMA,
+                "run_id": "legacy-auto-verifier",
+                "passed": True,
+                "device": {
+                    "serial": "emulator-5580",
+                    "package": "com.bilibili.azurlane",
+                    "driver_revision": "b" * 40,
+                },
+                "runner_result": {
+                    "budgets": {"sortie": 1, "combat": 0, "viewport_swipe": 0},
+                    "auto_search_completion": {
+                        "combat_auto_proven": True,
+                        "passive_after_sortie": True,
+                    },
+                },
+                "trace": {"after_close": {"recorded": 1}},
+                "raw_input_fallback_used": False,
+            }
+            receipt = {
+                "schema": AUTO_COMBAT_RESOURCE_RECEIPT_SCHEMA,
+                "run_id": "legacy-auto-verifier",
+                "serial": "emulator-5580",
+                "package": "com.bilibili.azurlane",
+                "driver_revision": "b" * 40,
+                "delta": {
+                    "successful_sorties": 1,
+                    "premium_currency_consumed": 0,
+                    "purchases": 0,
+                },
+            }
+            result_path = output / "result.json"
+            receipt_path = output / "resource-receipt.json"
+            write_json(result_path, result)
+            write_json(receipt_path, receipt)
+            write_json(
+                output / "baseline-summary.json",
+                {
+                    "schema": AUTO_COMBAT_WORKLOAD_BASELINE_SCHEMA,
+                    "run_id": "legacy-auto-verifier",
+                    "capture_passed": True,
+                    "source": {
+                        "result_sha256": sha256_file(result_path),
+                        "runtime_trace_sha256": sha256_file(trace_path),
+                        "resource_receipt": "resource-receipt.json",
+                    },
+                    "integrity": {
+                        "trace_records": 1,
+                        "trace_dropped": 0,
+                        "trace_invalid": 0,
+                        "trace_writer_error": None,
+                        "screenshots_captured": False,
+                        "observer_sidecar_used": False,
+                        "raw_input_fallback_used": False,
+                    },
+                },
+            )
+            write_json(
+                output / "verification-manifest.json",
+                build_workload_verification_manifest(output),
+            )
+
+            verification = verify_workload_capture(output)
+            self.assertTrue(verification["passed"], verification["errors"])
+            receipt["delta"]["purchases"] = 1
+            write_json(receipt_path, receipt)
+            verification = verify_workload_capture(output)
+            self.assertFalse(verification["passed"])
+            self.assertIn(
+                "verification manifest artifact hashes changed",
+                verification["errors"],
+            )
 
 
 if __name__ == "__main__":

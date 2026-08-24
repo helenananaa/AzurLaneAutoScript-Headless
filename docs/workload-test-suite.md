@@ -17,6 +17,7 @@ starts an observer sidecar, or falls back to raw input.
 | `reward-readonly` | Original Reward daily and weekly branches with all five collection switches disabled | No mutation dispatch | Every runtime candidate |
 | `restart-warm` | One original Restart scheduler task and running-PID turnover | Restarts the game process; no game resource operation | Image or lifecycle milestone |
 | `idle-soak` | Typed main-page check, passive wait, and typed final check | No input or account mutation | Release candidate |
+| `main-12-4-official-auto` | Original Main runner enters 12-4 once and delegates map movement and combat to the game's official auto-search | One bounded ordinary sortie; no premium currency or purchase capability | Sustained Unity/image milestone, after noncombat profiles |
 
 `semantic-io` and `idle-soak` normalize the starting surface before the timed
 capture. The exact bulletin blocker, when present, is closed by original ALAS
@@ -62,6 +63,21 @@ python scripts/python/collect_alas_noncombat_workload.py `
   --output-directory "$captureRoot\idle-30m-r1"
 ```
 
+The official-auto profile has a separate collector because it wraps the
+bounded Main live runner and records the passive game-owned combat interval:
+
+```powershell
+python scripts/python/collect_alas_auto_combat_workload.py `
+  --alas-root $alasRootForWorkload `
+  --serial emulator-5580 `
+  --driver-revision $driverForWorkload `
+  --output-directory "$captureRoot\main-12-4-auto-r1"
+```
+
+It grants one sortie and zero post-sortie combat/viewport input. The resource
+receipt records the successful sortie and reports oil as unobserved unless a
+typed counter was actually captured; it never invents an oil delta.
+
 Every output directory is new and contains:
 
 - `result.json`: profile result, typed postconditions, device identity, and
@@ -87,6 +103,27 @@ python scripts/python/verify_alas_workload_capture.py `
   "$captureRoot\semantic-io-r1" `
   "$captureRoot\idle-30m-r1"
 ```
+
+The verifier accepts both noncombat and official-auto schema families. It
+requires correlated run IDs, hashes for result/trace/resource receipt, complete
+trace accounting, no screenshot or observer sidecar, no raw-input fallback,
+and the official-auto one-sortie/zero-combat-input contract. A retained legacy
+capture that predates receipt hashing may be sealed by an additive
+`verification-manifest.json`; the original four capture artifacts are not
+rewritten. Use `--seal-legacy` once on an unsealed retained directory, then run
+the ordinary verifier without that write switch on later checks:
+
+```powershell
+python scripts/python/verify_alas_workload_capture.py `
+  --seal-legacy "$captureRoot\main-12-4-auto-legacy"
+```
+
+The retained 2026-08-24 KVM development set currently has verified successful
+captures for all four noncombat profiles plus
+`main-12-4-official-auto`. Failed setup/recovery attempts remain retained but
+are not comparison baselines. The successful official-auto capture is the
+first functional sustained-load slice; normal comparison still requires the
+repetition rhythm below.
 
 ## Comparison rhythm
 
