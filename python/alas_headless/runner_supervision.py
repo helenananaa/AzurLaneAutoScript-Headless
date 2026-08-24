@@ -2997,14 +2997,71 @@ def delete_owned_config_windows(
     )
 
 
+def _set_activation_write_nonblocking(write_fd: int) -> None:
+    if os.name != "nt":
+        os.set_blocking(write_fd, False)
+        return
+    import msvcrt
+
+    kernel32 = _windows_kernel32()
+    setter = kernel32.SetNamedPipeHandleState
+    setter.argtypes = (
+        wintypes.HANDLE,
+        ctypes.POINTER(wintypes.DWORD),
+        ctypes.POINTER(wintypes.DWORD),
+        ctypes.POINTER(wintypes.DWORD),
+    )
+    setter.restype = wintypes.BOOL
+    mode = wintypes.DWORD(0x00000001)  # PIPE_NOWAIT
+    handle = int(msvcrt.get_osfhandle(write_fd))
+    if not setter(handle, ctypes.byref(mode), None, None):
+        raise OSError(
+            ctypes.get_last_error(),
+            "SetNamedPipeHandleState(activation write) failed",
+        )
+
+
+def _activation_write_is_blocking(write_fd: int) -> bool:
+    if os.name != "nt":
+        return bool(os.get_blocking(write_fd))
+    import msvcrt
+
+    kernel32 = _windows_kernel32()
+    getter = kernel32.GetNamedPipeHandleStateW
+    getter.argtypes = (
+        wintypes.HANDLE,
+        ctypes.POINTER(wintypes.DWORD),
+        ctypes.POINTER(wintypes.DWORD),
+        ctypes.POINTER(wintypes.DWORD),
+        ctypes.POINTER(wintypes.DWORD),
+        wintypes.LPWSTR,
+        wintypes.DWORD,
+    )
+    getter.restype = wintypes.BOOL
+    state = wintypes.DWORD()
+    handle = int(msvcrt.get_osfhandle(write_fd))
+    if not getter(handle, ctypes.byref(state), None, None, None, None, 0):
+        raise OSError(
+            ctypes.get_last_error(),
+            "GetNamedPipeHandleState(activation write) failed",
+        )
+    return not bool(state.value & 0x00000001)  # PIPE_NOWAIT
+
+
+def activation_pipe_write_is_blocking(pipe: ActivationPipe) -> bool:
+    if pipe.write_fd < 0:
+        raise RuntimeError("activation pipe write end is closed")
+    return _activation_write_is_blocking(pipe.write_fd)
+
+
 def create_activation_pipe() -> ActivationPipe:
     read_fd, write_fd = os.pipe()
     try:
         # The parent performs exactly one small capability write before it
         # enters the supervisor.  Nonblocking mode makes an unexpected kernel
         # capacity failure fail closed instead of consuming the total deadline.
-        os.set_blocking(write_fd, False)
-        if os.get_blocking(write_fd):
+        _set_activation_write_nonblocking(write_fd)
+        if _activation_write_is_blocking(write_fd):
             raise RuntimeError("activation pipe write end remained blocking")
         if os.name == "nt":
             import msvcrt

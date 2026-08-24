@@ -50,6 +50,7 @@ from alas_headless.runner_supervision import (
     bind_record,
     canonical_json_bytes,
     create_activation_pipe,
+    activation_pipe_write_is_blocking,
     delete_owned_config_windows,
     exclusive_create,
     file_identity_from_fd,
@@ -597,7 +598,7 @@ class RunnerSupervisionTests(unittest.TestCase):
 
             saturated = create_activation_pipe()
             try:
-                self.assertFalse(os.get_blocking(saturated.write_fd))
+                self.assertFalse(activation_pipe_write_is_blocking(saturated))
                 while True:
                     try:
                         real_write(saturated.write_fd, b"x" * 4096)
