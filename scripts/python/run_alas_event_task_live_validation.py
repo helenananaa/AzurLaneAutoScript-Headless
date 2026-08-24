@@ -4235,7 +4235,6 @@ def _finish_worker_terminal(
 
 def main() -> int:
     args = parse_args()
-    args.serial = resolve_adb_serial(args.adb, args.serial)
     # A public invocation has no internal role.  An alleged worker must consume
     # the inherited one-shot activation handle and validate its real parent
     # before run() can create config, import ALAS, or touch ADB/session state.
@@ -4275,6 +4274,7 @@ def main() -> int:
             return _finish_worker_terminal(control, status, exc)
         finally:
             restore_signal()
+    args.serial = resolve_adb_serial(args.adb, args.serial)
     if args.task == "EventSp" and args.use_auto_search:
         result = _supervise_event_sp(args)
     else:

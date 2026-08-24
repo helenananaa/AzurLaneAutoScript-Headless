@@ -189,7 +189,7 @@ source lock、确定性 OCI、SBOM/NOTICE、userdata、restart 和 rollback 门�
 
 | 分支 | 快照提交 | 状态与范围 |
 | --- | --- | --- |
-| main | `dev-baseline-20260824` | `codex/android-image-foundation` 与 ALAS top-down 工作均已进入主线。可执行 lifecycle backend 仍只有 `kvm` 和 `external-adb`；`redroid`、`tcg`、`arm64-qemu` 继续由 `DeferredRuntimeBackend` fail-closed。当前 ALAS series 有 88 个成员并锁定上游 `81ccf63b4540f00241628c82a58c02c7a2bb11af`；本机全量套件通过 1692 项、跳过 3 项。四个非战斗 workload 与一个 12-4 官方自律 workload 均已有成功且通过统一完整性校验的 KVM 采集。这个标签是并行开发的工程基线，不是完整任务、长时间、多实例或生产发布资格。 |
+| main | `dev-baseline-20260824` | `codex/android-image-foundation` 与 ALAS top-down 工作均已进入主线。可执行 lifecycle backend 仍只有 `kvm` 和 `external-adb`；`redroid`、`tcg`、`arm64-qemu` 继续由 `DeferredRuntimeBackend` fail-closed。当前 ALAS series 有 88 个成员并锁定上游 `81ccf63b4540f00241628c82a58c02c7a2bb11af`；本机全量套件通过 1693 项、跳过 3 项。四个非战斗 workload 与一个 12-4 官方自律 workload 均已有成功且通过统一完整性校验的 KVM 采集。这个标签是并行开发的工程基线，不是完整任务、长时间、多实例或生产发布资格。 |
 
 旧的 platform-qualification、redroid-qualification、tcg-optimization、
 arm64-qemu-qualification 和 arm64-venus-qualification 分支是证据与实现参考，

@@ -3993,6 +3993,70 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                 .hexdigest(),
             )
 
+    def test_worker_main_consumes_activation_without_adb_discovery(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            run_id = uuid.uuid4().hex
+            binding = RunBinding(
+                run_id=run_id,
+                token_digest=hashlib.sha256(TEST_TOKEN).hexdigest(),
+                task="EventSp",
+                stage="SP",
+                event="event_20260813_cn",
+                deadline_seconds=120,
+                parent_pid=1,
+                parent_identity="1:1",
+                worker_pid=2,
+                config_path=root / ("_codex_event_live_eventsp_" + run_id + ".json"),
+                control_path=root / "control.json",
+                result_path=root / "result.json",
+                cleanup_path=root / "cleanup.json",
+                lease_path=root / "lease.json",
+            )
+            control = WorkerControl(
+                binding,
+                synthetic_ownership(binding),
+                synthetic_seed_source(binding),
+                "emulator-5580",
+                2703,
+                (),
+                WorkerHandles(100, 101, 102, 103, 104, 105),
+                synthetic_materialization_control(binding),
+                synthetic_execution_budgets(),
+            )
+            bind_test_control(control)
+            args = self.event_sp_args()
+            written = []
+            with (
+                patch(
+                    "scripts.python.run_alas_event_task_live_validation.parse_args",
+                    return_value=args,
+                ),
+                patch(
+                    "scripts.python.run_alas_event_task_live_validation.worker_control_from_activation",
+                    return_value=control,
+                ),
+                patch(
+                    "scripts.python.run_alas_event_task_live_validation.resolve_adb_serial",
+                    side_effect=AssertionError("worker must not enumerate ADB"),
+                ) as resolve_serial,
+                patch(
+                    "scripts.python.run_alas_event_task_live_validation.install_worker_stop_handler",
+                    return_value=lambda: None,
+                ),
+                patch(
+                    "scripts.python.run_alas_event_task_live_validation.run",
+                    return_value={"passed": True, "qualification_stop": None},
+                ),
+                patch(
+                    "scripts.python.run_alas_event_task_live_validation.write_bytes_handle",
+                    side_effect=lambda _handle, payload: written.append(payload),
+                ),
+            ):
+                self.assertEqual(runner_main(), 0)
+            resolve_serial.assert_not_called()
+            self.assertEqual(len(written), 1)
+
     def test_worker_public_artifacts_and_streams_never_expose_token_forms(self):
         class FatalProbe(BaseException):
             pass
@@ -4248,6 +4312,10 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             patch(
                 "scripts.python.run_alas_event_task_live_validation.parse_args",
                 return_value=args,
+            ),
+            patch(
+                "scripts.python.run_alas_event_task_live_validation.resolve_adb_serial",
+                return_value=args.serial,
             ),
             patch(
                 "scripts.python.run_alas_event_task_live_validation.worker_control_from_activation",
