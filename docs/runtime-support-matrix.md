@@ -184,11 +184,12 @@ source lock、确定性 OCI、SBOM/NOTICE、userdata、restart 和 rollback 门�
 
 ## 当前代码和开发分支
 
-当前主分支代码状态（2026-08-23）：
+当前主分支代码状态（2026-08-24；下表提交是本次全量复验基线，不要求等于
+文档自身的后续提交）：
 
 | 分支 | 快照提交 | 状态与范围 |
 | --- | --- | --- |
-| main | ce68bc5 | `codex/android-image-foundation` 与 ALAS top-down 工作均已进入主线。可执行 lifecycle backend 仍只有 `kvm` 和 `external-adb`；`redroid`、`tcg`、`arm64-qemu` 继续由 `DeferredRuntimeBackend` fail-closed。当前 ALAS series 有 88 个成员并锁定上游 `81ccf63b4540f00241628c82a58c02c7a2bb11af`；本机全量套件通过 1518/1518。 |
+| main | 7015cd8 | `codex/android-image-foundation` 与 ALAS top-down 工作均已进入主线。可执行 lifecycle backend 仍只有 `kvm` 和 `external-adb`；`redroid`、`tcg`、`arm64-qemu` 继续由 `DeferredRuntimeBackend` fail-closed。当前 ALAS series 有 88 个成员并锁定上游 `81ccf63b4540f00241628c82a58c02c7a2bb11af`；本机全量套件通过 1520/1520。 |
 
 旧的 platform-qualification、redroid-qualification、tcg-optimization、
 arm64-qemu-qualification 和 arm64-venus-qualification 分支是证据与实现参考，

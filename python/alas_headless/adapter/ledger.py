@@ -56,8 +56,18 @@ class ActionGrantDispatch(Generic[T]):
     value: T
 
 
+class ActionNotDispatched(Exception):
+    """Internal signal that a reserved grant provably produced no input."""
+
+    def __init__(self, cause: Exception) -> None:
+        if not isinstance(cause, Exception):
+            raise TypeError("undispatched action cause must be an Exception")
+        self.cause = cause
+        super().__init__("semantic action was not dispatched")
+
+
 class ActionLedger:
-    """Consume authority before calling a backend and never restore it."""
+    """Reserve before dispatch; refund only an explicit zero-input outcome."""
 
     def __init__(
         self,
@@ -126,7 +136,12 @@ class ActionLedger:
                 raise ActionLeaseError()
             self._remaining[capability] -= 1
             remaining = self._remaining[capability]
-        value = operation()
+        try:
+            value = operation()
+        except ActionNotDispatched as marker:
+            with self._lock:
+                self._remaining[capability] += 1
+            raise marker.cause.with_traceback(marker.cause.__traceback__) from None
         return ActionGrantDispatch(
             capability=capability,
             policy_sha256=self.policy_sha256,

@@ -6,12 +6,18 @@ from alas_headless.adapter import (
     RECOVERY_QUALIFICATION_STOP,
     ActionLedger,
     ActionLeaseError,
+    ActionNotDispatched,
     CapabilityClosureError,
     RecoveryPolicy,
     TaskCapabilityProfile,
     compatibility_policy_sha256,
 )
 from alas_headless.alas_adapter import AlasSemanticAdapter
+from alas_headless.semantic_oracle import (
+    OracleFingerprint,
+    SemanticGateClosed,
+    SemanticOracle,
+)
 
 
 class ActionLedgerTests(unittest.TestCase):
@@ -65,6 +71,17 @@ class ActionLedgerTests(unittest.TestCase):
         self.assertEqual(ledger.remaining("campaign.grid_click"), 0)
         with self.assertRaises(ActionLeaseError):
             ledger.dispatch("campaign.grid_click", lambda: None)
+
+    def test_explicit_zero_input_failure_restores_reserved_grant(self):
+        ledger = self.ledger()
+        failure = RuntimeError("pre-dispatch backend rejection")
+
+        def fail_before_input():
+            raise ActionNotDispatched(failure)
+
+        with self.assertRaisesRegex(RuntimeError, "pre-dispatch"):
+            ledger.dispatch("campaign.grid_click", fail_before_input)
+        self.assertEqual(ledger.remaining("campaign.grid_click"), 1)
 
     def test_incomplete_preflight_refuses_before_backend(self):
         ledger = self.ledger(
@@ -134,6 +151,44 @@ class ActionLedgerTests(unittest.TestCase):
         self.assertEqual(adapter._action_ledger.remaining("dorm.collect"), 0)
         with self.assertRaises(ActionLeaseError):
             adapter._dispatch_mutation("dorm.collect", lambda: None)
+
+    @staticmethod
+    def semantic_oracle(tap):
+        return SemanticOracle(
+            lambda _request: {},
+            lambda: "com.bilibili.azurlane/com.unity3d.player.UnityPlayerActivity",
+            tap,
+            OracleFingerprint(
+                package="com.bilibili.azurlane",
+                component=(
+                    "com.bilibili.azurlane/"
+                    "com.unity3d.player.UnityPlayerActivity"
+                ),
+                driver_revision="a" * 40,
+            ),
+        )
+
+    def test_adapter_restores_grant_when_semantic_oracle_proves_zero_input(self):
+        oracle = self.semantic_oracle(lambda _x, _y: None)
+        adapter = AlasSemanticAdapter(oracle, lambda: None, dorm_collect_budget=1)
+
+        def reject_before_input():
+            raise SemanticGateClosed("typed target is absent")
+
+        with self.assertRaisesRegex(SemanticGateClosed, "typed target"):
+            adapter._dispatch_mutation("dorm.collect", reject_before_input)
+        self.assertEqual(adapter._action_ledger.remaining("dorm.collect"), 1)
+
+    def test_adapter_burns_grant_once_input_dispatch_is_attempted(self):
+        def failed_tap(_x, _y):
+            raise RuntimeError("ADB outcome is ambiguous")
+
+        oracle = self.semantic_oracle(failed_tap)
+        adapter = AlasSemanticAdapter(oracle, lambda: None, dorm_collect_budget=1)
+
+        with self.assertRaisesRegex(RuntimeError, "ambiguous"):
+            adapter._dispatch_mutation("dorm.collect", lambda: oracle._tap(1, 2))
+        self.assertEqual(adapter._action_ledger.remaining("dorm.collect"), 0)
 
     def test_minigame_play_budget_does_not_admit_a_second_start(self):
         adapter = AlasSemanticAdapter(

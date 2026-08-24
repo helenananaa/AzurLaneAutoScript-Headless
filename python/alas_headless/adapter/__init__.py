@@ -36,6 +36,7 @@ from .legacy_environment import (
 from .ledger import (
     ActionGrantDispatch,
     ActionLedger,
+    ActionNotDispatched,
     compatibility_policy_sha256,
 )
 from .ports import (
@@ -137,6 +138,7 @@ __all__ = (
     "ActionPort",
     "ActionReceiptV2",
     "ActionLedger",
+    "ActionNotDispatched",
     "AdbRuntimeHandle",
     "AdbRuntimeHandleFactory",
     "AdapterContractError",

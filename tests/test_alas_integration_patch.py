@@ -69,11 +69,14 @@ class AlasIntegrationPatchTests(unittest.TestCase):
             "diff --git a/module/retire/enhancement.py",
             self.patch_text,
         )
-        self.assertIn("return semantic_session.enhance_ships(", self.patch_text)
-        self.assertIn("self.config.Enhance_ShipToEnhance", self.patch_text)
+        self.assertIn("semantic_session.begin_enhancement_task(", self.patch_text)
+        self.assertIn("return semantic_session.enhancement_enter(", self.patch_text)
+        self.assertIn("return semantic_session.enhancement_choose(", self.patch_text)
+        self.assertIn("semantic_session.enhancement_leave_category()", self.patch_text)
+        self.assertIn("semantic_session.finish_enhancement_task()", self.patch_text)
         self.assertIn("self.config.Enhance_CheckPerCategory", self.patch_text)
         self.assertIn("self.config.Enhance_Filter", self.patch_text)
-        self.assertIn("Invalid filter tokens fail", self.patch_text)
+        self.assertIn("prevents the legacy", self.patch_text)
         self.assertNotIn("-        if favourite is None:", self.patch_text)
 
     def test_semantic_screenshot_refreshes_after_alas_interval_ownership(self):

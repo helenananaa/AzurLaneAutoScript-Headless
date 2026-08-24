@@ -20,6 +20,7 @@ from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Set, 
 from .adapter import (
     DEFAULT_CAPABILITY_INVENTORY,
     ActionLedger,
+    ActionNotDispatched,
     AdbRuntimeHandleFactory,
     CapabilityClosureError,
     CapabilityInventory,
@@ -1021,8 +1022,22 @@ class CampaignAutoSearchCompletionProof:
     fleet2_role: str
     waited_seconds: float
     combat_auto_generation: int
+    result_exit_receipt: ActionReceipt
     combat_auto_proven: bool = True
     passive_after_sortie: bool = True
+
+
+@dataclass(frozen=True)
+class CampaignAutoSearchEvidenceBundle:
+    """One-shot evidence bound to one ALAS campaign transaction."""
+
+    transaction_id: int
+    owner: str
+    stage_code: str
+    mode: str
+    sortie_proof: Optional[CampaignSortieProof] = None
+    completion_proof: Optional[CampaignAutoSearchCompletionProof] = None
+    integrity_errors: Tuple[str, ...] = ()
 
 
 @dataclass
@@ -1036,6 +1051,9 @@ class _CampaignFlowContext:
     map_preparation_oil_cost: Optional[int] = None
     preparation_kind: Optional[str] = None
     cancel_receipt: Optional[ActionReceipt] = None
+    inherited_cancel_receipt: Optional[ActionReceipt] = None
+    inherited_cancel_kind: Optional[str] = None
+    inherited_cancel_stage_code: Optional[str] = None
     event_page_back_receipt: Optional[ActionReceipt] = None
     proof: Optional[CampaignPreSortieProof] = None
     initial_fleet_state: Optional[CampaignFleetSelectionState] = None
@@ -1054,6 +1072,8 @@ class _CampaignFlowContext:
     sortie_receipt: Optional[ActionReceipt] = None
     map_entry_state: Optional[CampaignMapEntryState] = None
     sortie_proof: Optional[CampaignSortieProof] = None
+    retained_preparation_generation: Optional[int] = None
+    retained_preparation_stable_reads: int = 0
     map_state: Optional[CampaignMapState] = None
     map_columns: Optional[int] = None
     map_rows: Optional[int] = None
@@ -1270,6 +1290,11 @@ class AlasSemanticAdapter:
         self._last_campaign_auto_search_completion: Optional[
             CampaignAutoSearchCompletionProof
         ] = None
+        self._campaign_evidence_sequence = 0
+        self._campaign_evidence_bundle: Optional[
+            CampaignAutoSearchEvidenceBundle
+        ] = None
+        self._next_campaign_evidence_owner: Optional[str] = None
         self._operation_siren_globe_swipe_intent: Optional[
             _OperationSirenGlobeSwipeIntent
         ] = None
@@ -1278,9 +1303,13 @@ class AlasSemanticAdapter:
         ] = None
         self._awaken_receipts: List[AwakenExecutionReceipt] = []
         self._awaken_cost_observations: List[AwakenCostState] = []
+        self._awaken_flow_active = False
         self._enhancement_receipts: List[
             Union[EnhancementExecutionReceipt, EnhancementNoMaterialReceipt]
         ] = []
+        self._enhancement_flow_active = False
+        self._enhancement_current_candidate = None
+        self._enhancement_no_material_cards: Set[Tuple[int, int, str, int]] = set()
         self._observer_stale_since: Optional[float] = None
         self._frame_observation_oracle = frame_observation_oracle
         self._frame_identity_provider = frame_identity_provider
@@ -1314,6 +1343,19 @@ class AlasSemanticAdapter:
         capability: str,
         operation: Callable[[], Any],
     ) -> Any:
+        if isinstance(self.oracle, SemanticOracle):
+            dispatch_count = self.oracle.input_dispatch_count
+            backend_operation = operation
+
+            def tracked_operation() -> Any:
+                try:
+                    return backend_operation()
+                except Exception as exc:
+                    if self.oracle.input_dispatch_count == dispatch_count:
+                        raise ActionNotDispatched(exc) from exc
+                    raise
+
+            operation = tracked_operation
         dispatch = self._action_ledger.dispatch(capability, operation)
         if isinstance(
             dispatch.value,
@@ -1345,13 +1387,13 @@ class AlasSemanticAdapter:
     def awaken_cost_observations(self) -> Tuple[AwakenCostState, ...]:
         return tuple(self._awaken_cost_observations)
 
-    def awaken_task(self, level_cap: str, favourite: bool) -> int:
-        """Run the configured Awaken task through bounded typed transactions."""
+    def begin_awaken_task(self, favourite: bool) -> None:
+        """Open the typed Dock boundary; ALAS retains the task state machine."""
 
-        if level_cap not in ("level120", "level125"):
-            raise ValueError("awaken level cap must be level120 or level125")
         if not isinstance(favourite, bool):
             raise TypeError("awaken favourite must be boolean")
+        if self._awaken_flow_active:
+            raise SemanticGateClosed("awaken flow is already active")
         if not self.awaken_allowed():
             raise SemanticGateClosed(
                 "awaken requires a positive transaction budget"
@@ -1372,62 +1414,68 @@ class AlasSemanticAdapter:
                 attempts=50,
                 interval_seconds=0.1,
             )
-        completed_normally = False
-        try:
-            self.oracle.set_enhancement_dock_favourite(favourite)
-            modes = (True, False) if level_cap == "level125" else (False,)
-            for use_array in modes:
-                if not self.awaken_allowed():
-                    break
-                self.oracle.set_awaken_dock_filter(use_array)
-                while self.awaken_allowed():
-                    candidates = self.oracle.awaken_dock_candidates()
-                    if not candidates:
-                        break
-                    candidate = candidates[0]
-                    detail, _ = self.oracle.open_awaken_dock_candidate(
-                        candidate.position,
-                        candidate.ship_id,
-                        candidate.ship_name,
-                        candidate.level,
-                    )
-                    cost, _ = self.oracle.open_awaken_confirmation(detail)
-                    self._awaken_cost_observations.append(cost)
-                    if cost.use_array != use_array:
-                        self.oracle.cancel_awaken_confirmation(cost)
-                        raise SemanticGateClosed(
-                            "awaken modal resource mode differs from configuration"
-                        )
-                    if not cost.sufficient:
-                        self.oracle.cancel_awaken_confirmation(cost)
-                        self.oracle.return_from_awaken_detail_to_dock()
-                        break
-                    receipt = self._dispatch_mutation(
-                        "awaken.execute",
-                        lambda cost=cost: self.oracle.commit_awaken_confirmation(
-                            cost
-                        ),
-                    )
-                    self._awaken_receipts.append(receipt)
-                    self.oracle.return_from_awaken_detail_to_dock()
-            completed_normally = True
-        finally:
-            if completed_normally:
-                self.oracle.reset_enhancement_dock()
-        return len(self._awaken_receipts)
+        self.oracle.set_enhancement_dock_favourite(favourite)
+        self._awaken_flow_active = True
+
+    def prepare_awaken_phase(self, use_array: bool) -> None:
+        if not self._awaken_flow_active or not isinstance(use_array, bool):
+            raise SemanticGateClosed("awaken phase is not active")
+        self.oracle.set_awaken_dock_filter(use_array)
+
+    def awaken_next(self, use_array: bool) -> str:
+        """Execute at most one reviewed ship transaction for ALAS's loop."""
+
+        if not self._awaken_flow_active or not isinstance(use_array, bool):
+            raise SemanticGateClosed("awaken phase is not active")
+        if not self.awaken_allowed():
+            return "finish"
+        candidates = self.oracle.awaken_dock_candidates()
+        if not candidates:
+            return "finish"
+        candidate = candidates[0]
+        detail, _ = self.oracle.open_awaken_dock_candidate(
+            candidate.position,
+            candidate.ship_id,
+            candidate.ship_name,
+            candidate.level,
+        )
+        cost, _ = self.oracle.open_awaken_confirmation(detail)
+        self._awaken_cost_observations.append(cost)
+        if cost.use_array != use_array:
+            self.oracle.cancel_awaken_confirmation(cost)
+            raise SemanticGateClosed(
+                "awaken modal resource mode differs from configuration"
+            )
+        if not cost.sufficient:
+            self.oracle.cancel_awaken_confirmation(cost)
+            self.oracle.return_from_awaken_detail_to_dock()
+            return "insufficient"
+        receipt = self._dispatch_mutation(
+            "awaken.execute",
+            lambda: self.oracle.commit_awaken_confirmation(cost),
+        )
+        self._awaken_receipts.append(receipt)
+        self.oracle.return_from_awaken_detail_to_dock()
+        return "continue"
+
+    def finish_awaken_task(self) -> None:
+        if not self._awaken_flow_active:
+            raise SemanticGateClosed("awaken flow is not active")
+        self.oracle.reset_enhancement_dock()
+        self._awaken_flow_active = False
 
     def enhancement_allowed(self) -> bool:
         return self._action_ledger.allowed("enhancement.execute")
 
-    def enhance_ships(
+    def begin_enhancement_task(
         self,
         ship_to_enhance: str,
         check_per_category: int,
         filter_expression: Optional[str],
-    ) -> int:
-        """Run ALAS Enhance settings through exact semantic Dock navigation."""
+    ) -> None:
+        """Validate the ALAS-owned flow and open its semantic boundary."""
 
-        policy = enhancement_config_policy(
+        enhancement_config_policy(
             ship_to_enhance, check_per_category, filter_expression
         )
         if not self.enhancement_allowed():
@@ -1435,68 +1483,98 @@ class AlasSemanticAdapter:
                 "enhancement requires a positive transaction budget"
             )
         self._package_gate()
+        self.oracle._enhancement_dock_records()
         self._enhancement_receipts = []
-        favourite = policy.target_scope.value == "favourite"
-        ship_types: Tuple[Optional[str], ...] = (
-            tuple(policy.ship_types) if policy.ship_types else (None,)
+        self._enhancement_current_candidate = None
+        self._enhancement_no_material_cards = set()
+        self._enhancement_flow_active = True
+
+    @staticmethod
+    def _enhancement_candidate_key(candidate: Any) -> Tuple[int, int, str, int]:
+        return (
+            candidate.position,
+            candidate.ship_id,
+            candidate.ship_name,
+            candidate.level,
         )
-        consumed = 0
-        completed_normally = False
-        try:
-            self.oracle.set_enhancement_dock_favourite(favourite)
-            for ship_type in ship_types:
-                self.oracle.set_enhancement_dock_filter(ship_type)
-                no_material_cards: Set[Tuple[int, int, str, int]] = set()
-                for _ in range(policy.check_per_category):
-                    if not self.enhancement_allowed():
-                        completed_normally = True
-                        break
-                    candidates = tuple(
-                        item
-                        for item in self.oracle.enhancement_dock_candidates()
-                        if (
-                            item.position,
-                            item.ship_id,
-                            item.ship_name,
-                            item.level,
-                        )
-                        not in no_material_cards
-                    )
-                    if not candidates:
-                        break
-                    candidate = candidates[0]
-                    self.oracle.open_enhancement_dock_candidate(
-                        candidate.position,
-                        candidate.ship_id,
-                        candidate.ship_name,
-                        candidate.level,
-                    )
-                    receipt = self._dispatch_mutation(
-                        "enhancement.execute",
-                        self.oracle.enhance_with_official_recommendation,
-                    )
-                    self._enhancement_receipts.append(receipt)
-                    if isinstance(receipt, EnhancementExecutionReceipt):
-                        consumed += receipt.consumed_count
-                    else:
-                        no_material_cards.add(
-                            (
-                                candidate.position,
-                                candidate.ship_id,
-                                candidate.ship_name,
-                                candidate.level,
-                            )
-                        )
-                    self.oracle.return_to_enhancement_dock()
-                if not self.enhancement_allowed():
-                    break
-            completed_normally = True
-        finally:
-            # If confirmation was sent but its postcondition was not observed,
-            # never add another input merely to tidy the page.
-            if completed_normally:
-                self.oracle.reset_enhancement_dock()
-        return consumed
+
+    def _open_next_enhancement_candidate(self) -> bool:
+        candidates = tuple(
+            item
+            for item in self.oracle.enhancement_dock_candidates()
+            if self._enhancement_candidate_key(item)
+            not in self._enhancement_no_material_cards
+        )
+        if not candidates:
+            self._enhancement_current_candidate = None
+            return False
+        candidate = candidates[0]
+        self.oracle.open_enhancement_dock_candidate(
+            candidate.position,
+            candidate.ship_id,
+            candidate.ship_name,
+            candidate.level,
+        )
+        self._enhancement_current_candidate = candidate
+        return True
+
+    def enhancement_enter(self, favourite: bool, ship_type: Optional[str]) -> bool:
+        """Apply one ALAS-selected category and open its first reviewed card."""
+
+        if not self._enhancement_flow_active:
+            raise SemanticGateClosed("enhancement flow is not active")
+        if not isinstance(favourite, bool):
+            raise TypeError("enhancement favourite policy must be boolean")
+        self.oracle.set_enhancement_dock_favourite(favourite)
+        self.oracle.set_enhancement_dock_filter(ship_type)
+        self._enhancement_no_material_cards = set()
+        self._enhancement_current_candidate = None
+        return self._open_next_enhancement_candidate()
+
+    def enhancement_choose(self, ship_count: int) -> Tuple[bool, int]:
+        """Execute at most one successful ALAS enhancement selection."""
+
+        if not self._enhancement_flow_active:
+            raise SemanticGateClosed("enhancement flow is not active")
+        if isinstance(ship_count, bool) or not isinstance(ship_count, int):
+            raise TypeError("enhancement ship count must be an integer")
+        while ship_count > 0 and self.enhancement_allowed():
+            candidate = self._enhancement_current_candidate
+            if candidate is None:
+                return False, ship_count
+            receipt = self._dispatch_mutation(
+                "enhancement.execute",
+                self.oracle.enhance_with_official_recommendation,
+            )
+            self._enhancement_receipts.append(receipt)
+            if isinstance(receipt, EnhancementExecutionReceipt):
+                return True, ship_count
+            self._enhancement_no_material_cards.add(
+                self._enhancement_candidate_key(candidate)
+            )
+            ship_count -= 1
+            self.oracle.return_to_enhancement_dock()
+            self._enhancement_current_candidate = None
+            if not self.enhancement_allowed():
+                return False, ship_count
+            if not self._open_next_enhancement_candidate():
+                return False, ship_count
+        return False, ship_count
+
+    def enhancement_leave_category(self) -> None:
+        if not self._enhancement_flow_active:
+            raise SemanticGateClosed("enhancement flow is not active")
+        if self._enhancement_current_candidate is not None:
+            self.oracle.return_to_enhancement_dock()
+        self._enhancement_current_candidate = None
+        self._enhancement_no_material_cards = set()
+
+    def finish_enhancement_task(self) -> None:
+        if not self._enhancement_flow_active:
+            raise SemanticGateClosed("enhancement flow is not active")
+        self.enhancement_leave_category()
+        self.oracle.reset_enhancement_dock()
+        self._enhancement_flow_active = False
 
     def enhancement_receipts(
         self,
@@ -2550,6 +2628,86 @@ class AlasSemanticAdapter:
             mode=mode,
             passive_transition_until=time.monotonic() + 20.0,
         )
+        # Begin always invalidates an unconsumed prior bundle.  The live runner
+        # binds its task owner immediately before ALAS starts this transaction.
+        self._campaign_evidence_sequence += 1
+        self._campaign_evidence_bundle = CampaignAutoSearchEvidenceBundle(
+            transaction_id=self._campaign_evidence_sequence,
+            owner=self._next_campaign_evidence_owner or "alas-campaign",
+            stage_code=stage_code.lower(),
+            mode=mode,
+        )
+        self._next_campaign_evidence_owner = None
+        self._last_campaign_auto_search_completion = None
+
+    def bind_next_campaign_evidence_owner(self, owner: str) -> None:
+        if self._campaign_context is not None:
+            raise SemanticGateClosed(
+                "campaign evidence owner cannot change during an active flow"
+            )
+        if re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,31}", owner) is None:
+            raise ValueError("campaign evidence owner is malformed")
+        self._campaign_evidence_bundle = None
+        self._next_campaign_evidence_owner = owner
+
+    def consume_campaign_auto_search_evidence(
+        self,
+        *,
+        expected_owner: str,
+        expected_stage_code: str,
+        expected_mode: str,
+    ) -> Optional[CampaignAutoSearchEvidenceBundle]:
+        """Consume, clear, and integrity-check one transaction-bound bundle."""
+
+        bundle = self._campaign_evidence_bundle
+        self._campaign_evidence_bundle = None
+        self._next_campaign_evidence_owner = None
+        if bundle is None:
+            return None
+        errors = []
+        if bundle.owner != expected_owner:
+            errors.append("campaign_evidence.owner_mismatch")
+        if bundle.stage_code != expected_stage_code.lower():
+            errors.append("campaign_evidence.stage_mismatch")
+        if bundle.mode != expected_mode:
+            errors.append("campaign_evidence.mode_mismatch")
+        sortie = bundle.sortie_proof
+        completion = bundle.completion_proof
+        if sortie is not None:
+            if sortie.stage_code != bundle.stage_code:
+                errors.append("campaign_evidence.sortie_stage_mismatch")
+            if any(
+                isinstance(value, bool) or not isinstance(value, int)
+                for value in (sortie.sortie_generation, sortie.map_generation)
+            ):
+                errors.append("campaign_evidence.start_generation_malformed")
+            elif sortie.map_generation <= sortie.sortie_generation:
+                errors.append("campaign_evidence.start_generation_not_advanced")
+        if completion is not None and completion.stage_code != bundle.stage_code:
+            errors.append("campaign_evidence.completion_stage_mismatch")
+        if sortie is not None and completion is not None:
+            chain = (
+                sortie.map_generation,
+                completion.combat_auto_generation,
+                completion.result_generation,
+                completion.result_exit_receipt.generation,
+            )
+            if any(
+                isinstance(value, bool) or not isinstance(value, int)
+                for value in chain
+            ):
+                errors.append("campaign_evidence.completion_generation_malformed")
+            else:
+                if completion.combat_auto_generation <= sortie.map_generation:
+                    errors.append("campaign_evidence.combat_generation_not_advanced")
+                if completion.result_generation <= completion.combat_auto_generation:
+                    errors.append("campaign_evidence.result_generation_not_advanced")
+                if (
+                    completion.result_exit_receipt.generation
+                    < completion.result_generation
+                ):
+                    errors.append("campaign_evidence.exit_receipt_stale")
+        return replace(bundle, integrity_errors=tuple(errors))
 
     def last_campaign_auto_search_completion(
         self,
@@ -2611,7 +2769,57 @@ class AlasSemanticAdapter:
             return False
         try:
             self.oracle.campaign_auto_search_active_state()
-        except SemanticGateClosed:
+        except SemanticTargetMissing:
+            retained = self.oracle.campaign_preparation_state(context.stage_code)
+            if retained is None:
+                if (
+                    isinstance(context.sortie_receipt.generation, bool)
+                    or not isinstance(context.sortie_receipt.generation, int)
+                ):
+                    raise
+                if time.monotonic() > context.passive_transition_until:
+                    raise
+                # After the exact sortie click, Unity can destroy the fleet
+                # overlay before mounting LevelGrid/pre-combat/combat.  That
+                # empty interval is a normal passive load, not evidence that
+                # official auto-search was ignored.  Wait only inside the
+                # 30-second deadline armed by the sortie receipt; the original
+                # ALAS loop owns retry and no additional input is admitted.
+                if self._input_frame_refresher is not None:
+                    self._input_frame_refresher()
+                return False
+            if (
+                getattr(retained, "kind", None) != "fleet"
+                or getattr(retained, "stage_code", None) != context.stage_code
+                or isinstance(getattr(retained, "generation", None), bool)
+                or not isinstance(getattr(retained, "generation", None), int)
+                or isinstance(context.sortie_receipt.generation, bool)
+                or not isinstance(context.sortie_receipt.generation, int)
+                or retained.generation <= context.sortie_receipt.generation
+            ):
+                raise
+            if (
+                context.retained_preparation_generation is not None
+                and retained.generation < context.retained_preparation_generation
+            ):
+                raise SemanticGateClosed(
+                    "retained campaign fleet-preparation generation moved backwards"
+                )
+            if retained.generation == context.retained_preparation_generation:
+                context.retained_preparation_stable_reads += 1
+            else:
+                context.retained_preparation_generation = retained.generation
+                context.retained_preparation_stable_reads = 1
+            if context.retained_preparation_stable_reads >= 8:
+                raise SemanticGateClosed(
+                    "retained campaign fleet-preparation generation did not advance"
+                )
+            # A retained fleet-preparation root can briefly mask the passive
+            # transition after the already-authorized sortie.  Refresh only;
+            # the original ALAS loop owns waiting/retry and no second input is
+            # admitted here.
+            if self._input_frame_refresher is not None:
+                self._input_frame_refresher()
             return False
         return True
 
@@ -2666,6 +2874,10 @@ class AlasSemanticAdapter:
             combat_auto = self.oracle.campaign_official_combat_auto_state()
             if combat_auto is not None:
                 generation, enabled = combat_auto
+                if isinstance(generation, bool) or not isinstance(generation, int):
+                    raise SemanticGateClosed(
+                        "inherited official combat generation is malformed"
+                    )
                 if not enabled:
                     raise SemanticGateClosed(
                         "official combat automation is disabled"
@@ -2681,7 +2893,32 @@ class AlasSemanticAdapter:
                 if not self.oracle.enabled("reward/campaign-total/exit"):
                     continue
                 result_state = self.oracle.read_state()
-                self.oracle.click("reward/campaign-total/exit")
+                if isinstance(result_state.generation, bool) or not isinstance(
+                    result_state.generation, int
+                ):
+                    raise SemanticGateClosed(
+                        "inherited auto-search result generation is malformed"
+                    )
+                result_exit_receipt = self.oracle.click(
+                    "reward/campaign-total/exit"
+                )
+                if isinstance(
+                    result_exit_receipt.generation, bool
+                ) or not isinstance(result_exit_receipt.generation, int):
+                    raise SemanticGateClosed(
+                        "inherited auto-search exit generation is malformed"
+                    )
+                if (
+                    result_exit_receipt.semantic_id
+                    != "reward/campaign-total/exit"
+                    or result_exit_receipt.generation < result_state.generation
+                    or not result_exit_receipt.path.endswith(
+                        "LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit"
+                    )
+                ):
+                    raise SemanticGateClosed(
+                        "inherited auto-search result exit receipt is incoherent"
+                    )
                 stage_deadline = time.monotonic() + 30.0
                 while time.monotonic() < stage_deadline:
                     try:
@@ -2700,9 +2937,15 @@ class AlasSemanticAdapter:
                                     3,
                                 ),
                                 combat_auto_generation=combat_auto_generation,
+                                result_exit_receipt=result_exit_receipt,
                             )
                             context.auto_search_completion = proof
                             self._last_campaign_auto_search_completion = proof
+                            if self._campaign_evidence_bundle is not None:
+                                self._campaign_evidence_bundle = replace(
+                                    self._campaign_evidence_bundle,
+                                    completion_proof=proof,
+                                )
                             return proof
                     except SemanticGateClosed:
                         pass
@@ -2734,6 +2977,13 @@ class AlasSemanticAdapter:
                 "campaign auto-search start proof is incomplete"
             )
         active = self.oracle.campaign_auto_search_active_state()
+        if any(
+            isinstance(value, bool) or not isinstance(value, int)
+            for value in (active.generation, context.sortie_receipt.generation)
+        ):
+            raise SemanticGateClosed(
+                "campaign auto-search start generation is malformed"
+            )
         if active.generation <= context.sortie_receipt.generation:
             raise SemanticGateClosed(
                 "campaign auto-search surface did not advance generation"
@@ -2761,6 +3011,11 @@ class AlasSemanticAdapter:
             map_generation=active.generation,
             map_root_path=active.root_path,
         )
+        if self._campaign_evidence_bundle is not None:
+            self._campaign_evidence_bundle = replace(
+                self._campaign_evidence_bundle,
+                sortie_proof=context.sortie_proof,
+            )
         return context.sortie_proof
 
     def wait_campaign_auto_search_completion(
@@ -2810,6 +3065,10 @@ class AlasSemanticAdapter:
             combat_auto = self.oracle.campaign_official_combat_auto_state()
             if combat_auto is not None:
                 generation, enabled = combat_auto
+                if isinstance(generation, bool) or not isinstance(generation, int):
+                    raise SemanticGateClosed(
+                        "official combat automation generation is malformed"
+                    )
                 if not enabled:
                     raise SemanticGateClosed(
                         "official combat automation is disabled"
@@ -2828,6 +3087,12 @@ class AlasSemanticAdapter:
                 if not self.oracle.enabled("reward/campaign-total/exit"):
                     continue
                 state = self.oracle.read_state()
+                if isinstance(state.generation, bool) or not isinstance(
+                    state.generation, int
+                ):
+                    raise SemanticGateClosed(
+                        "campaign auto-search result generation is malformed"
+                    )
                 targets = tuple(
                     button
                     for button in state.buttons
@@ -2841,6 +3106,32 @@ class AlasSemanticAdapter:
                     raise SemanticGateClosed(
                         "campaign auto-search result target is ambiguous"
                     )
+                if combat_auto_generation <= context.sortie_proof.map_generation:
+                    raise SemanticGateClosed(
+                        "official combat automation generation did not advance"
+                    )
+                if state.generation <= combat_auto_generation:
+                    raise SemanticGateClosed(
+                        "campaign auto-search result generation did not advance"
+                    )
+                result_exit_receipt = self.oracle.click(
+                    "reward/campaign-total/exit"
+                )
+                if isinstance(
+                    result_exit_receipt.generation, bool
+                ) or not isinstance(result_exit_receipt.generation, int):
+                    raise SemanticGateClosed(
+                        "campaign auto-search result exit generation is malformed"
+                    )
+                if (
+                    result_exit_receipt.semantic_id
+                    != "reward/campaign-total/exit"
+                    or result_exit_receipt.generation < state.generation
+                    or result_exit_receipt.path != targets[0].path
+                ):
+                    raise SemanticGateClosed(
+                        "campaign auto-search result exit receipt is incoherent"
+                    )
                 roles = context.auto_search_role_state
                 proof = CampaignAutoSearchCompletionProof(
                     stage_code=stage_code,
@@ -2850,14 +3141,19 @@ class AlasSemanticAdapter:
                     fleet2_role=roles.fleet2_role,
                     waited_seconds=round(time.monotonic() - started, 3),
                     combat_auto_generation=combat_auto_generation,
+                    result_exit_receipt=result_exit_receipt,
                 )
-                self.oracle.click("reward/campaign-total/exit")
                 stage_deadline = time.monotonic() + 30.0
                 while time.monotonic() < stage_deadline:
                     try:
                         if self.oracle.campaign_page_is_normal():
                             context.auto_search_completion = proof
                             self._last_campaign_auto_search_completion = proof
+                            if self._campaign_evidence_bundle is not None:
+                                self._campaign_evidence_bundle = replace(
+                                    self._campaign_evidence_bundle,
+                                    completion_proof=proof,
+                                )
                             return proof
                     except SemanticGateClosed:
                         pass
@@ -2953,7 +3249,32 @@ class AlasSemanticAdapter:
 
         self._package_gate()
         context = self._require_campaign_context()
-        if fleet1 not in range(1, 7) or fleet2 not in range(0, 7) or submarine not in range(0, 7):
+        owned_receipts = (
+            context.entry_receipt is not None,
+            context.map_preparation_receipt is not None,
+        )
+        if any(owned_receipts) and not all(owned_receipts):
+            raise SemanticGateClosed(
+                "campaign fleet authorization ownership proof is partial"
+            )
+        if not any(owned_receipts):
+            if not self._campaign_inherited_fleet_overlay_is_pristine(context):
+                raise SemanticGateClosed(
+                    "inherited campaign fleet authorization requires pristine passive state"
+                )
+            # The patched ALAS branch treats False as a non-authorizing result:
+            # its finally block calls enter_map_cancel(), while every legacy
+            # fleet mutation, selection, and sortie call remains nested under
+            # `if fleet_authorized`.  The immediately preceding passive appear
+            # proved the overlay; cancel revalidates stage, raycast, and target
+            # freshness before input.  Never add an intervening fleet read or
+            # arm authority for an overlay predating this transaction.
+            return False
+        if any(isinstance(value, bool) for value in (fleet1, fleet2, submarine)) or (
+            fleet1 not in range(1, 7)
+            or fleet2 not in range(0, 7)
+            or submarine not in range(0, 7)
+        ):
             raise SemanticGateClosed("campaign fleet configuration is outside 1 through 6")
         if context.initial_fleet_state is not None:
             raise SemanticGateClosed("campaign fleet preparation was already authorized")
@@ -2963,8 +3284,6 @@ class AlasSemanticAdapter:
         )
         context.initial_fleet_state = initial
         context.requested_fleets = (fleet1, fleet2, submarine)
-        if not self._action_ledger.allowed("campaign.fleet_mutation"):
-            return False
 
         if context.mode == "hard":
             if (fleet1, fleet2, submarine) != (1, 2, 0):
@@ -2994,7 +3313,7 @@ class AlasSemanticAdapter:
             context.required_fleet_mutations = len(operations)
             context.expected_fleet_mutations = tuple(operations)
             remaining = self._action_ledger.remaining("campaign.fleet_mutation")
-            if remaining < len(operations):
+            if operations and remaining < len(operations):
                 raise SemanticGateClosed(
                     "campaign fleet mutation budget is below the hard fleet "
                     "recommendation requirement: {0} < {1}".format(
@@ -3069,7 +3388,7 @@ class AlasSemanticAdapter:
         context.required_fleet_mutations = len(operations)
         context.expected_fleet_mutations = tuple(operations)
         remaining = self._action_ledger.remaining("campaign.fleet_mutation")
-        if remaining < len(operations):
+        if operations and remaining < len(operations):
             raise SemanticGateClosed(
                 "campaign fleet mutation budget is below the preflight requirement: "
                 "{0} < {1}".format(remaining, len(operations))
@@ -3303,6 +3622,75 @@ class AlasSemanticAdapter:
             )
 
         role_oracle = fresh_role_oracle()
+        hard_event_surface = bool(
+            context.prepared_fleet_state.hard_mode
+            and re.fullmatch(r"(?:[abcd][1-3]|sp)", context.stage_code)
+        )
+        if hard_event_surface and not role_oracle.toggle_present(
+            "campaign/fleet-preparation/roles/tab"
+        ):
+            # Event SP is scheduled through ALAS' normal campaign mode even
+            # though the live fleet overlay carries hard requirements.  Some
+            # such overlays have no duty tab and leave fleet roles entirely
+            # game-managed.  Accept that only when the typed oracle proves the
+            # exact reviewed hard surface; this performs no fleet mutation and
+            # retains the same strict structural proof used by hard 11-4.
+            state = role_oracle.campaign_auto_search_role_state()
+            if (state.fleet1_role, state.fleet2_role) != (
+                "game-managed",
+                "game-managed",
+            ):
+                raise SemanticGateClosed(
+                    "event hard game-managed auto-search proof changed"
+                )
+            context.auto_search_role_state = state
+            return state
+        if not self._action_ledger.allowed("campaign.fleet_mutation"):
+            if not role_oracle.toggle_selected(
+                "campaign/fleet-preparation/roles/tab"
+            ):
+                if not hard_event_surface:
+                    raise SemanticGateClosed(
+                        "campaign auto-search roles require the exact selected duty "
+                        "tab when fleet mutation budget is zero"
+                    )
+                if context.auto_search_role_receipts:
+                    raise SemanticGateClosed(
+                        "event hard duty inspection was already attempted"
+                    )
+                # Selecting the duty view does not change either fleet or its
+                # assigned role.  Event SP nevertheless defaults to the
+                # formation view, so one exact, receipt-backed inspection click
+                # is required before a zero-mutation no-op can be proven.  Keep
+                # this exception scoped to a typed hard event surface and
+                # never use it to authorize either of the role controls.
+                if self._input_frame_refresher is not None:
+                    self._input_frame_refresher()
+                receipt = self.oracle.click_toggle(
+                    "campaign/fleet-preparation/roles/tab"
+                )
+                context.auto_search_role_receipts.append(receipt)
+                context.passive_transition_until = time.monotonic() + 3.0
+                deadline = time.monotonic() + 5.0
+                while True:
+                    role_oracle = fresh_role_oracle()
+                    if role_oracle.toggle_selected(
+                        "campaign/fleet-preparation/roles/tab"
+                    ):
+                        break
+                    if time.monotonic() >= deadline:
+                        raise SemanticGateClosed(
+                            "event hard duty inspection did not settle"
+                        )
+                    time.sleep(0.2)
+            state = role_oracle.campaign_auto_search_role_state()
+            if (state.fleet1_role, state.fleet2_role) != expected:
+                raise SemanticGateClosed(
+                    "campaign auto-search roles require an exact no-op proof "
+                    "when fleet mutation budget is zero"
+                )
+            context.auto_search_role_state = state
+            return state
         if not role_oracle.toggle_selected(
             "campaign/fleet-preparation/roles/tab"
         ):
@@ -3465,8 +3853,12 @@ class AlasSemanticAdapter:
                     "fleet1_standby_fleet2_all": ("standby", "all"),
                 }
             ).get(fleet_order)
+            hard_event_surface = bool(
+                context.prepared_fleet_state.hard_mode
+                and re.fullmatch(r"(?:[abcd][1-3]|sp)", context.stage_code)
+            )
             if (
-                context.mode == "hard"
+                (context.mode == "hard" or hard_event_surface)
                 and context.auto_search_role_state is not None
                 and (
                     context.auto_search_role_state.fleet1_role,
@@ -3641,9 +4033,15 @@ class AlasSemanticAdapter:
         return context.fleet_proof
 
     def _campaign_preparation_kind(self) -> Optional[str]:
+        kind, _stage_code = self._campaign_preparation_kind_with_stage()
+        return kind
+
+    def _campaign_preparation_kind_with_stage(self) -> Tuple[Optional[str], str]:
+        """Return the overlay kind together with its resolved shared entrance."""
+
         context = self._require_campaign_context()
         try:
-            state, _stage_code = self._campaign_preparation_state_with_stage()
+            state, stage_code = self._campaign_preparation_state_with_stage()
         except SemanticGateClosed:
             if (
                 (
@@ -3654,14 +4052,14 @@ class AlasSemanticAdapter:
                 )
                 and time.monotonic() <= context.passive_transition_until
             ):
-                return None
+                return None, context.stage_code
             raise
         if state is None:
-            return None
+            return None, stage_code
         if state.kind not in ("map", "fleet"):
             raise SemanticGateClosed("campaign preparation kind is invalid")
         context.preparation_kind = state.kind
-        return state.kind
+        return state.kind, stage_code
 
     def _campaign_preparation_state_with_stage(
         self,
@@ -3683,6 +4081,58 @@ class AlasSemanticAdapter:
                 last_identity_error = exc
         assert last_identity_error is not None
         raise last_identity_error
+
+    @staticmethod
+    def _campaign_inherited_fleet_overlay_is_pristine(
+        context: _CampaignFlowContext,
+    ) -> bool:
+        """Admit only a passive, pre-existing fleet overlay with no authority."""
+
+        return (
+            context.entry_receipt is None
+            and context.map_preparation_receipt is None
+            and context.auto_search_toggle_receipt is None
+            and context.cancel_receipt is None
+            and context.inherited_cancel_receipt is None
+            and context.inherited_cancel_kind is None
+            and context.inherited_cancel_stage_code is None
+            and context.proof is None
+            and context.initial_fleet_state is None
+            and context.prepared_fleet_state is None
+            and context.requested_fleets is None
+            and context.required_fleet_mutations == 0
+            and not context.expected_fleet_mutations
+            and not context.fleet_mutation_receipts
+            and not context.auto_search_role_receipts
+            and context.auto_search_role_state is None
+            and context.fleet_dropdown_row is None
+            and context.fleet_dropdown_previous_index is None
+            and context.fleet_proof is None
+            and context.oil_before_sortie is None
+            and not context.sortie_authorized
+            and context.sortie_receipt is None
+            and context.map_entry_state is None
+            and context.sortie_proof is None
+            and context.map_state is None
+            and context.map_columns is None
+            and context.map_rows is None
+            and not context.map_land_cells
+            and context.map_expected_fleet_count is None
+            and context.combat_admission is None
+            and not context.viewport_swipe_required
+            and context.viewport_swipe_intent is None
+            and context.viewport_swipe_proof is None
+            and not context.post_combat_viewport_proofs
+            and context.camera_positioning_admission is None
+            and not context.camera_positioning_proofs
+            and not context.camera_positioning_completed
+            and context.target_recheck_proof is None
+            and not context.combat_route_receipts
+            and not context.map_fleet_switch_receipts
+            and context.combat_receipt is None
+            and context.combat_proof is None
+            and context.auto_search_completion is None
+        )
 
     def campaign_map_preparation_mode_state(self) -> str:
         self._package_gate()
@@ -4821,25 +5271,6 @@ class AlasSemanticAdapter:
             if expected_cost is None or cost != expected_cost:
                 raise SemanticGateClosed("commission start oil cost changed")
             return self._commission_context.start_confirm_receipt is None
-        if name == "EVENT_CHECK" and self._campaign_context is not None:
-            if (
-                self._campaign_context.event_page_back_receipt is not None
-                and time.monotonic()
-                <= self._campaign_context.passive_transition_until
-            ):
-                # LevelSelectSPFullUI can retain its event-page identity for
-                # several frames after the exact back control has committed.
-                # Hide that stale source page so ui_goto() waits for the
-                # destination instead of submitting the one-shot back input
-                # a second time.
-                return False
-            try:
-                if self.oracle.campaign_preparation_state(
-                    self._campaign_context.stage_code
-                ) is not None:
-                    return True
-            except (SemanticGateClosed, SemanticTargetMissing):
-                pass
         if semantic_id == "os/page/back":
             # Unity may retain the old LevelOrigin hierarchy briefly after
             # leaving Operation Siren.  A proven main page wins over that
@@ -4974,10 +5405,54 @@ class AlasSemanticAdapter:
             return self.oracle.enabled("campaign-menu/event")
         if semantic_id == "event/mode/story":
             if name == "EVENT_CHECK":
-                return bool(
-                    self.oracle.event_campaign_page_visible()
-                    and self.oracle.enabled("event-list/page/back")
-                )
+                context = self._campaign_context
+                if context is not None:
+                    # `enter_map_cancel()` first asks whether it is already
+                    # back on the event selector.  A strictly proven
+                    # preparation layer legitimately covers that selector;
+                    # report only this passive presence as absent so the
+                    # original ALAS loop can continue to its existing
+                    # MAP_PREPARATION/FLEET_PREPARATION cancel branch.  Do not
+                    # use the transition-grace helper here: stale, duplicate,
+                    # remounted, partial, or wrong-stage preparation state
+                    # must remain fail-closed.
+                    try:
+                        preparation, _stage_code = (
+                            self._campaign_preparation_state_with_stage()
+                        )
+                    except SemanticGateClosed as exc:
+                        # `appear()` grants a short transition grace to a few
+                        # generic observer errors.  Preparation identity is the
+                        # deciding proof for this shadow case, so keep even
+                        # those exact errors fail-closed at this boundary.
+                        raise SemanticGateClosed(
+                            "EVENT_CHECK campaign preparation proof failed: {0}".format(
+                                exc
+                            )
+                        ) from exc
+                    if preparation is not None:
+                        kind = getattr(preparation, "kind", None)
+                        if kind in ("map", "fleet"):
+                            return False
+                        raise SemanticGateClosed(
+                            "campaign preparation overlay kind is invalid"
+                        )
+                try:
+                    self.oracle.event_campaign_page_state()
+                except SemanticTargetMissing:
+                    return False
+                if (
+                    context is not None
+                    and context.event_page_back_receipt is not None
+                    and time.monotonic() <= context.passive_transition_until
+                ):
+                    # LevelSelectSPFullUI can retain its event-page identity for
+                    # several frames after the exact back control has committed.
+                    # Hide that stale source page so ui_goto() waits for the
+                    # destination instead of submitting the one-shot back input
+                    # a second time.
+                    return False
+                return True
             return self.oracle.exists("event/mode/battle")
         if semantic_id == "event/mode/battle":
             return self.oracle.exists("event/mode/story")
@@ -5178,15 +5653,24 @@ class AlasSemanticAdapter:
                 event_campaign_selector_visible = (
                     self._campaign_preparation_state_with_stage()[0] is None
                 )
-            except (SemanticGateClosed, SemanticTargetMissing):
+            except SemanticGateClosed:
+                if name in (
+                    "MAP_PREPARATION",
+                    "FLEET_PREPARATION",
+                    "MAP_PREPARATION_CANCEL",
+                ):
+                    # A still-mounted selector can coexist beneath a partial
+                    # or foreign preparation view.  Preparation resources
+                    # must reach their strict typed proof below instead of
+                    # being hidden as generic selector-page misses.
+                    raise
+            except SemanticTargetMissing:
                 pass
         if event_campaign_selector_visible:
             # The event battle/story selector keeps the generic campaign root
-            # mounted.  During Page.iter_pages, only EVENT_CHECK is a valid
-            # identity; unrelated page probes (including CAMPAIGN_CHECK) are
-            # known absent on this exact surface.
-            if name == "EVENT_CHECK":
-                return True
+            # mounted. EVENT_CHECK was already resolved above through the
+            # complete event_campaign_page_state contract. Unrelated page
+            # probes (including CAMPAIGN_CHECK) are known absent here.
             if name == "SWITCH_20241219_COMBAT":
                 return self.oracle.exists("event/mode/story")
             if name == "SWITCH_20241219_STORY":
@@ -5737,17 +6221,81 @@ class AlasSemanticAdapter:
                 and self._campaign_context.map_preparation_receipt is not None
             ):
                 return False
+            if name == "FLEET_PREPARATION":
+                context = self._require_campaign_context()
+                try:
+                    preparation, _resolved_stage_code = (
+                        self._campaign_preparation_state_with_stage()
+                    )
+                except SemanticGateClosed:
+                    if (
+                        (
+                            context.entry_receipt is not None
+                            or context.map_preparation_receipt is not None
+                            or context.cancel_receipt is not None
+                            or context.sortie_receipt is not None
+                        )
+                        and time.monotonic() <= context.passive_transition_until
+                    ):
+                        return False
+                    raise
+                if preparation is None:
+                    return False
+                preparation_kind = getattr(preparation, "kind", None)
+                owned_receipts = (
+                    context.entry_receipt is not None,
+                    context.map_preparation_receipt is not None,
+                )
+                if preparation_kind == "map":
+                    # After ALAS clicks the stage, the map-detail layer is a
+                    # normal intermediate state: the stage-entry receipt is
+                    # present while the map-preparation receipt is not.  This
+                    # is not a partial fleet-ownership claim, because no fleet
+                    # overlay exists yet.
+                    if owned_receipts == (False, True):
+                        raise SemanticGateClosed(
+                            "campaign map preparation ownership proof is partial"
+                        )
+                    if any(owned_receipts):
+                        return False
+                    raise SemanticGateClosed(
+                        "inherited campaign fleet preparation kind is not fleet"
+                    )
+                if preparation_kind != "fleet":
+                    raise SemanticGateClosed(
+                        "campaign preparation kind is not reviewed"
+                    )
+                if all(owned_receipts):
+                    return True
+                if any(owned_receipts):
+                    raise SemanticGateClosed(
+                        "campaign fleet preparation ownership proof is partial"
+                    )
+                if not self._campaign_inherited_fleet_overlay_is_pristine(context):
+                    raise SemanticGateClosed(
+                        "inherited campaign fleet preparation requires pristine passive state"
+                    )
+                return True
+            if name == "MAP_PREPARATION":
+                context = self._require_campaign_context()
+                if context.entry_receipt is None:
+                    preparation, _resolved_stage_code = (
+                        self._campaign_preparation_state_with_stage()
+                    )
+                    if preparation is None:
+                        return False
+                    kind = getattr(preparation, "kind", None)
+                    if kind not in ("map", "fleet"):
+                        raise SemanticGateClosed(
+                            "inherited campaign preparation kind is invalid"
+                        )
+                    # Presence of an inherited map detail is observation-only.
+                    # The cancel action independently revalidates the exact
+                    # stage, root pair, raycast, and one-shot receipt.
+                    return kind == "map"
             kind = self._campaign_preparation_kind()
             if name == "MAP_PREPARATION":
                 return kind == "map"
-            if name == "FLEET_PREPARATION":
-                if kind != "fleet":
-                    return False
-                if self._campaign_context.map_preparation_receipt is None:
-                    raise SemanticGateClosed(
-                        "campaign fleet preparation appeared without map transition"
-                    )
-                return True
             return kind in ("map", "fleet")
         if name in RESEARCH_VIRTUAL_RESOURCES and self._research_context is not None:
             if name == "QUEUE_CHECK":
@@ -10658,23 +11206,35 @@ class AlasSemanticAdapter:
                 context.map_preparation_oil_cost = getattr(
                     observed_preparation, "oil_cost", None
                 )
-            receipt = self.oracle.click_campaign_map_preparation(
-                stage_code
-            )
+            receipt = self.oracle.click_campaign_map_preparation(stage_code)
             context.map_preparation_receipt = receipt
             context.passive_transition_until = time.monotonic() + 60.0
             return receipt
-        if (
-            self._campaign_context is not None
-            and name == "MAP_PREPARATION_CANCEL"
-        ):
+        if self._campaign_context is not None and name == "MAP_PREPARATION_CANCEL":
             context = self._require_campaign_context()
             if context.cancel_receipt is not None:
                 raise SemanticGateClosed(
                     "campaign preparation cancel is not currently allowed"
                 )
-            kind = self._campaign_preparation_kind()
-            if kind == "map" and context.entry_receipt is None:
+            if (
+                context.entry_receipt is None
+                and context.inherited_cancel_receipt is not None
+            ):
+                raise SemanticGateClosed(
+                    "inherited campaign preparation cancel is single-use"
+                )
+            if context.entry_receipt is None:
+                preparation, resolved_stage_code = (
+                    self._campaign_preparation_state_with_stage()
+                )
+                kind = getattr(preparation, "kind", None)
+                if preparation is not None and kind not in ("map", "fleet"):
+                    raise SemanticGateClosed(
+                        "inherited campaign preparation kind is invalid"
+                    )
+            else:
+                kind, resolved_stage_code = self._campaign_preparation_kind_with_stage()
+            if kind in ("map", "fleet") and context.entry_receipt is None:
                 # ALAS deliberately closes an already-open stage detail while
                 # discovering the current page.  A new process has no local
                 # entry receipt for that inherited overlay, but the observer's
@@ -10682,9 +11242,17 @@ class AlasSemanticAdapter:
                 # cancel safe.  Do not consume the flow's later cancel receipt:
                 # the normal pre-sortie proof must still perform its own
                 # entry -> preparation -> cancel sequence.
-                receipt = self.oracle.cancel_campaign_map_preparation(
-                    context.stage_code
-                )
+                if kind == "fleet":
+                    receipt = self.oracle.cancel_campaign_fleet_preparation(
+                        resolved_stage_code
+                    )
+                else:
+                    receipt = self.oracle.cancel_campaign_map_preparation(
+                        resolved_stage_code
+                    )
+                context.inherited_cancel_receipt = receipt
+                context.inherited_cancel_kind = kind
+                context.inherited_cancel_stage_code = resolved_stage_code
                 context.passive_transition_until = time.monotonic() + 20.0
                 return receipt
             if context.entry_receipt is None:
@@ -10697,11 +11265,11 @@ class AlasSemanticAdapter:
                         "campaign fleet cancel requires proven map transition"
                     )
                 receipt = self.oracle.cancel_campaign_fleet_preparation(
-                    context.stage_code
+                    resolved_stage_code
                 )
             elif kind == "map":
                 receipt = self.oracle.cancel_campaign_map_preparation(
-                    context.stage_code
+                    resolved_stage_code
                 )
             else:
                 raise SemanticGateClosed(
@@ -13455,8 +14023,21 @@ class AlasSemanticSession:
     def awaken_allowed(self) -> bool:
         return self.open().awaken_allowed()
 
-    def awaken_task(self, level_cap: str, favourite: bool) -> int:
-        return self.open().awaken_task(level_cap, favourite)
+    def begin_awaken_task(self, favourite: bool) -> None:
+        self.refresh_frame()
+        self.open().begin_awaken_task(favourite)
+
+    def prepare_awaken_phase(self, use_array: bool) -> None:
+        self.refresh_frame()
+        self.open().prepare_awaken_phase(use_array)
+
+    def awaken_next(self, use_array: bool) -> str:
+        self.refresh_frame()
+        return self.open().awaken_next(use_array)
+
+    def finish_awaken_task(self) -> None:
+        self.refresh_frame()
+        self.open().finish_awaken_task()
 
     def awaken_receipts(self) -> Tuple[AwakenExecutionReceipt, ...]:
         return self.open().awaken_receipts()
@@ -13467,15 +14048,34 @@ class AlasSemanticSession:
     def enhancement_allowed(self) -> bool:
         return self.open().enhancement_allowed()
 
-    def enhance_ships(
+    def begin_enhancement_task(
         self,
         ship_to_enhance: str,
         check_per_category: int,
         filter_expression: Optional[str],
-    ) -> int:
-        return self.open().enhance_ships(
+    ) -> None:
+        self.refresh_frame()
+        self.open().begin_enhancement_task(
             ship_to_enhance, check_per_category, filter_expression
         )
+
+    def enhancement_enter(
+        self, favourite: bool, ship_type: Optional[str]
+    ) -> bool:
+        self.refresh_frame()
+        return self.open().enhancement_enter(favourite, ship_type)
+
+    def enhancement_choose(self, ship_count: int) -> Tuple[bool, int]:
+        self.refresh_frame()
+        return self.open().enhancement_choose(ship_count)
+
+    def enhancement_leave_category(self) -> None:
+        self.refresh_frame()
+        self.open().enhancement_leave_category()
+
+    def finish_enhancement_task(self) -> None:
+        self.refresh_frame()
+        self.open().finish_enhancement_task()
 
     def enhancement_receipts(
         self,
@@ -14395,6 +14995,22 @@ class AlasSemanticSession:
         self,
     ) -> Optional[CampaignAutoSearchCompletionProof]:
         return self.open().last_campaign_auto_search_completion()
+
+    def bind_next_campaign_evidence_owner(self, owner: str) -> None:
+        self.open().bind_next_campaign_evidence_owner(owner)
+
+    def consume_campaign_auto_search_evidence(
+        self,
+        *,
+        expected_owner: str,
+        expected_stage_code: str,
+        expected_mode: str,
+    ) -> Optional[CampaignAutoSearchEvidenceBundle]:
+        return self.open().consume_campaign_auto_search_evidence(
+            expected_owner=expected_owner,
+            expected_stage_code=expected_stage_code,
+            expected_mode=expected_mode,
+        )
 
     def close_campaign_fleet_dropdown_for_rollback(self) -> None:
         self.open().close_campaign_fleet_dropdown_for_rollback()

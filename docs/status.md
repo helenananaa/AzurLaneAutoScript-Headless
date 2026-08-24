@@ -772,11 +772,12 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   Only `level120`/`level125` and real booleans are admitted; enum aliases,
   casing changes, integer booleans, and wrong types stop before any
   `awaken_run` call.
-- Semantic mode now delegates from the original `Awaken.run()` into a bounded
-  transaction loop. It proves the official Dock and favourite scope, selects
-  the exact `可认知觉醒`/`可认知觉醒 II` filter, waits until card levels match
-  that filter, reads coins/chips/arrays from their exact sprites, and commits
-  only a sufficient modal under the `awaken.execute` single-use grant.
+- The original `Awaken.run()` retains level-125 array-first ordering, its
+  `awaken_run()` loops, scheduling, and exit decisions. Semantic mode now uses
+  narrow begin/phase/next/finish ports: they prove the official Dock and
+  favourite scope, select the exact `可认知觉醒`/`可认知觉醒 II` filter, read
+  coins/chips/arrays from exact sprites, and commit only a sufficient modal
+  under an `awaken.execute` grant.
 - Live receipts cover all-scope 120→125 with arrays, favourite-scope 105→110
   through the original level-125 chip fallback, and a level-120 100→105 chip
   transaction. Completion is accepted only from the exact official result
@@ -1097,10 +1098,11 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   positive attribute preview before its single confirmation. It never retries
   an unobserved destructive input, and the equipment-preservation flow is part
   of the transaction receipt.
-- The pinned ALAS `enhance_ships()` task now delegates semantic mode before any
-  legacy framebuffer/random-type branch. It passes `ShipToEnhance`,
-  `CheckPerCategory`, and `Filter` unchanged into the strict policy and returns
-  the observed number of consumed ships instead of a hard-coded increment.
+- The pinned ALAS `enhance_ships()` method retains category ordering,
+  per-category checks, totals, retry/exit decisions, and `_retire_amount`.
+  Semantic mode validates `ShipToEnhance`, `CheckPerCategory`, and `Filter`
+  before the legacy random-type branch, then replaces only category entry,
+  one selection transaction, category leave, and final Dock reset.
 - A separate default-zero `enhancement.execute` budget, translated from
   `ALAS_SEMANTIC_ENHANCEMENT_BUDGET`, bounds official recommendation attempts.
   `all`/`favourite` switching, the eight ship-type
@@ -1109,7 +1111,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   favourite on/off, `dd`, one exact candidate (`格里芬`), enhancement preview
   with zero selected materials, back, and reset; no recommendation or confirm
   was clicked in that smoke.
-- The complete ALAS task loop is deterministic-test covered for ordered filters,
+- The retained ALAS task loop is deterministic-test covered for ordered filters,
   per-category checking, no-material skips, budget exhaustion, cleanup, invalid
   configuration, and default denial. A naturally empty-material live branch
   remains unrun; that is an evidence gap, not a pixel fallback.

@@ -2,8 +2,10 @@ import copy
 import dataclasses
 import re
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 
+from alas_headless.alas_adapter import AlasSemanticAdapter
 from alas_headless.semantic_oracle import (
     ActionReceipt,
     AdbObserverBridge,
@@ -685,6 +687,298 @@ def make_campaign_map_backend(generations=(10, 11)):
     ]
     backend.buttons = make_buttons(buttons, generation=generations[-1])
     backend.ui = make_ui(texts, images=images, generation=generations[-1])
+    return backend
+
+
+def make_event_preparation_backend(stage_code="sp", *, kind="map", prefix="root/"):
+    """Build one complete reviewed event preparation surface."""
+
+    map_root = (
+        prefix
+        + "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/panel/"
+    )
+    fleet_root = (
+        prefix
+        + "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/"
+    )
+    stage_root = (
+        prefix
+        + "UICamera/Canvas/UIMain/LevelSelectSPFullUI(Clone)/Battle/"
+        "Nodes/Chapter_0/main"
+    )
+    if kind == "map":
+        buttons = [
+            make_button("start_button", map_root + "start_button", 949, 521),
+            make_button("btnBack", map_root + "btnBack", 1065, 148),
+        ]
+        texts = [
+            make_text(stage_code.upper(), map_root + "title_form/title_index"),
+            make_text("活动关卡", map_root + "title_form/title"),
+            make_text("10", map_root + "cost/text"),
+        ]
+    elif kind == "fleet":
+        buttons = [
+            make_button("main", stage_root, raycast_top=False),
+            make_button("btnBack", fleet_root + "Fixed/btnBack", 1196, 97),
+            make_button(
+                "start_button",
+                fleet_root + "Fixed/start_button",
+                1078,
+                585,
+            ),
+        ]
+        texts = [
+            make_text("舰队选择", fleet_root + "Fixed/title/Image/text"),
+            make_text(
+                stage_code.upper(), stage_root + "/info/bk/title_form/title_index"
+            ),
+            make_text("活动关卡", stage_root + "/info/bk/title_form/title"),
+        ]
+    else:
+        raise ValueError("unknown preparation kind")
+    backend = FakeBackend(buttons)
+    backend.ui = make_ui(texts)
+    return backend
+
+
+def make_live_eventsp_fleet_preparation_backend():
+    """Build the exact rootless EventSp fleet surface observed live."""
+
+    view_root = "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)"
+    fleet_root = (
+        "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/"
+    )
+    stage_root = (
+        "UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+        "LevelSelectSPFullUI(Clone)/Battle/Nodes/Chapter_2050041/main"
+    )
+    backend = FakeBackend(
+        [
+            make_button("main", stage_root, raycast_top=False),
+            make_button("bg", view_root + "/bg", raycast_top=False),
+            make_button("btnBack", fleet_root + "Fixed/btnBack", 1196, 97),
+            make_button(
+                "start_button",
+                fleet_root + "Fixed/start_button",
+                1078,
+                585,
+            ),
+        ]
+    )
+    backend.ui = make_ui(
+        [
+            make_text("舰队选择", fleet_root + "Fixed/title/Image/text"),
+            make_text("SP", stage_root + "/info/bk/title_form/title_index"),
+            make_text("活动关卡", stage_root + "/info/bk/title_form/title"),
+            make_text("1/1", stage_root + "/info/bk/tries"),
+        ],
+        images=[
+            make_image(view_root + "/bg", "fleet_select_bg"),
+            make_image(view_root + "/panel", "fleet_select_panel"),
+        ],
+    )
+    return backend
+
+
+def make_live_eventsp_map_preparation_backend():
+    """Build the exact 81-record rootless LevelInfoSPUI live surface."""
+
+    view_root = "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)"
+    stage_root = (
+        "UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+        "LevelSelectSPFullUI(Clone)/Battle/Nodes/Chapter_2050041/main"
+    )
+    event_root = (
+        "UICamera/Canvas/UIMain/LevelMainScene(Clone)/" "LevelSelectSPFullUI(Clone)/"
+    )
+    button_specs = {
+        "bg": ("bg", 1),
+        "panel/BottomExtra/ButtonHelp": ("ButtonHelp", 1),
+        "panel/BottomExtra/LoopGroup/Loop/Toggle": ("Toggle", 1),
+        "panel/btnBack": ("btnBack", 1),
+        "panel/drops/frame/list/item": ("item", 1),
+        "panel/drops/frame/list/item(Clone)": ("item(Clone)", 4),
+        "panel/head/Image": ("Image", 1),
+        "panel/start_button": ("start_button", 1),
+    }
+    buttons = [
+        make_button("main", stage_root, raycast_top=None),
+        make_button(
+            "Switch",
+            event_root + "Battle/Mask/Story/Switch",
+            raycast_top=False,
+        ),
+    ]
+    for relative, (name, count) in button_specs.items():
+        for _index in range(count):
+            buttons.append(
+                make_button(name, view_root + "/" + relative, raycast_top=None)
+            )
+
+    toggles = [
+        make_toggle(
+            view_root + "/panel/BottomExtra/LoopGroup/view/container/AutoFight",
+            checked=True,
+            raycast_top=None,
+        ),
+        make_toggle(
+            view_root + "/panel/quickPlay",
+            checked=True,
+            raycast_top=None,
+        ),
+    ]
+    text_values = {
+        "panel/BottomExtra/LoopGroup/Loop/Text": ["循环"],
+        "panel/BottomExtra/LoopGroup/view/container/AutoFight/Text": ["自律寻敌"],
+        "panel/Level/Text": ["LV 110"],
+        "panel/cost/label": ["消耗"],
+        "panel/cost/text": ["10"],
+        "panel/drops/frame/list/item(Clone)/icon_bg/count": ["", "", "", ""],
+        "panel/drops/frame/list/item/icon_bg/count": ["800"],
+        "panel/drops/title_bg/Text": ["可能获得"],
+        "panel/intro": ["活动关卡说明"],
+        "panel/lose_conditions/desc": ["失败条件"],
+        "panel/quickPlay/desc": ["快速出击"],
+        "panel/title_form/title": ["活动关卡"],
+        "panel/title_form/title_en": [""],
+        "panel/title_form/title_index": ["SP  "],
+        "panel/win_conditions/desc": ["胜利条件"],
+    }
+    texts = [
+        make_text("SP", stage_root + "/info/bk/title_form/title_index"),
+        make_text("活动关卡", stage_root + "/info/bk/title_form/title"),
+        make_text(
+            "<color=#92FC63FF>1/1</color>",
+            stage_root + "/triesLimit/Text",
+        ),
+        make_text(
+            "SP",
+            event_root + "Battle/MapItems/List/Item(Clone)/Selected/Text",
+        ),
+    ]
+    for relative, values in text_values.items():
+        for value in values:
+            text = make_text(value, view_root + "/" + relative)
+            if relative == "panel/title_form/title_en":
+                text["adb_bounds"] = None
+            texts.append(text)
+
+    image_specs = {
+        "bg": (("white_dot",), True),
+        "bg/bottom": (("white_dot",), True),
+        "bg/decorate/decorateCenter": (("decorate1_1920",), True),
+        "bg/decorate/decorateTop": (("decorate2_1920",), True),
+        "bg/decorate/decoratebtm": (("decorate2_1920",), True),
+        "bg/hori": (("white_dot",), True),
+        "bg/hori/Image": (("weigh_anchor_text",), True),
+        "bg/right": (("white_dot",), True),
+        "bg/vert": (("white_dot",), True),
+        "panel": (("white_dot",), True),
+        "panel/BottomExtra": (("loop_bg",), True),
+        "panel/BottomExtra/ButtonHelp": (("btn_help",), True),
+        "panel/BottomExtra/LoopGroup": (("white_dot",), True),
+        "panel/BottomExtra/LoopGroup/Loop/Toggle": (("white_dot",), True),
+        "panel/BottomExtra/LoopGroup/Loop/Toggle/on": (("live2d_on",), True),
+        "panel/BottomExtra/LoopGroup/Loop/Toggle/on/GameObject": (
+            ("btn_switch_loop",),
+            True,
+        ),
+        "panel/BottomExtra/LoopGroup/view/container/AutoFight": (
+            ("white_dot",),
+            True,
+        ),
+        "panel/BottomExtra/LoopGroup/view/container/AutoFight/Flag": (
+            ("auto_fight_active_icon",),
+            False,
+        ),
+        "panel/BottomExtra/LoopGroup/view/container/AutoFight/Frame": (
+            ("auto_fight_frame",),
+            False,
+        ),
+        "panel/Level/Hard": (("bg_lv_hard",), False),
+        "panel/btnBack": (("x_butten",), True),
+        "panel/cost": (("white_dot",), True),
+        "panel/cost/oil": (("res_oil",), True),
+        "panel/drops/frame": (("icon_bar01",), True),
+        "panel/drops/frame/list/item(Clone)/icon_bg": (
+            ("bg4", "bg3", "bg1", "bg1"),
+            True,
+        ),
+        "panel/drops/frame/list/item(Clone)/icon_bg/frame": (
+            ("frame", "frame", "frame", "frame"),
+            False,
+        ),
+        "panel/drops/frame/list/item(Clone)/icon_bg/icon": (
+            ("30004", "54013", "55000", "54000"),
+            False,
+        ),
+        "panel/drops/frame/list/item/icon_bg": (("bg4",), True),
+        "panel/drops/frame/list/item/icon_bg/frame": (("frame",), False),
+        "panel/drops/frame/list/item/icon_bg/icon": (("66064",), False),
+        "panel/drops/title_bg": (("icon_bar05",), True),
+        "panel/head": (("touxiang_kuang",), True),
+        "panel/head/Image": (("haorenlichade_alter",), True),
+        "panel/line": (("line_h",), True),
+        "panel/lose_conditions": (("text_bg",), False),
+        "panel/quickPlay": (("di_5",), True),
+        "panel/quickPlay/Image": (("di_4",), False),
+        "panel/quickPlay/Image/gou": (("gou",), False),
+        "panel/start_button": (("qianwang_butten",), True),
+        "panel/title/Hard": (("bg_title_hard",), False),
+        "panel/win_conditions": (("text_bg",), False),
+    }
+    images = [
+        make_image(
+            event_root + "Battle/MapItems/List/Item(Clone)/Selected/Frame",
+            "level_item_select",
+        ),
+        make_image(
+            event_root + "Battle/MapItems/List/Item(Clone)/Selected/Light",
+            "level_item_light",
+        ),
+    ]
+    for relative, (sprites, raycast_target) in image_specs.items():
+        for sprite in sprites:
+            image = make_image(view_root + "/" + relative, sprite)
+            image["raycast_target"] = raycast_target
+            images.append(image)
+
+    backend = FakeBackend(buttons)
+    backend.ui = make_ui(texts, toggles=toggles, images=images)
+    return backend
+
+
+def make_normal_fleet_preparation_backend(stage_code="12-4"):
+    chapter, stage_index = (int(value) for value in stage_code.split("-"))
+    fleet_root = (
+        "root/OverlayCamera/Overlay/UIMain/"
+        "LevelFleetSelectView(Clone)/panel/"
+    )
+    stage_root = (
+        "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/float/levels/"
+        "items/Chapter_{0}/main".format(chapter * 100 + stage_index)
+    )
+    backend = FakeBackend(
+        [
+            make_button("main", stage_root, raycast_top=False),
+            make_button("btnBack", fleet_root + "Fixed/btnBack", 1196, 97),
+            make_button(
+                "start_button",
+                fleet_root + "Fixed/start_button",
+                1078,
+                585,
+            ),
+        ]
+    )
+    backend.ui = make_ui(
+        [
+            make_text("舰队选择", fleet_root + "Fixed/title/Image/text"),
+            make_text(
+                stage_code, stage_root + "/info/bk/title_form/title_index"
+            ),
+            make_text("普通关卡", stage_root + "/info/bk/title_form/title"),
+        ]
+    )
     return backend
 
 
@@ -2371,6 +2665,9 @@ class SemanticOracleTests(unittest.TestCase):
         oracle = make_oracle(backend)
 
         self.assertTrue(oracle.event_campaign_stage_selector_visible())
+        event_state = oracle.event_campaign_page_state()
+        self.assertEqual(event_state.generation, 10)
+        self.assertEqual([stage.stage_code for stage in event_state.stages], ["a1"])
         state = oracle.campaign_page_state()
         self.assertEqual(state.chapter_name, "a")
         self.assertEqual([stage.stage_code for stage in state.stages], ["a1"])
@@ -2440,6 +2737,274 @@ class SemanticOracleTests(unittest.TestCase):
             ]
         )
         self.assertEqual(make_oracle(restoring).campaign_oil(), 9504)
+
+    def test_event_campaign_page_identity_is_complete_unique_and_coherent(self):
+        canonical_page = (
+            "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)"
+        )
+        canonical_root = canonical_page + "/LevelSelectSPFullUI(Clone)"
+
+        def event_backend(
+            *,
+            root=canonical_root,
+            page_root=canonical_page,
+            extra_buttons=(),
+            include_back=True,
+            include_story_marker=True,
+            include_stage=True,
+            button_generation=10,
+            ui_generation=10,
+        ):
+            stage_root = root + "/Battle/Nodes/Chapter_2050001"
+            buttons = []
+            if include_back:
+                buttons.append(
+                    make_button(
+                        "back_button",
+                        page_root + "/top/top_chapter/back_button",
+                    )
+                )
+            if include_story_marker:
+                buttons.append(
+                    make_button(
+                        "Switch",
+                        root + "/Battle/Mask/Story/Switch",
+                        raycast_top=False,
+                    )
+                )
+            if include_stage:
+                buttons.extend(
+                    [
+                        make_button("main", stage_root + "/main", 450, 266),
+                        make_button(
+                            "Chapter_2050001",
+                            stage_root,
+                            322,
+                            343,
+                            raycast_top=None,
+                        ),
+                    ]
+                )
+            buttons.extend(extra_buttons)
+            backend = FakeBackend(buttons)
+            backend.snapshot = make_snapshot(generation=button_generation)
+            backend.buttons = make_buttons(
+                buttons, generation=button_generation
+            )
+            texts = []
+            if include_stage:
+                texts.extend(
+                    [
+                        make_text(
+                            "EX",
+                            stage_root
+                            + "/main/info/bk/title_form/title_index",
+                        ),
+                        make_text(
+                            "额外海域",
+                            stage_root + "/main/info/bk/title_form/title",
+                        ),
+                        make_text(
+                            "EX",
+                            root
+                            + "/Battle/MapItems/List/Item/Selected/Text",
+                        ),
+                        make_text(
+                            "SP",
+                            root
+                            + "/Battle/MapItems/List/Item(Clone)/Unselect/Text",
+                        ),
+                    ]
+                )
+            backend.ui = make_ui(texts, generation=ui_generation)
+            return backend
+
+        live = event_backend(
+            extra_buttons=(
+                make_button(
+                    "back_btn",
+                    "root/UICamera/Canvas/UIMain/UnrelatedUI(Clone)/back_btn",
+                ),
+            )
+        )
+        live_state = make_oracle(live).event_campaign_page_state()
+        self.assertEqual(live_state.chapter_name, "ex")
+        self.assertEqual(
+            [stage.stage_code for stage in live_state.stages], ["ex"]
+        )
+        self.assertEqual(live.taps, [])
+
+        activity_root = "root/UICamera/Canvas/UIMain/ActivityMainUI(Clone)"
+        normal_root = canonical_page + "/float/levels/items/Chapter_101"
+        for label, buttons in (
+            (
+                "activity-event-list",
+                [
+                    make_button(
+                        "back_btn",
+                        activity_root + "/blur_panel/adapt/top/back_btn",
+                    )
+                ],
+            ),
+            (
+                "normal-campaign",
+                [
+                    make_button(
+                        "back_button",
+                        canonical_page + "/top/top_chapter/back_button",
+                    ),
+                    make_button("main", normal_root + "/main"),
+                ],
+            ),
+        ):
+            with self.subTest(case=label):
+                with self.assertRaises(SemanticTargetMissing):
+                    make_oracle(FakeBackend(buttons)).event_campaign_page_state()
+
+        invalid_cases = {
+            "duplicate-marker": event_backend(
+                extra_buttons=(
+                    make_button(
+                        "Switch",
+                        canonical_root + "/Battle/Mask/Story/Switch",
+                        raycast_top=False,
+                    ),
+                )
+            ),
+            "duplicate-stage": event_backend(
+                extra_buttons=(
+                    make_button(
+                        "main",
+                        canonical_root
+                        + "/Battle/Nodes/Chapter_2050001/main",
+                    ),
+                )
+            ),
+            "partial-remount": event_backend(
+                page_root="root/Remounted/UICamera/Canvas/UIMain/LevelMainScene(Clone)"
+            ),
+            "unsupported-root": event_backend(
+                root=activity_root + "/LevelSelectSPFullUI(Clone)",
+                page_root=activity_root,
+            ),
+            "story-only": event_backend(
+                include_story_marker=False,
+                extra_buttons=(
+                    make_button(
+                        "Switch",
+                        canonical_root + "/Story/Battle/Switch",
+                    ),
+                ),
+            ),
+            "activity-overlap": event_backend(
+                extra_buttons=(
+                    make_button(
+                        "back_btn",
+                        activity_root + "/blur_panel/adapt/top/back_btn",
+                    ),
+                )
+            ),
+            "preparation-overlap": event_backend(
+                extra_buttons=(
+                    make_button(
+                        "start_button",
+                        canonical_root
+                        + "/Battle/LevelStageInfoView(Clone)/start_button",
+                    ),
+                )
+            ),
+            "stale-ui": event_backend(ui_generation=9),
+            "future-ui": event_backend(ui_generation=13),
+        }
+        second_root = (
+            "root/Remounted/UICamera/Canvas/UIMain/LevelMainScene(Clone)"
+            "/LevelSelectSPFullUI(Clone)"
+        )
+        invalid_cases["duplicate-root"] = event_backend(
+            extra_buttons=(
+                make_button(
+                    "Switch",
+                    second_root + "/Battle/Mask/Story/Switch",
+                    raycast_top=False,
+                ),
+            )
+        )
+        for label, backend in invalid_cases.items():
+            with self.subTest(case=label):
+                with self.assertRaises(SemanticGateClosed):
+                    make_oracle(backend).event_campaign_page_state()
+
+    @staticmethod
+    def _event_campaign_backend_with_back_paths(back_paths):
+        page_root = "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)"
+        event_root = page_root + "/LevelSelectSPFullUI(Clone)"
+        stage_root = event_root + "/Battle/Nodes/Chapter_2050001"
+        backend = FakeBackend(
+            [
+                *(
+                    make_button("back_button", path)
+                    for path in back_paths
+                ),
+                make_button(
+                    "Switch",
+                    event_root + "/Battle/Mask/Story/Switch",
+                    raycast_top=False,
+                ),
+                make_button("main", stage_root + "/main", 450, 266),
+                make_button(
+                    "Chapter_2050001",
+                    stage_root,
+                    322,
+                    343,
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "EX",
+                    stage_root + "/main/info/bk/title_form/title_index",
+                ),
+                make_text(
+                    "额外海域",
+                    stage_root + "/main/info/bk/title_form/title",
+                ),
+            ]
+        )
+        return backend
+
+    def test_event_campaign_page_rejects_duplicate_canonical_back_candidates(self):
+        back_path = (
+            "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+            "top/top_chapter/back_button"
+        )
+        backend = self._event_campaign_backend_with_back_paths(
+            (back_path, back_path)
+        )
+
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "back identity is absent or ambiguous"
+        ):
+            make_oracle(backend).event_campaign_page_state()
+
+    def test_event_campaign_page_rejects_canonical_and_remounted_back(self):
+        canonical = (
+            "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+            "top/top_chapter/back_button"
+        )
+        remounted = (
+            "root/Remounted/UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+            "top/top_chapter/back_button"
+        )
+        backend = self._event_campaign_backend_with_back_paths(
+            (canonical, remounted)
+        )
+
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "back identity is absent or ambiguous"
+        ):
+            make_oracle(backend).event_campaign_page_state()
 
     def test_current_event_campaign_aside_uses_typed_label_and_matching_row(self):
         root = (
@@ -2550,6 +3115,74 @@ class SemanticOracleTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "identity changed"):
             make_oracle(backend).campaign_map_preparation_state("12-4")
 
+    def test_campaign_map_preparation_accepts_reviewed_rootless_live_path_only(self):
+        root = "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/"
+
+        def live_backend():
+            backend = FakeBackend(
+                [
+                    make_button(
+                        "bg",
+                        "OverlayCamera/Overlay/UIMain/"
+                        "LevelStageInfoView(Clone)/bg",
+                        raycast_top=False,
+                    ),
+                    make_button("start_button", root + "start_button", 951, 523),
+                    make_button("btnBack", root + "btnBack", 1066, 149),
+                ]
+            )
+            backend.ui = make_ui(
+                [
+                    make_text("12–4  ", root + "title_form/title_index"),
+                    make_text("TF58，翱翔于天际", root + "title_form/title"),
+                ]
+            )
+            return backend
+
+        backend = live_backend()
+        state = make_oracle(backend).campaign_map_preparation_state("12-4")
+        self.assertEqual((state.kind, state.stage_code), ("map", "12-4"))
+
+        backend = live_backend()
+        for button in backend.buttons["buttons"]:
+            button["path"] = "Mirror/" + button["path"]
+        for text in backend.ui["texts"]:
+            text["path"] = "Mirror/" + text["path"]
+        with self.assertRaisesRegex(SemanticGateClosed, "not reviewed"):
+            make_oracle(backend).campaign_map_preparation_state("12-4")
+
+    def test_campaign_fleet_preparation_accepts_reviewed_rootless_live_pair_only(self):
+        def rootless_backend():
+            backend = make_normal_fleet_preparation_backend("12-4")
+            for button in backend.buttons["buttons"]:
+                button["path"] = button["path"].removeprefix("root/")
+            for text in backend.ui["texts"]:
+                text["path"] = text["path"].removeprefix("root/")
+            backend.buttons["buttons"].append(
+                make_button(
+                    "bg",
+                    "OverlayCamera/Overlay/UIMain/"
+                    "LevelFleetSelectView(Clone)/bg",
+                    raycast_top=False,
+                )
+            )
+            backend.buttons["button_count"] += 1
+            return backend
+
+        backend = rootless_backend()
+        state = make_oracle(backend).campaign_fleet_preparation_state("12-4")
+        self.assertEqual((state.kind, state.stage_code), ("fleet", "12-4"))
+
+        backend = rootless_backend()
+        for button in backend.buttons["buttons"]:
+            if button["path"].startswith("UICamera/"):
+                button["path"] = "Mirror/" + button["path"]
+        for text in backend.ui["texts"]:
+            if text["path"].startswith("UICamera/"):
+                text["path"] = "Mirror/" + text["path"]
+        with self.assertRaisesRegex(SemanticGateClosed, "underlay is not reviewed"):
+            make_oracle(backend).campaign_fleet_preparation_state("12-4")
+
     def test_campaign_map_achievement_uses_typed_progress_stars_and_safe_label(self):
         root = "root/OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/"
         backend = FakeBackend(
@@ -2649,6 +3282,1220 @@ class SemanticOracleTests(unittest.TestCase):
         receipt = oracle.cancel_campaign_map_preparation("a1")
         self.assertEqual(receipt.semantic_id, "campaign/map-preparation/cancel")
         self.assertEqual(backend.taps, [(392, 598), (1065, 148)])
+
+    def test_campaign_preparation_state_requires_one_complete_reviewed_root(self):
+        for kind in ("map", "fleet"):
+            with self.subTest(case="canonical", kind=kind):
+                backend = make_event_preparation_backend("sp", kind=kind)
+                state = make_oracle(backend).campaign_preparation_state("sp")
+                self.assertEqual((state.kind, state.stage_code), (kind, "sp"))
+
+        backend = FakeBackend([])
+        self.assertIsNone(make_oracle(backend).campaign_preparation_state("sp"))
+
+        map_root = (
+            "root/OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/panel/"
+        )
+        backend = FakeBackend([])
+        backend.ui = make_ui([make_text("SP", map_root + "title_form/title_index")])
+        with self.assertRaisesRegex(SemanticGateClosed, "controls"):
+            make_oracle(backend).campaign_preparation_state("sp")
+        self.assertEqual(backend.taps, [])
+
+        fleet_root = (
+            "root/OverlayCamera/Overlay/UIMain/"
+            "LevelFleetSelectView(Clone)/panel/"
+        )
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [make_text("舰队选择", fleet_root + "Fixed/title/Image/text")]
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "cancel"):
+            make_oracle(backend).campaign_preparation_state("sp")
+        self.assertEqual(backend.taps, [])
+
+        for kind in ("map", "fleet"):
+            with self.subTest(case="cross-root", kind=kind):
+                backend = make_event_preparation_backend("sp", kind=kind)
+                for text in backend.ui["texts"]:
+                    text["path"] = text["path"].replace("root/", "other/", 1)
+                with self.assertRaisesRegex(
+                    SemanticGateClosed, "root is not reviewed"
+                ):
+                    make_oracle(backend).campaign_preparation_state("sp")
+                self.assertEqual(backend.taps, [])
+
+        for kind in ("map", "fleet"):
+            with self.subTest(case="remounted", kind=kind):
+                backend = make_event_preparation_backend(
+                    "sp", kind=kind, prefix="root/Remounted/"
+                )
+                with self.assertRaisesRegex(
+                    SemanticGateClosed, "root is not reviewed"
+                ):
+                    make_oracle(backend).campaign_preparation_state("sp")
+                self.assertEqual(backend.taps, [])
+
+            with self.subTest(case="renamed-remount", kind=kind):
+                backend = make_event_preparation_backend("sp", kind=kind)
+                for button in backend.buttons["buttons"]:
+                    button["path"] = button["path"].replace(
+                        "View(Clone)", "View(Remounted)"
+                    ).replace("SPUI(Clone)", "SPUI(Remounted)")
+                for text in backend.ui["texts"]:
+                    text["path"] = text["path"].replace(
+                        "View(Clone)", "View(Remounted)"
+                    ).replace("SPUI(Clone)", "SPUI(Remounted)")
+                with self.assertRaisesRegex(
+                    SemanticGateClosed, "root is not reviewed"
+                ):
+                    make_oracle(backend).campaign_preparation_state("sp")
+                self.assertEqual(backend.taps, [])
+
+        for kind in ("map", "fleet"):
+            with self.subTest(case="duplicate-root", kind=kind):
+                backend = make_event_preparation_backend("sp", kind=kind)
+                duplicate = make_event_preparation_backend(
+                    "sp", kind=kind, prefix="other/"
+                )
+                backend.buttons["buttons"].extend(duplicate.buttons["buttons"])
+                backend.buttons["button_count"] = len(backend.buttons["buttons"])
+                backend.ui["texts"].extend(duplicate.ui["texts"])
+                backend.ui["text_count"] = len(backend.ui["texts"])
+                with self.assertRaisesRegex(
+                    SemanticGateClosed, "root is not reviewed|ambiguous"
+                ):
+                    make_oracle(backend).campaign_preparation_state("sp")
+
+        backend = make_event_preparation_backend("sp", kind="fleet")
+        for button in backend.buttons["buttons"]:
+            if "LevelSelectSPFullUI" in button["path"]:
+                button["path"] = button["path"].replace(
+                    "root/", "root/Remounted/", 1
+                )
+        for text in backend.ui["texts"]:
+            if "LevelSelectSPFullUI" in text["path"]:
+                text["path"] = text["path"].replace(
+                    "root/", "root/Remounted/", 1
+                )
+        with self.assertRaisesRegex(SemanticGateClosed, "underlay is not reviewed"):
+            make_oracle(backend).campaign_preparation_state("sp")
+        self.assertEqual(backend.taps, [])
+
+        for kind in ("map", "fleet"):
+            for generation in (7, 13):
+                with self.subTest(
+                    case="incoherent", kind=kind, generation=generation
+                ):
+                    backend = make_event_preparation_backend("sp", kind=kind)
+                    backend.ui["generation"] = generation
+                    with self.assertRaisesRegex(
+                        SemanticGateClosed, "not coherent|moved backwards"
+                    ):
+                        make_oracle(backend).campaign_preparation_state("sp")
+
+        backend = make_event_preparation_backend("sp", kind="map")
+        backend.ui["text_truncated"] = True
+        with self.assertRaises(SemanticGateClosed):
+            make_oracle(backend).campaign_preparation_state("sp")
+
+        backend = make_event_preparation_backend("sp", kind="fleet")
+        backend.ui["texts"][1]["flags"] |= 0x10
+        with self.assertRaisesRegex(SemanticGateClosed, "underlay"):
+            make_oracle(backend).campaign_preparation_state("sp")
+
+        for kind in ("map", "fleet"):
+            with self.subTest(case="wrong-stage", kind=kind):
+                backend = make_event_preparation_backend("sp", kind=kind)
+                with self.assertRaisesRegex(SemanticGateClosed, "identity changed"):
+                    make_oracle(backend).campaign_preparation_state("ex")
+
+    def test_campaign_preparation_absolute_root_allowlist_rejects_aliases(self):
+        def rewrite(backend, old_root, new_root):
+            for button in backend.buttons["buttons"]:
+                if button["path"].startswith(old_root):
+                    button["path"] = new_root + button["path"][len(old_root) :]
+            for group in ("texts", "toggles", "images"):
+                for item in backend.ui[group]:
+                    if item["path"].startswith(old_root):
+                        item["path"] = new_root + item["path"][len(old_root) :]
+
+        event_map = make_event_preparation_backend("sp", kind="map")
+        event_fleet = make_event_preparation_backend("sp", kind="fleet")
+        normal_fleet = make_normal_fleet_preparation_backend("12-4")
+        self.assertEqual(
+            make_oracle(event_map).campaign_preparation_state("sp").kind, "map"
+        )
+        self.assertEqual(
+            make_oracle(event_fleet).campaign_preparation_state("sp").kind,
+            "fleet",
+        )
+        self.assertEqual(
+            make_oracle(normal_fleet).campaign_preparation_state("12-4").kind,
+            "fleet",
+        )
+
+        canonical_prep_roots = {
+            "map": (
+                "root/OverlayCamera/Overlay/UIMain/"
+                "LevelInfoSPUI(Clone)/panel/"
+            ),
+            "fleet": (
+                "root/OverlayCamera/Overlay/UIMain/"
+                "LevelFleetSelectView(Clone)/panel/"
+            ),
+        }
+        for kind, canonical in canonical_prep_roots.items():
+            variants = (
+                "root/Mirror/" + canonical[len("root/") :],
+                "root/550e8400-e29b-41d4-a716-446655440000/"
+                + canonical[len("root/") :],
+                canonical.lower(),
+                "extra/" + canonical,
+                canonical.replace("UIMain/Level", "UIMain/Nested/Level"),
+                canonical.replace("(Clone)", "(UnknownClone)"),
+                canonical.replace("UIMain/Level", "UIMain/../Level"),
+                canonical
+                + "Mirror/"
+                + (
+                    "LevelInfoSPUI(Clone)/panel/"
+                    if kind == "map"
+                    else "LevelFleetSelectView(Clone)/panel/"
+                ),
+            )
+            for index, variant in enumerate(variants):
+                with self.subTest(kind=kind, variant=index):
+                    backend = make_event_preparation_backend("sp", kind=kind)
+                    rewrite(backend, canonical, variant)
+                    adapter = AlasSemanticAdapter(make_oracle(backend), lambda: None)
+                    adapter.begin_campaign_pre_sortie("SP")
+                    context = adapter._campaign_context
+                    context_before = dict(vars(context))
+                    ledger_before = dict(adapter._action_ledger._remaining)
+
+                    with self.assertRaises(SemanticGateClosed):
+                        adapter.appear(SimpleNamespace(name="EVENT_CHECK"))
+
+                    self.assertEqual(backend.taps, [])
+                    self.assertEqual(vars(context), context_before)
+                    self.assertEqual(adapter._action_ledger._remaining, ledger_before)
+                    adapter.end_campaign_pre_sortie()
+
+        underlays = (
+            (
+                "event",
+                "sp",
+                make_event_preparation_backend,
+                "root/UICamera/Canvas/UIMain/LevelSelectSPFullUI(Clone)/",
+            ),
+            (
+                "normal",
+                "12-4",
+                lambda stage, **_kwargs: make_normal_fleet_preparation_backend(
+                    stage
+                ),
+                "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/",
+            ),
+        )
+        for surface, stage_code, factory, canonical in underlays:
+            variants = (
+                "root/Mirror/" + canonical[len("root/") :],
+                "root/550e8400-e29b-41d4-a716-446655440000/"
+                + canonical[len("root/") :],
+                canonical.upper(),
+                "extra/" + canonical,
+                canonical.replace("UIMain/Level", "UIMain/Nested/Level"),
+                canonical.replace("(Clone)", "(UnknownClone)"),
+                canonical.replace("UIMain/Level", "UIMain/../Level"),
+                canonical
+                + "Mirror/"
+                + (
+                    "LevelSelectSPFullUI(Clone)/"
+                    if surface == "event"
+                    else "LevelMainScene(Clone)/"
+                ),
+            )
+            for index, variant in enumerate(variants):
+                with self.subTest(surface=surface, variant=index):
+                    backend = factory(stage_code, kind="fleet")
+                    rewrite(backend, canonical, variant)
+                    adapter = AlasSemanticAdapter(make_oracle(backend), lambda: None)
+                    adapter.begin_campaign_pre_sortie(stage_code)
+                    context = adapter._campaign_context
+                    context_before = dict(vars(context))
+                    ledger_before = dict(adapter._action_ledger._remaining)
+
+                    with self.assertRaises(SemanticGateClosed):
+                        adapter.appear(SimpleNamespace(name="EVENT_CHECK"))
+
+                    self.assertEqual(backend.taps, [])
+                    self.assertEqual(vars(context), context_before)
+                    self.assertEqual(adapter._action_ledger._remaining, ledger_before)
+                    adapter.end_campaign_pre_sortie()
+
+    def test_live_eventsp_map_preparation_requires_exact_closed_surface(self):
+        backend = make_live_eventsp_map_preparation_backend()
+        state = make_oracle(backend).campaign_preparation_state("sp")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "sp", 10)
+        )
+        self.assertEqual(
+            state.cancel_button.path,
+            "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/panel/btnBack",
+        )
+        self.assertEqual(backend.taps, [])
+
+        view_root = "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)"
+        title_en_path = view_root + "/panel/title_form/title_en"
+
+        def record_groups(candidate):
+            return (
+                candidate.buttons["buttons"],
+                candidate.ui["toggles"],
+                candidate.ui["texts"],
+                candidate.ui["images"],
+            )
+
+        def exact_record(candidate, path, *, group=None):
+            groups = record_groups(candidate) if group is None else (group,)
+            matches = [
+                record
+                for records in groups
+                for record in records
+                if record["path"] == path
+            ]
+            self.assertTrue(matches, path)
+            return matches[0]
+
+        def moved(path, replacement):
+            candidate = make_live_eventsp_map_preparation_backend()
+            exact_record(candidate, path)["path"] = replacement
+            return candidate
+
+        hostiles = {
+            "unreviewed-bg-child": moved(
+                view_root + "/bg/bottom",
+                view_root + "/bg/bottom/extra",
+            ),
+            "unreviewed-panel-child": moved(
+                view_root + "/panel/line",
+                view_root + "/panel/line/extra",
+            ),
+            "arbitrary-sibling": moved(
+                view_root + "/panel/line",
+                view_root + "/other",
+            ),
+            "extra-prefix": moved(
+                view_root + "/panel/line",
+                "extra/" + view_root + "/panel/line",
+            ),
+            "remount": moved(
+                view_root + "/panel/line",
+                "Remounted/" + view_root + "/panel/line",
+            ),
+            "cross-camera": moved(
+                view_root + "/panel/line",
+                view_root.replace("OverlayCamera", "UICamera") + "/panel/line",
+            ),
+            "nested-family": moved(
+                view_root + "/panel/line",
+                view_root + "/Nested/LevelInfoSPUI(Clone)/panel/line",
+            ),
+            "dot": moved(
+                view_root + "/panel/line",
+                view_root + "/panel/./line",
+            ),
+            "dotdot": moved(
+                view_root + "/panel/line",
+                view_root + "/panel/../line",
+            ),
+            "case": moved(
+                view_root + "/panel/line",
+                view_root.upper() + "/PANEL/LINE",
+            ),
+            "guid": moved(
+                view_root + "/panel/line",
+                "550e8400-e29b-41d4-a716-446655440000/" + view_root + "/panel/line",
+            ),
+            "remounted-title-en": moved(
+                title_en_path,
+                "Remounted/" + title_en_path,
+            ),
+            "case-title-en": moved(
+                title_en_path,
+                title_en_path.upper(),
+            ),
+        }
+        missing = make_live_eventsp_map_preparation_backend()
+        missing.buttons["buttons"] = [
+            item
+            for item in missing.buttons["buttons"]
+            if item["path"] != view_root + "/panel/start_button"
+        ]
+        missing.buttons["button_count"] = len(missing.buttons["buttons"])
+        hostiles["missing-start-button"] = missing
+
+        missing_image = make_live_eventsp_map_preparation_backend()
+        missing_image.ui["images"] = [
+            item
+            for item in missing_image.ui["images"]
+            if item["path"] != view_root + "/panel"
+        ]
+        missing_image.ui["image_count"] = len(missing_image.ui["images"])
+        hostiles["missing-panel-image"] = missing_image
+
+        duplicate = make_live_eventsp_map_preparation_backend()
+        duplicate.buttons["buttons"].append(
+            copy.deepcopy(
+                exact_record(
+                    duplicate,
+                    view_root + "/panel/btnBack",
+                    group=duplicate.buttons["buttons"],
+                )
+            )
+        )
+        duplicate.buttons["button_count"] = len(duplicate.buttons["buttons"])
+        hostiles["duplicate-back"] = duplicate
+
+        wrong_kind = make_live_eventsp_map_preparation_backend()
+        wrong_kind.buttons["buttons"] = [
+            item
+            for item in wrong_kind.buttons["buttons"]
+            if item["path"] != view_root + "/panel/head/Image"
+        ]
+        wrong_kind.buttons["button_count"] = len(wrong_kind.buttons["buttons"])
+        wrong_kind.ui["texts"].append(
+            make_text("Image", view_root + "/panel/head/Image")
+        )
+        wrong_kind.ui["text_count"] = len(wrong_kind.ui["texts"])
+        hostiles["wrong-kind"] = wrong_kind
+
+        wrong_sprite = make_live_eventsp_map_preparation_backend()
+        exact_record(
+            wrong_sprite,
+            view_root + "/panel/start_button",
+            group=wrong_sprite.ui["images"],
+        )["sprite"] = "unreviewed"
+        hostiles["wrong-sprite"] = wrong_sprite
+
+        wrong_cost = make_live_eventsp_map_preparation_backend()
+        exact_record(
+            wrong_cost,
+            view_root + "/panel/cost/text",
+            group=wrong_cost.ui["texts"],
+        )["text"] = "10 "
+        hostiles["wrong-exact-cost"] = wrong_cost
+
+        null_bounds_elsewhere = make_live_eventsp_map_preparation_backend()
+        exact_record(
+            null_bounds_elsewhere,
+            view_root + "/panel/cost/text",
+            group=null_bounds_elsewhere.ui["texts"],
+        )["adb_bounds"] = None
+        hostiles["null-bounds-elsewhere"] = null_bounds_elsewhere
+
+        nonempty_title_en = make_live_eventsp_map_preparation_backend()
+        exact_record(
+            nonempty_title_en,
+            title_en_path,
+            group=nonempty_title_en.ui["texts"],
+        )["text"] = "EN"
+        hostiles["nonempty-title-en"] = nonempty_title_en
+
+        duplicate_title_en = make_live_eventsp_map_preparation_backend()
+        duplicate_title_en.ui["texts"].append(
+            copy.deepcopy(
+                exact_record(
+                    duplicate_title_en,
+                    title_en_path,
+                    group=duplicate_title_en.ui["texts"],
+                )
+            )
+        )
+        duplicate_title_en.ui["text_count"] = len(duplicate_title_en.ui["texts"])
+        hostiles["duplicate-title-en"] = duplicate_title_en
+
+        missing_title_en = make_live_eventsp_map_preparation_backend()
+        missing_title_en.ui["texts"] = [
+            item
+            for item in missing_title_en.ui["texts"]
+            if item["path"] != title_en_path
+        ]
+        missing_title_en.ui["text_count"] = len(missing_title_en.ui["texts"])
+        hostiles["missing-title-en"] = missing_title_en
+
+        wrong_kind_title_en = make_live_eventsp_map_preparation_backend()
+        wrong_kind_title_en.ui["texts"] = [
+            item
+            for item in wrong_kind_title_en.ui["texts"]
+            if item["path"] != title_en_path
+        ]
+        wrong_kind_title_en.ui["text_count"] = len(wrong_kind_title_en.ui["texts"])
+        wrong_kind_title_en.ui["images"].append(make_image(title_en_path, "empty"))
+        wrong_kind_title_en.ui["image_count"] = len(wrong_kind_title_en.ui["images"])
+        hostiles["wrong-kind-title-en"] = wrong_kind_title_en
+
+        multiplicity = make_live_eventsp_map_preparation_backend()
+        multiplicity.ui["images"].append(
+            copy.deepcopy(
+                exact_record(
+                    multiplicity,
+                    view_root + "/panel/drops/frame/list/item(Clone)/icon_bg/icon",
+                    group=multiplicity.ui["images"],
+                )
+            )
+        )
+        multiplicity.ui["image_count"] = len(multiplicity.ui["images"])
+        hostiles["multiplicity-abuse"] = multiplicity
+
+        duplicate_root = make_live_eventsp_map_preparation_backend()
+        baseline = make_event_preparation_backend("sp", kind="map")
+        duplicate_root.buttons["buttons"].extend(baseline.buttons["buttons"])
+        duplicate_root.buttons["button_count"] = len(duplicate_root.buttons["buttons"])
+        duplicate_root.ui["texts"].extend(baseline.ui["texts"])
+        duplicate_root.ui["text_count"] = len(duplicate_root.ui["texts"])
+        hostiles["duplicate-view-root"] = duplicate_root
+
+        for case, candidate in hostiles.items():
+            with self.subTest(case=case):
+                with self.assertRaises(SemanticGateClosed):
+                    make_oracle(candidate).campaign_preparation_state("sp")
+                adapter = AlasSemanticAdapter(make_oracle(candidate), lambda: None)
+                adapter.begin_campaign_pre_sortie("sp")
+                context = adapter._campaign_context
+                context_before = dict(vars(context))
+                ledger_before = dict(adapter._action_ledger._remaining)
+                for operation in (
+                    lambda: adapter.appear(SimpleNamespace(name="EVENT_CHECK")),
+                    lambda: adapter.appear(SimpleNamespace(name="MAP_PREPARATION")),
+                    lambda: adapter.click(
+                        SimpleNamespace(name="MAP_PREPARATION_CANCEL")
+                    ),
+                ):
+                    with self.assertRaises(SemanticGateClosed):
+                        operation()
+                    self.assertEqual(candidate.taps, [])
+                    self.assertEqual(vars(context), context_before)
+                    self.assertEqual(adapter._action_ledger._remaining, ledger_before)
+                adapter.end_campaign_pre_sortie()
+
+    def test_live_eventsp_map_preparation_binds_exact_selector_underlay(self):
+        live_root = (
+            "UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+            "LevelSelectSPFullUI(Clone)/"
+        )
+        baseline_root = "root/UICamera/Canvas/UIMain/LevelSelectSPFullUI(Clone)/"
+
+        def rewrite(candidate, old_root, new_root):
+            for records in (
+                candidate.buttons["buttons"],
+                candidate.ui["toggles"],
+                candidate.ui["texts"],
+                candidate.ui["images"],
+            ):
+                for record in records:
+                    if record["path"].startswith(old_root):
+                        record["path"] = new_root + record["path"][len(old_root) :]
+
+        live_with_other_stage = make_live_eventsp_map_preparation_backend()
+        other_stage = live_root + "Battle/Nodes/Chapter_2050042/main"
+        live_with_other_stage.buttons["buttons"].append(
+            make_button("main", other_stage, raycast_top=None)
+        )
+        live_with_other_stage.buttons["button_count"] = len(
+            live_with_other_stage.buttons["buttons"]
+        )
+        live_with_other_stage.ui["texts"].extend(
+            (
+                make_text("A1", other_stage + "/info/bk/title_form/title_index"),
+                make_text("另一个完整关卡", other_stage + "/info/bk/title_form/title"),
+            )
+        )
+        live_with_other_stage.ui["text_count"] = len(live_with_other_stage.ui["texts"])
+        self.assertEqual(
+            make_oracle(live_with_other_stage).campaign_preparation_state("sp").kind,
+            "map",
+        )
+
+        mixed_live = make_live_eventsp_map_preparation_backend()
+        rewrite(mixed_live, live_root, baseline_root)
+
+        mixed_baseline = make_event_preparation_backend("sp", kind="map")
+        live_underlay = make_live_eventsp_map_preparation_backend()
+        mixed_baseline.buttons["buttons"].extend(
+            copy.deepcopy(record)
+            for record in live_underlay.buttons["buttons"]
+            if "LevelSelectSPFullUI" in record["path"]
+        )
+        mixed_baseline.buttons["button_count"] = len(mixed_baseline.buttons["buttons"])
+        for group in ("toggles", "texts", "images"):
+            mixed_baseline.ui[group].extend(
+                copy.deepcopy(record)
+                for record in live_underlay.ui[group]
+                if "LevelSelectSPFullUI" in record["path"]
+            )
+            mixed_baseline.ui[group[:-1] + "_count"] = len(mixed_baseline.ui[group])
+
+        selected_text = live_root + "Battle/MapItems/List/Item(Clone)/Selected/Text"
+        tries_text = live_root + "Battle/Nodes/Chapter_2050041/main/triesLimit/Text"
+        selected_frame = live_root + "Battle/MapItems/List/Item(Clone)/Selected/Frame"
+        selected_light = live_root + "Battle/MapItems/List/Item(Clone)/Selected/Light"
+        overlay_title_path = (
+            "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/"
+            "panel/title_form/title"
+        )
+        underlay_title_path = (
+            live_root + "Battle/Nodes/Chapter_2050041/main/info/bk/title_form/title"
+        )
+        hostile = {
+            "live-overlay-baseline-underlay": mixed_live,
+            "baseline-overlay-live-underlay": mixed_baseline,
+        }
+        for case, path in (
+            ("moved-selected", selected_text),
+            ("moved-tries", tries_text),
+            ("moved-frame", selected_frame),
+            ("moved-light", selected_light),
+        ):
+            candidate = make_live_eventsp_map_preparation_backend()
+            for records in (
+                candidate.ui["texts"],
+                candidate.ui["images"],
+            ):
+                for item in records:
+                    if item["path"] == path:
+                        item["path"] = "Mirror/" + path
+            hostile[case] = candidate
+        wrong_tries = make_live_eventsp_map_preparation_backend()
+        next(item for item in wrong_tries.ui["texts"] if item["path"] == tries_text)[
+            "text"
+        ] = "0/1"
+        hostile["wrong-tries"] = wrong_tries
+        wrong_selected = make_live_eventsp_map_preparation_backend()
+        next(
+            item for item in wrong_selected.ui["texts"] if item["path"] == selected_text
+        )["text"] = "A1"
+        hostile["wrong-selected"] = wrong_selected
+        wrong_selected_sprite = make_live_eventsp_map_preparation_backend()
+        next(
+            item
+            for item in wrong_selected_sprite.ui["images"]
+            if item["path"] == selected_frame
+        )["sprite"] = "other"
+        hostile["wrong-selected-sprite"] = wrong_selected_sprite
+
+        overlay_title_mismatch = make_live_eventsp_map_preparation_backend()
+        next(
+            item
+            for item in overlay_title_mismatch.ui["texts"]
+            if item["path"] == overlay_title_path
+        )["text"] = "仅上层标题"
+        hostile["overlay-title-mismatch"] = overlay_title_mismatch
+        underlay_title_mismatch = make_live_eventsp_map_preparation_backend()
+        next(
+            item
+            for item in underlay_title_mismatch.ui["texts"]
+            if item["path"] == underlay_title_path
+        )["text"] = "仅底层标题"
+        hostile["underlay-title-mismatch"] = underlay_title_mismatch
+
+        for case, candidate in hostile.items():
+            with self.subTest(case=case):
+                with self.assertRaises(SemanticGateClosed):
+                    make_oracle(candidate).campaign_preparation_state("sp")
+                adapter = AlasSemanticAdapter(make_oracle(candidate), lambda: None)
+                adapter.begin_campaign_pre_sortie("sp")
+                context = adapter._campaign_context
+                context_before = dict(vars(context))
+                ledger_before = dict(adapter._action_ledger._remaining)
+                for operation in (
+                    lambda: adapter.appear(SimpleNamespace(name="EVENT_CHECK")),
+                    lambda: adapter.appear(SimpleNamespace(name="MAP_PREPARATION")),
+                    lambda: adapter.click(
+                        SimpleNamespace(name="MAP_PREPARATION_CANCEL")
+                    ),
+                ):
+                    with self.assertRaises(SemanticGateClosed):
+                        operation()
+                    self.assertEqual(candidate.taps, [])
+                    self.assertEqual(vars(context), context_before)
+                    self.assertEqual(adapter._action_ledger._remaining, ledger_before)
+                adapter.end_campaign_pre_sortie()
+
+    def test_campaign_preparation_accepts_only_exact_live_eventsp_roots(self):
+        view_root = "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)"
+        fleet_root = (
+            "OverlayCamera/Overlay/UIMain/"
+            "LevelFleetSelectView(Clone)/panel/"
+        )
+        stage_root = (
+            "UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+            "LevelSelectSPFullUI(Clone)/"
+        )
+        baseline_stage_root = (
+            "root/UICamera/Canvas/UIMain/LevelSelectSPFullUI(Clone)/"
+        )
+
+        def rewrite(backend, old_root, new_root):
+            for button in backend.buttons["buttons"]:
+                if button["path"].startswith(old_root):
+                    button["path"] = new_root + button["path"][len(old_root) :]
+            for group in ("texts", "toggles", "images"):
+                for item in backend.ui[group]:
+                    if item["path"].startswith(old_root):
+                        item["path"] = new_root + item["path"][len(old_root) :]
+
+        def rewrite_exact(backend, old_path, new_path):
+            for record in (
+                *backend.buttons["buttons"],
+                *backend.ui["texts"],
+                *backend.ui["toggles"],
+                *backend.ui["images"],
+            ):
+                if record["path"] == old_path:
+                    record["path"] = new_path
+
+        backend = make_live_eventsp_fleet_preparation_backend()
+        preparation = make_oracle(backend).campaign_preparation_state("sp")
+        self.assertIsNotNone(preparation)
+        self.assertEqual(preparation.kind, "fleet")
+        self.assertEqual(preparation.stage_code, "sp")
+        self.assertEqual(
+            preparation.cancel_button.path,
+            fleet_root + "Fixed/btnBack",
+        )
+        self.assertEqual(backend.taps, [])
+
+        mixed = {
+            "live-overlay-baseline-underlay": (
+                make_live_eventsp_fleet_preparation_backend(),
+                stage_root,
+                baseline_stage_root,
+            ),
+            "baseline-overlay-live-underlay": (
+                make_event_preparation_backend("sp", kind="fleet"),
+                baseline_stage_root,
+                stage_root,
+            ),
+        }
+        for case, (backend, old_root, new_root) in mixed.items():
+            with self.subTest(case=case):
+                rewrite(backend, old_root, new_root)
+                with self.assertRaisesRegex(
+                    SemanticGateClosed, "not a reviewed pair"
+                ):
+                    make_oracle(backend).campaign_preparation_state("sp")
+                self.assertEqual(backend.taps, [])
+
+        anchor_hostiles = {
+            "arbitrary-sibling": (view_root + "/bg", view_root + "/other"),
+            "deeper-bg": (view_root + "/bg", view_root + "/bg/Nested"),
+            "deeper-panel": (
+                view_root + "/panel",
+                view_root + "/Nested/panel",
+            ),
+            "remount": (
+                view_root + "/bg",
+                "Remounted/" + view_root + "/bg",
+            ),
+            "cross-root": (view_root + "/bg", "root/" + view_root + "/bg"),
+            "dot": (view_root + "/bg", view_root + "/./bg"),
+            "dotdot": (view_root + "/bg", view_root + "/../bg"),
+            "case": (view_root + "/bg", view_root.upper() + "/BG"),
+            "guid": (
+                view_root + "/bg",
+                "550e8400-e29b-41d4-a716-446655440000/"
+                + view_root
+                + "/bg",
+            ),
+        }
+        for case, (old_path, new_path) in anchor_hostiles.items():
+            with self.subTest(anchor=case):
+                backend = make_live_eventsp_fleet_preparation_backend()
+                rewrite_exact(backend, old_path, new_path)
+                with self.assertRaises(SemanticGateClosed):
+                    make_oracle(backend).campaign_preparation_state("sp")
+                self.assertEqual(backend.taps, [])
+
+        hostile_fleet_roots = (
+            "extra/" + fleet_root,
+            "Mirror/" + fleet_root,
+            "550e8400-e29b-41d4-a716-446655440000/" + fleet_root,
+            fleet_root.upper(),
+            fleet_root.replace("UIMain/Level", "UIMain/Nested/Level"),
+            fleet_root.replace("UIMain/Level", "UIMain/./Level"),
+            fleet_root.replace("UIMain/Level", "UIMain/../Level"),
+            fleet_root + "Nested/",
+        )
+        for hostile in hostile_fleet_roots:
+            with self.subTest(surface="fleet", hostile=hostile):
+                backend = make_live_eventsp_fleet_preparation_backend()
+                rewrite(backend, fleet_root, hostile)
+                with self.assertRaises(SemanticGateClosed):
+                    make_oracle(backend).campaign_preparation_state("sp")
+                self.assertEqual(backend.taps, [])
+
+        hostile_stage_roots = (
+            "root/" + stage_root,
+            "extra/" + stage_root,
+            "Mirror/" + stage_root,
+            "550e8400-e29b-41d4-a716-446655440000/" + stage_root,
+            stage_root.upper(),
+            stage_root.replace("UIMain/Level", "UIMain/Nested/Level"),
+            stage_root.replace("UIMain/Level", "UIMain/./Level"),
+            stage_root.replace("UIMain/Level", "UIMain/../Level"),
+            stage_root.replace("LevelMainScene(Clone)/", ""),
+        )
+        for hostile in hostile_stage_roots:
+            with self.subTest(surface="underlay", hostile=hostile):
+                backend = make_live_eventsp_fleet_preparation_backend()
+                rewrite(backend, stage_root, hostile)
+                with self.assertRaises(SemanticGateClosed):
+                    make_oracle(backend).campaign_preparation_state("sp")
+                self.assertEqual(backend.taps, [])
+
+        duplicate = make_live_eventsp_fleet_preparation_backend()
+        baseline = make_event_preparation_backend("sp", kind="fleet")
+        duplicate.buttons["buttons"].extend(baseline.buttons["buttons"])
+        duplicate.buttons["button_count"] = len(duplicate.buttons["buttons"])
+        duplicate.ui["texts"].extend(baseline.ui["texts"])
+        duplicate.ui["text_count"] = len(duplicate.ui["texts"])
+        with self.assertRaisesRegex(SemanticGateClosed, "ambiguous"):
+            make_oracle(duplicate).campaign_preparation_state("sp")
+        self.assertEqual(duplicate.taps, [])
+
+    def test_campaign_fleet_underlay_identity_texts_require_exact_paths(self):
+        surfaces = (
+            (
+                "event",
+                "sp",
+                lambda: make_event_preparation_backend("sp", kind="fleet"),
+                "LevelSelectSPFullUI",
+            ),
+            (
+                "normal",
+                "12-4",
+                lambda: make_normal_fleet_preparation_backend("12-4"),
+                "LevelMainScene",
+            ),
+        )
+
+        def foreign_path(path, variant):
+            if variant == "extra":
+                return "extra/" + path
+            if variant == "mirror":
+                return "root/Mirror/" + path[len("root/") :]
+            if variant == "guid":
+                return (
+                    "root/550e8400-e29b-41d4-a716-446655440000/"
+                    + path[len("root/") :]
+                )
+            if variant == "nested":
+                return path.replace("/Level", "/Nested/Level", 1)
+            if variant == "dot":
+                return path.replace("/Level", "/./Level", 1)
+            if variant == "dotdot":
+                return path.replace("/Level", "/../Level", 1)
+            if variant == "case":
+                return path.upper()
+            raise AssertionError("unknown hostile identity variant")
+
+        for surface, stage_code, factory, family in surfaces:
+            for variant in (
+                "extra",
+                "mirror",
+                "guid",
+                "nested",
+                "dot",
+                "dotdot",
+                "case",
+            ):
+                for mutation in ("move", "duplicate"):
+                    with self.subTest(
+                        surface=surface,
+                        variant=variant,
+                        mutation=mutation,
+                    ):
+                        backend = factory()
+                        underlay_buttons = tuple(
+                            button["path"]
+                            for button in backend.buttons["buttons"]
+                            if family in button["path"]
+                        )
+                        identity_texts = tuple(
+                            item
+                            for item in backend.ui["texts"]
+                            if family in item["path"]
+                            and item["path"].endswith(
+                                (
+                                    "/info/bk/title_form/title_index",
+                                    "/info/bk/title_form/title",
+                                )
+                            )
+                        )
+                        self.assertEqual(len(identity_texts), 2)
+                        if mutation == "move":
+                            for item in identity_texts:
+                                item["path"] = foreign_path(item["path"], variant)
+                        else:
+                            backend.ui["texts"].extend(
+                                dict(
+                                    copy.deepcopy(item),
+                                    path=foreign_path(item["path"], variant),
+                                )
+                                for item in identity_texts
+                            )
+                            backend.ui["text_count"] = len(backend.ui["texts"])
+
+                        self.assertEqual(
+                            tuple(
+                                button["path"]
+                                for button in backend.buttons["buttons"]
+                                if family in button["path"]
+                            ),
+                            underlay_buttons,
+                        )
+                        adapter = AlasSemanticAdapter(
+                            make_oracle(backend), lambda: None
+                        )
+                        adapter.begin_campaign_pre_sortie(stage_code)
+                        context = adapter._campaign_context
+                        context_before = dict(vars(context))
+                        ledger_before = dict(adapter._action_ledger._remaining)
+
+                        with self.assertRaises(SemanticGateClosed):
+                            adapter.appear(SimpleNamespace(name="EVENT_CHECK"))
+
+                        self.assertEqual(backend.taps, [])
+                        self.assertEqual(vars(context), context_before)
+                        self.assertEqual(
+                            adapter._action_ledger._remaining, ledger_before
+                        )
+                        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_fleet_underlay_selects_requested_canonical_pair(self):
+        surfaces = (
+            (
+                "event",
+                "sp",
+                lambda: make_event_preparation_backend("sp", kind="fleet"),
+                (
+                    "root/UICamera/Canvas/UIMain/LevelSelectSPFullUI(Clone)/"
+                    "Battle/Nodes/Chapter_1/main"
+                ),
+                "a1",
+                "活动 A1",
+            ),
+            (
+                "normal",
+                "12-4",
+                lambda: make_normal_fleet_preparation_backend("12-4"),
+                (
+                    "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/float/"
+                    "levels/items/Chapter_1203/main"
+                ),
+                "12-3",
+                "普通关卡 12-3",
+            ),
+        )
+
+        def add_stage_pair(backend, stage_path, stage_code, title):
+            backend.buttons["buttons"].append(
+                make_button("main", stage_path, raycast_top=False)
+            )
+            backend.buttons["button_count"] = len(backend.buttons["buttons"])
+            backend.ui["texts"].extend(
+                (
+                    make_text(
+                        stage_code.upper(),
+                        stage_path + "/info/bk/title_form/title_index",
+                    ),
+                    make_text(title, stage_path + "/info/bk/title_form/title"),
+                )
+            )
+            backend.ui["text_count"] = len(backend.ui["texts"])
+
+        for surface, requested, factory, other_path, other_code, other_title in surfaces:
+            with self.subTest(surface=surface, case="positive"):
+                backend = factory()
+                add_stage_pair(backend, other_path, other_code, other_title)
+                adapter = AlasSemanticAdapter(make_oracle(backend), lambda: None)
+                adapter.begin_campaign_pre_sortie(requested)
+
+                self.assertFalse(
+                    adapter.appear(SimpleNamespace(name="EVENT_CHECK"))
+                )
+                self.assertEqual(backend.taps, [])
+                receipt = adapter.click(
+                    SimpleNamespace(name="MAP_PREPARATION_CANCEL")
+                )
+
+                self.assertEqual(
+                    receipt.semantic_id, "campaign/fleet-preparation/cancel"
+                )
+                self.assertEqual(len(backend.taps), 1)
+                adapter.end_campaign_pre_sortie()
+
+            for mutation in ("duplicate", "missing", "foreign"):
+                with self.subTest(surface=surface, case=mutation):
+                    backend = factory()
+                    add_stage_pair(backend, other_path, other_code, other_title)
+                    requested_button = next(
+                        button
+                        for button in backend.buttons["buttons"]
+                        if button["name"] == "main"
+                        and button["path"] != other_path
+                    )
+                    requested_path = requested_button["path"]
+                    requested_texts = tuple(
+                        item
+                        for item in backend.ui["texts"]
+                        if item["path"].startswith(
+                            requested_path + "/info/bk/title_form/"
+                        )
+                    )
+                    self.assertEqual(len(requested_texts), 2)
+                    if mutation == "duplicate":
+                        title_index = next(
+                            item
+                            for item in requested_texts
+                            if item["path"].split("/")[-1] == "title_index"
+                        )
+                        backend.ui["texts"].append(copy.deepcopy(title_index))
+                    elif mutation == "missing":
+                        backend.ui["texts"] = [
+                            item
+                            for item in backend.ui["texts"]
+                            if item["path"]
+                            != requested_path + "/info/bk/title_form/title"
+                        ]
+                    else:
+                        for item in requested_texts:
+                            item["path"] = "extra/" + item["path"]
+                    backend.ui["text_count"] = len(backend.ui["texts"])
+
+                    adapter = AlasSemanticAdapter(
+                        make_oracle(backend), lambda: None
+                    )
+                    adapter.begin_campaign_pre_sortie(requested)
+                    context = adapter._campaign_context
+                    context_before = dict(vars(context))
+                    ledger_before = dict(adapter._action_ledger._remaining)
+
+                    with self.assertRaises(SemanticGateClosed):
+                        adapter.appear(SimpleNamespace(name="EVENT_CHECK"))
+
+                    self.assertEqual(backend.taps, [])
+                    self.assertEqual(vars(context), context_before)
+                    self.assertEqual(
+                        adapter._action_ledger._remaining, ledger_before
+                    )
+                    adapter.end_campaign_pre_sortie()
+
+            for mutation in (
+                "missing-title",
+                "missing-index",
+                "empty-title",
+                "truncated-title",
+                "truncated-index",
+                "orphan-button",
+                "orphan-index",
+                "orphan-title",
+            ):
+                with self.subTest(surface=surface, unrelated=mutation):
+                    backend = factory()
+                    add_stage_pair(backend, other_path, other_code, other_title)
+                    other_index_path = (
+                        other_path + "/info/bk/title_form/title_index"
+                    )
+                    other_title_path = other_path + "/info/bk/title_form/title"
+                    other_index = next(
+                        item
+                        for item in backend.ui["texts"]
+                        if item["path"] == other_index_path
+                    )
+                    other_title_item = next(
+                        item
+                        for item in backend.ui["texts"]
+                        if item["path"] == other_title_path
+                    )
+                    if mutation in ("missing-title", "orphan-index"):
+                        backend.ui["texts"].remove(other_title_item)
+                    if mutation in ("missing-index", "orphan-title"):
+                        backend.ui["texts"].remove(other_index)
+                    if mutation == "empty-title":
+                        other_title_item["text"] = ""
+                    if mutation == "truncated-title":
+                        other_title_item["flags"] |= 0x10
+                    if mutation == "truncated-index":
+                        other_index["flags"] |= 0x10
+                    if mutation in ("orphan-index", "orphan-title"):
+                        backend.buttons["buttons"] = [
+                            button
+                            for button in backend.buttons["buttons"]
+                            if button["path"] != other_path
+                        ]
+                    if mutation == "orphan-button":
+                        backend.ui["texts"] = [
+                            item
+                            for item in backend.ui["texts"]
+                            if item["path"]
+                            not in (other_index_path, other_title_path)
+                        ]
+                    backend.buttons["button_count"] = len(
+                        backend.buttons["buttons"]
+                    )
+                    backend.ui["text_count"] = len(backend.ui["texts"])
+
+                    adapter = AlasSemanticAdapter(
+                        make_oracle(backend), lambda: None
+                    )
+                    adapter.begin_campaign_pre_sortie(requested)
+                    context = adapter._campaign_context
+                    context_before = dict(vars(context))
+                    ledger_before = dict(adapter._action_ledger._remaining)
+
+                    with self.assertRaises(SemanticGateClosed):
+                        adapter.appear(SimpleNamespace(name="EVENT_CHECK"))
+
+                    self.assertEqual(backend.taps, [])
+                    self.assertEqual(vars(context), context_before)
+                    self.assertEqual(
+                        adapter._action_ledger._remaining, ledger_before
+                    )
+                    adapter.end_campaign_pre_sortie()
+
+    def test_event_check_partial_real_oracle_is_passive_and_fail_closed(self):
+        root = "root/OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/panel/"
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [
+                make_text("SP", root + "title_form/title_index"),
+                make_text("活动关卡", root + "title_form/title"),
+            ]
+        )
+        adapter = AlasSemanticAdapter(make_oracle(backend), lambda: None)
+        adapter.begin_campaign_pre_sortie("SP")
+        context = adapter._campaign_context
+        context_before = dict(vars(context))
+        ledger_before = dict(adapter._action_ledger._remaining)
+
+        with self.assertRaisesRegex(SemanticGateClosed, "controls"):
+            adapter.appear(SimpleNamespace(name="EVENT_CHECK"))
+
+        self.assertEqual(backend.taps, [])
+        self.assertEqual(vars(context), context_before)
+        self.assertEqual(adapter._action_ledger._remaining, ledger_before)
+        adapter.end_campaign_pre_sortie()
+
+    def test_event_check_real_oracle_rejections_never_mutate_or_tap(self):
+        cases = []
+
+        cross_root = make_event_preparation_backend("sp", kind="map")
+        for text in cross_root.ui["texts"]:
+            text["path"] = text["path"].replace("root/", "other/", 1)
+        cases.append(("cross-root", cross_root))
+
+        remounted = make_event_preparation_backend(
+            "sp", kind="fleet", prefix="root/Remounted/"
+        )
+        cases.append(("remounted", remounted))
+
+        duplicate = make_event_preparation_backend("sp", kind="map")
+        duplicate_other = make_event_preparation_backend(
+            "sp", kind="map", prefix="other/"
+        )
+        duplicate.buttons["buttons"].extend(duplicate_other.buttons["buttons"])
+        duplicate.buttons["button_count"] = len(duplicate.buttons["buttons"])
+        duplicate.ui["texts"].extend(duplicate_other.ui["texts"])
+        duplicate.ui["text_count"] = len(duplicate.ui["texts"])
+        cases.append(("duplicate", duplicate))
+
+        stale = make_event_preparation_backend("sp", kind="fleet")
+        stale.ui["generation"] = 7
+        cases.append(("stale", stale))
+
+        wrong_stage = make_event_preparation_backend("ex", kind="map")
+        cases.append(("wrong-stage", wrong_stage))
+
+        for case, backend in cases:
+            with self.subTest(case=case):
+                adapter = AlasSemanticAdapter(make_oracle(backend), lambda: None)
+                adapter.begin_campaign_pre_sortie("SP")
+                context = adapter._campaign_context
+                context_before = dict(vars(context))
+                ledger_before = dict(adapter._action_ledger._remaining)
+
+                with self.assertRaises(SemanticGateClosed):
+                    adapter.appear(SimpleNamespace(name="EVENT_CHECK"))
+
+                self.assertEqual(backend.taps, [])
+                self.assertEqual(vars(context), context_before)
+                self.assertEqual(adapter._action_ledger._remaining, ledger_before)
+                adapter.end_campaign_pre_sortie()
+
+    def test_shared_event_stage_cancel_uses_resolved_real_oracle_stage(self):
+        seed = ActionReceipt(
+            semantic_id="test/seed",
+            generation=1,
+            point=Point(1, 1),
+            bounds=Bounds(0, 0, 2, 2),
+            path="test/seed",
+        )
+        for requested, actual in (("c1", "a1"), ("d1", "b1")):
+            for kind in ("map", "fleet"):
+                for owned in (False, True):
+                    with self.subTest(
+                        requested=requested,
+                        actual=actual,
+                        kind=kind,
+                        owned=owned,
+                    ):
+                        backend = make_event_preparation_backend(actual, kind=kind)
+                        adapter = AlasSemanticAdapter(make_oracle(backend), lambda: None)
+                        adapter.begin_campaign_pre_sortie(requested.upper())
+                        context = adapter._campaign_context
+                        if owned:
+                            context.entry_receipt = seed
+                            if kind == "fleet":
+                                context.map_preparation_receipt = seed
+                        ledger_before = dict(adapter._action_ledger._remaining)
+
+                        self.assertFalse(
+                            adapter.appear(SimpleNamespace(name="EVENT_CHECK"))
+                        )
+                        self.assertEqual(backend.taps, [])
+                        self.assertEqual(context.stage_code, requested)
+                        self.assertEqual(adapter._action_ledger._remaining, ledger_before)
+
+                        receipt = adapter.click(
+                            SimpleNamespace(name="MAP_PREPARATION_CANCEL")
+                        )
+
+                        expected = "campaign/{0}-preparation/cancel".format(kind)
+                        self.assertEqual(receipt.semantic_id, expected)
+                        self.assertEqual(len(backend.taps), 1)
+                        self.assertEqual(context.stage_code, requested)
+                        if owned:
+                            self.assertIs(context.cancel_receipt, receipt)
+                        else:
+                            self.assertIsNone(context.cancel_receipt)
+                            self.assertIs(context.inherited_cancel_receipt, receipt)
+                            self.assertEqual(context.inherited_cancel_kind, kind)
+                            self.assertEqual(
+                                context.inherited_cancel_stage_code, actual
+                            )
+                            with self.assertRaisesRegex(
+                                SemanticGateClosed, "single-use"
+                            ):
+                                adapter.click(
+                                    SimpleNamespace(
+                                        name="MAP_PREPARATION_CANCEL"
+                                    )
+                                )
+                            self.assertEqual(len(backend.taps), 1)
+                        adapter.end_campaign_pre_sortie()
 
     def test_campaign_fleet_preparation_exposes_exact_cancel_and_sortie(self):
         fleet = (
@@ -3284,13 +5131,28 @@ class SemanticOracleTests(unittest.TestCase):
         )
 
         with self.assertRaisesRegex(
-            SemanticGateClosed, "official auto-search surface"
+            SemanticTargetMissing, "official auto-search surface is absent"
         ):
             make_oracle(backend).campaign_auto_search_active_state()
 
         combat_root = (
             "root/UICamera/Canvas/UIMain/CombatUIStandard(Clone)/AutoBtn"
         )
+        result_root = (
+            "root/UICamera/Canvas/UIMain/NewBattleResultEmptyUI(Clone)/Main"
+        )
+        backend.ui = make_ui(
+            [
+                make_text("自动", combat_root + "/Text"),
+                make_text("战斗结果", result_root + "/Text"),
+            ],
+            generation=20,
+        )
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "official auto-search surface is ambiguous"
+        ):
+            make_oracle(backend).campaign_auto_search_active_state()
+
         backend.ui = make_ui(
             [make_text("自动", combat_root + "/Text")],
             generation=21,
@@ -3301,6 +5163,13 @@ class SemanticOracleTests(unittest.TestCase):
             active.root_path,
             "root/UICamera/Canvas/UIMain/CombatUIStandard(Clone)",
         )
+
+        backend.ui = make_ui(
+            [make_text("自动", combat_root + "/Text")],
+            generation=True,
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "invalid integer field"):
+            make_oracle(backend).campaign_auto_search_active_state()
 
     def test_campaign_map_model_is_complete_stable_and_uses_alas_topology(self):
         backend = make_campaign_map_backend()

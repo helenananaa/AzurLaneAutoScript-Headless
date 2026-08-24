@@ -73,7 +73,7 @@
     {
       "order": 15,
       "path": "integration/alas/series/0130-enhancement-flow-ports.patch",
-      "sha256": "c009fd4b11d97f493e419e2936ad0405b25b98927a1fcb04df50933cc15db348"
+      "sha256": "6b06ac8e54d6684ff357c39664b78b534bc3a3a72942929dad4158a09af5c112"
     },
     {
       "order": 16,
@@ -88,7 +88,7 @@
     {
       "order": 18,
       "path": "integration/alas/series/0160-awaken-config-contract.patch",
-      "sha256": "413d98901ae54f9e1d2b992e2eae60db2e939269cbca8229873484caa988e3a2"
+      "sha256": "3af676177a3b4dab9660d3c810811e6061788005ef2401c88c4439c8d0401393"
     },
     {
       "order": 19,

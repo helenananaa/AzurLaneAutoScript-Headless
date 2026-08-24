@@ -234,7 +234,7 @@ def validate(
     }
     instance: object | None = None
     adapter: Any | None = None
-    original_adapter_enhance: Any | None = None
+    original_adapter_begin: Any | None = None
     original_dispatch: Any | None = None
     original_scope: Any | None = None
     original_filter: Any | None = None
@@ -297,16 +297,16 @@ def validate(
                 "receipts": [_receipt_value(item) for item in bootstrap],
             }
 
-        original_adapter_enhance = semantic_session.enhance_ships
+        original_adapter_begin = semantic_session.begin_enhancement_task
         original_dispatch = adapter._dispatch_mutation
         original_scope = adapter.oracle.set_enhancement_dock_favourite
         original_filter = adapter.oracle.set_enhancement_dock_filter
 
-        def record_adapter_enhance(
+        def record_adapter_begin(
             ship_to_enhance: str,
             check_per_category: int,
             filter_expression: Optional[str],
-        ) -> int:
+        ) -> None:
             result["forwarded"].append(
                 {
                     "ship_to_enhance": ship_to_enhance,
@@ -314,7 +314,7 @@ def validate(
                     "filter_expression": filter_expression,
                 }
             )
-            return original_adapter_enhance(
+            original_adapter_begin(
                 ship_to_enhance,
                 check_per_category,
                 filter_expression,
@@ -351,7 +351,7 @@ def validate(
             )
             return receipts
 
-        semantic_session.enhance_ships = record_adapter_enhance
+        semantic_session.begin_enhancement_task = record_adapter_begin
         adapter._dispatch_mutation = record_dispatch
         adapter.oracle.set_enhancement_dock_favourite = record_scope
         adapter.oracle.set_enhancement_dock_filter = record_filter
@@ -398,8 +398,10 @@ def validate(
                 "official recommendation did not produce configured real enhancements"
             )
         consumed = sum(int(item["consumed_count"]) for item in execution_receipts)
-        if consumed < check_per_category or result["original_task_result"] != consumed:
-            raise AssertionError("original task result does not match confirmed materials")
+        if consumed < check_per_category:
+            raise AssertionError("confirmed enhancement materials are below executions")
+        if result["original_task_result"] != 10 * check_per_category:
+            raise AssertionError("original ALAS enhancement total contract changed")
         if not result["dock_scopes"] or result["dock_scopes"][0]["enabled"] != (
             ship_to_enhance == "favourite"
         ):
@@ -487,8 +489,8 @@ def validate(
             if instance is not None
             else None
         ):
-            if original_adapter_enhance is not None:
-                semantic_session.enhance_ships = original_adapter_enhance
+            if original_adapter_begin is not None:
+                semantic_session.begin_enhancement_task = original_adapter_begin
         if adapter is not None:
             if original_dispatch is not None:
                 adapter._dispatch_mutation = original_dispatch

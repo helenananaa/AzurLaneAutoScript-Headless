@@ -17,6 +17,10 @@ from typing import Any, Mapping
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = "alas-headless.hard-live-validation/v1"
+if str(ROOT / "python") not in sys.path:
+    sys.path.insert(0, str(ROOT / "python"))
+
+from alas_headless.adb_device import resolve_adb_serial  # noqa: E402
 
 
 def _now() -> str:
@@ -183,7 +187,10 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--alas-root", required=True, type=Path)
-    parser.add_argument("--serial", default="emulator-5580")
+    parser.add_argument(
+        "--serial",
+        help="exact online ADB serial; auto-discovered only when exactly one is online",
+    )
     parser.add_argument("--driver-revision", required=True)
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--seed-config", default="semantic_e2e")
@@ -198,6 +205,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    args.serial = resolve_adb_serial(args.adb, args.serial)
     result = run(args)
     _write(args.output, result)
     return 0 if result.get("passed") else 1

@@ -7,7 +7,23 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
  from module.awaken.assets import *
  from module.base.timer import Timer
  from module.exception import ScriptError
-@@ -371,19 +373,32 @@ class Awaken(Dock):
+@@ -329,6 +331,15 @@ class Awaken(Dock):
+             in: Any
+             out: page_dock
+         """
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.prepare_awaken_phase(use_array)
++            while 1:
++                result = semantic_session.awaken_next(use_array)
++                if result == 'continue':
++                    continue
++                return result
++
+         logger.hr('Awaken run', level=1)
+         self.ui_ensure(page_dock)
+         self.dock_favourite_set(enable=favourite, wait_loading=False)
+@@ -371,25 +382,36 @@ class Awaken(Dock):
          return result
  
      def run(self):
@@ -17,12 +33,7 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
 +        )
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
-+            semantic_session.awaken_task(
-+                level_cap=awaken_config.level_cap,
-+                favourite=awaken_config.favourite,
-+            )
-+            self.config.task_delay(server_update=True)
-+            return
++            semantic_session.begin_awaken_task(awaken_config.favourite)
 +
          # Run Awakening+ first
 -        favourite = self.config.Awaken_Favourite
@@ -44,3 +55,15 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
  
          # Reset dock filters
          logger.hr('Awaken run exit', level=1)
+-        if favourite:
+-            self.dock_favourite_set(wait_loading=False)
+-        self.dock_filter_set(wait_loading=False)
++        if semantic_session is not None:
++            semantic_session.finish_awaken_task()
++        else:
++            if favourite:
++                self.dock_favourite_set(wait_loading=False)
++            self.dock_filter_set(wait_loading=False)
+ 
+         # Scheduler
+         self.config.task_delay(server_update=True)

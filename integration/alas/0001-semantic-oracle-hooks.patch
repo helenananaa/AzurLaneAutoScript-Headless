@@ -7859,33 +7859,74 @@ index 19e08df2..9ea66349 100644
                  logger.warning(
                      'No ship retired, trying to reset dock filter and disable favourite, then retire again')
 diff --git a/module/retire/enhancement.py b/module/retire/enhancement.py
-index a1c9b013..f2e4b6c8 100644
+index a1c9b013..77b5ed3a 100644
 --- a/module/retire/enhancement.py
 +++ b/module/retire/enhancement.py
-@@ -263,6 +263,23 @@ class Enhancement(Dock):
-         Returns:
-             int: total enhanced
+@@ -42,8 +42,13 @@ class Enhancement(Dock):
+             bool: False with filter applied resulting
+                   in empty dock.
+                   Otherwise true with at least 1 card
+                   available to be picked.
          """
 +        from alas_headless import current_semantic_session
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
-+            # ALAS retains task scheduling and the detailed Enhance config.
-+            # The semantic port owns Dock filtering, target navigation, the
-+            # official recommendation, the single destructive confirmation,
-+            # and the observed material count.  Invalid filter tokens fail
-+            # closed instead of entering the legacy random-type fallback.
-+            ship_to_enhance = self.config.Enhance_ShipToEnhance
-+            if favourite is not None:
-+                ship_to_enhance = 'favourite' if favourite else 'all'
-+            return semantic_session.enhance_ships(
++            return semantic_session.enhancement_enter(favourite, ship_type)
++
+         if favourite:
+             self.dock_favourite_set(enable=True, wait_loading=False)
+ 
+@@ -123,6 +128,11 @@ class Enhancement(Dock):
+             True if able to enhance otherwise False
+             Always paired with current ship_count
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.enhancement_choose(ship_count)
++
+         need_to_skip: bool = False
+ 
+         def state_enhance_check():
+@@ -263,8 +273,20 @@ class Enhancement(Dock):
+         Returns:
+             int: total enhanced
+         """
+         if favourite is None:
+             favourite = self.config.Enhance_ShipToEnhance == 'favourite'
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            # Validate before ALAS parses the order.  This prevents the legacy
++            # random fallback for unknown types while leaving the category,
++            # retry, total and exit loops in their original owner.
++            ship_to_enhance = 'favourite' if favourite else 'all'
++            semantic_session.begin_enhancement_task(
 +                ship_to_enhance=ship_to_enhance,
 +                check_per_category=self.config.Enhance_CheckPerCategory,
 +                filter_expression=self.config.Enhance_Filter,
 +            )
-+
-         if favourite is None:
-             favourite = self.config.Enhance_ShipToEnhance == 'favourite'
  
+         logger.hr('Enhancement by type')
+         total = 0
+@@ -318,9 +341,15 @@ class Enhancement(Dock):
+                 total += 10
+                 if total >= self._retire_amount:
+                     break
+-            self.ui_back(DOCK_CHECK)
++            if semantic_session is not None:
++                semantic_session.enhancement_leave_category()
++            else:
++                self.ui_back(DOCK_CHECK)
+ 
+-        self._enhance_quit()
++        if semantic_session is not None:
++            semantic_session.finish_enhancement_task()
++        else:
++            self._enhance_quit()
+         return total
+ 
+     def _enhance_handler(self):
 diff --git a/module/config/config.py b/module/config/config.py
 index 97631fca..6b26dd61 100644
 --- a/module/config/config.py
@@ -8020,7 +8061,23 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
  from module.awaken.assets import *
  from module.base.timer import Timer
  from module.exception import ScriptError
-@@ -371,19 +373,32 @@ class Awaken(Dock):
+@@ -329,6 +331,15 @@ class Awaken(Dock):
+             in: Any
+             out: page_dock
+         """
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.prepare_awaken_phase(use_array)
++            while 1:
++                result = semantic_session.awaken_next(use_array)
++                if result == 'continue':
++                    continue
++                return result
++
+         logger.hr('Awaken run', level=1)
+         self.ui_ensure(page_dock)
+         self.dock_favourite_set(enable=favourite, wait_loading=False)
+@@ -371,25 +382,36 @@ class Awaken(Dock):
          return result
  
      def run(self):
@@ -8030,12 +8087,7 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
 +        )
 +        semantic_session = current_semantic_session()
 +        if semantic_session is not None:
-+            semantic_session.awaken_task(
-+                level_cap=awaken_config.level_cap,
-+                favourite=awaken_config.favourite,
-+            )
-+            self.config.task_delay(server_update=True)
-+            return
++            semantic_session.begin_awaken_task(awaken_config.favourite)
 +
          # Run Awakening+ first
 -        favourite = self.config.Awaken_Favourite
@@ -8057,6 +8109,18 @@ diff --git a/module/awaken/awaken.py b/module/awaken/awaken.py
  
          # Reset dock filters
          logger.hr('Awaken run exit', level=1)
+-        if favourite:
+-            self.dock_favourite_set(wait_loading=False)
+-        self.dock_filter_set(wait_loading=False)
++        if semantic_session is not None:
++            semantic_session.finish_awaken_task()
++        else:
++            if favourite:
++                self.dock_favourite_set(wait_loading=False)
++            self.dock_filter_set(wait_loading=False)
+ 
+         # Scheduler
+         self.config.task_delay(server_update=True)
 diff --git a/module/event_hospital/combat.py b/module/event_hospital/combat.py
 --- a/module/event_hospital/combat.py
 +++ b/module/event_hospital/combat.py
