@@ -1,5 +1,6 @@
 import hashlib
 import base64
+import errno
 import json
 import os
 import shutil
@@ -602,19 +603,27 @@ class RunnerSupervisionTests(unittest.TestCase):
                 while True:
                     try:
                         real_write(saturated.write_fd, b"x" * 4096)
-                    except BlockingIOError:
+                    except OSError as exc:
+                        self.assertIn(
+                            exc.errno,
+                            {errno.EAGAIN, errno.EWOULDBLOCK, errno.ENOSPC},
+                        )
                         break
                 started = time.monotonic()
                 with mock.patch(
                     "alas_headless.runner_supervision.os.write", wraps=real_write
                 ) as writer:
-                    with self.assertRaises(BlockingIOError):
+                    with self.assertRaises(OSError) as raised:
                         send_activation(
                             saturated,
                             control,
                             control_path,
                             absolute_deadline=time.monotonic() + 5.0,
                         )
+                self.assertIn(
+                    raised.exception.errno,
+                    {errno.EAGAIN, errno.EWOULDBLOCK, errno.ENOSPC},
+                )
                 self.assertLess(time.monotonic() - started, 1.0)
                 writer.assert_called_once()
             finally:
