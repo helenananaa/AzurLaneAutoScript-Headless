@@ -219,11 +219,19 @@ index 57033308..c70ee57c 100644
          name, folder = self.handle_stage_name(name, folder, mode=mode)
          self.config.override(Campaign_Name=name, Campaign_Event=folder)
          self.load_campaign(name, folder=folder)
-@@ -398,13 +450,18 @@ class CampaignRun(CampaignEvent):
+@@ -398,13 +450,26 @@ class CampaignRun(CampaignEvent):
              if not self.device.has_cached_image:
                  self.device.screenshot()
              self.campaign.device.image = self.device.image
 +            semantic_map_resume = False
++            if (
++                semantic_adapter is not None
++                and self.handle_popup_confirm('CAMPAIGN_RECONNECT')
++            ):
++                logger.warning(
++                    'Recovered NetworkDown before campaign startup surface check')
++                self.device.screenshot()
++                self.campaign.device.image = self.device.image
              if self.campaign.is_in_map():
 -                logger.info('Already in map, retreating.')
 -                try:
@@ -683,13 +691,13 @@ index 9fa9cba2..1f7044a1 100644
          logger.info('Map swipe: %s' % str(vector))
 +        from alas_headless import current_semantic_session
 +        semantic_session = current_semantic_session()
-+        if semantic_session is not None and not np.any(vector):
-+            return False
 +        if (
 +            semantic_session is not None
 +            and semantic_session.recover_campaign_map_network_reconnect()
 +        ):
 +            logger.warning('Recovered NetworkDown before campaign map swipe')
++        if semantic_session is not None and not np.any(vector):
++            return False
          self._prev_view = copy.copy(self.view)
          self._prev_swipe = vector
          vector = np.array(vector)
@@ -905,7 +913,7 @@ index c44e0996..78c9d812 100644
 +                                try:
 +                                    semantic_adapter.close_campaign_fleet_dropdown_for_rollback()
 +                                finally:
-+                                    self.enter_map_cancel()
++                                    self.enter_map_cancel(skip_first_screenshot=False)
 +                        if sortie_clicked:
 +                            continue
 +                        if fleet_authorized:

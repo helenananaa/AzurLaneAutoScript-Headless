@@ -10,6 +10,7 @@ from __future__ import annotations
 import os
 import math
 import re
+import statistics
 import time
 from dataclasses import dataclass, field, replace
 from numbers import Real
@@ -136,6 +137,8 @@ from .semantic_oracle import (
     GuildFormationState,
     GuildLogisticsState,
     GuildOperationsState,
+    GemsFarmingDockCandidate,
+    GemsFarmingEquipmentLoadout,
     MissionPageState,
     MissionDisposition,
     MetaEntranceState,
@@ -1061,6 +1064,7 @@ class _CampaignFlowContext:
     requested_fleets: Optional[Tuple[int, int, int]] = None
     required_fleet_mutations: int = 0
     expected_fleet_mutations: Tuple[str, ...] = ()
+    gems_farming_hard_pending_roles: Tuple[str, ...] = ()
     fleet_mutation_receipts: List[ActionReceipt] = field(default_factory=list)
     auto_search_role_receipts: List[ActionReceipt] = field(default_factory=list)
     auto_search_role_state: Optional[CampaignAutoSearchRoleState] = None
@@ -1097,6 +1101,7 @@ class _CampaignFlowContext:
     combat_route_receipts: List[ActionReceipt] = field(default_factory=list)
     map_fleet_switch_receipts: List[ActionReceipt] = field(default_factory=list)
     combat_receipt: Optional[ActionReceipt] = None
+    combat_input_retry_count: int = 0
     combat_proof: Optional[AlasCampaignCombatProof] = None
     auto_search_completion: Optional[CampaignAutoSearchCompletionProof] = None
     passive_transition_until: float = 0.0
@@ -1265,6 +1270,9 @@ class AlasSemanticAdapter:
         self._supply_pack_context: Optional[_SupplyPackFlowContext] = None
         self._minigame_context: Optional[_MinigameFlowContext] = None
         self._campaign_context: Optional[_CampaignFlowContext] = None
+        self._gems_farming_hard_profile: Optional[
+            Tuple[str, int, str, str]
+        ] = None
         self._daily_kind: Optional[str] = None
         self._daily_stage: Optional[int] = None
         self._daily_execution_receipts: List[ActionReceipt] = []
@@ -1466,6 +1474,251 @@ class AlasSemanticAdapter:
 
     def enhancement_allowed(self) -> bool:
         return self._action_ledger.allowed("enhancement.execute")
+
+    def gems_farming_admit_live_mode(
+        self,
+        stage_code: str,
+        campaign_mode: str,
+        change_flagship: str,
+        change_vanguard: str,
+        attacking_fleet: int,
+    ) -> None:
+        """Admit only GemsFarming paths whose observation and input are typed."""
+
+        if change_flagship not in ("ship", "ship_equip"):
+            raise SemanticGateClosed(
+                "GemsFarming flagship change mode is not typed"
+            )
+        if change_vanguard not in ("disabled", "ship", "ship_equip"):
+            raise SemanticGateClosed(
+                "GemsFarming vanguard change mode is not typed"
+            )
+        if campaign_mode == "normal":
+            self._gems_farming_hard_profile = None
+            return
+        if campaign_mode != "hard":
+            raise SemanticGateClosed("GemsFarming campaign mode is not reviewed")
+        if stage_code.upper() not in ("11-4", "12-1"):
+            raise SemanticGateClosed(
+                "GemsFarming hard mode is qualified only for reviewed hard stages"
+            )
+        if change_flagship != "ship" or change_vanguard not in (
+            "disabled",
+            "ship",
+        ):
+            raise SemanticGateClosed(
+                "GemsFarming hard ship_equip replacement is not typed"
+            )
+        if attacking_fleet not in (1, 2):
+            raise SemanticGateClosed(
+                "GemsFarming hard attacking fleet must be 1 or 2"
+            )
+        self._gems_farming_hard_profile = (
+            stage_code.upper(),
+            attacking_fleet,
+            change_flagship,
+            change_vanguard,
+        )
+
+    def gems_farming_select_fleet_index(self, fleet_index: int) -> int:
+        self._package_gate()
+        return self.oracle.gems_farming_select_fleet_index(fleet_index)
+
+    def gems_farming_open_slot(self, role: str) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.gems_farming_open_slot(role)
+
+    def gems_farming_hard_slot_occupied(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> bool:
+        self._package_gate()
+        return self.oracle.gems_farming_hard_slot_occupied(
+            stage_code, fleet_index, role
+        )
+
+    def gems_farming_hard_fleet_preparation_visible(self, stage_code: str) -> bool:
+        """Wait briefly for the exact hard fleet overlay during ALAS re-entry."""
+
+        self._package_gate()
+        for attempt in range(30):
+            try:
+                state = self.oracle.campaign_fleet_selection_state(stage_code)
+            except (SemanticGateClosed, SemanticTargetMissing):
+                if attempt < 29:
+                    time.sleep(0.1)
+                continue
+            return bool(state.hard_mode)
+        return False
+
+    def gems_farming_hard_unmount(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> ActionReceipt:
+        if not self._action_ledger.allowed("campaign.fleet_mutation"):
+            raise SemanticGateClosed(
+                "GemsFarming hard unmount requires a campaign fleet mutation budget"
+            )
+        self._package_gate()
+        return self._dispatch_mutation(
+            "campaign.fleet_mutation",
+            lambda: self.oracle.gems_farming_hard_unmount(
+                stage_code, fleet_index, role
+            ),
+        )
+
+    def gems_farming_hard_open_slot(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.gems_farming_hard_open_slot(
+            stage_code, fleet_index, role
+        )
+
+    def gems_farming_equipment_take_off(
+        self, role: str
+    ) -> GemsFarmingEquipmentLoadout:
+        if not self._action_ledger.allowed("campaign.fleet_mutation"):
+            raise SemanticGateClosed(
+                "GemsFarming equipment transfer requires a positive campaign fleet mutation budget"
+            )
+        self._package_gate()
+        return self.oracle.gems_farming_equipment_take_off(role)
+
+    def gems_farming_equipment_take_on(
+        self, role: str
+    ) -> GemsFarmingEquipmentLoadout:
+        self._package_gate()
+        return self.oracle.gems_farming_equipment_take_on(role)
+
+    @staticmethod
+    def _gems_candidate_name_allowed(
+        role: str, selector: str, ship_name: str
+    ) -> bool:
+        names = {
+            "flagship": {
+                "bogue": ("博格", "博格.改"),
+                "hermes": ("竞技神", "竞技神.改"),
+                "langley": ("兰利", "兰利.改"),
+                "ranger": ("突击者", "突击者.改"),
+            },
+            "vanguard": {
+                "aulick_or_foote": ("奥利克", "富特"),
+                "cassin_or_downes": ("卡辛", "卡辛.改", "唐斯", "唐斯.改"),
+                "z20_or_z21": ("Z20", "Z21"),
+            },
+        }
+        if selector in ("any", "favourite"):
+            return True
+        return ship_name in names.get(role, {}).get(selector, ())
+
+    def gems_farming_candidates(
+        self,
+        *,
+        role: str,
+        selector: str,
+        max_level: int,
+        min_emotion: int,
+        fleet_index: int,
+    ) -> Tuple[GemsFarmingDockCandidate, ...]:
+        """Replace ALAS's OCR/template scanner with exact typed Dock cards."""
+
+        if role not in ("flagship", "vanguard"):
+            raise ValueError("GemsFarming role must be flagship or vanguard")
+        if (
+            isinstance(max_level, bool)
+            or not isinstance(max_level, int)
+            or not 1 <= max_level <= 125
+            or isinstance(min_emotion, bool)
+            or not isinstance(min_emotion, int)
+            or not 0 <= min_emotion <= 150
+            or isinstance(fleet_index, bool)
+            or not isinstance(fleet_index, int)
+            or not 1 <= fleet_index <= 6
+        ):
+            raise SemanticGateClosed("GemsFarming candidate bounds are invalid")
+        allowed_selectors = {
+            "flagship": {"any", "bogue", "hermes", "langley", "ranger"},
+            "vanguard": {
+                "any",
+                "favourite",
+                "aulick_or_foote",
+                "cassin_or_downes",
+                "z20_or_z21",
+            },
+        }
+        if selector not in allowed_selectors[role]:
+            raise SemanticGateClosed("GemsFarming candidate selector is invalid")
+        self._package_gate()
+        try:
+            favourite = role == "vanguard" and selector == "favourite"
+            self.oracle.set_enhancement_dock_favourite(favourite)
+            self.oracle.set_gems_farming_dock_sort(role == "vanguard")
+            if role == "flagship" or selector == "favourite":
+                factions = ("all",)
+            elif selector == "z20_or_z21":
+                factions = ("iron",)
+            elif selector in ("aulick_or_foote", "cassin_or_downes"):
+                factions = ("eagle",)
+            else:
+                factions = ("eagle", "iron")
+            self.oracle.set_gems_farming_dock_filter(role, factions)
+            observed = self.oracle.gems_farming_dock_candidates()
+        except SemanticOracleError as original_error:
+            try:
+                self.oracle.cancel_gems_farming_dock_filter_if_visible()
+                self.oracle.cancel_gems_farming_candidate_selection()
+            except SemanticOracleError as recovery_error:
+                raise SemanticGateClosed(
+                    "GemsFarming candidate observation recovery failed"
+                ) from recovery_error
+            raise original_error
+        expected_type = "cv" if role == "flagship" else "dd"
+        candidates = tuple(
+            item
+            for item in observed
+            if item.ship_type == expected_type
+            and item.rarity == "common"
+            and (
+                1 <= item.level <= max_level
+                if role == "flagship"
+                else item.level == max_level
+            )
+            and min_emotion <= item.emotion <= 150
+            and item.status == "free"
+            and self._gems_candidate_name_allowed(role, selector, item.ship_name)
+        )
+        if role == "flagship":
+            same_fleet = tuple(
+                item for item in candidates if item.fleet_index == fleet_index
+            )
+            if same_fleet:
+                return same_fleet
+            return tuple(item for item in candidates if item.fleet_index == 0)
+        return tuple(
+            item for item in candidates if item.fleet_index in (0, fleet_index)
+        )
+
+    def gems_farming_select_candidate(
+        self, candidate: GemsFarmingDockCandidate
+    ) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_gems_farming_candidate(candidate)
+
+    def gems_farming_cancel_candidate_selection(self) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.cancel_gems_farming_candidate_selection()
+
+    def gems_farming_confirm_candidate_selection(
+        self, candidate: GemsFarmingDockCandidate, role: str
+    ) -> ActionReceipt:
+        if not self._action_ledger.allowed("campaign.fleet_mutation"):
+            raise SemanticGateClosed(
+                "GemsFarming replacement requires a positive campaign fleet mutation budget"
+            )
+        self._package_gate()
+        return self._dispatch_mutation(
+            "campaign.fleet_mutation",
+            lambda: self.oracle.confirm_gems_farming_candidate_selection(candidate, role),
+        )
 
     def begin_enhancement_task(
         self,
@@ -2752,7 +3005,13 @@ class AlasSemanticAdapter:
 
     def campaign_map_preparation_committed(self) -> bool:
         context = self._require_campaign_context()
-        return context.map_preparation_receipt is not None
+        if context.map_preparation_receipt is None:
+            return False
+        if time.monotonic() > context.passive_transition_until:
+            raise SemanticGateClosed(
+                "campaign map-preparation transition did not reach the fleet overlay"
+            )
+        return True
 
     def campaign_sortie_committed(self) -> bool:
         context = self._require_campaign_context()
@@ -3040,7 +3299,7 @@ class AlasSemanticAdapter:
             )
         if (
             context.mode == "hard"
-            and stage_code != "11-4"
+            and stage_code not in ("11-4", "12-1")
             and re.fullmatch(r"[cd][1-3]", stage_code) is None
         ):
             raise SemanticGateClosed(
@@ -3196,7 +3455,7 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "campaign auto-search continue is qualified only for hard mode"
             )
-        if context.stage_code != "11-4":
+        if context.stage_code not in ("11-4", "12-1"):
             raise SemanticGateClosed(
                 "campaign auto-search continue is qualified only for hard 11-4"
             )
@@ -3297,10 +3556,52 @@ class AlasSemanticAdapter:
             rows = {row.row_key: row for row in initial.rows}
             if set(rows) != {"fleet1", "fleet2", "submarine"}:
                 raise SemanticGateClosed("hard campaign fleet rows are incomplete")
+            pending_roles: Tuple[str, ...] = ()
+            profile = self._gems_farming_hard_profile
+            if profile is not None and profile[:2] == (
+                context.stage_code.upper(),
+                fleet1,
+            ):
+                _, attacking_fleet, change_flagship, change_vanguard = profile
+                roles = []
+                for role, enabled in (
+                    ("flagship", change_flagship == "ship"),
+                    ("vanguard", change_vanguard == "ship"),
+                ):
+                    occupied = self.oracle.gems_farming_hard_slot_occupied(
+                        context.stage_code, attacking_fleet, role
+                    )
+                    if enabled and not occupied:
+                        roles.append(role)
+                    elif not enabled and not occupied:
+                        raise SemanticGateClosed(
+                            "disabled GemsFarming hard role has an empty slot"
+                        )
+                pending_roles = tuple(roles)
+                attacking_row = rows["fleet{0}".format(attacking_fleet)]
+                if pending_roles:
+                    if (
+                        attacking_row.empty_required_slots != len(pending_roles)
+                        or not initial.hard_requirements
+                        or any(
+                            not requirement.satisfied
+                            for requirement in initial.hard_requirements
+                        )
+                    ):
+                        raise SemanticGateClosed(
+                            "GemsFarming hard vacancy proof is incomplete"
+                        )
+            context.gems_farming_hard_pending_roles = pending_roles
+            pending_row = (
+                "fleet{0}".format(profile[1])
+                if pending_roles and profile is not None
+                else None
+            )
             operations = list(
                 "campaign/fleet-preparation/fleet/{0}/recommend".format(index)
                 for index, row_key in ((1, "fleet1"), (2, "fleet2"))
                 if rows[row_key].hard_satisfied is not True
+                and row_key != pending_row
             )
             if rows["submarine"].in_use:
                 if rows["submarine"].clear_button is None:
@@ -3456,7 +3757,14 @@ class AlasSemanticAdapter:
             fallback_oil_cost=context.map_preparation_oil_cost,
         )
         rows = {row.row_key: row for row in prepared.rows}
-        if any(rows[key].hard_satisfied is not True for key in ("fleet1", "fleet2")):
+        pending_row = None
+        if context.gems_farming_hard_pending_roles:
+            assert self._gems_farming_hard_profile is not None
+            pending_row = "fleet{0}".format(self._gems_farming_hard_profile[1])
+        if any(
+            rows[key].hard_satisfied is not True and key != pending_row
+            for key in ("fleet1", "fleet2")
+        ):
             raise SemanticGateClosed("hard campaign fixed fleet slots are incomplete")
         if not prepared.hard_requirements or any(
             not requirement.satisfied for requirement in prepared.hard_requirements
@@ -3579,9 +3887,9 @@ class AlasSemanticAdapter:
                     "fleet1_mob_fleet2_boss": ("mob", "boss"),
                     "fleet1_boss_fleet2_mob": ("boss", "mob"),
                 }.get(fleet_order)
-            elif context.stage_code != "11-4":
+            elif context.stage_code not in ("11-4", "12-1"):
                 raise SemanticGateClosed(
-                    "hard campaign auto-search roles are qualified only for 11-4"
+                    "hard campaign auto-search roles are not qualified for this stage"
                 )
             else:
                 expected = {
@@ -3792,18 +4100,29 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("campaign sortie mode is not reviewed")
         if context.prepared_fleet_state is None or context.requested_fleets is None:
             raise SemanticGateClosed("campaign fleet selection was not proven")
-        sortie_profiles = {
-            (1, 2, 0): ("fleet1_mob_fleet2_boss", 2),
-            (1, 0, 0): ("fleet1_all_fleet2_standby", 1),
-        }
-        try:
-            expected_fleet_order, expected_surface_count = sortie_profiles[
-                context.requested_fleets
-            ]
-        except KeyError as exc:
+        if context.requested_fleets == (1, 2, 0):
+            expected_fleet_order = (
+                "fleet1_all_fleet2_standby"
+                if context.mode == "hard" and context.stage_code == "12-1"
+                else "fleet1_mob_fleet2_boss"
+            )
+            expected_surface_count = 2
+        elif (
+            context.requested_fleets[0] in range(1, 7)
+            and context.requested_fleets[1:] == (0, 0)
+        ):
+            # A single-fleet sortie is structurally identical for ALAS fleet
+            # indices 1 through 6.  Fleet preparation has already proven the
+            # exact requested index and mutation sequence; do not turn the
+            # representative fleet-1 fixture into a runtime allowlist.
+            expected_fleet_order, expected_surface_count = (
+                "fleet1_all_fleet2_standby",
+                1,
+            )
+        else:
             raise SemanticGateClosed(
                 "campaign sortie fleet profile is not reviewed"
-            ) from exc
+            )
         if use_2x_book is not False:
             raise SemanticGateClosed("campaign sortie requires 2x book disabled")
         if use_auto_search:
@@ -3833,7 +4152,7 @@ class AlasSemanticAdapter:
                 context.mode == "hard"
                 and (
                     (
-                        context.stage_code != "11-4"
+                        context.stage_code not in ("11-4", "12-1")
                         and not hard_event_stage
                     )
                     or context.requested_fleets != (1, 2, 0)
@@ -3879,13 +4198,22 @@ class AlasSemanticAdapter:
                 )
         elif use_auto_search is not False:
             raise SemanticGateClosed("campaign auto-search setting is malformed")
-        if context.mode == "hard" and not use_auto_search and not (
-            context.stage_code == "11-4"
-            and context.requested_fleets == (1, 2, 0)
-            and fleet_order == "fleet1_mob_fleet2_boss"
-        ):
+        reviewed_manual_hard = (
+            context.requested_fleets == (1, 2, 0)
+            and (
+                (
+                    context.stage_code == "11-4"
+                    and fleet_order == "fleet1_mob_fleet2_boss"
+                )
+                or (
+                    context.stage_code == "12-1"
+                    and fleet_order == "fleet1_all_fleet2_standby"
+                )
+            )
+        )
+        if context.mode == "hard" and not use_auto_search and not reviewed_manual_hard:
             raise SemanticGateClosed(
-                "manual hard campaign is qualified only for two-fleet 11-4"
+                "manual hard campaign configuration is not reviewed"
             )
         if submarine_mode != "do_not_use":
             raise SemanticGateClosed(
@@ -6674,6 +7002,15 @@ class AlasSemanticAdapter:
                     if self.oracle.campaign_page_is_normal():
                         return True
                 except SemanticGateClosed:
+                    # The hard fleet overlay deliberately remains mounted
+                    # when GemsFarming stops because no replacement ship was
+                    # admitted. Its chapter underlay is exact but blocked, so
+                    # page identity correctly fails. Report only this passive
+                    # CAMPAIGN_CHECK as absent when the covering preparation
+                    # layer itself is strictly proven; ALAS then reaches its
+                    # existing FLEET_PREPARATION cancel branch.
+                    if self._campaign_preparation_kind() is not None:
+                        return False
                     if (
                         time.monotonic()
                         <= self._campaign_context.passive_transition_until
@@ -8641,9 +8978,15 @@ class AlasSemanticAdapter:
 
         self._package_gate()
         context = self._require_campaign_context()
-        if context.mode == "hard" and context.stage_code != "11-4":
+        hard_event_stage = re.fullmatch(r"[cd][1-3]", context.stage_code)
+        if (
+            context.mode == "hard"
+            and context.stage_code not in ("11-4", "12-1")
+            and hard_event_stage is None
+        ):
             raise SemanticGateClosed(
-                "hard campaign map model is qualified only for 11-4"
+                "hard campaign map model is qualified only for reviewed main or "
+                "reviewed shared event C/D stages"
             )
         if context.mode not in ("normal", "hard"):
             raise SemanticGateClosed(
@@ -8930,8 +9273,25 @@ class AlasSemanticAdapter:
             and context.map_state is not None
             and self._campaign_post_combat_state_proven(context, context.map_state)
         )
+        retry_ready = (
+            self._action_ledger.allowed("campaign.viewport_swipe")
+            and self._action_ledger.remaining("campaign.viewport_swipe") >= 1
+            and self._action_ledger.allowed("campaign.grid_click")
+            and self._action_ledger.remaining("campaign.grid_click") >= 1
+            and context.combat_admission is not None
+            and context.combat_receipt is not None
+            and len(context.combat_route_receipts)
+            == len(context.combat_admission.input_nodes)
+            and context.combat_input_retry_count == 0
+            and context.camera_positioning_admission is None
+            and context.map_state is not None
+            and self._campaign_combat_input_retry_state_proven(
+                context, context.map_state
+            )
+        )
         if (
-            sum((combat_ready, positioning_ready, post_combat_ready)) != 1
+            sum((combat_ready, positioning_ready, post_combat_ready, retry_ready))
+            != 1
             or context.map_state is None
             or context.viewport_swipe_intent is not None
         ):
@@ -9312,6 +9672,49 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed(
                 "campaign map viewport endpoint left ALAS selection domain"
             )
+        blacklist_areas = intent.blacklist_areas
+        # Device.swipe_vector refreshes the immutable semantic frame after
+        # ALAS has calculated its gesture.  Unity may still finish a small,
+        # uniform camera easing step during that boundary.  Rebase only this
+        # geometry-only input frame after the full logical map contract has
+        # been re-proven, and retain both the original and translated hazard
+        # areas so the fresher view cannot make the sampled path less safe.
+        if self._input_frame_refresher is not None and context.map_state is not None:
+            prior_state = context.map_state
+            self._input_frame_refresher()
+            fresh_state = self.campaign_camera_state()
+            prior_cells = {cell.node: cell for cell in prior_state.cells}
+            fresh_cells = {cell.node: cell for cell in fresh_state.cells}
+            if set(prior_cells) != set(fresh_cells):
+                raise SemanticGateClosed(
+                    "campaign map viewport easing changed the cell set"
+                )
+            geometry_deltas = tuple(
+                (
+                    fresh_cells[node].point.x - prior_cells[node].point.x,
+                    fresh_cells[node].point.y - prior_cells[node].point.y,
+                )
+                for node in sorted(prior_cells)
+            )
+            easing_dx = float(statistics.median(delta[0] for delta in geometry_deltas))
+            easing_dy = float(statistics.median(delta[1] for delta in geometry_deltas))
+            if intent.blacklist_areas and any(
+                math.hypot(dx - easing_dx, dy - easing_dy) > 3.0
+                for dx, dy in geometry_deltas
+            ):
+                raise SemanticGateClosed(
+                    "campaign map viewport easing is not a uniform shift"
+                )
+            if math.hypot(easing_dx, easing_dy) > 1.0:
+                blacklist_areas = blacklist_areas + tuple(
+                    (
+                        area[0] + easing_dx,
+                        area[1] + easing_dy,
+                        area[2] + easing_dx,
+                        area[3] + easing_dy,
+                    )
+                    for area in intent.blacklist_areas
+                )
         segment_count = int(math.hypot(*expected_delta) // 70) + 1
         for index in range(segment_count + 1):
             point = (
@@ -9320,7 +9723,7 @@ class AlasSemanticAdapter:
             )
             if any(
                 self._campaign_point_in_area(point, area)
-                for area in intent.blacklist_areas
+                for area in blacklist_areas
             ):
                 raise SemanticGateClosed("campaign map viewport path entered its blacklist")
         duration_value = (
@@ -9868,6 +10271,25 @@ class AlasSemanticAdapter:
         ):
             raise SemanticGateClosed("campaign combat route dynamic state changed")
 
+    @staticmethod
+    def _campaign_combat_input_retry_state_proven(
+        context: _CampaignFlowContext, state: CampaignMapState
+    ) -> bool:
+        """Prove that one committed destination tap had no game-side effect."""
+
+        admission = context.combat_admission
+        if admission is None or state.signature != admission.map_signature:
+            return False
+        fleets = tuple(
+            fleet for fleet in state.fleets if fleet.marker == admission.fleet_marker
+        )
+        return bool(
+            len(fleets) == 1
+            and fleets[0].node == admission.origin_node
+            and fleets[0].ammo == admission.ammo_before
+            and context.combat_input_retry_count == 0
+        )
+
     def click_campaign_combat_grid(self, button: Any) -> ActionReceipt:
         """Consume each budget unit at ALAS's original `device.click(grid)`."""
 
@@ -9913,6 +10335,40 @@ class AlasSemanticAdapter:
                 land_cells=context.map_land_cells,
                 expected_fleet_count=context.map_expected_fleet_count,
             )
+            if (
+                self._campaign_combat_input_retry_state_proven(context, post_state)
+                and self._action_ledger.allowed("campaign.grid_click")
+                and self._action_ledger.remaining("campaign.grid_click") >= 1
+            ):
+                target = self.oracle.campaign_map_cell_input(
+                    post_state,
+                    node,
+                    allow_expected_enemy_coverage=True,
+                )
+                assert target.point is not None and target.bounds is not None
+                receipt = self._dispatch_mutation(
+                    "campaign.grid_click",
+                    lambda: self.oracle.click_campaign_map_cell(
+                        post_state,
+                        node,
+                        allow_expected_enemy_coverage=True,
+                    ),
+                )
+                if (
+                    receipt.path != target.path
+                    or receipt.point != target.point
+                    or receipt.bounds != target.bounds
+                ):
+                    raise SemanticGateClosed(
+                        "campaign combat retry receipt changed"
+                    )
+                context.map_state = post_state
+                context.combat_receipt = receipt
+                context.combat_input_retry_count += 1
+                context.viewport_swipe_proof = None
+                context.target_recheck_proof = None
+                context.passive_transition_until = time.monotonic() + 30.0
+                return receipt
             try:
                 prove_alas_campaign_combat_transition(
                     admission,
@@ -13392,6 +13848,11 @@ class AlasSemanticSession:
 
         return self.refresh_frame(include_ui=False)
 
+    def refresh_gems_farming_dock_input_frame(self) -> SemanticFrame:
+        """Acquire a Gems Dock lease before its focused typed projections."""
+
+        return self.refresh_frame(include_ui=False)
+
     def __enter__(self) -> AlasSemanticAdapter:
         return self.open()
 
@@ -14047,6 +14508,104 @@ class AlasSemanticSession:
 
     def enhancement_allowed(self) -> bool:
         return self.open().enhancement_allowed()
+
+    def gems_farming_admit_live_mode(
+        self,
+        stage_code: str,
+        campaign_mode: str,
+        change_flagship: str,
+        change_vanguard: str,
+        attacking_fleet: int,
+    ) -> None:
+        self.open().gems_farming_admit_live_mode(
+            stage_code,
+            campaign_mode,
+            change_flagship,
+            change_vanguard,
+            attacking_fleet,
+        )
+
+    def gems_farming_select_fleet_index(self, fleet_index: int) -> int:
+        self.refresh_frame()
+        return self.open().gems_farming_select_fleet_index(fleet_index)
+
+    def gems_farming_open_slot(self, role: str) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().gems_farming_open_slot(role)
+
+    def gems_farming_hard_slot_occupied(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> bool:
+        self.refresh_frame()
+        return self.open().gems_farming_hard_slot_occupied(
+            stage_code, fleet_index, role
+        )
+
+    def gems_farming_hard_fleet_preparation_visible(self, stage_code: str) -> bool:
+        self.refresh_frame(include_ui=False)
+        return self.open().gems_farming_hard_fleet_preparation_visible(stage_code)
+
+    def gems_farming_hard_unmount(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().gems_farming_hard_unmount(
+            stage_code, fleet_index, role
+        )
+
+    def gems_farming_hard_open_slot(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().gems_farming_hard_open_slot(
+            stage_code, fleet_index, role
+        )
+
+    def gems_farming_equipment_take_off(
+        self, role: str
+    ) -> GemsFarmingEquipmentLoadout:
+        self.refresh_frame()
+        return self.open().gems_farming_equipment_take_off(role)
+
+    def gems_farming_equipment_take_on(
+        self, role: str
+    ) -> GemsFarmingEquipmentLoadout:
+        self.refresh_frame()
+        return self.open().gems_farming_equipment_take_on(role)
+
+    def gems_farming_candidates(
+        self,
+        *,
+        role: str,
+        selector: str,
+        max_level: int,
+        min_emotion: int,
+        fleet_index: int,
+    ) -> Tuple[GemsFarmingDockCandidate, ...]:
+        self.refresh_gems_farming_dock_input_frame()
+        return self.open().gems_farming_candidates(
+            role=role,
+            selector=selector,
+            max_level=max_level,
+            min_emotion=min_emotion,
+            fleet_index=fleet_index,
+        )
+
+    def gems_farming_select_candidate(
+        self, candidate: GemsFarmingDockCandidate
+    ) -> ActionReceipt:
+        self.refresh_gems_farming_dock_input_frame()
+        return self.open().gems_farming_select_candidate(candidate)
+
+    def gems_farming_cancel_candidate_selection(self) -> ActionReceipt:
+        self.refresh_gems_farming_dock_input_frame()
+        return self.open().gems_farming_cancel_candidate_selection()
+
+    def gems_farming_confirm_candidate_selection(
+        self, candidate: GemsFarmingDockCandidate, role: str
+    ) -> ActionReceipt:
+        self.refresh_gems_farming_dock_input_frame()
+        return self.open().gems_farming_confirm_candidate_selection(candidate, role)
 
     def begin_enhancement_task(
         self,
@@ -15270,6 +15829,16 @@ class AlasSemanticSession:
                 and time.monotonic() <= observation[1] + 6.0
                 and self._combat_last_result_receipt is not None
             ):
+                # The immutable ALAS frame may still describe the award popup
+                # while Unity has already mounted the statistics confirm page.
+                # Re-prove that exact live result target before treating the
+                # delayed ALAS click as a no-input acknowledgement.
+                if adapter.oracle.daily_battle_result_visible():
+                    receipt = adapter.oracle.click_daily_battle_result()
+                    self._combat_result_observation = None
+                    self._combat_last_result_receipt = receipt
+                    self._arm_combat_result_transition(adapter)
+                    return receipt
                 # ALAS deliberately sleeps between appear() and click().  The
                 # exact result page can finish its own transition during that
                 # delay.  Consume the one-use positive observation without

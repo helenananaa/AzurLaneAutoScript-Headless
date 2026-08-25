@@ -1,0 +1,112 @@
+{
+  "adapter_sha256": "8c66d9cff20aa3f4ad3f5d7eed6aad6eb010eb605dba6549c1d64113f88b0202",
+  "android_input_injected": true,
+  "captured_at_utc": "2026-08-25T04:16:51Z",
+  "candidate_identity_limitation": "The live client exposes the same typed ship_id and sprite for duplicate Ranger instances. This receipt proves the selected card bounds and resulting role/loadout, but does not claim restoration of the same hidden ship instance.",
+  "configuration": {
+    "campaign_mode": "normal",
+    "change_flagship": "ship_equip",
+    "common_cv": "ranger",
+    "fleet_index": 6,
+    "max_level": 125,
+    "min_emotion": 0
+  },
+  "current_card_exclusion": {
+    "current_fleet_index": 6,
+    "current_ship_sprite": "tujizhe",
+    "raw_status": "current",
+    "statement": "The exact Formation main_1 sprite and fleet index captured while opening Dock identify the current slot card. It is excluded from status=free without changing ALAS same-fleet-first/fallback precedence."
+  },
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "full_task_executed": false,
+  "game_version": "9.7.10",
+  "input_budget": {
+    "campaign_fleet_mutation_grant": 4,
+    "consumed_confirmations": 1,
+    "premium_or_purchase_actions": 0
+  },
+  "package": "com.bilibili.azurlane",
+  "patch_member_sha256": "5a0d55af0216030d73c4fd1e841f25dd477193829224b812ab287973d6d4b77b",
+  "pid": 2030,
+  "production_candidates": [
+    {
+      "emotion": 150,
+      "fleet_index": 0,
+      "level": 1,
+      "ship_id": 107041,
+      "ship_sprite": "tujizhe",
+      "status": "free",
+      "typed_card_left": 578.8
+    },
+    {
+      "emotion": 150,
+      "fleet_index": 0,
+      "level": 1,
+      "ship_id": 107041,
+      "ship_sprite": "tujizhe",
+      "status": "free",
+      "typed_card_left": 743.467
+    }
+  ],
+  "qualification": {
+    "loadout": {
+      "role": "flagship",
+      "slots": [
+        {
+          "enhancement": 0,
+          "equipment_id": "18100",
+          "position": 1,
+          "special": false
+        },
+        {
+          "enhancement": 0,
+          "equipment_id": "19000",
+          "position": 2,
+          "special": false
+        }
+      ]
+    },
+    "operations": [
+      "production take_off returned the source Ranger's exact two-slot non-empty loadout",
+      "production candidate admission returned exactly two free Ranger cards after excluding the current slot card",
+      "the original ALAS max(level, emotion) decision selected the first tied card",
+      "production replacement confirmed the selected Ranger in main_1",
+      "production take_on mounted both +0 items on the target Ranger",
+      "a stable typed detail read returned the exact two-slot target loadout"
+    ],
+    "source_ship": {
+      "fleet_index": 6,
+      "ship_id": 107041,
+      "ship_sprite": "tujizhe"
+    },
+    "target_confirm_generation": 109280,
+    "target_readback_generation": 109477,
+    "target_ship": {
+      "fleet_index_before_selection": 0,
+      "ship_id": 107041,
+      "ship_sprite": "tujizhe",
+      "typed_card_left": 578.8
+    }
+  },
+  "qualification_scope": "typed normal-mode production-candidate non-empty two-slot ship_equip replacement boundary",
+  "recovery": {
+    "final_fleet_index": 1,
+    "final_formation_generation": 109588,
+    "final_hero_roots": [
+      "nandaketa_root",
+      "linggu_root"
+    ],
+    "fleet6_flagship_loadout_preserved": true,
+    "fleet6_flagship_semantic_identity": "tujizhe",
+    "source_and_target_hidden_instance_identity_not_claimed": true
+  },
+  "schema": "alas-headless.gems-farming-normal-ship-equip-live-validation/v2",
+  "semantic_oracle_sha256": "2eb5aa3c57404d14047bbda088895f52364d7ed0e2b1b458bbbce889f242a3d5",
+  "serial": "emulator-5580",
+  "unsupported_branches": [
+    "Campaign_Mode=hard",
+    "five-slot cross-ship compatibility",
+    "post-replacement enhancement",
+    "end-to-end GemsFarming campaign loop"
+  ]
+}

@@ -20,6 +20,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    FrozenSet,
     Iterable,
     List,
     Mapping,
@@ -707,6 +708,50 @@ class EnhancementDockCandidate:
     button: ButtonState
 
 
+@dataclass(frozen=True)
+class GemsFarmingDockCandidate:
+    """One typed Dock card exposed to ALAS's GemsFarming selector."""
+
+    position: int
+    ship_id: int
+    ship_name: str
+    ship_sprite: str
+    ship_type: str
+    rarity: str
+    level: int
+    emotion: int
+    fleet_index: int
+    status: str
+    button: ButtonState
+
+
+@dataclass(frozen=True)
+class GemsFarmingEquipmentSlot:
+    """One exact equipment identity captured from a GemsFarming ship slot."""
+
+    position: int
+    equipment_id: str
+    enhancement: int
+    special: bool
+
+
+@dataclass(frozen=True)
+class GemsFarmingEquipmentLoadout:
+    """The non-empty equipment ALAS asked GemsFarming to transfer."""
+
+    role: str
+    slots: Tuple[GemsFarmingEquipmentSlot, ...]
+
+    def __post_init__(self) -> None:
+        if self.role not in ("flagship", "vanguard"):
+            raise ValueError("GemsFarming equipment role is invalid")
+        positions = tuple(slot.position for slot in self.slots)
+        if len(set(positions)) != len(positions):
+            raise ValueError("GemsFarming equipment positions must be unique")
+        if any(not 1 <= position <= 6 for position in positions):
+            raise ValueError("GemsFarming equipment position is outside 1 through 6")
+
+
 def enhancement_config_policy(
     ship_to_enhance: str,
     check_per_category: int,
@@ -1060,6 +1105,7 @@ class CampaignStageState:
     stage_code: str
     title: str
     button: ButtonState
+    remaining_attempts: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -1078,6 +1124,7 @@ class CampaignPreparationState:
     proceed_button: ButtonState
     cancel_button: ButtonState
     oil_cost: Optional[int] = None
+    remaining_attempts: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -3949,6 +3996,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "os/precombat/info/confirm",
             "os/port/dock/repair-confirm",
             "os/port/dock/repair-cancel",
+            "gems-farming/equipment/unload-confirm",
         ),
     ),
     BlockerRule(
@@ -4665,6 +4713,13 @@ class SemanticOracle:
         self._last_generation: Optional[int] = None
         self._login_update_seen = False
         self._login_update_restart_consumed = False
+        self._gems_farming_equipment_loadouts: Dict[
+            str, GemsFarmingEquipmentLoadout
+        ] = {}
+        self._gems_farming_open_slot_context: Optional[Tuple[str, str, int]] = None
+        self._gems_farming_hard_open_slot_context: Optional[
+            Tuple[str, int, str, Tuple[str, ...]]
+        ] = None
 
     @property
     def input_dispatch_count(self) -> int:
@@ -12802,7 +12857,7 @@ class SemanticOracle:
         self._swipe(start[0], start[1], end[0], end[1], 450)
         post_generation = None
         last_center = center
-        for _ in range(12):
+        for _ in range(80):
             self._sleep(0.25)
             candidate = self.read_ui_state()
             moved = portal(candidate)
@@ -19599,8 +19654,22 @@ class SemanticOracle:
 
         button_state = self.read_state()
         back = self._unique(button_state, "campaign-menu/page/back")
-        if not back.actionable or self._blocking_rules(
-            button_state, "campaign-menu/page/back"
+        # Page identity is an observation boundary, not authorization to click
+        # the chapter back control.  The live hard page can briefly report the
+        # exact active back control below the stage canvas (raycast_top=False)
+        # after the fleet overlay closes, while its chapter title and nodes are
+        # already coherent.  Accept that structural anchor here; ``click``
+        # continues to require the full actionable predicate, and reviewed
+        # blockers still prevent the page from impersonating an unobstructed
+        # chapter surface.
+        if (
+            not back.active_in_hierarchy
+            or not back.active_and_enabled
+            or not back.interactable
+            or back.point is None
+            or back.bounds is None
+            or not back.bounds.contains(back.point)
+            or self._blocking_rules(button_state, "campaign-menu/page/back")
         ):
             raise SemanticGateClosed("campaign page identity is not proven")
         if self._matches(button_state, "campaign-menu/normal"):
@@ -19768,12 +19837,32 @@ class SemanticOracle:
             stage_code = indexes[0].text.strip().lower()
             if re.fullmatch(r"(?:[a-z]+[0-9]*|[0-9]+-[0-9]+)", stage_code) is None:
                 raise SemanticGateClosed("event campaign stage text is malformed")
+            remaining_attempts = None
+            if stage_code == "sp":
+                attempt_path = identity_button.path + "/triesLimit/Text"
+                attempts = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path == attempt_path
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.bounds is not None
+                )
+                if len(attempts) != 1:
+                    raise SemanticGateClosed(
+                        "event SP attempt counter is absent or ambiguous"
+                    )
+                remaining_attempts = self._campaign_eventsp_remaining_attempts(
+                    attempts[0].text
+                )
             stages.append(
                 CampaignStageState(
                     stage_id=stage_id,
                     stage_code=stage_code,
                     title=titles[0].text.strip(),
                     button=button,
+                    remaining_attempts=remaining_attempts,
                 )
             )
         chapters = {self._campaign_stage_chapter(stage.stage_code) for stage in stages}
@@ -21324,11 +21413,22 @@ class SemanticOracle:
         )
 
     @staticmethod
+    def _campaign_eventsp_remaining_attempts(text: str) -> int:
+        exact = {
+            "<color=#92FC63FF>1/1</color>": 1,
+            "<color=#FF5C5CFF>0/1</color>": 0,
+        }
+        remaining = exact.get(text.strip())
+        if remaining is None:
+            raise SemanticGateClosed("event SP attempt counter is malformed")
+        return remaining
+
+    @staticmethod
     def _validate_campaign_live_map_underlay(
         button_state: OracleState,
         ui_state: UiState,
         stage_button: ButtonState,
-    ) -> None:
+    ) -> int:
         """Require the exact live SP selector identity obscured by LevelInfoSPUI."""
 
         if (
@@ -21395,7 +21495,6 @@ class SemanticOracle:
             not tries[0].active_and_enabled
             or tries[0].truncated
             or tries[0].bounds is None
-            or tries[0].text.strip() != "<color=#92FC63FF>1/1</color>"
             or not selected[0].active_and_enabled
             or selected[0].truncated
             or selected[0].bounds is None
@@ -21404,6 +21503,9 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "campaign live map-preparation selected-stage underlay changed"
             )
+        remaining_attempts = SemanticOracle._campaign_eventsp_remaining_attempts(
+            tries[0].text
+        )
 
         selected_images = {
             _CAMPAIGN_LIVE_EVENTSP_SELECTED_ROOT + "Frame": "level_item_select",
@@ -21435,6 +21537,7 @@ class SemanticOracle:
                 raise SemanticGateClosed(
                     "campaign live map-preparation selected image changed"
                 )
+        return remaining_attempts
 
     def campaign_map_preparation_state(
         self, stage_code: str
@@ -21779,6 +21882,7 @@ class SemanticOracle:
         if observed_stage != stage_code:
             raise SemanticGateClosed("campaign map-preparation stage identity changed")
         oil_cost = None
+        remaining_attempts = None
         if root.endswith("LevelInfoSPUI(Clone)/panel/"):
             stage_costs = tuple(
                 item
@@ -21812,7 +21916,7 @@ class SemanticOracle:
                 )
                 self._campaign_map_underlay_pair_is_reviewed(root, stage_button)
                 if root == _CAMPAIGN_LIVE_MAP_PANEL_ROOT:
-                    self._validate_campaign_live_map_underlay(
+                    remaining_attempts = self._validate_campaign_live_map_underlay(
                         button_state,
                         ui_state,
                         stage_button,
@@ -21829,12 +21933,15 @@ class SemanticOracle:
             proceed_button=proceed,
             cancel_button=cancel,
             oil_cost=oil_cost,
+            remaining_attempts=remaining_attempts,
         )
 
     def click_campaign_map_preparation(self, stage_code: str) -> ActionReceipt:
         """Advance from stage details to fleet preparation, never to sortie."""
 
         observed = self.campaign_map_preparation_state(stage_code)
+        if observed.remaining_attempts == 0:
+            raise SemanticGateClosed("campaign stage attempts are exhausted")
         target = observed.proceed_button
         actionable = target.actionable or (
             "LevelInfoSPUI(Clone)/panel/" in target.path
@@ -22792,6 +22899,8 @@ class SemanticOracle:
         """Click one exact stage after revalidating its typed Unity identity."""
 
         observed = self.campaign_stage_state(stage_code)
+        if observed.remaining_attempts == 0:
+            raise SemanticGateClosed("campaign stage attempts are exhausted")
         state = None
         target = None
         for attempt in range(12):
@@ -27162,7 +27271,7 @@ class SemanticOracle:
         """Leave the ship detail and prove the filtered Dock returns."""
 
         receipt: Optional[ActionReceipt] = None
-        for _ in range(3):
+        for _ in range(8):
             state = self.read_state()
             targets = tuple(
                 item
@@ -27247,6 +27356,2338 @@ class SemanticOracle:
         )
         return receipt
 
+    def _gems_farming_formation_records(self) -> Tuple[OracleState, UiState, int]:
+        """Read the exact normal Formation page and selected fleet index."""
+
+        last_error: Optional[SemanticGateClosed] = None
+        number_path = (
+            "UICamera/Canvas/UIMain/FormationUI(Clone)/blur_panel/"
+            "fleet_info/fleet_number"
+        )
+        for attempt in range(8):
+            try:
+                state = self.read_state()
+                ui_state = self.read_ui_state()
+                numbers = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path == number_path
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and re.fullmatch(r"[1-6]", item.text)
+                )
+                slots = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path.startswith(
+                        "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/"
+                        "GridFrame/"
+                    )
+                    and item.path.endswith("/shadow")
+                    and item.sprite == "shadow"
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and item.bounds is not None
+                )
+                if (
+                    state.generation <= ui_state.generation <= state.generation + 2
+                    and len(numbers) == 1
+                    and len(slots) == 6
+                ):
+                    return state, ui_state, int(numbers[0].text)
+                last_error = SemanticGateClosed(
+                    "GemsFarming formation identity is incomplete"
+                )
+            except SemanticGateClosed as exc:
+                last_error = exc
+            if attempt < 7:
+                self._sleep(0.05)
+        raise SemanticGateClosed(
+            "GemsFarming formation snapshots did not stabilize"
+        ) from last_error
+
+    def gems_farming_select_fleet_index(self, fleet_index: int) -> int:
+        """Select ALAS's attacking 1-6 fleet on the normal Formation page."""
+
+        if isinstance(fleet_index, bool) or not isinstance(fleet_index, int):
+            raise TypeError("GemsFarming fleet index must be an integer")
+        if not 1 <= fleet_index <= 6:
+            raise SemanticGateClosed("GemsFarming fleet index is outside 1 through 6")
+        for _ in range(6):
+            state, ui_state, current = self._gems_farming_formation_records()
+            if current == fleet_index:
+                return current
+            direction = "nextPage" if current < fleet_index else "prevPage"
+            pages = tuple(
+                item
+                for item in ui_state.images
+                if item.path
+                == "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/" + direction
+                and item.name == direction
+                and item.sprite == "arr"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.raycast_target
+                and item.bounds is not None
+            )
+            if len(pages) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming formation fleet navigation is incomplete"
+                )
+            before = current
+            self._click_exact_image(
+                state,
+                pages[0],
+                "gems-farming/formation/fleet/{0}".format(
+                    "next" if current < fleet_index else "previous"
+                ),
+            )
+            expected = before + 1 if before < fleet_index else before - 1
+            for _ in range(30):
+                self._sleep(0.05)
+                _, _, after = self._gems_farming_formation_records()
+                if after == expected:
+                    break
+            else:
+                raise SemanticGateClosed(
+                    "GemsFarming formation fleet index did not advance"
+                )
+        raise SemanticGateClosed("GemsFarming formation fleet selection did not settle")
+
+    def gems_farming_open_slot(self, role: str) -> ActionReceipt:
+        """Open the exact flagship or first-vanguard replacement slot."""
+
+        slot_names = {"flagship": "main_1", "vanguard": "vanguard_1"}
+        if role not in slot_names:
+            raise ValueError("GemsFarming role must be flagship or vanguard")
+        slot_path = (
+            "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/GridFrame/"
+            + slot_names[role]
+            + "/shadow"
+        )
+        semantic_id = "gems-farming/formation/{0}/open".format(role)
+        for _ in range(20):
+            state, ui_state, fleet_index = self._gems_farming_formation_records()
+            slots = tuple(item for item in ui_state.images if item.path == slot_path)
+            if len(slots) != 1 or slots[0].bounds is None:
+                raise SemanticGateClosed("GemsFarming formation slot is incomplete")
+            slot_center_x = (
+                slots[0].bounds.left + slots[0].bounds.right
+            ) / 2.0
+            ships = tuple(
+                item
+                for item in ui_state.images
+                if item.path.startswith(
+                    "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/"
+                    "HeroContainer/heroInfo(Clone)/"
+                )
+                and item.path.endswith("_root/mouseChild")
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.raycast_target
+                and not item.truncated
+                and item.bounds is not None
+                and abs(
+                    (item.bounds.left + item.bounds.right) / 2.0 - slot_center_x
+                )
+                <= 2.0
+            )
+            if len(ships) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming formation ship identity is absent or ambiguous"
+                )
+            ship_match = re.search(r"/([^/]+)_root/mouseChild$", ships[0].path)
+            if ship_match is None:
+                raise SemanticGateClosed(
+                    "GemsFarming formation ship sprite is incomplete"
+                )
+            current_ship_sprite = ship_match.group(1)
+            if not self._blocking_rules(state, semantic_id):
+                break
+            self._sleep(0.05)
+        else:
+            raise SemanticGateClosed("GemsFarming formation slot stayed blocked")
+        receipt = self._click_exact_image(state, ships[0], semantic_id)
+        self._retry_transition_read(
+            self._enhancement_dock_records,
+            attempts=50,
+            interval_seconds=0.1,
+        )
+        self._gems_farming_open_slot_context = (
+            role,
+            current_ship_sprite,
+            fleet_index,
+        )
+        return receipt
+
+    @staticmethod
+    def _gems_farming_hard_role_name(role: str) -> str:
+        if role == "flagship":
+            return "main"
+        if role == "vanguard":
+            return "vanguard"
+        raise ValueError("GemsFarming role must be flagship or vanguard")
+
+    def _gems_farming_hard_role_cards(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> Tuple[OracleState, UiState, Tuple[ImageState, ...], Tuple[str, ...]]:
+        """Read the compacted hard-fleet role row and exact ship sprites."""
+
+        if stage_code.upper() not in ("11-4", "12-1"):
+            raise SemanticGateClosed(
+                "GemsFarming hard replacement is qualified only for reviewed hard stages"
+            )
+        if fleet_index not in (1, 2):
+            raise SemanticGateClosed("GemsFarming hard fleet must be 1 or 2")
+        group = self._gems_farming_hard_role_name(role)
+        preparation = self.campaign_fleet_selection_state(stage_code)
+        if not preparation.hard_mode:
+            raise SemanticGateClosed("GemsFarming hard fleet preparation is absent")
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        path = (
+            "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/"
+            "ShipList/fleet/{0}/{1}/shiptpl(Clone)/icon_bg"
+        ).format(fleet_index, group)
+        cards = tuple(
+            sorted(
+                (
+                    item
+                    for item in ui_state.images
+                    if item.path == path
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.raycast_target
+                    and item.bounds is not None
+                ),
+                key=lambda item: item.bounds.left,
+            )
+        )
+        if len(cards) not in (2, 3):
+            raise SemanticGateClosed(
+                "GemsFarming hard role row must contain two or three ships"
+            )
+        sprites = []
+        for card in cards:
+            assert card.bounds is not None
+            icons = tuple(
+                item
+                for item in ui_state.images
+                if item.path == path + "/icon"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.sprite
+                and self._gems_equipment_in_bounds(item, card.bounds)
+            )
+            if len(icons) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming hard fleet ship identity is incomplete"
+                )
+            sprites.append(icons[0].sprite)
+        if state.generation > ui_state.generation:
+            raise SemanticGateClosed(
+                "GemsFarming hard fleet snapshots are incoherent"
+            )
+        return state, ui_state, cards, tuple(sprites)
+
+    def gems_farming_hard_slot_occupied(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> bool:
+        """Return whether ALAS's compacted first hard-fleet role slot is filled."""
+
+        _, _, cards, _ = self._gems_farming_hard_role_cards(
+            stage_code, fleet_index, role
+        )
+        return len(cards) == 3
+
+    def cancel_campaign_hard_recommend_prompt(self) -> ActionReceipt:
+        """Cancel the exact official-recommend prompt left by hard recovery."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not any(
+            "LevelFleetSelectView(Clone)" in item.path
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            for item in state.buttons
+        ):
+            raise SemanticGateClosed(
+                "hard fleet recommendation prompt has no fleet owner"
+            )
+        root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+        texts = {
+            item.path: item.text.strip()
+            for item in ui_state.texts
+            if item.path in {
+                root + "msg_panel/content",
+                root + "button_container/custom_button_1(Clone)/pic",
+                root + "button_container/custom_button_2(Clone)/pic",
+            }
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+        }
+        content = texts.get(root + "msg_panel/content")
+        confirm = "".join(
+            texts.get(
+                root + "button_container/custom_button_1(Clone)/pic", ""
+            ).split()
+        )
+        cancel = "".join(
+            texts.get(
+                root + "button_container/custom_button_2(Clone)/pic", ""
+            ).split()
+        )
+        if (
+            content
+            not in (
+                "是否采用推荐配置补齐空余位置?",
+                "是否使用推荐编队来填充空位?",
+                "是否使用推荐编队填充空位?",
+                "�Ƿ�����Ƽ����ò������λ��?",
+            )
+            or (cancel, confirm) not in (("取消", "确定"), ("ȡ��", "ȷ��"))
+        ):
+            raise SemanticGateClosed(
+                "hard fleet recommendation prompt text is not reviewed"
+            )
+        path = root + "button_container/custom_button_2(Clone)"
+        buttons = tuple(
+            item
+            for item in state.buttons
+            if item.path == path
+            and item.name == "custom_button_2(Clone)"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.raycast_top is True
+            and item.point is not None
+            and item.bounds is not None
+            and item.bounds.contains(item.point)
+        )
+        images = tuple(
+            item
+            for item in ui_state.images
+            if item.path == path
+            and item.sprite == "btn_big_grey"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+        )
+        if len(buttons) != 1 or len(images) != 1:
+            raise SemanticGateClosed(
+                "hard fleet recommendation cancel is absent or ambiguous"
+            )
+        target = buttons[0]
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed(
+                "foreground changed before hard recommendation cancellation"
+            )
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="campaign/hard/recommend/cancel",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def gems_farming_hard_unmount(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> ActionReceipt:
+        """Unmount the compacted first hard-fleet ship and prove one-card removal."""
+
+        state, _, cards, before = self._gems_farming_hard_role_cards(
+            stage_code, fleet_index, role
+        )
+        if len(cards) != 3:
+            raise SemanticGateClosed("GemsFarming hard source slot is already empty")
+        open_receipt = self._click_exact_image(
+            state,
+            cards[0],
+            "campaign/fleet-preparation/fleet/{0}/select".format(fleet_index),
+        )
+        dock_state, _ = self._retry_transition_read(
+            self._enhancement_dock_records, attempts=50, interval_seconds=0.1
+        )
+        current = tuple(
+            item
+            for item in dock_state.buttons
+            if item.path
+            == "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/0"
+            and item.name == "0"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.point is not None
+            and item.bounds is not None
+        )
+        if len(current) != 1:
+            raise SemanticGateClosed(
+                "GemsFarming hard current-ship placeholder is absent or ambiguous"
+            )
+        receipt = self._gems_equipment_click_button(
+            dock_state, current[0], "tactical/dock/confirm"
+        )
+        for _ in range(60):
+            self._sleep(0.1)
+            try:
+                _, _, after_cards, after = self._gems_farming_hard_role_cards(
+                    stage_code, fleet_index, role
+                )
+            except SemanticGateClosed:
+                continue
+            if len(after_cards) == 2 and after == before[1:]:
+                self._gems_farming_hard_open_slot_context = None
+                return receipt
+        raise SemanticGateClosed(
+            "GemsFarming hard unmount postcondition was not proven; open receipt "
+            + open_receipt.semantic_id
+        )
+
+    def gems_farming_hard_open_slot(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> ActionReceipt:
+        """Open the unique third compacted hard-fleet slot after unmount."""
+
+        state, ui_state, cards, before = self._gems_farming_hard_role_cards(
+            stage_code, fleet_index, role
+        )
+        if len(cards) != 2:
+            raise SemanticGateClosed(
+                "GemsFarming hard target slot requires exactly two remaining ships"
+            )
+        group = self._gems_farming_hard_role_name(role)
+        path = (
+            "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/"
+            "ShipList/fleet/{0}/{1}/emptytpl(Clone)/icon_bg"
+        ).format(fleet_index, group)
+        blanks = tuple(
+            item
+            for item in ui_state.images
+            if item.path == path
+            and item.name == "icon_bg"
+            and item.sprite == "tianjia_icon"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.raycast_target
+            and item.bounds is not None
+        )
+        if len(blanks) != 1:
+            raise SemanticGateClosed(
+                "GemsFarming hard target blank is absent or ambiguous"
+            )
+        receipt = self._click_exact_image(
+            state,
+            blanks[0],
+            "campaign/fleet-preparation/fleet/{0}/select".format(fleet_index),
+        )
+        self._retry_transition_read(
+            self._enhancement_dock_records, attempts=50, interval_seconds=0.1
+        )
+        self._gems_farming_hard_open_slot_context = (
+            stage_code,
+            fleet_index,
+            role,
+            before,
+        )
+        return receipt
+
+    @staticmethod
+    def _gems_equipment_center(bounds: Bounds) -> Point:
+        return Point(
+            (bounds.left + bounds.right) / 2.0,
+            (bounds.top + bounds.bottom) / 2.0,
+        )
+
+    @staticmethod
+    def _gems_equipment_in_bounds(
+        item: Union[ImageState, TextState], bounds: Bounds
+    ) -> bool:
+        return item.bounds is not None and bounds.contains(
+            SemanticOracle._gems_equipment_center(item.bounds)
+        )
+
+    def _gems_equipment_click_button(
+        self,
+        state: OracleState,
+        button: ButtonState,
+        semantic_id: str,
+        *,
+        require_raycast_top: bool = False,
+    ) -> ActionReceipt:
+        if (
+            not button.active_in_hierarchy
+            or not button.active_and_enabled
+            or not button.interactable
+            or button.point is None
+            or button.bounds is None
+            or not button.bounds.contains(button.point)
+            or (require_raycast_top and button.raycast_top is not True)
+        ):
+            raise SemanticGateClosed(semantic_id + " is not safely actionable")
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed(semantic_id + " input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before equipment input")
+        self._tap(int(round(button.point.x)), int(round(button.point.y)))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed after equipment input")
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=state.generation,
+            point=button.point,
+            bounds=button.bounds,
+            path=button.path,
+        )
+
+    def _gems_equipment_open_ship_detail(self, role: str) -> ActionReceipt:
+        """Enter ALAS's flagship or first-vanguard detail through typed Formation."""
+
+        if role not in ("flagship", "vanguard"):
+            raise ValueError("GemsFarming role must be flagship or vanguard")
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        already_detail = tuple(
+            item
+            for item in ui_state.toggles
+            if item.path.endswith("/bottom/toggle_list/detail_toggle")
+            and item.name == "detail_toggle"
+            and item.checked
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+        )
+        if len(already_detail) > 1:
+            raise SemanticGateClosed("GemsFarming Formation detail state is ambiguous")
+        if not already_detail:
+            state, ui_state, _ = self._gems_farming_formation_records()
+        toggles = tuple(
+            item
+            for item in ui_state.toggles
+            if item.path.endswith("/bottom/toggle_list/detail_toggle")
+            and item.name == "detail_toggle"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.point is not None
+            and item.bounds is not None
+            and item.bounds.contains(item.point)
+        )
+        if len(toggles) != 1:
+            raise SemanticGateClosed("GemsFarming Formation detail toggle is incomplete")
+        if not toggles[0].checked:
+            if self._blocking_rules(state, "gems-farming/equipment/detail-toggle"):
+                raise SemanticGateClosed("GemsFarming Formation detail toggle is blocked")
+            self._tap(
+                int(round(toggles[0].point.x)), int(round(toggles[0].point.y))
+            )
+            self._sleep(0.2)
+
+        def detail_card() -> Tuple[OracleState, ImageState]:
+            current = self.read_state()
+            current_ui = self.read_ui_state()
+            group = "main" if role == "flagship" else "vanguard"
+            suffix = "/attr_frame/{0}/list/RectShipCardTpl(Clone)/content/detail".format(
+                group
+            )
+            cards = tuple(
+                item
+                for item in current_ui.images
+                if item.path.endswith(suffix)
+                and item.sprite == "rect_bg"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            cards = tuple(sorted(cards, key=lambda item: item.bounds.left))
+            if not cards:
+                raise SemanticGateClosed("GemsFarming Formation detail cards are absent")
+            target = cards[0]
+            if role == "flagship":
+                flags = tuple(
+                    item
+                    for item in current_ui.images
+                    if item.path.endswith(
+                        "/attr_frame/main/list/RectShipCardTpl(Clone)/content/front/flag"
+                    )
+                    and item.sprite == "flag_icon"
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.bounds is not None
+                    and self._bounds_overlap(item.bounds, target.bounds) > 0
+                )
+                if len(flags) != 1:
+                    raise SemanticGateClosed(
+                        "GemsFarming flagship detail identity is incomplete"
+                    )
+            if current.generation > current_ui.generation:
+                raise SemanticGateClosed("GemsFarming detail snapshots are incoherent")
+            return current, target
+
+        card_state, card = self._retry_transition_read(
+            detail_card, attempts=120, interval_seconds=0.1
+        )
+        assert card.bounds is not None
+        point = self._gems_equipment_center(card.bounds)
+        semantic_id = "gems-farming/equipment/{0}/detail".format(role)
+        if self._blocking_rules(card_state, semantic_id):
+            raise SemanticGateClosed("GemsFarming detail card input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before equipment detail")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        receipt = ActionReceipt(
+            semantic_id=semantic_id,
+            generation=card_state.generation,
+            point=point,
+            bounds=card.bounds,
+            path=card.path,
+        )
+        self._gems_equipment_stable_detail_loadout()
+        return receipt
+
+    def _gems_equipment_read_loadout(
+        self,
+    ) -> Tuple[OracleState, UiState, Tuple[GemsFarmingEquipmentSlot, ...]]:
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        regular_path = (
+            "/ShipDetailView(Clone)/equipments/"
+            "equipments/equipment_tpl(Clone)"
+        )
+        empty_path = (
+            "/ShipDetailView(Clone)/equipments/equipments/empty_tpl(Clone)"
+        )
+        regular = tuple(
+            sorted(
+                (
+                    item
+                    for item in state.buttons
+                    if item.path.endswith((regular_path, empty_path))
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and item.interactable
+                    and item.point is not None
+                    and item.bounds is not None
+                ),
+                key=lambda item: item.bounds.left,
+            )
+        )
+        special_path = "/ShipDetailView(Clone)/equipments/SpSlot"
+        special = tuple(
+            item
+            for item in state.buttons
+            if item.path.endswith(special_path)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.point is not None
+            and item.bounds is not None
+        )
+        if len(regular) != 5 or len(special) != 1:
+            raise SemanticGateClosed("GemsFarming ship equipment slots are incomplete")
+        slots = []
+        for position, button in enumerate(regular, start=1):
+            assert button.bounds is not None
+            icon_path = button.path + "/IconTpl/icon_bg/icon"
+            level_path = button.path + "/IconTpl/icon_bg/slv/Text"
+            icons = tuple(
+                item
+                for item in ui_state.images
+                if item.path == icon_path
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.sprite
+                and self._gems_equipment_in_bounds(item, button.bounds)
+            )
+            levels = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == level_path
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and re.fullmatch(r"(?:[0-9]|1[0-5])", item.text)
+                and self._gems_equipment_in_bounds(item, button.bounds)
+            )
+            if not icons and not levels:
+                continue
+            if len(icons) != 1 or len(levels) > 1:
+                raise SemanticGateClosed("GemsFarming regular equipment is ambiguous")
+            slots.append(
+                GemsFarmingEquipmentSlot(
+                    position=position,
+                    equipment_id=icons[0].sprite,
+                    enhancement=int(levels[0].text) if levels else 0,
+                    special=False,
+                )
+            )
+        special_button = special[0]
+        assert special_button.bounds is not None
+        special_icons = tuple(
+            item
+            for item in ui_state.images
+            if item.path.endswith(special_path + "/Icon/Mask/icon_bg/icon")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.sprite
+            and self._gems_equipment_in_bounds(item, special_button.bounds)
+        )
+        special_levels = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith(special_path + "/Icon/LV/Text")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and re.fullmatch(r"(?:[0-9]|1[0-5])", item.text)
+            and self._gems_equipment_in_bounds(item, special_button.bounds)
+        )
+        if special_icons or special_levels:
+            if len(special_icons) != 1 or len(special_levels) > 1:
+                raise SemanticGateClosed("GemsFarming special equipment is ambiguous")
+            slots.append(
+                GemsFarmingEquipmentSlot(
+                    position=6,
+                    equipment_id=special_icons[0].sprite,
+                    enhancement=(
+                        int(special_levels[0].text) if special_levels else 0
+                    ),
+                    special=True,
+                )
+            )
+        if state.generation > ui_state.generation:
+            raise SemanticGateClosed("GemsFarming equipment snapshots are incoherent")
+        return state, ui_state, tuple(slots)
+
+    def _gems_equipment_stable_detail_loadout(
+        self,
+    ) -> Tuple[OracleState, UiState, Tuple[GemsFarmingEquipmentSlot, ...]]:
+        """Require five identical typed detail reads before branching on emptiness."""
+
+        previous: Optional[Tuple[GemsFarmingEquipmentSlot, ...]] = None
+        stable_reads = 0
+        observed: Optional[
+            Tuple[OracleState, UiState, Tuple[GemsFarmingEquipmentSlot, ...]]
+        ] = None
+        last_error: Optional[SemanticGateClosed] = None
+        for _ in range(50):
+            try:
+                observed = self._gems_equipment_read_loadout()
+            except SemanticGateClosed as exc:
+                last_error = exc
+                previous = None
+                stable_reads = 0
+                self._sleep(0.1)
+                continue
+            current = observed[2]
+            if current == previous:
+                stable_reads += 1
+            else:
+                previous = current
+                stable_reads = 1
+            if stable_reads >= 5:
+                return observed
+            self._sleep(0.1)
+        raise SemanticGateClosed(
+            "GemsFarming detail loadout did not stabilize"
+        ) from last_error
+
+    def _gems_equipment_unload_detail_slot(
+        self, slot: GemsFarmingEquipmentSlot
+    ) -> None:
+        if slot.special or not 1 <= slot.position <= 5:
+            raise SemanticGateClosed(
+                "GemsFarming only unloads the five ALAS equipment-code slots"
+            )
+        state, _, current = self._gems_equipment_stable_detail_loadout()
+        if tuple(item for item in current if item.position == slot.position) != (slot,):
+            raise SemanticGateClosed("GemsFarming unload equipment identity changed")
+        suffixes = (
+            "/ShipDetailView(Clone)/equipments/equipments/equipment_tpl(Clone)",
+            "/ShipDetailView(Clone)/equipments/equipments/empty_tpl(Clone)",
+        )
+        buttons = tuple(
+            sorted(
+                (
+                    item
+                    for item in state.buttons
+                    if item.path.endswith(suffixes)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and item.interactable
+                    and item.bounds is not None
+                    and item.point is not None
+                ),
+                key=lambda item: item.bounds.left,
+            )
+        )
+        if len(buttons) != 5:
+            raise SemanticGateClosed("GemsFarming ship equipment slots are incomplete")
+        self._gems_equipment_click_button(
+            state,
+            buttons[slot.position - 1],
+            "gems-farming/equipment/slot/{0}/unload-open".format(slot.position),
+        )
+        action_path = (
+            "OverlayCamera/Overlay/UIMain/EquipmentInfoUI(Clone)/default/"
+            "actions/action_button_4"
+        )
+
+        def require_unload() -> Tuple[OracleState, ButtonState]:
+            current_state = self.read_state()
+            text_state = self.read_text_state()
+            actions = tuple(
+                item for item in current_state.buttons if item.path == action_path
+            )
+            labels = tuple(
+                item
+                for item in text_state.texts
+                if item.path == action_path + "/change"
+                and item.text == "卸 下"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            if len(actions) != 1 or len(labels) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming unload equipment action is incomplete"
+                )
+            return current_state, actions[0]
+
+        action_state, action = self._retry_transition_read(
+            require_unload, attempts=30, interval_seconds=0.1
+        )
+        self._gems_equipment_click_button(
+            action_state,
+            action,
+            "gems-farming/equipment/slot/{0}/unload".format(slot.position),
+        )
+        _, _, after = self._gems_equipment_stable_detail_loadout()
+        if any(item.position == slot.position for item in after):
+            raise SemanticGateClosed("GemsFarming equipment slot did not unload")
+
+    def _gems_equipment_back_to_formation(self) -> ActionReceipt:
+        receipt: Optional[ActionReceipt] = None
+        for depth in range(4):
+            try:
+                self._gems_farming_formation_records()
+                if receipt is None:
+                    raise SemanticGateClosed(
+                        "GemsFarming equipment return performed no navigation"
+                    )
+                return receipt
+            except SemanticGateClosed:
+                pass
+
+            state = self.read_state()
+            ui_state = self.read_ui_state()
+            toggles = tuple(
+                item
+                for item in ui_state.toggles
+                if item.path.endswith("/bottom/toggle_list/formation_toggle")
+                and item.name == "formation_toggle"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.interactable
+                and item.point is not None
+                and item.bounds is not None
+                and item.bounds.contains(item.point)
+            )
+            if len(toggles) > 1:
+                raise SemanticGateClosed(
+                    "GemsFarming Formation view toggle is ambiguous"
+                )
+            if len(toggles) == 1:
+                toggle = toggles[0]
+                if not toggle.checked:
+                    semantic_id = "gems-farming/equipment/formation-toggle"
+                    if self._blocking_rules(state, semantic_id):
+                        self._sleep(0.1)
+                        continue
+                    assert toggle.point is not None and toggle.bounds is not None
+                    self._tap(
+                        int(round(toggle.point.x)), int(round(toggle.point.y))
+                    )
+                    if receipt is None:
+                        receipt = ActionReceipt(
+                            semantic_id=semantic_id,
+                            generation=state.generation,
+                            point=toggle.point,
+                            bounds=toggle.bounds,
+                            path=toggle.path,
+                        )
+                self._sleep(0.5)
+                continue
+
+            suffix = "/blur_panel/adapt/top/back_btn"
+            buttons = tuple(
+                item
+                for item in state.buttons
+                if item.name == "back_btn" and item.path.endswith(suffix)
+            )
+            if len(buttons) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming equipment back control is incomplete"
+                )
+            current_receipt = self._gems_equipment_click_button(
+                state,
+                buttons[0],
+                "gems-farming/equipment/back/{0}".format(depth + 1),
+            )
+            if receipt is None:
+                receipt = current_receipt
+            self._sleep(0.2)
+        raise SemanticGateClosed("GemsFarming equipment return did not settle")
+
+    def gems_farming_equipment_take_off(
+        self, role: str
+    ) -> GemsFarmingEquipmentLoadout:
+        """Capture and unload ALAS's five equipment-code slots."""
+
+        if role in self._gems_farming_equipment_loadouts:
+            raise SemanticGateClosed(
+                "GemsFarming equipment transfer is already pending for " + role
+            )
+        self._gems_equipment_open_ship_detail(role)
+        _, _, observed = self._gems_equipment_stable_detail_loadout()
+        slots = tuple(item for item in observed if not item.special)
+        special = tuple(item for item in observed if item.special)
+        for slot in slots:
+            self._gems_equipment_unload_detail_slot(slot)
+        _, _, after = self._gems_equipment_stable_detail_loadout()
+        if tuple(item for item in after if not item.special):
+            raise SemanticGateClosed("GemsFarming equipment did not unload")
+        if tuple(item for item in after if item.special) != special:
+            raise SemanticGateClosed("GemsFarming special equipment changed")
+        loadout = GemsFarmingEquipmentLoadout(role=role, slots=slots)
+        self._gems_farming_equipment_loadouts[role] = loadout
+        self._gems_equipment_back_to_formation()
+        return loadout
+
+    @staticmethod
+    def _gems_equipment_overview_path(position: int) -> str:
+        paths = {
+            1: "OverlayCamera/Overlay/UIMain/equipment_r_container(Adapt)/equipment_r_container/equipment_r/equipment/equipment_r1",
+            2: "OverlayCamera/Overlay/UIMain/equipment_r_container(Adapt)/equipment_r_container/equipment_r/equipment/equipment_r2",
+            3: "OverlayCamera/Overlay/UIMain/equipment_r_container(Adapt)/equipment_r_container/equipment_r/equipment/equipment_r3",
+            4: "OverlayCamera/Overlay/UIMain/equipment_l_container(Adapt)/equipment_l_container/equipment_l/equipment/equipment_l1",
+            5: "OverlayCamera/Overlay/UIMain/equipment_l_container(Adapt)/equipment_l_container/equipment_l/equipment/equipment_l2",
+            6: "OverlayCamera/Overlay/UIMain/equipment_b_container(Adapt)/equipment_b_container/equipment_b/equipment",
+        }
+        try:
+            return paths[position]
+        except KeyError as exc:
+            raise ValueError("GemsFarming equipment position is invalid") from exc
+
+    def _gems_equipment_overview_loadout(
+        self,
+    ) -> Tuple[OracleState, UiState, Tuple[GemsFarmingEquipmentSlot, ...]]:
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        slots = []
+        for position in range(1, 7):
+            root = self._gems_equipment_overview_path(position)
+            buttons = tuple(
+                item
+                for item in state.buttons
+                if item.path == root
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.interactable
+                and item.point is not None
+                and item.bounds is not None
+            )
+            if position == 6 and not buttons:
+                continue
+            if len(buttons) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming equipment overview slot is incomplete"
+                )
+            icon_suffix = (
+                "/info/Icon/Mask/icon_bg/icon"
+                if position == 6
+                else "/info/IconTpl/icon_bg/icon"
+            )
+            level_suffix = (
+                "/info/Icon/LV/Text"
+                if position == 6
+                else "/info/IconTpl/icon_bg/slv/Text"
+            )
+            icons = tuple(
+                item
+                for item in ui_state.images
+                if item.path == root + icon_suffix
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.sprite
+            )
+            levels = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == root + level_suffix
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and re.fullmatch(r"(?:[0-9]|1[0-5])", item.text)
+            )
+            if not icons and not levels:
+                continue
+            if len(icons) != 1 or len(levels) > 1:
+                raise SemanticGateClosed(
+                    "GemsFarming equipment overview identity is ambiguous"
+                )
+            slots.append(
+                GemsFarmingEquipmentSlot(
+                    position=position,
+                    equipment_id=icons[0].sprite,
+                    enhancement=int(levels[0].text) if levels else 0,
+                    special=position == 6,
+                )
+            )
+        if state.generation > ui_state.generation:
+            raise SemanticGateClosed("GemsFarming overview snapshots are incoherent")
+        return state, ui_state, tuple(slots)
+
+    def _gems_equipment_open_detail_store(
+        self, slot: GemsFarmingEquipmentSlot
+    ) -> None:
+        state, _, current = self._gems_equipment_stable_detail_loadout()
+        mounted = tuple(item for item in current if item.position == slot.position)
+        if len(mounted) > 1:
+            raise SemanticGateClosed(
+                "GemsFarming occupied equipment slot is not uniquely mounted"
+            )
+        regular_suffixes = (
+            "/ShipDetailView(Clone)/equipments/equipments/equipment_tpl(Clone)",
+            "/ShipDetailView(Clone)/equipments/equipments/empty_tpl(Clone)",
+        )
+        regular = tuple(
+            sorted(
+                (
+                    item
+                    for item in state.buttons
+                    if item.path.endswith(regular_suffixes)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and item.interactable
+                    and item.bounds is not None
+                    and item.point is not None
+                ),
+                key=lambda item: item.bounds.left,
+            )
+        )
+        special = tuple(
+            item
+            for item in state.buttons
+            if item.path.endswith("/ShipDetailView(Clone)/equipments/SpSlot")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.bounds is not None
+            and item.point is not None
+        )
+        if len(regular) != 5 or len(special) != 1:
+            raise SemanticGateClosed("GemsFarming ship equipment slots are incomplete")
+        button = special[0] if slot.special else regular[slot.position - 1]
+        self._gems_equipment_click_button(
+            state,
+            button,
+            "gems-farming/equipment/slot/{0}/occupied".format(slot.position),
+        )
+        page = "SpWeaponStoreHouseUI(Clone)" if slot.special else "StoreHouseUI(Clone)"
+        if not mounted:
+            def require_empty_destination() -> str:
+                current_state = self.read_state()
+                if any(page in item.path for item in current_state.buttons):
+                    return "store"
+                try:
+                    self._gems_equipment_overview_loadout()
+                except SemanticGateClosed as exc:
+                    raise SemanticGateClosed(
+                        "GemsFarming empty equipment destination is incomplete"
+                    ) from exc
+                return "overview"
+
+            destination = self._retry_transition_read(
+                require_empty_destination, attempts=50, interval_seconds=0.1
+            )
+            if destination == "overview":
+                self._gems_equipment_open_store(slot)
+            return
+
+        dialog = "SpWeaponInfoUI(Clone)" if slot.special else "EquipmentInfoUI(Clone)"
+        action_path = (
+            "OverlayCamera/Overlay/UIMain/{0}/default/actions/action_button_3".format(
+                dialog
+            )
+        )
+
+        def require_change() -> Tuple[OracleState, ButtonState]:
+            current_state = self.read_state()
+            text_state = self.read_text_state()
+            buttons = tuple(
+                item for item in current_state.buttons if item.path == action_path
+            )
+            texts = tuple(
+                item
+                for item in text_state.texts
+                if item.path == action_path + "/change"
+                and item.text == "更 换"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            if len(buttons) != 1 or len(texts) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming occupied equipment action is incomplete"
+                )
+            return current_state, buttons[0]
+
+        action_state, change = self._retry_transition_read(
+            require_change, attempts=30, interval_seconds=0.1
+        )
+        self._gems_equipment_click_button(
+            action_state,
+            change,
+            "gems-farming/equipment/slot/{0}/change".format(slot.position),
+        )
+        def require_store() -> bool:
+            current_state = self.read_state()
+            if not any(page in item.path for item in current_state.buttons):
+                raise SemanticGateClosed("GemsFarming equipment store did not open")
+            return True
+
+        self._retry_transition_read(require_store, attempts=50, interval_seconds=0.1)
+
+    def _gems_equipment_open_store(self, slot: GemsFarmingEquipmentSlot) -> None:
+        state, _, _ = self._retry_transition_read(
+            self._gems_equipment_overview_loadout,
+            attempts=30,
+            interval_seconds=0.1,
+        )
+        path = self._gems_equipment_overview_path(slot.position)
+        buttons = tuple(item for item in state.buttons if item.path == path)
+        if len(buttons) != 1:
+            raise SemanticGateClosed("GemsFarming equipment slot control changed")
+        self._gems_equipment_click_button(
+            state,
+            buttons[0],
+            "gems-farming/equipment/slot/{0}/store".format(slot.position),
+        )
+        page = "SpWeaponStoreHouseUI(Clone)" if slot.special else "StoreHouseUI(Clone)"
+
+        def require_store() -> bool:
+            current = self.read_state()
+            if not any(page in item.path for item in current.buttons):
+                raise SemanticGateClosed("GemsFarming equipment store did not open")
+            return True
+
+        self._retry_transition_read(require_store, attempts=50, interval_seconds=0.1)
+
+    def _gems_equipment_store_candidate(
+        self, slot: GemsFarmingEquipmentSlot
+    ) -> Tuple[OracleState, ButtonState, Point]:
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        candidates = []
+        if slot.special:
+            prefix = (
+                "UICamera/Canvas/UIMain/SpWeaponStoreHouseUI(Clone)/adapt/"
+                "ScrollView/Viewport/Content/StoreHouse/Grid/Template(Clone)"
+            )
+            cards = tuple(
+                item
+                for item in state.buttons
+                if item.path == prefix
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.interactable
+                and item.bounds is not None
+                and item.point is not None
+            )
+            for card in cards:
+                assert card.bounds is not None
+                icons = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path == prefix + "/frame/bg/icon_bg/icon"
+                    and item.sprite == slot.equipment_id
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and self._gems_equipment_in_bounds(item, card.bounds)
+                )
+                levels = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path == prefix + "/frame/bg/icon_bg/slv/Text"
+                    and re.fullmatch(r"(?:[0-9]|1[0-5])", item.text)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and self._gems_equipment_in_bounds(item, card.bounds)
+                )
+                assigned = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path.startswith(prefix + "/frame/bg/equip_flag")
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and self._gems_equipment_in_bounds(item, card.bounds)
+                )
+                observed_enhancement = (
+                    int(levels[0].text) if len(levels) == 1 else 0
+                )
+                if (
+                    len(icons) == 1
+                    and len(levels) <= 1
+                    and observed_enhancement == slot.enhancement
+                    and not assigned
+                ):
+                    assert icons[0].bounds is not None
+                    candidates.append(
+                        (card, self._gems_equipment_center(icons[0].bounds))
+                    )
+        else:
+            prefix = (
+                "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/"
+                "equipment_scrollview/equipment_grid/"
+            )
+            for card in state.buttons:
+                match = re.fullmatch(re.escape(prefix) + r"([0-9]+)", card.path)
+                if (
+                    match is None
+                    or not card.active_in_hierarchy
+                    or not card.active_and_enabled
+                    or not card.interactable
+                    or card.bounds is None
+                    or card.point is None
+                ):
+                    continue
+                root = card.path
+                icons = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path == root + "/frame/bg/icon_bg/icon"
+                    and item.sprite == slot.equipment_id
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                )
+                levels = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path == root + "/frame/bg/icon_bg/slv/Text"
+                    and re.fullmatch(r"(?:[0-9]|1[0-5])", item.text)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                )
+                assigned = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path.startswith(root + "/frame/bg/equip_flag")
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                )
+                observed_enhancement = (
+                    int(levels[0].text) if len(levels) == 1 else 0
+                )
+                if (
+                    len(icons) == 1
+                    and len(levels) <= 1
+                    and observed_enhancement == slot.enhancement
+                    and not assigned
+                ):
+                    assert icons[0].bounds is not None
+                    candidates.append(
+                        (card, self._gems_equipment_center(icons[0].bounds))
+                    )
+        visible = tuple(
+            item
+            for item in candidates
+            if item[0].bounds is not None
+            and item[0].bounds.contains(item[1])
+            and item[0].bounds.top >= 40.0
+            and item[0].bounds.bottom <= 680.0
+        )
+        visible = tuple(
+            sorted(
+                visible,
+                key=lambda item: (
+                    item[0].bounds.top,
+                    item[0].bounds.left,
+                    item[0].path,
+                ),
+            )
+        )
+        if not visible:
+            raise SemanticGateClosed("GemsFarming equipment is not visible in store")
+        if state.generation > ui_state.generation:
+            raise SemanticGateClosed("GemsFarming store snapshots are incoherent")
+        return state, visible[0][0], visible[0][1]
+
+    def _gems_equipment_reset_store(self, special: bool) -> None:
+        if self._swipe is None:
+            raise SemanticGateClosed("GemsFarming equipment store requires typed swipe")
+        previous_regular_top: Optional[Tuple[int, int]] = None
+        for _ in range(12):
+            state = self.read_state()
+            ui_state = self.read_ui_state()
+            if special:
+                banner = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path.endswith(
+                        "/SpWeaponStoreHouseUI(Clone)/adapt/ScrollView/Viewport/Content/StoreHouse/Banner/Text"
+                    )
+                    and item.bounds is not None
+                )
+                at_top = len(banner) == 1 and banner[0].bounds.top >= 0.0
+            else:
+                prefix = (
+                    "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/"
+                    "equipment_scrollview/equipment_grid/"
+                )
+                visible_indices = tuple(
+                    (
+                        int(item.path[len(prefix) :]),
+                        int(round(item.bounds.top)),
+                    )
+                    for item in state.buttons
+                    if item.path.startswith(prefix)
+                    and item.path[len(prefix) :].isdigit()
+                    and item.bounds is not None
+                    and item.bounds.bottom >= 0.0
+                    and item.bounds.top <= 680.0
+                )
+                # A partially scrolled first page can still expose an index
+                # below 7. Treating that as the top made the subsequent
+                # downward-only search miss equipment immediately above the
+                # viewport. Prove the upper boundary by one unchanged upward
+                # swipe instead of assuming a particular grid index origin.
+                regular_top = min(visible_indices) if visible_indices else None
+                at_top = (
+                    regular_top is not None
+                    and regular_top == previous_regular_top
+                )
+                previous_regular_top = regular_top
+            if at_top:
+                return
+            if self._blocking_rules(state, "gems-farming/equipment/store/reset"):
+                raise SemanticGateClosed("GemsFarming equipment store swipe is blocked")
+            self._swipe(640, 160, 640, 600, 400)
+            self._sleep(0.15)
+        raise SemanticGateClosed("GemsFarming equipment store did not reset")
+
+    def _gems_equipment_select_from_store(
+        self, slot: GemsFarmingEquipmentSlot
+    ) -> str:
+        self._gems_equipment_reset_store(slot.special)
+        candidate: Optional[Tuple[OracleState, ButtonState, Point]] = None
+        previous_signature: Optional[Tuple[str, int, int]] = None
+        stable_reads = 0
+        for attempt in range(120):
+            try:
+                observed = self._gems_equipment_store_candidate(slot)
+            except SemanticGateClosed as exc:
+                if "not visible in store" not in str(exc):
+                    raise
+                observed = None
+            if observed is not None:
+                _, button, point = observed
+                signature = (button.path, round(point.x), round(point.y))
+                if signature == previous_signature:
+                    stable_reads += 1
+                else:
+                    previous_signature = signature
+                    stable_reads = 1
+                if stable_reads >= 3:
+                    candidate = observed
+                    break
+                self._sleep(0.25)
+                continue
+            previous_signature = None
+            stable_reads = 0
+            if self._swipe is None:
+                raise SemanticGateClosed("GemsFarming equipment store requires typed swipe")
+            current = self.read_state()
+            if self._blocking_rules(current, "gems-farming/equipment/store/search"):
+                raise SemanticGateClosed("GemsFarming equipment store swipe is blocked")
+            self._swipe(640, 600, 640, 350, 300)
+            self._sleep(0.15)
+        if candidate is None:
+            raise SemanticGateClosed(
+                "GemsFarming equipment is unavailable: {0} +{1}".format(
+                    slot.equipment_id, slot.enhancement
+                )
+            )
+        state, button, point = candidate
+        semantic_id = "gems-farming/equipment/slot/{0}/candidate/{1}".format(
+            slot.position, slot.equipment_id
+        )
+        if button.bounds is None or not button.bounds.contains(point):
+            raise SemanticGateClosed("GemsFarming equipment candidate moved")
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("GemsFarming equipment candidate is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before equipment selection")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        dialog = "SpWeaponInfoUI(Clone)" if slot.special else "EquipmentInfoUI(Clone)"
+        prefix = "OverlayCamera/Overlay/UIMain/{0}/replace".format(dialog)
+
+        def selection() -> Tuple[OracleState, ButtonState]:
+            current = self.read_state()
+            current_ui = self.read_ui_state()
+            buttons = tuple(
+                item
+                for item in current.buttons
+                if item.path == prefix + "/actions/action_button_2"
+            )
+            icons = tuple(
+                item
+                for item in current_ui.images
+                if item.path == prefix + "/equipment_on_ship/info/equip/icon_bg/icon"
+                and item.sprite == slot.equipment_id
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            levels = tuple(
+                item
+                for item in current_ui.texts
+                if item.path == prefix + "/equipment_on_ship/info/equip/slv/Text"
+                and item.text == str(slot.enhancement)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            observed_enhancement = int(levels[0].text) if len(levels) == 1 else 0
+            if (
+                len(buttons) != 1
+                or len(icons) != 1
+                or len(levels) > 1
+                or observed_enhancement != slot.enhancement
+            ):
+                raise SemanticGateClosed("GemsFarming equipment selection changed")
+            return current, buttons[0]
+
+        selected_state, confirm = self._retry_transition_read(
+            selection, attempts=30, interval_seconds=0.1
+        )
+        self._gems_equipment_click_button(
+            selected_state,
+            confirm,
+            "gems-farming/equipment/slot/{0}/confirm".format(slot.position),
+        )
+
+        def require_mounted() -> str:
+            for page, reader in (
+                ("overview", self._gems_equipment_overview_loadout),
+                ("detail", self._gems_equipment_read_loadout),
+            ):
+                try:
+                    _, _, mounted = reader()
+                except SemanticGateClosed:
+                    continue
+                matches = tuple(
+                    item for item in mounted if item.position == slot.position
+                )
+                if matches == (slot,):
+                    return page
+            raise SemanticGateClosed("GemsFarming equipment mount was not proven")
+
+        return self._retry_transition_read(
+            require_mounted, attempts=50, interval_seconds=0.1
+        )
+
+    def gems_farming_equipment_take_on(
+        self, role: str
+    ) -> GemsFarmingEquipmentLoadout:
+        """Mount the pending typed loadout on ALAS's current Formation ship."""
+
+        try:
+            loadout = self._gems_farming_equipment_loadouts[role]
+        except KeyError as exc:
+            raise SemanticGateClosed(
+                "GemsFarming equipment transfer is not pending for " + role
+            ) from exc
+        if any(slot.special for slot in loadout.slots):
+            raise SemanticGateClosed(
+                "GemsFarming pending loadout exceeds ALAS's five equipment-code slots"
+            )
+        self._gems_equipment_open_ship_detail(role)
+        _, _, current = self._gems_equipment_stable_detail_loadout()
+        current_by_position = {
+            slot.position: slot for slot in current if not slot.special
+        }
+        desired_by_position = {slot.position: slot for slot in loadout.slots}
+        for position in tuple(sorted(current_by_position)):
+            if position not in desired_by_position:
+                self._gems_equipment_unload_detail_slot(
+                    current_by_position[position]
+                )
+                del current_by_position[position]
+        page = "detail"
+        for slot in loadout.slots:
+            if current_by_position.get(slot.position) == slot:
+                continue
+            if page == "detail":
+                self._gems_equipment_open_detail_store(slot)
+            else:
+                self._gems_equipment_open_store(slot)
+            page = self._gems_equipment_select_from_store(slot)
+            reader = (
+                self._gems_equipment_overview_loadout
+                if page == "overview"
+                else self._gems_equipment_stable_detail_loadout
+            )
+            _, _, observed = self._retry_transition_read(
+                reader, attempts=30, interval_seconds=0.1
+            )
+            current_by_position = {
+                item.position: item for item in observed if not item.special
+            }
+        reader = (
+            self._gems_equipment_overview_loadout
+            if page == "overview"
+            else self._gems_equipment_stable_detail_loadout
+        )
+        _, _, mounted = self._retry_transition_read(
+            reader, attempts=30, interval_seconds=0.1
+        )
+        mounted_regular = tuple(item for item in mounted if not item.special)
+        if mounted_regular != loadout.slots:
+            raise SemanticGateClosed("GemsFarming equipment loadout did not restore")
+        self._gems_equipment_back_to_formation()
+        del self._gems_farming_equipment_loadouts[role]
+        return loadout
+
+    def set_gems_farming_dock_sort(self, descending: bool) -> Optional[ActionReceipt]:
+        """Set the Dock result direction through its exact typed arrow."""
+
+        if not isinstance(descending, bool):
+            raise TypeError("GemsFarming Dock sort direction must be boolean")
+        state, ui_state = self._enhancement_dock_records()
+        root = "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/sort_button/"
+        directions = {
+            "desc": tuple(
+                item
+                for item in ui_state.images
+                if item.path == root + "desc"
+                and item.sprite == "down"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.raycast_target
+                and not item.truncated
+                and item.bounds is not None
+            ),
+            "asc": tuple(
+                item
+                for item in ui_state.images
+                if item.path == root + "asc"
+                and item.sprite == "up"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.raycast_target
+                and not item.truncated
+                and item.bounds is not None
+            ),
+        }
+        if len(directions["desc"]) > 1 or len(directions["asc"]) > 1:
+            raise SemanticGateClosed("GemsFarming Dock sort direction is ambiguous")
+        current_descending = bool(directions["desc"])
+        if current_descending == descending:
+            return None
+        current_name = "desc" if current_descending else "asc"
+        if len(directions[current_name]) != 1:
+            raise SemanticGateClosed("GemsFarming Dock sort direction is incomplete")
+        parents = tuple(
+            item
+            for item in ui_state.images
+            if item.path == root[:-1]
+            and item.name == "sort_button"
+            and item.sprite == "shaixuan01"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.raycast_target
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(parents) != 1:
+            raise SemanticGateClosed("GemsFarming Dock sort control is incomplete")
+        target = parents[0]
+        for _ in range(20):
+            if not self._blocking_rules(state, "gems-farming/dock/sort"):
+                break
+            self._sleep(0.05)
+            state, refreshed = self._enhancement_dock_records()
+            matches = tuple(
+                item
+                for item in refreshed.images
+                if item.path == root[:-1]
+                and item.name == "sort_button"
+                and item.sprite == "shaixuan01"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.raycast_target
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming Dock sort direction changed while blocked"
+                )
+            target = matches[0]
+        else:
+            raise SemanticGateClosed("GemsFarming Dock sort input stayed blocked")
+        receipt = self._click_exact_image(
+            state,
+            target,
+            "gems-farming/dock/sort/" + ("descending" if descending else "ascending"),
+        )
+        for _ in range(30):
+            self._sleep(0.05)
+            _, after = self._enhancement_dock_records()
+            expected = tuple(
+                item
+                for item in after.images
+                if item.path == root + ("desc" if descending else "asc")
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+            )
+            if len(expected) == 1:
+                return receipt
+        raise SemanticGateClosed("GemsFarming Dock sort direction did not change")
+
+    def set_gems_farming_dock_filter(
+        self,
+        role: str,
+        factions: Tuple[str, ...],
+        *,
+        enhanceable_only: bool = True,
+    ) -> Tuple[ActionReceipt, ...]:
+        """Apply the exact ALAS GemsFarming Dock filter for one ship role."""
+
+        role_options = {
+            "flagship": ("7", "航母", "3", "可强化"),
+            "vanguard": ("3", "驱逐", "4", "可突破"),
+        }
+        faction_options = {
+            "all": ("tpl", "全阵营"),
+            "eagle": ("1", "白鹰"),
+            "iron": ("4", "铁血"),
+        }
+        if role not in role_options:
+            raise ValueError("GemsFarming role must be flagship or vanguard")
+        if not isinstance(enhanceable_only, bool):
+            raise TypeError("GemsFarming enhanceable_only must be boolean")
+        if (
+            not isinstance(factions, tuple)
+            or not factions
+            or any(item not in faction_options for item in factions)
+            or ("all" in factions and len(factions) != 1)
+        ):
+            raise SemanticGateClosed("GemsFarming Dock faction scope is invalid")
+        state, ui_state = self._enhancement_dock_records()
+        opener = tuple(
+            item
+            for item in ui_state.images
+            if item.path
+            == "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.raycast_target
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(opener) != 1:
+            raise SemanticGateClosed("GemsFarming Dock filter opener is incomplete")
+        receipts = [
+            self._click_exact_image(
+                state, opener[0], "gems-farming/dock/filter/open"
+            )
+        ]
+        self._sleep(0.1)
+        index_option, index_label, extra_option, extra_label = role_options[role]
+        if not enhanceable_only:
+            extra_option, extra_label = "tpl", "无限制"
+        # Match upstream ``Setting.reset_first``: selecting each group's
+        # default clears stale multi-select state before applying the task
+        # filter. Merely proving the desired option selected is insufficient;
+        # an old incompatible option can remain selected and produce an empty
+        # Dock while every desired label still looks correct.
+        choices = [
+            ("sort", "1", "等级", "btn_index_yellow"),
+            ("index", "tpl", "全部", "btn_index_blue"),
+            ("camp", "tpl", "全阵营", "btn_index_blue"),
+            ("rarity", "tpl", "全部", "btn_index_blue"),
+            ("extraindex", "tpl", "无限制", "btn_index_blue"),
+            ("sort", "2", "综合性能", "btn_index_yellow"),
+            ("index", index_option, index_label, "btn_index_blue"),
+        ]
+        choices.extend(
+            ("camp", faction_options[item][0], faction_options[item][1], "btn_index_blue")
+            for item in factions
+        )
+        choices.extend(
+            (
+                ("rarity", "1", "普通", "btn_index_blue"),
+                ("extraindex", extra_option, extra_label, "btn_index_blue"),
+            )
+        )
+        for group, option, label, selected_sprite in choices:
+            semantic_id = "gems-farming/dock/filter/{0}/{1}".format(
+                group, option
+            )
+            for click_attempt in range(3):
+                state, _, image = self._wait_enhancement_filter_option(
+                    group, option, label
+                )
+                if image.sprite == selected_sprite:
+                    break
+                if image.sprite != "btn_index_grey":
+                    raise SemanticGateClosed(
+                        "GemsFarming Dock filter state is unknown"
+                    )
+                for _ in range(20):
+                    if not self._blocking_rules(state, semantic_id):
+                        break
+                    self._sleep(0.05)
+                    state, _, image = self._wait_enhancement_filter_option(
+                        group, option, label
+                    )
+                    if image.sprite == selected_sprite:
+                        break
+                    if image.sprite != "btn_index_grey":
+                        raise SemanticGateClosed(
+                            "GemsFarming Dock filter state became unknown"
+                        )
+                else:
+                    raise SemanticGateClosed(
+                        "GemsFarming Dock filter input stayed blocked"
+                    )
+                if image.sprite == selected_sprite:
+                    break
+                receipts.append(
+                    self._click_exact_image(state, image, semantic_id)
+                )
+                for _ in range(30):
+                    self._sleep(0.05)
+                    _, _, verified = self._wait_enhancement_filter_option(
+                        group, option, label
+                    )
+                    if verified.sprite == selected_sprite:
+                        break
+                    if verified.sprite != "btn_index_grey":
+                        raise SemanticGateClosed(
+                            "GemsFarming Dock filter selection became unknown"
+                        )
+                else:
+                    if click_attempt == 2:
+                        raise SemanticGateClosed(
+                            "GemsFarming Dock filter option did not select"
+                        )
+                    continue
+                break
+            else:
+                raise SemanticGateClosed(
+                    "GemsFarming Dock filter option did not select"
+                )
+        expected_selected = {
+            "sort": {"2"},
+            "index": {index_option},
+            "camp": {faction_options[item][0] for item in factions},
+            "rarity": {"1"},
+            "extraindex": {extra_option},
+        }
+        option_pattern = re.compile(
+            r"OverlayCamera/Overlay/UIMain/CustomIndexUI\(Clone\)/index_panel/"
+            r"layout/container/indexsort_(sort|index|camp|rarity|extraindex)/"
+            r"bg/([^/]+)"
+        )
+
+        def selected_options(
+            current: UiState,
+        ) -> Dict[str, Dict[str, ImageState]]:
+            selected: Dict[str, Dict[str, ImageState]] = {
+                group: {} for group in expected_selected
+            }
+            for image in current.images:
+                match = option_pattern.fullmatch(image.path)
+                if (
+                    match is None
+                    or image.sprite not in ("btn_index_blue", "btn_index_yellow")
+                    or not image.active_in_hierarchy
+                    or not image.active_and_enabled
+                    or image.truncated
+                    or image.bounds is None
+                ):
+                    continue
+                selected[match.group(1)][match.group(2)] = image
+            return selected
+
+        # These groups are multi-select in the live client.  Selecting the
+        # requested item does not necessarily clear prior selections, so
+        # explicitly deselect every observed extra option and prove the exact
+        # final set before confirming.
+        for _ in range(40):
+            state, ui_state = self._retirement_records()
+            selected = selected_options(ui_state)
+            unexpected = [
+                (group, option, image)
+                for group, options in selected.items()
+                for option, image in options.items()
+                if option not in expected_selected[group]
+            ]
+            if not unexpected:
+                if all(
+                    set(selected[group]) == expected
+                    for group, expected in expected_selected.items()
+                ):
+                    break
+                raise SemanticGateClosed(
+                    "GemsFarming Dock filter selected set is incomplete"
+                )
+            group, option, image = unexpected[0]
+            semantic_id = "gems-farming/dock/filter/{0}/{1}/deselect".format(
+                group, option
+            )
+            if self._blocking_rules(state, semantic_id):
+                self._sleep(0.05)
+                continue
+            receipts.append(self._click_exact_image(state, image, semantic_id))
+            self._sleep(0.05)
+        else:
+            raise SemanticGateClosed(
+                "GemsFarming Dock filter extras did not clear"
+            )
+        for _ in range(20):
+            state, ui_state = self._retirement_records()
+            if not self._blocking_rules(
+                state, "gems-farming/dock/filter/confirm"
+            ):
+                break
+            self._sleep(0.05)
+        else:
+            raise SemanticGateClosed(
+                "GemsFarming Dock filter confirm stayed blocked"
+            )
+        confirm_path = (
+            "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/"
+            "layout/btns/ok"
+        )
+        confirm = tuple(
+            item
+            for item in ui_state.images
+            if item.path == confirm_path
+            and item.sprite == "btn_big_blue"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.raycast_target
+            and not item.truncated
+            and item.bounds is not None
+        )
+        confirm_text = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == confirm_path + "/Image"
+            and item.text == "确 定"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+        )
+        if len(confirm) != 1 or len(confirm_text) != 1:
+            raise SemanticGateClosed("GemsFarming Dock filter confirm is incomplete")
+        receipts.append(
+            self._click_exact_image(
+                state, confirm[0], "gems-farming/dock/filter/confirm"
+            )
+        )
+        self._retry_transition_read(
+            self._enhancement_dock_records,
+            attempts=30,
+            interval_seconds=0.1,
+        )
+        return tuple(receipts)
+
+    def cancel_gems_farming_dock_filter_if_visible(
+        self,
+    ) -> Optional[ActionReceipt]:
+        """Cancel only the exact open CustomIndexUI and prove Dock recovery."""
+
+        state, ui_state = self._retirement_records()
+        cancel_path = (
+            "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/"
+            "layout/btns/cancel"
+        )
+        controls = tuple(
+            item
+            for item in ui_state.images
+            if item.path == cancel_path
+            and item.name == "cancel"
+            and item.sprite == "btn_big_red"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.raycast_target
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if not controls:
+            return None
+        if len(controls) != 1:
+            raise SemanticGateClosed(
+                "GemsFarming Dock filter cancel is ambiguous"
+            )
+        semantic_id = "gems-farming/dock/filter/cancel"
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("GemsFarming Dock filter cancel is blocked")
+        receipt = self._click_exact_image(state, controls[0], semantic_id)
+        self._retry_transition_read(
+            self._enhancement_dock_records,
+            attempts=30,
+            interval_seconds=0.1,
+        )
+        return receipt
+
+    def _gems_farming_dock_candidates_once(
+        self,
+        *,
+        ship_ids: Optional[FrozenSet[int]] = None,
+    ) -> Tuple[GemsFarmingDockCandidate, ...]:
+        """Read one candidate snapshot after a Dock filter or scroll update."""
+
+        state, ui_state = self._enhancement_dock_records()
+        base = self.enhancement_dock_candidates()
+        rarity_names = {
+            "1": "common",
+            "2": "rare",
+            "3": "elite",
+            "4": "super_rare",
+            "4_0": "super_rare",
+            "5": "ultra",
+            # Research/PR ships use the rainbow frame variant while keeping
+            # the same Dock card contract.  It may coexist with ordinary
+            # GemsFarming candidates in a broad recovery view.
+            "5_0": "ultra",
+            "prop": "special",
+            # META carriers can share a broad recovery page with the exact
+            # target ship.  Classify their observed frame locally so an
+            # unrelated card does not invalidate every typed candidate; it
+            # still cannot satisfy GemsFarming's required common rarity.
+            "3_1": "special",
+            "4_1": "special",
+            "prop4_1": "special",
+        }
+        type_names = {
+            "hangmu": "cv",
+            "quzhu": "dd",
+            "zhongxun": "ca",
+            "zhanlie": "bb",
+        }
+        result = []
+        for candidate in base:
+            if ship_ids is not None and candidate.ship_id not in ship_ids:
+                continue
+            root = candidate.button.path + "/content/"
+            if candidate.button.bounds is None:
+                raise SemanticGateClosed("GemsFarming Dock card bounds are absent")
+            card_bounds = candidate.button.bounds
+
+            def belongs_to_card(item: Union[ImageState, TextState]) -> bool:
+                if item.bounds is None:
+                    return False
+                center = Point(
+                    (item.bounds.left + item.bounds.right) / 2.0,
+                    (item.bounds.top + item.bounds.bottom) / 2.0,
+                )
+                return card_bounds.contains(center)
+
+            def images(suffix: str) -> Tuple[ImageState, ...]:
+                return tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path == root + suffix
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and belongs_to_card(item)
+                )
+            emotion = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == root + "energy/Text"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and re.fullmatch(r"(?:[0-9]|[1-9][0-9]|1[0-4][0-9]|150)", item.text)
+                and belongs_to_card(item)
+            )
+            ship_icon = images("ship_icon")
+            ship_type = images("info/top/type")
+            frame = images("front/frame")
+            status = images("dockyard/status")
+            if (
+                len(emotion) != 1
+                or len(ship_icon) != 1
+                or len(ship_type) != 1
+                or len(frame) != 1
+                or len(status) > 1
+                or ship_type[0].sprite not in type_names
+                or frame[0].sprite not in rarity_names
+                or not ship_icon[0].sprite
+            ):
+                raise SemanticGateClosed(
+                    "GemsFarming Dock card semantics are incomplete"
+                )
+            status_sprite = status[0].sprite if status else ""
+            fleet_match = re.fullmatch(r"biandui0?([1-6])", status_sprite)
+            if fleet_match is not None:
+                fleet_index = int(fleet_match.group(1))
+                context = self._gems_farming_open_slot_context
+                availability = (
+                    "current"
+                    if context is not None
+                    and context[1] == ship_icon[0].sprite
+                    and context[2] == fleet_index
+                    else "free"
+                )
+            elif not status_sprite:
+                fleet_index = 0
+                availability = "free"
+            else:
+                fleet_index = 0
+                availability = status_sprite
+            result.append(
+                GemsFarmingDockCandidate(
+                    position=candidate.position,
+                    ship_id=candidate.ship_id,
+                    ship_name=candidate.ship_name,
+                    ship_sprite=ship_icon[0].sprite,
+                    ship_type=type_names[ship_type[0].sprite],
+                    rarity=rarity_names[frame[0].sprite],
+                    level=candidate.level,
+                    emotion=int(emotion[0].text),
+                    fleet_index=fleet_index,
+                    status=availability,
+                    button=candidate.button,
+                )
+            )
+        if state.generation > ui_state.generation:
+            raise SemanticGateClosed("GemsFarming Dock candidate snapshots are incoherent")
+        return tuple(result)
+
+    def gems_farming_dock_candidates(
+        self, *, ship_ids: Optional[Iterable[int]] = None
+    ) -> Tuple[GemsFarmingDockCandidate, ...]:
+        """Return a stable typed Dock view without OCR or templates."""
+
+        exact_ship_ids: Optional[FrozenSet[int]] = None
+        if ship_ids is not None:
+            exact_ship_ids = frozenset(ship_ids)
+            if (
+                not exact_ship_ids
+                or any(
+                    isinstance(ship_id, bool)
+                    or not isinstance(ship_id, int)
+                    or ship_id <= 0
+                    for ship_id in exact_ship_ids
+                )
+            ):
+                raise ValueError("GemsFarming exact ship IDs are invalid")
+
+        retryable = (
+            "enhancement Dock card identity is incomplete",
+            "GemsFarming Dock card semantics are incomplete",
+            "GemsFarming Dock candidate snapshots are incoherent",
+        )
+        last_error: Optional[SemanticGateClosed] = None
+        last_result: Tuple[GemsFarmingDockCandidate, ...] = ()
+        # The live Dock replaces its virtualized cards with off-screen ``-1``
+        # placeholders while a new filter is loading.  Upstream deliberately
+        # waits about 1.2 seconds before treating that view as empty.  Preserve
+        # that timing boundary here: a non-empty typed view may return early,
+        # while a genuinely empty filter still returns after the bounded wait.
+        for attempt in range(13):
+            try:
+                if exact_ship_ids is None:
+                    last_result = self._gems_farming_dock_candidates_once()
+                else:
+                    last_result = self._gems_farming_dock_candidates_once(
+                        ship_ids=exact_ship_ids
+                    )
+            except SemanticGateClosed as exc:
+                if str(exc) not in retryable:
+                    raise
+                last_error = exc
+            else:
+                if last_result:
+                    return last_result
+                last_error = None
+            if attempt < 12:
+                self._sleep(0.1)
+        if last_error is not None:
+            raise SemanticGateClosed(
+                "GemsFarming Dock candidate snapshots did not stabilize"
+            ) from last_error
+        return last_result
+
+    def click_gems_farming_candidate(
+        self, candidate: GemsFarmingDockCandidate
+    ) -> ActionReceipt:
+        """Select one unchanged typed candidate and prove the 1/1 counter."""
+
+        if not isinstance(candidate, GemsFarmingDockCandidate):
+            raise TypeError("GemsFarming candidate is invalid")
+        identity = (
+            candidate.ship_id,
+            candidate.ship_name,
+            candidate.ship_sprite,
+            candidate.ship_type,
+            candidate.rarity,
+            candidate.level,
+            candidate.emotion,
+            candidate.fleet_index,
+            candidate.status,
+        )
+        stable_signature: Optional[Tuple[str, Bounds, Point]] = None
+        stable_reads = 0
+        for attempt in range(20):
+            # A broad recovery filter may contain unrelated cards whose
+            # optional semantics are incomplete. Re-prove only the selected
+            # immutable ship identity here; duplicate cards with the same ID
+            # remain visible and must still resolve uniquely by full identity
+            # and bounds below.
+            current = self.gems_farming_dock_candidates(
+                ship_ids=(candidate.ship_id,)
+            )
+            matches = tuple(item for item in current if item == candidate)
+            if len(matches) != 1:
+                matches = tuple(
+                    item
+                    for item in current
+                    if (
+                        item.ship_id,
+                        item.ship_name,
+                        item.ship_sprite,
+                        item.ship_type,
+                        item.rarity,
+                        item.level,
+                        item.emotion,
+                        item.fleet_index,
+                        item.status,
+                    )
+                    == identity
+                )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming Dock candidate changed or became ambiguous"
+                )
+            target = matches[0].button
+            state = self.read_state()
+            buttons = tuple(
+                item
+                for item in state.buttons
+                if item.path == target.path
+                and item.name == target.name
+                and item.actionable
+                and item.bounds == target.bounds
+            )
+            if (
+                len(buttons) == 1
+                and target.point is not None
+                and target.bounds is not None
+            ):
+                signature = (target.path, target.bounds, target.point)
+                if signature == stable_signature:
+                    stable_reads += 1
+                else:
+                    stable_signature = signature
+                    stable_reads = 1
+                if stable_reads >= 3:
+                    break
+            else:
+                stable_signature = None
+                stable_reads = 0
+            if attempt < 19:
+                self._sleep(0.05)
+        else:
+            raise SemanticGateClosed("GemsFarming Dock candidate is not actionable")
+        if self._blocking_rules(state, "gems-farming/dock/candidate"):
+            raise SemanticGateClosed("GemsFarming Dock candidate input is blocked")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        receipt = ActionReceipt(
+            semantic_id="gems-farming/dock/ship/{0}".format(candidate.ship_id),
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+        count_path = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/"
+            "bottom_info/bg_input/count"
+        )
+        for _ in range(40):
+            self._sleep(0.05)
+            # The selected-count postcondition owns only this exact Text.
+            # Large Dock views may truncate unrelated Toggle records.
+            ui_state = self.read_text_state()
+            selected = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == count_path
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and re.fullmatch(r"<color=#[0-9A-Fa-f]{8}>1</color>/1", item.text)
+            )
+            if len(selected) == 1:
+                return receipt
+        raise SemanticGateClosed("GemsFarming Dock candidate did not select")
+
+    def cancel_gems_farming_candidate_selection(self) -> ActionReceipt:
+        hard_context = self._gems_farming_hard_open_slot_context
+        if hard_context is not None:
+            state = self.read_state()
+            controls = tuple(
+                item
+                for item in state.buttons
+                if item.path.endswith("/select_panel/cancel_button")
+                and item.name == "cancel_button"
+            )
+            if len(controls) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming hard Dock cancel is absent or ambiguous"
+                )
+            receipt = self._gems_equipment_click_button(
+                state, controls[0], "tactical/dock/cancel"
+            )
+            stage_code, _, _, _ = hard_context
+            self._retry_transition_read(
+                lambda: self.campaign_fleet_selection_state(stage_code),
+                attempts=50,
+                interval_seconds=0.1,
+            )
+            self._gems_farming_hard_open_slot_context = None
+            return receipt
+        receipt = self.click("tactical/dock/cancel")
+        self._retry_transition_read(
+            self._gems_farming_formation_records,
+            attempts=50,
+            interval_seconds=0.1,
+        )
+        return receipt
+
+    def confirm_gems_farming_candidate_selection(
+        self, candidate: GemsFarmingDockCandidate, role: str
+    ) -> ActionReceipt:
+        """Confirm exactly one selected ship and prove it mounted in formation."""
+
+        if not isinstance(candidate, GemsFarmingDockCandidate):
+            raise TypeError("GemsFarming candidate is invalid")
+        slot_names = {"flagship": "main_1", "vanguard": "vanguard_1"}
+        if role not in slot_names:
+            raise ValueError("GemsFarming role must be flagship or vanguard")
+        # A large unfiltered Dock can exhaust the unrelated Toggle slice.
+        # Confirmation owns only the exact 1/1 Text record; keep that slice
+        # complete and fail closed without making Toggle completeness global.
+        ui_state = self.read_text_state()
+        count_path = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/"
+            "bottom_info/bg_input/count"
+        )
+        selected = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == count_path
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and re.fullmatch(r"<color=#[0-9A-Fa-f]{8}>1</color>/1", item.text)
+        )
+        if len(selected) != 1:
+            raise SemanticGateClosed("GemsFarming Dock selection count changed")
+        hard_context = self._gems_farming_hard_open_slot_context
+        if hard_context is not None:
+            state = self.read_state()
+            controls = tuple(
+                item
+                for item in state.buttons
+                if item.path.endswith("/select_panel/confirm_button")
+                and item.name == "confirm_button"
+            )
+            if len(controls) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming hard Dock confirm is absent or ambiguous"
+                )
+            receipt = self._gems_equipment_click_button(
+                state, controls[0], "tactical/dock/confirm"
+            )
+            stage_code, fleet_index, hard_role, before = hard_context
+            if role != hard_role:
+                raise SemanticGateClosed(
+                    "GemsFarming hard replacement role changed before confirmation"
+                )
+            for _ in range(60):
+                self._sleep(0.1)
+                try:
+                    _, _, cards, after = self._gems_farming_hard_role_cards(
+                        stage_code, fleet_index, role
+                    )
+                except SemanticGateClosed:
+                    continue
+                if len(cards) == 3 and after == before + (candidate.ship_sprite,):
+                    self._gems_farming_hard_open_slot_context = None
+                    return receipt
+            raise SemanticGateClosed(
+                "GemsFarming hard replacement postcondition was not proven"
+            )
+        receipt = self.click("tactical/dock/confirm")
+        expected_suffix = "/{0}_root/mouseChild".format(candidate.ship_sprite)
+        for _ in range(60):
+            self._sleep(0.1)
+            try:
+                _, after, _ = self._gems_farming_formation_records()
+            except SemanticGateClosed:
+                continue
+            slot_path = (
+                "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/GridFrame/"
+                + slot_names[role]
+                + "/shadow"
+            )
+            slots = tuple(item for item in after.images if item.path == slot_path)
+            if len(slots) != 1 or slots[0].bounds is None:
+                continue
+            slot_center_x = (slots[0].bounds.left + slots[0].bounds.right) / 2.0
+            mounted = tuple(
+                item
+                for item in after.images
+                if item.path.endswith(expected_suffix)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.bounds is not None
+                and abs(
+                    (item.bounds.left + item.bounds.right) / 2.0 - slot_center_x
+                )
+                <= 2.0
+            )
+            if len(mounted) == 1:
+                return receipt
+        raise SemanticGateClosed("GemsFarming replacement postcondition was not proven")
+
     def set_enhancement_dock_favourite(self, enabled: bool) -> Optional[ActionReceipt]:
         """Set the Dock favourite scope using its currently rendered toggle."""
 
@@ -27292,18 +29733,29 @@ class SemanticOracle:
         deadline = time.monotonic() + 5.0
         while time.monotonic() < deadline:
             _, after = self._enhancement_dock_records()
-            visible = tuple(
-                item
-                for item in after.images
-                if item.path == root + target_name
-                and item.sprite
-                == ("changyong_butten01" if enabled else "changyong_butten02")
-                and item.active_in_hierarchy
-                and item.active_and_enabled
-                and not item.truncated
-                and item.bounds is not None
-            )
-            if len(visible) == 1:
+            visible = {
+                suffix: tuple(
+                    item
+                    for item in after.images
+                    if item.path == root + suffix
+                    and item.sprite == sprite
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.bounds is not None
+                )
+                for suffix, sprite in (
+                    ("on", "changyong_butten01"),
+                    ("off", "changyong_butten02"),
+                )
+            }
+            if enabled and len(visible["on"]) == 1:
+                return receipt
+            if (
+                not enabled
+                and not visible["on"]
+                and len(visible["off"]) == 1
+            ):
                 return receipt
             self._sleep(0.05)
         raise SemanticGateClosed("Dock favourite state did not change")
@@ -27353,43 +29805,59 @@ class SemanticOracle:
             ),
         )
         for group, option, label, selected_sprite in choices:
-            state, _, image = self._wait_enhancement_filter_option(
-                group, option, label
+            semantic_id = "enhancement/dock/filter/{0}/{1}".format(
+                group, option
             )
-            if image.sprite == selected_sprite:
-                continue
-            if image.sprite != "btn_index_grey":
-                raise SemanticGateClosed("enhancement Dock filter state is unknown")
-            for _ in range(20):
-                if not self._blocking_rules(
-                    state,
-                    "enhancement/dock/filter/{0}/{1}".format(group, option),
-                ):
-                    break
-                self._sleep(0.05)
+            for click_attempt in range(3):
                 state, _, image = self._wait_enhancement_filter_option(
                     group, option, label
                 )
-            else:
-                raise SemanticGateClosed("enhancement Dock filter input stayed blocked")
-            receipts.append(
-                self._click_exact_image(
-                    state,
-                    image,
-                    "enhancement/dock/filter/{0}/{1}".format(group, option),
-                )
-            )
-            for _ in range(30):
-                self._sleep(0.05)
-                _, _, verified = self._wait_enhancement_filter_option(
-                    group, option, label
-                )
-                if verified.sprite == selected_sprite:
+                if image.sprite == selected_sprite:
                     break
-                if verified.sprite != "btn_index_grey":
+                if image.sprite != "btn_index_grey":
                     raise SemanticGateClosed(
-                        "enhancement Dock filter selection became unknown"
+                        "enhancement Dock filter state is unknown"
                     )
+                for _ in range(20):
+                    if not self._blocking_rules(state, semantic_id):
+                        break
+                    self._sleep(0.05)
+                    state, _, image = self._wait_enhancement_filter_option(
+                        group, option, label
+                    )
+                    if image.sprite == selected_sprite:
+                        break
+                    if image.sprite != "btn_index_grey":
+                        raise SemanticGateClosed(
+                            "enhancement Dock filter state became unknown"
+                        )
+                else:
+                    raise SemanticGateClosed(
+                        "enhancement Dock filter input stayed blocked"
+                    )
+                if image.sprite == selected_sprite:
+                    break
+                receipts.append(
+                    self._click_exact_image(state, image, semantic_id)
+                )
+                for _ in range(30):
+                    self._sleep(0.05)
+                    _, _, verified = self._wait_enhancement_filter_option(
+                        group, option, label
+                    )
+                    if verified.sprite == selected_sprite:
+                        break
+                    if verified.sprite != "btn_index_grey":
+                        raise SemanticGateClosed(
+                            "enhancement Dock filter selection became unknown"
+                        )
+                else:
+                    if click_attempt == 2:
+                        raise SemanticGateClosed(
+                            "enhancement Dock filter option did not select"
+                        )
+                    continue
+                break
             else:
                 raise SemanticGateClosed(
                     "enhancement Dock filter option did not select"
@@ -27458,6 +29926,18 @@ class SemanticOracle:
         result = []
         for position, button in enumerate(ordered):
             root = button.path + "/content/"
+            assert button.bounds is not None
+
+            def belongs_to_button(item: TextState) -> bool:
+                if item.bounds is None:
+                    return False
+                return button.bounds.contains(
+                    Point(
+                        (item.bounds.left + item.bounds.right) / 2.0,
+                        (item.bounds.top + item.bounds.bottom) / 2.0,
+                    )
+                )
+
             name = tuple(
                 item
                 for item in ui_state.texts
@@ -27466,6 +29946,7 @@ class SemanticOracle:
                 and item.active_and_enabled
                 and not item.truncated
                 and item.text.strip()
+                and belongs_to_button(item)
             )
             level = tuple(
                 item
@@ -27475,6 +29956,7 @@ class SemanticOracle:
                 and item.active_and_enabled
                 and not item.truncated
                 and re.fullmatch(r"[1-9][0-9]{0,2}", item.text)
+                and belongs_to_button(item)
             )
             if (
                 not name
@@ -29402,6 +31884,7 @@ class SemanticOracle:
                     semantic_id.startswith("enhancement/dock/")
                     or semantic_id.startswith("awaken/")
                     or semantic_id.startswith("os/port/dock/")
+                    or semantic_id.startswith("gems-farming/dock/")
                 )
             )
             and not (
@@ -30367,6 +32850,15 @@ class SemanticOracle:
             return self._mail_manager_back_delegated_raycast_proven(state)
         if semantic_id == "exercise/opponent/start":
             return self.exercise_opponent_detail_visible()
+        matches = self._matches(state, semantic_id)
+        if semantic_id in (
+            "overlay/network-reconnect/cancel",
+            "overlay/network-reconnect/confirm",
+        ) and not matches:
+            # Dock pages can legitimately exceed the observer toggle budget.
+            # Do not demand an unrelated full Msgbox/UI snapshot when the
+            # colliding NetworkDown button target is absent in typed state.
+            return False
         if semantic_id in (
             "overlay/network-reconnect/cancel",
             "overlay/network-reconnect/confirm",
@@ -30377,7 +32869,6 @@ class SemanticOracle:
             and not self._login_data_expired_prompt_matches(state)
         ):
             return False
-        matches = self._matches(state, semantic_id)
         if len(matches) > 1:
             raise SemanticGateClosed("semantic target mapping is ambiguous")
         if semantic_id.startswith("guild/") and semantic_id in (

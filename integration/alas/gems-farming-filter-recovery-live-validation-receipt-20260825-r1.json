@@ -1,0 +1,44 @@
+{
+  "schema": "alas-headless.gems-farming-filter-recovery-live-validation/v1",
+  "passed": true,
+  "recorded_at_utc": "2026-08-25T11:12:57Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "package": "com.bilibili.azurlane",
+  "pid": 2030,
+  "qualification_scope": "typed atomic rollback after GemsFarming Dock filter stabilization failure",
+  "android_input_injected": true,
+  "raw_input_fallback_used": false,
+  "fleet_mutation_count": 0,
+  "original_failure": {
+    "classification": "SemanticGateClosed",
+    "message": "enhancement Dock snapshots did not stabilize",
+    "filter_surface_generation": 571970,
+    "surface": "CustomIndexUI(Clone)"
+  },
+  "recovery_actions": [
+    {
+      "semantic_id": "gems-farming/dock/filter/cancel",
+      "target": "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/layout/btns/cancel",
+      "sprite": "btn_big_red"
+    },
+    {
+      "semantic_id": "tactical/dock/cancel",
+      "target": "exact reviewed Dock candidate-selection cancel"
+    },
+    {
+      "semantic_id": "gems-farming/startup/formation/back",
+      "generation": 573986
+    }
+  ],
+  "postcondition": {
+    "final_main_page": true,
+    "fleet_unchanged": true,
+    "equipment_unchanged": true
+  },
+  "implementation_sha256": {
+    "alas_adapter.py": "13796cd6ef4dd82e61751c97625892198400954c9d916a4d8887d6dec7350889",
+    "semantic_oracle.py": "f4719490fcdc6aaa8983a8d810467104e8d7b63a339c381fc32608c205a9f2ff"
+  },
+  "statement": "A real named-selector probe failed before candidate selection because the typed Dock snapshots did not stabilize. The new localized rollback clicked only the unique reviewed red filter cancel, then the reviewed Dock cancel and Formation back, re-proving the main page with zero fleet or equipment mutation. The original classified failure remains visible to the caller."
+}

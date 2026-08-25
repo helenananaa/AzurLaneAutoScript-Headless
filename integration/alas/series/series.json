@@ -33,7 +33,7 @@
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "895d7597e999df8eddf59561fee1b2f00011a44bebbb5c91354f87bbf0bc9bb0"
+      "sha256": "2f27b6688412bae00e6569497e015845a79313e3f82a9bca93d10ec814774558"
     },
     {
       "order": 8,
@@ -123,7 +123,7 @@
     {
       "order": 25,
       "path": "integration/alas/series/0195-gems-farming-config-contract.patch",
-      "sha256": "9728e8901318ed578d0e4179f56d6f300f7f7e7e9ec57e5a89c219219c42d58e"
+      "sha256": "f50db771f7775d6a44491f30cd7301fa1b32cde9a40e120cad1063fc44eab672"
     },
     {
       "order": 26,
@@ -439,6 +439,11 @@
       "order": 88,
       "path": "integration/alas/series/0430-event-boss-stage-return-runtime.patch",
       "sha256": "5339fc32acfe9ece492c12a94cbbb2bafce3e93138f784f5019318528b008ed0"
+    },
+    {
+      "order": 89,
+      "path": "integration/alas/series/0440-gems-farming-hard-remain-port.patch",
+      "sha256": "a993e0d214d5d058b2b55e620b1f44e0f37a8901bb4dcc9657c5271f5b12a7af"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

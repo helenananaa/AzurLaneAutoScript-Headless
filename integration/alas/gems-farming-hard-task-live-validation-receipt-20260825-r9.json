@@ -1,0 +1,70 @@
+{
+  "schema": "alas-headless.gems-farming-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-25T08:02:01.045898Z",
+  "finished_at": "2026-08-25T08:05:54.483923Z",
+  "task": "GemsFarming",
+  "task_method": "AzurLaneAutoScript.gems_farming",
+  "campaign_run_method": "GemsFarming.run",
+  "stage": "11-4",
+  "event": "campaign_main",
+  "mode": "hard",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "configuration": {
+    "change_flagship": "ship",
+    "common_cv": "ranger",
+    "change_vanguard": "disabled",
+    "run_count_before": 1,
+    "run_count_after": 0,
+    "scheduler_enabled_after": true
+  },
+  "run_result": true,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "campaign_page": true,
+    "generation": 366482
+  },
+  "startup_recovery": {
+    "surface": "hard-replacement-dock",
+    "semantic_id": "tactical/dock/back",
+    "generation": 366460,
+    "followup": {
+      "surface": "hard-fleet-preparation",
+      "semantic_id": "campaign/fleet-preparation/cancel",
+      "generation": 366471
+    }
+  },
+  "hard_preparation": {
+    "before": [],
+    "after_unmount": [],
+    "semantic_id": "gems-farming/hard/vacancy-offsurface",
+    "generation": 366806
+  },
+  "hard_replacement_trace": {
+    "open_calls": 1,
+    "confirmed": []
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "campaign_page": true
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 4,
+    "sortie": 1,
+    "combat": 1,
+    "viewport_swipe": 4
+  },
+  "observer": {
+    "generation": 370597,
+    "scene_handle": -76,
+    "button_count": 22
+  },
+  "raw_input_fallback_used": false,
+  "qualification_random_seed": 20260825
+}

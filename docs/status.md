@@ -22,6 +22,195 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `macos-hvf` backend. Evidence hashes and the retained-host boundary are in the
   [Mac/HVF login validation report](mac-apple-silicon-hvf-login-validation-report.md).
 
+## 2026-08-24
+
+### Event shared map capability is closed offline
+
+- The shared event entry now continues into the same typed ALAS map projection
+  for A/B/SP normal maps and the reviewed C1-D3 effective-hard maps. Unrelated
+  hard maps remain behind the existing 11-4 boundary.
+- The projection no longer treats a legal movable event enemy as static-map
+  drift. Typed sirens may leave `MS` cells only with
+  `MAP_HAS_MOVABLE_ENEMY`; typed normal enemies require the independent
+  `MAP_HAS_MOVABLE_NORMAL_ENEMY` capability. Boss and land placement remain
+  unchanged and fail closed.
+- Focused map/adapter validation passes without Android input. This is an
+  offline shared-capability closure only; EventB-D and EventSp still need their
+  own live map/combat/result receipts before support promotion.
+
+### GemsFarming now has typed normal and hard main paths
+
+- The pinned upstream `GemsFarming.run` method is executed directly in replay;
+  the adapter does not replace its campaign loop, ship-change ordering,
+  emotion/Lv32 handling, run-count decision, task switch, retry, or delay
+  state machine.
+- All six task-specific settings are validated before that method can act:
+  `ChangeFlagship`, `ChangeVanguard`, `CommissionLimit`, `CommonCV`, `CommonDD`,
+  and `EquipmentCode.ExportToConfig`. Replay admits all 600 legal combinations
+  and rejects six representative malformed values.
+- Branch replay covers defaults, every option enabled, Lv32 completion,
+  flagship-only emotion handling, exhausted run count, replacement failure
+  short-circuiting, and task switching. Its mutation budget is zero and it
+  performs no Android input.
+- Semantic mode now preserves that original loop while replacing only its
+  normal Formation fleet-index read, Dock filters/candidates, and exact
+  flagship/first-vanguard selection and confirmation. Candidate cards bind
+  duplicate ship IDs by card bounds and carry typed name, sprite, class,
+  rarity, level, emotion, fleet/status and actionable bounds. The original
+  ALAS `max(...)` choice and flagship fleet-precedence rules remain unchanged.
+- The normal-mode `ship_equip` branch now keeps ALAS's original
+  unload/change/mount order and replaces only `ship_equipment_take_off/on`.
+  Pinned ALAS equipment codes contain exactly five entries (`0/0/0/0/0` for
+  the empty code), so the typed port captures and transfers only the five
+  regular slots by exact ID and enhancement. Special weapons remain attached
+  to the source ship. The port rejects assigned duplicate inventory cards,
+  proves every mounted regular slot, and retains the pending loadout after a
+  localized failure so recovery can resume.
+- Live validation on the pinned API 32 x86_64 AVD selected Fleet 6, admitted
+  ten eligible common carriers and one exact level-100 common destroyer, then
+  confirmed Langley in `main_1` and Spence in `vanguard_1` with a two-mutation
+  budget. The original Arromanches and Napoli were subsequently restored to
+  those same typed roles; final generation `289388` contains the original six
+  hero roots. The receipt is
+  `integration/alas/gems-farming-normal-ship-live-validation-receipt-20260824-r1.json`.
+- That receipt also closes two field-level omissions in the support ledger:
+  `CommonCV=any` selected Langley, while `ChangeVanguard=ship` with
+  `CommonDD=any` selected Spence and proved it in `vanguard_1` before restoring
+  Napoli. These are live-partial values; the named CommonDD selectors are not
+  inferred from them.
+- A controlled Fleet 1 flagship development run initially captured all six
+  visible slots. Review against pinned ALAS then corrected that overreach:
+  `51000/11260/26600/1260/600`, all at `+10`, are the five equipment-code
+  slots, while special weapon `12300 +10` must remain attached to South
+  Dakota. A clean same-ship five-slot unload/mount round trip passed live.
+- A later live attempt additionally proved `+0` equipment as an icon with no
+  level Text, the occupied-slot `EquipmentInfoUI` action labels, bounded Dock
+  virtual-list stabilization, and both `UICamera`/`OverlayCamera` detail-back
+  paths. The implementation now replaces occupied slots individually, unloads
+  target-only regular slots, admits an absent locked special slot on level-1
+  ships, and avoids the surface-fleet-to-submarine wrap at Fleet 6 -> 1.
+- Production-candidate non-empty `ship_equip` now has a live receipt. Opening
+  Fleet 6 `main_1` records the current typed ship sprite and fleet index, so
+  its Dock card is classified as `current` instead of incorrectly satisfying
+  `status=free`. This preserves ALAS's same-fleet-first/fallback precedence
+  while exposing the two genuinely free Ranger cards. The original
+  `max(level, emotion)` decision selected the first tied free card, production
+  `take_off -> replace -> take_on` transferred Ranger's existing slot 1
+  `18100 +0` and slot 2 `19000 +0`, and generation `109477` read both items
+  back from the target Ranger. Fleet 6 retained a Ranger flagship with the
+  same loadout and the UI returned to Fleet 1 at generation `109588`. Duplicate
+  Rangers expose the same typed ship ID, so hidden instance identity is not
+  claimed. See
+  `integration/alas/gems-farming-normal-ship-equip-live-validation-receipt-20260825-r2.json`.
+- The earlier incompatible paths remain fail-closed: Fleet 1 South Dakota ->
+  Ranger rejected battleship gear and Fleet 6 Arromanches -> Ranger rejected
+  ship-restricted gear. The earlier Ranger -> Langley empty-code run still
+  covers only the empty branch.
+- A clean live qualification now covers the complete normal `1-1` path in one
+  uninterrupted original `GemsFarming.run` invocation: it starts on the
+  campaign page, enters chapter 1-1, sorties Fleet 6 as the exact single-fleet
+  profile, completes the ordinary and boss battles, handles both result
+  stacks, persists `StopCondition.RunCount` one-to-zero and
+  `Scheduler.Enable=false`, and returns to the campaign page without raw-input
+  fallback. The camera boundary re-proves the
+  complete logical map across Unity's boss-appearance translation/perspective
+  motion; non-uniform movement still fails closed when a translated hazard
+  area must be preserved, and degenerate axes on a one-row map do not create
+  false movement. One exact no-progress grid retry is admitted only with an
+  additional combat budget unit and a completely unchanged fleet, enemy,
+  ammunition, and map state. See
+  `integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json`.
+- Hard mode is now a live main path, but not every hard stage is compatible
+  with Ranger. The 11-4 first Fleet 1 main slot exposes `label_7`, and the
+  extracted game tables identify type 7 as a full carrier; Ranger 107041 is
+  type 6, a light carrier. The previous empty result was therefore the correct
+  structural outcome, not a broken Dock filter. The reviewed 12-1 profile has
+  a type-6-compatible first main slot and retains the original ALAS
+  `fleet1_all_fleet2_standby` role assignment.
+- A bounded 12-1 vacancy run removed only the existing Fleet 1 flagship, then
+  let the original `HardNotSatisfied -> hard_fleet_prepare()` branch own the
+  replacement. The typed Dock admitted three free Rangers and original ALAS
+  `max(level, emotion)` selected the level-9/emotion-119 card. The confirmed
+  postcondition was ship 107041, sprite `tujizhe`, in the flagship role, after
+  which both hard fleets were satisfied. See
+  `integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r25.json`.
+- The immediately following original task run completed the already-progressed
+  12-1 Boss map, results, award close, stable campaign-page return, RunCount
+  one-to-zero and scheduler disable with no raw-input fallback. See
+  `integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r26.json`.
+  Its historical top-level `passed=false` is a runner-classification defect:
+  that version required a replacement to occur again in the completion run,
+  although `run_result=true` and every task-completion postcondition passed.
+  The runner now requires replacement evidence only when
+  `--seed-hard-vacancy` explicitly requests that component. The two immutable
+  receipts are retained rather than rewritten or consuming another unchanged
+  hard attempt merely to alter the classifier bit.
+- GemsFarming is therefore promoted from partial (`P`) to main-path complete
+  (`L`), not full (`F`). A clean five-slot cross-ship compatibility path and
+  the unexercised replacement-trigger branches for Lv32/emotion remain
+  localized fail-closed gaps. A real
+  `[ConnectionReset]` overlay was recovered only through its exact reviewed
+  confirm target; map cells stayed blocked while the overlay was present.
+  Edge-clamped camera motion retains its typed-map identity and upper-bound
+  checks without imposing a post-input minimum displacement. The `extra`
+  value `enhanceable` is only ALAS's candidate filter; GemsFarming has no
+  separate post-replacement enhancement action to qualify.
+- A later read-only account preflight cycled all six normal fleets, opened only
+  the typed first-vanguard detail, and read five occupied regular equipment
+  slots on every source ship. The primary guns are cruiser/large-cruiser-class
+  rather than a prepared empty DD loadout, so this account has no low-risk
+  empty-source shortcut for a Spence `ship_equip` run. No fleet or equipment
+  mutation occurred, Fleet 1 was restored, and the exact Formation back target
+  returned to the main page. The preflight receipt is
+  `integration/alas/gems-farming-vanguard-equipment-preflight-20260825-r1.json`;
+  it records a re-entry condition rather than promoting the unsupported branch.
+- That re-entry condition has now been exercised with a reversible empty-source
+  fixture. Production typed take-off captured Napoli's exact five regular slots,
+  the ordinary `CommonDD=any` decision selected the sole level-100 Spence, and
+  production take-on proved the empty target loadout. Cleanup then found Napoli
+  by exact ship ID and sprite through a bounded typed Dock traversal and restored
+  all five original slots. The fifth inventory slot required one fail-closed
+  retry; no approximate item was selected. Fleet 1 and the main page were
+  restored at generation `607249`. This promotes the `ship_equip` value only
+  for an empty source; non-empty five-slot cross-ship compatibility remains a
+  localized gap. See
+  `integration/alas/gems-farming-vanguard-ship-equip-live-validation-receipt-20260825-r1.json`.
+- A second reversible fixture closes the genuinely non-empty vanguard transfer.
+  Game tables prove Napoli's slot-4 `1760 +10` steering gear and slot-5
+  `2400 +10` repair toolkit admit Spence's type-1 destroyer. Production
+  take-off captured those two slots, `CommonDD=any` again selected the sole
+  level-100 Spence, and production take-on read both exact items back from
+  Spence. They were then unloaded before restoring Napoli, so no equipment was
+  stranded on the temporary ship; Napoli's original five slots and Fleet 1
+  were restored at generation `637655`. The first target inventory traversal
+  failed closed before mounting `1760`; the exact retry passed. Store reset now
+  proves the upper scroll boundary instead of assuming any visible grid index
+  below seven is already at the top. See
+  `integration/alas/gems-farming-vanguard-ship-equip-live-validation-receipt-20260825-r2.json`.
+- A zero-mutation Fleet 6 Dock preflight exercised every named CommonCV filter.
+  Bogue exposed one free candidate, Hermes two, Langley none on the current
+  account, and Ranger two; no candidate was confirmed and the exact Dock and
+  Formation cancel targets returned to the main page. This extends live
+  observation coverage without claiming action-qualified named selectors. See
+  `integration/alas/gems-farming-common-cv-filter-preflight-20260825-r1.json`.
+- The following CommonDD probe exposed a real atomicity defect: if Dock filter
+  snapshots failed to stabilize, `CustomIndexUI(Clone)` remained open and the
+  generic Dock cancellation could not own the surface. Candidate observation
+  now rolls back through the unique reviewed red filter cancel and then the
+  exact Dock cancel before re-raising the original classified error. A live
+  occurrence returned through Formation to the main page with no ship or
+  equipment mutation; named CommonDD values remain unpromoted. See
+  `integration/alas/gems-farming-filter-recovery-live-validation-receipt-20260825-r1.json`.
+- All four named CommonDD values now have zero-mutation live filter evidence.
+  `favourite` returned an empty page. The Aulick/Foote and Cassin/Downes faction
+  filters exposed the free level-100 Spence, but their exact name rules
+  correctly excluded it. The Z20/Z21 filter exposed the exact two named ships,
+  both level 77 with non-free `green` status, so the level-100/free admission
+  contract rejected them. No ship was confirmed and Fleet 1/main were restored
+  at generation `646434`. These are observation-qualified safe empty results;
+  only `CommonDD=any` is action-qualified on this account. See
+  `integration/alas/gems-farming-common-dd-filter-preflight-20260825-r1.json`.
+
 ## 2026-08-22
 
 ### Event/Event2/EventA-D/EventSp shared entry is closed offline

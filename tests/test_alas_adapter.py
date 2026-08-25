@@ -260,6 +260,11 @@ class FakeOracle:
         self.award_info_page_visible_value = False
         self.retirement_keep_limit_break = None
         self.enhancement_calls = []
+        self.gems_calls = []
+        self.gems_hard_occupied = {"flagship": True, "vanguard": True}
+        self.gems_candidates = ()
+        self.gems_filter_error = None
+        self.gems_filter_cancel_error = None
         self.awaken_calls = []
         self.awaken_use_array = False
         self.awaken_sufficient = True
@@ -326,6 +331,11 @@ class FakeOracle:
             "fleet1": 1,
             "fleet2": 2,
             "submarine": 1,
+        }
+        self.campaign_empty_required_slots = {
+            "fleet1": 0,
+            "fleet2": 0,
+            "submarine": 0,
         }
         self.campaign_fleet_dropdown_row = None
         self.campaign_role_tab_selected = False
@@ -596,6 +606,66 @@ class FakeOracle:
     def set_enhancement_dock_favourite(self, enabled):
         self.enhancement_calls.append(("favourite", enabled))
         self.awaken_calls.append(("favourite", enabled))
+
+    def gems_farming_select_fleet_index(self, fleet_index):
+        self.gems_calls.append(("fleet", fleet_index))
+        return fleet_index
+
+    def gems_farming_open_slot(self, role):
+        self.gems_calls.append(("open", role))
+        return self.click_receipt("gems-farming/formation/" + role + "/open")
+
+    def gems_farming_hard_slot_occupied(self, stage_code, fleet_index, role):
+        self.gems_calls.append(("hard-occupied", stage_code, fleet_index, role))
+        return self.gems_hard_occupied[role]
+
+    def gems_farming_hard_unmount(self, stage_code, fleet_index, role):
+        self.gems_calls.append(("hard-unmount", stage_code, fleet_index, role))
+        return self.click_receipt("gems-farming/hard/unmount")
+
+    def gems_farming_hard_open_slot(self, stage_code, fleet_index, role):
+        self.gems_calls.append(("hard-open", stage_code, fleet_index, role))
+        return self.click_receipt("gems-farming/hard/open")
+
+    def gems_farming_equipment_take_off(self, role):
+        self.gems_calls.append(("equipment-off", role))
+        return SimpleNamespace(role=role)
+
+    def gems_farming_equipment_take_on(self, role):
+        self.gems_calls.append(("equipment-on", role))
+        return SimpleNamespace(role=role)
+
+    def set_gems_farming_dock_sort(self, descending):
+        self.gems_calls.append(("sort", descending))
+        return None
+
+    def set_gems_farming_dock_filter(self, role, factions):
+        self.gems_calls.append(("filter", role, factions))
+        if self.gems_filter_error is not None:
+            raise self.gems_filter_error
+        return ()
+
+    def cancel_gems_farming_dock_filter_if_visible(self):
+        self.gems_calls.append(("filter-cancel",))
+        if self.gems_filter_cancel_error is not None:
+            raise self.gems_filter_cancel_error
+        return self.click_receipt("gems-farming/dock/filter/cancel")
+
+    def gems_farming_dock_candidates(self):
+        self.gems_calls.append(("candidates",))
+        return self.gems_candidates
+
+    def click_gems_farming_candidate(self, candidate):
+        self.gems_calls.append(("select", candidate.ship_id))
+        return self.click_receipt("gems-farming/dock/ship/{0}".format(candidate.ship_id))
+
+    def cancel_gems_farming_candidate_selection(self):
+        self.gems_calls.append(("cancel",))
+        return self.click_receipt("gems-farming/dock/cancel")
+
+    def confirm_gems_farming_candidate_selection(self, candidate, role):
+        self.gems_calls.append(("confirm", candidate.ship_id, role))
+        return self.click_receipt("gems-farming/dock/confirm")
 
     def _enhancement_dock_records(self):
         return object(), object()
@@ -1094,9 +1164,12 @@ class FakeOracle:
                     path="root/{0}/clear".format(row_key),
                 ),
                 hard_satisfied=(
-                    bool(selected) if self.campaign_hard_mode and row_key != "submarine"
+                    bool(selected)
+                    and self.campaign_empty_required_slots[row_key] == 0
+                    if self.campaign_hard_mode and row_key != "submarine"
                     else None
                 ),
+                empty_required_slots=self.campaign_empty_required_slots[row_key],
             )
             for row_key, selected in self.campaign_fleets.items()
         )
@@ -3423,6 +3496,249 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(oracle.enhancement_calls, [])
 
+    def test_gems_farming_live_mode_admits_typed_normal_equipment_transfer(self):
+        adapter, _, _ = self.make_adapter()
+        adapter.gems_farming_admit_live_mode("1-1", "normal", "ship", "disabled", 1)
+        adapter.gems_farming_admit_live_mode("1-1", "normal", "ship", "ship", 1)
+        adapter.gems_farming_admit_live_mode(
+            "1-1", "normal", "ship_equip", "disabled", 1
+        )
+        adapter.gems_farming_admit_live_mode(
+            "1-1", "normal", "ship", "ship_equip", 1
+        )
+        adapter.gems_farming_admit_live_mode("11-4", "hard", "ship", "disabled", 1)
+        adapter.gems_farming_admit_live_mode("11-4", "hard", "ship", "ship", 2)
+        adapter.gems_farming_admit_live_mode("12-1", "hard", "ship", "disabled", 1)
+        for values, message in (
+            (("10-4", "hard", "ship", "disabled", 1), "reviewed hard stages"),
+            (("11-4", "hard", "ship_equip", "disabled", 1), "ship_equip"),
+            (("11-4", "hard", "ship", "disabled", 6), "attacking fleet"),
+            (("1-1", "normal", "disabled", "disabled", 1), "flagship change mode"),
+            (("1-1", "normal", "ship", "unknown", 1), "vanguard change mode"),
+        ):
+            with self.subTest(values=values), self.assertRaisesRegex(
+                SemanticGateClosed, message
+            ):
+                adapter.gems_farming_admit_live_mode(*values)
+
+    def test_gems_farming_hard_unmount_consumes_one_mutation_unit(self):
+        denied, denied_oracle, _ = self.make_adapter()
+        with self.assertRaisesRegex(SemanticGateClosed, "mutation budget"):
+            denied.gems_farming_hard_unmount("11-4", 1, "flagship")
+        self.assertEqual(denied_oracle.gems_calls, [])
+
+        adapter, oracle, _ = self.make_adapter(campaign_fleet_mutation_budget=1)
+        adapter.gems_farming_hard_slot_occupied("11-4", 1, "flagship")
+        adapter.gems_farming_hard_unmount("11-4", 1, "flagship")
+        adapter.gems_farming_hard_open_slot("11-4", 1, "flagship")
+        self.assertEqual(
+            oracle.gems_calls,
+            [
+                ("hard-occupied", "11-4", 1, "flagship"),
+                ("hard-unmount", "11-4", 1, "flagship"),
+                ("hard-open", "11-4", 1, "flagship"),
+            ],
+        )
+        self.assertEqual(
+            adapter._action_ledger.remaining("campaign.fleet_mutation"), 0
+        )
+
+    def test_gems_farming_hard_fleet_presence_uses_exact_hard_overlay(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_hard_mode = True
+
+        self.assertTrue(
+            adapter.gems_farming_hard_fleet_preparation_visible("11-4")
+        )
+
+    def test_gems_farming_hard_vacancy_bypasses_generic_recommend_only_for_task(self):
+        oracle = FakeOracle()
+        oracle.campaign_hard_mode = True
+        oracle.campaign_fleets["submarine"] = 0
+        oracle.campaign_empty_required_slots["fleet1"] = 1
+        oracle.gems_hard_occupied["flagship"] = False
+        oracle.campaign_state_value.stages = (
+            SimpleNamespace(
+                stage_code="11-4",
+                button=SimpleNamespace(actionable=True),
+            ),
+        )
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=1,
+            campaign_sortie_budget=1,
+        )
+        adapter.gems_farming_admit_live_mode(
+            "11-4", "hard", "ship", "disabled", 1
+        )
+        entrance = NamedButton("11-4")
+        entrance.semantic_campaign_stage_code = "11-4"
+        adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+
+        self.assertTrue(adapter.authorize_campaign_fleet_preparation(1, 2, 0))
+        prepared = adapter.prepare_campaign_hard_fleets()
+
+        self.assertFalse(next(row for row in prepared.rows if row.row_key == "fleet1").hard_satisfied)
+        self.assertEqual(
+            adapter._campaign_context.gems_farming_hard_pending_roles,
+            ("flagship",),
+        )
+        self.assertEqual(adapter._campaign_context.expected_fleet_mutations, ())
+        self.assertNotIn("campaign/fleet-preparation/fleet/1/recommend", oracle.click_calls)
+
+        oracle.campaign_empty_required_slots["fleet1"] = 0
+        oracle.gems_hard_occupied["flagship"] = True
+        oracle.campaign_fleet_generation += 1
+        final = adapter.confirm_campaign_fleet_selection()
+        self.assertTrue(next(row for row in final.rows if row.row_key == "fleet1").hard_satisfied)
+        adapter.end_campaign_pre_sortie()
+
+    def test_gems_farming_equipment_transfer_requires_budget_only_at_take_off(self):
+        for role in ("flagship", "vanguard"):
+            with self.subTest(role=role):
+                denied, denied_oracle, _ = self.make_adapter()
+                with self.assertRaisesRegex(SemanticGateClosed, "budget"):
+                    denied.gems_farming_equipment_take_off(role)
+                self.assertEqual(denied_oracle.gems_calls, [])
+
+                adapter, oracle, _ = self.make_adapter(
+                    campaign_fleet_mutation_budget=1
+                )
+                self.assertEqual(
+                    adapter.gems_farming_equipment_take_off(role).role, role
+                )
+                self.assertEqual(
+                    adapter.gems_farming_equipment_take_on(role).role, role
+                )
+                self.assertEqual(
+                    oracle.gems_calls,
+                    [("equipment-off", role), ("equipment-on", role)],
+                )
+
+    def test_gems_farming_candidates_preserve_original_fleet_precedence(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        candidate = lambda **values: SimpleNamespace(
+            position=values.get("position", 0),
+            ship_id=values["ship_id"],
+            ship_name=values["ship_name"],
+            ship_sprite=values.get("ship_sprite", "boge"),
+            ship_type=values.get("ship_type", "cv"),
+            rarity=values.get("rarity", "common"),
+            level=values.get("level", 20),
+            emotion=values.get("emotion", 120),
+            fleet_index=values.get("fleet_index", 0),
+            status=values.get("status", "free"),
+            button=SimpleNamespace(),
+        )
+        same = candidate(ship_id=106014, ship_name="博格", fleet_index=2)
+        free = candidate(ship_id=106024, ship_name="博格.改", fleet_index=0)
+        wrong_name = candidate(ship_id=107014, ship_name="突击者", fleet_index=2)
+        busy = candidate(
+            ship_id=106034, ship_name="博格", fleet_index=2, status="weituo"
+        )
+        oracle.gems_candidates = (free, wrong_name, busy, same)
+
+        result = adapter.gems_farming_candidates(
+            role="flagship",
+            selector="bogue",
+            max_level=31,
+            min_emotion=100,
+            fleet_index=2,
+        )
+
+        self.assertEqual(result, (same,))
+        self.assertEqual(
+            oracle.gems_calls,
+            [
+                ("sort", False),
+                ("filter", "flagship", ("all",)),
+                ("candidates",),
+            ],
+        )
+        self.assertEqual(oracle.enhancement_calls, [("favourite", False)])
+        self.assertEqual(len(gate_calls), 1)
+
+        level_100 = candidate(
+            ship_id=101153,
+            ship_name="斯彭斯",
+            ship_sprite="sipengsi",
+            ship_type="dd",
+            level=100,
+        )
+        level_99 = candidate(
+            ship_id=101154,
+            ship_name="斯彭斯",
+            ship_sprite="sipengsi",
+            ship_type="dd",
+            level=99,
+        )
+        oracle.gems_candidates = (level_99, level_100)
+
+        result = adapter.gems_farming_candidates(
+            role="vanguard",
+            selector="any",
+            max_level=100,
+            min_emotion=100,
+            fleet_index=2,
+        )
+
+        self.assertEqual(result, (level_100,))
+
+    def test_gems_farming_candidate_filter_failure_rolls_back_to_formation(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.gems_filter_error = SemanticGateClosed("filter drift")
+
+        with self.assertRaisesRegex(SemanticGateClosed, "filter drift"):
+            adapter.gems_farming_candidates(
+                role="vanguard",
+                selector="favourite",
+                max_level=100,
+                min_emotion=0,
+                fleet_index=6,
+            )
+
+        self.assertEqual(
+            oracle.gems_calls[-3:],
+            [
+                ("filter", "vanguard", ("all",)),
+                ("filter-cancel",),
+                ("cancel",),
+            ],
+        )
+
+    def test_gems_farming_candidate_filter_recovery_failure_is_classified(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.gems_filter_error = SemanticGateClosed("filter drift")
+        oracle.gems_filter_cancel_error = SemanticGateClosed("cancel blocked")
+
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "candidate observation recovery failed"
+        ):
+            adapter.gems_farming_candidates(
+                role="vanguard",
+                selector="favourite",
+                max_level=100,
+                min_emotion=0,
+                fleet_index=6,
+            )
+
+    def test_gems_farming_confirmation_requires_campaign_fleet_budget(self):
+        candidate = SimpleNamespace(ship_id=106014)
+        denied, denied_oracle, _ = self.make_adapter()
+        with self.assertRaisesRegex(SemanticGateClosed, "budget"):
+            denied.gems_farming_confirm_candidate_selection(candidate, "flagship")
+        self.assertEqual(denied_oracle.gems_calls, [])
+
+        adapter, oracle, _ = self.make_adapter(campaign_fleet_mutation_budget=1)
+        receipt = adapter.gems_farming_confirm_candidate_selection(candidate, "flagship")
+        self.assertEqual(receipt.semantic_id, "gems-farming/dock/confirm")
+        self.assertEqual(oracle.gems_calls, [("confirm", 106014, "flagship")])
+        self.assertEqual(adapter._action_ledger.remaining("campaign.fleet_mutation"), 0)
+
     def test_build_coin_count_falls_back_to_proven_build_resource_panel(self):
         oracle = FakeOracle()
         oracle.build_gold_value = 81908
@@ -3893,6 +4209,20 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
 
         self.assertTrue(adapter.appear(NamedButton("CAMPAIGN_CHECK")))
+
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_check_defers_to_exact_hard_fleet_overlay_after_grace(self):
+        adapter, oracle, _ = self.make_adapter()
+        with patch("alas_headless.alas_adapter.time.monotonic", return_value=10.0):
+            adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+        oracle.campaign_page_error = SemanticGateClosed(
+            "campaign page identity is not proven"
+        )
+        oracle.campaign_preparation_value = SimpleNamespace(kind="fleet")
+
+        with patch("alas_headless.alas_adapter.time.monotonic", return_value=40.0):
+            self.assertFalse(adapter.appear(NamedButton("CAMPAIGN_CHECK")))
 
         adapter.end_campaign_pre_sortie()
 
@@ -5429,6 +5759,13 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         ):
             adapter.click(NamedButton("MAP_PREPARATION"))
         self.assertTrue(adapter.campaign_map_preparation_committed())
+        adapter._campaign_context.passive_transition_until = time.monotonic() - 1
+        with self.assertRaisesRegex(
+            SemanticGateClosed,
+            "map-preparation transition did not reach the fleet overlay",
+        ):
+            adapter.campaign_map_preparation_committed()
+        adapter._campaign_context.passive_transition_until = time.monotonic() + 20
         oracle.campaign_preparation_error = SemanticGateClosed(
             "campaign map-preparation controls are not proven"
         )
@@ -5575,6 +5912,41 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(oracle.click_calls, [])
         adapter.end_campaign_pre_sortie()
+
+    def test_event_sp_normal_fleet_reconciliation_is_bounded_to_four_mutations(self):
+        for budget, allowed in ((3, False), (4, True)):
+            with self.subTest(budget=budget):
+                oracle = FakeOracle()
+                oracle.campaign_fleets.update(
+                    {"fleet1": 3, "fleet2": 4, "submarine": 1}
+                )
+                adapter = AlasSemanticAdapter(
+                    oracle,
+                    lambda: None,
+                    campaign_fleet_mutation_budget=budget,
+                )
+                oracle.campaign_preparation_value = SimpleNamespace(kind="fleet")
+
+                adapter.begin_campaign_pre_sortie("SP")
+                self.seed_owned_campaign_fleet_overlay(adapter)
+                if allowed:
+                    self.assertTrue(
+                        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+                    )
+                    self.assertEqual(
+                        adapter._campaign_context.expected_fleet_mutations,
+                        (
+                            "campaign/fleet-preparation/fleet/2/clear",
+                            "campaign/fleet-preparation/submarine/1/clear",
+                            "campaign/fleet-preparation/option/1",
+                            "campaign/fleet-preparation/option/2",
+                        ),
+                    )
+                else:
+                    with self.assertRaisesRegex(SemanticGateClosed, "3 < 4"):
+                        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+                self.assertEqual(oracle.click_calls, [])
+                adapter.end_campaign_pre_sortie()
 
     def test_campaign_fleet_preflight_uses_submarine_capacity_not_occupancy(self):
         oracle = FakeOracle()
@@ -6791,7 +7163,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
         adapter.end_campaign_pre_sortie()
 
-    def test_hard_auto_search_is_qualified_only_for_11_4(self):
+    def test_hard_auto_search_rejects_unreviewed_main_stage(self):
         oracle = FakeOracle()
         oracle.campaign_hard_mode = True
         oracle.campaign_fleets["submarine"] = 0
@@ -6810,7 +7182,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.authorize_campaign_fleet_preparation(1, 2, 0)
         adapter.confirm_campaign_fleet_selection()
 
-        with self.assertRaisesRegex(SemanticGateClosed, "only for 11-4"):
+        with self.assertRaisesRegex(SemanticGateClosed, "not qualified"):
             adapter.ensure_campaign_auto_search_roles(
                 "fleet1_all_fleet2_standby"
             )
@@ -6860,7 +7232,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         gated.click(NamedButton("MAP_PREPARATION"))
         gated.authorize_campaign_fleet_preparation(1, 2, 0)
         gated.confirm_campaign_fleet_selection()
-        with self.assertRaisesRegex(SemanticGateClosed, "two-fleet 11-4"):
+        with self.assertRaisesRegex(SemanticGateClosed, "not reviewed"):
             gated.authorize_campaign_sortie(
                 use_auto_search=False,
                 use_2x_book=False,
@@ -6868,6 +7240,35 @@ class AlasSemanticAdapterTests(unittest.TestCase):
                 fleet_order="fleet1_boss_fleet2_mob",
             )
         gated.end_campaign_pre_sortie()
+
+    def test_hard_12_1_accepts_gems_farming_all_standby_profile(self):
+        oracle = FakeOracle()
+        oracle.campaign_hard_mode = True
+        oracle.campaign_fleets["submarine"] = 0
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=1,
+            campaign_sortie_budget=1,
+        )
+        entrance = NamedButton("12-1")
+        entrance.semantic_campaign_stage_code = "12-1"
+        adapter.begin_campaign_pre_sortie("12-1", mode="hard")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+        adapter.confirm_campaign_fleet_selection()
+
+        self.assertTrue(
+            adapter.authorize_campaign_sortie(
+                use_auto_search=False,
+                use_2x_book=False,
+                submarine_mode="do_not_use",
+                fleet_order="fleet1_all_fleet2_standby",
+            )
+        )
+        adapter.end_campaign_pre_sortie()
 
     def test_campaign_ambush_spends_one_campaign_grid_click_lease(self):
         oracle = FakeOracle()
@@ -6890,7 +7291,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             adapter.handle_campaign_ambush(evade=False)
         adapter.end_campaign_pre_sortie()
 
-    def test_campaign_sortie_accepts_typed_single_fleet_profile(self):
+    def test_campaign_sortie_accepts_typed_single_fleet_six_profile(self):
         oracle = FakeOracle()
         oracle.campaign_fleets.update(fleet2=0, submarine=0)
         adapter = AlasSemanticAdapter(
@@ -6905,7 +7306,9 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.begin_campaign_pre_sortie("1-1")
         adapter.click(entrance)
         adapter.click(NamedButton("MAP_PREPARATION"))
-        self.assertTrue(adapter.authorize_campaign_fleet_preparation(1, 0, 0))
+        self.assertTrue(adapter.authorize_campaign_fleet_preparation(6, 0, 0))
+        adapter.click(NamedButton("FLEET_1_CHOOSE"))
+        adapter.click(NamedButton("FLEET_1_BAR_INDEX_6"))
         adapter.confirm_campaign_fleet_selection()
 
         self.assertTrue(
@@ -6921,8 +7324,11 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.end_campaign_pre_sortie()
 
         self.assertEqual(proof.stage_code, "1-1")
-        self.assertEqual(proof.prepared_fleets, (1, 0, 0))
-        self.assertEqual(proof.mutation_semantic_ids, ())
+        self.assertEqual(proof.prepared_fleets, (6, 0, 0))
+        self.assertEqual(
+            proof.mutation_semantic_ids,
+            ("campaign/fleet-preparation/option/6",),
+        )
         self.assertEqual(proof.required_oil, 97)
 
     def test_campaign_sortie_rejects_single_fleet_with_two_fleet_order(self):
@@ -7015,6 +7421,45 @@ class AlasSemanticAdapterTests(unittest.TestCase):
                 land_cells=((5, 0),),
                 expected_fleet_count=2,
             )
+
+    def test_campaign_map_model_is_shared_by_reviewed_event_hard_stages(self):
+        for stage_code in ("C1", "D3"):
+            with self.subTest(stage_code=stage_code):
+                oracle = FakeOracle()
+                adapter = AlasSemanticAdapter(oracle, lambda: None)
+                adapter.begin_campaign_pre_sortie(stage_code)
+
+                state = adapter.campaign_map_state(
+                    columns=9,
+                    rows=9,
+                    land_cells=((3, 0),),
+                    expected_fleet_count=2,
+                )
+
+                self.assertIs(state, oracle.campaign_map_state_value)
+                self.assertEqual(
+                    oracle.campaign_map_state_calls,
+                    [(stage_code.lower(), 9, 9, ((3, 0),), 2)],
+                )
+                adapter.end_campaign_pre_sortie()
+
+    def test_campaign_map_model_keeps_unreviewed_hard_stage_isolated(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(oracle, lambda: None)
+        adapter.begin_campaign_pre_sortie("10-4", mode="hard")
+
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "reviewed shared event C/D stages"
+        ):
+            adapter.campaign_map_state(
+                columns=9,
+                rows=9,
+                land_cells=((3, 0),),
+                expected_fleet_count=2,
+            )
+
+        self.assertEqual(oracle.campaign_map_state_calls, [])
+        adapter.end_campaign_pre_sortie()
 
     def test_campaign_map_reconnect_returns_to_same_logical_map(self):
         oracle = FakeOracle()
@@ -7554,6 +7999,153 @@ class AlasSemanticAdapterTests(unittest.TestCase):
                 name="MAP_SWIPE_-2_0",
                 distance_check=True,
             )
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_viewport_swipe_accepts_large_uniform_input_frame_shift(self):
+        oracle = FakeOracle()
+        initial = make_campaign_combat_state()
+        oracle.campaign_map_state_value = initial
+
+        def refresh_frame():
+            oracle.campaign_map_state_value = replace(
+                initial,
+                generation=initial.generation + 1,
+                cells=tuple(
+                    replace(
+                        cell,
+                        point=Point(cell.point.x - 400, cell.point.y + 45),
+                        bounds=Bounds(
+                            cell.bounds.left - 400,
+                            cell.bounds.top + 45,
+                            cell.bounds.right - 400,
+                            cell.bounds.bottom + 45,
+                        ),
+                    )
+                    for cell in initial.cells
+                ),
+            )
+
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            input_frame_refresher=refresh_frame,
+            campaign_combat_budget=1,
+            campaign_viewport_swipe_budget=1,
+        )
+        adapter.begin_campaign_pre_sortie("12-4")
+        state = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        adapter.authorize_campaign_combat(make_campaign_combat_decision(), state)
+        intent = adapter.begin_campaign_map_swipe_vector(
+            (200.0, 0.0),
+            box=(123, 159, 1175, 628),
+            random_range=(0, 0, 0, 0),
+            padding=15,
+            duration=(0.1, 0.2),
+            whitelist_area=None,
+            blacklist_area=None,
+            name="MAP_SWIPE_-2_0",
+            distance_check=True,
+        )
+
+        proof = adapter.swipe(
+            (500, 400),
+            (700, 400),
+            duration=0.157,
+            name="MAP_SWIPE_-2_0",
+            distance_check=True,
+        )
+
+        self.assertEqual(proof.end, (700, 400))
+        self.assertEqual(len(oracle.campaign_map_swipe_calls), 1)
+        adapter.end_campaign_map_swipe_vector(intent)
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_viewport_swipe_rejects_nonuniform_input_frame_shift(self):
+        oracle = FakeOracle()
+        initial = make_campaign_combat_state()
+        initial = replace(
+            initial,
+            cells=initial.cells
+            + (
+                replace(
+                    initial.cells[0],
+                    column=5,
+                    node="E6",
+                    button_path=(
+                        "root/DragLayer/plane/quads/chapter_cell_quad_6_5"
+                    ),
+                    point=Point(720, 360),
+                    bounds=Bounds(680, 320, 760, 400),
+                ),
+            ),
+        )
+        oracle.campaign_map_state_value = initial
+
+        def refresh_frame():
+            shifted = []
+            for index, cell in enumerate(initial.cells):
+                dx = -400 if index else -390
+                shifted.append(
+                    replace(
+                        cell,
+                        point=Point(cell.point.x + dx, cell.point.y + 45),
+                        bounds=Bounds(
+                            cell.bounds.left + dx,
+                            cell.bounds.top + 45,
+                            cell.bounds.right + dx,
+                            cell.bounds.bottom + 45,
+                        ),
+                    )
+                )
+            oracle.campaign_map_state_value = replace(
+                initial,
+                generation=initial.generation + 1,
+                cells=tuple(shifted),
+            )
+
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            input_frame_refresher=refresh_frame,
+            campaign_combat_budget=1,
+            campaign_viewport_swipe_budget=1,
+        )
+        adapter.begin_campaign_pre_sortie("12-4")
+        state = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        adapter.authorize_campaign_combat(make_campaign_combat_decision(), state)
+        intent = adapter.begin_campaign_map_swipe_vector(
+            (200.0, 0.0),
+            box=(123, 159, 1175, 628),
+            random_range=(0, 0, 0, 0),
+            padding=15,
+            duration=(0.1, 0.2),
+            whitelist_area=None,
+            blacklist_area=((900, 500, 950, 550),),
+            name="MAP_SWIPE_-2_0",
+            distance_check=True,
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "not a uniform shift"):
+            adapter.swipe(
+                (500, 400),
+                (700, 400),
+                duration=0.157,
+                name="MAP_SWIPE_-2_0",
+                distance_check=True,
+            )
+
+        self.assertEqual(oracle.campaign_map_swipe_calls, [])
+        adapter.end_campaign_map_swipe_vector(intent)
         adapter.end_campaign_pre_sortie()
 
     def test_campaign_viewport_rebases_exact_partial_hard_route(self):
@@ -8108,6 +8700,37 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             adapter.click(CampaignGridButton((3, 5)))
 
         self.assertEqual(oracle.click_calls, ["campaign/map/grid/D6"])
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_combat_allows_one_exact_no_progress_input_retry(self):
+        oracle = FakeOracle()
+        state = make_campaign_combat_state()
+        oracle.campaign_map_state_value = state
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_combat_budget=2,
+        )
+        adapter.begin_campaign_pre_sortie("12-4")
+        current = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        adapter.authorize_campaign_combat(make_campaign_combat_decision(), current)
+
+        adapter.click(CampaignGridButton((3, 5)))
+        oracle.campaign_map_state_value = replace(state, generation=52)
+        adapter.click(CampaignGridButton((3, 5)))
+
+        self.assertEqual(
+            oracle.click_calls,
+            ["campaign/map/grid/D6", "campaign/map/grid/D6"],
+        )
+        self.assertEqual(adapter._campaign_context.combat_input_retry_count, 1)
+        with self.assertRaisesRegex(SemanticGateClosed, "proven post-state"):
+            adapter.click(CampaignGridButton((3, 5)))
         adapter.end_campaign_pre_sortie()
 
     def test_goto_main_from_mission_uses_exact_task_back(self):
@@ -9171,6 +9794,46 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(
             session.click(NamedButton("BATTLE_STATUS_D")), receipt
         )
+
+    def test_campaign_result_passive_fallback_clicks_fresh_statistics_page(self):
+        adapter, oracle, _ = self.make_adapter(campaign_combat_budget=1)
+        oracle.campaign_map_state_value = make_campaign_combat_state()
+        adapter.begin_campaign_pre_sortie("12-4")
+        state = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        adapter.authorize_campaign_combat(make_campaign_combat_decision(), state)
+        adapter.click(CampaignGridButton((3, 5)))
+
+        prior = oracle.click_receipt("reward/award-info/close")
+        expected = oracle.click_receipt("daily/battle/result", generation=60)
+        oracle.daily_battle_result_visible = Mock(return_value=True)
+        oracle.click_daily_battle_result = Mock(return_value=expected)
+        stale_oracle = SimpleNamespace(
+            daily_battle_result_visible=Mock(return_value=False),
+            operation_siren_battle_result_visible=Mock(return_value=False),
+        )
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session._combat_result_action_oracle = lambda _adapter: stale_oracle
+        session._combat_result_observation = (
+            "BATTLE_STATUS_S",
+            time.monotonic(),
+        )
+        session._combat_last_result_receipt = prior
+        session._arm_combat_result_transition = Mock()
+
+        receipt = session.click(NamedButton("BATTLE_STATUS_S"))
+
+        self.assertEqual(receipt, expected)
+        oracle.click_daily_battle_result.assert_called_once_with()
+        session._arm_combat_result_transition.assert_called_once_with(adapter)
+        self.assertIsNone(session._combat_result_observation)
+        adapter.end_campaign_pre_sortie()
 
     def test_month_boss_skip_ignores_stacked_neighbour_hud(self):
         adapter, oracle, _ = self.make_adapter()

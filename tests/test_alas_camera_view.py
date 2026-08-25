@@ -165,6 +165,11 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
 
         self.assertEqual(before.predict_swipe(after), (0, 0))
 
+        tiny_after = build_alas_campaign_camera_view(
+            make_state(generation=12, dy=1.0), screen_center=(350.0, 300.0)
+        )
+        self.assertEqual(before.predict_swipe(tiny_after), (0, 0))
+
         unchanged = build_alas_campaign_camera_view(
             make_state(generation=13), screen_center=(350.0, 300.0)
         )
@@ -189,6 +194,29 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
             target_node="E3",
         )
         self.assertEqual(before.predict_swipe(newly_targeted), (0, 0))
+
+    def test_predict_swipe_ignores_fractional_offset_on_single_row_axis(self):
+        before = build_alas_campaign_camera_view(
+            make_single_row_state(generation=10),
+            screen_center=(350.0, 140.0),
+        )
+        after = build_alas_campaign_camera_view(
+            make_single_row_state(generation=12),
+            screen_center=(370.0, 200.0),
+        )
+        after.semantic_observation = replace(
+            after.semantic_observation,
+            center_offset=(0.70, 0.02),
+        )
+
+        self.assertEqual(before.predict_swipe(after), (0, 0))
+
+        after.semantic_observation = replace(
+            after.semantic_observation,
+            center_offset=(1.40, 0.50),
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "outside limits"):
+            before.predict_swipe(after)
 
     def test_predict_swipe_allows_only_exact_additive_boss_transition(self):
         before_state = make_state(generation=10)

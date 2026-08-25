@@ -365,10 +365,21 @@ class AlasSemanticCampaignView:
         # edge after applying the fractional center correction.  The observed
         # logical delta can therefore be one cell larger on either axis.
         if delta == (0, 0):
+            active_axes = tuple(
+                index
+                for index, limit in enumerate(
+                    (current.semantic_state.columns, current.semantic_state.rows)
+                )
+                if limit > 1
+            )
             fractional_delta = float(
                 np.linalg.norm(
-                    np.asarray(after.center_offset)
-                    - np.asarray(before.center_offset)
+                    np.asarray(
+                        [after.center_offset[index] for index in active_axes]
+                    )
+                    - np.asarray(
+                        [before.center_offset[index] for index in active_axes]
+                    )
                 )
             )
             # A large requested swipe can be clamped against a map edge while
@@ -397,7 +408,13 @@ class AlasSemanticCampaignView:
                     and after.target_bounds.contains(after.target_point)
                 )
             )
-            if not (0.05 <= fractional_delta <= 0.75 or stable_target):
+            # A camera gesture is already committed before this postcondition
+            # runs, and Unity may clamp it to an arbitrarily small coherent
+            # displacement at a map edge.  Requiring a minimum of 0.05 cells
+            # cannot prevent an unsafe swipe; it only rejects a valid typed
+            # post-state.  Preserve the upper bound and reject a true no-op
+            # unless the exact target stayed stable.
+            if not (0.0 < fractional_delta <= 0.75 or stable_target):
                 raise SemanticGateClosed(
                     "ALAS camera observed swipe is outside limits"
                 )

@@ -1,0 +1,65 @@
+{
+  "schema": "alas-headless.gems-farming-common-cv-filter-preflight/v1",
+  "passed": true,
+  "recorded_at_utc": "2026-08-25T11:12:57Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "package": "com.bilibili.azurlane",
+  "pid": 2030,
+  "qualification_scope": "typed observation-only CommonCV named-filter and candidate-card preflight from Fleet 6 flagship Dock",
+  "android_input_injected": true,
+  "raw_input_fallback_used": false,
+  "fleet_mutation_count": 0,
+  "confirmation_count": 0,
+  "selectors": {
+    "bogue": [
+      {
+        "ship_id": 106021,
+        "sprite": "boge",
+        "level": 1,
+        "emotion": 150,
+        "status": "free"
+      }
+    ],
+    "hermes": [
+      {
+        "ship_id": 206011,
+        "sprite": "jingjishen",
+        "level": 1,
+        "emotion": 150,
+        "status": "free"
+      },
+      {
+        "ship_id": 206011,
+        "sprite": "jingjishen",
+        "level": 1,
+        "emotion": 150,
+        "status": "free"
+      }
+    ],
+    "langley": [],
+    "ranger": [
+      {
+        "ship_id": 107041,
+        "sprite": "tujizhe",
+        "level": 1,
+        "emotion": 150,
+        "status": "free"
+      },
+      {
+        "ship_id": 107041,
+        "sprite": "tujizhe",
+        "level": 1,
+        "emotion": 150,
+        "status": "free"
+      }
+    ]
+  },
+  "recovery": {
+    "dock_cancel_semantic_id": "tactical/dock/cancel",
+    "formation_back_semantic_id": "gems-farming/startup/formation/back",
+    "formation_back_generation": 568381,
+    "final_main_page": true
+  },
+  "statement": "The production typed Dock filters observed Bogue, Hermes, Langley, and Ranger selector results without confirming a ship. Bogue and Hermes expose free actionable candidates, Langley is currently empty, and Ranger remains available. This is observation evidence only and does not promote Bogue, Hermes, or the named Langley selector to action-qualified support."
+}

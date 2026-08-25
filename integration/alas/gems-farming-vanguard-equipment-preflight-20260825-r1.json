@@ -1,0 +1,64 @@
+{
+  "schema": "alas-headless.gems-farming-vanguard-equipment-preflight/v1",
+  "passed": true,
+  "captured_at_utc": "2026-08-25T10:57:18Z",
+  "recovered_at_utc": "2026-08-25T11:00:15Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "package": "com.bilibili.azurlane",
+  "qualification_scope": "typed read-only Formation inventory and first-vanguard five-regular-slot loadout preflight",
+  "android_input_injected": true,
+  "raw_input_fallback_used": false,
+  "fleet_mutation_count": 0,
+  "fleets": [
+    {
+      "fleet": 1,
+      "first_vanguard_sprite": "linggu",
+      "regular_equipment": ["43160+10", "45100+10", "26500+10", "2400+10", "1760+10"]
+    },
+    {
+      "fleet": 2,
+      "first_vanguard_sprite": "sebao",
+      "regular_equipment": ["44400+10", "85640+10", "26500+10", "1760+10", "3200+10"]
+    },
+    {
+      "fleet": 3,
+      "first_vanguard_sprite": "aijier",
+      "regular_equipment": ["23120+13", "45100+10", "26500+10", "1760+13", "89400+10"]
+    },
+    {
+      "fleet": 4,
+      "first_vanguard_sprite": "guandao_3",
+      "regular_equipment": ["14000+13", "85000+10", "26500+10", "3200+10", "1760+10"]
+    },
+    {
+      "fleet": 5,
+      "first_vanguard_sprite": "wensensi",
+      "regular_equipment": ["43000+10", "41160+10", "26500+10", "2400+10", "1760+10"]
+    },
+    {
+      "fleet": 6,
+      "first_vanguard_sprite": "nabulesi",
+      "regular_equipment": ["23120+10", "32260+10", "26500+10", "1760+10", "2400+10"]
+    }
+  ],
+  "primary_equipment_game_table": {
+    "source_repository": "https://github.com/AzurLaneTools/AzurLaneLuaScripts.git",
+    "source_revision": "d93f83db24195981c5f5ca90ac5e29ce0580b12c",
+    "equipment_types": {
+      "14000": 4,
+      "23120": 3,
+      "43000": 3,
+      "43160": 3,
+      "44400": 11
+    }
+  },
+  "recovery": {
+    "original_fleet_index": 1,
+    "formation_back_semantic_id": "gems-farming/startup/formation/back",
+    "formation_back_generation": 565275,
+    "final_main_page": true
+  },
+  "statement": "All six current first-vanguard ships have five occupied regular equipment slots. This receipt proves that the account has no empty-source shortcut for ChangeVanguard=ship_equip; it does not claim that every individual item is incompatible with every eligible CommonDD.",
+  "reentry_condition": "Qualify vanguard ship_equip when a reviewed first-vanguard source and a free eligible CommonDD have a compatible five-slot transfer, or when a reversible empty-source fixture is explicitly prepared and its original formation is restored."
+}

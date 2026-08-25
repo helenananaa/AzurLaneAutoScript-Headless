@@ -279,7 +279,7 @@ def synthetic_materialization_control(binding: RunBinding) -> dict[str, object]:
 def synthetic_execution_budgets() -> dict[str, int]:
     return {
         "stage_entry": 1,
-        "fleet_mutation": 0,
+        "fleet_mutation": 4,
         "sortie": 1,
         "combat": 0,
         "grid_click": 0,
@@ -302,7 +302,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             "stage": "SP",
             "use_auto_search": True,
             "stage_entry_budget": 1,
-            "fleet_mutation_budget": 0,
+            "fleet_mutation_budget": 4,
             "sortie_budget": 1,
             "combat_budget": 0,
             "viewport_swipe_budget": 0,
@@ -459,7 +459,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
         environment_before = dict(os.environ)
         expected = {
             "stage_entry": 1,
-            "fleet_mutation": 0,
+            "fleet_mutation": 4,
             "sortie": 1,
             "combat": 0,
             "grid_click": 0,
@@ -473,7 +473,8 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             {"use_auto_search": False},
             {"stage": "A1"},
             {"stage_entry_budget": None},
-            {"fleet_mutation_budget": 1},
+            {"fleet_mutation_budget": 0},
+            {"fleet_mutation_budget": 5},
             {"sortie_budget": True},
             {"combat_budget": -1},
             {"viewport_swipe_budget": 1},
@@ -988,7 +989,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             )
             self.assertEqual(
                 MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256,
-                "c391f5dbb986e6482bbd6cc14245007cfe2aa8bffc2eb1d57d662fe3396bcf4a",
+                "0503d9e7e30f7b8665be265cef3f586b063ea7783cffbd63d02f763c7aac3614",
             )
             self.assertEqual(
                 proof["canonical_source_sha256"],
@@ -996,7 +997,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             )
             self.assertEqual(
                 MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256,
-                "d890a45505a7491eea73368295096d634f1acee2a85507ccfcc94e083664510a",
+                "d65605da61567ea5713e23269ddaa5cd490dcec8db20e96fec79696dff75c622",
             )
             self.assertEqual(
                 proof["canonical_source_sha256"],
@@ -1238,6 +1239,11 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             "downstream-missing": replace_authoritative_once(
                 "                                self.handle_auto_search_setting()\n",
                 "",
+            ),
+            "rollback-stale-frame": replace_authoritative_once(
+                "                                    self.enter_map_cancel("
+                "skip_first_screenshot=False)\n",
+                "                                    self.enter_map_cancel()\n",
             ),
         }
         with tempfile.TemporaryDirectory() as directory:
@@ -3635,6 +3641,31 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                     oracle.campaign_preparation_state.assert_not_called()
                 elif orphan:
                     oracle.campaign_preparation_state.assert_not_called()
+
+    def test_event_sp_exhausted_selector_stops_without_stage_input(self):
+        session = SimpleNamespace(
+            orphan_combat_result_visible=Mock(return_value=False),
+        )
+        oracle = SimpleNamespace(
+            campaign_preparation_state=Mock(return_value=None),
+            campaign_stage_state=Mock(
+                return_value=SimpleNamespace(remaining_attempts=0)
+            ),
+            click_campaign_stage=Mock(
+                side_effect=AssertionError("stage input is forbidden")
+            ),
+        )
+
+        stop = _event_sp_clean_start_stop(
+            session,
+            oracle,
+            {"login": False, "event_page": True},
+            "SP",
+        )
+
+        self.assertEqual(stop, "event_sp.clean_start.attempt_exhausted")
+        oracle.campaign_stage_state.assert_called_once_with("SP")
+        oracle.click_campaign_stage.assert_not_called()
 
     def test_startup_session_frame_is_available_without_ui_projection(self):
         source = __import__(

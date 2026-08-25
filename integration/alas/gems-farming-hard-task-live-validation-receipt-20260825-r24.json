@@ -1,0 +1,61 @@
+{
+  "schema": "alas-headless.gems-farming-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-25T10:22:19.368616Z",
+  "finished_at": "2026-08-25T10:26:23.528545Z",
+  "task": "GemsFarming",
+  "task_method": "AzurLaneAutoScript.gems_farming",
+  "campaign_run_method": "GemsFarming.run",
+  "stage": "12-1",
+  "event": "campaign_main",
+  "mode": "hard",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "configuration": {
+    "change_flagship": "ship",
+    "common_cv": "ranger",
+    "change_vanguard": "disabled",
+    "run_count_before": 1,
+    "run_count_after": 1,
+    "scheduler_enabled_after": true
+  },
+  "run_result": true,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "campaign_page": true,
+    "generation": 523951
+  },
+  "startup_recovery": null,
+  "hard_preparation": {
+    "before": [],
+    "after_unmount": [],
+    "semantic_id": "gems-farming/hard/vacancy-offsurface",
+    "generation": 524277
+  },
+  "hard_replacement_trace": {
+    "open_calls": 0,
+    "confirmed": []
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "campaign_page": true
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 4,
+    "sortie": 0,
+    "combat": 8,
+    "viewport_swipe": 4
+  },
+  "observer": {
+    "generation": 528273,
+    "scene_handle": -76,
+    "button_count": 22
+  },
+  "raw_input_fallback_used": false,
+  "qualification_random_seed": 20260825
+}

@@ -1,0 +1,80 @@
+{
+  "adapter_sha256": "15a47b5b1f54950da78d3ddbf408b31e745d3644dcc44228c6f60636b53de32e",
+  "android_input_injected": true,
+  "captured_at_utc": "2026-08-24T11:34:53.8307108Z",
+  "configuration": {
+    "campaign_mode": "normal",
+    "change_flagship": "ship",
+    "change_vanguard": "ship",
+    "common_cv": "any",
+    "common_dd": "any",
+    "fleet_index": 6
+  },
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "full_task_executed": false,
+  "game_version": "9.7.10",
+  "input_budget": {
+    "campaign_fleet_mutation": 2,
+    "consumed": 2
+  },
+  "package": "com.bilibili.azurlane",
+  "patch_member_sha256": "64f0ecaeddad3cdf3a1e11e7e502909e5b7ce5951bcece83773522f9a27b9557",
+  "pid": 6474,
+  "qualification_scope": "typed normal-mode ship replacement boundary only",
+  "recovery": {
+    "final_generation": 289388,
+    "final_hero_roots": [
+      "aluomangshi_root",
+      "bulisituoer_root",
+      "haman_g_root",
+      "nabulesi_root",
+      "qibolin_root",
+      "zengkehaijunshangjiang_root"
+    ],
+    "flagship_restored": {
+      "level": 100,
+      "ship_id": 806024,
+      "ship_name": "阿罗芒什",
+      "ship_sprite": "aluomangshi"
+    },
+    "original_roles_restored": true,
+    "vanguard_restored": {
+      "level": 123,
+      "ship_id": 699024,
+      "ship_name": "那不勒斯",
+      "ship_sprite": "nabulesi"
+    }
+  },
+  "schema": "alas-headless.gems-farming-normal-ship-live-validation/v1",
+  "semantic_oracle_sha256": "d633afc38eb12a2c808f0769a8fc766d227a922072e7ae8b0f6618a5befe4503",
+  "serial": "emulator-5580",
+  "temporary_replacements": [
+    {
+      "candidate_count": 10,
+      "confirm_generation": 283685,
+      "level": 1,
+      "postcondition_role": "main_1",
+      "ship_id": 107011,
+      "ship_name": "兰利",
+      "ship_sprite": "lanli"
+    },
+    {
+      "candidate_count": 1,
+      "confirm_generation": 283832,
+      "emotion": 136,
+      "level": 100,
+      "postcondition_role": "vanguard_1",
+      "ship_id": 101153,
+      "ship_name": "斯彭斯",
+      "ship_sprite": "sipengsi"
+    }
+  ],
+  "unsupported_branches": [
+    "Campaign_Mode=hard",
+    "ChangeFlagship=ship_equip",
+    "ChangeVanguard=ship_equip",
+    "equipment transfer",
+    "post-replacement enhancement",
+    "end-to-end GemsFarming campaign loop"
+  ]
+}

@@ -1,0 +1,1074 @@
+{
+  "open_calls": 1,
+  "confirmed": [],
+  "fleet_preparation": {
+    "hard_requirements": [
+      {
+        "label": "机动总值",
+        "comparator": "大于",
+        "target": 1250,
+        "actual": 1406
+      },
+      {
+        "label": "雷击总值",
+        "comparator": "大于",
+        "target": 1800,
+        "actual": 3170
+      },
+      {
+        "label": "平均等级",
+        "comparator": "大于",
+        "target": 100,
+        "actual": 125
+      }
+    ],
+    "ship_list_images": [
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image",
+        "name": "Image",
+        "sprite": "IconColorfulring01"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image0",
+        "name": "Image0",
+        "sprite": "IconColorfulring02"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image",
+        "name": "Image",
+        "sprite": "IconColorfulring01"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image0",
+        "name": "Image0",
+        "sprite": "IconColorfulring02"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image",
+        "name": "Image",
+        "sprite": "IconColorfulring01"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image0",
+        "name": "Image0",
+        "sprite": "IconColorfulring02"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image",
+        "name": "Image",
+        "sprite": "IconColorfulring01"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image0",
+        "name": "Image0",
+        "sprite": "IconColorfulring02"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image",
+        "name": "Image",
+        "sprite": "IconColorfulring01"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image0",
+        "name": "Image0",
+        "sprite": "IconColorfulring02"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image",
+        "name": "Image",
+        "sprite": "IconColorfulring01"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image0",
+        "name": "Image0",
+        "sprite": "IconColorfulring02"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image",
+        "name": "Image",
+        "sprite": "IconColorfulring01"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image0",
+        "name": "Image0",
+        "sprite": "IconColorfulring02"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image",
+        "name": "Image",
+        "sprite": "IconColorfulring01"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/frame/IconColorful(Clone)/Image0",
+        "name": "Image0",
+        "sprite": "IconColorfulring02"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/frame/specialFrame",
+        "name": "specialFrame",
+        "sprite": "frame5_0"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "aijier"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg5_0"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/ship_type",
+        "name": "ship_type",
+        "sprite": "label_1"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "anshan_g"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg4"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/ship_type",
+        "name": "ship_type",
+        "sprite": "label_2"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "shengdiyage_g"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg5"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "aersasi"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg5"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/ship_type",
+        "name": "ship_type",
+        "sprite": "label_11"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "wuzang"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg5"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/ship_type",
+        "name": "ship_type",
+        "sprite": "label_6"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "yingxianzuo"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg4"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "aierdeliqi_g"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg5"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/frame/specialFrame",
+        "name": "specialFrame",
+        "sprite": "frame5_0"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "pulimaosi"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg5_0"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/frame/specialFrame",
+        "name": "specialFrame",
+        "sprite": "frame4_1"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/ship_type",
+        "name": "ship_type",
+        "sprite": "label_2"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "shentong_alter"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg4_1"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/emptytpl(Clone)/ship_type",
+        "name": "ship_type",
+        "sprite": "label_7"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/emptytpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "tianjia_icon"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "shi"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg5"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/frame/specialFrame",
+        "name": "specialFrame",
+        "sprite": "frame5_0"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/ship_type",
+        "name": "ship_type",
+        "sprite": "label_5"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/frame",
+        "name": "frame",
+        "sprite": "frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/lv/lv_bg",
+        "name": "lv_bg",
+        "sprite": "bg_lv"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/icon",
+        "name": "icon",
+        "sprite": "meikelunbao_2"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg",
+        "name": "icon_bg",
+        "sprite": "bg5_0"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/selected",
+        "name": "selected",
+        "sprite": "7_frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/btn_clear",
+        "name": "btn_clear",
+        "sprite": "qingkong_butten"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/btn_recom",
+        "name": "btn_recom",
+        "sprite": "tuijian_butten"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/bg",
+        "name": "bg",
+        "sprite": "icon_bar03"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/selected",
+        "name": "selected",
+        "sprite": "7_frame"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/btn_clear",
+        "name": "btn_clear",
+        "sprite": "qingkong_butten"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/btn_recom",
+        "name": "btn_recom",
+        "sprite": "tuijian_butten"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/bg",
+        "name": "bg",
+        "sprite": "icon_bar03"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/label",
+        "name": "label",
+        "sprite": "shuimianjiandui_bar"
+      }
+    ],
+    "ship_list_texts": [
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/vanguard/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/main/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/vanguard/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/lv/Text",
+        "text": "125"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/main/shiptpl(Clone)/icon_bg/lv/lv_label",
+        "text": "LV."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/2/bg/name",
+        "text": "第二舰队"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/ShipList/fleet/1/bg/name",
+        "text": "第一舰队"
+      }
+    ]
+  },
+  "favourite": [
+    {
+      "requested": false,
+      "before": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/switch/toggles/preference_toggle/off",
+          "sprite": "changyong_butten02",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true
+        }
+      ],
+      "receipt": null,
+      "after": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/switch/toggles/preference_toggle/off",
+          "sprite": "changyong_butten02",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true
+        }
+      ]
+    },
+    {
+      "requested": false,
+      "before": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/switch/toggles/preference_toggle/off",
+          "sprite": "changyong_butten02",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true
+        }
+      ],
+      "receipt": null,
+      "after": [
+        {
+          "path": "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/switch/toggles/preference_toggle/off",
+          "sprite": "changyong_butten02",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true
+        }
+      ]
+    }
+  ],
+  "eligible_candidates": [],
+  "dock_buttons": [
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    },
+    {
+      "name": "-1",
+      "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+      "actionable": false,
+      "bounds": {
+        "left": 7245.468,
+        "top": -6719.0,
+        "right": 7400.134,
+        "bottom": -6502.334
+      }
+    }
+  ],
+  "typed_dock_candidates": [],
+  "no_limit_typed_candidates": [],
+  "unfiltered_visible_cards": [
+    {
+      "ship_id": 11100061,
+      "ship_name": "古手川唯",
+      "level": 1
+    },
+    {
+      "ship_id": 307141,
+      "ship_name": "小信浓",
+      "level": 1
+    },
+    {
+      "ship_id": 307131,
+      "ship_name": "小大凤",
+      "level": 1
+    },
+    {
+      "ship_id": 307091,
+      "ship_name": "小赤城",
+      "level": 1
+    },
+    {
+      "ship_id": 11500021,
+      "ship_name": "鸢一折纸",
+      "level": 1
+    },
+    {
+      "ship_id": 11200021,
+      "ship_name": "DEAD MASTER",
+      "level": 1
+    },
+    {
+      "ship_id": 10600101,
+      "ship_name": "伊莉丝",
+      "level": 1
+    },
+    {
+      "ship_id": 9707061,
+      "ship_name": "大黄蜂·META",
+      "level": 1
+    },
+    {
+      "ship_id": 9707051,
+      "ship_name": "大凤·META",
+      "level": 1
+    },
+    {
+      "ship_id": 207121,
+      "ship_name": "不挠",
+      "level": 1
+    },
+    {
+      "ship_id": 107201,
+      "ship_name": "本宁顿",
+      "level": 1
+    },
+    {
+      "ship_id": 107201,
+      "ship_name": "本宁顿",
+      "level": 1
+    },
+    {
+      "ship_id": 307113,
+      "ship_name": "大凤(μ兵装)",
+      "level": 85
+    },
+    {
+      "ship_id": 10900052,
+      "ship_name": "赛莉·古劳斯",
+      "level": 100
+    },
+    {
+      "ship_id": 10600062,
+      "ship_name": "女天狗",
+      "level": 100
+    },
+    {
+      "ship_id": 407024,
+      "ship_name": "小齐柏林",
+      "level": 100
+    },
+    {
+      "ship_id": 11000043,
+      "ship_name": "雪泉",
+      "level": 100
+    },
+    {
+      "ship_id": 207111,
+      "ship_name": "光辉(μ兵装)",
+      "level": 100
+    },
+    {
+      "ship_id": 207094,
+      "ship_name": "小光辉",
+      "level": 109
+    },
+    {
+      "ship_id": 807014,
+      "ship_name": "贝亚恩",
+      "level": 115
+    },
+    {
+      "ship_id": 207134,
+      "ship_name": "小可畏",
+      "level": 115
+    }
+  ]
+}

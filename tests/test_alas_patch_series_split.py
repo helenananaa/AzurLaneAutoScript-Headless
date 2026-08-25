@@ -228,6 +228,9 @@ FLOW_PATHS = {
     "0150-runtime-optimization-contract.patch": {
         "alas.py",
     },
+    "0195-gems-farming-config-contract.patch": {
+        "module/campaign/gems_farming.py",
+    },
     "0350-meowfficer-dock-training-port.patch": {
         "module/meowfficer/buy.py",
         "module/meowfficer/train.py",

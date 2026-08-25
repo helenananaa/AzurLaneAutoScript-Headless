@@ -123,12 +123,19 @@ allowed entry mode. The existing EventDaily validator still owns filter and
 cursor semantics, including server-day reset ordering. This gate classifies
 entry configuration only and does not claim live battle coverage for B-D/SP.
 
-When ALAS is already on a normal campaign map, the patch now passes ALAS's own
-map shape, land cells, and enabled fleet count to the read-only semantic map
-model. The returned stable cells, fleets, enemies, and pickups are validated
+When ALAS is already on a normal or reviewed shared event campaign map, the
+patch passes ALAS's own map shape, land cells, and enabled fleet count to the
+read-only semantic map model. Event C/D reuse the same model in their effective
+hard mode instead of falling into the unrelated 11-4-only boundary. The
+returned stable cells, fleets, enemies, and pickups are validated
 against a deep copy of ALAS's native `CampaignMap`, initialized through
 `map_data_init()`, and planned through ALAS's existing path methods. The
-invocation logs immutable per-marker reachability summaries and returns before
+projection also follows ALAS's own `MAP_HAS_MOVABLE_ENEMY` and
+`MAP_HAS_MOVABLE_NORMAL_ENEMY` capabilities: a typed siren or normal enemy may
+leave its static spawn cell only when the corresponding campaign config says
+that enemy family moves. Boss placement, land topology, unrelated hard maps,
+and the opposite movable-enemy family remain fail-closed. The invocation logs
+immutable per-marker reachability summaries and returns before
 ALAS's existing retreat branch. A semantic marker is assigned to the displayed
 fleet only when its suffix uniquely matches one typed ship sprite in the exact
 top-stage roster across stable generations. The displayed `1|2` number is then

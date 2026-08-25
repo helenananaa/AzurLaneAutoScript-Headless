@@ -1,0 +1,43 @@
+{
+  "adapter_sha256": "bd4c2b467cb440126d75c79bb383000bd9c86a028711aef32ed0051407586641",
+  "captured_at_utc": "2026-08-25T06:57:45Z",
+  "configuration": {
+    "campaign_mode": "normal",
+    "common_cv": "langley",
+    "fleet_index": 1,
+    "max_level": 31,
+    "min_emotion": 0,
+    "role": "flagship"
+  },
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "game_version": "9.7.10",
+  "input_dispatch_count": 6,
+  "live_result": {
+    "cancel_receipt": {
+      "generation": 295486,
+      "path": "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/cancel_button",
+      "semantic_id": "tactical/dock/cancel"
+    },
+    "candidate_count": 0,
+    "fleet_index_after": 1,
+    "fleet_index_before": 1,
+    "flagship_sprite_after": "nandaketa",
+    "flagship_sprite_before": "nandaketa",
+    "formation_unchanged": true,
+    "generation_end": 295517,
+    "generation_start": 295436
+  },
+  "mutation_accounting": {
+    "fleet_mutation_count": 0,
+    "premium_or_purchase_actions": 0,
+    "raw_input_fallback_count": 0
+  },
+  "package": "com.bilibili.azurlane",
+  "patch_member_sha256": "5a0d55af0216030d73c4fd1e841f25dd477193829224b812ab287973d6d4b77b",
+  "pid": 2030,
+  "qualification_scope": "typed normal-mode empty CommonCV selector cancellation and unchanged Formation postcondition",
+  "schema": "alas-headless.gems-farming-no-candidate-live-validation/v1",
+  "semantic_oracle_sha256": "2eb5aa3c57404d14047bbda088895f52364d7ed0e2b1b458bbbce889f242a3d5",
+  "serial": "emulator-5580",
+  "statement": "The production typed Dock filter returned no Langley candidate, the exact cancel action returned to Formation, and the Fleet 1 flagship sprite and fleet index were unchanged. This proves the safe no-candidate boundary without claiming a full task stop-and-delay loop."
+}

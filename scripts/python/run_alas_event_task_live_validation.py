@@ -140,7 +140,10 @@ EVENT_SP_ATTEMPT_TEXT = re.compile(
 )
 EVENT_SP_EXECUTION_BUDGETS = {
     "stage_entry": 1,
-    "fleet_mutation": 0,
+    # Normal-mode reconciliation of the reviewed (1, 2, 0) fleet tuple needs
+    # at most: clear fleet 2, clear submarine, select fleet 1, select fleet 2.
+    # The adapter preflights the exact sequence before spending any of these.
+    "fleet_mutation": 4,
     "sortie": 1,
     "combat": 0,
     "grid_click": 0,
@@ -165,7 +168,7 @@ EVENT_SP_TEMPLATE_SHA256 = (
 )
 EVENT_SP_TEMPLATE_UNPROVEN = "event_sp.template_seed_unproven"
 EVENT_SP_TEMPLATE_CHANGED = "event_sp.template_seed_changed"
-MATERIALIZED_ALAS_CAPABILITY_ID = "alas.eventsp.materialized-fleet-noop-guard/v3"
+MATERIALIZED_ALAS_CAPABILITY_ID = "alas.eventsp.materialized-fleet-rollback-guard/v4"
 MATERIALIZED_ALAS_PROOF_SCHEMA = "alas-headless.materialized-alas-proof/v3"
 MATERIALIZED_ALAS_CONTROL_SCHEMA = "alas-headless.materialized-alas-control/v4"
 MATERIALIZED_ALAS_LOADED_SCHEMA = "alas-headless.materialized-alas-loaded/v3"
@@ -174,10 +177,10 @@ MATERIALIZED_ALAS_RELATIVE_PATH = Path("module/map/map_operation.py")
 MATERIALIZED_ALAS_MODULE_NAME = "module.map.map_operation"
 MATERIALIZED_ALAS_LOADER_ID = "verified-canonical-source-bytes/v3"
 MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256 = (
-    "d890a45505a7491eea73368295096d634f1acee2a85507ccfcc94e083664510a"
+    "d65605da61567ea5713e23269ddaa5cd490dcec8db20e96fec79696dff75c622"
 )
 MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256 = (
-    "c391f5dbb986e6482bbd6cc14245007cfe2aa8bffc2eb1d57d662fe3396bcf4a"
+    "0503d9e7e30f7b8665be265cef3f586b063ea7783cffbd63d02f763c7aac3614"
 )
 MATERIALIZED_ALAS_MAX_SOURCE_BYTES = 2 * 1024 * 1024
 MATERIALIZED_ALAS_MAX_CONTROL_BYTES = 8 * 1024
@@ -458,6 +461,52 @@ def _validate_materialized_enter_map(tree: ast.Module) -> str:
     if len(fleet_tries) != 1:
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
     try_node = fleet_tries[0]
+    if (
+        try_node.orelse
+        or len(try_node.finalbody) != 1
+        or not isinstance(try_node.finalbody[0], ast.If)
+    ):
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    rollback_if = try_node.finalbody[0]
+    if (
+        not isinstance(rollback_if.test, ast.UnaryOp)
+        or not isinstance(rollback_if.test.op, ast.Not)
+        or not isinstance(rollback_if.test.operand, ast.Name)
+        or rollback_if.test.operand.id != "sortie_clicked"
+        or rollback_if.orelse
+        or len(rollback_if.body) != 1
+        or not isinstance(rollback_if.body[0], ast.Try)
+    ):
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    rollback_try = rollback_if.body[0]
+    close_chain = (
+        "semantic_adapter",
+        "close_campaign_fleet_dropdown_for_rollback",
+    )
+    cancel_chain = ("self", "enter_map_cancel")
+    if (
+        rollback_try.handlers
+        or rollback_try.orelse
+        or len(rollback_try.body) != 1
+        or not _direct_call_statement(rollback_try.body[0], close_chain)
+        or len(rollback_try.finalbody) != 1
+        or not isinstance(rollback_try.finalbody[0], ast.Expr)
+        or not _call_matches(rollback_try.finalbody[0].value, cancel_chain)
+    ):
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    close_call = rollback_try.body[0].value
+    cancel_call = rollback_try.finalbody[0].value
+    assert isinstance(close_call, ast.Call) and isinstance(cancel_call, ast.Call)
+    if (
+        close_call.args
+        or close_call.keywords
+        or cancel_call.args
+        or len(cancel_call.keywords) != 1
+        or cancel_call.keywords[0].arg != "skip_first_screenshot"
+        or not isinstance(cancel_call.keywords[0].value, ast.Constant)
+        or cancel_call.keywords[0].value.value is not False
+    ):
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
     authorize_locations = [
         (index, statement)
         for index, statement in enumerate(try_node.body)
@@ -1736,6 +1785,10 @@ def _event_sp_clean_start_stop(
         return "event_sp.clean_start.orphan_result"
     state, _observed_stage_code = _inherited_preparation_state(oracle, stage)
     if state is None:
+        if surfaces.get("event_page") is True:
+            selected = oracle.campaign_stage_state(stage)
+            if getattr(selected, "remaining_attempts", None) == 0:
+                return "event_sp.clean_start.attempt_exhausted"
         return None
     kind = getattr(state, "kind", None)
     if kind not in ("fleet", "map"):

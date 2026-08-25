@@ -2,7 +2,6 @@
 
 import copy
 import re
-import re
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, Optional, Tuple
 
@@ -328,12 +327,21 @@ def synchronize_alas_campaign_map(
             )
         grid = source_map[location]
         is_boss = enemy.genre.lower() == "boss"
+        movable_siren = bool(
+            enemy.is_siren
+            and getattr(campaign.config, "MAP_HAS_MOVABLE_ENEMY", False)
+        )
+        movable_normal = bool(
+            not enemy.is_siren
+            and not is_boss
+            and getattr(campaign.config, "MAP_HAS_MOVABLE_NORMAL_ENEMY", False)
+        )
         if enemy.is_siren:
-            permitted = bool(getattr(grid, "may_siren", False))
+            permitted = bool(getattr(grid, "may_siren", False) or movable_siren)
         elif is_boss:
             permitted = grid.may_boss
         else:
-            permitted = grid.may_enemy
+            permitted = bool(grid.may_enemy or movable_normal)
         if grid.is_land or not permitted:
             raise SemanticGateClosed("ALAS map projection enemy violates static map")
     for pickup in state.pickups:
@@ -433,12 +441,26 @@ def synchronize_alas_campaign_map(
             grid = campaign.map[location]
             if enemy.is_siren:
                 grid.is_siren = True
+                if (
+                    getattr(campaign.config, "MAP_HAS_MOVABLE_ENEMY", False)
+                    and not getattr(grid, "may_siren", False)
+                ):
+                    grid.is_movable = True
             elif enemy.genre.lower() == "boss":
                 grid.is_boss = True
             else:
                 grid.is_enemy = True
                 grid.enemy_scale = enemy.scale
                 grid.enemy_genre = enemy.genre
+                if (
+                    getattr(
+                        campaign.config,
+                        "MAP_HAS_MOVABLE_NORMAL_ENEMY",
+                        False,
+                    )
+                    and not getattr(grid, "may_enemy", False)
+                ):
+                    grid.is_movable = True
         campaign.siren_count = sum(enemy.is_siren for enemy in state.enemies)
         for pickup in state.pickups:
             location = _node_to_location(

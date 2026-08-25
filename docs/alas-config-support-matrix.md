@@ -45,11 +45,11 @@ Headless 适配证据提交：`73433ccbac00be4c0fb367803d4affa7cb1ea599`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **9 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、OpsiHazard1Leveling、OpsiMeowfficerFarming、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **26 / 60** | Daily、Dorm、Event、Event2、EventA、EventB、EventC、EventD、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiExplore、OpsiObscure、OpsiShop、OpsiStronghold、OpsiVoucher、Research、ShopFrequent、ShopOnce、Tactical |
+| 🟢 主路径已完成、全配置未完成（`L`） | **27 / 60** | Daily、Dorm、Event、Event2、EventA、EventB、EventC、EventD、Exercise、Gacha、GemsFarming、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiExplore、OpsiObscure、OpsiShop、OpsiStronghold、OpsiVoucher、Research、ShopFrequent、ShopOnce、Tactical |
 | 🧪 仅离线完成（`O`） | **6 / 60** | Coalition、CoalitionSp、Hospital、PrivateQuarters、Raid、RaidDaily |
 | 🟡 部分完成（`P`） | **10 / 60** | Alas、AzurLaneUncensored、Daemon、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral |
 | 🧱 已到边界、尚未完成（`B`） | **8 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiMonthBoss、Shipyard、WarArchives |
-| 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
+| 🔴 尚未完成（`M`） | **0 / 60** | 暂无 |
 
 当前账本的已提交功能证据基线为 `73433cc`；2026-08-22 的月度 Boss 证据已纳入该提交，但 r61 资格收据本身仍为未通过，因此不会伪装成完整任务验收。矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线或仓库测试通过不会自动提升任何实机复核栏。
 
@@ -404,7 +404,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 4 | Main | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 三实例 9 组、54 字段（合计 162 个面板字段实例）已证明除 Scheduler.Command 外结构和默认值完全等价；六个 StopCondition 字段共 60 个合法类与 45 个非法类在任何导航前统一严校。普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；Main 已在真实 API 32 x86_64 AVD 上完成 normal 1-1 的手动地图闭环，以及 normal 12-4 的官方自律寻敌闭环。12-4 使用舰队 1/2、禁用潜艇，精确设置一队道中/二队 Boss，出击后由游戏官方承担全部地图和战斗，ALAS 的 combat/viewport 预算均为 0；官方 AutoBtn checked、总奖励页、RunCount 归零、Scheduler 关闭及无 raw fallback 均有实机证明，凭证见 integration/alas/main-12-4-auto-search-live-validation-receipt.json。反向的一队 Boss/二队道中走同一类型化路径并有确定性测试；12-4 之外的自动寻敌、舰队锁定、潜艇、其他舰队编号、困难/活动图未提升 |
 | 5 | Main2 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 已纳入三实例 9 组、54 字段共享等价类，除 Scheduler.Command 外无差异；六个 StopCondition 字段在导航前严校。已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main2 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、阵型策略、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main2-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升 |
 | 6 | Main3 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 已纳入三实例 9 组、54 字段共享等价类，除 Scheduler.Command 外无差异；六个 StopCondition 字段在导航前严校。已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main3 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main3-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升 |
-| 7 | GemsFarming | Scheduler, GemsFarming, EquipmentCode, Campaign, StopCondition, Fleet, Submarine, Emotion | M | 换旗舰/前排、常用舰选择、装备导入导出和换船后的强化衔接缺失；只有委托限制可复用 |
+| 7 | GemsFarming | Scheduler, GemsFarming, EquipmentCode, Campaign, StopCondition, Fleet, Submarine, Emotion | L | 六项专属设置及原 run 收尾/调度已离线回放；normal + ship 的 Fleet 索引、白皮航母/驱逐候选和旗舰/前排唯一确认已实机闭环并恢复原编队；normal + ship_equip 已按 pinned ALAS 的五项 equipment code 接入逐槽 typed 卸装/替换，特殊兵装保持随原舰；当前槽位舰卡不再误入 free 候选，Fleet 6 突击者的生产筛选返回两张真实空闲突击者，并完成现有 18100 +0、19000 +0 双槽 take_off -> replace -> take_on 及目标读回；同舰五槽卸装恢复、空 code 控制流、两类舰装不兼容 fail-closed 亦已覆盖；normal 1-1 已完成 Fleet 6 单舰队完整原任务闭环，凭证见 integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json；hard 11-4 的第一主力槽为 type 7 正航而不兼容 type 6 轻航突击者，正确返回无候选；改用兼容轻航的 hard 12-1 后，原 HardNotSatisfied -> hard_fleet_prepare 从三张空闲突击者中选择等级/心情最高的 Lv9 突击者并确认旗舰，随后原任务完成既有 Boss 进度、结算、RunCount 归零、Scheduler 关闭和章节页返回，全程无 raw fallback，组件凭证见 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r25.json 与 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r26.json；两张历史收据的顶层 passed=false 分别来自零出击替换探针与旧 runner 错把换船重复发生绑定到完整任务，底层 replacement/task completion 后置条件已分别通过且 runner 已修正；仍缺五槽跨舰兼容及 Lv32/emotion 自然触发分支，因此为 L 而非 F；enhanceable 仅为候选过滤而非换船后强化动作 |
 | 8 | EventGeneral | EventGeneral, TaskBalancer | P | 五字段离线决策已完整；仍缺 typed PT/金币实机观察、时间相关性、真实任务切换恢复和防调度环证据 |
 | 9 | Coalition | Scheduler, Campaign, Coalition, StopCondition, Emotion | O | 难度与单/多舰队已离线回放；共斗入口、战斗和结算未适配 |
 | 10 | Event | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 七活动入口共享 9 组 54 字段，Event/Event2 包装结构等价；活动目录、关卡名与模式现于语义导航前严校。当前 A1 默认路径闭环；其他关卡和全部共用地图配置仍按字段验收 |
@@ -487,7 +487,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Emotion | `Mode`=`calculate/ignore/calculate_ignore`; `Fleet1Value`; `Fleet1Record`; `Fleet1Control`; `Fleet1Recover`; `Fleet1Oath`; `Fleet2Value`; `Fleet2Record`; `Fleet2Control`; `Fleet2Recover`; `Fleet2Oath`; 两个 `Control` 均为 `keep_exp_bonus/prevent_green_face/prevent_yellow_face/prevent_red_face`，两个 `Recover` 均为 `not_in_dormitory/dormitory_floor_1/dormitory_floor_2` | P | 11 字段已完成原时间账本离线回放与中心 fail-closed；真实低心情等待、持久化调度、誓约/宿舍事实观察和跨任务恢复仍未扩证 |
 | HpControl | `UseHpBalance`; `UseEmergencyRepair`; `UseLowHpRetreat`; `HpBalanceThreshold`; `HpBalanceWeight`; `RepairUseSingleThreshold`; `RepairUseMultiThreshold`; `LowHpRetreatThreshold` | P | 八字段已离线分类并在出击前 fail-closed；三个启用态仍分别缺 typed 编队拖拽、紧急维修模板/输入和完整撤退循环，故动作与实机完整性不提升 |
 | EnemyPriority | `EnemyScaleBalanceWeight`=`default_mode/S3_enemy_first/S1_enemy_first` | P | 三值已完成原方法离线回放与导航前 fail-closed；相同地图夹具覆盖过滤覆盖、无敌人和同星级多目标，实机/动作维度未扩大 |
-| GemsFarming | `ChangeFlagship`=`ship/ship_equip`; `ChangeVanguard`=`disabled/ship/ship_equip`; `CommissionLimit`; `CommonCV`=`any/langley/bogue/ranger/hermes`; `CommonDD`=`any/favourite/aulick_or_foote/cassin_or_downes/z20_or_z21` | M | 每个候选舰/换装模式、收藏过滤、无候选舰、船坞满、委托占用和换船后继续刷图 |
+| GemsFarming | `ChangeFlagship`=`ship/ship_equip`; `ChangeVanguard`=`disabled/ship/ship_equip`; `CommissionLimit`; `CommonCV`=`any/langley/bogue/ranger/hermes`; `CommonDD`=`any/favourite/aulick_or_foote/cassin_or_downes/z20_or_z21`; `EquipmentCode.ExportToConfig` | L | 六项专属设置和原 `run` 分支已离线回放；normal 舰队 6 的 typed 候选、实际换船/双槽换装及 1-1 单进程原任务闭环已有实机凭证；hard 12-1 已完成突击者旗舰替换与原任务 Boss/结算/RunCount/调度闭环，11-4 的 type 7 正航槽不兼容 type 6 轻航突击者并正确返回无候选；无候选舰、船坞满、委托占用继续 fail-closed，五槽跨舰与 Lv32/emotion 自然触发换船分支仍待实机；`enhanceable` 只是候选过滤值，不存在独立的换船后强化动作 |
 | EquipmentCode | `Config`（DD 与四艘 CV 的装备代码）；`ExportToConfig` | M | 合法/缺失/错误装备代码、导出开关、装备不足、被占用装备和回滚；不得装备到错误舰船 |
 
 ### 3.3 活动专用配置
@@ -678,9 +678,9 @@ python scripts/python/verify_alas_support_matrix.py `
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
 | ✅ 五维完整支持 | **52 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **130 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **80 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
-| ⊘ 当前未适配或无效 | **16 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
+| ◐ 有实机当前值/分支证据 | **136 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **75 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ⊘ 当前未适配或无效 | **15 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
@@ -771,7 +771,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Enhance.Filter` | General | type=textarea; display=default | input/default: null | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Enhance.ShipToEnhance` | General | type=select; display=default | options: "all", "favourite"; default: "all" | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `EquipmentCode.Config` | GemsFarming | type=textarea; display=default | input/default:…4672 tokens truncated…t" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `EquipmentCode.ExportToConfig` | GemsFarming | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `EquipmentCode.ExportToConfig` | GemsFarming | type=checkbox; display=default | input/default: true | `P`/◐ normal ship_equip 实机 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Error.HandleError` | Alas | type=checkbox; display=default | input/default: true | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Error.OnePushConfig` | Alas | type=textarea; display=default | input/default: "provider: null" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Error.SaveError` | Alas | type=checkbox; display=default | input/default: true | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
@@ -802,11 +802,11 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Gacha.UseDrill` | Gacha | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Gacha.UseTicket` | Gacha | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GameManager.AutoRestart` | GameManager | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
-| `GemsFarming.ChangeFlagship` | GemsFarming | type=select; display=default | options: "ship_equip", "ship"; default: "ship" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GemsFarming.ChangeVanguard` | GemsFarming | type=select; display=default | options: "disabled", "ship_equip", "ship"; default: "ship" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GemsFarming.CommissionLimit` | GemsFarming | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GemsFarming.CommonCV` | GemsFarming | type=select; display=default | options: "any", "bogue", "hermes", "langley", "ranger"; default: "any" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GemsFarming.CommonDD` | GemsFarming | type=select; display=default | options: "any", "aulick_or_foote", "cassin_or_downes", "favourite", "z20_or_z21"; default: "any" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GemsFarming.ChangeFlagship` | GemsFarming | type=select; display=default | options: "ship_equip", "ship"; default: "ship" | `P`/◐ normal 两模式及 hard ship 主路径实机 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `GemsFarming.ChangeVanguard` | GemsFarming | type=select; display=default | options: "disabled", "ship_equip", "ship"; default: "ship" | `P`/◐ 三值实机；ship_equip 已过兼容两槽 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `GemsFarming.CommissionLimit` | GemsFarming | type=checkbox; display=default | input/default: true | `P`/◐ false 实机；true 未通过 | ☑ | ☐ | ☐ | ☑ | ◐ |
+| `GemsFarming.CommonCV` | GemsFarming | type=select; display=default | options: "any", "bogue", "hermes", "langley", "ranger"; default: "any" | `P`/◐ any→langley/ranger 已确认；bogue/hermes 筛选已观察 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `GemsFarming.CommonDD` | GemsFarming | type=select; display=default | options: "any", "aulick_or_foote", "cassin_or_downes", "favourite", "z20_or_z21"; default: "any" | `P`/◐ any 已确认；四命名筛选实机空结果 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `GeneralShop.BuySkinBox` | ShopFrequent | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GeneralShop.ConsumeCoins` | ShopFrequent | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GeneralShop.Filter` | ShopFrequent | type=textarea; display=default | input/default: "BookRedT3 > BookYellowT3 > BookBlueT3 > BookRedT2\n> Cube\n> FoodT6 > FoodT5" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
