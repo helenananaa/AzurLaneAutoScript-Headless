@@ -175,16 +175,21 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_battle_pass_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_battle_pass_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0460-freebies-battle-pass-port.patch",
+        "integration/alas/freebies-battle-pass-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -648,7 +653,7 @@
         "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -1361,16 +1366,25 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_data_key_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_data_key_config_replay.py",
+        "scripts/python/run_alas_freebies_data_key_live_validation.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0460-freebies-battle-pass-port.patch",
+        "integration/alas/freebies-data-key-capacity-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-data-key-force-live-validation-receipt-20260826-r1.json",
+        "integration/alas/freebies-data-key-force-post-live-validation-receipt-20260826-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260826-r2.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1379,22 +1393,31 @@
         "Freebies"
       ],
       "path": "DataKey.Collect",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 满仓强制实机",
       "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_data_key_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_data_key_config_replay.py",
+        "scripts/python/run_alas_freebies_data_key_live_validation.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0460-freebies-battle-pass-port.patch",
+        "integration/alas/freebies-data-key-capacity-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-data-key-force-live-validation-receipt-20260826-r1.json",
+        "integration/alas/freebies-data-key-force-post-live-validation-receipt-20260826-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260826-r2.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1403,7 +1426,7 @@
         "Freebies"
       ],
       "path": "DataKey.ForceCollect",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 满仓强制实机",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -7957,13 +7980,19 @@
         "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_supply_pack_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_supply_pack_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0460-freebies-battle-pass-port.patch",
+        "scripts/python/run_alas_freebies_remaining_live_validation.py",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260826-r2.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -7978,7 +8007,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -7986,8 +8015,12 @@
       },
       "evidence": [
         "tests/test_alas_supply_pack_config.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_supply_pack_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0460-freebies-battle-pass-port.patch",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260826-r2.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -8344,8 +8377,8 @@
         "Storage"
       ],
       "name": "EventSp",
-      "note": "共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；实机已证明初始 (1,2,0) 舰队配置可零变更保留、自动寻敌职责与语义出击，且今日次数变为 0/1 并返回活动页。但控制器未在进程内捕获完整地图/战斗/结算收据，边界凭证见 integration/alas/eventsp-sp-auto-search-live-boundary-20260823.json；仍保持 P，不升级为主路径闭环",
-      "status": "P"
+      "note": "共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；原 EventSp 任务已在固定 API 32 x86_64 AVD 上从主页完成活动入口、SP 选择、100% clear 与官方自动寻敌确认、(1,2,0) 舰队零变更出击、315 秒被动地图/战斗、Boss 总奖励退出、返回活动页及 1/1→0/1 次数后置。RunCount 1→0 并写入次日 00:00 调度；同一 supervised runner 捕获全部 generation/receipt，recovery、combat/grid/viewport 输入和 raw fallback 均为 0。凭证见 integration/alas/eventsp-sp-auto-search-live-validation-receipt-20260825-r11.json。其他舰队组合、非默认共用地图配置及新的活动布局仍按字段保持部分支持，因此为 L 而非 F",
+      "status": "L"
     },
     {
       "groups": [
@@ -8373,7 +8406,7 @@
         "SupplyPack"
       ],
       "name": "Freebies",
-      "note": "BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环",
+      "note": "原 Freebies 已再次组合实机成功：BattlePass 无待领奖、DataKey 已领取、SupplyPack 油量 4477 且无免费卡时零购买并调度次日。BattlePass 普通 claim-all 已单独实机领取且未触碰付费升级；DataKey 300/300 的安全跳过、取消和 ForceCollect=true 精确确认均已执行，独立后置复跑证明 state_after、计数不变及零重复动作。强制分支因日状态不可逆尚缺单一不间断通过收据；自然免费礼包确认/领奖仍待样本",
       "status": "P"
     },
     {
@@ -8694,7 +8727,7 @@
         "Emotion"
       ],
       "name": "RaidDaily",
-      "note": "难度过滤的 64 个无重复排列及 EX 奖励路由已离线回放；每日次数、战斗和领奖未适配",
+      "note": "难度过滤与 EX 奖励路由已离线回放；固定 Raid 的 easy/normal/hard/ex 次数已接入 typed 端口并通过补丁树，但当前客户端未开放 Raid，入口、战斗、领奖仍待实机",
       "status": "O"
     },
     {
@@ -11720,9 +11753,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "d2732f53cc720cd376b0e0bb18dcd22049969793d7c9e443decd0d3179ddac99",
-      "manifest_sha256": "fd65f25978506b5f2534abac9032605d60a5aaa061b3a72026365921c27f96e0",
-      "member_count": 89
+      "combined_sha256": "2bfd4fe27d1ec45e334022b19c7eefa58ea9cc641b899a337e7e79a76e254eae",
+      "manifest_sha256": "cff31a0362e22d9a6e6466100826cc394f79181a2b379ad4f208bdaaf396b68a",
+      "member_count": 91
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

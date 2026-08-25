@@ -2,6 +2,36 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-25
+
+### EventSp official auto-search main path is live complete
+
+- The original pinned `EventSp` task started from the semantic main page,
+  selected `event_20260813_cn/SP`, proved the exact remaining `1/1` attempt,
+  100% clear state, official auto-search availability, and the reviewed
+  `(fleet1, fleet2, submarine) = (1, 2, 0)` tuple before its only sortie.
+- The fleet tuple already matched, so no fleet mutation occurred. Generation
+  `687801 -> 687952` proved the sortie and `CombatUIStandard(Clone)` handoff.
+  The game then owned the complete map and combat path for 315 seconds; ALAS
+  sent no combat, grid, viewport, camera-positioning, or recovery input.
+- The same supervised runner observed official combat-auto at generation
+  `691127`, the Boss total-reward exit at generations `691162/691163`, returned
+  to the event page, and read the exact `0/1` attempt at generation `691263`.
+  `StopCondition.RunCount` persisted `1 -> 0` and the task scheduled the next
+  server update at `2026-08-26 00:00`.
+- The qualification passed with `run_result=true`, an empty validation-error
+  list, `recovery_total=0`, and no raw-input fallback. The first invocation on
+  the retained older materialized tree stopped before worker launch or Android
+  input because its source did not match the required rollback guard; the
+  successful run used a clean locked `81ccf63` worktree with the authoritative
+  89-member patch series. Evidence is retained in
+  `integration/alas/eventsp-sp-auto-search-live-validation-receipt-20260825-r10.json`
+  and
+  `integration/alas/eventsp-sp-auto-search-live-validation-receipt-20260825-r11.json`.
+- EventSp is promoted from partial (`P`) to main-path complete (`L`), not full
+  (`F`). Other fleet tuples, non-default shared campaign fields, and future
+  event layouts remain localized qualification work.
+
 ## 2026-08-23
 
 ### Apple Silicon Mac reaches the typed G4 login boundary under HVF
@@ -936,9 +966,21 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   ordered subsets of `easy`/`normal`/`hard`/`ex`. The normal forwarding and
   EX reward-routing decisions execute only in memory; invalid filters stop
   before any RaidDaily stateful boundary.
-- This promotes only offline evidence for the three fields. Raid navigation,
-  activity availability, run counts, combat, reward collection,
-  postconditions, observation, and all Android input remain unadapted.
+- The pinned `raid_20260212` daily counter now reads the exact typed
+  `BossRushVerSardiniaSPUI/Battle/Nodes/5001..5004` surface for
+  `easy`/`normal`/`hard`/`ex`. Non-EX values must be a unique `n/15` counter;
+  EX uses its exact `times/Text` path. Unknown events, roots, duplicate values,
+  stale generations, and malformed counters fail closed. The original
+  `RaidDaily.run()` loop owns filtering, retries, execution, and scheduling;
+  pixel mode is unchanged, while semantic mode does not enter the still
+  unsupported optional Raid reward-dot branch.
+- The 90-member integration series applies and compiles cleanly on the pinned
+  ALAS tree. A controlled typed preflight on game `9.7.10` found the healthy
+  ordinary `LevelMainScene(Clone)` campaign surface, not a live Raid root, so
+  `integration/alas/raid-daily-live-preflight-blocked-20260825-r1.json` records
+  no input and no support promotion. Raid entry, preparation, combat return,
+  and Raid-specific reward collection remain the re-entry work when a reviewed
+  compatible Raid surface is live.
 
 ### Hospital: recommendation switch replayed before any UI work
 
@@ -1579,7 +1621,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   selected-target identity, long-running recovery, and rare popup branches
   remain incomplete, so both daemon panels stay `P`.
 
-### Battle Pass collection switch: offline dispatch contract passed
+### Battle Pass collection: typed ordinary-claim live path passed
 
 - `BattlePass.Collect` admits only exact booleans. Its guard is the first
   executable statement of `Freebies.run()`, before any BattlePass, DataKey,
@@ -1587,11 +1629,15 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - Replay executes both original dispatch branches. Disabled mode retains Mail
   without touching BattlePass; enabled mode preserves BattlePass before Mail.
   The final `task_delay(server_update=True)` remains exact in both cases.
-- Seven non-boolean values fail at zero events. Every child is a recorder;
-  mutation budget is `0`, and no navigation, reward claim, or Android input
-  occurs. Only `offline` becomes complete. Real entrance/red-dot observation,
-  free versus paid rewards, no-reward handling, claim receipts, and recovery
-  remain incomplete, so Freebies stays `P`.
+- Seven non-boolean values still fail at zero events in replay. Live typed
+  validation then identified the exact Reward entrance and World Cruise page,
+  clicked only ordinary `btn_all`, closed the delayed AwardInfo receipt, and
+  proved the ordinary claim notice absent afterward. The separate paid
+  `btn_pay`/lock control was never clicked and no premium input was issued.
+- A later original `Freebies` run also completed the no-reward branch and
+  recovered from an inherited Shop page through exact `shop/home`. Paid-track
+  collection and broader account/season variants remain unqualified, so the
+  field is live-partial and the panel stays `P`.
 
 ### Global Optimization runtime settings: offline original-method replay passed
 
@@ -1996,7 +2042,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `offline=complete`; live nonzero-oil starts, each preset against changing
   rows, major dispatch, cancellation, and consecutive scheduling remain open.
 
-### Data Key collection configuration: offline contract passed
+### Data Key collection: typed full-capacity live branch passed
 
 - `DataKey.Collect` and `DataKey.ForceCollect` admit exact booleans at the
   beginning of original `Freebies.run()`, before BattlePass, DataKey, Mail, or
@@ -2005,11 +2051,29 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - Pinned replay covers all four switch combinations and 12 invalid
   single-field cases. Original `DataKey.data_key_collect()` is also replayed
   for already-collected, exact-full forced/unforced, and one-slot-free states.
-- The real `_data_key_collect()` loop is never called. Mutation budget is `0`,
-  with no key receipt, page input, popup confirmation, or Android injection.
-- Both fields move only to `offline=complete`. The existing 300/300 live
-  observation is not evidence for forced collection, a new key receipt,
-  capacity-limit popup handling, or post-claim inventory changes.
+- The exact uncollected `state_before` control now has a typed final-input
+  method. It requires the reviewed Archives root, coherent EX/SP toggle state,
+  one uncollected control with delegated raycast, valid bounds, no blocker, and
+  the exact foreground package. An already-collected or ambiguous state cannot
+  dispatch input.
+- The original `Freebies` task ran live with `DataKey.Collect=true`,
+  `ForceCollect=false`, all Mail mutations disabled, and SupplyPack/BattlePass
+  disabled. It observed `300/300`, preserved the uncollected state, made zero
+  Data Key claim calls, returned success, and scheduled `2026-08-26 00:00:00`.
+  The temporary ALAS config was removed; the receipt is
+  `integration/alas/freebies-data-key-capacity-live-validation-receipt-20260825-r1.json`.
+- The full-capacity warning popup is now typed structurally: it requires the
+  reviewed Archives root, exact `300/300`, both custom buttons, and the zero-key
+  warning markup. Live validation opened it through the exact collect control
+  and safely clicked typed cancel, proving the counter remained `300/300`.
+  Confirm is exposed only inside the original DataKey flow when
+  `ForceCollect=true` and a preceding collect receipt exists. It has now been
+  clicked live after the exact claim; the standard AwardInfo overlay was closed
+  through its exact target. Because the daily transition is irreversible, the
+  initial run and final postcondition are split: an independent original-task
+  rerun proves active `state_after` sprite `remaster_key_got`, counter `300/300`,
+  and zero repeated claim/confirm actions. A single uninterrupted passing
+  receipt must wait for the next uncollected day; this is not reported as one.
 
 ### Campaign shared switch configuration: offline contract passed
 
@@ -2045,7 +2109,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   weekly claim postconditions, red dots, number rows, empty pages, and special
   ship rewards remain live gaps and are not inferred from replay.
 
-### SupplyPack collect and weekday configuration: offline contract passed
+### SupplyPack typed zero-price boundary and no-free live path passed
 
 - `SupplyPack.Collect` admits only booleans at the beginning of original
   `Freebies.run()`, before BattlePass, DataKey, Mail, or SupplyPack can run.
@@ -2057,10 +2121,15 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - Pinned replay executes original `Freebies.run()` and `SupplyPack.run()` for
   both collect values, all seven target weekdays against Wednesday, and the
   exact 21000-oil guard: 14 accepted and 10 invalid cases.
-- The real `supply_pack_buy()` method is never called; replay records only
-  whether ALAS would produce a free-pack candidate. Mutation budget is `0`,
-  with no claim, item change, page input, or Android injection. Both fields
-  move only to `offline=complete`; current live absence is not a claim receipt.
+- The adapter now identifies only a unique numeric gift card whose name is a
+  free/weekly label and whose displayed price is exactly `0` or `免费`; paid
+  cards are excluded by focused tests. The post-card purchase confirmation is
+  still fail-closed until a natural free-card sample can be reviewed.
+- The original combined `Freebies` task was rerun live with oil `4477`, reached
+  the typed gift-pack page, observed no free card, performed zero purchase
+  actions, returned success, and scheduled `2026-08-27 00:00:00`. This completes the
+  no-free safe branch, not a real free-pack claim receipt, so both fields and
+  the Freebies panel remain partial.
 
 ### Hard stage and fleet configuration: offline contract passed
 

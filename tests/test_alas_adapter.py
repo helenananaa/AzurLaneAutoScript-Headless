@@ -296,6 +296,14 @@ class FakeOracle:
         self.war_archives_visible_value = False
         self.war_archives_collected_value = False
         self.war_archives_key_text_value = "300/300"
+        self.data_key_limit_prompt_value = False
+        self.battle_pass_page_visible_value = False
+        self.battle_pass_reward_available_value = False
+        self.battle_pass_claim_available_value = False
+        self.recommendation_shop_visible_value = False
+        self.gift_pack_page_visible_value = False
+        self.free_weekly_supply_pack_available_value = False
+        self.shop_oil_value = 12000
         self.main_gold_value = 10000
         self.build_gold_value = 10000
         self.dorm_state_value = SimpleNamespace(
@@ -772,6 +780,53 @@ class FakeOracle:
     def war_archives_page_visible(self):
         return self.war_archives_visible_value
 
+    def battle_pass_page_visible(self):
+        return self.battle_pass_page_visible_value
+
+    def battle_pass_reward_available(self):
+        return self.battle_pass_reward_available_value
+
+    def battle_pass_claim_all_available(self):
+        return self.battle_pass_claim_available_value
+
+    def click_battle_pass_entrance(self):
+        self.battle_pass_page_visible_value = True
+        return self.click_receipt("reward/battle-pass/enter")
+
+    def click_battle_pass_claim_all(self):
+        if not self.battle_pass_claim_available_value:
+            raise SemanticGateClosed("Battle Pass claim-all reward is unavailable")
+        self.battle_pass_claim_available_value = False
+        return self.click_receipt("battle-pass/claim-all")
+
+    def click_battle_pass_home(self):
+        self.battle_pass_page_visible_value = False
+        return self.click_receipt("battle-pass/home")
+
+    def recommendation_shop_visible(self):
+        return self.recommendation_shop_visible_value
+
+    def click_recommendation_shop_home(self):
+        if not self.recommendation_shop_visible_value:
+            raise SemanticGateClosed("shop shell identity is absent")
+        self.recommendation_shop_visible_value = False
+        return self.click_receipt("shop/home")
+
+    def gift_pack_page_visible(self):
+        return self.gift_pack_page_visible_value
+
+    def free_weekly_supply_pack_available(self):
+        return self.free_weekly_supply_pack_available_value
+
+    def shop_oil(self):
+        return self.shop_oil_value
+
+    def click_free_weekly_supply_pack(self):
+        if not self.free_weekly_supply_pack_available_value:
+            raise SemanticGateClosed("free weekly supply pack is unavailable")
+        self.free_weekly_supply_pack_available_value = False
+        return self.click_receipt("shop/free-weekly-pack")
+
     def war_archives_data_key_collected(self):
         if not self.war_archives_visible_value:
             raise SemanticGateClosed("war archives page identity is not proven")
@@ -781,6 +836,27 @@ class FakeOracle:
         if not self.war_archives_visible_value:
             raise SemanticGateClosed("war archives page identity is not proven")
         return self.war_archives_key_text_value
+
+    def click_war_archives_data_key_collect(self):
+        if not self.war_archives_visible_value:
+            raise SemanticGateClosed("war archives page identity is not proven")
+        if self.war_archives_collected_value:
+            raise SemanticGateClosed("war archives data key is already collected")
+        self.war_archives_collected_value = True
+        return self.click_receipt("archive/key/collect")
+
+    def data_key_limit_prompt_visible(self):
+        return self.data_key_limit_prompt_value
+
+    def click_data_key_limit_choice(self, *, confirm):
+        if not self.data_key_limit_prompt_value:
+            raise SemanticGateClosed("data-key limit prompt is absent")
+        self.data_key_limit_prompt_value = False
+        if confirm:
+            self.war_archives_collected_value = True
+        return self.click_receipt(
+            "archive/key-limit/confirm" if confirm else "archive/key-limit/cancel"
+        )
 
     def main_gold(self):
         return self.main_gold_value
@@ -10427,6 +10503,10 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             adapter.ocr_text([(133, 39, 250, 72)], alphabet="0123456789/IDSB"),
             "300/300",
         )
+        receipt = adapter.click(NamedButton("DATA_KEY_COLLECT"))
+        self.assertEqual(receipt.semantic_id, "archive/key/collect")
+        with self.assertRaisesRegex(SemanticGateClosed, "already collected"):
+            adapter.click(NamedButton("DATA_KEY_COLLECT"))
 
     def test_bounded_task_flows_begin_with_page_discovery_grace(self):
         for begin_name in (
@@ -10844,6 +10924,24 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertIsNone(session.runtime_handle)
 
+    def test_session_routes_data_key_collect_to_reviewed_adapter_action(self):
+        adapter = Mock()
+        receipt = Mock()
+        adapter.campaign_combat_committed.return_value = False
+        adapter.operation_siren_combat_committed.return_value = False
+        adapter.click.return_value = receipt
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = Mock()
+
+        self.assertIs(session.click(NamedButton("DATA_KEY_COLLECT")), receipt)
+        self.assertIs(
+            session.click(NamedButton("POPUP_CONFIRM_DATA_KEY_LIMIT")), receipt
+        )
+        self.assertEqual(session.refresh_frame.call_count, 2)
+        self.assertEqual(adapter.click.call_count, 2)
+
     def test_live_combat_manifest_rebinds_only_reviewed_capacity_successor(self):
         base_revision = "be80ce591a481c12d60c50d6040d40c035b40a2b"
         live_revision = "506b76f698b5089aaa29c4e7908b48edb8532a44"
@@ -11052,6 +11150,132 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with patch.dict("os.environ", environment, clear=True):
             with self.assertRaises(SemanticGateClosed):
                 AlasSemanticSession.from_environment("emulator-test")
+
+
+    def test_battle_pass_context_claims_only_reviewed_claim_all(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.battle_pass_reward_available_value = True
+        oracle.battle_pass_claim_available_value = True
+        adapter.begin_battle_pass()
+
+        self.assertTrue(adapter.appear(NamedButton("REWARD_GOTO_BATTLE_PASS")))
+        entrance = adapter.click(NamedButton("REWARD_GOTO_BATTLE_PASS"))
+        self.assertEqual(entrance.semantic_id, "reward/battle-pass/enter")
+        self.assertTrue(adapter.appear(NamedButton("BATTLE_PASS_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("REWARD_RECEIVE_WHITE")))
+        claim = adapter.click(NamedButton("REWARD_RECEIVE_WHITE"))
+        self.assertEqual(claim.semantic_id, "battle-pass/claim-all")
+        self.assertFalse(adapter.appear(NamedButton("REWARD_RECEIVE_WHITE")))
+        with self.assertRaisesRegex(SemanticGateClosed, "outside the reviewed"):
+            adapter.click(NamedButton("REWARD_RECEIVE_SP"))
+
+    def test_battle_pass_page_recovers_through_exact_home(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.battle_pass_page_visible_value = True
+        adapter.begin_battle_pass()
+
+        self.assertTrue(adapter.appear(NamedButton("BATTLE_PASS_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("GOTO_MAIN")))
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "battle-pass/home")
+        self.assertFalse(oracle.battle_pass_page_visible_value)
+
+        # A delayed page transition must be idempotent rather than dispatching
+        # another input after the reviewed target has already unmounted.
+        self.assertIs(adapter.click(NamedButton("GOTO_MAIN")), receipt)
+
+    def test_supply_pack_click_admits_only_exact_free_card(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.recommendation_shop_visible_value = True
+        oracle.gift_pack_page_visible_value = True
+        oracle.free_weekly_supply_pack_available_value = True
+        adapter.begin_supply_pack()
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("FREE_SUPPLY_PACK")))
+        receipt = adapter.click(NamedButton("FREE_SUPPLY_PACK"))
+
+        self.assertEqual(receipt.semantic_id, "shop/free-weekly-pack")
+        self.assertFalse(adapter.appear(NamedButton("FREE_SUPPLY_PACK")))
+        with self.assertRaisesRegex(SemanticGateClosed, "confirmation"):
+            adapter.click(NamedButton("BUY_CONFIRM"))
+
+    def test_battle_pass_navigation_recovers_from_existing_shop(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.recommendation_shop_visible_value = True
+        adapter.begin_battle_pass()
+
+        self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "shop/home")
+        self.assertIs(adapter.click(NamedButton("GOTO_MAIN")), receipt)
+        adapter._battle_pass_context.passive_transition_until = time.monotonic() - 1
+        self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
+        adapter.end_battle_pass()
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "EVENT_LIST_CHECK"):
+            adapter.appear(NamedButton("EVENT_LIST_CHECK"))
+
+    def test_data_key_limit_confirm_requires_force_and_preceding_claim(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.war_archives_visible_value = True
+        oracle.enabled_values.update(
+            {
+                "reward/award-info/close": False,
+                "reward/award-info1/close": False,
+            }
+        )
+        adapter.begin_data_key(force_collect=True)
+
+        claim = adapter.click(NamedButton("DATA_KEY_COLLECT"))
+        oracle.data_key_limit_prompt_value = True
+
+        self.assertEqual(claim.semantic_id, "archive/key/collect")
+        self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
+        confirm = adapter.click(NamedButton("POPUP_CONFIRM_DATA_KEY_LIMIT"))
+        self.assertEqual(confirm.semantic_id, "archive/key-limit/confirm")
+        oracle.war_archives_visible_value = False
+        self.assertFalse(adapter.appear(NamedButton("DATA_KEY_COLLECT")))
+        self.assertFalse(adapter.appear(NamedButton("DATA_KEY_COLLECTED")))
+
+        adapter.end_data_key()
+        oracle.war_archives_collected_value = False
+        oracle.data_key_limit_prompt_value = True
+        adapter.begin_data_key(force_collect=False)
+        self.assertFalse(adapter.appear(NamedButton("POPUP_CONFIRM")))
+        with self.assertRaisesRegex(SemanticGateClosed, "ForceCollect"):
+            adapter.click(NamedButton("POPUP_CONFIRM"))
+
+    def test_data_key_navigation_closes_only_exact_award_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values.update(
+            {
+                "reward/award-info/close": True,
+                "reward/award-info1/close": False,
+            }
+        )
+        adapter.begin_data_key(force_collect=True)
+
+        self.assertTrue(adapter.appear(NamedButton("GET_ITEMS_1")))
+        receipt = adapter.click(NamedButton("GET_ITEMS_1"))
+
+        self.assertEqual(receipt.semantic_id, "reward/award-info/close")
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+
+        navigation_receipt = adapter.click(
+            NamedButton("CAMPAIGN_MENU_GOTO_WAR_ARCHIVES")
+        )
+        self.assertEqual(
+            navigation_receipt.semantic_id, "reward/award-info/close"
+        )
+
+        adapter._data_key_context.passive_transition_until = time.monotonic() - 1
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        adapter.end_data_key()
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "FLEET_CHECK"):
+            adapter.appear(NamedButton("FLEET_CHECK"))
 
 
 class GuildSemanticAdapterTests(unittest.TestCase):

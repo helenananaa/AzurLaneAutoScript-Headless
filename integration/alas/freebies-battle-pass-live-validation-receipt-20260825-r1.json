@@ -1,0 +1,34 @@
+{
+  "schema": "alas-headless.freebies-battle-pass-live-validation/v1",
+  "captured_at": "2026-08-25T22:52:00+08:00",
+  "capture_mode": "interactive_typed_validation",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "passed": true,
+  "precondition": {
+    "battle_pass_reward_available": true,
+    "ordinary_claim_all_available": true
+  },
+  "actions": [
+    {
+      "semantic_id": "reward/battle-pass/enter",
+      "generation": 807188,
+      "path": "OverlayCamera/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)/frame/link_btns/btns/crusing"
+    },
+    {
+      "semantic_id": "battle-pass/claim-all",
+      "generation": 808130,
+      "path": "UICamera/Canvas/UIMain/WorldCruiseUI(Clone)/frame/award_container/WorldCruiseAwardPage(Clone)/frame/btns/btn_all"
+    },
+    {
+      "semantic_id": "reward/award-info/close",
+      "generation": 813727
+    }
+  ],
+  "postcondition": {
+    "ordinary_claim_all_available": false,
+    "paid_upgrade_control_clicked": false,
+    "premium_currency_input": false
+  }
+}

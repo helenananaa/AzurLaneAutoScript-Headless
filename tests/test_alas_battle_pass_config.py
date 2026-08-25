@@ -1,4 +1,5 @@
 import ast
+import json
 import unittest
 from pathlib import Path
 
@@ -47,8 +48,44 @@ class AlasBattlePassConfigTests(unittest.TestCase):
             "python/alas_headless/alas_battle_pass_config_contract.py",
             "python/alas_headless/alas_battle_pass_config_replay.py",
             "scripts/python/verify_alas_battle_pass_config.py",
+            "scripts/python/run_alas_freebies_remaining_live_validation.py",
         ):
             ast.parse(ROOT.joinpath(relative).read_text(encoding="utf-8"))
+
+    def test_live_ordinary_claim_receipt_excludes_paid_input(self):
+        receipt = json.loads(
+            ROOT.joinpath(
+                "integration/alas/freebies-battle-pass-live-validation-receipt-20260825-r1.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertTrue(receipt["passed"])
+        self.assertEqual(
+            [action["semantic_id"] for action in receipt["actions"]],
+            [
+                "reward/battle-pass/enter",
+                "battle-pass/claim-all",
+                "reward/award-info/close",
+            ],
+        )
+        self.assertFalse(receipt["postcondition"]["ordinary_claim_all_available"])
+        self.assertFalse(receipt["postcondition"]["paid_upgrade_control_clicked"])
+        self.assertFalse(receipt["postcondition"]["premium_currency_input"])
+
+    def test_combined_freebies_live_receipt_is_zero_purchase(self):
+        receipt = json.loads(
+            ROOT.joinpath(
+                "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertTrue(receipt["passed"])
+        self.assertTrue(receipt["task_result"])
+        self.assertEqual(receipt["configured"]["DataKey.ForceCollect"], False)
+        self.assertEqual(receipt["actions"], [])
+        self.assertIn(
+            {"method": "free_weekly_supply_pack_available", "value": False},
+            receipt["observations"],
+        )
+        self.assertTrue(receipt["temporary_config_removed"])
 
 
 if __name__ == "__main__":

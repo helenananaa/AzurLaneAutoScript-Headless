@@ -987,6 +987,57 @@ def make_normal_fleet_preparation_backend(stage_code="12-4"):
 
 
 class SemanticOracleTests(unittest.TestCase):
+    def test_raid_remain_reads_all_pinned_modes_from_typed_nodes(self):
+        root = "UICamera/Canvas/UIMain/BossRushVerSardiniaSPUI(Clone)"
+        buttons = [
+            make_button(str(node), f"{root}/Battle/Nodes/{node}")
+            for node in range(5001, 5006)
+        ]
+        backend = FakeBackend(buttons)
+        backend.ui = make_ui(
+            [
+                make_text("12/15", f"{root}/Battle/Nodes/5001/remain/Text"),
+                make_text("7 / 15", f"{root}/Battle/Nodes/5002/remain/Text"),
+                make_text("0/15", f"{root}/Battle/Nodes/5003/remain/Text"),
+                make_text("3", f"{root}/Battle/Nodes/5004/times/Text"),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.raid_remain("raid_20260212", "easy"), 12)
+        self.assertEqual(oracle.raid_remain("raid_20260212", "normal"), 7)
+        self.assertEqual(oracle.raid_remain("raid_20260212", "hard"), 0)
+        state = oracle.raid_remain_state("raid_20260212", "ex")
+        self.assertEqual((state.remaining, state.capacity, state.node_id), (3, None, 5004))
+
+    def test_raid_remain_rejects_unsafe_and_harmless_drift_separately(self):
+        root = "UICamera/Canvas/UIMain/BossRushVerSardiniaSPUI(Clone)"
+        buttons = [
+            make_button(str(node), f"{root}/Battle/Nodes/{node}")
+            for node in range(5001, 5006)
+        ]
+        backend = FakeBackend(buttons)
+        backend.ui = make_ui(
+            [
+                make_text("9/15", f"{root}/Battle/Nodes/5001/new_layout/value"),
+                make_text("metadata", f"{root}/Battle/Nodes/5001/new_layout/label"),
+            ]
+        )
+        oracle = make_oracle(backend)
+        self.assertEqual(oracle.raid_remain("raid_20260212", "easy"), 9)
+
+        backend.ui = make_ui(
+            [
+                make_text("9/15", f"{root}/Battle/Nodes/5001/remain/Text"),
+                make_text("8/15", f"{root}/Battle/Nodes/5001/duplicate/Text"),
+            ]
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            make_oracle(backend).raid_remain("raid_20260212", "easy")
+
+        with self.assertRaisesRegex(SemanticGateClosed, "event is unsupported"):
+            make_oracle(backend).raid_remain("raid_future", "easy")
+
     def test_gems_farming_equipment_loadout_rejects_duplicate_positions(self):
         slot = GemsFarmingEquipmentSlot(1, "51000", 10, False)
         with self.assertRaisesRegex(ValueError, "positions must be unique"):
@@ -1750,6 +1801,77 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "shop/gift-pack")
         self.assertEqual(backend.taps, [(640, 360)])
 
+    def test_recommendation_shop_home_uses_exact_top_control(self):
+        root = "OverlayCamera/Overlay/UIMain/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "homeBtn",
+                    root + "buttonList/top/homeBtn",
+                    x=1140.0,
+                    y=42.0,
+                    raycast_top=None,
+                ),
+                make_button("closeBtn", root + "buttonList/top/closeBtn"),
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("商店", root + "buttonList/top/title/Text")],
+            toggles=[
+                make_toggle(
+                    root + "buttonList/shop1List/giftPackShop/shop1Tg",
+                    checked=False,
+                    raycast_top=None,
+                )
+            ],
+        )
+
+        receipt = make_oracle(backend).click_recommendation_shop_home()
+
+        self.assertEqual(receipt.semantic_id, "shop/home")
+        self.assertEqual(backend.taps, [(1140, 42)])
+
+    def test_free_weekly_supply_pack_click_excludes_paid_cards(self):
+        root = "OverlayCamera/Overlay/UIMain/"
+        free = root + "ChargeGiftShopUI(Clone)/lScrollRect/content/0"
+        paid = root + "ChargeGiftShopUI(Clone)/lScrollRect/content/1"
+        backend = FakeBackend(
+            [
+                make_button("homeBtn", root + "buttonList/top/homeBtn"),
+                make_button("closeBtn", root + "buttonList/top/closeBtn"),
+                make_button("0", free, x=300, y=350, raycast_top=None),
+                make_button("1", paid, x=500, y=350, raycast_top=None),
+            ]
+        )
+        toggle = make_toggle(
+            root + "buttonList/shop1List/giftPackShop/shop1Tg",
+            checked=True,
+            raycast_top=None,
+        )
+        backend.ui = make_ui(
+            [
+                make_text("商店", root + "buttonList/top/title/Text"),
+                make_text(
+                    "全部",
+                    root
+                    + "ChargeGiftShopUI(Clone)/toggleGroup/Toggle/selected/Label",
+                ),
+                make_text("每周免费礼包", free + "/real_tpl/item_name_mask/item_name"),
+                make_text("0", free + "/real_tpl/Price/Text"),
+                make_text("限时礼包", paid + "/real_tpl/item_name_mask/item_name"),
+                make_text("300", paid + "/real_tpl/Price/Text"),
+            ],
+            toggles=[toggle],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.free_weekly_supply_pack_available())
+        receipt = oracle.click_free_weekly_supply_pack()
+
+        self.assertEqual(receipt.semantic_id, "shop/free-weekly-pack")
+        self.assertEqual(backend.taps, [(300, 350)])
+        self.assertNotIn((500, 350), backend.taps)
+
     def test_campaign_battle_reward_requires_result_stack_marker(self):
         backend = FakeBackend(
             [
@@ -1843,6 +1965,36 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertTrue(oracle.war_archives_page_visible())
         self.assertEqual(oracle.war_archives_data_key_text(), "300/300")
         self.assertFalse(oracle.war_archives_data_key_collected())
+
+        receipt = oracle.click_war_archives_data_key_collect()
+        self.assertEqual(receipt.semantic_id, "archive/key/collect")
+        self.assertEqual(receipt.path, root + "/getBtn/state_before")
+        self.assertEqual(backend.taps, [(640, 360)])
+
+        backend.taps.clear()
+        backend.buttons = make_buttons(
+            [make_button("state_after", root + "/getBtn/state_after", raycast_top=None)]
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "already collected"):
+            oracle.click_war_archives_data_key_collect()
+        self.assertEqual(backend.taps, [])
+
+        backend.buttons = make_buttons([])
+        backend.ui = make_ui(
+            [make_text("300/300", root + "/nums/text")],
+            toggles=[
+                make_toggle(root + "/toggles/EX", checked=True, raycast_top=None),
+                make_toggle(root + "/toggles/SP", checked=False, raycast_top=None),
+            ],
+            images=[
+                make_image(
+                    root + "/getBtn/state_after", sprite="remaster_key_got"
+                )
+            ],
+        )
+        self.assertTrue(oracle.war_archives_data_key_collected())
+        with self.assertRaisesRegex(SemanticGateClosed, "already collected"):
+            oracle.click_war_archives_data_key_collect()
 
     def test_war_archives_page_rejects_inconsistent_toggle_selection(self):
         root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)"
@@ -10362,6 +10514,39 @@ class SemanticOracleTests(unittest.TestCase):
             ("tactical-page",),
         )
 
+    def test_archive_page_allows_only_exact_reward_close_to_cross_owner(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "close",
+                    "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+                    1100,
+                    120,
+                ),
+                make_button(
+                    "EX",
+                    "UICamera/Canvas/UIOrigin/LevelRemasterView(Clone)/toggles/EX",
+                ),
+                make_button(
+                    "btn_remaster",
+                    "UICamera/Canvas/UIMain/LevelMainScene(Clone)/entrance/btns/btn_remaster",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+        state = oracle.read_state()
+
+        self.assertEqual(
+            oracle._blocking_rules(state, "reward/award-info/close"), ()
+        )
+        self.assertEqual(
+            tuple(
+                rule.blocker_id
+                for rule in oracle._blocking_rules(state, "main/settings")
+            ),
+            ("award-info", "campaign-menu", "archive-page"),
+        )
+
     def test_bulletin_blocks_main_but_allows_mapped_close(self):
         backend = FakeBackend(
             [
@@ -14346,6 +14531,125 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         self.assertTrue(
             oracle.operation_siren_order_confirmation_visible("scan")
         )
+
+
+    def test_battle_pass_reward_uses_exact_notice_and_delegated_entrance(self):
+        reward_root = "root/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)"
+        entrance = reward_root + "/frame/link_btns/btns/crusing"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "CommissionInfoUI4Mellow(Clone)", reward_root,
+                    raycast_top=True,
+                ),
+                make_button("crusing", entrance, x=617, y=130, raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [], images=[make_image(entrance + "/tip", "exclamation_mark")]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.battle_pass_reward_available())
+        receipt = oracle.click_battle_pass_entrance()
+        self.assertEqual(receipt.semantic_id, "reward/battle-pass/enter")
+        self.assertEqual(backend.taps, [(617, 130)])
+
+        backend.ui["images"][0]["sprite"] = "unrelated"
+        self.assertFalse(oracle.battle_pass_reward_available())
+
+    def test_battle_pass_claim_all_excludes_paid_button(self):
+        root = "root/UICamera/Canvas/UIMain/WorldCruiseUI(Clone)"
+        claim = (
+            root
+            + "/frame/award_container/WorldCruiseAwardPage(Clone)/frame/btns/btn_all"
+        )
+        backend = FakeBackend(
+            [
+                make_button("award", root + "/frame/toggles/award", raycast_top=None),
+                make_button("btn_all", claim, x=1160, y=615, raycast_top=None),
+                make_button(
+                    "btn_pay",
+                    root
+                    + "/frame/award_container/WorldCruiseAwardPage(Clone)/frame/btns/btn_pay",
+                    x=900,
+                    y=615,
+                    raycast_top=None,
+                ),
+                make_button("home", root + "/top/home", x=1223, y=38, raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("W O R L D  C R U I S E", root + "/top/title/Text/en")],
+            images=[
+                make_image(root, "mask"),
+                make_image(root + "/frame/toggles/award/selected", "toggle_bg"),
+                make_image(claim + "/Image", "tip"),
+                make_image(
+                    root
+                    + "/frame/award_container/WorldCruiseAwardPage(Clone)/frame/btns/btn_pay/Image",
+                    "lock",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.battle_pass_page_visible())
+        self.assertTrue(oracle.battle_pass_claim_all_available())
+        receipt = oracle.click_battle_pass_claim_all()
+        self.assertEqual(receipt.semantic_id, "battle-pass/claim-all")
+        self.assertEqual(backend.taps, [(1160, 615)])
+        self.assertNotIn((900, 615), backend.taps)
+
+        backend.ui["images"][2]["sprite"] = "lock"
+        self.assertFalse(oracle.battle_pass_claim_all_available())
+
+    def test_data_key_limit_prompt_cancel_preserves_full_counter(self):
+        archive = "root/UICamera/Canvas/UIOrigin/LevelRemasterView(Clone)"
+        popup = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window"
+        backend = FakeBackend(
+            [
+                make_button("bg", archive + "/bg", raycast_top=None),
+                make_button(
+                    "custom_button_1(Clone)",
+                    popup + "/button_container/custom_button_1(Clone)",
+                    x=790,
+                    y=515,
+                ),
+                make_button(
+                    "custom_button_2(Clone)",
+                    popup + "/button_container/custom_button_2(Clone)",
+                    x=490,
+                    y=515,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("300/300", archive + "/nums/text"),
+                make_text(
+                    "确 定",
+                    popup + "/button_container/custom_button_1(Clone)/pic",
+                ),
+                make_text(
+                    "取 消",
+                    popup + "/button_container/custom_button_2(Clone)/pic",
+                ),
+                make_text(
+                    "所持<color=#ffde38>档案密钥</color>数量达到上限，"
+                    "完成任务后只能获得<color=#ff5c5c>0</color>份"
+                    "<color=#ffde38>档案密钥</color>，是否确认领取？",
+                    popup + "/msg_panel/content",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.data_key_limit_prompt_visible())
+        receipt = oracle.click_data_key_limit_choice(confirm=False)
+
+        self.assertEqual(receipt.semantic_id, "archive/key-limit/cancel")
+        self.assertEqual(backend.taps, [(490, 515)])
 
 
 if __name__ == "__main__":

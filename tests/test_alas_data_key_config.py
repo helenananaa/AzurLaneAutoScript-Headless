@@ -1,5 +1,6 @@
 import ast
 import itertools
+import json
 import unittest
 from pathlib import Path
 
@@ -60,8 +61,24 @@ class AlasDataKeyConfigTests(unittest.TestCase):
             "python/alas_headless/alas_data_key_config_contract.py",
             "python/alas_headless/alas_data_key_config_replay.py",
             "scripts/python/verify_alas_data_key_config.py",
+            "scripts/python/run_alas_freebies_data_key_live_validation.py",
         ):
             ast.parse(ROOT.joinpath(relative).read_text(encoding="utf-8"))
+
+    def test_live_full_capacity_receipt_is_scoped_and_zero_claim(self):
+        receipt = json.loads(
+            ROOT.joinpath(
+                "integration/alas/freebies-data-key-capacity-live-validation-receipt-20260825-r1.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertTrue(receipt["passed"])
+        self.assertTrue(receipt["task_result"])
+        self.assertEqual(receipt["observations"], [
+            {"kind": "collected", "value": False},
+            {"kind": "counter", "value": "300/300"},
+        ])
+        self.assertEqual(receipt["collect_calls"], [])
+        self.assertTrue(receipt["temporary_config_removed"])
 
 
 if __name__ == "__main__":

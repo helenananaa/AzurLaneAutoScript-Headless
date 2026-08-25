@@ -444,6 +444,16 @@
       "order": 89,
       "path": "integration/alas/series/0440-gems-farming-hard-remain-port.patch",
       "sha256": "a993e0d214d5d058b2b55e620b1f44e0f37a8901bb4dcc9657c5271f5b12a7af"
+    },
+    {
+      "order": 90,
+      "path": "integration/alas/series/0450-raid-daily-remain-port.patch",
+      "sha256": "7dab72a4aab24e51f888ab2db3f137991b7f30e07b036765e26d63250351dc88"
+    },
+    {
+      "order": 91,
+      "path": "integration/alas/series/0460-freebies-battle-pass-port.patch",
+      "sha256": "9dba8b93295478891b8fc993f6e7ca8fa4532d1769f1bd3de891727210cc40e2"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

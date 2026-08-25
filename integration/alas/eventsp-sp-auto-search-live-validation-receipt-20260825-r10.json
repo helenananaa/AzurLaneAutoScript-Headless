@@ -1,0 +1,48 @@
+{
+  "schema": "alas-headless.event-task-live-validation/v1",
+  "passed": false,
+  "execution_state": "not_started",
+  "executed": false,
+  "capability_promotion": false,
+  "started_at": "2026-08-25T12:54:48.448398Z",
+  "finished_at": "2026-08-25T12:54:48.458661Z",
+  "task": "EventSp",
+  "stage": "SP",
+  "event": "event_20260813_cn",
+  "mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "use_auto_search": true,
+  "run_result": false,
+  "run_error": {
+    "type": "RuntimeError",
+    "message_digest": "ead4fc7a99e76d9c43d2ba4403f0e67b1ab274af17829671d8a59d792506dda2",
+    "traceback_digest": "8e0563499c09cff25a629d834fdd43add364f3bfdce34d77a29d38022d3a5913",
+    "classification": "event_sp.materialized_fleet_noop_guard_unproven"
+  },
+  "validation_errors": [
+    "event_sp.materialized_fleet_noop_guard_unproven"
+  ],
+  "supervision": {
+    "binding": null,
+    "run_id": "f16453ccebed4345857e2d41819a329e",
+    "total_deadline_seconds": 900,
+    "deadline_triggered": false,
+    "interrupted": false,
+    "termination_mode": "worker_not_started",
+    "worker_returncode": null,
+    "cooperative_stop_requested": false,
+    "forced_worker_terminate": false,
+    "forced_worker_kill": false,
+    "termination_confirmed": true,
+    "lifecycle_errors": [],
+    "worker_cleanup": null,
+    "parent_cleanup": {
+      "completed": true,
+      "actions": [],
+      "blockers": [],
+      "details": {}
+    }
+  },
+  "raw_input_fallback_used": false
+}

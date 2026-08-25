@@ -1116,6 +1116,17 @@ class CampaignPageState:
 
 
 @dataclass(frozen=True)
+class RaidRemainState:
+    generation: int
+    event: str
+    mode: str
+    remaining: int
+    capacity: Optional[int]
+    root: str
+    node_id: int
+
+
+@dataclass(frozen=True)
 class CampaignPreparationState:
     generation: int
     kind: str
@@ -2306,6 +2317,16 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "LevelRemasterView(Clone)/getBtn/state_before",
     ),
     SemanticTarget(
+        "archive/key-limit/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "archive/key-limit/cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
         "archive/page/back",
         "bg",
         "Overlay/UIMain/LevelRemasterView(Clone)/bg",
@@ -2679,6 +2700,21 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "reward/meta/enter",
         "meta_boss",
         "CommissionInfoUI4Mellow(Clone)/frame/link_btns/btns/meta_boss",
+    ),
+    SemanticTarget(
+        "reward/battle-pass/enter",
+        "crusing",
+        "CommissionInfoUI4Mellow(Clone)/frame/link_btns/btns/crusing",
+    ),
+    SemanticTarget(
+        "battle-pass/claim-all",
+        "btn_all",
+        "WorldCruiseUI(Clone)/frame/award_container/WorldCruiseAwardPage(Clone)/frame/btns/btn_all",
+    ),
+    SemanticTarget(
+        "battle-pass/home",
+        "home",
+        "WorldCruiseUI(Clone)/top/home",
     ),
     SemanticTarget(
         "meta/page/back",
@@ -3452,6 +3488,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         (
             "reward/page/back",
             "reward/meta/enter",
+            "reward/battle-pass/enter",
             "reward/resource/oil",
             "reward/resource/coin",
             "reward/resource/exp",
@@ -3467,6 +3504,17 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "reward/award-info/close",
             "reward/award-info1/close",
             "reward/ship-exp/close",
+        ),
+    ),
+    BlockerRule(
+        "battle-pass-page",
+        "/WorldCruiseUI(Clone)/",
+        (
+            "battle-pass/claim-all",
+            "battle-pass/home",
+            "reward/award-info/close",
+            "reward/award-info1/close",
+            "reward/new-ship/continue",
         ),
     ),
     BlockerRule(
@@ -3595,6 +3643,11 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "os/exit/confirm",
             "os/exit/cancel",
             "archive/page/back",
+            "archive/key/collect",
+            "archive/key-limit/confirm",
+            "archive/key-limit/cancel",
+            "reward/award-info/close",
+            "reward/award-info1/close",
             "campaign-menu/daily",
             "campaign/mode/normal",
             "campaign/mode/hard",
@@ -3721,7 +3774,14 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "archive-page",
         "/LevelRemasterView(Clone)/",
-        ("archive/page/back", "archive/key/collect"),
+        (
+            "archive/page/back",
+            "archive/key/collect",
+            "archive/key-limit/confirm",
+            "archive/key-limit/cancel",
+            "reward/award-info/close",
+            "reward/award-info1/close",
+        ),
     ),
     BlockerRule(
         "daily-page",
@@ -3997,6 +4057,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "os/port/dock/repair-confirm",
             "os/port/dock/repair-cancel",
             "gems-farming/equipment/unload-confirm",
+            "archive/key-limit/confirm",
+            "archive/key-limit/cancel",
         ),
     ),
     BlockerRule(
@@ -9148,6 +9210,46 @@ class SemanticOracle:
         gift = self._toggle_matches(ui_state, "shop/gift-pack")
         return len(controls) == 2 and len(title) == 1 and len(gift) == 1
 
+    def click_recommendation_shop_home(self) -> ActionReceipt:
+        """Leave the exact Shop shell through its top home control."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("shop home snapshots are not coherent")
+        if not self._recommendation_shop_visible_from_states(state, ui_state):
+            raise SemanticGateClosed("shop shell identity is absent")
+        targets = tuple(
+            button
+            for button in state.buttons
+            if button.name == "homeBtn"
+            and button.path.endswith("buttonList/top/homeBtn")
+        )
+        if len(targets) != 1:
+            raise SemanticGateClosed("shop home target is absent or ambiguous")
+        target = targets[0]
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "shop/home")
+        ):
+            raise SemanticGateClosed("shop home target is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="shop/home",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def shop_oil(self) -> int:
         return self._retry_transition_read(self._shop_oil_once)
 
@@ -9214,6 +9316,11 @@ class SemanticOracle:
         ui_state = self.read_ui_state()
         if not self._gift_pack_page_visible_from_states(state, ui_state):
             return False
+        return self._free_weekly_supply_pack_root(state, ui_state) is not None
+
+    def _free_weekly_supply_pack_root(
+        self, state: OracleState, ui_state: UiState
+    ) -> Optional[str]:
         roots = tuple(
             button.path
             for button in state.buttons
@@ -9250,7 +9357,45 @@ class SemanticOracle:
                 matches.append(root)
         if len(matches) > 1:
             raise SemanticGateClosed("free weekly supply pack is ambiguous")
-        return len(matches) == 1
+        return matches[0] if matches else None
+
+    def click_free_weekly_supply_pack(self) -> ActionReceipt:
+        """Open only the exact zero-price weekly pack card."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("free weekly supply pack snapshots are not coherent")
+        if not self._gift_pack_page_visible_from_states(state, ui_state):
+            raise SemanticGateClosed("gift pack page identity is absent")
+        root = self._free_weekly_supply_pack_root(state, ui_state)
+        if root is None:
+            raise SemanticGateClosed("free weekly supply pack is unavailable")
+        targets = tuple(button for button in state.buttons if button.path == root)
+        if len(targets) != 1:
+            raise SemanticGateClosed("free weekly supply pack target is ambiguous")
+        target = targets[0]
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "shop/free-weekly-pack")
+        ):
+            raise SemanticGateClosed("free weekly supply pack is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="shop/free-weekly-pack",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
 
     def shop_general_nav_selected(self) -> bool:
         return self.shop_selected_nav_label() == "补给商店"
@@ -11454,6 +11599,7 @@ class SemanticOracle:
             raise SemanticGateClosed("campaign archive entrance requires menu")
         state = self.read_state()
         target = self._unique(state, "campaign-menu/archive")
+        blockers = self._blocking_rules(state, "campaign-menu/archive")
         if not (
             target.active_in_hierarchy
             and target.active_and_enabled
@@ -11462,9 +11608,21 @@ class SemanticOracle:
             and target.point is not None
             and target.bounds is not None
             and target.bounds.contains(target.point)
-            and not self._blocking_rules(state, "campaign-menu/archive")
+            and not blockers
         ):
-            raise SemanticGateClosed("campaign archive entrance is not actionable")
+            raise SemanticGateClosed(
+                "campaign archive entrance is not actionable: "
+                "active={0}, enabled={1}, interactable={2}, raycast_top={3}, "
+                "point={4}, bounds={5}, blockers={6}".format(
+                    target.active_in_hierarchy,
+                    target.active_and_enabled,
+                    target.interactable,
+                    target.raycast_top,
+                    target.point,
+                    target.bounds,
+                    tuple(rule.blocker_id for rule in blockers),
+                )
+            )
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="campaign-menu/archive",
@@ -15968,6 +16126,208 @@ class SemanticOracle:
             path=target.path,
         )
 
+    def battle_pass_reward_available(self) -> bool:
+        """Read the exact active Battle Pass notice on the reward summary."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("Battle Pass reward snapshots are not coherent")
+        page = self._matches(state, "reward/page/back")
+        entrance = self._matches(state, "reward/battle-pass/enter")
+        if len(page) != 1 or len(entrance) != 1:
+            return False
+        target = entrance[0]
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "reward/battle-pass/enter")
+        ):
+            return False
+        tip_path = target.path + "/tip"
+        tips = tuple(
+            image
+            for image in ui_state.images
+            if image.path == tip_path
+            and image.name == "tip"
+            and image.sprite == "exclamation_mark"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(tips) > 1:
+            raise SemanticGateClosed("Battle Pass reward notice is ambiguous")
+        return len(tips) == 1
+
+    def click_battle_pass_entrance(self) -> ActionReceipt:
+        """Open Battle Pass through its exact delegated reward-summary card."""
+
+        if not self.battle_pass_reward_available():
+            raise SemanticGateClosed("Battle Pass reward is not available")
+        state = self.read_state()
+        target = self._unique(state, "reward/battle-pass/enter")
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="reward/battle-pass/enter",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def battle_pass_page_visible(self) -> bool:
+        """Require the exact current World Cruise award page."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("Battle Pass page snapshots are not coherent")
+        roots = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith("/WorldCruiseUI(Clone)")
+            and image.name == "WorldCruiseUI(Clone)"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        award_tabs = tuple(
+            button
+            for button in state.buttons
+            if button.path.endswith("WorldCruiseUI(Clone)/frame/toggles/award")
+            and button.name == "award"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        selected = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith(
+                "WorldCruiseUI(Clone)/frame/toggles/award/selected"
+            )
+            and image.sprite == "toggle_bg"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+        )
+        titles = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith("WorldCruiseUI(Clone)/top/title/Text/en")
+            and text.text.strip() == "W O R L D  C R U I S E"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+        )
+        if (
+            len(roots) > 1
+            or len(award_tabs) > 1
+            or len(selected) > 1
+            or len(titles) > 1
+        ):
+            raise SemanticGateClosed("Battle Pass page identity is ambiguous")
+        return len(roots) == len(award_tabs) == len(selected) == len(titles) == 1
+
+    def battle_pass_claim_all_available(self) -> bool:
+        """Admit only the ordinary claim-all button with its active notice."""
+
+        if not self.battle_pass_page_visible():
+            return False
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("Battle Pass claim snapshots are not coherent")
+        matches = self._matches(state, "battle-pass/claim-all")
+        if len(matches) != 1:
+            return False
+        target = matches[0]
+        tips = tuple(
+            image
+            for image in ui_state.images
+            if image.path == target.path + "/Image"
+            and image.name == "Image"
+            and image.sprite == "tip"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(tips) > 1:
+            raise SemanticGateClosed("Battle Pass claim notice is ambiguous")
+        return bool(
+            len(tips) == 1
+            and target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "battle-pass/claim-all")
+        )
+
+    def click_battle_pass_claim_all(self) -> ActionReceipt:
+        """Claim currently unlocked rewards without touching the paid-pass control."""
+
+        if not self.battle_pass_claim_all_available():
+            raise SemanticGateClosed("Battle Pass claim-all reward is unavailable")
+        state = self.read_state()
+        target = self._unique(state, "battle-pass/claim-all")
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="battle-pass/claim-all",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_battle_pass_home(self) -> ActionReceipt:
+        """Leave World Cruise through its exact top-right home control."""
+
+        if not self.battle_pass_page_visible():
+            raise SemanticGateClosed("Battle Pass page identity is absent")
+        state = self.read_state()
+        target = self._unique(state, "battle-pass/home")
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "battle-pass/home")
+        ):
+            raise SemanticGateClosed("Battle Pass home is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="battle-pass/home",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def meta_entrance_state(self) -> MetaEntranceState:
         """Read current and dossier META resources from the landing page."""
 
@@ -16775,9 +17135,159 @@ class SemanticOracle:
             and button.active_in_hierarchy
             and button.active_and_enabled
         )
-        if bool(before) == bool(after) or len(before) > 1 or len(after) > 1:
+        ui_state = self.read_ui_state()
+        after_images = tuple(
+            image
+            for image in ui_state.images
+            if image.name == "state_after"
+            and image.path.endswith("LevelRemasterView(Clone)/getBtn/state_after")
+            and image.sprite == "remaster_key_got"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        after_present = bool(after or after_images)
+        if (
+            bool(before) == after_present
+            or len(before) > 1
+            or len(after) > 1
+            or len(after_images) > 1
+        ):
             raise SemanticGateClosed("war archives data-key claim state is ambiguous")
-        return bool(after)
+        return after_present
+
+    def click_war_archives_data_key_collect(self) -> ActionReceipt:
+        """Click the exact uncollected daily-key control on the Archives page."""
+
+        if not self.war_archives_page_visible():
+            raise SemanticGateClosed("war archives page identity is not proven")
+        if self.war_archives_data_key_collected():
+            raise SemanticGateClosed("war archives data key is already collected")
+        state = self.read_state()
+        matches = self._matches(state, "archive/key/collect")
+        if len(matches) != 1:
+            raise SemanticGateClosed("war archives data-key claim is ambiguous")
+        target = matches[0]
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "archive/key/collect")
+        ):
+            raise SemanticGateClosed("war archives data-key claim is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before data-key input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="archive/key/collect",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def data_key_limit_prompt_visible(self) -> bool:
+        """Identify the exact full-capacity zero-key confirmation prompt."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("data-key limit snapshots are not coherent")
+        archive_roots = tuple(
+            button
+            for button in state.buttons
+            if button.name == "bg"
+            and button.path.endswith("UIOrigin/LevelRemasterView(Clone)/bg")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+        )
+        if len(archive_roots) != 1:
+            return False
+        confirm = self._matches(state, "archive/key-limit/confirm")
+        cancel = self._matches(state, "archive/key-limit/cancel")
+        if len(confirm) != 1 or len(cancel) != 1:
+            return False
+        labels = {
+            text.path
+            for text in ui_state.texts
+            if text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and text.path.startswith(
+                "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+            )
+        }
+        content = tuple(
+            text.text
+            for text in ui_state.texts
+            if text.path
+            == "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/msg_panel/content"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+        )
+        if len(content) != 1:
+            return False
+        counters = tuple(
+            text.text.strip()
+            for text in ui_state.texts
+            if text.path.endswith("LevelRemasterView(Clone)/nums/text")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and re.fullmatch(r"[0-9]+/[0-9]+", text.text.strip())
+        )
+        full = False
+        if len(counters) == 1:
+            current, total = (int(value) for value in counters[0].split("/"))
+            full = current == total and total > 0
+        return bool(
+            full
+            and (
+                "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+                "button_container/custom_button_1(Clone)/pic"
+            )
+            in labels
+            and (
+                "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+                "button_container/custom_button_2(Clone)/pic"
+            )
+            in labels
+            and content[0].count("<color=#ffde38>") == 2
+            and "<color=#ff5c5c>0</color>" in content[0]
+        )
+
+    def click_data_key_limit_choice(self, *, confirm: bool) -> ActionReceipt:
+        """Resolve the exact full-capacity prompt; confirm intentionally loses one key."""
+
+        if not self.data_key_limit_prompt_visible():
+            raise SemanticGateClosed("data-key limit prompt is absent")
+        state = self.read_state()
+        semantic_id = (
+            "archive/key-limit/confirm"
+            if confirm
+            else "archive/key-limit/cancel"
+        )
+        target = self._unique(state, semantic_id)
+        if not target.actionable:
+            raise SemanticGateClosed("data-key limit choice is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before data-key choice")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
 
     def exercise_page_visible(self) -> bool:
         state = self.read_state()
@@ -20039,6 +20549,107 @@ class SemanticOracle:
         if value is None:
             raise SemanticGateClosed("hard campaign quota is malformed")
         return int(value.group(1))
+
+    def raid_remain_state(self, event: str, mode: str) -> RaidRemainState:
+        """Read one pinned RaidDaily counter from typed BossRush state."""
+
+        if event != "raid_20260212":
+            raise SemanticGateClosed("Raid remaining counter event is unsupported")
+        node_ids = {"easy": 5001, "normal": 5002, "hard": 5003, "ex": 5004}
+        try:
+            node_id = node_ids[mode]
+        except KeyError as exc:
+            raise SemanticGateClosed("Raid remaining counter mode is unsupported") from exc
+
+        button_state = self.read_state()
+        ui_state = self.read_text_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("Raid button and text generations are incoherent")
+
+        root_suffix = "/BossRushVerSardiniaSPUI(Clone)"
+        node_pattern = re.compile(
+            r"(?P<root>.+/BossRushVerSardiniaSPUI\(Clone\))"
+            r"/Battle/Nodes/(?P<node>500[1-5])(?:/.*)?$"
+        )
+        family_buttons = tuple(
+            button
+            for button in button_state.buttons
+            if "/BossRush" in button.path
+            and "/Battle/Nodes/" in button.path
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+        )
+        parsed_buttons = []
+        for button in family_buttons:
+            match = node_pattern.fullmatch(button.path)
+            if match is None or not match.group("root").endswith(root_suffix):
+                raise SemanticGateClosed("Raid stage button root is not reviewed")
+            parsed_buttons.append((match.group("root"), int(match.group("node")), button))
+        roots = {root for root, _node, _button in parsed_buttons}
+        if len(roots) != 1:
+            raise SemanticGateClosed("Raid stage root is absent or ambiguous")
+        root = next(iter(roots))
+
+        stage_buttons = tuple(
+            button
+            for candidate_root, candidate_node, button in parsed_buttons
+            if candidate_root == root
+            and candidate_node == node_id
+            and button.path == f"{root}/Battle/Nodes/{node_id}"
+        )
+        if len(stage_buttons) != 1 or stage_buttons[0].bounds is None:
+            raise SemanticGateClosed("Raid stage identity is absent or ambiguous")
+
+        prefix = f"{root}/Battle/Nodes/{node_id}/"
+        texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.startswith(prefix)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if mode == "ex":
+            expected_path = prefix + "times/Text"
+            counters = tuple(
+                item
+                for item in texts
+                if item.path == expected_path
+                and re.fullmatch(r"[0-9]+", item.text.strip()) is not None
+            )
+            capacity = None
+        else:
+            counters = tuple(
+                item
+                for item in texts
+                if re.fullmatch(r"[0-9]+\s*/\s*15", item.text.strip()) is not None
+            )
+            capacity = 15
+        if len(counters) != 1:
+            raise SemanticGateClosed("Raid remaining counter is absent or ambiguous")
+        counter = counters[0]
+        if mode == "ex":
+            remaining = int(counter.text.strip())
+        else:
+            remaining = int(counter.text.split("/", 1)[0].strip())
+            if remaining > 15:
+                raise SemanticGateClosed("Raid remaining counter exceeds capacity")
+        return RaidRemainState(
+            generation=ui_state.generation,
+            event=event,
+            mode=mode,
+            remaining=remaining,
+            capacity=capacity,
+            root=root,
+            node_id=node_id,
+        )
+
+    def raid_remain(self, event: str, mode: str) -> int:
+        return self.raid_remain_state(event=event, mode=mode).remaining
 
     def campaign_oil(self) -> int:
         """Read the exact global oil counter on a proven campaign surface."""

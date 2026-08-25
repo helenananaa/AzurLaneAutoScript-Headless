@@ -1,0 +1,76 @@
+{
+  "schema": "alas-headless.freebies-remaining-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "BattlePass.Collect": true,
+    "DataKey.Collect": true,
+    "DataKey.ForceCollect": false,
+    "Mail.*": false,
+    "SupplyPack.Collect": true,
+    "SupplyPack.DayOfWeek": 0
+  },
+  "source_sha256": {
+    "freebies": "93067e1006564a9e2fd06a1c9f4d794a5890052f8041a190c36a754346fb9ab5",
+    "battle_pass": "b23a03a16e3d9c67f9fb09ba2c8793d7a991e375095dfe9b50eb00d56a7ce79c",
+    "data_key": "5ed30c24a6687ad29b48488999d50bb02fbcdce60c85724339295cd19e85f4d6",
+    "supply_pack": "1bcc8e7f199b174c12f336b2ad653435addee4c56d71dbff17d7f72afcc85fe2",
+    "adapter": "42a5b9227f69765f023d8053b29eae415da639f070739f3b5d79c990f39e3ae7",
+    "oracle": "47c1763728ce035d121b1caf2a46bc0628dfbafaba73135509764a64ac01e9c8"
+  },
+  "passed": true,
+  "task_result": true,
+  "elapsed_seconds": 283.719,
+  "observations": [
+    {
+      "method": "battle_pass_reward_available",
+      "value": false
+    },
+    {
+      "method": "war_archives_data_key_collected",
+      "value": true
+    },
+    {
+      "method": "shop_oil",
+      "value": 4477
+    },
+    {
+      "method": "free_weekly_supply_pack_available",
+      "value": false
+    },
+    {
+      "method": "free_weekly_supply_pack_available",
+      "value": false
+    },
+    {
+      "method": "free_weekly_supply_pack_available",
+      "value": false
+    },
+    {
+      "method": "free_weekly_supply_pack_available",
+      "value": false
+    },
+    {
+      "method": "free_weekly_supply_pack_available",
+      "value": false
+    },
+    {
+      "method": "free_weekly_supply_pack_available",
+      "value": false
+    },
+    {
+      "method": "free_weekly_supply_pack_available",
+      "value": false
+    },
+    {
+      "method": "free_weekly_supply_pack_available",
+      "value": false
+    }
+  ],
+  "actions": [],
+  "scheduler_next_run": "2026-08-27 00:00:00",
+  "temporary_config_removed": true
+}

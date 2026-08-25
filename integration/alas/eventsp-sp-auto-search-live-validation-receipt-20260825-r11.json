@@ -1,0 +1,362 @@
+{
+  "budgets": {
+    "camera_positioning": 0,
+    "combat": 0,
+    "fleet_mutation": 4,
+    "grid_click": 0,
+    "recovery_total": 0,
+    "sortie": 1,
+    "stage_entry": 1,
+    "viewport_swipe": 0
+  },
+  "capability_promotion": true,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "effective_config": {
+    "event": "event_20260813_cn",
+    "mode": "normal",
+    "name": "SP",
+    "run_count": 1,
+    "use_auto_search": true
+  },
+  "event": "event_20260813_cn",
+  "event_daily_last_stage_after": null,
+  "event_sp_auto_search_evidence": {
+    "bundle": {
+      "completion_proof": {
+        "combat_auto_generation": 691127,
+        "combat_auto_proven": true,
+        "fleet1_role": "mob",
+        "fleet2_role": "boss",
+        "passive_after_sortie": true,
+        "result_exit_receipt": {
+          "bounds": {
+            "bottom": 654.3,
+            "left": 368.53,
+            "right": 524.523,
+            "top": 597.287
+          },
+          "capability_id": null,
+          "generation": 691163,
+          "path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+          "point": {
+            "x": 446.527,
+            "y": 625.793
+          },
+          "policy_sha256": null,
+          "semantic_id": "reward/campaign-total/exit"
+        },
+        "result_generation": 691162,
+        "result_path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+        "stage_code": "sp",
+        "waited_seconds": 315.0
+      },
+      "integrity_errors": [],
+      "mode": "normal",
+      "owner": "EventSp",
+      "sortie_proof": {
+        "initial_fleets": [
+          1,
+          2,
+          0
+        ],
+        "map_generation": 687952,
+        "map_root_path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)",
+        "mutation_semantic_ids": [],
+        "oil_before_sortie": 5183,
+        "prepared_fleets": [
+          1,
+          2,
+          0
+        ],
+        "requested_fleets": [
+          1,
+          2,
+          0
+        ],
+        "required_oil": 20,
+        "sortie_generation": 687801,
+        "stage_code": "sp"
+      },
+      "stage_code": "sp",
+      "transaction_id": 1
+    },
+    "completion": {
+      "combat_auto_generation": 691127,
+      "combat_auto_proven": true,
+      "fleet1_role": "mob",
+      "fleet2_role": "boss",
+      "passive_after_sortie": true,
+      "result_exit_receipt": {
+        "bounds": {
+          "bottom": 654.3,
+          "left": 368.53,
+          "right": 524.523,
+          "top": 597.287
+        },
+        "capability_id": null,
+        "generation": 691163,
+        "path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+        "point": {
+          "x": 446.527,
+          "y": 625.793
+        },
+        "policy_sha256": null,
+        "semantic_id": "reward/campaign-total/exit"
+      },
+      "result_generation": 691162,
+      "result_path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonExit",
+      "stage_code": "sp",
+      "waited_seconds": 315.0
+    },
+    "final_attempt": {
+      "generation": 691263,
+      "path": "UICamera/Canvas/UIMain/LevelMainScene(Clone)/LevelSelectSPFullUI(Clone)/Battle/Nodes/Chapter_2050041/main/triesLimit/Text",
+      "raw_text": "<color=#FF5C5CFF>0/1</color>",
+      "text": "0/1"
+    },
+    "sortie": {
+      "initial_fleets": [
+        1,
+        2,
+        0
+      ],
+      "map_generation": 687952,
+      "map_root_path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)",
+      "mutation_semantic_ids": [],
+      "oil_before_sortie": 5183,
+      "prepared_fleets": [
+        1,
+        2,
+        0
+      ],
+      "requested_fleets": [
+        1,
+        2,
+        0
+      ],
+      "required_oil": 20,
+      "sortie_generation": 687801,
+      "stage_code": "sp"
+    }
+  },
+  "executed": true,
+  "final_surface": {
+    "campaign_map": false,
+    "event_page": true,
+    "main_page": false
+  },
+  "finished_at": "2026-08-25T13:03:57.590806Z",
+  "login_recovery_performed": false,
+  "materialized_alas": {
+    "canonical_source_sha256": "d65605da61567ea5713e23269ddaa5cd490dcec8db20e96fec79696dff75c622",
+    "capability_id": "alas.eventsp.materialized-fleet-rollback-guard/v4",
+    "load_count": 1,
+    "loader_id": "verified-canonical-source-bytes/v3",
+    "module_name": "module.map.map_operation",
+    "proof": {
+      "canonical_source_sha256": "d65605da61567ea5713e23269ddaa5cd490dcec8db20e96fec79696dff75c622",
+      "capability_id": "alas.eventsp.materialized-fleet-rollback-guard/v4",
+      "relative_path": "module/map/map_operation.py",
+      "schema": "alas-headless.materialized-alas-proof/v3",
+      "semantic_branch_sha256": "0503d9e7e30f7b8665be265cef3f586b063ea7783cffbd63d02f763c7aac3614"
+    },
+    "relative_path": "module/map/map_operation.py",
+    "schema": "alas-headless.materialized-alas-loaded/v3",
+    "semantic_branch_sha256": "0503d9e7e30f7b8665be265cef3f586b063ea7783cffbd63d02f763c7aac3614",
+    "support_classification": "fully_qualified_baseline"
+  },
+  "mode": "normal",
+  "observer": {
+    "button_count": 13,
+    "generation": 691261,
+    "scene_handle": -76
+  },
+  "orphan_result_recovery_count": 0,
+  "passed": true,
+  "preparation_recovery_count": 0,
+  "qualification_stop": null,
+  "raw_input_fallback_used": false,
+  "recovery_total": 0,
+  "run_count_after": 0,
+  "run_count_before": 1,
+  "run_error": null,
+  "run_result": true,
+  "scheduler_command": "EventSp",
+  "scheduler_enabled_after": true,
+  "schema": "alas-headless.event-task-live-validation/v1",
+  "serial": "emulator-5580",
+  "stage": "SP",
+  "started_at": "2026-08-25T12:55:49.767526Z",
+  "starting_surface": {
+    "campaign_map": false,
+    "event_page": false,
+    "generation": 685303,
+    "main_page": true
+  },
+  "task": "EventSp",
+  "upstream_invocation_mode": "normal",
+  "use_auto_search": true,
+  "validation_errors": [],
+  "worker_cleanup": {
+    "actions": [
+      "semantic_session_close",
+      "cwd_restore",
+      "temp_config_deferred_to_parent",
+      "environment_restore",
+      "temp_config_state_captured"
+    ],
+    "completed": true,
+    "config_state": {
+      "attributes": 32,
+      "exists": true,
+      "identity": {
+        "file_id": 9570149208162552,
+        "volume_serial": 136308236
+      },
+      "is_directory": false,
+      "is_reparse_point": false,
+      "link_count": 1,
+      "marker_error": null,
+      "marker_verified": true,
+      "size": 50548
+    },
+    "errors": [],
+    "temp_config_path": "H:\\program\\AzurLaneAutoScript-eventsp-live-r10-20260825\\config\\_codex_event_live_eventsp_11efbbed60234aed872099dae6044fcf.json",
+    "temp_config_present_after": true
+  },
+  "execution_state": "finished",
+  "supervision": {
+    "binding": {
+      "schema": "alas-headless.runner-worker-binding/v2",
+      "run_id": "11efbbed60234aed872099dae6044fcf",
+      "token_digest": "4d6ba318eef91fc7bbcaf1c3bd0b92b6b3031114c038e47484bb5bd1f88f953f",
+      "task": "EventSp",
+      "stage": "SP",
+      "event": "event_20260813_cn",
+      "deadline_seconds": 900,
+      "parent_pid": 38572,
+      "parent_identity": "38572:134321361482407895",
+      "worker_pid": 42960,
+      "config_path": "H:\\program\\AzurLaneAutoScript-eventsp-live-r10-20260825\\config\\_codex_event_live_eventsp_11efbbed60234aed872099dae6044fcf.json",
+      "control_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-edav0din\\worker-control.json",
+      "result_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-edav0din\\worker-result.json",
+      "cleanup_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-edav0din\\worker-cleanup.json",
+      "lease_path": "E:\\CacheVault\\Temp\\alas-eventsp-runner-edav0din\\forward-lease.json"
+    },
+    "run_id": "11efbbed60234aed872099dae6044fcf",
+    "total_deadline_seconds": 900,
+    "deadline_triggered": false,
+    "interrupted": false,
+    "termination_mode": "completed",
+    "worker_returncode": 0,
+    "cooperative_stop_requested": false,
+    "forced_worker_terminate": false,
+    "forced_worker_kill": false,
+    "termination_confirmed": true,
+    "lifecycle_errors": [],
+    "worker_cleanup": {
+      "actions": [
+        "semantic_session_close",
+        "cwd_restore",
+        "temp_config_deferred_to_parent",
+        "environment_restore",
+        "temp_config_state_captured"
+      ],
+      "completed": true,
+      "config_state": {
+        "attributes": 32,
+        "exists": true,
+        "identity": {
+          "file_id": 9570149208162552,
+          "volume_serial": 136308236
+        },
+        "is_directory": false,
+        "is_reparse_point": false,
+        "link_count": 1,
+        "marker_error": null,
+        "marker_verified": true,
+        "size": 50548
+      },
+      "errors": [],
+      "temp_config_path": "H:\\program\\AzurLaneAutoScript-eventsp-live-r10-20260825\\config\\_codex_event_live_eventsp_11efbbed60234aed872099dae6044fcf.json",
+      "temp_config_present_after": true
+    },
+    "parent_cleanup": {
+      "completed": true,
+      "actions": [
+        "observer_forward_already_absent",
+        "config_removed_by_validated_handle",
+        "result_removed",
+        "cleanup_removed",
+        "lease_removed",
+        "control_removed_after_config",
+        "internal_control_directory_removed"
+      ],
+      "blockers": [],
+      "details": {
+        "config_path": "H:\\program\\AzurLaneAutoScript-eventsp-live-r10-20260825\\config\\_codex_event_live_eventsp_11efbbed60234aed872099dae6044fcf.json",
+        "forward": {
+          "source": "lease",
+          "already_absent": true,
+          "record": null
+        },
+        "config_state": {
+          "exists": true,
+          "identity": {
+            "volume_serial": 136308236,
+            "file_id": 9570149208162552
+          },
+          "attributes": 32,
+          "link_count": 1,
+          "size": 50548,
+          "is_directory": false,
+          "is_reparse_point": false,
+          "marker_verified": true,
+          "marker_error": null
+        }
+      }
+    },
+    "materialization_control": {
+      "schema": "alas-headless.materialized-alas-control/v4",
+      "run_id": "11efbbed60234aed872099dae6044fcf",
+      "task": "EventSp",
+      "stage": "SP",
+      "event": "event_20260813_cn",
+      "deadline_seconds": 900,
+      "parent_pid": 38572,
+      "alas_root": "H:\\program\\AzurLaneAutoScript-eventsp-live-r10-20260825",
+      "proof": {
+        "schema": "alas-headless.materialized-alas-proof/v3",
+        "capability_id": "alas.eventsp.materialized-fleet-rollback-guard/v4",
+        "relative_path": "module/map/map_operation.py",
+        "canonical_source_sha256": "d65605da61567ea5713e23269ddaa5cd490dcec8db20e96fec79696dff75c622",
+        "semantic_branch_sha256": "0503d9e7e30f7b8665be265cef3f586b063ea7783cffbd63d02f763c7aac3614"
+      }
+    },
+    "seed_source": {
+      "schema": "alas-headless.runner-seed-source/v1",
+      "capability": "alas.eventsp.pinned-template/v1",
+      "seed_name": "template",
+      "path": "H:\\program\\AzurLaneAutoScript-eventsp-live-r10-20260825\\config\\template.json",
+      "root_path": "H:\\program\\AzurLaneAutoScript-eventsp-live-r10-20260825\\config",
+      "root_identity": {
+        "volume_serial": 136308236,
+        "file_id": 67553994410942446
+      },
+      "identity": {
+        "volume_serial": 136308236,
+        "file_id": 67835469387653112
+      },
+      "size": 50013,
+      "sha256": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced"
+    },
+    "seed_support_classification": "fully_qualified_baseline"
+  },
+  "materialized_alas_admission": {
+    "schema": "alas-headless.materialized-alas-proof/v3",
+    "capability_id": "alas.eventsp.materialized-fleet-rollback-guard/v4",
+    "relative_path": "module/map/map_operation.py",
+    "canonical_source_sha256": "d65605da61567ea5713e23269ddaa5cd490dcec8db20e96fec79696dff75c622",
+    "semantic_branch_sha256": "0503d9e7e30f7b8665be265cef3f586b063ea7783cffbd63d02f763c7aac3614"
+  }
+}

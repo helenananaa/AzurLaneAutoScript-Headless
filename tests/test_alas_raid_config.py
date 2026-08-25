@@ -15,6 +15,7 @@ from scripts.python.verify_alas_raid_config import verify_clean_upstream
 
 ROOT = Path(__file__).resolve().parents[1]
 PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
+RAID_REMAIN_PATCH = ROOT / "integration/alas/series/0450-raid-daily-remain-port.patch"
 
 
 class AlasRaidConfigTests(unittest.TestCase):
@@ -60,6 +61,22 @@ class AlasRaidConfigTests(unittest.TestCase):
             patch.index("reward_config = validate_alas_reward_config("),
         )
         self.assertLess(patch.rindex("validate_alas_raid_use_ticket("), patch.index("if self.appear(TICKET_USE_CONFIRM"))
+
+    def test_daily_remain_patch_preserves_pixel_mode_and_uses_semantic_port(self):
+        patch = RAID_REMAIN_PATCH.read_text(encoding="utf-8")
+        self.assertIn("semantic_adapter.raid_remain(", patch)
+        self.assertIn("event=self.config.Campaign_Event", patch)
+        self.assertIn("mode=mode", patch)
+        self.assertIn("+                ocr = raid_ocr(", patch)
+        self.assertIn("+                result = ocr.ocr(self.device.image)", patch)
+        self.assertIn(
+            "if semantic_adapter is None and self.appear_then_click(RAID_REWARDS",
+            patch,
+        )
+        self.assertLess(
+            patch.index("if semantic_adapter is not None:"),
+            patch.index("+                ocr = raid_ocr("),
+        )
 
     def test_sources_compile(self):
         for relative in (

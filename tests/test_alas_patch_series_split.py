@@ -265,6 +265,11 @@ FLOW_PATHS = {
         "module/map/fleet.py",
         "module/map/map.py",
     },
+    "0460-freebies-battle-pass-port.patch": {
+        "module/freebies/battle_pass.py",
+        "module/freebies/data_key.py",
+        "module/freebies/supply_pack.py",
+    },
 }
 
 OVERRIDE_PATHS = {
@@ -474,6 +479,9 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                         "module/campaign/campaign_base.py",
                         "module/combat/combat.py",
                         "module/map/fleet.py",
+                    },
+                    "0460-freebies-battle-pass-port.patch": {
+                        "module/freebies/supply_pack.py",
                     },
                 }.get(name, set())
                 self.assertEqual(promoted & actual, expected_overlap)

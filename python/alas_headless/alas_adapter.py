@@ -394,6 +394,7 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "COMMISSION_CHECK": "commission/page/back",
     "REWARD_CHECK": "reward/page/back",
     "REWARD_GOTO_MAIN": "reward/page/back",
+    "REWARD_GOTO_BATTLE_PASS": "reward/battle-pass/enter",
     "META_ENTRANCE": "reward/meta/enter",
     "META_CHECK": "meta/page/back",
     "ASH_SHOWDOWN": "meta/page/back",
@@ -449,6 +450,28 @@ MISSION_VIRTUAL_RESOURCES = frozenset(
         "GET_SHIP",
         "GUILD_POPUP_CONFIRM",
         "GUILD_POPUP_CANCEL",
+    }
+)
+BATTLE_PASS_VIRTUAL_RESOURCES = frozenset(
+    {
+        "BATTLE_PASS_CHECK",
+        "REWARD_RECEIVE",
+        "REWARD_RECEIVE_SP",
+        "REWARD_RECEIVE_WHITE",
+        "PURCHASE_POPUP",
+        "POPUP_CONFIRM_WHITE_BATTLEPASS",
+    }
+)
+SUPPLY_PACK_VIRTUAL_RESOURCES = frozenset(
+    {"SUPPLY_PACK_CHECK", "FREE_SUPPLY_PACK", "BUY_CONFIRM", "SHOP_OCR_OIL_CHECK"}
+)
+DATA_KEY_VIRTUAL_RESOURCES = frozenset(
+    {
+        "WAR_ARCHIVES_CHECK",
+        "DATA_KEY_COLLECTED",
+        "DATA_KEY_COLLECT",
+        "POPUP_CONFIRM_DATA_KEY_LIMIT",
+        "POPUP_CANCEL_DATA_KEY_LIMIT",
     }
 )
 MISSION_CLICK_RESOURCES = frozenset(
@@ -697,6 +720,8 @@ PAGE_VIRTUAL_RESOURCES = frozenset(
         "WAR_ARCHIVES_CHECK",
         "DATA_KEY_COLLECTED",
         "DATA_KEY_COLLECT",
+        "BATTLE_PASS_CHECK",
+        "SHOP_CHECK",
     }
 )
 RESEARCH_VIRTUAL_RESOURCES = frozenset(
@@ -978,6 +1003,22 @@ class _BuildFlowContext:
 class _SupplyPackFlowContext:
     cached_oil: Optional[int] = None
     gift_pack_selected: bool = False
+    passive_transition_until: float = 0.0
+
+
+@dataclass
+class _BattlePassFlowContext:
+    entrance_receipt: Optional[ActionReceipt] = None
+    claim_receipts: List[ActionReceipt] = field(default_factory=list)
+    home_receipt: Optional[ActionReceipt] = None
+    passive_transition_until: float = 0.0
+
+
+@dataclass
+class _DataKeyFlowContext:
+    force_collect: bool = False
+    collect_receipt: Optional[ActionReceipt] = None
+    confirmation_receipt: Optional[ActionReceipt] = None
     passive_transition_until: float = 0.0
 
 
@@ -1268,6 +1309,8 @@ class AlasSemanticAdapter:
         self._dorm_context: Optional[_DormFlowContext] = None
         self._build_context: Optional[_BuildFlowContext] = None
         self._supply_pack_context: Optional[_SupplyPackFlowContext] = None
+        self._battle_pass_context: Optional[_BattlePassFlowContext] = None
+        self._data_key_context: Optional[_DataKeyFlowContext] = None
         self._minigame_context: Optional[_MinigameFlowContext] = None
         self._campaign_context: Optional[_CampaignFlowContext] = None
         self._gems_farming_hard_profile: Optional[
@@ -2492,6 +2535,9 @@ class AlasSemanticAdapter:
             or name in MINIGAME_VIRTUAL_RESOURCES
             or name in BUILD_VIRTUAL_RESOURCES
             or name in TACTICAL_VIRTUAL_RESOURCES
+            or name in BATTLE_PASS_VIRTUAL_RESOURCES
+            or name in SUPPLY_PACK_VIRTUAL_RESOURCES
+            or name in DATA_KEY_VIRTUAL_RESOURCES
             or CAMPAIGN_FLEET_BAR_PATTERN.fullmatch(name)
             or MISSION_NAVBAR_PATTERN.fullmatch(name)
             or COMMISSION_ROW_PATTERN.fullmatch(name)
@@ -2781,6 +2827,48 @@ class AlasSemanticAdapter:
         self._supply_pack_context = _SupplyPackFlowContext(
             passive_transition_until=time.monotonic() + 20.0,
         )
+
+    def begin_battle_pass(self) -> None:
+        self._package_gate()
+        if self._login_flow.active or any(
+            context is not None
+            for context in (
+                self._mission_context,
+                self._mail_context,
+                self._commission_context,
+                self._research_context,
+                self._dorm_context,
+                self._build_context,
+                self._supply_pack_context,
+                self._battle_pass_context,
+                self._minigame_context,
+                self._campaign_context,
+            )
+        ):
+            raise SemanticGateClosed("nested semantic ALAS flow is not allowed")
+        self._battle_pass_context = _BattlePassFlowContext(
+            passive_transition_until=time.monotonic() + 20.0,
+        )
+
+    def end_battle_pass(self) -> None:
+        self._battle_pass_context = None
+
+    def battle_pass_active(self) -> bool:
+        return self._battle_pass_context is not None
+
+    def begin_data_key(self, *, force_collect: bool) -> None:
+        self._package_gate()
+        if not isinstance(force_collect, bool):
+            raise SemanticGateClosed("DataKey.ForceCollect must be a bool")
+        if self._data_key_context is not None:
+            raise SemanticGateClosed("nested Data Key flow is not allowed")
+        self._data_key_context = _DataKeyFlowContext(
+            force_collect=force_collect,
+            passive_transition_until=time.monotonic() + 20.0,
+        )
+
+    def end_data_key(self) -> None:
+        self._data_key_context = None
 
     def end_supply_pack(self) -> None:
         self._supply_pack_context = None
@@ -5119,6 +5207,19 @@ class AlasSemanticAdapter:
             )
         ):
             return True
+        if (
+            self._data_key_context is not None
+        ):
+            # DataKey.ui_ensure enumerates the complete upstream page registry
+            # and its duration depends on observer latency.  The active task
+            # context is the bounded owner: unknown presence probes are safe
+            # absences, while every click remains explicitly mapped.
+            return True
+        if self._battle_pass_context is not None:
+            # BattlePass.ui_ensure uses the same complete page registry.  Its
+            # task context owns passive enumeration regardless of observer
+            # speed; all input remains restricted to reviewed resources.
+            return True
         return False
 
     def begin_operation_siren_startup_recovery(
@@ -5292,6 +5393,10 @@ class AlasSemanticAdapter:
             # the typed room identity rather than enabled(), which correctly
             # remains false for the raw target.
             targets.append("game-room/home")
+        if self.oracle.battle_pass_page_visible():
+            targets.append("battle-pass/home")
+        if self.oracle.recommendation_shop_visible():
+            targets.append("shop/home")
         if self.oracle.campaign_menu_is_entry() and self.oracle.enabled(
             "campaign-menu/page/back"
         ):
@@ -5910,6 +6015,48 @@ class AlasSemanticAdapter:
                     *MAIL_VIRTUAL_RESOURCES,
                 ):
                     return False
+        if self._data_key_context is not None and name in (
+            "GET_ITEMS_1",
+            "GET_ITEMS_2",
+        ):
+            return self._award_close_target() is not None
+        if self._data_key_context is not None and name in (
+            "POPUP_CONFIRM",
+            "POPUP_CANCEL",
+            "POPUP_CONFIRM_DATA_KEY_LIMIT",
+            "POPUP_CANCEL_DATA_KEY_LIMIT",
+        ):
+            visible = self.oracle.data_key_limit_prompt_visible()
+            if not visible:
+                return False
+            if name == "POPUP_CANCEL":
+                return True
+            context = self._data_key_context
+            return bool(
+                context.force_collect
+                and context.collect_receipt is not None
+                and context.confirmation_receipt is None
+            )
+        if self._battle_pass_context is not None:
+            if name == "REWARD_CHECK":
+                return self.oracle.enabled("reward/page/back")
+            if name == "REWARD_GOTO_BATTLE_PASS":
+                return self.oracle.battle_pass_reward_available()
+            if name == "BATTLE_PASS_CHECK":
+                return self.oracle.battle_pass_page_visible()
+            if name == "REWARD_RECEIVE_WHITE":
+                return self.oracle.battle_pass_claim_all_available()
+            if name in (
+                "REWARD_RECEIVE",
+                "REWARD_RECEIVE_SP",
+                "PURCHASE_POPUP",
+                "POPUP_CONFIRM_WHITE_BATTLEPASS",
+                "POPUP_CONFIRM",
+                "POPUP_CANCEL",
+            ):
+                return False
+            if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
+                return self._award_close_target() is not None
         if self._supply_pack_context is not None:
             context = self._supply_pack_context
             if name == "SHOP_CHECK":
@@ -5935,8 +6082,6 @@ class AlasSemanticAdapter:
             if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
                 return self._award_close_target() is not None
             if name in ("BUY_CONFIRM", "POPUP_CONFIRM", "POPUP_CANCEL"):
-                return False
-            if semantic_id is None:
                 return False
         if (
             name not in ("LOGIN_ANNOUNCE", "LOGIN_ANNOUNCE_2")
@@ -6068,11 +6213,35 @@ class AlasSemanticAdapter:
             return False
         if (
             semantic_id is None
-            and name not in ("WAR_ARCHIVES_CHECK", "DATA_KEY_COLLECTED", "DATA_KEY_COLLECT")
+            and name not in DATA_KEY_VIRTUAL_RESOURCES
             and self.oracle.war_archives_page_visible()
         ):
             # The exact archive root proves unrelated generic page probes
             # absent until Page enumeration reaches WAR_ARCHIVES_CHECK.
+            return False
+        if (
+            semantic_id is None
+            and name not in ("BATTLE_PASS_CHECK", "GOTO_MAIN")
+            and name not in BATTLE_PASS_VIRTUAL_RESOURCES
+            and self.oracle.battle_pass_page_visible()
+        ):
+            # WorldCruiseUI is an exact full-screen page.  Keep unrelated
+            # pixel-only page probes absent until ALAS reaches its own page
+            # check; navigation still uses the reviewed top-right home.
+            return False
+        if (
+            semantic_id is None
+            and name != "SHOP_CHECK"
+            and name not in SUPPLY_PACK_VIRTUAL_RESOURCES
+            and (
+                self.oracle.recommendation_shop_visible()
+                or self.oracle.gift_pack_page_visible()
+            )
+        ):
+            # The exact shop/gift-pack surface proves unrelated Page.iter_pages
+            # probes absent even when another task inherited this page.  This
+            # is presence-only classification: supply-pack input remains
+            # limited to the reviewed zero-price card and its own context.
             return False
         if (
             self._mail_context is not None
@@ -6217,6 +6386,7 @@ class AlasSemanticAdapter:
                 and self._minigame_context is None
                 and self._build_context is None
                 and self._campaign_context is None
+                and self._data_key_context is None
             ):
                 raise AlasSemanticUnmapped(
                     "ALAS resource is not semantically mapped: {0}".format(name)
@@ -6263,6 +6433,17 @@ class AlasSemanticAdapter:
                 and time.monotonic()
                 <= self._build_context.passive_transition_until
             ):
+                return False
+            if (
+                self._data_key_context is not None
+            ):
+                # DataKey owns one ALAS page-enumeration/navigation run.  Its
+                # lifetime, rather than a machine-speed timeout, scopes passive
+                # unknown probes; unmapped input is still rejected by click().
+                return False
+            if self._battle_pass_context is not None:
+                # The BattlePass task lifetime scopes only presence probes;
+                # no unknown resource becomes eligible for click().
                 return False
             if (
                 self._campaign_context is not None
@@ -6341,11 +6522,31 @@ class AlasSemanticAdapter:
             if self.oracle.meta_assist_sortie_prompt_visible():
                 return True
         if name in PAGE_VIRTUAL_RESOURCES:
+            if name == "BATTLE_PASS_CHECK":
+                return self.oracle.battle_pass_page_visible()
+            if name == "SHOP_CHECK":
+                return self.oracle.recommendation_shop_visible()
             if name == "WAR_ARCHIVES_CHECK":
                 return self.oracle.war_archives_page_visible()
             if name == "DATA_KEY_COLLECTED":
+                if (
+                    self._data_key_context is not None
+                    and self._data_key_context.collect_receipt is not None
+                    and time.monotonic()
+                    <= self._data_key_context.passive_transition_until
+                    and not self.oracle.war_archives_page_visible()
+                ):
+                    return False
                 return self.oracle.war_archives_data_key_collected()
             if name == "DATA_KEY_COLLECT":
+                if (
+                    self._data_key_context is not None
+                    and self._data_key_context.collect_receipt is not None
+                    and time.monotonic()
+                    <= self._data_key_context.passive_transition_until
+                    and not self.oracle.war_archives_page_visible()
+                ):
+                    return False
                 return not self.oracle.war_archives_data_key_collected()
             if name == "EXERCISE_CHECK":
                 if self.oracle.exercise_page_visible():
@@ -8849,6 +9050,10 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("hard quota used outside hard campaign flow")
         return self.oracle.campaign_hard_remain()
 
+    def raid_remain(self, event: str, mode: str) -> int:
+        self._package_gate()
+        return self.oracle.raid_remain(event=event, mode=mode)
+
     def campaign_map_formation(self) -> str:
         self._package_gate()
         self._require_campaign_context()
@@ -11029,6 +11234,53 @@ class AlasSemanticAdapter:
         campaign_stage_code = getattr(
             button, "semantic_campaign_stage_code", None
         )
+        if name == "DATA_KEY_COLLECT":
+            if self._data_key_context is not None:
+                target = self._award_close_target()
+                if target is not None:
+                    return self.oracle.click(target)
+                receipt = self.oracle.click_war_archives_data_key_collect()
+                self._data_key_context.collect_receipt = receipt
+                self._data_key_context.passive_transition_until = (
+                    time.monotonic() + 60.0
+                )
+                return receipt
+            return self.oracle.click_war_archives_data_key_collect()
+        if self._data_key_context is not None and name in (
+            "GET_ITEMS_1",
+            "GET_ITEMS_2",
+        ):
+            target = self._award_close_target()
+            if target is None:
+                raise SemanticGateClosed("Data Key reward popup is absent")
+            receipt = self.oracle.click(target)
+            self._data_key_context.passive_transition_until = (
+                time.monotonic() + 60.0
+            )
+            return receipt
+        if self._data_key_context is not None and name in (
+            "POPUP_CONFIRM",
+            "POPUP_CANCEL",
+            "POPUP_CONFIRM_DATA_KEY_LIMIT",
+            "POPUP_CANCEL_DATA_KEY_LIMIT",
+        ):
+            context = self._data_key_context
+            if not self.oracle.data_key_limit_prompt_visible():
+                raise SemanticGateClosed("data-key limit prompt is absent")
+            if name in ("POPUP_CONFIRM", "POPUP_CONFIRM_DATA_KEY_LIMIT"):
+                if not context.force_collect or context.collect_receipt is None:
+                    raise SemanticGateClosed(
+                        "data-key limit confirmation requires ForceCollect and a preceding claim"
+                    )
+                if context.confirmation_receipt is not None:
+                    return context.confirmation_receipt
+                receipt = self.oracle.click_data_key_limit_choice(confirm=True)
+                context.confirmation_receipt = receipt
+                context.passive_transition_until = time.monotonic() + 60.0
+                return receipt
+            receipt = self.oracle.click_data_key_limit_choice(confirm=False)
+            context.passive_transition_until = time.monotonic() + 60.0
+            return receipt
         if name in LOGIN_ACTION_TARGETS or (
             self._login_flow.active and name in ("POPUP_CONFIRM", "GOTO_MAIN")
         ):
@@ -11089,6 +11341,34 @@ class AlasSemanticAdapter:
         build_side_navbar_match = BUILD_SIDE_NAVBAR_PATTERN.fullmatch(name)
         build_pool_navbar_match = BUILD_POOL_NAVBAR_PATTERN.fullmatch(name)
         campaign_fleet_bar_match = CAMPAIGN_FLEET_BAR_PATTERN.fullmatch(name)
+        if self._battle_pass_context is not None:
+            context = self._battle_pass_context
+            if name == "REWARD_GOTO_BATTLE_PASS":
+                receipt = self.oracle.click_battle_pass_entrance()
+                context.entrance_receipt = receipt
+                context.passive_transition_until = time.monotonic() + 20.0
+                return receipt
+            if name == "REWARD_RECEIVE_WHITE":
+                receipt = self.oracle.click_battle_pass_claim_all()
+                context.claim_receipts.append(receipt)
+                context.passive_transition_until = time.monotonic() + 20.0
+                return receipt
+            if name in ("GET_ITEMS_1", "GET_ITEMS_2"):
+                target = self._award_close_target()
+                if target is None:
+                    raise SemanticGateClosed("Battle Pass reward popup is absent")
+                return self.oracle.click(target)
+            if name in (
+                "REWARD_RECEIVE",
+                "REWARD_RECEIVE_SP",
+                "PURCHASE_POPUP",
+                "POPUP_CONFIRM_WHITE_BATTLEPASS",
+                "POPUP_CONFIRM",
+                "POPUP_CANCEL",
+            ):
+                raise SemanticGateClosed(
+                    "Battle Pass input is outside the reviewed ordinary claim path"
+                )
         if self._supply_pack_context is not None:
             context = self._supply_pack_context
             if name == "SHOP_GOTO_SUPPLY_PACK":
@@ -11101,9 +11381,13 @@ class AlasSemanticAdapter:
                 if target is None:
                     raise SemanticGateClosed("supply-pack reward popup is absent")
                 return self.oracle.click(target)
-            if name in ("FREE_SUPPLY_PACK", "BUY_CONFIRM"):
+            if name == "FREE_SUPPLY_PACK":
+                receipt = self.oracle.click_free_weekly_supply_pack()
+                context.passive_transition_until = time.monotonic() + 20.0
+                return receipt
+            if name == "BUY_CONFIRM":
                 raise SemanticGateClosed(
-                    "free weekly supply pack purchase is unavailable"
+                    "free weekly supply pack confirmation is unavailable"
                 )
         if name == "MISSION_OVERVIEW_ACCEPT_SINGLE":
             return self.oracle.click_operation_siren_mission_overview_accept()
@@ -12191,6 +12475,17 @@ class AlasSemanticAdapter:
                 )
             target = self._goto_main_target()
             if target is None:
+                context = self._battle_pass_context
+                if (
+                    context is not None
+                    and context.home_receipt is not None
+                    and time.monotonic() <= context.passive_transition_until
+                ):
+                    # ui_goto may reissue GOTO_MAIN after the clicked page has
+                    # unmounted but before the main root is fully observable.
+                    # Return the proven receipt instead of issuing a second
+                    # input into an unidentified transition frame.
+                    return context.home_receipt
                 if self.oracle.main_page_visible():
                     return self.oracle.main_page_receipt()
                 raise SemanticGateClosed("GOTO_MAIN has no reviewed page target")
@@ -12200,6 +12495,30 @@ class AlasSemanticAdapter:
                 )
             if target == "meta/home":
                 return self._record_mission_transition(self.oracle.click_meta_home())
+            if target == "battle-pass/home":
+                context = self._battle_pass_context
+                if (
+                    context is not None
+                    and context.home_receipt is not None
+                    and time.monotonic() <= context.passive_transition_until
+                ):
+                    return context.home_receipt
+                receipt = self._record_mission_transition(
+                    self.oracle.click_battle_pass_home()
+                )
+                if context is not None:
+                    context.home_receipt = receipt
+                    context.passive_transition_until = time.monotonic() + 20.0
+                return receipt
+            if target == "shop/home":
+                receipt = self._record_mission_transition(
+                    self.oracle.click_recommendation_shop_home()
+                )
+                context = self._battle_pass_context
+                if context is not None:
+                    context.home_receipt = receipt
+                    context.passive_transition_until = time.monotonic() + 20.0
+                return receipt
             if (
                 self._research_context is not None
                 and target in ("research/page/back", "research-menu/page/back")
@@ -12214,7 +12533,12 @@ class AlasSemanticAdapter:
                 receipt = self._record_mission_transition(self.oracle.click(target))
                 context.navigation_receipts[target] = receipt
                 return receipt
-            return self._record_mission_transition(self.oracle.click(target))
+            receipt = self._record_mission_transition(self.oracle.click(target))
+            context = self._battle_pass_context
+            if context is not None:
+                context.home_receipt = receipt
+                context.passive_transition_until = time.monotonic() + 20.0
+            return receipt
         if self._mail_context is not None and name == "MAIL_MANAGE":
             if self.oracle.enabled("mail/manage/back"):
                 return self.oracle.click("mail/manage/back")
@@ -12303,6 +12627,14 @@ class AlasSemanticAdapter:
             if semantic_id == "campaign-menu/exercise":
                 return self.oracle.click_campaign_exercise_entrance()
             if semantic_id == "campaign-menu/archive":
+                if self._data_key_context is not None:
+                    target = self._award_close_target()
+                    if target is not None:
+                        receipt = self.oracle.click(target)
+                        self._data_key_context.passive_transition_until = (
+                            time.monotonic() + 60.0
+                        )
+                        return receipt
                 return self.oracle.click_campaign_archive_entrance()
             if semantic_id == "campaign-menu/os":
                 if (
@@ -15955,6 +16287,18 @@ class AlasSemanticSession:
             )
             and not (
                 self.adapter is not None
+                and name in BATTLE_PASS_VIRTUAL_RESOURCES
+            )
+            and not (
+                self.adapter is not None
+                and name in SUPPLY_PACK_VIRTUAL_RESOURCES
+            )
+            and not (
+                self.adapter is not None
+                and name in DATA_KEY_VIRTUAL_RESOURCES
+            )
+            and not (
+                self.adapter is not None
                 and name in COMMISSION_CLICK_RESOURCES
             )
             and MISSION_NAVBAR_PATTERN.fullmatch(name) is None
@@ -16280,6 +16624,25 @@ class AlasSemanticSession:
     def begin_supply_pack(self) -> None:
         self.open().begin_supply_pack()
 
+    def begin_battle_pass(self) -> None:
+        self.open().begin_battle_pass()
+
+    def end_battle_pass(self) -> None:
+        if self.adapter is not None:
+            self.adapter.end_battle_pass()
+
+    def battle_pass_active(self) -> bool:
+        return bool(
+            self.adapter is not None and self.adapter.battle_pass_active()
+        )
+
+    def begin_data_key(self, *, force_collect: bool) -> None:
+        self.open().begin_data_key(force_collect=force_collect)
+
+    def end_data_key(self) -> None:
+        if self.adapter is not None:
+            self.adapter.end_data_key()
+
     def end_supply_pack(self) -> None:
         if self.adapter is not None:
             self.adapter.end_supply_pack()
@@ -16451,6 +16814,9 @@ class AlasSemanticSession:
 
     def campaign_hard_remain(self) -> int:
         return self.open().campaign_hard_remain()
+
+    def raid_remain(self, event: str, mode: str) -> int:
+        return self.open().raid_remain(event=event, mode=mode)
 
     @staticmethod
     def _login_probe_is_transient(adapter: AlasSemanticAdapter, exc: Exception) -> bool:
