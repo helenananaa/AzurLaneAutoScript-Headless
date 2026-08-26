@@ -160,7 +160,7 @@ diff --git a/module/daemon/daemon.py b/module/daemon/daemon.py
 index 7bfc8531..143cc0c2 100644
 --- a/module/daemon/daemon.py
 +++ b/module/daemon/daemon.py
-@@ -6,59 +6,78 @@ from module.map.map_operation import FLEET_PREPARATION, MAP_PREPARATION
+@@ -6,59 +6,117 @@ from module.map.map_operation import FLEET_PREPARATION, MAP_PREPARATION
  
  
  class AzurLaneDaemon(DaemonBase, CampaignBase):
@@ -205,10 +205,49 @@ index 7bfc8531..143cc0c2 100644
 +
 +        # Map preparation
 +        if self.config.Daemon_EnterMap:
-+            if self.appear_then_click(MAP_PREPARATION, offset=(20, 20), interval=2):
-+                return 'map_preparation'
-+            if self.appear_then_click(FLEET_PREPARATION, offset=(20, 50), interval=2):
-+                return 'fleet_preparation'
++            if semantic_adapter is not None:
++                if self.appear(MAP_PREPARATION, offset=(20, 20), interval=2):
++                    semantic_adapter.arm_daemon_campaign_map_preparation()
++                    self.device.click(MAP_PREPARATION)
++                    return 'map_preparation'
++                if self.appear(FLEET_PREPARATION, offset=(20, 50), interval=2):
++                    fleet_authorized = (
++                        semantic_adapter.authorize_campaign_fleet_preparation(
++                            self.config.Fleet_Fleet1,
++                            self.config.Fleet_Fleet2,
++                            self.config.Submarine_Fleet,
++                        )
++                    )
++                    if not fleet_authorized:
++                        return 'fleet_preparation_waiting'
++                    if semantic_adapter.campaign_fleet_preparation_required():
++                        self.fleet_preparation()
++                    semantic_adapter.confirm_campaign_fleet_selection()
++                    self.map_is_auto_search = self.config.Campaign_UseAutoSearch
++                    self.map_is_2x_book = self.config.Campaign_Use2xBook
++                    self.handle_auto_submarine_call_disable()
++                    self.handle_auto_search_setting()
++                    authorized = semantic_adapter.authorize_campaign_sortie(
++                        use_auto_search=self.config.Campaign_UseAutoSearch,
++                        use_2x_book=self.config.Campaign_Use2xBook,
++                        submarine_mode=self.config.Submarine_Mode,
++                        fleet_order=self.config.Fleet_FleetOrder,
++                    )
++                    if not authorized:
++                        return 'fleet_preparation_waiting'
++                    self.device.click(FLEET_PREPARATION)
++                    semantic_adapter.confirm_daemon_campaign_sortie()
++                    if self.config.Campaign_UseAutoSearch:
++                        semantic_adapter.wait_campaign_auto_search_completion(
++                            semantic_adapter.campaign_pre_sortie_stage_code()
++                        )
++                        return 'auto_search_complete'
++                    return 'fleet_preparation'
++            else:
++                if self.appear_then_click(MAP_PREPARATION, offset=(20, 20), interval=2):
++                    return 'map_preparation'
++                if self.appear_then_click(FLEET_PREPARATION, offset=(20, 50), interval=2):
++                    return 'fleet_preparation'
 +
 +        # Retire
 +        if self.handle_retirement():

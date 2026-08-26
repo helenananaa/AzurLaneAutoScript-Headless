@@ -6061,6 +6061,15 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
     def test_campaign_mode_switch_reports_exact_destination_without_input(self):
         adapter, oracle, _ = self.make_adapter()
+        oracle.war_archives_page_visible = Mock(
+            side_effect=SemanticGateClosed("archive snapshots are unrelated")
+        )
+        oracle.battle_pass_page_visible = Mock(
+            side_effect=SemanticGateClosed("Battle Pass snapshots are unrelated")
+        )
+        oracle.recommendation_shop_visible = Mock(
+            side_effect=SemanticGateClosed("shop snapshots are unrelated")
+        )
 
         adapter.begin_campaign_pre_sortie("12-4")
         self.assertTrue(adapter.appear(NamedButton("SWITCH_1_HARD")))
@@ -6070,6 +6079,9 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.end_campaign_pre_sortie()
 
         self.assertEqual(oracle.click_calls, [])
+        oracle.war_archives_page_visible.assert_not_called()
+        oracle.battle_pass_page_visible.assert_not_called()
+        oracle.recommendation_shop_visible.assert_not_called()
 
     def test_campaign_oil_is_typed_for_global_alas_status_probe(self):
         adapter, _, _ = self.make_adapter()
@@ -6474,6 +6486,181 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(
             adapter._action_ledger.remaining("campaign.fleet_mutation"), 0
         )
+        adapter.end_campaign_pre_sortie()
+
+    def test_daemon_sortie_reuses_exact_owned_campaign_state_without_mutation(self):
+        adapter, oracle, _ = self.make_adapter(
+            campaign_stage_entry_budget=1,
+            campaign_sortie_budget=1,
+        )
+        oracle.campaign_fleets["submarine"] = 0
+        oracle.campaign_role_tab_selected = True
+        oracle.campaign_roles = ["mob", "boss"]
+        oracle.toggle_selected_values[
+            "campaign/map-preparation/auto-search"
+        ] = True
+        oracle.campaign_state_value = SimpleNamespace(
+            generation=12,
+            chapter_name="chapter 12",
+            stages=(
+                SimpleNamespace(
+                    stage_code="12-4",
+                    button=SimpleNamespace(actionable=True),
+                ),
+            ),
+        )
+        entrance = NamedButton("12-4")
+        entrance.semantic_campaign_stage_code = "12-4"
+
+        adapter.begin_campaign_pre_sortie("12-4")
+        adapter.click(entrance)
+        self.assertTrue(adapter.arm_daemon_campaign_map_preparation())
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        self.assertTrue(
+            adapter.authorize_daemon_campaign_sortie(
+                fleet1=1,
+                fleet2=2,
+                submarine=0,
+                use_auto_search=True,
+                use_2x_book=False,
+                submarine_mode="do_not_use",
+                fleet_order="fleet1_mob_fleet2_boss",
+            )
+        )
+
+        context = adapter._campaign_context
+        self.assertEqual(context.requested_fleets, (1, 2, 0))
+        self.assertIs(context.initial_fleet_state, context.prepared_fleet_state)
+        self.assertEqual(context.required_fleet_mutations, 0)
+        self.assertEqual(
+            (context.auto_search_role_state.fleet1_role,
+             context.auto_search_role_state.fleet2_role),
+            ("mob", "boss"),
+        )
+        self.assertEqual(
+            oracle.click_calls,
+            ["campaign/stage/12-4", "campaign/map-preparation/proceed"],
+        )
+        adapter.end_campaign_pre_sortie()
+
+    def test_daemon_auto_search_sortie_proves_official_game_ownership(self):
+        adapter, oracle, _ = self.make_adapter(
+            campaign_stage_entry_budget=1,
+            campaign_sortie_budget=1,
+        )
+        oracle.campaign_fleets["submarine"] = 0
+        oracle.campaign_role_tab_selected = True
+        oracle.campaign_roles = ["mob", "boss"]
+        oracle.toggle_selected_values[
+            "campaign/map-preparation/auto-search"
+        ] = True
+        oracle.campaign_state_value = SimpleNamespace(
+            generation=12,
+            chapter_name="chapter 12",
+            stages=(
+                SimpleNamespace(
+                    stage_code="12-4",
+                    button=SimpleNamespace(actionable=True),
+                ),
+            ),
+        )
+        entrance = NamedButton("12-4")
+        entrance.semantic_campaign_stage_code = "12-4"
+
+        adapter.begin_campaign_pre_sortie("12-4")
+        adapter.click(entrance)
+        self.assertTrue(adapter.arm_daemon_campaign_map_preparation())
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        self.assertTrue(
+            adapter.authorize_daemon_campaign_sortie(
+                fleet1=1,
+                fleet2=2,
+                submarine=0,
+                use_auto_search=True,
+                use_2x_book=False,
+                submarine_mode="do_not_use",
+                fleet_order="fleet1_mob_fleet2_boss",
+            )
+        )
+        adapter.click(NamedButton("FLEET_PREPARATION"))
+        # Confirmation follows the final authorized fleet-panel setting, not
+        # the value first observed on the preceding map-preparation overlay.
+        adapter._campaign_context.daemon_auto_search_selected = False
+
+        proof = adapter.confirm_daemon_campaign_sortie()
+
+        self.assertIn("CombatUIStandard", proof.map_root_path)
+        self.assertEqual(proof.prepared_fleets, (1, 2, 0))
+        self.assertEqual(
+            oracle.click_calls[-1], "campaign/fleet-preparation/sortie"
+        )
+        adapter.end_campaign_pre_sortie()
+
+    def test_daemon_sortie_mismatch_and_zero_budget_are_observation_only(self):
+        for sortie_budget, expected_error in ((0, None), (1, "differs")):
+            with self.subTest(sortie_budget=sortie_budget):
+                adapter, oracle, _ = self.make_adapter(
+                    campaign_stage_entry_budget=1,
+                    campaign_sortie_budget=sortie_budget,
+                )
+                oracle.campaign_fleets["submarine"] = 0
+                oracle.toggle_selected_values[
+                    "campaign/map-preparation/auto-search"
+                ] = False
+                oracle.campaign_state_value = SimpleNamespace(
+                    generation=12,
+                    chapter_name="chapter 12",
+                    stages=(
+                        SimpleNamespace(
+                            stage_code="12-4",
+                            button=SimpleNamespace(actionable=True),
+                        ),
+                    ),
+                )
+                entrance = NamedButton("12-4")
+                entrance.semantic_campaign_stage_code = "12-4"
+                adapter.begin_campaign_pre_sortie("12-4")
+                adapter.click(entrance)
+                self.assertFalse(adapter.arm_daemon_campaign_map_preparation())
+                adapter.click(NamedButton("MAP_PREPARATION"))
+                calls_before = list(oracle.click_calls)
+
+                operation = lambda: adapter.authorize_daemon_campaign_sortie(
+                    fleet1=1,
+                    fleet2=0,
+                    submarine=0,
+                    use_auto_search=False,
+                    use_2x_book=False,
+                    submarine_mode="do_not_use",
+                    fleet_order="fleet1_all_fleet2_standby",
+                )
+                if expected_error is None:
+                    self.assertFalse(operation())
+                else:
+                    with self.assertRaisesRegex(SemanticGateClosed, expected_error):
+                        operation()
+                self.assertEqual(oracle.click_calls, calls_before)
+                self.assertIsNone(adapter._campaign_context.initial_fleet_state)
+                self.assertIsNone(adapter._campaign_context.prepared_fleet_state)
+                self.assertIsNone(adapter._campaign_context.requested_fleets)
+                adapter.end_campaign_pre_sortie()
+
+    def test_daemon_preparation_hides_unrelated_probe_before_page_sampling(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_preparation_value = SimpleNamespace(kind="map")
+        oracle.battle_pass_page_visible = Mock(
+            side_effect=SemanticGateClosed(
+                "Battle Pass page snapshots are not coherent"
+            )
+        )
+        adapter.begin_campaign_pre_sortie("1-1")
+
+        self.assertFalse(adapter.appear(NamedButton("GET_ITEMS_1")))
+        oracle.battle_pass_page_visible.assert_not_called()
+
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton("GET_ITEMS_1"))
+        self.assertEqual(oracle.click_calls, [])
         adapter.end_campaign_pre_sortie()
 
     def test_event_sp_hard_surface_accepts_exact_game_managed_zero_grant_noop(self):

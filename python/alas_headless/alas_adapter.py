@@ -1098,6 +1098,7 @@ class _CampaignFlowContext:
     map_preparation_receipt: Optional[ActionReceipt] = None
     auto_search_toggle_receipt: Optional[ActionReceipt] = None
     map_preparation_oil_cost: Optional[int] = None
+    daemon_auto_search_selected: Optional[bool] = None
     preparation_kind: Optional[str] = None
     cancel_receipt: Optional[ActionReceipt] = None
     inherited_cancel_receipt: Optional[ActionReceipt] = None
@@ -3202,6 +3203,126 @@ class AlasSemanticAdapter:
     def campaign_sortie_committed(self) -> bool:
         context = self._require_campaign_context()
         return context.sortie_receipt is not None
+
+    def arm_daemon_campaign_map_preparation(self) -> bool:
+        """Record the exact inherited ALAS setting before Daemon advances it."""
+
+        self._package_gate()
+        context = self._require_campaign_context()
+        if (
+            context.entry_receipt is None
+            or context.map_preparation_receipt is not None
+            or context.daemon_auto_search_selected is not None
+        ):
+            raise SemanticGateClosed(
+                "Daemon map preparation requires one owned stage entry"
+            )
+        if self._campaign_preparation_kind() != "map":
+            raise SemanticGateClosed("Daemon map preparation layer is absent")
+        selected = self.oracle.campaign_auto_search_selected()
+        context.daemon_auto_search_selected = selected
+        return selected
+
+    def authorize_daemon_campaign_sortie(
+        self,
+        *,
+        fleet1: int,
+        fleet2: int,
+        submarine: int,
+        use_auto_search: bool,
+        use_2x_book: bool,
+        submarine_mode: str,
+        fleet_order: str,
+    ) -> bool:
+        """Authorize Daemon only when the inherited fleet is already exact."""
+
+        self._package_gate()
+        context = self._require_campaign_context()
+        if not self._action_ledger.allowed("campaign.sortie"):
+            return False
+        if (
+            context.entry_receipt is None
+            or context.map_preparation_receipt is None
+            or context.daemon_auto_search_selected is None
+            or context.initial_fleet_state is not None
+            or context.prepared_fleet_state is not None
+            or context.requested_fleets is not None
+            or context.sortie_authorized
+            or context.sortie_receipt is not None
+        ):
+            raise SemanticGateClosed(
+                "Daemon sortie requires one fresh owned preparation chain"
+            )
+        if context.daemon_auto_search_selected is not use_auto_search:
+            raise SemanticGateClosed(
+                "Daemon auto-search state differs from ALAS configuration"
+            )
+        if use_2x_book is not False:
+            raise SemanticGateClosed("Daemon sortie requires 2x book disabled")
+        if self.oracle.campaign_fleet_dropdown_state() is not None:
+            raise SemanticGateClosed("Daemon inherited fleet dropdown is open")
+
+        prepared = self.oracle.campaign_fleet_selection_state(
+            context.stage_code,
+            fallback_oil_cost=context.map_preparation_oil_cost,
+        )
+        requested = (fleet1, fleet2, submarine)
+        if self._campaign_fleet_tuple(prepared) != requested:
+            raise SemanticGateClosed(
+                "Daemon inherited fleet differs from ALAS configuration"
+            )
+        roles = None
+        if use_auto_search:
+            roles = self.oracle.campaign_auto_search_role_state()
+            expected_roles = {
+                "fleet1_mob_fleet2_boss": ("mob", "boss"),
+                "fleet1_boss_fleet2_mob": ("boss", "mob"),
+                "fleet1_all_fleet2_standby": ("all", "standby"),
+                "fleet1_standby_fleet2_all": ("standby", "all"),
+            }.get(fleet_order)
+            observed_roles = (roles.fleet1_role, roles.fleet2_role)
+            if expected_roles is None or observed_roles not in (
+                expected_roles,
+                ("game-managed", "game-managed"),
+            ):
+                raise SemanticGateClosed(
+                    "Daemon inherited auto-search roles differ from ALAS configuration"
+                )
+
+        context.initial_fleet_state = prepared
+        context.prepared_fleet_state = prepared
+        context.requested_fleets = requested
+        context.required_fleet_mutations = 0
+        context.expected_fleet_mutations = ()
+        context.auto_search_role_state = roles
+        try:
+            return self.authorize_campaign_sortie(
+                use_auto_search=use_auto_search,
+                use_2x_book=use_2x_book,
+                submarine_mode=submarine_mode,
+                fleet_order=fleet_order,
+            )
+        except Exception:
+            context.initial_fleet_state = None
+            context.prepared_fleet_state = None
+            context.requested_fleets = None
+            context.auto_search_role_state = None
+            raise
+
+    def confirm_daemon_campaign_sortie(self) -> CampaignSortieProof:
+        """Prove Daemon handed its one sortie to the configured game mode."""
+
+        context = self._require_campaign_context()
+        confirmation = (
+            self.confirm_campaign_auto_search_started
+            if context.auto_search_role_state is not None
+            else self.confirm_campaign_sortie
+        )
+        return self.oracle._retry_transition_read(
+            confirmation,
+            attempts=60,
+            interval_seconds=0.5,
+        )
 
     def confirm_war_archives_entry_if_present(self) -> Optional[ActionReceipt]:
         """Confirm the bounded ordinary-key prompt after an archive sortie."""
@@ -6276,6 +6397,20 @@ class AlasSemanticAdapter:
                 return False
         if (
             semantic_id is None
+            and self._campaign_context is not None
+            and name not in CAMPAIGN_VIRTUAL_RESOURCES
+            and self._campaign_preparation_kind() is not None
+        ):
+            # An exact owned map/fleet preparation overlay makes Daemon's
+            # unrelated legacy image probes known absences.  Resolve this
+            # before probing independent pages such as Battle Pass: their
+            # separately sampled observer trees can be transiently incoherent
+            # while the campaign overlay is mounting.  Campaign virtual
+            # resources still reach their strict typed branches below and
+            # unknown input remains rejected by click().
+            return False
+        if (
+            semantic_id is None
             and self._operation_siren_allows_passive_probe()
         ):
             if name == "IN_MAP":
@@ -6301,7 +6436,13 @@ class AlasSemanticAdapter:
             # beyond its initial 30-second loading lease during long battles,
             # so retirement/page checks must not become unmapped mid-combat.
             return False
-        if self.oracle.exists("dorm-menu/page/root"):
+        if (
+            not (
+                self._campaign_context is not None
+                and name in CAMPAIGN_VIRTUAL_RESOURCES
+            )
+            and self.oracle.exists("dorm-menu/page/root")
+        ):
             # MainLiveAreaUI is an overlay above the still-mounted main page.
             # The underlying main/build button is not evidence of BuildShipUI;
             # during live-area routes the exact overlay owns page discovery.
@@ -6311,6 +6452,10 @@ class AlasSemanticAdapter:
             return name == "DORMMENU_CHECK"
         if (
             semantic_id is None
+            and not (
+                self._campaign_context is not None
+                and name in CAMPAIGN_VIRTUAL_RESOURCES
+            )
             and self._commission_context is None
             and name not in ("BUILD_CHECK", "GOTO_MAIN")
             and name not in BUILD_VIRTUAL_RESOURCES
@@ -6329,6 +6474,10 @@ class AlasSemanticAdapter:
             return False
         if (
             semantic_id is None
+            and not (
+                self._campaign_context is not None
+                and name in CAMPAIGN_VIRTUAL_RESOURCES
+            )
             and name not in DATA_KEY_VIRTUAL_RESOURCES
             and self.oracle.war_archives_page_visible()
         ):
@@ -6337,6 +6486,10 @@ class AlasSemanticAdapter:
             return False
         if (
             semantic_id is None
+            and not (
+                self._campaign_context is not None
+                and name in CAMPAIGN_VIRTUAL_RESOURCES
+            )
             and name not in ("BATTLE_PASS_CHECK", "GOTO_MAIN")
             and name not in BATTLE_PASS_VIRTUAL_RESOURCES
             and self.oracle.battle_pass_page_visible()
@@ -6347,6 +6500,10 @@ class AlasSemanticAdapter:
             return False
         if (
             semantic_id is None
+            and not (
+                self._campaign_context is not None
+                and name in CAMPAIGN_VIRTUAL_RESOURCES
+            )
             and name != "SHOP_CHECK"
             and name not in SUPPLY_PACK_VIRTUAL_RESOURCES
             and (
@@ -16516,6 +16673,33 @@ class AlasSemanticSession:
 
     def campaign_sortie_committed(self) -> bool:
         return self.open().campaign_sortie_committed()
+
+    def arm_daemon_campaign_map_preparation(self) -> bool:
+        return self.open().arm_daemon_campaign_map_preparation()
+
+    def authorize_daemon_campaign_sortie(
+        self,
+        *,
+        fleet1: int,
+        fleet2: int,
+        submarine: int,
+        use_auto_search: bool,
+        use_2x_book: bool,
+        submarine_mode: str,
+        fleet_order: str,
+    ) -> bool:
+        return self.open().authorize_daemon_campaign_sortie(
+            fleet1=fleet1,
+            fleet2=fleet2,
+            submarine=submarine,
+            use_auto_search=use_auto_search,
+            use_2x_book=use_2x_book,
+            submarine_mode=submarine_mode,
+            fleet_order=fleet_order,
+        )
+
+    def confirm_daemon_campaign_sortie(self) -> CampaignSortieProof:
+        return self.open().confirm_daemon_campaign_sortie()
 
     def confirm_war_archives_entry_if_present(self) -> Optional[ActionReceipt]:
         return self.open().confirm_war_archives_entry_if_present()

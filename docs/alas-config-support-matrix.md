@@ -94,7 +94,7 @@ observation 状态。
 
 | 字段/路径 | 已完成层级 | 当前阻塞与为何不安全地继续 | 明确重新进入条件 |
 |---|---|---|---|
-| `Daemon.EnterMap` | 双值校验、禁用不探测地图、启用时 MAP/FLEET 原始分派回放 | 语义 `MAP_PREPARATION`/`FLEET_PREPARATION` 输入必须绑定已有 `begin_campaign_pre_sortie(stage)` 上下文、退出证明和 sortie 预算；Daemon 没有可信 stage identity，直接放开会绕过共享 campaign 门禁 | 有独立的、无 stage 歧义的 daemon 地图/编队观察，及进入、取消、恢复的可回放 postcondition；实机仅在隔离账户/明确输入预算下验证 |
+| `Daemon.EnterMap` | 双值校验、禁用不探测地图、启用时 MAP/FLEET 原始分派回放；实机已闭环同一 ALAS-owned `1-1` 手动 sortie→战前撤退，以及 `12-4` 双舰队校正→官方 auto-search→完整战斗/总奖励→主界面恢复 | cold-start 继承的准备层没有可信 stage/config 所有权链，仍不能授权；断线、稀有弹窗和长期跨场景循环未实机闭环 | 为冷继承准备层建立不歧义的 ALAS-owned 重入契约；补断线/稀有弹窗恢复及更长跨场景 soak |
 | `Campaign.Event`、`Campaign.Mode`、`Campaign.Name` | 原 `handle_stage_name()`、配置覆写和已适配的当前主路径 | 三字段横跨 16 个任务面板；`Name` 是动态输入，别名、活动目录、硬图回退、循环和任务内部覆写共同决定实际路由。通用白名单会错误拒绝原内部路径，宽松校验又无法 fail-closed | 按 Scheduler command 建立锁定的路由/别名清单，并为每类目录、模式、内部覆写和未知组合提供无输入回放与 typed 页面证据 |
 | `Emulator.Serial`、`ScreenshotMethod`、`ControlMethod` | 配置读取、严格值域与现有语义适配 | 三值在 `Device.__init__` 连接建立阶段即被消费，早于语义会话；继续需要改变连接、断线恢复与资源释放的所有权，不能以运行中的账户/设备试错 | 专用可丢弃设备上的连接、截图、控制、重连和清理生命周期契约；每种声明方式都有失败注入与无遗留证明 |
 | `EventStory.SkipBattle` | 故事入口观察；字段已确认是上游锁定但无消费者 | 固定上游无条件在剧情战斗时重启应用，`false` 没有原业务分支。自行添加继续战斗会重写 ALAS 状态机且需要战斗/结算观察 | 上游提供消费者，或单独批准并审阅的继续战斗状态机，加上多活动布局的战斗、结算和恢复夹具 |
@@ -344,7 +344,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 单轮回放覆盖 EnterMap 的两个值和 OpsiDaemon 的四个组合。普通 Daemon 保持 MAP_PREPARATION 先于 FLEET_PREPARATION 的探测及各自早退，关闭时不触及这两个目标，但不篡改无关的伏击处理。OpsiDaemon 保持港口修复优先级、进入→修复→退出→interval reset 的顺序，以及无港口时才执行的最近目标探测。当前 OpsiDaemon 已把港口修理和最近目标移动改为默认零预算、一次性授权的 typed 动作：修理前复核港口页与舰队状态，移动前复核唯一目标身份、相对坐标、原半径限制和 stale frame；重复、并列、未知、截断及远距 EMP 目标均 fail-closed。
 
-`Daemon.EnterMap` 仍仅提升 `offline=complete`，真实地图进入 postcondition、长期循环、断线/弹窗恢复和停止条件未闭环。OpsiDaemon 实机已证明满血舰队进入港口后安全退出且资源不变，以及无雷达目标时保持等待；但受损舰真实确认、最近目标正向移动、远距 EMP、长期循环和异常恢复仍缺，因此两个面板均保持 P，不能称为长期值守完整支持。
+`Daemon.EnterMap` 现有四段受控实机证据：主界面 180 秒内完成 63 轮 typed-only `idle`，PID 不变、generation 持续前进且零输入；可逆路径由原 Daemon 从精确 `1-1` 地图详情推进到编队层再撤销且资源不变；手动正向路径在同一 ALAS-owned 上下文中核对 `Use2xBook=false` 和舰队 `(1,0,0)`，进入精确 map root 后战前 typed 撤退并恢复主界面，消耗 10 油；完整正向路径由原 Daemon 在 `12-4` 把舰队 `(1,2,1)` 校正为 `(1,2,0)`、证明 `mob/boss` 角色后交给游戏官方 auto-search，零 combat/viewport 动作等待 526.36 秒，经总奖励恢复主界面，精确消耗 317 油。cold-start 继承准备层、跨场景长期循环和断线/稀有弹窗恢复仍未闭环。OpsiDaemon 实机已证明满血舰队进入港口后安全退出且资源不变，以及无雷达目标时保持等待；但受损舰真实确认、最近目标正向移动、远距 EMP、长期循环和异常恢复仍缺，因此两个面板均保持 P，不能称为长期值守完整支持。
 
 ### 1.34 本轮 BattlePass 领取开关契约
 
@@ -452,7 +452,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | F | HazardLevel 五值、Fleet 四值、Submarine 两值、行动力保留与自由选区已离线等价；原任务实机完成显式 zone 22、Fleet 2、Submarine=false、自动搜索战斗和战后处理，并以独立有界原任务周期完成 Fleet 3、Submarine=true 的精确命令、确认、动画结束及四项相关任务冷却写入。 |
 | 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | F | TargetZone 三值与 Fleet 四值已离线等价；原任务实机完成 zone 44 到 zone 22 的精确选区、Fleet 2、行动力门槛、战略搜索配置、7 场真实战斗、自动搜索自然回 OFF、无残余问号、战后 HP/大修检查及有界任务结束。Submarine 为共享 OpsiFleet 字段且该上游任务不消费，true 的原始导航命令另由 Meowfficer 完整实机闭环。 |
 | 54 | OpsiCrossMonth | Scheduler | B | 非月末安全跳过；月末执行、重置和跨月恢复未验证 |
-| 55 | Daemon | Daemon | P | EnterMap 双值与单轮地图/编队分派已离线等价；真实进入 postcondition、长期值守和稀有恢复仍未闭环 |
+| 55 | Daemon | Daemon | P | EnterMap 双值与单轮分派已离线等价；主界面完成 180 秒/63 轮 typed idle soak；实机闭环 1-1 手动 sortie 到战前撤退，以及 12-4 双舰队校正、官方 auto-search、完整战斗、总奖励和主界面恢复。冷启动继承准备层、跨场景长期值守和稀有恢复仍未闭环 |
 | 56 | OpsiDaemon | OpsiDaemon | P | 修船/选敌四组合保持原优先级；新增默认零预算、一次性 typed 修理/移动能力，实机证明满血港口无修理及无目标等待均不改资源。受损舰确认、最近目标正向移动、远距 EMP 与长期恢复仍未闭环 |
 | 57 | EventStory | EventStory | P | `SkipBattle` 在固定上游锁为 true 且无运行时消费者；false 需要新的剧情战斗状态机和多活动观察，当前仅一条入口路径，战斗转场及其他故事结构未闭环 |
 | 58 | Benchmark | Benchmark | F | 五种 DeviceType 与三种 TestScene 已逐组实机执行；每组保留原 15 次计时、确认回到主页并清理临时配置。DeviceType 在 Headless semantic 后端是已验证的配置来源，不宣称旧云/VMOS 传输。 |
@@ -568,7 +568,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| Daemon | `EnterMap` | P | 两值及单轮分派已离线；主界面/地图内真实进入、恢复循环和未知弹窗仍待闭环 |
+| Daemon | `EnterMap` | P | 两值及单轮分派已离线；主界面 180 秒/63 轮零输入 soak、实机 1-1 手动 sortie→战前撤退及 12-4 双舰队校正→官方 auto-search→完整战斗/总奖励均已闭环；冷继承准备层、跨场景长期循环、断线和未知弹窗仍待闭环 |
 | OpsiDaemon | `RepairShip`; `SelectEnemy` | P | 四组合保持原修理优先级；已接入默认零预算、一次性 typed 修理/移动，实机证明满血港口无修及无目标等待不改状态；受损舰确认、最近目标正向移动、远距 EMP、长期循环和异常恢复仍待闭环 |
 | EventStory | `SkipBattle`（当前只允许 true） | P | 固定上游锁 true 且无字段消费者，实际始终重启跳过战斗；false 需上游/评审后的继续战斗状态机及多活动战斗、结算夹具，当前不外推完成 |
 | Benchmark | `DeviceType`=`emulator/plone_cloud_with_adb/phone_cloud_without_adb/android_phone/android_phone_vmos`; `TestScene`=`screenshot_click/screenshot/click` | F | 5 x 3 全矩阵已实机执行；逐组返回预期 observer/settings-round-trip 测量、回主页并清理临时配置。设备类型完成范围是 Headless semantic 配置绑定与验证，不宣称旧云/VMOS 传输 |
@@ -716,7 +716,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `ControlExpOverflow.T3Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `ControlExpOverflow.T4Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `CoreShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Array" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Daemon.EnterMap` | Daemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Daemon.EnterMap` | Daemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Daily.AdvanceMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.AdvanceMissionFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.EmergencyModuleDevelopment` | Daily | type=select; display=default | options: "first", "second", "skip"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |

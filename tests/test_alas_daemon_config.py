@@ -67,6 +67,11 @@ class AlasDaemonConfigTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertEqual(patch.count("validate_alas_daemon_config("), 1)
         self.assertEqual(patch.count("validate_alas_opsi_daemon_config("), 1)
+        confirm = patch.index("confirm_daemon_campaign_sortie()")
+        wait = patch.index("wait_campaign_auto_search_completion(", confirm)
+        completed = patch.index("return 'auto_search_complete'", wait)
+        self.assertLess(confirm, wait)
+        self.assertLess(wait, completed)
 
     def test_phase2_runtime_patch_owns_typed_mutation_boundaries(self):
         patch = ROOT.joinpath(
@@ -115,6 +120,9 @@ class AlasDaemonConfigTests(unittest.TestCase):
             "python/alas_headless/alas_daemon_config_contract.py",
             "python/alas_headless/alas_daemon_config_replay.py",
             "scripts/python/verify_alas_daemon_config.py",
+            "scripts/python/run_alas_daemon_idle_soak_live_validation.py",
+            "scripts/python/run_alas_daemon_enter_map_live_validation.py",
+            "scripts/python/run_alas_daemon_sortie_live_validation.py",
             "scripts/python/run_alas_opsi_general_daemon_live_validation.py",
             "scripts/python/verify_alas_opsi_action_point_transition.py",
         ):

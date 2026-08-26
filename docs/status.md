@@ -4,6 +4,49 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-26
 
+### Daemon typed idle soak, bounded sortie, and 12-4 official auto-search are live-qualified
+
+- The original `AzurLaneDaemon.run_once()` completed a 180-second typed-only
+  main-page soak with `Daemon.EnterMap=true`: all 63 iterations returned
+  `idle`, observer generations advanced from `84200` to `84952` with 64
+  distinct samples, the game PID remained `24414`, and the Daemon sent no tap
+  or mutation. The temporary configuration was removed and the pre-existing
+  observer-forward set was unchanged. Evidence is
+  `integration/alas/daemon-idle-soak-live-validation-receipt-20260826-r4.json`.
+- A separate reversible run selected exact stage `1-1` through the existing
+  campaign boundary, then handed its typed map-preparation frame to the
+  original Daemon branch. Daemon used one reviewed input to reach fleet
+  preparation; the validator cancelled through the exact fleet back control
+  and proved restoration of chapter `1-1`. No sortie started, oil remained
+  `4127`, the PID remained `24414`, and the only mutation capability consumed
+  was the initial `campaign.stage_entry`. Evidence is
+  `integration/alas/daemon-enter-map-live-validation-receipt-20260826-r3.json`.
+- The positive bounded run kept that same ALAS-owned campaign transaction,
+  required the inherited fleet tuple `(1, 0, 0)`, manual-search state and
+  `Use2xBook=false` to match configuration exactly, and allowed no fleet
+  mutation. The original Daemon then owned both preparation branches, entered
+  the exact `LevelGrid` map root, and the validator withdrew before combat and
+  restored the main page. PID `24414` remained stable; only
+  `campaign.stage_entry` and `campaign.sortie` were dispatched. The successful
+  run consumed 10 oil and removed its temporary configuration. Evidence is
+  `integration/alas/daemon-sortie-live-validation-receipt-20260826-r9.json`.
+- The full positive run selected exact `12-4`, reconciled the live fleet from
+  `(1, 2, 1)` to configured `(1, 2, 0)` through the original ALAS fleet
+  preparation loop, proved `fleet1=mob` and `fleet2=boss`, and handed combat
+  entirely to the game's official auto-search. The adapter used zero campaign
+  combat and zero viewport-swipe budget after sortie, observed
+  `CombatUIStandard`, waited `526.36` seconds for the exact total-reward
+  panel, closed its reviewed exit, and restored the main page with PID `24414`
+  unchanged. Oil changed exactly `2799 -> 2482`: the proven 10-oil map entry
+  plus six 42-oil mob battles and one 55-oil boss battle, for 317 total. The
+  temporary configuration was removed. Evidence is
+  `integration/alas/daemon-auto-search-live-validation-receipt-20260826-r8.json`.
+- This proves bounded main-page residence and one exact active-context sortie,
+  not unattended production completeness. A cold-start inherited MAP/FLEET
+  overlay still lacks a trusted stage/config ownership chain and remains
+  fail-closed. Disconnect/rare-popup handling and a materially longer
+  cross-scene soak remain open, so the Daemon panel stays `P`.
+
 ### WarArchives winter-crown A1 is live complete
 
 - The adapter now replaces the archive category/card boundary, all 45 archive

@@ -986,7 +986,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -996,6 +996,14 @@
         "tests/test_alas_daemon_config.py",
         "python/alas_headless/alas_daemon_config_replay.py",
         "integration/alas/series/0100-tool-flow-ports.patch",
+        "scripts/python/run_alas_daemon_idle_soak_live_validation.py",
+        "integration/alas/daemon-idle-soak-live-validation-receipt-20260826-r4.json",
+        "scripts/python/run_alas_daemon_enter_map_live_validation.py",
+        "integration/alas/daemon-enter-map-live-validation-receipt-20260826-r3.json",
+        "scripts/python/run_alas_daemon_sortie_live_validation.py",
+        "integration/alas/daemon-sortie-live-validation-receipt-20260826-r9.json",
+        "integration/alas/daemon-auto-search-live-validation-receipt-20260826-r8.json",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -8256,7 +8264,7 @@
         "Daemon"
       ],
       "name": "Daemon",
-      "note": "EnterMap 双值与单轮地图/编队分派已离线等价；真实进入 postcondition、长期值守和稀有恢复仍未闭环",
+      "note": "EnterMap 双值与单轮分派已离线等价；主界面完成 180 秒/63 轮 typed idle soak；实机闭环 1-1 手动 sortie 到战前撤退，以及 12-4 双舰队校正、官方 auto-search、完整战斗、总奖励和主界面恢复。冷启动继承准备层、跨场景长期值守和稀有恢复仍未闭环",
       "status": "P"
     },
     {
@@ -11776,8 +11784,8 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "17fa5134fac37f917ef76aaaac76a13634faf61cfe42eded4c39e43cb5e9dfc1",
-      "manifest_sha256": "b92fd09bdd43ec29922401d18641ac86e4e1189e8b050dcfd1a118592419a8b9",
+      "combined_sha256": "5fc7952f49dac90fffab30144df1e2c449d2bf7dc23dfddb028426094f2a3596",
+      "manifest_sha256": "fbfba7fb9d96444925d3d763a83b6d331f1301b5ded51fd4c8ec693f39c5f43b",
       "member_count": 92
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
