@@ -127,7 +127,12 @@ from .semantic_oracle import (
     DormFurnitureShopBalance,
     DormState,
     DormFeedState,
+    MeowfficerAcquisitionState,
+    MeowfficerCatState,
     MeowfficerDockState,
+    MeowfficerEnhanceState,
+    MeowfficerFeedState,
+    MeowfficerPurchaseState,
     MeowfficerQueueState,
     MeowfficerTrainingState,
     EnhancementExecutionReceipt,
@@ -1115,6 +1120,7 @@ class _CampaignFlowContext:
     oil_before_sortie: Optional[int] = None
     sortie_authorized: bool = False
     sortie_receipt: Optional[ActionReceipt] = None
+    archive_entry_confirm_receipt: Optional[ActionReceipt] = None
     map_entry_state: Optional[CampaignMapEntryState] = None
     sortie_proof: Optional[CampaignSortieProof] = None
     retained_preparation_generation: Optional[int] = None
@@ -2870,6 +2876,98 @@ class AlasSemanticAdapter:
     def end_data_key(self) -> None:
         self._data_key_context = None
 
+    def war_archives_campaign_visible(self) -> bool:
+        """Expose the exact archive stage-page identity to original ALAS."""
+
+        self._package_gate()
+        return self.oracle.war_archives_campaign_page_visible()
+
+    def _campaign_page_back_visible(self) -> bool:
+        if self.oracle.war_archives_campaign_page_visible():
+            return True
+        try:
+            self.oracle.campaign_page_state()
+        except SemanticGateClosed:
+            return False
+        return True
+
+    def war_archives_data_key_count(self) -> Tuple[int, int]:
+        """Return the typed archive key inventory on the campaign page."""
+
+        self._package_gate()
+        return self.oracle.war_archives_campaign_data_key_count()
+
+    def open_war_archives_campaign(self, event: str, category: str) -> ActionReceipt:
+        """Perform the original archive search against typed card identities."""
+
+        self._package_gate()
+        expected_category, _sprite = self.oracle.war_archives_campaign_identity(event)
+        if category != expected_category:
+            raise SemanticGateClosed(
+                "war archives category does not match configured campaign"
+            )
+        if not self.oracle.war_archives_page_visible():
+            raise SemanticGateClosed("war archives campaign search requires landing page")
+        if self.oracle.war_archives_category() != category:
+            if self._input_frame_refresher is not None:
+                self._input_frame_refresher()
+            receipt = self.oracle.click_war_archives_category(category)
+            deadline = time.monotonic() + 20.0
+            while True:
+                try:
+                    if self.oracle.war_archives_category() == category:
+                        break
+                except SemanticGateClosed:
+                    pass
+                if time.monotonic() >= deadline:
+                    raise SemanticGateClosed(
+                        "war archives category did not reach postcondition"
+                    )
+                time.sleep(0.2)
+            if receipt.semantic_id != "archive/category/" + category:
+                raise SemanticGateClosed("war archives category receipt changed")
+
+        for _ in range(32):
+            position = self.oracle.war_archives_campaign_card_position(event)
+            if position == "visible":
+                if self._input_frame_refresher is not None:
+                    self._input_frame_refresher()
+                receipt = self.oracle.click_war_archives_campaign(event)
+                deadline = time.monotonic() + 30.0
+                while True:
+                    if self.oracle.war_archives_campaign_page_visible():
+                        state = self.oracle.campaign_page_state()
+                        if state.generation <= receipt.generation:
+                            raise SemanticGateClosed(
+                                "war archives campaign postcondition predates input"
+                            )
+                        return receipt
+                    if time.monotonic() >= deadline:
+                        raise SemanticGateClosed(
+                            "war archives campaign page did not open"
+                        )
+                    time.sleep(0.25)
+
+            before_generation, before_bounds = (
+                self.oracle.war_archives_campaign_card_geometry(event)
+            )
+            if self._input_frame_refresher is not None:
+                self._input_frame_refresher()
+            swipe = self.oracle.swipe_war_archives_campaign_toward(event)
+            deadline = time.monotonic() + 10.0
+            while True:
+                generation, bounds = self.oracle.war_archives_campaign_card_geometry(
+                    event
+                )
+                if generation > max(before_generation, swipe.generation) and bounds != before_bounds:
+                    break
+                if time.monotonic() >= deadline:
+                    raise SemanticGateClosed(
+                        "war archives campaign list did not advance"
+                    )
+                time.sleep(0.2)
+        raise SemanticGateClosed("war archives campaign search exceeded list bounds")
+
     def end_supply_pack(self) -> None:
         self._supply_pack_context = None
 
@@ -3104,6 +3202,24 @@ class AlasSemanticAdapter:
     def campaign_sortie_committed(self) -> bool:
         context = self._require_campaign_context()
         return context.sortie_receipt is not None
+
+    def confirm_war_archives_entry_if_present(self) -> Optional[ActionReceipt]:
+        """Confirm the bounded ordinary-key prompt after an archive sortie."""
+
+        context = self._require_campaign_context()
+        if context.sortie_receipt is None:
+            return None
+        cost = self.oracle.war_archives_entry_confirmation_cost()
+        if cost is None:
+            return None
+        if context.archive_entry_confirm_receipt is not None:
+            raise SemanticGateClosed("war archives entry confirmation is single-use")
+        receipt = self.oracle.confirm_war_archives_entry()
+        if receipt.generation <= context.sortie_receipt.generation:
+            raise SemanticGateClosed("war archives entry prompt did not advance")
+        context.archive_entry_confirm_receipt = receipt
+        context.passive_transition_until = time.monotonic() + 60.0
+        return receipt
 
     def campaign_auto_search_running(self) -> bool:
         context = self._require_campaign_context()
@@ -6708,6 +6824,8 @@ class AlasSemanticAdapter:
         if self._campaign_context is not None and name == "EVENT_LIST_CHECK":
             return self.oracle.exists("event-list/page/back")
         if self._campaign_context is not None and name == "BACK_ARROW":
+            if self._campaign_page_back_visible():
+                return self.oracle.enabled("campaign-menu/page/back")
             return self.oracle.enabled("event-list/page/back")
         if self._campaign_context is not None and name in (
             "SWITCH_1_NORMAL",
@@ -8030,6 +8148,409 @@ class AlasSemanticAdapter:
     def meowfficer_dock_state(self) -> MeowfficerDockState:
         self._package_gate()
         return self.oracle.meowfficer_dock_state()
+
+    def meowfficer_purchase_state(self) -> MeowfficerPurchaseState:
+        self._package_gate()
+        return self.oracle.meowfficer_purchase_state()
+
+    def buy_meowfficer_boxes(
+        self, count: int, *, timeout_seconds: float = 45.0
+    ) -> MeowfficerDockState:
+        """Buy one exact ALAS-selected Commander Cat box count."""
+
+        self._package_gate()
+        if type(count) is not int or not 1 <= count <= 15:
+            raise ValueError("meowfficer purchase count must be 1 through 15")
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        before = self.oracle.meowfficer_dock_state()
+        remaining = before.purchase_total - before.purchased
+        if count > remaining:
+            raise SemanticGateClosed("meowfficer purchase exceeds today's quota")
+        free = 1 if before.purchased == 0 else 0
+        expected_cost = max(0, count - free) * 1500
+        if before.coins < expected_cost:
+            raise SemanticGateClosed("meowfficer purchase coins are insufficient")
+
+        self.oracle.click("meowfficer/buy/enter")
+        purchase = self.oracle._retry_transition_read(
+            self.oracle.meowfficer_purchase_state,
+            attempts=30,
+            interval_seconds=0.1,
+        )
+
+        def read_selected(expected: int) -> MeowfficerPurchaseState:
+            state = self.oracle.meowfficer_purchase_state()
+            if state.count != expected:
+                raise SemanticGateClosed(
+                    "meowfficer purchase count has not reached the target"
+                )
+            return state
+
+        if purchase.count != 1:
+            self.oracle.click("meowfficer/buy/min")
+            purchase = self.oracle._retry_transition_read(
+                lambda: read_selected(1),
+                attempts=20,
+                interval_seconds=0.1,
+            )
+        for selected in range(2, count + 1):
+            self.oracle.click("meowfficer/buy/add")
+            purchase = self.oracle._retry_transition_read(
+                lambda selected=selected: read_selected(selected),
+                attempts=20,
+                interval_seconds=0.1,
+            )
+        if purchase.count != count or purchase.total_price != expected_cost:
+            raise SemanticGateClosed("meowfficer purchase price is inconsistent")
+
+        self.oracle.click("meowfficer/buy/submit")
+        deadline = time.monotonic() + timeout_seconds
+        confirmed = False
+        skipped = False
+        last_error: Optional[BaseException] = None
+        while time.monotonic() < deadline:
+            try:
+                after = self.oracle.meowfficer_dock_state()
+            except SemanticGateClosed as exc:
+                last_error = exc
+            else:
+                if after.purchased != before.purchased + count:
+                    raise SemanticGateClosed(
+                        "meowfficer purchase quota did not advance exactly"
+                    )
+                if after.coins != before.coins - expected_cost:
+                    raise SemanticGateClosed(
+                        "meowfficer purchase coin postcondition failed"
+                    )
+                if sum(after.box_counts) != sum(before.box_counts) + count:
+                    raise SemanticGateClosed(
+                        "meowfficer purchase box postcondition failed"
+                    )
+                return after
+
+            if not confirmed and self.oracle.enabled("meowfficer/buy/confirm"):
+                self.oracle.click("meowfficer/buy/confirm")
+                confirmed = True
+                time.sleep(0.2)
+                continue
+            if not skipped and self.oracle.enabled("meowfficer/buy/skip"):
+                self.oracle.click("meowfficer/buy/skip")
+                skipped = True
+                time.sleep(0.2)
+                continue
+            if self.oracle.enabled("reward/award-info/close"):
+                self.oracle.click("reward/award-info/close")
+                time.sleep(0.2)
+                continue
+            try:
+                self.oracle.meowfficer_purchase_state()
+            except SemanticGateClosed:
+                time.sleep(0.1)
+                continue
+            self.oracle.click("meowfficer/page/back")
+            time.sleep(0.2)
+
+        raise SemanticGateClosed("meowfficer purchase timed out") from last_error
+
+    def meowfficer_fort_chore_available(self) -> bool:
+        """Admit Fort chores only after a cat occupies the typed Fort state."""
+
+        self._package_gate()
+        state = self.oracle.meowfficer_dock_state()
+        if state.fort_current == 0:
+            return False
+        if not 0 < state.fort_current <= state.fort_total <= 8:
+            raise SemanticGateClosed("Meowfficer Fort occupancy is inconsistent")
+        return True
+
+    def run_meowfficer_fort_chores(
+        self, *, timeout_seconds: float = 30.0
+    ) -> Tuple[ActionReceipt, ...]:
+        """Run the exact active Fort chore buttons until the page is idle."""
+
+        self._package_gate()
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        deadline = time.monotonic() + timeout_seconds
+        receipts: List[ActionReceipt] = []
+        last_paths: Optional[Tuple[str, ...]] = None
+        while time.monotonic() < deadline:
+            if self.oracle.enabled("reward/award-info/close"):
+                receipts.append(self.oracle.click("reward/award-info/close"))
+                time.sleep(0.2)
+                continue
+            paths = self.oracle.meowfficer_fort_chore_paths()
+            if not paths:
+                return tuple(receipts)
+            if paths == last_paths:
+                time.sleep(0.1)
+                continue
+            last_paths = paths
+            receipts.append(self.oracle.click_meowfficer_fort_chore(paths[0]))
+            time.sleep(0.2)
+        raise SemanticGateClosed("meowfficer Fort chores timed out")
+
+    def admit_meowfficer_training_plan(self, *, mode: str, sunday: bool) -> None:
+        """Validate an ALAS-owned Meowfficer training schedule."""
+
+        self._package_gate()
+        if mode not in ("once_a_day", "seamlessly"):
+            raise ValueError("Meowfficer training mode is invalid")
+        if type(sunday) is not bool:
+            raise ValueError("Meowfficer Sunday flag must be an exact boolean")
+
+    def enhance_meowfficer(
+        self,
+        *,
+        index: int,
+        max_feed_level: int,
+        timeout_seconds: float = 90.0,
+    ) -> str:
+        """Run one ALAS-selected Commander Cat enhancement target semantically."""
+
+        self._package_gate()
+        if type(index) is not int or not 1 <= index <= 12:
+            return "invalid"
+        if type(max_feed_level) is not int:
+            raise ValueError("Meowfficer feed level must be an exact integer")
+        max_feed_level = min(30, max(1, max_feed_level))
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+
+        dock = self.oracle.meowfficer_dock_state()
+        if dock.coins < 1000:
+            return "coin_limit"
+        cats = self.oracle.meowfficer_dock_cats()
+        if index > len(cats):
+            return "invalid"
+        target = cats[index - 1]
+        if target.level >= 30:
+            return "leveled_max"
+        if not target.selected:
+            self.oracle.click_meowfficer_cat(target)
+
+            def selected_target() -> Tuple[MeowfficerCatState, ...]:
+                current = self.oracle.meowfficer_dock_cats()
+                if index > len(current) or not current[index - 1].selected:
+                    raise SemanticGateClosed(
+                        "Meowfficer enhancement target is not selected"
+                    )
+                return current
+
+            self.oracle._retry_transition_read(
+                selected_target, attempts=30, interval_seconds=0.1
+            )
+
+        self.oracle.click("meowfficer/enhance/open")
+        try:
+            enhance = self.oracle._retry_transition_read(
+                self.oracle.meowfficer_enhance_state,
+                attempts=40,
+                interval_seconds=0.1,
+            )
+        except SemanticGateClosed:
+            return "in_battle"
+
+        deadline = time.monotonic() + timeout_seconds
+        enhanced = False
+        while time.monotonic() < deadline:
+            if enhance.level >= 30 or enhance.coins < 1000:
+                break
+            self.oracle.click("meowfficer/feed/open")
+            feed = self.oracle._retry_transition_read(
+                self.oracle.meowfficer_feed_state,
+                attempts=40,
+                interval_seconds=0.1,
+            )
+            if feed.selected != 0:
+                raise SemanticGateClosed(
+                    "Meowfficer feed opened with a stale selection"
+                )
+
+            eligible = tuple(
+                cat
+                for cat in feed.candidates
+                if not cat.selected and cat.level <= max_feed_level
+            )[: feed.capacity]
+            for cat in eligible:
+                before_selected = feed.selected
+                self.oracle.click_meowfficer_cat(cat)
+
+                def selection_advanced() -> MeowfficerFeedState:
+                    current = self.oracle.meowfficer_feed_state()
+                    if current.selected != before_selected + 1:
+                        raise SemanticGateClosed(
+                            "Meowfficer feed selection did not advance exactly"
+                        )
+                    if not any(
+                        item.path == cat.path
+                        and item.bounds == cat.bounds
+                        and item.selected
+                        for item in current.candidates
+                    ):
+                        raise SemanticGateClosed(
+                            "Meowfficer feed target selection is not proven"
+                        )
+                    return current
+
+                feed = self.oracle._retry_transition_read(
+                    selection_advanced, attempts=30, interval_seconds=0.1
+                )
+                if feed.selected >= feed.capacity:
+                    break
+
+            if feed.selected == 0:
+                self.oracle.click("meowfficer/feed/cancel")
+                enhance = self.oracle._retry_transition_read(
+                    self.oracle.meowfficer_enhance_state,
+                    attempts=30,
+                    interval_seconds=0.1,
+                )
+                break
+
+            self.oracle.click("meowfficer/feed/confirm")
+            enhance = self.oracle._retry_transition_read(
+                self.oracle.meowfficer_enhance_state,
+                attempts=40,
+                interval_seconds=0.1,
+            )
+            before = enhance
+            self.oracle.click("meowfficer/enhance/submit")
+            confirmed = False
+            last_error: Optional[BaseException] = None
+            while time.monotonic() < deadline:
+                if (
+                    not confirmed
+                    and self.oracle.enabled("meowfficer/enhance/confirm")
+                ):
+                    self.oracle.click("meowfficer/enhance/confirm")
+                    confirmed = True
+                    time.sleep(0.2)
+                    continue
+                try:
+                    current = self.oracle.meowfficer_enhance_state()
+                except SemanticGateClosed as exc:
+                    last_error = exc
+                    time.sleep(0.1)
+                    continue
+                if current.generation <= before.generation:
+                    time.sleep(0.1)
+                    continue
+                if current.level < before.level or current.coins >= before.coins:
+                    raise SemanticGateClosed(
+                        "Meowfficer enhancement resource postcondition failed"
+                    )
+                enhance = current
+                enhanced = True
+                break
+            else:
+                raise SemanticGateClosed(
+                    "Meowfficer enhancement confirmation timed out"
+                ) from last_error
+
+        self.oracle.click("meowfficer/enhance/back")
+        self.oracle._retry_transition_read(
+            self.oracle.meowfficer_dock_state,
+            attempts=40,
+            interval_seconds=0.1,
+        )
+        if not enhanced and enhance.coins < 1000:
+            return "coin_limit"
+        return "success"
+
+    def meowfficer_acquisition_state(self) -> MeowfficerAcquisitionState:
+        self._package_gate()
+        return self.oracle.meowfficer_acquisition_state()
+
+    def finish_meowfficer_acquisition(
+        self,
+        *,
+        retain_talented_gold: bool,
+        retain_talented_purple: bool,
+        timeout_seconds: float = 45.0,
+    ) -> int:
+        """Finish the exact acquisition flow and return collected-card count."""
+
+        self._package_gate()
+        if type(retain_talented_gold) is not bool:
+            raise ValueError("retain_talented_gold must be an exact boolean")
+        if type(retain_talented_purple) is not bool:
+            raise ValueError("retain_talented_purple must be an exact boolean")
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+
+        deadline = time.monotonic() + timeout_seconds
+        collected = 0
+        last_acquisition_generation = -1
+        retained_lock_pending = False
+        last_error: Optional[BaseException] = None
+        while time.monotonic() < deadline:
+            try:
+                self.oracle.meowfficer_training_state()
+                return collected
+            except SemanticGateClosed as exc:
+                last_error = exc
+
+            if self.oracle.enabled("meowfficer/get/result/close"):
+                self.oracle.click("meowfficer/get/result/close")
+                time.sleep(0.25)
+                continue
+            if retained_lock_pending:
+                if self.oracle.enabled("meowfficer/get/lock-confirm"):
+                    self.oracle.click("meowfficer/get/lock-confirm")
+                    retained_lock_pending = False
+                    time.sleep(0.25)
+                    continue
+            elif self.oracle.enabled("meowfficer/get/lock-cancel"):
+                self.oracle.click("meowfficer/get/lock-cancel")
+                time.sleep(0.25)
+                continue
+
+            try:
+                state = self.oracle.meowfficer_acquisition_state()
+            except SemanticGateClosed as exc:
+                last_error = exc
+                time.sleep(0.1)
+                continue
+            if type(state.generation) is not int or state.generation < 0:
+                raise SemanticGateClosed(
+                    "meowfficer acquisition generation is malformed"
+                )
+            if state.generation <= last_acquisition_generation:
+                time.sleep(0.1)
+                continue
+            # A purple retained card may not present the gold confirmation
+            # dialog. A freshly advanced acquisition card is the exact
+            # postcondition that the prior continue action completed.
+            retained_lock_pending = False
+            retain_special = state.has_special_talent and (
+                (state.rarity == "SSR" and retain_talented_gold)
+                or (state.rarity == "SR" and retain_talented_purple)
+            )
+            if retain_special:
+                if self.oracle.enabled("meowfficer/get/lock"):
+                    self.oracle.click("meowfficer/get/lock")
+                    lock_deadline = min(deadline, time.monotonic() + 5.0)
+                    while time.monotonic() < lock_deadline:
+                        if self.oracle.enabled("meowfficer/get/unlock"):
+                            break
+                        time.sleep(0.1)
+                    else:
+                        raise SemanticGateClosed(
+                            "meowfficer lock state did not advance after input"
+                        )
+                elif not self.oracle.enabled("meowfficer/get/unlock"):
+                    raise SemanticGateClosed(
+                        "meowfficer special-talent lock control is not proven"
+                    )
+            collected += 1
+            last_acquisition_generation = state.generation
+            retained_lock_pending = retain_special
+            self.oracle.click("meowfficer/get/continue")
+            time.sleep(0.25)
+
+        raise SemanticGateClosed("meowfficer acquisition timed out") from last_error
 
     def meowfficer_training_state(self) -> MeowfficerTrainingState:
         self._package_gate()
@@ -9886,27 +10407,40 @@ class AlasSemanticAdapter:
         # areas so the fresher view cannot make the sampled path less safe.
         if self._input_frame_refresher is not None and context.map_state is not None:
             prior_state = context.map_state
-            self._input_frame_refresher()
-            fresh_state = self.campaign_camera_state()
             prior_cells = {cell.node: cell for cell in prior_state.cells}
-            fresh_cells = {cell.node: cell for cell in fresh_state.cells}
-            if set(prior_cells) != set(fresh_cells):
-                raise SemanticGateClosed(
-                    "campaign map viewport easing changed the cell set"
+            easing_dx = 0.0
+            easing_dy = 0.0
+            for attempt in range(3):
+                self._input_frame_refresher()
+                fresh_state = self.campaign_camera_state()
+                fresh_cells = {cell.node: cell for cell in fresh_state.cells}
+                if set(prior_cells) != set(fresh_cells):
+                    raise SemanticGateClosed(
+                        "campaign map viewport easing changed the cell set"
+                    )
+                geometry_deltas = tuple(
+                    (
+                        fresh_cells[node].point.x - prior_cells[node].point.x,
+                        fresh_cells[node].point.y - prior_cells[node].point.y,
+                    )
+                    for node in sorted(prior_cells)
                 )
-            geometry_deltas = tuple(
-                (
-                    fresh_cells[node].point.x - prior_cells[node].point.x,
-                    fresh_cells[node].point.y - prior_cells[node].point.y,
+                easing_dx = float(
+                    statistics.median(delta[0] for delta in geometry_deltas)
                 )
-                for node in sorted(prior_cells)
-            )
-            easing_dx = float(statistics.median(delta[0] for delta in geometry_deltas))
-            easing_dy = float(statistics.median(delta[1] for delta in geometry_deltas))
-            if intent.blacklist_areas and any(
-                math.hypot(dx - easing_dx, dy - easing_dy) > 3.0
-                for dx, dy in geometry_deltas
-            ):
+                easing_dy = float(
+                    statistics.median(delta[1] for delta in geometry_deltas)
+                )
+                if not intent.blacklist_areas or all(
+                    math.hypot(dx - easing_dx, dy - easing_dy) <= 3.0
+                    for dx, dy in geometry_deltas
+                ):
+                    break
+                if attempt == 2:
+                    raise SemanticGateClosed(
+                        "campaign map viewport easing is not a uniform shift"
+                    )
+            else:  # pragma: no cover - the bounded loop always breaks or raises
                 raise SemanticGateClosed(
                     "campaign map viewport easing is not a uniform shift"
                 )
@@ -12024,6 +12558,8 @@ class AlasSemanticAdapter:
                 receipt = self.oracle.click_daily_precombat_back()
             elif self.oracle.daily_page_visible():
                 receipt = self.oracle.click_daily_control("daily/page/back")
+            elif self._campaign_page_back_visible():
+                receipt = self.oracle.click("campaign-menu/page/back")
             else:
                 receipt = self.oracle.click("event-list/page/back")
                 self._campaign_context.event_page_back_receipt = receipt
@@ -15062,6 +15598,58 @@ class AlasSemanticSession:
     def meowfficer_dock_state(self) -> MeowfficerDockState:
         return self.open().meowfficer_dock_state()
 
+    def meowfficer_purchase_state(self) -> MeowfficerPurchaseState:
+        return self.open().meowfficer_purchase_state()
+
+    def buy_meowfficer_boxes(
+        self, count: int, *, timeout_seconds: float = 45.0
+    ) -> MeowfficerDockState:
+        return self.open().buy_meowfficer_boxes(
+            count, timeout_seconds=timeout_seconds
+        )
+
+    def meowfficer_fort_chore_available(self) -> bool:
+        return self.open().meowfficer_fort_chore_available()
+
+    def run_meowfficer_fort_chores(
+        self, *, timeout_seconds: float = 30.0
+    ) -> Tuple[ActionReceipt, ...]:
+        return self.open().run_meowfficer_fort_chores(
+            timeout_seconds=timeout_seconds
+        )
+
+    def admit_meowfficer_training_plan(self, *, mode: str, sunday: bool) -> None:
+        self.open().admit_meowfficer_training_plan(mode=mode, sunday=sunday)
+
+    def enhance_meowfficer(
+        self,
+        *,
+        index: int,
+        max_feed_level: int,
+        timeout_seconds: float = 90.0,
+    ) -> str:
+        return self.open().enhance_meowfficer(
+            index=index,
+            max_feed_level=max_feed_level,
+            timeout_seconds=timeout_seconds,
+        )
+
+    def meowfficer_acquisition_state(self) -> MeowfficerAcquisitionState:
+        return self.open().meowfficer_acquisition_state()
+
+    def finish_meowfficer_acquisition(
+        self,
+        *,
+        retain_talented_gold: bool,
+        retain_talented_purple: bool,
+        timeout_seconds: float = 45.0,
+    ) -> int:
+        return self.open().finish_meowfficer_acquisition(
+            retain_talented_gold=retain_talented_gold,
+            retain_talented_purple=retain_talented_purple,
+            timeout_seconds=timeout_seconds,
+        )
+
     def meowfficer_training_state(self) -> MeowfficerTrainingState:
         return self.open().meowfficer_training_state()
 
@@ -15929,6 +16517,9 @@ class AlasSemanticSession:
     def campaign_sortie_committed(self) -> bool:
         return self.open().campaign_sortie_committed()
 
+    def confirm_war_archives_entry_if_present(self) -> Optional[ActionReceipt]:
+        return self.open().confirm_war_archives_entry_if_present()
+
     def confirm_campaign_sortie(self) -> CampaignSortieProof:
         return self.open().confirm_campaign_sortie()
 
@@ -16159,8 +16750,15 @@ class AlasSemanticSession:
                 # even when refreshing that frame correctly closed the prior
                 # post-action transition window.
                 and time.monotonic() <= observation[1] + 6.0
-                and self._combat_last_result_receipt is not None
             ):
+                # The grade-page root can temporarily leave the Button slice
+                # while its victory animation keeps the exact typed result
+                # hierarchy mounted.  Refresh once after the positive ALAS
+                # probe and require the complete result target again; this
+                # does not authorize a different or merely image-like page.
+                if self._combat_last_result_receipt is None:
+                    self.refresh_frame()
+                    adapter = self.open()
                 # The immutable ALAS frame may still describe the award popup
                 # while Unity has already mounted the statistics confirm page.
                 # Re-prove that exact live result target before treating the
@@ -16176,11 +16774,12 @@ class AlasSemanticSession:
                 # delay.  Consume the one-use positive observation without
                 # injecting another input; every ordinary combat action still
                 # revalidates and fails closed below.
-                self._combat_result_observation = None
-                return replace(
-                    self._combat_last_result_receipt,
-                    semantic_id="combat/result-transition/passive",
-                )
+                if self._combat_last_result_receipt is not None:
+                    self._combat_result_observation = None
+                    return replace(
+                        self._combat_last_result_receipt,
+                        semantic_id="combat/result-transition/passive",
+                    )
         if name in ("GET_ITEMS_1", "GET_ITEMS_2", "GET_ITEMS_3"):
             adapter = self.open()
             result_oracle = self._combat_result_action_oracle(adapter)
@@ -16642,6 +17241,20 @@ class AlasSemanticSession:
     def end_data_key(self) -> None:
         if self.adapter is not None:
             self.adapter.end_data_key()
+
+    def war_archives_campaign_visible(self) -> bool:
+        self.refresh_frame()
+        return self.open().war_archives_campaign_visible()
+
+    def war_archives_data_key_count(self) -> Tuple[int, int]:
+        self.refresh_frame()
+        return self.open().war_archives_data_key_count()
+
+    def open_war_archives_campaign(
+        self, event: str, category: str
+    ) -> ActionReceipt:
+        self.refresh_frame()
+        return self.open().open_war_archives_campaign(event, category)
 
     def end_supply_pack(self) -> None:
         if self.adapter is not None:

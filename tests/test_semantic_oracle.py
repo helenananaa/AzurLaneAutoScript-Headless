@@ -2010,6 +2010,251 @@ class SemanticOracleTests(unittest.TestCase):
         with self.assertRaises(SemanticGateClosed):
             make_oracle(backend).war_archives_page_visible()
 
+    def test_war_archives_campaign_card_uses_sprite_not_list_position(self):
+        root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)"
+        card = root + "/list/content/item/bg/icon"
+        card_bounds = {
+            "left": 95.0,
+            "top": 151.0,
+            "right": 550.0,
+            "bottom": 321.0,
+        }
+        backend = FakeBackend(
+            [
+                make_button(
+                    "icon",
+                    card,
+                    x=322.5,
+                    y=236.0,
+                    bounds=card_bounds,
+                    raycast_top=None,
+                )
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("300/300", root + "/nums/text")],
+            toggles=[
+                make_toggle(root + "/toggles/EX", checked=True, raycast_top=None),
+                make_toggle(root + "/toggles/SP", checked=False, raycast_top=None),
+            ],
+            images=[make_image(card, "temp_hongran", card_bounds)],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(
+            oracle.war_archives_campaign_card_position(
+                "war_archives_20190321_en"
+            ),
+            "visible",
+        )
+        receipt = oracle.click_war_archives_campaign(
+            "war_archives_20190321_en"
+        )
+        self.assertEqual(
+            receipt.semantic_id,
+            "archive/campaign/war_archives_20190321_en",
+        )
+
+        underlying = make_button(
+            "back_button",
+            "UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/back_button",
+        )
+        backend.buttons["buttons"].append(underlying)
+        backend.buttons["button_count"] += 1
+        receipt = oracle.click_war_archives_campaign(
+            "war_archives_20190321_en"
+        )
+        self.assertEqual(
+            receipt.semantic_id,
+            "archive/campaign/war_archives_20190321_en",
+        )
+        self.assertEqual(backend.taps, [(322, 236), (322, 236)])
+
+        backend.taps.clear()
+        with self.assertRaisesRegex(SemanticGateClosed, "unavailable"):
+            oracle.click_war_archives_campaign("war_archives_20240725_cn")
+        self.assertEqual(backend.taps, [])
+
+    def test_war_archives_offscreen_card_swipe_is_exact_and_bounded(self):
+        root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)"
+        card = root + "/list/content/item(Clone)/bg/icon"
+        card_bounds = {
+            "left": 729.0,
+            "top": 900.0,
+            "right": 1184.0,
+            "bottom": 1070.0,
+        }
+        backend = FakeBackend(
+            [
+                make_button(
+                    "icon",
+                    card,
+                    x=956.0,
+                    y=985.0,
+                    bounds=card_bounds,
+                    raycast_top=None,
+                )
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("300/300", root + "/nums/text")],
+            toggles=[
+                make_toggle(root + "/toggles/EX", checked=True, raycast_top=None),
+                make_toggle(root + "/toggles/SP", checked=False, raycast_top=None),
+            ],
+            images=[
+                make_image(card, "temp_zhuiluo", card_bounds),
+                make_image(
+                    root + "/list/scroll_bar/Handle/Image",
+                    "scroll_bar",
+                    {"left": 1248, "top": 126, "right": 1264, "bottom": 215},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        receipt = oracle.swipe_war_archives_campaign_toward(
+            "war_archives_20181026_en"
+        )
+        self.assertEqual(
+            receipt.semantic_id,
+            "archive/campaign/search/war_archives_20181026_en",
+        )
+        self.assertEqual(backend.swipes, [(640, 620, 640, 250, 350)])
+        self.assertEqual(backend.taps, [])
+
+    def test_war_archives_category_click_requires_exact_unselected_toggle(self):
+        root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)"
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [make_text("300/300", root + "/nums/text")],
+            toggles=[
+                make_toggle(
+                    root + "/toggles/EX",
+                    checked=True,
+                    raycast_top=None,
+                    x=949,
+                    y=56,
+                    bounds={"left": 897, "top": 36, "right": 1001, "bottom": 76},
+                ),
+                make_toggle(
+                    root + "/toggles/SP",
+                    checked=False,
+                    raycast_top=None,
+                    x=1053,
+                    y=56,
+                    bounds={"left": 1001, "top": 36, "right": 1105, "bottom": 76},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        receipt = oracle.click_war_archives_category("sp")
+        self.assertEqual(receipt.semantic_id, "archive/category/sp")
+        self.assertEqual(backend.taps, [(1053, 56)])
+
+    def test_war_archives_campaign_page_parses_letter_stage_and_key_counter(self):
+        root = "UICamera/Canvas/UIMain/LevelMainScene(Clone)"
+        stage = root + "/float/levels/items/Chapter_2100001/main"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button", root + "/top/top_chapter/back_button"
+                ),
+                make_button("main", stage, x=630, y=355, raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "红染的参访者-前篇",
+                    root + "/top/top_chapter/title_chapter/name",
+                ),
+                make_text("A1  ", stage + "/info/bk/title_form/title_index"),
+                make_text("风暴的尽头", stage + "/info/bk/title_form/title"),
+                make_text(
+                    "300 / 300",
+                    root + "/main/right_chapter/event_btns/tickets/Text",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        state = oracle.campaign_page_state()
+        self.assertEqual(state.chapter_name, "a")
+        self.assertEqual([item.stage_code for item in state.stages], ["a1"])
+        self.assertTrue(oracle.war_archives_campaign_page_visible())
+        self.assertEqual(oracle.war_archives_campaign_data_key_count(), (300, 300))
+        backend.buttons["buttons"].append(
+            make_button(
+                "btn_act_elite",
+                "UICamera/Canvas/UIMain/LevelMainScene(Clone)/main/"
+                "left_chapter/buttons/btn_act_elite",
+                raycast_top=None,
+            )
+        )
+        backend.buttons["button_count"] += 1
+        self.assertEqual(oracle.campaign_mode_switch_state(), "hard")
+        self.assertTrue(oracle.campaign_stage_actionable("a1"))
+        receipt = oracle.click_campaign_stage("a1")
+        self.assertEqual(receipt.semantic_id, "campaign/stage/a1")
+        self.assertEqual(backend.taps, [(630, 355)])
+
+    def test_war_archives_entry_prompt_requires_exact_cost_and_key_balance(self):
+        msgbox = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window"
+        campaign = "UICamera/Canvas/UIMain/LevelMainScene(Clone)"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "custom_button_2(Clone)",
+                    msgbox + "/button_container/custom_button_2(Clone)",
+                    x=480,
+                    y=520,
+                ),
+                make_button(
+                    "custom_button_1(Clone)",
+                    msgbox + "/button_container/custom_button_1(Clone)",
+                    x=800,
+                    y=520,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "进入所选关卡需要消耗档案秘钥x5，是否进入？",
+                    msgbox + "/msg_panel/content",
+                ),
+                make_text(
+                    "取消",
+                    msgbox + "/button_container/custom_button_2(Clone)/pic",
+                ),
+                make_text(
+                    "确定",
+                    msgbox + "/button_container/custom_button_1(Clone)/pic",
+                ),
+                make_text(
+                    "295 / 300",
+                    campaign + "/main/right_chapter/event_btns/tickets/Text",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.war_archives_entry_confirmation_cost(), 5)
+        receipt = oracle.confirm_war_archives_entry()
+        self.assertEqual(receipt.semantic_id, "archive/entry/confirm")
+        self.assertEqual(backend.taps, [(800, 520)])
+
+        backend.ui["texts"][0]["text"] = (
+            "进入所选关卡需要消耗档案秘钥x6，是否进入？"
+        )
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "entry cost changed"
+        ):
+            oracle.war_archives_entry_confirmation_cost()
+        self.assertEqual(backend.taps, [(800, 520)])
+
     def test_foreground_parser_accepts_resumed_markers_only(self):
         for output in (
             "topResumedActivity=ActivityRecord{abc u0 " + COMPONENT + " t42}",
@@ -2336,6 +2581,32 @@ class SemanticOracleTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
             oracle.click_toggle("campaign/map-preparation/auto-search")
         self.assertEqual(backend.taps, [])
+
+    def test_campaign_auto_search_effectively_off_when_standard_loop_is_off(self):
+        root = "root/OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/"
+        toggle_path = root + "BottomExtra/LoopGroup/view/container/AutoFight"
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [],
+            toggles=[
+                make_toggle(
+                    toggle_path,
+                    checked=True,
+                    raycast_top=False,
+                    x=950,
+                    y=596,
+                )
+            ],
+            images=[
+                make_image(
+                    root + "BottomExtra/LoopGroup/Loop/Toggle/off",
+                    "live2d_off",
+                    {"left": 1034, "top": 590, "right": 1053, "bottom": 603},
+                )
+            ],
+        )
+
+        self.assertFalse(make_oracle(backend).campaign_auto_search_selected())
 
     def test_campaign_auto_search_clicks_exact_sp_delegated_image_when_loop_on(self):
         root = "root/OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/panel/"
@@ -5256,6 +5527,38 @@ class SemanticOracleTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "sortie is not proven"):
             make_oracle(backend).campaign_fleet_preparation_state("12-4")
 
+    def test_war_archives_fleet_preparation_uses_letter_stage_underlay(self):
+        fleet = (
+            "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/"
+        )
+        stage = (
+            "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/float/levels/"
+            "items/Chapter_2100001/main"
+        )
+        backend = FakeBackend(
+            [
+                make_button("main", stage, raycast_top=False),
+                make_button("btnBack", fleet + "btnBack", 1196, 97),
+                make_button("start_button", fleet + "start_button", 1078, 585),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("舰队选择", fleet + "title/Image/text"),
+                make_text("A1  ", stage + "/info/bk/title_form/title_index"),
+                make_text("风暴的尽头", stage + "/info/bk/title_form/title"),
+                make_text(
+                    "300 / 300",
+                    "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/main/"
+                    "right_chapter/event_btns/tickets/Text",
+                ),
+            ]
+        )
+
+        state = make_oracle(backend).campaign_fleet_preparation_state("a1")
+
+        self.assertEqual((state.kind, state.stage_code), ("fleet", "a1"))
+
     def test_campaign_fleet_preparation_accepts_exact_hard_stage_underlay(self):
         fleet = (
             "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/"
@@ -5422,6 +5725,29 @@ class SemanticOracleTests(unittest.TestCase):
                 conservative.submarine_oil_cost,
             ),
             (500, 500, 0),
+        )
+
+        archive_stage = stage.replace("Chapter_101", "Chapter_2100001")
+        for record in (*backend.buttons["buttons"], *backend.ui["texts"]):
+            record["path"] = record["path"].replace(stage, archive_stage)
+        next(
+            item
+            for item in backend.ui["texts"]
+            if item["path"].endswith("/title_form/title_index")
+        )["text"] = "A1"
+        backend.ui["texts"].append(
+            make_text(
+                "300 / 300",
+                "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/main/"
+                "right_chapter/event_btns/tickets/Text",
+            )
+        )
+        backend.ui["text_count"] += 1
+
+        archive = make_oracle(backend).campaign_fleet_selection_state("a1")
+        self.assertEqual(
+            (archive.mob_oil_cost, archive.boss_oil_cost),
+            (500, 500),
         )
 
     def test_event_hard_fleet_selection_types_one_sided_selected_submarine(self):
@@ -5810,6 +6136,12 @@ class SemanticOracleTests(unittest.TestCase):
         backend.ui["images"][1]["sprite"] = "sea_YW"
         hard_11_state = make_oracle(backend).campaign_map_entry_state()
         self.assertEqual(hard_11_state.root_path, map_root)
+        backend.ui["images"][1]["sprite"] = "sea_BW"
+        archive_state = make_oracle(backend).campaign_map_entry_state()
+        self.assertEqual(archive_state.root_path, map_root)
+        backend.ui["images"][1]["sprite"] = "sea_YX"
+        winter_state = make_oracle(backend).campaign_map_entry_state()
+        self.assertEqual(winter_state.root_path, map_root)
 
         backend.buttons["buttons"].append(
             make_button(
@@ -7342,6 +7674,466 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(state.waiting, 6)
         self.assertEqual(state.waiting_capacity, 6)
         self.assertEqual(state.completed, 0)
+
+    def test_meowfficer_purchase_state_uses_asset_derived_exact_paths(self):
+        root = "root/OverlayCamera/Overlay/UIMain/CommanderReserveUI(Clone)/frame/"
+        controls = root + "bg1/"
+        backend = FakeBackend(
+            [
+                make_button("min", controls + "count/min", raycast_top=None),
+                make_button("add", controls + "count/add", raycast_top=None),
+                make_button("max", controls + "max", raycast_top=None),
+                make_button("Button", controls + "Button", raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("3", controls + "count/Text"),
+                make_text("3000", controls + "price_all/Text"),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        state = oracle.meowfficer_purchase_state()
+
+        self.assertEqual(state.generation, 10)
+        self.assertEqual(state.count, 3)
+        self.assertEqual(state.total_price, 3000)
+        self.assertTrue(oracle.enabled("meowfficer/buy/submit"))
+
+    def test_meowfficer_purchase_prompt_is_scoped_to_reserve_ui(self):
+        root = (
+            "root/OverlayCamera/Overlay/UIMain/CommanderReserveUI(Clone)/"
+            "CommanderMsgBoxUI(Clone)/frame/"
+        )
+        backend = FakeBackend(
+            [
+                make_button("cancel_btn", root + "cancel_btn", raycast_top=None),
+                make_button("confirm_btn", root + "confirm_btn", raycast_top=None),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.enabled("meowfficer/buy/cancel"))
+        self.assertTrue(oracle.enabled("meowfficer/buy/confirm"))
+
+    def test_meowfficer_dock_cats_use_exact_card_bounds_and_selection(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        dock = root + "pages/CommanderCatDockUI(Clone)/"
+        box = dock + "box/"
+        card = dock + "frame/content/ComanderCatTpl/info/"
+        first_bounds = {"left": 680, "top": 180, "right": 760, "bottom": 280}
+        second_bounds = {"left": 810, "top": 180, "right": 890, "bottom": 280}
+        backend = FakeBackend(
+            [
+                make_button("back_btn", root + "top/back_btn", raycast_top=None),
+                make_button("home", box + "home", raycast_top=None),
+                make_button("reserve_btn", box + "reserve_btn", raycast_top=None),
+                make_button("boxes_btn", box + "boxes_btn", raycast_top=None),
+                make_button(
+                    "icon", card + "icon", 720, 230,
+                    bounds=first_bounds, raycast_top=None,
+                ),
+                make_button(
+                    "icon", card + "icon", 850, 230,
+                    bounds=second_bounds, raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/8", box + "home/Text"),
+                make_text("0/10", box + "boxes_btn/Text"),
+                make_text("0/15", box + "reserve_btn/Text"),
+                make_text("2/40", box + "capcity/Text"),
+                make_text("5000", root + "top/res/gold/Text"),
+                make_text("3", root + "top/res/1/Text"),
+                make_text("4", root + "top/res/2/Text"),
+                make_text("5", root + "top/res/3/Text"),
+                make_text("LV.8", card + "level_bg/Text", first_bounds),
+                make_text("1", card + "level_bg/Text", second_bounds),
+            ],
+            images=[make_image(dock + "frame/content/ComanderCatTpl/up", bounds=first_bounds)],
+        )
+        oracle = make_oracle(backend)
+
+        cats = oracle.meowfficer_dock_cats()
+
+        self.assertEqual(tuple(item.level for item in cats), (8, 1))
+        self.assertEqual(tuple(item.selected for item in cats), (True, False))
+        receipt = oracle.click_meowfficer_cat(cats[1])
+        self.assertEqual(receipt.semantic_id, "meowfficer/cat/select")
+        self.assertEqual(backend.taps, [(850, 230)])
+
+    def test_meowfficer_feed_state_maps_selected_material_by_bounds(self):
+        root = (
+            "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+            "CommanderCatPlayUI(Clone)/CommanderCatDockUI(Clone)/"
+        )
+        card = root + "frame/content/ComanderCatTpl/info/"
+        card_bounds = {"left": 760, "top": 160, "right": 840, "bottom": 260}
+        backend = FakeBackend(
+            [
+                make_button("cancel_btn", root + "bottom/cancel_btn", raycast_top=None),
+                make_button("select_btn", root + "bottom/select_btn", raycast_top=None),
+                make_button(
+                    "icon", card + "icon", 800, 210,
+                    bounds=card_bounds, raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("1/10", root + "bottom/value/Text"),
+                make_text("LV.1", card + "level_bg/Text", card_bounds),
+            ],
+            images=[
+                make_image(
+                    root + "frame/content/ComanderCatTpl/up", bounds=card_bounds
+                )
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        state = oracle.meowfficer_feed_state()
+
+        self.assertEqual(state.selected, 1)
+        self.assertEqual(state.capacity, 10)
+        self.assertTrue(state.candidates[0].selected)
+        self.assertTrue(oracle.enabled("meowfficer/feed/confirm"))
+
+    def test_meowfficer_dock_cats_accept_live_numeric_card_nodes(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        dock = root + "pages/CommanderCatDockUI(Clone)/"
+        box = dock + "box/"
+        first = dock + "frame/content/0/"
+        second = dock + "frame/content/1/"
+        first_bounds = {"left": 720, "top": 130, "right": 845, "bottom": 260}
+        second_bounds = {"left": 850, "top": 130, "right": 975, "bottom": 260}
+        backend = FakeBackend(
+            [
+                make_button("back_btn", root + "top/back_btn", raycast_top=None),
+                make_button("home", box + "home", raycast_top=None),
+                make_button("reserve_btn", box + "reserve_btn", raycast_top=None),
+                make_button("boxes_btn", box + "boxes_btn", raycast_top=None),
+                make_button(
+                    "info", first + "info", 784, 195,
+                    bounds=first_bounds, raycast_top=None,
+                ),
+                make_button(
+                    "info", second + "info", 914, 195,
+                    bounds=second_bounds, raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/8", box + "home/Text"),
+                make_text("7/10", box + "boxes_btn/Text"),
+                make_text("15/15", box + "reserve_btn/Text"),
+                make_text("38/40", box + "capcity/Text"),
+                make_text("109505", root + "top/res/gold/Text"),
+                make_text("469", root + "top/res/1/Text"),
+                make_text("4", root + "top/res/2/Text"),
+                make_text("5", root + "top/res/3/Text"),
+                make_text("30", first + "info/level_bg/Text", first_bounds),
+                make_text("5", second + "info/level_bg/Text", second_bounds),
+            ],
+            images=[make_image(first + "up", bounds=first_bounds)],
+        )
+        oracle = make_oracle(backend)
+
+        cats = oracle.meowfficer_dock_cats()
+
+        self.assertEqual(tuple(item.level for item in cats), (30, 5))
+        self.assertEqual(tuple(item.selected for item in cats), (True, False))
+        receipt = oracle.click_meowfficer_cat(cats[1])
+        self.assertEqual(receipt.path, second + "info")
+        self.assertEqual(backend.taps, [(914, 195)])
+
+    def test_meowfficer_dock_cats_reject_more_than_live_viewport(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        dock = root + "pages/CommanderCatDockUI(Clone)/"
+        box = dock + "box/"
+        cards = []
+        levels = []
+        for index in range(17):
+            left = 40 + (index % 4) * 130
+            top = 120 + (index // 4) * 110
+            bounds = {
+                "left": left,
+                "top": top,
+                "right": left + 100,
+                "bottom": top + 100,
+            }
+            path = dock + f"frame/content/{index}/info"
+            cards.append(
+                make_button(
+                    "info", path, left + 50, top + 50,
+                    bounds=bounds, raycast_top=None,
+                )
+            )
+            levels.append(make_text("1", path + "/level_bg/Text", bounds))
+        backend = FakeBackend(
+            [
+                make_button("back_btn", root + "top/back_btn", raycast_top=None),
+                make_button("home", box + "home", raycast_top=None),
+                make_button("reserve_btn", box + "reserve_btn", raycast_top=None),
+                make_button("boxes_btn", box + "boxes_btn", raycast_top=None),
+                *cards,
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/8", box + "home/Text"),
+                make_text("0/10", box + "boxes_btn/Text"),
+                make_text("0/15", box + "reserve_btn/Text"),
+                make_text("17/40", box + "capcity/Text"),
+                make_text("5000", root + "top/res/gold/Text"),
+                make_text("3", root + "top/res/1/Text"),
+                make_text("4", root + "top/res/2/Text"),
+                make_text("5", root + "top/res/3/Text"),
+                *levels,
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        with self.assertRaisesRegex(SemanticGateClosed, "cat grid is ambiguous"):
+            oracle.meowfficer_dock_cats()
+
+    def test_meowfficer_enhance_state_and_submit_use_reviewed_controls(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        play = root + "CommanderCatPlayUI(Clone)/select_panel/"
+        backend = FakeBackend(
+            [
+                make_button("back_btn", root + "top/back_btn", raycast_top=None),
+                make_button(
+                    "add", play + "frame/list/commandeTF/add", raycast_top=None
+                ),
+                make_button("confirm_btn", play + "confirm_btn", raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("LV.9", play + "exp_bg/level_bg/Text"),
+                make_text("4000", root + "top/res/gold/Text"),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        state = oracle.meowfficer_enhance_state()
+
+        self.assertEqual((state.level, state.coins), (9, 4000))
+        self.assertTrue(oracle.enabled("meowfficer/enhance/submit"))
+        oracle.click("meowfficer/enhance/submit")
+        self.assertEqual(backend.taps, [(640, 360)])
+
+    def test_meowfficer_enhance_prompt_is_scoped_to_play_ui(self):
+        root = (
+            "root/OverlayCamera/Overlay/UIMain/CommanderCatPlayUI(Clone)/"
+            "CommanderMsgBoxUI(Clone)/frame/"
+        )
+        backend = FakeBackend(
+            [
+                make_button("cancel_btn", root + "cancel_btn", raycast_top=None),
+                make_button("confirm_btn", root + "confirm_btn", raycast_top=None),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.enabled("meowfficer/enhance/cancel"))
+        self.assertTrue(oracle.enabled("meowfficer/enhance/confirm"))
+
+    def test_meowfficer_fort_chores_use_asset_derived_clone_paths(self):
+        root = "root/OverlayCamera/Overlay/UIMain/CommanderHomeUI(Clone)/bg/frame/"
+        content = root + "scrollrect/content/"
+        backend = FakeBackend(
+            [
+                make_button("close_btn", root + "close_btn", raycast_top=None),
+                make_button(
+                    "play",
+                    content + "tpl/unlock/bubble/play",
+                    100,
+                    200,
+                    raycast_top=None,
+                ),
+                make_button(
+                    "clean",
+                    content + "tpl(Clone)/unlock/bubble/clean",
+                    300,
+                    400,
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("2/8", root + "cnt/Text"),
+                make_text("LV.3", root + "title/Text"),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        paths = oracle.meowfficer_fort_chore_paths()
+
+        self.assertEqual(
+            paths,
+            (
+                content + "tpl(Clone)/unlock/bubble/clean",
+                content + "tpl/unlock/bubble/play",
+            ),
+        )
+        receipt = oracle.click_meowfficer_fort_chore(paths[0])
+        self.assertEqual(receipt.semantic_id, "meowfficer/fort/chore/clean")
+        self.assertEqual(backend.taps, [(300, 400)])
+
+    def test_meowfficer_completed_slots_include_clone_rows_and_use_button_center(self):
+        root = "root/OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/frame/"
+        boxes = root + "boxes/"
+        content = boxes + "mask/content/"
+        backend = FakeBackend(
+            [
+                make_button("close_btn", root + "close_btn", raycast_top=None),
+                make_button("finish_btn", boxes + "finish_btn", raycast_top=None),
+                make_button("start_btn", boxes + "start_btn", raycast_top=None),
+                make_button(
+                    "frame",
+                    content + "frame",
+                    438,
+                    190,
+                    bounds={"left": 252, "top": 190, "right": 624, "bottom": 354},
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/4", boxes + "statistics/traning"),
+                make_text("0/6", boxes + "statistics/wait"),
+                make_text("COMPLETE", content + "frame/ongoing/time/Text"),
+                make_text(
+                    "COMPLETE",
+                    content + "frame(Clone)/ongoing/time/Text",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.meowfficer_training_state().completed, 2)
+        receipt = oracle.click("meowfficer/train/complete/first")
+
+        self.assertEqual(receipt.point, Point(438.0, 272.0))
+        self.assertEqual(backend.taps, [(438, 272)])
+
+    def test_meowfficer_queue_prompt_accepts_exact_partial_capacity(self):
+        root = "root/OverlayCamera/Overlay/UIMain/"
+        prompt = root + "CommanderMsgBoxUI(Clone)/frame/"
+        pool = root + "CommanderBoxesUI(Clone)/CommanderBuildPoolUI(Clone)/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "cancel_btn", prompt + "cancel_btn", raycast_top=None
+                ),
+                make_button(
+                    "confirm_btn", prompt + "confirm_btn", raycast_top=None
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "<color=#847D7B>selected 1 box</color>",
+                    prompt + "bg/content/Text",
+                ),
+                make_text("1/1", pool + "statistics/Text"),
+            ],
+            images=[
+                make_image(
+                    pool + "frame/bg/content/queue/list1/pos/icon",
+                    sprite="ssr1",
+                )
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.enabled("meowfficer/queue/confirm"))
+        oracle.click("meowfficer/queue/confirm")
+
+        self.assertEqual(backend.taps, [(640, 360)])
+
+    def test_meowfficer_acquisition_classifies_tiered_and_tierless_talents(self):
+        root = "root/OverlayCamera/Overlay/UIMain/GetCommanderUI(Clone)/"
+        backend = FakeBackend(
+            [
+                make_button("click", root + "click", raycast_top=None),
+                make_button(
+                    "lock",
+                    root + "left_panel/btns/lock",
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("COMMAND MEOW", root + "main/bg/Image"),
+                make_text("260825", root + "main/info/content/copyright/Text"),
+            ],
+            images=[
+                make_image(root + "main/info/content/rarity/value", sprite="SSR"),
+                make_image(
+                    root + "main/info/content/talents/talent/icon",
+                    sprite="hangmu_one_1",
+                ),
+                make_image(
+                    root + "main/info/content/talents/talent(Clone)/icon",
+                    sprite="chongying_two_2",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        state = oracle.meowfficer_acquisition_state()
+
+        self.assertEqual(state.generation, 10)
+        self.assertEqual(state.identity, "260825")
+        self.assertEqual(state.rarity, "SSR")
+        self.assertFalse(state.has_special_talent)
+        self.assertTrue(oracle.enabled("meowfficer/get/lock"))
+        self.assertFalse(oracle.enabled("meowfficer/get/unlock"))
+        oracle.click("meowfficer/get/lock")
+        self.assertEqual(backend.taps, [(640, 360)])
+
+        backend.ui["images"][-1]["sprite"] = "rainbow_unique"
+        self.assertTrue(oracle.meowfficer_acquisition_state().has_special_talent)
+
+    def test_meowfficer_acquisition_rejects_ambiguous_lock_state(self):
+        root = "root/OverlayCamera/Overlay/UIMain/GetCommanderUI(Clone)/"
+        backend = FakeBackend(
+            [
+                make_button("click", root + "click", raycast_top=None),
+                make_button("lock", root + "left_panel/btns/lock", raycast_top=None),
+                make_button(
+                    "unlock", root + "left_panel/btns/unlock", raycast_top=None
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("COMMAND MEOW", root + "main/bg/Image"),
+                make_text("260825", root + "main/info/content/copyright/Text"),
+            ],
+            images=[
+                make_image(root + "main/info/content/rarity/value", sprite="SSR"),
+                make_image(
+                    root + "main/info/content/talents/talent/icon",
+                    sprite="rainbow_unique",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.enabled("meowfficer/get/lock"))
+        self.assertFalse(oracle.enabled("meowfficer/get/unlock"))
 
     def test_meowfficer_training_state_rejects_over_capacity_counter(self):
         root = "root/OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/frame/"

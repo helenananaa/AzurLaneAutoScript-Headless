@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the real ALAS Meowfficer task at the full-training-queue boundary."""
+"""Run the real ALAS Meowfficer task at a typed training boundary."""
 
 from __future__ import annotations
 
@@ -122,6 +122,9 @@ def validate(*, alas_root: Path, seed_config: str, driver_revision: str) -> Mapp
     try:
         from alas import AzurLaneAutoScript
         from module.config.config import name_to_function
+        from module.handler.login import LoginHandler
+        from module.meowfficer.meowfficer import RewardMeowfficer
+        from module.ui.page import page_meowfficer
 
         instance = AzurLaneAutoScript(config_name)
         task = name_to_function("Meowfficer")
@@ -130,12 +133,18 @@ def validate(*, alas_root: Path, seed_config: str, driver_revision: str) -> Mapp
         adapter = instance.device.semantic_adapter.open()
         instance.config.task = task
         instance.config.bind(task)
+        meowfficer = RewardMeowfficer(config=instance.config, device=instance.device)
+        LoginHandler(config=instance.config, device=instance.device).handle_app_login()
+        meowfficer.ui_ensure(page_meowfficer)
+        meowfficer.wait_meowfficer_buttons()
         before = _ensure_dock(adapter)
 
         dispatches: list[str] = []
         taps: list[tuple[int, int]] = []
+        actions: list[dict[str, Any]] = []
         original_dispatch = adapter._dispatch_mutation
         original_tap = adapter.oracle._tap
+        original_click = adapter.oracle.click
 
         def record_dispatch(capability: str, operation: object) -> object:
             dispatches.append(capability)
@@ -145,8 +154,20 @@ def validate(*, alas_root: Path, seed_config: str, driver_revision: str) -> Mapp
             taps.append((x, y))
             original_tap(x, y)
 
+        def record_click(semantic_id: str) -> object:
+            receipt = original_click(semantic_id)
+            actions.append(
+                {
+                    "semantic_id": receipt.semantic_id,
+                    "generation": receipt.generation,
+                    "path": receipt.path,
+                }
+            )
+            return receipt
+
         adapter._dispatch_mutation = record_dispatch
         adapter.oracle._tap = record_tap
+        adapter.oracle.click = record_click
         before_next_run = instance.config.Scheduler_NextRun
         started = time.monotonic()
         instance.meowfficer()
@@ -155,21 +176,58 @@ def validate(*, alas_root: Path, seed_config: str, driver_revision: str) -> Mapp
         persisted = _read_json(config_path)
         after_next_run = persisted["Meowfficer"]["Scheduler"]["NextRun"]
 
-        if len(taps) != 2:
-            raise AssertionError("full-queue run must only enter and close training")
         if dispatches:
-            raise AssertionError("full-queue run unexpectedly dispatched a mutation")
-        if after != before:
-            raise AssertionError("full-queue run changed the typed dock state")
+            raise AssertionError("Meowfficer run unexpectedly used raw mutation dispatch")
+        if before.training_finished == 0:
+            validation_branch = "full-queue-no-op"
+            if [item["semantic_id"] for item in actions] != [
+                "meowfficer/train/enter",
+                "meowfficer/train/close",
+            ]:
+                raise AssertionError("full-queue run used unexpected semantic actions")
+            if after != before:
+                raise AssertionError("full-queue run changed the typed dock state")
+        else:
+            validation_branch = "collect-one-and-requeue"
+            if before.capacity_used >= before.capacity_total:
+                raise AssertionError("positive run requires one free dock slot")
+            semantic_actions = [item["semantic_id"] for item in actions]
+            required = {
+                "meowfficer/train/enter",
+                "meowfficer/train/complete/first",
+                "meowfficer/get/continue",
+                "meowfficer/train/start",
+                "meowfficer/queue/auto",
+                "meowfficer/queue/start",
+                "meowfficer/queue/confirm",
+                "meowfficer/train/close",
+            }
+            if not required.issubset(semantic_actions):
+                raise AssertionError("positive run missed required semantic actions")
+            if after.capacity_used != before.capacity_used + 1:
+                raise AssertionError("positive run did not collect exactly one cat")
+            if after.training_finished != before.training_finished - 1:
+                raise AssertionError("positive run did not consume one completed slot")
+            if sum(after.box_counts) != sum(before.box_counts) - 1:
+                raise AssertionError("positive run did not enqueue exactly one box")
+            if (
+                after.purchased != before.purchased
+                or after.purchase_total != before.purchase_total
+                or after.coins != before.coins
+                or after.fort_current != before.fort_current
+            ):
+                raise AssertionError("positive run changed an unrelated dock resource")
         if after_next_run <= before_next_run.isoformat(sep=" "):
             raise AssertionError("Meowfficer scheduler delay was not committed")
         result.update(
             {
                 "passed": True,
+                "validation_branch": validation_branch,
                 "elapsed_seconds": elapsed,
                 "before": before.__dict__,
                 "after": after.__dict__,
                 "navigation_taps": taps,
+                "actions": actions,
                 "android_mutation_dispatched": False,
                 "mutation_dispatches": dispatches,
                 "before_next_run": before_next_run.isoformat(),

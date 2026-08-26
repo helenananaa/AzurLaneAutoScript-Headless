@@ -4886,10 +4886,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -4914,10 +4914,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -4925,6 +4925,9 @@
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
         "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-fort-empty-live-validation-receipt-20260826-r1.json",
+        "scripts/python/run_alas_meowfficer_fort_empty_live_validation.py",
+        "tests/test_alas_adapter.py",
         "tests/test_semantic_oracle.py",
         "docs/status.md"
       ],
@@ -4940,10 +4943,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -4968,10 +4971,10 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -4980,6 +4983,7 @@
         "integration/alas/series/0190-meowfficer-config-contract.patch",
         "integration/alas/series/0350-meowfficer-dock-training-port.patch",
         "integration/alas/meowfficer-train-full-live-validation-receipt.json",
+        "integration/alas/meowfficer-train-positive-live-validation-receipt-20260826-r7.json",
         "scripts/python/run_alas_meowfficer_train_full_live_validation.py",
         "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
@@ -4997,58 +5001,68 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-enhance-level-max-live-validation-receipt-20260826.json",
+        "scripts/python/run_alas_meowfficer_enhance_live_validation.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=input; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.EnhanceIndex",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机等级已满分支",
       "support": "supported",
       "values": "input/default: 1"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-enhance-level-max-live-validation-receipt-20260826.json",
+        "scripts/python/run_alas_meowfficer_enhance_live_validation.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=input; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.MaxFeedLevel",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机等级已满分支",
       "support": "supported",
       "values": "input/default: 5"
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -5057,6 +5071,7 @@
         "integration/alas/series/0190-meowfficer-config-contract.patch",
         "integration/alas/series/0350-meowfficer-dock-training-port.patch",
         "integration/alas/meowfficer-train-full-live-validation-receipt.json",
+        "integration/alas/meowfficer-train-positive-live-validation-receipt-20260826-r7.json",
         "scripts/python/run_alas_meowfficer_train_full_live_validation.py",
         "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
@@ -5074,40 +5089,48 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-train-positive-live-validation-receipt-20260826-r7.json",
+        "scripts/python/run_alas_meowfficer_train_full_live_validation.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.RetainTalentedGold",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机普通金猫",
       "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "missing",
-        "observation": "missing",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
       "group_code": "M",
@@ -5116,7 +5139,7 @@
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.RetainTalentedPurple",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "🧪 离线闭环",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -8537,7 +8560,7 @@
         "MeowfficerTrain"
       ],
       "name": "Meowfficer",
-      "note": "已用 typed 状态完成购买次数已满无操作、训练 10/10 已满无资源变化的原 ALAS 实机闭环；训练领取与排队控件已完成一次受控实机侦察。正向购买、自动领取/排队、指挥喵宿舍、增强与紫/金天赋保留全分支仍未闭环",
+      "note": "原 Meowfficer 状态机现已接入完整 typed 边界：购买精确数量与金币后置条件、Fort 已入住猫的 play/feed/clean chores、相同卡面的连续领取、特殊紫/金天赋锁定、seamlessly/周日增强，以及按 EnhanceIndex 与 MaxFeedLevel 选择目标和最多 10 只材料。实机证据覆盖购买次数已满零输入、Fort 0/8 安全跳过、训练 10/10 已满零资源变化、once_a_day 领取 1 只普通 SSR 后补排金箱，以及当前数字卡片层级下 EnhanceIndex=1 命中 LV30 后零输入返回 leveled_max；当前可见前 12 个 ALAS 目标均为 LV30，需出现可见非满级目标和合格材料后才能复核强化正向消耗。正向购买、已入住 Fort、特殊天赋、多只领取和完整强化消耗仍只离线闭环，因此面板保持 B",
       "status": "B"
     },
     {
@@ -8810,8 +8833,8 @@
         "EnemyPriority"
       ],
       "name": "WarArchives",
-      "note": "能观察入口/Data Key；48 个档案值的进入、消耗、地图和结算均未形成覆盖台账",
-      "status": "B"
+      "note": "常驻档案入口、分类、45 个当前 CN 客户端可识别档案卡、字母关卡、普通/困难切换、档案钥匙计数与精确 5-key 入场确认均已 typed 化。原 WarArchives 在冬冠 A1 完成 4 场普通战和 Boss、奖励结算并回到档案关卡页，钥匙 295→290，凭证见 integration/alas/war-archives-live-validation-receipt-20260826-r18.json。红染 A1 因原图脚本要求舰队前移到空格 C2，仍在现有敌人/拾取格输入边界局部拒绝；war_archives_20230525_cn、war_archives_20230803_cn、war_archives_20240725_cn 在当前固定 CN 游戏表中不存在并按任务局部不可用，其余档案仅有共享路径离线覆盖，尚未逐档案实机闭环",
+      "status": "L"
     }
   ],
   "promotions": [
@@ -11753,9 +11776,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "2bfd4fe27d1ec45e334022b19c7eefa58ea9cc641b899a337e7e79a76e254eae",
-      "manifest_sha256": "cff31a0362e22d9a6e6466100826cc394f79181a2b379ad4f208bdaaf396b68a",
-      "member_count": 91
+      "combined_sha256": "17fa5134fac37f917ef76aaaac76a13634faf61cfe42eded4c39e43cb5e9dfc1",
+      "manifest_sha256": "b92fd09bdd43ec29922401d18641ac86e4e1189e8b050dcfd1a118592419a8b9",
+      "member_count": 92
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

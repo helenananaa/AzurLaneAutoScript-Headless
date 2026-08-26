@@ -2,6 +2,98 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-26
+
+### WarArchives winter-crown A1 is live complete
+
+- The adapter now replaces the archive category/card boundary, all 45 archive
+  cards identifiable in the pinned CN client, letter-coded stage selection,
+  normal/hard switching, Data Key counters, and the exact five-key entry
+  confirmation. The original ALAS `CampaignWarArchives` remains responsible
+  for stage routing, map logic, enemy selection, combat, stop conditions, and
+  scheduling.
+- A controlled winter-crown A1 run consumed `295 -> 290` Data Keys, cleared
+  four normal enemies and the boss, acknowledged the exact grade, reward, and
+  statistics surfaces, and returned to the archive stage page at `290/300`.
+  Two transient geometry/result transitions stopped before input and resumed
+  only after their exact typed postconditions were re-proven. Evidence is
+  `integration/alas/war-archives-live-validation-receipt-20260826-r18.json`.
+- Red-dyed A1 remains locally unsupported because its upstream map script
+  calls `fleet_2_push_forward()` toward empty cell C2, outside the reviewed
+  enemy/pickup grid-input boundary. Three ALAS archive values
+  (`war_archives_20230525_cn`, `war_archives_20230803_cn`, and
+  `war_archives_20240725_cn`) have no matching card in the pinned CN game data
+  and fail only that requested task. Other archive cards share the offline
+  navigation contract but are not claimed as individually live-qualified.
+
+### Meowfficer Fort typed action boundary is complete offline
+
+- The current dock reports Fort `0/8`. A typed inspection of the Fort page
+  confirmed that all eight slots are empty; its `batch` control opens the cat
+  assignment page rather than performing chores. The selection page was
+  closed without choosing a cat or consuming resources.
+- Semantic mode now asks the adapter for the exact dock state before the
+  original `meow_fort()` red-dot branch. With zero occupied slots it returns
+  `False` without input, allowing the original task to schedule normally.
+  When at least one cat is already assigned, the adapter now enters the
+  original Fort page and runs only the exact active `play`, `feed`, or `clean`
+  controls derived from the reviewed clone hierarchy, stopping when the typed
+  chore list becomes empty. It does not assign or rearrange the user's cats.
+- The controlled original-task run preserved every typed resource and counter,
+  injected no Android input, used no mutation dispatch, and scheduled the next
+  server update. Evidence is
+  `integration/alas/meowfficer-fort-empty-live-validation-receipt-20260826-r1.json`.
+  The occupied-slot action path is covered offline and can re-enter live
+  qualification after at least one cat is assigned in game and a real chore
+  becomes available.
+
+### Meowfficer once-a-day collection and requeue is live complete
+
+- The original pinned `RewardMeowfficer.run()` remains the task owner. In
+  semantic mode its existing `once_a_day` branch now reads exact dock/training
+  counters, collects one completed cat when dock capacity permits, evaluates
+  the acquisition rarity and typed talent sprites, reuses the original queue
+  order, closes the training page, and writes the original 150–210 minute
+  schedule.
+- A controlled API 32 x86_64 run started with 8 completed slots and collected
+  one ordinary tiered-talent SSR. With `RetainTalentedGold=true`, the adapter
+  proved that its three talents were tiered and cancelled the unnecessary lock
+  prompt. It then auto-selected one gold box, confirmed the exact `1/1` queue,
+  and returned to the dock.
+- The postcondition was capacity `37/40 -> 38/40`, completed slots `8/10 ->
+  7/10`, and gold boxes `469 -> 468`; coins stayed `109505` and purchase quota
+  stayed `15/15`. All nine inputs
+  have semantic IDs, generations, and Unity paths; raw mutation dispatches are
+  zero. Evidence is
+  `integration/alas/meowfficer-train-positive-live-validation-receipt-20260826-r7.json`.
+- Tierless or otherwise unknown talents remain conservatively classified as
+  special. The exact acquisition `lock`/`unlock` controls and the nested
+  confirmation are now typed, so enabled purple/gold retention locks the card
+  before continuing; generation rather than card identity permits multiple
+  visually identical cats to be collected in one seamlessly run.
+- The enhancement port now selects the configured 1–12 target by exact card
+  bounds, admits material only at or below `MaxFeedLevel`, proves each selected
+  marker and the `n/10` counter, submits through the exact nested confirmation,
+  and requires generation advance plus a coin decrease without level
+  regression. No-material, level-30, coin-limit, invalid-index, and in-battle
+  conditions preserve the original ALAS result contract. Sunday and
+  `seamlessly` plans are therefore admitted again.
+- Live typed inspection also closed the current-client hierarchy drift: the
+  dock exposes 16 numeric `frame/content/0..15/info` cards instead of the old
+  `ComanderCatTpl/info/icon` sample. Both exact structures are supported and
+  covered. The current visible first 12 ALAS targets are all level 30, so an
+  `EnhanceIndex=1`, `MaxFeedLevel=5` run returned `leveled_max` before input;
+  coins, capacity, box counts, and every dock counter remained identical and
+  no raw mutation dispatch occurred. Evidence is
+  `integration/alas/meowfficer-enhance-level-max-live-validation-receipt-20260826.json`.
+- Positive purchasing also sets the exact requested count and verifies quota,
+  coin, and total-box deltas. These new positive purchase, occupied Fort,
+  multi-collect, special-lock, and enhancement branches are offline-complete;
+  live promotion remains pending on their corresponding natural states. For
+  enhancement specifically, re-entry requires a visible configured target
+  below level 30 plus at least one unlocked material at or below
+  `MaxFeedLevel`. The panel therefore remains `B`.
+
 ## 2026-08-25
 
 ### EventSp official auto-search main path is live complete

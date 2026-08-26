@@ -8627,7 +8627,7 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
  from module.meowfficer.buy import MeowfficerBuy
  from module.meowfficer.fort import MeowfficerFort
  from module.meowfficer.train import MeowfficerTrain
-@@ -33,10 +35,21 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+@@ -33,10 +35,27 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
              in: Any page
              out: page_meowfficer
          """
@@ -8646,6 +8646,12 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
 +            enhance_index=self.config.MeowfficerTrain_EnhanceIndex,
 +            max_feed_level=self.config.MeowfficerTrain_MaxFeedLevel,
 +        )
++        semantic_adapter = getattr(getattr(self, 'device', None), 'semantic_adapter', None)
++        if semantic_adapter is not None and meowfficer_config.train_enable:
++            semantic_adapter.admit_meowfficer_training_plan(
++                mode=meowfficer_config.train_mode,
++                sunday=self.meow_is_sunday(),
++            )
 +        if meowfficer_config.buy_amount <= 0 \
 +                and meowfficer_config.overflow_coins < 0 \
 +                and not meowfficer_config.fort_chore_meowfficer \
@@ -8653,7 +8659,7 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
              self.config.Scheduler_Enable = False
              self.config.task_stop()
  
-@@ -44,15 +57,15 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+@@ -44,15 +63,15 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
          self.wait_meowfficer_buttons()  # Wait for the ui to load fully
  
 -        if self.config.Meowfficer_BuyAmount > 0 \
@@ -8674,7 +8680,7 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
                  self.meow_enhance()
              elif self.meow_is_sunday():
                  self.meow_enhance()
-@@ -61,6 +74,6 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+@@ -61,6 +80,6 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
  
          # Scheduler
 -        if self.config.MeowfficerTrain_Enable:
@@ -9606,7 +9612,7 @@ index 78c9d812..62022064 100644
                          self.device.click(MAP_PREPARATION)
                          map_click += 1
 diff --git a/module/meowfficer/buy.py b/module/meowfficer/buy.py
-index 3b506ba1..31f3f11f 100644
+index 3b506ba1..666278b8 100644
 --- a/module/meowfficer/buy.py
 +++ b/module/meowfficer/buy.py
 @@ -29,15 +29,23 @@ class MeowfficerBuy(MeowfficerBase):
@@ -9641,11 +9647,100 @@ index 3b506ba1..31f3f11f 100644
  
          logger.attr('Meowfficer_remain', remain)
          logger.attr('Meowfficer_coins', coins)
+@@ -186,12 +194,16 @@ class MeowfficerBuy(MeowfficerBase):
+         buy_amount = self.config.Meowfficer_BuyAmount
+         buy_amount = max(min(buy_amount, 15), 1)
+         overflow_th = self.config.Meowfficer_OverflowCoins
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+ 
+         for _ in range(3):
+             count = self.meow_get_buy_count(buy_amount, overflow_th)
+             if count <= 0:
+                 return
+-            self.meow_choose(count)
+-            self.meow_confirm()
++            if semantic_adapter is not None:
++                semantic_adapter.buy_meowfficer_boxes(count)
++            else:
++                self.meow_choose(count)
++                self.meow_confirm()
+ 
+         logger.warning('Too many trial in meowfficer buy, stopped.')
+diff --git a/module/meowfficer/collect.py b/module/meowfficer/collect.py
+index 2fd930dc..4018f76f 100644
+--- a/module/meowfficer/collect.py
++++ b/module/meowfficer/collect.py
+@@ -236,6 +236,13 @@ class MeowfficerCollect(MeowfficerBase):
+             in: MEOWFFICER_GET_CHECK
+             out: MEOWFFICER_TRAIN
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.finish_meowfficer_acquisition(
++                retain_talented_gold=self.config.MeowfficerTrain_RetainTalentedGold,
++                retain_talented_purple=self.config.MeowfficerTrain_RetainTalentedPurple,
++            )
++
+         # Loop through possible screen transitions
+         confirm_timer = Timer(1.5, count=3).start()
+         count = 0
+diff --git a/module/meowfficer/enhance.py b/module/meowfficer/enhance.py
+index 3855ab1b..ceeeb22f 100644
+--- a/module/meowfficer/enhance.py
++++ b/module/meowfficer/enhance.py
+@@ -327,6 +327,13 @@ class MeowfficerEnhance(MeowfficerBase):
+         logger.hr('Meowfficer enhance', level=1)
+         logger.attr('MeowfficerTrain_EnhanceIndex', self.config.MeowfficerTrain_EnhanceIndex)
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.enhance_meowfficer(
++                index=self.config.MeowfficerTrain_EnhanceIndex,
++                max_feed_level=self.config.MeowfficerTrain_MaxFeedLevel,
++            )
++
+         # Base Cases
+         # - Config at least > 0 but less than or equal to 12
+         # - Coins at least > 1000
+diff --git a/module/meowfficer/fort.py b/module/meowfficer/fort.py
+index 595c248b..b40ab830 100644
+--- a/module/meowfficer/fort.py
++++ b/module/meowfficer/fort.py
+@@ -72,16 +72,25 @@ class MeowfficerFort(MeowfficerBase):
+             in: page_meowfficer
+             out: page_meowfficer
+         """
+-        # Check for fort red notification
+-        if not self.appear(MEOWFFICER_FORT_RED_DOT):
+-            return False
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            if not semantic_adapter.meowfficer_fort_chore_available():
++                logger.info('Meowfficer Fort has no occupied slots, stopped')
++                return False
++        else:
++            # Check for fort red notification
++            if not self.appear(MEOWFFICER_FORT_RED_DOT):
++                return False
+         logger.hr('Meowfficer fort', level=1)
+ 
+         # Enter MEOWFFICER_FORT window
+         self.meow_enter(MEOWFFICER_FORT_ENTER, check_button=MEOWFFICER_FORT_CHECK)
+ 
+         # Perform fort chore operations
+-        self.meow_chores()
++        if semantic_adapter is not None:
++            semantic_adapter.run_meowfficer_fort_chores()
++        else:
++            self.meow_chores()
+ 
+         # Exit back into page_meowfficer
+         self.meow_menu_close()
 diff --git a/module/meowfficer/train.py b/module/meowfficer/train.py
-index 24a406b4..e2774302 100644
+index ccdda576..cc81df14 100644
 --- a/module/meowfficer/train.py
 +++ b/module/meowfficer/train.py
-@@ -159,6 +159,26 @@ class MeowfficerTrain(MeowfficerCollect, MeowfficerEnhance):
+@@ -196,6 +196,33 @@ class MeowfficerTrain(MeowfficerCollect, MeowfficerEnhance):
          """
          logger.hr('Meowfficer train', level=1)
  
@@ -9664,19 +9759,26 @@ index 24a406b4..e2774302 100644
 +                logger.info('Meowfficer training queue is full, stopped')
 +                self.meow_menu_close()
 +                return False
-+            from alas_headless import SemanticGateClosed
-+            raise SemanticGateClosed(
-+                'Meowfficer semantic training requires a reviewed collect or queue boundary'
-+            )
++            logger.attr('MeowfficerTrain_Mode', self.config.MeowfficerTrain_Mode)
++            collected = False
++            if dock.capacity_used < dock.capacity_total:
++                collect_all = (
++                    self.config.MeowfficerTrain_Mode == 'seamlessly'
++                    or self.meow_is_sunday()
++                )
++                collected = self.meow_collect(collect_all=collect_all)
++            self.meow_queue(ascending=False)
++            self.meow_menu_close()
++            return collected
 +
          # Retrieve capacity to determine whether able to collect
          current, remain, total = MEOWFFICER_CAPACITY.ocr(self.device.image)
          logger.attr('Meowfficer_capacity_remain', remain)
 diff --git a/module/ui/ui.py b/module/ui/ui.py
-index afad4234..434ff2de 100644
+index 066253bd..c40604d0 100644
 --- a/module/ui/ui.py
 +++ b/module/ui/ui.py
-@@ -309,6 +309,13 @@ class UI(InfoHandler):
+@@ -310,6 +310,13 @@ class UI(InfoHandler):
              bool: If UI switched.
          """
          logger.hr("UI ensure")
@@ -15217,3 +15319,84 @@ index 66c082eb..b415e9bb 100644
 +
              elif self.appear_then_click(page_supply_pack.check_button, offset=(20, 20), interval=3):
                  continue
+diff --git a/campaign/campaign_war_archives/campaign_base.py b/campaign/campaign_war_archives/campaign_base.py
+index 85e1b21b43287791bac0b973bb252008cd8ed95d..63ced28f9a701c68cefffa36d497f95d2fc9c83c 100644
+--- a/campaign/campaign_war_archives/campaign_base.py
++++ b/campaign/campaign_war_archives/campaign_base.py
+@@ -109,6 +109,25 @@ class CampaignBase(CampaignBase_):
+         to target archive's campaign stage map
+         """
+         # On first run regardless of current location
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            result = True
++            if self.first_run or not semantic_adapter.war_archives_campaign_visible():
++                result = self.ui_ensure(destination=page_archives)
++                semantic_adapter.open_war_archives_campaign(
++                    self.config.Campaign_Event,
++                    mode,
++                )
++
++            # Preserve the original first-run lifecycle.  Search, retries,
++            # stage selection and every later campaign decision remain owned
++            # by CampaignRun; only the screenshot/template/input boundary is
++            # replaced above.
++            if self.first_run:
++                self.first_run = False
++
++            return result
++
+         # even in target stage map, start from page_archives
+         # For subsequent runs when neither reward or
+         # stop_triggers occur, no need perform operations
+diff --git a/module/war_archives/war_archives.py b/module/war_archives/war_archives.py
+index 24d7b3262cf264970ae650e146b3d3b170404341..e66782bd1dd26cc81499f915684dd2a2ffb0d103 100644
+--- a/module/war_archives/war_archives.py
++++ b/module/war_archives/war_archives.py
+@@ -21,10 +21,22 @@ DATA_KEY_CAMPAIGN = OcrDataKey(OCR_DATA_KEY_CAMPAIGN, letter=(255, 247, 247), t
+ 
+ class CampaignWarArchives(CampaignRun, CampaignBase):
+     def triggered_stop_condition(self, oil_check=True):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         # Must be in archives campaign to OCR check
+-        if self.appear(WAR_ARCHIVES_CAMPAIGN_CHECK, offset=(20, 20)):
++        if semantic_adapter is not None:
++            in_archives = semantic_adapter.war_archives_campaign_visible()
++        else:
++            in_archives = self.appear(
++                WAR_ARCHIVES_CAMPAIGN_CHECK,
++                offset=(20, 20),
++            )
++        if in_archives:
+             # Check for 0 data keys left to use
+-            current, remain, total = DATA_KEY_CAMPAIGN.ocr(self.device.image)
++            if semantic_adapter is not None:
++                current, total = semantic_adapter.war_archives_data_key_count()
++                remain = total - current
++            else:
++                current, remain, total = DATA_KEY_CAMPAIGN.ocr(self.device.image)
+             logger.info(f'Inventory: {current} / {total}, Remain: {current}')
+             if remain == total:
+                 logger.hr('Triggered out of data keys')
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+index 32316210..7b20b3c7 100644
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -175,6 +175,17 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                 ):
+                     logger.info('Semantic pre-sortie: scan fleet preparation')
+                     if semantic_adapter.campaign_sortie_committed():
++                        archive_receipt = (
++                            semantic_adapter
++                            .confirm_war_archives_entry_if_present()
++                        )
++                        if archive_receipt is not None:
++                            logger.info(
++                                'Semantic WarArchives entry confirmed: '
++                                f'{archive_receipt.semantic_id}, '
++                                f'generation={archive_receipt.generation}'
++                            )
++                            continue
+                         if self.is_in_auto_search_menu():
+                             if mode == 'hard':
+                                 receipt = (

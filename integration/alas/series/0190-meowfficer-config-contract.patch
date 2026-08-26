@@ -7,7 +7,7 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
  from module.meowfficer.buy import MeowfficerBuy
  from module.meowfficer.fort import MeowfficerFort
  from module.meowfficer.train import MeowfficerTrain
-@@ -33,10 +35,21 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+@@ -33,10 +35,27 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
              in: Any page
              out: page_meowfficer
          """
@@ -26,6 +26,12 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
 +            enhance_index=self.config.MeowfficerTrain_EnhanceIndex,
 +            max_feed_level=self.config.MeowfficerTrain_MaxFeedLevel,
 +        )
++        semantic_adapter = getattr(getattr(self, 'device', None), 'semantic_adapter', None)
++        if semantic_adapter is not None and meowfficer_config.train_enable:
++            semantic_adapter.admit_meowfficer_training_plan(
++                mode=meowfficer_config.train_mode,
++                sunday=self.meow_is_sunday(),
++            )
 +        if meowfficer_config.buy_amount <= 0 \
 +                and meowfficer_config.overflow_coins < 0 \
 +                and not meowfficer_config.fort_chore_meowfficer \
@@ -33,7 +39,7 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
              self.config.Scheduler_Enable = False
              self.config.task_stop()
  
-@@ -44,15 +57,15 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+@@ -44,15 +63,15 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
          self.wait_meowfficer_buttons()  # Wait for the ui to load fully
  
 -        if self.config.Meowfficer_BuyAmount > 0 \
@@ -54,7 +60,7 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
                  self.meow_enhance()
              elif self.meow_is_sunday():
                  self.meow_enhance()
-@@ -61,6 +74,6 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+@@ -61,6 +80,6 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
  
          # Scheduler
 -        if self.config.MeowfficerTrain_Enable:

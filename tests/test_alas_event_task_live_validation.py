@@ -989,7 +989,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             )
             self.assertEqual(
                 MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256,
-                "0503d9e7e30f7b8665be265cef3f586b063ea7783cffbd63d02f763c7aac3614",
+                "1803fd9c558a4cb2b99ae3ea837993e22a5f8131cf099ae1a9ffa9f87b5f6d3e",
             )
             self.assertEqual(
                 proof["canonical_source_sha256"],
@@ -997,7 +997,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             )
             self.assertEqual(
                 MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256,
-                "d65605da61567ea5713e23269ddaa5cd490dcec8db20e96fec79696dff75c622",
+                "c7901c1b850e75c1441f0dd441532bab06ca08ee3677481687cc129aa58e8505",
             )
             self.assertEqual(
                 proof["canonical_source_sha256"],

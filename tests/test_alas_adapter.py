@@ -294,6 +294,7 @@ class FakeOracle:
             actions=(self.click_receipt("retirement/ships/confirm"),),
         )
         self.war_archives_visible_value = False
+        self.war_archives_campaign_visible_value = False
         self.war_archives_collected_value = False
         self.war_archives_key_text_value = "300/300"
         self.data_key_limit_prompt_value = False
@@ -437,6 +438,9 @@ class FakeOracle:
             self.campaign_fleet_generation += 1
         if semantic_id == "overlay/network-reconnect/confirm":
             self.enabled_values[semantic_id] = False
+        if semantic_id == "meowfficer/get/lock":
+            self.enabled_values[semantic_id] = False
+            self.enabled_values["meowfficer/get/unlock"] = True
         if self.enable_main_after_overlay_click and semantic_id.startswith("overlay/"):
             self.enabled_values["main/task"] = True
         generation = 7
@@ -779,6 +783,9 @@ class FakeOracle:
 
     def war_archives_page_visible(self):
         return self.war_archives_visible_value
+
+    def war_archives_campaign_page_visible(self):
+        return self.war_archives_campaign_visible_value
 
     def battle_pass_page_visible(self):
         return self.battle_pass_page_visible_value
@@ -1901,6 +1908,353 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(oracle.click_calls, ["meowfficer/train/close"])
         self.assertEqual(len(gate_calls), 2)
+
+    def test_meowfficer_fort_zero_occupied_slots_is_a_safe_noop(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.meowfficer_dock_state = Mock(
+            return_value=SimpleNamespace(fort_current=0, fort_total=8)
+        )
+
+        self.assertFalse(adapter.meowfficer_fort_chore_available())
+        self.assertEqual(oracle.click_calls, [])
+        self.assertEqual(gate_calls, [True])
+
+    def test_meowfficer_fort_occupied_slots_are_admitted(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.meowfficer_dock_state = Mock(
+            return_value=SimpleNamespace(fort_current=1, fort_total=8)
+        )
+
+        self.assertTrue(adapter.meowfficer_fort_chore_available())
+
+        self.assertEqual(oracle.click_calls, [])
+        self.assertEqual(gate_calls, [True])
+
+    @patch("alas_headless.alas_adapter.time.sleep", return_value=None)
+    def test_meowfficer_fort_runs_one_exact_chore_to_idle(self, _sleep):
+        adapter, oracle, _ = self.make_adapter()
+        path = (
+            "root/CommanderHomeUI(Clone)/bg/frame/scrollrect/content/"
+            "tpl/unlock/bubble/play"
+        )
+        receipt = ActionReceipt(
+            semantic_id="meowfficer/fort/chore/play",
+            generation=10,
+            point=Point(10, 20),
+            bounds=Bounds(0, 0, 20, 40),
+            path=path,
+        )
+        oracle.enabled_values["reward/award-info/close"] = False
+        oracle.meowfficer_fort_chore_paths = Mock(side_effect=[(path,), ()])
+        oracle.click_meowfficer_fort_chore = Mock(return_value=receipt)
+
+        receipts = adapter.run_meowfficer_fort_chores()
+
+        self.assertEqual(receipts, (receipt,))
+        oracle.click_meowfficer_fort_chore.assert_called_once_with(path)
+
+    def test_meowfficer_purchase_uses_exact_selected_count_and_postconditions(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        before = SimpleNamespace(
+            purchased=0,
+            purchase_total=15,
+            coins=10000,
+            box_counts=(10, 20, 30),
+        )
+        after = SimpleNamespace(
+            purchased=3,
+            purchase_total=15,
+            coins=7000,
+            box_counts=(11, 21, 31),
+        )
+        oracle.meowfficer_dock_state = Mock(side_effect=[before, after])
+        oracle.meowfficer_purchase_state = Mock(
+            side_effect=[
+                SimpleNamespace(generation=10, count=1, total_price=0),
+                SimpleNamespace(generation=11, count=2, total_price=1500),
+                SimpleNamespace(generation=12, count=3, total_price=3000),
+            ]
+        )
+
+        result = adapter.buy_meowfficer_boxes(3)
+
+        self.assertIs(result, after)
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "meowfficer/buy/enter",
+                "meowfficer/buy/add",
+                "meowfficer/buy/add",
+                "meowfficer/buy/submit",
+            ],
+        )
+        self.assertEqual(gate_calls, [True])
+
+    def test_meowfficer_purchase_rejects_quota_before_input(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.meowfficer_dock_state = Mock(
+            return_value=SimpleNamespace(
+                purchased=14,
+                purchase_total=15,
+                coins=10000,
+                box_counts=(10, 20, 30),
+            )
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "quota"):
+            adapter.buy_meowfficer_boxes(2)
+
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_meowfficer_once_a_day_non_sunday_plan_is_admitted(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+
+        adapter.admit_meowfficer_training_plan(mode="once_a_day", sunday=False)
+
+        self.assertEqual(oracle.click_calls, [])
+        self.assertEqual(gate_calls, [True])
+
+    def test_meowfficer_enhancement_plans_are_admitted(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+
+        for mode, sunday in (("seamlessly", False), ("once_a_day", True)):
+            with self.subTest(mode=mode, sunday=sunday):
+                adapter.admit_meowfficer_training_plan(mode=mode, sunday=sunday)
+
+        self.assertEqual(oracle.click_calls, [])
+        self.assertEqual(gate_calls, [True, True])
+
+    def test_meowfficer_enhance_no_feed_material_returns_to_dock(self):
+        adapter, oracle, _ = self.make_adapter()
+        target = SimpleNamespace(
+            path="cat/one",
+            level=8,
+            selected=True,
+            point=Point(100, 100),
+            bounds=Bounds(80, 80, 120, 120),
+        )
+        oracle.meowfficer_dock_state = Mock(
+            side_effect=[SimpleNamespace(coins=5000), SimpleNamespace(coins=5000)]
+        )
+        oracle.meowfficer_dock_cats = Mock(return_value=(target,))
+        oracle.meowfficer_enhance_state = Mock(
+            side_effect=[
+                SimpleNamespace(generation=10, level=8, coins=5000),
+                SimpleNamespace(generation=11, level=8, coins=5000),
+            ]
+        )
+        oracle.meowfficer_feed_state = Mock(
+            return_value=SimpleNamespace(
+                generation=10, selected=0, capacity=10, candidates=()
+            )
+        )
+
+        result = adapter.enhance_meowfficer(index=1, max_feed_level=1)
+
+        self.assertEqual(result, "success")
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "meowfficer/enhance/open",
+                "meowfficer/feed/open",
+                "meowfficer/feed/cancel",
+                "meowfficer/enhance/back",
+            ],
+        )
+
+    @patch("alas_headless.alas_adapter.time.sleep", return_value=None)
+    def test_meowfficer_enhance_selects_eligible_feed_and_proves_spend(self, _sleep):
+        adapter, oracle, _ = self.make_adapter()
+        target = SimpleNamespace(
+            path="cat/target",
+            level=8,
+            selected=True,
+            point=Point(100, 100),
+            bounds=Bounds(80, 80, 120, 120),
+        )
+        material = SimpleNamespace(
+            path="cat/material",
+            level=1,
+            selected=False,
+            point=Point(200, 100),
+            bounds=Bounds(180, 80, 220, 120),
+        )
+        selected_material = SimpleNamespace(**{**vars(material), "selected": True})
+        oracle.meowfficer_dock_state = Mock(
+            side_effect=[SimpleNamespace(coins=5000), SimpleNamespace(coins=4000)]
+        )
+        oracle.meowfficer_dock_cats = Mock(return_value=(target,))
+        oracle.meowfficer_enhance_state = Mock(
+            side_effect=[
+                SimpleNamespace(generation=10, level=8, coins=5000),
+                SimpleNamespace(generation=12, level=8, coins=5000),
+                SimpleNamespace(generation=13, level=9, coins=4000),
+                SimpleNamespace(generation=14, level=9, coins=4000),
+            ]
+        )
+        oracle.meowfficer_feed_state = Mock(
+            side_effect=[
+                SimpleNamespace(
+                    generation=11,
+                    selected=0,
+                    capacity=10,
+                    candidates=(material,),
+                ),
+                SimpleNamespace(
+                    generation=12,
+                    selected=1,
+                    capacity=10,
+                    candidates=(selected_material,),
+                ),
+                SimpleNamespace(
+                    generation=14,
+                    selected=0,
+                    capacity=10,
+                    candidates=(),
+                ),
+            ]
+        )
+        oracle.click_meowfficer_cat = Mock(return_value=SimpleNamespace())
+        oracle.enabled_values["meowfficer/enhance/confirm"] = False
+
+        result = adapter.enhance_meowfficer(index=1, max_feed_level=1)
+
+        self.assertEqual(result, "success")
+        oracle.click_meowfficer_cat.assert_called_once_with(material)
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "meowfficer/enhance/open",
+                "meowfficer/feed/open",
+                "meowfficer/feed/confirm",
+                "meowfficer/enhance/submit",
+                "meowfficer/feed/open",
+                "meowfficer/feed/cancel",
+                "meowfficer/enhance/back",
+            ],
+        )
+
+    @patch("alas_headless.alas_adapter.time.sleep", return_value=None)
+    def test_meowfficer_acquisition_allows_ordinary_tiered_cat(self, _sleep):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.enabled_values.update(
+            {
+                "meowfficer/get/result/close": False,
+                "meowfficer/get/lock-cancel": False,
+            }
+        )
+        oracle.meowfficer_training_state = Mock(
+            side_effect=[SemanticGateClosed("acquiring"), SimpleNamespace()]
+        )
+        oracle.meowfficer_acquisition_state = Mock(
+            return_value=SimpleNamespace(
+                generation=10,
+                identity="260825",
+                rarity="SSR",
+                talent_sprites=("hangmu_one_1", "chongying_two_2"),
+                has_special_talent=False,
+            )
+        )
+
+        collected = adapter.finish_meowfficer_acquisition(
+            retain_talented_gold=True,
+            retain_talented_purple=True,
+        )
+
+        self.assertEqual(collected, 1)
+        self.assertEqual(oracle.click_calls, ["meowfficer/get/continue"])
+        self.assertEqual(gate_calls, [True])
+
+    @patch("alas_headless.alas_adapter.time.sleep", return_value=None)
+    def test_meowfficer_acquisition_locks_reviewed_special_talent(self, _sleep):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values.update(
+            {
+                "meowfficer/get/result/close": False,
+                "meowfficer/get/lock-cancel": False,
+                "meowfficer/get/lock": True,
+                "meowfficer/get/unlock": False,
+            }
+        )
+        oracle.meowfficer_training_state = Mock(
+            side_effect=[
+                SemanticGateClosed("acquiring"),
+                SemanticGateClosed("confirming"),
+                SimpleNamespace(),
+            ]
+        )
+        oracle.meowfficer_acquisition_state = Mock(
+            return_value=SimpleNamespace(
+                generation=10,
+                identity="special-1",
+                rarity="SSR",
+                talent_sprites=("rainbow_unique",),
+                has_special_talent=True,
+            )
+        )
+
+        collected = adapter.finish_meowfficer_acquisition(
+            retain_talented_gold=True,
+            retain_talented_purple=True,
+        )
+
+        self.assertEqual(collected, 1)
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "meowfficer/get/lock",
+                "meowfficer/get/continue",
+                "meowfficer/get/lock-confirm",
+            ],
+        )
+
+    @patch("alas_headless.alas_adapter.time.sleep", return_value=None)
+    def test_meowfficer_acquisition_allows_identical_cards_after_generation_advance(
+        self, _sleep
+    ):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values.update(
+            {
+                "meowfficer/get/result/close": False,
+                "meowfficer/get/lock-cancel": False,
+            }
+        )
+        oracle.meowfficer_training_state = Mock(
+            side_effect=[
+                SemanticGateClosed("first"),
+                SemanticGateClosed("second"),
+                SimpleNamespace(),
+            ]
+        )
+        oracle.meowfficer_acquisition_state = Mock(
+            side_effect=[
+                SimpleNamespace(
+                    generation=10,
+                    identity="same-card",
+                    rarity="R",
+                    talent_sprites=("ordinary_1",),
+                    has_special_talent=False,
+                ),
+                SimpleNamespace(
+                    generation=11,
+                    identity="same-card",
+                    rarity="R",
+                    talent_sprites=("ordinary_1",),
+                    has_special_talent=False,
+                ),
+            ]
+        )
+
+        collected = adapter.finish_meowfficer_acquisition(
+            retain_talented_gold=True,
+            retain_talented_purple=True,
+        )
+
+        self.assertEqual(collected, 2)
+        self.assertEqual(
+            oracle.click_calls,
+            ["meowfficer/get/continue", "meowfficer/get/continue"],
+        )
 
     def test_original_login_handler_uses_exact_semantic_entry_context(self):
         adapter, oracle, _ = self.make_adapter()
@@ -4682,6 +5036,31 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "event-list/page/back")
         self.assertEqual(oracle.click_calls, ["event-list/page/back"])
+
+    def test_war_archives_campaign_back_uses_main_scene_target(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.war_archives_campaign_visible_value = True
+        oracle.enabled_values["campaign-menu/page/back"] = True
+
+        adapter.begin_campaign_pre_sortie("A1")
+        self.assertTrue(adapter.appear(NamedButton("BACK_ARROW")))
+        receipt = adapter.click(NamedButton("BACK_ARROW"))
+        adapter.end_campaign_pre_sortie()
+
+        self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
+
+    def test_regular_campaign_back_uses_main_scene_target(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_page_value = True
+        oracle.enabled_values["campaign-menu/page/back"] = True
+        adapter.begin_campaign_pre_sortie("15-1", mode="normal")
+
+        self.assertTrue(adapter.appear(NamedButton("BACK_ARROW")))
+        receipt = adapter.click(NamedButton("BACK_ARROW"))
+        adapter.end_campaign_pre_sortie()
+
+        self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
+        self.assertEqual(oracle.click_calls, ["campaign-menu/page/back"])
 
     def test_campaign_event_identity_is_hidden_after_back_commit(self):
         adapter, oracle, _ = self.make_adapter()
@@ -9884,7 +10263,6 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.authorize_campaign_combat(make_campaign_combat_decision(), state)
         adapter.click(CampaignGridButton((3, 5)))
 
-        prior = oracle.click_receipt("reward/award-info/close")
         expected = oracle.click_receipt("daily/battle/result", generation=60)
         oracle.daily_battle_result_visible = Mock(return_value=True)
         oracle.click_daily_battle_result = Mock(return_value=expected)
@@ -9895,17 +10273,19 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         session = AlasSemanticSession.__new__(AlasSemanticSession)
         session.adapter = adapter
         session.open = lambda: adapter
+        session.refresh_frame = Mock()
         session._combat_result_action_oracle = lambda _adapter: stale_oracle
         session._combat_result_observation = (
             "BATTLE_STATUS_S",
             time.monotonic(),
         )
-        session._combat_last_result_receipt = prior
+        session._combat_last_result_receipt = None
         session._arm_combat_result_transition = Mock()
 
         receipt = session.click(NamedButton("BATTLE_STATUS_S"))
 
         self.assertEqual(receipt, expected)
+        session.refresh_frame.assert_called_once_with()
         oracle.click_daily_battle_result.assert_called_once_with()
         session._arm_combat_result_transition.assert_called_once_with(adapter)
         self.assertIsNone(session._combat_result_observation)
