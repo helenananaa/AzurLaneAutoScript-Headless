@@ -31,6 +31,141 @@ be identified safely.
   branch. An unsupported optional task must not prevent unrelated supported
   tasks from running.
 
+## Android build-host login and account rules
+
+The current lock-free Android build host uses dedicated SSH identities:
+
+```powershell
+ssh alas-redroid-new
+ssh alas-kvm-new
+ssh alas-build-admin
+```
+
+The equivalent explicit connections are:
+
+```powershell
+ssh -p 22023 alas-redroid-build@47.110.157.178
+ssh -p 22023 alas-kvm-build@47.110.157.178
+ssh -p 22023 asus@47.110.157.178
+```
+
+Routine Redroid source edits, `repo` operations, builds, packaging, and evidence
+generation must log in directly as `alas-redroid-build`. Routine KVM work must
+log in directly as `alas-kvm-build`. Both accounts are public-key-only, are not
+members of each other's group, and have full passwordless sudo through
+`/etc/sudoers.d/90-alas-build-users`. Their ordinary unprivileged identities
+cannot write the peer build domain. Full sudo is root-equivalent and can bypass
+that filesystem boundary, so account separation is an operational correctness
+contract, not a security boundary against either build user. Do not use `asus`
+as a development identity. Retain it for host-wide administration and
+break-glass recovery that does not naturally belong to one backend.
+
+Select the architecture-specific environment before build commands:
+
+```bash
+alas-redroid-run x86_64 -- bash
+alas-redroid-run arm64 -- bash
+alas-kvm-run x86_64 -- bash
+```
+
+These wrappers set the backend-owned `HOME`, `OUT_DIR`, `DIST_DIR`, `CCACHE_DIR`,
+`TMPDIR`, archive, and evidence paths. They do not acquire locks. Do not bypass
+them for a build or allow Android tooling to create a default `out` inside the
+source tree.
+
+Use sudo under a build account according to these rules:
+
+- Use `sudo -n` so automation fails instead of waiting for a password prompt.
+  `sudo -n true` is the connection preflight; the installed policy intentionally
+  permits `(ALL:ALL) NOPASSWD: ALL` for both build accounts.
+- Keep the wrapper shell, source checkout, `repo sync`, Git operations, Soong,
+  Ninja, ccache, and normal archive/evidence writes unprivileged. Never start an
+  entire build with `sudo`, `sudo -i`, or a root-owned `HOME`/`OUT_DIR`.
+- Elevate only the exact command that inherently needs root, such as installing
+  a host package, managing a loop device or mount, changing a system service, or
+  running the root-required OCI/userdata packaging step already called by the
+  build script. Do not run unrelated preparation or post-processing in the same
+  privileged shell.
+- After a privileged packaging or filesystem operation, verify that retained
+  source, output, cache, archive, and evidence files remain owned and writable
+  by the correct backend account. Repair only the exact affected backend path.
+- Never use sudo to write, clean, chown, chmod, mount over, or run as the peer
+  backend account. Never use it to recreate a shared build group, shared output,
+  or lock. If an administrative change affects both backends, inspect active
+  workloads and both path targets explicitly before applying the narrow change.
+- Record material privileged mutations in the relevant run log or evidence,
+  including the command, affected host path or service, result, and rollback.
+  Passwordless sudo does not authorize premium, credential, destructive
+  userdata, or unrelated account actions.
+
+The former build server remains a source/evidence fallback, not the default
+development login:
+
+```powershell
+ssh -p 22022 weipa@47.110.157.178
+ssh -p 43676 weipa@weipa.k9.luyouxia.net
+```
+
+No listed build endpoint is automatically a Redroid runtime qualification host.
+Run container boot, persistence, recovery, rollback, and game-path qualification
+on the separately rented compatible AWS x86 test server. That server is billed
+on demand and its public IP may change after it is stopped, so this file
+intentionally does not provide an SSH command for it. Ask the user for the
+current test-server connection details before attempting Redroid container
+validation; do not infer or reuse a historical IP address.
+
+Treat these as connection endpoints only. Verify the remote host identity,
+available resources, active workloads, and current build state after connecting
+before running image builds or cleanup operations.
+
+Redroid and KVM may use this same physical host, but they must use independent
+build domains. Do not share or cross-write AOSP source trees, `.repo` metadata,
+ccache, build homes, temporary directories, outputs, runtimes, archives,
+evidence, or APK archives. Do not add build locks, hot-slot locks, `flock`, a
+shared output slot, or a shared build group. KVM and Redroid may build at the
+same time because correctness comes from disjoint directories, not mutual
+exclusion. This is logical state isolation, not hardware isolation: CPU, RAM,
+I/O bandwidth, the physical disks, and host failure remain common failure and
+contention domains. Treat contention as an observable performance concern; do
+not reintroduce locks to hide it.
+
+## Cost-aware Android image development
+
+Remote Android image build hosts are billed resources. Server time, waiting
+time, and future maintenance friction are engineering costs and must be weighed
+against the concrete risk reduction or product value of every build, test, and
+gate.
+
+- Prioritize closing the usable product path: build, boot, ADB, ANGLE NULL,
+  observer, external installation and upgrade, userdata persistence, recovery,
+  and rollback.
+- Do not delay that path for secondary reproducibility, formatting, provenance,
+  exhaustive-matrix, or release-hardening work after a usable candidate already
+  exists. Schedule those checks at meaningful qualification or release
+  milestones.
+- During development, prefer incremental builds, retained source trees,
+  existing verified artifacts, focused local tests, and one-ABI exploration.
+  Require clean rebuilds, second independent builds, dual-ABI qualification,
+  and long-running tests only when their result controls a real decision or
+  support claim.
+- Before adding a gate or expensive test, state the concrete failure it
+  prevents, its likelihood and impact, why an existing boundary is
+  insufficient, the expected remote-server cost, the future development
+  friction, and the cheaper alternatives considered. Do not add it when its
+  expected value does not justify those costs.
+- Do not rerun an unchanged expensive build or qualification flow when the
+  relevant code, inputs, image identity, host state, and prior result have not
+  changed.
+- Diagnose a failed build before deleting outputs or starting a clean rebuild.
+  Preserve useful caches, source trees, logs, and completed artifacts when safe.
+- Before paid remote work, define the objective, expected duration, required
+  artifact, decision enabled by the result, and stop condition. Stop or release
+  the server after required artifacts and evidence are retained and verified.
+- Cost control does not permit unsupported claims. A candidate must still pass
+  the minimum real boot and capability checks required for the behavior being
+  claimed, and genuine typed-input, package/PID, freshness, ambiguity,
+  persistence, and rollback boundaries remain intact.
+
 ## Headless and screenshot rules
 
 The primary local AVD is currently:

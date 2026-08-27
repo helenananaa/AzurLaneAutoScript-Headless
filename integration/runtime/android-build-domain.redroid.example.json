@@ -1,0 +1,16 @@
+{
+  "schema": "alas-headless.android-build-domain/v3",
+  "backend": "redroid",
+  "paths": {
+    "source_root": "/srv/android-build/redroid/source/aosp-14-r75",
+    "repo_metadata_root": "/srv/android-build/redroid/repo/aosp-14-r75",
+    "output_root": "/srv/android-build/redroid/out/dual-abi",
+    "ccache_root": "/srv/android-build/redroid/ccache/dual-abi",
+    "build_home": "/srv/android-build/redroid/home",
+    "temp_root": "/srv/android-build/redroid/tmp/dual-abi",
+    "runtime_root": "/srv/android-build/redroid/runtime",
+    "archive_root": "/srv/android-build/redroid/archive/images",
+    "evidence_root": "/srv/android-build/redroid/evidence",
+    "apk_archive": "/srv/android-build/redroid/archive/apks"
+  }
+}
