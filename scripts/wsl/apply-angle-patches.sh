@@ -3,7 +3,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 revision="$(tr -d '\r\n' < "${repo_root}/ANGLE_REVISION")"
-angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle}/angle}"
+angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle-redroid}/angle}"
 patch_dir="${repo_root}/patches/angle"
 
 if ! git -C "${angle_dir}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -39,6 +39,10 @@ patch_marker_present() {
     0004-android-null-swap-with-damage.patch)
       grep -Fq 'SurfaceNULL::swapWithDamage' \
         "${angle_dir}/src/libANGLE/renderer/null/SurfaceNULL.cpp"
+      ;;
+    0005-android-extract-private-loader-libraries.patch)
+      grep -Fq 'angle_extract_native_libs = true' \
+        "${angle_dir}/gni/angle.gni"
       ;;
     *)
       return 1

@@ -35,13 +35,22 @@ def main(argv: Sequence[str] = ()) -> int:
     if args.output.exists():
         parser.error("--output must not already exist")
     lock = AndroidImageSourceLock.from_path(args.source_lock)
-    affected = sorted({
+    logged = {
         match.group(1)
         for line in args.apply_log.read_text(encoding="utf-8").splitlines()
         if (match := PROJECT_LINE.fullmatch(line)) is not None
-    })
-    if not affected:
+    }
+    if not logged:
         raise ValueError("apply log contains no affected projects")
+    locked_projects = {
+        str(item["project"]) for item in lock.document["project_patches"]
+    }
+    missing = sorted(locked_projects - logged)
+    if missing:
+        raise ValueError(
+            "apply log omits locked project patches: " + ", ".join(missing)
+        )
+    affected = sorted(logged | locked_projects)
     revisions = {
         item.get("path", item.get("name")): item.get("revision")
         for item in ET.parse(args.resolved_manifest).getroot().findall("project")

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle}/angle}"
-depot_tools_dir="${ALAS_DEPOT_TOOLS_DIR:-${HOME}/src/depot_tools}"
+angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle-redroid}/angle}"
+depot_tools_dir="${ALAS_DEPOT_TOOLS_DIR:-${HOME}/src/depot_tools-redroid}"
 target_cpu="${ALAS_ANGLE_TARGET_CPU:-x64}"
 case "${target_cpu}" in
   x64)

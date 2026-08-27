@@ -3,7 +3,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 revision="$(tr -d '\r\n' < "${repo_root}/ANGLE_REVISION")"
-angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle}/angle}"
+angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle-redroid}/angle}"
 patch_dir="${repo_root}/patches/angle-g3"
 overlay_dir="${repo_root}/overlays/angle-g3"
 
@@ -77,6 +77,10 @@ patch_marker_present() {
     0011-android-null-register-main-thread.patch)
       grep -Fq 'RegisterObserverMainThread' \
         "${angle_dir}/src/libANGLE/renderer/null/DisplayNULL.cpp"
+      ;;
+    0012-android-null-bootstrap-snapshot-retry.patch)
+      grep -Fq 'ALAS_G3_BOOTSTRAP_READY' \
+        "${angle_dir}/src/libANGLE/renderer/null/SurfaceNULL.cpp"
       ;;
     *)
       return 1

@@ -5,6 +5,7 @@ import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from alas_headless.android_image_source import AndroidImageSourceLock
 
@@ -28,9 +29,13 @@ class AndroidSourceLockRebindTests(unittest.TestCase):
         old_sha = MODULE.canonical_sha256(old_value)
         with TemporaryDirectory() as raw:
             directory = Path(raw)
+            source_root = directory / "source"
+            evidence_root = directory / "evidence"
+            source_root.mkdir()
+            evidence_root.mkdir()
             old_path = directory / "old.json"
             old_path.write_text(json.dumps(old_value), encoding="utf-8")
-            marker = directory / "marker"
+            marker = source_root / ".alas-redroid-build-source-lock"
             marker.write_text(old_sha + "\n", encoding="utf-8")
             projects = new_value["redroid"]["projects"] + new_value["redroid"]["webview_projects"]
             manifest = directory / "resolved.xml"
@@ -42,12 +47,24 @@ class AndroidSourceLockRebindTests(unittest.TestCase):
                 ) + "</manifest>",
                 encoding="utf-8",
             )
-            output = directory / "rebind.json"
-            self.assertEqual(MODULE.main([
-                "--old-source-lock", str(old_path), "--new-source-lock", str(new_path),
-                "--resume-marker", str(marker), "--resolved-manifest", str(manifest),
-                "--output", str(output),
-            ]), 0)
+            output = evidence_root / "rebind.json"
+
+            class FakeDomain:
+                def path(self, name: str) -> str:
+                    return str(
+                        source_root if name == "source_root" else evidence_root
+                    )
+
+            with patch.object(
+                MODULE.AndroidBuildDomain, "from_path", return_value=FakeDomain()
+            ):
+                self.assertEqual(MODULE.main([
+                    "--domain", str(directory / "domain.json"),
+                    "--old-source-lock", str(old_path),
+                    "--new-source-lock", str(new_path),
+                    "--resolved-manifest", str(manifest),
+                    "--output", str(output),
+                ]), 0)
             self.assertEqual(
                 marker.read_text(encoding="utf-8").strip(),
                 AndroidImageSourceLock.from_path(new_path).sha256,

@@ -96,6 +96,28 @@ class AndroidBuildDomainTests(unittest.TestCase):
         with self.assertRaisesRegex(AndroidBuildDomainError, "must stay under"):
             AndroidBuildDomain.from_mapping(kvm_value)
 
+    def test_build_and_rebind_are_lock_free(self) -> None:
+        build = (ROOT / "scripts" / "wsl" / "build-redroid-images.sh").read_text(
+            encoding="utf-8"
+        )
+        project_rebind = (
+            ROOT / "scripts" / "python" / "rebind_android_build_project_patches.py"
+        ).read_text(encoding="utf-8")
+        source_rebind = (
+            ROOT / "scripts" / "python" / "rebind_android_build_source_lock.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("require_isolated_domain_pair", build)
+        self.assertNotIn("flock", build)
+        self.assertNotIn("hot_output", build)
+        self.assertNotIn('value["locks"]', build)
+        for script in (project_rebind, source_rebind):
+            self.assertIn('expected_backend="redroid"', script)
+            self.assertIn('domain.path("source_root")', script)
+            self.assertNotIn("exclusive_file_lock", script)
+            self.assertNotIn("build_lock", script)
+            self.assertNotIn('add_argument("--source-root"', script)
+            self.assertNotIn('add_argument("--resume-marker"', script)
+
     def test_lock_based_cli_names_are_retired(self) -> None:
         scripts = ROOT / "scripts" / "python"
         self.assertFalse((scripts / "manage_android_hot_output.py").exists())

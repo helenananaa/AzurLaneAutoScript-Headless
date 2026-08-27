@@ -1,0 +1,27 @@
+From 0b8c3bc0cc8ab35aac4a05bc174744d956d8836d Mon Sep 17 00:00:00 2001
+From: ALAS Headless Research <local@alas-headless.invalid>
+Date: Tue, 25 Aug 2026 18:00:00 +0800
+Subject: [PATCH] Extract ANGLE APK native libraries
+
+Android 14 Redroid preloads its system ANGLE into the application linker
+namespace.  The ALAS image uses private loader aliases for the observer APK so
+the package libraries must be extracted into nativeLibraryDir, where all alias
+names can be resolved by the ANGLE namespace.
+---
+ gni/angle.gni | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gni/angle.gni b/gni/angle.gni
+--- a/gni/angle.gni
++++ b/gni/angle.gni
+@@ -21,7 +21,7 @@ if (!defined(checkout_angle_partition_alloc)) {
+ 
+ declare_args() {
+   # Extract native libs in ANGLE apk. Useful for flamegraph generation.
+-  angle_extract_native_libs = false
++  angle_extract_native_libs = true
+ 
+   # Display mode for ANGLE vulkan display, could be 'simple' or 'headless',
+   # default is 'simple'.
+-- 
+2.47.0

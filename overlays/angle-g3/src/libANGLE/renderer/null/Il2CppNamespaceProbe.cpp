@@ -381,6 +381,15 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
       EndsWith(path, "TaskScene(Clone)/blur_panel/adapt/top/GetAllButton")) {
     return true;
   }
+  if (name == "Confirm" &&
+      (EndsWith(path, "PaintingPrefsPanel(Clone)/Panel/Confirm") ||
+       EndsWith(path, "OtherPrefsPanel(Clone)/Panel/Confirm"))) {
+    return true;
+  }
+  if (name == "action_button" &&
+      EndsWith(path, "DialogPanel/dialog/action_button")) {
+    return true;
+  }
   if (name == "close" && (EndsWith(path, "AwardInfoUI(Clone)/items/close") ||
                           EndsWith(path, "AwardInfoUI1(Clone)/items/close"))) {
     return true;

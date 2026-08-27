@@ -2,22 +2,96 @@
 set -euo pipefail
 
 usage() {
-    echo "USAGE: $0 SOURCE_LOCK SOURCE_ROOT EVIDENCE_ROOT" >&2
+    echo "USAGE: $0 REDROID_BUILD_DOMAIN_JSON KVM_BUILD_DOMAIN_JSON SOURCE_LOCK RUN_ID [x86_64|arm64-v8a]" >&2
     exit 2
 }
 
-[[ $# -eq 3 ]] || usage
-source_lock=$(realpath "$1")
-source_root=$(realpath -m "$2")
-evidence_root=$(realpath -m "$3")
+[[ $# -eq 4 || $# -eq 5 ]] || usage
+build_domain=$(realpath "$1")
+peer_build_domain=$(realpath "$2")
+source_lock=$(realpath "$3")
+run_id=$4
+selected_abi=${5:-all}
+case "$selected_abi" in
+    all|x86_64|arm64-v8a) ;;
+    *) usage ;;
+esac
+[[ $run_id =~ ^[A-Za-z0-9._-]+$ ]] || {
+    echo "RUN_ID contains unsupported characters" >&2; exit 1;
+}
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
-
-[[ ! -e "$source_root" || -d "$source_root" ]] || { echo "source root is not a directory" >&2; exit 1; }
-mkdir -p "$source_root" "$evidence_root"
+python_bin=${ALAS_PYTHON:-python3}
+build_jobs=${ALAS_BUILD_JOBS:-$(nproc)}
+[[ $build_jobs =~ ^[1-9][0-9]*$ ]] || {
+    echo "ALAS_BUILD_JOBS must be a positive integer" >&2; exit 1;
+}
 
 export PYTHONPATH="$repo_root/python"
-python3 "$repo_root/scripts/python/validate_android_image_source_lock.py" --source-lock "$source_lock"
-source_lock_sha256=$(python3 "$repo_root/scripts/python/validate_android_image_source_lock.py" --source-lock "$source_lock" | tail -n1)
+build_domain_sha256=$("$python_bin" \
+    "$repo_root/scripts/python/validate_android_build_domain.py" \
+    --domain "$build_domain" --expected-backend redroid)
+peer_build_domain_sha256=$("$python_bin" \
+    "$repo_root/scripts/python/validate_android_build_domain.py" \
+    --domain "$peer_build_domain" --expected-backend kvm)
+"$python_bin" - "$build_domain" "$peer_build_domain" <<'PY'
+import sys
+from pathlib import Path
+
+from alas_headless.android_build_domain import (
+    AndroidBuildDomain,
+    require_isolated_domain_pair,
+)
+
+redroid = AndroidBuildDomain.from_path(Path(sys.argv[1]), expected_backend="redroid")
+kvm = AndroidBuildDomain.from_path(Path(sys.argv[2]), expected_backend="kvm")
+require_isolated_domain_pair(redroid, kvm)
+PY
+source_lock_sha256=$("$python_bin" \
+    "$repo_root/scripts/python/validate_android_image_source_lock.py" \
+    --source-lock "$source_lock" | tail -n1)
+mapfile -t configuration < <("$python_bin" - "$build_domain" <<'PY'
+import json, sys
+value = json.load(open(sys.argv[1], encoding="utf-8"))
+paths = value["paths"]
+for name in (
+    "source_root", "repo_metadata_root", "output_root", "ccache_root",
+    "build_home", "temp_root", "evidence_root",
+):
+    print(paths[name])
+PY
+)
+source_root=${configuration[0]}
+repo_metadata_root=${configuration[1]}
+out_root=${configuration[2]}
+ccache_root=${configuration[3]}
+build_home=${configuration[4]}
+temp_root=${configuration[5]}
+evidence_base=${configuration[6]}
+evidence_root="$evidence_base/$run_id"
+
+case "$selected_abi" in
+    x86_64)
+        [[ $out_root == */x86_64 && $ccache_root == */x86_64 \
+            && $temp_root == */x86_64 ]] || {
+            echo "x86_64 build domain must use architecture-specific output, ccache, and temp roots" >&2
+            exit 1
+        }
+        ;;
+    arm64-v8a)
+        [[ $out_root == */arm64 && $ccache_root == */arm64 \
+            && $temp_root == */arm64 ]] || {
+            echo "arm64-v8a build domain must use architecture-specific output, ccache, and temp roots" >&2
+            exit 1
+        }
+        ;;
+esac
+
+[[ ! -e "$source_root" || -d "$source_root" ]] || {
+    echo "source root is not a directory" >&2; exit 1;
+}
+mkdir -p "$source_root" "$repo_metadata_root" "$out_root" "$ccache_root" \
+    "$build_home" "$temp_root" "$evidence_root"
+
 resume_marker="$source_root/.alas-redroid-build-source-lock"
 if [[ -e "$resume_marker" ]]; then
     [[ -f "$resume_marker" && $(cat "$resume_marker") == "$source_lock_sha256" ]] || {
@@ -30,16 +104,27 @@ else
     printf '%s\n' "$source_lock_sha256" > "$resume_marker"
 fi
 
-# systemd build units intentionally have no login HOME. Android 14's release
-# config compiles Go helpers and therefore requires a writable cache. Keep all
-# build state on the dedicated work device alongside the source tree.
-export HOME="$source_root/.alas-build-home"
+repo_metadata_link="$source_root/.repo"
+if [[ -L $repo_metadata_link ]]; then
+    [[ $(realpath "$repo_metadata_link") == "$(realpath "$repo_metadata_root")" ]] || {
+        echo "Redroid source .repo points at another build domain" >&2; exit 1;
+    }
+elif [[ -e $repo_metadata_link ]]; then
+    echo "legacy in-tree .repo must be migrated to $repo_metadata_root" >&2
+    exit 1
+else
+    ln -s "$repo_metadata_root" "$repo_metadata_link"
+fi
+
+export HOME="$build_home"
 export XDG_CACHE_HOME="$HOME/.cache"
 export GOCACHE="$XDG_CACHE_HOME/go-build"
-export CCACHE_DIR="$XDG_CACHE_HOME/ccache"
-export OUT_DIR="$source_root/out"
+export CCACHE_DIR="$ccache_root"
+export TMPDIR="$temp_root"
+export OUT_DIR="$out_root"
+export DIST_DIR="$out_root/dist"
 unset OUT_DIR_COMMON_BASE
-mkdir -p "$GOCACHE" "$CCACHE_DIR"
+mkdir -p "$GOCACHE" "$CCACHE_DIR" "$out_root/dist"
 
 run_json_evidence() {
     local output=$1
@@ -60,9 +145,23 @@ run_json_evidence() {
     rm -f "$temporary"
 }
 
+for binding in "$build_domain:$evidence_root/android-build-domain.json" \
+               "$peer_build_domain:$evidence_root/android-build-peer-domain.json" \
+               "$source_lock:$evidence_root/source-lock.json"; do
+    source_path=${binding%%:*}
+    destination_path=${binding#*:}
+    if [[ -e $destination_path ]]; then
+        cmp -s "$source_path" "$destination_path" || {
+            echo "existing run identity differs: $destination_path" >&2; exit 1;
+        }
+    else
+        cp "$source_path" "$destination_path"
+    fi
+done
+
 preflight_args=(
     --source-lock "$source_lock" --root "$source_root"
-    --evidence-root "$evidence_root" --require-non-root-device
+    --evidence-root "$evidence_root"
 )
 if [[ -n ${ALAS_BUILD_BACKING_FREE_BYTES:-} ]]; then
     [[ $ALAS_BUILD_BACKING_FREE_BYTES =~ ^[0-9]+$ ]] || {
@@ -72,14 +171,14 @@ if [[ -n ${ALAS_BUILD_BACKING_FREE_BYTES:-} ]]; then
 fi
 preflight_evidence="$evidence_root/host-preflight.json"
 if [[ ! -e "$preflight_evidence" ]]; then
-    python3 "$repo_root/scripts/python/preflight_redroid_build.py" \
+    "$python_bin" "$repo_root/scripts/python/preflight_redroid_build.py" \
         "${preflight_args[@]}" --output "$preflight_evidence"
 else
     current_preflight=$(mktemp "$evidence_root/.resume-preflight.XXXXXX")
     rm -f "$current_preflight"
-    python3 "$repo_root/scripts/python/preflight_redroid_build.py" \
+    "$python_bin" "$repo_root/scripts/python/preflight_redroid_build.py" \
         "${preflight_args[@]}" --output "$current_preflight" >/dev/null
-    python3 - "$preflight_evidence" "$current_preflight" <<'PY'
+    "$python_bin" - "$preflight_evidence" "$current_preflight" <<'PY'
 import json, sys
 initial = json.load(open(sys.argv[1], encoding="utf-8"))
 current = json.load(open(sys.argv[2], encoding="utf-8"))
@@ -88,7 +187,7 @@ for value, label in ((initial, "initial"), (current, "current")):
         raise SystemExit(label + " build-host preflight is not pass")
 for key in (
     "source_lock_sha256", "root", "evidence_root", "work_device",
-    "evidence_device", "system_root_device", "require_non_root_device",
+    "evidence_device",
 ):
     if initial.get(key) != current.get(key):
         raise SystemExit("build-host identity changed during resume: " + key)
@@ -96,11 +195,11 @@ PY
     rm -f "$current_preflight"
 fi
 run_json_evidence "$evidence_root/source-remotes.json" \
-    python3 "$repo_root/scripts/python/verify_android_image_source_remotes.py" \
-    --source-lock "$source_lock"
+    "$python_bin" "$repo_root/scripts/python/verify_android_image_source_remotes.py" \
+    --source-lock "$source_lock" --abi "$selected_abi"
 
 json_field() {
-    python3 - "$source_lock" "$1" <<'PY'
+    "$python_bin" - "$source_lock" "$1" <<'PY'
 import json, sys
 value = json.load(open(sys.argv[1], encoding="utf-8"))
 for part in sys.argv[2].split('.'):
@@ -147,7 +246,7 @@ if [[ ! -d .repo/local_manifests/.git ]]; then
 fi
 git -C .repo/local_manifests fetch --depth=1 origin "$local_manifests_commit"
 git -C .repo/local_manifests checkout --detach "$local_manifests_commit"
-python3 - "$source_lock" > .repo/local_manifests/zz-alas-source-lock.xml <<'PY'
+"$python_bin" - "$source_lock" > .repo/local_manifests/zz-alas-source-lock.xml <<'PY'
 import json, sys
 from xml.sax.saxutils import quoteattr
 
@@ -165,23 +264,33 @@ print("</manifest>")
 PY
 resolved_manifest="$evidence_root/resolved-manifest.xml"
 if [[ ! -e "$resolved_manifest" ]]; then
-    sync_passed=false
-    for attempt in 1 2 3 4 5; do
-        if repo sync -c --fail-fast -j8; then
-            sync_passed=true
-            break
-        fi
-        echo "repo sync attempt $attempt failed; retaining objects for a rate-limited retry" >&2
-        (( attempt < 5 )) && sleep $((attempt * 15))
-    done
-    [[ $sync_passed == true ]] || { echo "repo sync exhausted five attempts" >&2; exit 1; }
-    repo manifest -r -o "$resolved_manifest"
+    if [[ -e "$source_root/.alas-redroid-patches-applied" \
+        || -e "$source_root/.alas-project-patches-applied" ]]; then
+        seed_manifest=${ALAS_PREPATCH_MANIFEST:-}
+        [[ -n $seed_manifest && -f $seed_manifest ]] || {
+            echo "refusing repo sync over a prepared Redroid source; set ALAS_PREPATCH_MANIFEST to its pre-patch resolved manifest" >&2
+            exit 1
+        }
+        cp "$seed_manifest" "$resolved_manifest"
+    else
+        sync_passed=false
+        for attempt in 1 2 3 4 5; do
+            if repo sync -c --fail-fast -j8; then
+                sync_passed=true
+                break
+            fi
+            echo "repo sync attempt $attempt failed; retaining objects for a rate-limited retry" >&2
+            (( attempt < 5 )) && sleep $((attempt * 15))
+        done
+        [[ $sync_passed == true ]] || { echo "repo sync exhausted five attempts" >&2; exit 1; }
+        repo manifest -r -o "$resolved_manifest"
+    fi
 fi
 observed_source_epoch=$(git -C .repo/manifests show -s --format=%ct "$platform_commit")
 [[ $observed_source_epoch == "$source_date_epoch" ]] || {
     echo "locked SOURCE_DATE_EPOCH differs from manifest commit" >&2; exit 1;
 }
-python3 - "$source_lock" "$resolved_manifest" <<'PY'
+"$python_bin" - "$source_lock" "$resolved_manifest" <<'PY'
 import json, sys
 import xml.etree.ElementTree as ET
 
@@ -229,7 +338,7 @@ if find "$source_root/.repo/projects" "$source_root/.repo/project-objects" \
     exit 1
 fi
 project_patch_marker="$source_root/.alas-project-patches-applied"
-project_patch_identity=$(python3 - "$source_lock" <<'PY'
+project_patch_identity=$("$python_bin" - "$source_lock" <<'PY'
 import hashlib, json, sys
 value = json.load(open(sys.argv[1], encoding="utf-8"))["project_patches"]
 print(hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest())
@@ -240,7 +349,7 @@ if [[ -e "$project_patch_marker" ]]; then
         echo "project patch resume marker mismatch" >&2; exit 1;
     }
 else
-    python3 - "$source_lock" "$repo_root" "$source_root" <<'PY'
+    "$python_bin" - "$source_lock" "$repo_root" "$source_root" <<'PY'
 import hashlib, json, pathlib, subprocess, sys
 lock = json.load(open(sys.argv[1], encoding="utf-8"))
 repo_root, source_root = map(pathlib.Path, sys.argv[2:])
@@ -258,18 +367,58 @@ for item in lock["project_patches"]:
         item["commit_message"],
     ], check=True)
 PY
-    python3 - "$source_lock" >> "$evidence_root/apply-patches.log" <<'PY'
+    "$python_bin" - "$source_lock" >> "$evidence_root/apply-patches.log" <<'PY'
 import json, sys
 for item in json.load(open(sys.argv[1], encoding="utf-8"))["project_patches"]:
     print("process project: " + item["project"])
 PY
     printf '%s\n' "$project_patch_identity" > "$project_patch_marker"
 fi
+if [[ ! -e "$evidence_root/apply-patches.log" ]]; then
+    # Source markers survive across run-specific evidence directories. Rebuild
+    # the affected-project inventory from the resolved manifest instead of
+    # depending on a historical run's patch-driver log.
+    "$python_bin" - "$source_root" "$resolved_manifest" \
+        > "$evidence_root/apply-patches.log" <<'PY'
+import pathlib, subprocess, sys, xml.etree.ElementTree as ET
+source_root = pathlib.Path(sys.argv[1])
+projects = []
+for item in ET.parse(sys.argv[2]).getroot().findall("project"):
+    path = item.get("path", item.get("name"))
+    revision = item.get("revision")
+    if not path or not revision:
+        continue
+    project = source_root / path
+    head = subprocess.check_output(
+        ["git", "-C", str(project), "rev-parse", "HEAD"],
+        text=True, encoding="utf-8",
+    ).strip()
+    if head != revision:
+        projects.append(path)
+for path in sorted(projects):
+    print("process project: " + path)
+PY
+fi
 run_json_evidence "$evidence_root/post-patch-state.json" \
-    python3 "$repo_root/scripts/python/capture_redroid_post_patch_state.py" \
+    "$python_bin" "$repo_root/scripts/python/capture_redroid_post_patch_state.py" \
     --source-lock "$source_lock" --source-root "$source_root" \
     --resolved-manifest "$resolved_manifest" \
     --apply-log "$evidence_root/apply-patches.log"
+
+redroid_source_status=$(repo status -j8)
+[[ $redroid_source_status == "nothing to commit (working directory clean)" ]] || {
+    printf '%s\n' "$redroid_source_status" >&2
+    echo "Redroid AOSP source is dirty after patch application" >&2
+    exit 1
+}
+redroid_source_evidence="$evidence_root/redroid-source-status.txt"
+if [[ -e $redroid_source_evidence ]]; then
+    [[ $(cat "$redroid_source_evidence") == "$redroid_source_status" ]] || {
+        echo "Redroid AOSP source status changed during resume" >&2; exit 1;
+    }
+else
+    printf '%s\n' "$redroid_source_status" > "$redroid_source_evidence"
+fi
 
 # Upstream Redroid intentionally leaves product.mk as a local extension point.
 # Bind our reviewed dual-volume FBE overlay into every build, and refuse to
@@ -277,7 +426,7 @@ run_json_evidence "$evidence_root/post-patch-state.json" \
 overlay_root="$repo_root/integration/runtime/redroid-native-fbe"
 overlay_evidence="$evidence_root/redroid-native-fbe-overlay.json"
 run_json_evidence "$overlay_evidence" \
-    python3 "$repo_root/scripts/python/validate_redroid_native_fbe_overlay.py" \
+    "$python_bin" "$repo_root/scripts/python/validate_redroid_native_fbe_overlay.py" \
     --overlay "$overlay_root" --source-lock "$source_lock"
 if [[ -e "$source_root/product.mk" ]] && ! cmp -s "$overlay_root/product.mk" "$source_root/product.mk"; then
     echo "refusing to overwrite different AOSP product.mk" >&2; exit 1
@@ -296,23 +445,22 @@ build_one() {
     # shellcheck disable=SC1091
     source build/envsetup.sh
     lunch "$lunch_target"
-    m -j"$(nproc)"
-    m sbom -j"$(nproc)"
+    m -j"$build_jobs"
+    m sbom -j"$build_jobs"
     set -u
-    local product_dir="$source_root/out/target/product/$product_name"
+    local product_dir="$out_root/target/product/$product_name"
     local build_prop="$product_dir/system/build.prop"
     [[ -f $build_prop ]] || build_prop="$product_dir/system/system/build.prop"
     [[ -f $build_prop ]] || { echo "system build.prop missing for $abi" >&2; exit 1; }
     local sbom="$product_dir/sbom.spdx.json"
-    [[ -f $sbom ]] || sbom="$source_root/out/dist/sbom/sbom.spdx.json"
-    [[ -f $sbom ]] || sbom="$source_root/out/dist/sbom.spdx.json"
+    [[ -f $sbom ]] || sbom="$out_root/dist/sbom/sbom.spdx.json"
     [[ -f $sbom ]] || { echo "AOSP SPDX 2.3 SBOM missing for $abi" >&2; exit 1; }
-    python3 "$repo_root/scripts/python/normalize_android_sbom.py" \
+    "$python_bin" "$repo_root/scripts/python/normalize_android_sbom.py" \
         --sbom "$sbom" --source-date-epoch "$source_date_epoch"
     local notice="$product_dir/obj/NOTICE.xml.gz"
     [[ -f $notice ]] || { echo "product NOTICE.xml.gz missing for $abi" >&2; exit 1; }
     run_json_evidence "$evidence_root/ext4-timestamps-$abi.json" \
-        python3 "$repo_root/scripts/python/verify_android_ext4_timestamps.py" \
+        "$python_bin" "$repo_root/scripts/python/verify_android_ext4_timestamps.py" \
         --image "$product_dir/system.img" --image "$product_dir/vendor.img" \
         --source-date-epoch "$source_date_epoch"
     local fingerprint patch
@@ -335,11 +483,14 @@ build_one() {
     }
     local oci_archive="$evidence_root/redroid-$abi.oci.tar"
     local oci_identity="$evidence_root/redroid-$abi.oci-build.json"
+    local runtime_components="$evidence_root/runtime-components-$abi.json"
     sudo /bin/bash "$repo_root/scripts/wsl/package-redroid-oci.sh" \
         "$product_dir/system.img" "$product_dir/vendor.img" "$abi" \
         "$source_lock_sha256" "$fingerprint" "$source_date_epoch" \
-        "$oci_archive" "$oci_identity"
-    python3 "$repo_root/scripts/python/create_android_build_provenance.py" \
+        "$product_dir/system/lib64/libEGL.so" \
+        "$product_dir/vendor/lib64/hw/vulkan.pastel.so" \
+        "$oci_archive" "$oci_identity" "$runtime_components"
+    "$python_bin" "$repo_root/scripts/python/create_android_build_provenance.py" \
         --source-lock "$source_lock" \
         --resolved-manifest "$evidence_root/resolved-manifest.xml" \
         --abi "$abi" --lunch "$lunch_target" --product-out "$product_name" \
@@ -347,8 +498,10 @@ build_one() {
         --artifact "system.img=$product_dir/system.img" \
         --artifact "vendor.img=$product_dir/vendor.img" \
         --artifact "redroid.oci.tar=$oci_archive" \
+        --artifact "android-build-domain.json=$evidence_root/android-build-domain.json" \
         --artifact "redroid-native-fbe-overlay.json=$overlay_evidence" \
         --artifact "post-patch-state.json=$evidence_root/post-patch-state.json" \
+        --artifact "runtime-components.json=$runtime_components" \
         --artifact "ext4-timestamps.json=$evidence_root/ext4-timestamps-$abi.json" \
         --sbom "$sbom" --notice "$notice" \
         --installed-files "$product_dir/installed-files.txt" \
@@ -356,5 +509,15 @@ build_one() {
         --output "$evidence_root/provenance-$abi.json"
 }
 
-build_one x86_64 redroid_x86_64_only-trunk_staging-userdebug redroid_x86_64_only
-build_one arm64-v8a redroid_arm64_only-trunk_staging-userdebug redroid_arm64_only
+case "$selected_abi" in
+    all)
+        build_one x86_64 redroid_x86_64_only-trunk_staging-userdebug redroid_x86_64_only
+        build_one arm64-v8a redroid_arm64_only-trunk_staging-userdebug redroid_arm64_only
+        ;;
+    x86_64)
+        build_one x86_64 redroid_x86_64_only-trunk_staging-userdebug redroid_x86_64_only
+        ;;
+    arm64-v8a)
+        build_one arm64-v8a redroid_arm64_only-trunk_staging-userdebug redroid_arm64_only
+        ;;
+esac
