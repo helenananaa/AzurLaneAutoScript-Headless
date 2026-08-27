@@ -2,6 +2,58 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-26
+
+### Historical old-host KVM and Redroid split is retained as evidence
+
+- On the former build host, KVM and Redroid were split on the same physical
+  machine into independent AOSP source, `.repo` metadata,
+  ccache, build home, temporary, output, runtime, archive, evidence, and APK
+  archive paths.
+- That old-host implementation still used
+  `/run/alas-headless/android-cache-hot-slot.lock`. It coordinates one existing
+  cache-SSD hot-output slot; verified outputs move to backend-private cold
+  archives before the peer backend owns that slot. This is retained historical
+  provenance, not the current build-domain contract.
+- KVM source is `/srv/android-build/src/kvm-14-r75`, with private metadata at
+  `/var/lib/alas-build-metadata/kvm/aosp-14-r75/.repo`. Redroid uses
+  `/srv/android-build/src/redroid-14-r75` and
+  `/var/lib/alas-build-metadata/redroid/aosp-14-r75/.repo`. The split receipts
+  report zero regular-file inode intersection between the two metadata trees.
+- This closes the old cross-write risk: a KVM source, index, output, or cache
+  mutation is no longer Redroid's next build input. CPU, RAM, I/O, physical-disk
+  failure, and whole-host failure remain shared and still require scheduling
+  and capacity checks.
+- A fresh KVM build completed all `135744/135744` actions in 52 minutes 42
+  seconds. It used the backend-private source, metadata, output, ccache, home,
+  and temporary paths; its retained manifest is
+  `/srv/android-archive/kvm/evidence/kvm-split-fresh-r75-20260826-r4/manifest.json`.
+  This was an empty-slot build with small pre-compile retries while source
+  ownership was corrected, not a second clean rebuild.
+- The resulting `kvm-r75-x86_64-v2` runtime bundle was published under the
+  KVM-private runtime root and passed the bundle verifier. The running v7
+  bootstrap service still uses the migration-era release and remains
+  migration-only and unqualified until an offline whole-AVD rollback point and
+  the reviewed formal live cutover both pass.
+- The shared build host cannot qualify Redroid runtime behavior. Redroid
+  container boot, persistence, recovery, rollback, and game-path claims still
+  require the compatible AWS runtime host.
+
+### Current default build domains are lock-free and fully disjoint
+
+- Current development uses the dedicated `alas-kvm-build` and
+  `alas-redroid-build` accounts on the new build host. The
+  `alas-kvm-run x86_64 -- bash` and architecture-specific Redroid wrappers bind
+  backend-owned source, `.repo`, output, ccache, home, temporary, runtime,
+  archive, evidence, and APK paths.
+- The current `alas-headless.android-build-domain/v3` contract has no build
+  lock, shared hot-output slot, or peer-writable mutable path. KVM and Redroid
+  may build concurrently; CPU, RAM, I/O, physical disks, and host failure remain
+  shared contention and failure domains.
+- The former server is now source/evidence fallback only. Its active KVM
+  service and retained AVD/userdata are not migrated or changed by this source
+  reorganization.
+
 ## 2026-08-23
 
 ### Apple Silicon Mac reaches the typed G4 login boundary under HVF
