@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle}/angle}"
-depot_tools_dir="${ALAS_DEPOT_TOOLS_DIR:-${HOME}/src/depot_tools}"
+angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle-kvm}/angle}"
+depot_tools_dir="${ALAS_DEPOT_TOOLS_DIR:-${HOME}/src/depot_tools-kvm}"
 target_cpu="${ALAS_ANGLE_TARGET_CPU:-x64}"
 case "${target_cpu}" in
   x64)
-    default_out_dir="out/AndroidNullObserverX64"
+    default_out_dir="out-kvm/AndroidNullObserverX64"
     ;;
   arm64)
-    default_out_dir="out/AndroidNullObserverArm64"
+    default_out_dir="out-kvm/AndroidNullObserverArm64"
     ;;
   *)
     echo "Unsupported ALAS_ANGLE_TARGET_CPU: ${target_cpu} (expected x64 or arm64)" >&2

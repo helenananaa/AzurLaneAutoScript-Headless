@@ -1,0 +1,29 @@
+diff --git a/core/Makefile b/core/Makefile
+index 084a500..458423c 100644
+--- a/core/Makefile
++++ b/core/Makefile
+@@ -2143,6 +2143,7 @@ endef
+ # $(2): a subset of "system vendor cache userdata product system_ext oem odm vendor_dlkm odm_dlkm system_dlkm"
+ # $(3): additional "key=value" pairs to append to the dictionary file.
+ define generate-image-prop-dictionary
++$(hide) echo "timestamp=$(BUILD_DATETIME_FROM_FILE)" >> $(1)
+ $(if $(filter $(2),system),\
+     $(if $(INTERNAL_SYSTEM_OTHER_PARTITION_SIZE),$(hide) echo "system_other_size=$(INTERNAL_SYSTEM_OTHER_PARTITION_SIZE)" >> $(1))
+     $(if $(PRODUCT_SYSTEM_HEADROOM),$(hide) echo "system_headroom=$(PRODUCT_SYSTEM_HEADROOM)" >> $(1))
+diff --git a/tools/releasetools/build_image.py b/tools/releasetools/build_image.py
+index a7b1d8c..b5fb3c8 100755
+--- a/tools/releasetools/build_image.py
++++ b/tools/releasetools/build_image.py
+@@ -695,6 +695,12 @@ def ImagePropFromGlobalDict(glob_dict, mount_point):
+     timestamp = glob_dict["build.prop"].GetProp("ro.build.date.utc")
+     if timestamp:
+       d["timestamp"] = timestamp
++  if "timestamp" in glob_dict:
++    d["timestamp"] = glob_dict["timestamp"]
++
++  source_date_epoch = os.environ.get("SOURCE_DATE_EPOCH")
++  if source_date_epoch:
++    d["timestamp"] = str(int(source_date_epoch))
+ 
+   def copy_prop(src_p, dest_p):
+     """Copy a property from the global dictionary.

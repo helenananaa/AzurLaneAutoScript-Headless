@@ -1,0 +1,42 @@
+{
+  "schema": "alas-headless.kvm-image-source-lock/v1",
+  "backend": "kvm",
+  "platform": {
+    "manifest_url": "https://android.googlesource.com/platform/manifest",
+    "revision": "android-14.0.0_r75",
+    "tag_object": "c49a52c108f10a64f6122af27fd27f96b8d45424",
+    "commit": "e3b1a5113daede938922ed29c36806e0aac2ecb3"
+  },
+  "project_patches": [
+    {
+      "project": "frameworks/base",
+      "path": "integration/runtime/aosp-patches/0001-protolog-deterministic-generation-hash.patch",
+      "sha256": "56452119114c2677513cf78b0b8d80df4b4170b2cc2c8de2212118d59ae499e7",
+      "commit_message": "ALAS: make ProtoLog generation reproducible"
+    },
+    {
+      "project": "build/make",
+      "path": "integration/runtime/aosp-patches/0002-build-image-source-date-epoch.patch",
+      "sha256": "c831571309743c2a51065c852347869d938dc324668e6648b483daafe504f1cb",
+      "commit_message": "ALAS: make images reproducible and trim KVM-only packages"
+    },
+    {
+      "project": "device/generic/goldfish",
+      "path": "integration/runtime/aosp-patches/0003-alas-kvm-first-stage-product.patch",
+      "sha256": "eda4861d8978e9a21acc2cfe762ff0abce4c5a89508e934774884fb63e9dae41",
+      "commit_message": "ALAS: add the first-stage headless KVM product"
+    },
+    {
+      "project": "external/chromium-webview",
+      "path": "integration/runtime/aosp-patches/0004-webview-x86_64-only-prebuilt.patch",
+      "sha256": "6894d8c0565936fe06b677d84e5cc42498c59062b27a0e68a905c2eeddb127d8",
+      "commit_message": "ALAS: strip the unused x86 WebView payload"
+    },
+    {
+      "project": "external/noto-fonts",
+      "path": "integration/runtime/aosp-patches/0005-kvm-language-font-whitelist.patch",
+      "sha256": "b2e762814c8fa50bd66ef5f3ef97e0745a6ebd506b49be36c930592bdbcaf492",
+      "commit_message": "ALAS: retain only required KVM language fonts"
+    }
+  ]
+}

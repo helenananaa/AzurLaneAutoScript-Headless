@@ -1,0 +1,190 @@
+diff --git a/core/Makefile b/core/Makefile
+index 084a500..458423c 100644
+--- a/core/Makefile
++++ b/core/Makefile
+@@ -2143,6 +2143,7 @@ endef
+ # $(2): a subset of "system vendor cache userdata product system_ext oem odm vendor_dlkm odm_dlkm system_dlkm"
+ # $(3): additional "key=value" pairs to append to the dictionary file.
+ define generate-image-prop-dictionary
++$(hide) echo "timestamp=$(BUILD_DATETIME_FROM_FILE)" >> $(1)
+ $(if $(filter $(2),system),\
+     $(if $(INTERNAL_SYSTEM_OTHER_PARTITION_SIZE),$(hide) echo "system_other_size=$(INTERNAL_SYSTEM_OTHER_PARTITION_SIZE)" >> $(1))
+     $(if $(PRODUCT_SYSTEM_HEADROOM),$(hide) echo "system_headroom=$(PRODUCT_SYSTEM_HEADROOM)" >> $(1))
+diff --git a/tools/releasetools/build_image.py b/tools/releasetools/build_image.py
+index a7b1d8c..b5fb3c8 100755
+--- a/tools/releasetools/build_image.py
++++ b/tools/releasetools/build_image.py
+@@ -695,6 +695,12 @@ def ImagePropFromGlobalDict(glob_dict, mount_point):
+     timestamp = glob_dict["build.prop"].GetProp("ro.build.date.utc")
+     if timestamp:
+       d["timestamp"] = timestamp
++  if "timestamp" in glob_dict:
++    d["timestamp"] = glob_dict["timestamp"]
++
++  source_date_epoch = os.environ.get("SOURCE_DATE_EPOCH")
++  if source_date_epoch:
++    d["timestamp"] = str(int(source_date_epoch))
+ 
+   def copy_prop(src_p, dest_p):
+     """Copy a property from the global dictionary.
+
+diff --git a/target/product/base_system.mk b/target/product/base_system.mk
+--- a/target/product/base_system.mk
++++ b/target/product/base_system.mk
+@@ -32,9 +32,9 @@ PRODUCT_PACKAGES += \
+     app_process \
+     appwidget \
+     atrace \
+     audioserver \
+-    BackupRestoreConfirmation \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,BackupRestoreConfirmation) \
+     bcc \
+     blank_screen \
+     blkid \
+     bmgr \
+@@ -76,10 +76,10 @@ PRODUCT_PACKAGES += \
+     com.android.uwb \
+     com.android.virt \
+     com.android.wifi \
+-    ContactsProvider \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,ContactsProvider) \
+     content \
+-    CtsShimPrebuilt \
+-    CtsShimPrivPrebuilt \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,CtsShimPrebuilt) \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,CtsShimPrivPrebuilt) \
+     debuggerd\
+     device_config \
+     DeviceDiagnostics \
+@@ -91,7 +91,7 @@ PRODUCT_PACKAGES += \
+     dump.erofs \
+     dumpstate \
+     dumpsys \
+-    E2eeContactKeysProvider \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,E2eeContactKeysProvider) \
+     e2fsck \
+     enhanced-confirmation.xml \
+     ExtShared \
+@@ -260,9 +260,9 @@ PRODUCT_PACKAGES += \
+     schedtest \
+     screencap \
+     sdcard \
+     secdiscard \
+-    SecureElement \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,SecureElement) \
+     selinux_policy_system \
+     sensorservice \
+     service \
+     servicemanager \
+@@ -312,12 +312,12 @@ ifneq ($(PRODUCT_IS_ATV),true)
+   PRODUCT_PACKAGES += \
+-      $(RELEASE_PACKAGE_SOUND_PICKER) \
++      $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,$(RELEASE_PACKAGE_SOUND_PICKER)) \
+ 
+ endif
+ 
+ # Product does not support Dynamic System Update
+ ifneq ($(PRODUCT_NO_DYNAMIC_SYSTEM_UPDATE),true)
+     PRODUCT_PACKAGES += \
+-        DynamicSystemInstallationService \
++        $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,DynamicSystemInstallationService) \
+ 
+ endif
+ 
+diff --git a/target/product/generic_system.mk b/target/product/generic_system.mk
+--- a/target/product/generic_system.mk
++++ b/target/product/generic_system.mk
+@@ -30,10 +30,10 @@ PRODUCT_PACKAGES += \
+ 
+ # Applications
+ PRODUCT_PACKAGES += \
+-    LiveWallpapersPicker \
+-    PartnerBookmarksProvider \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,LiveWallpapersPicker) \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,PartnerBookmarksProvider) \
+     preinstalled-packages-platform-generic-system.xml \
+-    Stk \
+-    Tag \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,Stk) \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,Tag) \
+ 
+ ifeq ($(RELEASE_AVATAR_PICKER_APP),true)
+diff --git a/target/product/handheld_system.mk b/target/product/handheld_system.mk
+--- a/target/product/handheld_system.mk
++++ b/target/product/handheld_system.mk
+@@ -34,20 +34,20 @@ $(call inherit-product-if-exists, frameworks/webview/chromium/chromium.mk)
+ 
+ PRODUCT_PACKAGES += \
+-    BasicDreams \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,BasicDreams) \
+     BlockedNumberProvider \
+     BluetoothMidiService \
+-    BookmarkProvider \
+-    BuiltInPrintService \
+-    CalendarProvider \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,BookmarkProvider) \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,BuiltInPrintService) \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,CalendarProvider) \
+     cameraserver \
+-    CameraExtensionsProxy \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,CameraExtensionsProxy) \
+     CaptivePortalLogin \
+     CertInstaller \
+     CredentialManager \
+-    DeviceAsWebcam \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,DeviceAsWebcam) \
+     DocumentsUI \
+     DownloadProviderUi \
+-    EasterEgg \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,EasterEgg) \
+     ExternalStorageProvider \
+     FusedLocation \
+     InputDevices \
+@@ -55,14 +55,14 @@ PRODUCT_PACKAGES += \
+     librs_jni \
+-    ManagedProvisioning \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,ManagedProvisioning) \
+     MmsService \
+-    MtpService \
+-    MusicFX \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,MtpService) \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,MusicFX) \
+     PacProcessor \
+     preinstalled-packages-platform-handheld-system.xml \
+-    PrintRecommendationService \
+-    PrintSpooler \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,PrintRecommendationService) \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,PrintSpooler) \
+     ProxyHandler \
+     screenrecord \
+-    SecureElement \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,SecureElement) \
+     SharedStorageBackup \
+     SimAppDialog \
+@@ -69,10 +69,10 @@ PRODUCT_PACKAGES += \
+     Telecom \
+     TelephonyProvider \
+     TeleService \
+-    Traceur \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,Traceur) \
+     UserDictionaryProvider \
+     VpnDialogs \
+-    vr \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,vr) \
+ 
+ PRODUCT_PACKAGES += $(RELEASE_PACKAGE_VIRTUAL_CAMERA)
+ # Set virtual_camera_service_enabled soong config variable based on the
+diff --git a/target/product/media_system.mk b/target/product/media_system.mk
+--- a/target/product/media_system.mk
++++ b/target/product/media_system.mk
+@@ -24,9 +24,9 @@ PRODUCT_PACKAGES += \
+     com.android.future.usb.accessory \
+     com.android.mediadrm.signer \
+     com.android.media.remotedisplay \
+     com.android.media.remotedisplay.xml \
+-    CompanionDeviceManager \
++    $(if $(filter alas_kvm_x86_64,$(TARGET_PRODUCT)),,CompanionDeviceManager) \
+     drmserver \
+     fsck.f2fs \
+     HTMLViewer \
+     libfilterpack_imageproc \
