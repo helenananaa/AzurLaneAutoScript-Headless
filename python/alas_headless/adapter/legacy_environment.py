@@ -20,6 +20,7 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
     {
         "ALAS_SEMANTIC_ADB",
         "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS",
+        "ALAS_SEMANTIC_ADB_SERVER_PORT",
         "ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS",
         "ALAS_SEMANTIC_ALLOW_MAIL_MUTATIONS",
         "ALAS_SEMANTIC_MAIL_MUTATION_BUDGET",
@@ -201,6 +202,7 @@ class LegacyEnvironmentTranslation:
 
     driver_revision: str
     adb: str
+    adb_server_port: int
     adb_command_timeout_seconds: int
     observer_max_age_ms: int
     grants: Mapping[str, int]
@@ -220,6 +222,7 @@ class LegacyEnvironmentTranslation:
             {
                 "driver_revision": self.driver_revision,
                 "adb": self.adb,
+                "adb_server_port": self.adb_server_port,
                 "allow_mission_claim_once": self.grant("mission.claim") > 0,
                 "allow_mail_mutations": self.grant("mail.mutation") > 0,
                 "mail_mutation_budget": self.grant("mail.mutation"),
@@ -298,6 +301,18 @@ def translate_legacy_semantic_environment(
     if not 1 <= timeout <= 120:
         raise SemanticGateClosed("semantic ALAS ADB timeout must be in [1, 120]")
 
+    raw_adb_server_port = environment.get("ALAS_SEMANTIC_ADB_SERVER_PORT", "5037")
+    if (
+        not isinstance(raw_adb_server_port, str)
+        or _CANONICAL_NON_NEGATIVE_INTEGER.fullmatch(raw_adb_server_port) is None
+    ):
+        raise SemanticGateClosed(
+            "ADB server port must be a canonical positive integer"
+        )
+    adb_server_port = int(raw_adb_server_port)
+    if not 1 <= adb_server_port <= 65535:
+        raise SemanticGateClosed("semantic ALAS ADB server port must be in [1, 65535]")
+
     raw_max_age = environment.get("ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS", "10000")
     if (
         not isinstance(raw_max_age, str)
@@ -335,6 +350,7 @@ def translate_legacy_semantic_environment(
     translation = LegacyEnvironmentTranslation(
         driver_revision=revision,
         adb=environment.get("ALAS_SEMANTIC_ADB", "adb"),
+        adb_server_port=adb_server_port,
         adb_command_timeout_seconds=timeout,
         observer_max_age_ms=max_age,
         grants=grants,

@@ -4156,12 +4156,20 @@ class AdbObserverBridge:
         serial: str,
         package: str,
         adb: str = "adb",
+        adb_server_port: int = 5037,
         command_timeout_seconds: float = 10.0,
         trace: Optional[RuntimeTraceRecorder] = None,
     ) -> None:
+        if (
+            isinstance(adb_server_port, bool)
+            or not isinstance(adb_server_port, int)
+            or not 1 <= adb_server_port <= 65535
+        ):
+            raise ValueError("ADB server port must be an integer in [1, 65535]")
         self.serial = serial
         self.package = package
         self.adb = adb
+        self.adb_server_port = adb_server_port
         self.command_timeout_seconds = command_timeout_seconds
         self.trace = trace
         self.pid: Optional[int] = None
@@ -4180,7 +4188,14 @@ class AdbObserverBridge:
         started_ns = time.monotonic_ns()
         try:
             completed = subprocess.run(
-                [self.adb, "-s", self.serial, *arguments],
+                [
+                    self.adb,
+                    "-P",
+                    str(self.adb_server_port),
+                    "-s",
+                    self.serial,
+                    *arguments,
+                ],
                 check=True,
                 capture_output=True,
                 text=True,

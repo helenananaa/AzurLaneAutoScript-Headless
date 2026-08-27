@@ -212,6 +212,7 @@ class AdbRuntimeHandleFactory:
     command_timeout_seconds: float
     fingerprint_sha256: str
     driver_revision: str
+    adb_server_port: int = 5037
     process_lease: Optional[AlasPackageProcessLease] = None
     trace: Optional[RuntimeTraceRecorder] = None
     _bridge: AdbObserverBridge = field(init=False, repr=False)
@@ -231,6 +232,7 @@ class AdbRuntimeHandleFactory:
             self.serial,
             self.package,
             adb=self.adb,
+            adb_server_port=self.adb_server_port,
             command_timeout_seconds=self.command_timeout_seconds,
             trace=self.trace,
         )

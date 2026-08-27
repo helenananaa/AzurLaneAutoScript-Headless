@@ -17,7 +17,7 @@ class DeferredRuntimeBackend(RuntimeBackend):
     """Visible plan-only adapter that cannot be accidentally selected."""
 
     def __init__(self, kind: BackendKind, reason: str, host_class: str) -> None:
-        if kind not in (BackendKind.REDROID, BackendKind.TCG, BackendKind.ARM64_QEMU):
+        if kind not in (BackendKind.TCG, BackendKind.ARM64_QEMU):
             raise ValueError("deferred backend kind is unsupported")
         super().__init__(built_in_backend_profiles()[kind])
         if not isinstance(host_class, str) or not host_class.strip():

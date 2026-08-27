@@ -16,6 +16,7 @@ from .runtime_backend_adb import (
     RuntimeBackendNotReady,
     _PACKAGE_PATTERN,
     _validate_adb_identity,
+    _validate_adb_server_port,
 )
 from .runtime_command import (
     RuntimeCommandExecutor,
@@ -37,6 +38,7 @@ class KvmRuntimeConfig:
     avd_name: str
     avd_home: Path
     console_port: int
+    adb_server_port: int = 5037
     sdk_root: Optional[Path] = None
     angle_package: str = "org.chromium.angle"
     unity_command_line: Optional[str] = "-force-gfx-st"
@@ -75,8 +77,13 @@ class KvmRuntimeConfig:
             or self.console_port % 2
         ):
             raise ValueError("KVM emulator console port must be even and in [5554, 5680]")
-        if self.serial != "emulator-{0}".format(self.console_port):
-            raise ValueError("KVM serial must match its emulator console port")
+        allowed_serials = {
+            "emulator-{0}".format(self.console_port),
+            "127.0.0.1:{0}".format(self.console_port + 1),
+        }
+        if self.serial not in allowed_serials:
+            raise ValueError("KVM ADB transport must match its emulator console port")
+        _validate_adb_server_port(self.adb_server_port)
         if (
             isinstance(self.poll_interval_seconds, bool)
             or not isinstance(self.poll_interval_seconds, (int, float))
@@ -141,6 +148,8 @@ class KvmBackend(AdbAttachedBackend):
             config.component,
             config.host_class,
             str(config.adb),
+            config.adb_server_port,
+            True,
             config.angle_package,
             config.unity_command_line,
             config.manage_angle_routing,
@@ -200,7 +209,12 @@ class KvmBackend(AdbAttachedBackend):
         devices = self.executor.run(
             RuntimeCommandSpec(
                 "adb-device-inventory",
-                (str(self.config.adb), "devices"),
+                (
+                    str(self.config.adb),
+                    "-P",
+                    str(self.config.adb_server_port),
+                    "devices",
+                ),
                 timeout_seconds=10.0,
             )
         )
@@ -210,7 +224,11 @@ class KvmBackend(AdbAttachedBackend):
             columns = line.split()
             if columns and columns[0] == self.serial:
                 raise RuntimeBackendNotReady("emulator-serial-already-in-use")
-        environment = {"ANDROID_AVD_HOME": str(self.config.avd_home.resolve())}
+        environment = {
+            "ANDROID_AVD_HOME": str(self.config.avd_home.resolve()),
+            "ADB_SERVER_PORT": str(self.config.adb_server_port),
+            "ANDROID_ADB_SERVER_PORT": str(self.config.adb_server_port),
+        }
         if self.config.sdk_root is not None:
             environment["ANDROID_SDK_ROOT"] = str(self.config.sdk_root.resolve())
         arguments = (

@@ -1420,6 +1420,34 @@ class SemanticOracleTests(unittest.TestCase):
             timeout_seconds=30.0,
         )
 
+    def test_observer_bridge_uses_only_its_configured_adb_server(self):
+        completed = SimpleNamespace(stdout="device\n")
+        with mock.patch(
+            "alas_headless.semantic_oracle.subprocess.run",
+            return_value=completed,
+        ) as run:
+            bridge = AdbObserverBridge(
+                "device-1",
+                PACKAGE,
+                adb="owned-adb",
+                adb_server_port=5044,
+            )
+            self.assertEqual(bridge._run(("get-state",)), "device")
+
+        self.assertEqual(
+            run.call_args.args[0],
+            [
+                "owned-adb",
+                "-P",
+                "5044",
+                "-s",
+                "device-1",
+                "get-state",
+            ],
+        )
+        with self.assertRaisesRegex(ValueError, "ADB server port"):
+            AdbObserverBridge("device-1", PACKAGE, adb_server_port=65536)
+
     def test_cold_restart_requires_a_new_numeric_game_pid(self):
         bridge = AdbObserverBridge("device-1", PACKAGE)
         bridge.pid = 1234
