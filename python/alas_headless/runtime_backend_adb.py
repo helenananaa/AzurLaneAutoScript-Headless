@@ -8,7 +8,7 @@ import re
 import time
 import uuid
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, Mapping, Optional, Sequence
 
 from .runtime_artifacts import RuntimeLock
 from .runtime_backend import (
@@ -62,7 +62,9 @@ def _validate_adb_identity(serial: str, package: str, component: str) -> None:
         raise ValueError("ADB serial is malformed")
     if _PACKAGE_PATTERN.fullmatch(package) is None:
         raise ValueError("Android package is malformed")
-    if not component.startswith(package + "/") or any(char.isspace() for char in component):
+    if not component.startswith(package + "/") or any(
+        char.isspace() for char in component
+    ):
         raise ValueError("Android component is malformed")
 
 
@@ -110,7 +112,6 @@ class ExternalAdbConfig:
             raise ValueError("ADB polling interval must be positive")
 
 
-
 class AdbAttachedBackend(RuntimeBackend):
     """Shared read/identity path for externally owned and VM-backed Android."""
 
@@ -128,6 +129,7 @@ class AdbAttachedBackend(RuntimeBackend):
         executor: RuntimeCommandExecutor,
         launch_game: bool,
         poll_interval_seconds: float,
+        adb_server_port: Optional[int] = None,
         trace: Optional[RuntimeTraceRecorder] = None,
         bridge_factory: Callable[..., AdbObserverBridge] = AdbObserverBridge,
         monotonic: Callable[[], float] = time.monotonic,
@@ -139,6 +141,13 @@ class AdbAttachedBackend(RuntimeBackend):
         self.component = component
         self.host_class = host_class
         self.adb = adb
+        if adb_server_port is not None and (
+            isinstance(adb_server_port, bool)
+            or not isinstance(adb_server_port, int)
+            or not 1 <= adb_server_port <= 65535
+        ):
+            raise ValueError("ADB server port must be in [1, 65535]")
+        self.adb_server_port = adb_server_port
         self.angle_package = angle_package
         self.unity_command_line = unity_command_line
         self.manage_angle_routing = manage_angle_routing
@@ -153,6 +162,12 @@ class AdbAttachedBackend(RuntimeBackend):
         self._bridges: Dict[str, AdbObserverBridge] = {}
         self._original_angle_settings: Dict[str, Mapping[str, Optional[str]]] = {}
 
+    _UNITY_EXTRA_TRANSPORT = {
+        # adb v39 reparses `adb shell` argv into a device-shell command.  The
+        # leading dash must survive that layer as string data for `am --es`,
+        # not become another Activity Manager option.
+        "-force-gfx-st": "\\-force-gfx-st",
+    }
     _ANGLE_SETTINGS = (
         "angle_debug_package",
         "angle_gl_driver_selection_pkgs",
@@ -167,9 +182,12 @@ class AdbAttachedBackend(RuntimeBackend):
         timeout_seconds: float = 30.0,
         mutating: bool = False,
     ) -> RuntimeCommandSpec:
+        prefix = [self.adb]
+        if self.adb_server_port is not None:
+            prefix.extend(("-P", str(self.adb_server_port)))
         return RuntimeCommandSpec(
             label,
-            tuple([self.adb, "-s", self.serial] + list(arguments)),
+            tuple(prefix + ["-s", self.serial] + list(arguments)),
             timeout_seconds=timeout_seconds,
             mutating=mutating,
         )
@@ -204,7 +222,9 @@ class AdbAttachedBackend(RuntimeBackend):
                 return value
             if self.monotonic() >= deadline:
                 raise RuntimeBackendNotReady(failure_code)
-            self.sleep(min(self.poll_interval_seconds, max(0.0, deadline - self.monotonic())))
+            self.sleep(
+                min(self.poll_interval_seconds, max(0.0, deadline - self.monotonic()))
+            )
 
     def _read_angle_settings(self) -> Mapping[str, Optional[str]]:
         values: Dict[str, Optional[str]] = {}
@@ -335,9 +355,7 @@ class AdbAttachedBackend(RuntimeBackend):
                 return {"boot_completed": True, "package_manager_ready": True}
             return None
 
-        return self._wait_for(
-            timeout_seconds, ready, "android-framework-ready-timeout"
-        )
+        return self._wait_for(timeout_seconds, ready, "android-framework-ready-timeout")
 
     def _launch_game_process(
         self,
@@ -358,7 +376,10 @@ class AdbAttachedBackend(RuntimeBackend):
         self._require_success(force_stop, "game-force-stop-failed")
         launch_arguments = ["shell", "am", "start", "-W"]
         if self.unity_command_line is not None:
-            launch_arguments.extend(("--es", "unity", self.unity_command_line))
+            transport_value = self._UNITY_EXTRA_TRANSPORT.get(
+                self.unity_command_line, self.unity_command_line
+            )
+            launch_arguments.extend(("--es", "unity", transport_value))
         launch_arguments.extend(("-n", self.component))
         launch = self._adb(
             launch_label,
@@ -375,9 +396,7 @@ class AdbAttachedBackend(RuntimeBackend):
             ),
         )
 
-    def _wait_game_foreground(
-        self, timeout_seconds: float
-    ) -> Mapping[str, Any]:
+    def _wait_game_foreground(self, timeout_seconds: float) -> Mapping[str, Any]:
         def ready() -> Optional[Mapping[str, Any]]:
             pid_result = self._adb(
                 "game-pid", ("shell", "pidof", self.package), timeout_seconds=5.0
@@ -395,7 +414,10 @@ class AdbAttachedBackend(RuntimeBackend):
                 else None
             )
             if match is not None and match.group(1) == self.component:
-                return {"pid": int(pid_result.stdout.strip()), "component": self.component}
+                return {
+                    "pid": int(pid_result.stdout.strip()),
+                    "component": self.component,
+                }
             return None
 
         return self._wait_for(timeout_seconds, ready, "game-ready-timeout")
@@ -440,12 +462,17 @@ class AdbAttachedBackend(RuntimeBackend):
         instance_id = str(instance.get("instance_id", ""))
         if not instance_id:
             raise RuntimeBackendNotReady("runtime-instance-id-missing")
+        bridge_arguments: Dict[str, Any] = {
+            "adb": self.adb,
+            "command_timeout_seconds": min(120.0, max(1.0, timeout_seconds)),
+            "trace": self.trace,
+        }
+        if self.adb_server_port is not None:
+            bridge_arguments["adb_server_port"] = self.adb_server_port
         bridge = self.bridge_factory(
             self.serial,
             self.package,
-            adb=self.adb,
-            command_timeout_seconds=min(120.0, max(1.0, timeout_seconds)),
-            trace=self.trace,
+            **bridge_arguments,
         )
         try:
             bridge.open()
@@ -472,8 +499,7 @@ class AdbAttachedBackend(RuntimeBackend):
             if any(value.get("status") != "ok" for value in (snapshot, buttons)):
                 return None
             if any(
-                value.get("package") != self.package
-                for value in (snapshot, buttons)
+                value.get("package") != self.package for value in (snapshot, buttons)
             ):
                 raise RuntimeBackendNotReady("observer-package-mismatch")
             if any(value.get("pid") != bridge.pid for value in (snapshot, buttons)):
@@ -500,7 +526,9 @@ class AdbAttachedBackend(RuntimeBackend):
                 and (
                     button_generation == snapshot_generation
                     if atomic
-                    else snapshot_generation <= button_generation <= snapshot_generation + 2
+                    else snapshot_generation
+                    <= button_generation
+                    <= snapshot_generation + 2
                 )
             )
             if not coherent:
@@ -534,9 +562,7 @@ class AdbAttachedBackend(RuntimeBackend):
         # The libil2cpp digest remains useful as observed evidence, but it is
         # no longer compared with the runtime lock.  Game updates therefore do
         # not reject an otherwise working observer/runtime combination.
-        il2cpp_sha256 = bridge._device_sha256(
-            str(package_compatibility["il2cpp_path"])
-        )
+        il2cpp_sha256 = bridge._device_sha256(str(package_compatibility["il2cpp_path"]))
         android_fingerprint = self._require_success(
             self._adb(
                 "android-build-fingerprint",
@@ -570,9 +596,10 @@ class AdbAttachedBackend(RuntimeBackend):
             for line in angle_path_output.splitlines()
             if line.startswith("package:")
         ]
-        if len(angle_paths) != 1 or re.fullmatch(
-            r"/[A-Za-z0-9._/+=:@~-]+", angle_paths[0]
-        ) is None:
+        if (
+            len(angle_paths) != 1
+            or re.fullmatch(r"/[A-Za-z0-9._/+=:@~-]+", angle_paths[0]) is None
+        ):
             raise RuntimeIdentityMismatch("angle-package-path-mismatch")
         angle_sha256_output = self._require_success(
             self._adb(
@@ -582,7 +609,9 @@ class AdbAttachedBackend(RuntimeBackend):
             ),
             "angle-package-hash-unavailable",
         )
-        angle_sha256_match = re.match(r"^([0-9a-fA-F]{64})(?:\s|$)", angle_sha256_output)
+        angle_sha256_match = re.match(
+            r"^([0-9a-fA-F]{64})(?:\s|$)", angle_sha256_output
+        )
         if angle_sha256_match is None:
             raise RuntimeIdentityMismatch("angle-package-hash-malformed")
         angle_sha256 = angle_sha256_match.group(1).lower()
@@ -633,9 +662,7 @@ class AdbAttachedBackend(RuntimeBackend):
         if cleanup_failure is not None:
             raise cleanup_failure
 
-    def qualification_plan(
-        self, runtime_lock: Mapping[str, Any]
-    ) -> Mapping[str, Any]:
+    def qualification_plan(self, runtime_lock: Mapping[str, Any]) -> Mapping[str, Any]:
         return {
             "schema": "alas-headless.runtime-qualification-plan/v1",
             "backend": self.profile.backend.value,
@@ -677,7 +704,7 @@ class ExternalAdbBackend(AdbAttachedBackend):
         config: ExternalAdbConfig,
         executor: RuntimeCommandExecutor,
         trace: Optional[RuntimeTraceRecorder] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         self.config = config
         super().__init__(
@@ -694,22 +721,28 @@ class ExternalAdbBackend(AdbAttachedBackend):
             config.launch_game,
             config.poll_interval_seconds,
             trace=trace,
-            **kwargs
+            **kwargs,
         )
 
     def probe_host(self) -> RuntimeProbeResult:
         version = self.executor.run(
-            RuntimeCommandSpec("adb-version", (self.adb, "version"), timeout_seconds=10.0)
+            RuntimeCommandSpec(
+                "adb-version", (self.adb, "version"), timeout_seconds=10.0
+            )
         )
         state = self._adb("adb-get-state", ("get-state",), timeout_seconds=10.0)
-        available = version.succeeded and state.succeeded and state.stdout.strip() == "device"
+        available = (
+            version.succeeded and state.succeeded and state.stdout.strip() == "device"
+        )
         return RuntimeProbeResult(
             available,
             BackendKind.EXTERNAL_ADB,
             "ready" if available else "adb-device-unavailable",
             {
                 "host_class": self.host_class,
-                "serial_sha256": hashlib.sha256(self.serial.encode("utf-8")).hexdigest(),
+                "serial_sha256": hashlib.sha256(
+                    self.serial.encode("utf-8")
+                ).hexdigest(),
             },
         )
 
@@ -732,8 +765,6 @@ class ExternalAdbBackend(AdbAttachedBackend):
         self._require_success(result, "android-reboot-failed")
 
     def supports_recovery(self, recovery: str) -> bool:
-        return (
-            recovery == "game" and self.config.allow_game_restart
-        ) or (
+        return (recovery == "game" and self.config.allow_game_restart) or (
             recovery == "android" and self.config.allow_android_restart
         )

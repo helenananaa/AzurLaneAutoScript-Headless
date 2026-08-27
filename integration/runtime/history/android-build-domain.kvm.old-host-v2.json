@@ -1,0 +1,21 @@
+{
+  "schema": "alas-headless.android-build-domain/v2",
+  "backend": "kvm",
+  "paths": {
+    "source_root": "/srv/android-build/src/kvm-14-r75",
+    "repo_metadata_root": "/var/lib/alas-build-metadata/kvm/aosp-14-r75/.repo",
+    "output_root": "/srv/android-cache/out/kvm-14-r75-x86_64",
+    "ccache_root": "/srv/android-cache/ccache/kvm/aosp-14-r75-x86_64",
+    "build_home": "/srv/android-cache/home/kvm/aosp-14-r75",
+    "temp_root": "/srv/android-cache/tmp/kvm/aosp-14-r75",
+    "runtime_root": "/srv/android-runtime/kvm/alas-headless",
+    "archive_root": "/srv/android-archive/kvm/images",
+    "evidence_root": "/srv/android-archive/kvm/evidence",
+    "apk_archive": "/srv/android-archive/kvm/apks"
+  },
+  "locks": {
+    "build_lock": "/run/alas-headless/kvm-aosp-build.lock",
+    "hot_output_slot_lock": "/run/alas-headless/android-cache-hot-slot.lock"
+  },
+  "output_residency": "hot-slot"
+}

@@ -49,6 +49,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
         expected = {
             "ALAS_SEMANTIC_ADB",
             "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS",
+            "ALAS_SEMANTIC_ADB_SERVER_PORT",
             "ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS",
             "ALAS_SEMANTIC_ALLOW_MAIL_MUTATIONS",
             "ALAS_SEMANTIC_MAIL_MUTATION_BUDGET",
@@ -93,6 +94,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             "ALAS_SEMANTIC_DRIVER_REVISION",
             "ALAS_SEMANTIC_ADB",
             "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS",
+            "ALAS_SEMANTIC_ADB_SERVER_PORT",
             "ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS",
             "ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS",
             *LEGACY_BOOLEAN_GRANTS,
@@ -106,6 +108,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             ("ALAS_SEMANTIC_DRIVER_REVISION", REVISION.upper(), "revision", REVISION),
             ("ALAS_SEMANTIC_ADB", "safe-adb", "adb", "safe-adb"),
             ("ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS", "30", "timeout", 30),
+            ("ALAS_SEMANTIC_ADB_SERVER_PORT", "5044", "adb_port", 5044),
             ("ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS", "60000", "max_age", 60000),
             ("ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS", "0", "reject", None),
         ]
@@ -134,6 +137,8 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
                     self.assertEqual(result.adb, expected)
                 elif behavior == "timeout":
                     self.assertEqual(result.adb_command_timeout_seconds, expected)
+                elif behavior == "adb_port":
+                    self.assertEqual(result.adb_server_port, expected)
                 elif behavior == "max_age":
                     self.assertEqual(result.observer_max_age_ms, expected)
                 else:
@@ -151,6 +156,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
     def test_integer_variables_reject_noncanonical_values(self):
         variables = [
             "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS",
+            "ALAS_SEMANTIC_ADB_SERVER_PORT",
             "ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS",
             *LEGACY_BUDGET_GRANTS,
         ]
@@ -167,6 +173,12 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             with self.subTest(timeout=timeout):
                 environment = dict(BASE_ENVIRONMENT)
                 environment["ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS"] = timeout
+                with self.assertRaises(SemanticGateClosed):
+                    translate_legacy_semantic_environment(environment)
+        for port in ("0", "65536"):
+            with self.subTest(adb_server_port=port):
+                environment = dict(BASE_ENVIRONMENT)
+                environment["ALAS_SEMANTIC_ADB_SERVER_PORT"] = port
                 with self.assertRaises(SemanticGateClosed):
                     translate_legacy_semantic_environment(environment)
         for max_age in ("0", "300001"):

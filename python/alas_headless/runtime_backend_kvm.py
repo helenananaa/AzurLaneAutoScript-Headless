@@ -23,6 +23,7 @@ from .runtime_command import (
     RuntimeOwnedProcess,
 )
 from .runtime_trace import RuntimeTraceRecorder
+from .kvm_runtime_bundle import verify_pinned_runtime_release
 
 
 @dataclass(frozen=True)
@@ -37,6 +38,8 @@ class KvmRuntimeConfig:
     avd_name: str
     avd_home: Path
     console_port: int
+    adb_server_port: int
+    runtime_release_root: Path
     sdk_root: Optional[Path] = None
     angle_package: str = "org.chromium.angle"
     unity_command_line: Optional[str] = "-force-gfx-st"
@@ -57,11 +60,52 @@ class KvmRuntimeConfig:
             or not self.avd_name.strip()
         ):
             raise ValueError("KVM host class and AVD name cannot be empty")
-        for path in (self.emulator, self.emulator_check, self.adb, self.avd_home):
+        for path in (
+            self.emulator,
+            self.emulator_check,
+            self.adb,
+            self.avd_home,
+            self.runtime_release_root,
+        ):
             if not isinstance(path, Path):
                 raise ValueError("KVM runtime paths must be pathlib.Path values")
         if self.sdk_root is not None and not isinstance(self.sdk_root, Path):
             raise ValueError("KVM SDK root must be a pathlib.Path value")
+        release = self.runtime_release_root
+        if release.parent.name != "releases" or not release.name:
+            raise ValueError("KVM runtime release root must be under releases")
+        expected_runtime_paths = {
+            "emulator": release / "emulator" / "emulator",
+            "emulator_check": release / "emulator" / "emulator-check",
+            "adb": release / "sdk" / "platform-tools" / "adb",
+            "sdk_root": release / "sdk",
+        }
+        actual_runtime_paths = {
+            "emulator": self.emulator,
+            "emulator_check": self.emulator_check,
+            "adb": self.adb,
+            "sdk_root": self.sdk_root,
+        }
+        if actual_runtime_paths != expected_runtime_paths:
+            raise ValueError("KVM runtime tools must belong to one pinned release")
+        runtime_root = release.parent.parent
+        if self.avd_home != runtime_root / "avd":
+            raise ValueError("KVM AVD home must belong to the pinned runtime root")
+        if os.name == "posix":
+            owned_root = Path("/srv/android-runtime/kvm").resolve(strict=False)
+            resolved_release = release.resolve(strict=False)
+            resolved_avd = self.avd_home.resolve(strict=False)
+            try:
+                resolved_release.relative_to(owned_root)
+                resolved_avd.relative_to(owned_root)
+            except ValueError as exc:
+                raise ValueError("KVM runtime paths must be under its owned /srv root") from exc
+            for candidate in (release, self.avd_home):
+                cursor = Path(candidate.anchor)
+                for part in candidate.parts[1:]:
+                    cursor /= part
+                    if cursor.is_symlink():
+                        raise ValueError("KVM runtime paths must not contain symlinks")
         if not isinstance(self.launch_game, bool) or not isinstance(
             self.manage_angle_routing, bool
         ):
@@ -75,8 +119,12 @@ class KvmRuntimeConfig:
             or self.console_port % 2
         ):
             raise ValueError("KVM emulator console port must be even and in [5554, 5680]")
-        if self.serial != "emulator-{0}".format(self.console_port):
-            raise ValueError("KVM serial must match its emulator console port")
+        if (
+            isinstance(self.adb_server_port, bool)
+            or not isinstance(self.adb_server_port, int)
+            or not 1 <= self.adb_server_port <= 65535
+        ):
+            raise ValueError("KVM ADB server port must be in [1, 65535]")
         if (
             isinstance(self.poll_interval_seconds, bool)
             or not isinstance(self.poll_interval_seconds, (int, float))
@@ -129,10 +177,12 @@ class KvmBackend(AdbAttachedBackend):
         executor: RuntimeCommandExecutor,
         trace: Optional[RuntimeTraceRecorder] = None,
         kvm_probe: Callable[[], Tuple[bool, str, Mapping[str, str]]] = probe_linux_kvm,
+        release_verifier: Callable[[Path], Path] = verify_pinned_runtime_release,
         **kwargs: Any
     ) -> None:
         self.config = config
         self.kvm_probe = kvm_probe
+        self.release_verifier = release_verifier
         self._owned_processes: Dict[str, RuntimeOwnedProcess] = {}
         super().__init__(
             built_in_backend_profiles()[BackendKind.KVM],
@@ -147,6 +197,7 @@ class KvmBackend(AdbAttachedBackend):
             executor,
             config.launch_game,
             config.poll_interval_seconds,
+            adb_server_port=config.adb_server_port,
             trace=trace,
             **kwargs
         )
@@ -154,6 +205,25 @@ class KvmBackend(AdbAttachedBackend):
     @property
     def avd_config_path(self) -> Path:
         return self.config.avd_home / (self.config.avd_name + ".avd") / "config.ini"
+
+    def _require_release_avd(self) -> Path:
+        release = self.release_verifier(self.config.runtime_release_root)
+        try:
+            lines = self.avd_config_path.read_text(encoding="utf-8").splitlines()
+        except OSError as exc:
+            raise RuntimeBackendNotReady("kvm-avd-config-missing") from exc
+        values = [
+            line.split("=", 1)[1]
+            for line in lines
+            if line.startswith("image.sysdir.1=")
+        ]
+        if len(values) != 1:
+            raise RuntimeBackendNotReady("kvm-avd-image-sysdir-invalid")
+        actual = Path(values[0].rstrip("/\\")).resolve(strict=False)
+        expected = (release / "images").resolve(strict=False)
+        if actual != expected:
+            raise RuntimeBackendNotReady("kvm-avd-image-sysdir-outside-release")
+        return release
 
     def probe_host(self) -> RuntimeProbeResult:
         available, reason, fingerprint = self.kvm_probe()
@@ -167,6 +237,12 @@ class KvmBackend(AdbAttachedBackend):
         if missing:
             available = False
             reason = "kvm-runtime-path-missing"
+        if available:
+            try:
+                self._require_release_avd()
+            except Exception:
+                available = False
+                reason = "kvm-runtime-release-invalid"
         if available:
             acceleration = self.executor.run(
                 RuntimeCommandSpec(
@@ -186,21 +262,92 @@ class KvmBackend(AdbAttachedBackend):
 
     def provision(self, artifacts: Mapping[str, Any]) -> Mapping[str, Any]:
         provisioned = super().provision(artifacts)
-        if not self.avd_config_path.is_file():
-            raise RuntimeBackendNotReady("kvm-avd-config-missing")
+        release = self._require_release_avd()
         provisioned.update(
             {
                 "avd_name": self.config.avd_name,
                 "avd_config": str(self.avd_config_path.resolve()),
+                "runtime_release_root": str(release.resolve()),
             }
         )
         return provisioned
+
+    def wait_adb(self, instance: Mapping[str, Any], timeout_seconds: float) -> str:
+        """Reconnect the TCP transport through the dedicated ADB server."""
+
+        def ready() -> Optional[Mapping[str, Any]]:
+            connect = self.executor.run(
+                RuntimeCommandSpec(
+                    "adb-transport-connect",
+                    (
+                        str(self.config.adb),
+                        "-P",
+                        str(self.config.adb_server_port),
+                        "connect",
+                        self.serial,
+                    ),
+                    timeout_seconds=5.0,
+                    mutating=True,
+                )
+            )
+            if not connect.succeeded:
+                return None
+            state = self._adb("adb-get-state", ("get-state",), timeout_seconds=5.0)
+            if state.succeeded and state.stdout.strip() == "device":
+                return {"serial": self.serial}
+            return None
+
+        self._wait_for(timeout_seconds, ready, "adb-ready-timeout")
+        return self.serial
+
+    def wait_android_ready(
+        self, instance: Mapping[str, Any], timeout_seconds: float
+    ) -> Mapping[str, Any]:
+        """Wait for Goldfish provisioning, not only the early boot property."""
+
+        framework = super().wait_android_ready(instance, timeout_seconds)
+
+        def ready() -> Optional[Mapping[str, Any]]:
+            provisioned = self._adb(
+                "kvm-device-provisioned",
+                ("shell", "settings", "get", "global", "device_provisioned"),
+                timeout_seconds=5.0,
+            )
+            wifi = self._adb(
+                "kvm-wifi-status",
+                ("shell", "cmd", "wifi", "status"),
+                timeout_seconds=5.0,
+            )
+            if (
+                provisioned.succeeded
+                and provisioned.stdout.strip() == "1"
+                and wifi.succeeded
+                and "Wifi is connected" in wifi.stdout
+                and "IP: /" in wifi.stdout
+            ):
+                return {
+                    **framework,
+                    "device_provisioned": True,
+                    "network_ready": True,
+                }
+            return None
+
+        return self._wait_for(
+            timeout_seconds,
+            ready,
+            "kvm-network-provisioning-ready-timeout",
+        )
 
     def start(self, provisioned: Mapping[str, Any]) -> Mapping[str, Any]:
         devices = self.executor.run(
             RuntimeCommandSpec(
                 "adb-device-inventory",
-                (str(self.config.adb), "devices"),
+                (
+                    str(self.config.adb),
+                    "-P",
+                    str(self.config.adb_server_port),
+                    "devices",
+                ),
                 timeout_seconds=10.0,
             )
         )
@@ -210,9 +357,19 @@ class KvmBackend(AdbAttachedBackend):
             columns = line.split()
             if columns and columns[0] == self.serial:
                 raise RuntimeBackendNotReady("emulator-serial-already-in-use")
-        environment = {"ANDROID_AVD_HOME": str(self.config.avd_home.resolve())}
+        environment = {
+            "ANDROID_AVD_HOME": str(self.config.avd_home.resolve()),
+            "ANDROID_ADB_SERVER_PORT": str(self.config.adb_server_port),
+        }
         if self.config.sdk_root is not None:
             environment["ANDROID_SDK_ROOT"] = str(self.config.sdk_root.resolve())
+        platform_tools = (
+            self.config.runtime_release_root / "sdk" / "platform-tools"
+        ).resolve()
+        inherited_path = os.environ.get("PATH", "")
+        environment["PATH"] = str(platform_tools) + (
+            os.pathsep + inherited_path if inherited_path else ""
+        )
         arguments = (
             str(self.config.emulator),
             "-avd",

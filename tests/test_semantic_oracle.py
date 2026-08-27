@@ -1404,6 +1404,31 @@ class SemanticOracleTests(unittest.TestCase):
             )
         )
 
+    def test_observer_bridge_targets_the_pinned_adb_server(self):
+        bridge = AdbObserverBridge(
+            "127.0.0.1:5589",
+            PACKAGE,
+            adb="/runtime/platform-tools/adb",
+            adb_server_port=5043,
+        )
+        completed = SimpleNamespace(stdout="device\n")
+        with mock.patch(
+            "alas_headless.semantic_oracle.subprocess.run",
+            return_value=completed,
+        ) as run:
+            self.assertEqual(bridge._run(("get-state",)), "device")
+        self.assertEqual(
+            run.call_args.args[0],
+            [
+                "/runtime/platform-tools/adb",
+                "-P",
+                "5043",
+                "-s",
+                "127.0.0.1:5589",
+                "get-state",
+            ],
+        )
+
     def test_foreground_query_has_a_dedicated_busy_emulator_timeout(self):
         bridge = AdbObserverBridge("device-1", PACKAGE)
         bridge._run = mock.Mock(

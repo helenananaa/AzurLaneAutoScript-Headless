@@ -90,6 +90,8 @@ def backend_from_config(
             "avd_name",
             "avd_home",
             "console_port",
+            "adb_server_port",
+            "runtime_release_root",
         }
         allowed = required | {
             "sdk_root",
@@ -118,6 +120,8 @@ def backend_from_config(
             avd_name=value["avd_name"],
             avd_home=path_field("avd_home"),
             console_port=value["console_port"],
+            adb_server_port=value["adb_server_port"],
+            runtime_release_root=path_field("runtime_release_root"),
             sdk_root=path_field("sdk_root", optional=True),
             angle_package=value.get("angle_package", "org.chromium.angle"),
             unity_command_line=value.get("unity_command_line", "-force-gfx-st"),

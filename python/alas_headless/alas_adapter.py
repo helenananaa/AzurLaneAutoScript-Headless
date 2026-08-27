@@ -12727,6 +12727,7 @@ class AlasSemanticSession:
         policy_grants: Optional[Mapping[str, int]] = None,
         capability_profile: Optional[TaskCapabilityProfile] = None,
         capability_inventory: Optional[CapabilityInventory] = None,
+        adb_server_port: int = 5037,
     ) -> None:
         if runtime_handle is None and not serial:
             raise ValueError(
@@ -12741,6 +12742,8 @@ class AlasSemanticSession:
                 )
             if adb_command_timeout_seconds != 10:
                 raise ValueError("runtime handle conflicts with ADB timeout")
+            if adb_server_port != 5037:
+                raise ValueError("runtime handle conflicts with ADB server port")
         if not self._REVISION_PATTERN.fullmatch(driver_revision):
             raise ValueError("semantic ALAS mode requires a pinned ANGLE revision")
         if (
@@ -12749,6 +12752,12 @@ class AlasSemanticSession:
             or not 1 <= adb_command_timeout_seconds <= 120
         ):
             raise ValueError("semantic ALAS ADB timeout must be in [1, 120]")
+        if (
+            isinstance(adb_server_port, bool)
+            or not isinstance(adb_server_port, int)
+            or not 1 <= adb_server_port <= 65535
+        ):
+            raise ValueError("semantic ALAS ADB server port must be in [1, 65535]")
         if (
             isinstance(observer_max_age_ms, bool)
             or not isinstance(observer_max_age_ms, int)
@@ -12945,6 +12954,7 @@ class AlasSemanticSession:
                 serial=serial or "",
                 package=package,
                 adb=adb or "adb",
+                adb_server_port=adb_server_port,
                 command_timeout_seconds=float(adb_command_timeout_seconds),
                 fingerprint_sha256=self.expected_runtime_fingerprint_sha256,
                 driver_revision=driver_revision,
