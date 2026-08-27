@@ -2,6 +2,96 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-27
+
+### Lock-free Redroid/KVM build domains are active on the new host
+
+- The current build-domain v3 contract has no lock fields, shared hot output,
+  shared build group, or cross-backend mutable path. Both outputs may exist and
+  build concurrently under `/srv/android-build/redroid` and
+  `/srv/android-build/kvm`.
+- Routine work logs in directly as `alas-redroid-build` or `alas-kvm-build`.
+  Both are public-key-only and have verified `(ALL:ALL) NOPASSWD: ALL` through
+  `/etc/sudoers.d/90-alas-build-users`. Ordinary unprivileged cross-domain
+  writes remain denied, but full sudo is root-equivalent and can bypass that
+  boundary. Development rules therefore keep normal builds unprivileged,
+  elevate only exact root-required commands, forbid privileged peer-domain
+  writes, and require ownership checks after privileged packaging. `asus` is
+  retained for host-wide administration and break-glass recovery.
+- The new Redroid source seed passed source-lock, 1363-project, Git-object,
+  checksum, and clean-worktree validation. This is build-input qualification,
+  not Redroid boot or game-path qualification.
+
+## 2026-08-26
+
+### Historical first split without another disk
+
+- The retained Android build host now has independent Redroid and KVM build
+  domains. They no longer share AOSP source, `.repo` metadata, ccache, build
+  home, temporary directories, output, runtime, archive, evidence, or APK
+  archive paths.
+- This first split still used a shared hot-output coordination mechanism. That
+  mechanism was removed by the 2026-08-27 v3 domain contract; it is not a
+  current development boundary. No physical disk was added.
+- Redroid source is bound to
+  `/var/lib/alas-build-metadata/redroid/aosp-14-r75/.repo`; KVM source is bound
+  to `/var/lib/alas-build-metadata/kvm/aosp-14-r75/.repo`. The split metadata
+  receipts report zero regular-file inode intersection. Legacy outputs are
+  retained under backend-private `images/cold-output` archives rather than
+  being reused as live build state.
+- This prevents a KVM source or cache change from silently changing Redroid's
+  next build, and vice versa. It does not isolate CPU, RAM, I/O, physical-disk
+  failure, or whole-host failure; scheduling and capacity checks are still
+  required on the shared machine.
+- A fresh KVM build completed all `135744/135744` actions in 52 minutes 42
+  seconds in the private KVM domain. Its versioned runtime bundle
+  `kvm-r75-x86_64-v2` was published and passed its verifier. The build used a
+  then-empty KVM-private output directory with small pre-compile retries while
+  source ownership was corrected; it was not a second clean rebuild.
+- The existing KVM v7 service still runs the migration-era release and remains
+  migration-only and unqualified until the offline whole-AVD rollback point and
+  reviewed formal live cutover pass. That remaining KVM runtime work does not
+  reopen Redroid's separated mutable build paths.
+- The build host's kernel still cannot qualify Redroid container boot,
+  persistence, recovery, rollback, or the game path. Those claims require the
+  separately rented compatible AWS runtime host.
+
+### ARM64 Redroid reaches the real game login boundary
+
+- The AWS ARM64 runtime now boots Android 14 Redroid on the retained
+  `6.1.176-alas-dmdefault-ikconfig-va39+` kernel. The VA39 configuration
+  closes the old-LuaJIT `bad light userdata pointer` exit that occurred when
+  valid `libtolua.so` mappings landed outside the lightuserdata window.
+- Android 14 loads the observer through private `alasx` ANGLE library names,
+  and every Unity launch uses `-force-gfx-st`. The observer main-thread check
+  remains intact; a bounded initial-snapshot retry and three exact resource
+  action paths replace neither typed state nor ALAS task ownership.
+- A second isolated container with new 48 GiB userdata and 1 GiB metadata
+  completed the first-run agreement and the 28.1 GB resource update. Observed
+  failures stayed at zero; after the completed update left the non-actionable
+  `opening(Clone)` overlay, one narrowly admitted `-force-gfx-st` cold restart
+  reached `com.gsc.phone_login.PhoneLoginActivity`.
+- Final UI evidence contains one empty, unfocused phone field and one disabled
+  next control. No account value was entered or submitted. The fresh agreement
+  DOM transition passed once, but it occurred before the missing private-loader
+  runtime file was restored, so the full private-NULL-from-first-launch topology
+  still needs a sealed-OCI rerun.
+- The fresh launch exposed that the retained image tag/digest did not contain
+  the proven `/system/lib64/libEGL.so` loader or process-lived Pastel binary;
+  the old passing container held both only in its writable layer. Copying their
+  exact verified hashes recovered this container, but digest-only OCI
+  reproduction remains blocked until those fixes are sealed and requalified.
+- The focused ARM build/observer/host/backend suite passes 34 tests. Full local
+  regression recorded 1,704 passes, 3 skips, and one unrelated failure caused
+  by consumer drift in an external dirty ALAS live tree.
+- The complete operation sequence, incident classifications, rejected false
+  leads and re-entry conditions are in the
+  [ARM64 Redroid runbook](arm64-redroid-end-to-end-runbook.zh-CN.md); exact
+  fresh-container evidence is in the
+  [fresh login report](aws-arm64-redroid-fresh-login-validation-20260826.md).
+  This is an engineering pre-login baseline, not ALAS workload, FBE, recovery,
+  soak, or release qualification.
+
 ## 2026-08-23
 
 ### Apple Silicon Mac reaches the typed G4 login boundary under HVF
