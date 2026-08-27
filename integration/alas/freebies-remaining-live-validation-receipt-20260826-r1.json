@@ -1,0 +1,28 @@
+{
+  "schema": "alas-headless.freebies-remaining-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "BattlePass.Collect": true,
+    "DataKey.Collect": true,
+    "DataKey.ForceCollect": false,
+    "Mail.*": false,
+    "SupplyPack.Collect": true,
+    "SupplyPack.DayOfWeek": 0
+  },
+  "source_sha256": {
+    "freebies": "93067e1006564a9e2fd06a1c9f4d794a5890052f8041a190c36a754346fb9ab5",
+    "battle_pass": "b23a03a16e3d9c67f9fb09ba2c8793d7a991e375095dfe9b50eb00d56a7ce79c",
+    "data_key": "5ed30c24a6687ad29b48488999d50bb02fbcdce60c85724339295cd19e85f4d6",
+    "supply_pack": "1bcc8e7f199b174c12f336b2ad653435addee4c56d71dbff17d7f72afcc85fe2",
+    "adapter": "ba8c391633ba380f28bf1ffb0f218696c7ac7ab12d8894d3a1330e94250b3563",
+    "oracle": "47c1763728ce035d121b1caf2a46bc0628dfbafaba73135509764a64ac01e9c8"
+  },
+  "passed": false,
+  "error": "SystemExit: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\alas.py\", line 71, in run\n    self.__getattribute__(command)()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\alas.py\", line 236, in freebies\n    Freebies(config=self.config, device=self.device).run()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\freebies\\freebies.py\", line 21, in run\n    BattlePass(self.config, self.device).run()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\freebies\\battle_pass.py\", line 127, in run\n    self.ui_ensure(page_reward)\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\ui\\ui.py\", line 334, in ui_ensure\n    self.ui_goto(destination, skip_first_screenshot=True)\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\ui\\ui.py\", line 294, in ui_goto\n    if self.appear(page.check_button, offset=offset, interval=5):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\base\\base.py\", line 255, in appear\n    appear = semantic_adapter.appear(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 14671, in appear\n    return self.open().appear(button)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 5464, in appear\n    result = self._appear_once(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 7480, in _appear_once\n    raise AlasSemanticUnmapped(\nalas_headless.alas_adapter.AlasSemanticUnmapped: ALAS virtual resource has no active semantic flow: EVENT_LIST_CHECK\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_freebies_remaining_live_validation.py\", line 143, in validate\n    result[\"task_result\"] = instance.run(\"freebies\")\n                            ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\alas.py\", line 135, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "temporary_config_removed": true
+}

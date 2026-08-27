@@ -1,0 +1,95 @@
+{
+  "schema": "alas-headless.event-task-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-08-26T12:46:19.323717Z",
+  "finished_at": "2026-08-26T12:49:48.193369Z",
+  "task": "EventC",
+  "stage": "C1",
+  "event": "event_20260813_cn",
+  "mode": "hard",
+  "upstream_invocation_mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "scheduler_command": "EventC",
+  "effective_config": {
+    "event": "event_20260813_cn",
+    "name": "dynamic",
+    "mode": "normal",
+    "use_auto_search": true,
+    "run_count": 1,
+    "pt_limit": 0,
+    "time_limit": "2026-08-26T21:46:19"
+  },
+  "run_result": true,
+  "run_error": null,
+  "run_count_before": 1,
+  "run_count_after": 0,
+  "event_points_before": 17180,
+  "event_points_after": 17270,
+  "oil_before": 10925,
+  "oil_after": 10480,
+  "pt_limit_expected_triggered": false,
+  "time_limit": "2026-08-26T21:46:19",
+  "time_limit_offset_seconds": 3600,
+  "time_limit_expected_triggered": false,
+  "host_time_before": "2026-08-26T20:46:26.974535+08:00",
+  "host_time_after": "2026-08-26T20:49:48.138260+08:00",
+  "device_time_before": "2026-08-26T12:46:26+0000",
+  "device_time_after": "2026-08-26T12:49:47+0000",
+  "scheduler_enabled_after": true,
+  "event_daily_last_stage_after": "c1",
+  "use_auto_search": true,
+  "materialized_alas": null,
+  "login_recovery_performed": false,
+  "orphan_result_recovery_count": 0,
+  "preparation_recovery_count": 0,
+  "recovery_total": 0,
+  "qualification_stop": null,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "event_page": true,
+    "generation": 15983
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 6,
+    "sortie": 1,
+    "combat": 12,
+    "grid_click": 12,
+    "viewport_swipe": 4,
+    "camera_positioning": 0,
+    "recovery_total": 4
+  },
+  "observer": {
+    "generation": 19876,
+    "scene_handle": -76,
+    "button_count": 17
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "event_page": true
+  },
+  "event_sp_auto_search_evidence": {
+    "bundle": null,
+    "sortie": null,
+    "completion": null,
+    "final_attempt": null
+  },
+  "validation_errors": [],
+  "raw_input_fallback_used": false,
+  "worker_cleanup": {
+    "completed": true,
+    "actions": [
+      "semantic_session_close",
+      "cwd_restore",
+      "temp_config_remove",
+      "environment_restore"
+    ],
+    "errors": [],
+    "temp_config_path": "H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\config\\_codex_event_live_eventc_e9ade1345db0453294d4e930cdc0c0bc.json",
+    "temp_config_present_after": false,
+    "config_state": null
+  }
+}

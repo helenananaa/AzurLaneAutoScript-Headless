@@ -2080,6 +2080,18 @@ diff --git a/module/campaign/campaign_status.py b/module/campaign/campaign_statu
 index 45e8179f..55ba834c 100644
 --- a/module/campaign/campaign_status.py
 +++ b/module/campaign/campaign_status.py
+@@ -61,6 +61,11 @@ class CampaignStatus(UI):
+         Returns:
+             int: Coin amount
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.event_coin()
++
+         amount = 0
+         timeout = Timer(1, count=2).start()
+         while 1:
 @@ -107,6 +107,11 @@ class CampaignStatus(UI):
          Returns:
              int: Oil amount
@@ -2330,7 +2342,22 @@ index 541cb00a55838510a473b5fad5fc6cd0588e17df..c485edad2f5f00b0dd316f77fc6b9b8e
          # Some may use "100,000"
          limit = int(
              re.sub(r'[,.\'"，。]', '', str(self.config.EventGeneral_PtLimit))
-@@ -78,11 +91,13 @@ class CampaignEvent(CampaignStatus):
+@@ -66,7 +79,13 @@ class CampaignEvent(CampaignStatus):
+         if command in GEMS_FARMINGS and self.stage_is_main(self.config.Campaign_Name):
+             return False
+ 
+-        pt = self.get_event_pt()
++        semantic_adapter = getattr(
++            getattr(self, 'device', None), 'semantic_adapter', None
++        )
++        if semantic_adapter is None:
++            pt = self.get_event_pt()
++        else:
++            pt = semantic_adapter.event_points()
+         logger.attr('Event_PT_limit', f'{pt}/{limit}')
+         if pt >= limit:
+             logger.hr(f'Reach event PT limit: {limit}')
+@@ -78,11 +97,13 @@ class CampaignEvent(CampaignStatus):
      def event_time_limit_triggered(self):
          """
          Returns:
@@ -2344,7 +2371,7 @@ index 541cb00a55838510a473b5fad5fc6cd0588e17df..c485edad2f5f00b0dd316f77fc6b9b8e
          limit = self.config.EventGeneral_TimeLimit
          tasks = EVENTS + RAIDS + COALITIONS + GEMS_FARMINGS + MARITIME_ESCORTS + HOSPITAL
          command = self.config.Scheduler_Command
-@@ -103,10 +118,12 @@ class CampaignEvent(CampaignStatus):
+@@ -103,10 +120,12 @@ class CampaignEvent(CampaignStatus):
      def triggered_task_balancer(self):
          """
          Returns:
@@ -2357,7 +2384,7 @@ index 541cb00a55838510a473b5fad5fc6cd0588e17df..c485edad2f5f00b0dd316f77fc6b9b8e
          limit = self.config.TaskBalancer_CoinLimit
          coin = self.get_coin()
          # Check Coin
-@@ -127,4 +144,6 @@ class CampaignEvent(CampaignStatus):
+@@ -127,4 +146,6 @@ class CampaignEvent(CampaignStatus):
      def handle_task_balancer(self):
 +        self._validate_event_general_config()
 +
@@ -9498,18 +9525,13 @@ diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
 index 3232fe5e..88b5f629 100644
 --- a/module/campaign/campaign_base.py
 +++ b/module/campaign/campaign_base.py
-@@ -210,6 +210,25 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+@@ -210,6 +210,20 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
          self.ENTRANCE.area = self.ENTRANCE.button
          self.enter_map(self.ENTRANCE, mode=self.config.Campaign_Mode)
  
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if self.map_is_auto_search and semantic_adapter is not None:
-+            if self.config.Campaign_Mode == 'hard':
-+                semantic_stage = self.config.Hard_HardStage
-+            else:
-+                semantic_stage = self.config.Campaign_Name
-+            if semantic_stage == 'campaign_12_4':
-+                semantic_stage = '12-4'
++            semantic_stage = semantic_adapter.campaign_pre_sortie_stage_code()
 +            proof = semantic_adapter.wait_campaign_auto_search_completion(
 +                semantic_stage
 +            )
@@ -10235,9 +10257,18 @@ index 454f4aa6..941b507a 100644
  
  from module.base.timer import Timer
  from module.exception import CampaignEnd, RequestHumanTakeover, ScriptEnd
-@@ -174,24 +175,45 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -174,24 +175,54 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                  ):
                      logger.info('Semantic pre-sortie: scan fleet preparation')
++                    if semantic_adapter.campaign_dock_full_visible():
++                        # Preserve ALAS's configured one-click-retire versus
++                        # enhancement state machine. The adapter maps only the
++                        # exact labelled non-premium entry choices; dock
++                        # expansion remains unavailable.
++                        self.handle_retirement()
++                        campaign_timer.reset()
++                        fleet_timer.reset()
++                        continue
                      if semantic_adapter.campaign_sortie_committed():
 -                        if (
 -                            self.map_is_auto_search
@@ -10297,7 +10328,7 @@ index 454f4aa6..941b507a 100644
                              proof = semantic_adapter.confirm_campaign_sortie()
                              logger.info(
                                  f'Semantic campaign sortie proof: '
-@@ -209,7 +231,8 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -209,7 +240,8 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                              # map/combat/result states as well, so leave the
                              # entry loop normally and let CampaignBase run.
                              break
@@ -10307,9 +10338,27 @@ index 454f4aa6..941b507a 100644
                      if self.appear(FLEET_PREPARATION, offset=(20, 50)):
                          fleet_authorized = False
                          sortie_clicked = False
-@@ -281,25 +304,47 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -281,25 +313,65 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                      if self.appear(MAP_PREPARATION, offset=(20, 20)):
                          logger.info('Semantic pre-sortie: map preparation active')
++                        observed_mode = (
++                            semantic_adapter.campaign_map_preparation_mode_state()
++                        )
++                        if observed_mode != self.config.Campaign_Mode:
++                            receipt = (
++                                semantic_adapter.set_campaign_map_preparation_mode(
++                                    self.config.Campaign_Mode
++                                )
++                            )
++                            logger.info(
++                                'Semantic campaign mode switch: '
++                                f'{observed_mode}->{self.config.Campaign_Mode}, '
++                                f'generation={receipt.generation}'
++                            )
++                            # The shared A/B entrance remounts the C/D detail
++                            # hierarchy. Re-read every subsequent decision from
++                            # the new immutable semantic frame.
++                            continue
                          if self.config.Campaign_UseAutoSearch:
 -                            # The typed AutoFight control itself proves that
 -                            # this cleared stage supports the official clear-
@@ -10368,7 +10417,7 @@ index 454f4aa6..941b507a 100644
                          logger.info('Semantic pre-sortie: click map preparation')
                          self.device.click(MAP_PREPARATION)
                          map_click += 1
-@@ -311,7 +356,10 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -311,7 +383,10 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                      # unhandled transition generation fall through to the
                      # original fleet/sortie input branches below.  Earlier
                      # ALAS navigation and recovery states remain unchanged.
@@ -15421,9 +15470,18 @@ diff --git a/module/map/map_operation.py b/module/map/map_operation.py
 index 32316210..7b20b3c7 100644
 --- a/module/map/map_operation.py
 +++ b/module/map/map_operation.py
-@@ -175,6 +175,17 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -175,15 +175,26 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                  ):
                      logger.info('Semantic pre-sortie: scan fleet preparation')
+                     if semantic_adapter.campaign_dock_full_visible():
+                         # Preserve ALAS's configured one-click-retire versus
+                         # enhancement state machine. The adapter maps only the
+                         # exact labelled non-premium entry choices; dock
+                         # expansion remains unavailable.
+                         self.handle_retirement()
+                         campaign_timer.reset()
+                         fleet_timer.reset()
+                         continue
                      if semantic_adapter.campaign_sortie_committed():
 +                        archive_receipt = (
 +                            semantic_adapter

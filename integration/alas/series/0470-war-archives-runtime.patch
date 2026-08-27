@@ -61,9 +61,18 @@ diff --git a/module/map/map_operation.py b/module/map/map_operation.py
 index 32316210..7b20b3c7 100644
 --- a/module/map/map_operation.py
 +++ b/module/map/map_operation.py
-@@ -175,6 +175,17 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -175,15 +175,26 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                  ):
                      logger.info('Semantic pre-sortie: scan fleet preparation')
+                     if semantic_adapter.campaign_dock_full_visible():
+                         # Preserve ALAS's configured one-click-retire versus
+                         # enhancement state machine. The adapter maps only the
+                         # exact labelled non-premium entry choices; dock
+                         # expansion remains unavailable.
+                         self.handle_retirement()
+                         campaign_timer.reset()
+                         fleet_timer.reset()
+                         continue
                      if semantic_adapter.campaign_sortie_committed():
 +                        archive_receipt = (
 +                            semantic_adapter

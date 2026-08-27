@@ -361,6 +361,104 @@ def make_oracle(backend):
     )
 
 
+class CampaignDockFullTests(unittest.TestCase):
+    @staticmethod
+    def _backend():
+        msgbox = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/"
+        window = msgbox + "window/"
+        action = window + "button_container/custom_button_1(Clone)"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "custom_button_1(Clone)",
+                    action,
+                    440,
+                    515,
+                    {"left": 352, "top": 475, "right": 527, "bottom": 555},
+                ),
+                make_button(
+                    "custom_button_1(Clone)",
+                    action,
+                    640,
+                    515,
+                    {"left": 552, "top": 475, "right": 727, "bottom": 555},
+                ),
+                make_button(
+                    "custom_button_1(Clone)",
+                    action,
+                    840,
+                    515,
+                    {"left": 752, "top": 475, "right": 927, "bottom": 555},
+                ),
+                make_button("content", window + "msg_panel/content", 640, 360),
+                make_button("btnBack", window + "top/btnBack", 1030, 160),
+                make_button("bg", msgbox + "bg", 640, 360),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("情 报", window + "top/title"),
+                make_text("INFORMATION", window + "top/title_en"),
+                make_text("船坞已满，请先进行整理", window + "msg_panel/content"),
+                make_text(
+                    "整 理",
+                    action + "/pic",
+                    {"left": 390, "top": 492, "right": 477, "bottom": 538},
+                ),
+                make_text(
+                    "拓 展",
+                    action + "/pic",
+                    {"left": 590, "top": 492, "right": 677, "bottom": 538},
+                ),
+                make_text(
+                    "强 化",
+                    action + "/pic",
+                    {"left": 790, "top": 492, "right": 877, "bottom": 538},
+                ),
+                make_text(
+                    "D3",
+                    "UICamera/Canvas/UIOrigin/LevelInfoSPUI(Clone)/panel/"
+                    "title_form/title_index",
+                ),
+            ]
+        )
+        return backend
+
+    def test_d3_dock_full_maps_only_labelled_nonpremium_choices(self):
+        backend = self._backend()
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.campaign_dock_full_visible("d3"))
+        organize = oracle.click_campaign_dock_full_choice("d3", "organize")
+        enhance = oracle.click_campaign_dock_full_choice("d3", "enhance")
+
+        self.assertEqual(organize.semantic_id, "campaign/dock-full/organize")
+        self.assertEqual(enhance.semantic_id, "campaign/dock-full/enhance")
+        self.assertEqual(backend.taps, [(440, 515), (840, 515)])
+        with self.assertRaisesRegex(SemanticGateClosed, "expansion"):
+            oracle.click_campaign_dock_full_choice("d3", "expand")
+
+    def test_d3_dock_full_rejects_label_drift(self):
+        backend = self._backend()
+        backend.ui["texts"][4]["text"] = "购 买"
+
+        with self.assertRaisesRegex(SemanticGateClosed, "labels"):
+            make_oracle(backend).campaign_dock_full_visible("d3")
+
+    def test_d3_dock_full_rejects_unreviewed_control(self):
+        backend = self._backend()
+        backend.buttons["buttons"].append(
+            make_button(
+                "unknown",
+                "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/unknown",
+            )
+        )
+        backend.buttons["button_count"] += 1
+
+        with self.assertRaisesRegex(SemanticGateClosed, "control surface"):
+            make_oracle(backend).campaign_dock_full_visible("d3")
+
+
 def set_retirement_selection(backend, generation, used, selected=0):
     root = "root/OverlayCamera/Overlay/UIMain/blur_panel/"
     backend.snapshot = make_snapshot(generation=generation)
@@ -784,8 +882,8 @@ def make_live_eventsp_fleet_preparation_backend():
     return backend
 
 
-def make_live_eventsp_map_preparation_backend():
-    """Build the exact 81-record rootless LevelInfoSPUI live surface."""
+def make_live_eventsp_map_preparation_backend(*, profile="sp", mount="overlay"):
+    """Build one exact rootless LevelInfoSPUI live profile."""
 
     view_root = "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)"
     stage_root = (
@@ -949,6 +1047,293 @@ def make_live_eventsp_map_preparation_backend():
 
     backend = FakeBackend(buttons)
     backend.ui = make_ui(texts, toggles=toggles, images=images)
+    if profile in ("c1", "c2", "c3", "d1", "d2", "d3"):
+        profile_values = {
+            "c1": {
+                "chapter": "Chapter_2050021",
+                "stage": "C1  ",
+                "level": "LV 75",
+                "points": "90",
+                "head": "emotion_zhongxun",
+                "cost_limit": False,
+            },
+            "c2": {
+                "chapter": "Chapter_2050002",
+                "stage": "C2  ",
+                "level": "LV 80",
+                "points": "100",
+                "head": "emotion_zhanlie",
+                "cost_limit": False,
+            },
+            "c3": {
+                "chapter": "Chapter_2050003",
+                "stage": "C3  ",
+                "level": "LV 85",
+                "points": "110",
+                "head": "emotion_hangmu",
+                "cost_limit": False,
+            },
+            "d1": {
+                "chapter": "Chapter_2050024",
+                "stage": "D1  ",
+                "level": "LV 95",
+                "points": "120",
+                "head": "haorenlichade_m_qianting",
+                "cost_limit": True,
+            },
+            "d2": {
+                "chapter": "Chapter_2050005",
+                "stage": "D2  ",
+                "level": "LV 100",
+                "points": "150",
+                "head": "haorenlichade_m_zhanlie",
+                "cost_limit": True,
+            },
+            "d3": {
+                "chapter": "Chapter_2050006",
+                "stage": "D3  ",
+                "level": "LV 105",
+                "points": "180",
+                "head": "haorenlichade_m_hangmu",
+                "cost_limit": True,
+            },
+        }[profile]
+        for records in (
+            backend.buttons["buttons"],
+            backend.ui["texts"],
+            backend.ui["images"],
+        ):
+            for record in records:
+                record["path"] = record["path"].replace(
+                    "Chapter_2050041", profile_values["chapter"]
+                )
+        backend.buttons["buttons"].extend(
+            [
+                make_button(
+                    "Switch",
+                    view_root + "/panel/Difficulty/Hard/Switch",
+                    raycast_top=None,
+                ),
+                make_button(
+                    "Image",
+                    view_root + "/panel/passState/Image",
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.buttons["button_count"] = len(backend.buttons["buttons"])
+        for text in backend.ui["texts"]:
+            if text["path"].endswith("/title_form/title_index"):
+                text["text"] = profile_values["stage"]
+            elif text["path"] == view_root + "/panel/Level/Text":
+                text["text"] = profile_values["level"]
+            elif text["path"] == (
+                view_root + "/panel/drops/frame/list/item/icon_bg/count"
+            ):
+                text["text"] = profile_values["points"]
+        backend.ui["texts"].extend(
+            [
+                make_text(
+                    value,
+                    view_root + "/panel/achieves/achieve(Clone)/desc",
+                )
+                for value in ("完成关卡", "击破护卫舰队（11/11）", "击破敌方旗舰")
+            ]
+            + [
+                make_text("威胁排除: ", view_root + "/panel/progress/Text"),
+                make_text("100%", view_root + "/panel/progress/Text/value"),
+            ]
+        )
+        backend.ui["text_count"] = len(backend.ui["texts"])
+        for image in backend.ui["images"]:
+            if image["path"] == view_root + "/panel/head/Image":
+                image["sprite"] = profile_values["head"]
+        d1_images = {
+            "panel/achieves/achieve(Clone)": (("white_dot",) * 3, True),
+            "panel/achieves/achieve(Clone)/star": (("star",) * 3, True),
+            "panel/BottomExtra/LoopGroup/view/container/CostLimit": (
+                ("cost_limit_tag",),
+                True,
+            ),
+            "panel/Difficulty/Hard": (("btn_switch_hard",), True),
+            "panel/Difficulty/Hard/Bonus1": (("bonus_bg",), False),
+            "panel/Difficulty/Hard/Bonus1/Image": (("bonus_us",), False),
+            "panel/Difficulty/Hard/Mask_Difficulty_Loop": (("bonus_us",), True),
+            "panel/Difficulty/Hard/TextHard": (("text_hard_select",), False),
+            "panel/Difficulty/Hard/TextNormal": (("text_normal",), False),
+            "panel/Difficulty/Mask_Difficlty": (("text_normal",), False),
+            "panel/Difficulty/Mask_Difficlty/Image": (
+                ("text_hard_select",),
+                False,
+            ),
+            "panel/Difficulty/Mask_Difficlty/Image_1": (("bonus_bg",), False),
+            "panel/Difficulty/Mask_Difficlty/Image_2": (("bonus_us",), False),
+            "panel/passState/Image": (("1",), True),
+            "panel/progress/Background": (("bar_with_brackets",), True),
+            "panel/progress/Fill Area/Fill": (("yellow_progress",), True),
+        }
+        for relative, (sprites, raycast_target) in d1_images.items():
+            if (
+                relative
+                == "panel/BottomExtra/LoopGroup/view/container/CostLimit"
+                and not profile_values["cost_limit"]
+            ):
+                continue
+            for sprite in sprites:
+                image = make_image(view_root + "/" + relative, sprite)
+                image["raycast_target"] = raycast_target
+                backend.ui["images"].append(image)
+        backend.ui["image_count"] = len(backend.ui["images"])
+    elif profile in ("a2", "a3", "b2", "b3"):
+        profile_values = {
+            "a2": {
+                "chapter": "Chapter_2050002",
+                "stage": "A2  ",
+                "level": "LV 30",
+                "points": "40",
+                "head": "emotion_zhanlie",
+                "clone_bgs": ("bg2", "bg2", "bg1", "bg1"),
+                "clone_icons": ("30002", "54012", "55000", "54000"),
+            },
+            "a3": {
+                "chapter": "Chapter_2050003",
+                "stage": "A3  ",
+                "level": "LV 35",
+                "points": "50",
+                "head": "emotion_hangmu",
+                "clone_bgs": ("bg2", "bg2", "bg1", "bg1"),
+                "clone_icons": ("30002", "54012", "55000", "54000"),
+            },
+            "b2": {
+                "chapter": "Chapter_2050005",
+                "stage": "B2  ",
+                "level": "LV 55",
+                "points": "70",
+                "head": "haorenlichade_m_zhanlie",
+                "clone_bgs": ("bg3", "bg2", "bg1", "bg1"),
+                "clone_icons": ("30003", "54012", "55000", "54000"),
+            },
+            "b3": {
+                "chapter": "Chapter_2050006",
+                "stage": "B3  ",
+                "level": "LV 60",
+                "points": "80",
+                "head": "haorenlichade_m_hangmu",
+                "clone_bgs": ("bg4", "bg2", "bg1", "bg1"),
+                "clone_icons": ("30004", "54012", "55000", "54000"),
+            },
+        }[profile]
+        for records in (
+            backend.buttons["buttons"],
+            backend.ui["texts"],
+            backend.ui["images"],
+        ):
+            for record in records:
+                record["path"] = record["path"].replace(
+                    "Chapter_2050041", profile_values["chapter"]
+                )
+        backend.buttons["buttons"].extend(
+            [
+                make_button(
+                    "Switch",
+                    view_root + "/panel/Difficulty/Normal/Switch",
+                    raycast_top=None,
+                ),
+                make_button(
+                    "Image",
+                    view_root + "/panel/passState/Image",
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.buttons["button_count"] = len(backend.buttons["buttons"])
+        for text in backend.ui["texts"]:
+            if text["path"].endswith("/title_form/title_index"):
+                text["text"] = profile_values["stage"]
+            elif text["path"] == view_root + "/panel/Level/Text":
+                text["text"] = profile_values["level"]
+            elif text["path"] == (
+                view_root + "/panel/drops/frame/list/item/icon_bg/count"
+            ):
+                text["text"] = profile_values["points"]
+        backend.ui["texts"].extend(
+            [
+                make_text(
+                    value,
+                    view_root + "/panel/achieves/achieve(Clone)/desc",
+                )
+                for value in ("完成关卡", "击破护卫舰队（10/10）", "击破敌方旗舰")
+            ]
+            + [
+                make_text("威胁排除: ", view_root + "/panel/progress/Text"),
+                make_text("100%", view_root + "/panel/progress/Text/value"),
+            ]
+        )
+        backend.ui["text_count"] = len(backend.ui["texts"])
+        backend.ui["images"] = [
+            image
+            for image in backend.ui["images"]
+            if image["path"]
+            not in (
+                view_root + "/panel/Level/Hard",
+                view_root + "/panel/title/Hard",
+            )
+        ]
+        clone_bgs = iter(profile_values["clone_bgs"])
+        clone_icons = iter(profile_values["clone_icons"])
+        for image in backend.ui["images"]:
+            if image["path"] == view_root + "/panel/head/Image":
+                image["sprite"] = profile_values["head"]
+            elif image["path"] == (
+                view_root + "/panel/drops/frame/list/item(Clone)/icon_bg"
+            ):
+                image["sprite"] = next(clone_bgs)
+            elif image["path"] == (
+                view_root + "/panel/drops/frame/list/item(Clone)/icon_bg/icon"
+            ):
+                image["sprite"] = next(clone_icons)
+        b2_images = {
+            "panel/achieves/achieve(Clone)": (("white_dot",) * 3, True),
+            "panel/achieves/achieve(Clone)/star": (("star",) * 3, True),
+            "panel/Difficulty/Mask_Normal": (("text_hard",), False),
+            "panel/Difficulty/Mask_Normal/Image": (("bonus_bg",), False),
+            "panel/Difficulty/Mask_Normal/Image_1": (("bonus_us",), False),
+            "panel/Difficulty/Mask_Normal/Image_2": (("text_normal_select",), False),
+            "panel/Difficulty/Normal": (("btn_switch_normal",), True),
+            "panel/Difficulty/Normal/Bonus1": (("bonus_bg",), False),
+            "panel/Difficulty/Normal/Bonus1/Image": (("bonus_us",), False),
+            "panel/Difficulty/Normal/Mask_Normal_Loop": (
+                ("text_normal_select",),
+                True,
+            ),
+            "panel/Difficulty/Normal/TextHard": (("text_hard",), False),
+            "panel/Difficulty/Normal/TextNormal": (("text_normal_select",), False),
+            "panel/Level/Normal": (("bg_lv_normal",), False),
+            "panel/passState/Image": (("1",), True),
+            "panel/progress/Background": (("bar_with_brackets",), True),
+            "panel/progress/Fill Area/Fill": (("yellow_progress",), True),
+            "panel/title/Normal": (("bg_title_normal",), False),
+        }
+        for relative, (sprites, raycast_target) in b2_images.items():
+            for sprite in sprites:
+                image = make_image(view_root + "/" + relative, sprite)
+                image["raycast_target"] = raycast_target
+                backend.ui["images"].append(image)
+        backend.ui["image_count"] = len(backend.ui["images"])
+    elif profile != "sp":
+        raise ValueError("unknown live map-preparation profile")
+    if mount == "uiorigin":
+        destination = "UICamera/Canvas/UIOrigin/LevelInfoSPUI(Clone)"
+        for records in (
+            backend.buttons["buttons"],
+            backend.ui["toggles"],
+            backend.ui["texts"],
+            backend.ui["images"],
+        ):
+            for record in records:
+                record["path"] = record["path"].replace(view_root, destination)
+    elif mount != "overlay":
+        raise ValueError("unknown live map-preparation mount")
     return backend
 
 
@@ -3588,6 +3973,48 @@ class SemanticOracleTests(unittest.TestCase):
         receipt = oracle.click_campaign_stage("a1")
         self.assertEqual(receipt.semantic_id, "campaign/stage/a1")
         self.assertEqual(backend.taps, [(450, 266)])
+        point_path = (
+            "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/main/"
+            "right_chapter/event_btns/pt_text/Text"
+        )
+        backend.ui["texts"].append(
+            make_text(
+                "x17060",
+                point_path,
+                bounds={"left": 1000, "top": 10, "right": 1100, "bottom": 40},
+            )
+        )
+        backend.ui["text_count"] += 1
+        self.assertEqual(make_oracle(backend).event_points(), 17060)
+        backend.ui["texts"].append(
+            make_text(
+                "70477",
+                "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_value",
+                bounds={"left": 832, "top": 24, "right": 921, "bottom": 45},
+            )
+        )
+        backend.ui["text_count"] += 1
+        self.assertEqual(make_oracle(backend).event_coin(), 70477)
+        coin_text = backend.ui["texts"][-1]
+        coin_text["text"] = "70,477"
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or malformed"):
+            make_oracle(backend).event_coin()
+        coin_text["text"] = "70477"
+        point_text = backend.ui["texts"][-2]
+        point_text["text"] = "17060"
+        with self.assertRaisesRegex(SemanticGateClosed, "counter is malformed"):
+            make_oracle(backend).event_points()
+        point_text["text"] = "x17060"
+        point_text["flags"] |= 0x10
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            make_oracle(backend).event_points()
+        point_text["flags"] &= ~0x10
+        backend.ui["texts"].append(dict(point_text))
+        backend.ui["text_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            make_oracle(backend).event_points()
+        backend.ui["texts"].pop()
+        backend.ui["text_count"] -= 1
         mixed_root = root + "Battle/Nodes/Chapter_2050002"
         backend.buttons["buttons"].extend(
             [
@@ -4496,6 +4923,274 @@ class SemanticOracleTests(unittest.TestCase):
                     self.assertEqual(vars(context), context_before)
                     self.assertEqual(adapter._action_ledger._remaining, ledger_before)
                     adapter.end_campaign_pre_sortie()
+
+    def test_live_eventd_d1_map_preparation_accepts_only_reviewed_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="d1")
+        pooled_paths = {
+            "panel/Difficulty/Hard/Mask_Difficulty_Loop",
+            "panel/Difficulty/Mask_Difficlty",
+            "panel/Difficulty/Mask_Difficlty/Image",
+            "panel/Difficulty/Mask_Difficlty/Image_1",
+            "panel/Difficulty/Mask_Difficlty/Image_2",
+        }
+        for image in backend.ui["images"]:
+            if image["path"].rsplit("LevelInfoSPUI(Clone)/", 1)[-1] in pooled_paths:
+                image["sprite"] = "pooled_star_sprite"
+                image["adb_bounds"] = None
+            if image["path"].endswith("/panel/passState/Image"):
+                image["sprite"] = "2"
+        state = make_oracle(backend).campaign_preparation_state("d1")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "d1", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        unknown = make_live_eventsp_map_preparation_backend(profile="d1")
+        unknown.buttons["buttons"].append(
+            make_button(
+                "Switch",
+                "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/"
+                "panel/Difficulty/Hard/UnknownSwitch",
+                raycast_top=None,
+            )
+        )
+        unknown.buttons["button_count"] = len(unknown.buttons["buttons"])
+        with self.assertRaisesRegex(SemanticGateClosed, "record is not reviewed"):
+            make_oracle(unknown).campaign_preparation_state("d1")
+        self.assertEqual(unknown.taps, [])
+
+    def test_live_eventc_c1_map_preparation_accepts_exact_stage_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="c1")
+        state = make_oracle(backend).campaign_preparation_state("c1")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "c1", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        wrong_head = make_live_eventsp_map_preparation_backend(profile="c1")
+        for image in wrong_head.ui["images"]:
+            if image["path"].endswith("/panel/head/Image"):
+                image["sprite"] = "haorenlichade_m_qianting"
+        with self.assertRaisesRegex(SemanticGateClosed, "image identity is malformed"):
+            make_oracle(wrong_head).campaign_preparation_state("c1")
+        self.assertEqual(wrong_head.taps, [])
+
+    def test_live_eventb_b2_map_preparation_accepts_only_reviewed_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="b2")
+        pooled_paths = {
+            "panel/Difficulty/Mask_Normal",
+            "panel/Difficulty/Mask_Normal/Image",
+            "panel/Difficulty/Mask_Normal/Image_1",
+            "panel/Difficulty/Mask_Normal/Image_2",
+            "panel/Difficulty/Normal/Mask_Normal_Loop",
+        }
+        for image in backend.ui["images"]:
+            if image["path"].rsplit("LevelInfoSPUI(Clone)/", 1)[-1] in pooled_paths:
+                image["sprite"] = "pooled_stage_star_sprite"
+        state = make_oracle(backend).campaign_preparation_state("b2")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "b2", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        unknown = make_live_eventsp_map_preparation_backend(profile="b2")
+        unknown.buttons["buttons"].append(
+            make_button(
+                "Switch",
+                "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/"
+                "panel/Difficulty/Normal/UnknownSwitch",
+                raycast_top=None,
+            )
+        )
+        unknown.buttons["button_count"] = len(unknown.buttons["buttons"])
+        with self.assertRaisesRegex(SemanticGateClosed, "record is not reviewed"):
+            make_oracle(unknown).campaign_preparation_state("b2")
+        self.assertEqual(unknown.taps, [])
+
+        bonus_consumed = make_live_eventsp_map_preparation_backend(profile="b2")
+        bonus_paths = {
+            "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/"
+            "panel/Difficulty/Normal/Bonus1",
+            "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/"
+            "panel/Difficulty/Normal/Bonus1/Image",
+        }
+        bonus_consumed.ui["images"] = [
+            image
+            for image in bonus_consumed.ui["images"]
+            if image["path"] not in bonus_paths
+        ]
+        bonus_consumed.ui["image_count"] = len(bonus_consumed.ui["images"])
+        state = make_oracle(bonus_consumed).campaign_preparation_state("b2")
+        self.assertEqual(state.stage_code, "b2")
+
+        partial_bonus = make_live_eventsp_map_preparation_backend(profile="b2")
+        partial_bonus.ui["images"] = [
+            image
+            for image in partial_bonus.ui["images"]
+            if image["path"] != sorted(bonus_paths)[0]
+        ]
+        partial_bonus.ui["image_count"] = len(partial_bonus.ui["images"])
+        with self.assertRaisesRegex(SemanticGateClosed, "image surface is incomplete"):
+            make_oracle(partial_bonus).campaign_preparation_state("b2")
+
+    def test_live_eventc_c2_shared_a2_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="a2")
+        state = make_oracle(backend).campaign_preparation_state("a2")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "a2", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        wrong_head = make_live_eventsp_map_preparation_backend(profile="a2")
+        for image in wrong_head.ui["images"]:
+            if image["path"].endswith("/panel/head/Image"):
+                image["sprite"] = "emotion_zhongxun"
+        with self.assertRaisesRegex(SemanticGateClosed, "image identity is malformed"):
+            make_oracle(wrong_head).campaign_preparation_state("a2")
+        self.assertEqual(wrong_head.taps, [])
+
+    def test_live_eventc_c2_hard_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="c2")
+        state = make_oracle(backend).campaign_preparation_state("c2")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "c2", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        wrong_points = make_live_eventsp_map_preparation_backend(profile="c2")
+        for text in wrong_points.ui["texts"]:
+            if text["path"].endswith("/drops/frame/list/item/icon_bg/count"):
+                text["text"] = "90"
+        with self.assertRaisesRegex(SemanticGateClosed, "text value changed"):
+            make_oracle(wrong_points).campaign_preparation_state("c2")
+        self.assertEqual(wrong_points.taps, [])
+
+    def test_live_eventc_c3_shared_a3_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="a3")
+        state = make_oracle(backend).campaign_preparation_state("a3")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "a3", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+    def test_live_eventc_c3_hard_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="c3")
+        state = make_oracle(backend).campaign_preparation_state("c3")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "c3", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+    def test_live_eventd_d2_hard_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="d2")
+        state = make_oracle(backend).campaign_preparation_state("d2")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "d2", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        bonus_consumed = make_live_eventsp_map_preparation_backend(profile="d2")
+        bonus_consumed.ui["images"] = [
+            image
+            for image in bonus_consumed.ui["images"]
+            if "/panel/Difficulty/Hard/Bonus1" not in image["path"]
+        ]
+        bonus_consumed.ui["image_count"] = len(bonus_consumed.ui["images"])
+        state = make_oracle(bonus_consumed).campaign_preparation_state("d2")
+        self.assertEqual(state.stage_code, "d2")
+
+    def test_live_eventd_d3_hard_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="d3")
+        state = make_oracle(backend).campaign_preparation_state("d3")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "d3", 10)
+        )
+        self.assertEqual(backend.taps, [])
+        backend.ui["texts"].append(
+            make_text(
+                "70477",
+                "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_value",
+            )
+        )
+        backend.ui["text_count"] += 1
+        self.assertEqual(make_oracle(backend).event_coin("d3"), 70477)
+        for toggle in backend.ui["toggles"]:
+            if toggle["path"].endswith("/AutoFight"):
+                toggle["checked"] = False
+        backend.ui["images"] = [
+            image
+            for image in backend.ui["images"]
+            if not image["path"].endswith("/AutoFight/Flag")
+        ]
+        backend.ui["image_count"] = len(backend.ui["images"])
+        self.assertEqual(
+            make_oracle(backend).campaign_preparation_state("d3").stage_code,
+            "d3",
+        )
+        self.assertEqual(make_oracle(backend).event_coin("d3"), 70477)
+        with self.assertRaises(SemanticGateClosed):
+            make_oracle(backend).event_coin("d2")
+
+        remounted = make_live_eventsp_map_preparation_backend(
+            profile="d3", mount="uiorigin"
+        )
+        state = make_oracle(remounted).campaign_preparation_state("d3")
+        self.assertEqual(state.stage_code, "d3")
+
+        dedicated_hard_node = make_live_eventsp_map_preparation_backend(
+            profile="d3"
+        )
+        for records in (
+            dedicated_hard_node.buttons["buttons"],
+            dedicated_hard_node.ui["texts"],
+            dedicated_hard_node.ui["images"],
+        ):
+            for record in records:
+                record["path"] = record["path"].replace(
+                    "Chapter_2050006", "Chapter_2050026"
+                )
+        state = make_oracle(dedicated_hard_node).campaign_preparation_state("d3")
+        self.assertEqual(state.stage_code, "d3")
+
+        mixed = make_live_eventsp_map_preparation_backend(
+            profile="d3", mount="uiorigin"
+        )
+        mixed.buttons["buttons"].append(
+            make_button(
+                "bg",
+                "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/bg",
+                raycast_top=None,
+            )
+        )
+        mixed.buttons["button_count"] = len(mixed.buttons["buttons"])
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is incomplete"):
+            make_oracle(mixed).campaign_preparation_state("d3")
+
+    def test_live_eventb_b3_map_preparation_accepts_exact_stage_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="b3")
+        state = make_oracle(backend).campaign_preparation_state("b3")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "b3", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        wrong_level = make_live_eventsp_map_preparation_backend(profile="b3")
+        for text in wrong_level.ui["texts"]:
+            if text["path"].endswith("/panel/Level/Text"):
+                text["text"] = "LV 55"
+        with self.assertRaisesRegex(SemanticGateClosed, "text value changed"):
+            make_oracle(wrong_level).campaign_preparation_state("b3")
+        self.assertEqual(wrong_level.taps, [])
 
     def test_live_eventsp_map_preparation_requires_exact_closed_surface(self):
         backend = make_live_eventsp_map_preparation_backend()

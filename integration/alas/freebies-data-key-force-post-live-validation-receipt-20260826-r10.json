@@ -1,0 +1,1746 @@
+{
+  "schema": "alas-headless.freebies-data-key-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "BattlePass.Collect": false,
+    "DataKey.Collect": true,
+    "DataKey.ForceCollect": true,
+    "Mail.ClaimMaintenance": false,
+    "Mail.ClaimMerit": false,
+    "Mail.ClaimTradeLicense": false,
+    "Mail.DeleteCollected": false,
+    "SupplyPack.Collect": false
+  },
+  "source_sha256": {
+    "freebies": "93067e1006564a9e2fd06a1c9f4d794a5890052f8041a190c36a754346fb9ab5",
+    "data_key": "5ed30c24a6687ad29b48488999d50bb02fbcdce60c85724339295cd19e85f4d6",
+    "adapter": "ba8c391633ba380f28bf1ffb0f218696c7ac7ab12d8894d3a1330e94250b3563",
+    "oracle": "4567c677919dc4d457346e6ebd6017a3051b4e33af1261cdf4d276c12b1f8f40"
+  },
+  "passed": false,
+  "observations": [],
+  "collect_calls": [],
+  "limit_choices": [],
+  "error": "SystemExit: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\alas.py\", line 71, in run\n    self.__getattribute__(command)()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\alas.py\", line 236, in freebies\n    Freebies(config=self.config, device=self.device).run()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\freebies\\freebies.py\", line 25, in run\n    DataKey(self.config, self.device).run()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\freebies\\data_key.py\", line 84, in run\n    self.data_key_collect()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\freebies\\data_key.py\", line 55, in data_key_collect\n    if self.appear(DATA_KEY_COLLECTED, offset=(20, 20)):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\base\\base.py\", line 255, in appear\n    appear = semantic_adapter.appear(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 14671, in appear\n    return self.open().appear(button)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 5464, in appear\n    result = self._appear_once(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 6531, in _appear_once\n    return self.oracle.war_archives_data_key_collected()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_freebies_data_key_live_validation.py\", line 130, in record_collected\n    value = original_collected()\n            ^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 17139, in war_archives_data_key_collected\n    raise SemanticGateClosed(\"war archives data-key claim state is ambiguous\")\nalas_headless.semantic_oracle.SemanticGateClosed: war archives data-key claim state is ambiguous\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_freebies_data_key_live_validation.py\", line 168, in validate\n    result[\"task_result\"] = instance.run(\"freebies\")\n                            ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\alas.py\", line 135, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "failure_surface": {
+    "generation": 914054,
+    "buttons": [
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon/info/content/award(Clone)/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "IconTpl",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon/info/content/award/IconTpl",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "help",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/help",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": null
+      },
+      {
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/bg",
+        "active": true,
+        "enabled": true,
+        "interactable": true,
+        "raycast_top": true
+      }
+    ],
+    "texts": [
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon/info/content/award(Clone)/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "30"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "29"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "28"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "27"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "26"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "25"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "24"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "23"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "22"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "21"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "20"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "19"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "18"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "17"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "16"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "15"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "14"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "13"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "12"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "11"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "100%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "10"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "100%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "09"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "08"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "07"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "06"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "05"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "04"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "03"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1/index",
+        "text": "02"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item(Clone)/bg/icon/info/dec1",
+        "text": "NO."
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/nums/text",
+        "text": "300/300"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon/info/progress/Text",
+        "text": "0%"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon/info/content/award/IconTpl/icon_bg/count",
+        "text": ""
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon/info/dec1/index",
+        "text": "01"
+      },
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/item/bg/icon/info/dec1",
+        "text": "NO."
+      }
+    ],
+    "images": [
+      {
+        "path": "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/getBtn/state_after",
+        "sprite": "remaster_key_got",
+        "active": true,
+        "enabled": true
+      }
+    ]
+  },
+  "temporary_config_removed": true
+}

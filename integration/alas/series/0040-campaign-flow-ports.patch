@@ -109,6 +109,18 @@ diff --git a/module/campaign/campaign_status.py b/module/campaign/campaign_statu
 index 45e8179f..55ba834c 100644
 --- a/module/campaign/campaign_status.py
 +++ b/module/campaign/campaign_status.py
+@@ -61,6 +61,11 @@ class CampaignStatus(UI):
+         Returns:
+             int: Coin amount
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.event_coin()
++
+         amount = 0
+         timeout = Timer(1, count=2).start()
+         while 1:
 @@ -107,6 +107,11 @@ class CampaignStatus(UI):
          Returns:
              int: Oil amount
@@ -359,7 +371,22 @@ index 541cb00a55838510a473b5fad5fc6cd0588e17df..c485edad2f5f00b0dd316f77fc6b9b8e
          # Some may use "100,000"
          limit = int(
              re.sub(r'[,.\'"，。]', '', str(self.config.EventGeneral_PtLimit))
-@@ -78,11 +91,13 @@ class CampaignEvent(CampaignStatus):
+@@ -66,7 +79,13 @@ class CampaignEvent(CampaignStatus):
+         if command in GEMS_FARMINGS and self.stage_is_main(self.config.Campaign_Name):
+             return False
+ 
+-        pt = self.get_event_pt()
++        semantic_adapter = getattr(
++            getattr(self, 'device', None), 'semantic_adapter', None
++        )
++        if semantic_adapter is None:
++            pt = self.get_event_pt()
++        else:
++            pt = semantic_adapter.event_points()
+         logger.attr('Event_PT_limit', f'{pt}/{limit}')
+         if pt >= limit:
+             logger.hr(f'Reach event PT limit: {limit}')
+@@ -78,11 +97,13 @@ class CampaignEvent(CampaignStatus):
      def event_time_limit_triggered(self):
          """
          Returns:
@@ -373,7 +400,7 @@ index 541cb00a55838510a473b5fad5fc6cd0588e17df..c485edad2f5f00b0dd316f77fc6b9b8e
          limit = self.config.EventGeneral_TimeLimit
          tasks = EVENTS + RAIDS + COALITIONS + GEMS_FARMINGS + MARITIME_ESCORTS + HOSPITAL
          command = self.config.Scheduler_Command
-@@ -103,10 +118,12 @@ class CampaignEvent(CampaignStatus):
+@@ -103,10 +120,12 @@ class CampaignEvent(CampaignStatus):
      def triggered_task_balancer(self):
          """
          Returns:
@@ -386,7 +413,7 @@ index 541cb00a55838510a473b5fad5fc6cd0588e17df..c485edad2f5f00b0dd316f77fc6b9b8e
          limit = self.config.TaskBalancer_CoinLimit
          coin = self.get_coin()
          # Check Coin
-@@ -127,4 +144,6 @@ class CampaignEvent(CampaignStatus):
+@@ -127,4 +146,6 @@ class CampaignEvent(CampaignStatus):
      def handle_task_balancer(self):
 +        self._validate_event_general_config()
 +

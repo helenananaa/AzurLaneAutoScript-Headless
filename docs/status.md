@@ -4,6 +4,38 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
 ## 2026-08-26
 
+### Event C/D stage coverage and TimeLimit are live complete on the current event
+
+- The original `EventC` and `EventD` tasks now complete official auto-search
+  for C1-C3 and D1-D3 through the normal scheduler entry. The fresh C2, C3,
+  D2, and D3 receipts each show `RunCount 1 -> 0`, the matching `LastStage`,
+  return to the event page, no validation errors, and no raw-input fallback.
+  Evidence is retained in
+  `integration/alas/eventc-c2-auto-search-live-validation-receipt-20260826-r1.json`,
+  `integration/alas/eventc-c3-auto-search-live-validation-receipt-20260826-r1.json`,
+  `integration/alas/eventd-d2-auto-search-live-validation-receipt-20260826-r1.json`,
+  and
+  `integration/alas/eventd-d3-auto-search-live-validation-receipt-20260826-r1.json`.
+- D3 exposed a dedicated hard-stage underlay (`Chapter_2050026`) in addition
+  to the shared B3 route (`Chapter_2050006`). Both exact identities are now
+  accepted; an unknown chapter remains rejected rather than guessed.
+- `EventGeneral.TimeLimit` completed both live directions after fresh coherent
+  observer state returned: an expired limit disabled the event with zero
+  sortie, while a future limit admitted exactly one C1 run and returned
+  cleanly. Evidence is
+  `integration/alas/event-general-time-limit-expired-live-validation-receipt-20260826-r1.json`
+  and
+  `integration/alas/event-general-time-limit-future-eventc-c1-live-validation-receipt-20260826-r1.json`.
+- A natural D3 dock-full popup was identified by its exact `强化/拓展/整理`
+  controls. The recovery port delegates `整理` to ALAS's configured official
+  one-click retirement transaction, never selects premium `拓展`, and keeps
+  `强化` as the other ALAS-owned branch. This live encounter retired 95 ships
+  (`930/930 -> 835/930`) and preserved their equipment, but the original run
+  reached the equipment-preservation dialog before the reconnect classifier
+  fix. The repaired automatic dock-full path is therefore covered offline and
+  remains pending one fresh natural end-to-end live reproduction; it is not
+  promoted as live complete by the later clean D3 sortie.
+
 ### Daemon typed idle soak, bounded sortie, and 12-4 official auto-search are live-qualified
 
 - The original `AzurLaneDaemon.run_once()` completed a 180-second typed-only
@@ -1221,12 +1253,26 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `task_delay(5) -> task_call() -> task_stop()` sequences. Static evidence pins
   every runtime consumer across campaign, coalition, raid, hospital, and
   auto-search combat modules.
-- Nine malformed/bounds cases fail closed. No event PT or coin was read from a
-  live account, no task was actually disabled, called, delayed, or stopped, and
-  no Android input occurred. Live promotion still requires typed page-specific
-  PT/coin observations, server/local-time correlation, and scheduler recovery
-  receipts proving the target task starts without a loop; only offline
-  dimensions are promoted here.
+- Nine malformed/bounds cases fail closed. `PtLimit` now reads only the exact
+  active `xNNN` Unity text on a fully proven event selector; malformed,
+  truncated, duplicated, incoherent, or wrong-page records fail closed. On the
+  current CN account, `17060/17060` stopped before sortie with oil unchanged at
+  11119, while `17060/17061` admitted exactly one D1 run and returned with
+  17180 points and 10925 oil. Both receipts used the original ALAS disable/run
+  paths and no raw-input fallback. `TimeLimit` subsequently completed both live
+  directions: an expired limit stopped with zero sortie, while a future limit
+  admitted one C1 run.
+- TaskBalancer now reads only the exact active event `gold_value`, brackets it
+  with the same proven event surface, and rejects malformed, truncated, stale,
+  duplicated, or wrong-stage values. The live account yielded coherent typed
+  coin observations without pixel access. The last bounded D3 run completed at
+  23:59:35, but ALAS reloaded scheduler state and switched to an already-due
+  `Restart` before evaluating the coin threshold. The failed receipt
+  `integration/alas/event-general-task-balancer-main-live-validation-receipt-20260826-r9.json`
+  is retained as blocker evidence, not support evidence. The validation runner
+  now writes unrelated-task isolation into its one-use temporary seed so a
+  later event can re-enter directly; real Main/Main2/Main3 switch recovery and
+  anti-loop evidence remain missing.
 
 ### Submarine shared configuration: inactive surface complete, active input refused
 

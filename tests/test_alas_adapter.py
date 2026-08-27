@@ -351,6 +351,8 @@ class FakeOracle:
         self.campaign_roles = ["all", "standby"]
         self.campaign_hard_mode = False
         self.campaign_oil_value = 9504
+        self.event_points_value = 17060
+        self.event_coin_value = 70477
         self.campaign_achievement_value = SimpleNamespace(
             generation=31,
             clear_percentage=1.0,
@@ -1182,6 +1184,12 @@ class FakeOracle:
 
     def campaign_oil(self):
         return self.campaign_oil_value
+
+    def event_points(self):
+        return self.event_points_value
+
+    def event_coin(self, stage_code=None):
+        return self.event_coin_value
 
     def campaign_map_achievement_state(self, stage_code):
         return self.campaign_achievement_value
@@ -4626,6 +4634,8 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertTrue(adapter.appear(NamedButton("CAMPAIGN_CHECK")))
         self.assertEqual(adapter.campaign_page_state().chapter_name, "第一章")
+        self.assertEqual(adapter.event_points(), 17060)
+        self.assertEqual(adapter.event_coin(), 70477)
         receipt = adapter.click(NamedButton("BACK_ARROW"))
         self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
         self.assertEqual(oracle.click_calls, ["campaign-menu/page/back"])
@@ -6273,6 +6283,33 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             ],
         )
 
+    def test_event_map_to_fleet_allows_only_bounded_uiorigin_remount(self):
+        oracle = FakeOracle()
+        oracle.event_campaign_page_visible_value = True
+        oracle.campaign_state_value.stages = (
+            SimpleNamespace(stage_code="sp", button=SimpleNamespace(actionable=True)),
+        )
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+        )
+        entrance = NamedButton("sp")
+        entrance.semantic_campaign_stage_code = "sp"
+        adapter.begin_campaign_pre_sortie("SP")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        oracle.campaign_preparation_error = SemanticGateClosed(
+            "campaign preparation root is not reviewed"
+        )
+
+        adapter._campaign_context.passive_transition_until = time.monotonic() + 20
+        self.assertFalse(adapter.appear(NamedButton("FLEET_PREPARATION")))
+
+        adapter._campaign_context.passive_transition_until = time.monotonic() - 1
+        with self.assertRaisesRegex(SemanticGateClosed, "root is not reviewed"):
+            adapter.appear(NamedButton("FLEET_PREPARATION"))
+
     def test_campaign_stale_map_preparation_can_be_closed_before_fresh_entry(self):
         oracle = FakeOracle()
         oracle.campaign_preparation_value = SimpleNamespace(kind="map")
@@ -7504,6 +7541,52 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(state.chapter_name, "c")
         self.assertEqual([stage.stage_code for stage in state.stages], ["c1"])
 
+    def test_event_hard_page_uses_only_same_index_shared_normal_alias(self):
+        for requested, stages, expected_chapter, expected_stage in (
+            ("C2", ("a2", "a3", "c1"), "a", "a2"),
+            ("C3", ("a2", "a3", "c1"), "a", "a3"),
+            ("D2", ("b2", "b3", "d1"), "b", "b2"),
+            ("D3", ("b2", "b3", "d1"), "b", "b3"),
+        ):
+            with self.subTest(requested=requested):
+                oracle = FakeOracle()
+                oracle.campaign_page_value = True
+                oracle.campaign_state_value = SimpleNamespace(
+                    generation=12,
+                    chapter_name="shared",
+                    stages=tuple(
+                        SimpleNamespace(stage_code=stage) for stage in stages
+                    ),
+                )
+                adapter = AlasSemanticAdapter(oracle, lambda: None)
+                adapter.begin_campaign_pre_sortie(requested)
+
+                state = adapter.campaign_page_state()
+
+                self.assertEqual(state.chapter_name, expected_chapter)
+                self.assertEqual(
+                    [stage.stage_code for stage in state.stages], [expected_stage]
+                )
+
+    def test_event_hard_page_prefers_exact_index_over_shared_alias(self):
+        oracle = FakeOracle()
+        oracle.campaign_page_value = True
+        oracle.campaign_state_value = SimpleNamespace(
+            generation=12,
+            chapter_name="a/c",
+            stages=(
+                SimpleNamespace(stage_code="a2"),
+                SimpleNamespace(stage_code="c2"),
+            ),
+        )
+        adapter = AlasSemanticAdapter(oracle, lambda: None)
+        adapter.begin_campaign_pre_sortie("C2")
+
+        state = adapter.campaign_page_state()
+
+        self.assertEqual(state.chapter_name, "c")
+        self.assertEqual([stage.stage_code for stage in state.stages], ["c2"])
+
     def test_event_sp_stage_code_is_canonical_without_numeric_suffix(self):
         adapter = AlasSemanticAdapter(FakeOracle(), lambda: None)
 
@@ -7535,6 +7618,8 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
     def test_event_hard_stage_normalizes_mode_and_clears_selected_submarine(self):
         oracle = FakeOracle()
+        fleet_state = Mock(wraps=oracle.campaign_fleet_selection_state)
+        oracle.campaign_fleet_selection_state = fleet_state
         oracle.campaign_hard_mode = True
         oracle.campaign_fleets["submarine"] = 1
         oracle.toggle_selected_values[
@@ -7590,6 +7675,10 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             ("campaign/fleet-preparation/submarine/1/clear",),
         )
         self.assertEqual((roles.fleet1_role, roles.fleet2_role), ("mob", "boss"))
+        self.assertTrue(fleet_state.call_args_list)
+        self.assertTrue(
+            all(call.args[0] == "c1" for call in fleet_state.call_args_list)
+        )
 
     def test_inherited_event_auto_search_closes_exact_total_reward(self):
         oracle = FakeOracle()

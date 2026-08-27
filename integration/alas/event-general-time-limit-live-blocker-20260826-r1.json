@@ -1,0 +1,43 @@
+{
+  "schema": "alas-headless.event-general-time-limit-live-blocker/v1",
+  "passed": false,
+  "capability_promotion": false,
+  "observed_at_host": "2026-08-26T20:24:41+08:00",
+  "observed_at_device": "2026-08-26T12:24:40+0000",
+  "serial": "emulator-5580",
+  "avd": "H:\\AndroidAVD\\alas_game_api32_x64.avd",
+  "boot_completed": true,
+  "package": "com.bilibili.azurlane",
+  "game_version": "9.7.10",
+  "foreground_component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+  "angle_package": "org.chromium.angle",
+  "angle_apk_sha256": "585b197a485c597249892047ff080ca0b4aaeeb3c7ac81ca9d74a2d3835353e6",
+  "expected_driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "process_attempts": [
+    {
+      "pid": 1931,
+      "observer_state": "unavailable",
+      "namespace_probe": "dynamic_found_manual_symbols_32",
+      "snapshot_published": false
+    },
+    {
+      "pid": 4982,
+      "observer_state": "unavailable",
+      "namespace_probe": "dynamic_found_manual_symbols_32",
+      "snapshot_published": false
+    }
+  ],
+  "recovery_actions": [
+    "restart_same_headless_avd_without_snapshot_or_userdata_reset",
+    "restart_exact_game_package_once",
+    "recreate_home_to_game_activity_lifecycle_once"
+  ],
+  "android_game_ui_input_injected": false,
+  "raw_input_fallback_used": false,
+  "stage_entry_budget": 0,
+  "sortie_budget": 0,
+  "combat_budget": 0,
+  "resource_change_observed": null,
+  "classification": "event_general.time_limit_live_blocked_observer_unavailable_after_cold_start",
+  "reentry_condition": "GET /v1/state must return status=ok with fresh coherent snapshot and button generations on the exact package PID before rerunning expired and future TimeLimit branches"
+}

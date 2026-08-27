@@ -1,0 +1,4 @@
+{
+  "passed": false,
+  "error": "AttributeError: 'AzurLaneAutoScript' object has no attribute 'ui_ensure'"
+}

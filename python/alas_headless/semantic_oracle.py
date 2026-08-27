@@ -3405,6 +3405,12 @@ _CAMPAIGN_LIVE_FLEET_DIRECT_ANCHORS = (
 )
 _CAMPAIGN_LIVE_MAP_VIEW_ROOT = "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)"
 _CAMPAIGN_LIVE_MAP_PANEL_ROOT = _CAMPAIGN_LIVE_MAP_VIEW_ROOT + "/panel/"
+_CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT = (
+    "UICamera/Canvas/UIOrigin/LevelInfoSPUI(Clone)"
+)
+_CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT = (
+    _CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT + "/panel/"
+)
 _CAMPAIGN_LIVE_NORMAL_MAP_VIEW_ROOT = (
     "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)"
 )
@@ -3418,6 +3424,14 @@ _CAMPAIGN_LIVE_MAP_BUTTON_SPECS = {
     "panel/drops/frame/list/item(Clone)": ("item(Clone)", 4),
     "panel/head/Image": ("Image", 1),
     "panel/start_button": ("start_button", 1),
+}
+_CAMPAIGN_LIVE_D1_MAP_BUTTON_ADDITIONS = {
+    "panel/Difficulty/Hard/Switch": ("Switch", 1),
+    "panel/passState/Image": ("Image", 1),
+}
+_CAMPAIGN_LIVE_B2_MAP_BUTTON_ADDITIONS = {
+    "panel/Difficulty/Normal/Switch": ("Switch", 1),
+    "panel/passState/Image": ("Image", 1),
 }
 _CAMPAIGN_LIVE_MAP_TOGGLE_SPECS = {
     "panel/BottomExtra/LoopGroup/view/container/AutoFight": 1,
@@ -3439,6 +3453,11 @@ _CAMPAIGN_LIVE_MAP_TEXT_COUNTS = {
     "panel/title_form/title_en": 1,
     "panel/title_form/title_index": 1,
     "panel/win_conditions/desc": 1,
+}
+_CAMPAIGN_LIVE_D1_MAP_TEXT_ADDITIONS = {
+    "panel/achieves/achieve(Clone)/desc": 3,
+    "panel/progress/Text": 1,
+    "panel/progress/Text/value": 1,
 }
 _CAMPAIGN_LIVE_MAP_IMAGE_SPECS = {
     "bg": (("white_dot",), True),
@@ -3504,6 +3523,56 @@ _CAMPAIGN_LIVE_MAP_IMAGE_SPECS = {
     "panel/title/Hard": (("bg_title_hard",), False),
     "panel/win_conditions": (("text_bg",), False),
 }
+_CAMPAIGN_LIVE_D1_MAP_IMAGE_ADDITIONS = {
+    "panel/achieves/achieve(Clone)": (("white_dot",) * 3, True),
+    "panel/achieves/achieve(Clone)/star": (("star",) * 3, True),
+    "panel/BottomExtra/LoopGroup/view/container/CostLimit": (
+        ("cost_limit_tag",),
+        True,
+    ),
+    "panel/Difficulty/Hard": (("btn_switch_hard",), True),
+    "panel/Difficulty/Hard/Bonus1": (("bonus_bg",), False),
+    "panel/Difficulty/Hard/Bonus1/Image": (("bonus_us",), False),
+    # These five exact decorative records reuse pooled star sprites and expose
+    # no stable bounds on the live D1 surface.  They are not action targets;
+    # the reviewed path and raycast behavior are the useful structural facts.
+    "panel/Difficulty/Hard/Mask_Difficulty_Loop": ((), True),
+    "panel/Difficulty/Hard/TextHard": (("text_hard_select",), False),
+    "panel/Difficulty/Hard/TextNormal": (("text_normal",), False),
+    "panel/Difficulty/Mask_Difficlty": ((), False),
+    "panel/Difficulty/Mask_Difficlty/Image": ((), False),
+    "panel/Difficulty/Mask_Difficlty/Image_1": ((), False),
+    "panel/Difficulty/Mask_Difficlty/Image_2": ((), False),
+    # The sprite is the completed-run counter (1, 2, ...), not control
+    # identity.  Keep the exact record path/raycast contract and accept the
+    # non-empty counter sprite.
+    "panel/passState/Image": ((), True),
+    "panel/progress/Background": (("bar_with_brackets",), True),
+    "panel/progress/Fill Area/Fill": (("yellow_progress",), True),
+}
+_CAMPAIGN_LIVE_B2_MAP_IMAGE_ADDITIONS = {
+    "panel/achieves/achieve(Clone)": (("white_dot",) * 3, True),
+    "panel/achieves/achieve(Clone)/star": (("star",) * 3, True),
+    # These five exact decorative records share the stage-star sprite pool;
+    # their sprites change after a render tick.  They are not action targets,
+    # so retain the exact path and raycast contract while requiring non-empty
+    # sprite identity rather than one transient pooled value.
+    "panel/Difficulty/Mask_Normal": ((), False),
+    "panel/Difficulty/Mask_Normal/Image": ((), False),
+    "panel/Difficulty/Mask_Normal/Image_1": ((), False),
+    "panel/Difficulty/Mask_Normal/Image_2": ((), False),
+    "panel/Difficulty/Normal": (("btn_switch_normal",), True),
+    "panel/Difficulty/Normal/Bonus1": (("bonus_bg",), False),
+    "panel/Difficulty/Normal/Bonus1/Image": (("bonus_us",), False),
+    "panel/Difficulty/Normal/Mask_Normal_Loop": ((), True),
+    "panel/Difficulty/Normal/TextHard": (("text_hard",), False),
+    "panel/Difficulty/Normal/TextNormal": (("text_normal_select",), False),
+    "panel/Level/Normal": (("bg_lv_normal",), False),
+    "panel/passState/Image": ((), True),
+    "panel/progress/Background": (("bar_with_brackets",), True),
+    "panel/progress/Fill Area/Fill": (("yellow_progress",), True),
+    "panel/title/Normal": (("bg_title_normal",), False),
+}
 _CAMPAIGN_PREPARATION_REVIEWED_ROOTS: Tuple[Tuple[str, str], ...] = (
     (
         "map",
@@ -3512,6 +3581,10 @@ _CAMPAIGN_PREPARATION_REVIEWED_ROOTS: Tuple[Tuple[str, str], ...] = (
     (
         "map",
         _CAMPAIGN_LIVE_NORMAL_MAP_PANEL_ROOT,
+    ),
+    (
+        "map",
+        _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
     ),
     (
         "map",
@@ -3565,12 +3638,46 @@ _CAMPAIGN_MAP_UNDERLAY_ROOT_PAIRS = (
         _CAMPAIGN_LIVE_MAP_PANEL_ROOT,
         ("UICamera/Canvas/UIMain/LevelMainScene(Clone)/" "LevelSelectSPFullUI(Clone)/"),
     ),
+    (
+        _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
+        ("UICamera/Canvas/UIMain/LevelMainScene(Clone)/" "LevelSelectSPFullUI(Clone)/"),
+    ),
 )
 _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT = (
     "UICamera/Canvas/UIMain/LevelMainScene(Clone)/" "LevelSelectSPFullUI(Clone)/"
 )
 _CAMPAIGN_LIVE_EVENTSP_STAGE_ROOT = (
     _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050041/main"
+)
+_CAMPAIGN_LIVE_EVENTD1_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050024/main"
+)
+_CAMPAIGN_LIVE_EVENTC1_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050021/main"
+)
+_CAMPAIGN_LIVE_EVENTC2_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050022/main"
+)
+_CAMPAIGN_LIVE_EVENTC3_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050023/main"
+)
+_CAMPAIGN_LIVE_EVENTD2_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050025/main"
+)
+_CAMPAIGN_LIVE_EVENTD3_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050026/main"
+)
+_CAMPAIGN_LIVE_EVENTA2_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050002/main"
+)
+_CAMPAIGN_LIVE_EVENTA3_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050003/main"
+)
+_CAMPAIGN_LIVE_EVENTB2_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050005/main"
+)
+_CAMPAIGN_LIVE_EVENTB3_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050006/main"
 )
 _CAMPAIGN_LIVE_EVENTSP_SELECTED_ROOT = (
     _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/MapItems/List/Item(Clone)/Selected/"
@@ -3853,6 +3960,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "campaign/map-preparation/proceed",
             "campaign/map-preparation/cancel",
             "campaign/fleet-preparation/cancel",
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
             "archive/entry/confirm",
             "archive/entry/cancel",
             "reward/campaign-total/exit",
@@ -4009,6 +4118,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "campaign/map-preparation/mode/hard",
             "campaign/map-preparation/proceed",
             "campaign/map-preparation/cancel",
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
         ),
     ),
     BlockerRule(
@@ -4301,6 +4412,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "tactical-continue",
         "/Msgbox(Clone)/",
         (
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
             "tactical/continue/cancel",
             "tactical/course/cancel",
             "tactical/course/confirm",
@@ -11331,6 +11444,91 @@ class SemanticOracle:
         ):
             raise SemanticGateClosed("event campaign snapshots are not coherent")
         return self._event_campaign_page_state(button_state, ui_state)
+
+    def event_points(self) -> int:
+        """Read the exact event-point counter from a proven event selector."""
+
+        return self._retry_transition_read(self._event_points_once)
+
+    def event_coin(self, stage_code: Optional[str] = None) -> int:
+        """Read coins from a proven event selector or requested stage detail."""
+
+        return self._retry_transition_read(
+            lambda: self._event_coin_once(stage_code=stage_code)
+        )
+
+    def _event_coin_once(self, *, stage_code: Optional[str]) -> int:
+        try:
+            surface_generation = self.event_campaign_page_state().generation
+            surface_kind = "selector"
+        except SemanticGateClosed:
+            if stage_code is None:
+                raise
+            preparation = self.campaign_preparation_state(stage_code)
+            if preparation is None:
+                raise SemanticGateClosed(
+                    "event coin requires the selector or requested stage detail"
+                )
+            surface_generation = preparation.generation
+            surface_kind = preparation.kind
+        ui_state = self.read_ui_state()
+        if surface_kind == "selector":
+            surface_after_generation = self.event_campaign_page_state().generation
+        else:
+            assert stage_code is not None
+            preparation_after = self.campaign_preparation_state(stage_code)
+            if preparation_after is None or preparation_after.kind != surface_kind:
+                raise SemanticGateClosed("event coin surface changed during observation")
+            surface_after_generation = preparation_after.generation
+        if (
+            ui_state.generation < surface_generation
+            or ui_state.generation > surface_after_generation
+        ):
+            raise SemanticGateClosed("event coin snapshots are not coherent")
+        suffix = "ResPanel(Clone)/frame/gold/gold_value"
+        matches = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith(suffix)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if (
+            len(matches) != 1
+            or re.fullmatch(r"[0-9]+", matches[0].text.strip()) is None
+        ):
+            raise SemanticGateClosed("event coin counter is absent or malformed")
+        return int(matches[0].text.strip())
+
+    def _event_points_once(self) -> int:
+        ui_state = self.read_ui_state()
+        page = self.event_campaign_page_state()
+        if (
+            page.generation < ui_state.generation
+            or page.generation > ui_state.generation + 2
+        ):
+            raise SemanticGateClosed("event point snapshots are not coherent")
+        suffix = (
+            "LevelMainScene(Clone)/main/right_chapter/"
+            "event_btns/pt_text/Text"
+        )
+        matches = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith(suffix)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("event point counter is absent or ambiguous")
+        value = re.fullmatch(r"[xX]([0-9]+)", matches[0].text.strip())
+        if value is None:
+            raise SemanticGateClosed("event point counter is malformed")
+        return int(value.group(1))
 
     def _event_campaign_page_visible_in_state(self, state: OracleState) -> bool:
         return bool(
@@ -22261,20 +22459,42 @@ class SemanticOracle:
         """Return a reviewed preparation view root for one active UI record."""
 
         live_map_prefix = _CAMPAIGN_LIVE_MAP_VIEW_ROOT + "/"
+        live_map_uiorigin_prefix = _CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT + "/"
         live_normal_map_prefix = _CAMPAIGN_LIVE_NORMAL_MAP_VIEW_ROOT + "/"
-        if path.startswith(live_map_prefix):
-            relative = path[len(live_map_prefix) :]
+        if path.startswith(live_map_prefix) or path.startswith(
+            live_map_uiorigin_prefix
+        ):
+            matched_prefix, matched_panel_root = (
+                (live_map_prefix, _CAMPAIGN_LIVE_MAP_PANEL_ROOT)
+                if path.startswith(live_map_prefix)
+                else (
+                    live_map_uiorigin_prefix,
+                    _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
+                )
+            )
+            relative = path[len(matched_prefix) :]
             reviewed = {
-                "button": _CAMPAIGN_LIVE_MAP_BUTTON_SPECS,
+                "button": {
+                    **_CAMPAIGN_LIVE_MAP_BUTTON_SPECS,
+                    **_CAMPAIGN_LIVE_D1_MAP_BUTTON_ADDITIONS,
+                    **_CAMPAIGN_LIVE_B2_MAP_BUTTON_ADDITIONS,
+                },
                 "toggle": _CAMPAIGN_LIVE_MAP_TOGGLE_SPECS,
-                "text": _CAMPAIGN_LIVE_MAP_TEXT_COUNTS,
-                "image": _CAMPAIGN_LIVE_MAP_IMAGE_SPECS,
+                "text": {
+                    **_CAMPAIGN_LIVE_MAP_TEXT_COUNTS,
+                    **_CAMPAIGN_LIVE_D1_MAP_TEXT_ADDITIONS,
+                },
+                "image": {
+                    **_CAMPAIGN_LIVE_MAP_IMAGE_SPECS,
+                    **_CAMPAIGN_LIVE_D1_MAP_IMAGE_ADDITIONS,
+                    **_CAMPAIGN_LIVE_B2_MAP_IMAGE_ADDITIONS,
+                },
             }.get(record_kind)
             if reviewed is None or relative not in reviewed:
                 raise SemanticGateClosed(
                     "campaign live map-preparation record is not reviewed"
                 )
-            observed = (("map", _CAMPAIGN_LIVE_MAP_PANEL_ROOT),)
+            observed = (("map", matched_panel_root),)
         elif path.startswith(live_normal_map_prefix):
             # The reviewed normal-stage live surface contains active records
             # beside ``panel`` (for example the view-owned background).  They
@@ -22316,10 +22536,16 @@ class SemanticOracle:
     @staticmethod
     def _validate_campaign_live_map_records(
         records: Mapping[str, Sequence[Any]],
+        view_root: str,
     ) -> None:
-        """Require the exact reviewed 81-record LevelInfoSPUI live surface."""
+        """Require one exact reviewed LevelInfoSPUI live profile."""
 
-        root_prefix = _CAMPAIGN_LIVE_MAP_VIEW_ROOT + "/"
+        if view_root not in (
+            _CAMPAIGN_LIVE_MAP_VIEW_ROOT,
+            _CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT,
+        ):
+            raise SemanticGateClosed("campaign live map-preparation root changed")
+        root_prefix = view_root + "/"
 
         def by_relative(kind: str) -> Dict[str, List[Any]]:
             grouped: Dict[str, List[Any]] = {}
@@ -22333,11 +22559,133 @@ class SemanticOracle:
         toggles = by_relative("toggle")
         texts = by_relative("text")
         images = by_relative("image")
-        if set(buttons) != set(_CAMPAIGN_LIVE_MAP_BUTTON_SPECS):
+        title_path = "panel/title_form/title_index"
+        if title_path not in texts or len(texts[title_path]) != 1:
+            raise SemanticGateClosed(
+                "campaign live map-preparation stage identity is incomplete"
+            )
+        stage_identity = texts[title_path][0].text.strip().lower()
+        if stage_identity == "sp":
+            button_specs = _CAMPAIGN_LIVE_MAP_BUTTON_SPECS
+            text_counts = _CAMPAIGN_LIVE_MAP_TEXT_COUNTS
+            image_specs = _CAMPAIGN_LIVE_MAP_IMAGE_SPECS
+        elif stage_identity in ("c1", "c2", "c3", "d1", "d2", "d3"):
+            profile = {
+                "c1": {
+                    "head": "emotion_zhongxun",
+                    "level": "LV 75",
+                    "points": "90",
+                    "cost_limit": False,
+                },
+                "c2": {
+                    "head": "emotion_zhanlie",
+                    "level": "LV 80",
+                    "points": "100",
+                    "cost_limit": False,
+                },
+                "c3": {
+                    "head": "emotion_hangmu",
+                    "level": "LV 85",
+                    "points": "110",
+                    "cost_limit": False,
+                },
+                "d1": {
+                    "head": "haorenlichade_m_qianting",
+                    "level": "LV 95",
+                    "points": "120",
+                    "cost_limit": True,
+                },
+                "d2": {
+                    "head": "haorenlichade_m_zhanlie",
+                    "level": "LV 100",
+                    "points": "150",
+                    "cost_limit": True,
+                },
+                "d3": {
+                    "head": "haorenlichade_m_hangmu",
+                    "level": "LV 105",
+                    "points": "180",
+                    "cost_limit": True,
+                },
+            }[stage_identity]
+            button_specs = {
+                **_CAMPAIGN_LIVE_MAP_BUTTON_SPECS,
+                **_CAMPAIGN_LIVE_D1_MAP_BUTTON_ADDITIONS,
+            }
+            text_counts = {
+                **_CAMPAIGN_LIVE_MAP_TEXT_COUNTS,
+                **_CAMPAIGN_LIVE_D1_MAP_TEXT_ADDITIONS,
+            }
+            image_specs = {
+                **_CAMPAIGN_LIVE_MAP_IMAGE_SPECS,
+                **{
+                    path: value
+                    for path, value in _CAMPAIGN_LIVE_D1_MAP_IMAGE_ADDITIONS.items()
+                    if profile["cost_limit"]
+                    or path
+                    != "panel/BottomExtra/LoopGroup/view/container/CostLimit"
+                },
+                "panel/head/Image": ((profile["head"],), True),
+            }
+        elif stage_identity in ("a2", "a3", "b2", "b3"):
+            profile = {
+                "a2": {
+                    "clone_bgs": ("bg1", "bg1", "bg2", "bg2"),
+                    "clone_icons": ("30002", "54000", "54012", "55000"),
+                    "head": "emotion_zhanlie",
+                },
+                "a3": {
+                    "clone_bgs": ("bg1", "bg1", "bg2", "bg2"),
+                    "clone_icons": ("30002", "54000", "54012", "55000"),
+                    "head": "emotion_hangmu",
+                },
+                "b2": {
+                    "clone_bgs": ("bg1", "bg1", "bg2", "bg3"),
+                    "clone_icons": ("30003", "54000", "54012", "55000"),
+                    "head": "haorenlichade_m_zhanlie",
+                },
+                "b3": {
+                    "clone_bgs": ("bg1", "bg1", "bg2", "bg4"),
+                    "clone_icons": ("30004", "54000", "54012", "55000"),
+                    "head": "haorenlichade_m_hangmu",
+                },
+            }[stage_identity]
+            button_specs = {
+                **_CAMPAIGN_LIVE_MAP_BUTTON_SPECS,
+                **_CAMPAIGN_LIVE_B2_MAP_BUTTON_ADDITIONS,
+            }
+            text_counts = {
+                **_CAMPAIGN_LIVE_MAP_TEXT_COUNTS,
+                **_CAMPAIGN_LIVE_D1_MAP_TEXT_ADDITIONS,
+            }
+            image_specs = {
+                **{
+                    path: value
+                    for path, value in _CAMPAIGN_LIVE_MAP_IMAGE_SPECS.items()
+                    if path not in ("panel/Level/Hard", "panel/title/Hard")
+                },
+                **_CAMPAIGN_LIVE_B2_MAP_IMAGE_ADDITIONS,
+                "panel/Level/Normal": (("bg_lv_normal",), False),
+                "panel/title/Normal": (("bg_title_normal",), False),
+                "panel/drops/frame/list/item(Clone)/icon_bg": (
+                    profile["clone_bgs"],
+                    True,
+                ),
+                "panel/drops/frame/list/item(Clone)/icon_bg/icon": (
+                    profile["clone_icons"],
+                    False,
+                ),
+                "panel/head/Image": ((profile["head"],), True),
+            }
+        else:
+            raise SemanticGateClosed(
+                "campaign live map-preparation stage profile is not reviewed"
+            )
+        if set(buttons) != set(button_specs):
             raise SemanticGateClosed(
                 "campaign live map-preparation button surface is incomplete"
             )
-        for path, (name, count) in _CAMPAIGN_LIVE_MAP_BUTTON_SPECS.items():
+        for path, (name, count) in button_specs.items():
             observed = buttons[path]
             if len(observed) != count or any(
                 button.name != name
@@ -22364,7 +22712,7 @@ class SemanticOracle:
                 not toggle.active_in_hierarchy
                 or not toggle.active_and_enabled
                 or not toggle.interactable
-                or not toggle.checked
+                or (path == "panel/quickPlay" and not toggle.checked)
                 or toggle.raycast_top is not None
                 or toggle.point is None
                 or toggle.bounds is None
@@ -22374,12 +22722,12 @@ class SemanticOracle:
                     "campaign live map-preparation toggle identity is malformed"
                 )
 
-        if set(texts) != set(_CAMPAIGN_LIVE_MAP_TEXT_COUNTS):
+        if set(texts) != set(text_counts):
             raise SemanticGateClosed(
                 "campaign live map-preparation text surface is incomplete"
             )
         title_en_path = "panel/title_form/title_en"
-        for path, count in _CAMPAIGN_LIVE_MAP_TEXT_COUNTS.items():
+        for path, count in text_counts.items():
             observed = texts[path]
             if len(observed) != count or any(
                 text.kind != "ugui-text"
@@ -22396,18 +22744,41 @@ class SemanticOracle:
                 raise SemanticGateClosed(
                     "campaign live map-preparation text identity is malformed"
                 )
-        exact_text = {
-            "panel/Level/Text": "LV 110",
-            "panel/cost/text": "10",
-            "panel/drops/frame/list/item/icon_bg/count": "800",
-            "panel/title_form/title_en": "",
-        }
+        if stage_identity == "sp":
+            exact_text = {
+                "panel/Level/Text": "LV 110",
+                "panel/cost/text": "10",
+                "panel/drops/frame/list/item/icon_bg/count": "800",
+                "panel/title_form/title_en": "",
+            }
+        elif stage_identity in ("c1", "c2", "c3", "d1", "d2", "d3"):
+            exact_text = {
+                "panel/Level/Text": profile["level"],
+                "panel/cost/text": "10",
+                "panel/drops/frame/list/item/icon_bg/count": profile["points"],
+                "panel/progress/Text/value": "100%",
+                "panel/title_form/title_en": "",
+            }
+        else:
+            level, points = {
+                "a2": ("LV 30", "40"),
+                "a3": ("LV 35", "50"),
+                "b2": ("LV 55", "70"),
+                "b3": ("LV 60", "80"),
+            }[stage_identity]
+            exact_text = {
+                "panel/Level/Text": level,
+                "panel/cost/text": "10",
+                "panel/drops/frame/list/item/icon_bg/count": points,
+                "panel/progress/Text/value": "100%",
+                "panel/title_form/title_en": "",
+            }
         for path, expected in exact_text.items():
             if texts[path][0].text != expected:
                 raise SemanticGateClosed(
                     "campaign live map-preparation text value changed"
                 )
-        if texts["panel/title_form/title_index"][0].text.strip().lower() != "sp":
+        if texts[title_path][0].text.strip().lower() != stage_identity:
             raise SemanticGateClosed(
                 "campaign live map-preparation stage identity changed"
             )
@@ -22428,27 +22799,79 @@ class SemanticOracle:
             "panel/quickPlay/desc",
             "panel/title_form/title",
             "panel/win_conditions/desc",
+            *(
+                (
+                    "panel/achieves/achieve(Clone)/desc",
+                    "panel/progress/Text",
+                )
+                if stage_identity
+                in (
+                    "c1",
+                    "c2",
+                    "c3",
+                    "d1",
+                    "d2",
+                    "d3",
+                    "a2",
+                    "a3",
+                    "b2",
+                    "b3",
+                )
+                else ()
+            ),
         ):
-            if not texts[path][0].text.strip():
+            if any(not item.text.strip() for item in texts[path]):
                 raise SemanticGateClosed(
                     "campaign live map-preparation required text is empty"
                 )
 
-        if set(images) != set(_CAMPAIGN_LIVE_MAP_IMAGE_SPECS):
+        optional_bonus_group = (
+            {
+                "panel/Difficulty/Normal/Bonus1",
+                "panel/Difficulty/Normal/Bonus1/Image",
+            }
+            if stage_identity in ("a2", "a3", "b2", "b3")
+            else (
+                {
+                    "panel/Difficulty/Hard/Bonus1",
+                    "panel/Difficulty/Hard/Bonus1/Image",
+                }
+                if stage_identity in ("c1", "c2", "c3", "d1", "d2", "d3")
+                else set()
+            )
+        )
+        optional_image_paths = {
+            "panel/BottomExtra/LoopGroup/view/container/AutoFight/Flag"
+        } | optional_bonus_group
+        required_image_paths = set(image_specs) - optional_image_paths
+        observed_image_paths = set(images)
+        if not (
+            required_image_paths <= observed_image_paths
+            and observed_image_paths <= required_image_paths | optional_image_paths
+            and (
+                not (observed_image_paths & optional_bonus_group)
+                or optional_bonus_group <= observed_image_paths
+            )
+        ):
             raise SemanticGateClosed(
                 "campaign live map-preparation image surface is incomplete"
             )
-        for path, (sprites, raycast_target) in _CAMPAIGN_LIVE_MAP_IMAGE_SPECS.items():
+        for path, (sprites, raycast_target) in image_specs.items():
+            if path not in images and path in optional_image_paths:
+                continue
             observed = images[path]
-            if tuple(sorted(image.sprite for image in observed)) != tuple(
-                sorted(sprites)
+            if (
+                sprites
+                and tuple(sorted(image.sprite for image in observed))
+                != tuple(sorted(sprites))
             ) or any(
                 not image.active_in_hierarchy
                 or not image.active_and_enabled
                 or image.truncated
+                or not image.sprite
                 or image.raycast_target is not raycast_target
                 or image.raycast_top is not None
-                or image.bounds is None
+                or (sprites and image.bounds is None)
                 for image in observed
             ):
                 raise SemanticGateClosed(
@@ -22481,8 +22904,15 @@ class SemanticOracle:
                 if resolved is not None:
                     kind, root = resolved
                     roots[kind].add(root)
-        if _CAMPAIGN_LIVE_MAP_PANEL_ROOT in roots["map"]:
-            self._validate_campaign_live_map_records(active_by_kind)
+        for panel_root, view_root in (
+            (_CAMPAIGN_LIVE_MAP_PANEL_ROOT, _CAMPAIGN_LIVE_MAP_VIEW_ROOT),
+            (
+                _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
+                _CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT,
+            ),
+        ):
+            if panel_root in roots["map"]:
+                self._validate_campaign_live_map_records(active_by_kind, view_root)
         return tuple(sorted(roots["map"])), tuple(sorted(roots["fleet"]))
 
     @staticmethod
@@ -22746,11 +23176,38 @@ class SemanticOracle:
         button_state: OracleState,
         ui_state: UiState,
         stage_button: ButtonState,
-    ) -> int:
-        """Require the exact live SP selector identity obscured by LevelInfoSPUI."""
+        stage_code: str,
+    ) -> Optional[int]:
+        """Require the exact reviewed selector identity obscured by LevelInfoSPUI."""
 
+        expected_stage_roots = {
+            "sp": (_CAMPAIGN_LIVE_EVENTSP_STAGE_ROOT,),
+            "a2": (_CAMPAIGN_LIVE_EVENTA2_STAGE_ROOT,),
+            "a3": (_CAMPAIGN_LIVE_EVENTA3_STAGE_ROOT,),
+            "c1": (_CAMPAIGN_LIVE_EVENTC1_STAGE_ROOT,),
+            "c2": (
+                _CAMPAIGN_LIVE_EVENTA2_STAGE_ROOT,
+                _CAMPAIGN_LIVE_EVENTC2_STAGE_ROOT,
+            ),
+            "c3": (
+                _CAMPAIGN_LIVE_EVENTA3_STAGE_ROOT,
+                _CAMPAIGN_LIVE_EVENTC3_STAGE_ROOT,
+            ),
+            "d1": (_CAMPAIGN_LIVE_EVENTD1_STAGE_ROOT,),
+            "d2": (
+                _CAMPAIGN_LIVE_EVENTB2_STAGE_ROOT,
+                _CAMPAIGN_LIVE_EVENTD2_STAGE_ROOT,
+            ),
+            "d3": (
+                _CAMPAIGN_LIVE_EVENTB3_STAGE_ROOT,
+                _CAMPAIGN_LIVE_EVENTD3_STAGE_ROOT,
+            ),
+            "b2": (_CAMPAIGN_LIVE_EVENTB2_STAGE_ROOT,),
+            "b3": (_CAMPAIGN_LIVE_EVENTB3_STAGE_ROOT,),
+        }.get(stage_code)
         if (
-            stage_button.path != _CAMPAIGN_LIVE_EVENTSP_STAGE_ROOT
+            expected_stage_roots is None
+            or stage_button.path not in expected_stage_roots
             or stage_button.name != "main"
             or not stage_button.active_in_hierarchy
             or not stage_button.active_and_enabled
@@ -22788,6 +23245,23 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "campaign live map-preparation story underlay is malformed"
             )
+
+        # Ordinary event stages have no daily attempt counter.  Their exact
+        # stage node, title, overlay profile, and actionable controls have
+        # already been bound above; the remaining checks are SP-only evidence.
+        if stage_code in (
+            "a2",
+            "a3",
+            "c1",
+            "c2",
+            "c3",
+            "d1",
+            "d2",
+            "d3",
+            "b2",
+            "b3",
+        ):
+            return None
 
         tries_path = _CAMPAIGN_LIVE_EVENTSP_STAGE_ROOT + "/triesLimit/Text"
         selected_text_path = _CAMPAIGN_LIVE_EVENTSP_SELECTED_ROOT + "Text"
@@ -23221,7 +23695,11 @@ class SemanticOracle:
                     "campaign event stage oil cost is outside the pinned range"
                 )
             if (
-                root == _CAMPAIGN_LIVE_MAP_PANEL_ROOT
+                root
+                in (
+                    _CAMPAIGN_LIVE_MAP_PANEL_ROOT,
+                    _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
+                )
                 or self._campaign_event_underlay_evidence(button_state, ui_state)
             ):
                 stage_button, _underlay_index, _underlay_title = (
@@ -23233,11 +23711,15 @@ class SemanticOracle:
                     )
                 )
                 self._campaign_map_underlay_pair_is_reviewed(root, stage_button)
-                if root == _CAMPAIGN_LIVE_MAP_PANEL_ROOT:
+                if root in (
+                    _CAMPAIGN_LIVE_MAP_PANEL_ROOT,
+                    _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
+                ):
                     remaining_attempts = self._validate_campaign_live_map_underlay(
                         button_state,
                         ui_state,
                         stage_button,
+                        stage_code,
                     )
                     if titles[0].text.strip() != _underlay_title.text.strip():
                         raise SemanticGateClosed(
@@ -23284,6 +23766,168 @@ class SemanticOracle:
         return ActionReceipt(
             semantic_id="campaign/map-preparation/proceed",
             generation=observed.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _campaign_dock_full_targets(
+        self, state: OracleState, stage_code: str
+    ) -> Mapping[str, ButtonState]:
+        """Prove the event D3 dock-full modal without admitting gem expansion."""
+
+        if stage_code.lower() != "d3":
+            raise SemanticGateClosed(
+                "campaign dock-full recovery is reviewed only for event D3"
+            )
+        msgbox_root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/"
+        popup_root = msgbox_root + "window/"
+        target_path = popup_root + "button_container/custom_button_1(Clone)"
+        popup_paths = tuple(
+            button.path
+            for button in state.buttons
+            if button.active_in_hierarchy and button.path.startswith(msgbox_root)
+        )
+        expected_paths = tuple(
+            sorted(
+                (
+                    target_path,
+                    target_path,
+                    target_path,
+                    popup_root + "msg_panel/content",
+                    popup_root + "top/btnBack",
+                    msgbox_root + "bg",
+                )
+            )
+        )
+        if tuple(sorted(popup_paths)) != expected_paths:
+            raise SemanticGateClosed(
+                "campaign dock-full control surface is not exact"
+            )
+        buttons = tuple(
+            button
+            for button in state.buttons
+            if button.path == target_path
+            and button.name == "custom_button_1(Clone)"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is True
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(buttons) != 3 or len({button.bounds for button in buttons}) != 3:
+            raise SemanticGateClosed(
+                "campaign dock-full buttons are absent or ambiguous"
+            )
+        for semantic_id in (
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
+        ):
+            if self._blocking_rules(state, semantic_id):
+                raise SemanticGateClosed("campaign dock-full action is blocked")
+
+        ui_state = self._stable_msgbox_ui_state(state)
+        content = tuple(
+            text
+            for text in ui_state.texts
+            if text.path == popup_root + "msg_panel/content"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and text.text.strip()
+        )
+        stage_indexes = tuple(
+            text
+            for text in ui_state.texts
+            if text.path
+            == _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT + "title_form/title_index"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.text.strip().lower() == "d3"
+        )
+        labels = tuple(
+            text
+            for text in ui_state.texts
+            if text.path == target_path + "/pic"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and text.text.strip()
+        )
+        if (
+            len(content) != 1
+            or len(stage_indexes) != 1
+            or len(labels) != 3
+        ):
+            raise SemanticGateClosed(
+                "campaign dock-full identity is incomplete or ambiguous: "
+                f"content={len(content)}, stage={len(stage_indexes)}, "
+                f"labels={len(labels)}"
+            )
+
+        normalized = {"".join(label.text.split()): label for label in labels}
+        if set(normalized) != {"强化", "拓展", "整理"}:
+            raise SemanticGateClosed("campaign dock-full labels are not exact")
+        targets: dict[str, ButtonState] = {}
+        for choice, text in (
+            ("enhance", "强化"),
+            ("expand", "拓展"),
+            ("organize", "整理"),
+        ):
+            label = normalized[text]
+            centre = Point(
+                (label.bounds.left + label.bounds.right) / 2.0,
+                (label.bounds.top + label.bounds.bottom) / 2.0,
+            )
+            labelled = tuple(
+                button for button in buttons if button.bounds.contains(centre)
+            )
+            if len(labelled) != 1:
+                raise SemanticGateClosed(
+                    "campaign dock-full label is not bound to one action"
+                )
+            targets[choice] = labelled[0]
+        if len({target.bounds for target in targets.values()}) != 3:
+            raise SemanticGateClosed("campaign dock-full actions are not unique")
+        return targets
+
+    def campaign_dock_full_visible(self, stage_code: str) -> bool:
+        state = self.read_state()
+        if not any(
+            button.path.startswith(
+                "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+            )
+            for button in state.buttons
+        ):
+            return False
+        self._campaign_dock_full_targets(state, stage_code)
+        return True
+
+    def click_campaign_dock_full_choice(
+        self, stage_code: str, choice: str
+    ) -> ActionReceipt:
+        if choice not in ("organize", "enhance"):
+            raise SemanticGateClosed(
+                "campaign dock expansion is not authorized by semantic recovery"
+            )
+        state = self.read_state()
+        target = self._campaign_dock_full_targets(state, stage_code)[choice]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        assert target.bounds is not None
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="campaign/dock-full/" + choice,
+            generation=state.generation,
             point=point,
             bounds=target.bounds,
             path=target.path,
@@ -32999,6 +33643,36 @@ class SemanticOracle:
             selected_count=selected,
         )
 
+    def click_retirement_page_back(self) -> ActionReceipt:
+        """Exit only an idle, unselected retirement page."""
+
+        selection = self.retirement_selection_state()
+        if selection.selected_count != 0:
+            raise SemanticGateClosed("retirement page has a live selection")
+        state, _ui_state = self._retirement_records()
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == "back"
+            and button.path
+            == "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back"
+            and button.actionable
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("retirement page back control is ambiguous")
+        target = matches[0]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="retirement/page/back",
+            generation=selection.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def open_retirement_settings(self) -> ActionReceipt:
         page = self.retirement_selection_state()
         if page.selected_count:
@@ -33292,7 +33966,7 @@ class SemanticOracle:
     def _recover_retirement_network_reconnect(self) -> Optional[ActionReceipt]:
         """Resume only the independently reviewed exact reconnect prompt."""
 
-        state = self.read_state()
+        state, ui_state = self._retirement_records()
         confirm = self._matches(state, "overlay/network-reconnect/confirm")
         cancel = self._matches(state, "overlay/network-reconnect/cancel")
         if not confirm and not cancel:
@@ -33301,11 +33975,39 @@ class SemanticOracle:
         # Msgbox button paths.  A reconnect prompt always owns the exact pair.
         if not confirm or not cancel:
             return None
-        if not self._network_reconnect_prompt_matches(state):
-            raise SemanticGateClosed("unreviewed popup interrupted retirement")
         if len(confirm) != 1 or len(cancel) != 1:
             raise SemanticGateClosed("retirement reconnect prompt is ambiguous")
-        return self.click("overlay/network-reconnect/confirm")
+        content = self._active_retirement_texts(
+            ui_state, "Msgbox(Clone)/window/msg_panel/content"
+        )
+        confirm_text = self._active_retirement_texts(
+            ui_state,
+            "Msgbox(Clone)/window/button_container/custom_button_1(Clone)/pic",
+        )
+        cancel_text = self._active_retirement_texts(
+            ui_state,
+            "Msgbox(Clone)/window/button_container/custom_button_2(Clone)/pic",
+        )
+        if len(content) != 1 or len(confirm_text) != 1 or len(cancel_text) != 1:
+            return None
+        plain = re.sub(r"<[^>]*>", "", content[0].text).strip()
+        if not (
+            re.fullmatch(
+                r"服务器连接失败，是否重新连接？\s*"
+                r"\[(?:NetworkDown|HostNotFound|ConnectionReset)\]",
+                plain,
+            )
+            and "".join(confirm_text[0].text.split()) == "确定"
+            and "".join(cancel_text[0].text.split()) == "取消"
+        ):
+            # Rarity/equipment dialogs own their own exact branches below.
+            return None
+        return self._click_retirement_button(
+            "overlay/network-reconnect/confirm",
+            "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+            identity_text_suffix="Msgbox(Clone)/window/msg_panel/content",
+            identity_text=content[0].text,
+        )
 
     def _retirement_reward_state(self) -> RetirementRewardState:
         state, ui_state = self._retirement_records()

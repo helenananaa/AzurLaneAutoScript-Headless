@@ -1,0 +1,31 @@
+{
+  "schema": "alas-headless.freebies-data-key-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "BattlePass.Collect": false,
+    "DataKey.Collect": true,
+    "DataKey.ForceCollect": true,
+    "Mail.ClaimMaintenance": false,
+    "Mail.ClaimMerit": false,
+    "Mail.ClaimTradeLicense": false,
+    "Mail.DeleteCollected": false,
+    "SupplyPack.Collect": false
+  },
+  "source_sha256": {
+    "freebies": "93067e1006564a9e2fd06a1c9f4d794a5890052f8041a190c36a754346fb9ab5",
+    "data_key": "5ed30c24a6687ad29b48488999d50bb02fbcdce60c85724339295cd19e85f4d6",
+    "adapter": "ba8c391633ba380f28bf1ffb0f218696c7ac7ab12d8894d3a1330e94250b3563",
+    "oracle": "bfeaecfe2cece8331440b2575388723632dd1afe3d9f53b3f70b48819c1fb4f3"
+  },
+  "passed": false,
+  "observations": [],
+  "collect_calls": [],
+  "limit_choices": [],
+  "error": "SystemExit: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\alas.py\", line 71, in run\n    self.__getattribute__(command)()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\alas.py\", line 236, in freebies\n    Freebies(config=self.config, device=self.device).run()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\freebies\\freebies.py\", line 25, in run\n    DataKey(self.config, self.device).run()\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\freebies\\data_key.py\", line 82, in run\n    self.ui_ensure(page_archives)\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\ui\\ui.py\", line 334, in ui_ensure\n    self.ui_goto(destination, skip_first_screenshot=True)\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\ui\\ui.py\", line 297, in ui_goto\n    self.device.click(button)\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\module\\device\\control.py\", line 57, in click\n    receipt = semantic_adapter.click(button)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 16312, in click\n    return self.open().click(button)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 12629, in click\n    return self.oracle.click_campaign_archive_entrance()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 11608, in click_campaign_archive_entrance\n    raise SemanticGateClosed(\"campaign archive entrance is not actionable\")\nalas_headless.semantic_oracle.SemanticGateClosed: campaign archive entrance is not actionable\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_freebies_data_key_live_validation.py\", line 168, in validate\n    result[\"task_result\"] = instance.run(\"freebies\")\n                            ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-topdown-live\\alas.py\", line 135, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "temporary_config_removed": true
+}

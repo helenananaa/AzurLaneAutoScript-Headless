@@ -200,7 +200,7 @@ observation 状态。
 
 `EventGeneral.PtLimit/TimeLimit` 与 `TaskBalancer.Enable/CoinLimit/TaskCall` 已在原 `CampaignEvent` 的 PT、时间、金币判断和任务切换方法入口统一校验。PT 支持非负整数及固定上游会归一化的中英文标点格式；时间只接受 2000..2100 的无时区 datetime；金币阈值有明确非负上限；目标任务严格为 Main/Main2/Main3。冻结时钟回放覆盖 PT 的 0/未达/等于、默认/未来/过期时间、非活动任务与 GemsFarming 主线豁免，以及金币 OCR 为 0、低于、等于、非 balancer 任务。
 
-回放还执行原活动任务禁用、GemsFarming 重置、TimeLimit 重置，以及三个目标任务严格的 `task_delay(5) -> task_call -> task_stop` 顺序；所有写入只落到内存桩。静态审计固定 campaign、coalition、raid、hospital 和 auto-search combat 的消费文件。当前缺口是页面特定的 typed PT/金币观察、服务器时间与本机 naive datetime 的实机相关性、任务切换后的恢复收据和防调度环证据；在取得这些条件前 observation/action/live 保持 missing，EventGeneral 面板仍为 P。
+回放还执行原活动任务禁用、GemsFarming 重置、TimeLimit 重置，以及三个目标任务严格的 `task_delay(5) -> task_call -> task_stop` 顺序；所有写入只落到内存桩。静态审计固定 campaign、coalition、raid、hospital 和 auto-search combat 的消费文件。`PtLimit` 已改为只读取完整活动页上的精确 active `xNNN` Unity 文本，格式错误、截断、重复、代际不一致及错误页面均 fail-closed。当前 CN 实机上，`17060/17060` 在零出击预算下触发原 ALAS 停刷，点数与油量均不变；`17060/17061` 放行恰好一局 D1，返回活动页后点数为 17180、油量由 11119 降至 10925，全程无 raw-input fallback。PtLimit 五维已完整；仍缺 TimeLimit 的服务器时间相关性、typed 金币实机观察、TaskBalancer 真实任务切换恢复和防调度环证据，因此 EventGeneral 面板仍为 P。
 
 ### 1.14 本轮 Campaign Clear Mode 共用开关契约
 
@@ -405,7 +405,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 5 | Main2 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 已纳入三实例 9 组、54 字段共享等价类，除 Scheduler.Command 外无差异；六个 StopCondition 字段在导航前严校。已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main2 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、阵型策略、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main2-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升 |
 | 6 | Main3 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 已纳入三实例 9 组、54 字段共享等价类，除 Scheduler.Command 外无差异；六个 StopCondition 字段在导航前严校。已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main3 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main3-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升 |
 | 7 | GemsFarming | Scheduler, GemsFarming, EquipmentCode, Campaign, StopCondition, Fleet, Submarine, Emotion | L | 六项专属设置及原 run 收尾/调度已离线回放；normal + ship 的 Fleet 索引、白皮航母/驱逐候选和旗舰/前排唯一确认已实机闭环并恢复原编队；normal + ship_equip 已按 pinned ALAS 的五项 equipment code 接入逐槽 typed 卸装/替换，特殊兵装保持随原舰；当前槽位舰卡不再误入 free 候选，Fleet 6 突击者的生产筛选返回两张真实空闲突击者，并完成现有 18100 +0、19000 +0 双槽 take_off -> replace -> take_on 及目标读回；同舰五槽卸装恢复、空 code 控制流、两类舰装不兼容 fail-closed 亦已覆盖；normal 1-1 已完成 Fleet 6 单舰队完整原任务闭环，凭证见 integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json；hard 11-4 的第一主力槽为 type 7 正航而不兼容 type 6 轻航突击者，正确返回无候选；改用兼容轻航的 hard 12-1 后，原 HardNotSatisfied -> hard_fleet_prepare 从三张空闲突击者中选择等级/心情最高的 Lv9 突击者并确认旗舰，随后原任务完成既有 Boss 进度、结算、RunCount 归零、Scheduler 关闭和章节页返回，全程无 raw fallback，组件凭证见 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r25.json 与 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r26.json；两张历史收据的顶层 passed=false 分别来自零出击替换探针与旧 runner 错把换船重复发生绑定到完整任务，底层 replacement/task completion 后置条件已分别通过且 runner 已修正；仍缺五槽跨舰兼容及 Lv32/emotion 自然触发分支，因此为 L 而非 F；enhanceable 仅为候选过滤而非换船后强化动作 |
-| 8 | EventGeneral | EventGeneral, TaskBalancer | P | 五字段离线决策已完整；仍缺 typed PT/金币实机观察、时间相关性、真实任务切换恢复和防调度环证据 |
+| 8 | EventGeneral | EventGeneral, TaskBalancer | P | PtLimit 已完成 typed PT 精确观察及已达/未达双向实机闭环：17060/17060 零出击停刷且油量不变，17060/17061 放行 D1 后点数增至 17180、油量 11119→10925。TimeLimit 也完成过期零出击禁用与未来时间放行一局 C1 的双向实机闭环。TaskBalancer 已完成 exact typed 金币观察；2026-08-26 末班 D3 在 23:59:35 完成，但 ALAS 的 task_switched() 从磁盘重载后由到期 Restart 抢先切走，因此真实金币阈值切换和防调度环仍未完成，保持 P。 |
 | 9 | Coalition | Scheduler, Campaign, Coalition, StopCondition, Emotion | O | 难度与单/多舰队已离线回放；共斗入口、战斗和结算未适配 |
 | 10 | Event | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 七活动入口共享 9 组 54 字段，Event/Event2 包装结构等价；活动目录、关卡名与模式现于语义导航前严校。当前 A1 默认路径闭环；其他关卡和全部共用地图配置仍按字段验收 |
 | 11 | Event2 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 已证明与 Event 共享同一 9 组 54 字段、入口包装和前置门禁；Event2 已用 A1 自动寻敌完成独立原任务实机闭环，RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/event2-a1-auto-search-live-validation-receipt-20260823-r3.json。其他关卡和共用地图配置仍未完整覆盖 |
@@ -414,9 +414,9 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 14 | WarArchives | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | 常驻档案入口、分类、45 个当前 CN 客户端可识别档案卡、字母关卡、普通/困难切换、档案钥匙计数与精确 5-key 入场确认均已 typed 化。原 WarArchives 在冬冠 A1 完成 4 场普通战和 Boss、奖励结算并回到档案关卡页，钥匙 295→290，凭证见 integration/alas/war-archives-live-validation-receipt-20260826-r18.json。红染 A1 因原图脚本要求舰队前移到空格 C2，仍在现有敌人/拾取格输入边界局部拒绝；war_archives_20230525_cn、war_archives_20230803_cn、war_archives_20240725_cn 在当前固定 CN 游戏表中不存在并按任务局部不可用，其余档案仅有共享路径离线覆盖，尚未逐档案实机闭环 |
 | 15 | CoalitionSp | Scheduler, Campaign, Coalition, StopCondition, Emotion | O | SP 强制多舰队和共享配置已离线回放；SP 状态机、战斗和结算未适配 |
 | 16 | EventA | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | A-D 共享 9 组 54 字段并各加 2 个 EventDaily 字段；入口门禁早于目录枚举，既有 StageFilter/LastStage 跨日顺序不变。当前仅 A1-A3 默认路径有实机闭环，其余分区和共用地图配置仍未完整覆盖 |
-| 17 | EventB | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；EventB 已用 B1 自动寻敌完成原任务实机闭环，LastStage 写回 b1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventb-b1-auto-search-live-validation-receipt-20260823-r2.json。普通 `GET_SHIP` 可继续，首次获得 `NEW_SHIP` 仍未适配，B2/B3 未验证 |
-| 18 | EventC | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；EventC 已通过原 normal 入口选择共享 C1 困难脚本并完成自动寻敌实机闭环，LastStage 写回 c1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventc-c1-auto-search-live-validation-receipt-20260823-r14.json。C2/C3 未验证 |
-| 19 | EventD | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；EventD 已通过原 normal 入口选择共享 D1 困难脚本并完成自动寻敌实机闭环，LastStage 写回 d1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventd-d1-auto-search-live-validation-receipt-20260823.json。D2/D3 未验证 |
+| 17 | EventB | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；EventB 的 B1 已有既有实机闭环，B2、B3 又在 2026-08-26 当前活动与游戏版本上分别通过原 normal 入口完成官方自动寻敌闭环，LastStage 分别写回 b2、b3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventb-b2-auto-search-live-validation-receipt-20260826-r3.json 和 integration/alas/eventb-b3-auto-search-live-validation-receipt-20260826-r2.json。普通 `GET_SHIP` 可继续，首次获得 `NEW_SHIP` 及非默认共用地图配置仍未完整覆盖，因此保持 L |
+| 18 | EventC | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；EventC 的 C1-C3 均已通过原 normal 入口完成官方自动寻敌实机闭环，LastStage 分别写回 c1/c2/c3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventc-c1-auto-search-live-validation-receipt-20260823-r14.json、integration/alas/eventc-c2-auto-search-live-validation-receipt-20260826-r1.json 和 integration/alas/eventc-c3-auto-search-live-validation-receipt-20260826-r1.json。首次获得 NEW_SHIP、非默认舰队组合和共用地图配置仍未完整覆盖，因此保持 L |
+| 19 | EventD | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；EventD 的 D1-D3 均已在 2026-08-26 当前活动与游戏版本上通过原 normal 入口完成官方自动寻敌实机闭环，LastStage 分别写回 d1/d2/d3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventd-d1-auto-search-live-validation-receipt-20260826-r7.json、integration/alas/eventd-d2-auto-search-live-validation-receipt-20260826-r1.json 和 integration/alas/eventd-d3-auto-search-live-validation-receipt-20260826-r1.json。首次获得 NEW_SHIP、非默认舰队组合和共用地图配置仍未完整覆盖，因此保持 L |
 | 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；原 EventSp 任务已在固定 API 32 x86_64 AVD 上从主页完成活动入口、SP 选择、100% clear 与官方自动寻敌确认、(1,2,0) 舰队零变更出击、315 秒被动地图/战斗、Boss 总奖励退出、返回活动页及 1/1→0/1 次数后置。RunCount 1→0 并写入次日 00:00 调度；同一 supervised runner 捕获全部 generation/receipt，recovery、combat/grid/viewport 输入和 raw fallback 均为 0。凭证见 integration/alas/eventsp-sp-auto-search-live-validation-receipt-20260825-r11.json。其他舰队组合、非默认共用地图配置及新的活动布局仍按字段保持部分支持，因此为 L 而非 F |
 | 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | O | 难度过滤与 EX 奖励路由已离线回放；固定 Raid 的 easy/normal/hard/ex 次数已接入 typed 端口并通过补丁树，但当前客户端未开放 Raid，入口、战斗、领奖仍待实机 |
 | 22 | Commission | Scheduler, Commission | F | 六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环 |
@@ -494,7 +494,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| EventGeneral | `PtLimit`; `TimeLimit` | P | PT 与冻结时间边界、非活动任务和 GemsFarming 主线豁免已离线完成；typed 实机观察、服务器时间相关性和真实禁用恢复仍缺 |
+| EventGeneral | `PtLimit`; `TimeLimit` | P | PtLimit 已完成 exact typed PT、已达零出击停刷与未达单局放行实机闭环；TimeLimit 仍缺服务器时间相关性和真实禁用恢复 |
 | TaskBalancer | `Enable`; `CoinLimit`; `TaskCall`=`Main/Main2/Main3` | P | 开关、金币边界和三个目标任务切换顺序已离线完成；真实任务调用、失败恢复及防调度环仍缺 |
 | Coalition | `Mode`=`easy/normal/hard/sp`; `Fleet`=`single/multi` | M | 四难度、单/多舰队、次数/票券不足、战斗、结算和 SP 特殊入口 |
 | Raid | `Mode`=`easy/normal/hard/ex`; `UseTicket` | M | 四难度、票券真假、无票券、次数耗尽、推荐舰队和结算 |
@@ -677,9 +677,9 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **52 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **139 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **72 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ✅ 五维完整支持 | **54 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **142 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **67 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **15 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
@@ -778,8 +778,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Error.ScreenshotLength` | Alas | type=input; display=default | input/default: 1 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EventDaily.LastStage` | EventA, EventB, EventC, EventD | type=input; display=default | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `EventDaily.StageFilter` | EventA, EventB, EventC, EventD | type=textarea; display=default | input/default: "A1 > A2 > A3", "B1 > B2 > B3", "C1 > C2 > C3", "D1 > D2 > D3" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `EventGeneral.PtLimit` | EventGeneral | type=input; display=default | input/default: 0 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `EventGeneral.TimeLimit` | EventGeneral | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `EventGeneral.PtLimit` | EventGeneral | type=input; display=default | input/default: 0 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `EventGeneral.TimeLimit` | EventGeneral | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `EventStory.SkipBattle` | EventStory | type=lock; display=default | options: true; default: true | `P`/◐ 实机当前值 | ◐ | ◐ | ◐ | ◐ | ◐ |
 | `Exercise.ExerciseStrategy` | Exercise | type=select; display=default | options: "aggressive", "fri18", "sat0", "sat12", "sat18", "sun0", "sun12", "sun18"; default: "aggressive" | `L`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `Exercise.LowHpConfirmWait` | Exercise | type=input; display=default | input/default: 0.1 | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
@@ -960,6 +960,6 @@ python scripts/python/verify_alas_support_matrix.py `
 | `SupplyPack.DayOfWeek` | Freebies | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Tactical.RapidTrainingSlot` | Tactical | type=select; display=default | options: "do_not_use", "slot_1", "slot_2", "slot_3", "slot_4"; default: "do_not_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Tactical.TacticalFilter` | Tactical | type=textarea; display=default | input/default: <long default in args.json> | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
-| `TaskBalancer.CoinLimit` | EventGeneral | type=input; display=default | input/default: 10000 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `TaskBalancer.Enable` | EventGeneral | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `TaskBalancer.TaskCall` | EventGeneral | type=select; display=default | options: "Main", "Main2", "Main3"; default: "Main" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `TaskBalancer.CoinLimit` | EventGeneral | type=input; display=default | input/default: 10000 | `P`/☐ 未逐值 | ☑ | ☑ | ☐ | ☑ | ◐ |
+| `TaskBalancer.Enable` | EventGeneral | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ◐ |
+| `TaskBalancer.TaskCall` | EventGeneral | type=select; display=default | options: "Main", "Main2", "Main3"; default: "Main" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ◐ |

@@ -1,0 +1,104 @@
+{
+  "schema": "alas-headless.daemon-idle-soak-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "Daemon.EnterMap": true
+  },
+  "passed": true,
+  "temporary_config": "codex_daemon_idle_soak_c06de734fd9c4baca97692b68cb29690.json",
+  "started_at": "2026-08-26T03:12:40.108304Z",
+  "finished_at": "2026-08-26T03:13:19.803507Z",
+  "duration_seconds": 30.0,
+  "iterations": 12,
+  "outcomes": {
+    "idle": 12
+  },
+  "pid_before": "24414",
+  "pid_after": "24414",
+  "generation_before": 83808,
+  "generation_after": 83959,
+  "unique_generation_samples": 13,
+  "main_page_before": {
+    "semantic_id": "main/already",
+    "generation": 83807,
+    "point": {
+      "x": 1191.73,
+      "y": 509.693
+    },
+    "bounds": {
+      "left": 1112.089,
+      "top": 426.72,
+      "right": 1271.371,
+      "bottom": 592.666
+    },
+    "path": "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/battle",
+    "policy_sha256": null,
+    "capability_id": null
+  },
+  "main_page_after": {
+    "semantic_id": "main/already",
+    "generation": 83959,
+    "point": {
+      "x": 1191.73,
+      "y": 509.693
+    },
+    "bounds": {
+      "left": 1112.089,
+      "top": 426.72,
+      "right": 1271.371,
+      "bottom": 592.666
+    },
+    "path": "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/battle",
+    "policy_sha256": null,
+    "capability_id": null
+  },
+  "typed_taps": [],
+  "mutation_dispatches": [],
+  "temporary_config_removed": true,
+  "observer_forwards_before": [
+    "emulator-5580 tcp:1032 localabstract:alas.g3.24414",
+    "emulator-5580 tcp:14216 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:2295 localabstract:alas.g3.23954",
+    "emulator-5580 tcp:2404 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:4184 localabstract:alas.g3.24414",
+    "emulator-5580 tcp:4840 localabstract:alas.g3.23954",
+    "emulator-5580 tcp:4984 localabstract:alas.g3.24414",
+    "emulator-5580 tcp:5242 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:6458 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:6683 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:7198 localabstract:alas.g3.23954",
+    "emulator-5580 tcp:7200 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:7667 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:7997 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:8645 localabstract:alas.g3.24414",
+    "emulator-5580 tcp:9735 localabstract:alas.g3.2030"
+  ],
+  "observer_forwards_after": [
+    "emulator-5580 tcp:1032 localabstract:alas.g3.24414",
+    "emulator-5580 tcp:14216 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:2295 localabstract:alas.g3.23954",
+    "emulator-5580 tcp:2404 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:4184 localabstract:alas.g3.24414",
+    "emulator-5580 tcp:4840 localabstract:alas.g3.23954",
+    "emulator-5580 tcp:4984 localabstract:alas.g3.24414",
+    "emulator-5580 tcp:5242 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:6458 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:6683 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:7198 localabstract:alas.g3.23954",
+    "emulator-5580 tcp:7200 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:7667 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:7997 localabstract:alas.g3.2030",
+    "emulator-5580 tcp:8645 localabstract:alas.g3.24414",
+    "emulator-5580 tcp:9735 localabstract:alas.g3.2030"
+  ],
+  "source_sha256": {
+    "daemon": "3c434142c776c9c81f8588b876c0edb870b0bdfaa9e7366203bb223264ea579a",
+    "adapter": "9e897d47d5f05a8286bc904ea4526b5a423c696dfece5d225168fcebfbb5673f",
+    "oracle": "8888eee438e35f2e5d436611a2a7eb8ac450e2bdd1fabc52767ea715bc545cfe",
+    "runner": "678614ade8dc3756e5c7d84290b842f1b48708287a82c3cdabf1a724bff75074"
+  }
+}

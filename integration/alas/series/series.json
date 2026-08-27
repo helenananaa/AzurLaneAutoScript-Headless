@@ -28,7 +28,7 @@
     {
       "order": 6,
       "path": "integration/alas/series/0040-campaign-flow-ports.patch",
-      "sha256": "c48ddd1c1955d30a4685c6a40f732a3c627825f1ab7f06f4ea6703b21a2cca3b"
+      "sha256": "2172c5a5adee01571ec6365f740d5d1769f619c87b1d29c34000ee5f61664ff4"
     },
     {
       "order": 7,
@@ -198,7 +198,7 @@
     {
       "order": 40,
       "path": "integration/alas/series/0340-campaign-auto-search-port.patch",
-      "sha256": "1491d156292b0dfa9e54fa3f6b3d87dc46b566fd4f7c47a64092fc2e865fd698"
+      "sha256": "db75b4fe1c6fe3e0d11add075485dfcadd11c6c1311a94e8cbd0998256e1b722"
     },
     {
       "order": 41,
@@ -213,7 +213,7 @@
     {
       "order": 43,
       "path": "integration/alas/series/0370-hard-11-4-semantic-clear-port.patch",
-      "sha256": "c9ca8ce782429d6e36bd102991b23d4cf6c5a0030498dcd37302fa8330ef712d"
+      "sha256": "40e510da73a83d862b140c3a48ba2eacb1756c9bfd4d7ade27d5a7b6baf93064"
     },
     {
       "order": 44,
@@ -458,7 +458,7 @@
     {
       "order": 92,
       "path": "integration/alas/series/0470-war-archives-runtime.patch",
-      "sha256": "9abef0299069bc83572abfe7c3e6898e117bc3662d6a8419f33046dc40e07d53"
+      "sha256": "06d30edb8d7f6327a296461dd77fa7d4a34c2138b4ed7f91ac598dc5d3b2a55a"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

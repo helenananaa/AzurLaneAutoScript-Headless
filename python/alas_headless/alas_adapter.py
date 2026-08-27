@@ -1098,6 +1098,7 @@ class _CampaignFlowContext:
     map_preparation_receipt: Optional[ActionReceipt] = None
     auto_search_toggle_receipt: Optional[ActionReceipt] = None
     map_preparation_oil_cost: Optional[int] = None
+    resolved_stage_code: Optional[str] = None
     daemon_auto_search_selected: Optional[bool] = None
     preparation_kind: Optional[str] = None
     cancel_receipt: Optional[ActionReceipt] = None
@@ -3204,6 +3205,19 @@ class AlasSemanticAdapter:
         context = self._require_campaign_context()
         return context.sortie_receipt is not None
 
+    def campaign_dock_full_visible(self) -> bool:
+        context = self._require_campaign_context()
+        return self.oracle.campaign_dock_full_visible(
+            context.resolved_stage_code or context.stage_code
+        )
+
+    def click_campaign_dock_full_choice(self, choice: str) -> ActionReceipt:
+        context = self._require_campaign_context()
+        return self.oracle.click_campaign_dock_full_choice(
+            context.resolved_stage_code or context.stage_code,
+            choice,
+        )
+
     def arm_daemon_campaign_map_preparation(self) -> bool:
         """Record the exact inherited ALAS setting before Daemon advances it."""
 
@@ -3263,7 +3277,7 @@ class AlasSemanticAdapter:
             raise SemanticGateClosed("Daemon inherited fleet dropdown is open")
 
         prepared = self.oracle.campaign_fleet_selection_state(
-            context.stage_code,
+            self._campaign_resolved_entrance_stage(),
             fallback_oil_cost=context.map_preparation_oil_cost,
         )
         requested = (fleet1, fleet2, submarine)
@@ -3354,7 +3368,9 @@ class AlasSemanticAdapter:
         try:
             self.oracle.campaign_auto_search_active_state()
         except SemanticTargetMissing:
-            retained = self.oracle.campaign_preparation_state(context.stage_code)
+            retained = self.oracle.campaign_preparation_state(
+                self._campaign_resolved_entrance_stage()
+            )
             if retained is None:
                 if (
                     isinstance(context.sortie_receipt.generation, bool)
@@ -3818,7 +3834,7 @@ class AlasSemanticAdapter:
     def _campaign_fleet_row(self, row_key: str) -> CampaignFleetRowState:
         context = self._require_campaign_context()
         state = self.oracle.campaign_fleet_selection_state(
-            context.stage_code,
+            self._campaign_resolved_entrance_stage(),
             fallback_oil_cost=context.map_preparation_oil_cost,
         )
         matches = tuple(row for row in state.rows if row.row_key == row_key)
@@ -3863,7 +3879,7 @@ class AlasSemanticAdapter:
         if context.initial_fleet_state is not None:
             raise SemanticGateClosed("campaign fleet preparation was already authorized")
         initial = self.oracle.campaign_fleet_selection_state(
-            context.stage_code,
+            self._campaign_resolved_entrance_stage(),
             fallback_oil_cost=context.map_preparation_oil_cost,
         )
         context.initial_fleet_state = initial
@@ -4057,7 +4073,7 @@ class AlasSemanticAdapter:
             receipt = self._dispatch_mutation(
                 "campaign.fleet_mutation",
                 lambda row_key=row_key: self.oracle.click_campaign_hard_recommend(
-                    context.stage_code, row_key
+                    self._campaign_resolved_entrance_stage(), row_key
                 ),
             )
             context.fleet_mutation_receipts.append(receipt)
@@ -4065,7 +4081,7 @@ class AlasSemanticAdapter:
             deadline = time.monotonic() + 8.0
             while True:
                 observed = self.oracle.campaign_fleet_selection_state(
-                    context.stage_code,
+                    self._campaign_resolved_entrance_stage(),
                     fallback_oil_cost=context.map_preparation_oil_cost,
                 )
                 row = next(item for item in observed.rows if item.row_key == row_key)
@@ -4078,7 +4094,7 @@ class AlasSemanticAdapter:
                     )
                 time.sleep(0.2)
         prepared = self.oracle.campaign_fleet_selection_state(
-            context.stage_code,
+            self._campaign_resolved_entrance_stage(),
             fallback_oil_cost=context.map_preparation_oil_cost,
         )
         rows = {row.row_key: row for row in prepared.rows}
@@ -4143,7 +4159,7 @@ class AlasSemanticAdapter:
         if context.fleet_dropdown_row is not None:
             raise SemanticGateClosed("campaign fleet dropdown remains open")
         prepared = self.oracle.campaign_fleet_selection_state(
-            context.stage_code,
+            self._campaign_resolved_entrance_stage(),
             fallback_oil_cost=context.map_preparation_oil_cost,
         )
         if self._campaign_fleet_tuple(prepared) != context.requested_fleets:
@@ -4735,6 +4751,21 @@ class AlasSemanticAdapter:
         assert last_identity_error is not None
         raise last_identity_error
 
+    def _campaign_resolved_entrance_stage(self) -> str:
+        """Return the exact physical stage proven by this entry transaction."""
+
+        context = self._require_campaign_context()
+        if context.resolved_stage_code is not None:
+            return context.resolved_stage_code
+        if context.entry_receipt is not None:
+            match = re.fullmatch(
+                r"campaign/stage/([a-z]+[0-9]*|[1-9][0-9]*-[1-9][0-9]*)",
+                context.entry_receipt.semantic_id,
+            )
+            if match is not None:
+                return match.group(1)
+        return context.stage_code
+
     @staticmethod
     def _campaign_inherited_fleet_overlay_is_pristine(
         context: _CampaignFlowContext,
@@ -4744,6 +4775,7 @@ class AlasSemanticAdapter:
         return (
             context.entry_receipt is None
             and context.map_preparation_receipt is None
+            and context.resolved_stage_code is None
             and context.auto_search_toggle_receipt is None
             and context.cancel_receipt is None
             and context.inherited_cancel_receipt is None
@@ -4817,9 +4849,15 @@ class AlasSemanticAdapter:
         receipt = self.oracle.click_campaign_map_preparation_mode(
             stage_code, destination
         )
-        self._require_campaign_context().passive_transition_until = (
-            time.monotonic() + 20.0
+        context = self._require_campaign_context()
+        context.resolved_stage_code = (
+            context.stage_code
+            if destination == "hard"
+            else CAMPAIGN_SHARED_HARD_STAGE_ENTRANCES.get(
+                context.stage_code, context.stage_code
+            )
         )
+        context.passive_transition_until = time.monotonic() + 20.0
         return receipt
 
     def confirm_campaign_pre_sortie(self) -> CampaignPreSortieProof:
@@ -5745,6 +5783,16 @@ class AlasSemanticAdapter:
 
     def _appear_once(self, button: Any) -> bool:
         name = self._button_name(button)
+        if self._campaign_context is not None and name in (
+            "RETIRE_APPEAR_1",
+            "RETIRE_APPEAR_2",
+            "RETIRE_APPEAR_3",
+        ):
+            if not self.campaign_dock_full_visible():
+                return False
+            # The middle choice is dock expansion and may consume premium
+            # currency. It is intentionally never exposed to ALAS.
+            return name != "RETIRE_APPEAR_2"
         if name in ("ACTION_POINT_USE", "ACTION_POINT_CANCEL"):
             self._package_gate()
             try:
@@ -6369,11 +6417,24 @@ class AlasSemanticAdapter:
                     "FLEET_PREPARATION",
                     "MAP_PREPARATION_CANCEL",
                 ):
-                    # A still-mounted selector can coexist beneath a partial
-                    # or foreign preparation view.  Preparation resources
-                    # must reach their strict typed proof below instead of
-                    # being hidden as generic selector-page misses.
-                    raise
+                    context = self._require_campaign_context()
+                    if (
+                        context.map_preparation_receipt is not None
+                        and time.monotonic() <= context.passive_transition_until
+                    ):
+                        # Unity can reparent the just-closed LevelInfoSPUI
+                        # under UIOrigin for a few frames while the selector
+                        # remains mounted.  Do not classify that transient as
+                        # the selector page; the preparation-specific branch
+                        # below still requires the reviewed fleet root before
+                        # any input.
+                        event_campaign_selector_visible = False
+                    else:
+                        # A still-mounted selector can coexist beneath a partial
+                        # or foreign preparation view.  Preparation resources
+                        # must reach their strict typed proof below instead of
+                        # being hidden as generic selector-page misses.
+                        raise
             except SemanticTargetMissing:
                 pass
         if event_campaign_selector_visible:
@@ -9633,20 +9694,19 @@ class AlasSemanticAdapter:
                         preferred = tuple(
                             stage
                             for stage in state.stages
-                            if SemanticOracle._campaign_stage_chapter(stage.stage_code)
-                            == requested_chapter
+                            if stage.stage_code == requested
                         )
                         shared_chapter = {"c": "a", "d": "b"}.get(
                             requested_chapter
                         )
                         if not preferred and shared_chapter is not None:
+                            shared_stage = shared_chapter + requested[
+                                len(requested_chapter) :
+                            ]
                             preferred = tuple(
                                 stage
                                 for stage in state.stages
-                                if SemanticOracle._campaign_stage_chapter(
-                                    stage.stage_code
-                                )
-                                == shared_chapter
+                                if stage.stage_code == shared_stage
                             )
                         if preferred:
                             state = CampaignPageState(
@@ -9666,6 +9726,20 @@ class AlasSemanticAdapter:
                 last_error = exc
         assert last_error is not None
         raise last_error
+
+    def event_points(self) -> int:
+        self._package_gate()
+        return self.oracle.event_points()
+
+    def event_coin(self) -> int:
+        self._package_gate()
+        context = self._campaign_context
+        stage_code = (
+            context.expected_stage_code
+            if context is not None and context.active
+            else None
+        )
+        return self.oracle.event_coin(stage_code)
 
     def campaign_oil(self) -> int:
         self._package_gate()
@@ -11905,6 +11979,18 @@ class AlasSemanticAdapter:
         if self._campaign_grid_location(button) is not None:
             return self.click_campaign_combat_grid(button)
         name = self._button_name(button)
+        if self._campaign_context is not None and name in (
+            "RETIRE_APPEAR_1",
+            "RETIRE_APPEAR_2",
+            "RETIRE_APPEAR_3",
+        ):
+            if name == "RETIRE_APPEAR_2":
+                raise SemanticGateClosed(
+                    "campaign dock expansion is not authorized"
+                )
+            return self.click_campaign_dock_full_choice(
+                "organize" if name == "RETIRE_APPEAR_1" else "enhance"
+            )
         if self._meta_beacon_active and self.oracle.daily_precombat_visible():
             if name == "BATTLE_PREPARATION":
                 return self.click_meta_precombat_start()
@@ -12403,11 +12489,11 @@ class AlasSemanticAdapter:
                 "campaign.sortie",
                 lambda: (
                     self.oracle.click_campaign_auto_search_sortie(
-                        context.stage_code
+                        self._campaign_resolved_entrance_stage()
                     )
                     if context.auto_search_role_state is not None
                     else self.oracle.click_campaign_sortie(
-                        context.stage_code,
+                        self._campaign_resolved_entrance_stage(),
                         fallback_oil_cost=context.map_preparation_oil_cost,
                     )
                 ),
@@ -12417,7 +12503,10 @@ class AlasSemanticAdapter:
                     "campaign sortie target predates prepared fleet state"
                 )
             context.sortie_receipt = receipt
-            context.passive_transition_until = time.monotonic() + 30.0
+            # ANGLE NULL can spend more than a minute in the exact read-only
+            # CombatLoadUI while assets stream.  The sortie budget is already
+            # consumed, so this longer passive window admits no further input.
+            context.passive_transition_until = time.monotonic() + 180.0
             return receipt
         if (
             self._campaign_context is not None
@@ -12481,7 +12570,7 @@ class AlasSemanticAdapter:
             row = self._campaign_fleet_row(row_key)
             if not row.in_use:
                 observed = self.oracle.campaign_fleet_selection_state(
-                    context.stage_code,
+                    self._campaign_resolved_entrance_stage(),
                     fallback_oil_cost=context.map_preparation_oil_cost,
                 )
                 matches = tuple(
@@ -12638,6 +12727,7 @@ class AlasSemanticAdapter:
                     observed_preparation, "oil_cost", None
                 )
             receipt = self.oracle.click_campaign_map_preparation(stage_code)
+            context.resolved_stage_code = stage_code
             context.map_preparation_receipt = receipt
             context.passive_transition_until = time.monotonic() + 60.0
             return receipt
@@ -16302,6 +16392,12 @@ class AlasSemanticSession:
     def campaign_page_state(self) -> CampaignPageState:
         return self.open().campaign_page_state()
 
+    def event_points(self) -> int:
+        return self.open().event_points()
+
+    def event_coin(self) -> int:
+        return self.open().event_coin()
+
     def campaign_oil(self) -> int:
         return self.open().campaign_oil()
 
@@ -16673,6 +16769,12 @@ class AlasSemanticSession:
 
     def campaign_sortie_committed(self) -> bool:
         return self.open().campaign_sortie_committed()
+
+    def campaign_dock_full_visible(self) -> bool:
+        return self.open().campaign_dock_full_visible()
+
+    def click_campaign_dock_full_choice(self, choice: str) -> ActionReceipt:
+        return self.open().click_campaign_dock_full_choice(choice)
 
     def arm_daemon_campaign_map_preparation(self) -> bool:
         return self.open().arm_daemon_campaign_map_preparation()
