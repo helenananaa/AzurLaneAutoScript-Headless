@@ -1,4 +1,5 @@
 import json
+import itertools
 import tempfile
 import unittest
 from pathlib import Path
@@ -341,6 +342,35 @@ class RuntimeBackendsTests(unittest.TestCase):
         labels = [spec.label for spec in executor.calls]
         self.assertNotIn("redroid-stop-script-probe", labels)
         self.assertNotIn("redroid-cleanup-host-stop", labels)
+
+    def test_redroid_backend_escalates_only_after_term_timeout(self):
+        running = "TASK PID STATUS\nalas-redroid-build1-x86-storage1 123 RUNNING"
+        results = self.redroid_provision_results(
+            tasks=[
+                (0, "TASK PID STATUS", ""),
+                (0, running, ""),
+                (0, running, ""),
+                (0, running, ""),
+                (0, "TASK PID STATUS", ""),
+            ]
+        )
+        results["redroid-cleanup-kill-force"] = (0, "", "")
+        clock = itertools.count(0.0, 31.0)
+        executor = ScriptedExecutor(results)
+        backend = RedroidBackend(
+            self.redroid_config(),
+            executor,
+            sleep=lambda _: None,
+            monotonic=lambda: next(clock),
+        )
+        artifacts = backend.resolve_artifacts(make_lock("redroid"))
+        instance = backend.start(backend.provision(artifacts))
+        backend.stop(instance)
+        forced = next(
+            spec for spec in executor.calls if spec.label == "redroid-cleanup-kill-force"
+        )
+        self.assertEqual(forced.argv[-2:], ("SIGKILL", self.redroid_config().container_id))
+        self.assertTrue(forced.mutating)
 
     def test_redroid_backend_rejects_public_adb_and_image_drift(self):
         with self.assertRaisesRegex(ValueError, "loopback or RFC1918-private"):

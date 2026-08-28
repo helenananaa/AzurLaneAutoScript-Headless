@@ -495,7 +495,26 @@ class RedroidBackend(AdbAttachedBackend):
         def stopped() -> Optional[Mapping[str, Any]]:
             return {"stopped": True} if not self._task_running() else None
 
-        self._wait_for(30.0, stopped, "redroid-task-stop-timeout")
+        try:
+            self._wait_for(30.0, stopped, "redroid-task-stop-timeout")
+        except RuntimeBackendNotReady as exc:
+            if exc.code != "redroid-task-stop-timeout":
+                raise
+            self._require_success(
+                self._ctr(
+                    label_prefix + "-kill-force",
+                    "tasks",
+                    "kill",
+                    "--signal",
+                    "SIGKILL",
+                    self.config.container_id,
+                    mutating=True,
+                ),
+                "redroid-task-force-stop-failed",
+            )
+            self._wait_for(
+                30.0, stopped, "redroid-task-force-stop-timeout"
+            )
         self._require_success(
             self._ctr(
                 label_prefix + "-delete",
