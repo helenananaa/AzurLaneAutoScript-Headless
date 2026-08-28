@@ -73,6 +73,31 @@ fi
     exit "$runtime_component_rc"
 }
 
+# containerd resolves the OCI process user/group against rootfs /etc while it
+# creates a fresh spec.  Android partition images use root-level absolute
+# links such as /etc -> /system/etc; snapshotter-safe extraction needs the
+# equivalent root-relative target (etc -> system/etc).  Only rewrite absolute
+# links at the root.  Nested absolute links keep their Android semantics.
+system_excludes=(--exclude='./vendor')
+root_absolute_symlinks=()
+while IFS= read -r -d '' path; do
+    target=$(readlink -- "$path")
+    [[ $target == /* ]] || continue
+    name=${path#"$system_mount"/}
+    [[ -n $name && $name != */* && $target != / ]] || {
+        echo "unsafe root-level Android symlink: $name -> $target" >&2
+        exit 1
+    }
+    case "/${target#/}/" in
+        */../*)
+            echo "root-level Android symlink contains parent traversal: $name -> $target" >&2
+            exit 1
+            ;;
+    esac
+    system_excludes+=("--exclude=./$name")
+    root_absolute_symlinks+=("./$name")
+done < <(find "$system_mount" -mindepth 1 -maxdepth 1 -type l -print0 | sort -z)
+
 tar --sort=name --format=pax --pax-option=delete=atime,delete=ctime \
     --mtime="@$source_date_epoch" \
     --numeric-owner --xattrs --xattrs-include='*' \
@@ -80,7 +105,14 @@ tar --sort=name --format=pax --pax-option=delete=atime,delete=ctime \
 tar --sort=name --format=pax --pax-option=delete=atime,delete=ctime \
     --mtime="@$source_date_epoch" \
     --numeric-owner --xattrs --xattrs-include='*' \
-    --exclude='./vendor' -rf "$layer" -C "$system_mount" .
+    "${system_excludes[@]}" -rf "$layer" -C "$system_mount" .
+if ((${#root_absolute_symlinks[@]})); then
+    tar --sort=name --format=pax --pax-option=delete=atime,delete=ctime \
+        --mtime="@$source_date_epoch" \
+        --numeric-owner --xattrs --xattrs-include='*' \
+        --transform='flags=s;s|^/||' \
+        -rf "$layer" -C "$system_mount" "${root_absolute_symlinks[@]}"
+fi
 tar --sort=name --format=pax --pax-option=delete=atime,delete=ctime \
     --mtime="@$source_date_epoch" \
     --numeric-owner --xattrs --xattrs-include='*' \

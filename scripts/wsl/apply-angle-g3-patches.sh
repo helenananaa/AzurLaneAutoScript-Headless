@@ -80,7 +80,9 @@ patch_marker_present() {
       ;;
     0012-android-null-bootstrap-snapshot-retry.patch)
       grep -Fq 'ALAS_G3_BOOTSTRAP_READY' \
-        "${angle_dir}/src/libANGLE/renderer/null/SurfaceNULL.cpp"
+        "${angle_dir}/src/libANGLE/renderer/null/SurfaceNULL.cpp" ||
+        grep -Fq 'frameGeneration % 3' \
+          "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"
       ;;
     *)
       return 1

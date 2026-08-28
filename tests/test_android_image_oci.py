@@ -57,6 +57,44 @@ class AndroidImageOciTests(unittest.TestCase):
                 "docker.io/alasheadless/redroid-x86-64:latest",
             )
 
+    def test_rejects_root_level_absolute_symlink_but_allows_nested_one(self) -> None:
+        with TemporaryDirectory() as raw:
+            directory = Path(raw)
+            layer = directory / "rootfs.tar"
+            with tarfile.open(layer, "w", format=tarfile.PAX_FORMAT) as archive:
+                nested = tarfile.TarInfo("system/bin/tool")
+                nested.type = tarfile.SYMTYPE
+                nested.linkname = "/system/bin/real-tool"
+                archive.addfile(nested)
+                root = tarfile.TarInfo("./etc")
+                root.type = tarfile.SYMTYPE
+                root.linkname = "/system/etc"
+                archive.addfile(root)
+            with self.assertRaisesRegex(
+                AndroidImageOciError,
+                r"containerd-incompatible.*etc -> /system/etc",
+            ):
+                create_redroid_oci_archive(
+                    layer, "x86_64", "c" * 64, "redroid/x86", 1746403200,
+                    directory / "image.tar",
+                )
+
+            relative_layer = directory / "relative-rootfs.tar"
+            with tarfile.open(relative_layer, "w", format=tarfile.PAX_FORMAT) as archive:
+                root = tarfile.TarInfo("./etc")
+                root.type = tarfile.SYMTYPE
+                root.linkname = "system/etc"
+                archive.addfile(root)
+                nested = tarfile.TarInfo("system/bin/tool")
+                nested.type = tarfile.SYMTYPE
+                nested.linkname = "/system/bin/real-tool"
+                archive.addfile(nested)
+            result = create_redroid_oci_archive(
+                relative_layer, "x86_64", "d" * 64, "redroid/x86", 1746403200,
+                directory / "relative-image.tar",
+            )
+            self.assertEqual(result["abi"], "x86_64")
+
     def test_rejects_tag_like_source_lock_and_existing_output(self) -> None:
         with TemporaryDirectory() as raw:
             directory = Path(raw)

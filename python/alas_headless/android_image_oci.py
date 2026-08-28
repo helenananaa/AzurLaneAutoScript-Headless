@@ -68,6 +68,23 @@ def _archive_layout(layout: Path, output: Path) -> None:
                 archive.addfile(info)
 
 
+def _root_level_absolute_symlinks(members: list[tarfile.TarInfo]) -> list[str]:
+    incompatible: list[str] = []
+    for member in members:
+        name = member.name
+        while name.startswith("./"):
+            name = name[2:]
+        name = name.rstrip("/")
+        if (
+            member.issym()
+            and name
+            and "/" not in name
+            and member.linkname.startswith("/")
+        ):
+            incompatible.append("{0} -> {1}".format(name, member.linkname))
+    return sorted(incompatible)
+
+
 def create_redroid_oci_archive(
     rootfs_layer: Path,
     abi: str,
@@ -90,8 +107,15 @@ def create_redroid_oci_archive(
         raise AndroidImageOciError("output must not already exist")
     try:
         with tarfile.open(rootfs_layer, "r") as archive:
-            if not archive.getmembers():
+            members = archive.getmembers()
+            if not members:
                 raise AndroidImageOciError("rootfs layer tar is empty")
+            incompatible_symlinks = _root_level_absolute_symlinks(members)
+            if incompatible_symlinks:
+                raise AndroidImageOciError(
+                    "rootfs layer contains containerd-incompatible root-level "
+                    "absolute symlink(s): {0}".format(", ".join(incompatible_symlinks))
+                )
     except tarfile.TarError as error:
         raise AndroidImageOciError("rootfs layer is not a valid uncompressed tar") from error
 

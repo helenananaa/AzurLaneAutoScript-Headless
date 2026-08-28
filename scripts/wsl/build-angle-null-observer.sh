@@ -161,7 +161,9 @@ if ! grep -Fq 'frameGeneration % 3' \
   exit 1
 fi
 if ! grep -Fq 'ALAS_G3_BOOTSTRAP_READY' \
-    "${angle_dir}/src/libANGLE/renderer/null/SurfaceNULL.cpp"; then
+    "${angle_dir}/src/libANGLE/renderer/null/SurfaceNULL.cpp" && \
+   ! grep -Fq 'frameGeneration % 3' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
   echo "Initial typed-snapshot retry is missing" >&2
   exit 1
 fi

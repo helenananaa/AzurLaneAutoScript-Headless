@@ -187,6 +187,19 @@ class AndroidBuildScriptTests(unittest.TestCase):
         )
         self.assertIn('runtime-components-$abi.json', build)
 
+    def test_oci_packager_normalizes_only_root_absolute_symlinks(self) -> None:
+        packager = (
+            Path(__file__).resolve().parents[1]
+            / "scripts"
+            / "wsl"
+            / "package-redroid-oci.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("-mindepth 1 -maxdepth 1 -type l", packager)
+        self.assertIn("system_excludes+=(\"--exclude=./$name\")", packager)
+        self.assertIn("root_absolute_symlinks+=(\"./$name\")", packager)
+        self.assertIn("--transform='flags=s;s|^/||'", packager)
+        self.assertIn("root-level Android symlink contains parent traversal", packager)
+
     def test_rendered_login_requires_and_restores_private_null_routing(self) -> None:
         script = (
             Path(__file__).resolve().parents[1]
