@@ -82,6 +82,7 @@ class RedroidRuntimeConfig:
     userdata_image: str
     metadata_image: str
     start_script: str
+    stop_script: Optional[str] = None
     ctr: str = "ctr"
     sudo: str = "sudo"
     namespace: str = "alas-headless"
@@ -118,6 +119,8 @@ class RedroidRuntimeConfig:
             ("start_script", self.start_script),
         ):
             _validate_narrow_path(name, value)
+        if self.stop_script is not None:
+            _validate_narrow_path("stop_script", self.stop_script)
         if self.userdata_image == self.metadata_image:
             raise ValueError("Redroid userdata and metadata images must be distinct")
         if self.unity_command_line not in (None, "-force-gfx-st"):
@@ -413,6 +416,13 @@ class RedroidBackend(AdbAttachedBackend):
             ),
             "redroid-start-script-unavailable",
         )
+        if self.config.stop_script is not None:
+            self._require_success(
+                self._command(
+                    "redroid-stop-script-probe", ("test", "-x", self.config.stop_script)
+                ),
+                "redroid-stop-script-unavailable",
+            )
         self._validate_container_and_storage()
         provisioned["initially_running"] = self._task_running()
         return provisioned
@@ -503,7 +513,21 @@ class RedroidBackend(AdbAttachedBackend):
             raise RuntimeBackendNotReady("redroid-restart-state-invalid")
         self._close_observer(instance)
         self._stop_task("redroid-restart")
+        self._stop_host_runtime("redroid-restart-host-stop")
         self._pending_android_restart[instance_id] = True
+
+    def _stop_host_runtime(self, label: str) -> None:
+        if self.config.stop_script is None:
+            return
+        self._require_success(
+            self._command(
+                label,
+                (self.config.stop_script,),
+                timeout_seconds=180.0,
+                mutating=True,
+            ),
+            "redroid-host-runtime-stop-failed",
+        )
 
     def wait_android_offline(
         self, instance: Mapping[str, Any], timeout_seconds: float
@@ -540,6 +564,7 @@ class RedroidBackend(AdbAttachedBackend):
                 and not pending_restart
             ):
                 self._stop_task("redroid-cleanup")
+                self._stop_host_runtime("redroid-cleanup-host-stop")
         except Exception as exc:
             if cleanup_failure is None:
                 cleanup_failure = exc

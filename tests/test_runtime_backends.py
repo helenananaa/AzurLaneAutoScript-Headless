@@ -217,6 +217,7 @@ class RuntimeBackendsTests(unittest.TestCase):
             "userdata_image": "/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/userdata.img",
             "metadata_image": "/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/metadata.img",
             "start_script": "/home/weipa/.local/bin/alas-redroid-start",
+            "stop_script": "/home/weipa/.local/bin/alas-redroid-stop",
             "adb_server_port": 5044,
             "launch_game": False,
             "poll_interval_seconds": 0.01,
@@ -273,6 +274,7 @@ class RuntimeBackendsTests(unittest.TestCase):
             ),
             "redroid-container-info": (0, json.dumps(container_info), ""),
             "redroid-start-script-probe": (0, "", ""),
+            "redroid-stop-script-probe": (0, "", ""),
             "redroid-userdata-loop": (
                 0,
                 "/dev/loop8: [] (/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/userdata.img)",
@@ -292,6 +294,7 @@ class RuntimeBackendsTests(unittest.TestCase):
             "redroid-container-start": (0, "started", ""),
             "redroid-cleanup-kill": (0, "", ""),
             "redroid-cleanup-delete": (0, "", ""),
+            "redroid-cleanup-host-stop": (0, "", ""),
         }
 
     def test_redroid_backend_starts_only_verified_preprovisioned_container(self):
@@ -307,6 +310,25 @@ class RuntimeBackendsTests(unittest.TestCase):
         self.assertIn("redroid-container-start", labels)
         self.assertIn("redroid-cleanup-kill", labels)
         self.assertIn("redroid-cleanup-delete", labels)
+        self.assertIn("redroid-cleanup-host-stop", labels)
+        host_stop = next(
+            spec for spec in executor.calls if spec.label == "redroid-cleanup-host-stop"
+        )
+        self.assertEqual(host_stop.argv, ("/home/weipa/.local/bin/alas-redroid-stop",))
+        self.assertTrue(host_stop.mutating)
+
+    def test_redroid_backend_allows_task_only_lifecycle_without_stop_script(self):
+        results = self.redroid_provision_results()
+        executor = ScriptedExecutor(results)
+        backend = RedroidBackend(
+            self.redroid_config(stop_script=None), executor, sleep=lambda _: None
+        )
+        artifacts = backend.resolve_artifacts(make_lock("redroid"))
+        instance = backend.start(backend.provision(artifacts))
+        backend.stop(instance)
+        labels = [spec.label for spec in executor.calls]
+        self.assertNotIn("redroid-stop-script-probe", labels)
+        self.assertNotIn("redroid-cleanup-host-stop", labels)
 
     def test_redroid_backend_rejects_public_adb_and_image_drift(self):
         with self.assertRaisesRegex(ValueError, "loopback or RFC1918-private"):
@@ -402,6 +424,7 @@ class RuntimeBackendsTests(unittest.TestCase):
             {
                 "redroid-restart-kill": (0, "", ""),
                 "redroid-restart-delete": (0, "", ""),
+                "redroid-restart-host-stop": (0, "", ""),
                 "adb-restart-boundary": (1, "", "device offline"),
                 "redroid-restart-start": (0, "started", ""),
             }
@@ -417,6 +440,7 @@ class RuntimeBackendsTests(unittest.TestCase):
         labels = [spec.label for spec in executor.calls]
         self.assertIn("redroid-restart-kill", labels)
         self.assertIn("redroid-restart-delete", labels)
+        self.assertIn("redroid-restart-host-stop", labels)
         self.assertIn("redroid-restart-start", labels)
 
     def test_external_adb_reference_backend_completes_read_only_identity_path(self):

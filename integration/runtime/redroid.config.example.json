@@ -11,6 +11,7 @@
   "userdata_image": "/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/userdata.img",
   "metadata_image": "/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/metadata.img",
   "start_script": "/home/weipa/.local/bin/alas-redroid-start",
+  "stop_script": "/home/weipa/.local/bin/alas-redroid-stop",
   "ctr": "ctr",
   "sudo": "sudo",
   "namespace": "alas-headless",

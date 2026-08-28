@@ -144,6 +144,7 @@ def backend_from_config(
             "start_script",
         }
         allowed = required | {
+            "stop_script",
             "ctr",
             "sudo",
             "namespace",
@@ -178,6 +179,7 @@ def backend_from_config(
             userdata_image=value["userdata_image"],
             metadata_image=value["metadata_image"],
             start_script=value["start_script"],
+            stop_script=value.get("stop_script"),
             ctr=value.get("ctr", "ctr"),
             sudo=value.get("sudo", "sudo"),
             namespace=value.get("namespace", "alas-headless"),
