@@ -316,6 +316,12 @@ class RuntimeBackendsTests(unittest.TestCase):
         )
         self.assertEqual(host_stop.argv, ("/home/weipa/.local/bin/alas-redroid-stop",))
         self.assertTrue(host_stop.mutating)
+        contract = backend.qualification_plan(make_lock("redroid"))[
+            "container_contract"
+        ]
+        self.assertTrue(contract["preprovisioned_container_required"])
+        self.assertTrue(contract["start_script_starts_task"])
+        self.assertTrue(contract["stop_script_cleans_host_runtime"])
 
     def test_redroid_backend_allows_task_only_lifecycle_without_stop_script(self):
         results = self.redroid_provision_results()

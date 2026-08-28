@@ -590,7 +590,11 @@ class RedroidBackend(AdbAttachedBackend):
                     "manifest_digest_verified": True,
                     "persistent_block_userdata": True,
                     "adb_private_only": True,
-                    "container_creation_owned_by_start_script": True,
+                    "preprovisioned_container_required": True,
+                    "start_script_starts_task": True,
+                    "stop_script_cleans_host_runtime": (
+                        self.config.stop_script is not None
+                    ),
                 },
             }
         )
