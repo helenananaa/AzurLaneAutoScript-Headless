@@ -247,6 +247,12 @@ class RuntimeBackendsTests(unittest.TestCase):
                     ],
                     "devices": [
                         {
+                            "path": "/dev/mapper/control",
+                            "type": "c",
+                            "major": 10,
+                            "minor": 236,
+                        },
+                        {
                             "path": "/dev/block/alas_userdata",
                             "type": "b",
                             "major": 7,
@@ -371,7 +377,11 @@ class RuntimeBackendsTests(unittest.TestCase):
     def test_redroid_backend_rejects_stale_storage_spec_and_frozen_dm(self):
         results = self.redroid_provision_results()
         info = json.loads(results["redroid-container-info"][1])
-        info["Spec"]["linux"]["devices"][0]["minor"] = 4
+        next(
+            item
+            for item in info["Spec"]["linux"]["devices"]
+            if item["path"] == "/dev/block/alas_userdata"
+        )["minor"] = 4
         results["redroid-container-info"] = (0, json.dumps(info), "")
         backend = RedroidBackend(
             self.redroid_config(), ScriptedExecutor(results), sleep=lambda _: None

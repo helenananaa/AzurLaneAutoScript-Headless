@@ -299,9 +299,11 @@ class RedroidBackend(AdbAttachedBackend):
         if not {"/dev/block/alas_userdata", "/dev/block/alas_metadata"}.issubset(device_paths):
             raise RuntimeIdentityMismatch("redroid-storage-device-contract-mismatch")
         if any(
-            isinstance(path, str)
+            item.get("type") == "b"
+            and isinstance(path, str)
             and (re.fullmatch(r"/dev/dm-[0-9]+", path) or path.startswith("/dev/mapper/"))
-            for path in device_paths
+            for item in devices
+            for path in (item.get("path"),)
         ):
             raise RuntimeIdentityMismatch("redroid-container-frozen-dm-device")
         namespaces = linux.get("namespaces")
