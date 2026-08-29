@@ -1696,6 +1696,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     ),
     SemanticTarget("main/battle", "battle", "frame/right/1/battle"),
     SemanticTarget("main/formation", "formation", "frame/right/1/formation"),
+    SemanticTarget(
+        "main/raid",
+        "MainActBossBtn",
+        "frame/right/activity/MainActBossBtn",
+    ),
     SemanticTarget("main/settings", "settings", "frame/top/btns/settings"),
     SemanticTarget("main/mail", "mail", "frame/top/btns/mail"),
     SemanticTarget("main/shop", "shop", "frame/bottom/frame/shop"),
@@ -7644,6 +7649,66 @@ class SemanticOracle:
             and formation[0].active_in_hierarchy
         )
 
+    def _main_raid_entry_proven(self, state: OracleState) -> bool:
+        """Prove the current main-page raid shortcut with its typed icon.
+
+        The activity shortcuts live on the overlay canvas where the observer
+        cannot always resolve a top raycast.  Keep that uncertainty local to
+        the exact generic raid button and require the matching visible
+        ``event_boss`` image to cover the same actionable rectangle.
+        """
+
+        target = self._matches(state, "main/raid")
+        battle = self._matches(state, "main/battle")
+        formation = self._matches(state, "main/formation")
+        if not (
+            len(target) == 1
+            and len(battle) == 1
+            and len(formation) == 1
+            and battle[0].active_in_hierarchy
+            and formation[0].active_in_hierarchy
+        ):
+            return False
+        button = target[0]
+        if not (
+            button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is None
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        ):
+            return False
+
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < state.generation
+            or ui_state.generation > state.generation + 2
+        ):
+            raise SemanticGateClosed("main raid entry snapshots are not coherent")
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == button.path + "/Image"
+            and image.sprite == "event_boss"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and image.raycast_target
+            and image.raycast_top is None
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+            and image.bounds.contains(button.point)
+        )
+        if len(images) != 1:
+            return False
+        button_area = (button.bounds.right - button.bounds.left) * (
+            button.bounds.bottom - button.bounds.top
+        )
+        return self._bounds_overlap(button.bounds, images[0].bounds) >= button_area * 0.99
+
     @staticmethod
     def _guild_page_visible_from_states(
         button_state: OracleState,
@@ -11503,6 +11568,34 @@ class SemanticOracle:
         return int(matches[0].text.strip())
 
     def _event_points_once(self) -> int:
+        try:
+            _buttons, raid_ui, raid_root, _stages = (
+                self._amatsukaze_raid_page_state()
+            )
+        except SemanticGateClosed as exc:
+            if str(exc) not in (
+                "current Raid page is absent",
+                "current Raid page is obscured by fleet selection",
+            ):
+                raise
+        else:
+            path = raid_root + "/adapt/right/ptaward/Text"
+            matches = tuple(
+                item
+                for item in raid_ui.texts
+                if item.path == path
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+                and re.fullmatch(r"[0-9]+", item.text.strip()) is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "current Raid point counter is absent or ambiguous"
+                )
+            return int(matches[0].text.strip())
+
         ui_state = self.read_ui_state()
         page = self.event_campaign_page_state()
         if (
@@ -21445,8 +21538,15 @@ class SemanticOracle:
         return int(value.group(1))
 
     def raid_remain_state(self, event: str, mode: str) -> RaidRemainState:
-        """Read one pinned RaidDaily counter from typed BossRush state."""
+        """Read one reviewed RaidDaily counter from typed Unity state."""
 
+        if event == "raid_20260827":
+            if mode not in ("easy", "normal", "hard", "ex"):
+                raise SemanticGateClosed("Raid remaining counter mode is unsupported")
+            return self._retry_transition_read(
+                lambda: self._amatsukaze_raid_remain_state(mode),
+                attempts=8,
+            )
         if event != "raid_20260212":
             raise SemanticGateClosed("Raid remaining counter event is unsupported")
         node_ids = {"easy": 5001, "normal": 5002, "hard": 5003, "ex": 5004}
@@ -21542,6 +21642,965 @@ class SemanticOracle:
             node_id=node_id,
         )
 
+    def _amatsukaze_raid_page_state(
+        self,
+    ) -> Tuple[OracleState, UiState, str, Dict[str, ButtonState]]:
+        """Prove the 2026-08-27 Raid page and its five distinct stage slots.
+
+        The first four slots belong to the existing ALAS Raid state machine.
+        Slot five is the update's separate advanced challenge and is proven only
+        so it cannot be confused with EX; it is deliberately not actionable.
+        """
+
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("current Raid button and UI snapshots are incoherent")
+
+        fleet_root = "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)"
+        if any(
+            button.path.startswith(fleet_root + "/")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            for button in button_state.buttons
+        ):
+            raise SemanticGateClosed("current Raid page is obscured by fleet selection")
+        precombat_roots = (
+            "UICamera/Canvas/UIOrigin/ActivityBossPrecombatUI(Clone)",
+            "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)",
+        )
+        if any(
+            any(button.path.startswith(root + "/") for root in precombat_roots)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            for button in button_state.buttons
+        ):
+            raise SemanticGateClosed("current Raid page is obscured by precombat")
+
+        story_roots = tuple(
+            button
+            for button in button_state.buttons
+            if button.path.endswith("Overlay/UIOverlay/NewStoryUI(Clone)")
+            and button.name == "NewStoryUI(Clone)"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.bounds is not None
+        )
+        if story_roots:
+            story_skips = self._matches(button_state, "story/skip")
+            if (
+                len(story_roots) == 1
+                and len(story_skips) == 1
+            ):
+                # Hide the underlay from Page.iter_pages() so the original
+                # ALAS ui_additional()->handle_story_skip() loop owns this
+                # event-story transition.
+                raise SemanticGateClosed(
+                    "current Raid page is obscured by event story"
+                )
+            raise SemanticGateClosed("current Raid event story overlay is malformed")
+
+        root = "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)"
+        title_path = root + "/adapt/top/TopPage/top/deco/Text/Text_1"
+        titles = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == title_path
+            and item.text.strip() == "JOINT OPERATION"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if not titles:
+            raise SemanticGateClosed("current Raid page is absent")
+        if len(titles) != 1:
+            raise SemanticGateClosed("current Raid page title is ambiguous")
+
+        modes = ("easy", "normal", "hard", "ex", "advanced")
+        buttons: Dict[str, ButtonState] = {}
+        for index, candidate_mode in enumerate(modes, start=1):
+            path = f"{root}/adapt/right/{index}"
+            matches = tuple(
+                button
+                for button in button_state.buttons
+                if button.name == str(index)
+                and button.path == path
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.raycast_top in (True, None)
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "current Raid stage identity is absent or ambiguous"
+                )
+            buttons[candidate_mode] = matches[0]
+
+        expected_images = {
+            root + "/adapt/right/1": "btn_lv_bg",
+            root + "/adapt/right/1/lv": "btn_lv_easy",
+            root + "/adapt/right/2": "btn_lv_bg",
+            root + "/adapt/right/2/lv": "btn_lv_normal",
+            root + "/adapt/right/3": "btn_lv_bg",
+            root + "/adapt/right/3/lv": "btn_lv_hard",
+            root + "/adapt/right/4": "btn_lv_ex",
+            root + "/adapt/right/5": "btn_lv_sp",
+        }
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path in expected_images
+            and image.sprite == expected_images[image.path]
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if (
+            len(images) != len(expected_images)
+            or {image.path for image in images} != set(expected_images)
+        ):
+            raise SemanticGateClosed("current Raid stage sprites are absent or ambiguous")
+
+        image_by_path = {image.path: image for image in images}
+        for index, candidate_mode in enumerate(modes, start=1):
+            button = buttons[candidate_mode]
+            assert button.bounds is not None
+            image = image_by_path[f"{root}/adapt/right/{index}"]
+            assert image.bounds is not None
+            button_area = (button.bounds.right - button.bounds.left) * (
+                button.bounds.bottom - button.bounds.top
+            )
+            if self._bounds_overlap(button.bounds, image.bounds) < button_area * 0.99:
+                raise SemanticGateClosed("current Raid stage sprite does not cover its button")
+        return button_state, ui_state, root, buttons
+
+    def _amatsukaze_raid_remain_state(self, mode: str) -> RaidRemainState:
+        node_ids = {"easy": 1, "normal": 2, "hard": 3, "ex": 4}
+        try:
+            node_id = node_ids[mode]
+        except KeyError as exc:
+            raise SemanticGateClosed("Raid remaining counter mode is unsupported") from exc
+
+        _button_state, ui_state, root, _buttons = self._amatsukaze_raid_page_state()
+        if mode == "ex":
+            counter_path = root + "/adapt/top/ticket/Text"
+            ticket_image_path = root + "/adapt/top/ticket"
+            ticket_label_path = ticket_image_path + "/Desc"
+            ticket_images = tuple(
+                image
+                for image in ui_state.images
+                if image.path == ticket_image_path
+                and image.active_in_hierarchy
+                and image.active_and_enabled
+                and not image.truncated
+                and image.bounds is not None
+            )
+            ticket_labels = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == ticket_label_path
+                and item.text.strip() == "特别挑战券"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            pattern = r"[0-9]{1,3}"
+            capacity = None
+        else:
+            counter_path = f"{root}/adapt/right/{node_id}/Text"
+            ticket_images = (True,)
+            ticket_labels = (True,)
+            pattern = r"([0-9]|1[0-5])\s*/\s*15"
+            capacity = 15
+        counters = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == counter_path
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+            and re.fullmatch(pattern, item.text.strip()) is not None
+        )
+        if (
+            len(ticket_images) != 1
+            or len(ticket_labels) != 1
+            or len(counters) != 1
+        ):
+            raise SemanticGateClosed("current Raid remaining counter is absent or ambiguous")
+        value = counters[0].text.strip()
+        remaining = int(value if mode == "ex" else value.split("/", 1)[0].strip())
+        return RaidRemainState(
+            generation=ui_state.generation,
+            event="raid_20260827",
+            mode=mode,
+            remaining=remaining,
+            capacity=capacity,
+            root=root,
+            node_id=node_id,
+        )
+
+    def raid_page_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid page event is unsupported")
+        try:
+            self._amatsukaze_raid_page_state()
+        except SemanticGateClosed as exc:
+            if str(exc) in (
+                "current Raid page is absent",
+                "current Raid page is obscured by fleet selection",
+                "current Raid page is obscured by precombat",
+                "current Raid page is obscured by event story",
+            ):
+                return False
+            raise
+        return True
+
+    def click_raid_stage(self, event: str, mode: str) -> ActionReceipt:
+        """Click one current Raid slot after exact page and mode proof."""
+
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid stage event is unsupported")
+        button_state, _ui_state, _root, buttons = self._amatsukaze_raid_page_state()
+        if mode not in ("easy", "normal", "hard", "ex"):
+            raise SemanticGateClosed("Raid stage mode is unsupported")
+        target = buttons[mode]
+        if self._blocking_rules(button_state, f"raid/stage/{mode}"):
+            raise SemanticGateClosed("Raid stage input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=f"raid/stage/{mode}",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_home(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid page event is unsupported")
+        button_state, ui_state, root, _buttons = self._amatsukaze_raid_page_state()
+        path = root + "/adapt/top/TopPage/top/btn_home"
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == path
+            and button.name == "btn_home"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "btn_home"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if len(targets) != 1 or len(images) != 1:
+            raise SemanticGateClosed("Raid home control is absent or ambiguous")
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed("Raid home image does not cover its control")
+        if self._blocking_rules(button_state, "raid/page/home"):
+            raise SemanticGateClosed("Raid home input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="raid/page/home",
+            generation=button_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _amatsukaze_raid_fleet_selection_state(
+        self,
+    ) -> Tuple[OracleState, UiState, Dict[str, ButtonState]]:
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("Raid fleet-selection snapshots are incoherent")
+        root = "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel"
+        paths = {
+            "back": root + "/btnBack",
+            "start": root + "/start_button",
+        }
+        buttons: Dict[str, ButtonState] = {}
+        for key, path in paths.items():
+            matches = tuple(
+                button
+                for button in button_state.buttons
+                if button.path == path
+                and button.name == path.rsplit("/", 1)[-1]
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.raycast_top in (True, None)
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "Raid fleet-selection control is absent or ambiguous"
+                )
+            buttons[key] = matches[0]
+        titles = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == root + "/title/Image/text/text (1)"
+            and item.text.strip() == "FLEET SELECT"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        expected_images = {
+            paths["back"]: "x_butten",
+            paths["start"]: "qianwang_button",
+        }
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path in expected_images
+            and image.sprite == expected_images[image.path]
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if (
+            len(titles) != 1
+            or len(images) != len(expected_images)
+            or {image.path for image in images} != set(expected_images)
+        ):
+            raise SemanticGateClosed("Raid fleet-selection identity is incomplete")
+        image_by_path = {image.path: image for image in images}
+        for key, button in buttons.items():
+            assert button.bounds is not None
+            image = image_by_path[paths[key]]
+            assert image.bounds is not None
+            button_area = (button.bounds.right - button.bounds.left) * (
+                button.bounds.bottom - button.bounds.top
+            )
+            if self._bounds_overlap(button.bounds, image.bounds) < button_area * 0.99:
+                raise SemanticGateClosed(
+                    "Raid fleet-selection image does not cover its control"
+                )
+        return button_state, ui_state, buttons
+
+    def raid_fleet_selection_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        try:
+            self._amatsukaze_raid_fleet_selection_state()
+        except SemanticGateClosed as exc:
+            if str(exc) == "Raid fleet-selection control is absent or ambiguous":
+                return False
+            raise
+        return True
+
+    def raid_fleet_ready(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        button_state, _ui_state, _buttons = (
+            self._amatsukaze_raid_fleet_selection_state()
+        )
+        root = (
+            "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/"
+            "panel/fleet/1"
+        )
+        for group in ("main", "vanguard"):
+            prefix = root + "/" + group + "/"
+            slots = tuple(
+                button
+                for button in button_state.buttons
+                if button.path.startswith(prefix)
+                and button.name in ("shiptpl(Clone)", "emptytpl(Clone)")
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.raycast_top in (True, None)
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
+            )
+            if len(slots) != 3:
+                raise SemanticGateClosed(
+                    "Raid fleet-selection slot identity is incomplete"
+                )
+            if not any(button.name == "shiptpl(Clone)" for button in slots):
+                return False
+        return True
+
+    def click_raid_fleet_back(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        button_state, _ui_state, buttons = self._amatsukaze_raid_fleet_selection_state()
+        target = buttons["back"]
+        if self._blocking_rules(button_state, "raid/fleet/back"):
+            raise SemanticGateClosed("Raid fleet-selection back input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        # ActivityBossFleetSelectView anchors btnBack at its top-right edge;
+        # Unity ignores that boundary point even though it belongs to the
+        # RectTransform.  Its exact image and rectangle were proven above.
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="raid/fleet/back",
+            generation=button_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_fleet_start(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        button_state, _ui_state, buttons = self._amatsukaze_raid_fleet_selection_state()
+        target = buttons["start"]
+        if self._blocking_rules(button_state, "raid/fleet/start"):
+            raise SemanticGateClosed("Raid fleet-selection start input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.bounds is not None
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="raid/fleet/start",
+            generation=button_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_fleet_recommend(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        button_state, ui_state, _buttons = (
+            self._amatsukaze_raid_fleet_selection_state()
+        )
+        path = (
+            "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/"
+            "panel/fleet/1/btn_recom"
+        )
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == path
+            and button.name == "btn_recom"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.bounds is not None
+            and button.point is not None
+            and button.bounds.contains(button.point)
+        )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "tuijian_butten"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if len(targets) != 1 or len(images) != 1:
+            raise SemanticGateClosed(
+                "Raid fleet-selection recommend control is absent or ambiguous"
+            )
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed(
+                "Raid fleet-selection recommend image does not cover its control"
+            )
+        if self._blocking_rules(button_state, "raid/fleet/recommend"):
+            raise SemanticGateClosed("Raid fleet-selection recommend input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="raid/fleet/recommend",
+            generation=button_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _amatsukaze_raid_precombat_state(
+        self,
+    ) -> Tuple[OracleState, UiState, ButtonState]:
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("Raid precombat snapshots are incoherent")
+        roots = (
+            "UICamera/Canvas/UIOrigin/ActivityBossPrecombatUI(Clone)",
+            "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)",
+        )
+        starts = tuple(
+            (root, button)
+            for root in roots
+            for button in button_state.buttons
+            if button.path == root + "/adapt/right/start"
+            and button.name == "start"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if not starts:
+            raise SemanticGateClosed("Raid precombat page is absent")
+        if len(starts) != 1:
+            raise SemanticGateClosed("Raid precombat start control is ambiguous")
+        root, target = starts[0]
+        start_path = root + "/adapt/right/start"
+        exact_texts = {
+            start_path + "/text_en": "WEIGH ANCHOR",
+            start_path + "/text": "出击",
+            start_path + "/cost_container/title": "消耗：",
+            root + "/adapt/middle/gear_score/main/line/Image/Text2": "MAIN",
+            root + "/adapt/middle/gear_score/vanguard/line/Image/Text2": "VANGUARD",
+        }
+        matched_texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.path in exact_texts
+            and item.text.strip() == exact_texts[item.path]
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        numeric_paths = (
+            start_path + "/cost_container/popup/Text",
+            root + "/adapt/middle/gear_score/main/Text",
+            root + "/adapt/middle/gear_score/vanguard/Text",
+        )
+        numeric_texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.path in numeric_paths
+            and re.fullmatch(r"[0-9]+", item.text.strip()) is not None
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        ordinary_paths = {
+            start_path + "/bonus/title",
+            start_path + "/bonus/Text",
+        }
+        ordinary_texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.path in ordinary_paths
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        ordinary_complete = (
+            len(ordinary_texts) == 2
+            and {item.path for item in ordinary_texts} == ordinary_paths
+            and next(
+                item.text.strip()
+                for item in ordinary_texts
+                if item.path == start_path + "/bonus/title"
+            )
+            == "额外收益次数："
+            and re.fullmatch(
+                r"[0-9]+",
+                next(
+                    item.text.strip()
+                    for item in ordinary_texts
+                    if item.path == start_path + "/bonus/Text"
+                ),
+            )
+            is not None
+        )
+        ex_paths = {
+            start_path + "/ticket/title",
+            start_path + "/ticket/Text",
+        }
+        ex_texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.path in ex_paths
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        ex_image_sprites = {
+            start_path + "/ticket/icon": "nvpu_ticket",
+            start_path + "/ticket/checkbox": "check_frame_bg",
+            start_path + "/ticket/bg": "frame_bg",
+        }
+        ex_images = tuple(
+            image
+            for image in ui_state.images
+            if image.path in ex_image_sprites
+            and image.sprite == ex_image_sprites[image.path]
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        ex_complete = (
+            len(ex_texts) == 2
+            and {item.path for item in ex_texts} == ex_paths
+            and next(
+                item.text.strip()
+                for item in ex_texts
+                if item.path == start_path + "/ticket/title"
+            )
+            == "使用"
+            and re.fullmatch(
+                r"[0-9]+/[0-9]+",
+                next(
+                    item.text.strip()
+                    for item in ex_texts
+                    if item.path == start_path + "/ticket/Text"
+                ),
+            )
+            is not None
+            and len(ex_images) == len(ex_image_sprites)
+            and {image.path for image in ex_images} == set(ex_image_sprites)
+        )
+        heroes = tuple(
+            button
+            for button in button_state.buttons
+            if button.path.startswith(root + "/adapt/middle/HeroContainer/info/")
+            and button.path.endswith("_root/mouseChild")
+            and button.name == "mouseChild"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds is not None
+        )
+        start_images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == start_path
+            and image.sprite == "btn_formation_sel"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        oil_images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == start_path + "/cost_container/popup/icon"
+            and image.sprite == "res_oil"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if (
+            len(matched_texts) != len(exact_texts)
+            or {item.path for item in matched_texts} != set(exact_texts)
+            or len(numeric_texts) != len(numeric_paths)
+            or {item.path for item in numeric_texts} != set(numeric_paths)
+            or ordinary_complete == ex_complete
+            or (ordinary_complete and (ex_texts or ex_images))
+            or (ex_complete and ordinary_texts)
+            or len(heroes) != 6
+            or len(start_images) != 1
+            or len(oil_images) != 1
+        ):
+            raise SemanticGateClosed("Raid precombat identity is incomplete")
+        assert target.bounds is not None
+        assert start_images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if (
+            self._bounds_overlap(target.bounds, start_images[0].bounds)
+            < button_area * 0.99
+        ):
+            raise SemanticGateClosed("Raid precombat image does not cover start")
+        return button_state, ui_state, target
+
+    def raid_precombat_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        try:
+            self._amatsukaze_raid_precombat_state()
+        except SemanticGateClosed as exc:
+            if str(exc) in (
+                "Raid precombat page is absent",
+                "Raid precombat identity is incomplete",
+                "Raid precombat image does not cover start",
+            ):
+                # ActivityBossPrecombatUI mounts its typed texts/images and
+                # animates the start Button/Image over separate observer
+                # generations. Presence polling may wait through either
+                # harmless transient; the click path repeats the complete
+                # identity and coverage proof and remains fail-closed.
+                return False
+            raise
+        return True
+
+    def _amatsukaze_raid_notice_target(
+        self,
+    ) -> Tuple[OracleState, UiState, ButtonState]:
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("Raid precombat notice snapshots are incoherent")
+        root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window"
+        path = root + "/button_container/custom_button_1(Clone)"
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == path
+            and button.name == "custom_button_1(Clone)"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is True
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if not targets:
+            raise SemanticGateClosed("Raid precombat notice is absent")
+        texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        exact = {
+            path + "/pic": "知道了",
+            root + "/top/bg/infomation/title": "信息",
+            root + "/top/bg/infomation/title_en": "INFORMATION",
+        }
+        exact_matches = tuple(
+            item
+            for item in texts
+            if item.path in exact and item.text.strip() == exact[item.path]
+        )
+        notices = tuple(
+            item
+            for item in texts
+            if item.path == root + "/help_panel/list/help_tpl"
+            and item.text.strip().startswith("注意，自律战斗时可能出现以下情况")
+        )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "btn_big_blue"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if (
+            len(targets) != 1
+            or len(exact_matches) != len(exact)
+            or {item.path for item in exact_matches} != set(exact)
+            or len(notices) != 1
+            or len(images) != 1
+        ):
+            raise SemanticGateClosed("Raid precombat notice identity is incomplete")
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed("Raid precombat notice image does not cover button")
+        return button_state, ui_state, target
+
+    def raid_precombat_notice_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        try:
+            self._amatsukaze_raid_notice_target()
+        except SemanticGateClosed as exc:
+            if str(exc) == "Raid precombat notice is absent":
+                return False
+            raise
+        return True
+
+    def click_raid_precombat_notice(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        button_state, _ui_state, target = self._amatsukaze_raid_notice_target()
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/precombat/notice/acknowledge",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_precombat_start(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        button_state, _ui_state, target = self._amatsukaze_raid_precombat_state()
+        if self.raid_precombat_notice_visible(event):
+            raise SemanticGateClosed("Raid precombat start is obscured by notice")
+        if self._blocking_rules(button_state, "raid/precombat/start"):
+            raise SemanticGateClosed("Raid precombat start input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/precombat/start",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_precombat_back(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        button_state, ui_state, start = self._amatsukaze_raid_precombat_state()
+        if self.raid_precombat_notice_visible(event):
+            raise SemanticGateClosed("Raid precombat back is obscured by notice")
+        root = start.path.rsplit("/adapt/right/start", 1)[0]
+        path = root + "/blur_panel/top/back_btn"
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == path
+            and button.name == "back_btn"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "icon_bg_front_1920"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if len(targets) != 1 or len(images) != 1:
+            raise SemanticGateClosed("Raid precombat back identity is incomplete")
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed("Raid precombat image does not cover back")
+        if self._blocking_rules(button_state, "raid/precombat/back"):
+            raise SemanticGateClosed("Raid precombat back input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/precombat/back",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def raid_remain(self, event: str, mode: str) -> int:
         return self.raid_remain_state(event=event, mode=mode).remaining
 
@@ -21556,7 +22615,9 @@ class SemanticOracle:
         try:
             self.campaign_page_state()
         except SemanticTargetMissing:
-            if self.event_campaign_page_visible():
+            if self.main_page_visible():
+                pass
+            elif self.event_campaign_page_visible():
                 pass
             else:
                 # The global resource panel remains visible after sortie.  A
@@ -21565,7 +22626,9 @@ class SemanticOracle:
                 # map root/anchor proof succeeds.
                 self.campaign_map_entry_state()
         except SemanticGateClosed as exc:
-            if self._event_campaign_detail_visible(self.read_state()):
+            if self.main_page_visible():
+                pass
+            elif self._event_campaign_detail_visible(self.read_state()):
                 pass
             elif self.event_campaign_page_visible():
                 # Event selectors use LevelSelectSPFullUI rather than the
@@ -21584,6 +22647,7 @@ class SemanticOracle:
             "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_value",
             "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil/oil_value",
             "LevelCamera/Canvas/LevelOrigin/ResPanel(Clone)/frame/oil/oil_value",
+            "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/top/res/oil/Text",
         )
         matches = tuple(
             item
@@ -35420,6 +36484,11 @@ class SemanticOracle:
 
     def _enabled_once(self, semantic_id: str) -> bool:
         state = self.read_state()
+        if semantic_id == "main/raid":
+            return bool(
+                self._main_raid_entry_proven(state)
+                and not self._blocking_rules(state, semantic_id)
+            )
         if semantic_id == "os/boss/start":
             return self.operation_siren_boss_preparation_visible()
         if semantic_id == "reward/new-ship/continue":
@@ -36279,6 +37348,9 @@ class SemanticOracle:
             and target.bounds.contains(target.point)
             and self.main_page_visible()
         )
+        delegated_main_raid = bool(
+            semantic_id == "main/raid" and self._main_raid_entry_proven(state)
+        )
         delegated_meowfficer_get_continue = bool(
             semantic_id == "meowfficer/get/continue"
             and self._meowfficer_get_continue_proven(state)
@@ -36689,6 +37761,7 @@ class SemanticOracle:
                 and not delegated_meowfficer_queue_control
                 and not delegated_meowfficer_queue_prompt
                 and not delegated_main_guild
+                and not delegated_main_raid
                 and not delegated_guild_control
                 and not delegated_guild_dispatch_detail
                 and not delegated_guild_report

@@ -296,6 +296,7 @@ def _daily_case(
     host.device = object()
     host.is_raid_rpg = lambda: host.events.append(("is_raid_rpg", None)) or False
     host.ui_ensure = lambda _page: host.events.append(("ui_ensure", None))
+    host._ensure_raid_page = lambda name: host.events.append(("ensure_raid_page", name))
     host.get_remain = lambda mode: 2 if mode == "ex" else 0
     host.ui_goto_main = lambda: host.events.append(("goto_main", None))
 

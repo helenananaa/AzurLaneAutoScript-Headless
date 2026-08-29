@@ -604,7 +604,7 @@ index 5b086931..e7b4038b 100644
 +            if oracle.event_story_skip_prompt_visible():
 +                logger.info('Modern event story skip -> semantic confirm')
 +                semantic_adapter.refresh_frame()
-+                oracle.click_event_story_skip_confirm()
++                semantic_adapter.click_event_story_skip_confirm()
 +                self.story_popup_timeout = Timer(10)
 +                return True
 +            if oracle.event_story_dialogue_visible():
@@ -612,13 +612,13 @@ index 5b086931..e7b4038b 100644
 +                if option_count:
 +                    logger.attr('Story_options', option_count)
 +                    semantic_adapter.refresh_frame()
-+                    oracle.click_event_story_option(self.config.STORY_OPTION)
++                    semantic_adapter.click_event_story_option(self.config.STORY_OPTION)
 +                    self.story_popup_timeout.reset()
 +                    return True
 +                if self.config.STORY_ALLOW_SKIP:
 +                    logger.info('Modern event story -> semantic skip')
 +                    semantic_adapter.refresh_frame()
-+                    oracle.click_event_story_skip()
++                    semantic_adapter.click_event_story_skip()
 +                    self.story_popup_timeout.reset()
 +                    return True
 +                return False

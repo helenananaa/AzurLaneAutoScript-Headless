@@ -262,6 +262,8 @@ DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
     "MAIN_GOTO_CAMPAIGN_WHITE": "main/battle",
     "MAIN_GOTO_FLEET": "main/formation",
     "MAIN_GOTO_FLEET_WHITE": "main/formation",
+    "MAIN_GOTO_RAID": "main/raid",
+    "MAIN_GOTO_RAID_WHITE": "main/raid",
     "CAMPAIGN_MENU_GOTO_EVENT": "campaign-menu/event",
     "SWITCH_20241219_COMBAT": "event/mode/battle",
     "SWITCH_20241219_STORY": "event/mode/story",
@@ -727,6 +729,29 @@ PAGE_VIRTUAL_RESOURCES = frozenset(
         "DATA_KEY_COLLECT",
         "BATTLE_PASS_CHECK",
         "SHOP_CHECK",
+    }
+)
+CURRENT_RAID_EARLIER_PAGE_CHECKS = frozenset(
+    {
+        "MAIN_GOTO_FLEET",
+        "CAMPAIGN_MENU_CHECK",
+        "CAMPAIGN_CHECK",
+        "FLEET_CHECK",
+        "MAIN_GOTO_CAMPAIGN_WHITE",
+        "EXERCISE_CHECK",
+        "DAILY_CHECK",
+        "EVENT_CHECK",
+        "SP_CHECK",
+        "HORROR_COALITION_CHECK",
+        "OS_CHECK",
+        "WAR_ARCHIVES_CHECK",
+        "REWARD_CHECK",
+        "MISSION_CHECK",
+        "GUILD_CHECK",
+        "COMMISSION_CHECK",
+        "TACTICAL_CHECK",
+        "BATTLE_PASS_CHECK",
+        "EVENT_LIST_CHECK",
     }
 )
 RESEARCH_VIRTUAL_RESOURCES = frozenset(
@@ -1331,6 +1356,8 @@ class AlasSemanticAdapter:
         self._daily_pending_stage_receipt: Optional[ActionReceipt] = None
         self._daily_stage_confirmed = False
         self._daily_transition_until = 0.0
+        self._current_raid_result_event: Optional[str] = None
+        self._event_story_transition_until = 0.0
         self._operation_siren_entry_transition_until = 0.0
         self._operation_siren_page_remount_until = 0.0
         self._operation_siren_entry_receipt: Optional[ActionReceipt] = None
@@ -5297,13 +5324,34 @@ class AlasSemanticAdapter:
         return replace(receipt, semantic_id="exercise/execute")
 
     def complete_daily_battle_result(self, timeout_seconds: float = 30.0) -> Tuple[ActionReceipt, ...]:
-        """Drain the typed Daily result stack without full-UI frame polling."""
+        """Drain a typed Daily-compatible result stack to its owning page."""
 
         self._package_gate()
         deadline = time.monotonic() + timeout_seconds
         receipts: List[ActionReceipt] = []
         while time.monotonic() < deadline:
-            if self.oracle.daily_page_visible():
+            if self._current_raid_result_event is not None:
+                try:
+                    raid_page_visible = self.oracle.raid_page_visible(
+                        event=self._current_raid_result_event
+                    )
+                except SemanticGateClosed as exc:
+                    if str(exc) not in (
+                        "current Raid stage identity is absent or ambiguous",
+                        "current Raid stage sprites are absent or ambiguous",
+                        "current Raid stage sprite does not cover its button",
+                    ):
+                        raise
+                    # The Raid page remounts behind the final result transition
+                    # before its five cards finish their layout.  No input is
+                    # authorized by an incomplete page; keep observing the
+                    # already-dispatched one-way return instead.
+                    time.sleep(0.25)
+                    continue
+                if raid_page_visible:
+                    self._current_raid_result_event = None
+                    return tuple(receipts)
+            elif self.oracle.daily_page_visible():
                 return tuple(receipts)
             if self.oracle.daily_battle_result_visible():
                 try:
@@ -5343,6 +5391,10 @@ class AlasSemanticAdapter:
                 time.sleep(1.0)
                 continue
             time.sleep(0.25)
+        if self._current_raid_result_event is not None:
+            raise SemanticGateClosed(
+                "current Raid battle result did not return to Raid page"
+            )
         raise SemanticGateClosed("daily battle result did not return to Daily page")
 
     def daily_execution_receipts(self) -> Tuple[ActionReceipt, ...]:
@@ -5380,6 +5432,31 @@ class AlasSemanticAdapter:
     def click_daily_precombat_back(self) -> ActionReceipt:
         self._package_gate()
         return self.oracle.click_daily_precombat_back()
+
+    def _record_event_story_transition(self, receipt: ActionReceipt) -> ActionReceipt:
+        # A modern story choice/skip can unmount NewStoryUI before its owning
+        # page is mounted again.  This deadline owns only passive appear()
+        # scans; every later input still needs its normal semantic proof.
+        self._event_story_transition_until = time.monotonic() + 12.0
+        return receipt
+
+    def click_event_story_skip_confirm(self) -> ActionReceipt:
+        self._package_gate()
+        return self._record_event_story_transition(
+            self.oracle.click_event_story_skip_confirm()
+        )
+
+    def click_event_story_option(self, option_index: int) -> ActionReceipt:
+        self._package_gate()
+        return self._record_event_story_transition(
+            self.oracle.click_event_story_option(option_index)
+        )
+
+    def click_event_story_skip(self) -> ActionReceipt:
+        self._package_gate()
+        return self._record_event_story_transition(
+            self.oracle.click_event_story_skip()
+        )
 
     def _operation_siren_allows_passive_probe(self) -> bool:
         now = time.monotonic()
@@ -5642,6 +5719,14 @@ class AlasSemanticAdapter:
 
     def _goto_main_target(self) -> Optional[str]:
         targets = []
+        raid_page_visible = getattr(self.oracle, "raid_page_visible", None)
+        try:
+            if callable(raid_page_visible) and raid_page_visible(
+                event="raid_20260827"
+            ):
+                targets.append("raid/page/home")
+        except SemanticGateClosed:
+            pass
         guild_page_visible = getattr(self.oracle, "guild_page_visible", None)
         try:
             if callable(guild_page_visible) and guild_page_visible():
@@ -5783,6 +5868,46 @@ class AlasSemanticAdapter:
 
     def _appear_once(self, button: Any) -> bool:
         name = self._button_name(button)
+        observation_oracle = (
+            self._require_frame_observation_oracle()
+            if self._login_flow.active
+            else self.oracle
+        )
+        if name == "RAID_CHECK":
+            return observation_oracle.raid_page_visible(event="raid_20260827")
+        raid_page_visible = getattr(observation_oracle, "raid_page_visible", None)
+        if (
+            name in CURRENT_RAID_EARLIER_PAGE_CHECKS
+            and callable(raid_page_visible)
+            and raid_page_visible(event="raid_20260827")
+        ):
+            # Page.iter_pages() checks these exact page identities before it
+            # reaches RAID_CHECK. The reviewed full-screen Raid root proves
+            # them absent; click() still rejects every unknown input.
+            return False
+        event_story_dialogue_visible = getattr(
+            observation_oracle, "event_story_dialogue_visible", None
+        )
+        event_story_skip_prompt_visible = getattr(
+            observation_oracle, "event_story_skip_prompt_visible", None
+        )
+        if (
+            callable(event_story_dialogue_visible)
+            and event_story_dialogue_visible()
+        ) or (
+            callable(event_story_skip_prompt_visible)
+            and event_story_skip_prompt_visible()
+        ):
+            # Page enumeration must not expose any underlay while the exact
+            # modern story overlay is mounted. The original ALAS
+            # ui_additional()->handle_story_skip() path reads and acts on the
+            # typed story surface directly, without an appear() probe.
+            return False
+        if time.monotonic() <= self._event_story_transition_until:
+            # The exact story input above owns one short Unity remount window.
+            # Presence-only page enumeration may wait through it, while click()
+            # remains mapped and fail-closed independently.
+            return False
         if self._campaign_context is not None and name in (
             "RETIRE_APPEAR_1",
             "RETIRE_APPEAR_2",
@@ -9806,6 +9931,134 @@ class AlasSemanticAdapter:
         self._package_gate()
         return self.oracle.raid_remain(event=event, mode=mode)
 
+    def raid_page_visible(self, event: str) -> bool:
+        self._package_gate()
+        return self.oracle.raid_page_visible(event=event)
+
+    def click_raid_stage(self, event: str, mode: str) -> ActionReceipt:
+        self._package_gate()
+        deadline = time.monotonic() + 10.0
+        while True:
+            try:
+                return self.oracle.click_raid_stage(event=event, mode=mode)
+            except SemanticGateClosed as exc:
+                if str(exc) != "Raid stage input is blocked":
+                    raise
+                # The current Raid cards fan into their final positions after
+                # the page identity is already complete.  A geometric overlap
+                # rejects the input before dispatch; keep observing until the
+                # exact target is unobscured, without clicking again.
+                if time.monotonic() >= deadline:
+                    raise SemanticGateClosed(
+                        "current Raid stage did not become actionable"
+                    ) from exc
+                time.sleep(0.25)
+
+    def enter_raid_page(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        if event != "raid_20260827" or not self.oracle.main_page_visible():
+            raise SemanticGateClosed("current Raid entry requires the reviewed main page")
+        receipt = self.oracle.click("main/raid")
+        deadline = time.monotonic() + 10.0
+        last_transition_error: Optional[SemanticGateClosed] = None
+        while True:
+            try:
+                if self.oracle.raid_page_visible(event=event):
+                    break
+            except SemanticGateClosed as exc:
+                # The stage cards animate independently while the exact Raid
+                # root is opening.  A temporary geometry mismatch is not an
+                # input authorization; keep observing without another click.
+                last_transition_error = exc
+            if time.monotonic() >= deadline:
+                if last_transition_error is not None:
+                    raise SemanticGateClosed(
+                        "current Raid page did not stabilize: {0}".format(
+                            last_transition_error
+                        )
+                    ) from last_transition_error
+                raise SemanticGateClosed("current Raid page did not open")
+            time.sleep(0.25)
+        return receipt
+
+    def click_raid_home(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        receipt = self.oracle.click_raid_home(event=event)
+        deadline = time.monotonic() + 10.0
+        while not self.oracle.main_page_visible():
+            if time.monotonic() >= deadline:
+                raise SemanticGateClosed("main page did not open from current Raid")
+            time.sleep(0.25)
+        return receipt
+
+    def raid_fleet_selection_visible(self, event: str) -> bool:
+        self._package_gate()
+        return self.oracle.raid_fleet_selection_visible(event=event)
+
+    def raid_fleet_ready(self, event: str) -> bool:
+        self._package_gate()
+        return self.oracle.raid_fleet_ready(event=event)
+
+    def click_raid_fleet_back(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_raid_fleet_back(event=event)
+
+    def click_raid_fleet_start(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_raid_fleet_start(event=event)
+
+    def click_raid_fleet_recommend(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        return self._dispatch_mutation(
+            "campaign.fleet_mutation",
+            lambda: self.oracle.click_raid_fleet_recommend(event=event),
+        )
+
+    def raid_precombat_visible(self, event: str) -> bool:
+        self._package_gate()
+        return self.oracle.raid_precombat_visible(event=event)
+
+    def raid_precombat_notice_visible(self, event: str) -> bool:
+        self._package_gate()
+        return self.oracle.raid_precombat_notice_visible(event=event)
+
+    def click_raid_precombat_notice(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        receipt = self.oracle.click_raid_precombat_notice(event=event)
+        deadline = time.monotonic() + 10.0
+        last_transition_error: Optional[SemanticGateClosed] = None
+        while True:
+            try:
+                if not self.oracle.raid_precombat_notice_visible(event=event):
+                    return receipt
+            except SemanticGateClosed as exc:
+                # The information box tears down its text and image children
+                # before the root button.  No further input is authorized
+                # during that one-way transition.
+                last_transition_error = exc
+            if time.monotonic() >= deadline:
+                if last_transition_error is not None:
+                    raise SemanticGateClosed(
+                        "Raid precombat notice did not close: {0}".format(
+                            last_transition_error
+                        )
+                    ) from last_transition_error
+                raise SemanticGateClosed("Raid precombat notice did not close")
+            time.sleep(0.25)
+
+    def click_raid_precombat_start(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        receipt = self._dispatch_mutation(
+            "campaign.sortie",
+            lambda: self.oracle.click_raid_precombat_start(event=event),
+        )
+        self._current_raid_result_event = event
+        return receipt
+
+    def click_raid_precombat_back(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_raid_precombat_back(event=event)
+
     def campaign_map_formation(self) -> str:
         self._package_gate()
         self._require_campaign_context()
@@ -13278,6 +13531,10 @@ class AlasSemanticAdapter:
                 )
             if target == "meta/home":
                 return self._record_mission_transition(self.oracle.click_meta_home())
+            if target == "raid/page/home":
+                return self._record_mission_transition(
+                    self.click_raid_home(event="raid_20260827")
+                )
             if target == "battle-pass/home":
                 context = self._battle_pass_context
                 if (
@@ -17716,6 +17973,57 @@ class AlasSemanticSession:
 
     def raid_remain(self, event: str, mode: str) -> int:
         return self.open().raid_remain(event=event, mode=mode)
+
+    def raid_page_visible(self, event: str) -> bool:
+        return self.open().raid_page_visible(event=event)
+
+    def click_event_story_skip_confirm(self) -> ActionReceipt:
+        return self.open().click_event_story_skip_confirm()
+
+    def click_event_story_option(self, option_index: int) -> ActionReceipt:
+        return self.open().click_event_story_option(option_index)
+
+    def click_event_story_skip(self) -> ActionReceipt:
+        return self.open().click_event_story_skip()
+
+    def click_raid_stage(self, event: str, mode: str) -> ActionReceipt:
+        return self.open().click_raid_stage(event=event, mode=mode)
+
+    def enter_raid_page(self, event: str) -> ActionReceipt:
+        return self.open().enter_raid_page(event=event)
+
+    def click_raid_home(self, event: str) -> ActionReceipt:
+        return self.open().click_raid_home(event=event)
+
+    def raid_fleet_selection_visible(self, event: str) -> bool:
+        return self.open().raid_fleet_selection_visible(event=event)
+
+    def raid_fleet_ready(self, event: str) -> bool:
+        return self.open().raid_fleet_ready(event=event)
+
+    def click_raid_fleet_back(self, event: str) -> ActionReceipt:
+        return self.open().click_raid_fleet_back(event=event)
+
+    def click_raid_fleet_start(self, event: str) -> ActionReceipt:
+        return self.open().click_raid_fleet_start(event=event)
+
+    def click_raid_fleet_recommend(self, event: str) -> ActionReceipt:
+        return self.open().click_raid_fleet_recommend(event=event)
+
+    def raid_precombat_visible(self, event: str) -> bool:
+        return self.open().raid_precombat_visible(event=event)
+
+    def raid_precombat_notice_visible(self, event: str) -> bool:
+        return self.open().raid_precombat_notice_visible(event=event)
+
+    def click_raid_precombat_notice(self, event: str) -> ActionReceipt:
+        return self.open().click_raid_precombat_notice(event=event)
+
+    def click_raid_precombat_start(self, event: str) -> ActionReceipt:
+        return self.open().click_raid_precombat_start(event=event)
+
+    def click_raid_precombat_back(self, event: str) -> ActionReceipt:
+        return self.open().click_raid_precombat_back(event=event)
 
     @staticmethod
     def _login_probe_is_transient(adapter: AlasSemanticAdapter, exc: Exception) -> bool:

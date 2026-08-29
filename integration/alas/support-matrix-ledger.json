@@ -409,6 +409,12 @@
         "python/alas_headless/alas_event_shared_entry_replay.py",
         "integration/alas/event-shared-entry-equivalence-20260822.json",
         "integration/alas/series/0420-event-shared-entry-runtime.patch",
+        "tests/test_alas_raid_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "scripts/python/run_alas_raid_live_validation.py",
+        "integration/alas/series/0480-current-raid-runtime.patch",
+        "integration/alas/current-raid-easy-live-validation-receipt-20260827-r10.json",
         "integration/alas/series/0050-combat-flow-ports.patch",
         "docs/status.md"
       ],
@@ -433,9 +439,9 @@
         "RaidDaily"
       ],
       "path": "Campaign.Event",
-      "status_label": "🧪 三主线路由 + 七活动入口",
+      "status_label": "◐ 三主线路由 + 当前 Raid 实机",
       "support": "supported",
-      "values": "options: \"campaign_main\", \"coalition_20260723\", \"event_20260625_cn\", \"event_20260813_cn\", \"raid_20260212\", \"war_archives_20180607_cn\", \"war_archives_20180726_cn\", \"war_archives_20181020_en\", \"war_archives_20181026_en\", \"war_archives_20181227_cn\", \"war_archives_20190221_en\", \"war_archives_20190314_en\", \"war_archives_20190321_en\", \"war_archives_20190620_en\", \"war_archives_20190911_cn\", \"war_archives_20191010_en\", \"war_archives_20191031_en\", \"war_archives_20200312_cn\", \"war_archives_20200507_cn\", \"war_archives_20200603_cn\", \"war_archives_20200806_cn\", \"war_archives_20200820_cn\", \"war_archives_20200903_cn\", \"war_archives_20200917_cn\", \"war_archives_20201012_cn\", \"war_archives_20201029_cn\", \"war_archives_20201229_cn\", \"war_archives_20210225_cn\", \"war_archives_20210325_cn\", \"war_archives_20210422_cn\", \"war_archives_20210527_cn\", \"war_archives_20210624_cn\", \"war_archives_20210819_cn\", \"war_archives_20210916_cn\", \"war_archives_20211014_cn\", \"war_archives_20211028_cn\", \"war_archives_20211111_cn\", \"war_archives_20211229_cn\", \"war_archives_20220210_cn\", \"war_archives_20220224_cn\", \"war_archives_20220324_cn\", \"war_archives_20220414_cn\", \"war_archives_20220428_cn\", \"war_archives_20220526_cn\", \"war_archives_20220728_cn\", \"war_archives_20220818_cn\", \"war_archives_20220915_cn\", \"war_archives_20221222_cn\", \"war_archives_20230223_cn\", \"war_archives_20230525_cn\", \"war_archives_20230803_cn\", \"war_archives_20231026_cn\", \"war_archives_20240725_cn\"; default: \"campaign_main\""
+      "values": "options: \"campaign_main\", \"coalition_20260723\", \"event_20260625_cn\", \"event_20260813_cn\", \"raid_20260212\", \"raid_20260827\", \"war_archives_20180607_cn\", \"war_archives_20180726_cn\", \"war_archives_20181020_en\", \"war_archives_20181026_en\", \"war_archives_20181227_cn\", \"war_archives_20190221_en\", \"war_archives_20190314_en\", \"war_archives_20190321_en\", \"war_archives_20190620_en\", \"war_archives_20190911_cn\", \"war_archives_20191010_en\", \"war_archives_20191031_en\", \"war_archives_20200312_cn\", \"war_archives_20200507_cn\", \"war_archives_20200603_cn\", \"war_archives_20200806_cn\", \"war_archives_20200820_cn\", \"war_archives_20200903_cn\", \"war_archives_20200917_cn\", \"war_archives_20201012_cn\", \"war_archives_20201029_cn\", \"war_archives_20201229_cn\", \"war_archives_20210225_cn\", \"war_archives_20210325_cn\", \"war_archives_20210422_cn\", \"war_archives_20210527_cn\", \"war_archives_20210624_cn\", \"war_archives_20210819_cn\", \"war_archives_20210916_cn\", \"war_archives_20211014_cn\", \"war_archives_20211028_cn\", \"war_archives_20211111_cn\", \"war_archives_20211229_cn\", \"war_archives_20220210_cn\", \"war_archives_20220224_cn\", \"war_archives_20220324_cn\", \"war_archives_20220414_cn\", \"war_archives_20220428_cn\", \"war_archives_20220526_cn\", \"war_archives_20220728_cn\", \"war_archives_20220818_cn\", \"war_archives_20220915_cn\", \"war_archives_20221222_cn\", \"war_archives_20230223_cn\", \"war_archives_20230525_cn\", \"war_archives_20230803_cn\", \"war_archives_20231026_cn\", \"war_archives_20240725_cn\"; default: \"campaign_main\""
     },
     {
       "dimensions": {
@@ -6526,73 +6532,96 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_raid_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_raid_config_replay.py",
         "integration/alas/series/0170-raid-config-contract.patch",
+        "integration/alas/series/0480-current-raid-runtime.patch",
+        "scripts/python/run_alas_raid_live_validation.py",
+        "integration/alas/current-raid-easy-live-validation-receipt-20260827-r10.json",
+        "integration/alas/current-raid-normal-live-validation-receipt-20260829-r8.json",
+        "integration/alas/current-raid-hard-live-validation-receipt-20260829-r2.json",
+        "integration/alas/current-raid-ex-live-validation-receipt-20260829-r6.json",
+        "integration/alas/current-raid-easy-live-validation-receipt-20260829-r11.json",
         "docs/status.md"
       ],
-      "group_code": "O",
+      "group_code": "L",
       "metadata": "type=select; display=default",
       "panels": [
         "Raid"
       ],
       "path": "Raid.Mode",
-      "status_label": "🧪 离线回放",
+      "status_label": "◐ 四模式单局实机闭环",
       "support": "supported",
       "values": "options: \"easy\", \"ex\", \"hard\", \"normal\"; default: \"hard\""
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_raid_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_raid_config_replay.py",
         "integration/alas/series/0170-raid-config-contract.patch",
+        "integration/alas/series/0480-current-raid-runtime.patch",
+        "scripts/python/run_alas_raid_live_validation.py",
+        "integration/alas/current-raid-easy-live-validation-receipt-20260827-r10.json",
+        "integration/alas/current-raid-normal-live-validation-receipt-20260829-r8.json",
+        "integration/alas/current-raid-hard-live-validation-receipt-20260829-r2.json",
+        "integration/alas/current-raid-ex-live-validation-receipt-20260829-r6.json",
+        "integration/alas/current-raid-easy-live-validation-receipt-20260829-r11.json",
         "docs/status.md"
       ],
-      "group_code": "O",
+      "group_code": "L",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Raid"
       ],
       "path": "Raid.UseTicket",
-      "status_label": "🧪 离线回放",
+      "status_label": "◐ false 实机闭环",
       "support": "supported",
       "values": "input/default: false"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_raid_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_raid_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "integration/alas/series/0480-current-raid-runtime.patch",
+        "scripts/python/run_alas_raid_live_validation.py",
+        "integration/alas/current-raid-daily-empty-ex-live-validation-receipt-20260829-r1.json",
         "docs/status.md"
       ],
-      "group_code": "O",
+      "group_code": "L",
       "metadata": "type=textarea; display=default",
       "panels": [
         "RaidDaily"
       ],
       "path": "RaidDaily.StageFilter",
-      "status_label": "🧪 离线回放",
+      "status_label": "◐ ex=0 原任务实机调度",
       "support": "supported",
       "values": "input/default: \"hard > normal > easy\""
     },
@@ -8757,8 +8786,8 @@
         "Emotion"
       ],
       "name": "Raid",
-      "note": "难度和票券的声明值及票券确认最终按钮已离线回放；活动入口、次数和结算未适配",
-      "status": "O"
+      "note": "当前 CN Raid 已由原 Raid 状态机完成 easy/normal/hard/ex 四模式独立单局实机闭环：typed 活动入口、五槽身份、剩余次数、PT、编队准备、普通与 EX 战前页、真实出击、战斗结算及返回均已接入；权威通过收据分别记录 easy 14→13/PT 30→60、normal 15→14/PT 60→130、hard 15→14/PT 130→250、ex 1→0/PT 250→562，均无 raw fallback。9.7.343 热更后 easy 另一次实际战斗产生 15→14/PT 562→592，并暴露后修复了结果返回动画的被动观察窗口，但该次收据本身诚实保留为失败。Raid.UseTicket=true、首次提示完整闭环、长循环/恢复和第五个进阶挑战仍未实机资格化，因此为 L 而非 F",
+      "status": "L"
     },
     {
       "groups": [
@@ -8769,8 +8798,8 @@
         "Emotion"
       ],
       "name": "RaidDaily",
-      "note": "难度过滤与 EX 奖励路由已离线回放；固定 Raid 的 easy/normal/hard/ex 次数已接入 typed 端口并通过补丁树，但当前客户端未开放 Raid，入口、战斗、领奖仍待实机",
-      "status": "O"
+      "note": "难度过滤与 EX 奖励路由已离线回放，共享的当前 Raid typed 运行时已在 Raid 任务下完成 easy/normal/hard/ex 四模式独立单局实机闭环；9.7.343 上原 RaidDaily 以 StageFilter=ex、EX=0、领奖关闭及全战斗预算为 0 完成实机页面往返、零票券停止和服务器日更调度，EX 0→0、PT 592→592 且无关卡/舰队/出击输入。非零 easy/normal/hard 循环、EX 领奖、组合过滤、跨日唤醒及恢复仍未实机，因此为 L",
+      "status": "L"
     },
     {
       "groups": [
@@ -11810,14 +11839,14 @@
     "adapter_evidence_commit": "73433ccbac00be4c0fb367803d4affa7cb1ea599",
     "config_sha256": {
       "config/template.json": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
-      "module/config/argument/args.json": "94a4e553e857e7e3bada215e08b8963f46d287ac530f32a02b7daf6b7533ad90",
+      "module/config/argument/args.json": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
       "module/config/argument/task.yaml": "19e6464aaa1e92913ba9f31de590096a09b101638969c41e14c70dd1a4eb6c5a"
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "7dc94cf70c3ee2ab51fffb0c83c1355b852cdf8e57cf25490014d449c0731667",
-      "manifest_sha256": "405de433732d74593977da31550a60cf0529697bc36a55187b050053f57a7534",
-      "member_count": 92
+      "combined_sha256": "eeebd9aeb1c3b4591d6e9eab0030bd1e7206843cad9f2e3908187c62566e196d",
+      "manifest_sha256": "d67d9b4c9d24d27d9e6bc08166d1247220460ed0c87ecb71e49f9ebd488097c8",
+      "member_count": 93
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

@@ -1121,7 +1121,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   availability, navigation, battle execution, rewards, postconditions,
   observation, and all Android input remain unadapted.
 
-### Raid/RaidDaily: exact configuration gates with recorder-only final inputs
+### Raid/RaidDaily: current Raid four-mode live path with localized qualification gaps
 
 - `Raid.Mode` admits only the four declared difficulties and `Raid.UseTicket`
   only real booleans before `RaidRun` work begins. The ticket-confirmation
@@ -1141,13 +1141,46 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `RaidDaily.run()` loop owns filtering, retries, execution, and scheduling;
   pixel mode is unchanged, while semantic mode does not enter the still
   unsupported optional Raid reward-dot branch.
-- The 90-member integration series applies and compiles cleanly on the pinned
-  ALAS tree. A controlled typed preflight on game `9.7.10` found the healthy
-  ordinary `LevelMainScene(Clone)` campaign surface, not a live Raid root, so
-  `integration/alas/raid-daily-live-preflight-blocked-20260825-r1.json` records
-  no input and no support promotion. Raid entry, preparation, combat return,
-  and Raid-specific reward collection remain the re-entry work when a reviewed
-  compatible Raid surface is live.
+- The current CN `raid_20260827` surface is independently typed from the pinned
+  baseline: `ActivityBossAmatsukazeUI(Clone)` must expose exactly the reviewed
+  easy/normal/hard/EX slots plus the distinct advanced-challenge slot. Remaining
+  attempts and PT are exact text reads; swapping EX with the advanced challenge,
+  duplicate counters, stale frames, blockers, or incomplete fleet/precombat
+  state fail closed at the affected Raid action.
+- The original ALAS `RaidRun` state machine now owns the current semantic flow:
+  main-to-Raid entry, difficulty selection, fleet recommendation/readiness,
+  precombat entry, the optional first-time informational notice, one bounded
+  re-entry after that notice, true sortie, battle result cleanup, and return to
+  the Raid page. Only the true precombat start consumes the sortie grant.
+- Four controlled one-battle runs completed through the original ALAS task with
+  no raw-input fallback. The authoritative receipts record `easy` `14→13` and
+  PT `30→60`, `normal` `15→14` and PT `60→130`, `hard` `15→14` and PT
+  `130→250`, and `ex` ticket `1→0` and PT `250→562`:
+  `integration/alas/current-raid-easy-live-validation-receipt-20260827-r10.json`,
+  `integration/alas/current-raid-normal-live-validation-receipt-20260829-r8.json`,
+  `integration/alas/current-raid-hard-live-validation-receipt-20260829-r2.json`,
+  and `integration/alas/current-raid-ex-live-validation-receipt-20260829-r6.json`.
+- The 2026-08-29 resource update kept APK `9.7.10` and advanced the live hot
+  resource version to `9.7.343`. A further `easy` run consumed exactly one
+  attempt and moved PT `562→592`; its retained r11 receipt is deliberately
+  failed because the returning Raid cards were still animating when the result
+  cleaner first observed them. A fresh read proved the stable postcondition
+  (`easy=14`, PT `592`), and focused coverage now waits through that typed-only
+  layout transition without dispatching another input.
+- The original `RaidDaily` task also completed a controlled zero-ticket branch
+  on hot version `9.7.343`: `StageFilter=ex`, all five Reward collection flags
+  disabled, and fleet-mutation/sortie/combat budgets all zero. EX remained
+  `0→0`, PT remained `592`, no stage/fleet/sortie receipt was emitted, the task
+  returned to the Raid page, and ALAS scheduled the next server-update run.
+  `integration/alas/current-raid-daily-empty-ex-live-validation-receipt-20260829-r1.json`
+  is the authoritative limited-live receipt.
+- This promotes `Raid.Mode` to four-mode single-run live evidence, while the
+  overall `Raid` task remains a limited live main path. `Raid.UseTicket=true`,
+  a fresh-account notice completion, and long-loop/restart recovery remain
+  unqualified. `RaidDaily` now has only its zero-EX scheduling branch live;
+  nonzero difficulty loops, reward-enabled EX, combined filters, cross-day
+  wakeup, and recovery remain open. The separate advanced challenge remains
+  intentionally unsupported instead of being guessed as EX.
 
 ### Hospital: recommendation switch replayed before any UI work
 

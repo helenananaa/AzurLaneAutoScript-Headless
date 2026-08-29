@@ -33,7 +33,7 @@
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "2f27b6688412bae00e6569497e015845a79313e3f82a9bca93d10ec814774558"
+      "sha256": "1a77802a8380d45326370bfd000476760364bd5ad49c5c9169bffc516d26efc9"
     },
     {
       "order": 8,
@@ -459,6 +459,11 @@
       "order": 92,
       "path": "integration/alas/series/0470-war-archives-runtime.patch",
       "sha256": "06d30edb8d7f6327a296461dd77fa7d4a34c2138b4ed7f91ac598dc5d3b2a55a"
+    },
+    {
+      "order": 93,
+      "path": "integration/alas/series/0480-current-raid-runtime.patch",
+      "sha256": "188161cce6ac83404006cfd3ef3769931217c7f6df542dd0a475d189c7bd89ad"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

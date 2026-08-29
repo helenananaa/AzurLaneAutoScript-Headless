@@ -1,0 +1,242 @@
+diff --git a/module/config/argument/args.json b/module/config/argument/args.json
+--- a/module/config/argument/args.json
++++ b/module/config/argument/args.json
+@@ -3121,22 +3121,24 @@
+         "type": "select",
+         "value": "campaign_main",
+         "option": [
+-          "raid_20260212"
++          "raid_20260212",
++          "raid_20260827"
+         ],
+         "option_cn": [
+-          "raid_20260212"
++          "raid_20260827"
+         ],
+         "option_en": [
+           "raid_20260212"
+         ],
+         "option_jp": [
+           "raid_20260212"
+         ],
+         "option_tw": [
+           "raid_20260212"
+         ],
+         "option_bold": [
+-          "raid_20260212"
++          "raid_20260212",
++          "raid_20260827"
+         ]
+       },
+       "Mode": {
+@@ -6451,22 +6453,24 @@
+         "type": "select",
+         "value": "campaign_main",
+         "option": [
+-          "raid_20260212"
++          "raid_20260212",
++          "raid_20260827"
+         ],
+         "option_cn": [
+-          "raid_20260212"
++          "raid_20260827"
+         ],
+         "option_en": [
+           "raid_20260212"
+         ],
+         "option_jp": [
+           "raid_20260212"
+         ],
+         "option_tw": [
+           "raid_20260212"
+         ],
+         "option_bold": [
+-          "raid_20260212"
++          "raid_20260212",
++          "raid_20260827"
+         ]
+       },
+       "Mode": {
+diff --git a/module/raid/raid.py b/module/raid/raid.py
+--- a/module/raid/raid.py
++++ b/module/raid/raid.py
+@@ -309,7 +309,18 @@ class Raid(MapOperation, RaidCombat, CampaignEvent):
+             in: page_raid
+             out: BATTLE_PREPARATION
+         """
+-        entrance = raid_entrance(raid=raid, mode=mode)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        semantic_current_raid = bool(
++            semantic_adapter is not None and raid == 'raid_20260827'
++        )
++        entrance = (
++            None if semantic_current_raid
++            else raid_entrance(raid=raid, mode=mode)
++        )
++        transition_timeout = Timer(30, count=60).start()
++        semantic_phase = 'raid-page'
++        semantic_notice_acknowledged = False
++        semantic_notice_reentry_used = False
+         while 1:
+             if skip_first_screenshot:
+                 skip_first_screenshot = False
+@@ -317,6 +328,76 @@ class Raid(MapOperation, RaidCombat, CampaignEvent):
+             else:
+                 self.device.screenshot()
+ 
++            if semantic_current_raid:
++                if semantic_phase == 'battle-loading':
++                    if semantic_adapter.combat_is_loading():
++                        break
++                elif semantic_phase == 'raid-page':
++                    if semantic_adapter.raid_page_visible(event=raid):
++                        # Keep the original ALAS stop decision immediately
++                        # before selecting a difficulty.
++                        if self.triggered_stop_condition(pt_check=True):
++                            self.config.task_stop()
++                        semantic_adapter.click_raid_stage(
++                            event=raid, mode=mode
++                        )
++                        semantic_phase = 'fleet-selection'
++                        transition_timeout.reset()
++                        continue
++                elif semantic_phase in ('fleet-selection', 'fleet-recommend'):
++                    if semantic_adapter.raid_fleet_selection_visible(event=raid):
++                        if not semantic_adapter.raid_fleet_ready(event=raid):
++                            if semantic_phase == 'fleet-selection':
++                                semantic_adapter.click_raid_fleet_recommend(
++                                    event=raid
++                                )
++                                semantic_phase = 'fleet-recommend'
++                                transition_timeout.reset()
++                                continue
++                        else:
++                            semantic_adapter.click_raid_fleet_start(event=raid)
++                            semantic_phase = 'precombat'
++                            transition_timeout.reset()
++                            continue
++                elif semantic_phase in ('precombat', 'precombat-notice-dismissed'):
++                    notice_visible = semantic_adapter.raid_precombat_notice_visible(
++                        event=raid
++                    )
++                    if notice_visible:
++                        if semantic_phase == 'precombat':
++                            if semantic_notice_acknowledged:
++                                raise ScriptError('Current Raid notice reappeared')
++                            semantic_adapter.click_raid_precombat_notice(event=raid)
++                            semantic_notice_acknowledged = True
++                            semantic_phase = 'precombat-notice-dismissed'
++                            transition_timeout.reset()
++                            continue
++                    elif semantic_adapter.raid_precombat_visible(event=raid):
++                        semantic_adapter.click_raid_precombat_start(event=raid)
++                        semantic_phase = 'battle-loading'
++                        transition_timeout.reset()
++                        continue
++                    elif (
++                        semantic_phase == 'precombat-notice-dismissed'
++                        and semantic_adapter.raid_page_visible(event=raid)
++                    ):
++                        if semantic_notice_reentry_used:
++                            raise ScriptError('Current Raid notice re-entry repeated')
++                        semantic_notice_reentry_used = True
++                        semantic_phase = 'raid-page'
++                        transition_timeout.reset()
++                        continue
++
++                # Every semantic input above is single-dispatch.  A stalled
++                # transition is diagnosed without clicking the same control
++                # again; re-entry starts from the exact Raid page.
++                if transition_timeout.reached():
++                    raise ScriptError(
++                        'Current Raid semantic entry did not reach battle '
++                        'loading; return to the exact Raid page and retry'
++                    )
++                continue
++
+             if self.appear(entrance, offset=(10, 10), interval=5):
+                 # Items appear from right
+                 # Check PT when entrance appear
+diff --git a/module/raid/run.py b/module/raid/run.py
+--- a/module/raid/run.py
++++ b/module/raid/run.py
+@@ -6,7 +6,7 @@ from module.exception import ScriptEnd, ScriptError
+ from module.logger import logger
+ from module.raid.assets import RAID_REWARDS
+ from module.raid.raid import Raid, raid_ocr
+-from module.ui.page import page_campaign_menu, page_raid, page_rpg_stage
++from module.ui.page import page_campaign_menu, page_main, page_raid, page_rpg_stage
+ 
+ 
+ class RaidRun(Raid, CampaignEvent):
+@@ -27,6 +27,17 @@ class RaidRun(Raid, CampaignEvent):
+ 
+         return super().triggered_stop_condition(oil_check=oil_check, pt_check=pt_check, coin_check=coin_check)
+ 
++    def _ensure_raid_page(self, name):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and name == 'raid_20260827'
++        ):
++            if not semantic_adapter.raid_page_visible(event=name):
++                self.ui_ensure(page_main)
++                semantic_adapter.enter_raid_page(event=name)
++        self.ui_ensure(page_raid)
++
+     def get_remain(self, mode, skip_first_screenshot=True):
+         """
+         Args:
+@@ -85,6 +96,10 @@ class RaidRun(Raid, CampaignEvent):
+         name = name if name else self.config.Campaign_Event
+         if not name or not mode:
+             raise ScriptError(f'RaidRun arguments unfilled. name={name}, mode={mode}')
++        semantic_current_raid = bool(
++            getattr(self.device, 'semantic_adapter', None) is not None
++            and name == 'raid_20260827'
++        )
+ 
+         self.run_count = 0
+         self.run_limit = self.config.StopCondition_RunCount
+@@ -104,7 +119,10 @@ class RaidRun(Raid, CampaignEvent):
+ 
+             # UI switches
+             if not self._raid_has_oil_icon:
+-                self.ui_ensure(page_campaign_menu)
++                if semantic_current_raid:
++                    self.ui_ensure(page_main)
++                else:
++                    self.ui_ensure(page_campaign_menu)
+                 if self.triggered_stop_condition(oil_check=True, coin_check=True):
+                     break
+ 
+@@ -112,7 +130,7 @@ class RaidRun(Raid, CampaignEvent):
+             self.device.stuck_record_clear()
+             self.device.click_record_clear()
+             if not self.is_raid_rpg():
+-                self.ui_ensure(page_raid)
++                self._ensure_raid_page(name)
+             else:
+                 self.ui_ensure(page_rpg_stage)
+                 self.raid_rpg_swipe()
+diff --git a/module/raid/daily.py b/module/raid/daily.py
+--- a/module/raid/daily.py
++++ b/module/raid/daily.py
+@@ -50,7 +50,7 @@ class RaidDaily(RaidRun):
+         STAGE_FILTER.load(raid_daily_stage_filter)
+         stages = STAGE_FILTER.apply(stages)
+ 
+-        self.ui_ensure(page_raid)
++        self._ensure_raid_page(name)
+ 
+         for stage in stages:
+             mode = stage.name
+@@ -73,7 +73,7 @@ class RaidDaily(RaidRun):
+             Reward(self.config, self.device).reward_mission(
+                    daily=reward_config.collect_mission,
+                    weekly=False)
+-            self.ui_ensure(page_raid)
++            self._ensure_raid_page(name)
+ 
+             logger.hr('ex', level=1)
+             super().run(name=name, mode='ex', total=self.get_remain('ex'))

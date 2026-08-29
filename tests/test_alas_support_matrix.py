@@ -37,13 +37,13 @@ class AlasSupportMatrixTests(unittest.TestCase):
             result["field_classes"],
             {
                 "complete": 54,
-                "live_partial": 142,
-                "offline_only": 67,
+                "live_partial": 145,
+                "offline_only": 64,
                 "unsupported": 15,
                 "declared_only": 0,
             },
         )
-        self.assertEqual(result["patch_series"]["member_count"], 92)
+        self.assertEqual(result["patch_series"]["member_count"], 93)
         ledger = validate_ledger()
         document = MATRIX.read_text(encoding="utf-8")
         self.assertEqual(render_matrix(ledger, document), document)

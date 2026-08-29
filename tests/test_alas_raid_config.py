@@ -14,8 +14,9 @@ from scripts.python.verify_alas_raid_config import verify_clean_upstream
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
+PINNED_UPSTREAM = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly")
 RAID_REMAIN_PATCH = ROOT / "integration/alas/series/0450-raid-daily-remain-port.patch"
+CURRENT_RAID_PATCH = ROOT / "integration/alas/series/0480-current-raid-runtime.patch"
 
 
 class AlasRaidConfigTests(unittest.TestCase):
@@ -77,6 +78,54 @@ class AlasRaidConfigTests(unittest.TestCase):
             patch.index("if semantic_adapter is not None:"),
             patch.index("+                ocr = raid_ocr("),
         )
+
+    def test_current_raid_patch_is_scoped_and_single_dispatch(self):
+        patch = CURRENT_RAID_PATCH.read_text(encoding="utf-8")
+
+        self.assertIn("raid == 'raid_20260827'", patch)
+        self.assertIn("else raid_entrance(raid=raid, mode=mode)", patch)
+        self.assertEqual(patch.count("+                        semantic_adapter.click_raid_stage("), 1)
+        self.assertEqual(
+            patch.count("+                            semantic_adapter.click_raid_fleet_start("),
+            1,
+        )
+        self.assertIn("semantic_phase = 'battle-loading'", patch)
+        self.assertLess(
+            patch.index("+                if semantic_phase == 'battle-loading':"),
+            patch.index("+                    if semantic_adapter.combat_is_loading():"),
+        )
+        self.assertLess(
+            patch.index("+                    if semantic_adapter.combat_is_loading():"),
+            patch.index("+                elif semantic_phase == 'raid-page':"),
+        )
+        self.assertEqual(
+            patch.count("+                                semantic_adapter.click_raid_fleet_recommend("),
+            1,
+        )
+        self.assertEqual(
+            patch.count("+                            semantic_adapter.click_raid_precombat_notice(event=raid)"),
+            1,
+        )
+        self.assertEqual(
+            patch.count("+                        semantic_adapter.click_raid_precombat_start(event=raid)"),
+            1,
+        )
+        self.assertIn("return to the exact Raid page and retry", patch)
+        self.assertIn("def _ensure_raid_page(self, name):", patch)
+        self.assertIn("semantic_adapter.enter_raid_page(event=name)", patch)
+        self.assertIn("self.ui_ensure(page_main)", patch)
+        self.assertEqual(patch.count("+                self._ensure_raid_page(name)"), 1)
+        self.assertEqual(patch.count("+        self._ensure_raid_page(name)"), 1)
+        self.assertEqual(patch.count("+            self._ensure_raid_page(name)"), 1)
+        self.assertNotIn("advanced", patch)
+        self.assertNotIn("+                self.device.click(", patch)
+
+    def test_current_raid_config_is_cn_only_and_keeps_pinned_baseline(self):
+        patch = CURRENT_RAID_PATCH.read_text(encoding="utf-8")
+
+        self.assertEqual(patch.count('+          "raid_20260827"'), 6)
+        self.assertEqual(patch.count('           "raid_20260212"'), 6)
+        self.assertNotIn('-          "raid_20260827"', patch)
 
     def test_sources_compile(self):
         for relative in (

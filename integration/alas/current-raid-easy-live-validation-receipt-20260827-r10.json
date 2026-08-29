@@ -1,0 +1,89 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-08-27T13:41:01.520086Z",
+  "finished_at": "2026-08-27T13:41:53.384875Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "mode": "easy",
+  "task_result": true,
+  "before": {
+    "remaining": 14,
+    "points": 30,
+    "sortie_grant": 1
+  },
+  "after": {
+    "raid_page": true,
+    "remaining": 13,
+    "points": 60,
+    "sortie_grant": 0
+  },
+  "stage_receipts": [
+    {
+      "semantic_id": "raid/stage/easy",
+      "generation": 117997,
+      "point": {
+        "x": 1024.067,
+        "y": 561.933
+      },
+      "bounds": {
+        "left": 900.067,
+        "top": 527.933,
+        "right": 1148.067,
+        "bottom": 595.933
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/1",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "recommend_receipts": [],
+  "fleet_receipts": [
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 118009,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "notice_receipts": [],
+  "sortie_receipts": [
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 118031,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "8902bec5b810f09b1405cb243393e11fefb27a5bcbe426a3e0e15f0f8b71f3ce",
+      "capability_id": "campaign.sortie"
+    }
+  ],
+  "raw_input_fallback_used": false,
+  "source_sha256": {
+    "raid": "b06ecce80365705183ced09023fc88e38fa1c3d7c2f5109ce655f3b893f94bcc",
+    "run": "36fcba32425497e4d838bf354482498296b66abadedf27a12fb06c453071c180",
+    "adapter": "8b2229e029d90bcf6734069e13894c33f46fc5783b5b3d80b072b083423ed9b6",
+    "oracle": "684d96c6b407aff5b7e05e9bb7e6cbfa4152d0137734cc092ca76757fdf6ae1c",
+    "runner": "530178080d931a552018f832a59bbfbcada68e470b8af94fa7445704d41974dc"
+  }
+}
