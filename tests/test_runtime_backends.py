@@ -24,6 +24,7 @@ from alas_headless.runtime_backends import (
     KvmRuntimeConfig,
     RedroidBackend,
     RedroidRuntimeConfig,
+    RuntimeBackendNotReady,
     RuntimeIdentityMismatch,
     backend_from_config,
 )
@@ -342,6 +343,102 @@ class RuntimeBackendsTests(unittest.TestCase):
         labels = [spec.label for spec in executor.calls]
         self.assertNotIn("redroid-stop-script-probe", labels)
         self.assertNotIn("redroid-cleanup-host-stop", labels)
+
+    def test_redroid_headless_system_ui_disable_is_opt_in_and_idempotent(self):
+        base_results = {
+            "android-boot-completed": (0, "1", ""),
+            "android-package-manager": (
+                0,
+                "package:/system/framework/framework-res.apk",
+                "",
+            ),
+        }
+        default_executor = ScriptedExecutor(dict(base_results))
+        default_backend = RedroidBackend(
+            self.redroid_config(), default_executor, sleep=lambda _: None
+        )
+        state = default_backend.wait_android_ready({}, 1.0)
+        self.assertNotIn("system_ui_disabled", state)
+        self.assertNotIn(
+            "redroid-system-ui-disabled",
+            [spec.label for spec in default_executor.calls],
+        )
+
+        results = dict(base_results)
+        results["redroid-system-ui-disabled"] = (
+            0,
+            "package:com.android.systemui",
+            "",
+        )
+        executor = ScriptedExecutor(results)
+        backend = RedroidBackend(
+            self.redroid_config(disable_system_ui_for_headless=True),
+            executor,
+            sleep=lambda _: None,
+        )
+        self.assertTrue(backend.wait_android_ready({}, 1.0)["system_ui_disabled"])
+        labels = [spec.label for spec in executor.calls]
+        self.assertNotIn("redroid-system-ui-disable", labels)
+        plan = backend.qualification_plan(make_lock("redroid"))
+        self.assertIn(
+            "disable-systemui-for-headless-runtime-if-enabled",
+            plan["state_changes"],
+        )
+
+    def test_redroid_headless_system_ui_disable_is_verified(self):
+        results = {
+            "android-boot-completed": (0, "1", ""),
+            "android-package-manager": (
+                0,
+                "package:/system/framework/framework-res.apk",
+                "",
+            ),
+            "redroid-system-ui-disabled": [
+                (0, "", ""),
+                (0, "package:com.android.systemui", ""),
+            ],
+            "redroid-system-ui-disable": (
+                0,
+                "Package com.android.systemui new state: disabled-user",
+                "",
+            ),
+        }
+        executor = ScriptedExecutor(results)
+        backend = RedroidBackend(
+            self.redroid_config(disable_system_ui_for_headless=True),
+            executor,
+            sleep=lambda _: None,
+        )
+        self.assertTrue(backend.wait_android_ready({}, 1.0)["system_ui_disabled"])
+        mutation = next(
+            spec for spec in executor.calls if spec.label == "redroid-system-ui-disable"
+        )
+        self.assertTrue(mutation.mutating)
+        self.assertEqual(
+            mutation.argv[-6:],
+            (
+                "shell",
+                "pm",
+                "disable-user",
+                "--user",
+                "0",
+                "com.android.systemui",
+            ),
+        )
+
+        results["redroid-system-ui-disabled"] = [
+            (0, "", ""),
+            (0, "", ""),
+        ]
+        failing = RedroidBackend(
+            self.redroid_config(disable_system_ui_for_headless=True),
+            ScriptedExecutor(results),
+            sleep=lambda _: None,
+        )
+        with self.assertRaisesRegex(
+            RuntimeBackendNotReady, "redroid-system-ui-disable-unconfirmed"
+        ):
+            failing.wait_android_ready({}, 1.0)
 
     def test_redroid_backend_escalates_only_after_term_timeout(self):
         running = "TASK PID STATUS\nalas-redroid-build1-x86-storage1 123 RUNNING"

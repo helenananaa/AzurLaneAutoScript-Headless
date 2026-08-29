@@ -157,6 +157,7 @@ def backend_from_config(
             "allow_game_restart",
             "allow_android_restart",
             "stop_container_on_cleanup",
+            "disable_system_ui_for_headless",
             "poll_interval_seconds",
             "storage_layout",
         }
@@ -192,6 +193,9 @@ def backend_from_config(
             allow_game_restart=value.get("allow_game_restart", True),
             allow_android_restart=value.get("allow_android_restart", True),
             stop_container_on_cleanup=value.get("stop_container_on_cleanup", True),
+            disable_system_ui_for_headless=value.get(
+                "disable_system_ui_for_headless", False
+            ),
             poll_interval_seconds=value.get("poll_interval_seconds", 1.0),
             storage_layout=value.get("storage_layout", "srv-v1"),
         )

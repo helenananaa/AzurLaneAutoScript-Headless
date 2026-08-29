@@ -31,6 +31,7 @@ _MANIFEST_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 _POSIX_ABSOLUTE_PATH_PATTERN = re.compile(r"^/(?:[^\x00\r\n/]+/?)*$")
 _SERIAL_IP_PATTERN = re.compile(r"^([^:]+):([1-9][0-9]{0,4})$")
 _LOOP_RECORD_PATTERN = re.compile(r"^/dev/loop([0-9]+):")
+_SYSTEM_UI_PACKAGE = "com.android.systemui"
 
 
 def _normalized_architecture(value: str) -> Optional[str]:
@@ -95,6 +96,7 @@ class RedroidRuntimeConfig:
     allow_game_restart: bool = True
     allow_android_restart: bool = True
     stop_container_on_cleanup: bool = True
+    disable_system_ui_for_headless: bool = False
     poll_interval_seconds: float = 1.0
     storage_layout: str = "srv-v1"
 
@@ -135,6 +137,7 @@ class RedroidRuntimeConfig:
             self.allow_game_restart,
             self.allow_android_restart,
             self.stop_container_on_cleanup,
+            self.disable_system_ui_for_headless,
         ):
             if not isinstance(value, bool):
                 raise ValueError("Redroid feature switches must be booleans")
@@ -470,6 +473,59 @@ class RedroidBackend(AdbAttachedBackend):
         self._validate_container_and_storage()
         return super().fingerprint(instance)
 
+    def _system_ui_disabled(self) -> bool:
+        result = self._adb(
+            "redroid-system-ui-disabled",
+            (
+                "shell",
+                "pm",
+                "list",
+                "packages",
+                "--user",
+                "0",
+                "-d",
+                _SYSTEM_UI_PACKAGE,
+            ),
+        )
+        output = self._require_success(
+            result, "redroid-system-ui-state-unavailable"
+        )
+        records = [line.strip() for line in output.splitlines() if line.strip()]
+        return records == ["package:" + _SYSTEM_UI_PACKAGE]
+
+    def wait_android_ready(
+        self, instance: Mapping[str, Any], timeout_seconds: float
+    ) -> Mapping[str, Any]:
+        state = dict(super().wait_android_ready(instance, timeout_seconds))
+        if not self.config.disable_system_ui_for_headless:
+            return state
+        if not self._system_ui_disabled():
+            output = self._require_success(
+                self._adb(
+                    "redroid-system-ui-disable",
+                    (
+                        "shell",
+                        "pm",
+                        "disable-user",
+                        "--user",
+                        "0",
+                        _SYSTEM_UI_PACKAGE,
+                    ),
+                    mutating=True,
+                ),
+                "redroid-system-ui-disable-failed",
+            )
+            if "disabled-user" not in output:
+                raise RuntimeBackendNotReady(
+                    "redroid-system-ui-disable-unconfirmed"
+                )
+            if not self._system_ui_disabled():
+                raise RuntimeBackendNotReady(
+                    "redroid-system-ui-disable-unconfirmed"
+                )
+        state["system_ui_disabled"] = True
+        return state
+
     def restart_game(self, instance: Mapping[str, Any]) -> None:
         if not self.config.allow_game_restart:
             return super().restart_game(instance)
@@ -606,6 +662,11 @@ class RedroidBackend(AdbAttachedBackend):
                     "start-retained-containerd-instance-if-stopped",
                     "stop-only-backend-started-task",
                 ]
+                + (
+                    ["disable-systemui-for-headless-runtime-if-enabled"]
+                    if self.config.disable_system_ui_for_headless
+                    else []
+                )
                 + list(plan["state_changes"]),
                 "container_contract": {
                     "manifest_digest_verified": True,
@@ -615,6 +676,9 @@ class RedroidBackend(AdbAttachedBackend):
                     "start_script_starts_task": True,
                     "stop_script_cleans_host_runtime": (
                         self.config.stop_script is not None
+                    ),
+                    "system_ui_disabled_for_headless": (
+                        self.config.disable_system_ui_for_headless
                     ),
                 },
             }
