@@ -1226,6 +1226,18 @@ class RaidRemainState:
 
 
 @dataclass(frozen=True)
+class RaidMultipleSortieState:
+    generation: int
+    event: str
+    sortie_count: int
+    ticket_selected: int
+    ticket_owned: int
+    bonus_count: int
+    zero_ticket_disabled: bool
+    root: str
+
+
+@dataclass(frozen=True)
 class CampaignPreparationState:
     generation: int
     kind: str
@@ -16754,6 +16766,28 @@ class SemanticOracle:
         """Require the exact current World Cruise award page."""
 
         state = self.read_state()
+        award_tabs = tuple(
+            button
+            for button in state.buttons
+            if button.path.endswith("WorldCruiseUI(Clone)/frame/toggles/award")
+            and button.name == "award"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(award_tabs) > 1:
+            raise SemanticGateClosed("Battle Pass page identity is ambiguous")
+        if not award_tabs:
+            # This predicate is also used to classify unrelated ALAS page
+            # probes.  Avoid reading a second, independently advancing UI
+            # endpoint unless the exact World Cruise award control makes this
+            # a Battle Pass candidate.  High-churn combat/result surfaces may
+            # otherwise produce harmless generation skew here.
+            return False
+
         ui_state = self.read_ui_state()
         if not state.generation <= ui_state.generation <= state.generation + 2:
             raise SemanticGateClosed("Battle Pass page snapshots are not coherent")
@@ -16766,18 +16800,6 @@ class SemanticOracle:
             and image.active_and_enabled
             and not image.truncated
             and image.bounds is not None
-        )
-        award_tabs = tuple(
-            button
-            for button in state.buttons
-            if button.path.endswith("WorldCruiseUI(Clone)/frame/toggles/award")
-            and button.name == "award"
-            and button.active_in_hierarchy
-            and button.active_and_enabled
-            and button.interactable
-            and button.point is not None
-            and button.bounds is not None
-            and button.bounds.contains(button.point)
         )
         selected = tuple(
             image
@@ -16801,7 +16823,6 @@ class SemanticOracle:
         )
         if (
             len(roots) > 1
-            or len(award_tabs) > 1
             or len(selected) > 1
             or len(titles) > 1
         ):
@@ -21833,6 +21854,98 @@ class SemanticOracle:
             and item.bounds is not None
             and re.fullmatch(pattern, item.text.strip()) is not None
         )
+        if mode != "ex" and not counters:
+            def hidden_zero_signature(candidate: UiState) -> Tuple[Optional[str], ...]:
+                ticket_path = root + "/adapt/top/ticket"
+                health_images = tuple(
+                    image
+                    for image in candidate.images
+                    if image.path == ticket_path
+                    and image.active_in_hierarchy
+                    and image.active_and_enabled
+                    and not image.truncated
+                    and image.bounds is not None
+                )
+                health_texts = {
+                    ticket_path + "/Text": r"[0-9]{1,3}",
+                    ticket_path + "/Desc": r"特别挑战券",
+                    root + "/adapt/right/ptaward/Text": r"[0-9]+",
+                }
+                for path, health_pattern in health_texts.items():
+                    matches = tuple(
+                        item
+                        for item in candidate.texts
+                        if item.path == path
+                        and item.active_in_hierarchy
+                        and item.active_and_enabled
+                        and not item.truncated
+                        and item.bounds is not None
+                        and re.fullmatch(health_pattern, item.text.strip()) is not None
+                    )
+                    if len(matches) != 1:
+                        raise SemanticGateClosed(
+                            "current Raid hidden-zero text health is not proven"
+                        )
+                if len(health_images) != 1:
+                    raise SemanticGateClosed(
+                        "current Raid hidden-zero image health is not proven"
+                    )
+
+                values: List[Optional[str]] = []
+                for ordinary_node in (1, 2, 3):
+                    ordinary_path = f"{root}/adapt/right/{ordinary_node}/Text"
+                    items = tuple(
+                        item
+                        for item in candidate.texts
+                        if item.path == ordinary_path
+                        and item.active_in_hierarchy
+                        and item.active_and_enabled
+                        and not item.truncated
+                        and item.bounds is not None
+                    )
+                    if len(items) > 1:
+                        raise SemanticGateClosed(
+                            "current Raid ordinary counter is ambiguous"
+                        )
+                    if not items:
+                        values.append(None)
+                        continue
+                    value = items[0].text.strip()
+                    if re.fullmatch(r"([0-9]|1[0-5])\s*/\s*15", value) is None:
+                        raise SemanticGateClosed(
+                            "current Raid ordinary counter is malformed"
+                        )
+                    values.append(re.sub(r"\s+", "", value))
+                return tuple(values)
+
+            first_signature = hidden_zero_signature(ui_state)
+            if first_signature[node_id - 1] is not None:
+                raise SemanticGateClosed(
+                    "current Raid remaining counter is absent or ambiguous"
+                )
+            self._sleep(0.25)
+            _second_buttons, second_ui, second_root, _second_stage_buttons = (
+                self._amatsukaze_raid_page_state()
+            )
+            second_signature = hidden_zero_signature(second_ui)
+            if not (
+                second_root == root
+                and second_ui.generation > ui_state.generation
+                and second_signature == first_signature
+                and second_signature[node_id - 1] is None
+            ):
+                raise SemanticGateClosed(
+                    "current Raid hidden-zero state is not stable"
+                )
+            return RaidRemainState(
+                generation=second_ui.generation,
+                event="raid_20260827",
+                mode=mode,
+                remaining=0,
+                capacity=capacity,
+                root=root,
+                node_id=node_id,
+            )
         if (
             len(ticket_images) != 1
             or len(ticket_labels) != 1
@@ -21885,6 +21998,28 @@ class SemanticOracle:
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id=f"raid/stage/{mode}",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_advanced_challenge(self, event: str) -> ActionReceipt:
+        """Open the separate fifth current-Raid slot without treating it as EX."""
+
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid advanced-challenge event is unsupported")
+        button_state, _ui_state, _root, buttons = self._amatsukaze_raid_page_state()
+        target = buttons["advanced"]
+        if self._blocking_rules(button_state, "raid/advanced/entry"):
+            raise SemanticGateClosed("Raid advanced-challenge input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/advanced/entry",
             generation=button_state.generation,
             point=target.point,
             bounds=target.bounds,
@@ -22397,8 +22532,24 @@ class SemanticOracle:
     def raid_precombat_visible(self, event: str) -> bool:
         if event != "raid_20260827":
             raise SemanticGateClosed("Raid precombat event is unsupported")
+        candidate_state = self.read_state()
+        precombat_start_paths = {
+            "UICamera/Canvas/UIOrigin/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+            "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+        }
+        if not any(
+            button.path in precombat_start_paths
+            and button.name == "start"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            for button in candidate_state.buttons
+        ):
+            # This is a passive recovery probe on every validation startup.
+            # Do not read an independently advancing UI endpoint unless the
+            # exact precombat start object makes this a real candidate.
+            return False
         try:
-            self._amatsukaze_raid_precombat_state()
+            button_state, _ui_state, _target = self._amatsukaze_raid_precombat_state()
         except SemanticGateClosed as exc:
             if str(exc) in (
                 "Raid precombat page is absent",
@@ -22412,7 +22563,295 @@ class SemanticOracle:
                 # identity and coverage proof and remains fail-closed.
                 return False
             raise
+        if (
+            self._blocking_rules(button_state, "raid/precombat/start")
+            and not self.raid_precombat_notice_visible(event)
+        ):
+            return False
         return True
+
+    def _amatsukaze_raid_multiple_target(
+        self,
+    ) -> Tuple[OracleState, UiState, ButtonState]:
+        """Prove the update's multiple-sortie entry on current Raid precombat."""
+
+        button_state, ui_state, start = self._amatsukaze_raid_precombat_state()
+        root = start.path.rsplit("/adapt/right/start", 1)[0]
+        path = root + "/adapt/right/multiple"
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == path
+            and button.name == "multiple"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        labels = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == path + "/text_en"
+            and item.text.strip() == "MULTIPLE SORTIES"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "btn_blue"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if len(targets) != 1 or len(labels) != 1 or len(images) != 1:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie entry identity is absent or ambiguous"
+            )
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie image does not cover its entry"
+            )
+        return button_state, ui_state, target
+
+    def raid_precombat_multiple_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        candidate = self.read_state()
+        if not any(
+            button.name == "multiple"
+            and button.path.endswith("/ActivityBossPrecombatUI(Clone)/adapt/right/multiple")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            for button in candidate.buttons
+        ):
+            return False
+        self._amatsukaze_raid_multiple_target()
+        return True
+
+    def click_raid_precombat_multiple(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        button_state, _ui_state, target = self._amatsukaze_raid_multiple_target()
+        if self.raid_precombat_notice_visible(event):
+            raise SemanticGateClosed("Raid multiple-sortie entry is obscured by notice")
+        if self._blocking_rules(button_state, "raid/precombat/multiple"):
+            raise SemanticGateClosed("Raid multiple-sortie entry is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/precombat/multiple",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _amatsukaze_raid_multiple_back_target(
+        self,
+    ) -> Tuple[OracleState, UiState, ButtonState]:
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("Raid multiple-sortie snapshots are incoherent")
+        root = "OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)"
+        back_path = root + "/window/top/btnBack"
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == back_path
+            and button.name == "btnBack"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        title_path = root + "/window/top/bg/title/title/title_en"
+        titles = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == title_path
+            and item.text.strip() == "MULTIPLE SORTIES"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        exact_texts = {
+            root + "/window/panel/content/value_bg/value": r"[1-9][0-9]*",
+            root + "/window/panel/ticket/Number": r"[0-9]+/[0-9]+",
+            root + "/window/panel/bonus/Number": r"[0-9]+",
+        }
+        for path, pattern in exact_texts.items():
+            matches = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == path
+                and re.fullmatch(pattern, item.text.strip()) is not None
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "Raid multiple-sortie panel identity is incomplete"
+                )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == back_path
+            and image.sprite == "close_btn"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if len(targets) != 1 or len(titles) != 1 or len(images) != 1:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie panel identity is incomplete"
+            )
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie close image does not cover its button"
+            )
+        return button_state, ui_state, target
+
+    def raid_multiple_sortie_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        candidate = self.read_state()
+        root = "OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)"
+        if not any(
+            button.path == root + "/window/top/btnBack"
+            and button.name == "btnBack"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            for button in candidate.buttons
+        ):
+            return False
+        self._amatsukaze_raid_multiple_back_target()
+        return True
+
+    def raid_multiple_sortie_state(self, event: str) -> RaidMultipleSortieState:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        button_state, ui_state, _target = self._amatsukaze_raid_multiple_back_target()
+        root = "OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)"
+
+        def exact_text(path: str, pattern: str) -> str:
+            matches = tuple(
+                item.text.strip()
+                for item in ui_state.texts
+                if item.path == path
+                and re.fullmatch(pattern, item.text.strip()) is not None
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "Raid multiple-sortie value is absent or ambiguous"
+                )
+            return matches[0]
+
+        sortie_count = int(
+            exact_text(root + "/window/panel/content/value_bg/value", r"[1-9][0-9]*")
+        )
+        selected_text, owned_text = exact_text(
+            root + "/window/panel/ticket/Number", r"[0-9]+/[0-9]+"
+        ).split("/", 1)
+        ticket_selected = int(selected_text)
+        ticket_owned = int(owned_text)
+        bonus_count = int(
+            exact_text(root + "/window/panel/bonus/Number", r"[0-9]+")
+        )
+        if ticket_selected > ticket_owned:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie ticket selection exceeds inventory"
+            )
+
+        disabled = tuple(
+            image
+            for image in ui_state.images
+            if image.path.startswith(root + "/window/panel/ticket/")
+            and image.sprite == "checkmark_ban"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if ticket_owned == 0:
+            if ticket_selected != 0 or len(disabled) != 1:
+                raise SemanticGateClosed(
+                    "Raid multiple-sortie zero-ticket state is inconsistent"
+                )
+        elif disabled:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie positive ticket state is disabled"
+            )
+        return RaidMultipleSortieState(
+            generation=button_state.generation,
+            event=event,
+            sortie_count=sortie_count,
+            ticket_selected=ticket_selected,
+            ticket_owned=ticket_owned,
+            bonus_count=bonus_count,
+            zero_ticket_disabled=bool(disabled),
+            root=root,
+        )
+
+    def click_raid_multiple_sortie_back(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        button_state, _ui_state, target = self._amatsukaze_raid_multiple_back_target()
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/multiple-sortie/back",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
 
     def _amatsukaze_raid_notice_target(
         self,

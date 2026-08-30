@@ -1161,12 +1161,13 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `integration/alas/current-raid-hard-live-validation-receipt-20260829-r2.json`,
   and `integration/alas/current-raid-ex-live-validation-receipt-20260829-r6.json`.
 - The 2026-08-29 resource update kept APK `9.7.10` and advanced the live hot
-  resource version to `9.7.343`. A further `easy` run consumed exactly one
-  attempt and moved PT `562→592`; its retained r11 receipt is deliberately
-  failed because the returning Raid cards were still animating when the result
-  cleaner first observed them. A fresh read proved the stable postcondition
-  (`easy=14`, PT `592`), and focused coverage now waits through that typed-only
-  layout transition without dispatching another input.
+  resource version to `9.7.343`. It exposed three additive compatibility gaps:
+  a non-EX counter disappears when it reaches zero, the Raid cards animate
+  briefly after a result, and an off-page precombat probe could observe an
+  independently advancing UI generation. The adapter now accepts a hidden
+  zero only after two coherent generations prove the other counters and exact
+  page health, passively waits through the result mount window, and reads the
+  full precombat projection only after its exact start candidate exists.
 - The original `RaidDaily` task also completed a controlled zero-ticket branch
   on hot version `9.7.343`: `StageFilter=ex`, all five Reward collection flags
   disabled, and fleet-mutation/sortie/combat budgets all zero. EX remained
@@ -1174,13 +1175,91 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   returned to the Raid page, and ALAS scheduled the next server-update run.
   `integration/alas/current-raid-daily-empty-ex-live-validation-receipt-20260829-r1.json`
   is the authoritative limited-live receipt.
-- This promotes `Raid.Mode` to four-mode single-run live evidence, while the
-  overall `Raid` task remains a limited live main path. `Raid.UseTicket=true`,
-  a fresh-account notice completion, and long-loop/restart recovery remain
-  unqualified. `RaidDaily` now has only its zero-EX scheduling branch live;
-  nonzero difficulty loops, reward-enabled EX, combined filters, cross-day
-  wakeup, and recovery remain open. The separate advanced challenge remains
-  intentionally unsupported instead of being guessed as EX.
+- After the 2026-08-30 reset, the original task cleared the last four `easy`
+  attempts and moved PT `1112→1232` with exactly four stage/fleet/sortie
+  sequences and no raw fallback. That first receipt remains deliberately
+  failed because the then-unmapped hidden-zero post-read terminated after the
+  useful game work. A fresh run with `easy=0` subsequently passed: no battle
+  input, no PT change, exact Raid-page return, and natural next-day scheduling.
+  The authoritative post-fix receipt is
+  `integration/alas/current-raid-daily-easy-zero-state-live-validation-receipt-20260830-r1.json`;
+  the failed diagnostic is retained as
+  `integration/alas/current-raid-daily-easy-full-clear-live-validation-receipt-20260830-r1.json`.
+- Reward-enabled EX is now closed across an honestly segmented recovery chain.
+  The first run dispatched exactly one original mission claim and exposed three
+  EX tickets, then failed on the returning TaskScene identity before any EX
+  input. A deliberately interrupted first EX battle was reattached through the
+  original `Combat.combat_execute()` path; five typed result/reward receipts
+  drained its orphan result and left EX `2`, PT `1544`. The final passing run
+  consumed those two tickets in one `RaidDaily` instance, moved EX `2→0` and PT
+  `1544→2168`, and emitted exactly two stage/fleet/sortie sequences. The honest
+  r1/r3 failures and r4 pass are kept separately instead of being presented as
+  one uninterrupted pass:
+  `integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r1.json`,
+  `integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r3.json`,
+  and `integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r4.json`.
+- A final combined-filter run used `StageFilter="easy > normal"` with `easy=0`
+  and `normal=14`. The same original task instance skipped easy without input,
+  completed all fourteen normal battles, moved normal `14→0` and PT
+  `2168→3148`, emitted exactly fourteen stage/fleet/sortie sequences, used no
+  reward or recovery path, and scheduled `RaidDaily` for the next server day.
+  `integration/alas/current-raid-daily-easy-normal-full-clear-live-validation-receipt-20260830-r2.json`
+  is the authoritative pass.
+- A fresh original `Restart` scheduler task then cold-started the game with the
+  mandatory `-force-gfx-st` contract, turned PID `5252→7648`, completed the
+  typed login to main, scheduled itself for the next server day, and left no
+  new ADB forward. The verified `restart-warm` capture contains 1,829 trace
+  records and no in-game resource capability:
+  `integration/alas/current-raid-restart-warm-workload-20260830-r1`.
+  Immediately afterward, `StageFilter="easy > normal"` re-entered the current
+  Raid on PID `7648`, read both cleared stages as zero, kept PT at `3148`,
+  emitted no stage/fleet/sortie/mission receipt, used no raw fallback, and
+  scheduled `RaidDaily` again. The post-restart pass is
+  `integration/alas/current-raid-daily-post-restart-zero-state-live-validation-receipt-20260830-r1.json`.
+- The upstream `RaidDaily` configuration locks `StopCondition.RunCount` to
+  zero, so the integration no longer propagates a pseudo single-battle limit;
+  bounded validation budgets stay in the evidence runner rather than changing
+  the task state machine. On current `raid_20260827`, `Raid.UseTicket=false` is
+  live-qualified. The original Raid state machine now also admits
+  `Raid.UseTicket=true` through one narrow zero-ticket compatibility branch: it
+  opens the exact multiple-sortie panel, requires count `1`, ticket `0/0`, and
+  the unique disabled-ticket marker, closes the panel, then falls back to one
+  ordinary sortie. Positive ticket selection, toggle, and final commit remain
+  localized fail-closed actions rather than being guessed.
+- A zero-sortie-budget live probe now maps the update's exact
+  `ActivityBossPrecombatUI(Clone)/adapt/right/multiple` entry and
+  `ContinuousOperationWindowUI(Clone)/window/top/btnBack` close action. The
+  panel proved default count `1`, hard bonus count `14`, estimated oil `25`,
+  and ticket inventory `0/0`; its ticket checkbox was disabled with
+  `checkmark_ban`. Six typed navigation inputs opened the hard precombat page,
+  opened and closed this panel, and returned through fleet selection to Raid.
+  Hard remained `14/15`, PT remained `3148`, and the sortie grant stayed zero.
+  The zero-ticket fallback is covered by focused parser/adapter tests, fresh
+  patched-tree compilation, login/frame-clock replays, and a pixel-boundary
+  verifier with zero unclassified access or Android input. Its end-to-end live
+  execution still awaits the next attempt reset because all ordinary attempts
+  are currently zero. Positive count selection, ticket toggle, and the panel's
+  battle commit remain closed.
+- The distinct fifth slot now has an exact `raid/advanced/entry` typed input,
+  separate from EX. A zero-sortie-budget live click in the current zero-ticket
+  state stayed on the reviewed Raid root and exposed no fleet, precombat, or
+  advanced surface. It was not repeated and consumed no resource; advanced
+  execution remains unsupported rather than being guessed from the EX flow.
+- Hard was then cleared from `14→0` and PT moved `3148→4828` across an honestly
+  segmented recovery chain. r3 completed eight battles before a fleet-start
+  transition stopped advancing; r4 completed one battle before the host-side
+  runner hung at its typed result, whose orphan result was recovered by r5;
+  r5 completed one more battle and exposed the missing current-Raid result
+  owner; after that owner was added, r6 recovered the retained result and
+  completed the final four battles. The chain emitted fourteen real sorties,
+  used no raw-input fallback, and consumed the hard grant `14→0`, but it is not
+  presented as one uninterrupted pass. The final passing receipt is
+  `integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r6.json`;
+  r3 and r5 remain as the corresponding failed receipts.
+- Actual cross-day wakeup, end-to-end live zero-ticket fallback, a positive
+  ticket-consuming final commit, advanced challenge execution, and a complete
+  easy round remain open. Normal has an uninterrupted full clear; hard has the
+  segmented recovery-backed full clear described above.
 
 ### Hospital: recommendation switch replayed before any UI work
 

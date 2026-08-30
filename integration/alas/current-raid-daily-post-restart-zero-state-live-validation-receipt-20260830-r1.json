@@ -1,0 +1,65 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-08-30T03:49:33.251813Z",
+  "finished_at": "2026-08-30T03:50:23.852899Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "task": "RaidDaily",
+  "mode": "normal",
+  "configured_stage_filter": "easy > normal",
+  "daily_battle_count": null,
+  "daily_reward_ex": false,
+  "task_result": true,
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 7648,
+    "generation": 955,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 42,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "game_version": "9.7.10",
+    "resource_hot_version": "9.7.343"
+  },
+  "scheduler_preflight": {
+    "expected": "RaidDaily",
+    "selected": "RaidDaily",
+    "selected_next_run": "2020-01-01 00:00:00",
+    "isolated_next_run": "2026-08-30 12:49:33",
+    "configured_run_count": 0
+  },
+  "login_recovered": false,
+  "ui_recovered": true,
+  "active_combat_recovered": false,
+  "ui_recovery_steps": [],
+  "orphan_result_receipts": [],
+  "mission_claim_dispatches": [],
+  "before": {
+    "remaining": 0,
+    "points": 3148,
+    "sortie_grant": 0
+  },
+  "after": {
+    "raid_page": true,
+    "remaining": 0,
+    "points": 3148,
+    "sortie_grant": 0
+  },
+  "stage_receipts": [],
+  "recommend_receipts": [],
+  "fleet_receipts": [],
+  "notice_receipts": [],
+  "sortie_receipts": [],
+  "raw_input_fallback_used": false,
+  "source_sha256": {
+    "raid": "b06ecce80365705183ced09023fc88e38fa1c3d7c2f5109ce655f3b893f94bcc",
+    "run": "9b93060194ebbffc698084373bee08590ad9477565ecdd8d2bc3f77e80fd480d",
+    "daily": "feba554df76f16c58048dcdb53ad2687f7bc3d549439d6ba6ee16c7cff87a8e7",
+    "adapter": "d8d81c2cf470ad05da2d913d6281907924c6e2342c54b878d90f9a3ff80f61c7",
+    "oracle": "57c4b37f0d9f77ff19b2f91a57df421c28cd248e0b1e9a350d6f51709db81125",
+    "runner": "229740029550742adbec65773fa70339ba998c1ee6cca2b77432cd5479e34332"
+  }
+}

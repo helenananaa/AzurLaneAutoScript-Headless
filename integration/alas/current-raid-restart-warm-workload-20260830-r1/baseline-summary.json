@@ -1,0 +1,76 @@
+{
+  "capture_passed": true,
+  "derived_at": "2026-08-30T03:49:12.157494Z",
+  "integrity": {
+    "controller_sample_failures": 0,
+    "guest_sample_failures": 5,
+    "host_sample_failures": 0,
+    "observer_sidecar_used": false,
+    "process_samples": 105,
+    "raw_input_fallback_used": false,
+    "screenshots_captured": false,
+    "trace_dropped": 0,
+    "trace_invalid": 0,
+    "trace_records": 1829,
+    "trace_writer_error": null
+  },
+  "run_id": "07899abccb474dfa82e91cc2992741e3",
+  "schema": "alas-headless.live-workload-baseline/v1",
+  "source": {
+    "resource_receipt_sha256": "b68dd4c6d561be5a060d90f32d5314c59a777903b287f9c3d0418115b466b420",
+    "result_sha256": "a9aa19530e5e939aa42aeca3ac1744e908e823d0cba3b9d913322018bd5e692a",
+    "runtime_trace_sha256": "e53db17a05055d767fb171c7634e3fb95eefbe8e31d5ddf132a7b04fe7e00ba8"
+  },
+  "whole_capture": {
+    "controller": {
+      "average_cpu_cores": 0.092697,
+      "read_bytes_delta": 54527618,
+      "rss_bytes_max": 201756672,
+      "rss_bytes_p50": 199639040,
+      "rss_bytes_p95": 200753152,
+      "samples": 105,
+      "write_bytes_delta": 632040
+    },
+    "elapsed_seconds": 106.234,
+    "game": {
+      "average_cpu_cores": 0.364923,
+      "rss_bytes_max": 1181011968,
+      "rss_bytes_p50": 609738752,
+      "rss_bytes_p95": 1156931584,
+      "samples": 100,
+      "threads_p50": 128,
+      "threads_p95": 158
+    },
+    "host_runtime": {
+      "average_cpu_cores": 1.681367,
+      "read_bytes_delta": 1478901760,
+      "rss_bytes_max": 2201415680,
+      "rss_bytes_p50": 2076549120,
+      "rss_bytes_p95": 2201325568,
+      "samples": 105,
+      "write_bytes_delta": 65966080
+    },
+    "observer": {
+      "duration_ms_max": 78,
+      "duration_ms_p50": 16,
+      "duration_ms_p95": 32,
+      "endpoints": {
+        "/v1/state": 288,
+        "/v1/ui": 164
+      },
+      "errors": 5,
+      "requests": 452,
+      "requests_per_second": 4.254758,
+      "response_bytes_max": 73230,
+      "response_bytes_p50": 2373,
+      "response_bytes_p95": 56133
+    }
+  },
+  "workload": {
+    "class": "lifecycle-recovery",
+    "description": "One original ALAS Restart task with running-PID turnover and recovery.",
+    "id": "restart-warm",
+    "recommended_frequency": "image-or-runtime-milestone",
+    "version": 1
+  }
+}

@@ -30,6 +30,7 @@ from alas_headless import (
     PINNED_CN_GAME_FINGERPRINT,
     PinnedPackageGate,
     Point,
+    RaidMultipleSortieState,
     ResearchProjectStatus,
     RetirementExecutionReceipt,
     RetirementNoCandidateReceipt,
@@ -181,6 +182,18 @@ class FakeOracle:
         self.raid_fleet_ready_value = False
         self.raid_precombat_visible_value = False
         self.raid_precombat_notice_visible_value = False
+        self.raid_precombat_multiple_visible_value = False
+        self.raid_multiple_sortie_visible_value = False
+        self.raid_multiple_sortie_state_value = RaidMultipleSortieState(
+            generation=10,
+            event="raid_20260827",
+            sortie_count=1,
+            ticket_selected=0,
+            ticket_owned=0,
+            bonus_count=14,
+            zero_ticket_disabled=True,
+            root="OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)",
+        )
         self.event_story_dialogue_visible_value = False
         self.event_story_skip_prompt_visible_value = False
         self.meta_page_visible_value = False
@@ -549,6 +562,10 @@ class FakeOracle:
         self.click_calls.append(semantic_id)
         return self.click_receipt(semantic_id)
 
+    def click_raid_advanced_challenge(self, event):
+        self.click_calls.append("raid/advanced/entry:" + event)
+        return self.click_receipt("raid/advanced/entry")
+
     def raid_fleet_ready(self, event):
         if event != "raid_20260827":
             raise SemanticGateClosed("Raid fleet-selection event is unsupported")
@@ -559,6 +576,17 @@ class FakeOracle:
 
     def raid_precombat_notice_visible(self, event):
         return self.raid_precombat_notice_visible_value
+
+    def raid_precombat_multiple_visible(self, event):
+        return self.raid_precombat_multiple_visible_value
+
+    def raid_multiple_sortie_visible(self, event):
+        return self.raid_multiple_sortie_visible_value
+
+    def raid_multiple_sortie_state(self, event):
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        return self.raid_multiple_sortie_state_value
 
     def event_story_dialogue_visible(self):
         return self.event_story_dialogue_visible_value
@@ -1439,6 +1467,14 @@ class FakeOracle:
         self.click_calls.append("raid/precombat/start:" + event)
         return self.click_receipt("raid/precombat/start")
 
+    def click_raid_precombat_multiple(self, event):
+        self.click_calls.append("raid/precombat/multiple:" + event)
+        return self.click_receipt("raid/precombat/multiple")
+
+    def click_raid_multiple_sortie_back(self, event):
+        self.click_calls.append("raid/multiple-sortie/back:" + event)
+        return self.click_receipt("raid/multiple-sortie/back")
+
     def click_raid_fleet_recommend(self, event):
         self.click_calls.append("raid/fleet/recommend:" + event)
         return self.click_receipt("raid/fleet/recommend")
@@ -1750,6 +1786,45 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(oracle.click_calls, ["raid/fleet/start:raid_20260827"])
         self.assertEqual(gate_calls, [True])
 
+    def test_current_raid_advanced_entry_is_navigation_not_ex_or_sortie(self):
+        adapter, oracle, gate_calls = self.make_adapter(campaign_sortie_budget=0)
+
+        receipt = adapter.click_raid_advanced_challenge("raid_20260827")
+
+        self.assertEqual(receipt.semantic_id, "raid/advanced/entry")
+        self.assertIsNone(receipt.capability_id)
+        self.assertEqual(
+            oracle.click_calls, ["raid/advanced/entry:raid_20260827"]
+        )
+        self.assertEqual(gate_calls, [True])
+        self.assertEqual(adapter._action_ledger.remaining("campaign.sortie"), 0)
+
+    def test_current_raid_multiple_sortie_navigation_uses_no_sortie_grant(self):
+        adapter, oracle, gate_calls = self.make_adapter(campaign_sortie_budget=0)
+        oracle.raid_precombat_multiple_visible_value = True
+        oracle.raid_multiple_sortie_visible_value = True
+
+        self.assertTrue(adapter.raid_precombat_multiple_visible("raid_20260827"))
+        entry = adapter.click_raid_precombat_multiple("raid_20260827")
+        self.assertTrue(adapter.raid_multiple_sortie_visible("raid_20260827"))
+        state = adapter.raid_multiple_sortie_state("raid_20260827")
+        back = adapter.click_raid_multiple_sortie_back("raid_20260827")
+
+        self.assertEqual(entry.semantic_id, "raid/precombat/multiple")
+        self.assertEqual(back.semantic_id, "raid/multiple-sortie/back")
+        self.assertIsNone(entry.capability_id)
+        self.assertIsNone(back.capability_id)
+        self.assertEqual((state.ticket_selected, state.ticket_owned), (0, 0))
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "raid/precombat/multiple:raid_20260827",
+                "raid/multiple-sortie/back:raid_20260827",
+            ],
+        )
+        self.assertEqual(gate_calls, [True, True, True, True, True])
+        self.assertEqual(adapter._action_ledger.remaining("campaign.sortie"), 0)
+
     def test_current_raid_precombat_start_reuses_bounded_sortie_grant(self):
         adapter, oracle, gate_calls = self.make_adapter(campaign_sortie_budget=1)
 
@@ -1770,7 +1845,10 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
     def test_current_raid_result_returns_to_raid_not_daily_page(self):
         adapter, oracle, _ = self.make_adapter(campaign_sortie_budget=1)
+        self.assertFalse(adapter.current_raid_result_active())
         adapter.click_raid_precombat_start("raid_20260827")
+        self.assertTrue(adapter.current_raid_result_active())
+        self.assertFalse(adapter.daily_execution_active())
         oracle.raid_page_visible_value = True
         oracle.raid_page_visible_errors = [
             SemanticGateClosed("current Raid stage sprite does not cover its button")
@@ -1781,8 +1859,25 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipts, ())
         self.assertIsNone(adapter._current_raid_result_event)
+        self.assertFalse(adapter.current_raid_result_active())
         self.assertFalse(oracle.daily_page_visible_value)
         sleep.assert_called_once_with(0.25)
+
+    def test_current_raid_result_is_owned_by_session_battle_status_probe(self):
+        adapter, oracle, _ = self.make_adapter(campaign_sortie_budget=1)
+        adapter.click_raid_precombat_start("raid_20260827")
+        oracle.daily_battle_result_visible = Mock(return_value=True)
+
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session._combat_result_transition_until = 0.0
+        session._combat_result_observation = None
+
+        self.assertTrue(session.current_raid_result_active())
+        self.assertTrue(session.appear(NamedButton("BATTLE_STATUS_S")))
+        self.assertFalse(session.appear(NamedButton("BATTLE_STATUS_D")))
+        self.assertIsNotNone(session._combat_result_observation)
 
     def test_current_raid_recommend_reuses_bounded_fleet_mutation_grant(self):
         adapter, oracle, gate_calls = self.make_adapter(
@@ -1840,6 +1935,38 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
         self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
         self.assertTrue(adapter.appear(NamedButton("RAID_CHECK")))
+
+    def test_current_raid_page_scan_tolerates_only_bounded_endpoint_skew(self):
+        adapter, oracle, _ = self.make_adapter()
+        message = "current Raid button and UI snapshots are incoherent"
+        oracle.raid_page_visible_errors = [
+            SemanticGateClosed(message),
+            SemanticGateClosed(message),
+            SemanticGateClosed(message),
+        ]
+
+        # Earlier page probes and RAID_CHECK are passive observations.  A
+        # short independent-endpoint skew is absence for this frame only and
+        # never authorizes an input.
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("RAID_CHECK")))
+        self.assertEqual(oracle.click_calls, [])
+
+        # The grace is bounded: an unchanged incoherent surface remains
+        # fail-closed instead of being promoted to the Raid page.
+        adapter._observer_stale_since = time.monotonic() - 6.0
+        with self.assertRaisesRegex(SemanticGateClosed, message):
+            adapter.appear(NamedButton("RAID_CHECK"))
+
+    def test_current_raid_page_scan_keeps_structural_errors_fail_closed(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.raid_page_visible_errors = [
+            SemanticGateClosed("current Raid stage sprite does not cover its button")
+        ]
+
+        with self.assertRaisesRegex(SemanticGateClosed, "does not cover"):
+            adapter.appear(NamedButton("EXERCISE_CHECK"))
+        self.assertEqual(oracle.click_calls, [])
 
     def test_current_raid_story_hides_unmapped_page_probes_for_alas_handler(self):
         adapter, oracle, _ = self.make_adapter()
@@ -2551,6 +2678,56 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "event-list/page/back")
         self.assertEqual(oracle.click_calls, ["event-list/page/back"])
+
+    def test_generic_page_scan_recovers_month_sign_through_event_list_page(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["event-list/page/back"] = True
+        oracle.enabled_values["event-list/page/back"] = True
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("GOTO_MAIN")))
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "event-list/page/back")
+        self.assertEqual(oracle.click_calls, ["event-list/page/back"])
+
+    def test_generic_page_scan_does_not_claim_month_sign_below_award_overlay(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values.update(
+            {
+                "event-list/page/back": True,
+                "reward/award-info/close": True,
+            }
+        )
+
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "FLEET_CHECK"):
+            adapter.appear(NamedButton("FLEET_CHECK"))
+
+    def test_generic_page_scan_recovers_exact_mission_page_after_reward(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["task/page/back"] = True
+        oracle.enabled_values["task/page/back"] = True
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("MISSION_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("GOTO_MAIN")))
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "task/page/back")
+        self.assertEqual(oracle.click_calls, ["task/page/back"])
+
+    def test_generic_page_scan_does_not_expose_blocked_mission_underlay(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["task/page/back"] = True
+        oracle.mission_page_state = Mock(
+            side_effect=SemanticGateClosed(
+                "mission page identity is not safely actionable"
+            )
+        )
+
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "FLEET_CHECK"):
+            adapter.appear(NamedButton("FLEET_CHECK"))
 
     def test_login_accepts_exact_main_identity_across_main_skins(self):
         adapter, oracle, _ = self.make_adapter()
@@ -5126,6 +5303,31 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         oracle.main_page_visible = Mock(return_value=False)
 
         self.assertEqual(session.recover_orphan_combat_result(), ())
+
+    def test_orphan_current_raid_result_accepts_exact_raid_page_return(self):
+        adapter, oracle, _ = self.make_adapter()
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+        session.orphan_combat_result_visible = lambda: True
+        session._combat_result_transition_until = 0.0
+        adapter._require_frame_observation_oracle = lambda: oracle
+        oracle.daily_battle_result_visible = Mock(return_value=False)
+        oracle.campaign_battle_reward_visible = Mock(return_value=False)
+        oracle.event_campaign_page_visible_value = False
+        oracle.operation_siren_page_visible = Mock(return_value=False)
+        oracle.daily_page_visible = Mock(return_value=False)
+        oracle.main_page_visible = Mock(return_value=False)
+        oracle.raid_page_visible = Mock(return_value=True)
+
+        self.assertEqual(
+            session.recover_orphan_combat_result(
+                current_raid_event="raid_20260827"
+            ),
+            (),
+        )
+        oracle.raid_page_visible.assert_called_once_with("raid_20260827")
 
     def test_orphan_campaign_result_tolerates_exact_map_mount_gap(self):
         adapter, oracle, _ = self.make_adapter()

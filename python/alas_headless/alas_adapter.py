@@ -150,6 +150,7 @@ from .semantic_oracle import (
     MetaAssistState,
     MetaCurrentDetailState,
     Point,
+    RaidMultipleSortieState,
     SemanticGateClosed,
     SemanticOracleError,
     ShipyardState,
@@ -5405,6 +5406,11 @@ class AlasSemanticAdapter:
 
         return self._daily_kind is not None and self._campaign_context is None
 
+    def current_raid_result_active(self) -> bool:
+        """Return whether an exact current-Raid sortie owns the result stack."""
+
+        return self._current_raid_result_event is not None
+
     def server_maintenance_visible(self) -> bool:
         self._package_gate()
         return self.oracle.server_maintenance_visible()
@@ -5849,6 +5855,7 @@ class AlasSemanticAdapter:
                 "observer snapshot is stale",
                 "observer endpoints are not generation-coherent",
                 "Msgbox snapshots are not coherent",
+                "current Raid button and UI snapshots are incoherent",
             )
             if not transient:
                 raise
@@ -5873,6 +5880,46 @@ class AlasSemanticAdapter:
             if self._login_flow.active
             else self.oracle
         )
+        mission_page_state = getattr(observation_oracle, "mission_page_state", None)
+        if (
+            not self._login_flow.active
+            and name in CURRENT_RAID_EARLIER_PAGE_CHECKS
+            and callable(mission_page_state)
+            and observation_oracle.exists("task/page/back")
+        ):
+            try:
+                mission_page_state()
+            except SemanticGateClosed:
+                # A retained TaskScene back control below an award or another
+                # blocker is not enough to expose the underlay as the current
+                # page.  The owning overlay keeps its separate typed action.
+                pass
+            else:
+                # Reward.reward_mission() intentionally returns on TaskScene.
+                # Page.iter_pages() probes several unrelated legacy pages
+                # before MISSION_CHECK, so classify only the fully reviewed
+                # TaskScene identity and let ALAS use its normal page graph.
+                return name == "MISSION_CHECK"
+        if (
+            not self._login_flow.active
+            and name in CURRENT_RAID_EARLIER_PAGE_CHECKS
+            and observation_oracle.exists("event-list/page/back")
+            and not any(
+                observation_oracle.exists(target)
+                for target in (
+                    "reward/award-info/close",
+                    "reward/award-info1/close",
+                )
+            )
+        ):
+            # ActivityMainUI is the exact full-screen event/month-sign page.
+            # Generic Page enumeration probes unrelated legacy identities such
+            # as FLEET_CHECK before it reaches EVENT_LIST_CHECK.  Classify only
+            # that owning page as present so ALAS follows its normal page graph
+            # and GOTO_MAIN uses the reviewed event-list/page/back target.
+            # A mounted award overlay is deliberately excluded and remains
+            # owned by its separate exact close action.
+            return name == "EVENT_LIST_CHECK"
         if name == "RAID_CHECK":
             return observation_oracle.raid_page_visible(event="raid_20260827")
         raid_page_visible = getattr(observation_oracle, "raid_page_visible", None)
@@ -9954,6 +10001,10 @@ class AlasSemanticAdapter:
                     ) from exc
                 time.sleep(0.25)
 
+    def click_raid_advanced_challenge(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_raid_advanced_challenge(event=event)
+
     def enter_raid_page(self, event: str) -> ActionReceipt:
         self._package_gate()
         if event != "raid_20260827" or not self.oracle.main_page_visible():
@@ -10017,6 +10068,26 @@ class AlasSemanticAdapter:
     def raid_precombat_visible(self, event: str) -> bool:
         self._package_gate()
         return self.oracle.raid_precombat_visible(event=event)
+
+    def raid_precombat_multiple_visible(self, event: str) -> bool:
+        self._package_gate()
+        return self.oracle.raid_precombat_multiple_visible(event=event)
+
+    def click_raid_precombat_multiple(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_raid_precombat_multiple(event=event)
+
+    def raid_multiple_sortie_visible(self, event: str) -> bool:
+        self._package_gate()
+        return self.oracle.raid_multiple_sortie_visible(event=event)
+
+    def raid_multiple_sortie_state(self, event: str) -> RaidMultipleSortieState:
+        self._package_gate()
+        return self.oracle.raid_multiple_sortie_state(event=event)
+
+    def click_raid_multiple_sortie_back(self, event: str) -> ActionReceipt:
+        self._package_gate()
+        return self.oracle.click_raid_multiple_sortie_back(event=event)
 
     def raid_precombat_notice_visible(self, event: str) -> bool:
         self._package_gate()
@@ -15640,6 +15711,7 @@ class AlasSemanticSession:
             return name == observed
         result_owner_active = bool(
             getattr(adapter, "daily_execution_active", lambda: False)()
+            or getattr(adapter, "current_raid_result_active", lambda: False)()
             or adapter.campaign_combat_committed()
             or getattr(
                 adapter, "operation_siren_combat_committed", lambda: False
@@ -17540,6 +17612,7 @@ class AlasSemanticSession:
     def recover_orphan_combat_result(
         self,
         timeout_seconds: float = 45.0,
+        current_raid_event: Optional[str] = None,
     ) -> Tuple[ActionReceipt, ...]:
         """Drain one exact ownerless result stack to a reviewed stable page."""
 
@@ -17575,6 +17648,17 @@ class AlasSemanticSession:
                 or oracle.event_campaign_page_visible()
             ):
                 return tuple(receipts)
+            if current_raid_event is not None:
+                try:
+                    if oracle.raid_page_visible(current_raid_event):
+                        return tuple(receipts)
+                except SemanticGateClosed as exc:
+                    if str(exc) not in {
+                        "current Raid stage identity is absent or ambiguous",
+                        "current Raid stage sprites are absent or ambiguous",
+                        "current Raid stage sprite does not cover its button",
+                    }:
+                        raise
             try:
                 if oracle.campaign_is_in_map():
                     return tuple(receipts)
@@ -17591,6 +17675,9 @@ class AlasSemanticSession:
 
     def daily_execution_active(self) -> bool:
         return self.open().daily_execution_active()
+
+    def current_raid_result_active(self) -> bool:
+        return self.open().current_raid_result_active()
 
     def exercise_execute_allowed(self) -> bool:
         return self.open().exercise_execute_allowed()
@@ -17989,6 +18076,9 @@ class AlasSemanticSession:
     def click_raid_stage(self, event: str, mode: str) -> ActionReceipt:
         return self.open().click_raid_stage(event=event, mode=mode)
 
+    def click_raid_advanced_challenge(self, event: str) -> ActionReceipt:
+        return self.open().click_raid_advanced_challenge(event=event)
+
     def enter_raid_page(self, event: str) -> ActionReceipt:
         return self.open().enter_raid_page(event=event)
 
@@ -18012,6 +18102,21 @@ class AlasSemanticSession:
 
     def raid_precombat_visible(self, event: str) -> bool:
         return self.open().raid_precombat_visible(event=event)
+
+    def raid_precombat_multiple_visible(self, event: str) -> bool:
+        return self.open().raid_precombat_multiple_visible(event=event)
+
+    def click_raid_precombat_multiple(self, event: str) -> ActionReceipt:
+        return self.open().click_raid_precombat_multiple(event=event)
+
+    def raid_multiple_sortie_visible(self, event: str) -> bool:
+        return self.open().raid_multiple_sortie_visible(event=event)
+
+    def raid_multiple_sortie_state(self, event: str) -> RaidMultipleSortieState:
+        return self.open().raid_multiple_sortie_state(event=event)
+
+    def click_raid_multiple_sortie_back(self, event: str) -> ActionReceipt:
+        return self.open().click_raid_multiple_sortie_back(event=event)
 
     def raid_precombat_notice_visible(self, event: str) -> bool:
         return self.open().raid_precombat_notice_visible(event=event)

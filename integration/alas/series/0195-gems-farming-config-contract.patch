@@ -113,7 +113,7 @@ index 62565971..96c82453 100644
 +                logger.info('No flagship to unmount, skip unmounting.')
 +            else:
 +                self.ui_enter_ship(unmount_button, long_click=False)
-+                self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK, 
++                self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK,
 +                              additional=self.ensure_no_info_bar, confirm_wait=1, retry_wait=5)
  
 -        self.ui_enter_ship(mount_button, long_click=False)
@@ -274,7 +274,7 @@ index 62565971..96c82453 100644
 +                logger.info('No vanguard to unmount, skip unmounting.')
 +            else:
 +                self.ui_enter_ship(unmount_button, long_click=False)
-+                self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK, 
++                self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK,
 +                              additional=self.ensure_no_info_bar, confirm_wait=1, retry_wait=5)
  
 -        self.ui_enter_ship(mount_button, long_click=False)

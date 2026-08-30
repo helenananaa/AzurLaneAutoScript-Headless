@@ -1,0 +1,498 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-30T06:02:13.482145Z",
+  "finished_at": "2026-08-30T06:13:25.325725Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "task": "RaidDaily",
+  "mode": "hard",
+  "configured_stage_filter": "hard",
+  "daily_battle_count": 14,
+  "daily_reward_ex": false,
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 1953,
+    "generation": 16323,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 3,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "game_version": "9.7.10",
+    "resource_hot_version": "9.7.343"
+  },
+  "scheduler_preflight": {
+    "expected": "RaidDaily",
+    "selected": "RaidDaily",
+    "selected_next_run": "2020-01-01 00:00:00",
+    "isolated_next_run": "2026-08-30 15:02:13",
+    "configured_run_count": 0
+  },
+  "login_recovered": false,
+  "ui_recovered": false,
+  "active_combat_recovered": false,
+  "ui_recovery_steps": [],
+  "orphan_result_receipts": [],
+  "mission_claim_dispatches": [],
+  "before": {
+    "remaining": 14,
+    "points": 3148,
+    "sortie_grant": 14
+  },
+  "after": {},
+  "stage_receipts": [
+    {
+      "semantic_id": "raid/stage/hard",
+      "generation": 16848,
+      "point": {
+        "x": 1111.867,
+        "y": 410.8
+      },
+      "bounds": {
+        "left": 987.867,
+        "top": 376.8,
+        "right": 1235.867,
+        "bottom": 444.8
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/3",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/hard",
+      "generation": 18482,
+      "point": {
+        "x": 1111.867,
+        "y": 410.8
+      },
+      "bounds": {
+        "left": 987.867,
+        "top": 376.8,
+        "right": 1235.867,
+        "bottom": 444.8
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/3",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/hard",
+      "generation": 20056,
+      "point": {
+        "x": 1111.867,
+        "y": 410.8
+      },
+      "bounds": {
+        "left": 987.867,
+        "top": 376.8,
+        "right": 1235.867,
+        "bottom": 444.8
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/3",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/hard",
+      "generation": 21291,
+      "point": {
+        "x": 1111.867,
+        "y": 410.8
+      },
+      "bounds": {
+        "left": 987.867,
+        "top": 376.8,
+        "right": 1235.867,
+        "bottom": 444.8
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/3",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/hard",
+      "generation": 22644,
+      "point": {
+        "x": 1111.867,
+        "y": 410.8
+      },
+      "bounds": {
+        "left": 987.867,
+        "top": 376.8,
+        "right": 1235.867,
+        "bottom": 444.8
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/3",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/hard",
+      "generation": 24199,
+      "point": {
+        "x": 1111.867,
+        "y": 410.8
+      },
+      "bounds": {
+        "left": 987.867,
+        "top": 376.8,
+        "right": 1235.867,
+        "bottom": 444.8
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/3",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/hard",
+      "generation": 25567,
+      "point": {
+        "x": 1111.867,
+        "y": 410.8
+      },
+      "bounds": {
+        "left": 987.867,
+        "top": 376.8,
+        "right": 1235.867,
+        "bottom": 444.8
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/3",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/hard",
+      "generation": 27220,
+      "point": {
+        "x": 1111.867,
+        "y": 410.8
+      },
+      "bounds": {
+        "left": 987.867,
+        "top": 376.8,
+        "right": 1235.867,
+        "bottom": 444.8
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/3",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/hard",
+      "generation": 28658,
+      "point": {
+        "x": 1111.867,
+        "y": 410.8
+      },
+      "bounds": {
+        "left": 987.867,
+        "top": 376.8,
+        "right": 1235.867,
+        "bottom": 444.8
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/3",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "recommend_receipts": [],
+  "fleet_receipts": [
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 16863,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 18499,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 20070,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 21306,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 22659,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 24214,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 25583,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 27234,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 28674,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "notice_receipts": [],
+  "sortie_receipts": [
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 16884,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "f6da5201d449e60c59f701800710e3d095fd28741efa2a71824b87b181a89ef9",
+      "capability_id": "campaign.sortie"
+    },
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 18520,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "f6da5201d449e60c59f701800710e3d095fd28741efa2a71824b87b181a89ef9",
+      "capability_id": "campaign.sortie"
+    },
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 20096,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "f6da5201d449e60c59f701800710e3d095fd28741efa2a71824b87b181a89ef9",
+      "capability_id": "campaign.sortie"
+    },
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 21326,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "f6da5201d449e60c59f701800710e3d095fd28741efa2a71824b87b181a89ef9",
+      "capability_id": "campaign.sortie"
+    },
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 22681,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "f6da5201d449e60c59f701800710e3d095fd28741efa2a71824b87b181a89ef9",
+      "capability_id": "campaign.sortie"
+    },
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 24232,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "f6da5201d449e60c59f701800710e3d095fd28741efa2a71824b87b181a89ef9",
+      "capability_id": "campaign.sortie"
+    },
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 25603,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "f6da5201d449e60c59f701800710e3d095fd28741efa2a71824b87b181a89ef9",
+      "capability_id": "campaign.sortie"
+    },
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 27252,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "f6da5201d449e60c59f701800710e3d095fd28741efa2a71824b87b181a89ef9",
+      "capability_id": "campaign.sortie"
+    }
+  ],
+  "error": "SystemExit: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 71, in run\n    self.__getattribute__(command)()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 269, in raid_daily\n    RaidDaily(config=self.config, device=self.device).run()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\daily.py\", line 62, in run\n    super().run(name=name, mode=mode, total=1)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\run.py\", line 156, in run\n    self.raid_execute_once(mode=mode, raid=name)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\raid.py\", line 450, in raid_execute_once\n    self.raid_enter(mode=mode, raid=raid)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\raid.py\", line 397, in raid_enter\n    raise ScriptError(\nmodule.exception.ScriptError: Current Raid semantic entry did not reach battle loading; return to the exact Raid page and retry\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 456, in run\n    task_result = instance.run(command_name)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 118, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "raw_input_fallback_used": false
+}

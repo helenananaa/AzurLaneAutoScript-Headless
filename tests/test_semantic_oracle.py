@@ -34,6 +34,7 @@ from alas_headless.semantic_oracle import (
     SemanticToggleTarget,
     RetirementNoCandidateReceipt,
     ResearchProjectStatus,
+    RaidMultipleSortieState,
     TacticalSlotStatus,
     enhancement_config_policy,
     request_observer_state,
@@ -1573,6 +1574,39 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(state.remaining, 2)
         self.assertEqual(backend.taps, [])
 
+    def test_current_raid_hidden_zero_requires_stable_healthy_page(self):
+        backend = make_current_raid_backend()
+        root = "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)"
+        zero_path = root + "/adapt/right/3/Text"
+        backend.ui["texts"] = [
+            item for item in backend.ui["texts"] if item["path"] != zero_path
+        ]
+        backend.ui["text_count"] = len(backend.ui["texts"])
+        stable_first = dict(copy.deepcopy(backend.ui), generation=10)
+        stable_second = dict(copy.deepcopy(backend.ui), generation=11)
+        backend.ui_sequence = [stable_first, stable_second]
+
+        state = make_oracle(backend).raid_remain_state("raid_20260827", "hard")
+
+        self.assertEqual((state.remaining, state.capacity, state.node_id), (0, 15, 3))
+        self.assertEqual(backend.taps, [])
+
+        unstable = make_current_raid_backend()
+        unstable.ui["texts"] = [
+            item for item in unstable.ui["texts"] if item["path"] != zero_path
+        ]
+        unstable.ui["text_count"] = len(unstable.ui["texts"])
+        with self.assertRaisesRegex(SemanticGateClosed, "not stable"):
+            make_oracle(unstable).raid_remain_state("raid_20260827", "hard")
+
+        malformed = make_current_raid_backend()
+        malformed_text = next(
+            item for item in malformed.ui["texts"] if item["path"] == zero_path
+        )
+        malformed_text["text"] = "CLEARED"
+        with self.assertRaisesRegex(SemanticGateClosed, "malformed"):
+            make_oracle(malformed).raid_remain_state("raid_20260827", "hard")
+
     def test_current_raid_home_uses_proven_bounds_center(self):
         backend = make_current_raid_backend()
         receipt = make_oracle(backend).click_raid_home("raid_20260827")
@@ -1729,12 +1763,62 @@ class SemanticOracleTests(unittest.TestCase):
             make_oracle(backend).raid_remain("raid_20260827", "ex")
         self.assertEqual(backend.taps, [])
 
+    def test_current_raid_advanced_entry_stays_distinct_from_ex(self):
+        backend = make_current_raid_backend()
+        oracle = make_oracle(backend)
+
+        with self.assertRaisesRegex(SemanticGateClosed, "mode is unsupported"):
+            oracle.click_raid_stage("raid_20260827", "advanced")
+        self.assertEqual(backend.taps, [])
+
+        receipt = oracle.click_raid_advanced_challenge("raid_20260827")
+        self.assertEqual(receipt.semantic_id, "raid/advanced/entry")
+        self.assertEqual(
+            receipt.path,
+            "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/5",
+        )
+        self.assertEqual(backend.taps, [(1146, 196)])
+
+        backend.taps.clear()
+        advanced_image = next(
+            image
+            for image in backend.ui["images"]
+            if image["path"].endswith("/adapt/right/5")
+        )
+        advanced_image["sprite"] = "btn_lv_ex"
+        with self.assertRaisesRegex(SemanticGateClosed, "stage sprites"):
+            oracle.click_raid_advanced_challenge("raid_20260827")
+        self.assertEqual(backend.taps, [])
+
+    def test_current_raid_precombat_probe_skips_ui_coherence_off_page(self):
+        backend = make_current_raid_backend()
+        backend.ui["generation"] = 30
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.raid_precombat_visible("raid_20260827"))
+        self.assertNotIn("GET /v1/ui\n", backend.requests)
+
+        root = "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)"
+        backend.buttons = make_buttons(
+            [make_button("start", root + "/adapt/right/start", raycast_top=None)],
+            generation=10,
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "snapshots are incoherent"):
+            make_oracle(backend).raid_precombat_visible("raid_20260827")
+
     def test_current_raid_precombat_notice_and_sortie_are_distinct_inputs(self):
         root = "UICamera/Canvas/UIOrigin/ActivityBossPrecombatUI(Clone)"
         start = root + "/adapt/right/start"
+        multiple = root + "/adapt/right/multiple"
         notice_root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window"
         notice = notice_root + "/button_container/custom_button_1(Clone)"
         start_bounds = {"left": 1051, "top": 596, "right": 1282, "bottom": 686}
+        multiple_bounds = {
+            "left": 1051,
+            "top": 520,
+            "right": 1282,
+            "bottom": 580,
+        }
         notice_bounds = {"left": 549, "top": 515, "right": 731, "bottom": 582}
         back = root + "/blur_panel/top/back_btn"
         back_bounds = {"left": 1, "top": -3, "right": 115, "bottom": 111}
@@ -1742,6 +1826,14 @@ class SemanticOracleTests(unittest.TestCase):
             [
                 make_button(
                     "start", start, 1167, 641, start_bounds, raycast_top=None
+                ),
+                make_button(
+                    "multiple",
+                    multiple,
+                    1167,
+                    550,
+                    multiple_bounds,
+                    raycast_top=None,
                 ),
                 *[
                     make_button(
@@ -1772,6 +1864,7 @@ class SemanticOracleTests(unittest.TestCase):
         backend.ui = make_ui(
             [
                 make_text("WEIGH ANCHOR", start + "/text_en"),
+                make_text("MULTIPLE SORTIES", multiple + "/text_en"),
                 make_text("出击", start + "/text"),
                 make_text("消耗：", start + "/cost_container/title"),
                 make_text("87", start + "/cost_container/popup/Text"),
@@ -1801,6 +1894,7 @@ class SemanticOracleTests(unittest.TestCase):
             ],
             images=[
                 make_image(start, "btn_formation_sel", start_bounds),
+                make_image(multiple, "btn_blue", multiple_bounds),
                 make_image(
                     start + "/cost_container/popup/icon", "res_oil"
                 ),
@@ -1811,9 +1905,14 @@ class SemanticOracleTests(unittest.TestCase):
         oracle = make_oracle(backend)
 
         self.assertTrue(oracle.raid_precombat_visible("raid_20260827"))
+        self.assertTrue(
+            oracle.raid_precombat_multiple_visible("raid_20260827")
+        )
         self.assertTrue(oracle.raid_precombat_notice_visible("raid_20260827"))
         with self.assertRaisesRegex(SemanticGateClosed, "obscured by notice"):
             oracle.click_raid_precombat_start("raid_20260827")
+        with self.assertRaisesRegex(SemanticGateClosed, "obscured by notice"):
+            oracle.click_raid_precombat_multiple("raid_20260827")
         notice_receipt = oracle.click_raid_precombat_notice("raid_20260827")
         self.assertEqual(
             notice_receipt.semantic_id, "raid/precombat/notice/acknowledge"
@@ -1837,6 +1936,31 @@ class SemanticOracleTests(unittest.TestCase):
         backend.taps.clear()
 
         self.assertFalse(oracle.raid_precombat_notice_visible("raid_20260827"))
+
+        multiple_receipt = oracle.click_raid_precombat_multiple(
+            "raid_20260827"
+        )
+        self.assertEqual(
+            multiple_receipt.semantic_id, "raid/precombat/multiple"
+        )
+        self.assertEqual(backend.taps, [(1167, 550)])
+        backend.taps.clear()
+
+        loading_path = "root/UIOverlay/Loading(Clone)/panel"
+        backend.buttons["buttons"].append(
+            make_button("panel", loading_path, raycast_top=True)
+        )
+        backend.buttons["button_count"] += 1
+        self.assertFalse(oracle.raid_precombat_visible("raid_20260827"))
+        with self.assertRaisesRegex(SemanticGateClosed, "input is blocked"):
+            oracle.click_raid_precombat_start("raid_20260827")
+        self.assertEqual(backend.taps, [])
+        backend.buttons["buttons"] = [
+            button
+            for button in backend.buttons["buttons"]
+            if button["path"] != loading_path
+        ]
+        backend.buttons["button_count"] -= 1
 
         start_image = next(
             image for image in backend.ui["images"] if image["path"] == start
@@ -1866,6 +1990,17 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(backend.taps, [])
         backend.ui["texts"].append(numeric_text)
         backend.ui["text_count"] += 1
+
+        multiple_image = next(
+            image for image in backend.ui["images"] if image["path"] == multiple
+        )
+        multiple_image["sprite"] = "btn_red"
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            oracle.raid_precombat_multiple_visible("raid_20260827")
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            oracle.click_raid_precombat_multiple("raid_20260827")
+        self.assertEqual(backend.taps, [])
+        multiple_image["sprite"] = "btn_blue"
 
         start_receipt = oracle.click_raid_precombat_start("raid_20260827")
         self.assertEqual(start_receipt.semantic_id, "raid/precombat/start")
@@ -1924,6 +2059,91 @@ class SemanticOracleTests(unittest.TestCase):
 
         with self.assertRaisesRegex(SemanticGateClosed, "counter is absent or ambiguous"):
             make_oracle(backend).raid_remain("raid_20260827", "normal")
+
+    def test_current_raid_multiple_sortie_close_is_exact_and_resource_free(self):
+        root = "OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)"
+        back = root + "/window/top/btnBack"
+        back_bounds = {"left": 891, "top": 149, "right": 963, "bottom": 201}
+        backend = FakeBackend(
+            [make_button("btnBack", back, 927, 175, back_bounds, raycast_top=None)]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "MULTIPLE SORTIES",
+                    root + "/window/top/bg/title/title/title_en",
+                ),
+                make_text("1", root + "/window/panel/content/value_bg/value"),
+                make_text("0/0", root + "/window/panel/ticket/Number"),
+                make_text("14", root + "/window/panel/bonus/Number"),
+            ],
+            images=[
+                make_image(back, "close_btn", back_bounds),
+                make_image(
+                    root + "/window/panel/ticket/checkbox/checkmark",
+                    "checkmark_ban",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.raid_multiple_sortie_visible("raid_20260827"))
+        state = oracle.raid_multiple_sortie_state("raid_20260827")
+        self.assertEqual(
+            state,
+            RaidMultipleSortieState(
+                generation=10,
+                event="raid_20260827",
+                sortie_count=1,
+                ticket_selected=0,
+                ticket_owned=0,
+                bonus_count=14,
+                zero_ticket_disabled=True,
+                root=root,
+            ),
+        )
+        receipt = oracle.click_raid_multiple_sortie_back("raid_20260827")
+        self.assertEqual(receipt.semantic_id, "raid/multiple-sortie/back")
+        self.assertEqual(backend.taps, [(927, 175)])
+
+        ticket_text = next(
+            item
+            for item in backend.ui["texts"]
+            if item["path"] == root + "/window/panel/ticket/Number"
+        )
+        checkmark = next(
+            item
+            for item in backend.ui["images"]
+            if item["sprite"] == "checkmark_ban"
+        )
+        backend.ui["images"].remove(checkmark)
+        backend.ui["image_count"] -= 1
+        ticket_text["text"] = "1/2"
+        positive = oracle.raid_multiple_sortie_state("raid_20260827")
+        self.assertEqual(
+            (positive.ticket_selected, positive.ticket_owned), (1, 2)
+        )
+        self.assertFalse(positive.zero_ticket_disabled)
+
+        backend.ui["images"].append(checkmark)
+        backend.ui["image_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "positive ticket state is disabled"):
+            oracle.raid_multiple_sortie_state("raid_20260827")
+        ticket_text["text"] = "0/0"
+        backend.ui["images"].remove(checkmark)
+        backend.ui["image_count"] -= 1
+        with self.assertRaisesRegex(SemanticGateClosed, "zero-ticket state is inconsistent"):
+            oracle.raid_multiple_sortie_state("raid_20260827")
+        backend.ui["images"].append(checkmark)
+        backend.ui["image_count"] += 1
+
+        backend.taps.clear()
+        backend.ui["images"][0]["sprite"] = "close_btn_disabled"
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is incomplete"):
+            oracle.raid_multiple_sortie_visible("raid_20260827")
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is incomplete"):
+            oracle.click_raid_multiple_sortie_back("raid_20260827")
+        self.assertEqual(backend.taps, [])
 
     def test_gems_farming_equipment_loadout_rejects_duplicate_positions(self):
         slot = GemsFarmingEquipmentSlot(1, "51000", 10, False)
@@ -16692,6 +16912,22 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
 
         backend.ui["images"][2]["sprite"] = "lock"
         self.assertFalse(oracle.battle_pass_claim_all_available())
+
+    def test_battle_pass_probe_skips_ui_coherence_off_page(self):
+        backend = FakeBackend([])
+        backend.ui = make_ui([], generation=30)
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.battle_pass_page_visible())
+        self.assertNotIn("GET /v1/ui\n", backend.requests)
+
+        root = "root/UICamera/Canvas/UIMain/WorldCruiseUI(Clone)"
+        backend.buttons = make_buttons(
+            [make_button("award", root + "/frame/toggles/award", raycast_top=None)],
+            generation=10,
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "not coherent"):
+            make_oracle(backend).battle_pass_page_visible()
 
     def test_data_key_limit_prompt_cancel_preserves_full_counter(self):
         archive = "root/UICamera/Canvas/UIOrigin/LevelRemasterView(Clone)"

@@ -123,7 +123,7 @@
     {
       "order": 25,
       "path": "integration/alas/series/0195-gems-farming-config-contract.patch",
-      "sha256": "f50db771f7775d6a44491f30cd7301fa1b32cde9a40e120cad1063fc44eab672"
+      "sha256": "059a4d2d1c8d853eb5497c2e09dc061c51c0c9e6ceb3dea2c4c59bf146511206"
     },
     {
       "order": 26,
@@ -463,7 +463,7 @@
     {
       "order": 93,
       "path": "integration/alas/series/0480-current-raid-runtime.patch",
-      "sha256": "188161cce6ac83404006cfd3ef3769931217c7f6df542dd0a475d189c7bd89ad"
+      "sha256": "4357acd28f1c19fde2086daa32cfed24c0f2fb02140f1c07ef7cc00cc5e72190"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

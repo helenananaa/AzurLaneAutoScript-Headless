@@ -1,0 +1,290 @@
+{
+  "device": {
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "package": "com.bilibili.azurlane",
+    "serial": "emulator-5580"
+  },
+  "duration_ns": 106234000000,
+  "failure": null,
+  "finished_at": "2026-08-30T03:49:12.010949Z",
+  "passed": true,
+  "raw_input_fallback_used": false,
+  "run_id": "07899abccb474dfa82e91cc2992741e3",
+  "runner_result": {
+    "case": {
+      "after_pid": 7648,
+      "before_pid": 5252,
+      "elapsed_seconds": 103.969,
+      "ending_observer_forwards": [],
+      "exit_code": 0,
+      "failure": null,
+      "next_run": "2026-08-31 00:00:00",
+      "owned_observer_forward_delta": [],
+      "remaining_observer_forwards": 0,
+      "run_commands": [
+        "restart"
+      ],
+      "started_at": "2026-08-30T11:47:27+08:00",
+      "starting_observer_forwards": []
+    },
+    "passed": true,
+    "postcondition": {
+      "game_process_running": true,
+      "owned_observer_forward_delta": 0,
+      "pid_turned_over": true,
+      "preexisting_observer_forwards": 0
+    },
+    "schema": "alas-headless.restart-warm-workload/v1"
+  },
+  "safety": {
+    "account_state_mutation": "none",
+    "in_game_resource_mutation_expected": false,
+    "observer_sidecar_allowed": false,
+    "premium_currency_budget": 0,
+    "process_restart_expected": true,
+    "purchase_budget": 0,
+    "raw_input_allowed": false,
+    "screenshots_allowed": false,
+    "transient_process_unavailability_expected": true,
+    "typed_semantic_only": true
+  },
+  "sampling": {
+    "interval_seconds": 1.0,
+    "observer_sidecar_used": false,
+    "post_meminfo": {
+      "phase": "after",
+      "pid": 7648,
+      "pss_bytes": 1338492928,
+      "rss_bytes": 1120321536,
+      "swap_pss_bytes": 266542080
+    },
+    "pre_meminfo": {
+      "phase": "before",
+      "pid": 5252,
+      "pss_bytes": 1707569152,
+      "rss_bytes": 781156352,
+      "swap_pss_bytes": 965175296
+    },
+    "process_sampler": {
+      "controller_failures": 0,
+      "guest_failures": 5,
+      "host_failures": 0,
+      "host_runtime_pid": 33412,
+      "samples": 105
+    },
+    "screenshots_captured": false
+  },
+  "schema": "alas-headless.live-workload-capture/v1",
+  "source": {
+    "commit": "f0ad26f0540a5208eac3a10baf19afeb675a6971",
+    "dirty": true,
+    "root": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue"
+  },
+  "started_at": "2026-08-30T03:47:25.787334Z",
+  "trace": {
+    "after_close": {
+      "dropped": 0,
+      "enabled": true,
+      "invalid": 0,
+      "recorded": 1829,
+      "run_id": "07899abccb474dfa82e91cc2992741e3",
+      "schema": "alas-headless.runtime-trace/v1",
+      "writer_error": null
+    },
+    "before_close": {
+      "dropped": 0,
+      "enabled": true,
+      "invalid": 0,
+      "recorded": 1828,
+      "run_id": "07899abccb474dfa82e91cc2992741e3",
+      "schema": "alas-headless.runtime-trace/v1",
+      "writer_error": null
+    },
+    "path": "E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\integration\\alas\\current-raid-restart-warm-workload-20260830-r1\\runtime-trace.jsonl",
+    "summary": {
+      "events": {
+        "adb.command": {
+          "count": 911,
+          "error_rate": 0.0,
+          "mean_ns": 55470911,
+          "outcomes": {
+            "ok": 911
+          },
+          "p50_ns": 47000000,
+          "p95_ns": 63000000,
+          "p99_ns": 79000000,
+          "timed_count": 911
+        },
+        "alas.action": {
+          "count": 1,
+          "error_rate": 0.0,
+          "mean_ns": 172000000,
+          "outcomes": {
+            "ok": 1
+          },
+          "p50_ns": 172000000,
+          "p95_ns": 172000000,
+          "p99_ns": 172000000,
+          "timed_count": 1
+        },
+        "observer.request": {
+          "count": 452,
+          "error_rate": 0.011061946902654867,
+          "mean_ns": 13539823,
+          "outcomes": {
+            "error": 5,
+            "ok": 447
+          },
+          "p50_ns": 16000000,
+          "p95_ns": 32000000,
+          "p99_ns": 32000000,
+          "timed_count": 452
+        },
+        "runtime.controller.process.sample": {
+          "count": 105,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 105
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        },
+        "runtime.game.meminfo": {
+          "count": 2,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 2
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        },
+        "runtime.game.process.identity": {
+          "count": 100,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 100
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        },
+        "runtime.process.sample": {
+          "count": 205,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 205
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        },
+        "semantic.frame.refresh": {
+          "count": 45,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 45
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        },
+        "semantic.game_manager.restart": {
+          "count": 1,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 1
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        },
+        "semantic.policy.environment-translation": {
+          "count": 1,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 1
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        },
+        "semantic.session.close": {
+          "count": 1,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 1
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        },
+        "semantic.session.open": {
+          "count": 1,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 1
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        },
+        "workload.case": {
+          "count": 2,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 2
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        },
+        "workload.phase": {
+          "count": 2,
+          "error_rate": 0.0,
+          "mean_ns": null,
+          "outcomes": {
+            "ok": 2
+          },
+          "p50_ns": null,
+          "p95_ns": null,
+          "p99_ns": null,
+          "timed_count": 0
+        }
+      },
+      "records": 1829,
+      "run_ids": [
+        "07899abccb474dfa82e91cc2992741e3"
+      ],
+      "schema": "alas-headless.runtime-trace-summary/v1"
+    }
+  },
+  "workload": {
+    "class": "lifecycle-recovery",
+    "description": "One original ALAS Restart task with running-PID turnover and recovery.",
+    "id": "restart-warm",
+    "recommended_frequency": "image-or-runtime-milestone",
+    "version": 1
+  }
+}

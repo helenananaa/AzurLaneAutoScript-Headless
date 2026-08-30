@@ -1,7 +1,22 @@
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -485,7 +485,10 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+             semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+             if (
+                 semantic_adapter is not None
+-                and semantic_adapter.daily_execution_active()
++                and (
++                    semantic_adapter.daily_execution_active()
++                    or semantic_adapter.current_raid_result_active()
++                )
+                 and semantic_adapter.open().oracle.daily_battle_result_visible()
+             ):
+                 semantic_adapter.complete_daily_battle_result()
 diff --git a/module/config/argument/args.json b/module/config/argument/args.json
 --- a/module/config/argument/args.json
 +++ b/module/config/argument/args.json
-@@ -3121,22 +3121,24 @@
+@@ -3124,10 +3124,11 @@
          "type": "select",
          "value": "campaign_main",
          "option": [
@@ -15,11 +30,7 @@ diff --git a/module/config/argument/args.json b/module/config/argument/args.json
          ],
          "option_en": [
            "raid_20260212"
-         ],
-         "option_jp": [
-           "raid_20260212"
-         ],
-         "option_tw": [
+@@ -3139,7 +3140,8 @@
            "raid_20260212"
          ],
          "option_bold": [
@@ -29,7 +40,7 @@ diff --git a/module/config/argument/args.json b/module/config/argument/args.json
          ]
        },
        "Mode": {
-@@ -6451,22 +6453,24 @@
+@@ -6454,10 +6456,11 @@
          "type": "select",
          "value": "campaign_main",
          "option": [
@@ -43,11 +54,7 @@ diff --git a/module/config/argument/args.json b/module/config/argument/args.json
          ],
          "option_en": [
            "raid_20260212"
-         ],
-         "option_jp": [
-           "raid_20260212"
-         ],
-         "option_tw": [
+@@ -6469,7 +6472,8 @@
            "raid_20260212"
          ],
          "option_bold": [
@@ -57,10 +64,31 @@ diff --git a/module/config/argument/args.json b/module/config/argument/args.json
          ]
        },
        "Mode": {
+diff --git a/module/raid/daily.py b/module/raid/daily.py
+--- a/module/raid/daily.py
++++ b/module/raid/daily.py
+@@ -50,7 +50,7 @@ class RaidDaily(RaidRun):
+         STAGE_FILTER.load(raid_daily_stage_filter)
+         stages = STAGE_FILTER.apply(stages)
+ 
+-        self.ui_ensure(page_raid)
++        self._ensure_raid_page(name)
+ 
+         for stage in stages:
+             mode = stage.name
+@@ -73,7 +73,7 @@ class RaidDaily(RaidRun):
+             Reward(self.config, self.device).reward_mission(
+                    daily=reward_config.collect_mission,
+                    weekly=False)
+-            self.ui_ensure(page_raid)
++            self._ensure_raid_page(name)
+ 
+             logger.hr('ex', level=1)
+             super().run(name=name, mode='ex', total=self.get_remain('ex'))
 diff --git a/module/raid/raid.py b/module/raid/raid.py
 --- a/module/raid/raid.py
 +++ b/module/raid/raid.py
-@@ -309,7 +309,18 @@ class Raid(MapOperation, RaidCombat, CampaignEvent):
+@@ -312,13 +312,142 @@ class Raid(MapOperation, RaidCombat, CampaignEvent):
              in: page_raid
              out: BATTLE_PREPARATION
          """
@@ -68,6 +96,10 @@ diff --git a/module/raid/raid.py b/module/raid/raid.py
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        semantic_current_raid = bool(
 +            semantic_adapter is not None and raid == 'raid_20260827'
++        )
++        semantic_use_ticket = (
++            validate_alas_raid_use_ticket(self.config.Raid_UseTicket)
++            if semantic_current_raid else False
 +        )
 +        entrance = (
 +            None if semantic_current_raid
@@ -80,7 +112,6 @@ diff --git a/module/raid/raid.py b/module/raid/raid.py
          while 1:
              if skip_first_screenshot:
                  skip_first_screenshot = False
-@@ -317,6 +328,76 @@ class Raid(MapOperation, RaidCombat, CampaignEvent):
              else:
                  self.device.screenshot()
  
@@ -115,7 +146,38 @@ diff --git a/module/raid/raid.py b/module/raid/raid.py
 +                            semantic_phase = 'precombat'
 +                            transition_timeout.reset()
 +                            continue
-+                elif semantic_phase in ('precombat', 'precombat-notice-dismissed'):
++                elif semantic_phase == 'multiple-sortie':
++                    if semantic_adapter.raid_multiple_sortie_visible(event=raid):
++                        multiple_state = semantic_adapter.raid_multiple_sortie_state(
++                            event=raid
++                        )
++                        if multiple_state.ticket_owned > 0:
++                            semantic_adapter.click_raid_multiple_sortie_back(
++                                event=raid
++                            )
++                            raise ScriptError(
++                                'Current Raid positive ticket selection is not '
++                                'semantically mapped; panel close was dispatched; '
++                                're-enter with Raid.UseTicket=false'
++                            )
++                        if not (
++                            multiple_state.sortie_count == 1
++                            and multiple_state.ticket_selected == 0
++                            and multiple_state.zero_ticket_disabled
++                        ):
++                            raise ScriptError(
++                                'Current Raid zero-ticket multiple-sortie state '
++                                'is inconsistent'
++                            )
++                        semantic_adapter.click_raid_multiple_sortie_back(event=raid)
++                        semantic_phase = 'multiple-sortie-closed'
++                        transition_timeout.reset()
++                        continue
++                elif semantic_phase in (
++                    'precombat',
++                    'precombat-notice-dismissed',
++                    'multiple-sortie-closed',
++                ):
 +                    notice_visible = semantic_adapter.raid_precombat_notice_visible(
 +                        event=raid
 +                    )
@@ -129,8 +191,21 @@ diff --git a/module/raid/raid.py b/module/raid/raid.py
 +                            transition_timeout.reset()
 +                            continue
 +                    elif semantic_adapter.raid_precombat_visible(event=raid):
-+                        semantic_adapter.click_raid_precombat_start(event=raid)
-+                        semantic_phase = 'battle-loading'
++                        if (
++                            semantic_use_ticket
++                            and semantic_phase != 'multiple-sortie-closed'
++                        ):
++                            if not semantic_adapter.raid_precombat_multiple_visible(
++                                event=raid
++                            ):
++                                raise ScriptError(
++                                    'Current Raid multiple-sortie entry is unavailable'
++                                )
++                            semantic_adapter.click_raid_precombat_multiple(event=raid)
++                            semantic_phase = 'multiple-sortie'
++                        else:
++                            semantic_adapter.click_raid_precombat_start(event=raid)
++                            semantic_phase = 'battle-loading'
 +                        transition_timeout.reset()
 +                        continue
 +                    elif (
@@ -187,18 +262,19 @@ diff --git a/module/raid/run.py b/module/raid/run.py
      def get_remain(self, mode, skip_first_screenshot=True):
          """
          Args:
-@@ -85,6 +96,10 @@ class RaidRun(Raid, CampaignEvent):
+@@ -85,7 +96,10 @@ class RaidRun(Raid, CampaignEvent):
          name = name if name else self.config.Campaign_Event
          if not name or not mode:
              raise ScriptError(f'RaidRun arguments unfilled. name={name}, mode={mode}')
+-
 +        semantic_current_raid = bool(
 +            getattr(self.device, 'semantic_adapter', None) is not None
 +            and name == 'raid_20260827'
 +        )
- 
          self.run_count = 0
          self.run_limit = self.config.StopCondition_RunCount
-@@ -104,7 +119,10 @@ class RaidRun(Raid, CampaignEvent):
+         while 1:
+@@ -104,7 +118,10 @@ class RaidRun(Raid, CampaignEvent):
  
              # UI switches
              if not self._raid_has_oil_icon:
@@ -210,7 +286,7 @@ diff --git a/module/raid/run.py b/module/raid/run.py
                  if self.triggered_stop_condition(oil_check=True, coin_check=True):
                      break
  
-@@ -112,7 +130,7 @@ class RaidRun(Raid, CampaignEvent):
+@@ -112,7 +129,7 @@ class RaidRun(Raid, CampaignEvent):
              self.device.stuck_record_clear()
              self.device.click_record_clear()
              if not self.is_raid_rpg():
@@ -219,24 +295,3 @@ diff --git a/module/raid/run.py b/module/raid/run.py
              else:
                  self.ui_ensure(page_rpg_stage)
                  self.raid_rpg_swipe()
-diff --git a/module/raid/daily.py b/module/raid/daily.py
---- a/module/raid/daily.py
-+++ b/module/raid/daily.py
-@@ -50,7 +50,7 @@ class RaidDaily(RaidRun):
-         STAGE_FILTER.load(raid_daily_stage_filter)
-         stages = STAGE_FILTER.apply(stages)
- 
--        self.ui_ensure(page_raid)
-+        self._ensure_raid_page(name)
- 
-         for stage in stages:
-             mode = stage.name
-@@ -73,7 +73,7 @@ class RaidDaily(RaidRun):
-             Reward(self.config, self.device).reward_mission(
-                    daily=reward_config.collect_mission,
-                    weekly=False)
--            self.ui_ensure(page_raid)
-+            self._ensure_raid_page(name)
- 
-             logger.hr('ex', level=1)
-             super().run(name=name, mode='ex', total=self.get_remain('ex'))

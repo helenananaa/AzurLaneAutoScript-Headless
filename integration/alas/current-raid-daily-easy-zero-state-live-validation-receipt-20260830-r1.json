@@ -1,0 +1,61 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-08-30T02:17:36.509971Z",
+  "finished_at": "2026-08-30T02:17:49.727601Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "task": "RaidDaily",
+  "mode": "easy",
+  "daily_battle_count": null,
+  "task_result": true,
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 5252,
+    "generation": 68160,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 52,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "game_version": "9.7.10",
+    "resource_hot_version": "9.7.343"
+  },
+  "scheduler_preflight": {
+    "expected": "RaidDaily",
+    "selected": "RaidDaily",
+    "selected_next_run": "2020-01-01 00:00:00",
+    "isolated_next_run": "2026-08-30 11:17:36",
+    "configured_run_count": 0
+  },
+  "login_recovered": false,
+  "ui_recovered": false,
+  "ui_recovery_steps": [],
+  "orphan_result_receipts": [],
+  "before": {
+    "remaining": 0,
+    "points": 1232,
+    "sortie_grant": 0
+  },
+  "after": {
+    "raid_page": true,
+    "remaining": 0,
+    "points": 1232,
+    "sortie_grant": 0
+  },
+  "stage_receipts": [],
+  "recommend_receipts": [],
+  "fleet_receipts": [],
+  "notice_receipts": [],
+  "sortie_receipts": [],
+  "raw_input_fallback_used": false,
+  "source_sha256": {
+    "raid": "b06ecce80365705183ced09023fc88e38fa1c3d7c2f5109ce655f3b893f94bcc",
+    "run": "36fcba32425497e4d838bf354482498296b66abadedf27a12fb06c453071c180",
+    "daily": "feba554df76f16c58048dcdb53ad2687f7bc3d549439d6ba6ee16c7cff87a8e7",
+    "adapter": "9e139199f5504a2155fdc9ab549b181057aaa48bbf808b1c7aa9b774d272bd67",
+    "oracle": "e9c0b952ba8e69a166fd6aa0ee12493c19a8c4a9c8a285c4c03fab2fc8a9876d",
+    "runner": "cfb41f8074ee96951a198399afe20757d2553a908dff78359705d3ed4d68a665"
+  }
+}
