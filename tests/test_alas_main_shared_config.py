@@ -12,7 +12,7 @@ from alas_headless.semantic_oracle import SemanticGateClosed
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
+PINNED_UPSTREAM = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly")
 
 
 class AlasMainSharedConfigTests(unittest.TestCase):

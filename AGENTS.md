@@ -35,10 +35,28 @@ be identified safely.
 
 The primary local AVD is currently:
 
-`H:\AndroidAVD\alas_game_api32_x64.avd`
+`E:\Runtime\AndroidAVD\alas_game_api32_x64.avd`
 
 Verify that the path still exists before using it. Do not assume an emulator
 serial from documentation examples; discover and bind the exact device.
+
+The Headless Unity runtime has a mandatory cold-start contract. Every game
+launch or restart, including update and recovery restarts, must pass the Unity
+extra `-force-gfx-st`; do not use a plain `am start` for this package. The
+equivalent explicit ADB launch is:
+
+```powershell
+adb -s <discovered-serial> shell am start -W --es unity '-force-gfx-st' -n com.bilibili.azurlane/com.manjuu.azurlane.MainActivity
+```
+
+An observer socket existing after a plain launch is not runtime-health
+evidence: without this Unity argument the socket may exist while main-thread
+semantic export remains unavailable. When that symptom appears, first verify
+the actual launch contract. Recover by force-stopping the exact package and
+cold-starting it with the required Unity extra, then re-validate the exact
+package, foreground activity/PID, fresh coherent generation, and required
+typed semantic surface before continuing. Do not diagnose this condition from
+the framebuffer or work around it with screenshot or coordinate input.
 
 When the game is routed through ANGLE NULL:
 

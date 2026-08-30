@@ -1317,7 +1317,7 @@ class RunnerSupervisionTests(unittest.TestCase):
         alas_root = Path(
             os.environ.get(
                 "ALAS_PINNED_ROOT",
-                "H:/program/AzurLaneAutoScript-alas-topdown-live-r5-20260824",
+                "E:/Disk0Merged/H/program/AzurLaneAutoScript-alas-topdown-live-r5-20260824",
             )
         )
         if not (alas_root / "module" / "config" / "config_updater.py").is_file():

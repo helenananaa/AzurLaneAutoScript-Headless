@@ -9,7 +9,7 @@ from alas_headless.alas_configuration_attack_matrix import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CLEAN_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
+CLEAN_UPSTREAM = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly")
 
 
 class AlasConfigurationAttackMatrixTests(unittest.TestCase):

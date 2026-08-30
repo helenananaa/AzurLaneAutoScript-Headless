@@ -6,7 +6,7 @@ from alas_headless.semantic_oracle import SemanticGateClosed
 from scripts.python.verify_alas_guild_config import verify_clean_upstream
 
 ROOT = Path(__file__).resolve().parents[1]
-PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
+PINNED_UPSTREAM = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly")
 
 class AlasGuildConfigTests(unittest.TestCase):
     def test_exact_pinned_upstream_replay_when_available(self):

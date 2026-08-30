@@ -14,8 +14,8 @@ from scripts.python.verify_alas_tactical_config import verify_clean_upstream
 
 
 ROOT = Path(__file__).resolve().parents[1]
-LIVE_ALAS = Path(r"H:\program\AzurLaneAutoScript-alas-topdown-live")
-PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
+LIVE_ALAS = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live")
+PINNED_UPSTREAM = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly")
 
 
 def defaults():

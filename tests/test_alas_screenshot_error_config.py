@@ -11,7 +11,7 @@ from scripts.python.verify_alas_screenshot_error_config import verify_clean_upst
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
+PINNED_UPSTREAM = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly")
 
 
 class AlasScreenshotErrorConfigTests(unittest.TestCase):

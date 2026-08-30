@@ -8,7 +8,7 @@ from scripts.python.verify_alas_onepush_config import verify_clean_upstream
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
+PINNED_UPSTREAM = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly")
 
 
 class AlasOnePushConfigTests(unittest.TestCase):
