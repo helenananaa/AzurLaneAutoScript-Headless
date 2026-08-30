@@ -2,6 +2,28 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-30
+
+### Research multi-resource detail and insufficient-resource delay are live complete
+
+- Research detail observation now enumerates both the base `item_tpl` and its
+  exact `item_tpl(Clone)` companion instead of silently retaining only the
+  first cost. Missing or unpaired count/icon nodes fail closed. Single-resource
+  and resource-free projects retain their original behavior.
+- The original ALAS selector chose current project `S9 Q-068-UL`. Its stable
+  typed detail proved `gold 1380/5000` and anti-air component T3
+  `17033 29858/20`, so the exact insufficient resource was gold rather than the
+  abundant component. The original `research_delay_check()` returned true;
+  research start and reward mutation counts were both zero.
+- The reconnect popup was cleared through its exact reviewed target and
+  postcondition. A separate typed return to main proved gold remained `1380`.
+  Evidence is
+  `integration/alas/research-coin-insufficient-delay-live-validation-receipt-20260830-r1.json`.
+- `Research.AllowDelay` is now field-complete. The Research panel remains `L`:
+  conditional Cube/Part strategies, all 26 presets, reset, and cross-round
+  coverage are still incomplete. A positive multi-resource start also remains
+  fail-closed until its exact confirmation prompt is naturally reviewable.
+
 ## 2026-08-26
 
 ### Event C/D stage coverage and TimeLimit are live complete on the current event
@@ -1198,6 +1220,22 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r1.json`,
   `integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r3.json`,
   and `integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r4.json`.
+- A second live recovery chain consumed the two EX tickets that were already
+  present on the account, moving EX `2→1→0` and PT `4828→5140→5452` (+312 per
+  battle). Both battles used the original RaidDaily stage/fleet/sortie and
+  combat paths. Retained failed segments exposed four adapter-boundary gaps:
+  ALAS's `POPUP_CONFIRM_COMBAT_EXECUTE` suffix, a NetworkDown overlay racing
+  `GOTO_MAIN` and unrelated login probes, the obsolete pixel-only
+  `RAID_REWARDS` probe after the current Raid page had returned, and unrelated
+  page-shell reads after a coherent Raid owner was already known. Each fix is
+  localized to its exact typed owner. The final zero-budget run read EX `0`
+  twice, preserved PT `5452`, emitted no stage/fleet/sortie receipt, returned
+  `task_result=true`, and let the original task take its zero-ticket scheduling
+  tail. The combined receipt references and hashes every retained source
+  segment:
+  `integration/alas/current-raid-daily-existing-two-ex-segmented-live-validation-receipt-20260830-r1.json`.
+  This qualifies RaidDaily's existing-ticket EX recovery, not the separate
+  `Raid.UseTicket=true` positive multiple-sortie selection/commit branch.
 - A final combined-filter run used `StageFilter="easy > normal"` with `easy=0`
   and `normal=14`. The same original task instance skipped easy without input,
   completed all fourteen normal battles, moved normal `14→0` and PT

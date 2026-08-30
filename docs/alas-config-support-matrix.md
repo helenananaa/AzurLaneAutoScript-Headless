@@ -146,7 +146,7 @@ observation 状态。
 
 语义模式新增两道动作前门禁：五张 typed 科研卡必须具有完整且唯一的槽位/Unity 身份，并且每张卡都能由固定上游 `ResearchProject` 解析；自定义过滤器中任何空 token、非法 token 或仅被上游宽松 `re.search` 部分匹配的 token 都会 fail-closed。回放 mutation budget 为 **0**，没有启动科研、重置、资源消费或 Android 输入。因此六个 Research 配置字段的 `offline` 维度提升为 `complete`，既有 observation/action/live 维度不因离线证据而提升，Research 面板仍保持 `L` 而不是 `F`。
 
-2026-08-18 的当前账号复验补齐了离开队列前的 typed 容量快照、五类部件名称到精确物品 ID 的确认映射，以及原 ALAS 已选位置与新鲜项目代码的双重校验；后者允许安全处理同一批次两张 `S9 C-153-MI`，但位置或代码任一变化仍会拒绝输入。受限运行启动两项金币科研（合计 8,000 金币）、一项魔方科研（3 魔方）、一项零件科研（鱼雷部件 T1×20）和一项无资源科研；Coin/Cube/Part 的三个 `do_not_use` 路径均没有消耗资源。最终源码绑定的 `AllowDelay=true` 回执覆盖无匹配、强制回退、重名卡选择、无资源启动及调度恢复，但当前资源充足，未触发“资源不足后等待”判定。五格队列已满，最早项目约在 2026-08-19 01:44 完成，因此 Research 保持 `L`，资源回执在最后一次位置接口变更后仍按阶段证据处理。
+2026-08-18 的当前账号复验补齐了离开队列前的 typed 容量快照、五类部件名称到精确物品 ID 的确认映射，以及原 ALAS 已选位置与新鲜项目代码的双重校验；后者允许安全处理同一批次两张 `S9 C-153-MI`，但位置或代码任一变化仍会拒绝输入。受限运行启动两项金币科研（合计 8,000 金币）、一项魔方科研（3 魔方）、一项零件科研（鱼雷部件 T1×20）和一项无资源科研；Coin/Cube/Part 的三个 `do_not_use` 路径均没有消耗资源。2026-08-30 的最终 typed 多资源回执进一步由原 ALAS 选择 `S9 Q-068-UL`，同时观察到物资 `1380/5000` 与防空炮部件 T3 `17033 29858/20`，并由原 `research_delay_check()` 返回等待；启动和领奖 mutation 均为零。`Research.AllowDelay` 因而达到五维完整，Research 面板仍因最终哈希下四策略全矩阵、26 预设、可用重置和跨轮闭环缺口保持 `L`。
 
 ### 1.5 本轮 Scheduler 六字段跨任务契约
 
@@ -418,10 +418,10 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 18 | EventC | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；EventC 的 C1-C3 均已通过原 normal 入口完成官方自动寻敌实机闭环，LastStage 分别写回 c1/c2/c3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventc-c1-auto-search-live-validation-receipt-20260823-r14.json、integration/alas/eventc-c2-auto-search-live-validation-receipt-20260826-r1.json 和 integration/alas/eventc-c3-auto-search-live-validation-receipt-20260826-r1.json。首次获得 NEW_SHIP、非默认舰队组合和共用地图配置仍未完整覆盖，因此保持 L |
 | 19 | EventD | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；EventD 的 D1-D3 均已在 2026-08-26 当前活动与游戏版本上通过原 normal 入口完成官方自动寻敌实机闭环，LastStage 分别写回 d1/d2/d3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventd-d1-auto-search-live-validation-receipt-20260826-r7.json、integration/alas/eventd-d2-auto-search-live-validation-receipt-20260826-r1.json 和 integration/alas/eventd-d3-auto-search-live-validation-receipt-20260826-r1.json。首次获得 NEW_SHIP、非默认舰队组合和共用地图配置仍未完整覆盖，因此保持 L |
 | 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；原 EventSp 任务已在固定 API 32 x86_64 AVD 上从主页完成活动入口、SP 选择、100% clear 与官方自动寻敌确认、(1,2,0) 舰队零变更出击、315 秒被动地图/战斗、Boss 总奖励退出、返回活动页及 1/1→0/1 次数后置。RunCount 1→0 并写入次日 00:00 调度；同一 supervised runner 捕获全部 generation/receipt，recovery、combat/grid/viewport 输入和 raw fallback 均为 0。凭证见 integration/alas/eventsp-sp-auto-search-live-validation-receipt-20260825-r11.json。其他舰队组合、非默认共用地图配置及新的活动布局仍按字段保持部分支持，因此为 L 而非 F |
-| 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | L | 难度过滤与 EX 奖励路由已离线回放，当前活动仍保留上游 RaidDaily 的 RunCount=0 原语义，不传播伪单战上限。9.7.343 上原任务已证明 EX=0 与 easy=0 的零输入次日调度；StageFilter='easy > normal' 在 easy=0 时安全跳过并由同一任务实例连续完成 normal 14→0、PT 2168→3148，恰好 14 组关卡/舰队/出击收据且无 raw fallback。15 次普通清理后的领奖产生 3 张 EX 票；诚实保留的 r1/r3 失败收据与最终 r4 通过收据合起来证明一次任务页失败、一次中断战果恢复和剩余两票连续清空，而不冒充单次不间断通过。随后 hard 14→0、PT 3148→4828 的十四战也通过 r3/r5 失败收据、r4 孤立战果恢复与 r6 最终四战通过收据形成可审计的分段全清；新增 current-Raid 结果所有权避免原通用 BATTLE_STATUS_S 输入接管 typed 结果。更新后原 Restart 任务已完成 -force-gfx-st PID turnover 与 typed 登录，紧随其后的 RaidDaily 在新 PID 上零输入确认 easy/normal=0、PT=3148 并再次调度。Raid.UseTicket=true 的严格零票单次回退已离线验证但仍待次数重置后的端到端实机；实际跨日唤醒、正票最终提交、进阶挑战执行和 easy 完整整轮仍未资格化，因此为 L |
+| 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | L | 难度过滤与 EX 奖励路由已离线回放，当前活动仍保留上游 RaidDaily 的 RunCount=0 原语义，不传播伪单战上限。9.7.343 上原任务已证明 EX=0 与 easy=0 的零输入次日调度；StageFilter='easy > normal' 在 easy=0 时安全跳过并由同一任务实例连续完成 normal 14→0、PT 2168→3148，恰好 14 组关卡/舰队/出击收据且无 raw fallback。15 次普通清理后的领奖产生 3 张 EX 票；诚实保留的 r1/r3 失败收据与最终 r4 通过收据合起来证明一次任务页失败、一次中断战果恢复和剩余两票连续清空，而不冒充单次不间断通过。随后 hard 14→0、PT 3148→4828 的十四战也通过 r3/r5 失败收据、r4 孤立战果恢复与 r6 最终四战通过收据形成可审计的分段全清；新增 current-Raid 结果所有权避免原通用 BATTLE_STATUS_S 输入接管 typed 结果。本轮又以可审计分段链消费账号现有两张 EX 票，EX 2→1→0、PT 4828→5140→5452；精确 NetworkDown 恢复覆盖 combat_execute、结果结束和返回主界面，最终零预算任务闭合为 task_result=true 且无 raw fallback。更新后原 Restart 任务已完成 -force-gfx-st PID turnover 与 typed 登录，紧随其后的 RaidDaily 在新 PID 上零输入确认 easy/normal=0、PT=3148 并再次调度。Raid.UseTicket=true 的严格零票单次回退已离线验证但仍待次数重置后的端到端实机；实际跨日唤醒、正票最终提交、进阶挑战执行和 easy 完整整轮仍未资格化，因此为 L |
 | 22 | Commission | Scheduler, Commission | F | 六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环 |
 | 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 新学员、选书过滤与经验溢出均已实机闭环；快速学习因当前非活动期仍未闭环 |
-| 24 | Research | Scheduler, Research | L | 三资源 always/do_not、队列容量、部件映射和重名卡已实机；最终哈希全策略、资源不足延迟、重置、26 预设及跨轮仍未闭环 |
+| 24 | Research | Scheduler, Research | L | 三资源 always/do_not、队列容量、部件映射、重名卡和真实物资不足延迟已实机；最终哈希全策略、重置、26 预设及跨轮仍未闭环 |
 | 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取、喂食与食物过滤均已完整闭环；BuyFurniture 已完成活动主题 set 实买、家具币扣款、LastRun、调度与主页恢复，all 原生路径已实现但因 set 后活动候选从当前账号消失，尚缺另一未购买活动主题的最终实买回执 |
 | 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | B | 原 Meowfficer 状态机现已接入完整 typed 边界：购买精确数量与金币后置条件、Fort 已入住猫的 play/feed/clean chores、相同卡面的连续领取、特殊紫/金天赋锁定、seamlessly/周日增强，以及按 EnhanceIndex 与 MaxFeedLevel 选择目标和最多 10 只材料。实机证据覆盖购买次数已满零输入、Fort 0/8 安全跳过、训练 10/10 已满零资源变化、once_a_day 领取 1 只普通 SSR 后补排金箱，以及当前数字卡片层级下 EnhanceIndex=1 命中 LV30 后零输入返回 leveled_max；当前可见前 12 个 ALAS 目标均为 LV30，需出现可见非满级目标和合格材料后才能复核强化正向消耗。正向购买、已入住 Fort、特殊天赋、多只领取和完整强化消耗仍只离线闭环，因此面板保持 B |
 | 27 | Guild | Scheduler, GuildLogistics, GuildOperation | L | 普通成员实机主路径已闭环：大厅 20/20 报告全领、后勤补给领取与 3 次按过滤器兑换、7-1 推荐编队并派遣；新任务选择、加入阈值、新行动创建、Boss 攻击与 Boss 推荐仍待对应角色和页面状态验证 |
@@ -510,7 +510,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Tactical | `RapidTrainingSlot`=`do_not_use/slot_1/slot_2/slot_3/slot_4`; `TacticalFilter` | L | TacticalFilter 已通过原始任务的真实书库存排序、选书、开课确认和运行后置状态；仍需真实快速学习可用性/次数、无书/无空位及其他教学分支闭环 |
 | ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | F | `5750/5800` 真实临界技能下完成关闭过滤、四档精确放行、T4 选书、唯一课程确认与运行后置状态；全部边界继续由离线回放覆盖 |
 | AddNewStudent | `Enable`; `Favorite`; `MinLevel` | F | Disabled 不变性、收藏/非收藏候选范围、120 级选舰、原始选书与唯一课程确认、运行中课程后置条件均已实机闭环 |
-| Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 三资源 always/do_not、重名卡、队列容量与真值回退已实机；仍缺当前最终哈希下四策略全矩阵、26 预设、真实资源不足延迟、可用重置和跨轮闭环 |
+| Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 三资源 always/do_not、重名卡、队列容量、真值回退与真实物资不足延迟已实机；仍缺当前最终哈希下四策略全矩阵、26 预设、可用重置和跨轮闭环 |
 | Dorm | `Collect`; `Feed`; `FeedFilter` | L | 三字段均已达到五维完整：真实收取控件由有变无、喂食库存差、关闭分支、单值过滤器与全部合法优先级均有证据；面板仍由 BuyFurniture all 的实买缺口限制 |
 | BuyFurniture | `Enable`; `BuyOption`=`set/all`; `LastRun` | P | set 活动主题实买、家具币精确扣款、LastRun、六舰调度、主页恢复和 post-set all 无候选均已闭环；all 最终实买等待另一未购买活动主题 |
 | Meowfficer | `BuyAmount`; `FortChoreMeowfficer`; `OverflowCoins` | B | 已精确读取 15/15 购买次数、707 物资、35/40 容量、0/8 宿舍及三类箱子；原购买任务在次数已满边界零输入并调度至次日。仍缺正向购买、金币溢出消费和宿舍任务动作 |
@@ -677,8 +677,8 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **54 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **145 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| ✅ 五维完整支持 | **55 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **144 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
 | 🧪 只有离线路径证据 | **64 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
 | ⊘ 当前未适配或无效 | **15 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
@@ -920,7 +920,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Raid.Mode` | Raid | type=select; display=default | options: "easy", "ex", "hard", "normal"; default: "hard" | `L`/◐ 四模式单局实机闭环 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `Raid.UseTicket` | Raid | type=checkbox; display=default | input/default: false | `L`/◐ false 实机；true 零票回退待实机 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `RaidDaily.StageFilter` | RaidDaily | type=textarea; display=default | input/default: "hard > normal > easy" | `L`/◐ normal 连续 + hard 分段全清 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `Research.AllowDelay` | Research | type=checkbox; display=default | input/default: true | `L`/◐ 双值严校/延迟待条件 | ☑ | ☑ | ◐ | ☑ | ◐ |
+| `Research.AllowDelay` | Research | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Research.CustomFilter` | Research | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 自定义语法实机子集 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `Research.PresetFilter` | Research | type=select; display=default | options: "custom", "series_2_457_only", "series_2_blueprint_457", "series_2_blueprint_only", "series_2_than_3_457_234", "series_3_234_only", "series_3_blueprint_234", "series_3_blueprint_only", "series_4_blueprint_only", "series_4_blueprint_tenrai", "series_4_tenrai_only", "series_5_152_only", "series_5_blueprint_152", "series_5_blueprint_only", "series_6_203_only", "series_6_blueprint_203", "series_6_blueprint_only", "series_7_blueprint_la9", "series_7_blueprint_only", "series_7_la9_only", "series_8_305_only", "series_8_blueprint_305", "series_8_blueprint_only", "series_9_blueprint_only", "series_9_blueprint_ta152", "series_9_ta152_only"; default: "series_9_blueprint_ta152" | `L`/◐ 26 预设严校/实机子集 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `Research.UseCoin` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 四策略实机/一项分段恢复 | ☑ | ☑ | ☑ | ☑ | ◐ |

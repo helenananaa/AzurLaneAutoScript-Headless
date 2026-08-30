@@ -10280,6 +10280,110 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(detail.resource_owned, 29300)
         self.assertEqual(detail.resource_required, 20)
 
+    def test_research_detail_collects_base_and_clone_resource_costs(self):
+        selected = (
+            "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"
+            "main/base_page/selecte_panel/"
+        )
+        card = selected + "technology_card/frame/"
+        backend = FakeBackend(
+            [
+                make_button("selecte_panel", selected.rstrip("/")),
+                make_button("start_btn", card + "btns/start_btn"),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("Q-068-UL", card + "name_bg/Text"),
+                make_text("小型项目", card + "sub_name"),
+                make_text("00:30:00", selected + "timer/bg/Text"),
+                make_text(
+                    "<color=#FF5C5CFF>1380</color>/5000",
+                    selected
+                    + "consume_panel/bg/container/item_tpl/icon_bg/count",
+                ),
+                make_text(
+                    "29858/20",
+                    selected
+                    + "consume_panel/bg/container/item_tpl(Clone)/icon_bg/count",
+                ),
+                make_text(
+                    "-无-",
+                    selected + "consume_panel/bg/task_panel/slider/Text",
+                ),
+            ],
+            images=[
+                make_image(
+                    selected
+                    + "consume_panel/bg/container/item_tpl/icon_bg/icon",
+                    "gold",
+                ),
+                make_image(
+                    selected
+                    + "consume_panel/bg/container/item_tpl(Clone)/icon_bg/icon",
+                    "17033",
+                ),
+            ],
+        )
+
+        detail = make_oracle(backend).research_detail_state()
+
+        self.assertEqual(detail.resource_id, "gold")
+        self.assertEqual(detail.resource_owned, 1380)
+        self.assertEqual(detail.resource_required, 5000)
+        self.assertEqual(
+            [
+                (cost.resource_id, cost.owned, cost.required)
+                for cost in detail.resource_costs
+            ],
+            [("gold", 1380, 5000), ("17033", 29858, 20)],
+        )
+        self.assertFalse(detail.can_start)
+
+    def test_research_detail_rejects_unpaired_clone_resource(self):
+        selected = (
+            "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"
+            "main/base_page/selecte_panel/"
+        )
+        card = selected + "technology_card/frame/"
+        backend = FakeBackend(
+            [
+                make_button("selecte_panel", selected.rstrip("/")),
+                make_button("start_btn", card + "btns/start_btn"),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("Q-068-UL", card + "name_bg/Text"),
+                make_text("小型项目", card + "sub_name"),
+                make_text("00:30:00", selected + "timer/bg/Text"),
+                make_text(
+                    "1380/5000",
+                    selected
+                    + "consume_panel/bg/container/item_tpl/icon_bg/count",
+                ),
+                make_text(
+                    "29858/20",
+                    selected
+                    + "consume_panel/bg/container/item_tpl(Clone)/icon_bg/count",
+                ),
+                make_text(
+                    "-无-",
+                    selected + "consume_panel/bg/task_panel/slider/Text",
+                ),
+            ],
+            images=[
+                make_image(
+                    selected
+                    + "consume_panel/bg/container/item_tpl/icon_bg/icon",
+                    "gold",
+                )
+            ],
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "resource identity"):
+            make_oracle(backend).research_detail_state()
+
     def test_finished_research_cannot_close_through_detail_root(self):
         selected = (
             "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"

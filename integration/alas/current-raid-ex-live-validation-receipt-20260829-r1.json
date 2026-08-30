@@ -1,0 +1,36 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-29T13:20:46.107113Z",
+  "finished_at": "2026-08-29T13:21:34.247079Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "mode": "ex",
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 4155,
+    "generation": 34862,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 45,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44"
+  },
+  "login_recovered": false,
+  "ui_recovered": false,
+  "before": {
+    "remaining": 1,
+    "points": 250,
+    "sortie_grant": 1
+  },
+  "after": {},
+  "stage_receipts": [],
+  "recommend_receipts": [],
+  "fleet_receipts": [],
+  "notice_receipts": [],
+  "sortie_receipts": [],
+  "error": "SystemExit: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 71, in run\n    self.__getattribute__(command)()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 378, in raid\n    RaidRun(config=self.config, device=self.device).run()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\run.py\", line 141, in run\n    if not self.get_remain(mode):\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\run.py\", line 60, in get_remain\n    remain = semantic_adapter.raid_remain(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 17940, in raid_remain\n    return self.open().raid_remain(event=event, mode=mode)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 9912, in raid_remain\n    return self.oracle.raid_remain(event=event, mode=mode)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 22503, in raid_remain\n    return self.raid_remain_state(event=event, mode=mode).remaining\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 21544, in raid_remain_state\n    return self._amatsukaze_raid_remain_state(mode)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 21821, in _amatsukaze_raid_remain_state\n    raise SemanticGateClosed(\"current Raid remaining counter is absent or ambiguous\")\nalas_headless.semantic_oracle.SemanticGateClosed: current Raid remaining counter is absent or ambiguous\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 217, in run\n    task_result = instance.run(\"raid\")\n                  ^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 135, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "raw_input_fallback_used": false
+}

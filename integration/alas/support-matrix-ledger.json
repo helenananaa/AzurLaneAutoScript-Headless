@@ -6650,9 +6650,9 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
-        "live": "partial",
+        "live": "complete",
         "observation": "complete",
         "offline": "complete"
       },
@@ -6660,21 +6660,23 @@
         "tests/test_alas_research_config_replay.py",
         "python/alas_headless/alas_research_config_contract.py",
         "python/alas_headless/alas_research_config_replay.py",
+        "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
         "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-coin-only-05-hour-current-final-r1-live-validation-receipt.json",
         "integration/alas/research-resource-policy-recovery-20260822.json",
+        "integration/alas/research-coin-insufficient-delay-live-validation-receipt-20260830-r1.json",
         "docs/status.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Research"
       ],
       "path": "Research.AllowDelay",
-      "status_label": "◐ 双值严校/延迟待条件",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -8821,7 +8823,7 @@
         "Emotion"
       ],
       "name": "RaidDaily",
-      "note": "难度过滤与 EX 奖励路由已离线回放，当前活动仍保留上游 RaidDaily 的 RunCount=0 原语义，不传播伪单战上限。9.7.343 上原任务已证明 EX=0 与 easy=0 的零输入次日调度；StageFilter='easy > normal' 在 easy=0 时安全跳过并由同一任务实例连续完成 normal 14→0、PT 2168→3148，恰好 14 组关卡/舰队/出击收据且无 raw fallback。15 次普通清理后的领奖产生 3 张 EX 票；诚实保留的 r1/r3 失败收据与最终 r4 通过收据合起来证明一次任务页失败、一次中断战果恢复和剩余两票连续清空，而不冒充单次不间断通过。随后 hard 14→0、PT 3148→4828 的十四战也通过 r3/r5 失败收据、r4 孤立战果恢复与 r6 最终四战通过收据形成可审计的分段全清；新增 current-Raid 结果所有权避免原通用 BATTLE_STATUS_S 输入接管 typed 结果。更新后原 Restart 任务已完成 -force-gfx-st PID turnover 与 typed 登录，紧随其后的 RaidDaily 在新 PID 上零输入确认 easy/normal=0、PT=3148 并再次调度。Raid.UseTicket=true 的严格零票单次回退已离线验证但仍待次数重置后的端到端实机；实际跨日唤醒、正票最终提交、进阶挑战执行和 easy 完整整轮仍未资格化，因此为 L",
+      "note": "难度过滤与 EX 奖励路由已离线回放，当前活动仍保留上游 RaidDaily 的 RunCount=0 原语义，不传播伪单战上限。9.7.343 上原任务已证明 EX=0 与 easy=0 的零输入次日调度；StageFilter='easy > normal' 在 easy=0 时安全跳过并由同一任务实例连续完成 normal 14→0、PT 2168→3148，恰好 14 组关卡/舰队/出击收据且无 raw fallback。15 次普通清理后的领奖产生 3 张 EX 票；诚实保留的 r1/r3 失败收据与最终 r4 通过收据合起来证明一次任务页失败、一次中断战果恢复和剩余两票连续清空，而不冒充单次不间断通过。随后 hard 14→0、PT 3148→4828 的十四战也通过 r3/r5 失败收据、r4 孤立战果恢复与 r6 最终四战通过收据形成可审计的分段全清；新增 current-Raid 结果所有权避免原通用 BATTLE_STATUS_S 输入接管 typed 结果。本轮又以可审计分段链消费账号现有两张 EX 票，EX 2→1→0、PT 4828→5140→5452；精确 NetworkDown 恢复覆盖 combat_execute、结果结束和返回主界面，最终零预算任务闭合为 task_result=true 且无 raw fallback。更新后原 Restart 任务已完成 -force-gfx-st PID turnover 与 typed 登录，紧随其后的 RaidDaily 在新 PID 上零输入确认 easy/normal=0、PT=3148 并再次调度。Raid.UseTicket=true 的严格零票单次回退已离线验证但仍待次数重置后的端到端实机；实际跨日唤醒、正票最终提交、进阶挑战执行和 easy 完整整轮仍未资格化，因此为 L",
       "status": "L"
     },
     {
@@ -8830,7 +8832,7 @@
         "Research"
       ],
       "name": "Research",
-      "note": "三资源 always/do_not、队列容量、部件映射和重名卡已实机；最终哈希全策略、资源不足延迟、重置、26 预设及跨轮仍未闭环",
+      "note": "三资源 always/do_not、队列容量、部件映射、重名卡和真实物资不足延迟已实机；最终哈希全策略、重置、26 预设及跨轮仍未闭环",
       "status": "L"
     },
     {
@@ -11545,10 +11547,11 @@
         "integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r6.json",
         "integration/alas/current-raid-restart-warm-workload-20260830-r1/result.json",
         "integration/alas/current-raid-daily-post-restart-zero-state-live-validation-receipt-20260830-r1.json",
+        "integration/alas/current-raid-daily-existing-two-ex-segmented-live-validation-receipt-20260830-r1.json",
         "docs/status.md"
       ],
       "field": "RaidDaily.StageFilter",
-      "note": "All 64 non-repeating ordered subsets preserve the original filter forwarding and EX reward route offline; current live evidence adds an easy-zero skip followed by a 14-battle uninterrupted normal clear, the segmented three-ticket EX reward/recovery path, a segmented hard 14→0 clear whose final four battles passed under the explicit current-Raid result owner, and a typed zero-state re-entry after the original Restart scheduler cold-started the game with -force-gfx-st. Malformed filters fail before a RaidDaily stateful boundary."
+      "note": "All 64 non-repeating ordered subsets preserve the original filter forwarding and EX reward route offline; current live evidence adds an easy-zero skip followed by a 14-battle uninterrupted normal clear, the segmented three-ticket EX reward/recovery path, a segmented hard 14→0 clear whose final four battles passed under the explicit current-Raid result owner, a second segmented existing-ticket EX 2→0 / PT 4828→5452 recovery with exact NetworkDown handling and a passing zero-budget task close, and a typed zero-state re-entry after the original Restart scheduler cold-started the game with -force-gfx-st. Malformed filters fail before a RaidDaily stateful boundary."
     },
     {
       "dimensions": {
@@ -11764,22 +11767,25 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
+        "live": "complete",
         "observation": "complete"
       },
       "evidence": [
         "tests/test_alas_research_config_replay.py",
         "python/alas_headless/alas_research_config_contract.py",
+        "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
         "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-coin-only-05-hour-current-final-r1-live-validation-receipt.json",
         "integration/alas/research-resource-policy-recovery-20260822.json",
+        "integration/alas/research-coin-insufficient-delay-live-validation-receipt-20260830-r1.json",
         "docs/status.md"
       ],
       "field": "Research.AllowDelay",
-      "note": "The pinned runtime now rejects non-boolean values before the original delay branch, and both booleans are complete offline. Current live runs exercised true and false through the original selector and exact start path. The actual insufficient-resource delay decision remains account-blocked and live-partial."
+      "note": "Both booleans are complete offline and reject malformed values before the original delay branch. Current live runs cover true and false through the original selector, and the final typed multi-resource run selected S9 Q-068-UL, proved gold 1380/5000 plus part 17033 29858/20, returned the original insufficient-resource delay decision, issued zero Research mutations, and preserved gold at 1380."
     },
     {
       "dimensions": {

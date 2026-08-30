@@ -1,0 +1,62 @@
+{
+  "schema": "alas-headless.oracle-live-smoke/v1",
+  "passed": true,
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 7176,
+  "generation": 12150,
+  "scene_handle": -76,
+  "button_count": 41,
+  "blockers": [],
+  "targets": {
+    "main/battle": {
+      "left": 1112.089,
+      "top": 426.72,
+      "right": 1271.371,
+      "bottom": 592.666
+    },
+    "main/formation": {
+      "left": 1012.346,
+      "top": 426.72,
+      "right": 1110.314,
+      "bottom": 592.666
+    },
+    "main/settings": {
+      "left": 1202.334,
+      "top": 17.557,
+      "right": 1239.667,
+      "bottom": 54.89
+    },
+    "main/mail": {
+      "left": 1033.001,
+      "top": 17.557,
+      "right": 1070.334,
+      "bottom": 54.89
+    },
+    "main/shop": {
+      "left": 8.705,
+      "top": 650.25,
+      "right": 174.651,
+      "bottom": 716.895
+    },
+    "main/dock": {
+      "left": 165.721,
+      "top": 650.25,
+      "right": 331.667,
+      "bottom": 716.895
+    },
+    "main/task": {
+      "left": 792.117,
+      "top": 650.25,
+      "right": 958.063,
+      "bottom": 716.895
+    },
+    "main/build": {
+      "left": 948.2,
+      "top": 650.25,
+      "right": 1114.146,
+      "bottom": 716.895
+    }
+  },
+  "input_injected": false
+}

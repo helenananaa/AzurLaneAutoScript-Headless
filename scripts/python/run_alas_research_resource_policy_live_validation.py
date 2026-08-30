@@ -30,6 +30,8 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT / "python") not in sys.path:
     sys.path.insert(0, str(ROOT / "python"))
 
+from alas_headless import SemanticGateClosed
+
 
 RESOURCE_FIELDS = {
     "coin": "UseCoin",
@@ -74,14 +76,20 @@ def _adb(serial: str, *arguments: str) -> str:
     return completed.stdout.strip()
 
 
-def _load_modules(alas_root: Path, driver_revision: str) -> SimpleNamespace:
+def _load_modules(
+    alas_root: Path,
+    driver_revision: str,
+    *,
+    start_budget: int = 1,
+    reward_budget: int = 2,
+) -> SimpleNamespace:
     os.environ["ALAS_SEMANTIC_MODE"] = "1"
     os.environ["ALAS_SEMANTIC_DRIVER_REVISION"] = driver_revision
     os.environ["ALAS_SEMANTIC_ADB"] = "adb"
-    os.environ["ALAS_SEMANTIC_RESEARCH_START_BUDGET"] = "1"
+    os.environ["ALAS_SEMANTIC_RESEARCH_START_BUDGET"] = str(start_budget)
     # Original ALAS can first claim the five-slot queue and then a separately
     # finished sixth card before it reaches selection.  Bound both claims.
-    os.environ["ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET"] = "2"
+    os.environ["ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET"] = str(reward_budget)
     for path in (ROOT / "python", alas_root):
         value = str(path)
         if value not in sys.path:
@@ -89,10 +97,12 @@ def _load_modules(alas_root: Path, driver_revision: str) -> SimpleNamespace:
     os.chdir(alas_root)
     from alas import AzurLaneAutoScript
     from module.config.config import name_to_function
+    from module.handler.login import LoginHandler
     from module.research.research import RewardResearch
 
     return SimpleNamespace(
         AzurLaneAutoScript=AzurLaneAutoScript,
+        LoginHandler=LoginHandler,
         name_to_function=name_to_function,
         RewardResearch=RewardResearch,
     )
@@ -145,34 +155,64 @@ def validate(
     resource: str,
     strategy: str,
     allow_delay: bool = False,
+    expect: str = "start",
+    filter_override: str | None = None,
+    serial_override: str | None = None,
+    reward_budget_override: int | None = None,
 ) -> Mapping[str, Any]:
     if resource not in RESOURCE_FIELDS:
         raise ValueError("resource must be coin, cube, or part")
     if strategy not in STRATEGIES:
         raise ValueError("strategy is not declared by the pinned ALAS config")
+    if expect not in ("start", "insufficient_delay"):
+        raise ValueError("expect must be start or insufficient_delay")
+    if filter_override is not None and (
+        not isinstance(filter_override, str) or not filter_override.strip()
+    ):
+        raise ValueError("filter override must be non-empty text")
+    if expect == "insufficient_delay" and not allow_delay:
+        raise ValueError("insufficient_delay requires AllowDelay=true")
+    if reward_budget_override is not None and not 0 <= reward_budget_override <= 6:
+        raise ValueError("reward budget must be in [0, 6]")
 
     seed_path = alas_root / "config" / (seed_config + ".json")
     seed = _read_json(seed_path)
-    serial = seed["Alas"]["Emulator"]["Serial"]
+    serial = serial_override or seed["Alas"]["Emulator"]["Serial"]
     package = seed["Alas"]["Emulator"]["PackageName"]
-    if not isinstance(serial, str) or not serial:
+    if not isinstance(serial, str) or not serial or serial == "auto":
         raise AssertionError("seed config has no emulator serial")
+    if package == "auto":
+        package = "com.bilibili.azurlane"
     if not isinstance(package, str) or not package:
         raise AssertionError("seed config has no package")
     if not _adb(serial, "shell", "pidof", package):
         raise RuntimeError("game package is not running")
 
     payload = copy.deepcopy(seed)
+    payload["Alas"]["Emulator"].update(
+        {
+            "Serial": serial,
+            "PackageName": package,
+            "ScreenshotMethod": "ADB",
+        }
+    )
     payload["Alas"]["Error"].update({"HandleError": False, "SaveError": False})
     payload["Research"]["Scheduler"]["Enable"] = False
     configured = {
         "PresetFilter": "custom",
-        "CustomFilter": RESOURCE_FILTERS[resource],
+        "CustomFilter": filter_override or RESOURCE_FILTERS[resource],
         "AllowDelay": allow_delay,
         "UseCoin": "do_not_use",
         "UseCube": "do_not_use",
         "UsePart": "do_not_use",
     }
+    if expect == "insufficient_delay":
+        # A current half-hour Q project carries both gold and a component cost.
+        # Admit companion resources so original ALAS can select the card, then
+        # prove the requested deficient resource from the complete typed detail.
+        configured.update(
+            {"UseCoin": "always_use", "UseCube": "always_use", "UsePart": "always_use"}
+        )
     configured[RESOURCE_FIELDS[resource]] = strategy
     payload["Research"]["Research"].update(configured)
     config_name = "codex_research_policy_live_" + uuid.uuid4().hex
@@ -183,32 +223,83 @@ def validate(
         "passed": False,
         "dispatches": [],
         "reward_dispatches": [],
+        "research_detail_observations": [],
+        "delay_checks": [],
+        "network_recoveries": [],
     }
     instance: object | None = None
     adapter: object | None = None
     original_sort_filter: Callable[..., object] | None = None
     original_dispatch: Callable[..., object] | None = None
+    original_detail_state: Callable[..., object] | None = None
+    original_delay_check: Callable[..., object] | None = None
     prior_budget = os.environ.get("ALAS_SEMANTIC_RESEARCH_START_BUDGET")
     prior_reward_budget = os.environ.get("ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET")
     try:
-        modules = _load_modules(alas_root, driver_revision)
+        start_budget = 0 if expect == "insufficient_delay" else 1
+        reward_budget = (
+            reward_budget_override
+            if reward_budget_override is not None
+            else (0 if expect == "insufficient_delay" else 2)
+        )
+        result["research_start_grant"] = start_budget
+        result["research_reward_grant"] = reward_budget
+        modules = _load_modules(
+            alas_root,
+            driver_revision,
+            start_budget=start_budget,
+            reward_budget=reward_budget,
+        )
         instance = modules.AzurLaneAutoScript(config_name)
         instance.config.bind("Research")
         instance.config.task = modules.name_to_function("Research")
         semantic_session = instance.device.semantic_adapter
         adapter = semantic_session.open()
+        startup_oracle = adapter.oracle
+        if (
+            startup_oracle.enabled("login/enter")
+            or startup_oracle.login_update_download_available()
+            or startup_oracle.login_update_in_progress()
+            or startup_oracle.login_update_restart_prompt_available()
+        ):
+            modules.LoginHandler(
+                instance.config, device=instance.device
+            ).handle_app_login()
+            result["login_recovery_performed"] = True
+            adapter = semantic_session.open()
+        else:
+            result["login_recovery_performed"] = False
         original_dispatch = adapter._dispatch_mutation
+        original_detail_state = adapter.oracle.research_detail_state
+
+        def observed_detail_state(*args: Any, **kwargs: Any) -> object:
+            detail = original_detail_state(*args, **kwargs)
+            result["research_detail_observations"].append(asdict(detail))
+            return detail
+
+        adapter.oracle.research_detail_state = observed_detail_state
 
         def record_dispatch(capability: str, operation: object) -> object:
             receipt = original_dispatch(capability, operation)
             context = adapter._research_context
+            pending_costs = tuple(
+                getattr(context, "pending_resource_costs", ()) or ()
+            )
+            primary_cost = pending_costs[0] if pending_costs else (
+                getattr(context, "pending_resource_id", None),
+                getattr(context, "pending_resource_required", None),
+            )
             record = {
                 "capability": capability,
                 "selected_code": getattr(context, "selected_code", None),
                 "expected_prompt_cost": {
-                    "resource_id": getattr(context, "pending_resource_id", None),
-                    "required": getattr(context, "pending_resource_required", None),
+                    "resource_id": primary_cost[0],
+                    "required": primary_cost[1],
                 },
+                "expected_prompt_costs": [
+                    {"resource_id": item[0], "required": item[1]}
+                    for item in pending_costs
+                ],
                 **_receipt_value(receipt),
             }
             if capability == "research.reward":
@@ -237,6 +328,14 @@ def validate(
 
         modules.RewardResearch.research_sort_filter = record_sort_filter
         task = modules.RewardResearch(config=instance.config, device=instance.device)
+        original_delay_check = task.research_delay_check
+
+        def observed_delay_check(*args: Any, **kwargs: Any) -> object:
+            returned = original_delay_check(*args, **kwargs)
+            result["delay_checks"].append({"returned": bool(returned)})
+            return returned
+
+        task.research_delay_check = observed_delay_check
         original_queue_append = task.research_queue_append
 
         def run_one_queue_append(*args: Any, **kwargs: Any) -> object:
@@ -253,8 +352,50 @@ def validate(
             return original_queue_append(*args, **kwargs)
 
         task.research_queue_append = run_one_queue_append
+
+        def recover_exact_network_popup() -> bool:
+            semantic_id = "overlay/network-reconnect/confirm"
+            if not adapter.oracle.enabled(semantic_id):
+                return False
+            receipt = adapter.oracle.click(semantic_id)
+            post_generation = receipt.generation
+            for _ in range(40):
+                time.sleep(0.25)
+                state = adapter.oracle.read_state()
+                post_generation = state.generation
+                if not adapter.oracle.exists(semantic_id):
+                    result["network_recoveries"].append(
+                        {
+                            **_receipt_value(receipt),
+                            "post_generation": post_generation,
+                            "postcondition": semantic_id + " absent",
+                        }
+                    )
+                    return True
+            raise SemanticGateClosed(
+                "network reconnect confirmation did not clear its exact popup"
+            )
+
         started = time.monotonic()
-        result["task_return"] = task.run()
+        for attempt in range(4):
+            recover_exact_network_popup()
+            try:
+                result["task_return"] = task.run()
+                break
+            except SemanticGateClosed as exc:
+                # A reconnect overlay can arrive between any two original
+                # Research reads, so the immediate failure may be a page or
+                # detail identity gate rather than the click-level actionable
+                # error.  Retry only when the exact reviewed reconnect target
+                # is currently present and its postcondition is observed.
+                if attempt < 3 and recover_exact_network_popup():
+                    result.setdefault("network_retry_errors", []).append(
+                        type(exc).__name__ + ": " + str(exc)
+                    )
+                    continue
+                raise
+        else:
+            raise AssertionError("Research retry loop exhausted unexpectedly")
         result["task_completed"] = True
         result["elapsed_seconds"] = round(time.monotonic() - started, 3)
         result["research_start_grant_remaining"] = adapter._action_ledger.remaining(
@@ -263,6 +404,7 @@ def validate(
         result["research_reward_grant_remaining"] = adapter._action_ledger.remaining(
             "research.reward"
         )
+        result["final_next_run"] = str(instance.config.Scheduler_NextRun)
         try:
             result["projects_after_task"] = _typed_projects(adapter)
         except Exception as exc:
@@ -286,18 +428,67 @@ def validate(
             for item in result["reward_dispatches"]
         ):
             raise AssertionError("Research reward issued an unexpected mutation capability")
-        if result["research_reward_grant_remaining"] != 2 - len(
+        if result["research_reward_grant_remaining"] != reward_budget - len(
             result["reward_dispatches"]
         ):
             raise AssertionError("Research reward-budget accounting is inconsistent")
-        if strategy == "do_not_use":
+        if expect == "insufficient_delay":
+            def observed_costs(item: Mapping[str, Any]) -> list[Mapping[str, Any]]:
+                costs = item.get("resource_costs") or []
+                if costs:
+                    return list(costs)
+                if item.get("resource_id"):
+                    return [
+                        {
+                            "resource_id": item["resource_id"],
+                            "owned": item["resource_owned"],
+                            "required": item["resource_required"],
+                        }
+                    ]
+                return []
+
+            def is_target_cost(resource_id: object) -> bool:
+                value = str(resource_id or "")
+                if resource == "coin":
+                    return value == "gold"
+                if resource == "cube":
+                    return value == "20001"
+                return value.startswith("research_part_t") or bool(
+                    len(value) == 5 and value.startswith("170") and value.isdigit()
+                )
+
+            insufficient = [
+                item
+                for item in result["research_detail_observations"]
+                if any(
+                    is_target_cost(cost.get("resource_id"))
+                    and int(cost.get("owned", 0)) < int(cost.get("required", 0))
+                    for cost in observed_costs(item)
+                )
+                and not item["can_start"]
+            ]
+            if not insufficient:
+                raise AssertionError(
+                    "selected research project did not prove insufficient resources"
+                )
+            if result["dispatches"]:
+                raise AssertionError(
+                    "insufficient-delay qualification crossed the research-start boundary"
+                )
+            if not any(item["returned"] for item in result["delay_checks"]):
+                raise AssertionError("original ALAS AllowDelay branch was not accepted")
+            if result["research_start_grant_remaining"] != 0:
+                raise AssertionError("zero research-start budget changed unexpectedly")
+            result["insufficient_resource_observations"] = insufficient
+        elif strategy == "do_not_use":
             # A no-resource project is allowed by all three upstream
             # ``do_not_use`` choices and starts directly, without consuming
             # gold/cubes/parts or opening a cost prompt.  It remains a
             # bounded Research start, but any non-empty resource receipt would
             # prove that the policy was violated.
             if any(
-                item["expected_prompt_cost"]["resource_id"]
+                item.get("expected_prompt_costs")
+                or item["expected_prompt_cost"]["resource_id"]
                 for item in result["dispatches"]
             ):
                 raise AssertionError("do_not_use started a resource-consuming research project")
@@ -306,7 +497,10 @@ def validate(
         elif not result["dispatches"]:
             raise AssertionError("resource policy did not produce its bounded start receipt")
         else:
-            if not result["dispatches"][0]["expected_prompt_cost"]["resource_id"]:
+            if not (
+                result["dispatches"][0].get("expected_prompt_costs")
+                or result["dispatches"][0]["expected_prompt_cost"]["resource_id"]
+            ):
                 raise AssertionError("resource policy selected a resource-free project")
             if result["research_start_grant_remaining"] != 0:
                 raise AssertionError("bounded Research start did not consume its grant")
@@ -317,6 +511,8 @@ def validate(
     finally:
         if original_sort_filter is not None:
             modules.RewardResearch.research_sort_filter = original_sort_filter
+        if adapter is not None and original_detail_state is not None:
+            adapter.oracle.research_detail_state = original_detail_state
         if adapter is not None and original_dispatch is not None:
             adapter._dispatch_mutation = original_dispatch
             result["research_start_grant_remaining"] = adapter._action_ledger.remaining(
@@ -347,6 +543,7 @@ def validate(
         "configured": {"Research." + key: value for key, value in configured.items()},
         "target_resource": resource,
         "strategy": strategy,
+        "expect": expect,
         "source_sha256": {
             "research": _sha256(alas_root / "module" / "research" / "research.py"),
             "selector": _sha256(alas_root / "module" / "research" / "selector.py"),
@@ -368,6 +565,12 @@ def main() -> int:
     parser.add_argument(
         "--allow-delay", choices=("true", "false"), default="false"
     )
+    parser.add_argument(
+        "--expect", choices=("start", "insufficient_delay"), default="start"
+    )
+    parser.add_argument("--filter", dest="filter_override")
+    parser.add_argument("--serial")
+    parser.add_argument("--reward-budget", type=int)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     output = args.output.resolve()
@@ -378,6 +581,10 @@ def main() -> int:
         resource=args.resource,
         strategy=args.strategy,
         allow_delay=args.allow_delay == "true",
+        expect=args.expect,
+        filter_override=args.filter_override,
+        serial_override=args.serial,
+        reward_budget_override=args.reward_budget,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     _write_json(output, result)

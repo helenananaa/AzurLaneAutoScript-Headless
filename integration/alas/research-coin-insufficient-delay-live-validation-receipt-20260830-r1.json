@@ -1,0 +1,627 @@
+{
+  "schema": "alas-headless.research-resource-policy-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "template",
+  "seed_config_sha256": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+  "configured": {
+    "Research.PresetFilter": "custom",
+    "Research.CustomFilter": "S9-Q0.5",
+    "Research.AllowDelay": true,
+    "Research.UseCoin": "always_use",
+    "Research.UseCube": "always_use",
+    "Research.UsePart": "always_use"
+  },
+  "target_resource": "coin",
+  "strategy": "always_use",
+  "expect": "insufficient_delay",
+  "source_sha256": {
+    "research": "c75e6c57308507bb912d2d7de1ded0bf39e825f03dbff7ab9eacc103c64e6077",
+    "selector": "a4c6da69e72f8e4d43c5f7769fad75d8e266faeedefc7a5684d1cd5e7a31edc2",
+    "adapter": "1b9da4c96f07ef75b30fd1e82cae7623feb920490bef52d5f8cc720bdeeac329",
+    "oracle": "d254a615dc4fc00b5aa69666718e198a79e9019d776703d014034329e9a3f018",
+    "runner": "4b34386d44c25b4fea7cd457318f3e7f8db3eaef1e9de32be38f1ae4005a9d71"
+  },
+  "passed": true,
+  "dispatches": [],
+  "reward_dispatches": [],
+  "research_detail_observations": [
+    {
+      "code": "Q-068-UL",
+      "subtitle": "小型项目",
+      "duration_seconds": 1800,
+      "resource_id": "gold",
+      "resource_owned": 1380,
+      "resource_required": 5000,
+      "requirement": "-无-",
+      "can_start": false,
+      "can_queue": false,
+      "is_running": false,
+      "is_finished": false,
+      "resource_costs": [
+        {
+          "resource_id": "gold",
+          "owned": 1380,
+          "required": 5000
+        },
+        {
+          "resource_id": "17033",
+          "owned": 29858,
+          "required": 20
+        }
+      ]
+    },
+    {
+      "code": "Q-068-UL",
+      "subtitle": "小型项目",
+      "duration_seconds": 1800,
+      "resource_id": "gold",
+      "resource_owned": 1380,
+      "resource_required": 5000,
+      "requirement": "-无-",
+      "can_start": false,
+      "can_queue": false,
+      "is_running": false,
+      "is_finished": false,
+      "resource_costs": [
+        {
+          "resource_id": "gold",
+          "owned": 1380,
+          "required": 5000
+        },
+        {
+          "resource_id": "17033",
+          "owned": 29858,
+          "required": 20
+        }
+      ]
+    },
+    {
+      "code": "Q-068-UL",
+      "subtitle": "小型项目",
+      "duration_seconds": 1800,
+      "resource_id": "gold",
+      "resource_owned": 1380,
+      "resource_required": 5000,
+      "requirement": "-无-",
+      "can_start": false,
+      "can_queue": false,
+      "is_running": false,
+      "is_finished": false,
+      "resource_costs": [
+        {
+          "resource_id": "gold",
+          "owned": 1380,
+          "required": 5000
+        },
+        {
+          "resource_id": "17033",
+          "owned": 29858,
+          "required": 20
+        }
+      ]
+    }
+  ],
+  "delay_checks": [
+    {
+      "returned": true
+    }
+  ],
+  "network_recoveries": [
+    {
+      "semantic_id": "overlay/network-reconnect/confirm",
+      "generation": 11771,
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+      "point": {
+        "x": 790.0,
+        "y": 515.0
+      },
+      "post_generation": 11775,
+      "postcondition": "overlay/network-reconnect/confirm absent"
+    }
+  ],
+  "research_start_grant": 0,
+  "research_reward_grant": 0,
+  "login_recovery_performed": false,
+  "selector_calls": [
+    {
+      "enforce": false,
+      "projects": [
+        {
+          "code": "S9 Q-068-UL",
+          "series": "S9",
+          "genre": "Q",
+          "duration": "0.5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": true,
+          "valid": true
+        },
+        {
+          "code": "S6 T-249-MI",
+          "series": "S6",
+          "genre": "T",
+          "duration": "6",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 Q-210-MI",
+          "series": "S9",
+          "genre": "Q",
+          "duration": "2",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": true,
+          "valid": true
+        },
+        {
+          "code": "S9 C-153-MI",
+          "series": "S9",
+          "genre": "C",
+          "duration": "6",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 E-315-MI",
+          "series": "S9",
+          "genre": "E",
+          "duration": "2",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        }
+      ],
+      "priority": [
+        {
+          "code": "S9 Q-068-UL",
+          "series": "S9",
+          "genre": "Q",
+          "duration": "0.5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": true,
+          "valid": true
+        }
+      ]
+    }
+  ],
+  "task_return": null,
+  "task_completed": true,
+  "elapsed_seconds": 216.813,
+  "research_start_grant_remaining": 0,
+  "research_reward_grant_remaining": 0,
+  "final_next_run": "2026-08-30 21:19:15",
+  "projects_after_task": [
+    {
+      "slot": 1,
+      "unity_index": 2,
+      "code": "C-153-MI",
+      "subtitle": "中型项目",
+      "series": 9,
+      "status": "detail",
+      "duration_seconds": 21600,
+      "button": {
+        "name": "2",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/2",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 180.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 98.267,
+          "top": 144.833,
+          "right": 261.733,
+          "bottom": 575.167
+        },
+        "raw": {
+          "name": "2",
+          "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/2",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "world_position": {
+            "x": -10.222,
+            "y": 0.0,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -107.5,
+            "y": -283.0,
+            "width": 215.0,
+            "height": 566.0
+          },
+          "screen_point": {
+            "x": 180.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 180.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 98.267,
+            "bottom": 144.833,
+            "right": 261.733,
+            "top": 575.167
+          },
+          "adb_bounds": {
+            "left": 98.267,
+            "top": 144.833,
+            "right": 261.733,
+            "bottom": 575.167
+          }
+        }
+      }
+    },
+    {
+      "slot": 2,
+      "unity_index": 1,
+      "code": "E-315-MI",
+      "subtitle": "小型项目",
+      "series": 9,
+      "status": "detail",
+      "duration_seconds": 7200,
+      "button": {
+        "name": "1",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 410.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 315.356,
+          "top": 110.843,
+          "right": 504.644,
+          "bottom": 609.157
+        },
+        "raw": {
+          "name": "1",
+          "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/1",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "world_position": {
+            "x": -5.111,
+            "y": 0.0,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -107.5,
+            "y": -283.0,
+            "width": 215.0,
+            "height": 566.0
+          },
+          "screen_point": {
+            "x": 410.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 410.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 315.356,
+            "bottom": 110.843,
+            "right": 504.644,
+            "top": 609.157
+          },
+          "adb_bounds": {
+            "left": 315.356,
+            "top": 110.843,
+            "right": 504.644,
+            "bottom": 609.157
+          }
+        }
+      }
+    },
+    {
+      "slot": 3,
+      "unity_index": 5,
+      "code": "Q-068-UL",
+      "subtitle": "小型项目",
+      "series": 9,
+      "status": "detail",
+      "duration_seconds": 1800,
+      "button": {
+        "name": "5",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/5",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 532.5,
+          "top": 77.0,
+          "right": 747.5,
+          "bottom": 643.0
+        },
+        "raw": {
+          "name": "5",
+          "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/5",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "world_position": {
+            "x": -0.0,
+            "y": 0.0,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -107.5,
+            "y": -283.0,
+            "width": 215.0,
+            "height": 566.0
+          },
+          "screen_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 532.5,
+            "bottom": 77.0,
+            "right": 747.5,
+            "top": 643.0
+          },
+          "adb_bounds": {
+            "left": 532.5,
+            "top": 77.0,
+            "right": 747.5,
+            "bottom": 643.0
+          }
+        }
+      }
+    },
+    {
+      "slot": 4,
+      "unity_index": 4,
+      "code": "T-249-MI",
+      "subtitle": "小型项目",
+      "series": 6,
+      "status": "detail",
+      "duration_seconds": 21600,
+      "button": {
+        "name": "4",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/4",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 870.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 775.345,
+          "top": 110.815,
+          "right": 964.655,
+          "bottom": 609.185
+        },
+        "raw": {
+          "name": "4",
+          "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/4",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "world_position": {
+            "x": 5.111,
+            "y": 0.0,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -107.5,
+            "y": -283.0,
+            "width": 215.0,
+            "height": 566.0
+          },
+          "screen_point": {
+            "x": 870.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 870.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 775.345,
+            "bottom": 110.815,
+            "right": 964.655,
+            "top": 609.185
+          },
+          "adb_bounds": {
+            "left": 775.345,
+            "top": 110.815,
+            "right": 964.655,
+            "bottom": 609.185
+          }
+        }
+      }
+    },
+    {
+      "slot": 5,
+      "unity_index": 3,
+      "code": "Q-210-MI",
+      "subtitle": "小型项目",
+      "series": 9,
+      "status": "detail",
+      "duration_seconds": 7200,
+      "button": {
+        "name": "3",
+        "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/3",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "point": {
+          "x": 1100.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": 1018.19,
+          "top": 144.629,
+          "right": 1181.81,
+          "bottom": 575.371
+        },
+        "raw": {
+          "name": "3",
+          "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/3",
+          "canvas": "Canvas",
+          "flags": 7679,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": true,
+          "canvas_render_mode": 1,
+          "world_position": {
+            "x": 10.222,
+            "y": 0.0,
+            "z": 10.015
+          },
+          "local_rect": {
+            "x": -107.5,
+            "y": -283.0,
+            "width": 215.0,
+            "height": 566.0
+          },
+          "screen_point": {
+            "x": 1100.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 1100.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": 1018.19,
+            "bottom": 144.629,
+            "right": 1181.81,
+            "top": 575.371
+          },
+          "adb_bounds": {
+            "left": 1018.19,
+            "top": 144.629,
+            "right": 1181.81,
+            "bottom": 575.371
+          }
+        }
+      }
+    }
+  ],
+  "insufficient_resource_observations": [
+    {
+      "code": "Q-068-UL",
+      "subtitle": "小型项目",
+      "duration_seconds": 1800,
+      "resource_id": "gold",
+      "resource_owned": 1380,
+      "resource_required": 5000,
+      "requirement": "-无-",
+      "can_start": false,
+      "can_queue": false,
+      "is_running": false,
+      "is_finished": false,
+      "resource_costs": [
+        {
+          "resource_id": "gold",
+          "owned": 1380,
+          "required": 5000
+        },
+        {
+          "resource_id": "17033",
+          "owned": 29858,
+          "required": 20
+        }
+      ]
+    },
+    {
+      "code": "Q-068-UL",
+      "subtitle": "小型项目",
+      "duration_seconds": 1800,
+      "resource_id": "gold",
+      "resource_owned": 1380,
+      "resource_required": 5000,
+      "requirement": "-无-",
+      "can_start": false,
+      "can_queue": false,
+      "is_running": false,
+      "is_finished": false,
+      "resource_costs": [
+        {
+          "resource_id": "gold",
+          "owned": 1380,
+          "required": 5000
+        },
+        {
+          "resource_id": "17033",
+          "owned": 29858,
+          "required": 20
+        }
+      ]
+    },
+    {
+      "code": "Q-068-UL",
+      "subtitle": "小型项目",
+      "duration_seconds": 1800,
+      "resource_id": "gold",
+      "resource_owned": 1380,
+      "resource_required": 5000,
+      "requirement": "-无-",
+      "can_start": false,
+      "can_queue": false,
+      "is_running": false,
+      "is_finished": false,
+      "resource_costs": [
+        {
+          "resource_id": "gold",
+          "owned": 1380,
+          "required": 5000
+        },
+        {
+          "resource_id": "17033",
+          "owned": 29858,
+          "required": 20
+        }
+      ]
+    }
+  ],
+  "temporary_config_removed": true
+}

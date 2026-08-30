@@ -45,7 +45,7 @@ from alas_headless.semantic_oracle import (
     MetaAssistState,
     ObserverTransportError,
 )
-from alas_headless.adapter import ActionLeaseError, SemanticFrameIdentity
+from alas_headless.adapter import ActionLeaseError, SemanticFrameIdentity, StaleFrameError
 from tests.test_semantic_oracle import (
     FakeBackend as RealOracleBackend,
     make_button as make_real_button,
@@ -565,6 +565,11 @@ class FakeOracle:
     def click_raid_advanced_challenge(self, event):
         self.click_calls.append("raid/advanced/entry:" + event)
         return self.click_receipt("raid/advanced/entry")
+
+    def click_raid_home(self, event):
+        self.click_calls.append("raid/page/home:" + event)
+        self.main_page_visible_value = True
+        return self.click_receipt("raid/page/home")
 
     def raid_fleet_ready(self, event):
         if event != "raid_20260827":
@@ -1754,6 +1759,8 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(
             oracle.enabled_calls,
             [
+                "overlay/network-reconnect/confirm",
+                "overlay/bulletin/close",
                 "overlay/bulletin/close",
                 "overlay/guild-message/close",
                 "login/enter",
@@ -1879,6 +1886,16 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertFalse(session.appear(NamedButton("BATTLE_STATUS_D")))
         self.assertIsNotNone(session._combat_result_observation)
 
+    def test_current_raid_page_makes_legacy_rewards_probe_a_passive_miss(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.raid_page_visible_value = True
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+
+        self.assertFalse(session.appear(NamedButton("RAID_REWARDS")))
+
     def test_current_raid_recommend_reuses_bounded_fleet_mutation_grant(self):
         adapter, oracle, gate_calls = self.make_adapter(
             campaign_fleet_mutation_budget=1
@@ -1927,6 +1944,18 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(oracle.click_calls, ["raid/stage/ex"])
         sleep.assert_called_once_with(0.25)
 
+    def test_current_raid_home_reproves_input_on_fresh_frame(self):
+        refresh = Mock()
+        adapter, oracle, _ = self.make_adapter(input_frame_refresher=refresh)
+
+        receipt = adapter.click_raid_home("raid_20260827")
+
+        self.assertEqual(receipt.semantic_id, "raid/page/home")
+        refresh.assert_called_once_with()
+        self.assertEqual(
+            oracle.click_calls, ["raid/page/home:raid_20260827"]
+        )
+
     def test_current_raid_page_makes_unrelated_page_probe_absent(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.raid_page_visible_value = True
@@ -1935,6 +1964,82 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
         self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
         self.assertTrue(adapter.appear(NamedButton("RAID_CHECK")))
+
+    def test_current_raid_page_scan_uses_immutable_screenshot_frame(self):
+        live_oracle = FakeOracle()
+        frame_oracle = FakeOracle()
+        live_oracle.raid_page_visible_errors = [
+            SemanticGateClosed("current Raid button and UI snapshots are incoherent")
+        ]
+        frame_oracle.raid_page_visible_value = True
+        adapter = AlasSemanticAdapter(
+            live_oracle,
+            lambda: None,
+            frame_observation_oracle=lambda: frame_oracle,
+            frame_identity_provider=self.frame_identity,
+        )
+
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("RAID_CHECK")))
+        self.assertEqual(len(live_oracle.raid_page_visible_errors), 1)
+        self.assertEqual(live_oracle.click_calls, [])
+        self.assertEqual(frame_oracle.click_calls, [])
+
+    def test_current_raid_page_scan_falls_back_read_only_without_frame(self):
+        live_oracle = FakeOracle()
+        live_oracle.raid_page_visible_value = True
+        adapter = AlasSemanticAdapter(
+            live_oracle,
+            lambda: None,
+            frame_observation_oracle=lambda: (_ for _ in ()).throw(
+                StaleFrameError()
+            ),
+            frame_identity_provider=self.frame_identity,
+        )
+
+        self.assertTrue(adapter.appear(NamedButton("RAID_CHECK")))
+        self.assertEqual(live_oracle.click_calls, [])
+
+    def test_current_raid_direct_visibility_uses_immutable_screenshot_frame(self):
+        live_oracle = FakeOracle()
+        frame_oracle = FakeOracle()
+        live_oracle.raid_page_visible_errors = [
+            SemanticGateClosed("current Raid button and UI snapshots are incoherent")
+        ]
+        frame_oracle.raid_page_visible_value = True
+        adapter = AlasSemanticAdapter(
+            live_oracle,
+            lambda: None,
+            frame_observation_oracle=lambda: frame_oracle,
+            frame_identity_provider=self.frame_identity,
+        )
+
+        self.assertTrue(adapter.raid_page_visible("raid_20260827"))
+        self.assertEqual(len(live_oracle.raid_page_visible_errors), 1)
+        self.assertEqual(live_oracle.click_calls, [])
+        self.assertEqual(frame_oracle.click_calls, [])
+
+    def test_current_raid_recovery_probe_uses_immutable_screenshot_frame(self):
+        live_oracle = FakeOracle()
+        frame_oracle = FakeOracle()
+        live_oracle.raid_fleet_selection_visible = Mock(
+            side_effect=SemanticGateClosed(
+                "Raid fleet-selection snapshots are incoherent"
+            )
+        )
+        frame_oracle.raid_fleet_selection_visible = Mock(return_value=False)
+        adapter = AlasSemanticAdapter(
+            live_oracle,
+            lambda: None,
+            frame_observation_oracle=lambda: frame_oracle,
+            frame_identity_provider=self.frame_identity,
+        )
+
+        self.assertFalse(adapter.raid_fleet_selection_visible("raid_20260827"))
+        frame_oracle.raid_fleet_selection_visible.assert_called_once_with(
+            event="raid_20260827"
+        )
+        live_oracle.raid_fleet_selection_visible.assert_not_called()
 
     def test_current_raid_page_scan_tolerates_only_bounded_endpoint_skew(self):
         adapter, oracle, _ = self.make_adapter()
@@ -2837,6 +2942,11 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "overlay/network-reconnect/confirm")
         self.assertEqual(oracle.click_calls, ["overlay/network-reconnect/confirm"])
+        self.assertFalse(adapter.appear(NamedButton("DOCK_CHECK")))
+
+        adapter._network_reconnect_transition_until = 0.0
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton("DOCK_CHECK"))
 
     def test_original_login_popup_handler_uses_exact_expired_data_target(self):
         adapter, oracle, _ = self.make_adapter()
@@ -2898,6 +3008,30 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.click(NamedButton("BUILD_CHECK"))
+
+    def test_research_menu_short_circuits_unrelated_shop_page_probe(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["research-menu/page/back"] = True
+        oracle.recommendation_shop_visible = Mock(
+            side_effect=SemanticGateClosed("shop snapshots are unrelated")
+        )
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("RESHMENU_CHECK")))
+        oracle.recommendation_shop_visible.assert_not_called()
+
+    def test_research_page_short_circuits_unrelated_page_probe(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.exists_values["research/page/back"] = True
+        oracle.research_project_values = [SimpleNamespace(slot=index) for index in range(5)]
+        oracle.recommendation_shop_visible = Mock(
+            side_effect=SemanticGateClosed("shop snapshots are unrelated")
+        )
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("RESEARCH_CHECK")))
+        oracle.recommendation_shop_visible.assert_not_called()
 
     def test_research_page_check_rejects_selected_detail_panel(self):
         adapter, oracle, _ = self.make_adapter()
@@ -3371,6 +3505,80 @@ class AlasSemanticAdapterTests(unittest.TestCase):
                 "research/start/confirm",
             ],
         )
+
+    def test_research_multi_resource_insufficient_closes_without_start(self):
+        oracle = FakeOracle()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=1,
+                unity_index=5,
+                code="Q-068-UL",
+                status=ResearchProjectStatus.DETAIL,
+            )
+        ]
+        oracle.research_detail_value = SimpleNamespace(
+            code="Q-068-UL",
+            subtitle="small project",
+            duration_seconds=1800,
+            resource_id="gold",
+            resource_owned=1380,
+            resource_required=5000,
+            resource_costs=(
+                SimpleNamespace(resource_id="gold", owned=1380, required=5000),
+                SimpleNamespace(resource_id="17033", owned=29858, required=20),
+            ),
+            requirement="",
+            can_start=False,
+            can_queue=False,
+            is_running=False,
+            is_finished=False,
+        )
+        adapter = AlasSemanticAdapter(oracle, lambda: None, research_start_budget=0)
+        adapter.begin_research()
+
+        self.assertFalse(adapter.start_research_project_code("Q-068-UL"))
+
+        self.assertEqual(
+            oracle.click_calls,
+            ["research/project/1", "research/detail/root"],
+        )
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
+
+    def test_research_multi_resource_start_fails_before_unreviewed_prompt(self):
+        oracle = FakeOracle()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=1,
+                unity_index=5,
+                code="Q-068-UL",
+                status=ResearchProjectStatus.DETAIL,
+            )
+        ]
+        oracle.research_detail_value = SimpleNamespace(
+            code="Q-068-UL",
+            subtitle="small project",
+            duration_seconds=1800,
+            resource_id="gold",
+            resource_owned=6000,
+            resource_required=5000,
+            resource_costs=(
+                SimpleNamespace(resource_id="gold", owned=6000, required=5000),
+                SimpleNamespace(resource_id="17033", owned=30, required=20),
+            ),
+            requirement="",
+            can_start=True,
+            can_queue=False,
+            is_running=False,
+            is_finished=False,
+        )
+        adapter = AlasSemanticAdapter(oracle, lambda: None, research_start_budget=1)
+        adapter.begin_research()
+
+        with self.assertRaisesRegex(SemanticGateClosed, "multi-resource"):
+            adapter.start_research_project_code("Q-068-UL")
+
+        self.assertEqual(oracle.click_calls, ["research/project/1"])
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 1)
 
     def test_research_start_budget_is_spent_only_on_matching_final_confirm(self):
         oracle = FakeOracle()
@@ -4999,6 +5207,25 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
         self.assertEqual(oracle.click_calls, ["campaign-menu/page/back"])
 
+    def test_campaign_menu_generic_back_uses_exact_navigation_target(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_menu_value = True
+        oracle.enabled_values["campaign-menu/page/back"] = True
+
+        receipt = adapter.click(NamedButton("BACK_ARROW"))
+
+        self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
+        self.assertEqual(oracle.click_calls, ["campaign-menu/page/back"])
+
+    def test_current_raid_generic_back_uses_exact_home_target(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.raid_page_visible_value = True
+
+        receipt = adapter.click(NamedButton("BACK_ARROW"))
+
+        self.assertEqual(receipt.semantic_id, "raid/page/home")
+        self.assertEqual(oracle.click_calls, ["raid/page/home:raid_20260827"])
+
     def test_campaign_menu_entry_has_bounded_transition_grace(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.campaign_page_error = SemanticGateClosed(
@@ -5160,6 +5387,96 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             oracle.click_calls, ["overlay/network-reconnect/confirm"]
         )
         adapter.end_campaign_pre_sortie()
+
+    def test_campaign_combat_execute_suffix_prioritizes_exact_network_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_campaign_pre_sortie("12-4")
+        oracle.enabled_values["overlay/network-reconnect/cancel"] = True
+        oracle.enabled_values["overlay/network-reconnect/confirm"] = True
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+        session._live_combat_visible = lambda: self.fail(
+            "covered combat hierarchy must not be classified"
+        )
+
+        self.assertTrue(session.appear(NamedButton("POPUP_CANCEL")))
+        self.assertTrue(session.appear(NamedButton("POPUP_CONFIRM")))
+        receipt = session.click(NamedButton("POPUP_CONFIRM_COMBAT_EXECUTE"))
+
+        self.assertEqual(
+            receipt.semantic_id, "overlay/network-reconnect/confirm"
+        )
+        self.assertEqual(
+            oracle.click_calls, ["overlay/network-reconnect/confirm"]
+        )
+        adapter.end_campaign_pre_sortie()
+
+    def test_goto_main_prioritizes_exact_network_reconnect_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values["overlay/network-reconnect/confirm"] = True
+
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(
+            receipt.semantic_id, "overlay/network-reconnect/confirm"
+        )
+        self.assertEqual(
+            oracle.click_calls, ["overlay/network-reconnect/confirm"]
+        )
+
+    def test_goto_main_uses_exact_raid_owner_before_unrelated_shell_probes(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.raid_page_visible_value = True
+        oracle.recommendation_shop_visible = Mock(
+            side_effect=AssertionError("unrelated shop shell must not be probed")
+        )
+
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "raid/page/home")
+        self.assertEqual(oracle.click_calls, ["raid/page/home:raid_20260827"])
+        oracle.recommendation_shop_visible.assert_not_called()
+
+    def test_ui_additional_login_probes_yield_to_exact_network_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values["overlay/network-reconnect/confirm"] = True
+        oracle.server_maintenance_visible = Mock(
+            side_effect=AssertionError(
+                "maintenance reader must not race NetworkDown"
+            )
+        )
+        oracle.login_update_restart_prompt_available = Mock(
+            side_effect=AssertionError("update reader must not race NetworkDown")
+        )
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session._login_update_restart_performed = False
+
+        self.assertFalse(session.server_maintenance_visible())
+        self.assertFalse(session.restart_game_after_update())
+        oracle.server_maintenance_visible.assert_not_called()
+        oracle.login_update_restart_prompt_available.assert_not_called()
+
+    def test_research_session_prioritizes_exact_network_reconnect_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.enabled_values["overlay/network-reconnect/cancel"] = True
+        oracle.enabled_values["overlay/network-reconnect/confirm"] = True
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+
+        self.assertFalse(session.appear(NamedButton("RESEARCH_CHECK")))
+        self.assertTrue(session.appear(NamedButton("POPUP_CANCEL")))
+        self.assertTrue(session.appear(NamedButton("POPUP_CONFIRM")))
+        receipt = session.click(NamedButton("POPUP_CONFIRM"))
+        self.assertEqual(receipt.semantic_id, "overlay/network-reconnect/confirm")
+        self.assertEqual(oracle.click_calls, ["overlay/network-reconnect/confirm"])
+        adapter.end_research()
 
     def test_campaign_combat_session_delegates_restored_chapter_check(self):
         adapter, oracle, _ = self.make_adapter()

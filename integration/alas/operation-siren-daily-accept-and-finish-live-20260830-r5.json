@@ -1,0 +1,43 @@
+{
+  "schema": "alas-headless.operation-siren-daily-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 22053,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "template",
+  "seed_config_sha256": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+  "configured": {
+    "DoMission": true,
+    "UseTuningSample": false,
+    "Fleet": 1,
+    "Submarine": false,
+    "ExpectMinFinished": 1
+  },
+  "tuning_sample_calls": [],
+  "overview_accepts": [],
+  "mission_finish_counts": [],
+  "fleet_actions": [],
+  "order_actions": [],
+  "auto_searches": [],
+  "login_recovered": false,
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 22053,
+    "generation": 1337,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 30,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44"
+  },
+  "error": "AlasSemanticUnmapped: ALAS virtual resource has no active semantic flow: RESET_TICKET_POPUP",
+  "passed": false,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "daily_task": "a1a5f6516b142cfd7fc816873bc8227a2987ee7c34e9e5544e69568fa1627785",
+    "mission_handler": "d4e520cd4f0b16ee34880da15c220c18f035051cd1d1f2ffcc95b96bd5bba34c",
+    "storage_handler": "75f08f566df7333d7381af02cf0d5edb08f935676d9de8d77f170d3ed2115e82",
+    "adapter": "a9f63cc31272b762ca432576e6a421015c81bdb6bf80c81be230ff98aee05b93",
+    "oracle": "411f3136cea6fa04e7667ab162c738cbc74e4697f86604cff1df9bc45bea43c0"
+  }
+}

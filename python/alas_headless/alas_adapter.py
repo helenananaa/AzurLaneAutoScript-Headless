@@ -755,6 +755,52 @@ CURRENT_RAID_EARLIER_PAGE_CHECKS = frozenset(
         "EVENT_LIST_CHECK",
     }
 )
+UI_PAGE_CHECK_RESOURCES = frozenset(
+    {
+        "MAIN_GOTO_FLEET",
+        "CAMPAIGN_MENU_CHECK",
+        "CAMPAIGN_CHECK",
+        "FLEET_CHECK",
+        "MAIN_GOTO_CAMPAIGN_WHITE",
+        "EXERCISE_CHECK",
+        "DAILY_CHECK",
+        "EVENT_CHECK",
+        "SP_CHECK",
+        "HORROR_COALITION_CHECK",
+        "OS_CHECK",
+        "WAR_ARCHIVES_CHECK",
+        "REWARD_CHECK",
+        "MISSION_CHECK",
+        "GUILD_CHECK",
+        "COMMISSION_CHECK",
+        "TACTICAL_CHECK",
+        "BATTLE_PASS_CHECK",
+        "EVENT_LIST_CHECK",
+        "RAID_CHECK",
+        "DOCK_CHECK",
+        "RESEARCH_CHECK",
+        "SHIPYARD_CHECK",
+        "META_CHECK",
+        "STORAGE_CHECK",
+        "RESHMENU_CHECK",
+        "DORMMENU_CHECK",
+        "DORM_CHECK",
+        "MEOWFFICER_CHECK",
+        "ACADEMY_CHECK",
+        "PRIVATE_QUARTERS_CHECK",
+        "GAME_ROOM_CHECK",
+        "SHOP_CHECK",
+        "MUNITIONS_CHECK",
+        "SUPPLY_PACK_CHECK",
+        "BUILD_CHECK",
+        "MAIL_CHECK",
+        "CHANNEL_CHECK",
+        "RPG_GOTO_STORY",
+        "RPG_GOTO_STAGE",
+        "RPG_LEAVE_CITY",
+        "HOSIPITAL_CHECK",
+    }
+)
 RESEARCH_VIRTUAL_RESOURCES = frozenset(
     {
         "QUEUE_CHECK",
@@ -998,6 +1044,7 @@ class _ResearchFlowContext:
     start_confirm_receipt: Optional[ActionReceipt] = None
     pending_resource_id: Optional[str] = None
     pending_resource_required: Optional[int] = None
+    pending_resource_costs: Tuple[Tuple[str, int], ...] = ()
     reward_receipts: List[ActionReceipt] = field(default_factory=list)
     popup_close_receipts: List[ActionReceipt] = field(default_factory=list)
     passive_transition_until: float = 0.0
@@ -1009,6 +1056,31 @@ class _ResearchFlowContext:
     queue_add_receipt: Optional[ActionReceipt] = None
     queue_confirm_receipt: Optional[ActionReceipt] = None
     queue_add_requires_start_grant: bool = False
+
+
+def _research_detail_costs(detail: object) -> Tuple[Tuple[str, int, int], ...]:
+    """Return every typed Research cost, with scalar-state compatibility."""
+
+    costs = tuple(getattr(detail, "resource_costs", ()) or ())
+    if costs:
+        return tuple(
+            (
+                str(getattr(cost, "resource_id")),
+                int(getattr(cost, "owned")),
+                int(getattr(cost, "required")),
+            )
+            for cost in costs
+        )
+    resource_id = str(getattr(detail, "resource_id", "") or "")
+    if not resource_id:
+        return ()
+    return (
+        (
+            resource_id,
+            int(getattr(detail, "resource_owned", 0)),
+            int(getattr(detail, "resource_required", 0)),
+        ),
+    )
 
 
 @dataclass
@@ -1358,6 +1430,7 @@ class AlasSemanticAdapter:
         self._daily_stage_confirmed = False
         self._daily_transition_until = 0.0
         self._current_raid_result_event: Optional[str] = None
+        self._network_reconnect_transition_until = 0.0
         self._event_story_transition_until = 0.0
         self._operation_siren_entry_transition_until = 0.0
         self._operation_siren_page_remount_until = 0.0
@@ -2441,6 +2514,28 @@ class AlasSemanticAdapter:
             raise StaleFrameError()
         return reader
 
+    def _fresh_input_oracle(self) -> Any:
+        """Bind a mutation's final semantic proof to one fresh ALAS frame."""
+
+        if (
+            self._input_frame_refresher is not None
+            and self._frame_observation_oracle is not None
+        ):
+            self._input_frame_refresher()
+            return self._require_frame_observation_oracle()
+        return self.oracle
+
+    def _frame_or_live_observation_oracle(self) -> Any:
+        """Use ALAS' immutable screenshot frame when one is currently leased."""
+
+        try:
+            return self._require_frame_observation_oracle()
+        except StaleFrameError:
+            # Direct runner probes can occur just after an exact click has
+            # invalidated the screenshot lease. They remain read-only and use
+            # the live oracle's unchanged coherence and structural checks.
+            return self.oracle
+
     def _current_frame_identity(self) -> SemanticFrameIdentity:
         provider = self._frame_identity_provider
         if provider is None:
@@ -2494,6 +2589,7 @@ class AlasSemanticAdapter:
             "POPUP_CONFIRM_RESEARCH_QUEUE",
             "POPUP_CONFIRM_LOGIN",
             "POPUP_CONFIRM_CAMPAIGN_RECONNECT",
+            "POPUP_CONFIRM_COMBAT_EXECUTE",
             "POPUP_CONFIRM_COMBAT_STATUS",
             "POPUP_CONFIRM_WHITE_LOGIN",
             "POPUP_CONFIRM_UI_ADDITIONAL",
@@ -5730,7 +5826,12 @@ class AlasSemanticAdapter:
             if callable(raid_page_visible) and raid_page_visible(
                 event="raid_20260827"
             ):
-                targets.append("raid/page/home")
+                # The current Raid page has an exact typed owner and an exact
+                # reviewed home target.  Return it before probing unrelated
+                # page shells: after a NetworkDown recovery those independent
+                # multi-endpoint readers can briefly span different frames,
+                # even though the Raid edge itself is already coherent.
+                return "raid/page/home"
         except SemanticGateClosed:
             pass
         guild_page_visible = getattr(self.oracle, "guild_page_visible", None)
@@ -5876,10 +5977,51 @@ class AlasSemanticAdapter:
     def _appear_once(self, button: Any) -> bool:
         name = self._button_name(button)
         observation_oracle = (
-            self._require_frame_observation_oracle()
+            (
+                self._require_frame_observation_oracle()
+                if self._login_flow.active
+                else self._frame_or_live_observation_oracle()
+            )
             if self._login_flow.active
+            or name == "RAID_CHECK"
+            or name in CURRENT_RAID_EARLIER_PAGE_CHECKS
             else self.oracle
         )
+        if (
+            not self._login_flow.active
+            and name in UI_PAGE_CHECK_RESOURCES
+            and observation_oracle.exists("research-menu/page/back")
+        ):
+            # This exact full-screen owner is enough to classify ALAS' page
+            # sweep before any unrelated task-specific reader runs.  Inputs
+            # still go through their individual typed mappings and raycasts.
+            return name == "RESHMENU_CHECK"
+        if (
+            not self._login_flow.active
+            and self._research_context is not None
+            and name in UI_PAGE_CHECK_RESOURCES
+            and observation_oracle.exists("research/page/back")
+        ):
+            # The owned research page is another full-screen page-sweep
+            # terminus.  Require its complete five-card typed surface for the
+            # positive marker; every earlier unrelated page probe is absent.
+            if name != "RESEARCH_CHECK":
+                return False
+            try:
+                return len(observation_oracle.research_projects()) == 5
+            except SemanticGateClosed:
+                return False
+        if (
+            not self._login_flow.active
+            and name in UI_PAGE_CHECK_RESOURCES
+            and not observation_oracle.enabled("overlay/network-reconnect/confirm")
+            and not observation_oracle.enabled("overlay/bulletin/close")
+            and observation_oracle.main_page_visible()
+        ):
+            # The exact unobstructed main hierarchy owns the first page in
+            # ALAS' registry.  Classify it before unrelated task readers so a
+            # page sweep cannot outlive the next server reconnect interval.
+            return name in ("MAIN_GOTO_FLEET", "MAIN_GOTO_CAMPAIGN_WHITE")
         mission_page_state = getattr(observation_oracle, "mission_page_state", None)
         if (
             not self._login_flow.active
@@ -6027,6 +6169,18 @@ class AlasSemanticAdapter:
         semantic_id = self._meowfficer_contextual_target(name)
         if semantic_id is None:
             semantic_id = self._mappings.get(name)
+        if (
+            not self._login_flow.active
+            and semantic_id is None
+            and name in UI_PAGE_CHECK_RESOURCES
+            and name != "RESHMENU_CHECK"
+            and self.oracle.exists("research-menu/page/back")
+        ):
+            # SelectTechnologyUI is an owned top-level menu.  Once its exact
+            # root is present, unmapped ALAS page probes cannot describe the
+            # current page and must not fan out into unrelated task readers.
+            # RESHMENU_CHECK is the one virtual page marker handled below.
+            return False
         pending_order = self._operation_siren_pending_order
         order_confirm_names = (
             "POPUP_CONFIRM",
@@ -6739,6 +6893,7 @@ class AlasSemanticAdapter:
             )
             and name != "SHOP_CHECK"
             and name not in SUPPLY_PACK_VIRTUAL_RESOURCES
+            and not self.oracle.exists("research-menu/page/back")
             and (
                 self.oracle.recommendation_shop_visible()
                 or self.oracle.gift_pack_page_visible()
@@ -7377,8 +7532,7 @@ class AlasSemanticAdapter:
                     and context.start_confirm_receipt is None
                     and self._action_ledger.allowed("research.start")
                     and cost is not None
-                    and cost
-                    == (context.pending_resource_id, context.pending_resource_required)
+                    and (cost,) == context.pending_resource_costs
                 )
             if name == "RESEARCH_UNAVAILABLE":
                 try:
@@ -7896,6 +8050,16 @@ class AlasSemanticAdapter:
                 ):
                     return False
             if (
+                name in UI_PAGE_CHECK_RESOURCES
+                and time.monotonic() <= self._network_reconnect_transition_until
+            ):
+                # Dismissing the exact NetworkDown overlay can leave every
+                # page root non-actionable for a few Unity frames.  Page owners
+                # proven above still win immediately; unrelated top-level
+                # probes are passive misses until one owner remounts.  This
+                # never authorizes input and expires back to fail-closed.
+                return False
+            if (
                 self._minigame_context is not None
                 and self._known_minigame_surface_exists()
                 and name not in MINIGAME_VIRTUAL_RESOURCES
@@ -8303,6 +8467,7 @@ class AlasSemanticAdapter:
         context.start_confirm_receipt = None
         context.pending_resource_id = None
         context.pending_resource_required = None
+        context.pending_resource_costs = ()
         context.queue_add_receipt = None
         context.queue_confirm_receipt = None
         context.queue_add_requires_start_grant = False
@@ -8341,9 +8506,24 @@ class AlasSemanticAdapter:
         if not self._action_ledger.allowed("research.start"):
             raise SemanticGateClosed("research start requires a positive budget")
 
-        context.pending_resource_id = detail.resource_id
-        context.pending_resource_required = detail.resource_required
-        if not detail.resource_id:
+        detail_costs = _research_detail_costs(detail)
+        expected_costs = tuple(
+            (resource_id, required)
+            for resource_id, _owned, required in detail_costs
+        )
+        if len(expected_costs) > 1:
+            raise SemanticGateClosed(
+                "multi-resource research start confirmation is not reviewed"
+            )
+        context.pending_resource_costs = expected_costs
+        if expected_costs:
+            context.pending_resource_id, context.pending_resource_required = (
+                expected_costs[0]
+            )
+        else:
+            context.pending_resource_id = None
+            context.pending_resource_required = None
+        if not expected_costs:
             # Resource-free projects have no confirmation modal.  The exact
             # typed Start control is the one budgeted mutation in this path.
             receipt = self._dispatch_mutation(
@@ -8358,7 +8538,7 @@ class AlasSemanticAdapter:
             start_receipt = self.oracle.click("research/detail/start")
             context.start_receipt = start_receipt
             context.start_confirm_receipt = None
-            expected_cost = (detail.resource_id, detail.resource_required)
+            expected_cost = expected_costs[0]
 
             deadline = time.monotonic() + 8.0
             last_prompt_error: Optional[SemanticGateClosed] = None
@@ -9976,18 +10156,24 @@ class AlasSemanticAdapter:
 
     def raid_remain(self, event: str, mode: str) -> int:
         self._package_gate()
-        return self.oracle.raid_remain(event=event, mode=mode)
+        return self._frame_or_live_observation_oracle().raid_remain(
+            event=event, mode=mode
+        )
 
     def raid_page_visible(self, event: str) -> bool:
         self._package_gate()
-        return self.oracle.raid_page_visible(event=event)
+        return self._frame_or_live_observation_oracle().raid_page_visible(
+            event=event
+        )
 
     def click_raid_stage(self, event: str, mode: str) -> ActionReceipt:
         self._package_gate()
         deadline = time.monotonic() + 10.0
         while True:
             try:
-                return self.oracle.click_raid_stage(event=event, mode=mode)
+                return self._fresh_input_oracle().click_raid_stage(
+                    event=event, mode=mode
+                )
             except SemanticGateClosed as exc:
                 if str(exc) != "Raid stage input is blocked":
                     raise
@@ -10003,13 +10189,14 @@ class AlasSemanticAdapter:
 
     def click_raid_advanced_challenge(self, event: str) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_raid_advanced_challenge(event=event)
+        return self._fresh_input_oracle().click_raid_advanced_challenge(event=event)
 
     def enter_raid_page(self, event: str) -> ActionReceipt:
         self._package_gate()
-        if event != "raid_20260827" or not self.oracle.main_page_visible():
+        input_oracle = self._fresh_input_oracle()
+        if event != "raid_20260827" or not input_oracle.main_page_visible():
             raise SemanticGateClosed("current Raid entry requires the reviewed main page")
-        receipt = self.oracle.click("main/raid")
+        receipt = input_oracle.click("main/raid")
         deadline = time.monotonic() + 10.0
         last_transition_error: Optional[SemanticGateClosed] = None
         while True:
@@ -10034,7 +10221,11 @@ class AlasSemanticAdapter:
 
     def click_raid_home(self, event: str) -> ActionReceipt:
         self._package_gate()
-        receipt = self.oracle.click_raid_home(event=event)
+        # The current Raid page carries a large UI projection.  Acquire it once
+        # as the immutable screenshot-equivalent, then run the full page,
+        # image, blocker and raycast proof against that same fresh frame.  This
+        # preserves the input-age gate without extending its threshold.
+        receipt = self._fresh_input_oracle().click_raid_home(event=event)
         deadline = time.monotonic() + 10.0
         while not self.oracle.main_page_visible():
             if time.monotonic() >= deadline:
@@ -10044,58 +10235,74 @@ class AlasSemanticAdapter:
 
     def raid_fleet_selection_visible(self, event: str) -> bool:
         self._package_gate()
-        return self.oracle.raid_fleet_selection_visible(event=event)
+        return self._frame_or_live_observation_oracle().raid_fleet_selection_visible(
+            event=event
+        )
 
     def raid_fleet_ready(self, event: str) -> bool:
         self._package_gate()
-        return self.oracle.raid_fleet_ready(event=event)
+        return self._frame_or_live_observation_oracle().raid_fleet_ready(event=event)
 
     def click_raid_fleet_back(self, event: str) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_raid_fleet_back(event=event)
+        return self._fresh_input_oracle().click_raid_fleet_back(event=event)
 
     def click_raid_fleet_start(self, event: str) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_raid_fleet_start(event=event)
+        return self._fresh_input_oracle().click_raid_fleet_start(event=event)
 
     def click_raid_fleet_recommend(self, event: str) -> ActionReceipt:
         self._package_gate()
         return self._dispatch_mutation(
             "campaign.fleet_mutation",
-            lambda: self.oracle.click_raid_fleet_recommend(event=event),
+            lambda: self._fresh_input_oracle().click_raid_fleet_recommend(
+                event=event
+            ),
         )
 
     def raid_precombat_visible(self, event: str) -> bool:
         self._package_gate()
-        return self.oracle.raid_precombat_visible(event=event)
+        return self._frame_or_live_observation_oracle().raid_precombat_visible(
+            event=event
+        )
 
     def raid_precombat_multiple_visible(self, event: str) -> bool:
         self._package_gate()
-        return self.oracle.raid_precombat_multiple_visible(event=event)
+        return self._frame_or_live_observation_oracle().raid_precombat_multiple_visible(
+            event=event
+        )
 
     def click_raid_precombat_multiple(self, event: str) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_raid_precombat_multiple(event=event)
+        return self._fresh_input_oracle().click_raid_precombat_multiple(event=event)
 
     def raid_multiple_sortie_visible(self, event: str) -> bool:
         self._package_gate()
-        return self.oracle.raid_multiple_sortie_visible(event=event)
+        return self._frame_or_live_observation_oracle().raid_multiple_sortie_visible(
+            event=event
+        )
 
     def raid_multiple_sortie_state(self, event: str) -> RaidMultipleSortieState:
         self._package_gate()
-        return self.oracle.raid_multiple_sortie_state(event=event)
+        return self._frame_or_live_observation_oracle().raid_multiple_sortie_state(
+            event=event
+        )
 
     def click_raid_multiple_sortie_back(self, event: str) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_raid_multiple_sortie_back(event=event)
+        return self._fresh_input_oracle().click_raid_multiple_sortie_back(
+            event=event
+        )
 
     def raid_precombat_notice_visible(self, event: str) -> bool:
         self._package_gate()
-        return self.oracle.raid_precombat_notice_visible(event=event)
+        return self._frame_or_live_observation_oracle().raid_precombat_notice_visible(
+            event=event
+        )
 
     def click_raid_precombat_notice(self, event: str) -> ActionReceipt:
         self._package_gate()
-        receipt = self.oracle.click_raid_precombat_notice(event=event)
+        receipt = self._fresh_input_oracle().click_raid_precombat_notice(event=event)
         deadline = time.monotonic() + 10.0
         last_transition_error: Optional[SemanticGateClosed] = None
         while True:
@@ -10121,14 +10328,16 @@ class AlasSemanticAdapter:
         self._package_gate()
         receipt = self._dispatch_mutation(
             "campaign.sortie",
-            lambda: self.oracle.click_raid_precombat_start(event=event),
+            lambda: self._fresh_input_oracle().click_raid_precombat_start(
+                event=event
+            ),
         )
         self._current_raid_result_event = event
         return receipt
 
     def click_raid_precombat_back(self, event: str) -> ActionReceipt:
         self._package_gate()
-        return self.oracle.click_raid_precombat_back(event=event)
+        return self._fresh_input_oracle().click_raid_precombat_back(event=event)
 
     def campaign_map_formation(self) -> str:
         self._package_gate()
@@ -11852,6 +12061,7 @@ class AlasSemanticAdapter:
                     detail.resource_id,
                     detail.resource_owned,
                     detail.resource_required,
+                    _research_detail_costs(detail),
                     detail.requirement,
                     detail.can_start,
                     detail.can_queue,
@@ -12303,6 +12513,26 @@ class AlasSemanticAdapter:
         if self._campaign_grid_location(button) is not None:
             return self.click_campaign_combat_grid(button)
         name = self._button_name(button)
+        if (
+            not self._login_flow.active
+            and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
+        ):
+            reconnect_target = (
+                "overlay/network-reconnect/confirm"
+                if name == "POPUP_CONFIRM"
+                else "overlay/network-reconnect/cancel"
+            )
+            if self.oracle.enabled(reconnect_target):
+                # NetworkDown is a global topmost overlay.  Resolve its exact
+                # typed target before any task context interprets ALAS'
+                # generic POPUP_* name as a task-local confirmation.
+                receipt = self.oracle.click(reconnect_target)
+                self._network_reconnect_transition_until = time.monotonic() + 20.0
+                if self._campaign_context is not None:
+                    self._campaign_context.passive_transition_until = (
+                        time.monotonic() + 20.0
+                    )
+                return receipt
         if self._campaign_context is not None and name in (
             "RETIRE_APPEAR_1",
             "RETIRE_APPEAR_2",
@@ -12627,11 +12857,27 @@ class AlasSemanticAdapter:
                 return self.oracle.click_daily_precombat_back()
             if self.oracle.daily_page_visible():
                 return self.oracle.click_daily_control("daily/page/back")
+            try:
+                current_raid_visible = (
+                    self._frame_or_live_observation_oracle().raid_page_visible(
+                        "raid_20260827"
+                    )
+                )
+            except SemanticGateClosed as exc:
+                if str(exc) != "current Raid page is absent":
+                    raise
+                current_raid_visible = False
+            if current_raid_visible:
+                return self.click_raid_home("raid_20260827")
+            input_oracle = self._fresh_input_oracle()
             if (
-                self.oracle.campaign_page_is_normal()
-                and self.oracle.enabled("campaign-menu/page/back")
+                (
+                    input_oracle.campaign_menu_is_entry()
+                    or input_oracle.campaign_page_is_normal()
+                )
+                and input_oracle.enabled("campaign-menu/page/back")
             ):
-                return self.oracle.click("campaign-menu/page/back")
+                return input_oracle.click("campaign-menu/page/back")
             raise AlasSemanticUnmapped(
                 "ALAS resource is not semantically mapped for input: BACK_ARROW"
             )
@@ -13289,11 +13535,26 @@ class AlasSemanticAdapter:
                     )
                 if context.selected_code is not None and detail.code != context.selected_code:
                     raise SemanticGateClosed("selected research project identity changed")
+                detail_costs = _research_detail_costs(detail)
+                expected_costs = tuple(
+                    (resource_id, required)
+                    for resource_id, _owned, required in detail_costs
+                )
+                if len(expected_costs) > 1:
+                    raise SemanticGateClosed(
+                        "multi-resource research start confirmation is not reviewed"
+                    )
                 receipt = self.oracle.click("research/detail/start")
                 context.start_receipt = receipt
                 context.start_confirm_receipt = None
-                context.pending_resource_id = detail.resource_id
-                context.pending_resource_required = detail.resource_required
+                context.pending_resource_costs = expected_costs
+                if expected_costs:
+                    context.pending_resource_id, context.pending_resource_required = (
+                        expected_costs[0]
+                    )
+                else:
+                    context.pending_resource_id = None
+                    context.pending_resource_required = None
                 return receipt
             if name == "POPUP_CONFIRM":
                 if context.queue_add_receipt is not None:
@@ -13317,15 +13578,12 @@ class AlasSemanticAdapter:
                     context.last_queue_state = None
                     context.last_projects = None
                     return receipt
-                expected = (
-                    context.pending_resource_id,
-                    context.pending_resource_required,
-                )
+                expected = context.pending_resource_costs
                 if (
                     context.start_receipt is None
                     or context.start_confirm_receipt is not None
                     or not self._action_ledger.allowed("research.start")
-                    or self.oracle.research_start_prompt_cost() != expected
+                    or (self.oracle.research_start_prompt_cost(),) != expected
                 ):
                     raise SemanticGateClosed(
                         "research start confirmation does not match the budgeted project"
@@ -13576,6 +13834,16 @@ class AlasSemanticAdapter:
                 context.prep_validated = False
                 return receipt
         if semantic_id is None and name == "GOTO_MAIN":
+            reconnect_target = "overlay/network-reconnect/confirm"
+            if self.oracle.enabled(reconnect_target):
+                # NetworkDown is a global topmost owner.  It can mount after
+                # ui_goto proved the current page but before the linked home
+                # action is revalidated.  Consume only that exact reviewed
+                # recovery target; ALAS' next ui_goto iteration retries the
+                # unchanged page edge after the overlay is gone.
+                receipt = self.oracle.click(reconnect_target)
+                self._network_reconnect_transition_until = time.monotonic() + 20.0
+                return receipt
             if self._mail_context is not None and self.oracle.enabled("mail/manage/back"):
                 return self._record_mission_transition(
                     self.oracle.click("mail/manage/back")
@@ -13901,6 +14169,7 @@ class AlasSemanticAdapter:
                     self._research_context.start_confirm_receipt = None
                     self._research_context.pending_resource_id = None
                     self._research_context.pending_resource_required = None
+                    self._research_context.pending_resource_costs = ()
                     self._research_context.last_queue_state = None
                     self._research_context.last_projects = None
                     self._research_context.queue_add_receipt = None
@@ -13915,6 +14184,7 @@ class AlasSemanticAdapter:
                 self._research_context.start_confirm_receipt = None
                 self._research_context.pending_resource_id = None
                 self._research_context.pending_resource_required = None
+                self._research_context.pending_resource_costs = ()
                 self._research_context.queue_add_receipt = None
                 self._research_context.queue_confirm_receipt = None
                 self._research_context.queue_add_requires_start_grant = False
@@ -15655,17 +15925,12 @@ class AlasSemanticSession:
             # GET_ITEMS_SHIP_1 is a build-owned acknowledgement.  Delegate it
             # before the generic AwardInfo fallback aliases only GET_ITEMS_1.
             return adapter.appear(button)
-        if (
-            adapter._campaign_context is not None
-            and adapter.oracle.enabled("overlay/network-reconnect/confirm")
-        ):
-            # NetworkDown may mount over a battle result or NewShipUI.  While
-            # that exact topmost prompt is present, do not ask the combat
-            # observer to classify the covered hierarchy: it correctly sees
-            # `network_down` as a blocker and would fail before ALAS reaches
-            # its generic popup handler.  Expose only the reviewed reconnect
-            # pair; every unrelated combat/resource probe is absent until the
-            # prompt is confirmed.
+        if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
+            # NetworkDown is a global exact overlay and may mount over any
+            # owned page between ALAS' page probe and its next action.  Expose
+            # only the reviewed reconnect pair before asking any covered page
+            # reader to classify its underlay; the original ALAS popup handler
+            # remains the owner of the retry.
             if name == "POPUP_CONFIRM":
                 return True
             if name == "POPUP_CANCEL":
@@ -15806,6 +16071,16 @@ class AlasSemanticSession:
             if oracle.daily_combat_visible():
                 self._daily_combat_seen_at = time.monotonic()
                 return name == "AUTOMATION_ON"
+            if name == "RAID_REWARDS":
+                try:
+                    if oracle.raid_page_visible(event="raid_20260827"):
+                        # Current Raid returns directly to its typed owner
+                        # page after the normal result overlays.  The legacy
+                        # RAID_REWARDS template is therefore an exact passive
+                        # miss; raid_expected_end() next probes RAID_CHECK.
+                        return False
+                except SemanticGateClosed:
+                    pass
             if time.monotonic() - getattr(
                 self, "_daily_combat_seen_at", float("-inf")
             ) <= 20.0:
@@ -18150,6 +18425,11 @@ class AlasSemanticSession:
 
     def server_maintenance_visible(self) -> bool:
         adapter = self.open()
+        if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
+            # ui_additional owns NetworkDown immediately after the maintenance
+            # and update probes.  Do not make a different Msgbox reader race
+            # the already-proven global reconnect owner.
+            return False
         try:
             return adapter.server_maintenance_visible()
         except (SemanticGateClosed, ObserverTransportError) as exc:
@@ -18190,6 +18470,11 @@ class AlasSemanticSession:
         if self._login_update_restart_performed:
             return False
         adapter = self.open()
+        if adapter.oracle.enabled("overlay/network-reconnect/confirm"):
+            # The exact NetworkDown prompt is mutually exclusive with the
+            # reviewed update-restart contract.  Let the original following
+            # handle_popup_confirm("UI_ADDITIONAL") branch consume it.
+            return False
         try:
             explicit_prompt = adapter.login_update_restart_prompt_available()
         except (SemanticGateClosed, ObserverTransportError) as exc:

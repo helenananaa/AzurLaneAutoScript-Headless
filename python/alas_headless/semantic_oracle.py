@@ -1519,10 +1519,20 @@ class ResearchProjectState:
 
 
 @dataclass(frozen=True)
+class ResearchResourceCostState:
+    resource_id: str
+    owned: int
+    required: int
+
+
+@dataclass(frozen=True)
 class ResearchDetailState:
     code: str
     subtitle: str
     duration_seconds: int
+    # The three scalar fields retain the first displayed cost for callers that
+    # predate multi-resource Research cards. Safety-sensitive consumers must
+    # use ``resource_costs``, which contains every exact item_tpl instance.
     resource_id: str
     resource_owned: int
     resource_required: int
@@ -1531,6 +1541,7 @@ class ResearchDetailState:
     can_queue: bool
     is_running: bool
     is_finished: bool
+    resource_costs: Tuple[ResearchResourceCostState, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -29227,38 +29238,38 @@ class SemanticOracle:
             resource_id = ""
             owned = 0
             required = 0
+            resource_costs: Tuple[ResearchResourceCostState, ...] = ()
             requirement = ""
         else:
-            resource_count_path = (
-                panel + "consume_panel/bg/container/item_tpl/icon_bg/count"
-            )
-            resource_path = panel + "consume_panel/bg/container/item_tpl/icon_bg/icon"
-            resource_counts = tuple(
-                item
-                for item in ui_state.texts
-                if item.path.endswith(resource_count_path)
-                and item.active_in_hierarchy
-                and item.active_and_enabled
-                and not item.truncated
-                and item.bounds is not None
-            )
-            icons = tuple(
-                item
-                for item in ui_state.images
-                if item.path.endswith(resource_path)
-                and item.active_in_hierarchy
-                and item.active_and_enabled
-                and not item.truncated
-                and item.bounds is not None
-            )
-            if not resource_counts and not icons:
-                resource_id = ""
-                owned = 0
-                required = 0
-                requirement = ""
-            elif len(resource_counts) != 1 or len(icons) != 1:
-                raise SemanticGateClosed("research detail resource identity is ambiguous")
-            else:
+            container = panel + "consume_panel/bg/container/"
+            costs = []
+            for instance in ("item_tpl", "item_tpl(Clone)"):
+                resource_count_path = container + instance + "/icon_bg/count"
+                resource_path = container + instance + "/icon_bg/icon"
+                resource_counts = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path.endswith(resource_count_path)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.bounds is not None
+                )
+                icons = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path.endswith(resource_path)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.bounds is not None
+                )
+                if not resource_counts and not icons:
+                    continue
+                if len(resource_counts) != 1 or len(icons) != 1:
+                    raise SemanticGateClosed(
+                        "research detail resource identity is ambiguous"
+                    )
                 resource = re.fullmatch(
                     r"([0-9]+)/([1-9][0-9]*)",
                     re.sub(r"<[^>]*>", "", resource_counts[0].text),
@@ -29266,19 +29277,39 @@ class SemanticOracle:
                 if resource is None:
                     raise SemanticGateClosed("research detail resource state is malformed")
                 if re.fullmatch(r"[A-Za-z0-9_.-]+", icons[0].sprite) is None:
-                    raise SemanticGateClosed("research detail resource identity is ambiguous")
-                owned, required = map(int, resource.groups())
-                # Research Q projects display the numeric inventory sprite
-                # on their detail card, while the confirmation prompt names
-                # the component by family and tier. Keep the reviewed legacy
+                    raise SemanticGateClosed(
+                        "research detail resource identity is ambiguous"
+                    )
+                item_owned, item_required = map(int, resource.groups())
+                # Research Q projects display the numeric inventory sprite on
+                # their detail card, while the confirmation prompt names the
+                # component by family and tier. Keep the reviewed legacy
                 # carrier-aircraft aliases; other component families retain
                 # their exact numeric item ids so both observations agree.
-                resource_id = {
+                item_resource_id = {
                     "17041": "research_part_t1",
                     "17042": "research_part_t2",
                     "17043": "research_part_t3",
                     "17044": "research_part_t4",
                 }.get(icons[0].sprite, icons[0].sprite)
+                costs.append(
+                    ResearchResourceCostState(
+                        resource_id=item_resource_id,
+                        owned=item_owned,
+                        required=item_required,
+                    )
+                )
+            resource_costs = tuple(costs)
+            if not resource_costs:
+                resource_id = ""
+                owned = 0
+                required = 0
+                requirement = ""
+            else:
+                primary = resource_costs[0]
+                resource_id = primary.resource_id
+                owned = primary.owned
+                required = primary.required
                 requirement = re.sub(
                     r"<[^>]*>",
                     "",
@@ -29292,10 +29323,13 @@ class SemanticOracle:
             resource_owned=owned,
             resource_required=required,
             requirement=requirement,
-            can_start=actions["start"] and owned >= required,
+            can_start=actions["start"] and all(
+                cost.owned >= cost.required for cost in resource_costs
+            ),
             can_queue=actions["queue"],
             is_running=actions["stop"],
             is_finished=actions["finish"],
+            resource_costs=resource_costs,
         )
 
     def _research_queue_add_proven(

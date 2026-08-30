@@ -1,0 +1,58 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-27T13:21:10.571853Z",
+  "finished_at": "2026-08-27T13:22:04.472001Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "mode": "easy",
+  "before": {
+    "remaining": 15,
+    "points": 0,
+    "sortie_grant": 1
+  },
+  "after": {},
+  "stage_receipts": [
+    {
+      "semantic_id": "raid/stage/easy",
+      "generation": 94222,
+      "point": {
+        "x": 1024.067,
+        "y": 561.933
+      },
+      "bounds": {
+        "left": 900.067,
+        "top": 527.933,
+        "right": 1148.067,
+        "bottom": 595.933
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/1",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "recommend_receipts": [],
+  "sortie_receipts": [
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 94238,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": "8902bec5b810f09b1405cb243393e11fefb27a5bcbe426a3e0e15f0f8b71f3ce",
+      "capability_id": "campaign.sortie"
+    }
+  ],
+  "error": "SystemExit: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 71, in run\n    self.__getattribute__(command)()\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 378, in raid\n    RaidRun(config=self.config, device=self.device).run()\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\run.py\", line 154, in run\n    self.raid_execute_once(mode=mode, raid=name)\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\raid.py\", line 420, in raid_execute_once\n    self.raid_enter(mode=mode, raid=raid)\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\raid.py\", line 367, in raid_enter\n    raise ScriptError(\nmodule.exception.ScriptError: Current Raid semantic entry did not reach battle preparation; return to the exact Raid page and retry\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 159, in run\n    task_result = instance.run(\"raid\")\n                  ^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 118, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "raw_input_fallback_used": false
+}

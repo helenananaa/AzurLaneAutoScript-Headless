@@ -36,8 +36,8 @@ class AlasSupportMatrixTests(unittest.TestCase):
         self.assertEqual(
             result["field_classes"],
             {
-                "complete": 54,
-                "live_partial": 145,
+                "complete": 55,
+                "live_partial": 144,
                 "offline_only": 64,
                 "unsupported": 15,
                 "declared_only": 0,

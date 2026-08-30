@@ -1,0 +1,21 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-27T12:54:27.338636Z",
+  "finished_at": "2026-08-27T12:54:51.018399Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "mode": "easy",
+  "before": {
+    "remaining": 15,
+    "points": 0,
+    "sortie_grant": 1
+  },
+  "after": {},
+  "stage_receipts": [],
+  "sortie_receipts": [],
+  "error": "SystemExit: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 71, in run\n    self.__getattribute__(command)()\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 378, in raid\n    RaidRun(config=self.config, device=self.device).run()\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\run.py\", line 101, in run\n    self.ui_ensure(page_campaign_menu)\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\ui\\ui.py\", line 328, in ui_ensure\n    self.ui_get_current_page(skip_first_screenshot=skip_first_screenshot)\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\ui\\ui.py\", line 200, in ui_get_current_page\n    if self.ui_page_appear(page=page):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\ui\\ui.py\", line 45, in ui_page_appear\n    return self.appear(page.check_button, offset=offset, interval=interval)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\base\\base.py\", line 255, in appear\n    appear = semantic_adapter.appear(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 15548, in appear\n    return self.open().appear(button)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 5754, in appear\n    result = self._appear_once(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 6928, in _appear_once\n    raise AlasSemanticUnmapped(\nalas_headless.alas_adapter.AlasSemanticUnmapped: ALAS resource is not semantically mapped: EXERCISE_CHECK\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 150, in run\n    task_result = instance.run(\"raid\")\n                  ^^^^^^^^^^^^^^^^^^^^\n  File \"H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 135, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "raw_input_fallback_used": false
+}

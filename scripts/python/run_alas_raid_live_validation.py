@@ -189,6 +189,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
     orphan_result_receipts: list[dict[str, Any]] = []
     scheduler_preflight: dict[str, Any] = {}
     mission_claim_dispatches: list[dict[str, Any]] = []
+    network_recovery_receipts: list[dict[str, Any]] = []
     try:
         os.chdir(alas_root)
         from alas import AzurLaneAutoScript
@@ -233,6 +234,31 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         session = instance.device.semantic_adapter
         adapter = session.open()
         oracle = adapter.oracle
+
+        def recover_exact_network_popup() -> bool:
+            semantic_id = "overlay/network-reconnect/confirm"
+            if not oracle.enabled(semantic_id):
+                return False
+            receipt = oracle.click(semantic_id)
+            post_generation = receipt.generation
+            for _ in range(40):
+                time.sleep(0.25)
+                state = oracle.read_state()
+                post_generation = state.generation
+                if not oracle.exists(semantic_id):
+                    network_recovery_receipts.append(
+                        {
+                            **asdict(receipt),
+                            "post_generation": post_generation,
+                            "postcondition": semantic_id + " absent",
+                        }
+                    )
+                    return True
+            raise SemanticGateClosed(
+                "network reconnect confirmation did not clear its exact popup"
+            )
+
+        recover_exact_network_popup()
         observed = oracle.read_state()
         runtime_preflight = {
             "package": observed.snapshot.get("package"),
@@ -260,6 +286,10 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "cat",
             "/sdcard/Android/data/com.bilibili.azurlane/files/version.txt",
         )
+        # Recovery inspects several mutually exclusive Raid owner surfaces.
+        # Bind those passive probes to the same immutable ALAS screenshot
+        # frame so independent live endpoints cannot drift between checks.
+        instance.device.screenshot()
         if oracle.daily_combat_visible():
             # Reattach only to the already-proven CombatUI surface through
             # ALAS's original combat-execute state machine.  Stop that loop at
@@ -287,6 +317,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             active_combat_recovered = True
             ui_recovered = True
             ui_recovery_steps.append("active_combat_execute")
+            instance.device.screenshot()
         if session.orphan_combat_result_visible():
             orphan_result_receipts.extend(
                 asdict(receipt)
@@ -315,6 +346,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
                         "current Raid result recovery did not stabilize its owner page"
                     )
                 time.sleep(0.25)
+            instance.device.screenshot()
         if session.raid_multiple_sortie_visible("raid_20260827"):
             session.click_raid_multiple_sortie_back("raid_20260827")
             deadline = time.monotonic() + 10.0
@@ -327,6 +359,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
                 time.sleep(0.25)
             ui_recovery_steps.append("multiple_sortie_back")
             ui_recovered = True
+            instance.device.screenshot()
         if session.raid_precombat_visible("raid_20260827"):
             # A prior bounded run may have stopped after opening the exact
             # typed precombat surface but before consuming its sortie grant.
@@ -347,6 +380,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
                     )
                 time.sleep(0.25)
             ui_recovery_steps.append("precombat_back")
+            instance.device.screenshot()
         if session.raid_fleet_selection_visible("raid_20260827"):
             session.click_raid_fleet_back("raid_20260827")
             deadline = time.monotonic() + 10.0
@@ -356,6 +390,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
                 time.sleep(0.25)
             ui_recovery_steps.append("fleet_back")
             ui_recovered = True
+            instance.device.screenshot()
         if (
             not oracle.main_page_visible()
             and not session.raid_page_visible("raid_20260827")
@@ -392,10 +427,20 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             instance.goto_main()
             ui_recovery_steps.append("mission_page_back")
             ui_recovered = True
+        recover_exact_network_popup()
         if oracle.main_page_visible():
-            session.enter_raid_page("raid_20260827")
+            try:
+                session.enter_raid_page("raid_20260827")
+            except SemanticGateClosed:
+                # The global reconnect overlay can mount between the main-page
+                # proof and the exact Raid entry click. Retry that one entry
+                # only after the reviewed popup and its absence postcondition.
+                if not recover_exact_network_popup():
+                    raise
+                session.enter_raid_page("raid_20260827")
         page_deadline = time.monotonic() + 10.0
         while True:
+            recover_exact_network_popup()
             try:
                 raid_ready = session.raid_page_visible("raid_20260827")
             except SemanticGateClosed as exc:
@@ -558,6 +603,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "ui_recovery_steps": ui_recovery_steps,
             "orphan_result_receipts": orphan_result_receipts,
             "mission_claim_dispatches": mission_claim_dispatches,
+            "network_recovery_receipts": network_recovery_receipts,
             "before": before,
             "after": after,
             "stage_receipts": stage_receipts,
@@ -598,6 +644,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "ui_recovery_steps": ui_recovery_steps,
             "orphan_result_receipts": orphan_result_receipts,
             "mission_claim_dispatches": mission_claim_dispatches,
+            "network_recovery_receipts": network_recovery_receipts,
             "before": before,
             "after": after,
             "stage_receipts": stage_receipts,
