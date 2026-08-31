@@ -25,9 +25,7 @@ metadata:  /srv/alas-runtime/volumes/a14-login-fresh-20260826-metadata.img
 evidence:  /srv/alas-runtime/evidence/arm64-login-fresh-20260826/
 ~~~
 
-旧登录基线容器保持停止，旧 userdata/资源未改。Android 报告
-`ro.crypto.state=encrypted`、`ro.crypto.type=file`；这不替代 native FBE/Direct Boot
-五项资格。
+旧登录基线容器保持停止，旧 userdata/资源未改。
 
 ## 首次隐私协议
 
@@ -115,4 +113,4 @@ PID `1763 -> 2593`，私有 ANGLE 和 observer 合同重新通过，约 10 秒�
 - 两个运行时修复尚未封入并重新资格化 OCI；
 - 私有 NULL 从首次游戏启动起生效的 Agreement 转场尚未重跑；
 - RedroidBackend lifecycle/recovery/cleanup 尚未在该实例资格化；
-- native FBE/Direct Boot、登录后主界面、ALAS workload、soak 和发布资格未通过。
+- 登录后主界面、ALAS workload、soak 和发布资格未通过。
