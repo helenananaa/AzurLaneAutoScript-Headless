@@ -14,7 +14,7 @@ from scripts.python.verify_alas_medal_shop_config import verify_clean_upstream
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
+PINNED_UPSTREAM = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly")
 FILTER_CONTRACT = SimpleNamespace(
     regex=re.compile(
         r"^(dr|pr|book(red|yellow|blue)t[23]|retrofit|foodt[56]|plate(general|wild)?t[1-3])$",

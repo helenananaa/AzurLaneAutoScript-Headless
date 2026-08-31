@@ -15,7 +15,7 @@ from alas_headless.semantic_oracle import SemanticGateClosed
 
 
 ROOT = Path(__file__).resolve().parents[1]
-LIVE_ALAS = Path(r"H:\program\AzurLaneAutoScript-alas-topdown-live")
+LIVE_ALAS = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live")
 DORM_FEED_EVIDENCE_ORACLE_SHA256 = (
     "96b7b240be56bac8a0262c503e2e9b65b42a5f5eba80eaad623adfebae2d7f40"
 )

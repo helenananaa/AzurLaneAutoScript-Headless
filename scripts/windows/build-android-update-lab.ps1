@@ -3,7 +3,7 @@ param(
     [string]$AndroidSdkRoot = 'H:\Unity\Editor\Data\PlaybackEngines\AndroidPlayer\SDK',
     [string]$AndroidNdkRoot = 'H:\Unity\Editor\Data\PlaybackEngines\AndroidPlayer\NDK',
     [string]$JavaHome = 'D:\java\jdk-24',
-    [string]$GradlePath = 'H:\program\AzurLaneAutoScript-Headless-localdata\AzurLaneAutoScript-Headless-arm64-venus\artifacts\toolchains\gradle-9.4.1\bin\gradle.bat',
+    [string]$GradlePath = 'E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-localdata\AzurLaneAutoScript-Headless-arm64-venus\artifacts\toolchains\gradle-9.4.1\bin\gradle.bat',
     [string]$BundletoolJar,
     [string]$OutputRoot
 )

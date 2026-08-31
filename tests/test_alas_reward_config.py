@@ -10,7 +10,7 @@ from scripts.python.verify_alas_reward_config import verify_clean_upstream
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PINNED_UPSTREAM = Path(r"H:\program\AzurLaneAutoScript-upstream-readonly")
+PINNED_UPSTREAM = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly")
 DAILY_MISSION_EVIDENCE_ADAPTER_SHA256 = (
     "e02aae0a20cc8e63dfc219185e0f9645ff7ab8fa05632382f9e9dd66e6b54ff1"
 )
