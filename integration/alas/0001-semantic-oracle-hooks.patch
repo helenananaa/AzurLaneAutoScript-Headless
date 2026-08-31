@@ -15794,3 +15794,47 @@ diff --git a/module/raid/run.py b/module/raid/run.py
              else:
                  self.ui_ensure(page_rpg_stage)
                  self.raid_rpg_swipe()
+diff --git a/module/os_handler/mission.py b/module/os_handler/mission.py
+--- a/module/os_handler/mission.py
++++ b/module/os_handler/mission.py
+@@ -51,7 +51,31 @@ class MissionHandler(GlobeOperation, ZoneManager):
+         """
+         logger.info('OS mission enter')
+         confirm_timer = Timer(2, count=6).start()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        mission_entry_timer = Timer(20)
++        mission_entry_committed = False
+         for _ in self.loop():
++            # On the typed local map, open the reviewed entrance before
++            # probing the not-yet-mounted mission panel.  The legacy order can
++            # spend its entire stuck window inside negative panel reads and
++            # never reach MISSION_ENTER.  The session probe and the following
++            # ALAS Button click independently enforce the exact map, unique
++            # actionable target, blocker, foreground, and fresh-frame gates.
++            if semantic_adapter is not None:
++                if mission_entry_committed:
++                    if semantic_adapter.open().oracle.operation_siren_mission_list_visible():
++                        mission_entry_committed = False
++                    elif not mission_entry_timer.reached():
++                        continue
++                    else:
++                        mission_entry_committed = False
++                if semantic_adapter.operation_siren_mission_entry_available():
++                    self.device.click(MISSION_ENTER)
++                    mission_entry_committed = True
++                    mission_entry_timer.reset()
++                    confirm_timer.reset()
++                    continue
++
+             # End
+             if self.is_in_os_mission() \
+                     and not self.appear(MISSION_FINISH, offset=(20, 20)) \
+@@ -72,6 +96,7 @@ class MissionHandler(GlobeOperation, ZoneManager):
+ 
+             # Click
+-            if self.appear_then_click(MISSION_ENTER, offset=(200, 5), interval=5):
++            if semantic_adapter is None and self.appear_then_click(
++                    MISSION_ENTER, offset=(200, 5), interval=5):
+                 confirm_timer.reset()
+                 continue
+             if self.appear_then_click(MISSION_FINISH, offset=(20, 20), interval=2):

@@ -5596,6 +5596,13 @@
         "integration/alas/operation-siren-daily-mission-no-sample-retry2-live-20260821.json",
         "integration/alas/operation-siren-daily-no-mission-use-sample-final-live-20260821.json",
         "integration/alas/operation-siren-daily-no-mission-no-sample-final-live-20260821.json",
+        "integration/alas/series/0490-operation-siren-mission-entry-first.patch",
+        "integration/alas/operation-siren-mission-entry-patch-tree-verification-20260831-r1/result.json",
+        "integration/alas/operation-siren-mission-entry-login-flow-replay-20260831-r1.json",
+        "integration/alas/operation-siren-mission-entry-frame-clock-replay-20260831-r1.json",
+        "integration/alas/operation-siren-mission-entry-pixel-inventory-verification-20260831-r1.json",
+        "integration/alas/operation-siren-daily-empty-after-overview-live-20260831-r1.json",
+        "integration/alas/operation-siren-mission-list-after-daily-accept-20260831-r1.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -6594,6 +6601,7 @@
         "integration/alas/current-raid-use-ticket-zero-fallback-login-flow-replay-20260830-r1.json",
         "integration/alas/current-raid-use-ticket-zero-fallback-frame-clock-replay-20260830-r1.json",
         "integration/alas/current-raid-pixel-inventory-verification-20260830-r3.json",
+        "integration/alas/current-raid-use-ticket-zero-fallback-live-validation-receipt-20260831-r1.json",
         "python/alas_headless/semantic_oracle.py",
         "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
@@ -6605,7 +6613,7 @@
         "Raid"
       ],
       "path": "Raid.UseTicket",
-      "status_label": "◐ false 实机；true 零票回退待实机",
+      "status_label": "◐ false 实机；true 零票回退实机",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -8704,7 +8712,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiDaily",
-      "note": "DoMission/UseTuningSample 四组合已在同一最终 oracle 版本逐项实机闭环：DoMission=false 精确跳过总览，true 可在无海域选中时进入总览并排除月度 Boss；UseTuningSample=true 读取 0 样本并安全空操作，false 精确跳过仓库；四组合均延迟到次日 00:00。真实每日任务清除、非零样本消费、Fleet 2-4 与 Submarine=true 仍未闭环",
+      "note": "DoMission/UseTuningSample 四组合已在同一最终 oracle 版本逐项实机闭环：DoMission=false 精确跳过总览，true 可在无海域选中时进入总览并排除月度 Boss；UseTuningSample=true 读取 0 样本并安全空操作，false 精确跳过仓库；四组合均延迟到次日 00:00。2026-08-31 又由原 os_mission_enter 状态机完成一次精确任务列表入口提交，typed 列表仅有标题、无任务按钮，随后成功退出并排到次日；入口冷却避免无状态推进时重复输入。真实每日任务清除、非零样本消费、Fleet 2-4 与 Submarine=true 仍未闭环",
       "status": "B"
     },
     {
@@ -8811,7 +8819,7 @@
         "Emotion"
       ],
       "name": "Raid",
-      "note": "当前 CN Raid 已由原 Raid 状态机完成 easy/normal/hard/ex 四模式独立单局实机闭环：typed 活动入口、五槽身份、剩余次数、PT、编队准备、普通与 EX 战前页、真实出击、战斗结算及返回均已接入；权威通过收据分别记录 easy 14→13/PT 30→60、normal 15→14/PT 60→130、hard 15→14/PT 130→250、ex 1→0/PT 250→562，均无 raw fallback。9.7.343 热更暴露的普通次数清零后计数隐藏、页面双端点代次错位、结果所有权换帧、领奖后任务页恢复和中断战果恢复已按当前 typed 结构局部补齐；共享运行时连续完成 normal 14→0/PT 2168→3148，并通过诚实保留失败段和孤立战果恢复的链路完成 hard 14→0/PT 3148→4828。原 Restart 任务随后以 -force-gfx-st 将 PID 5252→7648、typed 登录回主页且无新 forward，重启后 RaidDaily 再次零输入读取 easy/normal=0、PT=3148 并完成调度。Raid.UseTicket=true 现由原 Raid 状态机在精确 count=1、ticket=0/0 且禁用标记唯一时关闭多次出击面板并回退单次出击；该零票分支已通过 focused、patched-tree、login/frame-clock 和 pixel-boundary 离线验证，但因普通次数为零仍待端到端实机。正票选择、票券切换及最终提交继续局部拒绝；第五槽已有独立 typed 入口，但零票实机未暴露可审查的后续表面，进阶执行仍 unsupported，故为 L 而非 F",
+      "note": "当前 CN Raid 已由原 Raid 状态机完成 easy/normal/hard/ex 四模式独立单局实机闭环：typed 活动入口、五槽身份、剩余次数、PT、编队准备、普通与 EX 战前页、真实出击、战斗结算及返回均已接入；权威通过收据分别记录 easy 14→13/PT 30→60、normal 15→14/PT 60→130、hard 15→14/PT 130→250、ex 1→0/PT 250→562，均无 raw fallback。9.7.343 热更暴露的普通次数清零后计数隐藏、页面双端点代次错位、结果所有权换帧、领奖后任务页恢复和中断战果恢复已按当前 typed 结构局部补齐；共享运行时连续完成 normal 14→0/PT 2168→3148，并通过诚实保留失败段和孤立战果恢复的链路完成 hard 14→0/PT 3148→4828。原 Restart 任务随后以 -force-gfx-st 将 PID 5252→7648、typed 登录回主页且无新 forward，重启后 RaidDaily 再次零输入读取 easy/normal=0、PT=3148 并完成调度。Raid.UseTicket=true 现由原 Raid 状态机在精确 count=1、ticket=0/0 且禁用标记唯一时关闭多次出击面板并回退单次出击；该零票分支现已在 ordinary easy 15→14、PT 5452→5482 的端到端实机中通过，记录一次面板进入、count=1/ticket=0/0/disabled、一次返回和一次普通出击，task_result=true 且无 raw fallback。正票选择、票券切换及最终提交继续局部拒绝；第五槽已有独立 typed 入口，进阶执行仍 unsupported，故为 L 而非 F",
       "status": "L"
     },
     {
@@ -8823,7 +8831,7 @@
         "Emotion"
       ],
       "name": "RaidDaily",
-      "note": "难度过滤与 EX 奖励路由已离线回放，当前活动仍保留上游 RaidDaily 的 RunCount=0 原语义，不传播伪单战上限。9.7.343 上原任务已证明 EX=0 与 easy=0 的零输入次日调度；StageFilter='easy > normal' 在 easy=0 时安全跳过并由同一任务实例连续完成 normal 14→0、PT 2168→3148，恰好 14 组关卡/舰队/出击收据且无 raw fallback。15 次普通清理后的领奖产生 3 张 EX 票；诚实保留的 r1/r3 失败收据与最终 r4 通过收据合起来证明一次任务页失败、一次中断战果恢复和剩余两票连续清空，而不冒充单次不间断通过。随后 hard 14→0、PT 3148→4828 的十四战也通过 r3/r5 失败收据、r4 孤立战果恢复与 r6 最终四战通过收据形成可审计的分段全清；新增 current-Raid 结果所有权避免原通用 BATTLE_STATUS_S 输入接管 typed 结果。本轮又以可审计分段链消费账号现有两张 EX 票，EX 2→1→0、PT 4828→5140→5452；精确 NetworkDown 恢复覆盖 combat_execute、结果结束和返回主界面，最终零预算任务闭合为 task_result=true 且无 raw fallback。更新后原 Restart 任务已完成 -force-gfx-st PID turnover 与 typed 登录，紧随其后的 RaidDaily 在新 PID 上零输入确认 easy/normal=0、PT=3148 并再次调度。Raid.UseTicket=true 的严格零票单次回退已离线验证但仍待次数重置后的端到端实机；实际跨日唤醒、正票最终提交、进阶挑战执行和 easy 完整整轮仍未资格化，因此为 L",
+      "note": "难度过滤与 EX 奖励路由已离线回放，当前活动仍保留上游 RaidDaily 的 RunCount=0 原语义，不传播伪单战上限。9.7.343 上原任务已证明 EX=0 与 easy=0 的零输入次日调度；StageFilter='easy > normal' 在 easy=0 时安全跳过并由同一任务实例连续完成 normal 14→0、PT 2168→3148，恰好 14 组关卡/舰队/出击收据且无 raw fallback。15 次普通清理后的领奖产生 3 张 EX 票；诚实保留的 r1/r3 失败收据与最终 r4 通过收据合起来证明一次任务页失败、一次中断战果恢复和剩余两票连续清空，而不冒充单次不间断通过。随后 hard 14→0、PT 3148→4828 的十四战也通过 r3/r5 失败收据、r4 孤立战果恢复与 r6 最终四战通过收据形成可审计的分段全清；新增 current-Raid 结果所有权避免原通用 BATTLE_STATUS_S 输入接管 typed 结果。本轮又以可审计分段链消费账号现有两张 EX 票，EX 2→1→0、PT 4828→5140→5452；精确 NetworkDown 恢复覆盖 combat_execute、结果结束和返回主界面，最终零预算任务闭合为 task_result=true 且无 raw fallback。更新后原 Restart 任务已完成 -force-gfx-st PID turnover 与 typed 登录，紧随其后的 RaidDaily 在新 PID 上零输入确认 easy/normal=0、PT=3148 并再次调度。共享 Raid.UseTicket=true 的严格零票单次回退已在独立 Raid easy 15→14、PT 5452→5482 实机闭环；RaidDaily 本身的实际跨日唤醒、正票最终提交、进阶挑战执行和 easy 完整整轮仍未资格化，因此为 L",
       "status": "L"
     },
     {
@@ -11511,6 +11519,9 @@
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
@@ -11522,13 +11533,14 @@
         "integration/alas/current-raid-use-ticket-zero-fallback-login-flow-replay-20260830-r1.json",
         "integration/alas/current-raid-use-ticket-zero-fallback-frame-clock-replay-20260830-r1.json",
         "integration/alas/current-raid-pixel-inventory-verification-20260830-r3.json",
+        "integration/alas/current-raid-use-ticket-zero-fallback-live-validation-receipt-20260831-r1.json",
         "python/alas_headless/semantic_oracle.py",
         "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
       "field": "Raid.UseTicket",
-      "note": "Both exact boolean states preserve the pinned original confirm/cancel split in offline replay. On current raid_20260827, false is live-qualified. True now enters the original Raid state machine and may take only a strict zero-ticket fallback: the exact multiple-sortie panel must report count 1, ticket 0/0, and one disabled marker before the panel is closed and one ordinary sortie resumes. Focused tests, patched-tree compilation, login/frame-clock replays, and pixel-boundary verification cover that branch offline; end-to-end live validation awaits the next ordinary-attempt reset. Positive selection, toggle, and final commit remain localized fail-closed actions, and malformed values still fail before observation or a ticket click."
+      "note": "Both exact boolean states preserve the pinned original confirm/cancel split in offline replay. On current raid_20260827, false is live-qualified. True may take only a strict zero-ticket fallback: the exact multiple-sortie panel must report count 1, ticket 0/0, and one disabled marker before the panel is closed and one ordinary sortie resumes. That branch completed the original Raid easy flow live from 15→14 and PT 5452→5482 with one exact panel entry, one back action, task_result=true, and no raw fallback. Positive selection, toggle, and final commit remain localized fail-closed actions, and malformed values still fail before observation or a ticket click."
     },
     {
       "dimensions": {
@@ -11741,10 +11753,17 @@
         "integration/alas/operation-siren-daily-mission-no-sample-retry2-live-20260821.json",
         "integration/alas/operation-siren-daily-no-mission-use-sample-final-live-20260821.json",
         "integration/alas/operation-siren-daily-no-mission-no-sample-final-live-20260821.json",
+        "integration/alas/series/0490-operation-siren-mission-entry-first.patch",
+        "integration/alas/operation-siren-mission-entry-patch-tree-verification-20260831-r1/result.json",
+        "integration/alas/operation-siren-mission-entry-login-flow-replay-20260831-r1.json",
+        "integration/alas/operation-siren-mission-entry-frame-clock-replay-20260831-r1.json",
+        "integration/alas/operation-siren-mission-entry-pixel-inventory-verification-20260831-r1.json",
+        "integration/alas/operation-siren-daily-empty-after-overview-live-20260831-r1.json",
+        "integration/alas/operation-siren-mission-list-after-daily-accept-20260831-r1.json",
         "docs/status.md"
       ],
       "field": "OpsiDaily.DoMission",
-      "note": "Both booleans completed real empty-day runs on one final oracle revision: true entered and left the mission overview, excluded the monthly boss, observed zero executable dailies, and scheduled the next server update; false skipped the overview and scheduled the same update. Successful daily mission combat remains live-unproven."
+      "note": "Both booleans completed real empty-day runs on one final oracle revision: false skipped the overview and scheduled the next server update. On 2026-08-31 true entered the overview, then the patched original os_mission_enter state machine committed exactly one typed mission-list entry, observed a title-only list with no mission buttons, exited successfully, and scheduled the next server update. Successful daily mission combat remains live-unproven."
     },
     {
       "dimensions": {
@@ -11890,9 +11909,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "cc931e355cc31ad42b1d4bea9a9eadded45f04a01998e9eb6eb4b593fcfdf5bc",
-      "manifest_sha256": "040830de47eff9236f49a950f30226b18f589d7e636208a57cf38928646bd8e7",
-      "member_count": 93
+      "combined_sha256": "cc5fd7bd9963d05129e08aa7cfcca8fa2926d9f1c8c26d8239e45f343e66c05b",
+      "manifest_sha256": "daf1f58001be27db9ce3d0fe20537fbe53ebe4146fa4f0abbe1dadd215362901",
+      "member_count": 94
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

@@ -1,0 +1,34 @@
+{
+  "schema": "alas-headless.operation-siren-mission-list-probe/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 6316,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "generation": {
+    "buttons": 29469,
+    "ui": 29469
+  },
+  "monthly_boss_difficulty": null,
+  "buttons": [],
+  "texts": [
+    {
+      "kind": "ugui-text",
+      "name": "task_all",
+      "path": "OverlayCamera/Overlay/UIMain/WorldInformationUI(Clone)/adapt/right_panel/title/task_all",
+      "text": "任务总汇",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 478.667,
+        "top": 130.333,
+        "right": 562.0,
+        "bottom": 157.0
+      }
+    }
+  ],
+  "input_injected": true,
+  "mission_action_injected": false,
+  "passed": true,
+  "mission_list_closed": true
+}

@@ -464,6 +464,11 @@
       "order": 93,
       "path": "integration/alas/series/0480-current-raid-runtime.patch",
       "sha256": "4357acd28f1c19fde2086daa32cfed24c0f2fb02140f1c07ef7cc00cc5e72190"
+    },
+    {
+      "order": 94,
+      "path": "integration/alas/series/0490-operation-siren-mission-entry-first.patch",
+      "sha256": "7e5c98a90f589341a8a75666da1386a99174ec1f2f858f09eda7e0f8b3cb05f4"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",
