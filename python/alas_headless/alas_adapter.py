@@ -1431,6 +1431,8 @@ class AlasSemanticAdapter:
         self._daily_transition_until = 0.0
         self._current_raid_result_event: Optional[str] = None
         self._network_reconnect_transition_until = 0.0
+        self._main_battle_transition_receipt: Optional[ActionReceipt] = None
+        self._main_battle_transition_until = 0.0
         self._event_story_transition_until = 0.0
         self._operation_siren_entry_transition_until = 0.0
         self._operation_siren_page_remount_until = 0.0
@@ -9382,6 +9384,18 @@ class AlasSemanticAdapter:
         self._operation_siren_globe_map_receipt = None
         return state
 
+    def operation_siren_mission_entry_available(self) -> bool:
+        """Prove the local-map mission-list entrance is actionable now."""
+
+        # The button remains mounted below some OS panels, so raw existence
+        # is insufficient. ``enabled`` preserves the unique target, raycast,
+        # bounds, blocker, foreground, and fresh-frame gates at this boundary.
+        self._package_gate()
+        if self.oracle.operation_siren_mission_list_visible():
+            return False
+        self.oracle.operation_siren_state()
+        return self.oracle.enabled("os/map/mission-list")
+
     def operation_siren_stronghold_percentage(self) -> int:
         self._package_gate()
         return self.oracle.operation_siren_stronghold_percentage()
@@ -14258,6 +14272,18 @@ class AlasSemanticAdapter:
                     <= self._research_context.passive_transition_until
                 ):
                     return cached
+            if (
+                semantic_id == "main/battle"
+                and self._main_battle_transition_receipt is not None
+                and time.monotonic() <= self._main_battle_transition_until
+                and self.oracle.campaign_menu_is_entry()
+            ):
+                # ui_goto can still classify the fading main underlay after
+                # the first exact battle-menu click has already mounted the
+                # CampaignMenu owner.  Reuse that proven receipt so the
+                # original ALAS loop can observe its destination; never issue
+                # the same underlay click through the new top raycast.
+                return self._main_battle_transition_receipt
             if semantic_id in ("os/order/scan", "os/order/submarine"):
                 order_kind = semantic_id.rsplit("/", 1)[1]
                 for attempt in range(12):
@@ -14279,6 +14305,9 @@ class AlasSemanticAdapter:
                 receipt = self.oracle.click_operation_siren_order_back()
             else:
                 receipt = self.oracle.click(semantic_id)
+            if semantic_id == "main/battle":
+                self._main_battle_transition_receipt = receipt
+                self._main_battle_transition_until = time.monotonic() + 20.0
             if semantic_id == "os/map/auto-search/off":
                 self._operation_siren_auto_search_transition_until = (
                     time.monotonic() + 30.0
@@ -16541,6 +16570,9 @@ class AlasSemanticSession:
 
     def operation_siren_state(self) -> OperationSirenState:
         return self.open().operation_siren_state()
+
+    def operation_siren_mission_entry_available(self) -> bool:
+        return self.open().operation_siren_mission_entry_available()
 
     def operation_siren_stronghold_percentage(self) -> int:
         return self.open().operation_siren_stronghold_percentage()
