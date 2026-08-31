@@ -4,8 +4,8 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 revision="$(tr -d '\r\n' < "${repo_root}/ANGLE_REVISION")"
 
-angle_workspace="${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle}"
-depot_tools_dir="${ALAS_DEPOT_TOOLS_DIR:-${HOME}/src/depot_tools}"
+angle_workspace="${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle-kvm}"
+depot_tools_dir="${ALAS_DEPOT_TOOLS_DIR:-${HOME}/src/depot_tools-kvm}"
 angle_dir="${angle_workspace}/angle"
 
 mkdir -p "$(dirname "${depot_tools_dir}")" "${angle_workspace}"

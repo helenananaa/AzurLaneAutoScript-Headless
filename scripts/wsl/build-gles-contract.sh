@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle}/angle}"
+angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle-kvm}/angle}"
 gradle_version="9.4.1"
 gradle_cache="${ALAS_GRADLE_CACHE:-${HOME}/.cache/alas-headless/gradle-${gradle_version}}"
 target_sdk="${ALAS_TARGET_SDK:-32}"

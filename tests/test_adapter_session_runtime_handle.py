@@ -1056,6 +1056,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             {"serial": "device-1"},
             {"adb": "custom-adb"},
             {"adb_command_timeout_seconds": 11},
+            {"adb_server_port": 5043},
         )
         for values in conflicts:
             with self.subTest(values=values):
@@ -1101,12 +1102,14 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         environment = {
             "ALAS_SEMANTIC_MODE": "1",
             "ALAS_SEMANTIC_DRIVER_REVISION": REVISION,
+            "ALAS_SEMANTIC_ADB_SERVER_PORT": "5043",
         }
         with mock.patch.dict("os.environ", environment, clear=True):
             session = AlasSemanticSession.from_environment("device-1")
         factory = session._runtime_handle_factory
         self.assertIsNotNone(factory)
         bridge = factory._bridge
+        self.assertEqual(bridge.adb_server_port, 5043)
         self.assertIsNone(session.runtime_handle)
 
         def mark_open():

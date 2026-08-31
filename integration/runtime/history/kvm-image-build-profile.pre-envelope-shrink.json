@@ -1,0 +1,24 @@
+{
+  "schema": "alas-headless.kvm-image-build-profile/v1",
+  "backend": "kvm",
+  "source_lock_sha256": "54e43feaae53b2ffa9fb3f2f1565b20c2903528f3413873b98657190fa8d8a69",
+  "product": {
+    "abi": "x86_64",
+    "lunch": "alas_kvm_x86_64-trunk_staging-userdebug",
+    "product_out": "emu64x"
+  },
+  "build": {
+    "target": "emu_img_zip",
+    "separate_output_required": true,
+    "relax_uses_library_check": true,
+    "dynamic_partitions_size_bytes": 2147483648,
+    "super_partition_size_bytes": 2155872256
+  },
+  "runtime": {
+    "emulator": "prebuilts/android-emulator/linux-x86_64/emulator",
+    "emulator_check": "prebuilts/android-emulator/linux-x86_64/emulator-check",
+    "adb": "prebuilts/runtime/adb",
+    "userdata_scope": "per-instance",
+    "console_port": 5588
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schema": "alas-headless.kvm-image-source-lock/v1",
+  "backend": "kvm",
+  "platform": {
+    "manifest_url": "https://android.googlesource.com/platform/manifest",
+    "revision": "android-14.0.0_r75",
+    "tag_object": "c49a52c108f10a64f6122af27fd27f96b8d45424",
+    "commit": "e3b1a5113daede938922ed29c36806e0aac2ecb3"
+  },
+  "project_patches": [
+    {
+      "project": "frameworks/base",
+      "path": "integration/runtime/aosp-patches/0001-protolog-deterministic-generation-hash.patch",
+      "sha256": "56452119114c2677513cf78b0b8d80df4b4170b2cc2c8de2212118d59ae499e7",
+      "commit_message": "ALAS: make ProtoLog generation reproducible"
+    },
+    {
+      "project": "build/make",
+      "path": "integration/runtime/aosp-patches/0002-build-image-source-date-epoch.patch",
+      "sha256": "1b5030f3851974d3892741f5a19cbe05fb3df96a241d306f6a09cc98d27efb79",
+      "commit_message": "ALAS: make filesystem image timestamps reproducible"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "alas-headless.runtime-config/v1",
+  "backend": "kvm",
+  "serial": "127.0.0.1:5589",
+  "package": "com.bilibili.azurlane",
+  "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+  "host_class": "linux-x86_64-kvm-image-host",
+  "runtime_release_root": "/srv/android-runtime/kvm/alas-headless/releases/kvm-r75-x86_64-v2",
+  "emulator": "/srv/android-runtime/kvm/alas-headless/releases/kvm-r75-x86_64-v2/emulator/emulator",
+  "emulator_check": "/srv/android-runtime/kvm/alas-headless/releases/kvm-r75-x86_64-v2/emulator/emulator-check",
+  "adb": "/srv/android-runtime/kvm/alas-headless/releases/kvm-r75-x86_64-v2/sdk/platform-tools/adb",
+  "angle_package": "org.chromium.angle",
+  "unity_command_line": "-force-gfx-st",
+  "avd_name": "alas-headless-kvm-r75-x86_64",
+  "avd_home": "/srv/android-runtime/kvm/alas-headless/avd",
+  "console_port": 5588,
+  "adb_server_port": 5043,
+  "sdk_root": "/srv/android-runtime/kvm/alas-headless/releases/kvm-r75-x86_64-v2/sdk",
+  "launch_game": true,
+  "manage_angle_routing": false,
+  "poll_interval_seconds": 1.0
+}

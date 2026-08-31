@@ -1,0 +1,134 @@
+diff --git a/AndroidProducts.mk b/AndroidProducts.mk
+--- a/AndroidProducts.mk
++++ b/AndroidProducts.mk
+@@ -1,4 +1,5 @@
+ PRODUCT_MAKEFILES := \
++    $(LOCAL_DIR)/64bitonly/product/alas_kvm_x86_64.mk \
+     $(LOCAL_DIR)/64bitonly/product/sdk_phone64_x86_64.mk \
+     $(LOCAL_DIR)/64bitonly/product/sdk_phone16k_x86_64.mk \
+     $(LOCAL_DIR)/64bitonly/product/sdk_phone64_x86_64_riscv64.mk \
+diff --git a/64bitonly/product/alas_kvm_x86_64.mk b/64bitonly/product/alas_kvm_x86_64.mk
+new file mode 100644
+--- /dev/null
++++ b/64bitonly/product/alas_kvm_x86_64.mk
+@@ -0,0 +1,85 @@
++# Copyright (C) 2026 The AzurLaneAutoScript-Headless Authors
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#      http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++
++# A narrow Goldfish phone product for the externally installed Azur Lane,
++# ANGLE NULL observer, and ALAS adapter runtime.  The first slimming stage
++# removes generic phone applications while retaining the Android surfaces
++# required for installation, WebView login, recovery, and typed automation.
++
++PRODUCT_USE_DYNAMIC_PARTITIONS := true
++
++# Preserve the qualified emu64x partition envelope during the first stage.
++# It is intentionally reduced only after real image-size and rollback proof.
++BOARD_SUPER_PARTITION_SIZE ?= 1619001344
++BOARD_EMULATOR_DYNAMIC_PARTITIONS_SIZE ?= 1610612736
++
++# /system: retain the standard Android framework, security, networking,
++# storage, media, and Goldfish compatibility substrate.  KVM-only exclusions
++# are narrowly scoped in the pinned build/make patch.
++$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit_only.mk)
++$(call inherit-product, $(SRC_TARGET_DIR)/product/generic_system.mk)
++
++ifeq (alas_kvm_x86_64,$(TARGET_PRODUCT))
++PRODUCT_ENFORCE_ARTIFACT_PATH_REQUIREMENTS := relaxed
++endif
++
++# /system_ext: keep the real recovery and system-dialog surfaces.  Do not use
++# sdk_slim's FakeSystemApp or disabled-HWUI overlay.
++$(call inherit-product, $(SRC_TARGET_DIR)/product/media_system_ext.mk)
++# SdkSetup is the Goldfish provisioner.  It creates and enables the
++# AndroidWifi network; generic Provision marks setup complete without doing so.
++PRODUCT_PACKAGES += \
++    CarrierConfig \
++    Launcher3QuickStep \
++    SdkSetup \
++    Settings \
++    StorageManager \
++    SystemUI \
++
++# /product: retain WebView, input, settings intelligence, and the Goldfish
++# resource overlays; omit generic consumer applications and default media.
++$(call inherit-product, $(SRC_TARGET_DIR)/product/media_product.mk)
++PRODUCT_PACKAGES += \
++    LatinIME \
++    preinstalled-packages-platform-handheld-product.xml \
++    SettingsIntelligence \
++    frameworks-base-overlays \
++    GoldfishSkinConfig \
++
++PRODUCT_PACKAGES_DEBUG += \
++    frameworks-base-overlays-debug \
++
++PRODUCT_SDK_ADDON_SYS_IMG_SOURCE_PROP := \
++    development/sys-img/images_x86_64_source.prop_template
++
++# /vendor: keep the fully qualified Goldfish/KVM hardware boundary.
++$(call inherit-product, device/generic/goldfish/board/emu64x/details.mk)
++$(call inherit-product, device/generic/goldfish/64bitonly/product/emulator64_vendor.mk)
++
++# Override languages_default.mk only after every inherited product has been
++# evaluated.  This keeps the five required UI/resource families and prevents
++# the inherited full locale list from being appended back into AAPT_CONFIG.
++PRODUCT_LOCALES := \
++    en_US \
++    zh_CN \
++    zh_TW \
++    ja_JP \
++    ko_KR
++
++# The project intentionally builds userdebug while ANGLE routing, observer
++# installation, and failure diagnosis still require that surface.
++PRODUCT_BROKEN_VERIFY_USES_LIBRARIES := true
++PRODUCT_BRAND := Android
++PRODUCT_NAME := alas_kvm_x86_64
++PRODUCT_DEVICE := emu64x
++PRODUCT_MODEL := ALAS Headless KVM x86_64
+diff --git a/provision/EmulatorProvisonLib/src/com/android/sdksetup/ProvisionActivity.java b/provision/EmulatorProvisonLib/src/com/android/sdksetup/ProvisionActivity.java
+--- a/provision/EmulatorProvisonLib/src/com/android/sdksetup/ProvisionActivity.java
++++ b/provision/EmulatorProvisonLib/src/com/android/sdksetup/ProvisionActivity.java
+@@ -91,6 +91,12 @@ public abstract class ProvisionActivity extends Activity {
+         final WifiConfiguration config = new WifiConfiguration();
+         config.SSID = quotedSsid;
+         config.setSecurityParams(WifiConfiguration.SECURITY_TYPE_OPEN);
++        // Public captive-portal probes are unrelated to this dedicated KVM
++        // guest's real outbound path.  Treat a skipped probe as successful so
++        // AndroidWifi is not permanently disabled before the game starts.
++        if ("alas_kvm_x86_64".equals(SystemProperties.get("ro.product.name"))) {
++            Settings.Global.putInt(getContentResolver(), "captive_portal_mode", 0);
++        }
+ 
+         final WifiManager mWifiManager = getApplicationContext().getSystemService(WifiManager.class);
+         final int netId = mWifiManager.addNetwork(config);
+diff --git a/tools/mk_combined_img.py b/tools/mk_combined_img.py
+--- a/tools/mk_combined_img.py
++++ b/tools/mk_combined_img.py
+@@ -130,7 +130,14 @@ def main():
+     partitions = parse_input(config)
+     config.close()
+ 
++    # The incremental shortcut can only reuse an existing GPT when the rounded
++    # partition layout is unchanged.  dd with conv=notrunc otherwise preserves
++    # the old tail and partition table after the super envelope is reduced.
++    expected_size = (2 + sum(int(p["sizeByMb"]) for p in partitions)) * 1024 * 1024
++    if os.path.exists(output_filename) and os.path.getsize(output_filename) != expected_size:
++        os.remove(output_filename)
++
+     # take a shortcut in build environment
+     if os.path.exists(output_filename) and len(partitions) == 2:
+         shell_command(['dd', "if=" + partitions[0]["path"], "of=" + output_filename,
+                        "conv=notrunc,sync", "ibs=1024k", "obs=1024k", "seek=1"])
