@@ -121,14 +121,6 @@ class KvmRuntimeConfig:
         if self.avd_home != runtime_root / "avd":
             raise ValueError("KVM AVD home must belong to the pinned runtime root")
         if os.name == "posix":
-            owned_root = Path("/srv/android-runtime/kvm").resolve(strict=False)
-            resolved_release = release.resolve(strict=False)
-            resolved_avd = self.avd_home.resolve(strict=False)
-            try:
-                resolved_release.relative_to(owned_root)
-                resolved_avd.relative_to(owned_root)
-            except ValueError as exc:
-                raise ValueError("KVM runtime paths must be under its owned /srv root") from exc
             for candidate in (release, self.avd_home):
                 cursor = Path(candidate.anchor)
                 for part in candidate.parts[1:]:

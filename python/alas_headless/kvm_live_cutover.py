@@ -2102,8 +2102,8 @@ def _resolve_qcow_local_path(
         raise KvmLiveCutoverError(
             f"AVD image backing chain references forbidden dependency {violation}"
         )
-    windows_drive = os.name == "nt" and re.match(r"^[A-Za-z]:[\\/]", value)
-    if (_PATH_PROTOCOL.match(value) and windows_drive is None) or value.startswith(
+    windows_drive = os.name == "nt" and re.match(r"^[A-Za-z]:[\\/]", value) is not None
+    if (_PATH_PROTOCOL.match(value) and not windows_drive) or value.startswith(
         ("\\\\", "//")
     ):
         raise KvmLiveCutoverError(

@@ -1374,6 +1374,56 @@ class RuntimeBackendsTests(unittest.TestCase):
                 ):
                     KvmRuntimeConfig(**common, numa_node=invalid)
 
+    @unittest.skipUnless(os.name == "posix", "POSIX path contract")
+    def test_kvm_runtime_accepts_isolated_non_srv_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            runtime_root = Path(directory) / "runtime-kvm"
+            release = runtime_root / "releases" / "test"
+            config = KvmRuntimeConfig(
+                serial="127.0.0.1:5589",
+                package=PACKAGE,
+                component=COMPONENT,
+                host_class="linux-x86_64-kvm",
+                emulator=release / "emulator" / "emulator",
+                emulator_check=release / "emulator" / "emulator-check",
+                adb=release / "sdk" / "platform-tools" / "adb",
+                avd_name="test",
+                avd_home=runtime_root / "avd",
+                console_port=5588,
+                adb_server_port=5043,
+                runtime_release_root=release,
+                sdk_root=release / "sdk",
+            )
+
+            self.assertEqual(config.runtime_release_root, release)
+
+    @unittest.skipUnless(os.name == "posix", "POSIX symlink contract")
+    def test_kvm_runtime_rejects_symlinked_runtime_root(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            real_runtime_root = root / "real-runtime-kvm"
+            linked_runtime_root = root / "linked-runtime-kvm"
+            real_runtime_root.mkdir()
+            linked_runtime_root.symlink_to(real_runtime_root, target_is_directory=True)
+            release = linked_runtime_root / "releases" / "test"
+
+            with self.assertRaisesRegex(ValueError, "must not contain symlinks"):
+                KvmRuntimeConfig(
+                    serial="127.0.0.1:5589",
+                    package=PACKAGE,
+                    component=COMPONENT,
+                    host_class="linux-x86_64-kvm",
+                    emulator=release / "emulator" / "emulator",
+                    emulator_check=release / "emulator" / "emulator-check",
+                    adb=release / "sdk" / "platform-tools" / "adb",
+                    avd_name="test",
+                    avd_home=linked_runtime_root / "avd",
+                    console_port=5588,
+                    adb_server_port=5043,
+                    runtime_release_root=release,
+                    sdk_root=release / "sdk",
+                )
+
     def test_observer_readiness_retries_transient_transport_failure(self):
         executor = ScriptedExecutor()
         backend = ExternalAdbBackend(

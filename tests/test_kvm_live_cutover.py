@@ -40,6 +40,12 @@ def _completed(
     return subprocess.CompletedProcess(list(argv), returncode, stdout, stderr)
 
 
+def _write_executable(path: Path, payload: bytes) -> None:
+    path.write_bytes(payload)
+    if os.name == "posix":
+        path.chmod(0o755)
+
+
 def _context(tmp_path: Path) -> CutoverContext:
     source = tmp_path / "source-kvm"
     output = tmp_path / "output-kvm"
@@ -53,15 +59,15 @@ def _context(tmp_path: Path) -> CutoverContext:
         parents=True
     )
     (release / "manifest.json").write_text("{}\n", encoding="utf-8")
-    (release / "emulator" / "qemu-img").write_bytes(b"qemu-img")
-    (release / "emulator" / "qemu-system-x86_64").write_bytes(b"qemu")
+    _write_executable(release / "emulator" / "qemu-img", b"qemu-img")
+    _write_executable(release / "emulator" / "qemu-system-x86_64", b"qemu")
     adb = release / "sdk" / "platform-tools" / "adb"
     adb.parent.mkdir(parents=True)
-    adb.write_bytes(b"adb")
+    _write_executable(adb, b"adb")
     emulator = release / "emulator" / "emulator"
-    emulator.write_bytes(b"emulator")
+    _write_executable(emulator, b"emulator")
     emulator_check = release / "emulator" / "emulator-check"
-    emulator_check.write_bytes(b"check")
+    _write_executable(emulator_check, b"check")
     (release / "images").mkdir()
 
     avd_home = runtime / "avd"
@@ -213,7 +219,7 @@ def _effective_properties(
 def test_systemd_unit_is_non_root_bounded_and_exact(tmp_path: Path) -> None:
     context = _context(tmp_path)
     run_script = tmp_path / "run-kvm-avd.sh"
-    run_script.write_text("#!/bin/sh\n", encoding="utf-8")
+    _write_executable(run_script, b"#!/bin/sh\n")
     alas_python = _alas_python(context)
     identity = UserIdentity("weipa", 1000, tmp_path / "home-weipa")
 
@@ -254,7 +260,7 @@ def test_install_unit_is_atomic_inactive_and_not_enabled(
 ) -> None:
     context = _context(tmp_path)
     run_script = tmp_path / "run-kvm-avd.sh"
-    run_script.write_text("#!/bin/sh\n", encoding="utf-8")
+    _write_executable(run_script, b"#!/bin/sh\n")
     alas_python = _alas_python(context)
     unit_directory = tmp_path / "systemd"
     unit_directory.mkdir()
@@ -342,7 +348,7 @@ def test_effective_environment_keeps_logical_venv_symlink_and_decodes_quotes(
         "version = 3.12.11\n", encoding="utf-8"
     )
     run_script = tmp_path / "run-kvm-avd.sh"
-    run_script.write_text("#!/bin/sh\n", encoding="utf-8")
+    _write_executable(run_script, b"#!/bin/sh\n")
     unit_path = tmp_path / "alas-kvm.service"
     unit_path.write_text("[Service]\n", encoding="utf-8")
     identity = UserIdentity("weipa", 1000, tmp_path / "home-weipa")
@@ -393,7 +399,7 @@ def test_unit_install_failure_restores_previous_unit(
 ) -> None:
     context = _context(tmp_path)
     run_script = tmp_path / "run-kvm-avd.sh"
-    run_script.write_text("#!/bin/sh\n", encoding="utf-8")
+    _write_executable(run_script, b"#!/bin/sh\n")
     alas_python = _alas_python(context)
     unit_directory = tmp_path / "systemd"
     unit_directory.mkdir()
@@ -599,7 +605,7 @@ def test_offline_snapshot_contains_full_avd_descriptor_and_contracts(
     unit = tmp_path / "alas-kvm.service"
     unit.write_text("[Service]\n", encoding="utf-8")
     run_script = tmp_path / "run-kvm-avd.sh"
-    run_script.write_text("#!/bin/sh\n", encoding="utf-8")
+    _write_executable(run_script, b"#!/bin/sh\n")
     alas_python = _alas_python(context)
     unit_receipt = {
         "unit_path": str(unit),
@@ -1356,7 +1362,7 @@ def test_cutover_lock_and_phase_marker_reject_parallel_or_out_of_order_work(
 def test_effective_systemd_contract_rejects_drop_in_override(tmp_path: Path) -> None:
     context = _context(tmp_path)
     run_script = tmp_path / "run-kvm-avd.sh"
-    run_script.write_text("#!/bin/sh\n", encoding="utf-8")
+    _write_executable(run_script, b"#!/bin/sh\n")
     alas_python = _alas_python(context)
     unit = tmp_path / "alas-kvm.service"
     unit.write_text("[Service]\n", encoding="utf-8")
@@ -1459,7 +1465,7 @@ def test_previous_unit_is_archived_before_stop_disable_and_mask(
 def test_adb_unknown_listener_is_rejected_before_kill(tmp_path: Path) -> None:
     context = _context(tmp_path)
     foreign = tmp_path / "foreign-adb"
-    foreign.write_bytes(b"foreign")
+    _write_executable(foreign, b"foreign")
     proc_root = tmp_path / "proc"
     process = proc_root / "91"
     process.mkdir(parents=True)
@@ -1539,7 +1545,7 @@ def test_root_legacy_adb_is_only_cleaned_after_exact_provenance_recheck(
         / "adb"
     )
     old_adb.parent.mkdir(parents=True)
-    old_adb.write_bytes(b"old-pinned-adb")
+    _write_executable(old_adb, b"old-pinned-adb")
     proc_root = tmp_path / "proc"
     process = proc_root / "91"
     process.mkdir(parents=True)
