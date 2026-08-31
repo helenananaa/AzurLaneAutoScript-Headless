@@ -22,8 +22,12 @@ def test_kvm_avd_provision_binds_real_goldfish_images():
     assert "hw.cpu.arch=x86_64" in text
     assert "androidboot.hardware=ranchu" in text
     assert "data_partition_size=48G" in text
-    assert "display_width=1280" in text
-    assert "display_height=720" in text
+    assert "guest_ram_mib=3072" in text
+    assert "hw.ramSize=%s" in text
+    assert "display_width=960" in text
+    assert "display_height=540" in text
+    assert "display_density=180" in text
+    assert "hw.lcd.density=%s" in text
     assert "hw.initialOrientation=landscape" in text
     assert 'render_config "$config" "$config.tmp"' in text
     assert "config.ini" in text

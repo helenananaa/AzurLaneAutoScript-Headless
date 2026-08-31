@@ -47,8 +47,13 @@ config="$avd_dir/config.ini"
 descriptor="$avd_home/$avd_name.ini"
 expected_sysdir="image.sysdir.1=$image_root/"
 data_partition_size=48G
-display_width=1280
-display_height=720
+guest_ram_mib=3072
+# Keep the host-side virtual display one 16:9 tier below Unity's qualified
+# logical surface.  The KVM backend applies the 1280x720@240 logical override
+# immediately before every game cold launch.
+display_width=960
+display_height=540
+display_density=180
 
 render_config() {
     local input=$1
@@ -60,14 +65,16 @@ render_config() {
         -e "s|^skin\.path=.*$|skin.path=${display_width}x${display_height}|" \
         -e '/^hw\.lcd\.width=/d' \
         -e '/^hw\.lcd\.height=/d' \
+        -e '/^hw\.lcd\.density=/d' \
+        -e '/^hw\.ramSize[[:space:]]*=/d' \
         -e '/^hw\.initialOrientation=/d' \
         -e '/^hw\.cpu\.arch=/d' \
         -e '/^kernel\.parameters=/d' \
         "$input" > "$output"
-    printf '\nhw.lcd.width=%s\nhw.lcd.height=%s\nhw.initialOrientation=landscape\n' \
-        "$display_width" "$display_height" >> "$output"
-    printf 'hw.cpu.arch=x86_64\nkernel.parameters=androidboot.hardware=ranchu\n' \
-        >> "$output"
+    printf '\nhw.lcd.width=%s\nhw.lcd.height=%s\nhw.lcd.density=%s\nhw.initialOrientation=landscape\n' \
+        "$display_width" "$display_height" "$display_density" >> "$output"
+    printf 'hw.ramSize=%s\nhw.cpu.arch=x86_64\nkernel.parameters=androidboot.hardware=ranchu\n' \
+        "$guest_ram_mib" >> "$output"
 }
 
 if [[ -f "$config" ]]; then

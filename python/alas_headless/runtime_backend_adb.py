@@ -413,6 +413,7 @@ class AdbAttachedBackend(RuntimeBackend):
             mutating=True,
         )
         self._require_success(force_stop, "game-force-stop-failed")
+        self._prepare_game_cold_launch(instance)
         launch_arguments = ["shell", "am", "start", "-W"]
         if self.unity_command_line is not None:
             transport_value = self._UNITY_EXTRA_TRANSPORT.get(
@@ -434,6 +435,9 @@ class AdbAttachedBackend(RuntimeBackend):
                 else "game-launch-failed"
             ),
         )
+
+    def _prepare_game_cold_launch(self, instance: Mapping[str, Any]) -> None:
+        """Apply backend-owned state after force-stop and before Unity starts."""
 
     def _wait_game_foreground(self, timeout_seconds: float) -> Mapping[str, Any]:
         def ready() -> Optional[Mapping[str, Any]]:
