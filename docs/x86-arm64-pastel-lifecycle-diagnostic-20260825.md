@@ -100,7 +100,7 @@ SwiftShader/Unity destroyed-mutex，因而不能把问题缩小为单一 LLVM �
 
 | 项目 | 实际值 |
 | --- | --- |
-| Redroid task | `alas-redroid-r75-x86-fbe`，container PID `716625` |
+| Redroid task | 历史 x86 容器，container PID `716625` |
 | Android | Android 14，SDK 34 |
 | Build ID | `AP2A.240805.005.S4` |
 | Incremental | `alas-android-14-r75` |

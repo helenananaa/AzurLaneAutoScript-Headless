@@ -358,8 +358,8 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   [ARM64 Redroid runbook](arm64-redroid-end-to-end-runbook.zh-CN.md); exact
   fresh-container evidence is in the
   [fresh login report](aws-arm64-redroid-fresh-login-validation-20260826.md).
-  This is an engineering pre-login baseline, not ALAS workload, FBE, recovery,
-  soak, or release qualification.
+  This is an engineering pre-login baseline, not ALAS workload, recovery, soak,
+  or release qualification.
 
 ## 2026-08-23
 

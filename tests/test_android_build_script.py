@@ -61,6 +61,7 @@ class AndroidBuildScriptTests(unittest.TestCase):
         self.assertIn('[[ $out_root == */arm64', script)
         self.assertIn('case "$selected_abi" in', script)
         self.assertIn('--source-lock "$source_lock" --abi "$selected_abi"', script)
+        self.assertIn('--prepared-source-root "$source_root"', script)
 
     def test_redroid_angle_workspace_defaults_are_backend_owned(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -135,6 +136,14 @@ class AndroidBuildScriptTests(unittest.TestCase):
         self.assertIn("s/libEGL_alasx\\.so/libEGL_angle.so/g' \"$egl\"", packager)
         self.assertIn("s/libGLESv2_alasx\\.so/libGLESv2_angle.so/g'", packager)
         self.assertIn("! LC_ALL=C grep -aqF 'libGLESv2_angle' \"$private_egl\"", packager)
+        self.assertIn("-x 'lib/*/*.so' 'assets/a4a_rules.json'", packager)
+        self.assertIn(
+            "zip -X -q -0 \"$work/unsigned.apk\" lib/*/*.so assets/a4a_rules.json",
+            packager,
+        )
+        self.assertIn("compression method:", packager)
+        self.assertIn("none (stored)", packager)
+        self.assertIn('"$zipalign" -P 16 -f 4', packager)
 
         observer_build = (
             root / "scripts" / "wsl" / "build-angle-null-observer.sh"
@@ -161,6 +170,87 @@ class AndroidBuildScriptTests(unittest.TestCase):
         self.assertIn("llvm::Intrinsic::fptosi_sat", patch)
         self.assertIn("static std::mutex *ErrorHandlerMutex = new std::mutex();", patch)
         self.assertNotIn("ENABLE_RR_LLVM_IR_VERIFICATION", patch)
+
+    def test_x86_64_redroid_webview_strips_only_the_32_bit_payload(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        patch = (
+            root
+            / "integration"
+            / "runtime"
+            / "aosp-patches"
+            / "0005-redroid-webview-x86_64-only-prebuilt.patch"
+        ).read_text(encoding="utf-8")
+        self.assertIn('name: "redroid_webview_x86_64_only_apk"', patch)
+        self.assertIn("-x 'lib/x86/*'", patch)
+        self.assertIn('apk: ":redroid_webview_x86_64_only_apk"', patch)
+        self.assertNotIn("-x 'lib/x86_64/*'", patch)
+
+        build = self.script()
+        self.assertIn("verify_redroid_webview_abi.py", build)
+        self.assertIn('if [[ $abi == x86_64 ]]', build)
+        self.assertIn('webview-abi-$abi.json', build)
+        self.assertIn('webview-abi.json=$webview_abi_evidence', build)
+
+    def test_x86_64_headless_consumer_trim_is_target_local_and_verified(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        patch = (
+            root
+            / "integration"
+            / "runtime"
+            / "aosp-patches"
+            / "0006-redroid-x86_64-headless-consumer-app-trim.patch"
+        ).read_text(encoding="utf-8")
+        for module in (
+            "Camera2",
+            "Contacts",
+            "Gallery2",
+            "LiveWallpapersPicker",
+            "PrintSpooler",
+            "Traceur",
+        ):
+            self.assertIn(
+                f"$(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,{module})",
+                patch,
+            )
+        self.assertNotIn("ContactsProvider", patch)
+        self.assertNotIn("redroid_arm64_only", patch)
+
+        build = self.script()
+        self.assertIn("verify_redroid_headless_package_policy.py", build)
+        self.assertIn('headless-package-policy-$abi.json', build)
+        self.assertIn(
+            'headless-package-policy.json=$package_policy_evidence', build
+        )
+
+    def test_x86_64_locale_and_font_trim_is_target_local_and_verified(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        locale_patch = (
+            root
+            / "integration"
+            / "runtime"
+            / "aosp-patches"
+            / "0007-redroid-x86_64-five-locale-product.patch"
+        ).read_text(encoding="utf-8")
+        font_patch = (
+            root
+            / "integration"
+            / "runtime"
+            / "aosp-patches"
+            / "0008-redroid-x86_64-noto-font-whitelist.patch"
+        ).read_text(encoding="utf-8")
+        self.assertIn("PRODUCT_LOCALES := \\", locale_patch)
+        for locale in ("en_US", "zh_CN", "zh_TW", "ja_JP", "ko_KR"):
+            self.assertIn(f"+    {locale}", locale_patch)
+        self.assertIn(
+            "ifeq ($(TARGET_PRODUCT),redroid_x86_64_only)", font_patch
+        )
+        self.assertIn("+    NotoSansCJK-Regular.ttc", font_patch)
+        self.assertNotIn("+    NotoSerifCJK-Regular.ttc", font_patch)
+
+        build = self.script()
+        self.assertIn("verify_redroid_locale_font_policy.py", build)
+        self.assertIn('locale-font-policy-$abi.json', build)
+        self.assertIn('locale-font-policy.json=$locale_font_evidence', build)
 
     def test_oci_packager_preserves_android_numeric_ownership(self) -> None:
         packager = (
@@ -257,6 +347,18 @@ class AndroidBuildScriptTests(unittest.TestCase):
             "0012-android-null-bootstrap-snapshot-retry.patch", apply_script
         )
         self.assertIn("Initial typed-snapshot retry is missing", observer_build)
+
+    def test_g4_uses_observer_revision_and_both_resumed_activity_formats(self) -> None:
+        script = (
+            Path(__file__).resolve().parents[1]
+            / "scripts"
+            / "windows"
+            / "run-g4-game-init.ps1"
+        ).read_text(encoding="utf-8")
+        self.assertIn("ObserverServer.cpp", script)
+        self.assertIn("kDriverRevision", script)
+        self.assertIn("angle_source_revision", script)
+        self.assertIn("topResumedActivity=|mResumedActivity:", script)
 
 
 if __name__ == "__main__":

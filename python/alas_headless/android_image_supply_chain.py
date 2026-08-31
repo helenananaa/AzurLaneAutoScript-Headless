@@ -11,11 +11,10 @@ from typing import Any, Dict, Iterable, Mapping, Sequence, Tuple
 from .android_image_source import AndroidImageSourceLock
 
 
-PROVENANCE_SCHEMA = "alas-headless.android-image-build-provenance/v1"
+PROVENANCE_SCHEMA = "alas-headless.android-image-build-provenance/v2"
 REPRODUCIBILITY_SCHEMA = "alas-headless.android-image-reproducibility/v1"
 FORBIDDEN_GAME_TOKENS = ("com.bilibili.azurlane", "azurlane")
 ABIS = ("x86_64", "arm64-v8a")
-FBE_OVERLAY_VALIDATION_SCHEMA = "alas-headless.redroid-native-fbe-overlay-validation/v1"
 
 
 class AndroidImageSupplyChainError(ValueError):
@@ -52,13 +51,10 @@ def _parse_named_paths(values: Iterable[str]) -> Sequence[Tuple[str, Path]]:
             raise AndroidImageSupplyChainError("duplicate artifact name: {0}".format(name))
         observed.add(name)
         parsed.append((name, Path(raw_path)))
-    mandatory = {
-        "system.img", "vendor.img", "redroid-native-fbe-overlay.json",
-        "post-patch-state.json",
-    }
+    mandatory = {"system.img", "vendor.img", "post-patch-state.json"}
     if not mandatory.issubset(observed):
         raise AndroidImageSupplyChainError(
-            "system.img, vendor.img, Redroid post-patch state, and FBE overlay artifacts are mandatory"
+            "system.img, vendor.img, and Redroid post-patch state artifacts are mandatory"
         )
     return parsed
 
@@ -113,27 +109,12 @@ def create_build_provenance(
 
     artifact_records: Dict[str, Mapping[str, Any]] = {}
     parsed_artifacts = _parse_named_paths(artifacts)
-    overlay_validation = None
     post_patch_state = None
     for name, path in parsed_artifacts:
         _nonempty(path, "build artifact")
         artifact_records[name] = hash_file(path)
-        if name == "redroid-native-fbe-overlay.json":
-            overlay_validation = json.loads(path.read_text(encoding="utf-8"))
-        elif name == "post-patch-state.json":
+        if name == "post-patch-state.json":
             post_patch_state = json.loads(path.read_text(encoding="utf-8"))
-    if (
-        not isinstance(overlay_validation, Mapping)
-        or overlay_validation.get("schema") != FBE_OVERLAY_VALIDATION_SCHEMA
-        or overlay_validation.get("outcome") != "pass"
-        or overlay_validation.get("game_artifact_included") is not False
-        or overlay_validation.get("android_fbe_proven") is not False
-        or overlay_validation.get("direct_boot_proven") is not False
-        or overlay_validation.get("source_lock_sha256") != source_lock.sha256
-    ):
-        raise AndroidImageSupplyChainError(
-            "native FBE overlay validation must pass without claiming runtime FBE"
-        )
     if (
         not isinstance(post_patch_state, Mapping)
         or post_patch_state.get("schema") != "alas-headless.redroid-post-patch-state/v1"
@@ -153,16 +134,6 @@ def create_build_provenance(
             "security_patch": security_patch,
         },
         "artifacts": artifact_records,
-        "native_fbe_overlay": {
-            "schema": overlay_validation.get("schema"),
-            "outcome": overlay_validation.get("outcome"),
-            "android_fbe_proven": False,
-            "direct_boot_proven": False,
-            "source_lock_sha256": overlay_validation.get("source_lock_sha256"),
-            "artifact_sha256": artifact_records[
-                "redroid-native-fbe-overlay.json"
-            ]["sha256"],
-        },
         "redroid_post_patch_state": {
             "schema": post_patch_state.get("schema"),
             "source_lock_sha256": post_patch_state.get("source_lock_sha256"),

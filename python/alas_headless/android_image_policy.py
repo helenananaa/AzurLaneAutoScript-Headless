@@ -10,7 +10,7 @@ from types import MappingProxyType
 from typing import Any, Iterable, Mapping, Tuple
 
 
-ANDROID_IMAGE_POLICY_SCHEMA = "alas-headless.android-image-policy/v1"
+ANDROID_IMAGE_POLICY_SCHEMA = "alas-headless.android-image-policy/v2"
 TOKEN_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 SUPPORTED_BACKENDS = frozenset(("kvm", "redroid", "arm64-qemu"))
 SUPPORTED_ABIS = frozenset(("x86_64", "arm64-v8a"))
@@ -23,8 +23,6 @@ REQUIRED_PROTECTED_CAPABILITIES = frozenset(
         "android-framework",
         "art-runtime",
         "audio-framework",
-        "credential-encrypted-storage",
-        "device-encrypted-storage",
         "dns",
         "download-provider",
         "external-app-storage",
@@ -40,6 +38,7 @@ REQUIRED_PROTECTED_CAPABILITIES = frozenset(
         "surfaceflinger",
         "time-sync",
         "tls-ca-store",
+        "user-storage-ready",
         "webview",
     )
 )

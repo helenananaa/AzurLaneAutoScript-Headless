@@ -11,15 +11,12 @@ from typing import Any, Dict, Mapping, Optional
 
 from .android_foundation_audit import AUDIT_SCHEMA
 from .android_image_policy import AndroidImagePolicy
-from .android_userdata_volume import QUALIFICATION_SCHEMA as USERDATA_VOLUME_SCHEMA
-from .android_userdata_volume import VOLUME_SET_SCHEMA as FBE_VOLUME_SET_SCHEMA
 
 
 RELEASE_SCHEMA = "alas-headless.android-image-foundation-release/v1"
 TARGET_ABIS = ("x86_64", "arm64-v8a")
 OCI_IDENTITY_SCHEMA = "alas-headless.oci-image-identity/v1"
-PROVENANCE_SCHEMA = "alas-headless.android-image-build-provenance/v1"
-FBE_OVERLAY_VALIDATION_SCHEMA = "alas-headless.redroid-native-fbe-overlay-validation/v1"
+PROVENANCE_SCHEMA = "alas-headless.android-image-build-provenance/v2"
 REPRODUCIBILITY_SCHEMA = "alas-headless.android-image-reproducibility/v1"
 ROLLBACK_SCHEMA = "alas-headless.redroid-image-rollback/v1"
 OCI_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -80,8 +77,6 @@ def target_record(
     build_provenance: Optional[Mapping[str, Any]] = None,
     reproducibility_evidence: Optional[Mapping[str, Any]] = None,
     rollback_evidence: Optional[Mapping[str, Any]] = None,
-    userdata_volume_evidence: Optional[Mapping[str, Any]] = None,
-    fbe_volume_set_evidence: Optional[Mapping[str, Any]] = None,
 ) -> Mapping[str, Any]:
     blockers = []
     contract = None
@@ -248,7 +243,6 @@ def target_record(
             "target": build_provenance.get("target"),
             "build_identity": build_provenance.get("build_identity"),
             "artifacts": build_provenance.get("artifacts"),
-            "native_fbe_overlay": build_provenance.get("native_fbe_overlay"),
             "sbom": build_provenance.get("sbom"),
             "notices": build_provenance.get("notices"),
             "evidence_file": evidence_file(
@@ -265,8 +259,7 @@ def target_record(
         artifacts = build_provenance.get("artifacts", {})
         if not isinstance(artifacts, Mapping) or not all(
             valid_hashed_file(artifacts.get(name)) for name in (
-                "system.img", "vendor.img", "redroid-native-fbe-overlay.json",
-                "post-patch-state.json",
+                "system.img", "vendor.img", "post-patch-state.json",
             )
         ):
             blockers.append("build-provenance-artifacts-invalid")
@@ -280,18 +273,6 @@ def target_record(
             blockers.append("build-provenance-notices-invalid")
         if not valid_hashed_file(build_provenance.get("installed_files")):
             blockers.append("build-provenance-inventory-invalid")
-        overlay = build_provenance.get("native_fbe_overlay")
-        overlay_artifact = artifacts.get("redroid-native-fbe-overlay.json", {}) if isinstance(artifacts, Mapping) else {}
-        if (
-            not isinstance(overlay, Mapping)
-            or overlay.get("schema") != FBE_OVERLAY_VALIDATION_SCHEMA
-            or overlay.get("outcome") != "pass"
-            or overlay.get("android_fbe_proven") is not False
-            or overlay.get("direct_boot_proven") is not False
-            or overlay.get("source_lock_sha256") != build_provenance.get("source_lock_sha256")
-            or overlay.get("artifact_sha256") != overlay_artifact.get("sha256")
-        ):
-            blockers.append("build-provenance-fbe-overlay-invalid")
         host_preflight = build_provenance.get("host_preflight")
         if not isinstance(host_preflight, Mapping) or host_preflight.get("outcome") != "pass":
             blockers.append("build-provenance-host-preflight-invalid")
@@ -362,58 +343,6 @@ def target_record(
         if image_artifact is not None:
             blockers.append("image-rollback-candidate-unbound")
 
-    userdata_volume_summary = None
-    if userdata_volume_evidence is not None:
-        userdata_volume_summary = {
-            "schema": userdata_volume_evidence.get("schema"),
-            "outcome": userdata_volume_evidence.get("outcome"),
-            "ceiling": userdata_volume_evidence.get("ceiling"),
-            "android_fbe_proven": userdata_volume_evidence.get("android_fbe_proven"),
-            "direct_boot_proven": userdata_volume_evidence.get("direct_boot_proven"),
-            "evidence_file": evidence_file(
-                userdata_volume_evidence,
-                "userdata-volume-evidence-file-invalid",
-                blockers,
-            ),
-        }
-        if (
-            userdata_volume_evidence.get("schema") != USERDATA_VOLUME_SCHEMA
-            or userdata_volume_evidence.get("outcome") != "pass"
-            or userdata_volume_evidence.get("ceiling") != "host-volume-qualified"
-        ):
-            blockers.append("userdata-volume-evidence-not-pass")
-        if (
-            userdata_volume_evidence.get("android_fbe_proven") is not False
-            or userdata_volume_evidence.get("direct_boot_proven") is not False
-        ):
-            blockers.append("userdata-volume-evidence-overclaims-fbe")
-
-    fbe_volume_set_summary = None
-    if fbe_volume_set_evidence is not None:
-        fbe_volume_set_summary = {
-            "schema": fbe_volume_set_evidence.get("schema"),
-            "outcome": fbe_volume_set_evidence.get("outcome"),
-            "ceiling": fbe_volume_set_evidence.get("ceiling"),
-            "android_fbe_proven": fbe_volume_set_evidence.get("android_fbe_proven"),
-            "direct_boot_proven": fbe_volume_set_evidence.get("direct_boot_proven"),
-            "evidence_file": evidence_file(
-                fbe_volume_set_evidence,
-                "fbe-volume-set-evidence-file-invalid",
-                blockers,
-            ),
-        }
-        if (
-            fbe_volume_set_evidence.get("schema") != FBE_VOLUME_SET_SCHEMA
-            or fbe_volume_set_evidence.get("outcome") != "pass"
-            or fbe_volume_set_evidence.get("ceiling") != "host-fbe-volume-set-qualified"
-        ):
-            blockers.append("fbe-volume-set-evidence-not-pass")
-        if (
-            fbe_volume_set_evidence.get("android_fbe_proven") is not False
-            or fbe_volume_set_evidence.get("direct_boot_proven") is not False
-        ):
-            blockers.append("fbe-volume-set-evidence-overclaims-fbe")
-
     return {
         "abi": abi,
         "outcome": "platform-and-update-qualified" if not blockers else "blocked",
@@ -427,8 +356,6 @@ def target_record(
         "build_provenance": provenance_summary,
         "reproducibility": reproducibility_summary,
         "image_rollback": rollback_summary,
-        "host_userdata_volume": userdata_volume_summary,
-        "host_fbe_volume_set": fbe_volume_set_summary,
     }
 
 

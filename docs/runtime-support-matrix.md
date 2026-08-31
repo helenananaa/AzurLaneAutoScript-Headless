@@ -29,7 +29,7 @@ TCG 或外部设备之间静默切换。ANGLE NULL 消除的是游戏对硬件 G
 | Android 运行方式 | x86_64 Linux 服务器 | ARM64 Linux 服务器 |
 | --- | --- | --- |
 | KVM / Android Emulator | **主线可执行；当前最成熟。** API 32 x86_64、KVM 探测、ANGLE NULL、Unity、observer、游戏登录前、game/Android recovery 均有证据。仍缺当前 ALAS 全任务、长期 soak 与多实例资格。 | **未验证。** 已有 ARM64 ANGLE、Unity 和 runtime-lock 构件，但没有真实 ARM KVM 宿主、guest 生命周期、游戏或恢复证据。 |
-| Redroid | **真实探索；后端实现待执行资格。** 原生 x86 云宿主在无 /dev/kvm 条件下完成 Binder/容器路径、完整游戏资源、重启持久化并到达登录界面；未输入账号。主线后端已实现，并在当前 containerd 宿主通过 manifest、容器、ABI 和持久卷只读预检；尚未对隔离实例执行完整 lifecycle/recovery/cleanup，也缺当前 x86 OCI 真实回退。 | **全新容器的真实游戏登录前路径已通过，尚未取得 ALAS 资格。** AWS ARM64 宿主在 VA39 内核、Android 14 Redroid、新 userdata 首次协议、ANGLE NULL 和 typed observer 下完成 28.1 GB 资源下载；下载后按窄条件冷重启一次进入手机号登录 Activity，未输入或提交账号。当前 OCI 未封入两个运行时修复，原生 FBE、后端生命周期、登录后主界面、ALAS 工作负载、恢复与 soak 仍缺失。 |
+| Redroid | **真实探索；后端实现待执行资格。** 原生 x86 云宿主在无 /dev/kvm 条件下完成 Binder/容器路径、完整游戏资源、重启持久化并到达登录界面；未输入账号。主线后端已实现，并在当前 containerd 宿主通过 manifest、容器、ABI 和持久目录只读预检；尚未对隔离实例执行完整 lifecycle/recovery/cleanup，也缺当前 x86 OCI 真实回退。 | **全新容器的真实游戏登录前路径已通过，尚未取得 ALAS 资格。** AWS ARM64 宿主在 VA39 内核、Android 14 Redroid、新 userdata 首次协议、ANGLE NULL 和 typed observer 下完成 28.1 GB 资源下载；下载后按窄条件冷重启一次进入手机号登录 Activity，未输入或提交账号。当前 OCI 未封入两个运行时修复，后端生命周期、登录后主界面、ALAS 工作负载、恢复与 soak 仍缺失。 |
 | QEMU TCG | **部分通过，仅作为 fallback。** Q1/Q2/Q3、Unity 长运行和 observer freshness 通过，游戏到达隐私协议边界；WebView 黑屏/System UI ANR 阻止更深 Q4。单线程 portable PGO 候选保留，MTTCG 已因超时或退化被否决。 | **服务器格未验证。** 没有真实 ARM 服务器资格结果。相邻证据来自非 root ARM64 平板托管同架构 QEMU/Cuttlefish：Unity 通过且游戏到达无输入登录前，但极慢，不能替代服务器证据。ARM64 API 32 的另一实验还受 keystore2 崩溃阻塞。 |
 
 ### x86_64 KVM
@@ -80,12 +80,11 @@ loopback，测试没有输入账号。
 
 当前不能 promotion 的原因：
 
-- stock Redroid 14 的受保护能力为 20/21，原生 FBE 未通过；
-- 历史 stock 资格实例的 /data 是宿主 ext4 bind mount；最新登录候选虽已使用
-  独立 loop/dm userdata，仍未通过 Android native FBE 与 Direct Boot 五项门；
+- Redroid `/data` 使用每实例独立的宿主目录，仍需在当前候选上补齐 lifecycle、
+  restart/persistence 与 rollback 证据；
 - stock 基线安全补丁不足以作为长期发布基线；
-- 自维护 AOSP/Redroid 双 ABI 构建和 owner-preserving OCI 已完成，但尚未在满足
-  dm-default-key/FBE 条件的 ARM 运行宿主完成自建候选首启资格；
+- 自维护 AOSP/Redroid 双 ABI 构建和 owner-preserving OCI 已完成，但尚未在 ARM
+  运行宿主完成自建候选首启资格；
 - 真实游戏与资源全集已在 fresh userdata 到登录边界，首次隐私转场单次通过；但该次
   转场发生在私有 loader 恢复前，且两项运行时修复尚未封入 OCI。主界面和 ALAS
   工作负载仍未验证；

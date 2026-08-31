@@ -8,7 +8,7 @@
 `9.7.10` 的真实 Unity 登录页。两轮均满足：
 
 - container task 保持 `RUNNING`；
-- Android FBE 为 `encrypted` / `file`；
+- Android `/data` 已挂载且可写；
 - 游戏 ABI 为 `x86_64`，通过 ANGLE NULL 启动；
 - Unity 使用必需的 `-force-gfx-st`；
 - typed observer 返回 `status=ok`、`main_thread=true` 和新鲜 generation；
@@ -21,8 +21,7 @@
 因此可以确认：**“用当前 x86 镜像/rootfs 和保留的已装游戏 userdata，新建
 Redroid 容器可稳定进入游戏登录路径”已可复现。**
 
-本验证没有声称全新空 userdata 的首次 FBE 初始化已经修复，也没有把登录页提升
-为账号主页、ALAS workload、长时间 soak 或生产可用结论。
+本验证没有把登录页提升为账号主页、ALAS workload、长时间 soak 或生产可用结论。
 
 ## 验证对象
 
@@ -46,8 +45,7 @@ game:     com.bilibili.azurlane 9.7.10, x86_64
 ```
 
 这里复用的是已安装游戏的 volume 内容，不是 OCI container object。每轮都删除
-前一 task/container，并按现场设备身份创建新的 object；没有启动历史保留对象
-`alas-redroid-r75-x86-fbe` 或 `alas-redroid-r75-x86-verify2`。
+前一 task/container，并按现场设备身份创建新的 object；没有启动历史保留对象。
 
 ## 两轮结果
 
@@ -124,8 +122,7 @@ capabilities: INTERNET, VALIDATED
 kernel uevent/netlink I/O errors: 0
 ```
 
-这证明事件风暴不是 native FBE 的必然结果，并把此前宿主不稳定的直接触发条件
-缩小到共享 host network/netlink 边界。它还不是 Linux/Redroid 上游源码级最终
+这把此前宿主不稳定的直接触发条件缩小到共享 host network/netlink 边界。它还不是 Linux/Redroid 上游源码级最终
 根因，后续 runtime 应把私有 network namespace 和网络附件固化为正式启动路径。
 
 ## 验证中排除的无效轮次
@@ -206,10 +203,10 @@ summary.txt                       bf28df3bb64aa865622dad752071729395dfebfadc72a5
 ## 当前支持声明
 
 ```text
-x86 新 OCI container -> Android/FBE/ADB：两轮通过
+x86 新 OCI container -> Android/ADB：两轮通过
 x86 新 OCI container -> ANGLE NULL typed LoginUI2：两轮通过
 x86 独立 network namespace 宿主稳定性：本轮零事件错误
-x86 空 userdata 首次 FBE：仍未通过
+x86 空 userdata 首次启动：本轮未验证
 x86 账号主页 / ALAS workload / persistence / rollback / soak：本轮未验证
 ARM64：本轮未修改
 ```

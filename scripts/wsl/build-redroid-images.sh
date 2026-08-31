@@ -196,7 +196,8 @@ PY
 fi
 run_json_evidence "$evidence_root/source-remotes.json" \
     "$python_bin" "$repo_root/scripts/python/verify_android_image_source_remotes.py" \
-    --source-lock "$source_lock" --abi "$selected_abi"
+    --source-lock "$source_lock" --abi "$selected_abi" \
+    --prepared-source-root "$source_root"
 
 json_field() {
     "$python_bin" - "$source_lock" "$1" <<'PY'
@@ -420,21 +421,12 @@ else
     printf '%s\n' "$redroid_source_status" > "$redroid_source_evidence"
 fi
 
-# Upstream Redroid intentionally leaves product.mk as a local extension point.
-# Bind our reviewed dual-volume FBE overlay into every build, and refuse to
-# replace any pre-existing local customization.
-overlay_root="$repo_root/integration/runtime/redroid-native-fbe"
-overlay_evidence="$evidence_root/redroid-native-fbe-overlay.json"
-run_json_evidence "$overlay_evidence" \
-    "$python_bin" "$repo_root/scripts/python/validate_redroid_native_fbe_overlay.py" \
-    --overlay "$overlay_root" --source-lock "$source_lock"
-if [[ -e "$source_root/product.mk" ]] && ! cmp -s "$overlay_root/product.mk" "$source_root/product.mk"; then
-    echo "refusing to overwrite different AOSP product.mk" >&2; exit 1
+# The project no longer maintains a local AOSP product extension. Refuse stale
+# residue so a retired storage overlay cannot silently remain in a new image.
+if [[ -e "$source_root/product.mk" ]]; then
+    echo "legacy Redroid storage overlay residue is present in the AOSP source tree" >&2
+    exit 1
 fi
-mkdir -p "$source_root/alas/redroid-native-fbe"
-cp "$overlay_root/fstab.redroid" "$source_root/alas/redroid-native-fbe/fstab.redroid"
-cp "$overlay_root/init.alas-fbe.rc" "$source_root/alas/redroid-native-fbe/init.alas-fbe.rc"
-cp "$overlay_root/product.mk" "$source_root/product.mk"
 
 build_one() {
     local abi=$1 lunch_target=$2 product_name=$3
@@ -463,6 +455,44 @@ build_one() {
         "$python_bin" "$repo_root/scripts/python/verify_android_ext4_timestamps.py" \
         --image "$product_dir/system.img" --image "$product_dir/vendor.img" \
         --source-date-epoch "$source_date_epoch"
+    local webview_artifact_args=()
+    local package_policy_artifact_args=()
+    local locale_font_artifact_args=()
+    if [[ $abi == x86_64 ]]; then
+        local webview_apk="$product_dir/system/product/app/webview/webview.apk"
+        local webview_abi_evidence="$evidence_root/webview-abi-$abi.json"
+        run_json_evidence "$webview_abi_evidence" \
+            "$python_bin" "$repo_root/scripts/python/verify_redroid_webview_abi.py" \
+            --apk "$webview_apk"
+        webview_artifact_args+=(--artifact "webview-abi.json=$webview_abi_evidence")
+        local package_inventory="$product_dir/product_packages.txt"
+        local package_policy_evidence="$evidence_root/headless-package-policy-$abi.json"
+        run_json_evidence "$package_policy_evidence" \
+            "$python_bin" "$repo_root/scripts/python/verify_redroid_headless_package_policy.py" \
+            --inventory "$package_inventory"
+        package_policy_artifact_args+=(
+            --artifact "headless-package-policy.json=$package_policy_evidence"
+        )
+        local product_locales product_aapt_config
+        product_locales=$(build/soong/soong_ui.bash \
+            --dumpvar-mode PRODUCT_LOCALES | tail -n1)
+        product_aapt_config=$(build/soong/soong_ui.bash \
+            --dumpvar-mode PRODUCT_AAPT_CONFIG | tail -n1)
+        local locale_font_evidence="$evidence_root/locale-font-policy-$abi.json"
+        run_json_evidence "$locale_font_evidence" \
+            "$python_bin" "$repo_root/scripts/python/verify_redroid_locale_font_policy.py" \
+            --inventory "$package_inventory" \
+            --fonts-dir "$product_dir/system/fonts" \
+            --aapt2 "$source_root/prebuilts/sdk/tools/linux/bin/aapt2" \
+            --apk "$product_dir/system/system_ext/priv-app/Settings/Settings.apk" \
+            --apk "$product_dir/system/system_ext/priv-app/SystemUI/SystemUI.apk" \
+            --apk "$product_dir/system/system_ext/priv-app/Launcher3QuickStep/Launcher3QuickStep.apk" \
+            --product-locales "$product_locales" \
+            --product-aapt-config "$product_aapt_config"
+        locale_font_artifact_args+=(
+            --artifact "locale-font-policy.json=$locale_font_evidence"
+        )
+    fi
     local fingerprint patch
     fingerprint=$(sed -n \
         -e 's/^ro.system.build.fingerprint=//p' \
@@ -499,10 +529,12 @@ build_one() {
         --artifact "vendor.img=$product_dir/vendor.img" \
         --artifact "redroid.oci.tar=$oci_archive" \
         --artifact "android-build-domain.json=$evidence_root/android-build-domain.json" \
-        --artifact "redroid-native-fbe-overlay.json=$overlay_evidence" \
         --artifact "post-patch-state.json=$evidence_root/post-patch-state.json" \
         --artifact "runtime-components.json=$runtime_components" \
         --artifact "ext4-timestamps.json=$evidence_root/ext4-timestamps-$abi.json" \
+        "${webview_artifact_args[@]}" \
+        "${package_policy_artifact_args[@]}" \
+        "${locale_font_artifact_args[@]}" \
         --sbom "$sbom" --notice "$notice" \
         --installed-files "$product_dir/installed-files.txt" \
         --host-preflight "$evidence_root/host-preflight.json" \

@@ -1,5 +1,5 @@
 {
-  "schema": "alas-headless.android-image-policy/v1",
+  "schema": "alas-headless.android-image-policy/v2",
   "policy_id": "compat-foundation-v1",
   "game_delivery": {
     "package": "com.bilibili.azurlane",
@@ -34,8 +34,6 @@
     "android-framework",
     "art-runtime",
     "audio-framework",
-    "credential-encrypted-storage",
-    "device-encrypted-storage",
     "dns",
     "download-provider",
     "external-app-storage",
@@ -51,6 +49,7 @@
     "surfaceflinger",
     "time-sync",
     "tls-ca-store",
+    "user-storage-ready",
     "webview"
   ],
   "optimization_scope": {

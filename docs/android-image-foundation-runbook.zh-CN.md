@@ -214,13 +214,8 @@ provenance 必须同时绑定源码锁、resolved manifest、fingerprint、安�
 返回 `*-partition-image-stale`，必须先执行对应的 `m systemimage vendorimage` 或完整 `m`，
 不能直接重打 OCI，也不能从旧容器 writable layer 取文件冒充镜像内容。
 
-构建脚本还会强制校验并注入
-`integration/runtime/redroid-native-fbe`。该 overlay 固定 AOSP 14 goldfish 与 Redroid
-device 的上游依据，复制双卷 fstab 和 init mount 顺序；其验证 JSON 作为构建 artifact
-进入 provenance 和双构建一致性比较，并必须与主 source lock 的 AOSP revision、Redroid
-device commit 和 source-lock SHA-256 一致。若源码树已经存在本地 `product.mk`，脚本会拒绝
-覆盖。静态 overlay 通过只说明构建输入完整，不能替代设备上的五路 FBE 和 Direct Boot
-运行证据。
+构建脚本不注入本地 `product.mk` 或自定义存储 overlay。若源码树残留本地
+`product.mk`，脚本会拒绝继续，避免旧的产品扩展悄悄进入新镜像。
 
 单独调试打包器时：
 
@@ -240,54 +235,11 @@ docker load --platform linux/arm64 -i evidence/redroid-arm64-v8a.oci.tar
 
 同一 rootfs layer、源码锁、fingerprint 和 epoch 必须生成相同 archive SHA-256 与 manifest digest。合成 rootfs 已在 Docker 29 containerd image store 上分别完成 x86_64/ARM64 `load + inspect` 冒烟；这证明打包格式可消费，不代表真实 Android product 已构建或启动。
 
-### 3.4 FBE 的 userdata 模型迁移
+### 3.4 `/data` 持久化模型
 
-Redroid stock 的目录 bind 不能满足 Android native FBE。自维护线必须把每个实例的 userdata 改成独立块设备，禁止直接在宿主根分区上启用特性或就地试验：
-
-1. 在实验宿主创建可丢弃的独立 userdata 块卷，不使用生产 `/var/lib/redroid/data`；
-2. ext4 必须具备 `encrypt` feature，宿主内核必须有 `CONFIG_FS_ENCRYPTION=y`；当前 ARM 宿主内核满足，根 ext4 不满足；
-3. 将该设备以固定容器内路径提供给 Redroid，不再 `-v host-dir:/data`；
-4. 自维护 product 生成 userdata/fstab 合同，`/data` 使用 AOSP 推荐的 `fileencryption`，KeyMint 在 `early_hal`、vold 在 `post-fs-data` 前可用；
-5. 首次格式化只允许在空实验卷上执行；现有 userdata 必须走备份、校验、恢复迁移，FBE on-disk format 不能作为普通 OTA 原地切换；
-6. 通过五路 native FBE 门后，还要用测试凭据重启，验证 Direct Boot 时 DE 可用、CE 未解锁，解锁后 CE 与更新 userdata 恢复；
-7. 镜像回退必须同时恢复与旧镜像匹配的块卷快照，不能把新 FBE 卷直接交给不兼容旧镜像。
-
-在以上链路实测前，`device-encrypted-storage` 必须保持 fail；宿主 LUKS/fscrypt 只能作为额外的 at-rest 控制，不能冒充 Android FBE/Direct Boot。
-
-可先在 Linux/Redroid 宿主制备两个完全隔离的空实验卷，验证块设备和 ext4
-`encrypt` 前置能力。脚本只允许创建原本不存在的新镜像文件，拒绝生产 `/data`
-路径、非空或已挂载目录，并在失败时删除本轮新建镜像：
-
-```bash
-sudo ./scripts/wsl/provision-redroid-userdata-image.sh \
-  --role userdata \
-  --image /var/lib/redroid-volumes/fbe-lab/userdata.img \
-  --size-mib 1024 \
-  --mount /mnt/redroid-userdata-fbe-lab \
-  --output /var/lib/redroid-volumes/fbe-lab/probe.json
-PYTHONPATH=python python3 scripts/python/qualify_redroid_userdata_volume.py \
-  --probe /var/lib/redroid-volumes/fbe-lab/probe.json \
-  --output evidence/android-image-foundation/userdata-volume-host-qualification.json
-sudo ./scripts/wsl/provision-redroid-userdata-image.sh \
-  --role metadata \
-  --image /var/lib/redroid-volumes/fbe-lab/metadata.img \
-  --size-mib 256 \
-  --mount /mnt/redroid-metadata-fbe-lab \
-  --output /var/lib/redroid-volumes/fbe-lab/metadata-probe.json
-PYTHONPATH=python python3 scripts/python/qualify_redroid_userdata_volume.py \
-  --probe /var/lib/redroid-volumes/fbe-lab/metadata-probe.json \
-  --output evidence/android-image-foundation/metadata-volume-host-qualification.json
-PYTHONPATH=python python3 scripts/python/qualify_redroid_fbe_volume_set.py \
-  --userdata evidence/android-image-foundation/userdata-volume-host-qualification.json \
-  --metadata evidence/android-image-foundation/metadata-volume-host-qualification.json \
-  --output evidence/android-image-foundation/fbe-volume-set-host-qualification.json
-```
-
-单卷资格上限固定为 `host-volume-qualified`，双卷集合上限固定为
-`host-fbe-volume-set-qualified`，并显式记录
-`android_fbe_proven=false`、`direct_boot_proven=false`。只有把这两个卷交给自建
-Redroid 的 `/data` fstab、完成 Android 五路 FBE 门和 Direct Boot/CE 解锁恢复实验后，
-才能提升为 Android FBE 证据。
+每个 Redroid 实例使用独立的宿主目录 bind 到容器 `/data`。启动前校验目录存在、
+容器只包含一个可写 `/data` bind mount，且来源路径与运行配置完全一致。持久化资格通过
+写入标记、容器 Stop→Start、Android 重启和镜像回退分别验证；删除 userdata 仍需单独授权。
 
 ## 4. 构建双架构 ANGLE 制品
 
@@ -571,8 +523,6 @@ python scripts/python/create_android_image_release.py `
   --arm64-build-provenance <arm64-provenance.json> `
   --arm64-reproducibility-evidence <arm64-reproducibility.json> `
   --arm64-rollback-evidence <arm64-image-rollback.json> `
-  --arm64-userdata-volume-evidence <arm64-host-volume-qualification.json> `
-  --arm64-fbe-volume-set-evidence <arm64-host-fbe-volume-set.json> `
   --output evidence\android-image-foundation\release-candidate.json `
   --require-promotable
 ```
@@ -707,16 +657,10 @@ SSH shell 与 containerd/runc。x86_64 回退必须在具备 Binder 的原生 x8
 - 双 ABI 构建入口、AOSP SPDX 2.3 SBOM/NOTICE provenance、installed-files 游戏制品负检、两次构建 payload 一致性门与 release 强制绑定均已实现；
 - 确定性 Redroid OCI layout/archive 生成器已实现；同输入双次字节一致性单测通过，合成 x86_64 与 ARM64 archive 均已由 Docker 29 实际 load/inspect，且不包含游戏；
 - digest-pinned stock Redroid 14/API 34 ARM64 基线已独立通过 G1/G2/G3 与完整更新实验，安全补丁为 `2024-05-05`；600 秒无游戏/无 ALAS 空闲基线为 CPU busy `0.222%`、Used RAM `1078133 KiB`，只用于该镜像基线记录；
-- Android 14 ARM64 受保护能力仍为 20/21，唯一失败是 `device-encrypted-storage`。官方 Redroid 14 device 产品配置明确设置 `PRODUCT_BUILD_USERDATA_IMAGE := false`，宿主目录直接 bind 到 `/data`，所以 FBE 不能靠属性或普通 fstab overlay 修复；
-- FBE 受保护能力门已改为五路复合验证：`ro.crypto.state=encrypted`、`ro.crypto.type=file`、PackageManager FBE feature=true、`sm get-fbe-mode=native` 和 mount/vold service 存在；缺任一项或仅为 `emulated` 都失败；
 - Android 12 digest `d3fb…78b2` → Android 14 digest `0a61…69aa` → 恢复快照 → Android 12 的真实回退已通过；证据同时验证候选 fingerprint/API 34 与恢复后的旧 fingerprint/API 31，避免用可空的 `ro.runtime.firstboot` 冒充候选身份；
 - OCI identity 现在分别记录 registry/index digest 与架构平台 manifest digest；运行配置仍必须用 index digest，tag 或缺失平台 descriptor 都无法通过发布门；
-- ARM64 宿主已用全新 512 MiB 稀疏镜像实际完成独立 loop block、ext4 `encrypt`、
-  `rw,nodev,nosuid` 临时挂载与自动释放验证；资格证据上限固定为
-  `host-volume-qualified`，并明确 `android_fbe_proven=false`、
-  `direct_boot_proven=false`。生产 `/var/lib/redroid/data` 未被挂载或修改；
 - 与干净提交绑定的 fail-closed 候选清单中，双架构 G1/G2/G3 和更新证据均闭环；
-  仍保留自建 provenance/reproducibility、x86 OCI 回退以及 ARM FBE blocker。
+  仍保留自建 provenance/reproducibility 与 x86 OCI 回退 blocker。
 - AWS ARM64 实机已把游戏退出定位到宿主 48-bit VA 与内嵌旧 LuaJIT lightuserdata
   地址窗不兼容：同一事件的 `0xe559fdef1b58` 是 `libtolua.so` 的有效可写映射，调用方
   位于 `libil2cpp.so`，不是 ANGLE NULL、RSA 或悬空指针。保留原 48-bit 内核作为回退后，
@@ -741,15 +685,15 @@ SSH shell 与 containerd/runc。x86_64 回退必须在具备 Binder 的原生 x8
 
 当前仍然 fail-closed 的项目：
 
-- 历史 stock Redroid 基线的 `/data` 是宿主 ext4 bind mount；最新 AWS 登录候选已经使用独立 loop/dm userdata，但仍未形成 `ro.crypto.type=file`、native FBE 与 Direct Boot 的五项闭环。ARM `device-encrypted-storage` 必须保持 fail，不能凭块设备或启动参数豁免；
+- Redroid `/data` 采用每实例独立的宿主目录；持久化、恢复和回退必须对实际候选分别验证；
 - 当前生产 Android 12 ARM 基线的安全补丁级别为 `2021-10-05`；已验证的 stock
   Android 14 候选也仅为 `2024-05-05`。二者都需要由自维护镜像线替代，不能作为长期发布基线；
 - 当前 x86 镜像是内容哈希固定的 SDK API 32 基线，ARM 是 digest 固定的 stock Redroid 基线；二者都不是本项目从固定 AOSP/Redroid 产品配置构建出的精简镜像，尚未删除任何系统服务；
 - 当前 WSL 已安装 `repo` launcher，系统、架构、Git、Repo 项通过；VHD 内部虽报告约 621 GiB 可用，但 VHD 所在 H 盘实际仅约 218.5 GiB 可用，低于 400 GiB 下限；RAM 仅 `20971327488` bytes，也低于 64 GiB 下限。因此没有启动完整 sync/build，也没有生成伪 SBOM/provenance；
 - x86_64 的真实 Redroid OCI 镜像回退尚未执行；ARM 回退证据不能替代 x86 证据；
 - worktree 未提交时，发布清单还会附加 `source:dirty-worktree` blocker；最新干净候选
-  的实际 blocker 是双架构 build provenance/reproducibility、x86 OCI 回退和 ARM FBE；
-- 在支持 FBE、更新安全补丁且可复现的自维护 AOSP/Redroid 构建入口补齐前，双架构 release promotion 必须保持 `blocked`。
+  的实际 blocker 是双架构 build provenance/reproducibility 与 x86 OCI 回退；
+- 在更新安全补丁且可复现的自维护 AOSP/Redroid 构建入口补齐前，双架构 release promotion 必须保持 `blocked`。
 
 ### ARM 宿主恢复检查（跨架构实验后）
 

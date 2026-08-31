@@ -220,8 +220,7 @@ class RuntimeBackendsTests(unittest.TestCase):
             "container_id": "alas-redroid-build1-x86-storage1",
             "image_reference": "docker.io/alasheadless/redroid-x86-64:latest",
             "image_manifest_digest": "sha256:" + HASH,
-            "userdata_image": "/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/userdata.img",
-            "metadata_image": "/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/metadata.img",
+            "userdata_path": "/srv/android-runtime/redroid/alas-headless/build1-x86/data",
             "start_script": "/home/weipa/.local/bin/alas-redroid-start",
             "stop_script": "/home/weipa/.local/bin/alas-redroid-stop",
             "adb_server_port": 5044,
@@ -240,7 +239,7 @@ class RuntimeBackendsTests(unittest.TestCase):
                 "io.github.alas-headless.abi": "x86_64",
                 "io.github.alas-headless.build-fingerprint": "test/android/build",
                 "io.github.alas-headless.game-delivery": "external-install",
-                "io.github.alas-headless.storage-layout": "srv-v1",
+                "io.github.alas-headless.storage-layout": "host-directory-v1",
             },
             "Spec": {
                 "linux": {
@@ -253,25 +252,21 @@ class RuntimeBackendsTests(unittest.TestCase):
                     ],
                     "devices": [
                         {
-                            "path": "/dev/mapper/control",
+                            "path": "/dev/binder",
                             "type": "c",
                             "major": 10,
-                            "minor": 236,
-                        },
-                        {
-                            "path": "/dev/block/alas_userdata",
-                            "type": "b",
-                            "major": 7,
-                            "minor": 8,
-                        },
-                        {
-                            "path": "/dev/block/alas_metadata",
-                            "type": "b",
-                            "major": 7,
-                            "minor": 14,
-                        },
+                            "minor": 63,
+                        }
                     ]
-                }
+                },
+                "mounts": [
+                    {
+                        "destination": "/data",
+                        "source": "/srv/android-runtime/redroid/alas-headless/build1-x86/data",
+                        "type": "bind",
+                        "options": ["rbind", "rw"],
+                    }
+                ],
             },
         }
         return {
@@ -287,16 +282,7 @@ class RuntimeBackendsTests(unittest.TestCase):
             "redroid-container-info": (0, json.dumps(container_info), ""),
             "redroid-start-script-probe": (0, "", ""),
             "redroid-stop-script-probe": (0, "", ""),
-            "redroid-userdata-loop": (
-                0,
-                "/dev/loop8: [] (/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/userdata.img)",
-                "",
-            ),
-            "redroid-metadata-loop": (
-                0,
-                "/dev/loop14: [] (/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/metadata.img)",
-                "",
-            ),
+            "redroid-userdata-path-probe": (0, "", ""),
             "redroid-tasks-list": tasks or [
                 (0, "TASK PID STATUS", ""),
                 (0, "TASK PID STATUS\nalas-redroid-build1-x86-storage1 123 RUNNING", ""),
@@ -505,21 +491,17 @@ class RuntimeBackendsTests(unittest.TestCase):
         ):
             backend.provision(artifacts)
 
-    def test_redroid_backend_rejects_stale_storage_spec_and_frozen_dm(self):
+    def test_redroid_backend_rejects_wrong_userdata_mount_and_legacy_devices(self):
         results = self.redroid_provision_results()
         info = json.loads(results["redroid-container-info"][1])
-        next(
-            item
-            for item in info["Spec"]["linux"]["devices"]
-            if item["path"] == "/dev/block/alas_userdata"
-        )["minor"] = 4
+        info["Spec"]["mounts"][0]["source"] = "/srv/android-runtime/redroid/wrong-data"
         results["redroid-container-info"] = (0, json.dumps(info), "")
         backend = RedroidBackend(
             self.redroid_config(), ScriptedExecutor(results), sleep=lambda _: None
         )
         artifacts = backend.resolve_artifacts(make_lock("redroid"))
         with self.assertRaisesRegex(
-            RuntimeIdentityMismatch, "redroid-storage-device-identity-mismatch"
+            RuntimeIdentityMismatch, "redroid-userdata-mount-contract-mismatch"
         ):
             backend.provision(artifacts)
 
@@ -534,7 +516,7 @@ class RuntimeBackendsTests(unittest.TestCase):
         )
         artifacts = backend.resolve_artifacts(make_lock("redroid"))
         with self.assertRaisesRegex(
-            RuntimeIdentityMismatch, "redroid-container-frozen-dm-device"
+            RuntimeIdentityMismatch, "redroid-legacy-storage-device-present"
         ):
             backend.provision(artifacts)
 
@@ -1627,8 +1609,7 @@ class RuntimeBackendsTests(unittest.TestCase):
             "container_id": "alas-redroid-build1-x86-storage1",
             "image_reference": "docker.io/alasheadless/redroid-x86-64:latest",
             "image_manifest_digest": "sha256:" + HASH,
-            "userdata_image": "/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/userdata.img",
-            "metadata_image": "/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/metadata.img",
+            "userdata_path": "/srv/android-runtime/redroid/alas-headless/build1-x86/data",
             "start_script": "/home/weipa/.local/bin/alas-redroid-start",
             "adb_server_port": 5045,
         }

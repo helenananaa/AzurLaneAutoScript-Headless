@@ -5,11 +5,10 @@
   "package": "com.bilibili.azurlane",
   "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
   "host_class": "linux-x86_64-redroid",
-  "container_id": "alas-redroid-build1-x86-storage1",
+  "container_id": "alas-redroid-build1-x86-hostdir1",
   "image_reference": "docker.io/alasheadless/redroid-x86-64:latest",
-  "image_manifest_digest": "sha256:c8bed99e50609a5cd542328eefc79e504a7e38a94088ed7fdeb7eb704555dac5",
-  "userdata_image": "/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/userdata.img",
-  "metadata_image": "/srv/android-runtime/redroid/alas-headless/build1-x86/volumes/metadata.img",
+  "image_manifest_digest": "sha256:881be994eb02237524b070bd15638eaef5cdbc15108355d4137aa9e141854eac",
+  "userdata_path": "/srv/android-runtime/redroid/alas-headless/build1-x86/data",
   "start_script": "/home/weipa/.local/bin/alas-redroid-start",
   "stop_script": "/home/weipa/.local/bin/alas-redroid-stop",
   "ctr": "ctr",
@@ -25,5 +24,5 @@
   "allow_android_restart": true,
   "stop_container_on_cleanup": true,
   "poll_interval_seconds": 1.0,
-  "storage_layout": "srv-v1"
+  "storage_layout": "host-directory-v1"
 }

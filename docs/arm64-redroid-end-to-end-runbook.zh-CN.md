@@ -24,7 +24,7 @@ ARM64 Linux
 - 账号登录、游戏主界面和服务器选择；
 - pinned ALAS 或更新版 ALAS 的真实任务工作负载；
 - game/Android recovery、Redroid lifecycle/cleanup 和长期 soak；
-- Android native FBE、Direct Boot 和自维护镜像发布资格。
+- 自维护镜像发布资格。
 
 登录边界的逐项证据见原持久化 userdata 的
 [AWS ARM64 Redroid 登录边界验证](aws-arm64-redroid-login-boundary-validation-20260826.md)，
@@ -37,7 +37,7 @@ ARM64 Linux
 | --- | --- | --- |
 | 固定源码与双 ABI 构建 | 通过 | AOSP/Redroid 14 r75 的 x86_64、ARM64 system/vendor、OCI、SBOM 和 provenance 已产出；不等于运行资格 |
 | OCI Android UID/GID | 通过 | 双 ABI 修正版均验证 logd=0550 1036:1036 |
-| ARM64 host/kernel | 当前运行路径通过 | Binder、cgroup v2、VA39、dm-default-key/loop 路径可启动当前 Android 14 实例 |
+| ARM64 host/kernel | 当前运行路径通过 | Binder、cgroup v2、VA39 可启动当前 Android 14 实例 |
 | G1/G2/G3 平台合同 | 通过历史与当前样本 | ANGLE NULL、Unity、typed observer；不能替代真实 ALAS workload |
 | 外部 APK/资源更新 | 通过 | 合成更新矩阵已通过；真实游戏 28.1 GB 资源也完成 |
 | restart/persistence/OCI rollback | 平台证据通过 | 历史隔离实验已通过；最新登录实例尚未由新 backend 重跑完整 recovery/cleanup |
@@ -45,7 +45,6 @@ ARM64 Linux
 | fresh userdata 首次隐私页 | 单次通过、拓扑仍需复验 | 新 userdata 上唯一 `.agree` 经 CDP DOM 点击后同 PID 转入 MainActivity；该次转场发生在私有 loader 修复前，不能冒充“私有 NULL 自首次启动即生效”的完整证明 |
 | 当前 OCI 独立复现 | blocked | tag/digest 不含已验证的 libEGL loader 与 process-lived Pastel 二进制；当前 fresh 容器在 writable layer 补入两文件后通过 |
 | RedroidBackend | 实现与离线合同通过 | ARM 隔离实例完整 lifecycle 资格待执行 |
-| Android native FBE/Direct Boot | blocked | loop/dm 存在，但五项 Android 证据未闭环 |
 | ALAS workload/soak | 未验证 | 不得提升为生产或发布资格 |
 
 ## 2. 两条流水线、一个汇合点
@@ -57,7 +56,7 @@ ARM 环境不是一条“镜像能启动就算成功”的流水线。它由两�
 source lock
   -> AOSP/Redroid 双 ABI 构建
   -> 保留 Android UID/GID 的 OCI
-  -> Binder/cgroup/kernel/loop volumes
+  -> Binder/cgroup/kernel/host userdata directory
   -> Android boot/ADB/persistence
                          \
                           -> 汇合：精确 package + foreground PID
@@ -169,8 +168,7 @@ cat /sys/fs/cgroup/cgroup.controllers
 ls -l /dev/binderfs /dev/binder /dev/hwbinder /dev/vndbinder 2>/dev/null
 ~~~
 
-还要检查 dm-default-key、ext4 quota 和所需模块。native FBE 需要真实
-CONFIG_DM_DEFAULT_KEY 能力；普通 ext4 encrypt feature 不能替代它。
+还要检查容器运行所需的 Binder、cgroup、网络与存储空间。
 
 ## 6. 阶段 2：固定源码并构建双 ABI 镜像
 
@@ -216,7 +214,7 @@ out、runtime、archive、evidence 或 APK archive。build domain v3 没有锁�
 - 失败时的源码树、out 和缓存。
 
 构建失败后先诊断，不删除 out 或启动 clean rebuild。双 ABI 构建成功只证明“构建完成”，
-不证明镜像能启动、FBE 可用或游戏可运行。
+不证明镜像能启动或游戏可运行。
 
 以下记录属于拆分前的共享源码迁移阶段，已被现行双 build-domain 布局取代，只保留作历史
 诊断证据。2026-08-26 当时完成了一次不编译的共享源码迁移，并保留
@@ -356,46 +354,26 @@ Unity process exit status 1
 不要尝试通过增大 RLIMIT_STACK、截断地址或修改 Lua 指针表示绕过问题。这些做法没有
 稳定的语义边界。
 
-### quota 与 dm-default-key
-
-切换内核后，启动带 quota 的 userdata 前检查 quota_tree、quota_v2；模块化配置可先
-加载模块。native FBE 还要求 dm-default-key target。缺失时应明确阻止 FBE 路径，
-而不是删掉 fstab 中的 fileencryption 来制造启动成功。
+### 宿主内核合同
 
 构建/安装候选内核时至少审查以下配置，并保留完整 config 作为制品：
 
 ~~~text
 CONFIG_ARM64_4K_PAGES=y
 CONFIG_ARM64_VA_BITS_39=y
-CONFIG_DM_DEFAULT_KEY=y 或可在启动前加载的模块
 CONFIG_IKCONFIG=y
 CONFIG_IKCONFIG_PROC=y
-CONFIG_QUOTA_TREE=y/m
-CONFIG_QFMT_V2=y/m
 CONFIG_ANDROID_BINDER_IPC=y
 CONFIG_ANDROID_BINDERFS=y
 ~~~
 
-配置存在不等于功能已通过；仍要在重启后的当前内核上检查 dmsetup targets、Binder、
-quota、Android boot、userdata 和真实游戏。
+配置存在不等于功能已通过；仍要在重启后的当前内核上检查 Binder、Android boot、
+userdata 和真实游戏。
 
-## 9. 阶段 5：userdata、metadata 与 Redroid 启动
+## 9. 阶段 5：userdata 与 Redroid 启动
 
-正式实例应提供独立的 userdata 和 metadata block device。仓库提供：
-
-- [provision-redroid-userdata-image.sh](../scripts/wsl/provision-redroid-userdata-image.sh)
-- [redroid-native-fbe](../integration/runtime/redroid-native-fbe/)
-
-空实验卷可用于验证 host ext4 encrypt、独立 loop、rw/nodev/nosuid 和清理，但这只能
-叫 host-volume-qualified。只有 Android 同时满足以下条件才能声明 native FBE：
-
-~~~text
-ro.crypto.state=encrypted
-ro.crypto.type=file
-PackageManager advertises FBE
-sm get-fbe-mode=native
-mount/vold service and Direct Boot behavior are coherent
-~~~
+正式实例为 `/data` 提供独立的宿主目录。运行配置、容器 inspect 和宿主目录必须三方
+一致；目录不可读写、出现多个 `/data` mount、来源路径漂移或只读挂载都应 fail closed。
 
 启动后至少确认：
 
@@ -694,8 +672,6 @@ start/ready/recover/stop/cleanup 资格。
 | 已关闭 | 构建预检在 Python 3.8 报 dataclass slots 错误 | 任务解释器过旧，不是源码或硬件故障 | 构建任务显式使用 Python 3.10+；不替换系统 Python，不重做 sync |
 | 已关闭 | 自建 OCI 首启时 logd Permission denied/status 127 | 打包器用 owner=0/group=0 抹掉 Android UID/GID | 使用 numeric-owner 保留属主；验证 logd=0550 1036:1036 |
 | 未关闭/当前容器已恢复 | 新容器选择 ANGLE 后仍增加 angleLoadingFailureCount | 现场 OCI 未包含 private loader 与 process-lived Pastel 修复；旧成功仅来自 writable layer | 当前容器补入两份精确哈希二进制；重新封 OCI 并用 fresh userdata 独立验证后才能关闭 |
-| 外部宿主 blocker | 自建 native-FBE 候选无法创建 default-key dm target | 构建机内核缺 CONFIG_DM_DEFAULT_KEY | 换合格运行宿主/内核后用全新隔离卷首启；构建机不承担运行资格 |
-| 未关闭 | Android native FBE 20/21，device-encrypted-storage 失败 | host ext4 encrypt 不是 Android FBE/Direct Boot | 五项 FBE 与 Direct Boot 实机全部通过后才重入 |
 | 未关闭/局部缓解 | AgreementWebActivity 转 MainActivity 出现 destroyed mutex | ARM64 失败栈进入 Pastel Queue/Reactor/LLVM/marl；完整对象生命周期尚未闭环 | fresh userdata、等价私有 NULL/WebView 拓扑下连续采集并重复通过转场 |
 | 已关闭一个子因 | LLVM PassRegistry/ManagedStatic teardown 崩溃 | driver unload 时销毁进程仍在使用的 LLVM 状态 | LLVM state/PassRegistry 改为 process-lived；仍不能代表全部 Pastel mutex 已关闭 |
 | 已排除 | 怀疑 RSA/BIO 导致 Unity 退出 | 小米 11 与 Redroid 的 BIO/RSA 四步均成功，RSA_public_decrypt 都返回 182 字节 | 不再沿 OpenSSL 改代码；bio fail 视为并发退出期次生症状 |
@@ -710,7 +686,7 @@ start/ready/recover/stop/cleanup 资格。
 | 操作缺口 | 下载监控终端有输出但预期 tee 文件未创建 | 外层 tee 使用无写权限用户 | 未来先验证 evidence 目录属主/权限，或让写入与采集在同一授权上下文执行 |
 | 已关闭 | 完成下载后长期停在全屏 opening(Clone) | 资源和 LoginUI2 已完成，但覆盖层没有可确认的 raycast 动作 | 仅在完整下载会话/无失败/校验成功/无 fatal 的窄状态链下冷重启一次并验证新 PID |
 | 预期行为 | ANGLE NULL 下 ADB/emulator 游戏截图全黑 | NULL renderer 不产生可视觉验收的 framebuffer | 使用 typed state、trace、generation、receipt 和 postcondition |
-| 已关闭 | 把构建服务器当成 Redroid 运行资格机 | 构建机内核缺关键容器/FBE能力 | 构建与运行职责分离；AWS/合格 ARM Linux 做真实 boot/game 验证 |
+| 已关闭 | 把构建服务器当成 Redroid 运行资格机 | 构建机不具备所需运行时容器条件 | 构建与运行职责分离；AWS/合格 ARM Linux 做真实 boot/game 验证 |
 
 Pastel 的详细证据和 x86 对照见
 [x86 / ARM64 Pastel 生命周期诊断](x86-arm64-pastel-lifecycle-diagnostic-20260825.md)。
@@ -724,7 +700,6 @@ Pastel 的详细证据和 x86 对照见
 - 不因黑帧关闭 ANGLE NULL；
 - 不放宽 package/PID/freshness/main-thread/raycast/postcondition 边界；
 - 不通过卸载游戏、清空 userdata 或关闭签名检查解决升级问题；
-- 不把 host ext4 encrypt、dm-default-key 单项或属性字符串写成 FBE PASS；
 - 不把 process-lived LLVM patch 写成完整 Pastel 修复；
 - 不把旧容器 writable layer 中的二进制写成 OCI 已包含；
 - 不点击 `raycast_top=null` 的 opening 覆盖层；
@@ -781,11 +756,10 @@ live tree：DataKey_ForceCollect 消费面已漂移；它与本次 ARM/Redroid �
 1. 把 private loader 与 process-lived Pastel 修复封入 OCI，并从镜像导出验证精确哈希；
 2. 用另一套 fresh isolated userdata 从首次启动起复验私有 NULL 下的 Agreement 转场；
 3. 对当前 ARM 实例执行 Redroid backend 完整 lifecycle/recovery/cleanup；
-4. 在合格自维护镜像上完成 native FBE 与 Direct Boot；
-5. 到账号登录边界后等待新的账号操作授权；
-6. 登录后先冻结一个代表性 workload；
-7. 分开验证 W1 战斗因果、W2 日常 idle acceptance、W3 release soak；
-8. 最后才讨论 ARM 支持 promotion、多实例和长期运行。
+4. 到账号登录边界后等待新的账号操作授权；
+5. 登录后先冻结一个代表性 workload；
+6. 分开验证 W1 战斗因果、W2 日常 idle acceptance、W3 release soak；
+7. 最后才讨论 ARM 支持 promotion、多实例和长期运行。
 
 在上述项目完成前，准确状态是：
 

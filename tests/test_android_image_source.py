@@ -4,12 +4,14 @@ import copy
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from alas_headless.android_image_source import AndroidImageSourceError
 from alas_headless.android_image_source import AndroidImageSourceLock
 from alas_headless.android_image_source import disk_checks
 from alas_headless.android_image_source import host_preflight
 from alas_headless.android_image_source import webview_projects_for_abi
+from alas_headless.android_image_source import verify_remote_refs
 
 
 class AndroidImageSourceTests(unittest.TestCase):
@@ -108,6 +110,132 @@ class AndroidImageSourceTests(unittest.TestCase):
                 self.value["redroid"]["webview_projects"], "x86"
             )
 
+    def test_remote_verification_allows_moved_branch_with_pinned_build_commit(
+        self,
+    ) -> None:
+        lock = AndroidImageSourceLock.from_mapping(copy.deepcopy(self.value))
+        moved_name = "android_external_chromium-webview_prebuilt_x86_64"
+        moved_tip = "9" * 40
+
+        def fake_run(arguments, **_kwargs):
+            class Result:
+                returncode = 0
+                stderr = ""
+
+            result = Result()
+            if arguments[1] == "ls-remote":
+                url, ref = arguments[2], arguments[3]
+                expected = next(
+                    (
+                        item["commit"]
+                        for item in lock.document["redroid"]["webview_projects"]
+                        if item["url"] == url
+                    ),
+                    None,
+                )
+                if ref == "refs/heads/main" and moved_name in url:
+                    result.stdout = moved_tip + "\t" + ref + "\n"
+                elif expected:
+                    result.stdout = expected + "\t" + ref + "\n"
+                else:
+                    source = lock.document
+                    expected_by_ref = {
+                        "refs/tags/android-14.0.0_r75": source["platform"]["tag_object"],
+                        "refs/heads/14.0.0": source["redroid"]["local_manifests_commit"],
+                        "refs/heads/master": source["redroid"]["patches_commit"],
+                        "refs/heads/redroid-14.0.0": source["redroid"]["projects"][0]["commit"],
+                    }
+                    result.stdout = expected_by_ref[ref] + "\t" + ref + "\n"
+            elif arguments[1] == "init":
+                result.stdout = ""
+            elif arguments[3] == "fetch":
+                result.stdout = ""
+            else:
+                result.stdout = lock.document["platform"]["commit"] + "\n"
+            return result
+
+        with patch(
+            "alas_headless.android_image_source.subprocess.run",
+            side_effect=fake_run,
+        ):
+            result = verify_remote_refs(lock, abi="x86_64")
+        self.assertEqual(result["outcome"], "pass")
+        moved = next(
+            item for item in result["refs"] if moved_name in item["name"]
+        )
+        self.assertEqual(moved["expected_commit"], "74bc304c32135220898a0f9a8c8661d9747a60b8")
+        self.assertEqual(moved["observed_commit"], moved_tip)
+        self.assertEqual(moved["ref_state"], "advertised-tip-moved")
+
+    def test_remote_verification_still_rejects_unavailable_branch(self) -> None:
+        lock = AndroidImageSourceLock.from_mapping(copy.deepcopy(self.value))
+
+        class Missing:
+            returncode = 2
+            stdout = ""
+            stderr = "not found"
+
+        with patch(
+            "alas_headless.android_image_source.subprocess.run",
+            return_value=Missing(),
+        ):
+            result = verify_remote_refs(lock, abi="x86_64")
+        self.assertEqual(result["outcome"], "blocked")
+        self.assertTrue(result["blockers"])
+        self.assertTrue(
+            all(item["ref_state"] == "unavailable" for item in result["refs"][:-1])
+        )
+
+    def test_prepared_source_may_supply_pinned_objects_during_remote_outage(
+        self,
+    ) -> None:
+        lock = AndroidImageSourceLock.from_mapping(copy.deepcopy(self.value))
+
+        class Result:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        def fake_run(arguments, **_kwargs):
+            result = Result()
+            if arguments[1] == "ls-remote":
+                result.returncode = 2
+                result.stderr = "network unavailable"
+            elif len(arguments) > 3 and arguments[3] == "fetch":
+                result.returncode = 2
+                result.stderr = "network unavailable"
+            return result
+
+        with patch(
+            "alas_headless.android_image_source.subprocess.run",
+            side_effect=fake_run,
+        ), patch(
+            "alas_headless.android_image_source._local_git_object_available",
+            return_value=True,
+        ), patch(
+            "alas_headless.android_image_source._local_tag_commit",
+            return_value=lock.document["platform"]["commit"],
+        ):
+            result = verify_remote_refs(
+                lock, abi="x86_64", prepared_source_root=Path("prepared")
+            )
+        self.assertEqual(result["outcome"], "pass")
+        self.assertTrue(
+            all(item["outcome"] == "pass" for item in result["refs"])
+        )
+        self.assertTrue(
+            result["refs"][0]["ref_state"] == "prepared-local-platform-commit"
+        )
+        self.assertTrue(
+            all(
+                item["ref_state"] == "prepared-local-object"
+                for item in result["refs"][1:-1]
+            )
+        )
+        self.assertEqual(
+            result["refs"][-1]["verification_source"], "prepared-local-tag"
+        )
+
     def test_rejects_32_bit_or_single_arch_product(self) -> None:
         value = copy.deepcopy(self.value)
         value["products"] = value["products"][:1]
@@ -136,11 +264,37 @@ class AndroidImageSourceTests(unittest.TestCase):
         with self.assertRaisesRegex(AndroidImageSourceError, "sha256"):
             AndroidImageSourceLock.from_mapping(value)
 
+    def test_webview_patch_target_is_narrowly_approved(self) -> None:
+        lock = AndroidImageSourceLock.from_mapping(copy.deepcopy(self.value))
+        webview = [
+            item for item in lock.document["project_patches"]
+            if item["project"] == "external/chromium-webview"
+        ]
+        self.assertEqual(len(webview), 1)
+        self.assertTrue(
+            webview[0]["path"].endswith(
+                "0005-redroid-webview-x86_64-only-prebuilt.patch"
+            )
+        )
+
     def test_rejects_unapproved_project_patch_target(self) -> None:
         value = copy.deepcopy(self.value)
         value["project_patches"][0]["project"] = "system/core"
         with self.assertRaisesRegex(AndroidImageSourceError, "not approved"):
             AndroidImageSourceLock.from_mapping(value)
+
+    def test_locale_and_font_patch_targets_are_narrowly_approved(self) -> None:
+        value = copy.deepcopy(self.value)
+        template = copy.deepcopy(value["project_patches"][0])
+        template["path"] = "integration/runtime/aosp-patches/0007-test.patch"
+        template["sha256"] = "a" * 64
+        template["commit_message"] = "ALAS: test target"
+        for project in ("device/redroid", "external/noto-fonts"):
+            item = copy.deepcopy(template)
+            item["project"] = project
+            value["project_patches"].append(item)
+            template["path"] = "integration/runtime/aosp-patches/0008-test.patch"
+        AndroidImageSourceLock.from_mapping(value)
 
     def test_wsl_requires_real_backing_drive_capacity(self) -> None:
         gib = 1024 ** 3

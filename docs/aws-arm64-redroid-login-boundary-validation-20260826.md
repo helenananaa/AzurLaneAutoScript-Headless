@@ -101,4 +101,4 @@ ARM64 host probe 和 Redroid backend 定向回归为 `34 passed`。
 - 登录后的游戏主界面；
 - pinned ALAS 或更新版 ALAS 的真实任务工作负载；
 - game/Android recovery、容器 lifecycle/cleanup 和长期 soak；
-- FBE 与自维护镜像发布资格。
+- 自维护镜像发布资格。

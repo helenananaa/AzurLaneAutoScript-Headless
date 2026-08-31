@@ -24,6 +24,19 @@ class AndroidImagePolicyTests(unittest.TestCase):
         self.assertEqual(first.sha256, second.sha256)
         self.assertEqual(len(first.sha256), 64)
         self.assertEqual(first.document["game_delivery"]["mode"], "external-install")
+        self.assertIn("user-storage-ready", first.document["protected_capabilities"])
+        self.assertFalse(
+            any(
+                "encrypt" in capability
+                for capability in first.document["protected_capabilities"]
+            )
+        )
+
+    def test_rejects_retired_policy_schema(self):
+        value = copy.deepcopy(self.value)
+        value["schema"] = "alas-headless.android-image-policy/v1"
+        with self.assertRaisesRegex(AndroidImagePolicyError, "schema mismatch"):
+            AndroidImagePolicy.from_mapping(value)
 
     def test_rejects_baking_the_game_into_the_image(self):
         value = copy.deepcopy(self.value)
