@@ -145,3 +145,62 @@ contract tests can run in parallel across environments, but real Android/Unity
 performance remains a live-client measurement. Compare the same profile,
 profile version, seed state, sampling interval, and repetition rule across x86,
 ARM, KVM, Redroid, and TCG results.
+
+## Account-free battle capsule (W0)
+
+Convert an already verified official-auto capture into a versioned,
+account-free workload capsule and bind it to the offline G36 semantic combat
+replay:
+
+```powershell
+$env:PYTHONPATH = 'python'
+python scripts/python/compile_alas_battle_capsule.py `
+  <verified-capture-directory> `
+  integration/alas/g36-normal-observer-replay.json `
+  <new-capsule.json>
+python scripts/python/run_alas_battle_capsule.py <new-capsule.json>
+```
+
+Compilation fails closed unless the source capture verifies and the semantic
+replay is passing, pixel-free, input-free, and explicitly not
+production-ready. The default run mode only validates and summarizes the
+schedule. Optional `--mode host-proxy` executes a time-scaled, single-process
+CPU/memory/write proxy with explicit caps; it never launches Android or injects
+input.
+
+This is a W0 harness and regression workload. It preserves the shape of a real
+battle trace and the calls made by the semantic combat path, but does not
+reproduce Android guest scheduling, GPU/driver behavior, PSI, zram, or major
+faults. It therefore cannot replace W1 live battle qualification or prove that
+a 3 GiB KVM guest is sufficient.
+
+## Original-ALAS offline battle rehearsal
+
+At an implementation milestone, run the same capsule through a freshly patched
+disposable worktree made from the clean pinned ALAS checkout:
+
+```powershell
+$env:PYTHONPATH = 'python'
+python scripts/python/run_alas_battle_capsule.py `
+  <verified-capsule.json> `
+  --mode alas-replay `
+  --alas-upstream E:\Disk0Merged\H\program\AzurLaneAutoScript-upstream-readonly `
+  --output <new-offline-result.json>
+```
+
+This mode applies the canonical ALAS patch series in a temporary worktree, then
+calls the original ALAS `_goto`, `combat`, `combat_preparation`,
+`combat_execute`, and `combat_status` state-machine methods against the frozen
+typed observer fixture. It requires the fresh replay to match the capsule's
+upstream commit, task configuration, observer fixture, stage, target, phases,
+virtual actions, call plan, and artifact hash. Pixel access, Android input,
+changed battle/ammo post-state, or incomplete cleanup fails closed.
+
+The defensive-preflight artifact is checked separately. Every root must be an
+explicit qualified row or a qualification stop before the original grid click;
+a stop after that boundary, duplicate root, stale replay binding, or inconsistent
+grid-click decision is rejected. A passing result is classified only as
+`W1-offline-rehearsal-only`: it uses no Android runtime or account and never
+authorizes a live sortie. Live W1 still requires all defensive roots qualified,
+a fresh typed preflight on the selected runtime, and an explicit one-battle
+resource budget and user authorization.
