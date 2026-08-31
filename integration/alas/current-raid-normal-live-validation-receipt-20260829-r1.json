@@ -1,0 +1,31 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-29T12:53:04.364902Z",
+  "finished_at": "2026-08-29T12:53:31.847272Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "mode": "normal",
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 4155,
+    "generation": 2468,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 44,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44"
+  },
+  "login_recovered": true,
+  "before": {},
+  "after": {},
+  "stage_receipts": [],
+  "recommend_receipts": [],
+  "fleet_receipts": [],
+  "notice_receipts": [],
+  "sortie_receipts": [],
+  "error": "SemanticGateClosed: semantic input is blocked by: bulletin",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 155, in run\n    session.enter_raid_page(\"raid_20260827\")\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 17900, in enter_raid_page\n    return self.open().enter_raid_page(event=event)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 9877, in enter_raid_page\n    receipt = self.oracle.click(\"main/raid\")\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 37757, in click\n    raise SemanticGateClosed(\nalas_headless.semantic_oracle.SemanticGateClosed: semantic input is blocked by: bulletin\n",
+  "raw_input_fallback_used": false
+}

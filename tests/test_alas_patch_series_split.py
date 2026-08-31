@@ -228,8 +228,14 @@ FLOW_PATHS = {
     "0150-runtime-optimization-contract.patch": {
         "alas.py",
     },
+    "0195-gems-farming-config-contract.patch": {
+        "module/campaign/gems_farming.py",
+    },
     "0350-meowfficer-dock-training-port.patch": {
         "module/meowfficer/buy.py",
+        "module/meowfficer/collect.py",
+        "module/meowfficer/enhance.py",
+        "module/meowfficer/fort.py",
         "module/meowfficer/train.py",
         "module/ui/ui.py",
     },
@@ -261,6 +267,16 @@ FLOW_PATHS = {
         "module/combat/combat.py",
         "module/map/fleet.py",
         "module/map/map.py",
+    },
+    "0460-freebies-battle-pass-port.patch": {
+        "module/freebies/battle_pass.py",
+        "module/freebies/data_key.py",
+        "module/freebies/supply_pack.py",
+    },
+    "0470-war-archives-runtime.patch": {
+        "campaign/campaign_war_archives/campaign_base.py",
+        "module/map/map_operation.py",
+        "module/war_archives/war_archives.py",
     },
 }
 
@@ -471,6 +487,12 @@ class AlasPatchSeriesSplitTests(unittest.TestCase):
                         "module/campaign/campaign_base.py",
                         "module/combat/combat.py",
                         "module/map/fleet.py",
+                    },
+                    "0460-freebies-battle-pass-port.patch": {
+                        "module/freebies/supply_pack.py",
+                    },
+                    "0470-war-archives-runtime.patch": {
+                        "module/map/map_operation.py",
                     },
                 }.get(name, set())
                 self.assertEqual(promoted & actual, expected_overlap)

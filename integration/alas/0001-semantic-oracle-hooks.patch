@@ -2080,6 +2080,18 @@ diff --git a/module/campaign/campaign_status.py b/module/campaign/campaign_statu
 index 45e8179f..55ba834c 100644
 --- a/module/campaign/campaign_status.py
 +++ b/module/campaign/campaign_status.py
+@@ -61,6 +61,11 @@ class CampaignStatus(UI):
+         Returns:
+             int: Coin amount
+         """
++        from alas_headless import current_semantic_session
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return semantic_session.event_coin()
++
+         amount = 0
+         timeout = Timer(1, count=2).start()
+         while 1:
 @@ -107,6 +107,11 @@ class CampaignStatus(UI):
          Returns:
              int: Oil amount
@@ -2330,7 +2342,22 @@ index 541cb00a55838510a473b5fad5fc6cd0588e17df..c485edad2f5f00b0dd316f77fc6b9b8e
          # Some may use "100,000"
          limit = int(
              re.sub(r'[,.\'"，。]', '', str(self.config.EventGeneral_PtLimit))
-@@ -78,11 +91,13 @@ class CampaignEvent(CampaignStatus):
+@@ -66,7 +79,13 @@ class CampaignEvent(CampaignStatus):
+         if command in GEMS_FARMINGS and self.stage_is_main(self.config.Campaign_Name):
+             return False
+ 
+-        pt = self.get_event_pt()
++        semantic_adapter = getattr(
++            getattr(self, 'device', None), 'semantic_adapter', None
++        )
++        if semantic_adapter is None:
++            pt = self.get_event_pt()
++        else:
++            pt = semantic_adapter.event_points()
+         logger.attr('Event_PT_limit', f'{pt}/{limit}')
+         if pt >= limit:
+             logger.hr(f'Reach event PT limit: {limit}')
+@@ -78,11 +97,13 @@ class CampaignEvent(CampaignStatus):
      def event_time_limit_triggered(self):
          """
          Returns:
@@ -2344,7 +2371,7 @@ index 541cb00a55838510a473b5fad5fc6cd0588e17df..c485edad2f5f00b0dd316f77fc6b9b8e
          limit = self.config.EventGeneral_TimeLimit
          tasks = EVENTS + RAIDS + COALITIONS + GEMS_FARMINGS + MARITIME_ESCORTS + HOSPITAL
          command = self.config.Scheduler_Command
-@@ -103,10 +118,12 @@ class CampaignEvent(CampaignStatus):
+@@ -103,10 +120,12 @@ class CampaignEvent(CampaignStatus):
      def triggered_task_balancer(self):
          """
          Returns:
@@ -2357,7 +2384,7 @@ index 541cb00a55838510a473b5fad5fc6cd0588e17df..c485edad2f5f00b0dd316f77fc6b9b8e
          limit = self.config.TaskBalancer_CoinLimit
          coin = self.get_coin()
          # Check Coin
-@@ -127,4 +144,6 @@ class CampaignEvent(CampaignStatus):
+@@ -127,4 +146,6 @@ class CampaignEvent(CampaignStatus):
      def handle_task_balancer(self):
 +        self._validate_event_general_config()
 +
@@ -2623,11 +2650,19 @@ index 57033308..c70ee57c 100644
          name, folder = self.handle_stage_name(name, folder, mode=mode)
          self.config.override(Campaign_Name=name, Campaign_Event=folder)
          self.load_campaign(name, folder=folder)
-@@ -398,13 +450,18 @@ class CampaignRun(CampaignEvent):
+@@ -398,13 +450,26 @@ class CampaignRun(CampaignEvent):
              if not self.device.has_cached_image:
                  self.device.screenshot()
              self.campaign.device.image = self.device.image
 +            semantic_map_resume = False
++            if (
++                semantic_adapter is not None
++                and self.handle_popup_confirm('CAMPAIGN_RECONNECT')
++            ):
++                logger.warning(
++                    'Recovered NetworkDown before campaign startup surface check')
++                self.device.screenshot()
++                self.campaign.device.image = self.device.image
              if self.campaign.is_in_map():
 -                logger.info('Already in map, retreating.')
 -                try:
@@ -3000,7 +3035,7 @@ index 5b086931..e7b4038b 100644
 +            if oracle.event_story_skip_prompt_visible():
 +                logger.info('Modern event story skip -> semantic confirm')
 +                semantic_adapter.refresh_frame()
-+                oracle.click_event_story_skip_confirm()
++                semantic_adapter.click_event_story_skip_confirm()
 +                self.story_popup_timeout = Timer(10)
 +                return True
 +            if oracle.event_story_dialogue_visible():
@@ -3008,13 +3043,13 @@ index 5b086931..e7b4038b 100644
 +                if option_count:
 +                    logger.attr('Story_options', option_count)
 +                    semantic_adapter.refresh_frame()
-+                    oracle.click_event_story_option(self.config.STORY_OPTION)
++                    semantic_adapter.click_event_story_option(self.config.STORY_OPTION)
 +                    self.story_popup_timeout.reset()
 +                    return True
 +                if self.config.STORY_ALLOW_SKIP:
 +                    logger.info('Modern event story -> semantic skip')
 +                    semantic_adapter.refresh_frame()
-+                    oracle.click_event_story_skip()
++                    semantic_adapter.click_event_story_skip()
 +                    self.story_popup_timeout.reset()
 +                    return True
 +                return False
@@ -3087,13 +3122,13 @@ index 9fa9cba2..1f7044a1 100644
          logger.info('Map swipe: %s' % str(vector))
 +        from alas_headless import current_semantic_session
 +        semantic_session = current_semantic_session()
-+        if semantic_session is not None and not np.any(vector):
-+            return False
 +        if (
 +            semantic_session is not None
 +            and semantic_session.recover_campaign_map_network_reconnect()
 +        ):
 +            logger.warning('Recovered NetworkDown before campaign map swipe')
++        if semantic_session is not None and not np.any(vector):
++            return False
          self._prev_view = copy.copy(self.view)
          self._prev_swipe = vector
          vector = np.array(vector)
@@ -3309,7 +3344,7 @@ index c44e0996..78c9d812 100644
 +                                try:
 +                                    semantic_adapter.close_campaign_fleet_dropdown_for_rollback()
 +                                finally:
-+                                    self.enter_map_cancel()
++                                    self.enter_map_cancel(skip_first_screenshot=False)
 +                        if sortie_clicked:
 +                            continue
 +                        if fleet_authorized:
@@ -7311,7 +7346,7 @@ diff --git a/module/daemon/daemon.py b/module/daemon/daemon.py
 index 7bfc8531..143cc0c2 100644
 --- a/module/daemon/daemon.py
 +++ b/module/daemon/daemon.py
-@@ -6,59 +6,78 @@ from module.map.map_operation import FLEET_PREPARATION, MAP_PREPARATION
+@@ -6,59 +6,117 @@ from module.map.map_operation import FLEET_PREPARATION, MAP_PREPARATION
  
  
  class AzurLaneDaemon(DaemonBase, CampaignBase):
@@ -7356,10 +7391,49 @@ index 7bfc8531..143cc0c2 100644
 +
 +        # Map preparation
 +        if self.config.Daemon_EnterMap:
-+            if self.appear_then_click(MAP_PREPARATION, offset=(20, 20), interval=2):
-+                return 'map_preparation'
-+            if self.appear_then_click(FLEET_PREPARATION, offset=(20, 50), interval=2):
-+                return 'fleet_preparation'
++            if semantic_adapter is not None:
++                if self.appear(MAP_PREPARATION, offset=(20, 20), interval=2):
++                    semantic_adapter.arm_daemon_campaign_map_preparation()
++                    self.device.click(MAP_PREPARATION)
++                    return 'map_preparation'
++                if self.appear(FLEET_PREPARATION, offset=(20, 50), interval=2):
++                    fleet_authorized = (
++                        semantic_adapter.authorize_campaign_fleet_preparation(
++                            self.config.Fleet_Fleet1,
++                            self.config.Fleet_Fleet2,
++                            self.config.Submarine_Fleet,
++                        )
++                    )
++                    if not fleet_authorized:
++                        return 'fleet_preparation_waiting'
++                    if semantic_adapter.campaign_fleet_preparation_required():
++                        self.fleet_preparation()
++                    semantic_adapter.confirm_campaign_fleet_selection()
++                    self.map_is_auto_search = self.config.Campaign_UseAutoSearch
++                    self.map_is_2x_book = self.config.Campaign_Use2xBook
++                    self.handle_auto_submarine_call_disable()
++                    self.handle_auto_search_setting()
++                    authorized = semantic_adapter.authorize_campaign_sortie(
++                        use_auto_search=self.config.Campaign_UseAutoSearch,
++                        use_2x_book=self.config.Campaign_Use2xBook,
++                        submarine_mode=self.config.Submarine_Mode,
++                        fleet_order=self.config.Fleet_FleetOrder,
++                    )
++                    if not authorized:
++                        return 'fleet_preparation_waiting'
++                    self.device.click(FLEET_PREPARATION)
++                    semantic_adapter.confirm_daemon_campaign_sortie()
++                    if self.config.Campaign_UseAutoSearch:
++                        semantic_adapter.wait_campaign_auto_search_completion(
++                            semantic_adapter.campaign_pre_sortie_stage_code()
++                        )
++                        return 'auto_search_complete'
++                    return 'fleet_preparation'
++            else:
++                if self.appear_then_click(MAP_PREPARATION, offset=(20, 20), interval=2):
++                    return 'map_preparation'
++                if self.appear_then_click(FLEET_PREPARATION, offset=(20, 50), interval=2):
++                    return 'fleet_preparation'
 +
 +        # Retire
 +        if self.handle_retirement():
@@ -8619,7 +8693,7 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
  from module.meowfficer.buy import MeowfficerBuy
  from module.meowfficer.fort import MeowfficerFort
  from module.meowfficer.train import MeowfficerTrain
-@@ -33,10 +35,21 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+@@ -33,10 +35,27 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
              in: Any page
              out: page_meowfficer
          """
@@ -8638,6 +8712,12 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
 +            enhance_index=self.config.MeowfficerTrain_EnhanceIndex,
 +            max_feed_level=self.config.MeowfficerTrain_MaxFeedLevel,
 +        )
++        semantic_adapter = getattr(getattr(self, 'device', None), 'semantic_adapter', None)
++        if semantic_adapter is not None and meowfficer_config.train_enable:
++            semantic_adapter.admit_meowfficer_training_plan(
++                mode=meowfficer_config.train_mode,
++                sunday=self.meow_is_sunday(),
++            )
 +        if meowfficer_config.buy_amount <= 0 \
 +                and meowfficer_config.overflow_coins < 0 \
 +                and not meowfficer_config.fort_chore_meowfficer \
@@ -8645,7 +8725,7 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
              self.config.Scheduler_Enable = False
              self.config.task_stop()
  
-@@ -44,15 +57,15 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+@@ -44,15 +63,15 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
          self.wait_meowfficer_buttons()  # Wait for the ui to load fully
  
 -        if self.config.Meowfficer_BuyAmount > 0 \
@@ -8666,7 +8746,7 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
                  self.meow_enhance()
              elif self.meow_is_sunday():
                  self.meow_enhance()
-@@ -61,6 +74,6 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
+@@ -61,6 +80,6 @@ class RewardMeowfficer(MeowfficerBuy, MeowfficerFort, MeowfficerTrain):
  
          # Scheduler
 -        if self.config.MeowfficerTrain_Enable:
@@ -8675,15 +8755,385 @@ diff --git a/module/meowfficer/meowfficer.py b/module/meowfficer/meowfficer.py
              # - Blue, 2.0h ~ 2.5h
              # - Purple, 5.5h ~ 6.5h
 diff --git a/module/campaign/gems_farming.py b/module/campaign/gems_farming.py
+index 62565971..96c82453 100644
 --- a/module/campaign/gems_farming.py
 +++ b/module/campaign/gems_farming.py
 @@ -1,3 +1,5 @@
-+from alas_headless import validate_alas_gems_farming_config
++from alas_headless import current_semantic_session, validate_alas_gems_farming_config
 +
  from datetime import datetime
  
  from module.base.decorator import Config, cached_property
-@@ -645,6 +647,13 @@ class GemsFarming(CampaignRun, Dock):
+@@ -207,6 +209,10 @@ class GemsFarming(CampaignRun, Dock):
+     @Config.when(Campaign_Mode='normal')
+     def ui_goto_fleet(self):
+         self.ui_ensure(page_fleet)
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.gems_farming_select_fleet_index(self.fleet_to_attack_index)
++            return
+         
+         # ui_ensure_index, set fleet
+         letter = FLEET_INDEX
+@@ -235,6 +241,10 @@ class GemsFarming(CampaignRun, Dock):
+ 
+     @Config.when(Campaign_Mode='hard')
+     def ui_goto_fleet(self):
++        semantic_session = current_semantic_session()
++        if semantic_session is not None \
++                and semantic_session.gems_farming_hard_fleet_preparation_visible(self.stage):
++            return
+         if self.appear(FLEET_PREPARATION, offset=(20, 50)):
+             return
+         self.campaign.ensure_campaign_ui(self.stage, 'hard')
+@@ -343,6 +353,16 @@ class GemsFarming(CampaignRun, Dock):
+         Returns:
+             list[Ship]: Common rarity CVs that meet the level, emotion and fleet requirements.
+         """
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return list(semantic_session.gems_farming_candidates(
++                role='flagship',
++                selector=self.config.GemsFarming_CommonCV,
++                max_level=max_level,
++                min_emotion=min_emotion,
++                fleet_index=self.fleet_to_attack_index,
++            ))
++
+         self.dock_favourite_set(False, wait_loading=False)
+         self.dock_sort_method_dsc_set(False, wait_loading=False)
+         self.dock_filter_set(index='cv', rarity='common', extra='enhanceable', sort='total')
+@@ -368,43 +388,70 @@ class GemsFarming(CampaignRun, Dock):
+ 
+     @Config.when(Campaign_Mode='normal')
+     def flagship_change_execute(self):
+-        self.ui_enter_ship(FLEET_ENTER_FLAGSHIP, long_click=False)
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.gems_farming_open_slot('flagship')
++        else:
++            self.ui_enter_ship(FLEET_ENTER_FLAGSHIP, long_click=False)
+         candidate = self.get_common_rarity_cv(min_emotion=self.min_emotion)
+         if candidate:
+             ship = max(candidate, key=lambda s: (s.level, s.emotion))
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=page_fleet.check_button)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(ship, 'flagship')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=page_fleet.check_button)
+             logger.info('Change flagship success')
+             return True
+ 
+         logger.info('Change flagship failed, no CV in common rarity.')
+         self._new_fleet_emotion = 0
+-        self.dock_reset()
+-        self.ui_leave_ship()
++        if semantic_session is not None:
++            semantic_session.gems_farming_cancel_candidate_selection()
++        else:
++            self.dock_reset()
++            self.ui_leave_ship()
+         return False
+ 
+     @Config.when(Campaign_Mode='hard')
+     def flagship_change_execute(self):
+-        unmount_button = globals()[f'FLEET_{self.fleet_to_attack}_BACKLINE_1']
+-        mount_button = globals()[f'FLEET_{self.fleet_to_attack}_BACKLINE_3']
+-
+-        if self.appear(unmount_button, offset=(20, 20)):
+-            logger.info('No flagship to unmount, skip unmounting.')
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            if semantic_session.gems_farming_hard_slot_occupied(
++                    self.stage, self.fleet_to_attack, 'flagship'):
++                semantic_session.gems_farming_hard_unmount(
++                    self.stage, self.fleet_to_attack, 'flagship')
++            else:
++                logger.info('No flagship to unmount, skip unmounting.')
++            semantic_session.gems_farming_hard_open_slot(
++                self.stage, self.fleet_to_attack, 'flagship')
+         else:
+-            self.ui_enter_ship(unmount_button, long_click=False)
+-            self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK, 
+-                          additional=self.ensure_no_info_bar, confirm_wait=1, retry_wait=5)
++            unmount_button = globals()[f'FLEET_{self.fleet_to_attack}_BACKLINE_1']
++            mount_button = globals()[f'FLEET_{self.fleet_to_attack}_BACKLINE_3']
++
++            if self.appear(unmount_button, offset=(20, 20)):
++                logger.info('No flagship to unmount, skip unmounting.')
++            else:
++                self.ui_enter_ship(unmount_button, long_click=False)
++                self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK,
++                              additional=self.ensure_no_info_bar, confirm_wait=1, retry_wait=5)
+ 
+-        self.ui_enter_ship(mount_button, long_click=False)
++            self.ui_enter_ship(mount_button, long_click=False)
+         candidate = self.get_common_rarity_cv(max_level=31, min_emotion=self.min_emotion)
+         if candidate:
+             ship = max(candidate, key=lambda s: (s.level, s.emotion))
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=FLEET_PREPARATION)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(
++                    ship, 'flagship')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=FLEET_PREPARATION)
+             logger.info('Change flagship success')
+             return True
+ 
+@@ -413,15 +460,23 @@ class GemsFarming(CampaignRun, Dock):
+         if candidate:
+             ship = min(candidate, key=lambda s: (s.level, -s.emotion))
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=FLEET_PREPARATION)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(
++                    ship, 'flagship')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=FLEET_PREPARATION)
+             return False
+ 
+         logger.info('Change flagship failed, no CV was found.')
+         self._new_fleet_emotion = 0
+-        self.dock_reset()
+-        self.ui_leave_ship()
++        if semantic_session is not None:
++            semantic_session.gems_farming_cancel_candidate_selection()
++        else:
++            self.dock_reset()
++            self.ui_leave_ship()
+         return False
+ 
+     def flagship_change(self):
+@@ -435,8 +490,12 @@ class GemsFarming(CampaignRun, Dock):
+         logger.attr('ChangeFlagship', self.config.GemsFarming_ChangeFlagship)
+         self.ui_goto_fleet()
+         button = self.fleet_backline_1_button
++        semantic_session = current_semantic_session()
+ 
+-        if self.change_flagship_equip and not self.appear(button, offset=(20, 20)):
++        if self.change_flagship_equip and semantic_session is not None:
++            logger.hr('Unmount flagship equipments', level=2)
++            semantic_session.gems_farming_equipment_take_off('flagship')
++        elif self.change_flagship_equip and not self.appear(button, offset=(20, 20)):
+             logger.hr('Unmount flagship equipments', level=2)
+             self.ui_enter_ship(button, long_click=True)
+             self.ship_equipment_take_off()
+@@ -445,7 +504,10 @@ class GemsFarming(CampaignRun, Dock):
+         logger.hr('Change flagship', level=2)
+         success = self.flagship_change_execute()
+ 
+-        if self.change_flagship_equip and not self.appear(button, offset=(20, 20)):
++        if self.change_flagship_equip and semantic_session is not None:
++            logger.hr('Mount flagship equipments', level=2)
++            semantic_session.gems_farming_equipment_take_on('flagship')
++        elif self.change_flagship_equip and not self.appear(button, offset=(20, 20)):
+             logger.hr('Mount flagship equipments', level=2)
+             self.ui_enter_ship(button, long_click=True)
+             self.ship_equipment_take_on()
+@@ -496,6 +558,16 @@ class GemsFarming(CampaignRun, Dock):
+         Returns:
+             list[Ship]: Common rarity DDs that meet the emotion and fleet requirements.
+         """
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return list(semantic_session.gems_farming_candidates(
++                role='vanguard',
++                selector=self.config.GemsFarming_CommonDD,
++                max_level=self.max_level,
++                min_emotion=min_emotion,
++                fleet_index=self.fleet_to_attack_index,
++            ))
++
+         faction = self.get_dd_faction()
+         self.dock_favourite_set(self.config.GemsFarming_CommonDD == 'favourite', wait_loading=False)
+         self.dock_sort_method_dsc_set(True, wait_loading=False)
+@@ -517,43 +589,70 @@ class GemsFarming(CampaignRun, Dock):
+ 
+     @Config.when(Campaign_Mode='normal')
+     def vanguard_change_execute(self):
+-        self.ui_enter_ship(FLEET_ENTER, long_click=False)
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.gems_farming_open_slot('vanguard')
++        else:
++            self.ui_enter_ship(FLEET_ENTER, long_click=False)
+         candidate = self.get_common_rarity_dd(min_emotion=self.min_emotion)
+         if candidate:
+             ship = max(candidate, key=lambda s: s.emotion)
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=page_fleet.check_button)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(ship, 'vanguard')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=page_fleet.check_button)
+             logger.info('Change vanguard success')
+             return True
+ 
+         logger.info('Change vanguard failed, no DD in common rarity.')
+         self._new_fleet_emotion = 0
+-        self.dock_reset()
+-        self.ui_leave_ship()
++        if semantic_session is not None:
++            semantic_session.gems_farming_cancel_candidate_selection()
++        else:
++            self.dock_reset()
++            self.ui_leave_ship()
+         return False
+ 
+     @Config.when(Campaign_Mode='hard')
+     def vanguard_change_execute(self):
+-        unmount_button = globals()[f'FLEET_{self.fleet_to_attack}_VANGUARD_1']
+-        mount_button = globals()[f'FLEET_{self.fleet_to_attack}_VANGUARD_3']
+-
+-        if self.appear(unmount_button, offset=(20, 20)):
+-            logger.info('No vanguard to unmount, skip unmounting.')
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            if semantic_session.gems_farming_hard_slot_occupied(
++                    self.stage, self.fleet_to_attack, 'vanguard'):
++                semantic_session.gems_farming_hard_unmount(
++                    self.stage, self.fleet_to_attack, 'vanguard')
++            else:
++                logger.info('No vanguard to unmount, skip unmounting.')
++            semantic_session.gems_farming_hard_open_slot(
++                self.stage, self.fleet_to_attack, 'vanguard')
+         else:
+-            self.ui_enter_ship(unmount_button, long_click=False)
+-            self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK, 
+-                          additional=self.ensure_no_info_bar, confirm_wait=1, retry_wait=5)
++            unmount_button = globals()[f'FLEET_{self.fleet_to_attack}_VANGUARD_1']
++            mount_button = globals()[f'FLEET_{self.fleet_to_attack}_VANGUARD_3']
++
++            if self.appear(unmount_button, offset=(20, 20)):
++                logger.info('No vanguard to unmount, skip unmounting.')
++            else:
++                self.ui_enter_ship(unmount_button, long_click=False)
++                self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK,
++                              additional=self.ensure_no_info_bar, confirm_wait=1, retry_wait=5)
+ 
+-        self.ui_enter_ship(mount_button, long_click=False)
++            self.ui_enter_ship(mount_button, long_click=False)
+         candidate = self.get_common_rarity_dd(min_emotion=self.min_emotion)
+         if candidate:
+             ship = max(candidate, key=lambda s: s.emotion)
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=FLEET_PREPARATION)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(
++                    ship, 'vanguard')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=FLEET_PREPARATION)
+             logger.info('Change vanguard success')
+             return True
+ 
+@@ -562,15 +661,23 @@ class GemsFarming(CampaignRun, Dock):
+         if candidate:
+             ship = max(candidate, key=lambda s: s.emotion)
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=FLEET_PREPARATION)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(
++                    ship, 'vanguard')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=FLEET_PREPARATION)
+             return False
+ 
+         logger.info('Change vanguard failed, no DD was found.')
+         self._new_fleet_emotion = 0
+-        self.dock_reset()
+-        self.ui_leave_ship()
++        if semantic_session is not None:
++            semantic_session.gems_farming_cancel_candidate_selection()
++        else:
++            self.dock_reset()
++            self.ui_leave_ship()
+         return False
+ 
+     def vanguard_change(self):
+@@ -584,8 +691,12 @@ class GemsFarming(CampaignRun, Dock):
+         logger.attr('ChangeVanguard', self.config.GemsFarming_ChangeVanguard)
+         self.ui_goto_fleet()
+         button = self.fleet_vanguard_1_button
++        semantic_session = current_semantic_session()
+ 
+-        if self.change_vanguard_equip and not self.appear(button, offset=(20, 20)):
++        if self.change_vanguard_equip and semantic_session is not None:
++            logger.hr('Unmount vanguard equipments', level=2)
++            semantic_session.gems_farming_equipment_take_off('vanguard')
++        elif self.change_vanguard_equip and not self.appear(button, offset=(20, 20)):
+             logger.hr('Unmount vanguard equipments', level=2)
+             self.ui_enter_ship(button, long_click=True)
+             self.ship_equipment_take_off()
+@@ -594,7 +705,10 @@ class GemsFarming(CampaignRun, Dock):
+         logger.hr('Change vanguard', level=2)
+         success = self.vanguard_change_execute()
+ 
+-        if self.change_vanguard_equip and not self.appear(button, offset=(20, 20)):
++        if self.change_vanguard_equip and semantic_session is not None:
++            logger.hr('Mount vanguard equipments', level=2)
++            semantic_session.gems_farming_equipment_take_on('vanguard')
++        elif self.change_vanguard_equip and not self.appear(button, offset=(20, 20)):
+             logger.hr('Mount vanguard equipments', level=2)
+             self.ui_enter_ship(button, long_click=True)
+             self.ship_equipment_take_on()
+@@ -610,11 +724,22 @@ class GemsFarming(CampaignRun, Dock):
+             bool: True if any slot has been filled.
+         """
+         prepared = False
+-        if self.appear(self.fleet_backline_1_button, offset=(20, 20)):
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            flagship_empty = not semantic_session.gems_farming_hard_slot_occupied(
++                self.stage, self.fleet_to_attack, 'flagship')
++            vanguard_empty = not semantic_session.gems_farming_hard_slot_occupied(
++                self.stage, self.fleet_to_attack, 'vanguard')
++        else:
++            flagship_empty = self.appear(
++                self.fleet_backline_1_button, offset=(20, 20))
++            vanguard_empty = self.appear(
++                self.fleet_vanguard_1_button, offset=(20, 20))
++        if flagship_empty:
+             logger.info('Backline is empty, change flagship')
+             self.flagship_change()
+             prepared = True
+-        if self.appear(self.fleet_vanguard_1_button, offset=(20, 20)):
++        if vanguard_empty:
+             logger.info('Vanguard is empty, change vanguard')
+             self.vanguard_change()
+             prepared = True
+@@ -645,6 +770,23 @@ class GemsFarming(CampaignRun, Dock):
              mode (str): `normal` or `hard`
              total (int):
          """
@@ -8693,10 +9143,29 @@ diff --git a/module/campaign/gems_farming.py b/module/campaign/gems_farming.py
 +            change_vanguard=self.config.GemsFarming_ChangeVanguard,
 +            common_dd=self.config.GemsFarming_CommonDD,
 +            commission_limit=self.config.GemsFarming_CommissionLimit,
++            export_to_config=self.config.EquipmentCode_ExportToConfig,
 +        )
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.gems_farming_admit_live_mode(
++                stage_code=name,
++                campaign_mode=mode,
++                change_flagship=self.config.GemsFarming_ChangeFlagship,
++                change_vanguard=self.config.GemsFarming_ChangeVanguard,
++                attacking_fleet=self.fleet_to_attack,
++            )
          self.config.override(STOP_IF_REACH_LV32=True)
  
          while 1:
+@@ -652,7 +794,7 @@ class GemsFarming(CampaignRun, Dock):
+             is_limit = self.config.StopCondition_RunCount
+ 
+             try:
+-                super().run(name=name, folder=folder, total=total)
++                super().run(name=name, folder=folder, mode=mode, total=total)
+             except CampaignEnd as e:
+                 if "Emotion" in e.args[0]:
+                     self._trigger_emotion = True
 diff --git a/alas.py b/alas.py
 index e0e52437..96ba4292 100644
 --- a/alas.py
@@ -9056,18 +9525,13 @@ diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
 index 3232fe5e..88b5f629 100644
 --- a/module/campaign/campaign_base.py
 +++ b/module/campaign/campaign_base.py
-@@ -210,6 +210,25 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+@@ -210,6 +210,20 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
          self.ENTRANCE.area = self.ENTRANCE.button
          self.enter_map(self.ENTRANCE, mode=self.config.Campaign_Mode)
  
 +        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
 +        if self.map_is_auto_search and semantic_adapter is not None:
-+            if self.config.Campaign_Mode == 'hard':
-+                semantic_stage = self.config.Hard_HardStage
-+            else:
-+                semantic_stage = self.config.Campaign_Name
-+            if semantic_stage == 'campaign_12_4':
-+                semantic_stage = '12-4'
++            semantic_stage = semantic_adapter.campaign_pre_sortie_stage_code()
 +            proof = semantic_adapter.wait_campaign_auto_search_completion(
 +                semantic_stage
 +            )
@@ -9209,7 +9673,7 @@ index 78c9d812..62022064 100644
                          self.device.click(MAP_PREPARATION)
                          map_click += 1
 diff --git a/module/meowfficer/buy.py b/module/meowfficer/buy.py
-index 3b506ba1..31f3f11f 100644
+index 3b506ba1..666278b8 100644
 --- a/module/meowfficer/buy.py
 +++ b/module/meowfficer/buy.py
 @@ -29,15 +29,23 @@ class MeowfficerBuy(MeowfficerBase):
@@ -9244,11 +9708,100 @@ index 3b506ba1..31f3f11f 100644
  
          logger.attr('Meowfficer_remain', remain)
          logger.attr('Meowfficer_coins', coins)
+@@ -186,12 +194,16 @@ class MeowfficerBuy(MeowfficerBase):
+         buy_amount = self.config.Meowfficer_BuyAmount
+         buy_amount = max(min(buy_amount, 15), 1)
+         overflow_th = self.config.Meowfficer_OverflowCoins
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+ 
+         for _ in range(3):
+             count = self.meow_get_buy_count(buy_amount, overflow_th)
+             if count <= 0:
+                 return
+-            self.meow_choose(count)
+-            self.meow_confirm()
++            if semantic_adapter is not None:
++                semantic_adapter.buy_meowfficer_boxes(count)
++            else:
++                self.meow_choose(count)
++                self.meow_confirm()
+ 
+         logger.warning('Too many trial in meowfficer buy, stopped.')
+diff --git a/module/meowfficer/collect.py b/module/meowfficer/collect.py
+index 2fd930dc..4018f76f 100644
+--- a/module/meowfficer/collect.py
++++ b/module/meowfficer/collect.py
+@@ -236,6 +236,13 @@ class MeowfficerCollect(MeowfficerBase):
+             in: MEOWFFICER_GET_CHECK
+             out: MEOWFFICER_TRAIN
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.finish_meowfficer_acquisition(
++                retain_talented_gold=self.config.MeowfficerTrain_RetainTalentedGold,
++                retain_talented_purple=self.config.MeowfficerTrain_RetainTalentedPurple,
++            )
++
+         # Loop through possible screen transitions
+         confirm_timer = Timer(1.5, count=3).start()
+         count = 0
+diff --git a/module/meowfficer/enhance.py b/module/meowfficer/enhance.py
+index 3855ab1b..ceeeb22f 100644
+--- a/module/meowfficer/enhance.py
++++ b/module/meowfficer/enhance.py
+@@ -327,6 +327,13 @@ class MeowfficerEnhance(MeowfficerBase):
+         logger.hr('Meowfficer enhance', level=1)
+         logger.attr('MeowfficerTrain_EnhanceIndex', self.config.MeowfficerTrain_EnhanceIndex)
+ 
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.enhance_meowfficer(
++                index=self.config.MeowfficerTrain_EnhanceIndex,
++                max_feed_level=self.config.MeowfficerTrain_MaxFeedLevel,
++            )
++
+         # Base Cases
+         # - Config at least > 0 but less than or equal to 12
+         # - Coins at least > 1000
+diff --git a/module/meowfficer/fort.py b/module/meowfficer/fort.py
+index 595c248b..b40ab830 100644
+--- a/module/meowfficer/fort.py
++++ b/module/meowfficer/fort.py
+@@ -72,16 +72,25 @@ class MeowfficerFort(MeowfficerBase):
+             in: page_meowfficer
+             out: page_meowfficer
+         """
+-        # Check for fort red notification
+-        if not self.appear(MEOWFFICER_FORT_RED_DOT):
+-            return False
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            if not semantic_adapter.meowfficer_fort_chore_available():
++                logger.info('Meowfficer Fort has no occupied slots, stopped')
++                return False
++        else:
++            # Check for fort red notification
++            if not self.appear(MEOWFFICER_FORT_RED_DOT):
++                return False
+         logger.hr('Meowfficer fort', level=1)
+ 
+         # Enter MEOWFFICER_FORT window
+         self.meow_enter(MEOWFFICER_FORT_ENTER, check_button=MEOWFFICER_FORT_CHECK)
+ 
+         # Perform fort chore operations
+-        self.meow_chores()
++        if semantic_adapter is not None:
++            semantic_adapter.run_meowfficer_fort_chores()
++        else:
++            self.meow_chores()
+ 
+         # Exit back into page_meowfficer
+         self.meow_menu_close()
 diff --git a/module/meowfficer/train.py b/module/meowfficer/train.py
-index 24a406b4..e2774302 100644
+index ccdda576..cc81df14 100644
 --- a/module/meowfficer/train.py
 +++ b/module/meowfficer/train.py
-@@ -159,6 +159,26 @@ class MeowfficerTrain(MeowfficerCollect, MeowfficerEnhance):
+@@ -196,6 +196,33 @@ class MeowfficerTrain(MeowfficerCollect, MeowfficerEnhance):
          """
          logger.hr('Meowfficer train', level=1)
  
@@ -9267,19 +9820,26 @@ index 24a406b4..e2774302 100644
 +                logger.info('Meowfficer training queue is full, stopped')
 +                self.meow_menu_close()
 +                return False
-+            from alas_headless import SemanticGateClosed
-+            raise SemanticGateClosed(
-+                'Meowfficer semantic training requires a reviewed collect or queue boundary'
-+            )
++            logger.attr('MeowfficerTrain_Mode', self.config.MeowfficerTrain_Mode)
++            collected = False
++            if dock.capacity_used < dock.capacity_total:
++                collect_all = (
++                    self.config.MeowfficerTrain_Mode == 'seamlessly'
++                    or self.meow_is_sunday()
++                )
++                collected = self.meow_collect(collect_all=collect_all)
++            self.meow_queue(ascending=False)
++            self.meow_menu_close()
++            return collected
 +
          # Retrieve capacity to determine whether able to collect
          current, remain, total = MEOWFFICER_CAPACITY.ocr(self.device.image)
          logger.attr('Meowfficer_capacity_remain', remain)
 diff --git a/module/ui/ui.py b/module/ui/ui.py
-index afad4234..434ff2de 100644
+index 066253bd..c40604d0 100644
 --- a/module/ui/ui.py
 +++ b/module/ui/ui.py
-@@ -309,6 +309,13 @@ class UI(InfoHandler):
+@@ -310,6 +310,13 @@ class UI(InfoHandler):
              bool: If UI switched.
          """
          logger.hr("UI ensure")
@@ -9697,9 +10257,18 @@ index 454f4aa6..941b507a 100644
  
  from module.base.timer import Timer
  from module.exception import CampaignEnd, RequestHumanTakeover, ScriptEnd
-@@ -174,24 +175,45 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -174,24 +175,54 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                  ):
                      logger.info('Semantic pre-sortie: scan fleet preparation')
++                    if semantic_adapter.campaign_dock_full_visible():
++                        # Preserve ALAS's configured one-click-retire versus
++                        # enhancement state machine. The adapter maps only the
++                        # exact labelled non-premium entry choices; dock
++                        # expansion remains unavailable.
++                        self.handle_retirement()
++                        campaign_timer.reset()
++                        fleet_timer.reset()
++                        continue
                      if semantic_adapter.campaign_sortie_committed():
 -                        if (
 -                            self.map_is_auto_search
@@ -9759,7 +10328,7 @@ index 454f4aa6..941b507a 100644
                              proof = semantic_adapter.confirm_campaign_sortie()
                              logger.info(
                                  f'Semantic campaign sortie proof: '
-@@ -209,7 +231,8 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -209,7 +240,8 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                              # map/combat/result states as well, so leave the
                              # entry loop normally and let CampaignBase run.
                              break
@@ -9769,9 +10338,27 @@ index 454f4aa6..941b507a 100644
                      if self.appear(FLEET_PREPARATION, offset=(20, 50)):
                          fleet_authorized = False
                          sortie_clicked = False
-@@ -281,25 +304,47 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -281,25 +313,65 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                      if self.appear(MAP_PREPARATION, offset=(20, 20)):
                          logger.info('Semantic pre-sortie: map preparation active')
++                        observed_mode = (
++                            semantic_adapter.campaign_map_preparation_mode_state()
++                        )
++                        if observed_mode != self.config.Campaign_Mode:
++                            receipt = (
++                                semantic_adapter.set_campaign_map_preparation_mode(
++                                    self.config.Campaign_Mode
++                                )
++                            )
++                            logger.info(
++                                'Semantic campaign mode switch: '
++                                f'{observed_mode}->{self.config.Campaign_Mode}, '
++                                f'generation={receipt.generation}'
++                            )
++                            # The shared A/B entrance remounts the C/D detail
++                            # hierarchy. Re-read every subsequent decision from
++                            # the new immutable semantic frame.
++                            continue
                          if self.config.Campaign_UseAutoSearch:
 -                            # The typed AutoFight control itself proves that
 -                            # this cleared stage supports the official clear-
@@ -9830,7 +10417,7 @@ index 454f4aa6..941b507a 100644
                          logger.info('Semantic pre-sortie: click map preparation')
                          self.device.click(MAP_PREPARATION)
                          map_click += 1
-@@ -311,7 +356,10 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+@@ -311,7 +383,10 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
                      # unhandled transition generation fall through to the
                      # original fleet/sortie input branches below.  Earlier
                      # ALAS navigation and recovery states remain unchanged.
@@ -14682,3 +15269,528 @@ index 8326bc4..68a63f2 100644
                  break
              except MapEnemyMoved:
                  if self.battle_count > prev:
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+index bb034c5..208e24a 100644
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -474,8 +474,11 @@ class CampaignRun(CampaignEvent):
+ 
+             # if in hard mode, check remain times
+             if self.ui_page_appear(page_campaign) and MODE_SWITCH_1.get(main=self) == 'normal':
+-                from module.hard.hard import OCR_HARD_REMAIN
+-                remain = OCR_HARD_REMAIN.ocr(self.device.image)
++                if semantic_adapter is not None:
++                    remain = semantic_adapter.campaign_hard_remain()
++                else:
++                    from module.hard.hard import OCR_HARD_REMAIN
++                    remain = OCR_HARD_REMAIN.ocr(self.device.image)
+                 if not remain:
+                     logger.info('Remaining number of times of hard mode campaign_main is 0, delay task to next day')
+                     self.config.task_delay(server_update=True)
+diff --git a/module/raid/run.py b/module/raid/run.py
+--- a/module/raid/run.py
++++ b/module/raid/run.py
+@@ -31,6 +31,7 @@ class RaidRun(Raid, CampaignEvent):
+         Returns:
+             int:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         confirm_timer = Timer(0.3, count=0)
+         prev = 30
+         while 1:
+@@ -44,15 +45,20 @@ class RaidRun(Raid, CampaignEvent):
+             else:
+                 self.device.screenshot()
+ 
+-            ocr = raid_ocr(raid=self.config.Campaign_Event, mode=mode)
+-            result = ocr.ocr(self.device.image)
+-            if mode == 'ex':
+-                remain = result
++            if semantic_adapter is not None:
++                remain = semantic_adapter.raid_remain(
++                    event=self.config.Campaign_Event, mode=mode
++                )
+             else:
+-                remain, _, _ = result
++                ocr = raid_ocr(raid=self.config.Campaign_Event, mode=mode)
++                result = ocr.ocr(self.device.image)
++                if mode == 'ex':
++                    remain = result
++                else:
++                    remain, _, _ = result
+             logger.attr(f'{mode.capitalize()} Remain', remain)
+ 
+-            if self.appear_then_click(RAID_REWARDS, offset=(30, 30), interval=3):
++            if semantic_adapter is None and self.appear_then_click(RAID_REWARDS, offset=(30, 30), interval=3):
+                 confirm_timer.reset()
+                 continue
+ 
+diff --git a/module/freebies/battle_pass.py b/module/freebies/battle_pass.py
+index 48950956..46c42036 100644
+--- a/module/freebies/battle_pass.py
++++ b/module/freebies/battle_pass.py
+@@ -18,6 +18,9 @@ class BattlePass(Combat, UI):
+         Page:
+             in: page_reward
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.open().oracle.battle_pass_reward_available()
+         if self.appear(REWARD_GOTO_BATTLE_PASS, offset=(50, 150)):
+             # Load button offset from REWARD_GOTO_BATTLE_PASS,
+             # because entrance may not be the top one.
+@@ -117,8 +120,15 @@ class BattlePass(Combat, UI):
+         return received
+ 
+     def run(self):
+-        self.ui_ensure(page_reward)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_battle_pass()
++        try:
++            self.ui_ensure(page_reward)
+ 
+-        if self.battle_pass_red_dot_appear():
+-            self.battle_pass_enter()
+-            self.battle_pass_receive()
++            if self.battle_pass_red_dot_appear():
++                self.battle_pass_enter()
++                self.battle_pass_receive()
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_battle_pass()
+diff --git a/module/freebies/data_key.py b/module/freebies/data_key.py
+index 1bb637ae..9519cb47 100644
+--- a/module/freebies/data_key.py
++++ b/module/freebies/data_key.py
+@@ -73,9 +73,18 @@ class DataKey(UI):
+             in: page_any
+             out: page_main
+         """
+-        self.ui_ensure(page_archives)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_data_key(
++                force_collect=self.config.DataKey_ForceCollect
++            )
++        try:
++            self.ui_ensure(page_archives)
+ 
+-        self.data_key_collect()
++            self.data_key_collect()
+ 
+-        # clear interval of pages, for faster switching on the next ui_goto()
+-        self.interval_clear([page_archives.check_button, page_campaign_menu.check_button])
++            # clear interval of pages, for faster switching on the next ui_goto()
++            self.interval_clear([page_archives.check_button, page_campaign_menu.check_button])
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_data_key()
+diff --git a/module/freebies/supply_pack.py b/module/freebies/supply_pack.py
+index 66c082eb..b415e9bb 100644
+--- a/module/freebies/supply_pack.py
++++ b/module/freebies/supply_pack.py
+@@ -129,11 +136,16 @@ class SupplyPack_250814(SupplyPack):
+             out: page_supply_pack, supply pack tab
+         """
+         logger.info('Goto supply pack')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         for _ in self.loop():
+ 
+             if self.match_template_color(page_supply_pack.check_button, offset=(20, 20)):
+                 logger.info('At supply pack')
+                 break
+ 
++            elif semantic_adapter is not None and self.appear_then_click(
++                    page_shop.links[page_supply_pack], interval=3):
++                continue
++
+             elif self.appear_then_click(page_supply_pack.check_button, offset=(20, 20), interval=3):
+                 continue
+diff --git a/campaign/campaign_war_archives/campaign_base.py b/campaign/campaign_war_archives/campaign_base.py
+index 85e1b21b43287791bac0b973bb252008cd8ed95d..63ced28f9a701c68cefffa36d497f95d2fc9c83c 100644
+--- a/campaign/campaign_war_archives/campaign_base.py
++++ b/campaign/campaign_war_archives/campaign_base.py
+@@ -109,6 +109,25 @@ class CampaignBase(CampaignBase_):
+         to target archive's campaign stage map
+         """
+         # On first run regardless of current location
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            result = True
++            if self.first_run or not semantic_adapter.war_archives_campaign_visible():
++                result = self.ui_ensure(destination=page_archives)
++                semantic_adapter.open_war_archives_campaign(
++                    self.config.Campaign_Event,
++                    mode,
++                )
++
++            # Preserve the original first-run lifecycle.  Search, retries,
++            # stage selection and every later campaign decision remain owned
++            # by CampaignRun; only the screenshot/template/input boundary is
++            # replaced above.
++            if self.first_run:
++                self.first_run = False
++
++            return result
++
+         # even in target stage map, start from page_archives
+         # For subsequent runs when neither reward or
+         # stop_triggers occur, no need perform operations
+diff --git a/module/war_archives/war_archives.py b/module/war_archives/war_archives.py
+index 24d7b3262cf264970ae650e146b3d3b170404341..e66782bd1dd26cc81499f915684dd2a2ffb0d103 100644
+--- a/module/war_archives/war_archives.py
++++ b/module/war_archives/war_archives.py
+@@ -21,10 +21,22 @@ DATA_KEY_CAMPAIGN = OcrDataKey(OCR_DATA_KEY_CAMPAIGN, letter=(255, 247, 247), t
+ 
+ class CampaignWarArchives(CampaignRun, CampaignBase):
+     def triggered_stop_condition(self, oil_check=True):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         # Must be in archives campaign to OCR check
+-        if self.appear(WAR_ARCHIVES_CAMPAIGN_CHECK, offset=(20, 20)):
++        if semantic_adapter is not None:
++            in_archives = semantic_adapter.war_archives_campaign_visible()
++        else:
++            in_archives = self.appear(
++                WAR_ARCHIVES_CAMPAIGN_CHECK,
++                offset=(20, 20),
++            )
++        if in_archives:
+             # Check for 0 data keys left to use
+-            current, remain, total = DATA_KEY_CAMPAIGN.ocr(self.device.image)
++            if semantic_adapter is not None:
++                current, total = semantic_adapter.war_archives_data_key_count()
++                remain = total - current
++            else:
++                current, remain, total = DATA_KEY_CAMPAIGN.ocr(self.device.image)
+             logger.info(f'Inventory: {current} / {total}, Remain: {current}')
+             if remain == total:
+                 logger.hr('Triggered out of data keys')
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+index 32316210..7b20b3c7 100644
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -175,15 +175,26 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                 ):
+                     logger.info('Semantic pre-sortie: scan fleet preparation')
+                     if semantic_adapter.campaign_dock_full_visible():
+                         # Preserve ALAS's configured one-click-retire versus
+                         # enhancement state machine. The adapter maps only the
+                         # exact labelled non-premium entry choices; dock
+                         # expansion remains unavailable.
+                         self.handle_retirement()
+                         campaign_timer.reset()
+                         fleet_timer.reset()
+                         continue
+                     if semantic_adapter.campaign_sortie_committed():
++                        archive_receipt = (
++                            semantic_adapter
++                            .confirm_war_archives_entry_if_present()
++                        )
++                        if archive_receipt is not None:
++                            logger.info(
++                                'Semantic WarArchives entry confirmed: '
++                                f'{archive_receipt.semantic_id}, '
++                                f'generation={archive_receipt.generation}'
++                            )
++                            continue
+                         if self.is_in_auto_search_menu():
+                             if mode == 'hard':
+                                 receipt = (
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -485,7 +485,10 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+             semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+             if (
+                 semantic_adapter is not None
+-                and semantic_adapter.daily_execution_active()
++                and (
++                    semantic_adapter.daily_execution_active()
++                    or semantic_adapter.current_raid_result_active()
++                )
+                 and semantic_adapter.open().oracle.daily_battle_result_visible()
+             ):
+                 semantic_adapter.complete_daily_battle_result()
+diff --git a/module/config/argument/args.json b/module/config/argument/args.json
+--- a/module/config/argument/args.json
++++ b/module/config/argument/args.json
+@@ -3124,10 +3124,11 @@
+         "type": "select",
+         "value": "campaign_main",
+         "option": [
+-          "raid_20260212"
++          "raid_20260212",
++          "raid_20260827"
+         ],
+         "option_cn": [
+-          "raid_20260212"
++          "raid_20260827"
+         ],
+         "option_en": [
+           "raid_20260212"
+@@ -3139,7 +3140,8 @@
+           "raid_20260212"
+         ],
+         "option_bold": [
+-          "raid_20260212"
++          "raid_20260212",
++          "raid_20260827"
+         ]
+       },
+       "Mode": {
+@@ -6454,10 +6456,11 @@
+         "type": "select",
+         "value": "campaign_main",
+         "option": [
+-          "raid_20260212"
++          "raid_20260212",
++          "raid_20260827"
+         ],
+         "option_cn": [
+-          "raid_20260212"
++          "raid_20260827"
+         ],
+         "option_en": [
+           "raid_20260212"
+@@ -6469,7 +6472,8 @@
+           "raid_20260212"
+         ],
+         "option_bold": [
+-          "raid_20260212"
++          "raid_20260212",
++          "raid_20260827"
+         ]
+       },
+       "Mode": {
+diff --git a/module/raid/daily.py b/module/raid/daily.py
+--- a/module/raid/daily.py
++++ b/module/raid/daily.py
+@@ -50,7 +50,7 @@ class RaidDaily(RaidRun):
+         STAGE_FILTER.load(raid_daily_stage_filter)
+         stages = STAGE_FILTER.apply(stages)
+ 
+-        self.ui_ensure(page_raid)
++        self._ensure_raid_page(name)
+ 
+         for stage in stages:
+             mode = stage.name
+@@ -73,7 +73,7 @@ class RaidDaily(RaidRun):
+             Reward(self.config, self.device).reward_mission(
+                    daily=reward_config.collect_mission,
+                    weekly=False)
+-            self.ui_ensure(page_raid)
++            self._ensure_raid_page(name)
+ 
+             logger.hr('ex', level=1)
+             super().run(name=name, mode='ex', total=self.get_remain('ex'))
+diff --git a/module/raid/raid.py b/module/raid/raid.py
+--- a/module/raid/raid.py
++++ b/module/raid/raid.py
+@@ -312,13 +312,142 @@ class Raid(MapOperation, RaidCombat, CampaignEvent):
+             in: page_raid
+             out: BATTLE_PREPARATION
+         """
+-        entrance = raid_entrance(raid=raid, mode=mode)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        semantic_current_raid = bool(
++            semantic_adapter is not None and raid == 'raid_20260827'
++        )
++        semantic_use_ticket = (
++            validate_alas_raid_use_ticket(self.config.Raid_UseTicket)
++            if semantic_current_raid else False
++        )
++        entrance = (
++            None if semantic_current_raid
++            else raid_entrance(raid=raid, mode=mode)
++        )
++        transition_timeout = Timer(30, count=60).start()
++        semantic_phase = 'raid-page'
++        semantic_notice_acknowledged = False
++        semantic_notice_reentry_used = False
+         while 1:
+             if skip_first_screenshot:
+                 skip_first_screenshot = False
+             else:
+                 self.device.screenshot()
+ 
++            if semantic_current_raid:
++                if semantic_phase == 'battle-loading':
++                    if semantic_adapter.combat_is_loading():
++                        break
++                elif semantic_phase == 'raid-page':
++                    if semantic_adapter.raid_page_visible(event=raid):
++                        # Keep the original ALAS stop decision immediately
++                        # before selecting a difficulty.
++                        if self.triggered_stop_condition(pt_check=True):
++                            self.config.task_stop()
++                        semantic_adapter.click_raid_stage(
++                            event=raid, mode=mode
++                        )
++                        semantic_phase = 'fleet-selection'
++                        transition_timeout.reset()
++                        continue
++                elif semantic_phase in ('fleet-selection', 'fleet-recommend'):
++                    if semantic_adapter.raid_fleet_selection_visible(event=raid):
++                        if not semantic_adapter.raid_fleet_ready(event=raid):
++                            if semantic_phase == 'fleet-selection':
++                                semantic_adapter.click_raid_fleet_recommend(
++                                    event=raid
++                                )
++                                semantic_phase = 'fleet-recommend'
++                                transition_timeout.reset()
++                                continue
++                        else:
++                            semantic_adapter.click_raid_fleet_start(event=raid)
++                            semantic_phase = 'precombat'
++                            transition_timeout.reset()
++                            continue
++                elif semantic_phase == 'multiple-sortie':
++                    if semantic_adapter.raid_multiple_sortie_visible(event=raid):
++                        multiple_state = semantic_adapter.raid_multiple_sortie_state(
++                            event=raid
++                        )
++                        if multiple_state.ticket_owned > 0:
++                            semantic_adapter.click_raid_multiple_sortie_back(
++                                event=raid
++                            )
++                            raise ScriptError(
++                                'Current Raid positive ticket selection is not '
++                                'semantically mapped; panel close was dispatched; '
++                                're-enter with Raid.UseTicket=false'
++                            )
++                        if not (
++                            multiple_state.sortie_count == 1
++                            and multiple_state.ticket_selected == 0
++                            and multiple_state.zero_ticket_disabled
++                        ):
++                            raise ScriptError(
++                                'Current Raid zero-ticket multiple-sortie state '
++                                'is inconsistent'
++                            )
++                        semantic_adapter.click_raid_multiple_sortie_back(event=raid)
++                        semantic_phase = 'multiple-sortie-closed'
++                        transition_timeout.reset()
++                        continue
++                elif semantic_phase in (
++                    'precombat',
++                    'precombat-notice-dismissed',
++                    'multiple-sortie-closed',
++                ):
++                    notice_visible = semantic_adapter.raid_precombat_notice_visible(
++                        event=raid
++                    )
++                    if notice_visible:
++                        if semantic_phase == 'precombat':
++                            if semantic_notice_acknowledged:
++                                raise ScriptError('Current Raid notice reappeared')
++                            semantic_adapter.click_raid_precombat_notice(event=raid)
++                            semantic_notice_acknowledged = True
++                            semantic_phase = 'precombat-notice-dismissed'
++                            transition_timeout.reset()
++                            continue
++                    elif semantic_adapter.raid_precombat_visible(event=raid):
++                        if (
++                            semantic_use_ticket
++                            and semantic_phase != 'multiple-sortie-closed'
++                        ):
++                            if not semantic_adapter.raid_precombat_multiple_visible(
++                                event=raid
++                            ):
++                                raise ScriptError(
++                                    'Current Raid multiple-sortie entry is unavailable'
++                                )
++                            semantic_adapter.click_raid_precombat_multiple(event=raid)
++                            semantic_phase = 'multiple-sortie'
++                        else:
++                            semantic_adapter.click_raid_precombat_start(event=raid)
++                            semantic_phase = 'battle-loading'
++                        transition_timeout.reset()
++                        continue
++                    elif (
++                        semantic_phase == 'precombat-notice-dismissed'
++                        and semantic_adapter.raid_page_visible(event=raid)
++                    ):
++                        if semantic_notice_reentry_used:
++                            raise ScriptError('Current Raid notice re-entry repeated')
++                        semantic_notice_reentry_used = True
++                        semantic_phase = 'raid-page'
++                        transition_timeout.reset()
++                        continue
++
++                # Every semantic input above is single-dispatch.  A stalled
++                # transition is diagnosed without clicking the same control
++                # again; re-entry starts from the exact Raid page.
++                if transition_timeout.reached():
++                    raise ScriptError(
++                        'Current Raid semantic entry did not reach battle '
++                        'loading; return to the exact Raid page and retry'
++                    )
++                continue
++
+             if self.appear(entrance, offset=(10, 10), interval=5):
+                 # Items appear from right
+                 # Check PT when entrance appear
+diff --git a/module/raid/run.py b/module/raid/run.py
+--- a/module/raid/run.py
++++ b/module/raid/run.py
+@@ -6,7 +6,7 @@ from module.exception import ScriptEnd, ScriptError
+ from module.logger import logger
+ from module.raid.assets import RAID_REWARDS
+ from module.raid.raid import Raid, raid_ocr
+-from module.ui.page import page_campaign_menu, page_raid, page_rpg_stage
++from module.ui.page import page_campaign_menu, page_main, page_raid, page_rpg_stage
+ 
+ 
+ class RaidRun(Raid, CampaignEvent):
+@@ -27,6 +27,17 @@ class RaidRun(Raid, CampaignEvent):
+ 
+         return super().triggered_stop_condition(oil_check=oil_check, pt_check=pt_check, coin_check=coin_check)
+ 
++    def _ensure_raid_page(self, name):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if (
++            semantic_adapter is not None
++            and name == 'raid_20260827'
++        ):
++            if not semantic_adapter.raid_page_visible(event=name):
++                self.ui_ensure(page_main)
++                semantic_adapter.enter_raid_page(event=name)
++        self.ui_ensure(page_raid)
++
+     def get_remain(self, mode, skip_first_screenshot=True):
+         """
+         Args:
+@@ -85,7 +96,10 @@ class RaidRun(Raid, CampaignEvent):
+         name = name if name else self.config.Campaign_Event
+         if not name or not mode:
+             raise ScriptError(f'RaidRun arguments unfilled. name={name}, mode={mode}')
+-
++        semantic_current_raid = bool(
++            getattr(self.device, 'semantic_adapter', None) is not None
++            and name == 'raid_20260827'
++        )
+         self.run_count = 0
+         self.run_limit = self.config.StopCondition_RunCount
+         while 1:
+@@ -104,7 +118,10 @@ class RaidRun(Raid, CampaignEvent):
+ 
+             # UI switches
+             if not self._raid_has_oil_icon:
+-                self.ui_ensure(page_campaign_menu)
++                if semantic_current_raid:
++                    self.ui_ensure(page_main)
++                else:
++                    self.ui_ensure(page_campaign_menu)
+                 if self.triggered_stop_condition(oil_check=True, coin_check=True):
+                     break
+ 
+@@ -112,7 +129,7 @@ class RaidRun(Raid, CampaignEvent):
+             self.device.stuck_record_clear()
+             self.device.click_record_clear()
+             if not self.is_raid_rpg():
+-                self.ui_ensure(page_raid)
++                self._ensure_raid_page(name)
+             else:
+                 self.ui_ensure(page_rpg_stage)
+                 self.raid_rpg_swipe()

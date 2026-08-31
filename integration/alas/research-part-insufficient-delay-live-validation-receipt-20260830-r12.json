@@ -1,0 +1,39 @@
+{
+  "schema": "alas-headless.research-resource-policy-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "template",
+  "seed_config_sha256": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+  "configured": {
+    "Research.PresetFilter": "custom",
+    "Research.CustomFilter": "S9-Q",
+    "Research.AllowDelay": true,
+    "Research.UseCoin": "do_not_use",
+    "Research.UseCube": "do_not_use",
+    "Research.UsePart": "always_use"
+  },
+  "target_resource": "part",
+  "strategy": "always_use",
+  "expect": "insufficient_delay",
+  "source_sha256": {
+    "research": "c75e6c57308507bb912d2d7de1ded0bf39e825f03dbff7ab9eacc103c64e6077",
+    "selector": "a4c6da69e72f8e4d43c5f7769fad75d8e266faeedefc7a5684d1cd5e7a31edc2",
+    "adapter": "b9213dcfdb6534419668480ae9d879fcc1c2fab1d924724a8a942e631b34de9f",
+    "oracle": "411f3136cea6fa04e7667ab162c738cbc74e4697f86604cff1df9bc45bea43c0",
+    "runner": "94d658e60489d008cf87acaf14032e8520d69b9699af6fa18c9238a708a302b2"
+  },
+  "passed": false,
+  "dispatches": [],
+  "reward_dispatches": [],
+  "research_detail_observations": [],
+  "delay_checks": [],
+  "network_recoveries": [],
+  "research_start_grant": 0,
+  "research_reward_grant": 1,
+  "error": "SemanticGateClosed: network reconnect confirmation did not clear its exact popup",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_research_resource_policy_live_validation.py\", line 342, in validate\n    recover_exact_network_popup()\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_research_resource_policy_live_validation.py\", line 336, in recover_exact_network_popup\n    raise SemanticGateClosed(\nalas_headless.semantic_oracle.SemanticGateClosed: network reconnect confirmation did not clear its exact popup\n",
+  "research_start_grant_remaining": 0,
+  "research_reward_grant_remaining": 1,
+  "temporary_config_removed": true
+}

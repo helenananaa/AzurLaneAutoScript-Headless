@@ -1,0 +1,98 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-30T01:50:42.584044Z",
+  "finished_at": "2026-08-30T01:51:54.640923Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "task": "RaidDaily",
+  "mode": "easy",
+  "daily_battle_count": 2,
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 5252,
+    "generation": 36556,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 30,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "game_version": "9.7.10",
+    "resource_hot_version": "9.7.343"
+  },
+  "login_recovered": false,
+  "ui_recovered": true,
+  "ui_recovery_steps": [
+    "precombat_back",
+    "fleet_back"
+  ],
+  "before": {
+    "remaining": 12,
+    "points": 872,
+    "sortie_grant": 2
+  },
+  "after": {},
+  "stage_receipts": [
+    {
+      "semantic_id": "raid/stage/easy",
+      "generation": 37017,
+      "point": {
+        "x": 1024.067,
+        "y": 561.933
+      },
+      "bounds": {
+        "left": 900.067,
+        "top": 527.933,
+        "right": 1148.067,
+        "bottom": 595.933
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/1",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "recommend_receipts": [],
+  "fleet_receipts": [
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 37031,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "notice_receipts": [],
+  "sortie_receipts": [
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 37047,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "9be5edfad505e5b733d51118350141149778f4de6be12748f2fdce81e90ff9c8",
+      "capability_id": "campaign.sortie"
+    }
+  ],
+  "error": "SystemExit: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 71, in run\n    self.__getattribute__(command)()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 269, in raid_daily\n    RaidDaily(config=self.config, device=self.device).run()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\daily.py\", line 62, in run\n    super().run(name=name, mode=mode, total=1)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\run.py\", line 154, in run\n    self.raid_execute_once(mode=mode, raid=name)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\raid.py\", line 451, in raid_execute_once\n    self.combat(balance_hp=False, expected_end=self.raid_expected_end)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\combat\\combat.py\", line 816, in combat\n    self.combat_execute(\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\combat\\combat.py\", line 446, in combat_execute\n    if self.handle_mission_popup_ack():\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\handler\\info_handler.py\", line 318, in handle_mission_popup_ack\n    if self.appear(MISSION_POPUP_GO, offset=self._popup_offset) \\\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\base\\base.py\", line 255, in appear\n    appear = semantic_adapter.appear(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 15740, in appear\n    return self.open().appear(button)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 5829, in appear\n    result = self._appear_once(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 6701, in _appear_once\n    and self.oracle.battle_pass_page_visible()\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 16759, in battle_pass_page_visible\n    raise SemanticGateClosed(\"Battle Pass page snapshots are not coherent\")\nalas_headless.semantic_oracle.SemanticGateClosed: Battle Pass page snapshots are not coherent\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 320, in run\n    task_result = instance.run(command_name)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 135, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "raw_input_fallback_used": false
+}

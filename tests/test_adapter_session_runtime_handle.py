@@ -537,7 +537,10 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             bounds=Bounds(600, 320, 680, 400),
             path="Combat/Result/confirm",
         )
-        visibility = iter((True, True, False))
+        # The delayed click first checks the borrowed immutable ALAS frame,
+        # then independently re-proves the live result target before it may
+        # consume the one-use observation without input.
+        visibility = iter((True, True, False, False))
         click_result = mock.Mock(return_value=receipt)
         oracle = SimpleNamespace(
             daily_battle_result_visible=lambda: next(visibility),
@@ -1001,6 +1004,15 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         session.refresh_frame = mock.Mock(return_value=object())
 
         result = session.refresh_tactical_input_frame()
+
+        session.refresh_frame.assert_called_once_with(include_ui=False)
+        self.assertIs(result, session.refresh_frame.return_value)
+
+    def test_gems_farming_dock_input_frame_uses_state_without_ui_projection(self):
+        session = object.__new__(AlasSemanticSession)
+        session.refresh_frame = mock.Mock(return_value=object())
+
+        result = session.refresh_gems_farming_dock_input_frame()
 
         session.refresh_frame.assert_called_once_with(include_ui=False)
         self.assertIs(result, session.refresh_frame.return_value)

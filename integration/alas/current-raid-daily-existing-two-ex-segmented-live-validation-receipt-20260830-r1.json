@@ -1,0 +1,95 @@
+{
+  "schema": "alas-headless.current-raid-segmented-live-validation/v1",
+  "passed": true,
+  "qualification_scope": "RaidDaily StageFilter=ex consumed two pre-existing EX tickets across retained recovery segments and completed the original zero-ticket scheduling tail",
+  "continuity": {
+    "serial": "emulator-5580",
+    "package": "com.bilibili.azurlane",
+    "pid": 22053,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "game_version": "9.7.10",
+    "resource_hot_version": "9.7.343"
+  },
+  "before": {
+    "remaining": 2,
+    "points": 4828
+  },
+  "after": {
+    "raid_page": true,
+    "remaining": 0,
+    "points": 5452
+  },
+  "delta": {
+    "tickets_consumed": 2,
+    "points_gained": 624,
+    "points_per_battle": [
+      312,
+      312
+    ]
+  },
+  "battle_segments": [
+    {
+      "battle": 1,
+      "dispatch_receipt": "integration/alas/current-raid-daily-existing-two-ex-live-validation-receipt-20260830-r13.json",
+      "recovery_receipt": "integration/alas/current-raid-daily-existing-two-ex-live-validation-receipt-20260830-r14.json",
+      "before": {
+        "remaining": 2,
+        "points": 4828
+      },
+      "after_recovery": {
+        "remaining": 1,
+        "points": 5140
+      },
+      "typed_actions": {
+        "stage": 1,
+        "fleet": 1,
+        "sortie": 1,
+        "orphan_result": 5
+      }
+    },
+    {
+      "battle": 2,
+      "dispatch_receipt": "integration/alas/current-raid-daily-existing-two-ex-live-validation-receipt-20260830-r16.json",
+      "closure_receipt": "integration/alas/current-raid-daily-existing-two-ex-live-validation-receipt-20260830-r18.json",
+      "before": {
+        "remaining": 1,
+        "points": 5140
+      },
+      "after": {
+        "remaining": 0,
+        "points": 5452
+      },
+      "typed_actions": {
+        "stage": 1,
+        "fleet": 1,
+        "sortie": 1
+      }
+    }
+  ],
+  "final_task_close": {
+    "receipt": "integration/alas/current-raid-daily-existing-two-ex-live-validation-receipt-20260830-r18.json",
+    "passed": true,
+    "task_result": true,
+    "before_remaining": 0,
+    "after_remaining": 0,
+    "before_points": 5452,
+    "after_points": 5452,
+    "sortie_grant": 0,
+    "stage_receipts": 0,
+    "fleet_receipts": 0,
+    "sortie_receipts": 0
+  },
+  "retained_failed_segments": true,
+  "raw_input_fallback_used": false,
+  "source_receipt_sha256": {
+    "integration/alas/current-raid-daily-existing-two-ex-live-validation-receipt-20260830-r13.json": "3dcf9e6fbcc1b2bab9a6779b69210296e0e028db3f9252bd9da4cfc949770aa4",
+    "integration/alas/current-raid-daily-existing-two-ex-live-validation-receipt-20260830-r14.json": "cc8c8bb6e43aeb3978efe126146877145a266dcbb631814730b7a2c6f0b0a3c7",
+    "integration/alas/current-raid-daily-existing-two-ex-live-validation-receipt-20260830-r16.json": "127ec1ad872ea2374cdec97937d084d3c593e592fa1d23c6b829b4ea0698fbf7",
+    "integration/alas/current-raid-daily-existing-two-ex-live-validation-receipt-20260830-r18.json": "8d2ee80630871636b9faedaf70d4d61fe3d71724db33a42d94c270ca6adfb8f4"
+  },
+  "limitations": [
+    "This is an explicitly segmented recovery chain, not one uninterrupted RaidDaily invocation.",
+    "The two tickets were RaidDaily EX attempts; this does not qualify Raid.UseTicket=true positive multiple-sortie selection or commit.",
+    "Advanced challenge execution and actual cross-day scheduler wakeup remain outside this receipt."
+  ]
+}

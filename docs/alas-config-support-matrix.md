@@ -45,11 +45,11 @@ Headless 适配证据提交：`73433ccbac00be4c0fb367803d4affa7cb1ea599`
 | 完成度 | 数量 | 面板 |
 |---|---:|---|
 | ✅ 完整支持（`F`） | **9 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、OpsiHazard1Leveling、OpsiMeowfficerFarming、Restart、Reward |
-| 🟢 主路径已完成、全配置未完成（`L`） | **26 / 60** | Daily、Dorm、Event、Event2、EventA、EventB、EventC、EventD、Exercise、Gacha、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiExplore、OpsiObscure、OpsiShop、OpsiStronghold、OpsiVoucher、Research、ShopFrequent、ShopOnce、Tactical |
-| 🧪 仅离线完成（`O`） | **6 / 60** | Coalition、CoalitionSp、Hospital、PrivateQuarters、Raid、RaidDaily |
-| 🟡 部分完成（`P`） | **10 / 60** | Alas、AzurLaneUncensored、Daemon、EventGeneral、EventSp、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral |
-| 🧱 已到边界、尚未完成（`B`） | **8 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiMonthBoss、Shipyard、WarArchives |
-| 🔴 尚未完成（`M`） | **1 / 60** | GemsFarming |
+| 🟢 主路径已完成、全配置未完成（`L`） | **31 / 60** | Daily、Dorm、Event、Event2、EventA、EventB、EventC、EventD、EventSp、Exercise、Gacha、GemsFarming、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiExplore、OpsiObscure、OpsiShop、OpsiStronghold、OpsiVoucher、Raid、RaidDaily、Research、ShopFrequent、ShopOnce、Tactical、WarArchives |
+| 🧪 仅离线完成（`O`） | **4 / 60** | Coalition、CoalitionSp、Hospital、PrivateQuarters |
+| 🟡 部分完成（`P`） | **9 / 60** | Alas、AzurLaneUncensored、Daemon、EventGeneral、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral |
+| 🧱 已到边界、尚未完成（`B`） | **7 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiMonthBoss、Shipyard |
+| 🔴 尚未完成（`M`） | **0 / 60** | 暂无 |
 
 当前账本的已提交功能证据基线为 `73433cc`；2026-08-22 的月度 Boss 证据已纳入该提交，但 r61 资格收据本身仍为未通过，因此不会伪装成完整任务验收。矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线或仓库测试通过不会自动提升任何实机复核栏。
 
@@ -94,7 +94,7 @@ observation 状态。
 
 | 字段/路径 | 已完成层级 | 当前阻塞与为何不安全地继续 | 明确重新进入条件 |
 |---|---|---|---|
-| `Daemon.EnterMap` | 双值校验、禁用不探测地图、启用时 MAP/FLEET 原始分派回放 | 语义 `MAP_PREPARATION`/`FLEET_PREPARATION` 输入必须绑定已有 `begin_campaign_pre_sortie(stage)` 上下文、退出证明和 sortie 预算；Daemon 没有可信 stage identity，直接放开会绕过共享 campaign 门禁 | 有独立的、无 stage 歧义的 daemon 地图/编队观察，及进入、取消、恢复的可回放 postcondition；实机仅在隔离账户/明确输入预算下验证 |
+| `Daemon.EnterMap` | 双值校验、禁用不探测地图、启用时 MAP/FLEET 原始分派回放；实机已闭环同一 ALAS-owned `1-1` 手动 sortie→战前撤退，以及 `12-4` 双舰队校正→官方 auto-search→完整战斗/总奖励→主界面恢复 | cold-start 继承的准备层没有可信 stage/config 所有权链，仍不能授权；断线、稀有弹窗和长期跨场景循环未实机闭环 | 为冷继承准备层建立不歧义的 ALAS-owned 重入契约；补断线/稀有弹窗恢复及更长跨场景 soak |
 | `Campaign.Event`、`Campaign.Mode`、`Campaign.Name` | 原 `handle_stage_name()`、配置覆写和已适配的当前主路径 | 三字段横跨 16 个任务面板；`Name` 是动态输入，别名、活动目录、硬图回退、循环和任务内部覆写共同决定实际路由。通用白名单会错误拒绝原内部路径，宽松校验又无法 fail-closed | 按 Scheduler command 建立锁定的路由/别名清单，并为每类目录、模式、内部覆写和未知组合提供无输入回放与 typed 页面证据 |
 | `Emulator.Serial`、`ScreenshotMethod`、`ControlMethod` | 配置读取、严格值域与现有语义适配 | 三值在 `Device.__init__` 连接建立阶段即被消费，早于语义会话；继续需要改变连接、断线恢复与资源释放的所有权，不能以运行中的账户/设备试错 | 专用可丢弃设备上的连接、截图、控制、重连和清理生命周期契约；每种声明方式都有失败注入与无遗留证明 |
 | `EventStory.SkipBattle` | 故事入口观察；字段已确认是上游锁定但无消费者 | 固定上游无条件在剧情战斗时重启应用，`false` 没有原业务分支。自行添加继续战斗会重写 ALAS 状态机且需要战斗/结算观察 | 上游提供消费者，或单独批准并审阅的继续战斗状态机，加上多活动布局的战斗、结算和恢复夹具 |
@@ -146,7 +146,7 @@ observation 状态。
 
 语义模式新增两道动作前门禁：五张 typed 科研卡必须具有完整且唯一的槽位/Unity 身份，并且每张卡都能由固定上游 `ResearchProject` 解析；自定义过滤器中任何空 token、非法 token 或仅被上游宽松 `re.search` 部分匹配的 token 都会 fail-closed。回放 mutation budget 为 **0**，没有启动科研、重置、资源消费或 Android 输入。因此六个 Research 配置字段的 `offline` 维度提升为 `complete`，既有 observation/action/live 维度不因离线证据而提升，Research 面板仍保持 `L` 而不是 `F`。
 
-2026-08-18 的当前账号复验补齐了离开队列前的 typed 容量快照、五类部件名称到精确物品 ID 的确认映射，以及原 ALAS 已选位置与新鲜项目代码的双重校验；后者允许安全处理同一批次两张 `S9 C-153-MI`，但位置或代码任一变化仍会拒绝输入。受限运行启动两项金币科研（合计 8,000 金币）、一项魔方科研（3 魔方）、一项零件科研（鱼雷部件 T1×20）和一项无资源科研；Coin/Cube/Part 的三个 `do_not_use` 路径均没有消耗资源。最终源码绑定的 `AllowDelay=true` 回执覆盖无匹配、强制回退、重名卡选择、无资源启动及调度恢复，但当前资源充足，未触发“资源不足后等待”判定。五格队列已满，最早项目约在 2026-08-19 01:44 完成，因此 Research 保持 `L`，资源回执在最后一次位置接口变更后仍按阶段证据处理。
+2026-08-18 的当前账号复验补齐了离开队列前的 typed 容量快照、五类部件名称到精确物品 ID 的确认映射，以及原 ALAS 已选位置与新鲜项目代码的双重校验；后者允许安全处理同一批次两张 `S9 C-153-MI`，但位置或代码任一变化仍会拒绝输入。受限运行启动两项金币科研（合计 8,000 金币）、一项魔方科研（3 魔方）、一项零件科研（鱼雷部件 T1×20）和一项无资源科研；Coin/Cube/Part 的三个 `do_not_use` 路径均没有消耗资源。2026-08-30 的最终 typed 多资源回执进一步由原 ALAS 选择 `S9 Q-068-UL`，同时观察到物资 `1380/5000` 与防空炮部件 T3 `17033 29858/20`，并由原 `research_delay_check()` 返回等待；启动和领奖 mutation 均为零。`Research.AllowDelay` 因而达到五维完整，Research 面板仍因最终哈希下四策略全矩阵、26 预设、可用重置和跨轮闭环缺口保持 `L`。
 
 ### 1.5 本轮 Scheduler 六字段跨任务契约
 
@@ -200,7 +200,7 @@ observation 状态。
 
 `EventGeneral.PtLimit/TimeLimit` 与 `TaskBalancer.Enable/CoinLimit/TaskCall` 已在原 `CampaignEvent` 的 PT、时间、金币判断和任务切换方法入口统一校验。PT 支持非负整数及固定上游会归一化的中英文标点格式；时间只接受 2000..2100 的无时区 datetime；金币阈值有明确非负上限；目标任务严格为 Main/Main2/Main3。冻结时钟回放覆盖 PT 的 0/未达/等于、默认/未来/过期时间、非活动任务与 GemsFarming 主线豁免，以及金币 OCR 为 0、低于、等于、非 balancer 任务。
 
-回放还执行原活动任务禁用、GemsFarming 重置、TimeLimit 重置，以及三个目标任务严格的 `task_delay(5) -> task_call -> task_stop` 顺序；所有写入只落到内存桩。静态审计固定 campaign、coalition、raid、hospital 和 auto-search combat 的消费文件。当前缺口是页面特定的 typed PT/金币观察、服务器时间与本机 naive datetime 的实机相关性、任务切换后的恢复收据和防调度环证据；在取得这些条件前 observation/action/live 保持 missing，EventGeneral 面板仍为 P。
+回放还执行原活动任务禁用、GemsFarming 重置、TimeLimit 重置，以及三个目标任务严格的 `task_delay(5) -> task_call -> task_stop` 顺序；所有写入只落到内存桩。静态审计固定 campaign、coalition、raid、hospital 和 auto-search combat 的消费文件。`PtLimit` 已改为只读取完整活动页上的精确 active `xNNN` Unity 文本，格式错误、截断、重复、代际不一致及错误页面均 fail-closed。当前 CN 实机上，`17060/17060` 在零出击预算下触发原 ALAS 停刷，点数与油量均不变；`17060/17061` 放行恰好一局 D1，返回活动页后点数为 17180、油量由 11119 降至 10925，全程无 raw-input fallback。PtLimit 五维已完整；仍缺 TimeLimit 的服务器时间相关性、typed 金币实机观察、TaskBalancer 真实任务切换恢复和防调度环证据，因此 EventGeneral 面板仍为 P。
 
 ### 1.14 本轮 Campaign Clear Mode 共用开关契约
 
@@ -250,7 +250,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `SupplyPack.Collect` 现在只接受布尔值，并在原 Freebies 流程调用 BattlePass、DataKey 或 Mail 前 fail-closed；关闭时仍保留 Mail 和任务次日调度，开启时才进入原 SupplyPack 模块。`DayOfWeek` 只接受精确整数 0-6，继续使用 ALAS 原 Monday-zero `server_today >= target` 比较，文本数字、布尔值、浮点和越界值会在页面导航前拒绝。
 
-固定上游回放执行原 `Freebies.run()` 和 `SupplyPack.run()`，覆盖开关两值、七个目标星期、星期三前后边界及油量恰好 21000 的保护分支，共 14 个合法和 10 个非法配置案例。真实 `supply_pack_buy()` 从未调用，只记录原状态机是否会产生免费包候选；mutation budget 为 0，没有领取物品、页面输入或 Android 注入。因此两字段只提升 `offline`，当前页面无免费项的实机记录不能称为成功领取闭环。
+固定上游回放执行原 `Freebies.run()` 和 `SupplyPack.run()`，覆盖开关两值、七个目标星期、星期三前后边界及油量恰好 21000 的保护分支，共 14 个合法和 10 个非法配置案例。typed 运行时只接受名称为免费/每周且价格精确为 0/免费的唯一卡片，付费卡测试保持不可点击；购买确认仍 fail-closed。组合实机以油量 4477 到达礼包页、连续观察无免费卡、零购买成功结束并调度次日。该结果完成无免费卡安全分支，不等于真实免费礼包领取闭环。
 
 ### 1.21 本轮 Reward 五开关契约
 
@@ -268,7 +268,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 `DataKey.Collect` 和 `DataKey.ForceCollect` 现在只接受精确布尔值，并在原 `Freebies.run()` 开始处、BattlePass/DataKey/Mail/SupplyPack 任一子模块运行前 fail-closed。关闭 Collect 时仍保留 Mail 和次日调度；ForceCollect 只保留原容量已满时继续产生领取候选的语义。
 
-固定上游回放覆盖四种开关组合和 12 个非法单字段案例，并执行原 `DataKey.data_key_collect()` 的已领取、容量恰好已满且不强制、已满且强制、尚余一格四个边界。真实 `_data_key_collect()` 循环从未调用，mutation budget 为 0，没有领取档案密钥、处理上限弹窗、页面输入或 Android 注入。两字段只提升 `offline`；现有 300/300 实机观察不能外推为强制领取、领取收据、上限弹窗或库存变化闭环。
+固定上游回放覆盖四种开关组合和 12 个非法单字段案例，并执行原 `DataKey.data_key_collect()` 的已领取、容量恰好已满且不强制、已满且强制、尚余一格四个边界。实机已完成 300/300 + ForceCollect=false 的零领取安全分支，并从精确领取控件打开满仓零收益提示后用 typed cancel 关闭，计数保持 300/300。ForceCollect=true 只有在同一原任务上下文存在前序领取回执时才允许 typed confirm；本轮未实际确认浪费奖励，因此确认后的库存后置条件仍缺。
 
 ### 1.24 本轮 GameManager 重启开关契约与 EventStory 跳过记录
 
@@ -344,7 +344,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 单轮回放覆盖 EnterMap 的两个值和 OpsiDaemon 的四个组合。普通 Daemon 保持 MAP_PREPARATION 先于 FLEET_PREPARATION 的探测及各自早退，关闭时不触及这两个目标，但不篡改无关的伏击处理。OpsiDaemon 保持港口修复优先级、进入→修复→退出→interval reset 的顺序，以及无港口时才执行的最近目标探测。当前 OpsiDaemon 已把港口修理和最近目标移动改为默认零预算、一次性授权的 typed 动作：修理前复核港口页与舰队状态，移动前复核唯一目标身份、相对坐标、原半径限制和 stale frame；重复、并列、未知、截断及远距 EMP 目标均 fail-closed。
 
-`Daemon.EnterMap` 仍仅提升 `offline=complete`，真实地图进入 postcondition、长期循环、断线/弹窗恢复和停止条件未闭环。OpsiDaemon 实机已证明满血舰队进入港口后安全退出且资源不变，以及无雷达目标时保持等待；但受损舰真实确认、最近目标正向移动、远距 EMP、长期循环和异常恢复仍缺，因此两个面板均保持 P，不能称为长期值守完整支持。
+`Daemon.EnterMap` 现有四段受控实机证据：主界面 180 秒内完成 63 轮 typed-only `idle`，PID 不变、generation 持续前进且零输入；可逆路径由原 Daemon 从精确 `1-1` 地图详情推进到编队层再撤销且资源不变；手动正向路径在同一 ALAS-owned 上下文中核对 `Use2xBook=false` 和舰队 `(1,0,0)`，进入精确 map root 后战前 typed 撤退并恢复主界面，消耗 10 油；完整正向路径由原 Daemon 在 `12-4` 把舰队 `(1,2,1)` 校正为 `(1,2,0)`、证明 `mob/boss` 角色后交给游戏官方 auto-search，零 combat/viewport 动作等待 526.36 秒，经总奖励恢复主界面，精确消耗 317 油。cold-start 继承准备层、跨场景长期循环和断线/稀有弹窗恢复仍未闭环。OpsiDaemon 实机已证明满血舰队进入港口后安全退出且资源不变，以及无雷达目标时保持等待；但受损舰真实确认、最近目标正向移动、远距 EMP、长期循环和异常恢复仍缺，因此两个面板均保持 P，不能称为长期值守完整支持。
 
 ### 1.34 本轮 BattlePass 领取开关契约
 
@@ -352,7 +352,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 两值回放直接执行原 Freebies 分派：关闭时仅保留后续 Mail，开启时严格保持 BattlePass 在 Mail 之前；DataKey 与 SupplyPack 在夹具中关闭，最终 `task_delay(server_update=True)` 不变。所有子模块均为记录桩，mutation budget 为 0，没有真实战令导航、领奖或 Android 输入。
 
-该字段只提升 `offline=complete`。真实战令入口、红点、免费/付费奖励区分、无奖励路径、领取后库存/货币收据和异常恢复仍缺，因此 Freebies 面板保持 P。
+该字段已补齐 typed 战令入口、普通 claim-all、World Cruise 页面身份和返回主页路径。实机只点击普通 `btn_all`，关闭延迟奖励弹窗并证明领取提示消失；独立付费升级 `btn_pay` 从未点击。组合 Freebies 复跑也完成无奖励路径。付费轨道领取及更多赛季/账号形态仍缺，因此保持 `live/action=partial`，Freebies 面板仍为 P。
 
 ### 1.35 本轮 Optimization 三字段契约
 
@@ -404,26 +404,26 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 4 | Main | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 三实例 9 组、54 字段（合计 162 个面板字段实例）已证明除 Scheduler.Command 外结构和默认值完全等价；六个 StopCondition 字段共 60 个合法类与 45 个非法类在任何导航前统一严校。普通主线 1-1 至 16-4 共 64 图已在 Main/Main2/Main3 原始路由离线回放并在任何输入前 fail-closed；Main 已在真实 API 32 x86_64 AVD 上完成 normal 1-1 的手动地图闭环，以及 normal 12-4 的官方自律寻敌闭环。12-4 使用舰队 1/2、禁用潜艇，精确设置一队道中/二队 Boss，出击后由游戏官方承担全部地图和战斗，ALAS 的 combat/viewport 预算均为 0；官方 AutoBtn checked、总奖励页、RunCount 归零、Scheduler 关闭及无 raw fallback 均有实机证明，凭证见 integration/alas/main-12-4-auto-search-live-validation-receipt.json。反向的一队 Boss/二队道中走同一类型化路径并有确定性测试；12-4 之外的自动寻敌、舰队锁定、潜艇、其他舰队编号、困难/活动图未提升 |
 | 5 | Main2 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 已纳入三实例 9 组、54 字段共享等价类，除 Scheduler.Command 外无差异；六个 StopCondition 字段在导航前严校。已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main2 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、阵型策略、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main2-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升 |
 | 6 | Main3 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 已纳入三实例 9 组、54 字段共享等价类，除 Scheduler.Command 外无差异；六个 StopCondition 字段在导航前严校。已独立验证 Scheduler 命令、1-1 至 16-4 的 64 条 campaign_main/normal 路由及 RunCount 五类循环；Main3 已在真实 API 32 x86_64 AVD 上从关卡页单进程完成 normal 1-1 的入口、单舰队出击、普通战、Boss 战、胜利结算、RunCount 归零及调度关闭，且无 raw-input fallback，凭证见 integration/alas/main3-1-1-live-validation-receipt.json。自动寻敌、舰队锁定、潜艇、多舰队、困难/活动图仍未实机提升 |
-| 7 | GemsFarming | Scheduler, GemsFarming, EquipmentCode, Campaign, StopCondition, Fleet, Submarine, Emotion | M | 换旗舰/前排、常用舰选择、装备导入导出和换船后的强化衔接缺失；只有委托限制可复用 |
-| 8 | EventGeneral | EventGeneral, TaskBalancer | P | 五字段离线决策已完整；仍缺 typed PT/金币实机观察、时间相关性、真实任务切换恢复和防调度环证据 |
+| 7 | GemsFarming | Scheduler, GemsFarming, EquipmentCode, Campaign, StopCondition, Fleet, Submarine, Emotion | L | 六项专属设置及原 run 收尾/调度已离线回放；normal + ship 的 Fleet 索引、白皮航母/驱逐候选和旗舰/前排唯一确认已实机闭环并恢复原编队；normal + ship_equip 已按 pinned ALAS 的五项 equipment code 接入逐槽 typed 卸装/替换，特殊兵装保持随原舰；当前槽位舰卡不再误入 free 候选，Fleet 6 突击者的生产筛选返回两张真实空闲突击者，并完成现有 18100 +0、19000 +0 双槽 take_off -> replace -> take_on 及目标读回；同舰五槽卸装恢复、空 code 控制流、两类舰装不兼容 fail-closed 亦已覆盖；normal 1-1 已完成 Fleet 6 单舰队完整原任务闭环，凭证见 integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json；hard 11-4 的第一主力槽为 type 7 正航而不兼容 type 6 轻航突击者，正确返回无候选；改用兼容轻航的 hard 12-1 后，原 HardNotSatisfied -> hard_fleet_prepare 从三张空闲突击者中选择等级/心情最高的 Lv9 突击者并确认旗舰，随后原任务完成既有 Boss 进度、结算、RunCount 归零、Scheduler 关闭和章节页返回，全程无 raw fallback，组件凭证见 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r25.json 与 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r26.json；两张历史收据的顶层 passed=false 分别来自零出击替换探针与旧 runner 错把换船重复发生绑定到完整任务，底层 replacement/task completion 后置条件已分别通过且 runner 已修正；仍缺五槽跨舰兼容及 Lv32/emotion 自然触发分支，因此为 L 而非 F；enhanceable 仅为候选过滤而非换船后强化动作 |
+| 8 | EventGeneral | EventGeneral, TaskBalancer | P | PtLimit 已完成 typed PT 精确观察及已达/未达双向实机闭环：17060/17060 零出击停刷且油量不变，17060/17061 放行 D1 后点数增至 17180、油量 11119→10925。TimeLimit 也完成过期零出击禁用与未来时间放行一局 C1 的双向实机闭环。TaskBalancer 已完成 exact typed 金币观察；2026-08-26 末班 D3 在 23:59:35 完成，但 ALAS 的 task_switched() 从磁盘重载后由到期 Restart 抢先切走，因此真实金币阈值切换和防调度环仍未完成，保持 P。 |
 | 9 | Coalition | Scheduler, Campaign, Coalition, StopCondition, Emotion | O | 难度与单/多舰队已离线回放；共斗入口、战斗和结算未适配 |
 | 10 | Event | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 七活动入口共享 9 组 54 字段，Event/Event2 包装结构等价；活动目录、关卡名与模式现于语义导航前严校。当前 A1 默认路径闭环；其他关卡和全部共用地图配置仍按字段验收 |
 | 11 | Event2 | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 已证明与 Event 共享同一 9 组 54 字段、入口包装和前置门禁；Event2 已用 A1 自动寻敌完成独立原任务实机闭环，RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/event2-a1-auto-search-live-validation-receipt-20260823-r3.json。其他关卡和共用地图配置仍未完整覆盖 |
-| 12 | Raid | Scheduler, Raid, Campaign, StopCondition, Emotion | O | 难度和票券的声明值及票券确认最终按钮已离线回放；活动入口、次数和结算未适配 |
+| 12 | Raid | Scheduler, Raid, Campaign, StopCondition, Emotion | L | 当前 CN Raid 已由原 Raid 状态机完成 easy/normal/hard/ex 四模式独立单局实机闭环：typed 活动入口、五槽身份、剩余次数、PT、编队准备、普通与 EX 战前页、真实出击、战斗结算及返回均已接入；权威通过收据分别记录 easy 14→13/PT 30→60、normal 15→14/PT 60→130、hard 15→14/PT 130→250、ex 1→0/PT 250→562，均无 raw fallback。9.7.343 热更暴露的普通次数清零后计数隐藏、页面双端点代次错位、结果所有权换帧、领奖后任务页恢复和中断战果恢复已按当前 typed 结构局部补齐；共享运行时连续完成 normal 14→0/PT 2168→3148，并通过诚实保留失败段和孤立战果恢复的链路完成 hard 14→0/PT 3148→4828。原 Restart 任务随后以 -force-gfx-st 将 PID 5252→7648、typed 登录回主页且无新 forward，重启后 RaidDaily 再次零输入读取 easy/normal=0、PT=3148 并完成调度。Raid.UseTicket=true 现由原 Raid 状态机在精确 count=1、ticket=0/0 且禁用标记唯一时关闭多次出击面板并回退单次出击；该零票分支已通过 focused、patched-tree、login/frame-clock 和 pixel-boundary 离线验证，但因普通次数为零仍待端到端实机。正票选择、票券切换及最终提交继续局部拒绝；第五槽已有独立 typed 入口，但零票实机未暴露可审查的后续表面，进阶执行仍 unsupported，故为 L 而非 F |
 | 13 | Hospital | Scheduler, Hospital, StopCondition, Emotion | O | 推荐舰队开关已在医院入口与战斗准备入口离线回放并提前 fail-closed；医院页面、候选、推荐动作、战斗和结算观察/输入仍缺适配 |
-| 14 | WarArchives | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | B | 能观察入口/Data Key；48 个档案值的进入、消耗、地图和结算均未形成覆盖台账 |
+| 14 | WarArchives | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority | L | 常驻档案入口、分类、45 个当前 CN 客户端可识别档案卡、字母关卡、普通/困难切换、档案钥匙计数与精确 5-key 入场确认均已 typed 化。原 WarArchives 在冬冠 A1 完成 4 场普通战和 Boss、奖励结算并回到档案关卡页，钥匙 295→290，凭证见 integration/alas/war-archives-live-validation-receipt-20260826-r18.json。红染 A1 因原图脚本要求舰队前移到空格 C2，仍在现有敌人/拾取格输入边界局部拒绝；war_archives_20230525_cn、war_archives_20230803_cn、war_archives_20240725_cn 在当前固定 CN 游戏表中不存在并按任务局部不可用，其余档案仅有共享路径离线覆盖，尚未逐档案实机闭环 |
 | 15 | CoalitionSp | Scheduler, Campaign, Coalition, StopCondition, Emotion | O | SP 强制多舰队和共享配置已离线回放；SP 状态机、战斗和结算未适配 |
 | 16 | EventA | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | A-D 共享 9 组 54 字段并各加 2 个 EventDaily 字段；入口门禁早于目录枚举，既有 StageFilter/LastStage 跨日顺序不变。当前仅 A1-A3 默认路径有实机闭环，其余分区和共用地图配置仍未完整覆盖 |
-| 17 | EventB | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；EventB 已用 B1 自动寻敌完成原任务实机闭环，LastStage 写回 b1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventb-b1-auto-search-live-validation-receipt-20260823-r2.json。普通 `GET_SHIP` 可继续，首次获得 `NEW_SHIP` 仍未适配，B2/B3 未验证 |
-| 18 | EventC | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；EventC 已通过原 normal 入口选择共享 C1 困难脚本并完成自动寻敌实机闭环，LastStage 写回 c1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventc-c1-auto-search-live-validation-receipt-20260823-r14.json。C2/C3 未验证 |
-| 19 | EventD | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；EventD 已通过原 normal 入口选择共享 D1 困难脚本并完成自动寻敌实机闭环，LastStage 写回 d1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventd-d1-auto-search-live-validation-receipt-20260823.json。D2/D3 未验证 |
-| 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | P | 共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；实机已证明初始 (1,2,0) 舰队配置可零变更保留、自动寻敌职责与语义出击，且今日次数变为 0/1 并返回活动页。但控制器未在进程内捕获完整地图/战斗/结算收据，边界凭证见 integration/alas/eventsp-sp-auto-search-live-boundary-20260823.json；仍保持 P，不升级为主路径闭环 |
-| 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | O | 难度过滤的 64 个无重复排列及 EX 奖励路由已离线回放；每日次数、战斗和领奖未适配 |
+| 17 | EventB | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；EventB 的 B1 已有既有实机闭环，B2、B3 又在 2026-08-26 当前活动与游戏版本上分别通过原 normal 入口完成官方自动寻敌闭环，LastStage 分别写回 b2、b3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventb-b2-auto-search-live-validation-receipt-20260826-r3.json 和 integration/alas/eventb-b3-auto-search-live-validation-receipt-20260826-r2.json。普通 `GET_SHIP` 可继续，首次获得 `NEW_SHIP` 及非默认共用地图配置仍未完整覆盖，因此保持 L |
+| 18 | EventC | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；EventC 的 C1-C3 均已通过原 normal 入口完成官方自动寻敌实机闭环，LastStage 分别写回 c1/c2/c3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventc-c1-auto-search-live-validation-receipt-20260823-r14.json、integration/alas/eventc-c2-auto-search-live-validation-receipt-20260826-r1.json 和 integration/alas/eventc-c3-auto-search-live-validation-receipt-20260826-r1.json。首次获得 NEW_SHIP、非默认舰队组合和共用地图配置仍未完整覆盖，因此保持 L |
+| 19 | EventD | Scheduler, EventDaily, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；EventD 的 D1-D3 均已在 2026-08-26 当前活动与游戏版本上通过原 normal 入口完成官方自动寻敌实机闭环，LastStage 分别写回 d1/d2/d3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventd-d1-auto-search-live-validation-receipt-20260826-r7.json、integration/alas/eventd-d2-auto-search-live-validation-receipt-20260826-r1.json 和 integration/alas/eventd-d3-auto-search-live-validation-receipt-20260826-r1.json。首次获得 NEW_SHIP、非默认舰队组合和共用地图配置仍未完整覆盖，因此保持 L |
+| 20 | EventSp | Scheduler, Campaign, StopCondition, Fleet, Submarine, Emotion, HpControl, EnemyPriority, Storage | L | 共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；原 EventSp 任务已在固定 API 32 x86_64 AVD 上从主页完成活动入口、SP 选择、100% clear 与官方自动寻敌确认、(1,2,0) 舰队零变更出击、315 秒被动地图/战斗、Boss 总奖励退出、返回活动页及 1/1→0/1 次数后置。RunCount 1→0 并写入次日 00:00 调度；同一 supervised runner 捕获全部 generation/receipt，recovery、combat/grid/viewport 输入和 raw fallback 均为 0。凭证见 integration/alas/eventsp-sp-auto-search-live-validation-receipt-20260825-r11.json。其他舰队组合、非默认共用地图配置及新的活动布局仍按字段保持部分支持，因此为 L 而非 F |
+| 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | L | 难度过滤与 EX 奖励路由已离线回放，当前活动仍保留上游 RaidDaily 的 RunCount=0 原语义，不传播伪单战上限。9.7.343 上原任务已证明 EX=0 与 easy=0 的零输入次日调度；StageFilter='easy > normal' 在 easy=0 时安全跳过并由同一任务实例连续完成 normal 14→0、PT 2168→3148，恰好 14 组关卡/舰队/出击收据且无 raw fallback。15 次普通清理后的领奖产生 3 张 EX 票；诚实保留的 r1/r3 失败收据与最终 r4 通过收据合起来证明一次任务页失败、一次中断战果恢复和剩余两票连续清空，而不冒充单次不间断通过。随后 hard 14→0、PT 3148→4828 的十四战也通过 r3/r5 失败收据、r4 孤立战果恢复与 r6 最终四战通过收据形成可审计的分段全清；新增 current-Raid 结果所有权避免原通用 BATTLE_STATUS_S 输入接管 typed 结果。本轮又以可审计分段链消费账号现有两张 EX 票，EX 2→1→0、PT 4828→5140→5452；精确 NetworkDown 恢复覆盖 combat_execute、结果结束和返回主界面，最终零预算任务闭合为 task_result=true 且无 raw fallback。更新后原 Restart 任务已完成 -force-gfx-st PID turnover 与 typed 登录，紧随其后的 RaidDaily 在新 PID 上零输入确认 easy/normal=0、PT=3148 并再次调度。Raid.UseTicket=true 的严格零票单次回退已离线验证但仍待次数重置后的端到端实机；实际跨日唤醒、正票最终提交、进阶挑战执行和 easy 完整整轮仍未资格化，因此为 L |
 | 22 | Commission | Scheduler, Commission | F | 六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环 |
 | 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 新学员、选书过滤与经验溢出均已实机闭环；快速学习因当前非活动期仍未闭环 |
-| 24 | Research | Scheduler, Research | L | 三资源 always/do_not、队列容量、部件映射和重名卡已实机；最终哈希全策略、资源不足延迟、重置、26 预设及跨轮仍未闭环 |
+| 24 | Research | Scheduler, Research | L | 三资源 always/do_not、队列容量、部件映射、重名卡和真实物资不足延迟已实机；最终哈希全策略、重置、26 预设及跨轮仍未闭环 |
 | 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取、喂食与食物过滤均已完整闭环；BuyFurniture 已完成活动主题 set 实买、家具币扣款、LastRun、调度与主页恢复，all 原生路径已实现但因 set 后活动候选从当前账号消失，尚缺另一未购买活动主题的最终实买回执 |
-| 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | B | 已用 typed 状态完成购买次数已满无操作、训练 10/10 已满无资源变化的原 ALAS 实机闭环；训练领取与排队控件已完成一次受控实机侦察。正向购买、自动领取/排队、指挥喵宿舍、增强与紫/金天赋保留全分支仍未闭环 |
+| 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | B | 原 Meowfficer 状态机现已接入完整 typed 边界：购买精确数量与金币后置条件、Fort 已入住猫的 play/feed/clean chores、相同卡面的连续领取、特殊紫/金天赋锁定、seamlessly/周日增强，以及按 EnhanceIndex 与 MaxFeedLevel 选择目标和最多 10 只材料。实机证据覆盖购买次数已满零输入、Fort 0/8 安全跳过、训练 10/10 已满零资源变化、once_a_day 领取 1 只普通 SSR 后补排金箱，以及当前数字卡片层级下 EnhanceIndex=1 命中 LV30 后零输入返回 leveled_max；当前可见前 12 个 ALAS 目标均为 LV30，需出现可见非满级目标和合格材料后才能复核强化正向消耗。正向购买、已入住 Fort、特殊天赋、多只领取和完整强化消耗仍只离线闭环，因此面板保持 B |
 | 27 | Guild | Scheduler, GuildLogistics, GuildOperation | L | 普通成员实机主路径已闭环：大厅 20/20 报告全领、后勤补给领取与 3 次按过滤器兑换、7-1 推荐编队并派遣；新任务选择、加入阈值、新行动创建、Boss 攻击与 Boss 推荐仍待对应角色和页面状态验证 |
 | 28 | Reward | Scheduler, Reward | F | 五个 Reward 领取开关均已在原始 ALAS 流程中完成开启与关闭的实机闭环 |
 | 29 | Awaken | Scheduler, Awaken | F | 原始 Awaken 任务已实机覆盖收藏开关、阵列优先与芯片回退、精确候选过滤、资源充足门、单次授权、完成弹窗、实际等级与上限分离、无候选退出及恢复主页。 |
@@ -434,7 +434,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | L | 军需、舰队、核心月度、勋章四页已由原 ShopOnce 实机贯通；勋章 DR 单件购买与舰队商店一次刷新均以精确余额和库存后置条件闭环，二级品类选择及非当前过滤分支未逐值 |
 | 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝 |
 | 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，UseDrill 两值均已完成原任务闭环；票券、祈愿池、其余卡池和数量仍未闭环 |
-| 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环 |
+| 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | 原 Freebies 已再次组合实机成功：BattlePass 无待领奖、DataKey 已领取、SupplyPack 油量 4477 且无免费卡时零购买并调度次日。BattlePass 普通 claim-all 已单独实机领取且未触碰付费升级；DataKey 300/300 的安全跳过、取消和 ForceCollect=true 精确确认均已执行，独立后置复跑证明 state_after、计数不变及零重复动作。强制分支因日状态不可逆尚缺单一不间断通过收据；自然免费礼包确认/领奖仍待样本 |
 | 38 | Minigame | Scheduler | F | 固定源代码仅声明抚顺挑战；无用户字段，单票实机任务已完整进入、结算、退出、预算耗尽停止并返回主界面 |
 | 39 | PrivateQuarters | Scheduler, PrivateQuarters | O | 四项设置有固定上游的严格门禁和原方法离线回放；页面、货币、互动与输入闭环仍缺 |
 | 40 | OpsiGeneral | OpsiGeneral | P | 六字段继续保持离线等价；BuyActionPointLimit/OilLimit 已读取当前渐进式原生条款并以一次性预算证明行动力 240→340、石油 16077→15077、周次数 4→3，默认零预算复跑不再变化。满血无修、Akashi 出现、非空 Logger、随机事件全结果与异常恢复仍未闭环 |
@@ -452,7 +452,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 52 | OpsiMeowfficerFarming | Scheduler, OpsiMeowfficerFarming, OpsiFleet | F | HazardLevel 五值、Fleet 四值、Submarine 两值、行动力保留与自由选区已离线等价；原任务实机完成显式 zone 22、Fleet 2、Submarine=false、自动搜索战斗和战后处理，并以独立有界原任务周期完成 Fleet 3、Submarine=true 的精确命令、确认、动画结束及四项相关任务冷却写入。 |
 | 53 | OpsiHazard1Leveling | Scheduler, OpsiHazard1Leveling, OpsiFleet | F | TargetZone 三值与 Fleet 四值已离线等价；原任务实机完成 zone 44 到 zone 22 的精确选区、Fleet 2、行动力门槛、战略搜索配置、7 场真实战斗、自动搜索自然回 OFF、无残余问号、战后 HP/大修检查及有界任务结束。Submarine 为共享 OpsiFleet 字段且该上游任务不消费，true 的原始导航命令另由 Meowfficer 完整实机闭环。 |
 | 54 | OpsiCrossMonth | Scheduler | B | 非月末安全跳过；月末执行、重置和跨月恢复未验证 |
-| 55 | Daemon | Daemon | P | EnterMap 双值与单轮地图/编队分派已离线等价；真实进入 postcondition、长期值守和稀有恢复仍未闭环 |
+| 55 | Daemon | Daemon | P | EnterMap 双值与单轮分派已离线等价；主界面完成 180 秒/63 轮 typed idle soak；实机闭环 1-1 手动 sortie 到战前撤退，以及 12-4 双舰队校正、官方 auto-search、完整战斗、总奖励和主界面恢复。冷启动继承准备层、跨场景长期值守和稀有恢复仍未闭环 |
 | 56 | OpsiDaemon | OpsiDaemon | P | 修船/选敌四组合保持原优先级；新增默认零预算、一次性 typed 修理/移动能力，实机证明满血港口无修理及无目标等待均不改资源。受损舰确认、最近目标正向移动、远距 EMP 与长期恢复仍未闭环 |
 | 57 | EventStory | EventStory | P | `SkipBattle` 在固定上游锁为 true 且无运行时消费者；false 需要新的剧情战斗状态机和多活动观察，当前仅一条入口路径，战斗转场及其他故事结构未闭环 |
 | 58 | Benchmark | Benchmark | F | 五种 DeviceType 与三种 TestScene 已逐组实机执行；每组保留原 15 次计时、确认回到主页并清理临时配置。DeviceType 在 Headless semantic 后端是已验证的配置来源，不宣称旧云/VMOS 传输。 |
@@ -487,14 +487,14 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Emotion | `Mode`=`calculate/ignore/calculate_ignore`; `Fleet1Value`; `Fleet1Record`; `Fleet1Control`; `Fleet1Recover`; `Fleet1Oath`; `Fleet2Value`; `Fleet2Record`; `Fleet2Control`; `Fleet2Recover`; `Fleet2Oath`; 两个 `Control` 均为 `keep_exp_bonus/prevent_green_face/prevent_yellow_face/prevent_red_face`，两个 `Recover` 均为 `not_in_dormitory/dormitory_floor_1/dormitory_floor_2` | P | 11 字段已完成原时间账本离线回放与中心 fail-closed；真实低心情等待、持久化调度、誓约/宿舍事实观察和跨任务恢复仍未扩证 |
 | HpControl | `UseHpBalance`; `UseEmergencyRepair`; `UseLowHpRetreat`; `HpBalanceThreshold`; `HpBalanceWeight`; `RepairUseSingleThreshold`; `RepairUseMultiThreshold`; `LowHpRetreatThreshold` | P | 八字段已离线分类并在出击前 fail-closed；三个启用态仍分别缺 typed 编队拖拽、紧急维修模板/输入和完整撤退循环，故动作与实机完整性不提升 |
 | EnemyPriority | `EnemyScaleBalanceWeight`=`default_mode/S3_enemy_first/S1_enemy_first` | P | 三值已完成原方法离线回放与导航前 fail-closed；相同地图夹具覆盖过滤覆盖、无敌人和同星级多目标，实机/动作维度未扩大 |
-| GemsFarming | `ChangeFlagship`=`ship/ship_equip`; `ChangeVanguard`=`disabled/ship/ship_equip`; `CommissionLimit`; `CommonCV`=`any/langley/bogue/ranger/hermes`; `CommonDD`=`any/favourite/aulick_or_foote/cassin_or_downes/z20_or_z21` | M | 每个候选舰/换装模式、收藏过滤、无候选舰、船坞满、委托占用和换船后继续刷图 |
+| GemsFarming | `ChangeFlagship`=`ship/ship_equip`; `ChangeVanguard`=`disabled/ship/ship_equip`; `CommissionLimit`; `CommonCV`=`any/langley/bogue/ranger/hermes`; `CommonDD`=`any/favourite/aulick_or_foote/cassin_or_downes/z20_or_z21`; `EquipmentCode.ExportToConfig` | L | 六项专属设置和原 `run` 分支已离线回放；normal 舰队 6 的 typed 候选、实际换船/双槽换装及 1-1 单进程原任务闭环已有实机凭证；hard 12-1 已完成突击者旗舰替换与原任务 Boss/结算/RunCount/调度闭环，11-4 的 type 7 正航槽不兼容 type 6 轻航突击者并正确返回无候选；无候选舰、船坞满、委托占用继续 fail-closed，五槽跨舰与 Lv32/emotion 自然触发换船分支仍待实机；`enhanceable` 只是候选过滤值，不存在独立的换船后强化动作 |
 | EquipmentCode | `Config`（DD 与四艘 CV 的装备代码）；`ExportToConfig` | M | 合法/缺失/错误装备代码、导出开关、装备不足、被占用装备和回滚；不得装备到错误舰船 |
 
 ### 3.3 活动专用配置
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| EventGeneral | `PtLimit`; `TimeLimit` | P | PT 与冻结时间边界、非活动任务和 GemsFarming 主线豁免已离线完成；typed 实机观察、服务器时间相关性和真实禁用恢复仍缺 |
+| EventGeneral | `PtLimit`; `TimeLimit` | P | PtLimit 已完成 exact typed PT、已达零出击停刷与未达单局放行实机闭环；TimeLimit 仍缺服务器时间相关性和真实禁用恢复 |
 | TaskBalancer | `Enable`; `CoinLimit`; `TaskCall`=`Main/Main2/Main3` | P | 开关、金币边界和三个目标任务切换顺序已离线完成；真实任务调用、失败恢复及防调度环仍缺 |
 | Coalition | `Mode`=`easy/normal/hard/sp`; `Fleet`=`single/multi` | M | 四难度、单/多舰队、次数/票券不足、战斗、结算和 SP 特殊入口 |
 | Raid | `Mode`=`easy/normal/hard/ex`; `UseTicket` | M | 四难度、票券真假、无票券、次数耗尽、推荐舰队和结算 |
@@ -510,11 +510,11 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | Tactical | `RapidTrainingSlot`=`do_not_use/slot_1/slot_2/slot_3/slot_4`; `TacticalFilter` | L | TacticalFilter 已通过原始任务的真实书库存排序、选书、开课确认和运行后置状态；仍需真实快速学习可用性/次数、无书/无空位及其他教学分支闭环 |
 | ControlExpOverflow | `Enable`; `T1Allow`; `T2Allow`; `T3Allow`; `T4Allow` | F | `5750/5800` 真实临界技能下完成关闭过滤、四档精确放行、T4 选书、唯一课程确认与运行后置状态；全部边界继续由离线回放覆盖 |
 | AddNewStudent | `Enable`; `Favorite`; `MinLevel` | F | Disabled 不变性、收藏/非收藏候选范围、120 级选舰、原始选书与唯一课程确认、运行中课程后置条件均已实机闭环 |
-| Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 三资源 always/do_not、重名卡、队列容量与真值回退已实机；仍缺当前最终哈希下四策略全矩阵、26 预设、真实资源不足延迟、可用重置和跨轮闭环 |
+| Research | `PresetFilter`（26 值）; `CustomFilter`; `AllowDelay`; `UseCoin`, `UseCube`, `UsePart`=`always_use/only_05_hour/only_no_project/do_not_use` | L | 三资源 always/do_not、重名卡、队列容量、真值回退与真实物资不足延迟已实机；仍缺当前最终哈希下四策略全矩阵、26 预设、可用重置和跨轮闭环 |
 | Dorm | `Collect`; `Feed`; `FeedFilter` | L | 三字段均已达到五维完整：真实收取控件由有变无、喂食库存差、关闭分支、单值过滤器与全部合法优先级均有证据；面板仍由 BuyFurniture all 的实买缺口限制 |
 | BuyFurniture | `Enable`; `BuyOption`=`set/all`; `LastRun` | P | set 活动主题实买、家具币精确扣款、LastRun、六舰调度、主页恢复和 post-set all 无候选均已闭环；all 最终实买等待另一未购买活动主题 |
 | Meowfficer | `BuyAmount`; `FortChoreMeowfficer`; `OverflowCoins` | B | 已精确读取 15/15 购买次数、707 物资、35/40 容量、0/8 宿舍及三类箱子；原购买任务在次数已满边界零输入并调度至次日。仍缺正向购买、金币溢出消费和宿舍任务动作 |
-| MeowfficerTrain | `Enable`; `Mode`=`seamlessly/once_a_day`; `RetainTalentedGold`; `RetainTalentedPurple`; `MaxFeedLevel`; `EnhanceIndex` | B | 原任务以 once_a_day 进入训练页、确认 4/4 训练中与 6/6 等待、仅关闭页面且资源不变；领取、自动排队的 typed 控件已有一次受控侦察，尚未接入正式事务，增强和天赋保留仍仅离线 |
+| MeowfficerTrain | `Enable`; `Mode`=`seamlessly/once_a_day`; `RetainTalentedGold`; `RetainTalentedPurple`; `MaxFeedLevel`; `EnhanceIndex` | B | 原 once_a_day 任务已实机领取一只普通 SSR、按原队列补排金箱并写回调度；seamlessly、连续同卡领取、特殊天赋锁定与强化消耗已接入 typed 正式事务。实机强化已证明当前数字卡片层级及 LV30 零输入分支，但可见前 12 个目标均满级，需非满级目标和合格材料后复核正向消耗。 |
 | GuildLogistics | `Enable`; `ExchangeFilter`; `SelectNewMission` | M | 开关、兑换规则、新任务选择、贡献不足、无奖励和重复领取 |
 | GuildOperation | `Enable`; `JoinThreshold`; `SelectNewOperation`; `NewOperationMaxDate`; `AttackBoss`; `BossFleetRecommend` | M | 阈值/日期边界、加入/选择、Boss 与非 Boss、推荐舰队开关、次数不足和奖励 |
 | Reward | `CollectOil`; `CollectCoin`; `CollectExp`; `CollectMission`; `CollectWeeklyMission` | F | 32 种开关组合、20 个非法单字段案例及 Reward/RaidDaily 双入口 fail-closed 已离线完成；五个开关均有原始 ALAS 的开启/关闭实机闭环 |
@@ -535,10 +535,10 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | ShipyardDr | `ResearchSeries`=2..5; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；数量边界、每日去重、蓝图不足、达到上限和实际购买仍需闭环 |
 | Shipyard | `ResearchSeries`=1..6; `ShipIndex`=0..6; `BuyAmount`; `LastRun` | B | 系列/舰位已离线等价；其余同上，且 PR/DR 页面切换不能串页 |
 | Gacha | `Amount`=1..10; `Pool`=`light/heavy/special/event/wishing_well`; `UseDrill`; `UseTicket` | L | 200 个配置组合已离线等价；`UseDrill` 两值已实机完整，仍缺其他卡池、多单、票券、队列满、资源不足和领取 |
-| BattlePass | `Collect` | B | 两值与 Freebies 分派已离线；真实入口、免费/付费奖励区别、无奖励和领取结果仍待闭环 |
-| DataKey | `Collect`; `ForceCollect` | L | 四组合、非法值和已领取/满容量/强制/有余量边界已离线完成；仍缺真实普通/强制领取、上限弹窗和库存后置条件 |
+| BattlePass | `Collect` | B | 两值与 Freebies 分派已离线；普通 claim-all 与无奖励路径已实机，付费轨道和更多赛季形态仍待闭环 |
+| DataKey | `Collect`; `ForceCollect` | L | 四组合与容量边界已离线；300/300 安全跳过和上限弹窗取消已实机，仍缺强制确认后的库存后置条件 |
 | Mail | `ClaimMerit`; `ClaimMaintenance`; `ClaimTradeLicense`; `DeleteCollected` | P | 16 组合、不同邮件类型、附件为空、容量上限、只删除已领取和误删保护 |
-| SupplyPack | `Collect`; `DayOfWeek`=0..6 | B | 开关、七天、日期比较和高油保护已离线覆盖；仍缺免费包已领/可领、跨日、真实领取收据和购买项误触保护实机证据 |
+| SupplyPack | `Collect`; `DayOfWeek`=0..6 | B | 开关、七天和高油保护已离线；typed 零价卡排除付费项、当前无免费卡零购买已实机，仍缺自然免费卡确认/领奖与跨日样本 |
 | PrivateQuarters | `BuyCake`; `BuyRoses`; `TargetInteract`; `TargetShip`=`anchorage/noshiro/sirius/new_jersey/taihou/aegir/nakhimov` | M | 三开关组合、7 舰船、目标未解锁、货币不足、互动次数和购买确认 |
 | Minigame | 无用户字段，仅 Scheduler | F | 上游固定任务仅声明 `new_year_challenge`；单票实机验证覆盖进入、开局、结算、退出、预算耗尽停止及主界面清理 |
 
@@ -568,7 +568,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 
 | 配置组 | 字段与取值 | 当前 | 完整支持必须满足 |
 |---|---|:---:|---|
-| Daemon | `EnterMap` | P | 两值及单轮分派已离线；主界面/地图内真实进入、恢复循环和未知弹窗仍待闭环 |
+| Daemon | `EnterMap` | P | 两值及单轮分派已离线；主界面 180 秒/63 轮零输入 soak、实机 1-1 手动 sortie→战前撤退及 12-4 双舰队校正→官方 auto-search→完整战斗/总奖励均已闭环；冷继承准备层、跨场景长期循环、断线和未知弹窗仍待闭环 |
 | OpsiDaemon | `RepairShip`; `SelectEnemy` | P | 四组合保持原修理优先级；已接入默认零预算、一次性 typed 修理/移动，实机证明满血港口无修及无目标等待不改状态；受损舰确认、最近目标正向移动、远距 EMP、长期循环和异常恢复仍待闭环 |
 | EventStory | `SkipBattle`（当前只允许 true） | P | 固定上游锁 true 且无字段消费者，实际始终重启跳过战斗；false 需上游/评审后的继续战斗状态机及多活动战斗、结算夹具，当前不外推完成 |
 | Benchmark | `DeviceType`=`emulator/plone_cloud_with_adb/phone_cloud_without_adb/android_phone/android_phone_vmos`; `TestScene`=`screenshot_click/screenshot/click` | F | 5 x 3 全矩阵已实机执行；逐组返回预期 observer/settings-round-trip 测量、回主页并清理临时配置。设备类型完成范围是 Headless semantic 配置绑定与验证，不宣称旧云/VMOS 传输 |
@@ -632,7 +632,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 文件 | SHA-256 | 用途 |
 |---|---|---|
 | `module/config/argument/task.yaml` | `19E6464AAA1E92913BA9F31DE590096A09B101638969C41E14C70DD1A4EB6C5A` | 60 个侧栏面板及其配置组 |
-| `module/config/argument/args.json` | `94A4E553E857E7E3BADA215E08B8963F46D287AC530F32A02B7DAF6B7533AD90` | 当前实际字段、类型、默认值、枚举和显示 override |
+| `module/config/argument/args.json` | `2CE9C2AF6F33C3340C27903E9BB76C7455FDC8D94052C823E4477DF0AAE93022` | 当前实际字段、类型、默认值、枚举和显示 override |
 | `config/template.json` | `2DE0A47643D9AD73417473F66BE75DADCC1A82E11D405E1F2421ADE3E31EACED` | 用户配置模板和运行时默认值 |
 
 注意：以上哈希来自固定上游 `81ccf63b` 加 authoritative Headless patch series 的确定性重建，不读取或信任可能已经升级、带本地修改的实机 ALAS 工作副本。
@@ -677,10 +677,10 @@ python scripts/python/verify_alas_support_matrix.py `
 
 | 结论 | 字段数 | 含义 |
 |---|---:|---|
-| ✅ 五维完整支持 | **52 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
-| ◐ 有实机当前值/分支证据 | **130 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
-| 🧪 只有离线路径证据 | **80 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
-| ⊘ 当前未适配或无效 | **16 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
+| ✅ 五维完整支持 | **55 / 278** | 配置、观察、输入、离线和实机五个维度均已完成 |
+| ◐ 有实机当前值/分支证据 | **144 / 278** | 至少一个当前值或安全停止分支在实机出现；仍不是完整支持 |
+| 🧪 只有离线路径证据 | **64 / 278** | 有设置相关离线覆盖，但没有该设置的实机值证据 |
+| ⊘ 当前未适配或无效 | **15 / 278** | 任务级语义端口缺失，或配置当前不产生对应能力 |
 | ☐ 只有配置声明/读取 | **0 / 278** | 配置可以存在，但未找到设置相关的 Headless 闭环证据 |
 
 | 配置组.字段 | 使用面板 | 类型/显示元数据 | 默认值与可选值 | 组级现状 | 配置读取 | 语义观察 | 输入闭环 | 离线证据 | 实机证据 |
@@ -691,20 +691,20 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Awaken.Favourite` | Awaken | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Awaken.LevelCap` | Awaken | type=select; display=default | options: "level120", "level125"; default: "level120" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `AzurLaneUncensored.Repository` | AzurLaneUncensored | type=input; display=disabled | input/default: "https://gitee.com/LmeSzinc/AzurLaneUncensored" | `P`/⊘ 当前无效 | ⊘ | ⊘ | ⊘ | ⊘ | ⊘ |
-| `BattlePass.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `BattlePass.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `Benchmark.DeviceType` | Benchmark | type=select; display=default | options: "android_phone_vmos", "android_phone", "emulator", "phone_cloud_without_adb", "plone_cloud_with_adb"; default: "emulator" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Benchmark.TestScene` | Benchmark | type=select; display=default | options: "click", "screenshot_click", "screenshot"; default: "screenshot_click" | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `BuyFurniture.BuyOption` | Dorm | type=select; display=default | options: "all", "set"; default: "all" | `P`/◐ set 已购买/all 后置边界 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `BuyFurniture.Enable` | Dorm | type=checkbox; display=default | input/default: false | `P`/◐ 启用购买已闭环 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `BuyFurniture.LastRun` | Dorm | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/◐ 实机已写入 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `Campaign.AmbushEvade` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Campaign.Event` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "campaign_main", "coalition_20260723", "event_20260625_cn", "event_20260813_cn", "raid_20260212", "war_archives_20180607_cn", "war_archives_20180726_cn", "war_archives_20181020_en", "war_archives_20181026_en", "war_archives_20181227_cn", "war_archives_20190221_en", "war_archives_20190314_en", "war_archives_20190321_en", "war_archives_20190620_en", "war_archives_20190911_cn", "war_archives_20191010_en", "war_archives_20191031_en", "war_archives_20200312_cn", "war_archives_20200507_cn", "war_archives_20200603_cn", "war_archives_20200806_cn", "war_archives_20200820_cn", "war_archives_20200903_cn", "war_archives_20200917_cn", "war_archives_20201012_cn", "war_archives_20201029_cn", "war_archives_20201229_cn", "war_archives_20210225_cn", "war_archives_20210325_cn", "war_archives_20210422_cn", "war_archives_20210527_cn", "war_archives_20210624_cn", "war_archives_20210819_cn", "war_archives_20210916_cn", "war_archives_20211014_cn", "war_archives_20211028_cn", "war_archives_20211111_cn", "war_archives_20211229_cn", "war_archives_20220210_cn", "war_archives_20220224_cn", "war_archives_20220324_cn", "war_archives_20220414_cn", "war_archives_20220428_cn", "war_archives_20220526_cn", "war_archives_20220728_cn", "war_archives_20220818_cn", "war_archives_20220915_cn", "war_archives_20221222_cn", "war_archives_20230223_cn", "war_archives_20230525_cn", "war_archives_20230803_cn", "war_archives_20231026_cn", "war_archives_20240725_cn"; default: "campaign_main" | `P`/🧪 三主线路由 + 七活动入口 | ☑ | ◐ | ◐ | ◐ | ◐ |
+| `Campaign.Event` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "campaign_main", "coalition_20260723", "event_20260625_cn", "event_20260813_cn", "raid_20260212", "raid_20260827", "war_archives_20180607_cn", "war_archives_20180726_cn", "war_archives_20181020_en", "war_archives_20181026_en", "war_archives_20181227_cn", "war_archives_20190221_en", "war_archives_20190314_en", "war_archives_20190321_en", "war_archives_20190620_en", "war_archives_20190911_cn", "war_archives_20191010_en", "war_archives_20191031_en", "war_archives_20200312_cn", "war_archives_20200507_cn", "war_archives_20200603_cn", "war_archives_20200806_cn", "war_archives_20200820_cn", "war_archives_20200903_cn", "war_archives_20200917_cn", "war_archives_20201012_cn", "war_archives_20201029_cn", "war_archives_20201229_cn", "war_archives_20210225_cn", "war_archives_20210325_cn", "war_archives_20210422_cn", "war_archives_20210527_cn", "war_archives_20210624_cn", "war_archives_20210819_cn", "war_archives_20210916_cn", "war_archives_20211014_cn", "war_archives_20211028_cn", "war_archives_20211111_cn", "war_archives_20211229_cn", "war_archives_20220210_cn", "war_archives_20220224_cn", "war_archives_20220324_cn", "war_archives_20220414_cn", "war_archives_20220428_cn", "war_archives_20220526_cn", "war_archives_20220728_cn", "war_archives_20220818_cn", "war_archives_20220915_cn", "war_archives_20221222_cn", "war_archives_20230223_cn", "war_archives_20230525_cn", "war_archives_20230803_cn", "war_archives_20231026_cn", "war_archives_20240725_cn"; default: "campaign_main" | `P`/◐ 三主线路由 + 当前 Raid 实机 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Mode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=select; display=default/hide | options: "hard", "normal"; default: "normal" | `P`/🧪 三主线路由 + 七活动入口 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Name` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=input; display=default/hide | input/default: "12-4", "dynamic", "sp" | `P`/🧪 三主线 64 图 + 七活动入口 | ☑ | ◐ | ◐ | ◐ | ◐ |
 | `Campaign.Use2xBook` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Campaign.UseAutoSearch` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: false, true | `P`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `Campaign.UseClearMode` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Campaign.UseFleetLock` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Campaign.UseFleetLock` | Main, Main2, Main3, GemsFarming, Coalition, Event, Event2, Raid, WarArchives, CoalitionSp, EventA, EventB, EventC, EventD, EventSp, RaidDaily | type=checkbox; display=default/hide | input/default: true | `P`/◐ 实机当前值 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `Coalition.Fleet` | Coalition, CoalitionSp | type=select; display=default | options: "multi", "single"; default: "single" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Coalition.Mode` | Coalition, CoalitionSp | type=select; display=default/hide | options: "easy", "hard", "normal", "sp"; default: "hard", "sp" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Commission.CustomFilter` | Commission | type=textarea; display=default | input/default: <long default in args.json> | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
@@ -716,7 +716,7 @@ python scripts/python/verify_alas_support_matrix.py `
 | `ControlExpOverflow.T3Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `ControlExpOverflow.T4Allow` | Tactical | type=input; display=default | input/default: 100 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `CoreShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Array" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Daemon.EnterMap` | Daemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `Daemon.EnterMap` | Daemon | type=checkbox; display=default | input/default: true | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Daily.AdvanceMission` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.AdvanceMissionFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Daily.EmergencyModuleDevelopment` | Daily | type=select; display=default | options: "first", "second", "skip"; default: "first" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
@@ -731,8 +731,8 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Daily.TacticalTraining` | Daily | type=select; display=default | options: "first", "second", "skip", "third"; default: "second" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Daily.TacticalTrainingFleet` | Daily | type=select; display=default | options: 1, 2, 3, 4, 5, 6; default: 1 | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Daily.UseDailySkip` | Daily | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `DataKey.Collect` | Freebies | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `DataKey.ForceCollect` | Freebies | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `DataKey.Collect` | Freebies | type=checkbox; display=default | input/default: true | `L`/◐ 满仓强制实机 | ☑ | ☑ | ◐ | ☑ | ◐ |
+| `DataKey.ForceCollect` | Freebies | type=checkbox; display=default | input/default: false | `L`/◐ 满仓强制实机 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `Dorm.Collect` | Dorm | type=checkbox; display=default | input/default: true | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Dorm.Feed` | Dorm | type=checkbox; display=default | input/default: true | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Dorm.FeedFilter` | Dorm | type=textarea; display=default | input/default: "20000 > 10000 > 5000 > 3000 > 2000 > 1000" | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
@@ -771,15 +771,15 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Enhance.Filter` | General | type=textarea; display=default | input/default: null | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Enhance.ShipToEnhance` | General | type=select; display=default | options: "all", "favourite"; default: "all" | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `EquipmentCode.Config` | GemsFarming | type=textarea; display=default | input/default:…4672 tokens truncated…t" | `B`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `EquipmentCode.ExportToConfig` | GemsFarming | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
+| `EquipmentCode.ExportToConfig` | GemsFarming | type=checkbox; display=default | input/default: true | `P`/◐ normal ship_equip 实机 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Error.HandleError` | Alas | type=checkbox; display=default | input/default: true | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Error.OnePushConfig` | Alas | type=textarea; display=default | input/default: "provider: null" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Error.SaveError` | Alas | type=checkbox; display=default | input/default: true | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Error.ScreenshotLength` | Alas | type=input; display=default | input/default: 1 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `EventDaily.LastStage` | EventA, EventB, EventC, EventD | type=input; display=default | input/default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `EventDaily.StageFilter` | EventA, EventB, EventC, EventD | type=textarea; display=default | input/default: "A1 > A2 > A3", "B1 > B2 > B3", "C1 > C2 > C3", "D1 > D2 > D3" | `P`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `EventGeneral.PtLimit` | EventGeneral | type=input; display=default | input/default: 0 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `EventGeneral.TimeLimit` | EventGeneral | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `EventGeneral.PtLimit` | EventGeneral | type=input; display=default | input/default: 0 | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
+| `EventGeneral.TimeLimit` | EventGeneral | type=datetime; display=default; validate=datetime | input/default: "2020-01-01 00:00:00" | `P`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `EventStory.SkipBattle` | EventStory | type=lock; display=default | options: true; default: true | `P`/◐ 实机当前值 | ◐ | ◐ | ◐ | ◐ | ◐ |
 | `Exercise.ExerciseStrategy` | Exercise | type=select; display=default | options: "aggressive", "fri18", "sat0", "sat12", "sat18", "sun0", "sun12", "sun18"; default: "aggressive" | `L`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
 | `Exercise.LowHpConfirmWait` | Exercise | type=input; display=default | input/default: 0.1 | `L`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
@@ -802,11 +802,11 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Gacha.UseDrill` | Gacha | type=checkbox; display=default | input/default: false | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Gacha.UseTicket` | Gacha | type=checkbox; display=default | input/default: true | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GameManager.AutoRestart` | GameManager | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
-| `GemsFarming.ChangeFlagship` | GemsFarming | type=select; display=default | options: "ship_equip", "ship"; default: "ship" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GemsFarming.ChangeVanguard` | GemsFarming | type=select; display=default | options: "disabled", "ship_equip", "ship"; default: "ship" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GemsFarming.CommissionLimit` | GemsFarming | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GemsFarming.CommonCV` | GemsFarming | type=select; display=default | options: "any", "bogue", "hermes", "langley", "ranger"; default: "any" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `GemsFarming.CommonDD` | GemsFarming | type=select; display=default | options: "any", "aulick_or_foote", "cassin_or_downes", "favourite", "z20_or_z21"; default: "any" | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `GemsFarming.ChangeFlagship` | GemsFarming | type=select; display=default | options: "ship_equip", "ship"; default: "ship" | `P`/◐ normal 两模式及 hard ship 主路径实机 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `GemsFarming.ChangeVanguard` | GemsFarming | type=select; display=default | options: "disabled", "ship_equip", "ship"; default: "ship" | `P`/◐ 三值实机；ship_equip 已过兼容两槽 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `GemsFarming.CommissionLimit` | GemsFarming | type=checkbox; display=default | input/default: true | `P`/◐ false 实机；true 未通过 | ☑ | ☐ | ☐ | ☑ | ◐ |
+| `GemsFarming.CommonCV` | GemsFarming | type=select; display=default | options: "any", "bogue", "hermes", "langley", "ranger"; default: "any" | `P`/◐ any→langley/ranger 已确认；bogue/hermes 筛选已观察 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `GemsFarming.CommonDD` | GemsFarming | type=select; display=default | options: "any", "aulick_or_foote", "cassin_or_downes", "favourite", "z20_or_z21"; default: "any" | `P`/◐ any 已确认；四命名筛选实机空结果 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `GeneralShop.BuySkinBox` | ShopFrequent | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GeneralShop.ConsumeCoins` | ShopFrequent | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `GeneralShop.Filter` | ShopFrequent | type=textarea; display=default | input/default: "BookRedT3 > BookYellowT3 > BookBlueT3 > BookRedT2\n> Cube\n> FoodT6 > FoodT5" | `L`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
@@ -857,15 +857,15 @@ python scripts/python/verify_alas_support_matrix.py `
 | `MedalShop2.RETROFIT_T1` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MedalShop2.RETROFIT_T2` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `MedalShop2.RETROFIT_T3` | ShopOnce | type=select; display=default | options: "bb", "cl", "cv", "dd"; default: "cl" | `L`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Meowfficer.BuyAmount` | Meowfficer | type=input; display=default | input/default: 1 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Meowfficer.FortChoreMeowfficer` | Meowfficer | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `Meowfficer.OverflowCoins` | Meowfficer | type=input; display=default | input/default: -1 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `MeowfficerTrain.Enable` | Meowfficer | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `MeowfficerTrain.EnhanceIndex` | Meowfficer | type=input; display=default | input/default: 1 | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `MeowfficerTrain.MaxFeedLevel` | Meowfficer | type=input; display=default | input/default: 5 | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `MeowfficerTrain.Mode` | Meowfficer | type=select; display=default | options: "once_a_day", "seamlessly"; default: "seamlessly" | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `MeowfficerTrain.RetainTalentedGold` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `MeowfficerTrain.RetainTalentedPurple` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `Meowfficer.BuyAmount` | Meowfficer | type=input; display=default | input/default: 1 | `B`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `Meowfficer.FortChoreMeowfficer` | Meowfficer | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `Meowfficer.OverflowCoins` | Meowfficer | type=input; display=default | input/default: -1 | `B`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `MeowfficerTrain.Enable` | Meowfficer | type=checkbox; display=default | input/default: false | `B`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `MeowfficerTrain.EnhanceIndex` | Meowfficer | type=input; display=default | input/default: 1 | `B`/◐ 实机等级已满分支 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `MeowfficerTrain.MaxFeedLevel` | Meowfficer | type=input; display=default | input/default: 5 | `B`/◐ 实机等级已满分支 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `MeowfficerTrain.Mode` | Meowfficer | type=select; display=default | options: "once_a_day", "seamlessly"; default: "seamlessly" | `B`/◐ 实机当前值 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `MeowfficerTrain.RetainTalentedGold` | Meowfficer | type=checkbox; display=default | input/default: true | `B`/◐ 实机普通金猫 | ☑ | ☑ | ☑ | ☑ | ◐ |
+| `MeowfficerTrain.RetainTalentedPurple` | Meowfficer | type=checkbox; display=default | input/default: true | `M`/🧪 离线闭环 | ☑ | ☑ | ☑ | ☑ | ☐ |
 | `MeritShop.Filter` | ShopOnce | type=textarea; display=default | input/default: "Cube" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `MeritShop.Refresh` | ShopOnce | type=checkbox; display=default | input/default: false | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `OldRetire.N` | General | type=checkbox; display=default | input/default: true | `M`/⊘ 未适配 | ☑ | ⊘ | ⊘ | ⊘ | ⊘ |
@@ -917,10 +917,10 @@ python scripts/python/verify_alas_support_matrix.py `
 | `PrivateQuarters.BuyRoses` | PrivateQuarters | type=checkbox; display=default | input/default: true | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `PrivateQuarters.TargetInteract` | PrivateQuarters | type=checkbox; display=default | input/default: true | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `PrivateQuarters.TargetShip` | PrivateQuarters | type=select; display=default | options: "aegir", "anchorage", "nakhimov", "new_jersey", "noshiro", "sirius", "taihou"; default: "anchorage" | `O`/🧪 仅离线完成 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Raid.Mode` | Raid | type=select; display=default | options: "easy", "ex", "hard", "normal"; default: "hard" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Raid.UseTicket` | Raid | type=checkbox; display=default | input/default: false | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `RaidDaily.StageFilter` | RaidDaily | type=textarea; display=default | input/default: "hard > normal > easy" | `O`/🧪 离线回放 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `Research.AllowDelay` | Research | type=checkbox; display=default | input/default: true | `L`/◐ 双值严校/延迟待条件 | ☑ | ☑ | ◐ | ☑ | ◐ |
+| `Raid.Mode` | Raid | type=select; display=default | options: "easy", "ex", "hard", "normal"; default: "hard" | `L`/◐ 四模式单局实机闭环 | ☑ | ☑ | ◐ | ☑ | ◐ |
+| `Raid.UseTicket` | Raid | type=checkbox; display=default | input/default: false | `L`/◐ false 实机；true 零票回退待实机 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `RaidDaily.StageFilter` | RaidDaily | type=textarea; display=default | input/default: "hard > normal > easy" | `L`/◐ normal 连续 + hard 分段全清 | ☑ | ◐ | ◐ | ☑ | ◐ |
+| `Research.AllowDelay` | Research | type=checkbox; display=default | input/default: true | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
 | `Research.CustomFilter` | Research | type=textarea; display=default | input/default: <long default in args.json> | `L`/◐ 自定义语法实机子集 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `Research.PresetFilter` | Research | type=select; display=default | options: "custom", "series_2_457_only", "series_2_blueprint_457", "series_2_blueprint_only", "series_2_than_3_457_234", "series_3_234_only", "series_3_blueprint_234", "series_3_blueprint_only", "series_4_blueprint_only", "series_4_blueprint_tenrai", "series_4_tenrai_only", "series_5_152_only", "series_5_blueprint_152", "series_5_blueprint_only", "series_6_203_only", "series_6_blueprint_203", "series_6_blueprint_only", "series_7_blueprint_la9", "series_7_blueprint_only", "series_7_la9_only", "series_8_305_only", "series_8_blueprint_305", "series_8_blueprint_only", "series_9_blueprint_only", "series_9_blueprint_ta152", "series_9_ta152_only"; default: "series_9_blueprint_ta152" | `L`/◐ 26 预设严校/实机子集 | ☑ | ☑ | ◐ | ☑ | ◐ |
 | `Research.UseCoin` | Research | type=select; display=default | options: "always_use", "do_not_use", "only_05_hour", "only_no_project"; default: "always_use" | `L`/◐ 四策略实机/一项分段恢复 | ☑ | ☑ | ☑ | ☑ | ◐ |
@@ -956,10 +956,10 @@ python scripts/python/verify_alas_support_matrix.py `
 | `Submarine.DistanceToBoss` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/hide | options: "1_grid_to_boss", "2_grid_to_boss", "to_boss_position", "use_open_ocean_support"; default: "2_grid_to_boss", "use_open_ocean_support" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
 | `Submarine.Fleet` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default | options: 0, 1, 2; default: 0 | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Submarine.Mode` | Main, Main2, Main3, GemsFarming, Event, Event2, WarArchives, EventA, EventB, EventC, EventD, EventSp | type=select; display=default/display | options: "boss_only", "do_not_use", "every_combat", "hunt_and_boss", "hunt_only"; default: "do_not_use" | `P`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
-| `SupplyPack.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
-| `SupplyPack.DayOfWeek` | Freebies | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
+| `SupplyPack.Collect` | Freebies | type=checkbox; display=default | input/default: true | `B`/◐ 实机当前值 | ☑ | ☑ | ◐ | ☑ | ◐ |
+| `SupplyPack.DayOfWeek` | Freebies | type=select; display=default | options: 0, 1, 2, 3, 4, 5, 6; default: 0 | `B`/◐ 实机当前值 | ☑ | ◐ | ◐ | ☑ | ◐ |
 | `Tactical.RapidTrainingSlot` | Tactical | type=select; display=default | options: "do_not_use", "slot_1", "slot_2", "slot_3", "slot_4"; default: "do_not_use" | `L`/◐ 实机当前值 | ☑ | ◐ | ☐ | ☑ | ◐ |
 | `Tactical.TacticalFilter` | Tactical | type=textarea; display=default | input/default: <long default in args.json> | `F`/☑ 完整 | ☑ | ☑ | ☑ | ☑ | ☑ |
-| `TaskBalancer.CoinLimit` | EventGeneral | type=input; display=default | input/default: 10000 | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `TaskBalancer.Enable` | EventGeneral | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
-| `TaskBalancer.TaskCall` | EventGeneral | type=select; display=default | options: "Main", "Main2", "Main3"; default: "Main" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ☐ |
+| `TaskBalancer.CoinLimit` | EventGeneral | type=input; display=default | input/default: 10000 | `P`/☐ 未逐值 | ☑ | ☑ | ☐ | ☑ | ◐ |
+| `TaskBalancer.Enable` | EventGeneral | type=checkbox; display=default | input/default: false | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ◐ |
+| `TaskBalancer.TaskCall` | EventGeneral | type=select; display=default | options: "Main", "Main2", "Main3"; default: "Main" | `P`/☐ 未逐值 | ☑ | ☐ | ☐ | ☑ | ◐ |

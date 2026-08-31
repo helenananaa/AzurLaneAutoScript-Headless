@@ -1,0 +1,122 @@
+{
+  "schema": "alas-headless.gems-farming-vanguard-ship-equip-live-validation/v2",
+  "passed": true,
+  "captured_at_utc": "2026-08-25T12:12:30Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "package": "com.bilibili.azurlane",
+  "pid": 2030,
+  "qualification_scope": "typed normal-mode ChangeVanguard=ship_equip compatible non-empty two-slot cross-ship transfer with full source restoration",
+  "configuration": {
+    "campaign_mode": "normal",
+    "fleet_index": 6,
+    "change_vanguard": "ship_equip",
+    "common_dd": "any",
+    "max_level": 100,
+    "min_emotion": 0
+  },
+  "compatibility_preflight": {
+    "source_repository": "https://github.com/AzurLaneTools/AzurLaneLuaScripts.git",
+    "source_revision": "d93f83db24195981c5f5ca90ac5e29ce0580b12c",
+    "spence_ship_id": 101153,
+    "spence_game_type": 1,
+    "equipment": [
+      {
+        "equipment_id": "1760",
+        "name": "High Performance Hydraulic Steering Gear",
+        "game_type": 10,
+        "ship_type_forbidden": [22, 23, 24],
+        "spence_allowed": true
+      },
+      {
+        "equipment_id": "2400",
+        "name": "Repair Toolkit",
+        "game_type": 10,
+        "ship_type_forbidden": [],
+        "spence_allowed": true
+      }
+    ]
+  },
+  "source_ship": {
+    "ship_id": 699024,
+    "ship_sprite": "nabulesi",
+    "fleet_index": 6,
+    "original_loadout": [
+      {"position": 1, "equipment_id": "23120", "enhancement": 10, "special": false},
+      {"position": 2, "equipment_id": "32260", "enhancement": 10, "special": false},
+      {"position": 3, "equipment_id": "26500", "enhancement": 10, "special": false},
+      {"position": 4, "equipment_id": "1760", "enhancement": 10, "special": false},
+      {"position": 5, "equipment_id": "2400", "enhancement": 10, "special": false}
+    ],
+    "prepared_compatible_loadout": [
+      {"position": 4, "equipment_id": "1760", "enhancement": 10, "special": false},
+      {"position": 5, "equipment_id": "2400", "enhancement": 10, "special": false}
+    ]
+  },
+  "production_boundary": {
+    "take_off_readback": [
+      {"position": 4, "equipment_id": "1760", "enhancement": 10, "special": false},
+      {"position": 5, "equipment_id": "2400", "enhancement": 10, "special": false}
+    ],
+    "eligible_candidates": [
+      {
+        "ship_id": 101153,
+        "ship_sprite": "sipengsi",
+        "level": 100,
+        "emotion": 136,
+        "status": "free"
+      }
+    ],
+    "original_alas_choice": "max(candidate, key=emotion)",
+    "target_confirm_generation": 633613,
+    "target_ship_sprite": "sipengsi",
+    "target_readback": [
+      {"position": 4, "equipment_id": "1760", "enhancement": 10, "special": false},
+      {"position": 5, "equipment_id": "2400", "enhancement": 10, "special": false}
+    ],
+    "statement": "The production take-off, CommonDD admission, exact ship confirmation, take-on, and stable detail readback all used the ordinary vanguard ship_equip ports."
+  },
+  "localized_retry": {
+    "first_failure": "GemsFarming equipment is unavailable: 1760 +10",
+    "input_after_failure": "none until the reviewed equipment back path returned to Formation",
+    "retry_result": "the same exact two-slot pending loadout mounted and read back on Spence",
+    "implementation_change": "regular StoreHouse reset now proves an unchanged upper boundary after an upward swipe instead of treating any visible index <= 7 as the top",
+    "semantic_oracle_sha256": "566815139cb66e6a36841975ebfae554d21f973934bbb0495baccd66d08c87fd"
+  },
+  "recovery": {
+    "spence_unloaded_before_replacement": true,
+    "spence_unloaded_loadout": [
+      {"position": 4, "equipment_id": "1760", "enhancement": 10, "special": false},
+      {"position": 5, "equipment_id": "2400", "enhancement": 10, "special": false}
+    ],
+    "napoli_lookup_pages": 4,
+    "napoli_confirm_generation": 636860,
+    "restored_source_sprite": "nabulesi",
+    "restored_loadout": [
+      {"position": 1, "equipment_id": "23120", "enhancement": 10, "special": false},
+      {"position": 2, "equipment_id": "32260", "enhancement": 10, "special": false},
+      {"position": 3, "equipment_id": "26500", "enhancement": 10, "special": false},
+      {"position": 4, "equipment_id": "1760", "enhancement": 10, "special": false},
+      {"position": 5, "equipment_id": "2400", "enhancement": 10, "special": false}
+    ],
+    "final_fleet_index": 1,
+    "formation_back_semantic_id": "gems-farming/startup/formation/back",
+    "formation_back_generation": 637649,
+    "final_main_page": true,
+    "final_generation": 637655
+  },
+  "mutation_accounting": {
+    "fleet_confirmation_count": 2,
+    "temporary_replacement": "Napoli -> Spence -> Napoli",
+    "premium_or_purchase_actions": 0,
+    "battle_attempts": 0,
+    "raw_input_fallback_count": 0
+  },
+  "unsupported_branches": [
+    "full five-slot cross-ship transfer on the current account because the three primary slots are not DD-compatible",
+    "named CommonDD action selectors",
+    "natural Lv32 replacement trigger",
+    "natural low-emotion replacement trigger"
+  ],
+  "statement": "This receipt promotes ChangeVanguard=ship_equip from empty-source-only to a real compatible non-empty two-slot cross-ship transfer. It does not claim arbitrary or five-slot compatibility."
+}

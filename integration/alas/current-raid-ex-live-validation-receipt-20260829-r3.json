@@ -1,0 +1,90 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-29T13:24:00.501956Z",
+  "finished_at": "2026-08-29T13:24:55.241646Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "mode": "ex",
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 4155,
+    "generation": 38714,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 23,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44"
+  },
+  "login_recovered": false,
+  "ui_recovered": false,
+  "before": {
+    "remaining": 1,
+    "points": 250,
+    "sortie_grant": 1
+  },
+  "after": {},
+  "stage_receipts": [
+    {
+      "semantic_id": "raid/stage/ex",
+      "generation": 39109,
+      "point": {
+        "x": 1082.333,
+        "y": 235.4
+      },
+      "bounds": {
+        "left": 971.0,
+        "top": 159.733,
+        "right": 1193.667,
+        "bottom": 311.067
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/4",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "recommend_receipts": [
+    {
+      "semantic_id": "raid/fleet/recommend",
+      "generation": 39120,
+      "point": {
+        "x": 1056.6665,
+        "y": 200.12
+      },
+      "bounds": {
+        "left": 1019.333,
+        "top": 164.787,
+        "right": 1094.0,
+        "bottom": 235.453
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/fleet/1/btn_recom",
+      "policy_sha256": "8902bec5b810f09b1405cb243393e11fefb27a5bcbe426a3e0e15f0f8b71f3ce",
+      "capability_id": "campaign.fleet_mutation"
+    }
+  ],
+  "fleet_receipts": [
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 39128,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "notice_receipts": [],
+  "sortie_receipts": [],
+  "error": "SystemExit: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 71, in run\n    self.__getattribute__(command)()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 378, in raid\n    RaidRun(config=self.config, device=self.device).run()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\run.py\", line 154, in run\n    self.raid_execute_once(mode=mode, raid=name)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\raid.py\", line 450, in raid_execute_once\n    self.raid_enter(mode=mode, raid=raid)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\raid.py\", line 397, in raid_enter\n    raise ScriptError(\nmodule.exception.ScriptError: Current Raid semantic entry did not reach battle loading; return to the exact Raid page and retry\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 217, in run\n    task_result = instance.run(\"raid\")\n                  ^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 118, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "raw_input_fallback_used": false
+}

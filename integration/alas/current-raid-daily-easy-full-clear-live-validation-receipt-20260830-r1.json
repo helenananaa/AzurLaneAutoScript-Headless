@@ -1,0 +1,259 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-30T02:10:36.902230Z",
+  "finished_at": "2026-08-30T02:14:30.474965Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "task": "RaidDaily",
+  "mode": "easy",
+  "daily_battle_count": 4,
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 5252,
+    "generation": 60000,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 31,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "game_version": "9.7.10",
+    "resource_hot_version": "9.7.343"
+  },
+  "scheduler_preflight": {
+    "expected": "RaidDaily",
+    "selected": "RaidDaily",
+    "selected_next_run": "2020-01-01 00:00:00",
+    "isolated_next_run": "2026-08-30 11:10:36",
+    "configured_run_count": 0
+  },
+  "login_recovered": false,
+  "ui_recovered": true,
+  "ui_recovery_steps": [
+    "precombat_back",
+    "fleet_back"
+  ],
+  "orphan_result_receipts": [],
+  "before": {
+    "remaining": 4,
+    "points": 1112,
+    "sortie_grant": 4
+  },
+  "after": {},
+  "stage_receipts": [
+    {
+      "semantic_id": "raid/stage/easy",
+      "generation": 60534,
+      "point": {
+        "x": 1024.067,
+        "y": 561.933
+      },
+      "bounds": {
+        "left": 900.067,
+        "top": 527.933,
+        "right": 1148.067,
+        "bottom": 595.933
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/1",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/easy",
+      "generation": 61423,
+      "point": {
+        "x": 1024.067,
+        "y": 561.933
+      },
+      "bounds": {
+        "left": 900.067,
+        "top": 527.933,
+        "right": 1148.067,
+        "bottom": 595.933
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/1",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/easy",
+      "generation": 62427,
+      "point": {
+        "x": 1024.067,
+        "y": 561.933
+      },
+      "bounds": {
+        "left": 900.067,
+        "top": 527.933,
+        "right": 1148.067,
+        "bottom": 595.933
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/1",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/stage/easy",
+      "generation": 63298,
+      "point": {
+        "x": 1024.067,
+        "y": 561.933
+      },
+      "bounds": {
+        "left": 900.067,
+        "top": 527.933,
+        "right": 1148.067,
+        "bottom": 595.933
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/1",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "recommend_receipts": [],
+  "fleet_receipts": [
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 60550,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 61435,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 62437,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 63313,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "notice_receipts": [],
+  "sortie_receipts": [
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 60569,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "33d09d41e155a188547e3d3f955fa78048cba209c24af405576c5836316bb793",
+      "capability_id": "campaign.sortie"
+    },
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 61452,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "33d09d41e155a188547e3d3f955fa78048cba209c24af405576c5836316bb793",
+      "capability_id": "campaign.sortie"
+    },
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 62458,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "33d09d41e155a188547e3d3f955fa78048cba209c24af405576c5836316bb793",
+      "capability_id": "campaign.sortie"
+    },
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 63333,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "33d09d41e155a188547e3d3f955fa78048cba209c24af405576c5836316bb793",
+      "capability_id": "campaign.sortie"
+    }
+  ],
+  "error": "SystemExit: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 71, in run\n    self.__getattribute__(command)()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 269, in raid_daily\n    RaidDaily(config=self.config, device=self.device).run()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\daily.py\", line 59, in run\n    remain = self.get_remain(mode=mode)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\raid\\run.py\", line 60, in get_remain\n    remain = semantic_adapter.raid_remain(\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 18007, in raid_remain\n    return self.open().raid_remain(event=event, mode=mode)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 9952, in raid_remain\n    return self.oracle.raid_remain(event=event, mode=mode)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 22619, in raid_remain\n    return self.raid_remain_state(event=event, mode=mode).remaining\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 21555, in raid_remain_state\n    return self._retry_transition_read(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 5226, in _retry_transition_read\n    raise last_error\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 5220, in _retry_transition_read\n    return reader()\n           ^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 21556, in <lambda>\n    lambda: self._amatsukaze_raid_remain_state(mode),\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 21850, in _amatsukaze_raid_remain_state\n    raise SemanticGateClosed(\"current Raid remaining counter is absent or ambiguous\")\nalas_headless.semantic_oracle.SemanticGateClosed: current Raid remaining counter is absent or ambiguous\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 361, in run\n    task_result = instance.run(command_name)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 135, in run\n    exit(1)\n  File \"<frozen _sitebuiltins>\", line 26, in __call__\nSystemExit: 1\n",
+  "raw_input_fallback_used": false
+}

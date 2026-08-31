@@ -1,0 +1,311 @@
+{
+  "schema": "alas-headless.meowfficer-enhance-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "index": 1,
+    "max_feed_level": 5
+  },
+  "passed": true,
+  "temporary_config": "codex_meowfficer_enhance_live_a7c8df97603c40d5b00f8c6e6b91d545.json",
+  "decision": "leveled_max",
+  "before": {
+    "purchased": 15,
+    "purchase_total": 15,
+    "coins": 109505,
+    "capacity_used": 38,
+    "capacity_total": 40,
+    "fort_current": 0,
+    "fort_total": 8,
+    "training_finished": 7,
+    "training_total": 10,
+    "box_counts": [
+      2205,
+      1531,
+      468
+    ]
+  },
+  "after": {
+    "purchased": 15,
+    "purchase_total": 15,
+    "coins": 109505,
+    "capacity_used": 38,
+    "capacity_total": 40,
+    "fort_current": 0,
+    "fort_total": 8,
+    "training_finished": 7,
+    "training_total": 10,
+    "box_counts": [
+      2205,
+      1531,
+      468
+    ]
+  },
+  "visible_cats": [
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/0/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 784.087,
+        "y": 195.2
+      },
+      "bounds": {
+        "left": 722.76,
+        "top": 129.874,
+        "right": 845.413,
+        "bottom": 260.526
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/1/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 914.087,
+        "y": 195.2
+      },
+      "bounds": {
+        "left": 852.76,
+        "top": 129.874,
+        "right": 975.413,
+        "bottom": 260.526
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/2/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 1044.087,
+        "y": 195.2
+      },
+      "bounds": {
+        "left": 982.76,
+        "top": 129.874,
+        "right": 1105.413,
+        "bottom": 260.526
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/3/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 1174.087,
+        "y": 195.2
+      },
+      "bounds": {
+        "left": 1112.76,
+        "top": 129.874,
+        "right": 1235.413,
+        "bottom": 260.526
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/4/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 784.087,
+        "y": 341.867
+      },
+      "bounds": {
+        "left": 722.76,
+        "top": 276.54,
+        "right": 845.413,
+        "bottom": 407.193
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/5/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 914.087,
+        "y": 341.867
+      },
+      "bounds": {
+        "left": 852.76,
+        "top": 276.54,
+        "right": 975.413,
+        "bottom": 407.193
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/6/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 1044.087,
+        "y": 341.867
+      },
+      "bounds": {
+        "left": 982.76,
+        "top": 276.54,
+        "right": 1105.413,
+        "bottom": 407.193
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/7/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 1174.087,
+        "y": 341.867
+      },
+      "bounds": {
+        "left": 1112.76,
+        "top": 276.54,
+        "right": 1235.413,
+        "bottom": 407.193
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/8/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 784.087,
+        "y": 488.533
+      },
+      "bounds": {
+        "left": 722.76,
+        "top": 423.207,
+        "right": 845.413,
+        "bottom": 553.86
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/9/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 914.087,
+        "y": 488.533
+      },
+      "bounds": {
+        "left": 852.76,
+        "top": 423.207,
+        "right": 975.413,
+        "bottom": 553.86
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/10/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 1044.087,
+        "y": 488.533
+      },
+      "bounds": {
+        "left": 982.76,
+        "top": 423.207,
+        "right": 1105.413,
+        "bottom": 553.86
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/11/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 1174.087,
+        "y": 488.533
+      },
+      "bounds": {
+        "left": 1112.76,
+        "top": 423.207,
+        "right": 1235.413,
+        "bottom": 553.86
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/12/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 784.087,
+        "y": 635.2
+      },
+      "bounds": {
+        "left": 722.76,
+        "top": 569.874,
+        "right": 845.413,
+        "bottom": 700.526
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/13/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 914.087,
+        "y": 635.2
+      },
+      "bounds": {
+        "left": 852.76,
+        "top": 569.874,
+        "right": 975.413,
+        "bottom": 700.526
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/14/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 1044.087,
+        "y": 635.2
+      },
+      "bounds": {
+        "left": 982.76,
+        "top": 569.874,
+        "right": 1105.413,
+        "bottom": 700.526
+      }
+    },
+    {
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/15/info",
+      "level": 30,
+      "selected": false,
+      "point": {
+        "x": 1174.087,
+        "y": 635.2
+      },
+      "bounds": {
+        "left": 1112.76,
+        "top": 569.874,
+        "right": 1235.413,
+        "bottom": 700.526
+      }
+    }
+  ],
+  "selected_target": {
+    "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/frame/content/0/info",
+    "level": 30,
+    "selected": false,
+    "point": {
+      "x": 784.087,
+      "y": 195.2
+    },
+    "bounds": {
+      "left": 722.76,
+      "top": 129.874,
+      "right": 845.413,
+      "bottom": 260.526
+    }
+  },
+  "typed_taps": [],
+  "mutation_dispatches": [],
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "adapter": "9e897d47d5f05a8286bc904ea4526b5a423c696dfece5d225168fcebfbb5673f",
+    "oracle": "8888eee438e35f2e5d436611a2a7eb8ac450e2bdd1fabc52767ea715bc545cfe"
+  }
+}

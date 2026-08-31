@@ -1,0 +1,32 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-29T13:01:46.714359Z",
+  "finished_at": "2026-08-29T13:03:18.474103Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "mode": "normal",
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 4155,
+    "generation": 12560,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 26,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44"
+  },
+  "login_recovered": false,
+  "ui_recovered": false,
+  "before": {},
+  "after": {},
+  "stage_receipts": [],
+  "recommend_receipts": [],
+  "fleet_receipts": [],
+  "notice_receipts": [],
+  "sortie_receipts": [],
+  "error": "AlasSemanticUnmapped: ALAS virtual resource has no active semantic flow: EVENT_LIST_CHECK",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 169, in run\n    instance.goto_main()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\alas.py\", line 180, in goto_main\n    UI(self.config, device=self.device).ui_goto_main()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\ui\\ui.py\", line 338, in ui_goto_main\n    return self.ui_ensure(destination=page_main)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\ui\\ui.py\", line 328, in ui_ensure\n    self.ui_get_current_page(skip_first_screenshot=skip_first_screenshot)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\ui\\ui.py\", line 200, in ui_get_current_page\n    if self.ui_page_appear(page=page):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\ui\\ui.py\", line 45, in ui_page_appear\n    return self.appear(page.check_button, offset=offset, interval=interval)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\base\\base.py\", line 255, in appear\n    appear = semantic_adapter.appear(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 15654, in appear\n    return self.open().appear(button)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 5788, in appear\n    result = self._appear_once(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 7899, in _appear_once\n    raise AlasSemanticUnmapped(\nalas_headless.alas_adapter.AlasSemanticUnmapped: ALAS virtual resource has no active semantic flow: EVENT_LIST_CHECK\n",
+  "raw_input_fallback_used": false
+}

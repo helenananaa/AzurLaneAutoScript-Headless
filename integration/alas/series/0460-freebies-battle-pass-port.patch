@@ -1,0 +1,82 @@
+diff --git a/module/freebies/battle_pass.py b/module/freebies/battle_pass.py
+index 48950956..46c42036 100644
+--- a/module/freebies/battle_pass.py
++++ b/module/freebies/battle_pass.py
+@@ -18,6 +18,9 @@ class BattlePass(Combat, UI):
+         Page:
+             in: page_reward
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.open().oracle.battle_pass_reward_available()
+         if self.appear(REWARD_GOTO_BATTLE_PASS, offset=(50, 150)):
+             # Load button offset from REWARD_GOTO_BATTLE_PASS,
+             # because entrance may not be the top one.
+@@ -117,8 +120,15 @@ class BattlePass(Combat, UI):
+         return received
+ 
+     def run(self):
+-        self.ui_ensure(page_reward)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_battle_pass()
++        try:
++            self.ui_ensure(page_reward)
+ 
+-        if self.battle_pass_red_dot_appear():
+-            self.battle_pass_enter()
+-            self.battle_pass_receive()
++            if self.battle_pass_red_dot_appear():
++                self.battle_pass_enter()
++                self.battle_pass_receive()
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_battle_pass()
+diff --git a/module/freebies/data_key.py b/module/freebies/data_key.py
+index 1bb637ae..9519cb47 100644
+--- a/module/freebies/data_key.py
++++ b/module/freebies/data_key.py
+@@ -73,9 +73,18 @@ class DataKey(UI):
+             in: page_any
+             out: page_main
+         """
+-        self.ui_ensure(page_archives)
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.begin_data_key(
++                force_collect=self.config.DataKey_ForceCollect
++            )
++        try:
++            self.ui_ensure(page_archives)
+ 
+-        self.data_key_collect()
++            self.data_key_collect()
+ 
+-        # clear interval of pages, for faster switching on the next ui_goto()
+-        self.interval_clear([page_archives.check_button, page_campaign_menu.check_button])
++            # clear interval of pages, for faster switching on the next ui_goto()
++            self.interval_clear([page_archives.check_button, page_campaign_menu.check_button])
++        finally:
++            if semantic_adapter is not None:
++                semantic_adapter.end_data_key()
+diff --git a/module/freebies/supply_pack.py b/module/freebies/supply_pack.py
+index 66c082eb..b415e9bb 100644
+--- a/module/freebies/supply_pack.py
++++ b/module/freebies/supply_pack.py
+@@ -129,11 +136,16 @@ class SupplyPack_250814(SupplyPack):
+             out: page_supply_pack, supply pack tab
+         """
+         logger.info('Goto supply pack')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         for _ in self.loop():
+ 
+             if self.match_template_color(page_supply_pack.check_button, offset=(20, 20)):
+                 logger.info('At supply pack')
+                 break
+ 
++            elif semantic_adapter is not None and self.appear_then_click(
++                    page_shop.links[page_supply_pack], interval=3):
++                continue
++
+             elif self.appear_then_click(page_supply_pack.check_button, offset=(20, 20), interval=3):
+                 continue

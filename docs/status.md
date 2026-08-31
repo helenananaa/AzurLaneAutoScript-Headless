@@ -2,6 +2,225 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-08-30
+
+### Research multi-resource detail and insufficient-resource delay are live complete
+
+- Research detail observation now enumerates both the base `item_tpl` and its
+  exact `item_tpl(Clone)` companion instead of silently retaining only the
+  first cost. Missing or unpaired count/icon nodes fail closed. Single-resource
+  and resource-free projects retain their original behavior.
+- The original ALAS selector chose current project `S9 Q-068-UL`. Its stable
+  typed detail proved `gold 1380/5000` and anti-air component T3
+  `17033 29858/20`, so the exact insufficient resource was gold rather than the
+  abundant component. The original `research_delay_check()` returned true;
+  research start and reward mutation counts were both zero.
+- The reconnect popup was cleared through its exact reviewed target and
+  postcondition. A separate typed return to main proved gold remained `1380`.
+  Evidence is
+  `integration/alas/research-coin-insufficient-delay-live-validation-receipt-20260830-r1.json`.
+- `Research.AllowDelay` is now field-complete. The Research panel remains `L`:
+  conditional Cube/Part strategies, all 26 presets, reset, and cross-round
+  coverage are still incomplete. A positive multi-resource start also remains
+  fail-closed until its exact confirmation prompt is naturally reviewable.
+
+## 2026-08-26
+
+### Event C/D stage coverage and TimeLimit are live complete on the current event
+
+- The original `EventC` and `EventD` tasks now complete official auto-search
+  for C1-C3 and D1-D3 through the normal scheduler entry. The fresh C2, C3,
+  D2, and D3 receipts each show `RunCount 1 -> 0`, the matching `LastStage`,
+  return to the event page, no validation errors, and no raw-input fallback.
+  Evidence is retained in
+  `integration/alas/eventc-c2-auto-search-live-validation-receipt-20260826-r1.json`,
+  `integration/alas/eventc-c3-auto-search-live-validation-receipt-20260826-r1.json`,
+  `integration/alas/eventd-d2-auto-search-live-validation-receipt-20260826-r1.json`,
+  and
+  `integration/alas/eventd-d3-auto-search-live-validation-receipt-20260826-r1.json`.
+- D3 exposed a dedicated hard-stage underlay (`Chapter_2050026`) in addition
+  to the shared B3 route (`Chapter_2050006`). Both exact identities are now
+  accepted; an unknown chapter remains rejected rather than guessed.
+- `EventGeneral.TimeLimit` completed both live directions after fresh coherent
+  observer state returned: an expired limit disabled the event with zero
+  sortie, while a future limit admitted exactly one C1 run and returned
+  cleanly. Evidence is
+  `integration/alas/event-general-time-limit-expired-live-validation-receipt-20260826-r1.json`
+  and
+  `integration/alas/event-general-time-limit-future-eventc-c1-live-validation-receipt-20260826-r1.json`.
+- A natural D3 dock-full popup was identified by its exact `强化/拓展/整理`
+  controls. The recovery port delegates `整理` to ALAS's configured official
+  one-click retirement transaction, never selects premium `拓展`, and keeps
+  `强化` as the other ALAS-owned branch. This live encounter retired 95 ships
+  (`930/930 -> 835/930`) and preserved their equipment, but the original run
+  reached the equipment-preservation dialog before the reconnect classifier
+  fix. The repaired automatic dock-full path is therefore covered offline and
+  remains pending one fresh natural end-to-end live reproduction; it is not
+  promoted as live complete by the later clean D3 sortie.
+
+### Daemon typed idle soak, bounded sortie, and 12-4 official auto-search are live-qualified
+
+- The original `AzurLaneDaemon.run_once()` completed a 180-second typed-only
+  main-page soak with `Daemon.EnterMap=true`: all 63 iterations returned
+  `idle`, observer generations advanced from `84200` to `84952` with 64
+  distinct samples, the game PID remained `24414`, and the Daemon sent no tap
+  or mutation. The temporary configuration was removed and the pre-existing
+  observer-forward set was unchanged. Evidence is
+  `integration/alas/daemon-idle-soak-live-validation-receipt-20260826-r4.json`.
+- A separate reversible run selected exact stage `1-1` through the existing
+  campaign boundary, then handed its typed map-preparation frame to the
+  original Daemon branch. Daemon used one reviewed input to reach fleet
+  preparation; the validator cancelled through the exact fleet back control
+  and proved restoration of chapter `1-1`. No sortie started, oil remained
+  `4127`, the PID remained `24414`, and the only mutation capability consumed
+  was the initial `campaign.stage_entry`. Evidence is
+  `integration/alas/daemon-enter-map-live-validation-receipt-20260826-r3.json`.
+- The positive bounded run kept that same ALAS-owned campaign transaction,
+  required the inherited fleet tuple `(1, 0, 0)`, manual-search state and
+  `Use2xBook=false` to match configuration exactly, and allowed no fleet
+  mutation. The original Daemon then owned both preparation branches, entered
+  the exact `LevelGrid` map root, and the validator withdrew before combat and
+  restored the main page. PID `24414` remained stable; only
+  `campaign.stage_entry` and `campaign.sortie` were dispatched. The successful
+  run consumed 10 oil and removed its temporary configuration. Evidence is
+  `integration/alas/daemon-sortie-live-validation-receipt-20260826-r9.json`.
+- The full positive run selected exact `12-4`, reconciled the live fleet from
+  `(1, 2, 1)` to configured `(1, 2, 0)` through the original ALAS fleet
+  preparation loop, proved `fleet1=mob` and `fleet2=boss`, and handed combat
+  entirely to the game's official auto-search. The adapter used zero campaign
+  combat and zero viewport-swipe budget after sortie, observed
+  `CombatUIStandard`, waited `526.36` seconds for the exact total-reward
+  panel, closed its reviewed exit, and restored the main page with PID `24414`
+  unchanged. Oil changed exactly `2799 -> 2482`: the proven 10-oil map entry
+  plus six 42-oil mob battles and one 55-oil boss battle, for 317 total. The
+  temporary configuration was removed. Evidence is
+  `integration/alas/daemon-auto-search-live-validation-receipt-20260826-r8.json`.
+- This proves bounded main-page residence and one exact active-context sortie,
+  not unattended production completeness. A cold-start inherited MAP/FLEET
+  overlay still lacks a trusted stage/config ownership chain and remains
+  fail-closed. Disconnect/rare-popup handling and a materially longer
+  cross-scene soak remain open, so the Daemon panel stays `P`.
+
+### WarArchives winter-crown A1 is live complete
+
+- The adapter now replaces the archive category/card boundary, all 45 archive
+  cards identifiable in the pinned CN client, letter-coded stage selection,
+  normal/hard switching, Data Key counters, and the exact five-key entry
+  confirmation. The original ALAS `CampaignWarArchives` remains responsible
+  for stage routing, map logic, enemy selection, combat, stop conditions, and
+  scheduling.
+- A controlled winter-crown A1 run consumed `295 -> 290` Data Keys, cleared
+  four normal enemies and the boss, acknowledged the exact grade, reward, and
+  statistics surfaces, and returned to the archive stage page at `290/300`.
+  Two transient geometry/result transitions stopped before input and resumed
+  only after their exact typed postconditions were re-proven. Evidence is
+  `integration/alas/war-archives-live-validation-receipt-20260826-r18.json`.
+- Red-dyed A1 remains locally unsupported because its upstream map script
+  calls `fleet_2_push_forward()` toward empty cell C2, outside the reviewed
+  enemy/pickup grid-input boundary. Three ALAS archive values
+  (`war_archives_20230525_cn`, `war_archives_20230803_cn`, and
+  `war_archives_20240725_cn`) have no matching card in the pinned CN game data
+  and fail only that requested task. Other archive cards share the offline
+  navigation contract but are not claimed as individually live-qualified.
+
+### Meowfficer Fort typed action boundary is complete offline
+
+- The current dock reports Fort `0/8`. A typed inspection of the Fort page
+  confirmed that all eight slots are empty; its `batch` control opens the cat
+  assignment page rather than performing chores. The selection page was
+  closed without choosing a cat or consuming resources.
+- Semantic mode now asks the adapter for the exact dock state before the
+  original `meow_fort()` red-dot branch. With zero occupied slots it returns
+  `False` without input, allowing the original task to schedule normally.
+  When at least one cat is already assigned, the adapter now enters the
+  original Fort page and runs only the exact active `play`, `feed`, or `clean`
+  controls derived from the reviewed clone hierarchy, stopping when the typed
+  chore list becomes empty. It does not assign or rearrange the user's cats.
+- The controlled original-task run preserved every typed resource and counter,
+  injected no Android input, used no mutation dispatch, and scheduled the next
+  server update. Evidence is
+  `integration/alas/meowfficer-fort-empty-live-validation-receipt-20260826-r1.json`.
+  The occupied-slot action path is covered offline and can re-enter live
+  qualification after at least one cat is assigned in game and a real chore
+  becomes available.
+
+### Meowfficer once-a-day collection and requeue is live complete
+
+- The original pinned `RewardMeowfficer.run()` remains the task owner. In
+  semantic mode its existing `once_a_day` branch now reads exact dock/training
+  counters, collects one completed cat when dock capacity permits, evaluates
+  the acquisition rarity and typed talent sprites, reuses the original queue
+  order, closes the training page, and writes the original 150–210 minute
+  schedule.
+- A controlled API 32 x86_64 run started with 8 completed slots and collected
+  one ordinary tiered-talent SSR. With `RetainTalentedGold=true`, the adapter
+  proved that its three talents were tiered and cancelled the unnecessary lock
+  prompt. It then auto-selected one gold box, confirmed the exact `1/1` queue,
+  and returned to the dock.
+- The postcondition was capacity `37/40 -> 38/40`, completed slots `8/10 ->
+  7/10`, and gold boxes `469 -> 468`; coins stayed `109505` and purchase quota
+  stayed `15/15`. All nine inputs
+  have semantic IDs, generations, and Unity paths; raw mutation dispatches are
+  zero. Evidence is
+  `integration/alas/meowfficer-train-positive-live-validation-receipt-20260826-r7.json`.
+- Tierless or otherwise unknown talents remain conservatively classified as
+  special. The exact acquisition `lock`/`unlock` controls and the nested
+  confirmation are now typed, so enabled purple/gold retention locks the card
+  before continuing; generation rather than card identity permits multiple
+  visually identical cats to be collected in one seamlessly run.
+- The enhancement port now selects the configured 1–12 target by exact card
+  bounds, admits material only at or below `MaxFeedLevel`, proves each selected
+  marker and the `n/10` counter, submits through the exact nested confirmation,
+  and requires generation advance plus a coin decrease without level
+  regression. No-material, level-30, coin-limit, invalid-index, and in-battle
+  conditions preserve the original ALAS result contract. Sunday and
+  `seamlessly` plans are therefore admitted again.
+- Live typed inspection also closed the current-client hierarchy drift: the
+  dock exposes 16 numeric `frame/content/0..15/info` cards instead of the old
+  `ComanderCatTpl/info/icon` sample. Both exact structures are supported and
+  covered. The current visible first 12 ALAS targets are all level 30, so an
+  `EnhanceIndex=1`, `MaxFeedLevel=5` run returned `leveled_max` before input;
+  coins, capacity, box counts, and every dock counter remained identical and
+  no raw mutation dispatch occurred. Evidence is
+  `integration/alas/meowfficer-enhance-level-max-live-validation-receipt-20260826.json`.
+- Positive purchasing also sets the exact requested count and verifies quota,
+  coin, and total-box deltas. These new positive purchase, occupied Fort,
+  multi-collect, special-lock, and enhancement branches are offline-complete;
+  live promotion remains pending on their corresponding natural states. For
+  enhancement specifically, re-entry requires a visible configured target
+  below level 30 plus at least one unlocked material at or below
+  `MaxFeedLevel`. The panel therefore remains `B`.
+
+## 2026-08-25
+
+### EventSp official auto-search main path is live complete
+
+- The original pinned `EventSp` task started from the semantic main page,
+  selected `event_20260813_cn/SP`, proved the exact remaining `1/1` attempt,
+  100% clear state, official auto-search availability, and the reviewed
+  `(fleet1, fleet2, submarine) = (1, 2, 0)` tuple before its only sortie.
+- The fleet tuple already matched, so no fleet mutation occurred. Generation
+  `687801 -> 687952` proved the sortie and `CombatUIStandard(Clone)` handoff.
+  The game then owned the complete map and combat path for 315 seconds; ALAS
+  sent no combat, grid, viewport, camera-positioning, or recovery input.
+- The same supervised runner observed official combat-auto at generation
+  `691127`, the Boss total-reward exit at generations `691162/691163`, returned
+  to the event page, and read the exact `0/1` attempt at generation `691263`.
+  `StopCondition.RunCount` persisted `1 -> 0` and the task scheduled the next
+  server update at `2026-08-26 00:00`.
+- The qualification passed with `run_result=true`, an empty validation-error
+  list, `recovery_total=0`, and no raw-input fallback. The first invocation on
+  the retained older materialized tree stopped before worker launch or Android
+  input because its source did not match the required rollback guard; the
+  successful run used a clean locked `81ccf63` worktree with the authoritative
+  89-member patch series. Evidence is retained in
+  `integration/alas/eventsp-sp-auto-search-live-validation-receipt-20260825-r10.json`
+  and
+  `integration/alas/eventsp-sp-auto-search-live-validation-receipt-20260825-r11.json`.
+- EventSp is promoted from partial (`P`) to main-path complete (`L`), not full
+  (`F`). Other fleet tuples, non-default shared campaign fields, and future
+  event layouts remain localized qualification work.
+
 ## 2026-08-23
 
 ### Apple Silicon Mac reaches the typed G4 login boundary under HVF
@@ -21,6 +240,195 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   login, the main page, an ALAS workload, recovery, cleanup, soak, or a dedicated
   `macos-hvf` backend. Evidence hashes and the retained-host boundary are in the
   [Mac/HVF login validation report](mac-apple-silicon-hvf-login-validation-report.md).
+
+## 2026-08-24
+
+### Event shared map capability is closed offline
+
+- The shared event entry now continues into the same typed ALAS map projection
+  for A/B/SP normal maps and the reviewed C1-D3 effective-hard maps. Unrelated
+  hard maps remain behind the existing 11-4 boundary.
+- The projection no longer treats a legal movable event enemy as static-map
+  drift. Typed sirens may leave `MS` cells only with
+  `MAP_HAS_MOVABLE_ENEMY`; typed normal enemies require the independent
+  `MAP_HAS_MOVABLE_NORMAL_ENEMY` capability. Boss and land placement remain
+  unchanged and fail closed.
+- Focused map/adapter validation passes without Android input. This is an
+  offline shared-capability closure only; EventB-D and EventSp still need their
+  own live map/combat/result receipts before support promotion.
+
+### GemsFarming now has typed normal and hard main paths
+
+- The pinned upstream `GemsFarming.run` method is executed directly in replay;
+  the adapter does not replace its campaign loop, ship-change ordering,
+  emotion/Lv32 handling, run-count decision, task switch, retry, or delay
+  state machine.
+- All six task-specific settings are validated before that method can act:
+  `ChangeFlagship`, `ChangeVanguard`, `CommissionLimit`, `CommonCV`, `CommonDD`,
+  and `EquipmentCode.ExportToConfig`. Replay admits all 600 legal combinations
+  and rejects six representative malformed values.
+- Branch replay covers defaults, every option enabled, Lv32 completion,
+  flagship-only emotion handling, exhausted run count, replacement failure
+  short-circuiting, and task switching. Its mutation budget is zero and it
+  performs no Android input.
+- Semantic mode now preserves that original loop while replacing only its
+  normal Formation fleet-index read, Dock filters/candidates, and exact
+  flagship/first-vanguard selection and confirmation. Candidate cards bind
+  duplicate ship IDs by card bounds and carry typed name, sprite, class,
+  rarity, level, emotion, fleet/status and actionable bounds. The original
+  ALAS `max(...)` choice and flagship fleet-precedence rules remain unchanged.
+- The normal-mode `ship_equip` branch now keeps ALAS's original
+  unload/change/mount order and replaces only `ship_equipment_take_off/on`.
+  Pinned ALAS equipment codes contain exactly five entries (`0/0/0/0/0` for
+  the empty code), so the typed port captures and transfers only the five
+  regular slots by exact ID and enhancement. Special weapons remain attached
+  to the source ship. The port rejects assigned duplicate inventory cards,
+  proves every mounted regular slot, and retains the pending loadout after a
+  localized failure so recovery can resume.
+- Live validation on the pinned API 32 x86_64 AVD selected Fleet 6, admitted
+  ten eligible common carriers and one exact level-100 common destroyer, then
+  confirmed Langley in `main_1` and Spence in `vanguard_1` with a two-mutation
+  budget. The original Arromanches and Napoli were subsequently restored to
+  those same typed roles; final generation `289388` contains the original six
+  hero roots. The receipt is
+  `integration/alas/gems-farming-normal-ship-live-validation-receipt-20260824-r1.json`.
+- That receipt also closes two field-level omissions in the support ledger:
+  `CommonCV=any` selected Langley, while `ChangeVanguard=ship` with
+  `CommonDD=any` selected Spence and proved it in `vanguard_1` before restoring
+  Napoli. These are live-partial values; the named CommonDD selectors are not
+  inferred from them.
+- A controlled Fleet 1 flagship development run initially captured all six
+  visible slots. Review against pinned ALAS then corrected that overreach:
+  `51000/11260/26600/1260/600`, all at `+10`, are the five equipment-code
+  slots, while special weapon `12300 +10` must remain attached to South
+  Dakota. A clean same-ship five-slot unload/mount round trip passed live.
+- A later live attempt additionally proved `+0` equipment as an icon with no
+  level Text, the occupied-slot `EquipmentInfoUI` action labels, bounded Dock
+  virtual-list stabilization, and both `UICamera`/`OverlayCamera` detail-back
+  paths. The implementation now replaces occupied slots individually, unloads
+  target-only regular slots, admits an absent locked special slot on level-1
+  ships, and avoids the surface-fleet-to-submarine wrap at Fleet 6 -> 1.
+- Production-candidate non-empty `ship_equip` now has a live receipt. Opening
+  Fleet 6 `main_1` records the current typed ship sprite and fleet index, so
+  its Dock card is classified as `current` instead of incorrectly satisfying
+  `status=free`. This preserves ALAS's same-fleet-first/fallback precedence
+  while exposing the two genuinely free Ranger cards. The original
+  `max(level, emotion)` decision selected the first tied free card, production
+  `take_off -> replace -> take_on` transferred Ranger's existing slot 1
+  `18100 +0` and slot 2 `19000 +0`, and generation `109477` read both items
+  back from the target Ranger. Fleet 6 retained a Ranger flagship with the
+  same loadout and the UI returned to Fleet 1 at generation `109588`. Duplicate
+  Rangers expose the same typed ship ID, so hidden instance identity is not
+  claimed. See
+  `integration/alas/gems-farming-normal-ship-equip-live-validation-receipt-20260825-r2.json`.
+- The earlier incompatible paths remain fail-closed: Fleet 1 South Dakota ->
+  Ranger rejected battleship gear and Fleet 6 Arromanches -> Ranger rejected
+  ship-restricted gear. The earlier Ranger -> Langley empty-code run still
+  covers only the empty branch.
+- A clean live qualification now covers the complete normal `1-1` path in one
+  uninterrupted original `GemsFarming.run` invocation: it starts on the
+  campaign page, enters chapter 1-1, sorties Fleet 6 as the exact single-fleet
+  profile, completes the ordinary and boss battles, handles both result
+  stacks, persists `StopCondition.RunCount` one-to-zero and
+  `Scheduler.Enable=false`, and returns to the campaign page without raw-input
+  fallback. The camera boundary re-proves the
+  complete logical map across Unity's boss-appearance translation/perspective
+  motion; non-uniform movement still fails closed when a translated hazard
+  area must be preserved, and degenerate axes on a one-row map do not create
+  false movement. One exact no-progress grid retry is admitted only with an
+  additional combat budget unit and a completely unchanged fleet, enemy,
+  ammunition, and map state. See
+  `integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json`.
+- Hard mode is now a live main path, but not every hard stage is compatible
+  with Ranger. The 11-4 first Fleet 1 main slot exposes `label_7`, and the
+  extracted game tables identify type 7 as a full carrier; Ranger 107041 is
+  type 6, a light carrier. The previous empty result was therefore the correct
+  structural outcome, not a broken Dock filter. The reviewed 12-1 profile has
+  a type-6-compatible first main slot and retains the original ALAS
+  `fleet1_all_fleet2_standby` role assignment.
+- A bounded 12-1 vacancy run removed only the existing Fleet 1 flagship, then
+  let the original `HardNotSatisfied -> hard_fleet_prepare()` branch own the
+  replacement. The typed Dock admitted three free Rangers and original ALAS
+  `max(level, emotion)` selected the level-9/emotion-119 card. The confirmed
+  postcondition was ship 107041, sprite `tujizhe`, in the flagship role, after
+  which both hard fleets were satisfied. See
+  `integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r25.json`.
+- The immediately following original task run completed the already-progressed
+  12-1 Boss map, results, award close, stable campaign-page return, RunCount
+  one-to-zero and scheduler disable with no raw-input fallback. See
+  `integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r26.json`.
+  Its historical top-level `passed=false` is a runner-classification defect:
+  that version required a replacement to occur again in the completion run,
+  although `run_result=true` and every task-completion postcondition passed.
+  The runner now requires replacement evidence only when
+  `--seed-hard-vacancy` explicitly requests that component. The two immutable
+  receipts are retained rather than rewritten or consuming another unchanged
+  hard attempt merely to alter the classifier bit.
+- GemsFarming is therefore promoted from partial (`P`) to main-path complete
+  (`L`), not full (`F`). A clean five-slot cross-ship compatibility path and
+  the unexercised replacement-trigger branches for Lv32/emotion remain
+  localized fail-closed gaps. A real
+  `[ConnectionReset]` overlay was recovered only through its exact reviewed
+  confirm target; map cells stayed blocked while the overlay was present.
+  Edge-clamped camera motion retains its typed-map identity and upper-bound
+  checks without imposing a post-input minimum displacement. The `extra`
+  value `enhanceable` is only ALAS's candidate filter; GemsFarming has no
+  separate post-replacement enhancement action to qualify.
+- A later read-only account preflight cycled all six normal fleets, opened only
+  the typed first-vanguard detail, and read five occupied regular equipment
+  slots on every source ship. The primary guns are cruiser/large-cruiser-class
+  rather than a prepared empty DD loadout, so this account has no low-risk
+  empty-source shortcut for a Spence `ship_equip` run. No fleet or equipment
+  mutation occurred, Fleet 1 was restored, and the exact Formation back target
+  returned to the main page. The preflight receipt is
+  `integration/alas/gems-farming-vanguard-equipment-preflight-20260825-r1.json`;
+  it records a re-entry condition rather than promoting the unsupported branch.
+- That re-entry condition has now been exercised with a reversible empty-source
+  fixture. Production typed take-off captured Napoli's exact five regular slots,
+  the ordinary `CommonDD=any` decision selected the sole level-100 Spence, and
+  production take-on proved the empty target loadout. Cleanup then found Napoli
+  by exact ship ID and sprite through a bounded typed Dock traversal and restored
+  all five original slots. The fifth inventory slot required one fail-closed
+  retry; no approximate item was selected. Fleet 1 and the main page were
+  restored at generation `607249`. This promotes the `ship_equip` value only
+  for an empty source; non-empty five-slot cross-ship compatibility remains a
+  localized gap. See
+  `integration/alas/gems-farming-vanguard-ship-equip-live-validation-receipt-20260825-r1.json`.
+- A second reversible fixture closes the genuinely non-empty vanguard transfer.
+  Game tables prove Napoli's slot-4 `1760 +10` steering gear and slot-5
+  `2400 +10` repair toolkit admit Spence's type-1 destroyer. Production
+  take-off captured those two slots, `CommonDD=any` again selected the sole
+  level-100 Spence, and production take-on read both exact items back from
+  Spence. They were then unloaded before restoring Napoli, so no equipment was
+  stranded on the temporary ship; Napoli's original five slots and Fleet 1
+  were restored at generation `637655`. The first target inventory traversal
+  failed closed before mounting `1760`; the exact retry passed. Store reset now
+  proves the upper scroll boundary instead of assuming any visible grid index
+  below seven is already at the top. See
+  `integration/alas/gems-farming-vanguard-ship-equip-live-validation-receipt-20260825-r2.json`.
+- A zero-mutation Fleet 6 Dock preflight exercised every named CommonCV filter.
+  Bogue exposed one free candidate, Hermes two, Langley none on the current
+  account, and Ranger two; no candidate was confirmed and the exact Dock and
+  Formation cancel targets returned to the main page. This extends live
+  observation coverage without claiming action-qualified named selectors. See
+  `integration/alas/gems-farming-common-cv-filter-preflight-20260825-r1.json`.
+- The following CommonDD probe exposed a real atomicity defect: if Dock filter
+  snapshots failed to stabilize, `CustomIndexUI(Clone)` remained open and the
+  generic Dock cancellation could not own the surface. Candidate observation
+  now rolls back through the unique reviewed red filter cancel and then the
+  exact Dock cancel before re-raising the original classified error. A live
+  occurrence returned through Formation to the main page with no ship or
+  equipment mutation; named CommonDD values remain unpromoted. See
+  `integration/alas/gems-farming-filter-recovery-live-validation-receipt-20260825-r1.json`.
+- All four named CommonDD values now have zero-mutation live filter evidence.
+  `favourite` returned an empty page. The Aulick/Foote and Cassin/Downes faction
+  filters exposed the free level-100 Spence, but their exact name rules
+  correctly excluded it. The Z20/Z21 filter exposed the exact two named ships,
+  both level 77 with non-free `green` status, so the level-100/free admission
+  contract rejected them. No ship was confirmed and Fleet 1/main were restored
+  at generation `646434`. These are observation-qualified safe empty results;
+  only `CommonDD=any` is action-qualified on this account. See
+  `integration/alas/gems-farming-common-dd-filter-preflight-20260825-r1.json`.
 
 ## 2026-08-22
 
@@ -735,7 +1143,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   availability, navigation, battle execution, rewards, postconditions,
   observation, and all Android input remain unadapted.
 
-### Raid/RaidDaily: exact configuration gates with recorder-only final inputs
+### Raid/RaidDaily: current Raid four-mode live path with localized qualification gaps
 
 - `Raid.Mode` admits only the four declared difficulties and `Raid.UseTicket`
   only real booleans before `RaidRun` work begins. The ticket-confirmation
@@ -747,9 +1155,149 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   ordered subsets of `easy`/`normal`/`hard`/`ex`. The normal forwarding and
   EX reward-routing decisions execute only in memory; invalid filters stop
   before any RaidDaily stateful boundary.
-- This promotes only offline evidence for the three fields. Raid navigation,
-  activity availability, run counts, combat, reward collection,
-  postconditions, observation, and all Android input remain unadapted.
+- The pinned `raid_20260212` daily counter now reads the exact typed
+  `BossRushVerSardiniaSPUI/Battle/Nodes/5001..5004` surface for
+  `easy`/`normal`/`hard`/`ex`. Non-EX values must be a unique `n/15` counter;
+  EX uses its exact `times/Text` path. Unknown events, roots, duplicate values,
+  stale generations, and malformed counters fail closed. The original
+  `RaidDaily.run()` loop owns filtering, retries, execution, and scheduling;
+  pixel mode is unchanged, while semantic mode does not enter the still
+  unsupported optional Raid reward-dot branch.
+- The current CN `raid_20260827` surface is independently typed from the pinned
+  baseline: `ActivityBossAmatsukazeUI(Clone)` must expose exactly the reviewed
+  easy/normal/hard/EX slots plus the distinct advanced-challenge slot. Remaining
+  attempts and PT are exact text reads; swapping EX with the advanced challenge,
+  duplicate counters, stale frames, blockers, or incomplete fleet/precombat
+  state fail closed at the affected Raid action.
+- The original ALAS `RaidRun` state machine now owns the current semantic flow:
+  main-to-Raid entry, difficulty selection, fleet recommendation/readiness,
+  precombat entry, the optional first-time informational notice, one bounded
+  re-entry after that notice, true sortie, battle result cleanup, and return to
+  the Raid page. Only the true precombat start consumes the sortie grant.
+- Four controlled one-battle runs completed through the original ALAS task with
+  no raw-input fallback. The authoritative receipts record `easy` `14→13` and
+  PT `30→60`, `normal` `15→14` and PT `60→130`, `hard` `15→14` and PT
+  `130→250`, and `ex` ticket `1→0` and PT `250→562`:
+  `integration/alas/current-raid-easy-live-validation-receipt-20260827-r10.json`,
+  `integration/alas/current-raid-normal-live-validation-receipt-20260829-r8.json`,
+  `integration/alas/current-raid-hard-live-validation-receipt-20260829-r2.json`,
+  and `integration/alas/current-raid-ex-live-validation-receipt-20260829-r6.json`.
+- The 2026-08-29 resource update kept APK `9.7.10` and advanced the live hot
+  resource version to `9.7.343`. It exposed three additive compatibility gaps:
+  a non-EX counter disappears when it reaches zero, the Raid cards animate
+  briefly after a result, and an off-page precombat probe could observe an
+  independently advancing UI generation. The adapter now accepts a hidden
+  zero only after two coherent generations prove the other counters and exact
+  page health, passively waits through the result mount window, and reads the
+  full precombat projection only after its exact start candidate exists.
+- The original `RaidDaily` task also completed a controlled zero-ticket branch
+  on hot version `9.7.343`: `StageFilter=ex`, all five Reward collection flags
+  disabled, and fleet-mutation/sortie/combat budgets all zero. EX remained
+  `0→0`, PT remained `592`, no stage/fleet/sortie receipt was emitted, the task
+  returned to the Raid page, and ALAS scheduled the next server-update run.
+  `integration/alas/current-raid-daily-empty-ex-live-validation-receipt-20260829-r1.json`
+  is the authoritative limited-live receipt.
+- After the 2026-08-30 reset, the original task cleared the last four `easy`
+  attempts and moved PT `1112→1232` with exactly four stage/fleet/sortie
+  sequences and no raw fallback. That first receipt remains deliberately
+  failed because the then-unmapped hidden-zero post-read terminated after the
+  useful game work. A fresh run with `easy=0` subsequently passed: no battle
+  input, no PT change, exact Raid-page return, and natural next-day scheduling.
+  The authoritative post-fix receipt is
+  `integration/alas/current-raid-daily-easy-zero-state-live-validation-receipt-20260830-r1.json`;
+  the failed diagnostic is retained as
+  `integration/alas/current-raid-daily-easy-full-clear-live-validation-receipt-20260830-r1.json`.
+- Reward-enabled EX is now closed across an honestly segmented recovery chain.
+  The first run dispatched exactly one original mission claim and exposed three
+  EX tickets, then failed on the returning TaskScene identity before any EX
+  input. A deliberately interrupted first EX battle was reattached through the
+  original `Combat.combat_execute()` path; five typed result/reward receipts
+  drained its orphan result and left EX `2`, PT `1544`. The final passing run
+  consumed those two tickets in one `RaidDaily` instance, moved EX `2→0` and PT
+  `1544→2168`, and emitted exactly two stage/fleet/sortie sequences. The honest
+  r1/r3 failures and r4 pass are kept separately instead of being presented as
+  one uninterrupted pass:
+  `integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r1.json`,
+  `integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r3.json`,
+  and `integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r4.json`.
+- A second live recovery chain consumed the two EX tickets that were already
+  present on the account, moving EX `2→1→0` and PT `4828→5140→5452` (+312 per
+  battle). Both battles used the original RaidDaily stage/fleet/sortie and
+  combat paths. Retained failed segments exposed four adapter-boundary gaps:
+  ALAS's `POPUP_CONFIRM_COMBAT_EXECUTE` suffix, a NetworkDown overlay racing
+  `GOTO_MAIN` and unrelated login probes, the obsolete pixel-only
+  `RAID_REWARDS` probe after the current Raid page had returned, and unrelated
+  page-shell reads after a coherent Raid owner was already known. Each fix is
+  localized to its exact typed owner. The final zero-budget run read EX `0`
+  twice, preserved PT `5452`, emitted no stage/fleet/sortie receipt, returned
+  `task_result=true`, and let the original task take its zero-ticket scheduling
+  tail. The combined receipt references and hashes every retained source
+  segment:
+  `integration/alas/current-raid-daily-existing-two-ex-segmented-live-validation-receipt-20260830-r1.json`.
+  This qualifies RaidDaily's existing-ticket EX recovery, not the separate
+  `Raid.UseTicket=true` positive multiple-sortie selection/commit branch.
+- A final combined-filter run used `StageFilter="easy > normal"` with `easy=0`
+  and `normal=14`. The same original task instance skipped easy without input,
+  completed all fourteen normal battles, moved normal `14→0` and PT
+  `2168→3148`, emitted exactly fourteen stage/fleet/sortie sequences, used no
+  reward or recovery path, and scheduled `RaidDaily` for the next server day.
+  `integration/alas/current-raid-daily-easy-normal-full-clear-live-validation-receipt-20260830-r2.json`
+  is the authoritative pass.
+- A fresh original `Restart` scheduler task then cold-started the game with the
+  mandatory `-force-gfx-st` contract, turned PID `5252→7648`, completed the
+  typed login to main, scheduled itself for the next server day, and left no
+  new ADB forward. The verified `restart-warm` capture contains 1,829 trace
+  records and no in-game resource capability:
+  `integration/alas/current-raid-restart-warm-workload-20260830-r1`.
+  Immediately afterward, `StageFilter="easy > normal"` re-entered the current
+  Raid on PID `7648`, read both cleared stages as zero, kept PT at `3148`,
+  emitted no stage/fleet/sortie/mission receipt, used no raw fallback, and
+  scheduled `RaidDaily` again. The post-restart pass is
+  `integration/alas/current-raid-daily-post-restart-zero-state-live-validation-receipt-20260830-r1.json`.
+- The upstream `RaidDaily` configuration locks `StopCondition.RunCount` to
+  zero, so the integration no longer propagates a pseudo single-battle limit;
+  bounded validation budgets stay in the evidence runner rather than changing
+  the task state machine. On current `raid_20260827`, `Raid.UseTicket=false` is
+  live-qualified. The original Raid state machine now also admits
+  `Raid.UseTicket=true` through one narrow zero-ticket compatibility branch: it
+  opens the exact multiple-sortie panel, requires count `1`, ticket `0/0`, and
+  the unique disabled-ticket marker, closes the panel, then falls back to one
+  ordinary sortie. Positive ticket selection, toggle, and final commit remain
+  localized fail-closed actions rather than being guessed.
+- A zero-sortie-budget live probe now maps the update's exact
+  `ActivityBossPrecombatUI(Clone)/adapt/right/multiple` entry and
+  `ContinuousOperationWindowUI(Clone)/window/top/btnBack` close action. The
+  panel proved default count `1`, hard bonus count `14`, estimated oil `25`,
+  and ticket inventory `0/0`; its ticket checkbox was disabled with
+  `checkmark_ban`. Six typed navigation inputs opened the hard precombat page,
+  opened and closed this panel, and returned through fleet selection to Raid.
+  Hard remained `14/15`, PT remained `3148`, and the sortie grant stayed zero.
+  The zero-ticket fallback is covered by focused parser/adapter tests, fresh
+  patched-tree compilation, login/frame-clock replays, and a pixel-boundary
+  verifier with zero unclassified access or Android input. Its end-to-end live
+  execution still awaits the next attempt reset because all ordinary attempts
+  are currently zero. Positive count selection, ticket toggle, and the panel's
+  battle commit remain closed.
+- The distinct fifth slot now has an exact `raid/advanced/entry` typed input,
+  separate from EX. A zero-sortie-budget live click in the current zero-ticket
+  state stayed on the reviewed Raid root and exposed no fleet, precombat, or
+  advanced surface. It was not repeated and consumed no resource; advanced
+  execution remains unsupported rather than being guessed from the EX flow.
+- Hard was then cleared from `14→0` and PT moved `3148→4828` across an honestly
+  segmented recovery chain. r3 completed eight battles before a fleet-start
+  transition stopped advancing; r4 completed one battle before the host-side
+  runner hung at its typed result, whose orphan result was recovered by r5;
+  r5 completed one more battle and exposed the missing current-Raid result
+  owner; after that owner was added, r6 recovered the retained result and
+  completed the final four battles. The chain emitted fourteen real sorties,
+  used no raw-input fallback, and consumed the hard grant `14→0`, but it is not
+  presented as one uninterrupted pass. The final passing receipt is
+  `integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r6.json`;
+  r3 and r5 remain as the corresponding failed receipts.
+- Actual cross-day wakeup, end-to-end live zero-ticket fallback, a positive
+  ticket-consuming final commit, advanced challenge execution, and a complete
+  easy round remain open. Normal has an uninterrupted full clear; hard has the
+  segmented recovery-backed full clear described above.
 
 ### Hospital: recommendation switch replayed before any UI work
 
@@ -855,12 +1403,26 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `task_delay(5) -> task_call() -> task_stop()` sequences. Static evidence pins
   every runtime consumer across campaign, coalition, raid, hospital, and
   auto-search combat modules.
-- Nine malformed/bounds cases fail closed. No event PT or coin was read from a
-  live account, no task was actually disabled, called, delayed, or stopped, and
-  no Android input occurred. Live promotion still requires typed page-specific
-  PT/coin observations, server/local-time correlation, and scheduler recovery
-  receipts proving the target task starts without a loop; only offline
-  dimensions are promoted here.
+- Nine malformed/bounds cases fail closed. `PtLimit` now reads only the exact
+  active `xNNN` Unity text on a fully proven event selector; malformed,
+  truncated, duplicated, incoherent, or wrong-page records fail closed. On the
+  current CN account, `17060/17060` stopped before sortie with oil unchanged at
+  11119, while `17060/17061` admitted exactly one D1 run and returned with
+  17180 points and 10925 oil. Both receipts used the original ALAS disable/run
+  paths and no raw-input fallback. `TimeLimit` subsequently completed both live
+  directions: an expired limit stopped with zero sortie, while a future limit
+  admitted one C1 run.
+- TaskBalancer now reads only the exact active event `gold_value`, brackets it
+  with the same proven event surface, and rejects malformed, truncated, stale,
+  duplicated, or wrong-stage values. The live account yielded coherent typed
+  coin observations without pixel access. The last bounded D3 run completed at
+  23:59:35, but ALAS reloaded scheduler state and switched to an already-due
+  `Restart` before evaluating the coin threshold. The failed receipt
+  `integration/alas/event-general-task-balancer-main-live-validation-receipt-20260826-r9.json`
+  is retained as blocker evidence, not support evidence. The validation runner
+  now writes unrelated-task isolation into its one-use temporary seed so a
+  later event can re-enter directly; real Main/Main2/Main3 switch recovery and
+  anti-loop evidence remain missing.
 
 ### Submarine shared configuration: inactive surface complete, active input refused
 
@@ -1390,7 +1952,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   selected-target identity, long-running recovery, and rare popup branches
   remain incomplete, so both daemon panels stay `P`.
 
-### Battle Pass collection switch: offline dispatch contract passed
+### Battle Pass collection: typed ordinary-claim live path passed
 
 - `BattlePass.Collect` admits only exact booleans. Its guard is the first
   executable statement of `Freebies.run()`, before any BattlePass, DataKey,
@@ -1398,11 +1960,15 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - Replay executes both original dispatch branches. Disabled mode retains Mail
   without touching BattlePass; enabled mode preserves BattlePass before Mail.
   The final `task_delay(server_update=True)` remains exact in both cases.
-- Seven non-boolean values fail at zero events. Every child is a recorder;
-  mutation budget is `0`, and no navigation, reward claim, or Android input
-  occurs. Only `offline` becomes complete. Real entrance/red-dot observation,
-  free versus paid rewards, no-reward handling, claim receipts, and recovery
-  remain incomplete, so Freebies stays `P`.
+- Seven non-boolean values still fail at zero events in replay. Live typed
+  validation then identified the exact Reward entrance and World Cruise page,
+  clicked only ordinary `btn_all`, closed the delayed AwardInfo receipt, and
+  proved the ordinary claim notice absent afterward. The separate paid
+  `btn_pay`/lock control was never clicked and no premium input was issued.
+- A later original `Freebies` run also completed the no-reward branch and
+  recovered from an inherited Shop page through exact `shop/home`. Paid-track
+  collection and broader account/season variants remain unqualified, so the
+  field is live-partial and the panel stays `P`.
 
 ### Global Optimization runtime settings: offline original-method replay passed
 
@@ -1807,7 +2373,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   `offline=complete`; live nonzero-oil starts, each preset against changing
   rows, major dispatch, cancellation, and consecutive scheduling remain open.
 
-### Data Key collection configuration: offline contract passed
+### Data Key collection: typed full-capacity live branch passed
 
 - `DataKey.Collect` and `DataKey.ForceCollect` admit exact booleans at the
   beginning of original `Freebies.run()`, before BattlePass, DataKey, Mail, or
@@ -1816,11 +2382,29 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - Pinned replay covers all four switch combinations and 12 invalid
   single-field cases. Original `DataKey.data_key_collect()` is also replayed
   for already-collected, exact-full forced/unforced, and one-slot-free states.
-- The real `_data_key_collect()` loop is never called. Mutation budget is `0`,
-  with no key receipt, page input, popup confirmation, or Android injection.
-- Both fields move only to `offline=complete`. The existing 300/300 live
-  observation is not evidence for forced collection, a new key receipt,
-  capacity-limit popup handling, or post-claim inventory changes.
+- The exact uncollected `state_before` control now has a typed final-input
+  method. It requires the reviewed Archives root, coherent EX/SP toggle state,
+  one uncollected control with delegated raycast, valid bounds, no blocker, and
+  the exact foreground package. An already-collected or ambiguous state cannot
+  dispatch input.
+- The original `Freebies` task ran live with `DataKey.Collect=true`,
+  `ForceCollect=false`, all Mail mutations disabled, and SupplyPack/BattlePass
+  disabled. It observed `300/300`, preserved the uncollected state, made zero
+  Data Key claim calls, returned success, and scheduled `2026-08-26 00:00:00`.
+  The temporary ALAS config was removed; the receipt is
+  `integration/alas/freebies-data-key-capacity-live-validation-receipt-20260825-r1.json`.
+- The full-capacity warning popup is now typed structurally: it requires the
+  reviewed Archives root, exact `300/300`, both custom buttons, and the zero-key
+  warning markup. Live validation opened it through the exact collect control
+  and safely clicked typed cancel, proving the counter remained `300/300`.
+  Confirm is exposed only inside the original DataKey flow when
+  `ForceCollect=true` and a preceding collect receipt exists. It has now been
+  clicked live after the exact claim; the standard AwardInfo overlay was closed
+  through its exact target. Because the daily transition is irreversible, the
+  initial run and final postcondition are split: an independent original-task
+  rerun proves active `state_after` sprite `remaster_key_got`, counter `300/300`,
+  and zero repeated claim/confirm actions. A single uninterrupted passing
+  receipt must wait for the next uncollected day; this is not reported as one.
 
 ### Campaign shared switch configuration: offline contract passed
 
@@ -1856,7 +2440,7 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   weekly claim postconditions, red dots, number rows, empty pages, and special
   ship rewards remain live gaps and are not inferred from replay.
 
-### SupplyPack collect and weekday configuration: offline contract passed
+### SupplyPack typed zero-price boundary and no-free live path passed
 
 - `SupplyPack.Collect` admits only booleans at the beginning of original
   `Freebies.run()`, before BattlePass, DataKey, Mail, or SupplyPack can run.
@@ -1868,10 +2452,15 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
 - Pinned replay executes original `Freebies.run()` and `SupplyPack.run()` for
   both collect values, all seven target weekdays against Wednesday, and the
   exact 21000-oil guard: 14 accepted and 10 invalid cases.
-- The real `supply_pack_buy()` method is never called; replay records only
-  whether ALAS would produce a free-pack candidate. Mutation budget is `0`,
-  with no claim, item change, page input, or Android injection. Both fields
-  move only to `offline=complete`; current live absence is not a claim receipt.
+- The adapter now identifies only a unique numeric gift card whose name is a
+  free/weekly label and whose displayed price is exactly `0` or `免费`; paid
+  cards are excluded by focused tests. The post-card purchase confirmation is
+  still fail-closed until a natural free-card sample can be reviewed.
+- The original combined `Freebies` task was rerun live with oil `4477`, reached
+  the typed gift-pack page, observed no free card, performed zero purchase
+  actions, returned success, and scheduled `2026-08-27 00:00:00`. This completes the
+  no-free safe branch, not a real free-pack claim receipt, so both fields and
+  the Freebies panel remain partial.
 
 ### Hard stage and fleet configuration: offline contract passed
 

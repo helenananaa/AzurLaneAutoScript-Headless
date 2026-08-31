@@ -66,6 +66,7 @@ from scripts.python.run_alas_event_task_live_validation import (
     EVENT_SP_TEMPLATE_UNPROVEN,
     RUN_METHODS,
     _classify_event_sp_run_error,
+    _clock_delta_seconds,
     _configure,
     _event_sp_clean_start_stop,
     _event_sp_seed_name,
@@ -76,6 +77,7 @@ from scripts.python.run_alas_event_task_live_validation import (
     _finalize_parent_resources,
     _confirm_verified_map_operation_loaded,
     _install_verified_map_operation_importer,
+    _limit_resources,
     _materialization_control_record,
     _materialized_alas_proof,
     _materialized_alas_support_classification,
@@ -87,6 +89,7 @@ from scripts.python.run_alas_event_task_live_validation import (
     _admit_event_sp_template,
     _terminal_wrapper,
     _total_deadline,
+    _recover_inherited_dock_full,
     _recover_inherited_preparation,
     _read_worker_event_sp_template,
     _stage_difficulty,
@@ -279,7 +282,7 @@ def synthetic_materialization_control(binding: RunBinding) -> dict[str, object]:
 def synthetic_execution_budgets() -> dict[str, int]:
     return {
         "stage_entry": 1,
-        "fleet_mutation": 0,
+        "fleet_mutation": 4,
         "sortie": 1,
         "combat": 0,
         "grid_click": 0,
@@ -295,6 +298,37 @@ def bind_test_control(control: WorkerControl) -> WorkerControl:
 
 
 class AlasEventTaskLiveValidationTests(unittest.TestCase):
+    def test_limit_resources_do_not_read_event_points_from_main_page(self):
+        oracle = Mock()
+        self.assertEqual(
+            _limit_resources(
+                oracle, {"main_page": True, "event_page": False}
+            ),
+            (None, None),
+        )
+        oracle.event_points.assert_not_called()
+        oracle.campaign_oil.assert_not_called()
+
+    def test_limit_resources_read_both_values_from_event_page(self):
+        oracle = Mock()
+        oracle.event_points.return_value = 17180
+        oracle.campaign_oil.return_value = 10925
+        self.assertEqual(
+            _limit_resources(
+                oracle, {"main_page": False, "event_page": True}
+            ),
+            (17180, 10925),
+        )
+
+    def test_clock_delta_compares_absolute_instants(self):
+        self.assertEqual(
+            _clock_delta_seconds(
+                "2026-08-26T20:24:41+08:00",
+                "2026-08-26T12:24:40+0000",
+            ),
+            1.0,
+        )
+
     @staticmethod
     def event_sp_args(**overrides):
         values = {
@@ -302,7 +336,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             "stage": "SP",
             "use_auto_search": True,
             "stage_entry_budget": 1,
-            "fleet_mutation_budget": 0,
+            "fleet_mutation_budget": 4,
             "sortie_budget": 1,
             "combat_budget": 0,
             "viewport_swipe_budget": 0,
@@ -377,6 +411,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                 "Emulator": {
                     "Serial": "auto",
                     "ScreenshotMethod": "auto",
+                    "ControlMethod": "MaaTouch",
                 }
             },
             task: {
@@ -419,6 +454,10 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             payload["Alas"]["Emulator"]["ScreenshotMethod"],
             "ADB",
         )
+        self.assertEqual(
+            payload["Alas"]["Emulator"]["ControlMethod"],
+            "ADB",
+        )
 
     def test_daily_event_uses_single_stage_filter(self):
         payload = _configure(
@@ -455,11 +494,33 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             "fleet1_mob_fleet2_boss",
         )
 
+    def test_task_balancer_isolation_is_written_into_temporary_seed(self):
+        seed = self.seed("Event")
+        seed["Restart"] = {
+            "Scheduler": {
+                "Command": "Restart",
+                "Enable": True,
+                "NextRun": "2020-01-01 00:00:00",
+            }
+        }
+        payload = _configure(
+            seed,
+            serial="emulator-5580",
+            task="Event",
+            event="event_20260813_cn",
+            stage="D3",
+            use_auto_search=True,
+            isolate_task_scheduler=True,
+        )
+        self.assertTrue(payload["Event"]["Scheduler"]["Enable"])
+        self.assertFalse(payload["Restart"]["Scheduler"]["Enable"])
+        self.assertTrue(seed["Restart"]["Scheduler"]["Enable"])
+
     def test_event_sp_budgets_are_explicit_fail_closed_and_do_not_leak(self):
         environment_before = dict(os.environ)
         expected = {
             "stage_entry": 1,
-            "fleet_mutation": 0,
+            "fleet_mutation": 4,
             "sortie": 1,
             "combat": 0,
             "grid_click": 0,
@@ -473,7 +534,8 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             {"use_auto_search": False},
             {"stage": "A1"},
             {"stage_entry_budget": None},
-            {"fleet_mutation_budget": 1},
+            {"fleet_mutation_budget": 0},
+            {"fleet_mutation_budget": 5},
             {"sortie_budget": True},
             {"combat_budget": -1},
             {"viewport_swipe_budget": 1},
@@ -988,7 +1050,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             )
             self.assertEqual(
                 MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256,
-                "c391f5dbb986e6482bbd6cc14245007cfe2aa8bffc2eb1d57d662fe3396bcf4a",
+                "a0ac35cb40e6ad29711c0200598a77a18c88ec0060666adace3d46f30301f4d6",
             )
             self.assertEqual(
                 proof["canonical_source_sha256"],
@@ -996,7 +1058,7 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             )
             self.assertEqual(
                 MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256,
-                "d890a45505a7491eea73368295096d634f1acee2a85507ccfcc94e083664510a",
+                "0ddeec74cde1a94e686830d0504f07fc789aab85b7552073f4226779992e57f8",
             )
             self.assertEqual(
                 proof["canonical_source_sha256"],
@@ -1238,6 +1300,11 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
             "downstream-missing": replace_authoritative_once(
                 "                                self.handle_auto_search_setting()\n",
                 "",
+            ),
+            "rollback-stale-frame": replace_authoritative_once(
+                "                                    self.enter_map_cancel("
+                "skip_first_screenshot=False)\n",
+                "                                    self.enter_map_cancel()\n",
             ),
         }
         with tempfile.TemporaryDirectory() as directory:
@@ -3545,6 +3612,46 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
         oracle.cancel_campaign_fleet_preparation.assert_called_once_with("a1")
         oracle.cancel_campaign_map_preparation.assert_called_once_with("a1")
 
+    def test_inherited_d3_dock_full_is_left_for_alas_retirement_flow(self):
+        oracle = SimpleNamespace(
+            campaign_dock_full_visible=Mock(return_value=True),
+            campaign_preparation_state=Mock(return_value=None),
+            cancel_campaign_fleet_preparation=Mock(),
+            cancel_campaign_map_preparation=Mock(),
+        )
+
+        self.assertEqual(_recover_inherited_preparation(oracle, "D3"), 0)
+        oracle.campaign_preparation_state.assert_not_called()
+        oracle.cancel_campaign_fleet_preparation.assert_not_called()
+        oracle.cancel_campaign_map_preparation.assert_not_called()
+
+    def test_inherited_d3_dock_full_uses_alas_one_click_retirement(self):
+        oracle = SimpleNamespace(
+            campaign_dock_full_visible=Mock(return_value=True),
+            click_campaign_dock_full_choice=Mock(),
+            retirement_selection_state=Mock(return_value=SimpleNamespace()),
+        )
+        handler = SimpleNamespace(_retire_handler=Mock(return_value=10))
+        factory = Mock(return_value=handler)
+        instance = SimpleNamespace(
+            config=SimpleNamespace(Retirement_RetireMode="one_click_retire"),
+            device=object(),
+        )
+
+        self.assertEqual(
+            _recover_inherited_dock_full(
+                instance,
+                oracle,
+                "D3",
+                retirement_factory=factory,
+            ),
+            1,
+        )
+        oracle.click_campaign_dock_full_choice.assert_called_once_with(
+            "d3", "organize"
+        )
+        handler._retire_handler.assert_called_once_with(mode="one_click_retire")
+
     def test_inherited_hard_preparation_resolves_shared_normal_stage(self):
         class IdentityChanged(RuntimeError):
             pass
@@ -3635,6 +3742,31 @@ class AlasEventTaskLiveValidationTests(unittest.TestCase):
                     oracle.campaign_preparation_state.assert_not_called()
                 elif orphan:
                     oracle.campaign_preparation_state.assert_not_called()
+
+    def test_event_sp_exhausted_selector_stops_without_stage_input(self):
+        session = SimpleNamespace(
+            orphan_combat_result_visible=Mock(return_value=False),
+        )
+        oracle = SimpleNamespace(
+            campaign_preparation_state=Mock(return_value=None),
+            campaign_stage_state=Mock(
+                return_value=SimpleNamespace(remaining_attempts=0)
+            ),
+            click_campaign_stage=Mock(
+                side_effect=AssertionError("stage input is forbidden")
+            ),
+        )
+
+        stop = _event_sp_clean_start_stop(
+            session,
+            oracle,
+            {"login": False, "event_page": True},
+            "SP",
+        )
+
+        self.assertEqual(stop, "event_sp.clean_start.attempt_exhausted")
+        oracle.campaign_stage_state.assert_called_once_with("SP")
+        oracle.click_campaign_stage.assert_not_called()
 
     def test_startup_session_frame_is_available_without_ui_projection(self):
         source = __import__(

@@ -1,0 +1,165 @@
+{
+  "schema": "alas-headless.research-resource-policy-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "template",
+  "seed_config_sha256": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+  "configured": {
+    "Research.PresetFilter": "custom",
+    "Research.CustomFilter": "S9-Q",
+    "Research.AllowDelay": true,
+    "Research.UseCoin": "do_not_use",
+    "Research.UseCube": "do_not_use",
+    "Research.UsePart": "always_use"
+  },
+  "target_resource": "part",
+  "strategy": "always_use",
+  "expect": "insufficient_delay",
+  "source_sha256": {
+    "research": "c75e6c57308507bb912d2d7de1ded0bf39e825f03dbff7ab9eacc103c64e6077",
+    "selector": "a4c6da69e72f8e4d43c5f7769fad75d8e266faeedefc7a5684d1cd5e7a31edc2",
+    "adapter": "0453edc3ee766452860e2194bb968886700057bcda7fd47c7ee49adfb1a3cdd3",
+    "oracle": "411f3136cea6fa04e7667ab162c738cbc74e4697f86604cff1df9bc45bea43c0",
+    "runner": "efed9be943bbad73eeaf748da60371a6610cdd25c31fec4f81b895b0dfa8e553"
+  },
+  "passed": false,
+  "dispatches": [],
+  "reward_dispatches": [
+    {
+      "capability": "research.reward",
+      "selected_code": null,
+      "expected_prompt_cost": {
+        "resource_id": null,
+        "required": null
+      },
+      "semantic_id": "research/project/3",
+      "generation": 7339,
+      "path": "UICamera/Canvas/UIMain/TechnologyUI(Clone)/main/base_page/srcoll_rect/content/1",
+      "point": {
+        "x": 640.0,
+        "y": 360.0
+      }
+    }
+  ],
+  "research_detail_observations": [
+    {
+      "code": "Q-210-MI",
+      "subtitle": "小型项目",
+      "duration_seconds": 7200,
+      "resource_id": "17012",
+      "resource_owned": 36548,
+      "resource_required": 20,
+      "requirement": "-无-",
+      "can_start": true,
+      "can_queue": false,
+      "is_running": false,
+      "is_finished": false
+    },
+    {
+      "code": "Q-210-MI",
+      "subtitle": "小型项目",
+      "duration_seconds": 7200,
+      "resource_id": "17012",
+      "resource_owned": 36548,
+      "resource_required": 20,
+      "requirement": "-无-",
+      "can_start": true,
+      "can_queue": false,
+      "is_running": false,
+      "is_finished": false
+    },
+    {
+      "code": "Q-210-MI",
+      "subtitle": "小型项目",
+      "duration_seconds": 7200,
+      "resource_id": "17012",
+      "resource_owned": 36548,
+      "resource_required": 20,
+      "requirement": "-无-",
+      "can_start": true,
+      "can_queue": false,
+      "is_running": false,
+      "is_finished": false
+    }
+  ],
+  "delay_checks": [],
+  "network_recoveries": [],
+  "research_start_grant": 0,
+  "research_reward_grant": 1,
+  "login_recovery_performed": false,
+  "selector_calls": [
+    {
+      "enforce": false,
+      "projects": [
+        {
+          "code": "S9 E-315-MI",
+          "series": "S9",
+          "genre": "E",
+          "duration": "2",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 Q-210-MI",
+          "series": "S9",
+          "genre": "Q",
+          "duration": "2",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": true,
+          "valid": true
+        },
+        {
+          "code": "S9 Q-068-UL",
+          "series": "S9",
+          "genre": "Q",
+          "duration": "0.5",
+          "need_coin": true,
+          "need_cube": false,
+          "need_part": true,
+          "valid": true
+        },
+        {
+          "code": "S6 T-249-MI",
+          "series": "S6",
+          "genre": "T",
+          "duration": "6",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        },
+        {
+          "code": "S9 C-153-MI",
+          "series": "S9",
+          "genre": "C",
+          "duration": "6",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": false,
+          "valid": true
+        }
+      ],
+      "priority": [
+        {
+          "code": "S9 Q-210-MI",
+          "series": "S9",
+          "genre": "Q",
+          "duration": "2",
+          "need_coin": false,
+          "need_cube": false,
+          "need_part": true,
+          "valid": true
+        }
+      ]
+    }
+  ],
+  "error": "SemanticGateClosed: research start requires a positive budget",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_research_resource_policy_live_validation.py\", line 360, in validate\n    result[\"task_return\"] = task.run()\n                            ^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\research\\research.py\", line 648, in run\n    return self._run_alas_state_machine()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\research\\research.py\", line 618, in _run_alas_state_machine\n    self.research_fill_queue()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\research\\research.py\", line 532, in research_fill_queue\n    self.research_queue_append(drop=drop, add_queue=False)\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_research_resource_policy_live_validation.py\", line 329, in run_one_queue_append\n    return original_queue_append(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\research\\research.py\", line 491, in research_queue_append\n    result = self.research_select(priority, drop=drop, add_queue=add_queue)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\research\\research.py\", line 133, in research_select\n    ret = self.research_project_start_with_requirements(project, add_queue=add_queue)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\research\\research.py\", line 312, in research_project_start_with_requirements\n    return self.research_project_start(project, add_queue=add_queue)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\research\\research.py\", line 206, in research_project_start\n    started = semantic_session.start_research_project_code(\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 16231, in start_research_project_code\n    return self.open().start_research_project_code(code, position=position)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 8435, in start_research_project_code\n    raise SemanticGateClosed(\"research start requires a positive budget\")\nalas_headless.semantic_oracle.SemanticGateClosed: research start requires a positive budget\n",
+  "research_start_grant_remaining": 0,
+  "research_reward_grant_remaining": 0,
+  "temporary_config_removed": true
+}

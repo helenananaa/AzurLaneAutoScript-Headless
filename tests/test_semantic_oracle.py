@@ -18,6 +18,10 @@ from alas_headless.semantic_oracle import (
     CommissionStatus,
     DormState,
     EnhancementNoMaterialReceipt,
+    EnhancementDockCandidate,
+    GemsFarmingDockCandidate,
+    GemsFarmingEquipmentLoadout,
+    GemsFarmingEquipmentSlot,
     MissionDisposition,
     OracleFingerprint,
     Point,
@@ -30,6 +34,7 @@ from alas_headless.semantic_oracle import (
     SemanticToggleTarget,
     RetirementNoCandidateReceipt,
     ResearchProjectStatus,
+    RaidMultipleSortieState,
     TacticalSlotStatus,
     enhancement_config_policy,
     request_observer_state,
@@ -198,6 +203,88 @@ def make_ui(texts, toggles=None, images=None, generation=10, age_ms=20):
     }
 
 
+def make_current_raid_backend():
+    root = "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)"
+    stage_bounds = (
+        {"left": 900, "top": 528, "right": 1148, "bottom": 596},
+        {"left": 944, "top": 447, "right": 1192, "bottom": 515},
+        {"left": 988, "top": 377, "right": 1236, "bottom": 445},
+        {"left": 971, "top": 160, "right": 1194, "bottom": 311},
+        {"left": 1035, "top": 120, "right": 1258, "bottom": 272},
+    )
+    points = ((1024, 562), (1068, 481), (1112, 411), (1082, 235), (1146, 196))
+    backend = FakeBackend(
+        [
+            make_button(
+                str(index),
+                f"{root}/adapt/right/{index}",
+                x,
+                y,
+                bounds,
+                raycast_top=None,
+            )
+            for index, ((x, y), bounds) in enumerate(
+                zip(points, stage_bounds), start=1
+            )
+        ]
+    )
+    home_bounds = {"left": 1209, "top": 7, "right": 1273, "bottom": 72}
+    backend.buttons["buttons"].append(
+        make_button(
+            "btn_home",
+            f"{root}/adapt/top/TopPage/top/btn_home",
+            1273,
+            39,
+            home_bounds,
+            raycast_top=None,
+        )
+    )
+    backend.buttons["button_count"] += 1
+    images = []
+    for index, (sprite, bounds) in enumerate(
+        zip(
+            ("btn_lv_bg", "btn_lv_bg", "btn_lv_bg", "btn_lv_ex", "btn_lv_sp"),
+            stage_bounds,
+        ),
+        start=1,
+    ):
+        images.append(make_image(f"{root}/adapt/right/{index}", sprite, bounds))
+    for index, sprite in enumerate(
+        ("btn_lv_easy", "btn_lv_normal", "btn_lv_hard"), start=1
+    ):
+        images.append(
+            make_image(
+                f"{root}/adapt/right/{index}/lv",
+                sprite,
+                stage_bounds[index - 1],
+            )
+        )
+    images.append(make_image(f"{root}/adapt/top/ticket", "temp4"))
+    images.append(
+        make_image(
+            f"{root}/adapt/top/TopPage/top/btn_home",
+            "btn_home",
+            home_bounds,
+        )
+    )
+    backend.ui = make_ui(
+        [
+            make_text(
+                "JOINT OPERATION",
+                f"{root}/adapt/top/TopPage/top/deco/Text/Text_1",
+            ),
+            make_text("15/15", f"{root}/adapt/right/1/Text"),
+            make_text("8/15", f"{root}/adapt/right/2/Text"),
+            make_text("0/15", f"{root}/adapt/right/3/Text"),
+            make_text("2", f"{root}/adapt/top/ticket/Text"),
+            make_text("特别挑战券", f"{root}/adapt/top/ticket/Desc"),
+            make_text("1234", f"{root}/adapt/right/ptaward/Text"),
+        ],
+        images=images,
+    )
+    return backend
+
+
 def set_commission_scroll_view(
     backend,
     *,
@@ -355,6 +442,104 @@ def make_oracle(backend):
         sleep=lambda _: None,
         swipe=backend.swipe,
     )
+
+
+class CampaignDockFullTests(unittest.TestCase):
+    @staticmethod
+    def _backend():
+        msgbox = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/"
+        window = msgbox + "window/"
+        action = window + "button_container/custom_button_1(Clone)"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "custom_button_1(Clone)",
+                    action,
+                    440,
+                    515,
+                    {"left": 352, "top": 475, "right": 527, "bottom": 555},
+                ),
+                make_button(
+                    "custom_button_1(Clone)",
+                    action,
+                    640,
+                    515,
+                    {"left": 552, "top": 475, "right": 727, "bottom": 555},
+                ),
+                make_button(
+                    "custom_button_1(Clone)",
+                    action,
+                    840,
+                    515,
+                    {"left": 752, "top": 475, "right": 927, "bottom": 555},
+                ),
+                make_button("content", window + "msg_panel/content", 640, 360),
+                make_button("btnBack", window + "top/btnBack", 1030, 160),
+                make_button("bg", msgbox + "bg", 640, 360),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("情 报", window + "top/title"),
+                make_text("INFORMATION", window + "top/title_en"),
+                make_text("船坞已满，请先进行整理", window + "msg_panel/content"),
+                make_text(
+                    "整 理",
+                    action + "/pic",
+                    {"left": 390, "top": 492, "right": 477, "bottom": 538},
+                ),
+                make_text(
+                    "拓 展",
+                    action + "/pic",
+                    {"left": 590, "top": 492, "right": 677, "bottom": 538},
+                ),
+                make_text(
+                    "强 化",
+                    action + "/pic",
+                    {"left": 790, "top": 492, "right": 877, "bottom": 538},
+                ),
+                make_text(
+                    "D3",
+                    "UICamera/Canvas/UIOrigin/LevelInfoSPUI(Clone)/panel/"
+                    "title_form/title_index",
+                ),
+            ]
+        )
+        return backend
+
+    def test_d3_dock_full_maps_only_labelled_nonpremium_choices(self):
+        backend = self._backend()
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.campaign_dock_full_visible("d3"))
+        organize = oracle.click_campaign_dock_full_choice("d3", "organize")
+        enhance = oracle.click_campaign_dock_full_choice("d3", "enhance")
+
+        self.assertEqual(organize.semantic_id, "campaign/dock-full/organize")
+        self.assertEqual(enhance.semantic_id, "campaign/dock-full/enhance")
+        self.assertEqual(backend.taps, [(440, 515), (840, 515)])
+        with self.assertRaisesRegex(SemanticGateClosed, "expansion"):
+            oracle.click_campaign_dock_full_choice("d3", "expand")
+
+    def test_d3_dock_full_rejects_label_drift(self):
+        backend = self._backend()
+        backend.ui["texts"][4]["text"] = "购 买"
+
+        with self.assertRaisesRegex(SemanticGateClosed, "labels"):
+            make_oracle(backend).campaign_dock_full_visible("d3")
+
+    def test_d3_dock_full_rejects_unreviewed_control(self):
+        backend = self._backend()
+        backend.buttons["buttons"].append(
+            make_button(
+                "unknown",
+                "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/unknown",
+            )
+        )
+        backend.buttons["button_count"] += 1
+
+        with self.assertRaisesRegex(SemanticGateClosed, "control surface"):
+            make_oracle(backend).campaign_dock_full_visible("d3")
 
 
 def set_retirement_selection(backend, generation, used, selected=0):
@@ -780,8 +965,8 @@ def make_live_eventsp_fleet_preparation_backend():
     return backend
 
 
-def make_live_eventsp_map_preparation_backend():
-    """Build the exact 81-record rootless LevelInfoSPUI live surface."""
+def make_live_eventsp_map_preparation_backend(*, profile="sp", mount="overlay"):
+    """Build one exact rootless LevelInfoSPUI live profile."""
 
     view_root = "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)"
     stage_root = (
@@ -945,6 +1130,293 @@ def make_live_eventsp_map_preparation_backend():
 
     backend = FakeBackend(buttons)
     backend.ui = make_ui(texts, toggles=toggles, images=images)
+    if profile in ("c1", "c2", "c3", "d1", "d2", "d3"):
+        profile_values = {
+            "c1": {
+                "chapter": "Chapter_2050021",
+                "stage": "C1  ",
+                "level": "LV 75",
+                "points": "90",
+                "head": "emotion_zhongxun",
+                "cost_limit": False,
+            },
+            "c2": {
+                "chapter": "Chapter_2050002",
+                "stage": "C2  ",
+                "level": "LV 80",
+                "points": "100",
+                "head": "emotion_zhanlie",
+                "cost_limit": False,
+            },
+            "c3": {
+                "chapter": "Chapter_2050003",
+                "stage": "C3  ",
+                "level": "LV 85",
+                "points": "110",
+                "head": "emotion_hangmu",
+                "cost_limit": False,
+            },
+            "d1": {
+                "chapter": "Chapter_2050024",
+                "stage": "D1  ",
+                "level": "LV 95",
+                "points": "120",
+                "head": "haorenlichade_m_qianting",
+                "cost_limit": True,
+            },
+            "d2": {
+                "chapter": "Chapter_2050005",
+                "stage": "D2  ",
+                "level": "LV 100",
+                "points": "150",
+                "head": "haorenlichade_m_zhanlie",
+                "cost_limit": True,
+            },
+            "d3": {
+                "chapter": "Chapter_2050006",
+                "stage": "D3  ",
+                "level": "LV 105",
+                "points": "180",
+                "head": "haorenlichade_m_hangmu",
+                "cost_limit": True,
+            },
+        }[profile]
+        for records in (
+            backend.buttons["buttons"],
+            backend.ui["texts"],
+            backend.ui["images"],
+        ):
+            for record in records:
+                record["path"] = record["path"].replace(
+                    "Chapter_2050041", profile_values["chapter"]
+                )
+        backend.buttons["buttons"].extend(
+            [
+                make_button(
+                    "Switch",
+                    view_root + "/panel/Difficulty/Hard/Switch",
+                    raycast_top=None,
+                ),
+                make_button(
+                    "Image",
+                    view_root + "/panel/passState/Image",
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.buttons["button_count"] = len(backend.buttons["buttons"])
+        for text in backend.ui["texts"]:
+            if text["path"].endswith("/title_form/title_index"):
+                text["text"] = profile_values["stage"]
+            elif text["path"] == view_root + "/panel/Level/Text":
+                text["text"] = profile_values["level"]
+            elif text["path"] == (
+                view_root + "/panel/drops/frame/list/item/icon_bg/count"
+            ):
+                text["text"] = profile_values["points"]
+        backend.ui["texts"].extend(
+            [
+                make_text(
+                    value,
+                    view_root + "/panel/achieves/achieve(Clone)/desc",
+                )
+                for value in ("完成关卡", "击破护卫舰队（11/11）", "击破敌方旗舰")
+            ]
+            + [
+                make_text("威胁排除: ", view_root + "/panel/progress/Text"),
+                make_text("100%", view_root + "/panel/progress/Text/value"),
+            ]
+        )
+        backend.ui["text_count"] = len(backend.ui["texts"])
+        for image in backend.ui["images"]:
+            if image["path"] == view_root + "/panel/head/Image":
+                image["sprite"] = profile_values["head"]
+        d1_images = {
+            "panel/achieves/achieve(Clone)": (("white_dot",) * 3, True),
+            "panel/achieves/achieve(Clone)/star": (("star",) * 3, True),
+            "panel/BottomExtra/LoopGroup/view/container/CostLimit": (
+                ("cost_limit_tag",),
+                True,
+            ),
+            "panel/Difficulty/Hard": (("btn_switch_hard",), True),
+            "panel/Difficulty/Hard/Bonus1": (("bonus_bg",), False),
+            "panel/Difficulty/Hard/Bonus1/Image": (("bonus_us",), False),
+            "panel/Difficulty/Hard/Mask_Difficulty_Loop": (("bonus_us",), True),
+            "panel/Difficulty/Hard/TextHard": (("text_hard_select",), False),
+            "panel/Difficulty/Hard/TextNormal": (("text_normal",), False),
+            "panel/Difficulty/Mask_Difficlty": (("text_normal",), False),
+            "panel/Difficulty/Mask_Difficlty/Image": (
+                ("text_hard_select",),
+                False,
+            ),
+            "panel/Difficulty/Mask_Difficlty/Image_1": (("bonus_bg",), False),
+            "panel/Difficulty/Mask_Difficlty/Image_2": (("bonus_us",), False),
+            "panel/passState/Image": (("1",), True),
+            "panel/progress/Background": (("bar_with_brackets",), True),
+            "panel/progress/Fill Area/Fill": (("yellow_progress",), True),
+        }
+        for relative, (sprites, raycast_target) in d1_images.items():
+            if (
+                relative
+                == "panel/BottomExtra/LoopGroup/view/container/CostLimit"
+                and not profile_values["cost_limit"]
+            ):
+                continue
+            for sprite in sprites:
+                image = make_image(view_root + "/" + relative, sprite)
+                image["raycast_target"] = raycast_target
+                backend.ui["images"].append(image)
+        backend.ui["image_count"] = len(backend.ui["images"])
+    elif profile in ("a2", "a3", "b2", "b3"):
+        profile_values = {
+            "a2": {
+                "chapter": "Chapter_2050002",
+                "stage": "A2  ",
+                "level": "LV 30",
+                "points": "40",
+                "head": "emotion_zhanlie",
+                "clone_bgs": ("bg2", "bg2", "bg1", "bg1"),
+                "clone_icons": ("30002", "54012", "55000", "54000"),
+            },
+            "a3": {
+                "chapter": "Chapter_2050003",
+                "stage": "A3  ",
+                "level": "LV 35",
+                "points": "50",
+                "head": "emotion_hangmu",
+                "clone_bgs": ("bg2", "bg2", "bg1", "bg1"),
+                "clone_icons": ("30002", "54012", "55000", "54000"),
+            },
+            "b2": {
+                "chapter": "Chapter_2050005",
+                "stage": "B2  ",
+                "level": "LV 55",
+                "points": "70",
+                "head": "haorenlichade_m_zhanlie",
+                "clone_bgs": ("bg3", "bg2", "bg1", "bg1"),
+                "clone_icons": ("30003", "54012", "55000", "54000"),
+            },
+            "b3": {
+                "chapter": "Chapter_2050006",
+                "stage": "B3  ",
+                "level": "LV 60",
+                "points": "80",
+                "head": "haorenlichade_m_hangmu",
+                "clone_bgs": ("bg4", "bg2", "bg1", "bg1"),
+                "clone_icons": ("30004", "54012", "55000", "54000"),
+            },
+        }[profile]
+        for records in (
+            backend.buttons["buttons"],
+            backend.ui["texts"],
+            backend.ui["images"],
+        ):
+            for record in records:
+                record["path"] = record["path"].replace(
+                    "Chapter_2050041", profile_values["chapter"]
+                )
+        backend.buttons["buttons"].extend(
+            [
+                make_button(
+                    "Switch",
+                    view_root + "/panel/Difficulty/Normal/Switch",
+                    raycast_top=None,
+                ),
+                make_button(
+                    "Image",
+                    view_root + "/panel/passState/Image",
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.buttons["button_count"] = len(backend.buttons["buttons"])
+        for text in backend.ui["texts"]:
+            if text["path"].endswith("/title_form/title_index"):
+                text["text"] = profile_values["stage"]
+            elif text["path"] == view_root + "/panel/Level/Text":
+                text["text"] = profile_values["level"]
+            elif text["path"] == (
+                view_root + "/panel/drops/frame/list/item/icon_bg/count"
+            ):
+                text["text"] = profile_values["points"]
+        backend.ui["texts"].extend(
+            [
+                make_text(
+                    value,
+                    view_root + "/panel/achieves/achieve(Clone)/desc",
+                )
+                for value in ("完成关卡", "击破护卫舰队（10/10）", "击破敌方旗舰")
+            ]
+            + [
+                make_text("威胁排除: ", view_root + "/panel/progress/Text"),
+                make_text("100%", view_root + "/panel/progress/Text/value"),
+            ]
+        )
+        backend.ui["text_count"] = len(backend.ui["texts"])
+        backend.ui["images"] = [
+            image
+            for image in backend.ui["images"]
+            if image["path"]
+            not in (
+                view_root + "/panel/Level/Hard",
+                view_root + "/panel/title/Hard",
+            )
+        ]
+        clone_bgs = iter(profile_values["clone_bgs"])
+        clone_icons = iter(profile_values["clone_icons"])
+        for image in backend.ui["images"]:
+            if image["path"] == view_root + "/panel/head/Image":
+                image["sprite"] = profile_values["head"]
+            elif image["path"] == (
+                view_root + "/panel/drops/frame/list/item(Clone)/icon_bg"
+            ):
+                image["sprite"] = next(clone_bgs)
+            elif image["path"] == (
+                view_root + "/panel/drops/frame/list/item(Clone)/icon_bg/icon"
+            ):
+                image["sprite"] = next(clone_icons)
+        b2_images = {
+            "panel/achieves/achieve(Clone)": (("white_dot",) * 3, True),
+            "panel/achieves/achieve(Clone)/star": (("star",) * 3, True),
+            "panel/Difficulty/Mask_Normal": (("text_hard",), False),
+            "panel/Difficulty/Mask_Normal/Image": (("bonus_bg",), False),
+            "panel/Difficulty/Mask_Normal/Image_1": (("bonus_us",), False),
+            "panel/Difficulty/Mask_Normal/Image_2": (("text_normal_select",), False),
+            "panel/Difficulty/Normal": (("btn_switch_normal",), True),
+            "panel/Difficulty/Normal/Bonus1": (("bonus_bg",), False),
+            "panel/Difficulty/Normal/Bonus1/Image": (("bonus_us",), False),
+            "panel/Difficulty/Normal/Mask_Normal_Loop": (
+                ("text_normal_select",),
+                True,
+            ),
+            "panel/Difficulty/Normal/TextHard": (("text_hard",), False),
+            "panel/Difficulty/Normal/TextNormal": (("text_normal_select",), False),
+            "panel/Level/Normal": (("bg_lv_normal",), False),
+            "panel/passState/Image": (("1",), True),
+            "panel/progress/Background": (("bar_with_brackets",), True),
+            "panel/progress/Fill Area/Fill": (("yellow_progress",), True),
+            "panel/title/Normal": (("bg_title_normal",), False),
+        }
+        for relative, (sprites, raycast_target) in b2_images.items():
+            for sprite in sprites:
+                image = make_image(view_root + "/" + relative, sprite)
+                image["raycast_target"] = raycast_target
+                backend.ui["images"].append(image)
+        backend.ui["image_count"] = len(backend.ui["images"])
+    elif profile != "sp":
+        raise ValueError("unknown live map-preparation profile")
+    if mount == "uiorigin":
+        destination = "UICamera/Canvas/UIOrigin/LevelInfoSPUI(Clone)"
+        for records in (
+            backend.buttons["buttons"],
+            backend.ui["toggles"],
+            backend.ui["texts"],
+            backend.ui["images"],
+        ):
+            for record in records:
+                record["path"] = record["path"].replace(view_root, destination)
+    elif mount != "overlay":
+        raise ValueError("unknown live map-preparation mount")
     return backend
 
 
@@ -983,6 +1455,1161 @@ def make_normal_fleet_preparation_backend(stage_code="12-4"):
 
 
 class SemanticOracleTests(unittest.TestCase):
+    def test_raid_remain_reads_all_pinned_modes_from_typed_nodes(self):
+        root = "UICamera/Canvas/UIMain/BossRushVerSardiniaSPUI(Clone)"
+        buttons = [
+            make_button(str(node), f"{root}/Battle/Nodes/{node}")
+            for node in range(5001, 5006)
+        ]
+        backend = FakeBackend(buttons)
+        backend.ui = make_ui(
+            [
+                make_text("12/15", f"{root}/Battle/Nodes/5001/remain/Text"),
+                make_text("7 / 15", f"{root}/Battle/Nodes/5002/remain/Text"),
+                make_text("0/15", f"{root}/Battle/Nodes/5003/remain/Text"),
+                make_text("3", f"{root}/Battle/Nodes/5004/times/Text"),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.raid_remain("raid_20260212", "easy"), 12)
+        self.assertEqual(oracle.raid_remain("raid_20260212", "normal"), 7)
+        self.assertEqual(oracle.raid_remain("raid_20260212", "hard"), 0)
+        state = oracle.raid_remain_state("raid_20260212", "ex")
+        self.assertEqual((state.remaining, state.capacity, state.node_id), (3, None, 5004))
+
+    def test_raid_remain_rejects_unsafe_and_harmless_drift_separately(self):
+        root = "UICamera/Canvas/UIMain/BossRushVerSardiniaSPUI(Clone)"
+        buttons = [
+            make_button(str(node), f"{root}/Battle/Nodes/{node}")
+            for node in range(5001, 5006)
+        ]
+        backend = FakeBackend(buttons)
+        backend.ui = make_ui(
+            [
+                make_text("9/15", f"{root}/Battle/Nodes/5001/new_layout/value"),
+                make_text("metadata", f"{root}/Battle/Nodes/5001/new_layout/label"),
+            ]
+        )
+        oracle = make_oracle(backend)
+        self.assertEqual(oracle.raid_remain("raid_20260212", "easy"), 9)
+
+        backend.ui = make_ui(
+            [
+                make_text("9/15", f"{root}/Battle/Nodes/5001/remain/Text"),
+                make_text("8/15", f"{root}/Battle/Nodes/5001/duplicate/Text"),
+            ]
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            make_oracle(backend).raid_remain("raid_20260212", "easy")
+
+        with self.assertRaisesRegex(SemanticGateClosed, "event is unsupported"):
+            make_oracle(backend).raid_remain("raid_future", "easy")
+
+    def test_current_raid_reads_typed_counters_and_keeps_advanced_distinct(self):
+        backend = make_current_raid_backend()
+        root = "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)"
+        # Additive metadata and a future unrelated control do not alter any
+        # reviewed stage identity.
+        backend.buttons["buttons"].append(
+            make_button("metadata", root + "/adapt/left/metadata")
+        )
+        backend.buttons["button_count"] += 1
+        backend.ui["texts"].append(make_text("metadata", root + "/adapt/left/value"))
+        backend.ui["text_count"] += 1
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.raid_remain("raid_20260827", "easy"), 15)
+        self.assertEqual(oracle.raid_remain("raid_20260827", "normal"), 8)
+        self.assertEqual(oracle.raid_remain("raid_20260827", "hard"), 0)
+        self.assertEqual(oracle.event_points(), 1234)
+        state = oracle.raid_remain_state("raid_20260827", "ex")
+        self.assertEqual((state.remaining, state.capacity, state.node_id), (2, None, 4))
+
+        ticket_image = next(
+            image
+            for image in backend.ui["images"]
+            if image["path"] == root + "/adapt/top/ticket"
+        )
+        for sprite in ("star", "title", "future_ticket"):
+            ticket_image["sprite"] = sprite
+            self.assertEqual(oracle.raid_remain("raid_20260827", "ex"), 2)
+
+        ticket_label = next(
+            text
+            for text in backend.ui["texts"]
+            if text["path"] == root + "/adapt/top/ticket/Desc"
+        )
+        ticket_label["text"] = "未来挑战券"
+        with self.assertRaisesRegex(SemanticGateClosed, "counter is absent"):
+            oracle.raid_remain("raid_20260827", "ex")
+
+        with self.assertRaisesRegex(SemanticGateClosed, "mode is unsupported"):
+            oracle.click_raid_stage("raid_20260827", "advanced")
+        self.assertEqual(backend.taps, [])
+
+    def test_current_raid_stage_click_uses_exact_typed_slot(self):
+        backend = make_current_raid_backend()
+        receipt = make_oracle(backend).click_raid_stage("raid_20260827", "hard")
+
+        self.assertEqual(receipt.semantic_id, "raid/stage/hard")
+        self.assertTrue(receipt.path.endswith("/adapt/right/3"))
+        self.assertEqual(backend.taps, [(1112, 411)])
+
+    def test_current_raid_counter_waits_for_complete_typed_page(self):
+        backend = make_current_raid_backend()
+        transient = copy.deepcopy(backend.ui)
+        ticket_path = (
+            "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)"
+            "/adapt/top/ticket"
+        )
+        transient["images"] = [
+            image for image in transient["images"] if image["path"] != ticket_path
+        ]
+        transient["image_count"] = len(transient["images"])
+        backend.ui_sequence = [transient, copy.deepcopy(backend.ui)]
+
+        state = make_oracle(backend).raid_remain_state("raid_20260827", "ex")
+
+        self.assertEqual(state.remaining, 2)
+        self.assertEqual(backend.taps, [])
+
+    def test_current_raid_hidden_zero_requires_stable_healthy_page(self):
+        backend = make_current_raid_backend()
+        root = "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)"
+        zero_path = root + "/adapt/right/3/Text"
+        backend.ui["texts"] = [
+            item for item in backend.ui["texts"] if item["path"] != zero_path
+        ]
+        backend.ui["text_count"] = len(backend.ui["texts"])
+        stable_first = dict(copy.deepcopy(backend.ui), generation=10)
+        stable_second = dict(copy.deepcopy(backend.ui), generation=11)
+        backend.ui_sequence = [stable_first, stable_second]
+
+        state = make_oracle(backend).raid_remain_state("raid_20260827", "hard")
+
+        self.assertEqual((state.remaining, state.capacity, state.node_id), (0, 15, 3))
+        self.assertEqual(backend.taps, [])
+
+        unstable = make_current_raid_backend()
+        unstable.ui["texts"] = [
+            item for item in unstable.ui["texts"] if item["path"] != zero_path
+        ]
+        unstable.ui["text_count"] = len(unstable.ui["texts"])
+        with self.assertRaisesRegex(SemanticGateClosed, "not stable"):
+            make_oracle(unstable).raid_remain_state("raid_20260827", "hard")
+
+        malformed = make_current_raid_backend()
+        malformed_text = next(
+            item for item in malformed.ui["texts"] if item["path"] == zero_path
+        )
+        malformed_text["text"] = "CLEARED"
+        with self.assertRaisesRegex(SemanticGateClosed, "malformed"):
+            make_oracle(malformed).raid_remain_state("raid_20260827", "hard")
+
+    def test_current_raid_home_uses_proven_bounds_center(self):
+        backend = make_current_raid_backend()
+        receipt = make_oracle(backend).click_raid_home("raid_20260827")
+
+        self.assertEqual(receipt.semantic_id, "raid/page/home")
+        self.assertEqual(receipt.point, Point(1241, 39.5))
+        self.assertEqual(backend.taps, [(1241, 40)])
+
+    def test_current_raid_does_not_click_through_fleet_overlay(self):
+        backend = make_current_raid_backend()
+        fleet_root = (
+            "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel"
+        )
+        backend.buttons["buttons"].append(
+            make_button("start_button", fleet_root + "/start_button", raycast_top=None)
+        )
+        backend.buttons["button_count"] += 1
+
+        oracle = make_oracle(backend)
+        self.assertFalse(oracle.raid_page_visible("raid_20260827"))
+        with self.assertRaisesRegex(SemanticGateClosed, "obscured"):
+            oracle.click_raid_stage("raid_20260827", "normal")
+        self.assertEqual(backend.taps, [])
+
+    def test_current_raid_yields_exact_story_overlay_to_original_alas_handler(self):
+        backend = make_current_raid_backend()
+        story_root = "root/Overlay/UIOverlay/NewStoryUI(Clone)"
+        backend.buttons["buttons"].extend(
+            (
+                make_button("NewStoryUI(Clone)", story_root),
+                make_button(
+                    "skip_button",
+                    story_root + "/front/btns/btns/skip_button",
+                    raycast_top=None,
+                ),
+            )
+        )
+        backend.buttons["button_count"] += 2
+
+        oracle = make_oracle(backend)
+        self.assertFalse(oracle.raid_page_visible("raid_20260827"))
+        with self.assertRaisesRegex(SemanticGateClosed, "obscured by event story"):
+            oracle.click_raid_home("raid_20260827")
+        self.assertEqual(backend.taps, [])
+
+    def test_current_raid_rejects_malformed_story_overlay_locally(self):
+        backend = make_current_raid_backend()
+        backend.buttons["buttons"].append(
+            make_button(
+                "NewStoryUI(Clone)",
+                "root/Overlay/UIOverlay/NewStoryUI(Clone)",
+            )
+        )
+        backend.buttons["button_count"] += 1
+
+        with self.assertRaisesRegex(SemanticGateClosed, "story overlay is malformed"):
+            make_oracle(backend).raid_page_visible("raid_20260827")
+        self.assertEqual(backend.taps, [])
+
+    def test_current_raid_fleet_back_uses_proven_bounds_center(self):
+        root = "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel"
+        back_bounds = {"left": 1125, "top": 66, "right": 1197, "bottom": 118}
+        start_bounds = {"left": 966, "top": 567, "right": 1198, "bottom": 660}
+        recommend_bounds = {
+            "left": 1019,
+            "top": 165,
+            "right": 1094,
+            "bottom": 235,
+        }
+        backend = FakeBackend(
+            [
+                make_button(
+                    "btnBack",
+                    root + "/btnBack",
+                    1197,
+                    66,
+                    back_bounds,
+                    raycast_top=None,
+                ),
+                make_button(
+                    "start_button",
+                    root + "/start_button",
+                    966,
+                    660,
+                    start_bounds,
+                    raycast_top=None,
+                ),
+                make_button(
+                    "btn_recom",
+                    root + "/fleet/1/btn_recom",
+                    1057,
+                    200,
+                    recommend_bounds,
+                    raycast_top=None,
+                ),
+                *[
+                    make_button(
+                        "shiptpl(Clone)",
+                        root + "/fleet/1/" + group + "/shiptpl(Clone)",
+                        400 + index * 80,
+                        200 if group == "main" else 300,
+                        raycast_top=None,
+                    )
+                    for group in ("main", "vanguard")
+                    for index in range(3)
+                ],
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("FLEET SELECT", root + "/title/Image/text/text (1)")],
+            images=[
+                make_image(root + "/btnBack", "x_butten", back_bounds),
+                make_image(root + "/start_button", "qianwang_button", start_bounds),
+                make_image(
+                    root + "/fleet/1/btn_recom",
+                    "tuijian_butten",
+                    recommend_bounds,
+                ),
+            ],
+        )
+
+        receipt = make_oracle(backend).click_raid_fleet_back("raid_20260827")
+
+        self.assertEqual(receipt.point, Point(1161, 92))
+        self.assertEqual(backend.taps, [(1161, 92)])
+        backend.taps.clear()
+        receipt = make_oracle(backend).click_raid_fleet_start("raid_20260827")
+        self.assertEqual(receipt.point, Point(1082, 613.5))
+        self.assertEqual(backend.taps, [(1082, 614)])
+        backend.taps.clear()
+        receipt = make_oracle(backend).click_raid_fleet_recommend("raid_20260827")
+        self.assertEqual(receipt.point, Point(1056.5, 200))
+        self.assertEqual(backend.taps, [(1056, 200)])
+        self.assertTrue(make_oracle(backend).raid_fleet_ready("raid_20260827"))
+
+        for button in backend.buttons["buttons"]:
+            if button["name"] == "shiptpl(Clone)" and "/main/" in button["path"]:
+                button["name"] = "emptytpl(Clone)"
+                button["path"] = button["path"].replace(
+                    "/shiptpl(Clone)", "/emptytpl(Clone)"
+                )
+        self.assertFalse(make_oracle(backend).raid_fleet_ready("raid_20260827"))
+
+    def test_current_raid_rejects_swapped_ex_and_advanced_sprites(self):
+        backend = make_current_raid_backend()
+        root = "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)"
+        for image in backend.ui["images"]:
+            if image["path"] == root + "/adapt/right/4":
+                image["sprite"] = "btn_lv_sp"
+            elif image["path"] == root + "/adapt/right/5":
+                image["sprite"] = "btn_lv_ex"
+
+        with self.assertRaisesRegex(SemanticGateClosed, "stage sprites"):
+            make_oracle(backend).raid_remain("raid_20260827", "ex")
+        self.assertEqual(backend.taps, [])
+
+    def test_current_raid_advanced_entry_stays_distinct_from_ex(self):
+        backend = make_current_raid_backend()
+        oracle = make_oracle(backend)
+
+        with self.assertRaisesRegex(SemanticGateClosed, "mode is unsupported"):
+            oracle.click_raid_stage("raid_20260827", "advanced")
+        self.assertEqual(backend.taps, [])
+
+        receipt = oracle.click_raid_advanced_challenge("raid_20260827")
+        self.assertEqual(receipt.semantic_id, "raid/advanced/entry")
+        self.assertEqual(
+            receipt.path,
+            "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/5",
+        )
+        self.assertEqual(backend.taps, [(1146, 196)])
+
+        backend.taps.clear()
+        advanced_image = next(
+            image
+            for image in backend.ui["images"]
+            if image["path"].endswith("/adapt/right/5")
+        )
+        advanced_image["sprite"] = "btn_lv_ex"
+        with self.assertRaisesRegex(SemanticGateClosed, "stage sprites"):
+            oracle.click_raid_advanced_challenge("raid_20260827")
+        self.assertEqual(backend.taps, [])
+
+    def test_current_raid_precombat_probe_skips_ui_coherence_off_page(self):
+        backend = make_current_raid_backend()
+        backend.ui["generation"] = 30
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.raid_precombat_visible("raid_20260827"))
+        self.assertNotIn("GET /v1/ui\n", backend.requests)
+
+        root = "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)"
+        backend.buttons = make_buttons(
+            [make_button("start", root + "/adapt/right/start", raycast_top=None)],
+            generation=10,
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "snapshots are incoherent"):
+            make_oracle(backend).raid_precombat_visible("raid_20260827")
+
+    def test_current_raid_precombat_notice_and_sortie_are_distinct_inputs(self):
+        root = "UICamera/Canvas/UIOrigin/ActivityBossPrecombatUI(Clone)"
+        start = root + "/adapt/right/start"
+        multiple = root + "/adapt/right/multiple"
+        notice_root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window"
+        notice = notice_root + "/button_container/custom_button_1(Clone)"
+        start_bounds = {"left": 1051, "top": 596, "right": 1282, "bottom": 686}
+        multiple_bounds = {
+            "left": 1051,
+            "top": 520,
+            "right": 1282,
+            "bottom": 580,
+        }
+        notice_bounds = {"left": 549, "top": 515, "right": 731, "bottom": 582}
+        back = root + "/blur_panel/top/back_btn"
+        back_bounds = {"left": 1, "top": -3, "right": 115, "bottom": 111}
+        backend = FakeBackend(
+            [
+                make_button(
+                    "start", start, 1167, 641, start_bounds, raycast_top=None
+                ),
+                make_button(
+                    "multiple",
+                    multiple,
+                    1167,
+                    550,
+                    multiple_bounds,
+                    raycast_top=None,
+                ),
+                *[
+                    make_button(
+                        "mouseChild",
+                        root
+                        + "/adapt/middle/HeroContainer/info/ship{0}_root/mouseChild".format(
+                            index
+                        ),
+                        200 + index * 80,
+                        300,
+                        raycast_top=None,
+                    )
+                    for index in range(6)
+                ],
+                make_button(
+                    "custom_button_1(Clone)",
+                    notice,
+                    640,
+                    548,
+                    notice_bounds,
+                    raycast_top=True,
+                ),
+                make_button(
+                    "back_btn", back, 58, 54, back_bounds, raycast_top=None
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("WEIGH ANCHOR", start + "/text_en"),
+                make_text("MULTIPLE SORTIES", multiple + "/text_en"),
+                make_text("出击", start + "/text"),
+                make_text("消耗：", start + "/cost_container/title"),
+                make_text("87", start + "/cost_container/popup/Text"),
+                make_text("额外收益次数：", start + "/bonus/title"),
+                make_text("15", start + "/bonus/Text"),
+                make_text(
+                    "MAIN",
+                    root + "/adapt/middle/gear_score/main/line/Image/Text2",
+                ),
+                make_text(
+                    "VANGUARD",
+                    root + "/adapt/middle/gear_score/vanguard/line/Image/Text2",
+                ),
+                make_text("19476", root + "/adapt/middle/gear_score/main/Text"),
+                make_text(
+                    "16655", root + "/adapt/middle/gear_score/vanguard/Text"
+                ),
+                make_text("知道了", notice + "/pic"),
+                make_text("信息", notice_root + "/top/bg/infomation/title"),
+                make_text(
+                    "INFORMATION", notice_root + "/top/bg/infomation/title_en"
+                ),
+                make_text(
+                    "注意，自律战斗时可能出现以下情况",
+                    notice_root + "/help_panel/list/help_tpl",
+                ),
+            ],
+            images=[
+                make_image(start, "btn_formation_sel", start_bounds),
+                make_image(multiple, "btn_blue", multiple_bounds),
+                make_image(
+                    start + "/cost_container/popup/icon", "res_oil"
+                ),
+                make_image(notice, "btn_big_blue", notice_bounds),
+                make_image(back, "icon_bg_front_1920", back_bounds),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.raid_precombat_visible("raid_20260827"))
+        self.assertTrue(
+            oracle.raid_precombat_multiple_visible("raid_20260827")
+        )
+        self.assertTrue(oracle.raid_precombat_notice_visible("raid_20260827"))
+        with self.assertRaisesRegex(SemanticGateClosed, "obscured by notice"):
+            oracle.click_raid_precombat_start("raid_20260827")
+        with self.assertRaisesRegex(SemanticGateClosed, "obscured by notice"):
+            oracle.click_raid_precombat_multiple("raid_20260827")
+        notice_receipt = oracle.click_raid_precombat_notice("raid_20260827")
+        self.assertEqual(
+            notice_receipt.semantic_id, "raid/precombat/notice/acknowledge"
+        )
+        self.assertEqual(backend.taps, [(640, 548)])
+
+        backend.buttons["buttons"] = [
+            button for button in backend.buttons["buttons"] if button["path"] != notice
+        ]
+        backend.buttons["button_count"] -= 1
+        backend.ui["texts"] = [
+            text
+            for text in backend.ui["texts"]
+            if not text["path"].startswith(notice_root)
+        ]
+        backend.ui["text_count"] = len(backend.ui["texts"])
+        backend.ui["images"] = [
+            image for image in backend.ui["images"] if image["path"] != notice
+        ]
+        backend.ui["image_count"] -= 1
+        backend.taps.clear()
+
+        self.assertFalse(oracle.raid_precombat_notice_visible("raid_20260827"))
+
+        multiple_receipt = oracle.click_raid_precombat_multiple(
+            "raid_20260827"
+        )
+        self.assertEqual(
+            multiple_receipt.semantic_id, "raid/precombat/multiple"
+        )
+        self.assertEqual(backend.taps, [(1167, 550)])
+        backend.taps.clear()
+
+        loading_path = "root/UIOverlay/Loading(Clone)/panel"
+        backend.buttons["buttons"].append(
+            make_button("panel", loading_path, raycast_top=True)
+        )
+        backend.buttons["button_count"] += 1
+        self.assertFalse(oracle.raid_precombat_visible("raid_20260827"))
+        with self.assertRaisesRegex(SemanticGateClosed, "input is blocked"):
+            oracle.click_raid_precombat_start("raid_20260827")
+        self.assertEqual(backend.taps, [])
+        backend.buttons["buttons"] = [
+            button
+            for button in backend.buttons["buttons"]
+            if button["path"] != loading_path
+        ]
+        backend.buttons["button_count"] -= 1
+
+        start_image = next(
+            image for image in backend.ui["images"] if image["path"] == start
+        )
+        start_image["adb_bounds"] = {
+            "left": 1080,
+            "top": 596,
+            "right": 1282,
+            "bottom": 686,
+        }
+        self.assertFalse(oracle.raid_precombat_visible("raid_20260827"))
+        with self.assertRaisesRegex(SemanticGateClosed, "does not cover start"):
+            oracle.click_raid_precombat_start("raid_20260827")
+        self.assertEqual(backend.taps, [])
+        start_image["adb_bounds"] = start_bounds
+
+        numeric_text = next(
+            text
+            for text in backend.ui["texts"]
+            if text["path"] == start + "/cost_container/popup/Text"
+        )
+        backend.ui["texts"].remove(numeric_text)
+        backend.ui["text_count"] -= 1
+        self.assertFalse(oracle.raid_precombat_visible("raid_20260827"))
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is incomplete"):
+            oracle.click_raid_precombat_start("raid_20260827")
+        self.assertEqual(backend.taps, [])
+        backend.ui["texts"].append(numeric_text)
+        backend.ui["text_count"] += 1
+
+        multiple_image = next(
+            image for image in backend.ui["images"] if image["path"] == multiple
+        )
+        multiple_image["sprite"] = "btn_red"
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            oracle.raid_precombat_multiple_visible("raid_20260827")
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            oracle.click_raid_precombat_multiple("raid_20260827")
+        self.assertEqual(backend.taps, [])
+        multiple_image["sprite"] = "btn_blue"
+
+        start_receipt = oracle.click_raid_precombat_start("raid_20260827")
+        self.assertEqual(start_receipt.semantic_id, "raid/precombat/start")
+        self.assertEqual(backend.taps, [(1167, 641)])
+        backend.taps.clear()
+        back_receipt = oracle.click_raid_precombat_back("raid_20260827")
+        self.assertEqual(back_receipt.semantic_id, "raid/precombat/back")
+        self.assertEqual(backend.taps, [(58, 54)])
+
+        backend.taps.clear()
+        backend.ui["texts"] = [
+            text
+            for text in backend.ui["texts"]
+            if text["path"] not in {start + "/bonus/title", start + "/bonus/Text"}
+        ]
+        backend.ui["texts"].extend(
+            (
+                make_text("使用", start + "/ticket/title"),
+                make_text("1/1", start + "/ticket/Text"),
+            )
+        )
+        backend.ui["text_count"] = len(backend.ui["texts"])
+        backend.ui["images"].extend(
+            (
+                make_image(start + "/ticket/icon", "nvpu_ticket"),
+                make_image(start + "/ticket/checkbox", "check_frame_bg"),
+                make_image(start + "/ticket/bg", "frame_bg"),
+            )
+        )
+        backend.ui["image_count"] = len(backend.ui["images"])
+
+        self.assertTrue(oracle.raid_precombat_visible("raid_20260827"))
+        ex_receipt = oracle.click_raid_precombat_start("raid_20260827")
+        self.assertEqual(ex_receipt.semantic_id, "raid/precombat/start")
+        self.assertEqual(backend.taps, [(1167, 641)])
+
+        backend.taps.clear()
+        backend.ui["images"] = [
+            image
+            for image in backend.ui["images"]
+            if image["path"] != start + "/ticket/icon"
+        ]
+        backend.ui["image_count"] = len(backend.ui["images"])
+        self.assertFalse(oracle.raid_precombat_visible("raid_20260827"))
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is incomplete"):
+            oracle.click_raid_precombat_start("raid_20260827")
+        self.assertEqual(backend.taps, [])
+
+    def test_current_raid_rejects_duplicate_counter(self):
+        backend = make_current_raid_backend()
+        root = "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)"
+        backend.ui["texts"].append(
+            make_text("7/15", root + "/adapt/right/2/Text")
+        )
+        backend.ui["text_count"] += 1
+
+        with self.assertRaisesRegex(SemanticGateClosed, "counter is absent or ambiguous"):
+            make_oracle(backend).raid_remain("raid_20260827", "normal")
+
+    def test_current_raid_multiple_sortie_close_is_exact_and_resource_free(self):
+        root = "OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)"
+        back = root + "/window/top/btnBack"
+        back_bounds = {"left": 891, "top": 149, "right": 963, "bottom": 201}
+        backend = FakeBackend(
+            [make_button("btnBack", back, 927, 175, back_bounds, raycast_top=None)]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "MULTIPLE SORTIES",
+                    root + "/window/top/bg/title/title/title_en",
+                ),
+                make_text("1", root + "/window/panel/content/value_bg/value"),
+                make_text("0/0", root + "/window/panel/ticket/Number"),
+                make_text("14", root + "/window/panel/bonus/Number"),
+            ],
+            images=[
+                make_image(back, "close_btn", back_bounds),
+                make_image(
+                    root + "/window/panel/ticket/checkbox/checkmark",
+                    "checkmark_ban",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.raid_multiple_sortie_visible("raid_20260827"))
+        state = oracle.raid_multiple_sortie_state("raid_20260827")
+        self.assertEqual(
+            state,
+            RaidMultipleSortieState(
+                generation=10,
+                event="raid_20260827",
+                sortie_count=1,
+                ticket_selected=0,
+                ticket_owned=0,
+                bonus_count=14,
+                zero_ticket_disabled=True,
+                root=root,
+            ),
+        )
+        receipt = oracle.click_raid_multiple_sortie_back("raid_20260827")
+        self.assertEqual(receipt.semantic_id, "raid/multiple-sortie/back")
+        self.assertEqual(backend.taps, [(927, 175)])
+
+        ticket_text = next(
+            item
+            for item in backend.ui["texts"]
+            if item["path"] == root + "/window/panel/ticket/Number"
+        )
+        checkmark = next(
+            item
+            for item in backend.ui["images"]
+            if item["sprite"] == "checkmark_ban"
+        )
+        backend.ui["images"].remove(checkmark)
+        backend.ui["image_count"] -= 1
+        ticket_text["text"] = "1/2"
+        positive = oracle.raid_multiple_sortie_state("raid_20260827")
+        self.assertEqual(
+            (positive.ticket_selected, positive.ticket_owned), (1, 2)
+        )
+        self.assertFalse(positive.zero_ticket_disabled)
+
+        backend.ui["images"].append(checkmark)
+        backend.ui["image_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "positive ticket state is disabled"):
+            oracle.raid_multiple_sortie_state("raid_20260827")
+        ticket_text["text"] = "0/0"
+        backend.ui["images"].remove(checkmark)
+        backend.ui["image_count"] -= 1
+        with self.assertRaisesRegex(SemanticGateClosed, "zero-ticket state is inconsistent"):
+            oracle.raid_multiple_sortie_state("raid_20260827")
+        backend.ui["images"].append(checkmark)
+        backend.ui["image_count"] += 1
+
+        backend.taps.clear()
+        backend.ui["images"][0]["sprite"] = "close_btn_disabled"
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is incomplete"):
+            oracle.raid_multiple_sortie_visible("raid_20260827")
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is incomplete"):
+            oracle.click_raid_multiple_sortie_back("raid_20260827")
+        self.assertEqual(backend.taps, [])
+
+    def test_gems_farming_equipment_loadout_rejects_duplicate_positions(self):
+        slot = GemsFarmingEquipmentSlot(1, "51000", 10, False)
+        with self.assertRaisesRegex(ValueError, "positions must be unique"):
+            GemsFarmingEquipmentLoadout("flagship", (slot, slot))
+
+        loadout = GemsFarmingEquipmentLoadout(
+            "flagship",
+            (slot, GemsFarmingEquipmentSlot(6, "12300", 10, True)),
+        )
+        self.assertEqual([item.position for item in loadout.slots], [1, 6])
+
+    def test_gems_farming_dock_candidates_bind_duplicate_ids_by_card_bounds(self):
+        prefix = "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/"
+        first_bounds = {"left": 90, "top": 70, "right": 230, "bottom": 280}
+        second_bounds = {"left": 260, "top": 70, "right": 400, "bottom": 280}
+        filter_path = "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button"
+        backend = FakeBackend(
+            [
+                make_button("index_button", filter_path, 1200, 40),
+                make_button("106021", prefix + "106021", 160, 175, first_bounds),
+                make_button("106021", prefix + "106021", 330, 175, second_bounds),
+            ]
+        )
+
+        def card_text(value, suffix, bounds):
+            return make_text(value, prefix + "106021/content/" + suffix, bounds)
+
+        def card_image(sprite, suffix, bounds):
+            return make_image(prefix + "106021/content/" + suffix, sprite, bounds)
+
+        texts = [
+            make_text(
+                "1/1000",
+                "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/capacity/Text",
+            ),
+            make_text(
+                "船坞容量:",
+                "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/capacity/label",
+            ),
+        ]
+        images = [
+            make_image(
+                filter_path,
+                "shaixuan_off",
+                {"left": 1170, "top": 10, "right": 1230, "bottom": 70},
+            )
+        ]
+        for name, emotion, left, rarity, ship_type in (
+            ("博格甲", "119", 100, "1", "hangmu"),
+            ("博格乙", "150", 270, "3_1", "zhanlie"),
+        ):
+            texts.extend(
+                (
+                    card_text(name, "info/name_mask/name", {"left": left, "top": 220, "right": left + 100, "bottom": 245}),
+                    card_text("1", "dockyard/lv/Text", {"left": left + 80, "top": 80, "right": left + 110, "bottom": 105}),
+                    card_text(emotion, "energy/Text", {"left": left + 20, "top": 105, "right": left + 60, "bottom": 130}),
+                )
+            )
+            images.extend(
+                (
+                    card_image("boge", "ship_icon", {"left": left + 20, "top": 130, "right": left + 80, "bottom": 190}),
+                    card_image(ship_type, "info/top/type", {"left": left + 5, "top": 195, "right": left + 35, "bottom": 215}),
+                    card_image(rarity, "front/frame", {"left": left, "top": 72, "right": left + 120, "bottom": 78}),
+                )
+            )
+        images.append(
+            card_image(
+                "biandui02",
+                "dockyard/status",
+                {"left": 105, "top": 150, "right": 135, "bottom": 180},
+            )
+        )
+        backend.ui = make_ui(texts, images=images)
+
+        oracle = make_oracle(backend)
+        oracle._gems_farming_open_slot_context = ("flagship", "boge", 2)
+        candidates = oracle.gems_farming_dock_candidates()
+
+        self.assertEqual(
+            [(item.position, item.ship_name, item.emotion) for item in candidates],
+            [(0, "博格甲", 119), (1, "博格乙", 150)],
+        )
+        self.assertEqual(
+            [item.rarity for item in candidates], ["common", "special"]
+        )
+        self.assertEqual([item.ship_type for item in candidates], ["cv", "bb"])
+        self.assertEqual([item.status for item in candidates], ["current", "free"])
+
+    def test_gems_farming_dock_candidates_waits_for_virtualized_cards(self):
+        oracle = make_oracle(FakeBackend([]))
+        candidate = SimpleNamespace(ship_id=107041)
+        with mock.patch.object(
+            oracle,
+            "_gems_farming_dock_candidates_once",
+            side_effect=[(), (), (candidate,)],
+        ) as read, mock.patch.object(oracle, "_sleep") as sleep:
+            self.assertEqual(oracle.gems_farming_dock_candidates(), (candidate,))
+
+        self.assertEqual(read.call_count, 3)
+        self.assertEqual(sleep.call_args_list, [mock.call(0.1), mock.call(0.1)])
+
+    def test_gems_farming_dock_candidates_accepts_stable_empty_after_wait(self):
+        oracle = make_oracle(FakeBackend([]))
+        with mock.patch.object(
+            oracle, "_gems_farming_dock_candidates_once", return_value=()
+        ) as read, mock.patch.object(oracle, "_sleep") as sleep:
+            self.assertEqual(oracle.gems_farming_dock_candidates(), ())
+
+        self.assertEqual(read.call_count, 13)
+        self.assertEqual(sleep.call_count, 12)
+
+    def test_gems_farming_exact_ship_read_ignores_unrelated_incomplete_card(self):
+        prefix = "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/"
+        target_path = prefix + "699024"
+        other_path = prefix + "101153"
+        backend = FakeBackend(
+            [
+                make_button("699024", target_path, 160, 175),
+                make_button("101153", other_path, 330, 175),
+            ]
+        )
+        root = target_path + "/content/"
+        card_bounds = {"left": 140, "top": 155, "right": 180, "bottom": 195}
+        backend.ui = make_ui(
+            [
+                make_text("那不勒斯", root + "info/name_mask/name", card_bounds),
+                make_text("123", root + "dockyard/lv/Text", card_bounds),
+                make_text("150", root + "energy/Text", card_bounds),
+            ],
+            images=[
+                make_image(root + "ship_icon", "nabulesi", card_bounds),
+                make_image(root + "info/top/type", "zhongxun", card_bounds),
+                make_image(root + "front/frame", "5", card_bounds),
+            ],
+        )
+        oracle = make_oracle(backend)
+        state = oracle.read_state()
+        ui_state = oracle.read_ui_state()
+        target = EnhancementDockCandidate(
+            0, 699024, "那不勒斯", 123, state.buttons[0]
+        )
+        unrelated = EnhancementDockCandidate(
+            1, 101153, "斯彭斯", 100, state.buttons[1]
+        )
+
+        with mock.patch.object(
+            oracle, "_enhancement_dock_records", return_value=(state, ui_state)
+        ), mock.patch.object(
+            oracle,
+            "enhancement_dock_candidates",
+            return_value=(target, unrelated),
+        ):
+            result = oracle._gems_farming_dock_candidates_once(
+                ship_ids=frozenset({699024})
+            )
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].ship_sprite, "nabulesi")
+        self.assertEqual(result[0].ship_type, "ca")
+        self.assertEqual(result[0].rarity, "ultra")
+
+    def test_gems_farming_candidate_click_reproves_only_exact_ship_id(self):
+        backend = FakeBackend([make_button("699024", "root/699024")])
+        oracle = make_oracle(backend)
+        button = oracle.read_state().buttons[0]
+        candidate = GemsFarmingDockCandidate(
+            position=0,
+            ship_id=699024,
+            ship_name="Napoli",
+            ship_sprite="nabulesi",
+            ship_type="ca",
+            rarity="ultra",
+            level=123,
+            emotion=119,
+            fleet_index=0,
+            status="free",
+            button=button,
+        )
+        count_path = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/"
+            "bottom_info/bg_input/count"
+        )
+        selected = SimpleNamespace(
+            path=count_path,
+            text="<color=#FFFFFFFF>1</color>/1",
+            active_in_hierarchy=True,
+            active_and_enabled=True,
+            truncated=False,
+        )
+
+        with mock.patch.object(
+            oracle, "gems_farming_dock_candidates", return_value=(candidate,)
+        ) as candidates, mock.patch.object(
+            oracle, "read_state", return_value=SimpleNamespace(
+                generation=10, buttons=(button,)
+            )
+        ), mock.patch.object(
+            oracle, "_blocking_rules", return_value=()
+        ), mock.patch.object(
+            oracle, "_foreground_component", return_value=COMPONENT
+        ), mock.patch.object(
+            oracle, "_tap"
+        ), mock.patch.object(
+            oracle, "read_text_state", return_value=SimpleNamespace(texts=(selected,))
+        ):
+            receipt = oracle.click_gems_farming_candidate(candidate)
+
+        self.assertEqual(receipt.semantic_id, "gems-farming/dock/ship/699024")
+        self.assertEqual(candidates.call_args_list, [mock.call(ship_ids=(699024,))] * 3)
+
+    def test_gems_farming_regular_store_reset_proves_unchanged_upper_boundary(self):
+        oracle = make_oracle(FakeBackend([]))
+        prefix = (
+            "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/"
+            "equipment_scrollview/equipment_grid/"
+        )
+
+        def state(index, top):
+            return SimpleNamespace(
+                buttons=(
+                    SimpleNamespace(
+                        path=prefix + str(index),
+                        bounds=Bounds(100, top, 220, top + 120),
+                    ),
+                )
+            )
+
+        oracle._swipe = mock.Mock()
+        with mock.patch.object(
+            oracle,
+            "read_state",
+            side_effect=(state(7, 40), state(3, 40), state(0, 40), state(0, 40)),
+        ), mock.patch.object(
+            oracle, "read_ui_state", return_value=SimpleNamespace()
+        ), mock.patch.object(
+            oracle, "_blocking_rules", return_value=()
+        ):
+            oracle._gems_equipment_reset_store(False)
+
+        self.assertEqual(oracle._swipe.call_count, 3)
+
+    def test_gems_farming_regular_store_reset_rejects_moving_same_index(self):
+        oracle = make_oracle(FakeBackend([]))
+        prefix = (
+            "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/"
+            "equipment_scrollview/equipment_grid/"
+        )
+
+        def state(top):
+            return SimpleNamespace(
+                buttons=(
+                    SimpleNamespace(
+                        path=prefix + "0",
+                        bounds=Bounds(100, top, 220, top + 120),
+                    ),
+                )
+            )
+
+        oracle._swipe = mock.Mock()
+        with mock.patch.object(
+            oracle,
+            "read_state",
+            side_effect=(state(80), state(40), state(40)),
+        ), mock.patch.object(
+            oracle, "read_ui_state", return_value=SimpleNamespace()
+        ), mock.patch.object(
+            oracle, "_blocking_rules", return_value=()
+        ):
+            oracle._gems_equipment_reset_store(False)
+
+        self.assertEqual(oracle._swipe.call_count, 2)
+
+    def test_gems_farming_open_slot_captures_current_ship_context(self):
+        oracle = make_oracle(FakeBackend([]))
+        slot = SimpleNamespace(
+            path=(
+                "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/"
+                "GridFrame/main_1/shadow"
+            ),
+            bounds=Bounds(550, 298, 630, 336),
+        )
+        ranger = SimpleNamespace(
+            path=(
+                "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/"
+                "HeroContainer/heroInfo(Clone)/tujizhe_root/mouseChild"
+            ),
+            active_in_hierarchy=True,
+            active_and_enabled=True,
+            raycast_target=True,
+            truncated=False,
+            bounds=Bounds(510, 157, 670, 317),
+        )
+        state = SimpleNamespace(generation=10)
+        ui_state = SimpleNamespace(images=(slot, ranger))
+        receipt = ActionReceipt(
+            semantic_id="gems-farming/formation/flagship/open",
+            generation=10,
+            point=Point(590, 237),
+            bounds=ranger.bounds,
+            path=ranger.path,
+        )
+
+        with mock.patch.object(
+            oracle,
+            "_gems_farming_formation_records",
+            return_value=(state, ui_state, 6),
+        ), mock.patch.object(
+            oracle, "_blocking_rules", return_value=()
+        ), mock.patch.object(
+            oracle, "_click_exact_image", return_value=receipt
+        ), mock.patch.object(
+            oracle, "_retry_transition_read", return_value=None
+        ):
+            result = oracle.gems_farming_open_slot("flagship")
+
+        self.assertEqual(result, receipt)
+        self.assertEqual(
+            oracle._gems_farming_open_slot_context,
+            ("flagship", "tujizhe", 6),
+        )
+
+    def test_gems_farming_hard_unmount_proves_compacted_left_shift(self):
+        oracle = make_oracle(FakeBackend([]))
+        card = SimpleNamespace()
+        open_receipt = ActionReceipt(
+            "campaign/fleet-preparation/fleet/1/select",
+            10,
+            Point(433, 218),
+            Bounds(391, 177, 475, 260),
+            "root/card",
+        )
+        current = SimpleNamespace(
+            path=(
+                "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/"
+                "ship_container/ships/0"
+            ),
+            name="0",
+            active_in_hierarchy=True,
+            active_and_enabled=True,
+            interactable=True,
+            point=Point(162, 178),
+            bounds=Bounds(85, 69, 239, 286),
+        )
+        unmount_receipt = ActionReceipt(
+            "tactical/dock/confirm",
+            11,
+            current.point,
+            current.bounds,
+            current.path,
+        )
+        before = (SimpleNamespace(), SimpleNamespace(), (card, card, card), ("a", "b", "c"))
+        after = (SimpleNamespace(), SimpleNamespace(), (card, card), ("b", "c"))
+
+        with mock.patch.object(
+            oracle, "_gems_farming_hard_role_cards", side_effect=(before, after)
+        ), mock.patch.object(
+            oracle, "_click_exact_image", return_value=open_receipt
+        ), mock.patch.object(
+            oracle,
+            "_retry_transition_read",
+            return_value=(SimpleNamespace(buttons=(current,)), SimpleNamespace()),
+        ), mock.patch.object(
+            oracle, "_gems_equipment_click_button", return_value=unmount_receipt
+        ):
+            result = oracle.gems_farming_hard_unmount("11-4", 1, "flagship")
+
+        self.assertEqual(result, unmount_receipt)
+
+    def test_gems_farming_hard_open_slot_captures_append_postcondition(self):
+        oracle = make_oracle(FakeBackend([]))
+        blank = SimpleNamespace(
+            path=(
+                "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/"
+                "ShipList/fleet/1/main/emptytpl(Clone)/icon_bg"
+            ),
+            name="icon_bg",
+            sprite="tianjia_icon",
+            active_in_hierarchy=True,
+            active_and_enabled=True,
+            truncated=False,
+            raycast_target=True,
+            bounds=Bounds(595, 174, 684, 264),
+        )
+        state = SimpleNamespace(generation=20)
+        receipt = ActionReceipt(
+            "campaign/fleet-preparation/fleet/1/select",
+            20,
+            Point(640, 219),
+            blank.bounds,
+            blank.path,
+        )
+        with mock.patch.object(
+            oracle,
+            "_gems_farming_hard_role_cards",
+            return_value=(state, SimpleNamespace(images=(blank,)), (object(), object()), ("a", "b")),
+        ), mock.patch.object(
+            oracle, "_click_exact_image", return_value=receipt
+        ), mock.patch.object(oracle, "_retry_transition_read", return_value=None):
+            result = oracle.gems_farming_hard_open_slot("11-4", 1, "flagship")
+
+        self.assertEqual(result, receipt)
+        self.assertEqual(
+            oracle._gems_farming_hard_open_slot_context,
+            ("11-4", 1, "flagship", ("a", "b")),
+        )
+
+    def test_gems_farming_confirm_ignores_unrelated_truncated_toggle_slice(self):
+        count_path = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/"
+            "bottom_info/bg_input/count"
+        )
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [make_text("<color=#FFFFFFFF>1</color>/1", count_path)]
+        )
+        backend.ui["toggle_truncated"] = True
+        oracle = make_oracle(backend)
+        candidate = GemsFarmingDockCandidate(
+            position=0,
+            ship_id=806024,
+            ship_name="阿罗芒什",
+            ship_sprite="aluomangshi",
+            ship_type="cv",
+            rarity="super_rare",
+            level=100,
+            emotion=150,
+            fleet_index=0,
+            status="free",
+            button=None,
+        )
+        slot = SimpleNamespace(
+            path=(
+                "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/"
+                "GridFrame/main_1/shadow"
+            ),
+            bounds=Bounds(550, 298, 630, 336),
+        )
+        mounted = SimpleNamespace(
+            path=(
+                "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/"
+                "HeroContainer/heroInfo(Clone)/aluomangshi_root/mouseChild"
+            ),
+            active_in_hierarchy=True,
+            active_and_enabled=True,
+            bounds=Bounds(510, 157, 670, 317),
+        )
+        receipt = ActionReceipt(
+            semantic_id="tactical/dock/confirm",
+            generation=10,
+            point=Point(1022, 673),
+            bounds=Bounds(931, 640, 1113, 707),
+            path="root/confirm",
+        )
+
+        with mock.patch.object(oracle, "click", return_value=receipt), mock.patch.object(
+            oracle,
+            "_gems_farming_formation_records",
+            return_value=(None, SimpleNamespace(images=(slot, mounted)), 6),
+        ):
+            result = oracle.confirm_gems_farming_candidate_selection(
+                candidate, "flagship"
+            )
+
+        self.assertEqual(result, receipt)
+
     def test_campaign_auto_search_roles_use_exact_duty_controls(self):
         prefix = (
             "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/"
@@ -1281,6 +2908,77 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "shop/gift-pack")
         self.assertEqual(backend.taps, [(640, 360)])
 
+    def test_recommendation_shop_home_uses_exact_top_control(self):
+        root = "OverlayCamera/Overlay/UIMain/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "homeBtn",
+                    root + "buttonList/top/homeBtn",
+                    x=1140.0,
+                    y=42.0,
+                    raycast_top=None,
+                ),
+                make_button("closeBtn", root + "buttonList/top/closeBtn"),
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("商店", root + "buttonList/top/title/Text")],
+            toggles=[
+                make_toggle(
+                    root + "buttonList/shop1List/giftPackShop/shop1Tg",
+                    checked=False,
+                    raycast_top=None,
+                )
+            ],
+        )
+
+        receipt = make_oracle(backend).click_recommendation_shop_home()
+
+        self.assertEqual(receipt.semantic_id, "shop/home")
+        self.assertEqual(backend.taps, [(1140, 42)])
+
+    def test_free_weekly_supply_pack_click_excludes_paid_cards(self):
+        root = "OverlayCamera/Overlay/UIMain/"
+        free = root + "ChargeGiftShopUI(Clone)/lScrollRect/content/0"
+        paid = root + "ChargeGiftShopUI(Clone)/lScrollRect/content/1"
+        backend = FakeBackend(
+            [
+                make_button("homeBtn", root + "buttonList/top/homeBtn"),
+                make_button("closeBtn", root + "buttonList/top/closeBtn"),
+                make_button("0", free, x=300, y=350, raycast_top=None),
+                make_button("1", paid, x=500, y=350, raycast_top=None),
+            ]
+        )
+        toggle = make_toggle(
+            root + "buttonList/shop1List/giftPackShop/shop1Tg",
+            checked=True,
+            raycast_top=None,
+        )
+        backend.ui = make_ui(
+            [
+                make_text("商店", root + "buttonList/top/title/Text"),
+                make_text(
+                    "全部",
+                    root
+                    + "ChargeGiftShopUI(Clone)/toggleGroup/Toggle/selected/Label",
+                ),
+                make_text("每周免费礼包", free + "/real_tpl/item_name_mask/item_name"),
+                make_text("0", free + "/real_tpl/Price/Text"),
+                make_text("限时礼包", paid + "/real_tpl/item_name_mask/item_name"),
+                make_text("300", paid + "/real_tpl/Price/Text"),
+            ],
+            toggles=[toggle],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.free_weekly_supply_pack_available())
+        receipt = oracle.click_free_weekly_supply_pack()
+
+        self.assertEqual(receipt.semantic_id, "shop/free-weekly-pack")
+        self.assertEqual(backend.taps, [(300, 350)])
+        self.assertNotIn((500, 350), backend.taps)
+
     def test_campaign_battle_reward_requires_result_stack_marker(self):
         backend = FakeBackend(
             [
@@ -1375,6 +3073,36 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(oracle.war_archives_data_key_text(), "300/300")
         self.assertFalse(oracle.war_archives_data_key_collected())
 
+        receipt = oracle.click_war_archives_data_key_collect()
+        self.assertEqual(receipt.semantic_id, "archive/key/collect")
+        self.assertEqual(receipt.path, root + "/getBtn/state_before")
+        self.assertEqual(backend.taps, [(640, 360)])
+
+        backend.taps.clear()
+        backend.buttons = make_buttons(
+            [make_button("state_after", root + "/getBtn/state_after", raycast_top=None)]
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "already collected"):
+            oracle.click_war_archives_data_key_collect()
+        self.assertEqual(backend.taps, [])
+
+        backend.buttons = make_buttons([])
+        backend.ui = make_ui(
+            [make_text("300/300", root + "/nums/text")],
+            toggles=[
+                make_toggle(root + "/toggles/EX", checked=True, raycast_top=None),
+                make_toggle(root + "/toggles/SP", checked=False, raycast_top=None),
+            ],
+            images=[
+                make_image(
+                    root + "/getBtn/state_after", sprite="remaster_key_got"
+                )
+            ],
+        )
+        self.assertTrue(oracle.war_archives_data_key_collected())
+        with self.assertRaisesRegex(SemanticGateClosed, "already collected"):
+            oracle.click_war_archives_data_key_collect()
+
     def test_war_archives_page_rejects_inconsistent_toggle_selection(self):
         root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)"
         backend = FakeBackend([])
@@ -1388,6 +3116,251 @@ class SemanticOracleTests(unittest.TestCase):
 
         with self.assertRaises(SemanticGateClosed):
             make_oracle(backend).war_archives_page_visible()
+
+    def test_war_archives_campaign_card_uses_sprite_not_list_position(self):
+        root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)"
+        card = root + "/list/content/item/bg/icon"
+        card_bounds = {
+            "left": 95.0,
+            "top": 151.0,
+            "right": 550.0,
+            "bottom": 321.0,
+        }
+        backend = FakeBackend(
+            [
+                make_button(
+                    "icon",
+                    card,
+                    x=322.5,
+                    y=236.0,
+                    bounds=card_bounds,
+                    raycast_top=None,
+                )
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("300/300", root + "/nums/text")],
+            toggles=[
+                make_toggle(root + "/toggles/EX", checked=True, raycast_top=None),
+                make_toggle(root + "/toggles/SP", checked=False, raycast_top=None),
+            ],
+            images=[make_image(card, "temp_hongran", card_bounds)],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(
+            oracle.war_archives_campaign_card_position(
+                "war_archives_20190321_en"
+            ),
+            "visible",
+        )
+        receipt = oracle.click_war_archives_campaign(
+            "war_archives_20190321_en"
+        )
+        self.assertEqual(
+            receipt.semantic_id,
+            "archive/campaign/war_archives_20190321_en",
+        )
+
+        underlying = make_button(
+            "back_button",
+            "UICamera/Canvas/UIMain/LevelMainScene(Clone)/top/back_button",
+        )
+        backend.buttons["buttons"].append(underlying)
+        backend.buttons["button_count"] += 1
+        receipt = oracle.click_war_archives_campaign(
+            "war_archives_20190321_en"
+        )
+        self.assertEqual(
+            receipt.semantic_id,
+            "archive/campaign/war_archives_20190321_en",
+        )
+        self.assertEqual(backend.taps, [(322, 236), (322, 236)])
+
+        backend.taps.clear()
+        with self.assertRaisesRegex(SemanticGateClosed, "unavailable"):
+            oracle.click_war_archives_campaign("war_archives_20240725_cn")
+        self.assertEqual(backend.taps, [])
+
+    def test_war_archives_offscreen_card_swipe_is_exact_and_bounded(self):
+        root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)"
+        card = root + "/list/content/item(Clone)/bg/icon"
+        card_bounds = {
+            "left": 729.0,
+            "top": 900.0,
+            "right": 1184.0,
+            "bottom": 1070.0,
+        }
+        backend = FakeBackend(
+            [
+                make_button(
+                    "icon",
+                    card,
+                    x=956.0,
+                    y=985.0,
+                    bounds=card_bounds,
+                    raycast_top=None,
+                )
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("300/300", root + "/nums/text")],
+            toggles=[
+                make_toggle(root + "/toggles/EX", checked=True, raycast_top=None),
+                make_toggle(root + "/toggles/SP", checked=False, raycast_top=None),
+            ],
+            images=[
+                make_image(card, "temp_zhuiluo", card_bounds),
+                make_image(
+                    root + "/list/scroll_bar/Handle/Image",
+                    "scroll_bar",
+                    {"left": 1248, "top": 126, "right": 1264, "bottom": 215},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        receipt = oracle.swipe_war_archives_campaign_toward(
+            "war_archives_20181026_en"
+        )
+        self.assertEqual(
+            receipt.semantic_id,
+            "archive/campaign/search/war_archives_20181026_en",
+        )
+        self.assertEqual(backend.swipes, [(640, 620, 640, 250, 350)])
+        self.assertEqual(backend.taps, [])
+
+    def test_war_archives_category_click_requires_exact_unselected_toggle(self):
+        root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)"
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [make_text("300/300", root + "/nums/text")],
+            toggles=[
+                make_toggle(
+                    root + "/toggles/EX",
+                    checked=True,
+                    raycast_top=None,
+                    x=949,
+                    y=56,
+                    bounds={"left": 897, "top": 36, "right": 1001, "bottom": 76},
+                ),
+                make_toggle(
+                    root + "/toggles/SP",
+                    checked=False,
+                    raycast_top=None,
+                    x=1053,
+                    y=56,
+                    bounds={"left": 1001, "top": 36, "right": 1105, "bottom": 76},
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        receipt = oracle.click_war_archives_category("sp")
+        self.assertEqual(receipt.semantic_id, "archive/category/sp")
+        self.assertEqual(backend.taps, [(1053, 56)])
+
+    def test_war_archives_campaign_page_parses_letter_stage_and_key_counter(self):
+        root = "UICamera/Canvas/UIMain/LevelMainScene(Clone)"
+        stage = root + "/float/levels/items/Chapter_2100001/main"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button", root + "/top/top_chapter/back_button"
+                ),
+                make_button("main", stage, x=630, y=355, raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "红染的参访者-前篇",
+                    root + "/top/top_chapter/title_chapter/name",
+                ),
+                make_text("A1  ", stage + "/info/bk/title_form/title_index"),
+                make_text("风暴的尽头", stage + "/info/bk/title_form/title"),
+                make_text(
+                    "300 / 300",
+                    root + "/main/right_chapter/event_btns/tickets/Text",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        state = oracle.campaign_page_state()
+        self.assertEqual(state.chapter_name, "a")
+        self.assertEqual([item.stage_code for item in state.stages], ["a1"])
+        self.assertTrue(oracle.war_archives_campaign_page_visible())
+        self.assertEqual(oracle.war_archives_campaign_data_key_count(), (300, 300))
+        backend.buttons["buttons"].append(
+            make_button(
+                "btn_act_elite",
+                "UICamera/Canvas/UIMain/LevelMainScene(Clone)/main/"
+                "left_chapter/buttons/btn_act_elite",
+                raycast_top=None,
+            )
+        )
+        backend.buttons["button_count"] += 1
+        self.assertEqual(oracle.campaign_mode_switch_state(), "hard")
+        self.assertTrue(oracle.campaign_stage_actionable("a1"))
+        receipt = oracle.click_campaign_stage("a1")
+        self.assertEqual(receipt.semantic_id, "campaign/stage/a1")
+        self.assertEqual(backend.taps, [(630, 355)])
+
+    def test_war_archives_entry_prompt_requires_exact_cost_and_key_balance(self):
+        msgbox = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window"
+        campaign = "UICamera/Canvas/UIMain/LevelMainScene(Clone)"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "custom_button_2(Clone)",
+                    msgbox + "/button_container/custom_button_2(Clone)",
+                    x=480,
+                    y=520,
+                ),
+                make_button(
+                    "custom_button_1(Clone)",
+                    msgbox + "/button_container/custom_button_1(Clone)",
+                    x=800,
+                    y=520,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "进入所选关卡需要消耗档案秘钥x5，是否进入？",
+                    msgbox + "/msg_panel/content",
+                ),
+                make_text(
+                    "取消",
+                    msgbox + "/button_container/custom_button_2(Clone)/pic",
+                ),
+                make_text(
+                    "确定",
+                    msgbox + "/button_container/custom_button_1(Clone)/pic",
+                ),
+                make_text(
+                    "295 / 300",
+                    campaign + "/main/right_chapter/event_btns/tickets/Text",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.war_archives_entry_confirmation_cost(), 5)
+        receipt = oracle.confirm_war_archives_entry()
+        self.assertEqual(receipt.semantic_id, "archive/entry/confirm")
+        self.assertEqual(backend.taps, [(800, 520)])
+
+        backend.ui["texts"][0]["text"] = (
+            "进入所选关卡需要消耗档案秘钥x6，是否进入？"
+        )
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "entry cost changed"
+        ):
+            oracle.war_archives_entry_confirmation_cost()
+        self.assertEqual(backend.taps, [(800, 520)])
 
     def test_foreground_parser_accepts_resumed_markers_only(self):
         for output in (
@@ -1715,6 +3688,32 @@ class SemanticOracleTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
             oracle.click_toggle("campaign/map-preparation/auto-search")
         self.assertEqual(backend.taps, [])
+
+    def test_campaign_auto_search_effectively_off_when_standard_loop_is_off(self):
+        root = "root/OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/"
+        toggle_path = root + "BottomExtra/LoopGroup/view/container/AutoFight"
+        backend = FakeBackend([])
+        backend.ui = make_ui(
+            [],
+            toggles=[
+                make_toggle(
+                    toggle_path,
+                    checked=True,
+                    raycast_top=False,
+                    x=950,
+                    y=596,
+                )
+            ],
+            images=[
+                make_image(
+                    root + "BottomExtra/LoopGroup/Loop/Toggle/off",
+                    "live2d_off",
+                    {"left": 1034, "top": 590, "right": 1053, "bottom": 603},
+                )
+            ],
+        )
+
+        self.assertFalse(make_oracle(backend).campaign_auto_search_selected())
 
     def test_campaign_auto_search_clicks_exact_sp_delegated_image_when_loop_on(self):
         root = "root/OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/panel/"
@@ -2517,6 +4516,27 @@ class SemanticOracleTests(unittest.TestCase):
         )
         self.assertTrue(oracle.campaign_page_is_normal())
 
+        # Closing the hard fleet overlay restores the exact chapter tree one
+        # frame before the back control becomes topmost.  Presence must accept
+        # that coherent structural page, while input remains fail closed.
+        obscured_back_backend = copy.deepcopy(chapter_backend)
+        obscured_back_backend.buttons["buttons"][0]["raycast_top"] = False
+        obscured_back_oracle = make_oracle(obscured_back_backend)
+        self.assertEqual(
+            obscured_back_oracle.campaign_page_state().chapter_name,
+            "马里亚纳风云上",
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
+            obscured_back_oracle.click("campaign-menu/page/back")
+
+        blocked_backend = copy.deepcopy(obscured_back_backend)
+        blocked_backend.buttons["buttons"].append(
+            make_button("loading", "root/UIOverlay/Loading(Clone)/mask")
+        )
+        blocked_backend.buttons["button_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is not proven"):
+            make_oracle(blocked_backend).campaign_page_state()
+
     def test_campaign_os_entrance_uses_exact_delegated_card(self):
         root = "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
         backend = FakeBackend(
@@ -2675,6 +4695,48 @@ class SemanticOracleTests(unittest.TestCase):
         receipt = oracle.click_campaign_stage("a1")
         self.assertEqual(receipt.semantic_id, "campaign/stage/a1")
         self.assertEqual(backend.taps, [(450, 266)])
+        point_path = (
+            "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/main/"
+            "right_chapter/event_btns/pt_text/Text"
+        )
+        backend.ui["texts"].append(
+            make_text(
+                "x17060",
+                point_path,
+                bounds={"left": 1000, "top": 10, "right": 1100, "bottom": 40},
+            )
+        )
+        backend.ui["text_count"] += 1
+        self.assertEqual(make_oracle(backend).event_points(), 17060)
+        backend.ui["texts"].append(
+            make_text(
+                "70477",
+                "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_value",
+                bounds={"left": 832, "top": 24, "right": 921, "bottom": 45},
+            )
+        )
+        backend.ui["text_count"] += 1
+        self.assertEqual(make_oracle(backend).event_coin(), 70477)
+        coin_text = backend.ui["texts"][-1]
+        coin_text["text"] = "70,477"
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or malformed"):
+            make_oracle(backend).event_coin()
+        coin_text["text"] = "70477"
+        point_text = backend.ui["texts"][-2]
+        point_text["text"] = "17060"
+        with self.assertRaisesRegex(SemanticGateClosed, "counter is malformed"):
+            make_oracle(backend).event_points()
+        point_text["text"] = "x17060"
+        point_text["flags"] |= 0x10
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            make_oracle(backend).event_points()
+        point_text["flags"] &= ~0x10
+        backend.ui["texts"].append(dict(point_text))
+        backend.ui["text_count"] += 1
+        with self.assertRaisesRegex(SemanticGateClosed, "absent or ambiguous"):
+            make_oracle(backend).event_points()
+        backend.ui["texts"].pop()
+        backend.ui["text_count"] -= 1
         mixed_root = root + "Battle/Nodes/Chapter_2050002"
         backend.buttons["buttons"].extend(
             [
@@ -2737,6 +4799,57 @@ class SemanticOracleTests(unittest.TestCase):
             ]
         )
         self.assertEqual(make_oracle(restoring).campaign_oil(), 9504)
+
+    def test_event_sp_stage_click_rejects_exhausted_attempt_before_input(self):
+        root = (
+            "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+            "LevelSelectSPFullUI(Clone)/"
+        )
+        stage_root = root + "Battle/Nodes/Chapter_2050041"
+        attempt_path = stage_root + "/main/triesLimit/Text"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "back_button",
+                    "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+                    "top/top_chapter/back_button",
+                ),
+                make_button(
+                    "Switch", root + "Battle/Mask/Story/Switch", raycast_top=None
+                ),
+                make_button("main", stage_root + "/main", 563, 357),
+                make_button("Chapter_2050041", stage_root, raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "SP", stage_root + "/main/info/bk/title_form/title_index"
+                ),
+                make_text(
+                    "「美梦星光城」",
+                    stage_root + "/main/info/bk/title_form/title",
+                ),
+                make_text("<color=#FF5C5CFF>0/1</color>", attempt_path),
+            ]
+        )
+
+        exhausted = make_oracle(backend)
+        self.assertEqual(
+            exhausted.campaign_stage_state("sp").remaining_attempts, 0
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "attempts are exhausted"):
+            exhausted.click_campaign_stage("sp")
+        self.assertEqual(backend.taps, [])
+
+        next(item for item in backend.ui["texts"] if item["path"] == attempt_path)[
+            "text"
+        ] = "<color=#92FC63FF>1/1</color>"
+        available = make_oracle(backend)
+        self.assertEqual(available.campaign_stage_state("sp").remaining_attempts, 1)
+        receipt = available.click_campaign_stage("sp")
+        self.assertEqual(receipt.semantic_id, "campaign/stage/sp")
+        self.assertEqual(backend.taps, [(563, 357)])
 
     def test_event_campaign_page_identity_is_complete_unique_and_coherent(self):
         canonical_page = (
@@ -3533,6 +5646,274 @@ class SemanticOracleTests(unittest.TestCase):
                     self.assertEqual(adapter._action_ledger._remaining, ledger_before)
                     adapter.end_campaign_pre_sortie()
 
+    def test_live_eventd_d1_map_preparation_accepts_only_reviewed_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="d1")
+        pooled_paths = {
+            "panel/Difficulty/Hard/Mask_Difficulty_Loop",
+            "panel/Difficulty/Mask_Difficlty",
+            "panel/Difficulty/Mask_Difficlty/Image",
+            "panel/Difficulty/Mask_Difficlty/Image_1",
+            "panel/Difficulty/Mask_Difficlty/Image_2",
+        }
+        for image in backend.ui["images"]:
+            if image["path"].rsplit("LevelInfoSPUI(Clone)/", 1)[-1] in pooled_paths:
+                image["sprite"] = "pooled_star_sprite"
+                image["adb_bounds"] = None
+            if image["path"].endswith("/panel/passState/Image"):
+                image["sprite"] = "2"
+        state = make_oracle(backend).campaign_preparation_state("d1")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "d1", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        unknown = make_live_eventsp_map_preparation_backend(profile="d1")
+        unknown.buttons["buttons"].append(
+            make_button(
+                "Switch",
+                "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/"
+                "panel/Difficulty/Hard/UnknownSwitch",
+                raycast_top=None,
+            )
+        )
+        unknown.buttons["button_count"] = len(unknown.buttons["buttons"])
+        with self.assertRaisesRegex(SemanticGateClosed, "record is not reviewed"):
+            make_oracle(unknown).campaign_preparation_state("d1")
+        self.assertEqual(unknown.taps, [])
+
+    def test_live_eventc_c1_map_preparation_accepts_exact_stage_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="c1")
+        state = make_oracle(backend).campaign_preparation_state("c1")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "c1", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        wrong_head = make_live_eventsp_map_preparation_backend(profile="c1")
+        for image in wrong_head.ui["images"]:
+            if image["path"].endswith("/panel/head/Image"):
+                image["sprite"] = "haorenlichade_m_qianting"
+        with self.assertRaisesRegex(SemanticGateClosed, "image identity is malformed"):
+            make_oracle(wrong_head).campaign_preparation_state("c1")
+        self.assertEqual(wrong_head.taps, [])
+
+    def test_live_eventb_b2_map_preparation_accepts_only_reviewed_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="b2")
+        pooled_paths = {
+            "panel/Difficulty/Mask_Normal",
+            "panel/Difficulty/Mask_Normal/Image",
+            "panel/Difficulty/Mask_Normal/Image_1",
+            "panel/Difficulty/Mask_Normal/Image_2",
+            "panel/Difficulty/Normal/Mask_Normal_Loop",
+        }
+        for image in backend.ui["images"]:
+            if image["path"].rsplit("LevelInfoSPUI(Clone)/", 1)[-1] in pooled_paths:
+                image["sprite"] = "pooled_stage_star_sprite"
+        state = make_oracle(backend).campaign_preparation_state("b2")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "b2", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        unknown = make_live_eventsp_map_preparation_backend(profile="b2")
+        unknown.buttons["buttons"].append(
+            make_button(
+                "Switch",
+                "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/"
+                "panel/Difficulty/Normal/UnknownSwitch",
+                raycast_top=None,
+            )
+        )
+        unknown.buttons["button_count"] = len(unknown.buttons["buttons"])
+        with self.assertRaisesRegex(SemanticGateClosed, "record is not reviewed"):
+            make_oracle(unknown).campaign_preparation_state("b2")
+        self.assertEqual(unknown.taps, [])
+
+        bonus_consumed = make_live_eventsp_map_preparation_backend(profile="b2")
+        bonus_paths = {
+            "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/"
+            "panel/Difficulty/Normal/Bonus1",
+            "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/"
+            "panel/Difficulty/Normal/Bonus1/Image",
+        }
+        bonus_consumed.ui["images"] = [
+            image
+            for image in bonus_consumed.ui["images"]
+            if image["path"] not in bonus_paths
+        ]
+        bonus_consumed.ui["image_count"] = len(bonus_consumed.ui["images"])
+        state = make_oracle(bonus_consumed).campaign_preparation_state("b2")
+        self.assertEqual(state.stage_code, "b2")
+
+        partial_bonus = make_live_eventsp_map_preparation_backend(profile="b2")
+        partial_bonus.ui["images"] = [
+            image
+            for image in partial_bonus.ui["images"]
+            if image["path"] != sorted(bonus_paths)[0]
+        ]
+        partial_bonus.ui["image_count"] = len(partial_bonus.ui["images"])
+        with self.assertRaisesRegex(SemanticGateClosed, "image surface is incomplete"):
+            make_oracle(partial_bonus).campaign_preparation_state("b2")
+
+    def test_live_eventc_c2_shared_a2_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="a2")
+        state = make_oracle(backend).campaign_preparation_state("a2")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "a2", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        wrong_head = make_live_eventsp_map_preparation_backend(profile="a2")
+        for image in wrong_head.ui["images"]:
+            if image["path"].endswith("/panel/head/Image"):
+                image["sprite"] = "emotion_zhongxun"
+        with self.assertRaisesRegex(SemanticGateClosed, "image identity is malformed"):
+            make_oracle(wrong_head).campaign_preparation_state("a2")
+        self.assertEqual(wrong_head.taps, [])
+
+    def test_live_eventc_c2_hard_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="c2")
+        state = make_oracle(backend).campaign_preparation_state("c2")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "c2", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        wrong_points = make_live_eventsp_map_preparation_backend(profile="c2")
+        for text in wrong_points.ui["texts"]:
+            if text["path"].endswith("/drops/frame/list/item/icon_bg/count"):
+                text["text"] = "90"
+        with self.assertRaisesRegex(SemanticGateClosed, "text value changed"):
+            make_oracle(wrong_points).campaign_preparation_state("c2")
+        self.assertEqual(wrong_points.taps, [])
+
+    def test_live_eventc_c3_shared_a3_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="a3")
+        state = make_oracle(backend).campaign_preparation_state("a3")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "a3", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+    def test_live_eventc_c3_hard_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="c3")
+        state = make_oracle(backend).campaign_preparation_state("c3")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "c3", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+    def test_live_eventd_d2_hard_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="d2")
+        state = make_oracle(backend).campaign_preparation_state("d2")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "d2", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        bonus_consumed = make_live_eventsp_map_preparation_backend(profile="d2")
+        bonus_consumed.ui["images"] = [
+            image
+            for image in bonus_consumed.ui["images"]
+            if "/panel/Difficulty/Hard/Bonus1" not in image["path"]
+        ]
+        bonus_consumed.ui["image_count"] = len(bonus_consumed.ui["images"])
+        state = make_oracle(bonus_consumed).campaign_preparation_state("d2")
+        self.assertEqual(state.stage_code, "d2")
+
+    def test_live_eventd_d3_hard_preparation_accepts_exact_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="d3")
+        state = make_oracle(backend).campaign_preparation_state("d3")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "d3", 10)
+        )
+        self.assertEqual(backend.taps, [])
+        backend.ui["texts"].append(
+            make_text(
+                "70477",
+                "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/gold/gold_value",
+            )
+        )
+        backend.ui["text_count"] += 1
+        self.assertEqual(make_oracle(backend).event_coin("d3"), 70477)
+        for toggle in backend.ui["toggles"]:
+            if toggle["path"].endswith("/AutoFight"):
+                toggle["checked"] = False
+        backend.ui["images"] = [
+            image
+            for image in backend.ui["images"]
+            if not image["path"].endswith("/AutoFight/Flag")
+        ]
+        backend.ui["image_count"] = len(backend.ui["images"])
+        self.assertEqual(
+            make_oracle(backend).campaign_preparation_state("d3").stage_code,
+            "d3",
+        )
+        self.assertEqual(make_oracle(backend).event_coin("d3"), 70477)
+        with self.assertRaises(SemanticGateClosed):
+            make_oracle(backend).event_coin("d2")
+
+        remounted = make_live_eventsp_map_preparation_backend(
+            profile="d3", mount="uiorigin"
+        )
+        state = make_oracle(remounted).campaign_preparation_state("d3")
+        self.assertEqual(state.stage_code, "d3")
+
+        dedicated_hard_node = make_live_eventsp_map_preparation_backend(
+            profile="d3"
+        )
+        for records in (
+            dedicated_hard_node.buttons["buttons"],
+            dedicated_hard_node.ui["texts"],
+            dedicated_hard_node.ui["images"],
+        ):
+            for record in records:
+                record["path"] = record["path"].replace(
+                    "Chapter_2050006", "Chapter_2050026"
+                )
+        state = make_oracle(dedicated_hard_node).campaign_preparation_state("d3")
+        self.assertEqual(state.stage_code, "d3")
+
+        mixed = make_live_eventsp_map_preparation_backend(
+            profile="d3", mount="uiorigin"
+        )
+        mixed.buttons["buttons"].append(
+            make_button(
+                "bg",
+                "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)/bg",
+                raycast_top=None,
+            )
+        )
+        mixed.buttons["button_count"] = len(mixed.buttons["buttons"])
+        with self.assertRaisesRegex(SemanticGateClosed, "identity is incomplete"):
+            make_oracle(mixed).campaign_preparation_state("d3")
+
+    def test_live_eventb_b3_map_preparation_accepts_exact_stage_profile(self):
+        backend = make_live_eventsp_map_preparation_backend(profile="b3")
+        state = make_oracle(backend).campaign_preparation_state("b3")
+
+        self.assertEqual(
+            (state.kind, state.stage_code, state.oil_cost), ("map", "b3", 10)
+        )
+        self.assertEqual(backend.taps, [])
+
+        wrong_level = make_live_eventsp_map_preparation_backend(profile="b3")
+        for text in wrong_level.ui["texts"]:
+            if text["path"].endswith("/panel/Level/Text"):
+                text["text"] = "LV 55"
+        with self.assertRaisesRegex(SemanticGateClosed, "text value changed"):
+            make_oracle(wrong_level).campaign_preparation_state("b3")
+        self.assertEqual(wrong_level.taps, [])
+
     def test_live_eventsp_map_preparation_requires_exact_closed_surface(self):
         backend = make_live_eventsp_map_preparation_backend()
         state = make_oracle(backend).campaign_preparation_state("sp")
@@ -3779,6 +6160,28 @@ class SemanticOracleTests(unittest.TestCase):
                     self.assertEqual(vars(context), context_before)
                     self.assertEqual(adapter._action_ledger._remaining, ledger_before)
                 adapter.end_campaign_pre_sortie()
+
+    def test_exhausted_eventsp_detail_allows_cancel_but_never_proceed(self):
+        backend = make_live_eventsp_map_preparation_backend()
+        attempt_path = (
+            "UICamera/Canvas/UIMain/LevelMainScene(Clone)/"
+            "LevelSelectSPFullUI(Clone)/Battle/Nodes/Chapter_2050041/"
+            "main/triesLimit/Text"
+        )
+        next(item for item in backend.ui["texts"] if item["path"] == attempt_path)[
+            "text"
+        ] = "<color=#FF5C5CFF>0/1</color>"
+        oracle = make_oracle(backend)
+
+        state = oracle.campaign_map_preparation_state("sp")
+        self.assertEqual(state.remaining_attempts, 0)
+        with self.assertRaisesRegex(SemanticGateClosed, "attempts are exhausted"):
+            oracle.click_campaign_map_preparation("sp")
+        self.assertEqual(backend.taps, [])
+
+        receipt = oracle.cancel_campaign_map_preparation("sp")
+        self.assertEqual(receipt.semantic_id, "campaign/map-preparation/cancel")
+        self.assertEqual(len(backend.taps), 1)
 
     def test_live_eventsp_map_preparation_binds_exact_selector_underlay(self):
         live_root = (
@@ -4541,6 +6944,38 @@ class SemanticOracleTests(unittest.TestCase):
         with self.assertRaisesRegex(SemanticGateClosed, "sortie is not proven"):
             make_oracle(backend).campaign_fleet_preparation_state("12-4")
 
+    def test_war_archives_fleet_preparation_uses_letter_stage_underlay(self):
+        fleet = (
+            "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/"
+        )
+        stage = (
+            "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/float/levels/"
+            "items/Chapter_2100001/main"
+        )
+        backend = FakeBackend(
+            [
+                make_button("main", stage, raycast_top=False),
+                make_button("btnBack", fleet + "btnBack", 1196, 97),
+                make_button("start_button", fleet + "start_button", 1078, 585),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("舰队选择", fleet + "title/Image/text"),
+                make_text("A1  ", stage + "/info/bk/title_form/title_index"),
+                make_text("风暴的尽头", stage + "/info/bk/title_form/title"),
+                make_text(
+                    "300 / 300",
+                    "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/main/"
+                    "right_chapter/event_btns/tickets/Text",
+                ),
+            ]
+        )
+
+        state = make_oracle(backend).campaign_fleet_preparation_state("a1")
+
+        self.assertEqual((state.kind, state.stage_code), ("fleet", "a1"))
+
     def test_campaign_fleet_preparation_accepts_exact_hard_stage_underlay(self):
         fleet = (
             "root/OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/"
@@ -4707,6 +7142,29 @@ class SemanticOracleTests(unittest.TestCase):
                 conservative.submarine_oil_cost,
             ),
             (500, 500, 0),
+        )
+
+        archive_stage = stage.replace("Chapter_101", "Chapter_2100001")
+        for record in (*backend.buttons["buttons"], *backend.ui["texts"]):
+            record["path"] = record["path"].replace(stage, archive_stage)
+        next(
+            item
+            for item in backend.ui["texts"]
+            if item["path"].endswith("/title_form/title_index")
+        )["text"] = "A1"
+        backend.ui["texts"].append(
+            make_text(
+                "300 / 300",
+                "root/UICamera/Canvas/UIMain/LevelMainScene(Clone)/main/"
+                "right_chapter/event_btns/tickets/Text",
+            )
+        )
+        backend.ui["text_count"] += 1
+
+        archive = make_oracle(backend).campaign_fleet_selection_state("a1")
+        self.assertEqual(
+            (archive.mob_oil_cost, archive.boss_oil_cost),
+            (500, 500),
         )
 
     def test_event_hard_fleet_selection_types_one_sided_selected_submarine(self):
@@ -5095,6 +7553,12 @@ class SemanticOracleTests(unittest.TestCase):
         backend.ui["images"][1]["sprite"] = "sea_YW"
         hard_11_state = make_oracle(backend).campaign_map_entry_state()
         self.assertEqual(hard_11_state.root_path, map_root)
+        backend.ui["images"][1]["sprite"] = "sea_BW"
+        archive_state = make_oracle(backend).campaign_map_entry_state()
+        self.assertEqual(archive_state.root_path, map_root)
+        backend.ui["images"][1]["sprite"] = "sea_YX"
+        winter_state = make_oracle(backend).campaign_map_entry_state()
+        self.assertEqual(winter_state.root_path, map_root)
 
         backend.buttons["buttons"].append(
             make_button(
@@ -6628,6 +9092,466 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(state.waiting_capacity, 6)
         self.assertEqual(state.completed, 0)
 
+    def test_meowfficer_purchase_state_uses_asset_derived_exact_paths(self):
+        root = "root/OverlayCamera/Overlay/UIMain/CommanderReserveUI(Clone)/frame/"
+        controls = root + "bg1/"
+        backend = FakeBackend(
+            [
+                make_button("min", controls + "count/min", raycast_top=None),
+                make_button("add", controls + "count/add", raycast_top=None),
+                make_button("max", controls + "max", raycast_top=None),
+                make_button("Button", controls + "Button", raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("3", controls + "count/Text"),
+                make_text("3000", controls + "price_all/Text"),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        state = oracle.meowfficer_purchase_state()
+
+        self.assertEqual(state.generation, 10)
+        self.assertEqual(state.count, 3)
+        self.assertEqual(state.total_price, 3000)
+        self.assertTrue(oracle.enabled("meowfficer/buy/submit"))
+
+    def test_meowfficer_purchase_prompt_is_scoped_to_reserve_ui(self):
+        root = (
+            "root/OverlayCamera/Overlay/UIMain/CommanderReserveUI(Clone)/"
+            "CommanderMsgBoxUI(Clone)/frame/"
+        )
+        backend = FakeBackend(
+            [
+                make_button("cancel_btn", root + "cancel_btn", raycast_top=None),
+                make_button("confirm_btn", root + "confirm_btn", raycast_top=None),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.enabled("meowfficer/buy/cancel"))
+        self.assertTrue(oracle.enabled("meowfficer/buy/confirm"))
+
+    def test_meowfficer_dock_cats_use_exact_card_bounds_and_selection(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        dock = root + "pages/CommanderCatDockUI(Clone)/"
+        box = dock + "box/"
+        card = dock + "frame/content/ComanderCatTpl/info/"
+        first_bounds = {"left": 680, "top": 180, "right": 760, "bottom": 280}
+        second_bounds = {"left": 810, "top": 180, "right": 890, "bottom": 280}
+        backend = FakeBackend(
+            [
+                make_button("back_btn", root + "top/back_btn", raycast_top=None),
+                make_button("home", box + "home", raycast_top=None),
+                make_button("reserve_btn", box + "reserve_btn", raycast_top=None),
+                make_button("boxes_btn", box + "boxes_btn", raycast_top=None),
+                make_button(
+                    "icon", card + "icon", 720, 230,
+                    bounds=first_bounds, raycast_top=None,
+                ),
+                make_button(
+                    "icon", card + "icon", 850, 230,
+                    bounds=second_bounds, raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/8", box + "home/Text"),
+                make_text("0/10", box + "boxes_btn/Text"),
+                make_text("0/15", box + "reserve_btn/Text"),
+                make_text("2/40", box + "capcity/Text"),
+                make_text("5000", root + "top/res/gold/Text"),
+                make_text("3", root + "top/res/1/Text"),
+                make_text("4", root + "top/res/2/Text"),
+                make_text("5", root + "top/res/3/Text"),
+                make_text("LV.8", card + "level_bg/Text", first_bounds),
+                make_text("1", card + "level_bg/Text", second_bounds),
+            ],
+            images=[make_image(dock + "frame/content/ComanderCatTpl/up", bounds=first_bounds)],
+        )
+        oracle = make_oracle(backend)
+
+        cats = oracle.meowfficer_dock_cats()
+
+        self.assertEqual(tuple(item.level for item in cats), (8, 1))
+        self.assertEqual(tuple(item.selected for item in cats), (True, False))
+        receipt = oracle.click_meowfficer_cat(cats[1])
+        self.assertEqual(receipt.semantic_id, "meowfficer/cat/select")
+        self.assertEqual(backend.taps, [(850, 230)])
+
+    def test_meowfficer_feed_state_maps_selected_material_by_bounds(self):
+        root = (
+            "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+            "CommanderCatPlayUI(Clone)/CommanderCatDockUI(Clone)/"
+        )
+        card = root + "frame/content/ComanderCatTpl/info/"
+        card_bounds = {"left": 760, "top": 160, "right": 840, "bottom": 260}
+        backend = FakeBackend(
+            [
+                make_button("cancel_btn", root + "bottom/cancel_btn", raycast_top=None),
+                make_button("select_btn", root + "bottom/select_btn", raycast_top=None),
+                make_button(
+                    "icon", card + "icon", 800, 210,
+                    bounds=card_bounds, raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("1/10", root + "bottom/value/Text"),
+                make_text("LV.1", card + "level_bg/Text", card_bounds),
+            ],
+            images=[
+                make_image(
+                    root + "frame/content/ComanderCatTpl/up", bounds=card_bounds
+                )
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        state = oracle.meowfficer_feed_state()
+
+        self.assertEqual(state.selected, 1)
+        self.assertEqual(state.capacity, 10)
+        self.assertTrue(state.candidates[0].selected)
+        self.assertTrue(oracle.enabled("meowfficer/feed/confirm"))
+
+    def test_meowfficer_dock_cats_accept_live_numeric_card_nodes(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        dock = root + "pages/CommanderCatDockUI(Clone)/"
+        box = dock + "box/"
+        first = dock + "frame/content/0/"
+        second = dock + "frame/content/1/"
+        first_bounds = {"left": 720, "top": 130, "right": 845, "bottom": 260}
+        second_bounds = {"left": 850, "top": 130, "right": 975, "bottom": 260}
+        backend = FakeBackend(
+            [
+                make_button("back_btn", root + "top/back_btn", raycast_top=None),
+                make_button("home", box + "home", raycast_top=None),
+                make_button("reserve_btn", box + "reserve_btn", raycast_top=None),
+                make_button("boxes_btn", box + "boxes_btn", raycast_top=None),
+                make_button(
+                    "info", first + "info", 784, 195,
+                    bounds=first_bounds, raycast_top=None,
+                ),
+                make_button(
+                    "info", second + "info", 914, 195,
+                    bounds=second_bounds, raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/8", box + "home/Text"),
+                make_text("7/10", box + "boxes_btn/Text"),
+                make_text("15/15", box + "reserve_btn/Text"),
+                make_text("38/40", box + "capcity/Text"),
+                make_text("109505", root + "top/res/gold/Text"),
+                make_text("469", root + "top/res/1/Text"),
+                make_text("4", root + "top/res/2/Text"),
+                make_text("5", root + "top/res/3/Text"),
+                make_text("30", first + "info/level_bg/Text", first_bounds),
+                make_text("5", second + "info/level_bg/Text", second_bounds),
+            ],
+            images=[make_image(first + "up", bounds=first_bounds)],
+        )
+        oracle = make_oracle(backend)
+
+        cats = oracle.meowfficer_dock_cats()
+
+        self.assertEqual(tuple(item.level for item in cats), (30, 5))
+        self.assertEqual(tuple(item.selected for item in cats), (True, False))
+        receipt = oracle.click_meowfficer_cat(cats[1])
+        self.assertEqual(receipt.path, second + "info")
+        self.assertEqual(backend.taps, [(914, 195)])
+
+    def test_meowfficer_dock_cats_reject_more_than_live_viewport(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        dock = root + "pages/CommanderCatDockUI(Clone)/"
+        box = dock + "box/"
+        cards = []
+        levels = []
+        for index in range(17):
+            left = 40 + (index % 4) * 130
+            top = 120 + (index // 4) * 110
+            bounds = {
+                "left": left,
+                "top": top,
+                "right": left + 100,
+                "bottom": top + 100,
+            }
+            path = dock + f"frame/content/{index}/info"
+            cards.append(
+                make_button(
+                    "info", path, left + 50, top + 50,
+                    bounds=bounds, raycast_top=None,
+                )
+            )
+            levels.append(make_text("1", path + "/level_bg/Text", bounds))
+        backend = FakeBackend(
+            [
+                make_button("back_btn", root + "top/back_btn", raycast_top=None),
+                make_button("home", box + "home", raycast_top=None),
+                make_button("reserve_btn", box + "reserve_btn", raycast_top=None),
+                make_button("boxes_btn", box + "boxes_btn", raycast_top=None),
+                *cards,
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/8", box + "home/Text"),
+                make_text("0/10", box + "boxes_btn/Text"),
+                make_text("0/15", box + "reserve_btn/Text"),
+                make_text("17/40", box + "capcity/Text"),
+                make_text("5000", root + "top/res/gold/Text"),
+                make_text("3", root + "top/res/1/Text"),
+                make_text("4", root + "top/res/2/Text"),
+                make_text("5", root + "top/res/3/Text"),
+                *levels,
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        with self.assertRaisesRegex(SemanticGateClosed, "cat grid is ambiguous"):
+            oracle.meowfficer_dock_cats()
+
+    def test_meowfficer_enhance_state_and_submit_use_reviewed_controls(self):
+        root = "root/UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/"
+        play = root + "CommanderCatPlayUI(Clone)/select_panel/"
+        backend = FakeBackend(
+            [
+                make_button("back_btn", root + "top/back_btn", raycast_top=None),
+                make_button(
+                    "add", play + "frame/list/commandeTF/add", raycast_top=None
+                ),
+                make_button("confirm_btn", play + "confirm_btn", raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("LV.9", play + "exp_bg/level_bg/Text"),
+                make_text("4000", root + "top/res/gold/Text"),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        state = oracle.meowfficer_enhance_state()
+
+        self.assertEqual((state.level, state.coins), (9, 4000))
+        self.assertTrue(oracle.enabled("meowfficer/enhance/submit"))
+        oracle.click("meowfficer/enhance/submit")
+        self.assertEqual(backend.taps, [(640, 360)])
+
+    def test_meowfficer_enhance_prompt_is_scoped_to_play_ui(self):
+        root = (
+            "root/OverlayCamera/Overlay/UIMain/CommanderCatPlayUI(Clone)/"
+            "CommanderMsgBoxUI(Clone)/frame/"
+        )
+        backend = FakeBackend(
+            [
+                make_button("cancel_btn", root + "cancel_btn", raycast_top=None),
+                make_button("confirm_btn", root + "confirm_btn", raycast_top=None),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.enabled("meowfficer/enhance/cancel"))
+        self.assertTrue(oracle.enabled("meowfficer/enhance/confirm"))
+
+    def test_meowfficer_fort_chores_use_asset_derived_clone_paths(self):
+        root = "root/OverlayCamera/Overlay/UIMain/CommanderHomeUI(Clone)/bg/frame/"
+        content = root + "scrollrect/content/"
+        backend = FakeBackend(
+            [
+                make_button("close_btn", root + "close_btn", raycast_top=None),
+                make_button(
+                    "play",
+                    content + "tpl/unlock/bubble/play",
+                    100,
+                    200,
+                    raycast_top=None,
+                ),
+                make_button(
+                    "clean",
+                    content + "tpl(Clone)/unlock/bubble/clean",
+                    300,
+                    400,
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("2/8", root + "cnt/Text"),
+                make_text("LV.3", root + "title/Text"),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        paths = oracle.meowfficer_fort_chore_paths()
+
+        self.assertEqual(
+            paths,
+            (
+                content + "tpl(Clone)/unlock/bubble/clean",
+                content + "tpl/unlock/bubble/play",
+            ),
+        )
+        receipt = oracle.click_meowfficer_fort_chore(paths[0])
+        self.assertEqual(receipt.semantic_id, "meowfficer/fort/chore/clean")
+        self.assertEqual(backend.taps, [(300, 400)])
+
+    def test_meowfficer_completed_slots_include_clone_rows_and_use_button_center(self):
+        root = "root/OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/frame/"
+        boxes = root + "boxes/"
+        content = boxes + "mask/content/"
+        backend = FakeBackend(
+            [
+                make_button("close_btn", root + "close_btn", raycast_top=None),
+                make_button("finish_btn", boxes + "finish_btn", raycast_top=None),
+                make_button("start_btn", boxes + "start_btn", raycast_top=None),
+                make_button(
+                    "frame",
+                    content + "frame",
+                    438,
+                    190,
+                    bounds={"left": 252, "top": 190, "right": 624, "bottom": 354},
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("0/4", boxes + "statistics/traning"),
+                make_text("0/6", boxes + "statistics/wait"),
+                make_text("COMPLETE", content + "frame/ongoing/time/Text"),
+                make_text(
+                    "COMPLETE",
+                    content + "frame(Clone)/ongoing/time/Text",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertEqual(oracle.meowfficer_training_state().completed, 2)
+        receipt = oracle.click("meowfficer/train/complete/first")
+
+        self.assertEqual(receipt.point, Point(438.0, 272.0))
+        self.assertEqual(backend.taps, [(438, 272)])
+
+    def test_meowfficer_queue_prompt_accepts_exact_partial_capacity(self):
+        root = "root/OverlayCamera/Overlay/UIMain/"
+        prompt = root + "CommanderMsgBoxUI(Clone)/frame/"
+        pool = root + "CommanderBoxesUI(Clone)/CommanderBuildPoolUI(Clone)/"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "cancel_btn", prompt + "cancel_btn", raycast_top=None
+                ),
+                make_button(
+                    "confirm_btn", prompt + "confirm_btn", raycast_top=None
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "<color=#847D7B>selected 1 box</color>",
+                    prompt + "bg/content/Text",
+                ),
+                make_text("1/1", pool + "statistics/Text"),
+            ],
+            images=[
+                make_image(
+                    pool + "frame/bg/content/queue/list1/pos/icon",
+                    sprite="ssr1",
+                )
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.enabled("meowfficer/queue/confirm"))
+        oracle.click("meowfficer/queue/confirm")
+
+        self.assertEqual(backend.taps, [(640, 360)])
+
+    def test_meowfficer_acquisition_classifies_tiered_and_tierless_talents(self):
+        root = "root/OverlayCamera/Overlay/UIMain/GetCommanderUI(Clone)/"
+        backend = FakeBackend(
+            [
+                make_button("click", root + "click", raycast_top=None),
+                make_button(
+                    "lock",
+                    root + "left_panel/btns/lock",
+                    raycast_top=None,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("COMMAND MEOW", root + "main/bg/Image"),
+                make_text("260825", root + "main/info/content/copyright/Text"),
+            ],
+            images=[
+                make_image(root + "main/info/content/rarity/value", sprite="SSR"),
+                make_image(
+                    root + "main/info/content/talents/talent/icon",
+                    sprite="hangmu_one_1",
+                ),
+                make_image(
+                    root + "main/info/content/talents/talent(Clone)/icon",
+                    sprite="chongying_two_2",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        state = oracle.meowfficer_acquisition_state()
+
+        self.assertEqual(state.generation, 10)
+        self.assertEqual(state.identity, "260825")
+        self.assertEqual(state.rarity, "SSR")
+        self.assertFalse(state.has_special_talent)
+        self.assertTrue(oracle.enabled("meowfficer/get/lock"))
+        self.assertFalse(oracle.enabled("meowfficer/get/unlock"))
+        oracle.click("meowfficer/get/lock")
+        self.assertEqual(backend.taps, [(640, 360)])
+
+        backend.ui["images"][-1]["sprite"] = "rainbow_unique"
+        self.assertTrue(oracle.meowfficer_acquisition_state().has_special_talent)
+
+    def test_meowfficer_acquisition_rejects_ambiguous_lock_state(self):
+        root = "root/OverlayCamera/Overlay/UIMain/GetCommanderUI(Clone)/"
+        backend = FakeBackend(
+            [
+                make_button("click", root + "click", raycast_top=None),
+                make_button("lock", root + "left_panel/btns/lock", raycast_top=None),
+                make_button(
+                    "unlock", root + "left_panel/btns/unlock", raycast_top=None
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("COMMAND MEOW", root + "main/bg/Image"),
+                make_text("260825", root + "main/info/content/copyright/Text"),
+            ],
+            images=[
+                make_image(root + "main/info/content/rarity/value", sprite="SSR"),
+                make_image(
+                    root + "main/info/content/talents/talent/icon",
+                    sprite="rainbow_unique",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.enabled("meowfficer/get/lock"))
+        self.assertFalse(oracle.enabled("meowfficer/get/unlock"))
+
     def test_meowfficer_training_state_rejects_over_capacity_counter(self):
         root = "root/OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/frame/"
         boxes = root + "boxes/"
@@ -7355,6 +10279,110 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(detail.resource_id, "research_part_t2")
         self.assertEqual(detail.resource_owned, 29300)
         self.assertEqual(detail.resource_required, 20)
+
+    def test_research_detail_collects_base_and_clone_resource_costs(self):
+        selected = (
+            "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"
+            "main/base_page/selecte_panel/"
+        )
+        card = selected + "technology_card/frame/"
+        backend = FakeBackend(
+            [
+                make_button("selecte_panel", selected.rstrip("/")),
+                make_button("start_btn", card + "btns/start_btn"),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("Q-068-UL", card + "name_bg/Text"),
+                make_text("小型项目", card + "sub_name"),
+                make_text("00:30:00", selected + "timer/bg/Text"),
+                make_text(
+                    "<color=#FF5C5CFF>1380</color>/5000",
+                    selected
+                    + "consume_panel/bg/container/item_tpl/icon_bg/count",
+                ),
+                make_text(
+                    "29858/20",
+                    selected
+                    + "consume_panel/bg/container/item_tpl(Clone)/icon_bg/count",
+                ),
+                make_text(
+                    "-无-",
+                    selected + "consume_panel/bg/task_panel/slider/Text",
+                ),
+            ],
+            images=[
+                make_image(
+                    selected
+                    + "consume_panel/bg/container/item_tpl/icon_bg/icon",
+                    "gold",
+                ),
+                make_image(
+                    selected
+                    + "consume_panel/bg/container/item_tpl(Clone)/icon_bg/icon",
+                    "17033",
+                ),
+            ],
+        )
+
+        detail = make_oracle(backend).research_detail_state()
+
+        self.assertEqual(detail.resource_id, "gold")
+        self.assertEqual(detail.resource_owned, 1380)
+        self.assertEqual(detail.resource_required, 5000)
+        self.assertEqual(
+            [
+                (cost.resource_id, cost.owned, cost.required)
+                for cost in detail.resource_costs
+            ],
+            [("gold", 1380, 5000), ("17033", 29858, 20)],
+        )
+        self.assertFalse(detail.can_start)
+
+    def test_research_detail_rejects_unpaired_clone_resource(self):
+        selected = (
+            "root/UICamera/Canvas/UIMain/TechnologyUI(Clone)/"
+            "main/base_page/selecte_panel/"
+        )
+        card = selected + "technology_card/frame/"
+        backend = FakeBackend(
+            [
+                make_button("selecte_panel", selected.rstrip("/")),
+                make_button("start_btn", card + "btns/start_btn"),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("Q-068-UL", card + "name_bg/Text"),
+                make_text("小型项目", card + "sub_name"),
+                make_text("00:30:00", selected + "timer/bg/Text"),
+                make_text(
+                    "1380/5000",
+                    selected
+                    + "consume_panel/bg/container/item_tpl/icon_bg/count",
+                ),
+                make_text(
+                    "29858/20",
+                    selected
+                    + "consume_panel/bg/container/item_tpl(Clone)/icon_bg/count",
+                ),
+                make_text(
+                    "-无-",
+                    selected + "consume_panel/bg/task_panel/slider/Text",
+                ),
+            ],
+            images=[
+                make_image(
+                    selected
+                    + "consume_panel/bg/container/item_tpl/icon_bg/icon",
+                    "gold",
+                )
+            ],
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "resource identity"):
+            make_oracle(backend).research_detail_state()
 
     def test_finished_research_cannot_close_through_detail_root(self):
         selected = (
@@ -8885,6 +11913,14 @@ class SemanticOracleTests(unittest.TestCase):
             oracle.click("overlay/network-reconnect/confirm")
         self.assertEqual(backend.taps, [])
 
+    def test_absent_network_reconnect_does_not_require_unrelated_toggle_snapshot(self):
+        backend = FakeBackend([])
+        backend.ui["toggle_truncated"] = True
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.enabled("overlay/network-reconnect/cancel"))
+        self.assertFalse(oracle.enabled("overlay/network-reconnect/confirm"))
+
     def test_reward_summary_counter_requires_exact_typed_page_identity(self):
         backend = FakeBackend(
             [
@@ -9645,6 +12681,106 @@ class SemanticOracleTests(unittest.TestCase):
         self.assertEqual(receipt.path.split("/")[-1], "settings")
         self.assertEqual(backend.taps, [(1221, 36)])
 
+    def test_main_raid_entry_uses_current_typed_activity_button(self):
+        path = (
+            "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/"
+            "activity/MainActBossBtn"
+        )
+        bounds = {
+            "left": 945.061,
+            "top": 65.64,
+            "right": 1058.394,
+            "bottom": 179.01,
+        }
+        backend = FakeBackend(
+            [
+                make_button(
+                    "MainActBossBtn",
+                    path,
+                    1001.727,
+                    122.325,
+                    bounds,
+                    raycast_top=None,
+                ),
+                make_button("battle", "root/frame/right/1/battle"),
+                make_button("formation", "root/frame/right/1/formation"),
+            ]
+        )
+        icon = make_image(path + "/Image", "event_boss", bounds)
+        icon["raycast_target"] = True
+        backend.ui = make_ui([], images=[icon])
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.enabled("main/raid"))
+        receipt = oracle.click("main/raid")
+
+        self.assertEqual(receipt.path, path)
+        self.assertEqual(backend.taps, [(1002, 122)])
+
+    def test_campaign_oil_accepts_exact_current_main_resource_path(self):
+        backend = FakeBackend(
+            [
+                make_button("battle", "root/frame/right/1/battle"),
+                make_button("formation", "root/frame/right/1/formation"),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text(
+                    "8190",
+                    "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/"
+                    "frame/top/res/oil/Text",
+                )
+            ]
+        )
+
+        self.assertEqual(make_oracle(backend).campaign_oil(), 8190)
+
+    def test_main_raid_entry_rejects_a_mismatched_typed_icon(self):
+        path = "root/frame/right/activity/MainActBossBtn"
+        bounds = {"left": 945, "top": 66, "right": 1058, "bottom": 179}
+        backend = FakeBackend(
+            [
+                make_button(
+                    "MainActBossBtn",
+                    path,
+                    1002,
+                    122,
+                    bounds,
+                    raycast_top=None,
+                ),
+                make_button("battle", "root/frame/right/1/battle"),
+                make_button("formation", "root/frame/right/1/formation"),
+            ]
+        )
+        icon = make_image(path + "/Image", "event_summary", bounds)
+        icon["raycast_target"] = True
+        backend.ui = make_ui([], images=[icon])
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.enabled("main/raid"))
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click("main/raid")
+        self.assertEqual(backend.taps, [])
+
+    def test_main_raid_entry_rejects_an_unrelated_activity_button(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "MainCoreActivityBtn",
+                    "root/frame/right/activity/MainCoreActivityBtn",
+                    1111,
+                    122,
+                )
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.enabled("main/raid"))
+        with self.assertRaises(SemanticGateClosed):
+            oracle.click("main/raid")
+        self.assertEqual(backend.taps, [])
+
     def test_enabled_retries_a_truncated_button_transition_frame(self):
         button = make_button(
             "settings",
@@ -9789,6 +12925,39 @@ class SemanticOracleTests(unittest.TestCase):
                 )
             ),
             ("tactical-page",),
+        )
+
+    def test_archive_page_allows_only_exact_reward_close_to_cross_owner(self):
+        backend = FakeBackend(
+            [
+                make_button(
+                    "close",
+                    "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+                    1100,
+                    120,
+                ),
+                make_button(
+                    "EX",
+                    "UICamera/Canvas/UIOrigin/LevelRemasterView(Clone)/toggles/EX",
+                ),
+                make_button(
+                    "btn_remaster",
+                    "UICamera/Canvas/UIMain/LevelMainScene(Clone)/entrance/btns/btn_remaster",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+        state = oracle.read_state()
+
+        self.assertEqual(
+            oracle._blocking_rules(state, "reward/award-info/close"), ()
+        )
+        self.assertEqual(
+            tuple(
+                rule.blocker_id
+                for rule in oracle._blocking_rules(state, "main/settings")
+            ),
+            ("award-info", "campaign-menu", "archive-page"),
         )
 
     def test_bulletin_blocks_main_but_allows_mapped_close(self):
@@ -10773,9 +13942,15 @@ class EnhancementSemanticOracleTests(unittest.TestCase):
                     make_text("20/500", dock_root + "capacity/Text"),
                     make_text("船坞容量:", dock_root + "capacity/label"),
                     make_text(
-                        "那智.改", card_path + "/content/info/name_mask/name"
+                        "那智.改",
+                        card_path + "/content/info/name_mask/name",
+                        {"left": 155, "top": 185, "right": 185, "bottom": 198},
                     ),
-                    make_text("1", card_path + "/content/dockyard/lv/Text"),
+                    make_text(
+                        "1",
+                        card_path + "/content/dockyard/lv/Text",
+                        {"left": 160, "top": 200, "right": 180, "bottom": 215},
+                    ),
                 ],
                 images=[
                     make_image(
@@ -13769,6 +16944,141 @@ class OperationSirenSemanticOracleTests(unittest.TestCase):
         self.assertTrue(
             oracle.operation_siren_order_confirmation_visible("scan")
         )
+
+
+    def test_battle_pass_reward_uses_exact_notice_and_delegated_entrance(self):
+        reward_root = "root/Overlay/UIMain/CommissionInfoUI4Mellow(Clone)"
+        entrance = reward_root + "/frame/link_btns/btns/crusing"
+        backend = FakeBackend(
+            [
+                make_button(
+                    "CommissionInfoUI4Mellow(Clone)", reward_root,
+                    raycast_top=True,
+                ),
+                make_button("crusing", entrance, x=617, y=130, raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [], images=[make_image(entrance + "/tip", "exclamation_mark")]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.battle_pass_reward_available())
+        receipt = oracle.click_battle_pass_entrance()
+        self.assertEqual(receipt.semantic_id, "reward/battle-pass/enter")
+        self.assertEqual(backend.taps, [(617, 130)])
+
+        backend.ui["images"][0]["sprite"] = "unrelated"
+        self.assertFalse(oracle.battle_pass_reward_available())
+
+    def test_battle_pass_claim_all_excludes_paid_button(self):
+        root = "root/UICamera/Canvas/UIMain/WorldCruiseUI(Clone)"
+        claim = (
+            root
+            + "/frame/award_container/WorldCruiseAwardPage(Clone)/frame/btns/btn_all"
+        )
+        backend = FakeBackend(
+            [
+                make_button("award", root + "/frame/toggles/award", raycast_top=None),
+                make_button("btn_all", claim, x=1160, y=615, raycast_top=None),
+                make_button(
+                    "btn_pay",
+                    root
+                    + "/frame/award_container/WorldCruiseAwardPage(Clone)/frame/btns/btn_pay",
+                    x=900,
+                    y=615,
+                    raycast_top=None,
+                ),
+                make_button("home", root + "/top/home", x=1223, y=38, raycast_top=None),
+            ]
+        )
+        backend.ui = make_ui(
+            [make_text("W O R L D  C R U I S E", root + "/top/title/Text/en")],
+            images=[
+                make_image(root, "mask"),
+                make_image(root + "/frame/toggles/award/selected", "toggle_bg"),
+                make_image(claim + "/Image", "tip"),
+                make_image(
+                    root
+                    + "/frame/award_container/WorldCruiseAwardPage(Clone)/frame/btns/btn_pay/Image",
+                    "lock",
+                ),
+            ],
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.battle_pass_page_visible())
+        self.assertTrue(oracle.battle_pass_claim_all_available())
+        receipt = oracle.click_battle_pass_claim_all()
+        self.assertEqual(receipt.semantic_id, "battle-pass/claim-all")
+        self.assertEqual(backend.taps, [(1160, 615)])
+        self.assertNotIn((900, 615), backend.taps)
+
+        backend.ui["images"][2]["sprite"] = "lock"
+        self.assertFalse(oracle.battle_pass_claim_all_available())
+
+    def test_battle_pass_probe_skips_ui_coherence_off_page(self):
+        backend = FakeBackend([])
+        backend.ui = make_ui([], generation=30)
+        oracle = make_oracle(backend)
+
+        self.assertFalse(oracle.battle_pass_page_visible())
+        self.assertNotIn("GET /v1/ui\n", backend.requests)
+
+        root = "root/UICamera/Canvas/UIMain/WorldCruiseUI(Clone)"
+        backend.buttons = make_buttons(
+            [make_button("award", root + "/frame/toggles/award", raycast_top=None)],
+            generation=10,
+        )
+        with self.assertRaisesRegex(SemanticGateClosed, "not coherent"):
+            make_oracle(backend).battle_pass_page_visible()
+
+    def test_data_key_limit_prompt_cancel_preserves_full_counter(self):
+        archive = "root/UICamera/Canvas/UIOrigin/LevelRemasterView(Clone)"
+        popup = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window"
+        backend = FakeBackend(
+            [
+                make_button("bg", archive + "/bg", raycast_top=None),
+                make_button(
+                    "custom_button_1(Clone)",
+                    popup + "/button_container/custom_button_1(Clone)",
+                    x=790,
+                    y=515,
+                ),
+                make_button(
+                    "custom_button_2(Clone)",
+                    popup + "/button_container/custom_button_2(Clone)",
+                    x=490,
+                    y=515,
+                ),
+            ]
+        )
+        backend.ui = make_ui(
+            [
+                make_text("300/300", archive + "/nums/text"),
+                make_text(
+                    "确 定",
+                    popup + "/button_container/custom_button_1(Clone)/pic",
+                ),
+                make_text(
+                    "取 消",
+                    popup + "/button_container/custom_button_2(Clone)/pic",
+                ),
+                make_text(
+                    "所持<color=#ffde38>档案密钥</color>数量达到上限，"
+                    "完成任务后只能获得<color=#ff5c5c>0</color>份"
+                    "<color=#ffde38>档案密钥</color>，是否确认领取？",
+                    popup + "/msg_panel/content",
+                ),
+            ]
+        )
+        oracle = make_oracle(backend)
+
+        self.assertTrue(oracle.data_key_limit_prompt_visible())
+        receipt = oracle.click_data_key_limit_choice(confirm=False)
+
+        self.assertEqual(receipt.semantic_id, "archive/key-limit/cancel")
+        self.assertEqual(backend.taps, [(490, 515)])
 
 
 if __name__ == "__main__":

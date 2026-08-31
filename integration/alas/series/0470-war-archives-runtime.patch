@@ -1,0 +1,90 @@
+diff --git a/campaign/campaign_war_archives/campaign_base.py b/campaign/campaign_war_archives/campaign_base.py
+index 85e1b21b43287791bac0b973bb252008cd8ed95d..63ced28f9a701c68cefffa36d497f95d2fc9c83c 100644
+--- a/campaign/campaign_war_archives/campaign_base.py
++++ b/campaign/campaign_war_archives/campaign_base.py
+@@ -109,6 +109,25 @@ class CampaignBase(CampaignBase_):
+         to target archive's campaign stage map
+         """
+         # On first run regardless of current location
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            result = True
++            if self.first_run or not semantic_adapter.war_archives_campaign_visible():
++                result = self.ui_ensure(destination=page_archives)
++                semantic_adapter.open_war_archives_campaign(
++                    self.config.Campaign_Event,
++                    mode,
++                )
++
++            # Preserve the original first-run lifecycle.  Search, retries,
++            # stage selection and every later campaign decision remain owned
++            # by CampaignRun; only the screenshot/template/input boundary is
++            # replaced above.
++            if self.first_run:
++                self.first_run = False
++
++            return result
++
+         # even in target stage map, start from page_archives
+         # For subsequent runs when neither reward or
+         # stop_triggers occur, no need perform operations
+diff --git a/module/war_archives/war_archives.py b/module/war_archives/war_archives.py
+index 24d7b3262cf264970ae650e146b3d3b170404341..e66782bd1dd26cc81499f915684dd2a2ffb0d103 100644
+--- a/module/war_archives/war_archives.py
++++ b/module/war_archives/war_archives.py
+@@ -21,10 +21,22 @@ DATA_KEY_CAMPAIGN = OcrDataKey(OCR_DATA_KEY_CAMPAIGN, letter=(255, 247, 247), t
+ 
+ class CampaignWarArchives(CampaignRun, CampaignBase):
+     def triggered_stop_condition(self, oil_check=True):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         # Must be in archives campaign to OCR check
+-        if self.appear(WAR_ARCHIVES_CAMPAIGN_CHECK, offset=(20, 20)):
++        if semantic_adapter is not None:
++            in_archives = semantic_adapter.war_archives_campaign_visible()
++        else:
++            in_archives = self.appear(
++                WAR_ARCHIVES_CAMPAIGN_CHECK,
++                offset=(20, 20),
++            )
++        if in_archives:
+             # Check for 0 data keys left to use
+-            current, remain, total = DATA_KEY_CAMPAIGN.ocr(self.device.image)
++            if semantic_adapter is not None:
++                current, total = semantic_adapter.war_archives_data_key_count()
++                remain = total - current
++            else:
++                current, remain, total = DATA_KEY_CAMPAIGN.ocr(self.device.image)
+             logger.info(f'Inventory: {current} / {total}, Remain: {current}')
+             if remain == total:
+                 logger.hr('Triggered out of data keys')
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+index 32316210..7b20b3c7 100644
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -175,15 +175,26 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                 ):
+                     logger.info('Semantic pre-sortie: scan fleet preparation')
+                     if semantic_adapter.campaign_dock_full_visible():
+                         # Preserve ALAS's configured one-click-retire versus
+                         # enhancement state machine. The adapter maps only the
+                         # exact labelled non-premium entry choices; dock
+                         # expansion remains unavailable.
+                         self.handle_retirement()
+                         campaign_timer.reset()
+                         fleet_timer.reset()
+                         continue
+                     if semantic_adapter.campaign_sortie_committed():
++                        archive_receipt = (
++                            semantic_adapter
++                            .confirm_war_archives_entry_if_present()
++                        )
++                        if archive_receipt is not None:
++                            logger.info(
++                                'Semantic WarArchives entry confirmed: '
++                                f'{archive_receipt.semantic_id}, '
++                                f'generation={archive_receipt.generation}'
++                            )
++                            continue
+                         if self.is_in_auto_search_menu():
+                             if mode == 'hard':
+                                 receipt = (

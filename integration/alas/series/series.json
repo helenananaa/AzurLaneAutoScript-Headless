@@ -28,12 +28,12 @@
     {
       "order": 6,
       "path": "integration/alas/series/0040-campaign-flow-ports.patch",
-      "sha256": "c48ddd1c1955d30a4685c6a40f732a3c627825f1ab7f06f4ea6703b21a2cca3b"
+      "sha256": "2172c5a5adee01571ec6365f740d5d1769f619c87b1d29c34000ee5f61664ff4"
     },
     {
       "order": 7,
       "path": "integration/alas/series/0050-combat-flow-ports.patch",
-      "sha256": "895d7597e999df8eddf59561fee1b2f00011a44bebbb5c91354f87bbf0bc9bb0"
+      "sha256": "1a77802a8380d45326370bfd000476760364bd5ad49c5c9169bffc516d26efc9"
     },
     {
       "order": 8,
@@ -58,7 +58,7 @@
     {
       "order": 12,
       "path": "integration/alas/series/0100-tool-flow-ports.patch",
-      "sha256": "5c96089739dd319b2fc1b1acc4590a10817421869d5fa96b12429e1d4a81450b"
+      "sha256": "42a2c2b02b7a422315c2de832ea2f825962978b2a3e1bb3e2e1825adc64ac138"
     },
     {
       "order": 13,
@@ -118,12 +118,12 @@
     {
       "order": 24,
       "path": "integration/alas/series/0190-meowfficer-config-contract.patch",
-      "sha256": "0b1eef685775f49d2ed300325f1576f4626000475ccb16c0a09058db360f5786"
+      "sha256": "1840f4c706483e0049a9161f6ea59dd0e1dba37b98c6d23b900f2e31a71327ce"
     },
     {
       "order": 25,
       "path": "integration/alas/series/0195-gems-farming-config-contract.patch",
-      "sha256": "9728e8901318ed578d0e4179f56d6f300f7f7e7e9ec57e5a89c219219c42d58e"
+      "sha256": "059a4d2d1c8d853eb5497c2e09dc061c51c0c9e6ceb3dea2c4c59bf146511206"
     },
     {
       "order": 26,
@@ -198,12 +198,12 @@
     {
       "order": 40,
       "path": "integration/alas/series/0340-campaign-auto-search-port.patch",
-      "sha256": "1491d156292b0dfa9e54fa3f6b3d87dc46b566fd4f7c47a64092fc2e865fd698"
+      "sha256": "db75b4fe1c6fe3e0d11add075485dfcadd11c6c1311a94e8cbd0998256e1b722"
     },
     {
       "order": 41,
       "path": "integration/alas/series/0350-meowfficer-dock-training-port.patch",
-      "sha256": "440ee4c47cf831b27f152e62d1b166273a18afbff8e36ef5d90ad35f0e426367"
+      "sha256": "c6ed23c28de00a3b367fb1dfb3b813d87830dcca04e2096bb2fe758ff8065c99"
     },
     {
       "order": 42,
@@ -213,7 +213,7 @@
     {
       "order": 43,
       "path": "integration/alas/series/0370-hard-11-4-semantic-clear-port.patch",
-      "sha256": "c9ca8ce782429d6e36bd102991b23d4cf6c5a0030498dcd37302fa8330ef712d"
+      "sha256": "40e510da73a83d862b140c3a48ba2eacb1756c9bfd4d7ade27d5a7b6baf93064"
     },
     {
       "order": 44,
@@ -439,6 +439,31 @@
       "order": 88,
       "path": "integration/alas/series/0430-event-boss-stage-return-runtime.patch",
       "sha256": "5339fc32acfe9ece492c12a94cbbb2bafce3e93138f784f5019318528b008ed0"
+    },
+    {
+      "order": 89,
+      "path": "integration/alas/series/0440-gems-farming-hard-remain-port.patch",
+      "sha256": "a993e0d214d5d058b2b55e620b1f44e0f37a8901bb4dcc9657c5271f5b12a7af"
+    },
+    {
+      "order": 90,
+      "path": "integration/alas/series/0450-raid-daily-remain-port.patch",
+      "sha256": "7dab72a4aab24e51f888ab2db3f137991b7f30e07b036765e26d63250351dc88"
+    },
+    {
+      "order": 91,
+      "path": "integration/alas/series/0460-freebies-battle-pass-port.patch",
+      "sha256": "9dba8b93295478891b8fc993f6e7ca8fa4532d1769f1bd3de891727210cc40e2"
+    },
+    {
+      "order": 92,
+      "path": "integration/alas/series/0470-war-archives-runtime.patch",
+      "sha256": "06d30edb8d7f6327a296461dd77fa7d4a34c2138b4ed7f91ac598dc5d3b2a55a"
+    },
+    {
+      "order": 93,
+      "path": "integration/alas/series/0480-current-raid-runtime.patch",
+      "sha256": "4357acd28f1c19fde2086daa32cfed24c0f2fb02140f1c07ef7cc00cc5e72190"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

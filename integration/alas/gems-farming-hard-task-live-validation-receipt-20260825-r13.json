@@ -1,0 +1,450 @@
+{
+  "schema": "alas-headless.gems-farming-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-25T08:33:02.801945Z",
+  "finished_at": "2026-08-25T08:37:00.019634Z",
+  "task": "GemsFarming",
+  "task_method": "AzurLaneAutoScript.gems_farming",
+  "campaign_run_method": "GemsFarming.run",
+  "stage": "11-4",
+  "event": "campaign_main",
+  "mode": "hard",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "configuration": {
+    "change_flagship": "ship",
+    "common_cv": "ranger",
+    "change_vanguard": "disabled",
+    "run_count_before": 1,
+    "run_count_after": 0,
+    "scheduler_enabled_after": true
+  },
+  "run_result": true,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "campaign_page": true,
+    "generation": 403249
+  },
+  "startup_recovery": null,
+  "hard_preparation": {
+    "before": [],
+    "after_unmount": [],
+    "semantic_id": "gems-farming/hard/vacancy-offsurface",
+    "generation": 403560
+  },
+  "hard_replacement_trace": {
+    "open_calls": 1,
+    "confirmed": [],
+    "eligible_candidates": [],
+    "dock_buttons": [
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      },
+      {
+        "name": "-1",
+        "path": "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/-1",
+        "actionable": false,
+        "bounds": {
+          "left": 7245.468,
+          "top": -6719.0,
+          "right": 7400.134,
+          "bottom": -6502.334
+        }
+      }
+    ],
+    "typed_dock_candidates": []
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "campaign_page": true
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 4,
+    "sortie": 1,
+    "combat": 1,
+    "viewport_swipe": 4
+  },
+  "observer": {
+    "generation": 407343,
+    "scene_handle": -76,
+    "button_count": 22
+  },
+  "raw_input_fallback_used": false,
+  "qualification_random_seed": 20260825
+}

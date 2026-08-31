@@ -1,0 +1,40 @@
+{
+  "schema": "alas-headless.freebies-data-key-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "BattlePass.Collect": false,
+    "DataKey.Collect": true,
+    "DataKey.ForceCollect": false,
+    "Mail.ClaimMaintenance": false,
+    "Mail.ClaimMerit": false,
+    "Mail.ClaimTradeLicense": false,
+    "Mail.DeleteCollected": false,
+    "SupplyPack.Collect": false
+  },
+  "source_sha256": {
+    "freebies": "93067e1006564a9e2fd06a1c9f4d794a5890052f8041a190c36a754346fb9ab5",
+    "data_key": "8fbc8dfa83a04d015dae2602f6eb85ce7f818e23a021dfc5101e9929cb2f13b5",
+    "adapter": "32487a6fcc711cbd997df144ebd47d19d91fa5457ef413bc2123c5f6e88ae5df",
+    "oracle": "fb2a9a454a59c5d1e4128f5f9fd6fb7c4e71f66a57a7b173cb305932498ef05e"
+  },
+  "passed": true,
+  "task_result": true,
+  "elapsed_seconds": 5.922,
+  "observations": [
+    {
+      "kind": "collected",
+      "value": false
+    },
+    {
+      "kind": "counter",
+      "value": "300/300"
+    }
+  ],
+  "collect_calls": [],
+  "scheduler_next_run": "2026-08-26 00:00:00",
+  "temporary_config_removed": true
+}

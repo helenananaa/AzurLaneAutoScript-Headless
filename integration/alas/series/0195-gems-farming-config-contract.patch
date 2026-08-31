@@ -1,13 +1,383 @@
 diff --git a/module/campaign/gems_farming.py b/module/campaign/gems_farming.py
+index 62565971..96c82453 100644
 --- a/module/campaign/gems_farming.py
 +++ b/module/campaign/gems_farming.py
 @@ -1,3 +1,5 @@
-+from alas_headless import validate_alas_gems_farming_config
++from alas_headless import current_semantic_session, validate_alas_gems_farming_config
 +
  from datetime import datetime
  
  from module.base.decorator import Config, cached_property
-@@ -645,6 +647,13 @@ class GemsFarming(CampaignRun, Dock):
+@@ -207,6 +209,10 @@ class GemsFarming(CampaignRun, Dock):
+     @Config.when(Campaign_Mode='normal')
+     def ui_goto_fleet(self):
+         self.ui_ensure(page_fleet)
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.gems_farming_select_fleet_index(self.fleet_to_attack_index)
++            return
+         
+         # ui_ensure_index, set fleet
+         letter = FLEET_INDEX
+@@ -235,6 +241,10 @@ class GemsFarming(CampaignRun, Dock):
+ 
+     @Config.when(Campaign_Mode='hard')
+     def ui_goto_fleet(self):
++        semantic_session = current_semantic_session()
++        if semantic_session is not None \
++                and semantic_session.gems_farming_hard_fleet_preparation_visible(self.stage):
++            return
+         if self.appear(FLEET_PREPARATION, offset=(20, 50)):
+             return
+         self.campaign.ensure_campaign_ui(self.stage, 'hard')
+@@ -343,6 +353,16 @@ class GemsFarming(CampaignRun, Dock):
+         Returns:
+             list[Ship]: Common rarity CVs that meet the level, emotion and fleet requirements.
+         """
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return list(semantic_session.gems_farming_candidates(
++                role='flagship',
++                selector=self.config.GemsFarming_CommonCV,
++                max_level=max_level,
++                min_emotion=min_emotion,
++                fleet_index=self.fleet_to_attack_index,
++            ))
++
+         self.dock_favourite_set(False, wait_loading=False)
+         self.dock_sort_method_dsc_set(False, wait_loading=False)
+         self.dock_filter_set(index='cv', rarity='common', extra='enhanceable', sort='total')
+@@ -368,43 +388,70 @@ class GemsFarming(CampaignRun, Dock):
+ 
+     @Config.when(Campaign_Mode='normal')
+     def flagship_change_execute(self):
+-        self.ui_enter_ship(FLEET_ENTER_FLAGSHIP, long_click=False)
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.gems_farming_open_slot('flagship')
++        else:
++            self.ui_enter_ship(FLEET_ENTER_FLAGSHIP, long_click=False)
+         candidate = self.get_common_rarity_cv(min_emotion=self.min_emotion)
+         if candidate:
+             ship = max(candidate, key=lambda s: (s.level, s.emotion))
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=page_fleet.check_button)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(ship, 'flagship')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=page_fleet.check_button)
+             logger.info('Change flagship success')
+             return True
+ 
+         logger.info('Change flagship failed, no CV in common rarity.')
+         self._new_fleet_emotion = 0
+-        self.dock_reset()
+-        self.ui_leave_ship()
++        if semantic_session is not None:
++            semantic_session.gems_farming_cancel_candidate_selection()
++        else:
++            self.dock_reset()
++            self.ui_leave_ship()
+         return False
+ 
+     @Config.when(Campaign_Mode='hard')
+     def flagship_change_execute(self):
+-        unmount_button = globals()[f'FLEET_{self.fleet_to_attack}_BACKLINE_1']
+-        mount_button = globals()[f'FLEET_{self.fleet_to_attack}_BACKLINE_3']
+-
+-        if self.appear(unmount_button, offset=(20, 20)):
+-            logger.info('No flagship to unmount, skip unmounting.')
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            if semantic_session.gems_farming_hard_slot_occupied(
++                    self.stage, self.fleet_to_attack, 'flagship'):
++                semantic_session.gems_farming_hard_unmount(
++                    self.stage, self.fleet_to_attack, 'flagship')
++            else:
++                logger.info('No flagship to unmount, skip unmounting.')
++            semantic_session.gems_farming_hard_open_slot(
++                self.stage, self.fleet_to_attack, 'flagship')
+         else:
+-            self.ui_enter_ship(unmount_button, long_click=False)
+-            self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK, 
+-                          additional=self.ensure_no_info_bar, confirm_wait=1, retry_wait=5)
++            unmount_button = globals()[f'FLEET_{self.fleet_to_attack}_BACKLINE_1']
++            mount_button = globals()[f'FLEET_{self.fleet_to_attack}_BACKLINE_3']
++
++            if self.appear(unmount_button, offset=(20, 20)):
++                logger.info('No flagship to unmount, skip unmounting.')
++            else:
++                self.ui_enter_ship(unmount_button, long_click=False)
++                self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK,
++                              additional=self.ensure_no_info_bar, confirm_wait=1, retry_wait=5)
+ 
+-        self.ui_enter_ship(mount_button, long_click=False)
++            self.ui_enter_ship(mount_button, long_click=False)
+         candidate = self.get_common_rarity_cv(max_level=31, min_emotion=self.min_emotion)
+         if candidate:
+             ship = max(candidate, key=lambda s: (s.level, s.emotion))
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=FLEET_PREPARATION)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(
++                    ship, 'flagship')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=FLEET_PREPARATION)
+             logger.info('Change flagship success')
+             return True
+ 
+@@ -413,15 +460,23 @@ class GemsFarming(CampaignRun, Dock):
+         if candidate:
+             ship = min(candidate, key=lambda s: (s.level, -s.emotion))
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=FLEET_PREPARATION)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(
++                    ship, 'flagship')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=FLEET_PREPARATION)
+             return False
+ 
+         logger.info('Change flagship failed, no CV was found.')
+         self._new_fleet_emotion = 0
+-        self.dock_reset()
+-        self.ui_leave_ship()
++        if semantic_session is not None:
++            semantic_session.gems_farming_cancel_candidate_selection()
++        else:
++            self.dock_reset()
++            self.ui_leave_ship()
+         return False
+ 
+     def flagship_change(self):
+@@ -435,8 +490,12 @@ class GemsFarming(CampaignRun, Dock):
+         logger.attr('ChangeFlagship', self.config.GemsFarming_ChangeFlagship)
+         self.ui_goto_fleet()
+         button = self.fleet_backline_1_button
++        semantic_session = current_semantic_session()
+ 
+-        if self.change_flagship_equip and not self.appear(button, offset=(20, 20)):
++        if self.change_flagship_equip and semantic_session is not None:
++            logger.hr('Unmount flagship equipments', level=2)
++            semantic_session.gems_farming_equipment_take_off('flagship')
++        elif self.change_flagship_equip and not self.appear(button, offset=(20, 20)):
+             logger.hr('Unmount flagship equipments', level=2)
+             self.ui_enter_ship(button, long_click=True)
+             self.ship_equipment_take_off()
+@@ -445,7 +504,10 @@ class GemsFarming(CampaignRun, Dock):
+         logger.hr('Change flagship', level=2)
+         success = self.flagship_change_execute()
+ 
+-        if self.change_flagship_equip and not self.appear(button, offset=(20, 20)):
++        if self.change_flagship_equip and semantic_session is not None:
++            logger.hr('Mount flagship equipments', level=2)
++            semantic_session.gems_farming_equipment_take_on('flagship')
++        elif self.change_flagship_equip and not self.appear(button, offset=(20, 20)):
+             logger.hr('Mount flagship equipments', level=2)
+             self.ui_enter_ship(button, long_click=True)
+             self.ship_equipment_take_on()
+@@ -496,6 +558,16 @@ class GemsFarming(CampaignRun, Dock):
+         Returns:
+             list[Ship]: Common rarity DDs that meet the emotion and fleet requirements.
+         """
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            return list(semantic_session.gems_farming_candidates(
++                role='vanguard',
++                selector=self.config.GemsFarming_CommonDD,
++                max_level=self.max_level,
++                min_emotion=min_emotion,
++                fleet_index=self.fleet_to_attack_index,
++            ))
++
+         faction = self.get_dd_faction()
+         self.dock_favourite_set(self.config.GemsFarming_CommonDD == 'favourite', wait_loading=False)
+         self.dock_sort_method_dsc_set(True, wait_loading=False)
+@@ -517,43 +589,70 @@ class GemsFarming(CampaignRun, Dock):
+ 
+     @Config.when(Campaign_Mode='normal')
+     def vanguard_change_execute(self):
+-        self.ui_enter_ship(FLEET_ENTER, long_click=False)
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.gems_farming_open_slot('vanguard')
++        else:
++            self.ui_enter_ship(FLEET_ENTER, long_click=False)
+         candidate = self.get_common_rarity_dd(min_emotion=self.min_emotion)
+         if candidate:
+             ship = max(candidate, key=lambda s: s.emotion)
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=page_fleet.check_button)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(ship, 'vanguard')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=page_fleet.check_button)
+             logger.info('Change vanguard success')
+             return True
+ 
+         logger.info('Change vanguard failed, no DD in common rarity.')
+         self._new_fleet_emotion = 0
+-        self.dock_reset()
+-        self.ui_leave_ship()
++        if semantic_session is not None:
++            semantic_session.gems_farming_cancel_candidate_selection()
++        else:
++            self.dock_reset()
++            self.ui_leave_ship()
+         return False
+ 
+     @Config.when(Campaign_Mode='hard')
+     def vanguard_change_execute(self):
+-        unmount_button = globals()[f'FLEET_{self.fleet_to_attack}_VANGUARD_1']
+-        mount_button = globals()[f'FLEET_{self.fleet_to_attack}_VANGUARD_3']
+-
+-        if self.appear(unmount_button, offset=(20, 20)):
+-            logger.info('No vanguard to unmount, skip unmounting.')
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            if semantic_session.gems_farming_hard_slot_occupied(
++                    self.stage, self.fleet_to_attack, 'vanguard'):
++                semantic_session.gems_farming_hard_unmount(
++                    self.stage, self.fleet_to_attack, 'vanguard')
++            else:
++                logger.info('No vanguard to unmount, skip unmounting.')
++            semantic_session.gems_farming_hard_open_slot(
++                self.stage, self.fleet_to_attack, 'vanguard')
+         else:
+-            self.ui_enter_ship(unmount_button, long_click=False)
+-            self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK, 
+-                          additional=self.ensure_no_info_bar, confirm_wait=1, retry_wait=5)
++            unmount_button = globals()[f'FLEET_{self.fleet_to_attack}_VANGUARD_1']
++            mount_button = globals()[f'FLEET_{self.fleet_to_attack}_VANGUARD_3']
++
++            if self.appear(unmount_button, offset=(20, 20)):
++                logger.info('No vanguard to unmount, skip unmounting.')
++            else:
++                self.ui_enter_ship(unmount_button, long_click=False)
++                self.ui_click(DOCK_UNMOUNT, check_button=FLEET_PREPARATION, appear_button=DOCK_CHECK,
++                              additional=self.ensure_no_info_bar, confirm_wait=1, retry_wait=5)
+ 
+-        self.ui_enter_ship(mount_button, long_click=False)
++            self.ui_enter_ship(mount_button, long_click=False)
+         candidate = self.get_common_rarity_dd(min_emotion=self.min_emotion)
+         if candidate:
+             ship = max(candidate, key=lambda s: s.emotion)
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=FLEET_PREPARATION)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(
++                    ship, 'vanguard')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=FLEET_PREPARATION)
+             logger.info('Change vanguard success')
+             return True
+ 
+@@ -562,15 +661,23 @@ class GemsFarming(CampaignRun, Dock):
+         if candidate:
+             ship = max(candidate, key=lambda s: s.emotion)
+             self._new_fleet_emotion = min(ship.emotion, self._new_fleet_emotion) if self._new_fleet_emotion else ship.emotion
+-            self.dock_select_one(ship.button)
+-            self.dock_reset()
+-            self.dock_select_confirm(check_button=FLEET_PREPARATION)
++            if semantic_session is not None:
++                semantic_session.gems_farming_select_candidate(ship)
++                semantic_session.gems_farming_confirm_candidate_selection(
++                    ship, 'vanguard')
++            else:
++                self.dock_select_one(ship.button)
++                self.dock_reset()
++                self.dock_select_confirm(check_button=FLEET_PREPARATION)
+             return False
+ 
+         logger.info('Change vanguard failed, no DD was found.')
+         self._new_fleet_emotion = 0
+-        self.dock_reset()
+-        self.ui_leave_ship()
++        if semantic_session is not None:
++            semantic_session.gems_farming_cancel_candidate_selection()
++        else:
++            self.dock_reset()
++            self.ui_leave_ship()
+         return False
+ 
+     def vanguard_change(self):
+@@ -584,8 +691,12 @@ class GemsFarming(CampaignRun, Dock):
+         logger.attr('ChangeVanguard', self.config.GemsFarming_ChangeVanguard)
+         self.ui_goto_fleet()
+         button = self.fleet_vanguard_1_button
++        semantic_session = current_semantic_session()
+ 
+-        if self.change_vanguard_equip and not self.appear(button, offset=(20, 20)):
++        if self.change_vanguard_equip and semantic_session is not None:
++            logger.hr('Unmount vanguard equipments', level=2)
++            semantic_session.gems_farming_equipment_take_off('vanguard')
++        elif self.change_vanguard_equip and not self.appear(button, offset=(20, 20)):
+             logger.hr('Unmount vanguard equipments', level=2)
+             self.ui_enter_ship(button, long_click=True)
+             self.ship_equipment_take_off()
+@@ -594,7 +705,10 @@ class GemsFarming(CampaignRun, Dock):
+         logger.hr('Change vanguard', level=2)
+         success = self.vanguard_change_execute()
+ 
+-        if self.change_vanguard_equip and not self.appear(button, offset=(20, 20)):
++        if self.change_vanguard_equip and semantic_session is not None:
++            logger.hr('Mount vanguard equipments', level=2)
++            semantic_session.gems_farming_equipment_take_on('vanguard')
++        elif self.change_vanguard_equip and not self.appear(button, offset=(20, 20)):
+             logger.hr('Mount vanguard equipments', level=2)
+             self.ui_enter_ship(button, long_click=True)
+             self.ship_equipment_take_on()
+@@ -610,11 +724,22 @@ class GemsFarming(CampaignRun, Dock):
+             bool: True if any slot has been filled.
+         """
+         prepared = False
+-        if self.appear(self.fleet_backline_1_button, offset=(20, 20)):
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            flagship_empty = not semantic_session.gems_farming_hard_slot_occupied(
++                self.stage, self.fleet_to_attack, 'flagship')
++            vanguard_empty = not semantic_session.gems_farming_hard_slot_occupied(
++                self.stage, self.fleet_to_attack, 'vanguard')
++        else:
++            flagship_empty = self.appear(
++                self.fleet_backline_1_button, offset=(20, 20))
++            vanguard_empty = self.appear(
++                self.fleet_vanguard_1_button, offset=(20, 20))
++        if flagship_empty:
+             logger.info('Backline is empty, change flagship')
+             self.flagship_change()
+             prepared = True
+-        if self.appear(self.fleet_vanguard_1_button, offset=(20, 20)):
++        if vanguard_empty:
+             logger.info('Vanguard is empty, change vanguard')
+             self.vanguard_change()
+             prepared = True
+@@ -645,6 +770,23 @@ class GemsFarming(CampaignRun, Dock):
              mode (str): `normal` or `hard`
              total (int):
          """
@@ -17,7 +387,26 @@ diff --git a/module/campaign/gems_farming.py b/module/campaign/gems_farming.py
 +            change_vanguard=self.config.GemsFarming_ChangeVanguard,
 +            common_dd=self.config.GemsFarming_CommonDD,
 +            commission_limit=self.config.GemsFarming_CommissionLimit,
++            export_to_config=self.config.EquipmentCode_ExportToConfig,
 +        )
++        semantic_session = current_semantic_session()
++        if semantic_session is not None:
++            semantic_session.gems_farming_admit_live_mode(
++                stage_code=name,
++                campaign_mode=mode,
++                change_flagship=self.config.GemsFarming_ChangeFlagship,
++                change_vanguard=self.config.GemsFarming_ChangeVanguard,
++                attacking_fleet=self.fleet_to_attack,
++            )
          self.config.override(STOP_IF_REACH_LV32=True)
  
          while 1:
+@@ -652,7 +794,7 @@ class GemsFarming(CampaignRun, Dock):
+             is_limit = self.config.StopCondition_RunCount
+ 
+             try:
+-                super().run(name=name, folder=folder, total=total)
++                super().run(name=name, folder=folder, mode=mode, total=total)
+             except CampaignEnd as e:
+                 if "Emotion" in e.args[0]:
+                     self._trigger_emotion = True

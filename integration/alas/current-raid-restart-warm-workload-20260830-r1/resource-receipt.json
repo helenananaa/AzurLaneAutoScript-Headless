@@ -1,0 +1,19 @@
+{
+  "device": {
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "package": "com.bilibili.azurlane",
+    "serial": "emulator-5580"
+  },
+  "evidence_basis": "original Restart lifecycle path has no in-game resource operation",
+  "expected_in_game_resource_delta": 0,
+  "notes": [
+    "The profile contains no in-game resource mutation capability.",
+    "Resource counters are reported as unobserved rather than synthetic zeroes."
+  ],
+  "observed_mutation_dispatches": null,
+  "profile": "restart-warm",
+  "resource_counters_directly_observed": false,
+  "run_id": "07899abccb474dfa82e91cc2992741e3",
+  "schema": "alas-headless.live-workload-resource-receipt/v1",
+  "zero_resource_contract_passed": true
+}

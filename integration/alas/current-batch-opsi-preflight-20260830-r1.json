@@ -1,0 +1,58 @@
+{
+  "schema": "alas-headless.operation-siren-availability-probe/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 7176,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "generation": {
+    "buttons": 8725,
+    "ui": 8726
+  },
+  "scene_handle": -76,
+  "button_count": 46,
+  "text_count": 31,
+  "operation_siren": {
+    "local_map": {
+      "available": false,
+      "reason": "semantic target is absent: os/page/back"
+    },
+    "globe": {
+      "available": false,
+      "reason": "semantic target is absent: os/globe/map"
+    },
+    "storage": {
+      "available": false,
+      "reason": "semantic target is absent: os/storage/back"
+    },
+    "mission_overview_visible": false,
+    "mission_list_visible": false,
+    "mission_checkout_excluding_monthly_boss": {
+      "available": false,
+      "reason": "semantic target is absent: os/mission-list/close"
+    },
+    "mission_finish": {
+      "available": false,
+      "reason": "semantic target is absent: os/mission-list/close"
+    }
+  },
+  "meta": {
+    "landing": {
+      "available": false,
+      "reason": "semantic target is absent: meta/page/back"
+    },
+    "current_empty": {
+      "available": false,
+      "reason": "semantic target is absent: meta/current/list"
+    },
+    "current_detail": {
+      "available": false,
+      "reason": "semantic target is absent: meta/current/detail/list"
+    },
+    "assist": {
+      "available": false,
+      "reason": "semantic target is absent: meta/assist/start"
+    }
+  },
+  "input_injected": false,
+  "passed": true
+}

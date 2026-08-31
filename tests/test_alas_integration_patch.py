@@ -79,6 +79,70 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         self.assertIn("prevents the legacy", self.patch_text)
         self.assertNotIn("-        if favourite is None:", self.patch_text)
 
+    def test_gems_farming_keeps_original_loop_and_ports_typed_replacement(self):
+        self.assertIn(
+            "diff --git a/module/campaign/gems_farming.py",
+            self.patch_text,
+        )
+        self.assertIn("semantic_session.gems_farming_select_fleet_index", self.patch_text)
+        self.assertIn("semantic_session.gems_farming_candidates(", self.patch_text)
+        self.assertIn("semantic_session.gems_farming_open_slot('flagship')", self.patch_text)
+        self.assertIn("semantic_session.gems_farming_open_slot('vanguard')", self.patch_text)
+        self.assertIn(
+            "semantic_session.gems_farming_hard_slot_occupied(",
+            self.patch_text,
+        )
+        self.assertIn(
+            "semantic_session.gems_farming_hard_unmount(",
+            self.patch_text,
+        )
+        self.assertIn(
+            "semantic_session.gems_farming_hard_open_slot(",
+            self.patch_text,
+        )
+        self.assertIn("stage_code=name", self.patch_text)
+        self.assertIn(
+            "super().run(name=name, folder=folder, mode=mode, total=total)",
+            self.patch_text,
+        )
+        self.assertIn(
+            "remain = semantic_adapter.campaign_hard_remain()",
+            self.patch_text,
+        )
+        self.assertIn("if flagship_empty:", self.patch_text)
+        self.assertIn("if vanguard_empty:", self.patch_text)
+        self.assertIn(
+            "semantic_session.gems_farming_confirm_candidate_selection(ship, 'flagship')",
+            self.patch_text,
+        )
+        flagship_off = self.patch_text.index(
+            "semantic_session.gems_farming_equipment_take_off('flagship')",
+        )
+        flagship_change = self.patch_text.index(
+            "success = self.flagship_change_execute()", flagship_off
+        )
+        flagship_on = self.patch_text.index(
+            "semantic_session.gems_farming_equipment_take_on('flagship')",
+            flagship_change,
+        )
+        self.assertLess(flagship_off, flagship_change)
+        self.assertLess(flagship_change, flagship_on)
+        vanguard_off = self.patch_text.index(
+            "semantic_session.gems_farming_equipment_take_off('vanguard')",
+        )
+        vanguard_change = self.patch_text.index(
+            "success = self.vanguard_change_execute()", vanguard_off
+        )
+        vanguard_on = self.patch_text.index(
+            "semantic_session.gems_farming_equipment_take_on('vanguard')",
+            vanguard_change,
+        )
+        self.assertLess(vanguard_off, vanguard_change)
+        self.assertLess(vanguard_change, vanguard_on)
+        self.assertIn("while 1:", self.patch_text)
+        self.assertIn("self.config.override(STOP_IF_REACH_LV32=True)", self.patch_text)
+        self.assertNotIn("semantic_session.run_gems_farming", self.patch_text)
+
     def test_semantic_screenshot_refreshes_after_alas_interval_ownership(self):
         self.assertIn(
             "diff --git a/module/device/screenshot.py b/module/device/screenshot.py",
@@ -136,6 +200,24 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         )
         self.assertIn("self._view_init()", self.patch_text)
         self.assertNotIn("def update(self, camera=True", self.patch_text)
+
+    def test_campaign_zero_vector_still_recovers_exact_network_popup(self):
+        recovery = self.patch_text.index(
+            "semantic_session.recover_campaign_map_network_reconnect()"
+        )
+        zero_vector = self.patch_text.index(
+            "semantic_session is not None and not np.any(vector)", recovery
+        )
+        self.assertLess(recovery, zero_vector)
+
+    def test_campaign_startup_recovers_network_before_map_classification(self):
+        recovery = self.patch_text.index(
+            "self.handle_popup_confirm('CAMPAIGN_RECONNECT')"
+        )
+        refresh = self.patch_text.index("self.campaign.device.image = self.device.image", recovery)
+        map_probe = self.patch_text.index("if self.campaign.is_in_map():", refresh)
+        self.assertLess(recovery, refresh)
+        self.assertLess(refresh, map_probe)
 
     def test_campaign_boss_stage_return_ends_before_another_map_round(self):
         stable = self.patch_text.index(
@@ -304,6 +386,10 @@ class AlasIntegrationPatchTests(unittest.TestCase):
         )
         self.assertIn(
             "semantic_adapter.close_campaign_fleet_dropdown_for_rollback()",
+            self.patch_text,
+        )
+        self.assertIn(
+            "self.enter_map_cancel(skip_first_screenshot=False)",
             self.patch_text,
         )
         self.assertIn(

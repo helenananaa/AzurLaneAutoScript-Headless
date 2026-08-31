@@ -1,0 +1,115 @@
+{
+  "schema": "alas-headless.daemon-sortie-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "Daemon.EnterMap": true,
+    "stage": "1-1",
+    "fleets": [
+      1,
+      0,
+      0
+    ],
+    "auto_search": false,
+    "use_2x_book": false
+  },
+  "passed": true,
+  "temporary_config": "codex_daemon_sortie_0a14908609c04c2ebfe1788efb867721.json",
+  "pid_before": "24414",
+  "pid_after": "24414",
+  "oil_before": 4077,
+  "oil_after": 4067,
+  "oil_consumed": 10,
+  "oil_required_for_full_run": 1000,
+  "chapter_navigation_taps": 0,
+  "map_outcome": "map_preparation",
+  "fleet_outcome": "fleet_preparation",
+  "fleet_selection": {
+    "stage_code": "1-1",
+    "fleets": [
+      1,
+      0,
+      0
+    ],
+    "generation": 115886
+  },
+  "sortie_proof": {
+    "stage_code": "1-1",
+    "initial_fleets": [
+      1,
+      0,
+      0
+    ],
+    "requested_fleets": [
+      1,
+      0,
+      0
+    ],
+    "prepared_fleets": [
+      1,
+      0,
+      0
+    ],
+    "mutation_semantic_ids": [],
+    "oil_before_sortie": 4077,
+    "required_oil": 1000,
+    "sortie_generation": 116184,
+    "map_generation": 116201,
+    "map_root_path": "LevelCamera/Canvas/UIMain/LevelGrid"
+  },
+  "restored_generation": 116236,
+  "typed_taps": [
+    [
+      1192,
+      510
+    ],
+    [
+      339,
+      336
+    ],
+    [
+      137,
+      492
+    ],
+    [
+      951,
+      523
+    ],
+    [
+      1078,
+      585
+    ],
+    [
+      835,
+      683
+    ],
+    [
+      790,
+      515
+    ],
+    [
+      58,
+      54
+    ],
+    [
+      58,
+      54
+    ]
+  ],
+  "mutation_dispatches": [
+    "campaign.stage_entry",
+    "campaign.sortie"
+  ],
+  "withdrawn_before_combat": true,
+  "main_page_visible_after_cleanup": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "daemon": "79afd1d1d318b25ed82b89b546351deca702a4ee08393b7a8a33498d5c8d3c3d",
+    "adapter": "58e9728564b5f8d4e45dff8af80af96bf26152e3b0e8f8e289add29c43c6c2de",
+    "oracle": "8888eee438e35f2e5d436611a2a7eb8ac450e2bdd1fabc52767ea715bc545cfe",
+    "runner": "cc4fd8d196fbe7f21a7c49e608681ffaaa466976559707cd2060ca9a7558917a"
+  }
+}

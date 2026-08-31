@@ -12,10 +12,10 @@ class AlasGemsFarmingConfigTests(unittest.TestCase):
     def test_exact_pinned_upstream_replay_when_available(self):
         if not PINNED_UPSTREAM.joinpath("module/campaign/gems_farming.py").is_file(): self.skipTest("local pinned ALAS verification tree is unavailable")
         result = verify_clean_upstream(PINNED_UPSTREAM)
-        self.assertTrue(result["passed"]); self.assertEqual(result["field_count"], 5); self.assertEqual(result["accepted_case_count"], 300); self.assertEqual(result["mutation_budget"], 0); self.assertFalse(result["android_input_injected"])
+        self.assertTrue(result["passed"]); self.assertEqual(result["field_count"], 6); self.assertEqual(result["accepted_case_count"], 600); self.assertEqual(result["mutation_budget"], 0); self.assertFalse(result["android_input_injected"])
     def test_bounds_and_type_errors_fail_closed(self):
-        values = dict(change_flagship="ship", common_cv="any", change_vanguard="ship", common_dd="any", commission_limit=True)
-        for key, value in (("change_flagship", "all"), ("common_cv", None), ("change_vanguard", True), ("common_dd", "dd"), ("commission_limit", 0)):
+        values = dict(change_flagship="ship", common_cv="any", change_vanguard="ship", common_dd="any", commission_limit=True, export_to_config=True)
+        for key, value in (("change_flagship", "all"), ("common_cv", None), ("change_vanguard", True), ("common_dd", "dd"), ("commission_limit", 0), ("export_to_config", 1)):
             with self.subTest(key=key), self.assertRaises(SemanticGateClosed):
                 candidate = dict(values); candidate[key] = value; validate_alas_gems_farming_config(**candidate)
     def test_sources_compile(self):

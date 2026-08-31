@@ -1,0 +1,51 @@
+{
+  "schema": "alas-headless.gems-farming-task-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-08-25T06:13:46.969355Z",
+  "finished_at": "2026-08-25T06:15:57.204095Z",
+  "task": "GemsFarming",
+  "task_method": "AzurLaneAutoScript.gems_farming",
+  "campaign_run_method": "GemsFarming.run",
+  "stage": "1-1",
+  "event": "campaign_main",
+  "mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "configuration": {
+    "change_flagship": "ship_equip",
+    "common_cv": "ranger",
+    "change_vanguard": "disabled",
+    "run_count_before": 1,
+    "run_count_after": 0,
+    "scheduler_enabled_after": false
+  },
+  "run_result": true,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": true,
+    "campaign_entry": false,
+    "campaign_page": false,
+    "generation": 243498
+  },
+  "startup_recovery": null,
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "campaign_entry": false,
+    "campaign_page": true
+  },
+  "budgets": {
+    "stage_entry": 1,
+    "fleet_mutation": 4,
+    "sortie": 1,
+    "combat": 8,
+    "viewport_swipe": 4
+  },
+  "observer": {
+    "generation": 245893,
+    "scene_handle": -76,
+    "button_count": 21
+  },
+  "raw_input_fallback_used": false,
+  "qualification_random_seed": 20260825
+}

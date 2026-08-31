@@ -20,6 +20,7 @@ class AlasGemsFarmingConfigSnapshot:
     change_vanguard: str
     common_dd: str
     commission_limit: bool
+    export_to_config: bool
 
 
 def validate_alas_gems_farming_config(
@@ -29,6 +30,7 @@ def validate_alas_gems_farming_config(
     change_vanguard: object,
     common_dd: object,
     commission_limit: object,
+    export_to_config: object,
 ) -> AlasGemsFarmingConfigSnapshot:
     """Admit declared GemsFarming settings before campaign or dock work."""
 
@@ -42,10 +44,13 @@ def validate_alas_gems_farming_config(
             raise SemanticGateClosed(name + " is outside the pinned enum")
     if type(commission_limit) is not bool:
         raise SemanticGateClosed("GemsFarming.CommissionLimit must be a boolean")
+    if type(export_to_config) is not bool:
+        raise SemanticGateClosed("EquipmentCode.ExportToConfig must be a boolean")
     return AlasGemsFarmingConfigSnapshot(
         change_flagship=change_flagship,
         common_cv=common_cv,
         change_vanguard=change_vanguard,
         common_dd=common_dd,
         commission_limit=commission_limit,
+        export_to_config=export_to_config,
     )

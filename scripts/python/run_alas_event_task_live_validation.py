@@ -22,7 +22,7 @@ import time
 import traceback
 import uuid
 from dataclasses import asdict, dataclass, is_dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Mapping
@@ -140,7 +140,10 @@ EVENT_SP_ATTEMPT_TEXT = re.compile(
 )
 EVENT_SP_EXECUTION_BUDGETS = {
     "stage_entry": 1,
-    "fleet_mutation": 0,
+    # Normal-mode reconciliation of the reviewed (1, 2, 0) fleet tuple needs
+    # at most: clear fleet 2, clear submarine, select fleet 1, select fleet 2.
+    # The adapter preflights the exact sequence before spending any of these.
+    "fleet_mutation": 4,
     "sortie": 1,
     "combat": 0,
     "grid_click": 0,
@@ -156,6 +159,7 @@ LEGACY_EXECUTION_BUDGET_DEFAULTS = {
     "grid_click": 12,
     "viewport_swipe": 4,
     "camera_positioning": 0,
+    "retirement": 0,
 }
 GAME_PACKAGE = "com.bilibili.azurlane"
 EVENT_SP_SEED_NAME = "template"
@@ -165,7 +169,7 @@ EVENT_SP_TEMPLATE_SHA256 = (
 )
 EVENT_SP_TEMPLATE_UNPROVEN = "event_sp.template_seed_unproven"
 EVENT_SP_TEMPLATE_CHANGED = "event_sp.template_seed_changed"
-MATERIALIZED_ALAS_CAPABILITY_ID = "alas.eventsp.materialized-fleet-noop-guard/v3"
+MATERIALIZED_ALAS_CAPABILITY_ID = "alas.eventsp.materialized-fleet-rollback-guard/v4"
 MATERIALIZED_ALAS_PROOF_SCHEMA = "alas-headless.materialized-alas-proof/v3"
 MATERIALIZED_ALAS_CONTROL_SCHEMA = "alas-headless.materialized-alas-control/v4"
 MATERIALIZED_ALAS_LOADED_SCHEMA = "alas-headless.materialized-alas-loaded/v3"
@@ -174,10 +178,10 @@ MATERIALIZED_ALAS_RELATIVE_PATH = Path("module/map/map_operation.py")
 MATERIALIZED_ALAS_MODULE_NAME = "module.map.map_operation"
 MATERIALIZED_ALAS_LOADER_ID = "verified-canonical-source-bytes/v3"
 MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256 = (
-    "d890a45505a7491eea73368295096d634f1acee2a85507ccfcc94e083664510a"
+    "0ddeec74cde1a94e686830d0504f07fc789aab85b7552073f4226779992e57f8"
 )
 MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256 = (
-    "c391f5dbb986e6482bbd6cc14245007cfe2aa8bffc2eb1d57d662fe3396bcf4a"
+    "a0ac35cb40e6ad29711c0200598a77a18c88ec0060666adace3d46f30301f4d6"
 )
 MATERIALIZED_ALAS_MAX_SOURCE_BYTES = 2 * 1024 * 1024
 MATERIALIZED_ALAS_MAX_CONTROL_BYTES = 8 * 1024
@@ -458,6 +462,52 @@ def _validate_materialized_enter_map(tree: ast.Module) -> str:
     if len(fleet_tries) != 1:
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
     try_node = fleet_tries[0]
+    if (
+        try_node.orelse
+        or len(try_node.finalbody) != 1
+        or not isinstance(try_node.finalbody[0], ast.If)
+    ):
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    rollback_if = try_node.finalbody[0]
+    if (
+        not isinstance(rollback_if.test, ast.UnaryOp)
+        or not isinstance(rollback_if.test.op, ast.Not)
+        or not isinstance(rollback_if.test.operand, ast.Name)
+        or rollback_if.test.operand.id != "sortie_clicked"
+        or rollback_if.orelse
+        or len(rollback_if.body) != 1
+        or not isinstance(rollback_if.body[0], ast.Try)
+    ):
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    rollback_try = rollback_if.body[0]
+    close_chain = (
+        "semantic_adapter",
+        "close_campaign_fleet_dropdown_for_rollback",
+    )
+    cancel_chain = ("self", "enter_map_cancel")
+    if (
+        rollback_try.handlers
+        or rollback_try.orelse
+        or len(rollback_try.body) != 1
+        or not _direct_call_statement(rollback_try.body[0], close_chain)
+        or len(rollback_try.finalbody) != 1
+        or not isinstance(rollback_try.finalbody[0], ast.Expr)
+        or not _call_matches(rollback_try.finalbody[0].value, cancel_chain)
+    ):
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
+    close_call = rollback_try.body[0].value
+    cancel_call = rollback_try.finalbody[0].value
+    assert isinstance(close_call, ast.Call) and isinstance(cancel_call, ast.Call)
+    if (
+        close_call.args
+        or close_call.keywords
+        or cancel_call.args
+        or len(cancel_call.keywords) != 1
+        or cancel_call.keywords[0].arg != "skip_first_screenshot"
+        or not isinstance(cancel_call.keywords[0].value, ast.Constant)
+        or cancel_call.keywords[0].value.value is not False
+    ):
+        raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
     authorize_locations = [
         (index, statement)
         for index, statement in enumerate(try_node.body)
@@ -606,6 +656,7 @@ def _validate_materialized_enter_map(tree: ast.Module) -> str:
         ("self", "handle_auto_search"),
         ("self", "handle_auto_search_setting"),
         ("self", "handle_auto_submarine_call_disable"),
+        ("self", "handle_retirement"),
         ("self", "is_in_auto_search_menu"),
         ("self", "is_in_map"),
     }
@@ -623,6 +674,8 @@ def _validate_materialized_enter_map(tree: ast.Module) -> str:
 
     allowed_authorized_calls = {
         ("semantic_adapter", "prepare_campaign_hard_fleets"),
+        ("semantic_adapter", "campaign_dock_full_visible"),
+        ("self", "handle_retirement"),
         ("self", "handle_2x_book_setting"),
         required_chain,
         legacy_chain,
@@ -1339,6 +1392,7 @@ def _execution_budgets(args: argparse.Namespace) -> dict[str, int | None]:
         "viewport_swipe": "viewport_swipe_budget",
         "camera_positioning": "camera_positioning_budget",
         "recovery_total": "recovery_total",
+        "retirement": "retirement_budget",
     }
     if getattr(args, "task", None) == "EventSp":
         stage = getattr(args, "stage", None)
@@ -1385,6 +1439,30 @@ def _execution_budgets(args: argparse.Namespace) -> dict[str, int | None]:
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _device_wall_clock(args: argparse.Namespace) -> str:
+    completed = subprocess.run(
+        [
+            str(args.adb),
+            "-s",
+            str(args.serial),
+            "shell",
+            "date",
+            "+%Y-%m-%dT%H:%M:%S%z",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    value = completed.stdout.strip()
+    if completed.returncode != 0 or re.fullmatch(
+        r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}",
+        value,
+    ) is None:
+        raise RuntimeError("device wall clock is unavailable or malformed")
+    return value
 
 
 def _public_error(
@@ -1451,7 +1529,29 @@ def _surface_visible(probe: Any, *, strict: bool = False) -> bool:
     except Exception as exc:
         if exc.__class__.__name__ != "SemanticGateClosed" or strict:
             raise
-        return False
+    return False
+
+
+def _limit_resources(
+    oracle: Any, surfaces: Mapping[str, bool]
+) -> tuple[int | None, int | None]:
+    """Read only resources exposed on the current reviewed surface."""
+
+    event_points = oracle.event_points() if surfaces.get("event_page") else None
+    oil = oracle.campaign_oil() if surfaces.get("event_page") else None
+    return event_points, oil
+
+
+def _clock_delta_seconds(host_time: str, device_time: str) -> float:
+    host = datetime.fromisoformat(host_time)
+    device = datetime.strptime(device_time, "%Y-%m-%dT%H:%M:%S%z")
+    if host.tzinfo is None:
+        raise ValueError("host wall clock is timezone-naive")
+    return abs(
+        (
+            host.astimezone(timezone.utc) - device.astimezone(timezone.utc)
+        ).total_seconds()
+    )
 
 
 def _serialize_proof(value: Any) -> Mapping[str, Any] | None:
@@ -1736,6 +1836,10 @@ def _event_sp_clean_start_stop(
         return "event_sp.clean_start.orphan_result"
     state, _observed_stage_code = _inherited_preparation_state(oracle, stage)
     if state is None:
+        if surfaces.get("event_page") is True:
+            selected = oracle.campaign_stage_state(stage)
+            if getattr(selected, "remaining_attempts", None) == 0:
+                return "event_sp.clean_start.attempt_exhausted"
         return None
     kind = getattr(state, "kind", None)
     if kind not in ("fleet", "map"):
@@ -1747,6 +1851,13 @@ def _recover_inherited_preparation(oracle: Any, stage: str) -> int:
     """Close at most one inherited fleet layer and its map detail layer."""
 
     recovered = 0
+    dock_full_visible = getattr(
+        oracle, "campaign_dock_full_visible", lambda _stage: False
+    )
+    if dock_full_visible(stage.lower()):
+        # Dock-full mutation belongs to ALAS Retirement.handle_retirement();
+        # startup recovery must not bypass its configured filters or budget.
+        return recovered
     for _ in range(2):
         state, observed_stage_code = _inherited_preparation_state(oracle, stage)
         if state is None:
@@ -1783,6 +1894,48 @@ def _recover_inherited_preparation(oracle: Any, stage: str) -> int:
     return recovered
 
 
+def _recover_inherited_dock_full(
+    instance: Any,
+    oracle: Any,
+    stage: str,
+    *,
+    retirement_factory: Any = None,
+) -> int:
+    """Hand one inherited exact dock-full popup to ALAS one-click retirement."""
+
+    if not oracle.campaign_dock_full_visible(stage.lower()):
+        return 0
+    mode = instance.config.Retirement_RetireMode
+    if mode != "one_click_retire":
+        raise RuntimeError(
+            "inherited dock-full recovery requires ALAS one-click-retire mode"
+        )
+    oracle.click_campaign_dock_full_choice(stage.lower(), "organize")
+    deadline = time.monotonic() + 30.0
+    while True:
+        try:
+            oracle.retirement_selection_state()
+            break
+        except Exception as exc:
+            if exc.__class__.__name__ not in (
+                "SemanticGateClosed",
+                "SemanticTargetMissing",
+            ):
+                raise
+        if time.monotonic() >= deadline:
+            raise RuntimeError("retirement page did not open after dock-full organize")
+        time.sleep(0.25)
+    if retirement_factory is None:
+        from module.retire.retirement import Retirement
+
+        retirement_factory = Retirement
+    retirement = retirement_factory(instance.config, device=instance.device)
+    retired = retirement._retire_handler(mode="one_click_retire")
+    if isinstance(retired, bool) or not isinstance(retired, int) or retired <= 0:
+        raise RuntimeError("inherited dock-full recovery retired no ships")
+    return 1
+
+
 def _configure(
     seed: Mapping[str, Any],
     *,
@@ -1791,8 +1944,18 @@ def _configure(
     event: str,
     stage: str,
     use_auto_search: bool,
+    isolate_task_scheduler: bool = False,
 ) -> dict[str, Any]:
     payload = copy.deepcopy(seed)
+    if isolate_task_scheduler:
+        for task_name, task_value in payload.items():
+            if (
+                task_name == task
+                or not isinstance(task_value, Mapping)
+                or not isinstance(task_value.get("Scheduler"), Mapping)
+            ):
+                continue
+            task_value["Scheduler"]["Enable"] = False
     emulator = payload["Alas"]["Emulator"]
     emulator["Serial"] = serial
     # A live-qualification run must never enter ALAS's multi-method benchmark:
@@ -1800,6 +1963,11 @@ def _configure(
     # session exists.  ADB is the reviewed frame transport for this AVD; all
     # task actions remain owned by the semantic adapter.
     emulator["ScreenshotMethod"] = "ADB"
+    # Semantic mode owns every task action and rejects raw controller input.
+    # Avoid inheriting MaaTouch from the ordinary ALAS template: initializing
+    # an unused touch daemon can contend with the observer ADB transport before
+    # the semantic session has even opened.
+    emulator["ControlMethod"] = "ADB"
     target = payload[task]
     target["Scheduler"]["Command"] = task
     target["Scheduler"]["Enable"] = True
@@ -1973,6 +2141,25 @@ def run(
 ) -> Mapping[str, Any]:
     total_deadline = _total_deadline(args)
     _event_sp_seed_name(args)
+    pt_limit = int(getattr(args, "pt_limit", 0) or 0)
+    expect_pt_limit_triggered = bool(
+        getattr(args, "expect_pt_limit_triggered", False)
+    )
+    time_limit_offset_seconds = getattr(args, "time_limit_offset_seconds", None)
+    expect_time_limit_triggered = bool(
+        getattr(args, "expect_time_limit_triggered", False)
+    )
+    task_balancer_coin_limit = getattr(args, "task_balancer_coin_limit", None)
+    task_balancer_task_call = getattr(args, "task_balancer_task_call", "Main")
+    expect_task_balancer_triggered = bool(
+        getattr(args, "expect_task_balancer_triggered", False)
+    )
+    configured_run_count = 2 if expect_task_balancer_triggered else 1
+    time_limit = datetime(2020, 1, 1)
+    if time_limit_offset_seconds is not None:
+        time_limit = datetime.now().replace(microsecond=0) + timedelta(
+            seconds=time_limit_offset_seconds
+        )
     if args.task == "EventSp" and args.use_auto_search and worker_control is None:
         raise RuntimeError(
             "EventSp auto-search execution requires supervised worker activation"
@@ -2027,6 +2214,7 @@ def run(
         "ALAS_SEMANTIC_CAMPAIGN_SORTIE_BUDGET",
         "ALAS_SEMANTIC_CAMPAIGN_COMBAT_BUDGET",
         "ALAS_SEMANTIC_CAMPAIGN_VIEWPORT_SWIPE_BUDGET",
+        "ALAS_SEMANTIC_RETIREMENT_BUDGET",
     )
     prior_env = {name: os.environ.get(name) for name in environment_names}
     prior_cwd = Path.cwd()
@@ -2034,6 +2222,7 @@ def run(
     login_recovery_performed = False
     orphan_result_recovery_count = 0
     preparation_recovery_count = 0
+    dock_full_recovery_count = 0
     qualification_stop = None
     started_at = _utc_now()
     result_payload: dict[str, Any] | None = None
@@ -2056,7 +2245,16 @@ def run(
             event=args.event,
             stage=args.stage,
             use_auto_search=args.use_auto_search,
+            isolate_task_scheduler=task_balancer_coin_limit is not None,
         )
+        task_balancer_neutralized_tasks = [
+            task_name
+            for task_name, task_value in payload.items()
+            if task_name != args.task
+            and isinstance(task_value, Mapping)
+            and isinstance(task_value.get("Scheduler"), Mapping)
+            and task_value["Scheduler"].get("Enable") is False
+        ]
         for path in (ROOT / "python", alas_root):
             if str(path) not in sys.path:
                 sys.path.insert(0, str(path))
@@ -2098,6 +2296,9 @@ def run(
                 "ALAS_SEMANTIC_CAMPAIGN_VIEWPORT_SWIPE_BUDGET": str(
                     execution_budgets["viewport_swipe"]
                 ),
+                "ALAS_SEMANTIC_RETIREMENT_BUDGET": str(
+                    execution_budgets["retirement"]
+                ),
             }
         )
         os.chdir(alas_root)
@@ -2122,11 +2323,20 @@ def run(
             "Campaign_UseAutoSearch": args.use_auto_search,
             "Campaign_Use2xBook": False,
             "StopCondition_OilLimit": 0,
-            "StopCondition_RunCount": 1,
+            "StopCondition_RunCount": configured_run_count,
             "StopCondition_MapAchievement": "non_stop",
             "StopCondition_StageIncrease": False,
             "StopCondition_GetNewShip": False,
             "StopCondition_ReachLevel": 0,
+            "EventGeneral_PtLimit": pt_limit,
+            "EventGeneral_TimeLimit": time_limit,
+            "TaskBalancer_Enable": task_balancer_coin_limit is not None,
+            "TaskBalancer_CoinLimit": (
+                task_balancer_coin_limit
+                if task_balancer_coin_limit is not None
+                else 10_000
+            ),
+            "TaskBalancer_TaskCall": task_balancer_task_call,
             "Fleet_Fleet1": 1,
             "Fleet_Fleet2": 2 if args.use_auto_search else 0,
             "Fleet_FleetOrder": (
@@ -2154,13 +2364,27 @@ def run(
             "mode": instance.config.Campaign_Mode,
             "use_auto_search": instance.config.Campaign_UseAutoSearch,
             "run_count": instance.config.StopCondition_RunCount,
+            "pt_limit": instance.config.EventGeneral_PtLimit,
+            "time_limit": instance.config.EventGeneral_TimeLimit.isoformat(),
+            "task_balancer_enable": instance.config.TaskBalancer_Enable,
+            "task_balancer_coin_limit": instance.config.TaskBalancer_CoinLimit,
+            "task_balancer_task_call": instance.config.TaskBalancer_TaskCall,
         }
         if effective_config != {
             "event": args.event,
             "name": runtime_name,
             "mode": "normal",
             "use_auto_search": args.use_auto_search,
-            "run_count": 1,
+            "run_count": configured_run_count,
+            "pt_limit": pt_limit,
+            "time_limit": time_limit.isoformat(),
+            "task_balancer_enable": task_balancer_coin_limit is not None,
+            "task_balancer_coin_limit": (
+                task_balancer_coin_limit
+                if task_balancer_coin_limit is not None
+                else 10_000
+            ),
+            "task_balancer_task_call": task_balancer_task_call,
         }:
             raise RuntimeError(
                 f"effective Event configuration drifted: {effective_config!r}"
@@ -2183,6 +2407,53 @@ def run(
             "event_page": startup_surfaces["event_page"],
             "generation": startup_frame.generation,
         }
+        event_points_before = None
+        oil_before = None
+        task_balancer_coin_before = None
+        host_time_before = datetime.now().astimezone().isoformat()
+        device_time_before = None
+        if time_limit_offset_seconds is not None:
+            device_time_before = _device_wall_clock(args)
+        if pt_limit > 0:
+            if not startup_surfaces["event_page"]:
+                raise RuntimeError(
+                    "EventGeneral.PtLimit validation requires an event-page start"
+                )
+            event_points_before = startup_oracle.event_points()
+            oil_before = startup_oracle.campaign_oil()
+        elif time_limit_offset_seconds is not None and startup_surfaces["event_page"]:
+            event_points_before, oil_before = _limit_resources(
+                startup_oracle, startup_surfaces
+            )
+        if task_balancer_coin_limit is not None:
+            if not startup_surfaces["event_page"]:
+                raise RuntimeError(
+                    "TaskBalancer validation requires an event-page start"
+                )
+            task_balancer_coin_before = startup_oracle.event_coin(args.stage.lower())
+        if pt_limit > 0:
+            if expect_pt_limit_triggered:
+                if event_points_before < pt_limit:
+                    raise RuntimeError("event points are below the expected reached limit")
+            elif event_points_before >= pt_limit:
+                raise RuntimeError("event points already reached the continuation limit")
+        if time_limit_offset_seconds is not None:
+            host_now = datetime.now().replace(microsecond=0)
+            if expect_time_limit_triggered:
+                if host_now <= time_limit:
+                    raise RuntimeError("host time has not reached the expected limit")
+            elif host_now > time_limit:
+                raise RuntimeError("host time already exceeded the continuation limit")
+        if task_balancer_coin_limit is not None:
+            if expect_task_balancer_triggered:
+                if task_balancer_coin_before >= task_balancer_coin_limit:
+                    raise RuntimeError(
+                        "current coins do not satisfy the expected balancer trigger"
+                    )
+            elif task_balancer_coin_before < task_balancer_coin_limit:
+                raise RuntimeError(
+                    "current coins would unexpectedly trigger TaskBalancer"
+                )
         if args.task == "EventSp":
             qualification_stop = _event_sp_clean_start_stop(
                 semantic_session,
@@ -2205,10 +2476,30 @@ def run(
                 orphan_result_recovery_count = len(
                     semantic_session.recover_orphan_combat_result()
                 )
+            dock_full_recovery_count = _recover_inherited_dock_full(
+                instance,
+                semantic_session.open().oracle,
+                args.stage,
+            )
             preparation_recovery_count = _recover_inherited_preparation(
                 semantic_session.open().oracle,
                 args.stage,
             )
+            if time_limit_offset_seconds is not None:
+                pre_run_oracle = semantic_session.open().oracle
+                pre_run_surfaces = {
+                    "main_page": _surface_visible(pre_run_oracle.main_page_visible),
+                    "event_page": _surface_visible(
+                        pre_run_oracle.event_campaign_page_visible
+                    ),
+                }
+                pre_run_points, pre_run_oil = _limit_resources(
+                    pre_run_oracle, pre_run_surfaces
+                )
+                if pre_run_points is not None:
+                    event_points_before = pre_run_points
+                if pre_run_oil is not None:
+                    oil_before = pre_run_oil
         if qualification_stop is not None:
             run_result = False
             run_error = {
@@ -2244,8 +2535,15 @@ def run(
             "event_page": _surface_visible(adapter.oracle.event_campaign_page_visible),
         }
         state = adapter.oracle.read_state()
+        event_points_after = None
+        oil_after = None
+        if pt_limit > 0 or time_limit_offset_seconds is not None:
+            event_points_after, oil_after = _limit_resources(
+                adapter.oracle, final_surface
+            )
         run_count = task_post["StopCondition"]["RunCount"]
         enabled = task_post["Scheduler"]["Enable"]
+        balancer_target_post = post[task_balancer_task_call]["Scheduler"]
         evidence_bundle = None
         bundle_errors: tuple[str, ...] = ()
         if args.task == "EventSp":
@@ -2280,7 +2578,7 @@ def run(
                 completion_proof=completion_proof,
                 final_generation=state.generation,
                 final_surface=final_surface,
-                run_count_before=1,
+                run_count_before=configured_run_count,
                 run_count_after=run_count,
                 attempt_observation=attempt_observation,
                 attempt_errors=attempt_errors,
@@ -2289,18 +2587,62 @@ def run(
         )
         if run_error is not None:
             validation_errors.insert(0, run_error["classification"])
+        host_time_after = datetime.now().astimezone().isoformat()
+        device_time_after = (
+            _device_wall_clock(args)
+            if time_limit_offset_seconds is not None
+            else None
+        )
+        if time_limit_offset_seconds is not None:
+            if device_time_before is None or device_time_after is None:
+                validation_errors.append("time_limit.device_clock_missing")
+            else:
+                if _clock_delta_seconds(host_time_before, device_time_before) > 5:
+                    validation_errors.append("time_limit.clock_before_mismatch")
+                if _clock_delta_seconds(host_time_after, device_time_after) > 5:
+                    validation_errors.append("time_limit.clock_after_mismatch")
+            if (
+                isinstance(oil_before, int)
+                and isinstance(oil_after, int)
+                and expect_time_limit_triggered
+                and oil_after != oil_before
+            ):
+                validation_errors.append("time_limit.expired_oil_changed")
+            elif (
+                isinstance(oil_before, int)
+                and isinstance(oil_after, int)
+                and not expect_time_limit_triggered
+                and oil_after >= oil_before
+            ):
+                validation_errors.append("time_limit.future_sortie_not_observed")
         runner_recovery_total = (
             int(login_recovery_performed)
             + orphan_result_recovery_count
+            + dock_full_recovery_count
             + preparation_recovery_count
         )
         if args.task == "EventSp" and runner_recovery_total != 0:
             raise RuntimeError("EventSp runner recovery budget changed")
         passed = bool(
             run_result
-            and run_count == 0
+            and run_count == (1 if expect_task_balancer_triggered else 0)
             and isinstance(enabled, bool)
-            and final_surface["event_page"]
+            and (
+                not (expect_pt_limit_triggered or expect_time_limit_triggered)
+                or enabled is False
+            )
+            and (
+                not expect_task_balancer_triggered
+                or (
+                    balancer_target_post["Enable"] is True
+                    and balancer_target_post["NextRun"]
+                    != "2020-01-01 00:00:00"
+                )
+            )
+            and (
+                final_surface["event_page"]
+                or (expect_time_limit_triggered and final_surface["main_page"])
+            )
             and not validation_errors
         )
         result_payload = {
@@ -2319,8 +2661,26 @@ def run(
             "effective_config": effective_config,
             "run_result": bool(run_result),
             "run_error": run_error,
-            "run_count_before": 1,
+            "run_count_before": configured_run_count,
             "run_count_after": run_count,
+            "event_points_before": event_points_before,
+            "event_points_after": event_points_after,
+            "oil_before": oil_before,
+            "oil_after": oil_after,
+            "task_balancer_coin_before": task_balancer_coin_before,
+            "task_balancer_coin_limit": task_balancer_coin_limit,
+            "task_balancer_expected_triggered": expect_task_balancer_triggered,
+            "task_balancer_task_call": task_balancer_task_call,
+            "task_balancer_neutralized_tasks": task_balancer_neutralized_tasks,
+            "task_balancer_target_scheduler_after": balancer_target_post,
+            "pt_limit_expected_triggered": expect_pt_limit_triggered,
+            "time_limit": time_limit.isoformat(),
+            "time_limit_offset_seconds": time_limit_offset_seconds,
+            "time_limit_expected_triggered": expect_time_limit_triggered,
+            "host_time_before": host_time_before,
+            "host_time_after": host_time_after,
+            "device_time_before": device_time_before,
+            "device_time_after": device_time_after,
             "scheduler_enabled_after": enabled,
             "event_daily_last_stage_after": (
                 task_post["EventDaily"]["LastStage"]
@@ -2331,6 +2691,7 @@ def run(
             "materialized_alas": materialized_alas,
             "login_recovery_performed": login_recovery_performed,
             "orphan_result_recovery_count": orphan_result_recovery_count,
+            "dock_full_recovery_count": dock_full_recovery_count,
             "preparation_recovery_count": preparation_recovery_count,
             "recovery_total": runner_recovery_total,
             "qualification_stop": qualification_stop,
@@ -4021,6 +4382,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--event", default="event_20260813_cn")
     parser.add_argument("--stage", required=True)
     parser.add_argument("--use-auto-search", action="store_true")
+    parser.add_argument("--pt-limit", type=int, default=0)
+    parser.add_argument("--expect-pt-limit-triggered", action="store_true")
+    parser.add_argument("--time-limit-offset-seconds", type=int)
+    parser.add_argument("--expect-time-limit-triggered", action="store_true")
+    parser.add_argument("--task-balancer-coin-limit", type=int)
+    parser.add_argument(
+        "--task-balancer-task-call",
+        choices=("Main", "Main2", "Main3"),
+        default="Main",
+    )
+    parser.add_argument("--expect-task-balancer-triggered", action="store_true")
     parser.add_argument("--stage-entry-budget", type=int)
     parser.add_argument("--fleet-mutation-budget", type=int)
     parser.add_argument("--sortie-budget", type=int)
@@ -4028,10 +4400,33 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--viewport-swipe-budget", type=int)
     parser.add_argument("--camera-positioning-budget", type=int)
     parser.add_argument("--recovery-total", type=int)
+    parser.add_argument("--retirement-budget", type=int)
     parser.add_argument("--total-deadline-seconds", type=int)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     try:
+        if args.pt_limit < 0:
+            raise ValueError("pt limit must be non-negative")
+        if args.expect_pt_limit_triggered and args.pt_limit <= 0:
+            raise ValueError("expected PT limit requires a positive limit")
+        if args.expect_time_limit_triggered and args.time_limit_offset_seconds is None:
+            raise ValueError("expected time limit requires a time-limit offset")
+        if args.pt_limit > 0 and args.time_limit_offset_seconds is not None:
+            raise ValueError("PT and time limit validations must be isolated")
+        if (
+            args.task_balancer_coin_limit is not None
+            and args.task_balancer_coin_limit < 0
+        ):
+            raise ValueError("TaskBalancer coin limit must be non-negative")
+        if (
+            args.expect_task_balancer_triggered
+            and args.task_balancer_coin_limit is None
+        ):
+            raise ValueError("expected TaskBalancer trigger requires a coin limit")
+        if args.task_balancer_coin_limit is not None and (
+            args.pt_limit > 0 or args.time_limit_offset_seconds is not None
+        ):
+            raise ValueError("TaskBalancer and event-limit validations must be isolated")
         _total_deadline(args)
         _event_sp_seed_name(args)
         _execution_budgets(args)

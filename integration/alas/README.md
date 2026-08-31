@@ -121,14 +121,29 @@ enumeration, or SP path probe, the runtime validates an exact event folder,
 the task-specific stage family (including the pinned T/HT aliases), and the
 allowed entry mode. The existing EventDaily validator still owns filter and
 cursor semantics, including server-day reset ordering. This gate classifies
-entry configuration only and does not claim live battle coverage for B-D/SP.
+entry configuration only and does not by itself claim live battle coverage.
 
-When ALAS is already on a normal campaign map, the patch now passes ALAS's own
-map shape, land cells, and enabled fleet count to the read-only semantic map
-model. The returned stable cells, fleets, enemies, and pickups are validated
+EventSp's pinned main path is live-qualified by
+`eventsp-sp-auto-search-live-validation-receipt-20260825-r11.json`. The original
+task proved the exact SP attempt and `(1,2,0)` fleet tuple, handed the map and
+combat to official auto-search without combat/grid/viewport input, captured the
+Boss total-reward exit, returned to the event page, persisted RunCount `1 -> 0`,
+and scheduled the next server update. This is panel-level `L` evidence for the
+reviewed default path, not full coverage of every shared campaign field.
+
+When ALAS is already on a normal or reviewed shared event campaign map, the
+patch passes ALAS's own map shape, land cells, and enabled fleet count to the
+read-only semantic map model. Event C/D reuse the same model in their effective
+hard mode instead of falling into the unrelated 11-4-only boundary. The
+returned stable cells, fleets, enemies, and pickups are validated
 against a deep copy of ALAS's native `CampaignMap`, initialized through
 `map_data_init()`, and planned through ALAS's existing path methods. The
-invocation logs immutable per-marker reachability summaries and returns before
+projection also follows ALAS's own `MAP_HAS_MOVABLE_ENEMY` and
+`MAP_HAS_MOVABLE_NORMAL_ENEMY` capabilities: a typed siren or normal enemy may
+leave its static spawn cell only when the corresponding campaign config says
+that enemy family moves. Boss placement, land topology, unrelated hard maps,
+and the opposite movable-enemy family remain fail-closed. The invocation logs
+immutable per-marker reachability summaries and returns before
 ALAS's existing retreat branch. A semantic marker is assigned to the displayed
 fleet only when its suffix uniquely matches one typed ship sprite in the exact
 top-stage roster across stable generations. The displayed `1|2` number is then
@@ -616,6 +631,27 @@ all three Tactical Training repeats through the same loop.
 The expanded-stage observer distinguishes normal, one-time quick, and
 bulk-quick actions. The original `UseDailySkip=true` branch maps to a bounded
 bulk-quick mutation, but that state-changing branch remains live-unqualified.
+
+RaidDaily now has a task-local typed remaining-count port for the pinned
+`raid_20260212` BossRush surface. It accepts only one reviewed Raid root and a
+unique coherent counter for the requested `easy`/`normal`/`hard`/`ex` node;
+the original ALAS loop remains the owner. Member
+`0450-raid-daily-remain-port.patch` preserves the pixel path outside semantic
+mode and deliberately bypasses the unsupported optional Raid reward-dot probe
+in semantic mode. The current 9.7.10 client did not expose a live Raid surface,
+so entry, combat, return, and reward actions are not promoted by this change.
+
+Freebies now has typed task-local ports for the ordinary BattlePass claim,
+DataKey full-capacity prompt, Shop home recovery, and the unique zero-price
+weekly-pack card. Live evidence includes one ordinary BattlePass claim with no
+paid-control input, a safe cancel of the `300/300` DataKey warning, and an
+actual forced full-capacity DataKey confirmation. The latter produced the exact
+claim/confirm/award-close sequence; an independent original-task rerun proved
+`state_after`, `300/300`, and zero repeated mutations. A fresh combined run also
+completed with BattlePass empty, DataKey already collected, oil `4477`, and no
+free pack or purchase action. The irreversible daily transition prevented one
+uninterrupted evidence receipt, and a natural free-pack confirmation remains
+unqualified, so the panel stays partial.
 
 To stage this against a compatible ALAS checkout:
 

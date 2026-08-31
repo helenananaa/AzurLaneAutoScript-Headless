@@ -1,0 +1,72 @@
+{
+  "schema": "alas-headless.war-archives-live-validation/v1",
+  "passed": true,
+  "validation_form": "bounded split-resume live qualification",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "war_archives_20190221_en",
+  "stage": "A1",
+  "mode": "normal",
+  "auto_search": false,
+  "data_keys": {
+    "before": 295,
+    "entry_cost": 5,
+    "after": 290,
+    "maximum": 300
+  },
+  "entry_confirmation": {
+    "semantic_id": "archive/entry/confirm",
+    "generation": 1081165,
+    "expected_prompt": "进入所选关卡需要消耗档案秘钥x5，是否进入？"
+  },
+  "combat": {
+    "normal_targets": [
+      "B2",
+      "E2",
+      "E1",
+      "E5"
+    ],
+    "boss_target": "D2",
+    "boss_progression_resume": {
+      "battle": 4,
+      "generation_observed_after_resume": 1091458
+    }
+  },
+  "result_actions": [
+    {
+      "semantic_id": "daily/battle/result",
+      "generation": 1099040,
+      "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultGradePage(Clone)"
+    },
+    {
+      "semantic_id": "reward/award-info/close",
+      "generation": 1099432,
+      "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close"
+    },
+    {
+      "semantic_id": "daily/battle/result",
+      "generation": 1099717,
+      "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn"
+    }
+  ],
+  "postcondition": {
+    "generation": 1099974,
+    "war_archives_campaign_page_visible": true,
+    "campaign_map_visible": false,
+    "battle_result_visible": false,
+    "data_keys": {
+      "current": 290,
+      "maximum": 300
+    }
+  },
+  "fail_closed_recoveries": [
+    "A transient non-uniform pre-input viewport sample stopped before swipe; bounded re-sampling retained exact cell-set and uniform-shift requirements.",
+    "A transient missing grade-page action resource stopped before result input; the exact current grade Button, reward close, and statistics confirm were independently re-proven before input."
+  ],
+  "raw_input_fallback_used": false,
+  "screenshot_or_ocr_fallback_used": false,
+  "premium_currency_used": false,
+  "additional_data_keys_used_during_recovery": 0,
+  "source_log": "H:/program/AzurLaneAutoScript-alas-wararchives-live/log/2026-08-26_run_alas_war_archives_live_validation.txt"
+}

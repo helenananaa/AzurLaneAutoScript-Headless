@@ -1,0 +1,4 @@
+{
+  "passed": false,
+  "error": "AttributeError: 'RewardMeowfficer' object has no attribute 'handle_app_login'"
+}

@@ -1,0 +1,374 @@
+{
+  "schema": "alas-headless.daemon-enter-map-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "Daemon.EnterMap": true,
+    "stage": "1-1"
+  },
+  "passed": true,
+  "temporary_config": "codex_daemon_enter_map_2a79b646a9154547b4c378051edd718c.json",
+  "outcome": "map_preparation",
+  "pid_before": "24414",
+  "pid_after": "24414",
+  "oil_before": 4127,
+  "oil_after": 4127,
+  "map_preparation": {
+    "generation": 88571,
+    "kind": "map",
+    "stage_code": "1-1",
+    "title": "近海演习",
+    "proceed_button": {
+      "name": "start_button",
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/start_button",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": true,
+      "point": {
+        "x": 950.667,
+        "y": 522.667
+      },
+      "bounds": {
+        "left": 845.333,
+        "top": 486.333,
+        "right": 1056.0,
+        "bottom": 559.0
+      },
+      "raw": {
+        "name": "start_button",
+        "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/start_button",
+        "canvas": "Overlay",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "world_position": {
+          "x": 6.904,
+          "y": -3.615,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -158.0,
+          "y": -54.5,
+          "width": 316.0,
+          "height": 109.0
+        },
+        "screen_point": {
+          "x": 950.667,
+          "y": 197.333
+        },
+        "adb_point": {
+          "x": 950.667,
+          "y": 522.667
+        },
+        "screen_bounds": {
+          "left": 845.333,
+          "bottom": 161.0,
+          "right": 1056.0,
+          "top": 233.667
+        },
+        "adb_bounds": {
+          "left": 845.333,
+          "top": 486.333,
+          "right": 1056.0,
+          "bottom": 559.0
+        }
+      }
+    },
+    "cancel_button": {
+      "name": "btnBack",
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/btnBack",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": true,
+      "point": {
+        "x": 1012.633,
+        "y": 191.233
+      },
+      "bounds": {
+        "left": 994.8,
+        "top": 149.133,
+        "right": 1066.133,
+        "bottom": 205.267
+      },
+      "raw": {
+        "name": "btnBack",
+        "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/btnBack",
+        "canvas": "Overlay",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "world_position": {
+          "x": 9.47,
+          "y": 4.686,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -107.0,
+          "y": -84.2,
+          "width": 107.0,
+          "height": 84.2
+        },
+        "screen_point": {
+          "x": 1012.633,
+          "y": 528.767
+        },
+        "adb_point": {
+          "x": 1012.633,
+          "y": 191.233
+        },
+        "screen_bounds": {
+          "left": 994.8,
+          "bottom": 514.733,
+          "right": 1066.133,
+          "top": 570.867
+        },
+        "adb_bounds": {
+          "left": 994.8,
+          "top": 149.133,
+          "right": 1066.133,
+          "bottom": 205.267
+        }
+      }
+    },
+    "oil_cost": null,
+    "remaining_attempts": null
+  },
+  "fleet_preparation": {
+    "generation": 89394,
+    "kind": "fleet",
+    "stage_code": "1-1",
+    "title": "近海演习",
+    "proceed_button": {
+      "name": "start_button",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/start_button",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": true,
+      "point": {
+        "x": 1078.17,
+        "y": 584.8
+      },
+      "bounds": {
+        "left": 972.837,
+        "top": 548.467,
+        "right": 1183.503,
+        "bottom": 621.133
+      },
+      "raw": {
+        "name": "start_button",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/start_button",
+        "canvas": "Overlay",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "world_position": {
+          "x": 9.737,
+          "y": -4.996,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -158.0,
+          "y": -54.5,
+          "width": 316.0,
+          "height": 109.0
+        },
+        "screen_point": {
+          "x": 1078.17,
+          "y": 135.2
+        },
+        "adb_point": {
+          "x": 1078.17,
+          "y": 584.8
+        },
+        "screen_bounds": {
+          "left": 972.837,
+          "bottom": 98.867,
+          "right": 1183.503,
+          "top": 171.533
+        },
+        "adb_bounds": {
+          "left": 972.837,
+          "top": 548.467,
+          "right": 1183.503,
+          "bottom": 621.133
+        }
+      }
+    },
+    "cancel_button": {
+      "name": "btnBack",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/btnBack",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": true,
+      "point": {
+        "x": 1142.143,
+        "y": 135.5
+      },
+      "bounds": {
+        "left": 1124.31,
+        "top": 97.0,
+        "right": 1195.643,
+        "bottom": 148.333
+      },
+      "raw": {
+        "name": "btnBack",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/btnBack",
+        "canvas": "Overlay",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "world_position": {
+          "x": 12.348,
+          "y": 5.844,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -107.0,
+          "y": -77.0,
+          "width": 107.0,
+          "height": 77.0
+        },
+        "screen_point": {
+          "x": 1142.143,
+          "y": 584.5
+        },
+        "adb_point": {
+          "x": 1142.143,
+          "y": 135.5
+        },
+        "screen_bounds": {
+          "left": 1124.31,
+          "bottom": 571.667,
+          "right": 1195.643,
+          "top": 623.0
+        },
+        "adb_bounds": {
+          "left": 1124.31,
+          "top": 97.0,
+          "right": 1195.643,
+          "bottom": 148.333
+        }
+      }
+    },
+    "oil_cost": null,
+    "remaining_attempts": null
+  },
+  "restoration_proof": {
+    "stage_code": "1-1",
+    "chapter_name": "虎！虎！虎！",
+    "entry_generation": 88561,
+    "preparation_kind": "fleet",
+    "cancel_generation": 89406,
+    "restored_generation": 89413
+  },
+  "typed_taps": [
+    [
+      1192,
+      510
+    ],
+    [
+      339,
+      336
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      55,
+      398
+    ],
+    [
+      137,
+      492
+    ],
+    [
+      951,
+      523
+    ],
+    [
+      1142,
+      136
+    ]
+  ],
+  "chapter_navigation_taps": 14,
+  "daemon_branch_taps": 1,
+  "mutation_dispatches": [
+    "campaign.stage_entry"
+  ],
+  "sortie_started": false,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "daemon": "3c434142c776c9c81f8588b876c0edb870b0bdfaa9e7366203bb223264ea579a",
+    "adapter": "9e897d47d5f05a8286bc904ea4526b5a423c696dfece5d225168fcebfbb5673f",
+    "oracle": "8888eee438e35f2e5d436611a2a7eb8ac450e2bdd1fabc52767ea715bc545cfe",
+    "runner": "f2c49b5a8ac083984dad0d88c591d7eda436f317c595430c018628292fb4a5b3"
+  }
+}

@@ -1,0 +1,38 @@
+diff --git a/module/raid/run.py b/module/raid/run.py
+--- a/module/raid/run.py
++++ b/module/raid/run.py
+@@ -31,6 +31,7 @@ class RaidRun(Raid, CampaignEvent):
+         Returns:
+             int:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         confirm_timer = Timer(0.3, count=0)
+         prev = 30
+         while 1:
+@@ -44,15 +45,20 @@ class RaidRun(Raid, CampaignEvent):
+             else:
+                 self.device.screenshot()
+ 
+-            ocr = raid_ocr(raid=self.config.Campaign_Event, mode=mode)
+-            result = ocr.ocr(self.device.image)
+-            if mode == 'ex':
+-                remain = result
++            if semantic_adapter is not None:
++                remain = semantic_adapter.raid_remain(
++                    event=self.config.Campaign_Event, mode=mode
++                )
+             else:
+-                remain, _, _ = result
++                ocr = raid_ocr(raid=self.config.Campaign_Event, mode=mode)
++                result = ocr.ocr(self.device.image)
++                if mode == 'ex':
++                    remain = result
++                else:
++                    remain, _, _ = result
+             logger.attr(f'{mode.capitalize()} Remain', remain)
+ 
+-            if self.appear_then_click(RAID_REWARDS, offset=(30, 30), interval=3):
++            if semantic_adapter is None and self.appear_then_click(RAID_REWARDS, offset=(30, 30), interval=3):
+                 confirm_timer.reset()
+                 continue
+ 

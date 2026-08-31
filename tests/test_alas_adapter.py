@@ -30,6 +30,7 @@ from alas_headless import (
     PINNED_CN_GAME_FINGERPRINT,
     PinnedPackageGate,
     Point,
+    RaidMultipleSortieState,
     ResearchProjectStatus,
     RetirementExecutionReceipt,
     RetirementNoCandidateReceipt,
@@ -44,7 +45,7 @@ from alas_headless.semantic_oracle import (
     MetaAssistState,
     ObserverTransportError,
 )
-from alas_headless.adapter import SemanticFrameIdentity
+from alas_headless.adapter import ActionLeaseError, SemanticFrameIdentity, StaleFrameError
 from tests.test_semantic_oracle import (
     FakeBackend as RealOracleBackend,
     make_button as make_real_button,
@@ -175,6 +176,26 @@ class FakeOracle:
         self.mail_confirmation_kind_value = None
         self.mail_surface_kind_value = None
         self.main_page_visible_value = False
+        self.raid_page_visible_value = False
+        self.raid_page_visible_errors = []
+        self.raid_stage_errors = []
+        self.raid_fleet_ready_value = False
+        self.raid_precombat_visible_value = False
+        self.raid_precombat_notice_visible_value = False
+        self.raid_precombat_multiple_visible_value = False
+        self.raid_multiple_sortie_visible_value = False
+        self.raid_multiple_sortie_state_value = RaidMultipleSortieState(
+            generation=10,
+            event="raid_20260827",
+            sortie_count=1,
+            ticket_selected=0,
+            ticket_owned=0,
+            bonus_count=14,
+            zero_ticket_disabled=True,
+            root="OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)",
+        )
+        self.event_story_dialogue_visible_value = False
+        self.event_story_skip_prompt_visible_value = False
         self.meta_page_visible_value = False
         self.meta_assist_state_value = MetaAssistState(
             remaining_attempts=3,
@@ -260,6 +281,11 @@ class FakeOracle:
         self.award_info_page_visible_value = False
         self.retirement_keep_limit_break = None
         self.enhancement_calls = []
+        self.gems_calls = []
+        self.gems_hard_occupied = {"flagship": True, "vanguard": True}
+        self.gems_candidates = ()
+        self.gems_filter_error = None
+        self.gems_filter_cancel_error = None
         self.awaken_calls = []
         self.awaken_use_array = False
         self.awaken_sufficient = True
@@ -289,8 +315,17 @@ class FakeOracle:
             actions=(self.click_receipt("retirement/ships/confirm"),),
         )
         self.war_archives_visible_value = False
+        self.war_archives_campaign_visible_value = False
         self.war_archives_collected_value = False
         self.war_archives_key_text_value = "300/300"
+        self.data_key_limit_prompt_value = False
+        self.battle_pass_page_visible_value = False
+        self.battle_pass_reward_available_value = False
+        self.battle_pass_claim_available_value = False
+        self.recommendation_shop_visible_value = False
+        self.gift_pack_page_visible_value = False
+        self.free_weekly_supply_pack_available_value = False
+        self.shop_oil_value = 12000
         self.main_gold_value = 10000
         self.build_gold_value = 10000
         self.dorm_state_value = SimpleNamespace(
@@ -327,11 +362,18 @@ class FakeOracle:
             "fleet2": 2,
             "submarine": 1,
         }
+        self.campaign_empty_required_slots = {
+            "fleet1": 0,
+            "fleet2": 0,
+            "submarine": 0,
+        }
         self.campaign_fleet_dropdown_row = None
         self.campaign_role_tab_selected = False
         self.campaign_roles = ["all", "standby"]
         self.campaign_hard_mode = False
         self.campaign_oil_value = 9504
+        self.event_points_value = 17060
+        self.event_coin_value = 70477
         self.campaign_achievement_value = SimpleNamespace(
             generation=31,
             clear_percentage=1.0,
@@ -419,6 +461,9 @@ class FakeOracle:
             self.campaign_fleet_generation += 1
         if semantic_id == "overlay/network-reconnect/confirm":
             self.enabled_values[semantic_id] = False
+        if semantic_id == "meowfficer/get/lock":
+            self.enabled_values[semantic_id] = False
+            self.enabled_values["meowfficer/get/unlock"] = True
         if self.enable_main_after_overlay_click and semantic_id.startswith("overlay/"):
             self.enabled_values["main/task"] = True
         generation = 7
@@ -502,6 +547,87 @@ class FakeOracle:
 
     def main_page_visible(self):
         return self.main_page_visible_value
+
+    def raid_page_visible(self, event):
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid page event is unsupported")
+        if self.raid_page_visible_errors:
+            raise self.raid_page_visible_errors.pop(0)
+        return self.raid_page_visible_value
+
+    def click_raid_stage(self, event, mode):
+        if self.raid_stage_errors:
+            raise self.raid_stage_errors.pop(0)
+        semantic_id = "raid/stage/{0}".format(mode)
+        self.click_calls.append(semantic_id)
+        return self.click_receipt(semantic_id)
+
+    def click_raid_advanced_challenge(self, event):
+        self.click_calls.append("raid/advanced/entry:" + event)
+        return self.click_receipt("raid/advanced/entry")
+
+    def click_raid_home(self, event):
+        self.click_calls.append("raid/page/home:" + event)
+        self.main_page_visible_value = True
+        return self.click_receipt("raid/page/home")
+
+    def raid_fleet_ready(self, event):
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        return self.raid_fleet_ready_value
+
+    def raid_precombat_visible(self, event):
+        return self.raid_precombat_visible_value
+
+    def raid_precombat_notice_visible(self, event):
+        return self.raid_precombat_notice_visible_value
+
+    def raid_precombat_multiple_visible(self, event):
+        return self.raid_precombat_multiple_visible_value
+
+    def raid_multiple_sortie_visible(self, event):
+        return self.raid_multiple_sortie_visible_value
+
+    def raid_multiple_sortie_state(self, event):
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        return self.raid_multiple_sortie_state_value
+
+    def event_story_dialogue_visible(self):
+        return self.event_story_dialogue_visible_value
+
+    def event_story_skip_prompt_visible(self):
+        return self.event_story_skip_prompt_visible_value
+
+    def click_event_story_skip_confirm(self):
+        self.click_calls.append("story/skip/confirm")
+        return ActionReceipt(
+            semantic_id="story/skip/confirm",
+            generation=12,
+            point=Point(640, 360),
+            bounds=Bounds(600, 320, 680, 400),
+            path="root/story/skip/confirm",
+        )
+
+    def click_event_story_option(self, option_index):
+        self.click_calls.append("story/option/{0}".format(option_index))
+        return ActionReceipt(
+            semantic_id="story/option/{0}".format(option_index),
+            generation=12,
+            point=Point(640, 360),
+            bounds=Bounds(600, 320, 680, 400),
+            path="root/story/option",
+        )
+
+    def click_event_story_skip(self):
+        self.click_calls.append("story/skip")
+        return ActionReceipt(
+            semantic_id="story/skip",
+            generation=12,
+            point=Point(640, 80),
+            bounds=Bounds(600, 40, 680, 120),
+            path="root/story/skip",
+        )
 
     def meta_page_visible(self):
         return self.meta_page_visible_value
@@ -596,6 +722,66 @@ class FakeOracle:
     def set_enhancement_dock_favourite(self, enabled):
         self.enhancement_calls.append(("favourite", enabled))
         self.awaken_calls.append(("favourite", enabled))
+
+    def gems_farming_select_fleet_index(self, fleet_index):
+        self.gems_calls.append(("fleet", fleet_index))
+        return fleet_index
+
+    def gems_farming_open_slot(self, role):
+        self.gems_calls.append(("open", role))
+        return self.click_receipt("gems-farming/formation/" + role + "/open")
+
+    def gems_farming_hard_slot_occupied(self, stage_code, fleet_index, role):
+        self.gems_calls.append(("hard-occupied", stage_code, fleet_index, role))
+        return self.gems_hard_occupied[role]
+
+    def gems_farming_hard_unmount(self, stage_code, fleet_index, role):
+        self.gems_calls.append(("hard-unmount", stage_code, fleet_index, role))
+        return self.click_receipt("gems-farming/hard/unmount")
+
+    def gems_farming_hard_open_slot(self, stage_code, fleet_index, role):
+        self.gems_calls.append(("hard-open", stage_code, fleet_index, role))
+        return self.click_receipt("gems-farming/hard/open")
+
+    def gems_farming_equipment_take_off(self, role):
+        self.gems_calls.append(("equipment-off", role))
+        return SimpleNamespace(role=role)
+
+    def gems_farming_equipment_take_on(self, role):
+        self.gems_calls.append(("equipment-on", role))
+        return SimpleNamespace(role=role)
+
+    def set_gems_farming_dock_sort(self, descending):
+        self.gems_calls.append(("sort", descending))
+        return None
+
+    def set_gems_farming_dock_filter(self, role, factions):
+        self.gems_calls.append(("filter", role, factions))
+        if self.gems_filter_error is not None:
+            raise self.gems_filter_error
+        return ()
+
+    def cancel_gems_farming_dock_filter_if_visible(self):
+        self.gems_calls.append(("filter-cancel",))
+        if self.gems_filter_cancel_error is not None:
+            raise self.gems_filter_cancel_error
+        return self.click_receipt("gems-farming/dock/filter/cancel")
+
+    def gems_farming_dock_candidates(self):
+        self.gems_calls.append(("candidates",))
+        return self.gems_candidates
+
+    def click_gems_farming_candidate(self, candidate):
+        self.gems_calls.append(("select", candidate.ship_id))
+        return self.click_receipt("gems-farming/dock/ship/{0}".format(candidate.ship_id))
+
+    def cancel_gems_farming_candidate_selection(self):
+        self.gems_calls.append(("cancel",))
+        return self.click_receipt("gems-farming/dock/cancel")
+
+    def confirm_gems_farming_candidate_selection(self, candidate, role):
+        self.gems_calls.append(("confirm", candidate.ship_id, role))
+        return self.click_receipt("gems-farming/dock/confirm")
 
     def _enhancement_dock_records(self):
         return object(), object()
@@ -702,6 +888,56 @@ class FakeOracle:
     def war_archives_page_visible(self):
         return self.war_archives_visible_value
 
+    def war_archives_campaign_page_visible(self):
+        return self.war_archives_campaign_visible_value
+
+    def battle_pass_page_visible(self):
+        return self.battle_pass_page_visible_value
+
+    def battle_pass_reward_available(self):
+        return self.battle_pass_reward_available_value
+
+    def battle_pass_claim_all_available(self):
+        return self.battle_pass_claim_available_value
+
+    def click_battle_pass_entrance(self):
+        self.battle_pass_page_visible_value = True
+        return self.click_receipt("reward/battle-pass/enter")
+
+    def click_battle_pass_claim_all(self):
+        if not self.battle_pass_claim_available_value:
+            raise SemanticGateClosed("Battle Pass claim-all reward is unavailable")
+        self.battle_pass_claim_available_value = False
+        return self.click_receipt("battle-pass/claim-all")
+
+    def click_battle_pass_home(self):
+        self.battle_pass_page_visible_value = False
+        return self.click_receipt("battle-pass/home")
+
+    def recommendation_shop_visible(self):
+        return self.recommendation_shop_visible_value
+
+    def click_recommendation_shop_home(self):
+        if not self.recommendation_shop_visible_value:
+            raise SemanticGateClosed("shop shell identity is absent")
+        self.recommendation_shop_visible_value = False
+        return self.click_receipt("shop/home")
+
+    def gift_pack_page_visible(self):
+        return self.gift_pack_page_visible_value
+
+    def free_weekly_supply_pack_available(self):
+        return self.free_weekly_supply_pack_available_value
+
+    def shop_oil(self):
+        return self.shop_oil_value
+
+    def click_free_weekly_supply_pack(self):
+        if not self.free_weekly_supply_pack_available_value:
+            raise SemanticGateClosed("free weekly supply pack is unavailable")
+        self.free_weekly_supply_pack_available_value = False
+        return self.click_receipt("shop/free-weekly-pack")
+
     def war_archives_data_key_collected(self):
         if not self.war_archives_visible_value:
             raise SemanticGateClosed("war archives page identity is not proven")
@@ -711,6 +947,27 @@ class FakeOracle:
         if not self.war_archives_visible_value:
             raise SemanticGateClosed("war archives page identity is not proven")
         return self.war_archives_key_text_value
+
+    def click_war_archives_data_key_collect(self):
+        if not self.war_archives_visible_value:
+            raise SemanticGateClosed("war archives page identity is not proven")
+        if self.war_archives_collected_value:
+            raise SemanticGateClosed("war archives data key is already collected")
+        self.war_archives_collected_value = True
+        return self.click_receipt("archive/key/collect")
+
+    def data_key_limit_prompt_visible(self):
+        return self.data_key_limit_prompt_value
+
+    def click_data_key_limit_choice(self, *, confirm):
+        if not self.data_key_limit_prompt_value:
+            raise SemanticGateClosed("data-key limit prompt is absent")
+        self.data_key_limit_prompt_value = False
+        if confirm:
+            self.war_archives_collected_value = True
+        return self.click_receipt(
+            "archive/key-limit/confirm" if confirm else "archive/key-limit/cancel"
+        )
 
     def main_gold(self):
         return self.main_gold_value
@@ -1030,6 +1287,12 @@ class FakeOracle:
     def campaign_oil(self):
         return self.campaign_oil_value
 
+    def event_points(self):
+        return self.event_points_value
+
+    def event_coin(self, stage_code=None):
+        return self.event_coin_value
+
     def campaign_map_achievement_state(self, stage_code):
         return self.campaign_achievement_value
 
@@ -1094,9 +1357,12 @@ class FakeOracle:
                     path="root/{0}/clear".format(row_key),
                 ),
                 hard_satisfied=(
-                    bool(selected) if self.campaign_hard_mode and row_key != "submarine"
+                    bool(selected)
+                    and self.campaign_empty_required_slots[row_key] == 0
+                    if self.campaign_hard_mode and row_key != "submarine"
                     else None
                 ),
+                empty_required_slots=self.campaign_empty_required_slots[row_key],
             )
             for row_key, selected in self.campaign_fleets.items()
         )
@@ -1192,6 +1458,31 @@ class FakeOracle:
 
     def click_campaign_auto_search_sortie(self, stage_code):
         return self.click_campaign_sortie(stage_code)
+
+    def click_raid_fleet_start(self, event):
+        self.click_calls.append("raid/fleet/start:" + event)
+        return self.click_receipt("raid/fleet/start")
+
+    def click_raid_precombat_notice(self, event):
+        self.click_calls.append("raid/precombat/notice:" + event)
+        self.raid_precombat_notice_visible_value = False
+        return self.click_receipt("raid/precombat/notice/acknowledge")
+
+    def click_raid_precombat_start(self, event):
+        self.click_calls.append("raid/precombat/start:" + event)
+        return self.click_receipt("raid/precombat/start")
+
+    def click_raid_precombat_multiple(self, event):
+        self.click_calls.append("raid/precombat/multiple:" + event)
+        return self.click_receipt("raid/precombat/multiple")
+
+    def click_raid_multiple_sortie_back(self, event):
+        self.click_calls.append("raid/multiple-sortie/back:" + event)
+        return self.click_receipt("raid/multiple-sortie/back")
+
+    def click_raid_fleet_recommend(self, event):
+        self.click_calls.append("raid/fleet/recommend:" + event)
+        return self.click_receipt("raid/fleet/recommend")
 
     def campaign_auto_search_role_state(self):
         if (
@@ -1468,6 +1759,8 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(
             oracle.enabled_calls,
             [
+                "overlay/network-reconnect/confirm",
+                "overlay/bulletin/close",
                 "overlay/bulletin/close",
                 "overlay/guild-message/close",
                 "login/enter",
@@ -1478,6 +1771,331 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(oracle.click_calls, ["main/formation"])
         self.assertEqual(receipt.semantic_id, "main/formation")
         self.assertEqual(len(gate_calls), 2)
+
+    def test_main_raid_aliases_preserve_the_original_alas_page_edge(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+
+        self.assertTrue(adapter.appear(NamedButton("MAIN_GOTO_RAID_WHITE")))
+        receipt = adapter.click(NamedButton("MAIN_GOTO_RAID"))
+
+        self.assertIn("main/raid", oracle.enabled_calls)
+        self.assertEqual(oracle.click_calls, ["main/raid"])
+        self.assertEqual(receipt.semantic_id, "main/raid")
+        self.assertEqual(len(gate_calls), 2)
+
+    def test_current_raid_fleet_start_is_navigation_not_sortie_commit(self):
+        adapter, oracle, gate_calls = self.make_adapter(campaign_sortie_budget=0)
+
+        receipt = adapter.click_raid_fleet_start("raid_20260827")
+
+        self.assertEqual(receipt.semantic_id, "raid/fleet/start")
+        self.assertIsNone(receipt.capability_id)
+        self.assertEqual(oracle.click_calls, ["raid/fleet/start:raid_20260827"])
+        self.assertEqual(gate_calls, [True])
+
+    def test_current_raid_advanced_entry_is_navigation_not_ex_or_sortie(self):
+        adapter, oracle, gate_calls = self.make_adapter(campaign_sortie_budget=0)
+
+        receipt = adapter.click_raid_advanced_challenge("raid_20260827")
+
+        self.assertEqual(receipt.semantic_id, "raid/advanced/entry")
+        self.assertIsNone(receipt.capability_id)
+        self.assertEqual(
+            oracle.click_calls, ["raid/advanced/entry:raid_20260827"]
+        )
+        self.assertEqual(gate_calls, [True])
+        self.assertEqual(adapter._action_ledger.remaining("campaign.sortie"), 0)
+
+    def test_current_raid_multiple_sortie_navigation_uses_no_sortie_grant(self):
+        adapter, oracle, gate_calls = self.make_adapter(campaign_sortie_budget=0)
+        oracle.raid_precombat_multiple_visible_value = True
+        oracle.raid_multiple_sortie_visible_value = True
+
+        self.assertTrue(adapter.raid_precombat_multiple_visible("raid_20260827"))
+        entry = adapter.click_raid_precombat_multiple("raid_20260827")
+        self.assertTrue(adapter.raid_multiple_sortie_visible("raid_20260827"))
+        state = adapter.raid_multiple_sortie_state("raid_20260827")
+        back = adapter.click_raid_multiple_sortie_back("raid_20260827")
+
+        self.assertEqual(entry.semantic_id, "raid/precombat/multiple")
+        self.assertEqual(back.semantic_id, "raid/multiple-sortie/back")
+        self.assertIsNone(entry.capability_id)
+        self.assertIsNone(back.capability_id)
+        self.assertEqual((state.ticket_selected, state.ticket_owned), (0, 0))
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "raid/precombat/multiple:raid_20260827",
+                "raid/multiple-sortie/back:raid_20260827",
+            ],
+        )
+        self.assertEqual(gate_calls, [True, True, True, True, True])
+        self.assertEqual(adapter._action_ledger.remaining("campaign.sortie"), 0)
+
+    def test_current_raid_precombat_start_reuses_bounded_sortie_grant(self):
+        adapter, oracle, gate_calls = self.make_adapter(campaign_sortie_budget=1)
+
+        receipt = adapter.click_raid_precombat_start("raid_20260827")
+
+        self.assertEqual(receipt.semantic_id, "raid/precombat/start")
+        self.assertEqual(receipt.capability_id, "campaign.sortie")
+        self.assertEqual(
+            oracle.click_calls, ["raid/precombat/start:raid_20260827"]
+        )
+        self.assertEqual(adapter._current_raid_result_event, "raid_20260827")
+        self.assertEqual(gate_calls, [True])
+        with self.assertRaises(ActionLeaseError):
+            adapter.click_raid_precombat_start("raid_20260827")
+        self.assertEqual(
+            oracle.click_calls, ["raid/precombat/start:raid_20260827"]
+        )
+
+    def test_current_raid_result_returns_to_raid_not_daily_page(self):
+        adapter, oracle, _ = self.make_adapter(campaign_sortie_budget=1)
+        self.assertFalse(adapter.current_raid_result_active())
+        adapter.click_raid_precombat_start("raid_20260827")
+        self.assertTrue(adapter.current_raid_result_active())
+        self.assertFalse(adapter.daily_execution_active())
+        oracle.raid_page_visible_value = True
+        oracle.raid_page_visible_errors = [
+            SemanticGateClosed("current Raid stage sprite does not cover its button")
+        ]
+
+        with patch("alas_headless.alas_adapter.time.sleep") as sleep:
+            receipts = adapter.complete_daily_battle_result(timeout_seconds=0.1)
+
+        self.assertEqual(receipts, ())
+        self.assertIsNone(adapter._current_raid_result_event)
+        self.assertFalse(adapter.current_raid_result_active())
+        self.assertFalse(oracle.daily_page_visible_value)
+        sleep.assert_called_once_with(0.25)
+
+    def test_current_raid_result_is_owned_by_session_battle_status_probe(self):
+        adapter, oracle, _ = self.make_adapter(campaign_sortie_budget=1)
+        adapter.click_raid_precombat_start("raid_20260827")
+        oracle.daily_battle_result_visible = Mock(return_value=True)
+
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session._combat_result_transition_until = 0.0
+        session._combat_result_observation = None
+
+        self.assertTrue(session.current_raid_result_active())
+        self.assertTrue(session.appear(NamedButton("BATTLE_STATUS_S")))
+        self.assertFalse(session.appear(NamedButton("BATTLE_STATUS_D")))
+        self.assertIsNotNone(session._combat_result_observation)
+
+    def test_current_raid_page_makes_legacy_rewards_probe_a_passive_miss(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.raid_page_visible_value = True
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+
+        self.assertFalse(session.appear(NamedButton("RAID_REWARDS")))
+
+    def test_current_raid_recommend_reuses_bounded_fleet_mutation_grant(self):
+        adapter, oracle, gate_calls = self.make_adapter(
+            campaign_fleet_mutation_budget=1
+        )
+
+        receipt = adapter.click_raid_fleet_recommend("raid_20260827")
+
+        self.assertEqual(receipt.semantic_id, "raid/fleet/recommend")
+        self.assertEqual(receipt.capability_id, "campaign.fleet_mutation")
+        self.assertEqual(
+            oracle.click_calls, ["raid/fleet/recommend:raid_20260827"]
+        )
+        self.assertEqual(gate_calls, [True])
+        with self.assertRaises(ActionLeaseError):
+            adapter.click_raid_fleet_recommend("raid_20260827")
+        self.assertEqual(
+            oracle.click_calls, ["raid/fleet/recommend:raid_20260827"]
+        )
+
+    def test_current_raid_entry_waits_through_card_animation_without_reclick(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.main_page_visible_value = True
+        oracle.raid_page_visible_value = True
+        oracle.raid_page_visible_errors = [
+            SemanticGateClosed("current Raid stage sprite does not cover its button")
+        ]
+
+        with patch("alas_headless.alas_adapter.time.sleep") as sleep:
+            receipt = adapter.enter_raid_page("raid_20260827")
+
+        self.assertEqual(receipt.semantic_id, "main/raid")
+        self.assertEqual(oracle.click_calls, ["main/raid"])
+        self.assertEqual(gate_calls, [True])
+        sleep.assert_called_once_with(0.25)
+
+    def test_current_raid_stage_waits_for_unobscured_card_without_reclick(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.raid_stage_errors = [
+            SemanticGateClosed("Raid stage input is blocked")
+        ]
+
+        with patch("alas_headless.alas_adapter.time.sleep") as sleep:
+            receipt = adapter.click_raid_stage("raid_20260827", "ex")
+
+        self.assertEqual(receipt.semantic_id, "raid/stage/ex")
+        self.assertEqual(oracle.click_calls, ["raid/stage/ex"])
+        sleep.assert_called_once_with(0.25)
+
+    def test_current_raid_home_reproves_input_on_fresh_frame(self):
+        refresh = Mock()
+        adapter, oracle, _ = self.make_adapter(input_frame_refresher=refresh)
+
+        receipt = adapter.click_raid_home("raid_20260827")
+
+        self.assertEqual(receipt.semantic_id, "raid/page/home")
+        refresh.assert_called_once_with()
+        self.assertEqual(
+            oracle.click_calls, ["raid/page/home:raid_20260827"]
+        )
+
+    def test_current_raid_page_makes_unrelated_page_probe_absent(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.raid_page_visible_value = True
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("RAID_CHECK")))
+
+    def test_current_raid_page_scan_uses_immutable_screenshot_frame(self):
+        live_oracle = FakeOracle()
+        frame_oracle = FakeOracle()
+        live_oracle.raid_page_visible_errors = [
+            SemanticGateClosed("current Raid button and UI snapshots are incoherent")
+        ]
+        frame_oracle.raid_page_visible_value = True
+        adapter = AlasSemanticAdapter(
+            live_oracle,
+            lambda: None,
+            frame_observation_oracle=lambda: frame_oracle,
+            frame_identity_provider=self.frame_identity,
+        )
+
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("RAID_CHECK")))
+        self.assertEqual(len(live_oracle.raid_page_visible_errors), 1)
+        self.assertEqual(live_oracle.click_calls, [])
+        self.assertEqual(frame_oracle.click_calls, [])
+
+    def test_current_raid_page_scan_falls_back_read_only_without_frame(self):
+        live_oracle = FakeOracle()
+        live_oracle.raid_page_visible_value = True
+        adapter = AlasSemanticAdapter(
+            live_oracle,
+            lambda: None,
+            frame_observation_oracle=lambda: (_ for _ in ()).throw(
+                StaleFrameError()
+            ),
+            frame_identity_provider=self.frame_identity,
+        )
+
+        self.assertTrue(adapter.appear(NamedButton("RAID_CHECK")))
+        self.assertEqual(live_oracle.click_calls, [])
+
+    def test_current_raid_direct_visibility_uses_immutable_screenshot_frame(self):
+        live_oracle = FakeOracle()
+        frame_oracle = FakeOracle()
+        live_oracle.raid_page_visible_errors = [
+            SemanticGateClosed("current Raid button and UI snapshots are incoherent")
+        ]
+        frame_oracle.raid_page_visible_value = True
+        adapter = AlasSemanticAdapter(
+            live_oracle,
+            lambda: None,
+            frame_observation_oracle=lambda: frame_oracle,
+            frame_identity_provider=self.frame_identity,
+        )
+
+        self.assertTrue(adapter.raid_page_visible("raid_20260827"))
+        self.assertEqual(len(live_oracle.raid_page_visible_errors), 1)
+        self.assertEqual(live_oracle.click_calls, [])
+        self.assertEqual(frame_oracle.click_calls, [])
+
+    def test_current_raid_recovery_probe_uses_immutable_screenshot_frame(self):
+        live_oracle = FakeOracle()
+        frame_oracle = FakeOracle()
+        live_oracle.raid_fleet_selection_visible = Mock(
+            side_effect=SemanticGateClosed(
+                "Raid fleet-selection snapshots are incoherent"
+            )
+        )
+        frame_oracle.raid_fleet_selection_visible = Mock(return_value=False)
+        adapter = AlasSemanticAdapter(
+            live_oracle,
+            lambda: None,
+            frame_observation_oracle=lambda: frame_oracle,
+            frame_identity_provider=self.frame_identity,
+        )
+
+        self.assertFalse(adapter.raid_fleet_selection_visible("raid_20260827"))
+        frame_oracle.raid_fleet_selection_visible.assert_called_once_with(
+            event="raid_20260827"
+        )
+        live_oracle.raid_fleet_selection_visible.assert_not_called()
+
+    def test_current_raid_page_scan_tolerates_only_bounded_endpoint_skew(self):
+        adapter, oracle, _ = self.make_adapter()
+        message = "current Raid button and UI snapshots are incoherent"
+        oracle.raid_page_visible_errors = [
+            SemanticGateClosed(message),
+            SemanticGateClosed(message),
+            SemanticGateClosed(message),
+        ]
+
+        # Earlier page probes and RAID_CHECK are passive observations.  A
+        # short independent-endpoint skew is absence for this frame only and
+        # never authorizes an input.
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("RAID_CHECK")))
+        self.assertEqual(oracle.click_calls, [])
+
+        # The grace is bounded: an unchanged incoherent surface remains
+        # fail-closed instead of being promoted to the Raid page.
+        adapter._observer_stale_since = time.monotonic() - 6.0
+        with self.assertRaisesRegex(SemanticGateClosed, message):
+            adapter.appear(NamedButton("RAID_CHECK"))
+
+    def test_current_raid_page_scan_keeps_structural_errors_fail_closed(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.raid_page_visible_errors = [
+            SemanticGateClosed("current Raid stage sprite does not cover its button")
+        ]
+
+        with self.assertRaisesRegex(SemanticGateClosed, "does not cover"):
+            adapter.appear(NamedButton("EXERCISE_CHECK"))
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_current_raid_story_hides_unmapped_page_probes_for_alas_handler(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.event_story_dialogue_visible_value = True
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("EXERCISE_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
+
+    def test_event_story_input_owns_only_a_bounded_passive_transition(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.event_story_dialogue_visible_value = True
+
+        receipt = adapter.click_event_story_option(0)
+        oracle.event_story_dialogue_visible_value = False
+
+        self.assertEqual(receipt.semantic_id, "story/option/0")
+        self.assertEqual(oracle.click_calls, ["story/option/0"])
+        self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
+        self.assertFalse(adapter.appear(NamedButton("UNREVIEWED_PAGE_CHECK")))
+
+        adapter._event_story_transition_until = time.monotonic() - 1.0
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton("UNREVIEWED_PAGE_CHECK"))
 
     def test_operation_siren_order_owns_its_confirmation_popup(self):
         adapter, oracle, _ = self.make_adapter()
@@ -1753,6 +2371,353 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(oracle.click_calls, ["meowfficer/train/close"])
         self.assertEqual(len(gate_calls), 2)
 
+    def test_meowfficer_fort_zero_occupied_slots_is_a_safe_noop(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.meowfficer_dock_state = Mock(
+            return_value=SimpleNamespace(fort_current=0, fort_total=8)
+        )
+
+        self.assertFalse(adapter.meowfficer_fort_chore_available())
+        self.assertEqual(oracle.click_calls, [])
+        self.assertEqual(gate_calls, [True])
+
+    def test_meowfficer_fort_occupied_slots_are_admitted(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.meowfficer_dock_state = Mock(
+            return_value=SimpleNamespace(fort_current=1, fort_total=8)
+        )
+
+        self.assertTrue(adapter.meowfficer_fort_chore_available())
+
+        self.assertEqual(oracle.click_calls, [])
+        self.assertEqual(gate_calls, [True])
+
+    @patch("alas_headless.alas_adapter.time.sleep", return_value=None)
+    def test_meowfficer_fort_runs_one_exact_chore_to_idle(self, _sleep):
+        adapter, oracle, _ = self.make_adapter()
+        path = (
+            "root/CommanderHomeUI(Clone)/bg/frame/scrollrect/content/"
+            "tpl/unlock/bubble/play"
+        )
+        receipt = ActionReceipt(
+            semantic_id="meowfficer/fort/chore/play",
+            generation=10,
+            point=Point(10, 20),
+            bounds=Bounds(0, 0, 20, 40),
+            path=path,
+        )
+        oracle.enabled_values["reward/award-info/close"] = False
+        oracle.meowfficer_fort_chore_paths = Mock(side_effect=[(path,), ()])
+        oracle.click_meowfficer_fort_chore = Mock(return_value=receipt)
+
+        receipts = adapter.run_meowfficer_fort_chores()
+
+        self.assertEqual(receipts, (receipt,))
+        oracle.click_meowfficer_fort_chore.assert_called_once_with(path)
+
+    def test_meowfficer_purchase_uses_exact_selected_count_and_postconditions(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        before = SimpleNamespace(
+            purchased=0,
+            purchase_total=15,
+            coins=10000,
+            box_counts=(10, 20, 30),
+        )
+        after = SimpleNamespace(
+            purchased=3,
+            purchase_total=15,
+            coins=7000,
+            box_counts=(11, 21, 31),
+        )
+        oracle.meowfficer_dock_state = Mock(side_effect=[before, after])
+        oracle.meowfficer_purchase_state = Mock(
+            side_effect=[
+                SimpleNamespace(generation=10, count=1, total_price=0),
+                SimpleNamespace(generation=11, count=2, total_price=1500),
+                SimpleNamespace(generation=12, count=3, total_price=3000),
+            ]
+        )
+
+        result = adapter.buy_meowfficer_boxes(3)
+
+        self.assertIs(result, after)
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "meowfficer/buy/enter",
+                "meowfficer/buy/add",
+                "meowfficer/buy/add",
+                "meowfficer/buy/submit",
+            ],
+        )
+        self.assertEqual(gate_calls, [True])
+
+    def test_meowfficer_purchase_rejects_quota_before_input(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.meowfficer_dock_state = Mock(
+            return_value=SimpleNamespace(
+                purchased=14,
+                purchase_total=15,
+                coins=10000,
+                box_counts=(10, 20, 30),
+            )
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "quota"):
+            adapter.buy_meowfficer_boxes(2)
+
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_meowfficer_once_a_day_non_sunday_plan_is_admitted(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+
+        adapter.admit_meowfficer_training_plan(mode="once_a_day", sunday=False)
+
+        self.assertEqual(oracle.click_calls, [])
+        self.assertEqual(gate_calls, [True])
+
+    def test_meowfficer_enhancement_plans_are_admitted(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+
+        for mode, sunday in (("seamlessly", False), ("once_a_day", True)):
+            with self.subTest(mode=mode, sunday=sunday):
+                adapter.admit_meowfficer_training_plan(mode=mode, sunday=sunday)
+
+        self.assertEqual(oracle.click_calls, [])
+        self.assertEqual(gate_calls, [True, True])
+
+    def test_meowfficer_enhance_no_feed_material_returns_to_dock(self):
+        adapter, oracle, _ = self.make_adapter()
+        target = SimpleNamespace(
+            path="cat/one",
+            level=8,
+            selected=True,
+            point=Point(100, 100),
+            bounds=Bounds(80, 80, 120, 120),
+        )
+        oracle.meowfficer_dock_state = Mock(
+            side_effect=[SimpleNamespace(coins=5000), SimpleNamespace(coins=5000)]
+        )
+        oracle.meowfficer_dock_cats = Mock(return_value=(target,))
+        oracle.meowfficer_enhance_state = Mock(
+            side_effect=[
+                SimpleNamespace(generation=10, level=8, coins=5000),
+                SimpleNamespace(generation=11, level=8, coins=5000),
+            ]
+        )
+        oracle.meowfficer_feed_state = Mock(
+            return_value=SimpleNamespace(
+                generation=10, selected=0, capacity=10, candidates=()
+            )
+        )
+
+        result = adapter.enhance_meowfficer(index=1, max_feed_level=1)
+
+        self.assertEqual(result, "success")
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "meowfficer/enhance/open",
+                "meowfficer/feed/open",
+                "meowfficer/feed/cancel",
+                "meowfficer/enhance/back",
+            ],
+        )
+
+    @patch("alas_headless.alas_adapter.time.sleep", return_value=None)
+    def test_meowfficer_enhance_selects_eligible_feed_and_proves_spend(self, _sleep):
+        adapter, oracle, _ = self.make_adapter()
+        target = SimpleNamespace(
+            path="cat/target",
+            level=8,
+            selected=True,
+            point=Point(100, 100),
+            bounds=Bounds(80, 80, 120, 120),
+        )
+        material = SimpleNamespace(
+            path="cat/material",
+            level=1,
+            selected=False,
+            point=Point(200, 100),
+            bounds=Bounds(180, 80, 220, 120),
+        )
+        selected_material = SimpleNamespace(**{**vars(material), "selected": True})
+        oracle.meowfficer_dock_state = Mock(
+            side_effect=[SimpleNamespace(coins=5000), SimpleNamespace(coins=4000)]
+        )
+        oracle.meowfficer_dock_cats = Mock(return_value=(target,))
+        oracle.meowfficer_enhance_state = Mock(
+            side_effect=[
+                SimpleNamespace(generation=10, level=8, coins=5000),
+                SimpleNamespace(generation=12, level=8, coins=5000),
+                SimpleNamespace(generation=13, level=9, coins=4000),
+                SimpleNamespace(generation=14, level=9, coins=4000),
+            ]
+        )
+        oracle.meowfficer_feed_state = Mock(
+            side_effect=[
+                SimpleNamespace(
+                    generation=11,
+                    selected=0,
+                    capacity=10,
+                    candidates=(material,),
+                ),
+                SimpleNamespace(
+                    generation=12,
+                    selected=1,
+                    capacity=10,
+                    candidates=(selected_material,),
+                ),
+                SimpleNamespace(
+                    generation=14,
+                    selected=0,
+                    capacity=10,
+                    candidates=(),
+                ),
+            ]
+        )
+        oracle.click_meowfficer_cat = Mock(return_value=SimpleNamespace())
+        oracle.enabled_values["meowfficer/enhance/confirm"] = False
+
+        result = adapter.enhance_meowfficer(index=1, max_feed_level=1)
+
+        self.assertEqual(result, "success")
+        oracle.click_meowfficer_cat.assert_called_once_with(material)
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "meowfficer/enhance/open",
+                "meowfficer/feed/open",
+                "meowfficer/feed/confirm",
+                "meowfficer/enhance/submit",
+                "meowfficer/feed/open",
+                "meowfficer/feed/cancel",
+                "meowfficer/enhance/back",
+            ],
+        )
+
+    @patch("alas_headless.alas_adapter.time.sleep", return_value=None)
+    def test_meowfficer_acquisition_allows_ordinary_tiered_cat(self, _sleep):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.enabled_values.update(
+            {
+                "meowfficer/get/result/close": False,
+                "meowfficer/get/lock-cancel": False,
+            }
+        )
+        oracle.meowfficer_training_state = Mock(
+            side_effect=[SemanticGateClosed("acquiring"), SimpleNamespace()]
+        )
+        oracle.meowfficer_acquisition_state = Mock(
+            return_value=SimpleNamespace(
+                generation=10,
+                identity="260825",
+                rarity="SSR",
+                talent_sprites=("hangmu_one_1", "chongying_two_2"),
+                has_special_talent=False,
+            )
+        )
+
+        collected = adapter.finish_meowfficer_acquisition(
+            retain_talented_gold=True,
+            retain_talented_purple=True,
+        )
+
+        self.assertEqual(collected, 1)
+        self.assertEqual(oracle.click_calls, ["meowfficer/get/continue"])
+        self.assertEqual(gate_calls, [True])
+
+    @patch("alas_headless.alas_adapter.time.sleep", return_value=None)
+    def test_meowfficer_acquisition_locks_reviewed_special_talent(self, _sleep):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values.update(
+            {
+                "meowfficer/get/result/close": False,
+                "meowfficer/get/lock-cancel": False,
+                "meowfficer/get/lock": True,
+                "meowfficer/get/unlock": False,
+            }
+        )
+        oracle.meowfficer_training_state = Mock(
+            side_effect=[
+                SemanticGateClosed("acquiring"),
+                SemanticGateClosed("confirming"),
+                SimpleNamespace(),
+            ]
+        )
+        oracle.meowfficer_acquisition_state = Mock(
+            return_value=SimpleNamespace(
+                generation=10,
+                identity="special-1",
+                rarity="SSR",
+                talent_sprites=("rainbow_unique",),
+                has_special_talent=True,
+            )
+        )
+
+        collected = adapter.finish_meowfficer_acquisition(
+            retain_talented_gold=True,
+            retain_talented_purple=True,
+        )
+
+        self.assertEqual(collected, 1)
+        self.assertEqual(
+            oracle.click_calls,
+            [
+                "meowfficer/get/lock",
+                "meowfficer/get/continue",
+                "meowfficer/get/lock-confirm",
+            ],
+        )
+
+    @patch("alas_headless.alas_adapter.time.sleep", return_value=None)
+    def test_meowfficer_acquisition_allows_identical_cards_after_generation_advance(
+        self, _sleep
+    ):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values.update(
+            {
+                "meowfficer/get/result/close": False,
+                "meowfficer/get/lock-cancel": False,
+            }
+        )
+        oracle.meowfficer_training_state = Mock(
+            side_effect=[
+                SemanticGateClosed("first"),
+                SemanticGateClosed("second"),
+                SimpleNamespace(),
+            ]
+        )
+        oracle.meowfficer_acquisition_state = Mock(
+            side_effect=[
+                SimpleNamespace(
+                    generation=10,
+                    identity="same-card",
+                    rarity="R",
+                    talent_sprites=("ordinary_1",),
+                    has_special_talent=False,
+                ),
+                SimpleNamespace(
+                    generation=11,
+                    identity="same-card",
+                    rarity="R",
+                    talent_sprites=("ordinary_1",),
+                    has_special_talent=False,
+                ),
+            ]
+        )
+
+        collected = adapter.finish_meowfficer_acquisition(
+            retain_talented_gold=True,
+            retain_talented_purple=True,
+        )
+
+        self.assertEqual(collected, 2)
+        self.assertEqual(
+            oracle.click_calls,
+            ["meowfficer/get/continue", "meowfficer/get/continue"],
+        )
+
     def test_original_login_handler_uses_exact_semantic_entry_context(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.enabled_values["login/enter"] = True
@@ -1818,6 +2783,56 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "event-list/page/back")
         self.assertEqual(oracle.click_calls, ["event-list/page/back"])
+
+    def test_generic_page_scan_recovers_month_sign_through_event_list_page(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["event-list/page/back"] = True
+        oracle.enabled_values["event-list/page/back"] = True
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("GOTO_MAIN")))
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "event-list/page/back")
+        self.assertEqual(oracle.click_calls, ["event-list/page/back"])
+
+    def test_generic_page_scan_does_not_claim_month_sign_below_award_overlay(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values.update(
+            {
+                "event-list/page/back": True,
+                "reward/award-info/close": True,
+            }
+        )
+
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "FLEET_CHECK"):
+            adapter.appear(NamedButton("FLEET_CHECK"))
+
+    def test_generic_page_scan_recovers_exact_mission_page_after_reward(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["task/page/back"] = True
+        oracle.enabled_values["task/page/back"] = True
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("MISSION_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("GOTO_MAIN")))
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "task/page/back")
+        self.assertEqual(oracle.click_calls, ["task/page/back"])
+
+    def test_generic_page_scan_does_not_expose_blocked_mission_underlay(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["task/page/back"] = True
+        oracle.mission_page_state = Mock(
+            side_effect=SemanticGateClosed(
+                "mission page identity is not safely actionable"
+            )
+        )
+
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "FLEET_CHECK"):
+            adapter.appear(NamedButton("FLEET_CHECK"))
 
     def test_login_accepts_exact_main_identity_across_main_skins(self):
         adapter, oracle, _ = self.make_adapter()
@@ -1927,6 +2942,11 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "overlay/network-reconnect/confirm")
         self.assertEqual(oracle.click_calls, ["overlay/network-reconnect/confirm"])
+        self.assertFalse(adapter.appear(NamedButton("DOCK_CHECK")))
+
+        adapter._network_reconnect_transition_until = 0.0
+        with self.assertRaises(AlasSemanticUnmapped):
+            adapter.appear(NamedButton("DOCK_CHECK"))
 
     def test_original_login_popup_handler_uses_exact_expired_data_target(self):
         adapter, oracle, _ = self.make_adapter()
@@ -1988,6 +3008,30 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
         with self.assertRaises(AlasSemanticUnmapped):
             adapter.click(NamedButton("BUILD_CHECK"))
+
+    def test_research_menu_short_circuits_unrelated_shop_page_probe(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.exists_values["research-menu/page/back"] = True
+        oracle.recommendation_shop_visible = Mock(
+            side_effect=SemanticGateClosed("shop snapshots are unrelated")
+        )
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("RESHMENU_CHECK")))
+        oracle.recommendation_shop_visible.assert_not_called()
+
+    def test_research_page_short_circuits_unrelated_page_probe(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.exists_values["research/page/back"] = True
+        oracle.research_project_values = [SimpleNamespace(slot=index) for index in range(5)]
+        oracle.recommendation_shop_visible = Mock(
+            side_effect=SemanticGateClosed("shop snapshots are unrelated")
+        )
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("RESEARCH_CHECK")))
+        oracle.recommendation_shop_visible.assert_not_called()
 
     def test_research_page_check_rejects_selected_detail_panel(self):
         adapter, oracle, _ = self.make_adapter()
@@ -2461,6 +3505,80 @@ class AlasSemanticAdapterTests(unittest.TestCase):
                 "research/start/confirm",
             ],
         )
+
+    def test_research_multi_resource_insufficient_closes_without_start(self):
+        oracle = FakeOracle()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=1,
+                unity_index=5,
+                code="Q-068-UL",
+                status=ResearchProjectStatus.DETAIL,
+            )
+        ]
+        oracle.research_detail_value = SimpleNamespace(
+            code="Q-068-UL",
+            subtitle="small project",
+            duration_seconds=1800,
+            resource_id="gold",
+            resource_owned=1380,
+            resource_required=5000,
+            resource_costs=(
+                SimpleNamespace(resource_id="gold", owned=1380, required=5000),
+                SimpleNamespace(resource_id="17033", owned=29858, required=20),
+            ),
+            requirement="",
+            can_start=False,
+            can_queue=False,
+            is_running=False,
+            is_finished=False,
+        )
+        adapter = AlasSemanticAdapter(oracle, lambda: None, research_start_budget=0)
+        adapter.begin_research()
+
+        self.assertFalse(adapter.start_research_project_code("Q-068-UL"))
+
+        self.assertEqual(
+            oracle.click_calls,
+            ["research/project/1", "research/detail/root"],
+        )
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 0)
+
+    def test_research_multi_resource_start_fails_before_unreviewed_prompt(self):
+        oracle = FakeOracle()
+        oracle.research_project_values = [
+            SimpleNamespace(
+                slot=1,
+                unity_index=5,
+                code="Q-068-UL",
+                status=ResearchProjectStatus.DETAIL,
+            )
+        ]
+        oracle.research_detail_value = SimpleNamespace(
+            code="Q-068-UL",
+            subtitle="small project",
+            duration_seconds=1800,
+            resource_id="gold",
+            resource_owned=6000,
+            resource_required=5000,
+            resource_costs=(
+                SimpleNamespace(resource_id="gold", owned=6000, required=5000),
+                SimpleNamespace(resource_id="17033", owned=30, required=20),
+            ),
+            requirement="",
+            can_start=True,
+            can_queue=False,
+            is_running=False,
+            is_finished=False,
+        )
+        adapter = AlasSemanticAdapter(oracle, lambda: None, research_start_budget=1)
+        adapter.begin_research()
+
+        with self.assertRaisesRegex(SemanticGateClosed, "multi-resource"):
+            adapter.start_research_project_code("Q-068-UL")
+
+        self.assertEqual(oracle.click_calls, ["research/project/1"])
+        self.assertEqual(adapter._action_ledger.remaining("research.start"), 1)
 
     def test_research_start_budget_is_spent_only_on_matching_final_confirm(self):
         oracle = FakeOracle()
@@ -3423,6 +4541,249 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(oracle.enhancement_calls, [])
 
+    def test_gems_farming_live_mode_admits_typed_normal_equipment_transfer(self):
+        adapter, _, _ = self.make_adapter()
+        adapter.gems_farming_admit_live_mode("1-1", "normal", "ship", "disabled", 1)
+        adapter.gems_farming_admit_live_mode("1-1", "normal", "ship", "ship", 1)
+        adapter.gems_farming_admit_live_mode(
+            "1-1", "normal", "ship_equip", "disabled", 1
+        )
+        adapter.gems_farming_admit_live_mode(
+            "1-1", "normal", "ship", "ship_equip", 1
+        )
+        adapter.gems_farming_admit_live_mode("11-4", "hard", "ship", "disabled", 1)
+        adapter.gems_farming_admit_live_mode("11-4", "hard", "ship", "ship", 2)
+        adapter.gems_farming_admit_live_mode("12-1", "hard", "ship", "disabled", 1)
+        for values, message in (
+            (("10-4", "hard", "ship", "disabled", 1), "reviewed hard stages"),
+            (("11-4", "hard", "ship_equip", "disabled", 1), "ship_equip"),
+            (("11-4", "hard", "ship", "disabled", 6), "attacking fleet"),
+            (("1-1", "normal", "disabled", "disabled", 1), "flagship change mode"),
+            (("1-1", "normal", "ship", "unknown", 1), "vanguard change mode"),
+        ):
+            with self.subTest(values=values), self.assertRaisesRegex(
+                SemanticGateClosed, message
+            ):
+                adapter.gems_farming_admit_live_mode(*values)
+
+    def test_gems_farming_hard_unmount_consumes_one_mutation_unit(self):
+        denied, denied_oracle, _ = self.make_adapter()
+        with self.assertRaisesRegex(SemanticGateClosed, "mutation budget"):
+            denied.gems_farming_hard_unmount("11-4", 1, "flagship")
+        self.assertEqual(denied_oracle.gems_calls, [])
+
+        adapter, oracle, _ = self.make_adapter(campaign_fleet_mutation_budget=1)
+        adapter.gems_farming_hard_slot_occupied("11-4", 1, "flagship")
+        adapter.gems_farming_hard_unmount("11-4", 1, "flagship")
+        adapter.gems_farming_hard_open_slot("11-4", 1, "flagship")
+        self.assertEqual(
+            oracle.gems_calls,
+            [
+                ("hard-occupied", "11-4", 1, "flagship"),
+                ("hard-unmount", "11-4", 1, "flagship"),
+                ("hard-open", "11-4", 1, "flagship"),
+            ],
+        )
+        self.assertEqual(
+            adapter._action_ledger.remaining("campaign.fleet_mutation"), 0
+        )
+
+    def test_gems_farming_hard_fleet_presence_uses_exact_hard_overlay(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_hard_mode = True
+
+        self.assertTrue(
+            adapter.gems_farming_hard_fleet_preparation_visible("11-4")
+        )
+
+    def test_gems_farming_hard_vacancy_bypasses_generic_recommend_only_for_task(self):
+        oracle = FakeOracle()
+        oracle.campaign_hard_mode = True
+        oracle.campaign_fleets["submarine"] = 0
+        oracle.campaign_empty_required_slots["fleet1"] = 1
+        oracle.gems_hard_occupied["flagship"] = False
+        oracle.campaign_state_value.stages = (
+            SimpleNamespace(
+                stage_code="11-4",
+                button=SimpleNamespace(actionable=True),
+            ),
+        )
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=1,
+            campaign_sortie_budget=1,
+        )
+        adapter.gems_farming_admit_live_mode(
+            "11-4", "hard", "ship", "disabled", 1
+        )
+        entrance = NamedButton("11-4")
+        entrance.semantic_campaign_stage_code = "11-4"
+        adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+
+        self.assertTrue(adapter.authorize_campaign_fleet_preparation(1, 2, 0))
+        prepared = adapter.prepare_campaign_hard_fleets()
+
+        self.assertFalse(next(row for row in prepared.rows if row.row_key == "fleet1").hard_satisfied)
+        self.assertEqual(
+            adapter._campaign_context.gems_farming_hard_pending_roles,
+            ("flagship",),
+        )
+        self.assertEqual(adapter._campaign_context.expected_fleet_mutations, ())
+        self.assertNotIn("campaign/fleet-preparation/fleet/1/recommend", oracle.click_calls)
+
+        oracle.campaign_empty_required_slots["fleet1"] = 0
+        oracle.gems_hard_occupied["flagship"] = True
+        oracle.campaign_fleet_generation += 1
+        final = adapter.confirm_campaign_fleet_selection()
+        self.assertTrue(next(row for row in final.rows if row.row_key == "fleet1").hard_satisfied)
+        adapter.end_campaign_pre_sortie()
+
+    def test_gems_farming_equipment_transfer_requires_budget_only_at_take_off(self):
+        for role in ("flagship", "vanguard"):
+            with self.subTest(role=role):
+                denied, denied_oracle, _ = self.make_adapter()
+                with self.assertRaisesRegex(SemanticGateClosed, "budget"):
+                    denied.gems_farming_equipment_take_off(role)
+                self.assertEqual(denied_oracle.gems_calls, [])
+
+                adapter, oracle, _ = self.make_adapter(
+                    campaign_fleet_mutation_budget=1
+                )
+                self.assertEqual(
+                    adapter.gems_farming_equipment_take_off(role).role, role
+                )
+                self.assertEqual(
+                    adapter.gems_farming_equipment_take_on(role).role, role
+                )
+                self.assertEqual(
+                    oracle.gems_calls,
+                    [("equipment-off", role), ("equipment-on", role)],
+                )
+
+    def test_gems_farming_candidates_preserve_original_fleet_precedence(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        candidate = lambda **values: SimpleNamespace(
+            position=values.get("position", 0),
+            ship_id=values["ship_id"],
+            ship_name=values["ship_name"],
+            ship_sprite=values.get("ship_sprite", "boge"),
+            ship_type=values.get("ship_type", "cv"),
+            rarity=values.get("rarity", "common"),
+            level=values.get("level", 20),
+            emotion=values.get("emotion", 120),
+            fleet_index=values.get("fleet_index", 0),
+            status=values.get("status", "free"),
+            button=SimpleNamespace(),
+        )
+        same = candidate(ship_id=106014, ship_name="博格", fleet_index=2)
+        free = candidate(ship_id=106024, ship_name="博格.改", fleet_index=0)
+        wrong_name = candidate(ship_id=107014, ship_name="突击者", fleet_index=2)
+        busy = candidate(
+            ship_id=106034, ship_name="博格", fleet_index=2, status="weituo"
+        )
+        oracle.gems_candidates = (free, wrong_name, busy, same)
+
+        result = adapter.gems_farming_candidates(
+            role="flagship",
+            selector="bogue",
+            max_level=31,
+            min_emotion=100,
+            fleet_index=2,
+        )
+
+        self.assertEqual(result, (same,))
+        self.assertEqual(
+            oracle.gems_calls,
+            [
+                ("sort", False),
+                ("filter", "flagship", ("all",)),
+                ("candidates",),
+            ],
+        )
+        self.assertEqual(oracle.enhancement_calls, [("favourite", False)])
+        self.assertEqual(len(gate_calls), 1)
+
+        level_100 = candidate(
+            ship_id=101153,
+            ship_name="斯彭斯",
+            ship_sprite="sipengsi",
+            ship_type="dd",
+            level=100,
+        )
+        level_99 = candidate(
+            ship_id=101154,
+            ship_name="斯彭斯",
+            ship_sprite="sipengsi",
+            ship_type="dd",
+            level=99,
+        )
+        oracle.gems_candidates = (level_99, level_100)
+
+        result = adapter.gems_farming_candidates(
+            role="vanguard",
+            selector="any",
+            max_level=100,
+            min_emotion=100,
+            fleet_index=2,
+        )
+
+        self.assertEqual(result, (level_100,))
+
+    def test_gems_farming_candidate_filter_failure_rolls_back_to_formation(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.gems_filter_error = SemanticGateClosed("filter drift")
+
+        with self.assertRaisesRegex(SemanticGateClosed, "filter drift"):
+            adapter.gems_farming_candidates(
+                role="vanguard",
+                selector="favourite",
+                max_level=100,
+                min_emotion=0,
+                fleet_index=6,
+            )
+
+        self.assertEqual(
+            oracle.gems_calls[-3:],
+            [
+                ("filter", "vanguard", ("all",)),
+                ("filter-cancel",),
+                ("cancel",),
+            ],
+        )
+
+    def test_gems_farming_candidate_filter_recovery_failure_is_classified(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.gems_filter_error = SemanticGateClosed("filter drift")
+        oracle.gems_filter_cancel_error = SemanticGateClosed("cancel blocked")
+
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "candidate observation recovery failed"
+        ):
+            adapter.gems_farming_candidates(
+                role="vanguard",
+                selector="favourite",
+                max_level=100,
+                min_emotion=0,
+                fleet_index=6,
+            )
+
+    def test_gems_farming_confirmation_requires_campaign_fleet_budget(self):
+        candidate = SimpleNamespace(ship_id=106014)
+        denied, denied_oracle, _ = self.make_adapter()
+        with self.assertRaisesRegex(SemanticGateClosed, "budget"):
+            denied.gems_farming_confirm_candidate_selection(candidate, "flagship")
+        self.assertEqual(denied_oracle.gems_calls, [])
+
+        adapter, oracle, _ = self.make_adapter(campaign_fleet_mutation_budget=1)
+        receipt = adapter.gems_farming_confirm_candidate_selection(candidate, "flagship")
+        self.assertEqual(receipt.semantic_id, "gems-farming/dock/confirm")
+        self.assertEqual(oracle.gems_calls, [("confirm", 106014, "flagship")])
+        self.assertEqual(adapter._action_ledger.remaining("campaign.fleet_mutation"), 0)
+
     def test_build_coin_count_falls_back_to_proven_build_resource_panel(self):
         oracle = FakeOracle()
         oracle.build_gold_value = 81908
@@ -3846,6 +5207,25 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
         self.assertEqual(oracle.click_calls, ["campaign-menu/page/back"])
 
+    def test_campaign_menu_generic_back_uses_exact_navigation_target(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_menu_value = True
+        oracle.enabled_values["campaign-menu/page/back"] = True
+
+        receipt = adapter.click(NamedButton("BACK_ARROW"))
+
+        self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
+        self.assertEqual(oracle.click_calls, ["campaign-menu/page/back"])
+
+    def test_current_raid_generic_back_uses_exact_home_target(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.raid_page_visible_value = True
+
+        receipt = adapter.click(NamedButton("BACK_ARROW"))
+
+        self.assertEqual(receipt.semantic_id, "raid/page/home")
+        self.assertEqual(oracle.click_calls, ["raid/page/home:raid_20260827"])
+
     def test_campaign_menu_entry_has_bounded_transition_grace(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.campaign_page_error = SemanticGateClosed(
@@ -3880,6 +5260,8 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertTrue(adapter.appear(NamedButton("CAMPAIGN_CHECK")))
         self.assertEqual(adapter.campaign_page_state().chapter_name, "第一章")
+        self.assertEqual(adapter.event_points(), 17060)
+        self.assertEqual(adapter.event_coin(), 70477)
         receipt = adapter.click(NamedButton("BACK_ARROW"))
         self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
         self.assertEqual(oracle.click_calls, ["campaign-menu/page/back"])
@@ -3893,6 +5275,20 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
 
         self.assertTrue(adapter.appear(NamedButton("CAMPAIGN_CHECK")))
+
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_check_defers_to_exact_hard_fleet_overlay_after_grace(self):
+        adapter, oracle, _ = self.make_adapter()
+        with patch("alas_headless.alas_adapter.time.monotonic", return_value=10.0):
+            adapter.begin_campaign_pre_sortie("11-4", mode="hard")
+        oracle.campaign_page_error = SemanticGateClosed(
+            "campaign page identity is not proven"
+        )
+        oracle.campaign_preparation_value = SimpleNamespace(kind="fleet")
+
+        with patch("alas_headless.alas_adapter.time.monotonic", return_value=40.0):
+            self.assertFalse(adapter.appear(NamedButton("CAMPAIGN_CHECK")))
 
         adapter.end_campaign_pre_sortie()
 
@@ -3991,6 +5387,96 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             oracle.click_calls, ["overlay/network-reconnect/confirm"]
         )
         adapter.end_campaign_pre_sortie()
+
+    def test_campaign_combat_execute_suffix_prioritizes_exact_network_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_campaign_pre_sortie("12-4")
+        oracle.enabled_values["overlay/network-reconnect/cancel"] = True
+        oracle.enabled_values["overlay/network-reconnect/confirm"] = True
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+        session._live_combat_visible = lambda: self.fail(
+            "covered combat hierarchy must not be classified"
+        )
+
+        self.assertTrue(session.appear(NamedButton("POPUP_CANCEL")))
+        self.assertTrue(session.appear(NamedButton("POPUP_CONFIRM")))
+        receipt = session.click(NamedButton("POPUP_CONFIRM_COMBAT_EXECUTE"))
+
+        self.assertEqual(
+            receipt.semantic_id, "overlay/network-reconnect/confirm"
+        )
+        self.assertEqual(
+            oracle.click_calls, ["overlay/network-reconnect/confirm"]
+        )
+        adapter.end_campaign_pre_sortie()
+
+    def test_goto_main_prioritizes_exact_network_reconnect_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values["overlay/network-reconnect/confirm"] = True
+
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(
+            receipt.semantic_id, "overlay/network-reconnect/confirm"
+        )
+        self.assertEqual(
+            oracle.click_calls, ["overlay/network-reconnect/confirm"]
+        )
+
+    def test_goto_main_uses_exact_raid_owner_before_unrelated_shell_probes(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.raid_page_visible_value = True
+        oracle.recommendation_shop_visible = Mock(
+            side_effect=AssertionError("unrelated shop shell must not be probed")
+        )
+
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "raid/page/home")
+        self.assertEqual(oracle.click_calls, ["raid/page/home:raid_20260827"])
+        oracle.recommendation_shop_visible.assert_not_called()
+
+    def test_ui_additional_login_probes_yield_to_exact_network_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values["overlay/network-reconnect/confirm"] = True
+        oracle.server_maintenance_visible = Mock(
+            side_effect=AssertionError(
+                "maintenance reader must not race NetworkDown"
+            )
+        )
+        oracle.login_update_restart_prompt_available = Mock(
+            side_effect=AssertionError("update reader must not race NetworkDown")
+        )
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session._login_update_restart_performed = False
+
+        self.assertFalse(session.server_maintenance_visible())
+        self.assertFalse(session.restart_game_after_update())
+        oracle.server_maintenance_visible.assert_not_called()
+        oracle.login_update_restart_prompt_available.assert_not_called()
+
+    def test_research_session_prioritizes_exact_network_reconnect_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+        adapter.begin_research()
+        oracle.enabled_values["overlay/network-reconnect/cancel"] = True
+        oracle.enabled_values["overlay/network-reconnect/confirm"] = True
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+
+        self.assertFalse(session.appear(NamedButton("RESEARCH_CHECK")))
+        self.assertTrue(session.appear(NamedButton("POPUP_CANCEL")))
+        self.assertTrue(session.appear(NamedButton("POPUP_CONFIRM")))
+        receipt = session.click(NamedButton("POPUP_CONFIRM"))
+        self.assertEqual(receipt.semantic_id, "overlay/network-reconnect/confirm")
+        self.assertEqual(oracle.click_calls, ["overlay/network-reconnect/confirm"])
+        adapter.end_research()
 
     def test_campaign_combat_session_delegates_restored_chapter_check(self):
         adapter, oracle, _ = self.make_adapter()
@@ -4135,6 +5621,31 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(session.recover_orphan_combat_result(), ())
 
+    def test_orphan_current_raid_result_accepts_exact_raid_page_return(self):
+        adapter, oracle, _ = self.make_adapter()
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = lambda: None
+        session.orphan_combat_result_visible = lambda: True
+        session._combat_result_transition_until = 0.0
+        adapter._require_frame_observation_oracle = lambda: oracle
+        oracle.daily_battle_result_visible = Mock(return_value=False)
+        oracle.campaign_battle_reward_visible = Mock(return_value=False)
+        oracle.event_campaign_page_visible_value = False
+        oracle.operation_siren_page_visible = Mock(return_value=False)
+        oracle.daily_page_visible = Mock(return_value=False)
+        oracle.main_page_visible = Mock(return_value=False)
+        oracle.raid_page_visible = Mock(return_value=True)
+
+        self.assertEqual(
+            session.recover_orphan_combat_result(
+                current_raid_event="raid_20260827"
+            ),
+            (),
+        )
+        oracle.raid_page_visible.assert_called_once_with("raid_20260827")
+
     def test_orphan_campaign_result_tolerates_exact_map_mount_gap(self):
         adapter, oracle, _ = self.make_adapter()
         session = AlasSemanticSession.__new__(AlasSemanticSession)
@@ -4276,6 +5787,31 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertEqual(receipt.semantic_id, "event-list/page/back")
         self.assertEqual(oracle.click_calls, ["event-list/page/back"])
+
+    def test_war_archives_campaign_back_uses_main_scene_target(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.war_archives_campaign_visible_value = True
+        oracle.enabled_values["campaign-menu/page/back"] = True
+
+        adapter.begin_campaign_pre_sortie("A1")
+        self.assertTrue(adapter.appear(NamedButton("BACK_ARROW")))
+        receipt = adapter.click(NamedButton("BACK_ARROW"))
+        adapter.end_campaign_pre_sortie()
+
+        self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
+
+    def test_regular_campaign_back_uses_main_scene_target(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_page_value = True
+        oracle.enabled_values["campaign-menu/page/back"] = True
+        adapter.begin_campaign_pre_sortie("15-1", mode="normal")
+
+        self.assertTrue(adapter.appear(NamedButton("BACK_ARROW")))
+        receipt = adapter.click(NamedButton("BACK_ARROW"))
+        adapter.end_campaign_pre_sortie()
+
+        self.assertEqual(receipt.semantic_id, "campaign-menu/page/back")
+        self.assertEqual(oracle.click_calls, ["campaign-menu/page/back"])
 
     def test_campaign_event_identity_is_hidden_after_back_commit(self):
         adapter, oracle, _ = self.make_adapter()
@@ -5276,6 +6812,15 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
     def test_campaign_mode_switch_reports_exact_destination_without_input(self):
         adapter, oracle, _ = self.make_adapter()
+        oracle.war_archives_page_visible = Mock(
+            side_effect=SemanticGateClosed("archive snapshots are unrelated")
+        )
+        oracle.battle_pass_page_visible = Mock(
+            side_effect=SemanticGateClosed("Battle Pass snapshots are unrelated")
+        )
+        oracle.recommendation_shop_visible = Mock(
+            side_effect=SemanticGateClosed("shop snapshots are unrelated")
+        )
 
         adapter.begin_campaign_pre_sortie("12-4")
         self.assertTrue(adapter.appear(NamedButton("SWITCH_1_HARD")))
@@ -5285,6 +6830,9 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.end_campaign_pre_sortie()
 
         self.assertEqual(oracle.click_calls, [])
+        oracle.war_archives_page_visible.assert_not_called()
+        oracle.battle_pass_page_visible.assert_not_called()
+        oracle.recommendation_shop_visible.assert_not_called()
 
     def test_campaign_oil_is_typed_for_global_alas_status_probe(self):
         adapter, _, _ = self.make_adapter()
@@ -5429,6 +6977,13 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         ):
             adapter.click(NamedButton("MAP_PREPARATION"))
         self.assertTrue(adapter.campaign_map_preparation_committed())
+        adapter._campaign_context.passive_transition_until = time.monotonic() - 1
+        with self.assertRaisesRegex(
+            SemanticGateClosed,
+            "map-preparation transition did not reach the fleet overlay",
+        ):
+            adapter.campaign_map_preparation_committed()
+        adapter._campaign_context.passive_transition_until = time.monotonic() + 20
         oracle.campaign_preparation_error = SemanticGateClosed(
             "campaign map-preparation controls are not proven"
         )
@@ -5468,6 +7023,33 @@ class AlasSemanticAdapterTests(unittest.TestCase):
                 "campaign/fleet-preparation/cancel",
             ],
         )
+
+    def test_event_map_to_fleet_allows_only_bounded_uiorigin_remount(self):
+        oracle = FakeOracle()
+        oracle.event_campaign_page_visible_value = True
+        oracle.campaign_state_value.stages = (
+            SimpleNamespace(stage_code="sp", button=SimpleNamespace(actionable=True)),
+        )
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+        )
+        entrance = NamedButton("sp")
+        entrance.semantic_campaign_stage_code = "sp"
+        adapter.begin_campaign_pre_sortie("SP")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        oracle.campaign_preparation_error = SemanticGateClosed(
+            "campaign preparation root is not reviewed"
+        )
+
+        adapter._campaign_context.passive_transition_until = time.monotonic() + 20
+        self.assertFalse(adapter.appear(NamedButton("FLEET_PREPARATION")))
+
+        adapter._campaign_context.passive_transition_until = time.monotonic() - 1
+        with self.assertRaisesRegex(SemanticGateClosed, "root is not reviewed"):
+            adapter.appear(NamedButton("FLEET_PREPARATION"))
 
     def test_campaign_stale_map_preparation_can_be_closed_before_fresh_entry(self):
         oracle = FakeOracle()
@@ -5576,6 +7158,41 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(oracle.click_calls, [])
         adapter.end_campaign_pre_sortie()
 
+    def test_event_sp_normal_fleet_reconciliation_is_bounded_to_four_mutations(self):
+        for budget, allowed in ((3, False), (4, True)):
+            with self.subTest(budget=budget):
+                oracle = FakeOracle()
+                oracle.campaign_fleets.update(
+                    {"fleet1": 3, "fleet2": 4, "submarine": 1}
+                )
+                adapter = AlasSemanticAdapter(
+                    oracle,
+                    lambda: None,
+                    campaign_fleet_mutation_budget=budget,
+                )
+                oracle.campaign_preparation_value = SimpleNamespace(kind="fleet")
+
+                adapter.begin_campaign_pre_sortie("SP")
+                self.seed_owned_campaign_fleet_overlay(adapter)
+                if allowed:
+                    self.assertTrue(
+                        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+                    )
+                    self.assertEqual(
+                        adapter._campaign_context.expected_fleet_mutations,
+                        (
+                            "campaign/fleet-preparation/fleet/2/clear",
+                            "campaign/fleet-preparation/submarine/1/clear",
+                            "campaign/fleet-preparation/option/1",
+                            "campaign/fleet-preparation/option/2",
+                        ),
+                    )
+                else:
+                    with self.assertRaisesRegex(SemanticGateClosed, "3 < 4"):
+                        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+                self.assertEqual(oracle.click_calls, [])
+                adapter.end_campaign_pre_sortie()
+
     def test_campaign_fleet_preflight_uses_submarine_capacity_not_occupancy(self):
         oracle = FakeOracle()
         oracle.campaign_fleets["fleet2"] = 0
@@ -5647,6 +7264,181 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(
             adapter._action_ledger.remaining("campaign.fleet_mutation"), 0
         )
+        adapter.end_campaign_pre_sortie()
+
+    def test_daemon_sortie_reuses_exact_owned_campaign_state_without_mutation(self):
+        adapter, oracle, _ = self.make_adapter(
+            campaign_stage_entry_budget=1,
+            campaign_sortie_budget=1,
+        )
+        oracle.campaign_fleets["submarine"] = 0
+        oracle.campaign_role_tab_selected = True
+        oracle.campaign_roles = ["mob", "boss"]
+        oracle.toggle_selected_values[
+            "campaign/map-preparation/auto-search"
+        ] = True
+        oracle.campaign_state_value = SimpleNamespace(
+            generation=12,
+            chapter_name="chapter 12",
+            stages=(
+                SimpleNamespace(
+                    stage_code="12-4",
+                    button=SimpleNamespace(actionable=True),
+                ),
+            ),
+        )
+        entrance = NamedButton("12-4")
+        entrance.semantic_campaign_stage_code = "12-4"
+
+        adapter.begin_campaign_pre_sortie("12-4")
+        adapter.click(entrance)
+        self.assertTrue(adapter.arm_daemon_campaign_map_preparation())
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        self.assertTrue(
+            adapter.authorize_daemon_campaign_sortie(
+                fleet1=1,
+                fleet2=2,
+                submarine=0,
+                use_auto_search=True,
+                use_2x_book=False,
+                submarine_mode="do_not_use",
+                fleet_order="fleet1_mob_fleet2_boss",
+            )
+        )
+
+        context = adapter._campaign_context
+        self.assertEqual(context.requested_fleets, (1, 2, 0))
+        self.assertIs(context.initial_fleet_state, context.prepared_fleet_state)
+        self.assertEqual(context.required_fleet_mutations, 0)
+        self.assertEqual(
+            (context.auto_search_role_state.fleet1_role,
+             context.auto_search_role_state.fleet2_role),
+            ("mob", "boss"),
+        )
+        self.assertEqual(
+            oracle.click_calls,
+            ["campaign/stage/12-4", "campaign/map-preparation/proceed"],
+        )
+        adapter.end_campaign_pre_sortie()
+
+    def test_daemon_auto_search_sortie_proves_official_game_ownership(self):
+        adapter, oracle, _ = self.make_adapter(
+            campaign_stage_entry_budget=1,
+            campaign_sortie_budget=1,
+        )
+        oracle.campaign_fleets["submarine"] = 0
+        oracle.campaign_role_tab_selected = True
+        oracle.campaign_roles = ["mob", "boss"]
+        oracle.toggle_selected_values[
+            "campaign/map-preparation/auto-search"
+        ] = True
+        oracle.campaign_state_value = SimpleNamespace(
+            generation=12,
+            chapter_name="chapter 12",
+            stages=(
+                SimpleNamespace(
+                    stage_code="12-4",
+                    button=SimpleNamespace(actionable=True),
+                ),
+            ),
+        )
+        entrance = NamedButton("12-4")
+        entrance.semantic_campaign_stage_code = "12-4"
+
+        adapter.begin_campaign_pre_sortie("12-4")
+        adapter.click(entrance)
+        self.assertTrue(adapter.arm_daemon_campaign_map_preparation())
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        self.assertTrue(
+            adapter.authorize_daemon_campaign_sortie(
+                fleet1=1,
+                fleet2=2,
+                submarine=0,
+                use_auto_search=True,
+                use_2x_book=False,
+                submarine_mode="do_not_use",
+                fleet_order="fleet1_mob_fleet2_boss",
+            )
+        )
+        adapter.click(NamedButton("FLEET_PREPARATION"))
+        # Confirmation follows the final authorized fleet-panel setting, not
+        # the value first observed on the preceding map-preparation overlay.
+        adapter._campaign_context.daemon_auto_search_selected = False
+
+        proof = adapter.confirm_daemon_campaign_sortie()
+
+        self.assertIn("CombatUIStandard", proof.map_root_path)
+        self.assertEqual(proof.prepared_fleets, (1, 2, 0))
+        self.assertEqual(
+            oracle.click_calls[-1], "campaign/fleet-preparation/sortie"
+        )
+        adapter.end_campaign_pre_sortie()
+
+    def test_daemon_sortie_mismatch_and_zero_budget_are_observation_only(self):
+        for sortie_budget, expected_error in ((0, None), (1, "differs")):
+            with self.subTest(sortie_budget=sortie_budget):
+                adapter, oracle, _ = self.make_adapter(
+                    campaign_stage_entry_budget=1,
+                    campaign_sortie_budget=sortie_budget,
+                )
+                oracle.campaign_fleets["submarine"] = 0
+                oracle.toggle_selected_values[
+                    "campaign/map-preparation/auto-search"
+                ] = False
+                oracle.campaign_state_value = SimpleNamespace(
+                    generation=12,
+                    chapter_name="chapter 12",
+                    stages=(
+                        SimpleNamespace(
+                            stage_code="12-4",
+                            button=SimpleNamespace(actionable=True),
+                        ),
+                    ),
+                )
+                entrance = NamedButton("12-4")
+                entrance.semantic_campaign_stage_code = "12-4"
+                adapter.begin_campaign_pre_sortie("12-4")
+                adapter.click(entrance)
+                self.assertFalse(adapter.arm_daemon_campaign_map_preparation())
+                adapter.click(NamedButton("MAP_PREPARATION"))
+                calls_before = list(oracle.click_calls)
+
+                operation = lambda: adapter.authorize_daemon_campaign_sortie(
+                    fleet1=1,
+                    fleet2=0,
+                    submarine=0,
+                    use_auto_search=False,
+                    use_2x_book=False,
+                    submarine_mode="do_not_use",
+                    fleet_order="fleet1_all_fleet2_standby",
+                )
+                if expected_error is None:
+                    self.assertFalse(operation())
+                else:
+                    with self.assertRaisesRegex(SemanticGateClosed, expected_error):
+                        operation()
+                self.assertEqual(oracle.click_calls, calls_before)
+                self.assertIsNone(adapter._campaign_context.initial_fleet_state)
+                self.assertIsNone(adapter._campaign_context.prepared_fleet_state)
+                self.assertIsNone(adapter._campaign_context.requested_fleets)
+                adapter.end_campaign_pre_sortie()
+
+    def test_daemon_preparation_hides_unrelated_probe_before_page_sampling(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.campaign_preparation_value = SimpleNamespace(kind="map")
+        oracle.battle_pass_page_visible = Mock(
+            side_effect=SemanticGateClosed(
+                "Battle Pass page snapshots are not coherent"
+            )
+        )
+        adapter.begin_campaign_pre_sortie("1-1")
+
+        self.assertFalse(adapter.appear(NamedButton("GET_ITEMS_1")))
+        oracle.battle_pass_page_visible.assert_not_called()
+
+        with self.assertRaises(SemanticGateClosed):
+            adapter.click(NamedButton("GET_ITEMS_1"))
+        self.assertEqual(oracle.click_calls, [])
         adapter.end_campaign_pre_sortie()
 
     def test_event_sp_hard_surface_accepts_exact_game_managed_zero_grant_noop(self):
@@ -6490,6 +8282,52 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(state.chapter_name, "c")
         self.assertEqual([stage.stage_code for stage in state.stages], ["c1"])
 
+    def test_event_hard_page_uses_only_same_index_shared_normal_alias(self):
+        for requested, stages, expected_chapter, expected_stage in (
+            ("C2", ("a2", "a3", "c1"), "a", "a2"),
+            ("C3", ("a2", "a3", "c1"), "a", "a3"),
+            ("D2", ("b2", "b3", "d1"), "b", "b2"),
+            ("D3", ("b2", "b3", "d1"), "b", "b3"),
+        ):
+            with self.subTest(requested=requested):
+                oracle = FakeOracle()
+                oracle.campaign_page_value = True
+                oracle.campaign_state_value = SimpleNamespace(
+                    generation=12,
+                    chapter_name="shared",
+                    stages=tuple(
+                        SimpleNamespace(stage_code=stage) for stage in stages
+                    ),
+                )
+                adapter = AlasSemanticAdapter(oracle, lambda: None)
+                adapter.begin_campaign_pre_sortie(requested)
+
+                state = adapter.campaign_page_state()
+
+                self.assertEqual(state.chapter_name, expected_chapter)
+                self.assertEqual(
+                    [stage.stage_code for stage in state.stages], [expected_stage]
+                )
+
+    def test_event_hard_page_prefers_exact_index_over_shared_alias(self):
+        oracle = FakeOracle()
+        oracle.campaign_page_value = True
+        oracle.campaign_state_value = SimpleNamespace(
+            generation=12,
+            chapter_name="a/c",
+            stages=(
+                SimpleNamespace(stage_code="a2"),
+                SimpleNamespace(stage_code="c2"),
+            ),
+        )
+        adapter = AlasSemanticAdapter(oracle, lambda: None)
+        adapter.begin_campaign_pre_sortie("C2")
+
+        state = adapter.campaign_page_state()
+
+        self.assertEqual(state.chapter_name, "c")
+        self.assertEqual([stage.stage_code for stage in state.stages], ["c2"])
+
     def test_event_sp_stage_code_is_canonical_without_numeric_suffix(self):
         adapter = AlasSemanticAdapter(FakeOracle(), lambda: None)
 
@@ -6521,6 +8359,8 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
     def test_event_hard_stage_normalizes_mode_and_clears_selected_submarine(self):
         oracle = FakeOracle()
+        fleet_state = Mock(wraps=oracle.campaign_fleet_selection_state)
+        oracle.campaign_fleet_selection_state = fleet_state
         oracle.campaign_hard_mode = True
         oracle.campaign_fleets["submarine"] = 1
         oracle.toggle_selected_values[
@@ -6576,6 +8416,10 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             ("campaign/fleet-preparation/submarine/1/clear",),
         )
         self.assertEqual((roles.fleet1_role, roles.fleet2_role), ("mob", "boss"))
+        self.assertTrue(fleet_state.call_args_list)
+        self.assertTrue(
+            all(call.args[0] == "c1" for call in fleet_state.call_args_list)
+        )
 
     def test_inherited_event_auto_search_closes_exact_total_reward(self):
         oracle = FakeOracle()
@@ -6791,7 +8635,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
         adapter.end_campaign_pre_sortie()
 
-    def test_hard_auto_search_is_qualified_only_for_11_4(self):
+    def test_hard_auto_search_rejects_unreviewed_main_stage(self):
         oracle = FakeOracle()
         oracle.campaign_hard_mode = True
         oracle.campaign_fleets["submarine"] = 0
@@ -6810,7 +8654,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.authorize_campaign_fleet_preparation(1, 2, 0)
         adapter.confirm_campaign_fleet_selection()
 
-        with self.assertRaisesRegex(SemanticGateClosed, "only for 11-4"):
+        with self.assertRaisesRegex(SemanticGateClosed, "not qualified"):
             adapter.ensure_campaign_auto_search_roles(
                 "fleet1_all_fleet2_standby"
             )
@@ -6860,7 +8704,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         gated.click(NamedButton("MAP_PREPARATION"))
         gated.authorize_campaign_fleet_preparation(1, 2, 0)
         gated.confirm_campaign_fleet_selection()
-        with self.assertRaisesRegex(SemanticGateClosed, "two-fleet 11-4"):
+        with self.assertRaisesRegex(SemanticGateClosed, "not reviewed"):
             gated.authorize_campaign_sortie(
                 use_auto_search=False,
                 use_2x_book=False,
@@ -6868,6 +8712,35 @@ class AlasSemanticAdapterTests(unittest.TestCase):
                 fleet_order="fleet1_boss_fleet2_mob",
             )
         gated.end_campaign_pre_sortie()
+
+    def test_hard_12_1_accepts_gems_farming_all_standby_profile(self):
+        oracle = FakeOracle()
+        oracle.campaign_hard_mode = True
+        oracle.campaign_fleets["submarine"] = 0
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_stage_entry_budget=1,
+            campaign_fleet_mutation_budget=1,
+            campaign_sortie_budget=1,
+        )
+        entrance = NamedButton("12-1")
+        entrance.semantic_campaign_stage_code = "12-1"
+        adapter.begin_campaign_pre_sortie("12-1", mode="hard")
+        adapter.click(entrance)
+        adapter.click(NamedButton("MAP_PREPARATION"))
+        adapter.authorize_campaign_fleet_preparation(1, 2, 0)
+        adapter.confirm_campaign_fleet_selection()
+
+        self.assertTrue(
+            adapter.authorize_campaign_sortie(
+                use_auto_search=False,
+                use_2x_book=False,
+                submarine_mode="do_not_use",
+                fleet_order="fleet1_all_fleet2_standby",
+            )
+        )
+        adapter.end_campaign_pre_sortie()
 
     def test_campaign_ambush_spends_one_campaign_grid_click_lease(self):
         oracle = FakeOracle()
@@ -6890,7 +8763,7 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             adapter.handle_campaign_ambush(evade=False)
         adapter.end_campaign_pre_sortie()
 
-    def test_campaign_sortie_accepts_typed_single_fleet_profile(self):
+    def test_campaign_sortie_accepts_typed_single_fleet_six_profile(self):
         oracle = FakeOracle()
         oracle.campaign_fleets.update(fleet2=0, submarine=0)
         adapter = AlasSemanticAdapter(
@@ -6905,7 +8778,9 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.begin_campaign_pre_sortie("1-1")
         adapter.click(entrance)
         adapter.click(NamedButton("MAP_PREPARATION"))
-        self.assertTrue(adapter.authorize_campaign_fleet_preparation(1, 0, 0))
+        self.assertTrue(adapter.authorize_campaign_fleet_preparation(6, 0, 0))
+        adapter.click(NamedButton("FLEET_1_CHOOSE"))
+        adapter.click(NamedButton("FLEET_1_BAR_INDEX_6"))
         adapter.confirm_campaign_fleet_selection()
 
         self.assertTrue(
@@ -6921,8 +8796,11 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         adapter.end_campaign_pre_sortie()
 
         self.assertEqual(proof.stage_code, "1-1")
-        self.assertEqual(proof.prepared_fleets, (1, 0, 0))
-        self.assertEqual(proof.mutation_semantic_ids, ())
+        self.assertEqual(proof.prepared_fleets, (6, 0, 0))
+        self.assertEqual(
+            proof.mutation_semantic_ids,
+            ("campaign/fleet-preparation/option/6",),
+        )
         self.assertEqual(proof.required_oil, 97)
 
     def test_campaign_sortie_rejects_single_fleet_with_two_fleet_order(self):
@@ -7015,6 +8893,45 @@ class AlasSemanticAdapterTests(unittest.TestCase):
                 land_cells=((5, 0),),
                 expected_fleet_count=2,
             )
+
+    def test_campaign_map_model_is_shared_by_reviewed_event_hard_stages(self):
+        for stage_code in ("C1", "D3"):
+            with self.subTest(stage_code=stage_code):
+                oracle = FakeOracle()
+                adapter = AlasSemanticAdapter(oracle, lambda: None)
+                adapter.begin_campaign_pre_sortie(stage_code)
+
+                state = adapter.campaign_map_state(
+                    columns=9,
+                    rows=9,
+                    land_cells=((3, 0),),
+                    expected_fleet_count=2,
+                )
+
+                self.assertIs(state, oracle.campaign_map_state_value)
+                self.assertEqual(
+                    oracle.campaign_map_state_calls,
+                    [(stage_code.lower(), 9, 9, ((3, 0),), 2)],
+                )
+                adapter.end_campaign_pre_sortie()
+
+    def test_campaign_map_model_keeps_unreviewed_hard_stage_isolated(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(oracle, lambda: None)
+        adapter.begin_campaign_pre_sortie("10-4", mode="hard")
+
+        with self.assertRaisesRegex(
+            SemanticGateClosed, "reviewed shared event C/D stages"
+        ):
+            adapter.campaign_map_state(
+                columns=9,
+                rows=9,
+                land_cells=((3, 0),),
+                expected_fleet_count=2,
+            )
+
+        self.assertEqual(oracle.campaign_map_state_calls, [])
+        adapter.end_campaign_pre_sortie()
 
     def test_campaign_map_reconnect_returns_to_same_logical_map(self):
         oracle = FakeOracle()
@@ -7554,6 +9471,153 @@ class AlasSemanticAdapterTests(unittest.TestCase):
                 name="MAP_SWIPE_-2_0",
                 distance_check=True,
             )
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_viewport_swipe_accepts_large_uniform_input_frame_shift(self):
+        oracle = FakeOracle()
+        initial = make_campaign_combat_state()
+        oracle.campaign_map_state_value = initial
+
+        def refresh_frame():
+            oracle.campaign_map_state_value = replace(
+                initial,
+                generation=initial.generation + 1,
+                cells=tuple(
+                    replace(
+                        cell,
+                        point=Point(cell.point.x - 400, cell.point.y + 45),
+                        bounds=Bounds(
+                            cell.bounds.left - 400,
+                            cell.bounds.top + 45,
+                            cell.bounds.right - 400,
+                            cell.bounds.bottom + 45,
+                        ),
+                    )
+                    for cell in initial.cells
+                ),
+            )
+
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            input_frame_refresher=refresh_frame,
+            campaign_combat_budget=1,
+            campaign_viewport_swipe_budget=1,
+        )
+        adapter.begin_campaign_pre_sortie("12-4")
+        state = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        adapter.authorize_campaign_combat(make_campaign_combat_decision(), state)
+        intent = adapter.begin_campaign_map_swipe_vector(
+            (200.0, 0.0),
+            box=(123, 159, 1175, 628),
+            random_range=(0, 0, 0, 0),
+            padding=15,
+            duration=(0.1, 0.2),
+            whitelist_area=None,
+            blacklist_area=None,
+            name="MAP_SWIPE_-2_0",
+            distance_check=True,
+        )
+
+        proof = adapter.swipe(
+            (500, 400),
+            (700, 400),
+            duration=0.157,
+            name="MAP_SWIPE_-2_0",
+            distance_check=True,
+        )
+
+        self.assertEqual(proof.end, (700, 400))
+        self.assertEqual(len(oracle.campaign_map_swipe_calls), 1)
+        adapter.end_campaign_map_swipe_vector(intent)
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_viewport_swipe_rejects_nonuniform_input_frame_shift(self):
+        oracle = FakeOracle()
+        initial = make_campaign_combat_state()
+        initial = replace(
+            initial,
+            cells=initial.cells
+            + (
+                replace(
+                    initial.cells[0],
+                    column=5,
+                    node="E6",
+                    button_path=(
+                        "root/DragLayer/plane/quads/chapter_cell_quad_6_5"
+                    ),
+                    point=Point(720, 360),
+                    bounds=Bounds(680, 320, 760, 400),
+                ),
+            ),
+        )
+        oracle.campaign_map_state_value = initial
+
+        def refresh_frame():
+            shifted = []
+            for index, cell in enumerate(initial.cells):
+                dx = -400 if index else -390
+                shifted.append(
+                    replace(
+                        cell,
+                        point=Point(cell.point.x + dx, cell.point.y + 45),
+                        bounds=Bounds(
+                            cell.bounds.left + dx,
+                            cell.bounds.top + 45,
+                            cell.bounds.right + dx,
+                            cell.bounds.bottom + 45,
+                        ),
+                    )
+                )
+            oracle.campaign_map_state_value = replace(
+                initial,
+                generation=initial.generation + 1,
+                cells=tuple(shifted),
+            )
+
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            input_frame_refresher=refresh_frame,
+            campaign_combat_budget=1,
+            campaign_viewport_swipe_budget=1,
+        )
+        adapter.begin_campaign_pre_sortie("12-4")
+        state = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        adapter.authorize_campaign_combat(make_campaign_combat_decision(), state)
+        intent = adapter.begin_campaign_map_swipe_vector(
+            (200.0, 0.0),
+            box=(123, 159, 1175, 628),
+            random_range=(0, 0, 0, 0),
+            padding=15,
+            duration=(0.1, 0.2),
+            whitelist_area=None,
+            blacklist_area=((900, 500, 950, 550),),
+            name="MAP_SWIPE_-2_0",
+            distance_check=True,
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "not a uniform shift"):
+            adapter.swipe(
+                (500, 400),
+                (700, 400),
+                duration=0.157,
+                name="MAP_SWIPE_-2_0",
+                distance_check=True,
+            )
+
+        self.assertEqual(oracle.campaign_map_swipe_calls, [])
+        adapter.end_campaign_map_swipe_vector(intent)
         adapter.end_campaign_pre_sortie()
 
     def test_campaign_viewport_rebases_exact_partial_hard_route(self):
@@ -8108,6 +10172,37 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             adapter.click(CampaignGridButton((3, 5)))
 
         self.assertEqual(oracle.click_calls, ["campaign/map/grid/D6"])
+        adapter.end_campaign_pre_sortie()
+
+    def test_campaign_combat_allows_one_exact_no_progress_input_retry(self):
+        oracle = FakeOracle()
+        state = make_campaign_combat_state()
+        oracle.campaign_map_state_value = state
+        adapter = AlasSemanticAdapter(
+            oracle,
+            lambda: None,
+            campaign_combat_budget=2,
+        )
+        adapter.begin_campaign_pre_sortie("12-4")
+        current = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        adapter.authorize_campaign_combat(make_campaign_combat_decision(), current)
+
+        adapter.click(CampaignGridButton((3, 5)))
+        oracle.campaign_map_state_value = replace(state, generation=52)
+        adapter.click(CampaignGridButton((3, 5)))
+
+        self.assertEqual(
+            oracle.click_calls,
+            ["campaign/map/grid/D6", "campaign/map/grid/D6"],
+        )
+        self.assertEqual(adapter._campaign_context.combat_input_retry_count, 1)
+        with self.assertRaisesRegex(SemanticGateClosed, "proven post-state"):
+            adapter.click(CampaignGridButton((3, 5)))
         adapter.end_campaign_pre_sortie()
 
     def test_goto_main_from_mission_uses_exact_task_back(self):
@@ -9172,6 +11267,47 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             session.click(NamedButton("BATTLE_STATUS_D")), receipt
         )
 
+    def test_campaign_result_passive_fallback_clicks_fresh_statistics_page(self):
+        adapter, oracle, _ = self.make_adapter(campaign_combat_budget=1)
+        oracle.campaign_map_state_value = make_campaign_combat_state()
+        adapter.begin_campaign_pre_sortie("12-4")
+        state = adapter.campaign_map_state(
+            columns=11,
+            rows=8,
+            land_cells=((0, 0),),
+            expected_fleet_count=1,
+        )
+        adapter.authorize_campaign_combat(make_campaign_combat_decision(), state)
+        adapter.click(CampaignGridButton((3, 5)))
+
+        expected = oracle.click_receipt("daily/battle/result", generation=60)
+        oracle.daily_battle_result_visible = Mock(return_value=True)
+        oracle.click_daily_battle_result = Mock(return_value=expected)
+        stale_oracle = SimpleNamespace(
+            daily_battle_result_visible=Mock(return_value=False),
+            operation_siren_battle_result_visible=Mock(return_value=False),
+        )
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = Mock()
+        session._combat_result_action_oracle = lambda _adapter: stale_oracle
+        session._combat_result_observation = (
+            "BATTLE_STATUS_S",
+            time.monotonic(),
+        )
+        session._combat_last_result_receipt = None
+        session._arm_combat_result_transition = Mock()
+
+        receipt = session.click(NamedButton("BATTLE_STATUS_S"))
+
+        self.assertEqual(receipt, expected)
+        session.refresh_frame.assert_called_once_with()
+        oracle.click_daily_battle_result.assert_called_once_with()
+        session._arm_combat_result_transition.assert_called_once_with(adapter)
+        self.assertIsNone(session._combat_result_observation)
+        adapter.end_campaign_pre_sortie()
+
     def test_month_boss_skip_ignores_stacked_neighbour_hud(self):
         adapter, oracle, _ = self.make_adapter()
         oracle.operation_siren_radar_targets = Mock(return_value=((0, -1),))
@@ -9764,6 +11900,10 @@ class AlasSemanticAdapterTests(unittest.TestCase):
             adapter.ocr_text([(133, 39, 250, 72)], alphabet="0123456789/IDSB"),
             "300/300",
         )
+        receipt = adapter.click(NamedButton("DATA_KEY_COLLECT"))
+        self.assertEqual(receipt.semantic_id, "archive/key/collect")
+        with self.assertRaisesRegex(SemanticGateClosed, "already collected"):
+            adapter.click(NamedButton("DATA_KEY_COLLECT"))
 
     def test_bounded_task_flows_begin_with_page_discovery_grace(self):
         for begin_name in (
@@ -10181,6 +12321,24 @@ class AlasSemanticAdapterTests(unittest.TestCase):
 
         self.assertIsNone(session.runtime_handle)
 
+    def test_session_routes_data_key_collect_to_reviewed_adapter_action(self):
+        adapter = Mock()
+        receipt = Mock()
+        adapter.campaign_combat_committed.return_value = False
+        adapter.operation_siren_combat_committed.return_value = False
+        adapter.click.return_value = receipt
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.adapter = adapter
+        session.open = lambda: adapter
+        session.refresh_frame = Mock()
+
+        self.assertIs(session.click(NamedButton("DATA_KEY_COLLECT")), receipt)
+        self.assertIs(
+            session.click(NamedButton("POPUP_CONFIRM_DATA_KEY_LIMIT")), receipt
+        )
+        self.assertEqual(session.refresh_frame.call_count, 2)
+        self.assertEqual(adapter.click.call_count, 2)
+
     def test_live_combat_manifest_rebinds_only_reviewed_capacity_successor(self):
         base_revision = "be80ce591a481c12d60c50d6040d40c035b40a2b"
         live_revision = "506b76f698b5089aaa29c4e7908b48edb8532a44"
@@ -10389,6 +12547,132 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         with patch.dict("os.environ", environment, clear=True):
             with self.assertRaises(SemanticGateClosed):
                 AlasSemanticSession.from_environment("emulator-test")
+
+
+    def test_battle_pass_context_claims_only_reviewed_claim_all(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.battle_pass_reward_available_value = True
+        oracle.battle_pass_claim_available_value = True
+        adapter.begin_battle_pass()
+
+        self.assertTrue(adapter.appear(NamedButton("REWARD_GOTO_BATTLE_PASS")))
+        entrance = adapter.click(NamedButton("REWARD_GOTO_BATTLE_PASS"))
+        self.assertEqual(entrance.semantic_id, "reward/battle-pass/enter")
+        self.assertTrue(adapter.appear(NamedButton("BATTLE_PASS_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("REWARD_RECEIVE_WHITE")))
+        claim = adapter.click(NamedButton("REWARD_RECEIVE_WHITE"))
+        self.assertEqual(claim.semantic_id, "battle-pass/claim-all")
+        self.assertFalse(adapter.appear(NamedButton("REWARD_RECEIVE_WHITE")))
+        with self.assertRaisesRegex(SemanticGateClosed, "outside the reviewed"):
+            adapter.click(NamedButton("REWARD_RECEIVE_SP"))
+
+    def test_battle_pass_page_recovers_through_exact_home(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.battle_pass_page_visible_value = True
+        adapter.begin_battle_pass()
+
+        self.assertTrue(adapter.appear(NamedButton("BATTLE_PASS_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("GOTO_MAIN")))
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "battle-pass/home")
+        self.assertFalse(oracle.battle_pass_page_visible_value)
+
+        # A delayed page transition must be idempotent rather than dispatching
+        # another input after the reviewed target has already unmounted.
+        self.assertIs(adapter.click(NamedButton("GOTO_MAIN")), receipt)
+
+    def test_supply_pack_click_admits_only_exact_free_card(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.recommendation_shop_visible_value = True
+        oracle.gift_pack_page_visible_value = True
+        oracle.free_weekly_supply_pack_available_value = True
+        adapter.begin_supply_pack()
+
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
+        self.assertTrue(adapter.appear(NamedButton("FREE_SUPPLY_PACK")))
+        receipt = adapter.click(NamedButton("FREE_SUPPLY_PACK"))
+
+        self.assertEqual(receipt.semantic_id, "shop/free-weekly-pack")
+        self.assertFalse(adapter.appear(NamedButton("FREE_SUPPLY_PACK")))
+        with self.assertRaisesRegex(SemanticGateClosed, "confirmation"):
+            adapter.click(NamedButton("BUY_CONFIRM"))
+
+    def test_battle_pass_navigation_recovers_from_existing_shop(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.recommendation_shop_visible_value = True
+        adapter.begin_battle_pass()
+
+        self.assertTrue(adapter.appear(NamedButton("SHOP_CHECK")))
+        receipt = adapter.click(NamedButton("GOTO_MAIN"))
+
+        self.assertEqual(receipt.semantic_id, "shop/home")
+        self.assertIs(adapter.click(NamedButton("GOTO_MAIN")), receipt)
+        adapter._battle_pass_context.passive_transition_until = time.monotonic() - 1
+        self.assertFalse(adapter.appear(NamedButton("EVENT_LIST_CHECK")))
+        adapter.end_battle_pass()
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "EVENT_LIST_CHECK"):
+            adapter.appear(NamedButton("EVENT_LIST_CHECK"))
+
+    def test_data_key_limit_confirm_requires_force_and_preceding_claim(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.war_archives_visible_value = True
+        oracle.enabled_values.update(
+            {
+                "reward/award-info/close": False,
+                "reward/award-info1/close": False,
+            }
+        )
+        adapter.begin_data_key(force_collect=True)
+
+        claim = adapter.click(NamedButton("DATA_KEY_COLLECT"))
+        oracle.data_key_limit_prompt_value = True
+
+        self.assertEqual(claim.semantic_id, "archive/key/collect")
+        self.assertTrue(adapter.appear(NamedButton("POPUP_CONFIRM")))
+        confirm = adapter.click(NamedButton("POPUP_CONFIRM_DATA_KEY_LIMIT"))
+        self.assertEqual(confirm.semantic_id, "archive/key-limit/confirm")
+        oracle.war_archives_visible_value = False
+        self.assertFalse(adapter.appear(NamedButton("DATA_KEY_COLLECT")))
+        self.assertFalse(adapter.appear(NamedButton("DATA_KEY_COLLECTED")))
+
+        adapter.end_data_key()
+        oracle.war_archives_collected_value = False
+        oracle.data_key_limit_prompt_value = True
+        adapter.begin_data_key(force_collect=False)
+        self.assertFalse(adapter.appear(NamedButton("POPUP_CONFIRM")))
+        with self.assertRaisesRegex(SemanticGateClosed, "ForceCollect"):
+            adapter.click(NamedButton("POPUP_CONFIRM"))
+
+    def test_data_key_navigation_closes_only_exact_award_popup(self):
+        adapter, oracle, _ = self.make_adapter()
+        oracle.enabled_values.update(
+            {
+                "reward/award-info/close": True,
+                "reward/award-info1/close": False,
+            }
+        )
+        adapter.begin_data_key(force_collect=True)
+
+        self.assertTrue(adapter.appear(NamedButton("GET_ITEMS_1")))
+        receipt = adapter.click(NamedButton("GET_ITEMS_1"))
+
+        self.assertEqual(receipt.semantic_id, "reward/award-info/close")
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+
+        navigation_receipt = adapter.click(
+            NamedButton("CAMPAIGN_MENU_GOTO_WAR_ARCHIVES")
+        )
+        self.assertEqual(
+            navigation_receipt.semantic_id, "reward/award-info/close"
+        )
+
+        adapter._data_key_context.passive_transition_until = time.monotonic() - 1
+        self.assertFalse(adapter.appear(NamedButton("FLEET_CHECK")))
+        adapter.end_data_key()
+        with self.assertRaisesRegex(AlasSemanticUnmapped, "FLEET_CHECK"):
+            adapter.appear(NamedButton("FLEET_CHECK"))
 
 
 class GuildSemanticAdapterTests(unittest.TestCase):

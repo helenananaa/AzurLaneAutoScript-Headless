@@ -54,6 +54,7 @@ class FakeGrid:
         self.is_enemy = False
         self.is_boss = False
         self.is_siren = False
+        self.is_movable = False
         self.is_portal = False
         self.is_ammo = False
         self.enemy_scale = 0
@@ -168,6 +169,7 @@ class FakeCampaign:
             MAP_HAS_LAND_BASED=False,
             MAP_HAS_MAZE=False,
             MAP_HAS_MOVABLE_ENEMY=False,
+            MAP_HAS_MOVABLE_NORMAL_ENEMY=False,
             MAP_HAS_PORTAL=False,
             MAP_MYSTERY_HAS_CARRIER=False,
             MAP_FOCUS_ENEMY_AFTER_BATTLE=False,
@@ -611,6 +613,74 @@ class AlasCampaignMapSyncTests(unittest.TestCase):
         self.assertTrue(campaign.map[(0, 0)].is_siren)
         self.assertFalse(campaign.map[(0, 0)].is_enemy)
         self.assertEqual(campaign.siren_count, 1)
+
+    def test_projects_eventsp_movable_siren_off_its_static_spawn(self):
+        campaign = FakeCampaign()
+        campaign.MAP.name = "SP"
+        campaign.config.MAP_HAS_MOVABLE_ENEMY = True
+        state = replace(
+            make_state(),
+            stage_code="sp",
+            enemies=(
+                replace(
+                    make_state().enemies[0],
+                    object_id=0,
+                    sprite="emotion_qz",
+                    scale=0,
+                    genre="Siren",
+                    is_siren=True,
+                ),
+            ),
+        )
+
+        projection = synchronize_alas_campaign_map(campaign, state)
+
+        self.assertEqual(projection.stage_code, "sp")
+        self.assertTrue(campaign.map[(0, 0)].is_siren)
+        self.assertTrue(campaign.map[(0, 0)].is_movable)
+
+    def test_rejects_off_spawn_siren_without_movable_enemy_capability(self):
+        campaign = FakeCampaign()
+        campaign.MAP.name = "SP"
+        state = replace(
+            make_state(),
+            stage_code="sp",
+            enemies=(
+                replace(
+                    make_state().enemies[0],
+                    object_id=0,
+                    sprite="emotion_qz",
+                    scale=0,
+                    genre="Siren",
+                    is_siren=True,
+                ),
+            ),
+        )
+
+        with self.assertRaisesRegex(SemanticGateClosed, "violates static map"):
+            synchronize_alas_campaign_map(campaign, state)
+
+    def test_movable_siren_capability_does_not_admit_normal_enemy_drift(self):
+        campaign = FakeCampaign()
+        campaign.MAP.name = "SP"
+        campaign.config.MAP_HAS_MOVABLE_ENEMY = True
+        campaign.MAP[(0, 0)].may_enemy = False
+        state = replace(make_state(), stage_code="sp")
+
+        with self.assertRaisesRegex(SemanticGateClosed, "violates static map"):
+            synchronize_alas_campaign_map(campaign, state)
+
+    def test_projects_movable_normal_enemy_only_with_its_own_capability(self):
+        campaign = FakeCampaign()
+        campaign.MAP.name = "A1"
+        campaign.config.MAP_HAS_MOVABLE_NORMAL_ENEMY = True
+        campaign.MAP[(0, 0)].may_enemy = False
+        state = replace(make_state(), stage_code="a1")
+
+        synchronize_alas_campaign_map(campaign, state)
+
+        self.assertTrue(campaign.map[(0, 0)].is_enemy)
+        self.assertTrue(campaign.map[(0, 0)].is_movable)
 
     def test_rolls_back_campaign_if_alas_initializer_fails(self):
         campaign = FakeCampaign()

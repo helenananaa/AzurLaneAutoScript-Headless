@@ -20,6 +20,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    FrozenSet,
     Iterable,
     List,
     Mapping,
@@ -35,6 +36,61 @@ from .runtime_trace import RuntimeTraceRecorder
 OBSERVER_SCHEMA = "alas-headless.observer/v1"
 BUTTON_SCHEMA = "alas-headless.buttons/v1"
 UI_SCHEMA = "alas-headless.ui/v1"
+
+
+# Reviewed from the game's ``re_map_template`` identity table.  The folder is
+# ALAS's stable campaign module key; the pair is the Unity archive category
+# and the exact activity-banner sprite mounted on that card.  Three newer ALAS
+# folders (20230525, 20230803 and 20240725) are intentionally absent because
+# the pinned CN game exposes no corresponding re-map record.  They therefore
+# fail only the requested archive instead of being guessed by list position.
+WAR_ARCHIVES_CAMPAIGN_CARDS: Mapping[str, Tuple[str, str]] = {
+    "war_archives_20190321_en": ("ex", "temp_hongran"),
+    "war_archives_20181020_en": ("sp", "temp_zjiandui"),
+    "war_archives_20190221_en": ("ex", "temp_lingdong"),
+    "war_archives_20191010_en": ("sp", "temp_sipei"),
+    "war_archives_20191031_en": ("ex", "temp_yisege"),
+    "war_archives_20181026_en": ("ex", "temp_zhuiluo"),
+    "war_archives_20180726_cn": ("ex", "temp_yuanwei"),
+    "war_archives_20180607_cn": ("ex", "temp_moran"),
+    "war_archives_20190620_en": ("sp", "temp_guangrong"),
+    "war_archives_20181227_cn": ("ex", "temp_tiancheng"),
+    "war_archives_20190314_en": ("sp", "temp_xinaoerliang"),
+    "war_archives_20200820_cn": ("ex", "temp_bisimai"),
+    "war_archives_20211014_cn": ("sp", "temp_ouxiang"),
+    "war_archives_20190911_cn": ("ex", "temp_beixiju"),
+    "war_archives_20200312_cn": ("sp", "temp_longxiang"),
+    "war_archives_20210325_cn": ("ex", "temp_xiangting"),
+    "war_archives_20210624_cn": ("ex", "temp_fuying"),
+    "war_archives_20200806_cn": ("sp", "temp_u110"),
+    "war_archives_20201029_cn": ("sp", "temp_ouxiang2"),
+    "war_archives_20210819_cn": ("ex", "temp_weiceng"),
+    "war_archives_20200903_cn": ("sp", "temp_yonggan"),
+    "war_archives_20211028_cn": ("ex", "temp_zhende"),
+    "war_archives_20200507_cn": ("sp", "temp_taertu"),
+    "war_archives_20220210_cn": ("ex", "temp_qiaba"),
+    "war_archives_20220414_cn": ("ex", "temp_hemin"),
+    "war_archives_20200603_cn": ("sp", "temp_aisijimoren"),
+    "war_archives_20201229_cn": ("ex", "temp_u37"),
+    "war_archives_20200917_cn": ("ex", "temp_xinnong"),
+    "war_archives_20210527_cn": ("ex", "temp_xinzexi"),
+    "war_archives_20210225_cn": ("ex", "temp_talin"),
+    "war_archives_20201012_cn": ("sp", "temp_pulinsidun"),
+    "war_archives_20211111_cn": ("sp", "temp_fuxv"),
+    "war_archives_20210916_cn": ("ex", "temp_daofeng"),
+    "war_archives_20210422_cn": ("ex", "temp_weineituo"),
+    "war_archives_20211229_cn": ("ex", "temp_huteng"),
+    "war_archives_20220224_cn": ("ex", "temp_kalangshitade"),
+    "war_archives_20220324_cn": ("sp", "temp_diguo"),
+    "war_archives_20220526_cn": ("ex", "temp_qianwei"),
+    "war_archives_20220728_cn": ("ex", "temp_luoma"),
+    "war_archives_20220428_cn": ("ex", "temp_aimudeng"),
+    "war_archives_20231026_cn": ("sp", "temp_fengfanv1"),
+    "war_archives_20220915_cn": ("ex", "temp_wuzang"),
+    "war_archives_20221222_cn": ("ex", "temp_yuekechengII"),
+    "war_archives_20230223_cn": ("ex", "temp_yuanchou"),
+    "war_archives_20220818_cn": ("sp", "temp_bulunxierde"),
+}
 
 
 class SemanticOracleError(RuntimeError):
@@ -707,6 +763,50 @@ class EnhancementDockCandidate:
     button: ButtonState
 
 
+@dataclass(frozen=True)
+class GemsFarmingDockCandidate:
+    """One typed Dock card exposed to ALAS's GemsFarming selector."""
+
+    position: int
+    ship_id: int
+    ship_name: str
+    ship_sprite: str
+    ship_type: str
+    rarity: str
+    level: int
+    emotion: int
+    fleet_index: int
+    status: str
+    button: ButtonState
+
+
+@dataclass(frozen=True)
+class GemsFarmingEquipmentSlot:
+    """One exact equipment identity captured from a GemsFarming ship slot."""
+
+    position: int
+    equipment_id: str
+    enhancement: int
+    special: bool
+
+
+@dataclass(frozen=True)
+class GemsFarmingEquipmentLoadout:
+    """The non-empty equipment ALAS asked GemsFarming to transfer."""
+
+    role: str
+    slots: Tuple[GemsFarmingEquipmentSlot, ...]
+
+    def __post_init__(self) -> None:
+        if self.role not in ("flagship", "vanguard"):
+            raise ValueError("GemsFarming equipment role is invalid")
+        positions = tuple(slot.position for slot in self.slots)
+        if len(set(positions)) != len(positions):
+            raise ValueError("GemsFarming equipment positions must be unique")
+        if any(not 1 <= position <= 6 for position in positions):
+            raise ValueError("GemsFarming equipment position is outside 1 through 6")
+
+
 def enhancement_config_policy(
     ship_to_enhance: str,
     check_per_category: int,
@@ -929,10 +1029,54 @@ class MeowfficerTrainingState:
 
 
 @dataclass(frozen=True)
+class MeowfficerAcquisitionState:
+    """Typed identity of the Commander Cat currently being collected."""
+
+    generation: int
+    identity: str
+    rarity: str
+    talent_sprites: Tuple[str, ...]
+    has_special_talent: bool
+
+
+@dataclass(frozen=True)
 class MeowfficerQueueState:
     selected: int
     capacity: int
     box_counts: Tuple[int, int, int]
+
+
+@dataclass(frozen=True)
+class MeowfficerPurchaseState:
+    """Exact count and coin price on CommanderReserveUI."""
+
+    generation: int
+    count: int
+    total_price: int
+
+
+@dataclass(frozen=True)
+class MeowfficerCatState:
+    path: str
+    level: int
+    selected: bool
+    point: Point
+    bounds: Bounds
+
+
+@dataclass(frozen=True)
+class MeowfficerEnhanceState:
+    generation: int
+    level: int
+    coins: int
+
+
+@dataclass(frozen=True)
+class MeowfficerFeedState:
+    generation: int
+    selected: int
+    capacity: int
+    candidates: Tuple[MeowfficerCatState, ...]
 
 
 @dataclass(frozen=True)
@@ -1060,6 +1204,7 @@ class CampaignStageState:
     stage_code: str
     title: str
     button: ButtonState
+    remaining_attempts: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -1067,6 +1212,29 @@ class CampaignPageState:
     generation: int
     chapter_name: str
     stages: Tuple[CampaignStageState, ...]
+
+
+@dataclass(frozen=True)
+class RaidRemainState:
+    generation: int
+    event: str
+    mode: str
+    remaining: int
+    capacity: Optional[int]
+    root: str
+    node_id: int
+
+
+@dataclass(frozen=True)
+class RaidMultipleSortieState:
+    generation: int
+    event: str
+    sortie_count: int
+    ticket_selected: int
+    ticket_owned: int
+    bonus_count: int
+    zero_ticket_disabled: bool
+    root: str
 
 
 @dataclass(frozen=True)
@@ -1078,6 +1246,7 @@ class CampaignPreparationState:
     proceed_button: ButtonState
     cancel_button: ButtonState
     oil_cost: Optional[int] = None
+    remaining_attempts: Optional[int] = None
 
 
 @dataclass(frozen=True)
@@ -1350,10 +1519,20 @@ class ResearchProjectState:
 
 
 @dataclass(frozen=True)
+class ResearchResourceCostState:
+    resource_id: str
+    owned: int
+    required: int
+
+
+@dataclass(frozen=True)
 class ResearchDetailState:
     code: str
     subtitle: str
     duration_seconds: int
+    # The three scalar fields retain the first displayed cost for callers that
+    # predate multi-resource Research cards. Safety-sensitive consumers must
+    # use ``resource_costs``, which contains every exact item_tpl instance.
     resource_id: str
     resource_owned: int
     resource_required: int
@@ -1362,6 +1541,7 @@ class ResearchDetailState:
     can_queue: bool
     is_running: bool
     is_finished: bool
+    resource_costs: Tuple[ResearchResourceCostState, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -1539,6 +1719,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     ),
     SemanticTarget("main/battle", "battle", "frame/right/1/battle"),
     SemanticTarget("main/formation", "formation", "frame/right/1/formation"),
+    SemanticTarget(
+        "main/raid",
+        "MainActBossBtn",
+        "frame/right/activity/MainActBossBtn",
+    ),
     SemanticTarget("main/settings", "settings", "frame/top/btns/settings"),
     SemanticTarget("main/mail", "mail", "frame/top/btns/mail"),
     SemanticTarget("main/shop", "shop", "frame/bottom/frame/shop"),
@@ -1790,9 +1975,84 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "CommanderCatDockUI(Clone)/box/reserve_btn",
     ),
     SemanticTarget(
+        "meowfficer/buy/min",
+        "min",
+        "CommanderReserveUI(Clone)/frame/bg1/count/min",
+    ),
+    SemanticTarget(
+        "meowfficer/buy/add",
+        "add",
+        "CommanderReserveUI(Clone)/frame/bg1/count/add",
+    ),
+    SemanticTarget(
+        "meowfficer/buy/max",
+        "max",
+        "CommanderReserveUI(Clone)/frame/bg1/max",
+    ),
+    SemanticTarget(
+        "meowfficer/buy/submit",
+        "Button",
+        "CommanderReserveUI(Clone)/frame/bg1/Button",
+    ),
+    SemanticTarget(
+        "meowfficer/buy/skip",
+        "Button",
+        "CommanderReserveUI(Clone)/frame/bg2/Button",
+    ),
+    SemanticTarget(
+        "meowfficer/buy/cancel",
+        "cancel_btn",
+        "CommanderReserveUI(Clone)/CommanderMsgBoxUI(Clone)/frame/cancel_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/buy/confirm",
+        "confirm_btn",
+        "CommanderReserveUI(Clone)/CommanderMsgBoxUI(Clone)/frame/confirm_btn",
+    ),
+    SemanticTarget(
         "meowfficer/train/enter",
         "boxes_btn",
         "CommanderCatDockUI(Clone)/box/boxes_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/enhance/open",
+        "play",
+        "CommanderCatUI(Clone)/blur_panel/left_panel/toggles/play",
+    ),
+    SemanticTarget(
+        "meowfficer/enhance/back",
+        "back_btn",
+        "CommanderCatUI(Clone)/blur_panel/top/back_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/feed/open",
+        "add",
+        "CommanderCatPlayUI(Clone)/select_panel/frame/list/commandeTF/add",
+    ),
+    SemanticTarget(
+        "meowfficer/feed/cancel",
+        "cancel_btn",
+        "CommanderCatDockUI(Clone)/bottom/cancel_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/feed/confirm",
+        "select_btn",
+        "CommanderCatDockUI(Clone)/bottom/select_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/enhance/submit",
+        "confirm_btn",
+        "CommanderCatPlayUI(Clone)/select_panel/confirm_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/enhance/cancel",
+        "cancel_btn",
+        "CommanderCatPlayUI(Clone)/CommanderMsgBoxUI(Clone)/frame/cancel_btn",
+    ),
+    SemanticTarget(
+        "meowfficer/enhance/confirm",
+        "confirm_btn",
+        "CommanderCatPlayUI(Clone)/CommanderMsgBoxUI(Clone)/frame/confirm_btn",
     ),
     SemanticTarget(
         "meowfficer/train/close",
@@ -1818,6 +2078,16 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "meowfficer/get/continue",
         "click",
         "GetCommanderUI(Clone)/click",
+    ),
+    SemanticTarget(
+        "meowfficer/get/lock",
+        "lock",
+        "GetCommanderUI(Clone)/left_panel/btns/lock",
+    ),
+    SemanticTarget(
+        "meowfficer/get/unlock",
+        "unlock",
+        "GetCommanderUI(Clone)/left_panel/btns/unlock",
     ),
     SemanticTarget(
         "meowfficer/get/lock-cancel",
@@ -1873,6 +2143,16 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "build/warning/confirm",
         "custom_button_1(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "archive/entry/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "archive/entry/cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
     ),
     SemanticTarget(
         "build/prep/confirm",
@@ -2259,6 +2539,16 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "LevelRemasterView(Clone)/getBtn/state_before",
     ),
     SemanticTarget(
+        "archive/key-limit/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "archive/key-limit/cancel",
+        "custom_button_2(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_2(Clone)",
+    ),
+    SemanticTarget(
         "archive/page/back",
         "bg",
         "Overlay/UIMain/LevelRemasterView(Clone)/bg",
@@ -2632,6 +2922,21 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "reward/meta/enter",
         "meta_boss",
         "CommissionInfoUI4Mellow(Clone)/frame/link_btns/btns/meta_boss",
+    ),
+    SemanticTarget(
+        "reward/battle-pass/enter",
+        "crusing",
+        "CommissionInfoUI4Mellow(Clone)/frame/link_btns/btns/crusing",
+    ),
+    SemanticTarget(
+        "battle-pass/claim-all",
+        "btn_all",
+        "WorldCruiseUI(Clone)/frame/award_container/WorldCruiseAwardPage(Clone)/frame/btns/btn_all",
+    ),
+    SemanticTarget(
+        "battle-pass/home",
+        "home",
+        "WorldCruiseUI(Clone)/top/home",
     ),
     SemanticTarget(
         "meta/page/back",
@@ -3128,6 +3433,12 @@ _CAMPAIGN_LIVE_FLEET_DIRECT_ANCHORS = (
 )
 _CAMPAIGN_LIVE_MAP_VIEW_ROOT = "OverlayCamera/Overlay/UIMain/LevelInfoSPUI(Clone)"
 _CAMPAIGN_LIVE_MAP_PANEL_ROOT = _CAMPAIGN_LIVE_MAP_VIEW_ROOT + "/panel/"
+_CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT = (
+    "UICamera/Canvas/UIOrigin/LevelInfoSPUI(Clone)"
+)
+_CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT = (
+    _CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT + "/panel/"
+)
 _CAMPAIGN_LIVE_NORMAL_MAP_VIEW_ROOT = (
     "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)"
 )
@@ -3141,6 +3452,14 @@ _CAMPAIGN_LIVE_MAP_BUTTON_SPECS = {
     "panel/drops/frame/list/item(Clone)": ("item(Clone)", 4),
     "panel/head/Image": ("Image", 1),
     "panel/start_button": ("start_button", 1),
+}
+_CAMPAIGN_LIVE_D1_MAP_BUTTON_ADDITIONS = {
+    "panel/Difficulty/Hard/Switch": ("Switch", 1),
+    "panel/passState/Image": ("Image", 1),
+}
+_CAMPAIGN_LIVE_B2_MAP_BUTTON_ADDITIONS = {
+    "panel/Difficulty/Normal/Switch": ("Switch", 1),
+    "panel/passState/Image": ("Image", 1),
 }
 _CAMPAIGN_LIVE_MAP_TOGGLE_SPECS = {
     "panel/BottomExtra/LoopGroup/view/container/AutoFight": 1,
@@ -3162,6 +3481,11 @@ _CAMPAIGN_LIVE_MAP_TEXT_COUNTS = {
     "panel/title_form/title_en": 1,
     "panel/title_form/title_index": 1,
     "panel/win_conditions/desc": 1,
+}
+_CAMPAIGN_LIVE_D1_MAP_TEXT_ADDITIONS = {
+    "panel/achieves/achieve(Clone)/desc": 3,
+    "panel/progress/Text": 1,
+    "panel/progress/Text/value": 1,
 }
 _CAMPAIGN_LIVE_MAP_IMAGE_SPECS = {
     "bg": (("white_dot",), True),
@@ -3227,6 +3551,56 @@ _CAMPAIGN_LIVE_MAP_IMAGE_SPECS = {
     "panel/title/Hard": (("bg_title_hard",), False),
     "panel/win_conditions": (("text_bg",), False),
 }
+_CAMPAIGN_LIVE_D1_MAP_IMAGE_ADDITIONS = {
+    "panel/achieves/achieve(Clone)": (("white_dot",) * 3, True),
+    "panel/achieves/achieve(Clone)/star": (("star",) * 3, True),
+    "panel/BottomExtra/LoopGroup/view/container/CostLimit": (
+        ("cost_limit_tag",),
+        True,
+    ),
+    "panel/Difficulty/Hard": (("btn_switch_hard",), True),
+    "panel/Difficulty/Hard/Bonus1": (("bonus_bg",), False),
+    "panel/Difficulty/Hard/Bonus1/Image": (("bonus_us",), False),
+    # These five exact decorative records reuse pooled star sprites and expose
+    # no stable bounds on the live D1 surface.  They are not action targets;
+    # the reviewed path and raycast behavior are the useful structural facts.
+    "panel/Difficulty/Hard/Mask_Difficulty_Loop": ((), True),
+    "panel/Difficulty/Hard/TextHard": (("text_hard_select",), False),
+    "panel/Difficulty/Hard/TextNormal": (("text_normal",), False),
+    "panel/Difficulty/Mask_Difficlty": ((), False),
+    "panel/Difficulty/Mask_Difficlty/Image": ((), False),
+    "panel/Difficulty/Mask_Difficlty/Image_1": ((), False),
+    "panel/Difficulty/Mask_Difficlty/Image_2": ((), False),
+    # The sprite is the completed-run counter (1, 2, ...), not control
+    # identity.  Keep the exact record path/raycast contract and accept the
+    # non-empty counter sprite.
+    "panel/passState/Image": ((), True),
+    "panel/progress/Background": (("bar_with_brackets",), True),
+    "panel/progress/Fill Area/Fill": (("yellow_progress",), True),
+}
+_CAMPAIGN_LIVE_B2_MAP_IMAGE_ADDITIONS = {
+    "panel/achieves/achieve(Clone)": (("white_dot",) * 3, True),
+    "panel/achieves/achieve(Clone)/star": (("star",) * 3, True),
+    # These five exact decorative records share the stage-star sprite pool;
+    # their sprites change after a render tick.  They are not action targets,
+    # so retain the exact path and raycast contract while requiring non-empty
+    # sprite identity rather than one transient pooled value.
+    "panel/Difficulty/Mask_Normal": ((), False),
+    "panel/Difficulty/Mask_Normal/Image": ((), False),
+    "panel/Difficulty/Mask_Normal/Image_1": ((), False),
+    "panel/Difficulty/Mask_Normal/Image_2": ((), False),
+    "panel/Difficulty/Normal": (("btn_switch_normal",), True),
+    "panel/Difficulty/Normal/Bonus1": (("bonus_bg",), False),
+    "panel/Difficulty/Normal/Bonus1/Image": (("bonus_us",), False),
+    "panel/Difficulty/Normal/Mask_Normal_Loop": ((), True),
+    "panel/Difficulty/Normal/TextHard": (("text_hard",), False),
+    "panel/Difficulty/Normal/TextNormal": (("text_normal_select",), False),
+    "panel/Level/Normal": (("bg_lv_normal",), False),
+    "panel/passState/Image": ((), True),
+    "panel/progress/Background": (("bar_with_brackets",), True),
+    "panel/progress/Fill Area/Fill": (("yellow_progress",), True),
+    "panel/title/Normal": (("bg_title_normal",), False),
+}
 _CAMPAIGN_PREPARATION_REVIEWED_ROOTS: Tuple[Tuple[str, str], ...] = (
     (
         "map",
@@ -3235,6 +3609,10 @@ _CAMPAIGN_PREPARATION_REVIEWED_ROOTS: Tuple[Tuple[str, str], ...] = (
     (
         "map",
         _CAMPAIGN_LIVE_NORMAL_MAP_PANEL_ROOT,
+    ),
+    (
+        "map",
+        _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
     ),
     (
         "map",
@@ -3288,12 +3666,46 @@ _CAMPAIGN_MAP_UNDERLAY_ROOT_PAIRS = (
         _CAMPAIGN_LIVE_MAP_PANEL_ROOT,
         ("UICamera/Canvas/UIMain/LevelMainScene(Clone)/" "LevelSelectSPFullUI(Clone)/"),
     ),
+    (
+        _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
+        ("UICamera/Canvas/UIMain/LevelMainScene(Clone)/" "LevelSelectSPFullUI(Clone)/"),
+    ),
 )
 _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT = (
     "UICamera/Canvas/UIMain/LevelMainScene(Clone)/" "LevelSelectSPFullUI(Clone)/"
 )
 _CAMPAIGN_LIVE_EVENTSP_STAGE_ROOT = (
     _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050041/main"
+)
+_CAMPAIGN_LIVE_EVENTD1_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050024/main"
+)
+_CAMPAIGN_LIVE_EVENTC1_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050021/main"
+)
+_CAMPAIGN_LIVE_EVENTC2_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050022/main"
+)
+_CAMPAIGN_LIVE_EVENTC3_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050023/main"
+)
+_CAMPAIGN_LIVE_EVENTD2_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050025/main"
+)
+_CAMPAIGN_LIVE_EVENTD3_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050026/main"
+)
+_CAMPAIGN_LIVE_EVENTA2_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050002/main"
+)
+_CAMPAIGN_LIVE_EVENTA3_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050003/main"
+)
+_CAMPAIGN_LIVE_EVENTB2_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050005/main"
+)
+_CAMPAIGN_LIVE_EVENTB3_STAGE_ROOT = (
+    _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/Nodes/Chapter_2050006/main"
 )
 _CAMPAIGN_LIVE_EVENTSP_SELECTED_ROOT = (
     _CAMPAIGN_LIVE_EVENTSP_UNDERLAY_ROOT + "Battle/MapItems/List/Item(Clone)/Selected/"
@@ -3405,6 +3817,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         (
             "reward/page/back",
             "reward/meta/enter",
+            "reward/battle-pass/enter",
             "reward/resource/oil",
             "reward/resource/coin",
             "reward/resource/exp",
@@ -3420,6 +3833,17 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "reward/award-info/close",
             "reward/award-info1/close",
             "reward/ship-exp/close",
+        ),
+    ),
+    BlockerRule(
+        "battle-pass-page",
+        "/WorldCruiseUI(Clone)/",
+        (
+            "battle-pass/claim-all",
+            "battle-pass/home",
+            "reward/award-info/close",
+            "reward/award-info1/close",
+            "reward/new-ship/continue",
         ),
     ),
     BlockerRule(
@@ -3548,6 +3972,11 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "os/exit/confirm",
             "os/exit/cancel",
             "archive/page/back",
+            "archive/key/collect",
+            "archive/key-limit/confirm",
+            "archive/key-limit/cancel",
+            "reward/award-info/close",
+            "reward/award-info1/close",
             "campaign-menu/daily",
             "campaign/mode/normal",
             "campaign/mode/hard",
@@ -3559,6 +3988,10 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "campaign/map-preparation/proceed",
             "campaign/map-preparation/cancel",
             "campaign/fleet-preparation/cancel",
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
+            "archive/entry/confirm",
+            "archive/entry/cancel",
             "reward/campaign-total/exit",
             "reward/campaign-total/continue",
             *_CAMPAIGN_FLEET_INPUT_TARGETS,
@@ -3674,7 +4107,14 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "archive-page",
         "/LevelRemasterView(Clone)/",
-        ("archive/page/back", "archive/key/collect"),
+        (
+            "archive/page/back",
+            "archive/key/collect",
+            "archive/key-limit/confirm",
+            "archive/key-limit/cancel",
+            "reward/award-info/close",
+            "reward/award-info1/close",
+        ),
     ),
     BlockerRule(
         "daily-page",
@@ -3706,6 +4146,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "campaign/map-preparation/mode/hard",
             "campaign/map-preparation/proceed",
             "campaign/map-preparation/cancel",
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
         ),
     ),
     BlockerRule(
@@ -3756,12 +4198,30 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "meowfficer/fort/enter",
             "meowfficer/fort/close",
             "meowfficer/buy/enter",
+            "meowfficer/buy/min",
+            "meowfficer/buy/add",
+            "meowfficer/buy/max",
+            "meowfficer/buy/submit",
+            "meowfficer/buy/skip",
+            "meowfficer/buy/cancel",
+            "meowfficer/buy/confirm",
+            "meowfficer/enhance/open",
+            "meowfficer/enhance/back",
+            "meowfficer/feed/open",
+            "meowfficer/feed/cancel",
+            "meowfficer/feed/confirm",
+            "meowfficer/enhance/submit",
+            "meowfficer/enhance/cancel",
+            "meowfficer/enhance/confirm",
+            "meowfficer/cat/select",
             "meowfficer/train/enter",
             "meowfficer/train/close",
             "meowfficer/train/complete/first",
             "meowfficer/train/finish-all",
             "meowfficer/train/start",
             "meowfficer/get/continue",
+            "meowfficer/get/lock",
+            "meowfficer/get/unlock",
             "meowfficer/get/lock-cancel",
             "meowfficer/get/lock-confirm",
             "meowfficer/get/result/close",
@@ -3773,6 +4233,50 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         ),
     ),
     BlockerRule(
+        "meowfficer-buy",
+        "/CommanderReserveUI(Clone)/",
+        (
+            "meowfficer/page/back",
+            "meowfficer/buy/min",
+            "meowfficer/buy/add",
+            "meowfficer/buy/max",
+            "meowfficer/buy/submit",
+            "meowfficer/buy/skip",
+            "meowfficer/buy/cancel",
+            "meowfficer/buy/confirm",
+        ),
+    ),
+    BlockerRule(
+        "meowfficer-buy-prompt",
+        "/CommanderReserveUI(Clone)/CommanderMsgBoxUI(Clone)/",
+        (
+            "meowfficer/buy/cancel",
+            "meowfficer/buy/confirm",
+        ),
+    ),
+    BlockerRule(
+        "meowfficer-enhance",
+        "/CommanderCatPlayUI(Clone)/",
+        (
+            "meowfficer/enhance/back",
+            "meowfficer/feed/open",
+            "meowfficer/feed/cancel",
+            "meowfficer/feed/confirm",
+            "meowfficer/enhance/submit",
+            "meowfficer/enhance/cancel",
+            "meowfficer/enhance/confirm",
+            "meowfficer/cat/select",
+        ),
+    ),
+    BlockerRule(
+        "meowfficer-enhance-prompt",
+        "/CommanderCatPlayUI(Clone)/CommanderMsgBoxUI(Clone)/",
+        (
+            "meowfficer/enhance/cancel",
+            "meowfficer/enhance/confirm",
+        ),
+    ),
+    BlockerRule(
         "meowfficer-training",
         "/CommanderBoxesUI(Clone)/",
         (
@@ -3781,6 +4285,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "meowfficer/train/finish-all",
             "meowfficer/train/start",
             "meowfficer/get/continue",
+            "meowfficer/get/lock",
+            "meowfficer/get/unlock",
             "meowfficer/get/lock-cancel",
             "meowfficer/get/lock-confirm",
             "meowfficer/get/result/close",
@@ -3794,13 +4300,17 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "meowfficer-fort",
         "/CommanderHomeUI(Clone)/",
-        ("meowfficer/fort/close",),
+        (
+            "meowfficer/fort/close",
+        ),
     ),
     BlockerRule(
         "meowfficer-get",
         "/GetCommanderUI(Clone)/",
         (
             "meowfficer/get/continue",
+            "meowfficer/get/lock",
+            "meowfficer/get/unlock",
             "meowfficer/get/lock-cancel",
             "meowfficer/get/lock-confirm",
             "meowfficer/get/result/close",
@@ -3834,6 +4344,15 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "meowfficer-queue-prompt",
         "/CommanderMsgBoxUI(Clone)/",
         (
+            # The acquisition lock prompt uses the same generic msgbox name
+            # below GetCommanderUI.  Its more specific identity is still
+            # required by _meowfficer_lock_prompt_proven.
+            "meowfficer/get/lock-cancel",
+            "meowfficer/get/lock-confirm",
+            "meowfficer/buy/cancel",
+            "meowfficer/buy/confirm",
+            "meowfficer/enhance/cancel",
+            "meowfficer/enhance/confirm",
             "meowfficer/queue/cancel",
             "meowfficer/queue/confirm",
         ),
@@ -3921,6 +4440,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "tactical-continue",
         "/Msgbox(Clone)/",
         (
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
             "tactical/continue/cancel",
             "tactical/course/cancel",
             "tactical/course/confirm",
@@ -3949,6 +4470,11 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "os/precombat/info/confirm",
             "os/port/dock/repair-confirm",
             "os/port/dock/repair-cancel",
+            "gems-farming/equipment/unload-confirm",
+            "archive/key-limit/confirm",
+            "archive/key-limit/cancel",
+            "archive/entry/confirm",
+            "archive/entry/cancel",
         ),
     ),
     BlockerRule(
@@ -4665,6 +5191,13 @@ class SemanticOracle:
         self._last_generation: Optional[int] = None
         self._login_update_seen = False
         self._login_update_restart_consumed = False
+        self._gems_farming_equipment_loadouts: Dict[
+            str, GemsFarmingEquipmentLoadout
+        ] = {}
+        self._gems_farming_open_slot_context: Optional[Tuple[str, str, int]] = None
+        self._gems_farming_hard_open_slot_context: Optional[
+            Tuple[str, int, str, Tuple[str, ...]]
+        ] = None
 
     @property
     def input_dispatch_count(self) -> int:
@@ -7139,6 +7672,66 @@ class SemanticOracle:
             and formation[0].active_in_hierarchy
         )
 
+    def _main_raid_entry_proven(self, state: OracleState) -> bool:
+        """Prove the current main-page raid shortcut with its typed icon.
+
+        The activity shortcuts live on the overlay canvas where the observer
+        cannot always resolve a top raycast.  Keep that uncertainty local to
+        the exact generic raid button and require the matching visible
+        ``event_boss`` image to cover the same actionable rectangle.
+        """
+
+        target = self._matches(state, "main/raid")
+        battle = self._matches(state, "main/battle")
+        formation = self._matches(state, "main/formation")
+        if not (
+            len(target) == 1
+            and len(battle) == 1
+            and len(formation) == 1
+            and battle[0].active_in_hierarchy
+            and formation[0].active_in_hierarchy
+        ):
+            return False
+        button = target[0]
+        if not (
+            button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is None
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        ):
+            return False
+
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < state.generation
+            or ui_state.generation > state.generation + 2
+        ):
+            raise SemanticGateClosed("main raid entry snapshots are not coherent")
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == button.path + "/Image"
+            and image.sprite == "event_boss"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and image.raycast_target
+            and image.raycast_top is None
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+            and image.bounds.contains(button.point)
+        )
+        if len(images) != 1:
+            return False
+        button_area = (button.bounds.right - button.bounds.left) * (
+            button.bounds.bottom - button.bounds.top
+        )
+        return self._bounds_overlap(button.bounds, images[0].bounds) >= button_area * 0.99
+
     @staticmethod
     def _guild_page_visible_from_states(
         button_state: OracleState,
@@ -9093,6 +9686,46 @@ class SemanticOracle:
         gift = self._toggle_matches(ui_state, "shop/gift-pack")
         return len(controls) == 2 and len(title) == 1 and len(gift) == 1
 
+    def click_recommendation_shop_home(self) -> ActionReceipt:
+        """Leave the exact Shop shell through its top home control."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("shop home snapshots are not coherent")
+        if not self._recommendation_shop_visible_from_states(state, ui_state):
+            raise SemanticGateClosed("shop shell identity is absent")
+        targets = tuple(
+            button
+            for button in state.buttons
+            if button.name == "homeBtn"
+            and button.path.endswith("buttonList/top/homeBtn")
+        )
+        if len(targets) != 1:
+            raise SemanticGateClosed("shop home target is absent or ambiguous")
+        target = targets[0]
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "shop/home")
+        ):
+            raise SemanticGateClosed("shop home target is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="shop/home",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def shop_oil(self) -> int:
         return self._retry_transition_read(self._shop_oil_once)
 
@@ -9159,6 +9792,11 @@ class SemanticOracle:
         ui_state = self.read_ui_state()
         if not self._gift_pack_page_visible_from_states(state, ui_state):
             return False
+        return self._free_weekly_supply_pack_root(state, ui_state) is not None
+
+    def _free_weekly_supply_pack_root(
+        self, state: OracleState, ui_state: UiState
+    ) -> Optional[str]:
         roots = tuple(
             button.path
             for button in state.buttons
@@ -9195,7 +9833,45 @@ class SemanticOracle:
                 matches.append(root)
         if len(matches) > 1:
             raise SemanticGateClosed("free weekly supply pack is ambiguous")
-        return len(matches) == 1
+        return matches[0] if matches else None
+
+    def click_free_weekly_supply_pack(self) -> ActionReceipt:
+        """Open only the exact zero-price weekly pack card."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("free weekly supply pack snapshots are not coherent")
+        if not self._gift_pack_page_visible_from_states(state, ui_state):
+            raise SemanticGateClosed("gift pack page identity is absent")
+        root = self._free_weekly_supply_pack_root(state, ui_state)
+        if root is None:
+            raise SemanticGateClosed("free weekly supply pack is unavailable")
+        targets = tuple(button for button in state.buttons if button.path == root)
+        if len(targets) != 1:
+            raise SemanticGateClosed("free weekly supply pack target is ambiguous")
+        target = targets[0]
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "shop/free-weekly-pack")
+        ):
+            raise SemanticGateClosed("free weekly supply pack is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="shop/free-weekly-pack",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
 
     def shop_general_nav_selected(self) -> bool:
         return self.shop_selected_nav_label() == "补给商店"
@@ -10857,6 +11533,119 @@ class SemanticOracle:
             raise SemanticGateClosed("event campaign snapshots are not coherent")
         return self._event_campaign_page_state(button_state, ui_state)
 
+    def event_points(self) -> int:
+        """Read the exact event-point counter from a proven event selector."""
+
+        return self._retry_transition_read(self._event_points_once)
+
+    def event_coin(self, stage_code: Optional[str] = None) -> int:
+        """Read coins from a proven event selector or requested stage detail."""
+
+        return self._retry_transition_read(
+            lambda: self._event_coin_once(stage_code=stage_code)
+        )
+
+    def _event_coin_once(self, *, stage_code: Optional[str]) -> int:
+        try:
+            surface_generation = self.event_campaign_page_state().generation
+            surface_kind = "selector"
+        except SemanticGateClosed:
+            if stage_code is None:
+                raise
+            preparation = self.campaign_preparation_state(stage_code)
+            if preparation is None:
+                raise SemanticGateClosed(
+                    "event coin requires the selector or requested stage detail"
+                )
+            surface_generation = preparation.generation
+            surface_kind = preparation.kind
+        ui_state = self.read_ui_state()
+        if surface_kind == "selector":
+            surface_after_generation = self.event_campaign_page_state().generation
+        else:
+            assert stage_code is not None
+            preparation_after = self.campaign_preparation_state(stage_code)
+            if preparation_after is None or preparation_after.kind != surface_kind:
+                raise SemanticGateClosed("event coin surface changed during observation")
+            surface_after_generation = preparation_after.generation
+        if (
+            ui_state.generation < surface_generation
+            or ui_state.generation > surface_after_generation
+        ):
+            raise SemanticGateClosed("event coin snapshots are not coherent")
+        suffix = "ResPanel(Clone)/frame/gold/gold_value"
+        matches = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith(suffix)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if (
+            len(matches) != 1
+            or re.fullmatch(r"[0-9]+", matches[0].text.strip()) is None
+        ):
+            raise SemanticGateClosed("event coin counter is absent or malformed")
+        return int(matches[0].text.strip())
+
+    def _event_points_once(self) -> int:
+        try:
+            _buttons, raid_ui, raid_root, _stages = (
+                self._amatsukaze_raid_page_state()
+            )
+        except SemanticGateClosed as exc:
+            if str(exc) not in (
+                "current Raid page is absent",
+                "current Raid page is obscured by fleet selection",
+            ):
+                raise
+        else:
+            path = raid_root + "/adapt/right/ptaward/Text"
+            matches = tuple(
+                item
+                for item in raid_ui.texts
+                if item.path == path
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+                and re.fullmatch(r"[0-9]+", item.text.strip()) is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "current Raid point counter is absent or ambiguous"
+                )
+            return int(matches[0].text.strip())
+
+        ui_state = self.read_ui_state()
+        page = self.event_campaign_page_state()
+        if (
+            page.generation < ui_state.generation
+            or page.generation > ui_state.generation + 2
+        ):
+            raise SemanticGateClosed("event point snapshots are not coherent")
+        suffix = (
+            "LevelMainScene(Clone)/main/right_chapter/"
+            "event_btns/pt_text/Text"
+        )
+        matches = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith(suffix)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("event point counter is absent or ambiguous")
+        value = re.fullmatch(r"[xX]([0-9]+)", matches[0].text.strip())
+        if value is None:
+            raise SemanticGateClosed("event point counter is malformed")
+        return int(value.group(1))
+
     def _event_campaign_page_visible_in_state(self, state: OracleState) -> bool:
         return bool(
             len(self._matches(state, "event/mode/story")) == 1
@@ -11399,6 +12188,7 @@ class SemanticOracle:
             raise SemanticGateClosed("campaign archive entrance requires menu")
         state = self.read_state()
         target = self._unique(state, "campaign-menu/archive")
+        blockers = self._blocking_rules(state, "campaign-menu/archive")
         if not (
             target.active_in_hierarchy
             and target.active_and_enabled
@@ -11407,9 +12197,21 @@ class SemanticOracle:
             and target.point is not None
             and target.bounds is not None
             and target.bounds.contains(target.point)
-            and not self._blocking_rules(state, "campaign-menu/archive")
+            and not blockers
         ):
-            raise SemanticGateClosed("campaign archive entrance is not actionable")
+            raise SemanticGateClosed(
+                "campaign archive entrance is not actionable: "
+                "active={0}, enabled={1}, interactable={2}, raycast_top={3}, "
+                "point={4}, bounds={5}, blockers={6}".format(
+                    target.active_in_hierarchy,
+                    target.active_and_enabled,
+                    target.interactable,
+                    target.raycast_top,
+                    target.point,
+                    target.bounds,
+                    tuple(rule.blocker_id for rule in blockers),
+                )
+            )
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
         return ActionReceipt(
             semantic_id="campaign-menu/archive",
@@ -12802,7 +13604,7 @@ class SemanticOracle:
         self._swipe(start[0], start[1], end[0], end[1], 450)
         post_generation = None
         last_center = center
-        for _ in range(12):
+        for _ in range(80):
             self._sleep(0.25)
             candidate = self.read_ui_state()
             moved = portal(candidate)
@@ -15913,6 +16715,217 @@ class SemanticOracle:
             path=target.path,
         )
 
+    def battle_pass_reward_available(self) -> bool:
+        """Read the exact active Battle Pass notice on the reward summary."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("Battle Pass reward snapshots are not coherent")
+        page = self._matches(state, "reward/page/back")
+        entrance = self._matches(state, "reward/battle-pass/enter")
+        if len(page) != 1 or len(entrance) != 1:
+            return False
+        target = entrance[0]
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "reward/battle-pass/enter")
+        ):
+            return False
+        tip_path = target.path + "/tip"
+        tips = tuple(
+            image
+            for image in ui_state.images
+            if image.path == tip_path
+            and image.name == "tip"
+            and image.sprite == "exclamation_mark"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(tips) > 1:
+            raise SemanticGateClosed("Battle Pass reward notice is ambiguous")
+        return len(tips) == 1
+
+    def click_battle_pass_entrance(self) -> ActionReceipt:
+        """Open Battle Pass through its exact delegated reward-summary card."""
+
+        if not self.battle_pass_reward_available():
+            raise SemanticGateClosed("Battle Pass reward is not available")
+        state = self.read_state()
+        target = self._unique(state, "reward/battle-pass/enter")
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="reward/battle-pass/enter",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def battle_pass_page_visible(self) -> bool:
+        """Require the exact current World Cruise award page."""
+
+        state = self.read_state()
+        award_tabs = tuple(
+            button
+            for button in state.buttons
+            if button.path.endswith("WorldCruiseUI(Clone)/frame/toggles/award")
+            and button.name == "award"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(award_tabs) > 1:
+            raise SemanticGateClosed("Battle Pass page identity is ambiguous")
+        if not award_tabs:
+            # This predicate is also used to classify unrelated ALAS page
+            # probes.  Avoid reading a second, independently advancing UI
+            # endpoint unless the exact World Cruise award control makes this
+            # a Battle Pass candidate.  High-churn combat/result surfaces may
+            # otherwise produce harmless generation skew here.
+            return False
+
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("Battle Pass page snapshots are not coherent")
+        roots = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith("/WorldCruiseUI(Clone)")
+            and image.name == "WorldCruiseUI(Clone)"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        selected = tuple(
+            image
+            for image in ui_state.images
+            if image.path.endswith(
+                "WorldCruiseUI(Clone)/frame/toggles/award/selected"
+            )
+            and image.sprite == "toggle_bg"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+        )
+        titles = tuple(
+            text
+            for text in ui_state.texts
+            if text.path.endswith("WorldCruiseUI(Clone)/top/title/Text/en")
+            and text.text.strip() == "W O R L D  C R U I S E"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+        )
+        if (
+            len(roots) > 1
+            or len(selected) > 1
+            or len(titles) > 1
+        ):
+            raise SemanticGateClosed("Battle Pass page identity is ambiguous")
+        return len(roots) == len(award_tabs) == len(selected) == len(titles) == 1
+
+    def battle_pass_claim_all_available(self) -> bool:
+        """Admit only the ordinary claim-all button with its active notice."""
+
+        if not self.battle_pass_page_visible():
+            return False
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("Battle Pass claim snapshots are not coherent")
+        matches = self._matches(state, "battle-pass/claim-all")
+        if len(matches) != 1:
+            return False
+        target = matches[0]
+        tips = tuple(
+            image
+            for image in ui_state.images
+            if image.path == target.path + "/Image"
+            and image.name == "Image"
+            and image.sprite == "tip"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(tips) > 1:
+            raise SemanticGateClosed("Battle Pass claim notice is ambiguous")
+        return bool(
+            len(tips) == 1
+            and target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "battle-pass/claim-all")
+        )
+
+    def click_battle_pass_claim_all(self) -> ActionReceipt:
+        """Claim currently unlocked rewards without touching the paid-pass control."""
+
+        if not self.battle_pass_claim_all_available():
+            raise SemanticGateClosed("Battle Pass claim-all reward is unavailable")
+        state = self.read_state()
+        target = self._unique(state, "battle-pass/claim-all")
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="battle-pass/claim-all",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_battle_pass_home(self) -> ActionReceipt:
+        """Leave World Cruise through its exact top-right home control."""
+
+        if not self.battle_pass_page_visible():
+            raise SemanticGateClosed("Battle Pass page identity is absent")
+        state = self.read_state()
+        target = self._unique(state, "battle-pass/home")
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "battle-pass/home")
+        ):
+            raise SemanticGateClosed("Battle Pass home is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="battle-pass/home",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def meta_entrance_state(self) -> MetaEntranceState:
         """Read current and dossier META resources from the landing page."""
 
@@ -16684,6 +17697,236 @@ class SemanticOracle:
             raise SemanticGateClosed("war archives data-key counter is invalid")
         return True
 
+    @staticmethod
+    def war_archives_campaign_identity(event: str) -> Tuple[str, str]:
+        """Return the reviewed category and banner sprite for one ALAS folder."""
+
+        try:
+            return WAR_ARCHIVES_CAMPAIGN_CARDS[event]
+        except KeyError as exc:
+            raise SemanticGateClosed(
+                "war archives campaign is unavailable in the pinned game: " + str(event)
+            ) from exc
+
+    def war_archives_category(self) -> str:
+        """Return the exactly selected EX/SP landing-page category."""
+
+        if not self.war_archives_page_visible():
+            raise SemanticGateClosed("war archives page identity is not proven")
+        root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/toggles/"
+        state = self.read_ui_state()
+        selected = tuple(
+            toggle.name.lower()
+            for toggle in state.toggles
+            if toggle.path in (root + "EX", root + "SP")
+            and toggle.active_in_hierarchy
+            and toggle.active_and_enabled
+            and toggle.interactable
+            and toggle.checked
+            and toggle.bounds is not None
+        )
+        if len(selected) != 1 or selected[0] not in ("ex", "sp"):
+            raise SemanticGateClosed("war archives category is absent or ambiguous")
+        return selected[0]
+
+    def click_war_archives_category(self, category: str) -> ActionReceipt:
+        """Select one exact archive category toggle."""
+
+        if category not in ("ex", "sp"):
+            raise SemanticGateClosed("war archives category is invalid")
+        if not self.war_archives_page_visible():
+            raise SemanticGateClosed("war archives category requires landing page")
+        if self.war_archives_category() == category:
+            raise SemanticGateClosed("war archives category is already selected")
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        path = (
+            "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/toggles/"
+            + category.upper()
+        )
+        matches = tuple(
+            toggle
+            for toggle in ui_state.toggles
+            if toggle.path == path
+            and toggle.name == category.upper()
+            and toggle.active_in_hierarchy
+            and toggle.active_and_enabled
+            and toggle.interactable
+            and not toggle.checked
+            and toggle.bounds is not None
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("war archives category target is ambiguous")
+        if not (
+            state.generation <= ui_state.generation <= state.generation + 2
+        ):
+            raise SemanticGateClosed("war archives category snapshots are incoherent")
+        semantic_id = "archive/category/" + category
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("war archives category input is blocked")
+        target = matches[0]
+        assert target.bounds is not None
+        point = Point(
+            x=(target.bounds.left + target.bounds.right) / 2.0,
+            y=(target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        if not target.bounds.contains(point):
+            raise SemanticGateClosed("war archives category geometry is invalid")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before archive category input")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=ui_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _war_archives_campaign_card(
+        self, event: str
+    ) -> Tuple[OracleState, ImageState, ButtonState]:
+        expected_category, sprite = self.war_archives_campaign_identity(event)
+        if self.war_archives_category() != expected_category:
+            raise SemanticGateClosed("war archives campaign category is not selected")
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation
+            <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("war archives card snapshots are incoherent")
+        root = "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/list/content/"
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path.startswith(root)
+            and image.path.endswith("/bg/icon")
+            and image.name == "icon"
+            and image.sprite == sprite
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(images) != 1:
+            raise SemanticGateClosed(
+                "war archives campaign card is absent or ambiguous: " + event
+            )
+        image = images[0]
+        buttons = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == image.path
+            and button.name == "icon"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds == image.bounds
+        )
+        if len(buttons) != 1:
+            raise SemanticGateClosed("war archives campaign control is ambiguous")
+        return button_state, image, buttons[0]
+
+    def war_archives_campaign_card_position(self, event: str) -> str:
+        """Classify an exact campaign card relative to the safe list viewport."""
+
+        _state, image, _button = self._war_archives_campaign_card(event)
+        assert image.bounds is not None
+        if image.bounds.top >= 110.0 and image.bounds.bottom <= 680.0:
+            return "visible"
+        if image.bounds.bottom < 110.0:
+            return "above"
+        if image.bounds.top > 680.0:
+            return "below"
+        raise SemanticGateClosed("war archives campaign card clips the safe viewport")
+
+    def war_archives_campaign_card_geometry(
+        self, event: str
+    ) -> Tuple[int, Bounds]:
+        """Return the coherent generation and exact card bounds."""
+
+        state, image, _button = self._war_archives_campaign_card(event)
+        assert image.bounds is not None
+        return state.generation, image.bounds
+
+    def swipe_war_archives_campaign_toward(self, event: str) -> ActionReceipt:
+        """Move the typed archive list one page toward an exact off-screen card."""
+
+        if self._swipe is None:
+            raise SemanticGateClosed("war archives campaign search requires typed swipe")
+        button_state, _image, _button = self._war_archives_campaign_card(event)
+        position = self.war_archives_campaign_card_position(event)
+        if position == "visible":
+            raise SemanticGateClosed("war archives campaign card is already visible")
+        ui_state = self.read_ui_state()
+        handle_path = (
+            "OverlayCamera/Overlay/UIMain/LevelRemasterView(Clone)/"
+            "list/scroll_bar/Handle/Image"
+        )
+        handles = tuple(
+            image
+            for image in ui_state.images
+            if image.path == handle_path
+            and image.name == "Image"
+            and image.sprite == "scroll_bar"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if len(handles) != 1:
+            raise SemanticGateClosed("war archives scroll identity is ambiguous")
+        semantic_id = "archive/campaign/search/" + event
+        if self._blocking_rules(button_state, semantic_id):
+            raise SemanticGateClosed("war archives campaign search is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before archive list swipe")
+        if position == "below":
+            start, end = Point(640.0, 620.0), Point(640.0, 250.0)
+        else:
+            start, end = Point(640.0, 220.0), Point(640.0, 590.0)
+        self._swipe(
+            int(start.x), int(start.y), int(end.x), int(end.y), 350
+        )
+        handle = handles[0]
+        assert handle.bounds is not None
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=button_state.generation,
+            point=start,
+            bounds=handle.bounds,
+            path=handle.path,
+        )
+
+    def click_war_archives_campaign(self, event: str) -> ActionReceipt:
+        """Click one exact, fully visible archive campaign card."""
+
+        state, _image, target = self._war_archives_campaign_card(event)
+        if self.war_archives_campaign_card_position(event) != "visible":
+            raise SemanticGateClosed("war archives campaign card is outside viewport")
+        if (
+            target.point is None
+            or target.bounds is None
+            or not target.bounds.contains(target.point)
+            or target.raycast_top is not None
+        ):
+            raise SemanticGateClosed("war archives campaign card is not actionable")
+        semantic_id = "archive/campaign/" + event
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("war archives campaign input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before archive campaign input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def war_archives_data_key_text(self) -> str:
         """Return the exact typed data-key counter on a proven archives page."""
 
@@ -16720,9 +17963,159 @@ class SemanticOracle:
             and button.active_in_hierarchy
             and button.active_and_enabled
         )
-        if bool(before) == bool(after) or len(before) > 1 or len(after) > 1:
+        ui_state = self.read_ui_state()
+        after_images = tuple(
+            image
+            for image in ui_state.images
+            if image.name == "state_after"
+            and image.path.endswith("LevelRemasterView(Clone)/getBtn/state_after")
+            and image.sprite == "remaster_key_got"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        after_present = bool(after or after_images)
+        if (
+            bool(before) == after_present
+            or len(before) > 1
+            or len(after) > 1
+            or len(after_images) > 1
+        ):
             raise SemanticGateClosed("war archives data-key claim state is ambiguous")
-        return bool(after)
+        return after_present
+
+    def click_war_archives_data_key_collect(self) -> ActionReceipt:
+        """Click the exact uncollected daily-key control on the Archives page."""
+
+        if not self.war_archives_page_visible():
+            raise SemanticGateClosed("war archives page identity is not proven")
+        if self.war_archives_data_key_collected():
+            raise SemanticGateClosed("war archives data key is already collected")
+        state = self.read_state()
+        matches = self._matches(state, "archive/key/collect")
+        if len(matches) != 1:
+            raise SemanticGateClosed("war archives data-key claim is ambiguous")
+        target = matches[0]
+        if not (
+            target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+            and not self._blocking_rules(state, "archive/key/collect")
+        ):
+            raise SemanticGateClosed("war archives data-key claim is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before data-key input")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="archive/key/collect",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def data_key_limit_prompt_visible(self) -> bool:
+        """Identify the exact full-capacity zero-key confirmation prompt."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("data-key limit snapshots are not coherent")
+        archive_roots = tuple(
+            button
+            for button in state.buttons
+            if button.name == "bg"
+            and button.path.endswith("UIOrigin/LevelRemasterView(Clone)/bg")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+        )
+        if len(archive_roots) != 1:
+            return False
+        confirm = self._matches(state, "archive/key-limit/confirm")
+        cancel = self._matches(state, "archive/key-limit/cancel")
+        if len(confirm) != 1 or len(cancel) != 1:
+            return False
+        labels = {
+            text.path
+            for text in ui_state.texts
+            if text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and text.path.startswith(
+                "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+            )
+        }
+        content = tuple(
+            text.text
+            for text in ui_state.texts
+            if text.path
+            == "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/msg_panel/content"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+        )
+        if len(content) != 1:
+            return False
+        counters = tuple(
+            text.text.strip()
+            for text in ui_state.texts
+            if text.path.endswith("LevelRemasterView(Clone)/nums/text")
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and re.fullmatch(r"[0-9]+/[0-9]+", text.text.strip())
+        )
+        full = False
+        if len(counters) == 1:
+            current, total = (int(value) for value in counters[0].split("/"))
+            full = current == total and total > 0
+        return bool(
+            full
+            and (
+                "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+                "button_container/custom_button_1(Clone)/pic"
+            )
+            in labels
+            and (
+                "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+                "button_container/custom_button_2(Clone)/pic"
+            )
+            in labels
+            and content[0].count("<color=#ffde38>") == 2
+            and "<color=#ff5c5c>0</color>" in content[0]
+        )
+
+    def click_data_key_limit_choice(self, *, confirm: bool) -> ActionReceipt:
+        """Resolve the exact full-capacity prompt; confirm intentionally loses one key."""
+
+        if not self.data_key_limit_prompt_visible():
+            raise SemanticGateClosed("data-key limit prompt is absent")
+        state = self.read_state()
+        semantic_id = (
+            "archive/key-limit/confirm"
+            if confirm
+            else "archive/key-limit/cancel"
+        )
+        target = self._unique(state, semantic_id)
+        if not target.actionable:
+            raise SemanticGateClosed("data-key limit choice is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before data-key choice")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
 
     def exercise_page_visible(self) -> bool:
         state = self.read_state()
@@ -18093,6 +19486,8 @@ class SemanticOracle:
                 "sea_benningdun_1",
                 "sea_benningdun_2",
                 "sea_YW",
+                "sea_BW",
+                "sea_YX",
             ),
         }
         retreat_variants = (
@@ -19599,8 +20994,22 @@ class SemanticOracle:
 
         button_state = self.read_state()
         back = self._unique(button_state, "campaign-menu/page/back")
-        if not back.actionable or self._blocking_rules(
-            button_state, "campaign-menu/page/back"
+        # Page identity is an observation boundary, not authorization to click
+        # the chapter back control.  The live hard page can briefly report the
+        # exact active back control below the stage canvas (raycast_top=False)
+        # after the fleet overlay closes, while its chapter title and nodes are
+        # already coherent.  Accept that structural anchor here; ``click``
+        # continues to require the full actionable predicate, and reviewed
+        # blockers still prevent the page from impersonating an unobstructed
+        # chapter surface.
+        if (
+            not back.active_in_hierarchy
+            or not back.active_and_enabled
+            or not back.interactable
+            or back.point is None
+            or back.bounds is None
+            or not back.bounds.contains(back.point)
+            or self._blocking_rules(button_state, "campaign-menu/page/back")
         ):
             raise SemanticGateClosed("campaign page identity is not proven")
         if self._matches(button_state, "campaign-menu/normal"):
@@ -19611,6 +21020,9 @@ class SemanticOracle:
             or ui_state.generation > button_state.generation + 2
         ):
             raise SemanticGateClosed("campaign snapshots are not coherent")
+
+        if self._war_archives_campaign_counter_records(ui_state):
+            return self._war_archives_campaign_page_state(button_state, ui_state)
 
         if self._event_campaign_page_visible_in_state(button_state):
             return self._event_campaign_page_state(button_state, ui_state)
@@ -19696,6 +21108,186 @@ class SemanticOracle:
             stages=tuple(stages),
         )
 
+    @staticmethod
+    def _war_archives_campaign_counter_records(
+        ui_state: UiState,
+    ) -> Tuple[TextState, ...]:
+        suffix = (
+            "LevelMainScene(Clone)/main/right_chapter/"
+            "event_btns/tickets/Text"
+        )
+        return tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith(suffix)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+
+    def _war_archives_campaign_page_state(
+        self, button_state: OracleState, ui_state: UiState
+    ) -> CampaignPageState:
+        """Read the letter-coded stage nodes mounted in LevelMainScene."""
+
+        counters = self._war_archives_campaign_counter_records(ui_state)
+        if len(counters) != 1 or re.fullmatch(
+            r"[0-9]+\s*/\s*[0-9]+", counters[0].text.strip()
+        ) is None:
+            raise SemanticGateClosed("war archives campaign key counter is malformed")
+        title_suffix = "LevelMainScene(Clone)/top/top_chapter/title_chapter/name"
+        titles = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith(title_suffix)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.text.strip()
+        )
+        if len(titles) != 1:
+            raise SemanticGateClosed(
+                "war archives campaign title is absent or ambiguous"
+            )
+        prefix = "LevelMainScene(Clone)/float/levels/items/Chapter_"
+        control_pattern = re.compile(re.escape(prefix) + r"([1-9][0-9]*)/main$")
+        controls = []
+        for button in button_state.buttons:
+            match = control_pattern.search(button.path)
+            if match is None or button.name != "main":
+                continue
+            if (
+                not button.active_in_hierarchy
+                or not button.active_and_enabled
+                or button.bounds is None
+            ):
+                continue
+            controls.append((int(match.group(1)), button))
+        if not controls or len({stage_id for stage_id, _ in controls}) != len(controls):
+            raise SemanticGateClosed(
+                "war archives campaign stages are absent or ambiguous"
+            )
+        stages = []
+        for stage_id, button in sorted(controls, key=lambda item: item[0]):
+            root = button.path + "/info/bk/title_form/"
+            indexes = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == root + "title_index"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            stage_titles = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == root + "title"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.text.strip()
+            )
+            if len(indexes) != 1 or len(stage_titles) != 1:
+                raise SemanticGateClosed(
+                    "war archives campaign stage text is absent or ambiguous"
+                )
+            stage_code = indexes[0].text.strip().lower()
+            if re.fullmatch(r"[a-z]+[1-9][0-9]*", stage_code) is None:
+                raise SemanticGateClosed(
+                    "war archives campaign stage text is malformed"
+                )
+            stages.append(
+                CampaignStageState(
+                    stage_id=stage_id,
+                    stage_code=stage_code,
+                    title=stage_titles[0].text.strip(),
+                    button=button,
+                )
+            )
+        chapters = {self._campaign_stage_chapter(stage.stage_code) for stage in stages}
+        return CampaignPageState(
+            generation=button_state.generation,
+            chapter_name="/".join(sorted(chapters)),
+            stages=tuple(stages),
+        )
+
+    def war_archives_campaign_page_visible(self) -> bool:
+        """Return whether the exact archive campaign stage page is mounted."""
+
+        ui_state = self.read_ui_state()
+        if not self._war_archives_campaign_counter_records(ui_state):
+            return False
+        state = self.campaign_page_state()
+        if not state.stages:
+            raise SemanticGateClosed("war archives campaign has no typed stages")
+        return True
+
+    def war_archives_campaign_data_key_count(self) -> Tuple[int, int]:
+        """Return current and maximum archive keys from the stage-page HUD."""
+
+        if not self.war_archives_campaign_page_visible():
+            raise SemanticGateClosed("war archives campaign page is absent")
+        ui_state = self.read_ui_state()
+        counters = self._war_archives_campaign_counter_records(ui_state)
+        if len(counters) != 1:
+            raise SemanticGateClosed("war archives campaign key counter is ambiguous")
+        match = re.fullmatch(
+            r"([0-9]+)\s*/\s*([0-9]+)", counters[0].text.strip()
+        )
+        if match is None:
+            raise SemanticGateClosed("war archives campaign key counter is malformed")
+        current, total = map(int, match.groups())
+        if total <= 0 or current < 0 or current > total:
+            raise SemanticGateClosed("war archives campaign key count is invalid")
+        return current, total
+
+    def war_archives_entry_confirmation_cost(self) -> Optional[int]:
+        """Return the exact ordinary Data Key cost, or None without a Msgbox."""
+
+        state = self.read_state()
+        if not any("/Msgbox(Clone)/" in button.path for button in state.buttons):
+            return None
+        parts = self._msgbox_prompt_parts(state)
+        if parts is None:
+            raise SemanticGateClosed("war archives entry prompt is incomplete")
+        content, cancel, confirm = parts
+        normalized = "".join(re.sub(r"<[^>]*>", "", content).split())
+        match = re.fullmatch(
+            r"进入所选关卡需要消耗档案秘钥x([0-9]+)，是否进入？",
+            normalized,
+        )
+        if match is None or cancel != "取消" or confirm != "确定":
+            raise SemanticGateClosed("war archives entry prompt identity changed")
+        cost = int(match.group(1))
+        if cost != 5:
+            raise SemanticGateClosed("war archives entry cost changed")
+        counters = self._war_archives_campaign_counter_records(
+            self.read_ui_state()
+        )
+        counter_match = (
+            re.fullmatch(r"([0-9]+)\s*/\s*([0-9]+)", counters[0].text.strip())
+            if len(counters) == 1
+            else None
+        )
+        if counter_match is None or int(counter_match.group(1)) < cost:
+            raise SemanticGateClosed("war archives entry Data Keys are insufficient")
+        return cost
+
+    def confirm_war_archives_entry(self) -> ActionReceipt:
+        """Confirm one exact five-key archive sortie prompt."""
+
+        if self.war_archives_entry_confirmation_cost() != 5:
+            raise SemanticGateClosed("war archives entry prompt is absent")
+        return self.click("archive/entry/confirm")
+
+    def cancel_war_archives_entry(self) -> ActionReceipt:
+        """Cancel one exact archive sortie prompt without spending keys."""
+
+        if self.war_archives_entry_confirmation_cost() != 5:
+            raise SemanticGateClosed("war archives entry prompt is absent")
+        return self.click("archive/entry/cancel")
+
     def _event_campaign_page_state(
         self, button_state: OracleState, ui_state: UiState
     ) -> CampaignPageState:
@@ -19768,12 +21360,32 @@ class SemanticOracle:
             stage_code = indexes[0].text.strip().lower()
             if re.fullmatch(r"(?:[a-z]+[0-9]*|[0-9]+-[0-9]+)", stage_code) is None:
                 raise SemanticGateClosed("event campaign stage text is malformed")
+            remaining_attempts = None
+            if stage_code == "sp":
+                attempt_path = identity_button.path + "/triesLimit/Text"
+                attempts = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path == attempt_path
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.bounds is not None
+                )
+                if len(attempts) != 1:
+                    raise SemanticGateClosed(
+                        "event SP attempt counter is absent or ambiguous"
+                    )
+                remaining_attempts = self._campaign_eventsp_remaining_attempts(
+                    attempts[0].text
+                )
             stages.append(
                 CampaignStageState(
                     stage_id=stage_id,
                     stage_code=stage_code,
                     title=titles[0].text.strip(),
                     button=button,
+                    remaining_attempts=remaining_attempts,
                 )
             )
         chapters = {self._campaign_stage_chapter(stage.stage_code) for stage in stages}
@@ -19803,14 +21415,17 @@ class SemanticOracle:
         """Return the exact destination exposed by the normal/hard switch."""
 
         state = self.read_state()
+        archive = self.war_archives_campaign_page_visible()
         controls = {
             "hard": (
-                "btn_elite",
-                "LevelMainScene(Clone)/main/left_chapter/buttons/btn_elite",
+                "btn_act_elite" if archive else "btn_elite",
+                "LevelMainScene(Clone)/main/left_chapter/buttons/"
+                + ("btn_act_elite" if archive else "btn_elite"),
             ),
             "normal": (
-                "btn_normal",
-                "LevelMainScene(Clone)/main/left_chapter/buttons/btn_normal",
+                "btn_act_normal" if archive else "btn_normal",
+                "LevelMainScene(Clone)/main/left_chapter/buttons/"
+                + ("btn_act_normal" if archive else "btn_normal"),
             ),
         }
         observed = []
@@ -19835,14 +21450,17 @@ class SemanticOracle:
     def click_campaign_mode_switch(self, destination: str) -> ActionReceipt:
         """Click the exact normal/hard destination exposed by campaign UI."""
 
+        archive = self.war_archives_campaign_page_visible()
         paths = {
             "hard": (
-                "btn_elite",
-                "LevelMainScene(Clone)/main/left_chapter/buttons/btn_elite",
+                "btn_act_elite" if archive else "btn_elite",
+                "LevelMainScene(Clone)/main/left_chapter/buttons/"
+                + ("btn_act_elite" if archive else "btn_elite"),
             ),
             "normal": (
-                "btn_normal",
-                "LevelMainScene(Clone)/main/left_chapter/buttons/btn_normal",
+                "btn_act_normal" if archive else "btn_normal",
+                "LevelMainScene(Clone)/main/left_chapter/buttons/"
+                + ("btn_act_normal" if archive else "btn_normal"),
             ),
         }
         control = paths.get(destination)
@@ -19951,6 +21569,1491 @@ class SemanticOracle:
             raise SemanticGateClosed("hard campaign quota is malformed")
         return int(value.group(1))
 
+    def raid_remain_state(self, event: str, mode: str) -> RaidRemainState:
+        """Read one reviewed RaidDaily counter from typed Unity state."""
+
+        if event == "raid_20260827":
+            if mode not in ("easy", "normal", "hard", "ex"):
+                raise SemanticGateClosed("Raid remaining counter mode is unsupported")
+            return self._retry_transition_read(
+                lambda: self._amatsukaze_raid_remain_state(mode),
+                attempts=8,
+            )
+        if event != "raid_20260212":
+            raise SemanticGateClosed("Raid remaining counter event is unsupported")
+        node_ids = {"easy": 5001, "normal": 5002, "hard": 5003, "ex": 5004}
+        try:
+            node_id = node_ids[mode]
+        except KeyError as exc:
+            raise SemanticGateClosed("Raid remaining counter mode is unsupported") from exc
+
+        button_state = self.read_state()
+        ui_state = self.read_text_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("Raid button and text generations are incoherent")
+
+        root_suffix = "/BossRushVerSardiniaSPUI(Clone)"
+        node_pattern = re.compile(
+            r"(?P<root>.+/BossRushVerSardiniaSPUI\(Clone\))"
+            r"/Battle/Nodes/(?P<node>500[1-5])(?:/.*)?$"
+        )
+        family_buttons = tuple(
+            button
+            for button in button_state.buttons
+            if "/BossRush" in button.path
+            and "/Battle/Nodes/" in button.path
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+        )
+        parsed_buttons = []
+        for button in family_buttons:
+            match = node_pattern.fullmatch(button.path)
+            if match is None or not match.group("root").endswith(root_suffix):
+                raise SemanticGateClosed("Raid stage button root is not reviewed")
+            parsed_buttons.append((match.group("root"), int(match.group("node")), button))
+        roots = {root for root, _node, _button in parsed_buttons}
+        if len(roots) != 1:
+            raise SemanticGateClosed("Raid stage root is absent or ambiguous")
+        root = next(iter(roots))
+
+        stage_buttons = tuple(
+            button
+            for candidate_root, candidate_node, button in parsed_buttons
+            if candidate_root == root
+            and candidate_node == node_id
+            and button.path == f"{root}/Battle/Nodes/{node_id}"
+        )
+        if len(stage_buttons) != 1 or stage_buttons[0].bounds is None:
+            raise SemanticGateClosed("Raid stage identity is absent or ambiguous")
+
+        prefix = f"{root}/Battle/Nodes/{node_id}/"
+        texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.startswith(prefix)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if mode == "ex":
+            expected_path = prefix + "times/Text"
+            counters = tuple(
+                item
+                for item in texts
+                if item.path == expected_path
+                and re.fullmatch(r"[0-9]+", item.text.strip()) is not None
+            )
+            capacity = None
+        else:
+            counters = tuple(
+                item
+                for item in texts
+                if re.fullmatch(r"[0-9]+\s*/\s*15", item.text.strip()) is not None
+            )
+            capacity = 15
+        if len(counters) != 1:
+            raise SemanticGateClosed("Raid remaining counter is absent or ambiguous")
+        counter = counters[0]
+        if mode == "ex":
+            remaining = int(counter.text.strip())
+        else:
+            remaining = int(counter.text.split("/", 1)[0].strip())
+            if remaining > 15:
+                raise SemanticGateClosed("Raid remaining counter exceeds capacity")
+        return RaidRemainState(
+            generation=ui_state.generation,
+            event=event,
+            mode=mode,
+            remaining=remaining,
+            capacity=capacity,
+            root=root,
+            node_id=node_id,
+        )
+
+    def _amatsukaze_raid_page_state(
+        self,
+    ) -> Tuple[OracleState, UiState, str, Dict[str, ButtonState]]:
+        """Prove the 2026-08-27 Raid page and its five distinct stage slots.
+
+        The first four slots belong to the existing ALAS Raid state machine.
+        Slot five is the update's separate advanced challenge and is proven only
+        so it cannot be confused with EX; it is deliberately not actionable.
+        """
+
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("current Raid button and UI snapshots are incoherent")
+
+        fleet_root = "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)"
+        if any(
+            button.path.startswith(fleet_root + "/")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            for button in button_state.buttons
+        ):
+            raise SemanticGateClosed("current Raid page is obscured by fleet selection")
+        precombat_roots = (
+            "UICamera/Canvas/UIOrigin/ActivityBossPrecombatUI(Clone)",
+            "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)",
+        )
+        if any(
+            any(button.path.startswith(root + "/") for root in precombat_roots)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            for button in button_state.buttons
+        ):
+            raise SemanticGateClosed("current Raid page is obscured by precombat")
+
+        story_roots = tuple(
+            button
+            for button in button_state.buttons
+            if button.path.endswith("Overlay/UIOverlay/NewStoryUI(Clone)")
+            and button.name == "NewStoryUI(Clone)"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.bounds is not None
+        )
+        if story_roots:
+            story_skips = self._matches(button_state, "story/skip")
+            if (
+                len(story_roots) == 1
+                and len(story_skips) == 1
+            ):
+                # Hide the underlay from Page.iter_pages() so the original
+                # ALAS ui_additional()->handle_story_skip() loop owns this
+                # event-story transition.
+                raise SemanticGateClosed(
+                    "current Raid page is obscured by event story"
+                )
+            raise SemanticGateClosed("current Raid event story overlay is malformed")
+
+        root = "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)"
+        title_path = root + "/adapt/top/TopPage/top/deco/Text/Text_1"
+        titles = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == title_path
+            and item.text.strip() == "JOINT OPERATION"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if not titles:
+            raise SemanticGateClosed("current Raid page is absent")
+        if len(titles) != 1:
+            raise SemanticGateClosed("current Raid page title is ambiguous")
+
+        modes = ("easy", "normal", "hard", "ex", "advanced")
+        buttons: Dict[str, ButtonState] = {}
+        for index, candidate_mode in enumerate(modes, start=1):
+            path = f"{root}/adapt/right/{index}"
+            matches = tuple(
+                button
+                for button in button_state.buttons
+                if button.name == str(index)
+                and button.path == path
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.raycast_top in (True, None)
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "current Raid stage identity is absent or ambiguous"
+                )
+            buttons[candidate_mode] = matches[0]
+
+        expected_images = {
+            root + "/adapt/right/1": "btn_lv_bg",
+            root + "/adapt/right/1/lv": "btn_lv_easy",
+            root + "/adapt/right/2": "btn_lv_bg",
+            root + "/adapt/right/2/lv": "btn_lv_normal",
+            root + "/adapt/right/3": "btn_lv_bg",
+            root + "/adapt/right/3/lv": "btn_lv_hard",
+            root + "/adapt/right/4": "btn_lv_ex",
+            root + "/adapt/right/5": "btn_lv_sp",
+        }
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path in expected_images
+            and image.sprite == expected_images[image.path]
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if (
+            len(images) != len(expected_images)
+            or {image.path for image in images} != set(expected_images)
+        ):
+            raise SemanticGateClosed("current Raid stage sprites are absent or ambiguous")
+
+        image_by_path = {image.path: image for image in images}
+        for index, candidate_mode in enumerate(modes, start=1):
+            button = buttons[candidate_mode]
+            assert button.bounds is not None
+            image = image_by_path[f"{root}/adapt/right/{index}"]
+            assert image.bounds is not None
+            button_area = (button.bounds.right - button.bounds.left) * (
+                button.bounds.bottom - button.bounds.top
+            )
+            if self._bounds_overlap(button.bounds, image.bounds) < button_area * 0.99:
+                raise SemanticGateClosed("current Raid stage sprite does not cover its button")
+        return button_state, ui_state, root, buttons
+
+    def _amatsukaze_raid_remain_state(self, mode: str) -> RaidRemainState:
+        node_ids = {"easy": 1, "normal": 2, "hard": 3, "ex": 4}
+        try:
+            node_id = node_ids[mode]
+        except KeyError as exc:
+            raise SemanticGateClosed("Raid remaining counter mode is unsupported") from exc
+
+        _button_state, ui_state, root, _buttons = self._amatsukaze_raid_page_state()
+        if mode == "ex":
+            counter_path = root + "/adapt/top/ticket/Text"
+            ticket_image_path = root + "/adapt/top/ticket"
+            ticket_label_path = ticket_image_path + "/Desc"
+            ticket_images = tuple(
+                image
+                for image in ui_state.images
+                if image.path == ticket_image_path
+                and image.active_in_hierarchy
+                and image.active_and_enabled
+                and not image.truncated
+                and image.bounds is not None
+            )
+            ticket_labels = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == ticket_label_path
+                and item.text.strip() == "特别挑战券"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            pattern = r"[0-9]{1,3}"
+            capacity = None
+        else:
+            counter_path = f"{root}/adapt/right/{node_id}/Text"
+            ticket_images = (True,)
+            ticket_labels = (True,)
+            pattern = r"([0-9]|1[0-5])\s*/\s*15"
+            capacity = 15
+        counters = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == counter_path
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+            and re.fullmatch(pattern, item.text.strip()) is not None
+        )
+        if mode != "ex" and not counters:
+            def hidden_zero_signature(candidate: UiState) -> Tuple[Optional[str], ...]:
+                ticket_path = root + "/adapt/top/ticket"
+                health_images = tuple(
+                    image
+                    for image in candidate.images
+                    if image.path == ticket_path
+                    and image.active_in_hierarchy
+                    and image.active_and_enabled
+                    and not image.truncated
+                    and image.bounds is not None
+                )
+                health_texts = {
+                    ticket_path + "/Text": r"[0-9]{1,3}",
+                    ticket_path + "/Desc": r"特别挑战券",
+                    root + "/adapt/right/ptaward/Text": r"[0-9]+",
+                }
+                for path, health_pattern in health_texts.items():
+                    matches = tuple(
+                        item
+                        for item in candidate.texts
+                        if item.path == path
+                        and item.active_in_hierarchy
+                        and item.active_and_enabled
+                        and not item.truncated
+                        and item.bounds is not None
+                        and re.fullmatch(health_pattern, item.text.strip()) is not None
+                    )
+                    if len(matches) != 1:
+                        raise SemanticGateClosed(
+                            "current Raid hidden-zero text health is not proven"
+                        )
+                if len(health_images) != 1:
+                    raise SemanticGateClosed(
+                        "current Raid hidden-zero image health is not proven"
+                    )
+
+                values: List[Optional[str]] = []
+                for ordinary_node in (1, 2, 3):
+                    ordinary_path = f"{root}/adapt/right/{ordinary_node}/Text"
+                    items = tuple(
+                        item
+                        for item in candidate.texts
+                        if item.path == ordinary_path
+                        and item.active_in_hierarchy
+                        and item.active_and_enabled
+                        and not item.truncated
+                        and item.bounds is not None
+                    )
+                    if len(items) > 1:
+                        raise SemanticGateClosed(
+                            "current Raid ordinary counter is ambiguous"
+                        )
+                    if not items:
+                        values.append(None)
+                        continue
+                    value = items[0].text.strip()
+                    if re.fullmatch(r"([0-9]|1[0-5])\s*/\s*15", value) is None:
+                        raise SemanticGateClosed(
+                            "current Raid ordinary counter is malformed"
+                        )
+                    values.append(re.sub(r"\s+", "", value))
+                return tuple(values)
+
+            first_signature = hidden_zero_signature(ui_state)
+            if first_signature[node_id - 1] is not None:
+                raise SemanticGateClosed(
+                    "current Raid remaining counter is absent or ambiguous"
+                )
+            self._sleep(0.25)
+            _second_buttons, second_ui, second_root, _second_stage_buttons = (
+                self._amatsukaze_raid_page_state()
+            )
+            second_signature = hidden_zero_signature(second_ui)
+            if not (
+                second_root == root
+                and second_ui.generation > ui_state.generation
+                and second_signature == first_signature
+                and second_signature[node_id - 1] is None
+            ):
+                raise SemanticGateClosed(
+                    "current Raid hidden-zero state is not stable"
+                )
+            return RaidRemainState(
+                generation=second_ui.generation,
+                event="raid_20260827",
+                mode=mode,
+                remaining=0,
+                capacity=capacity,
+                root=root,
+                node_id=node_id,
+            )
+        if (
+            len(ticket_images) != 1
+            or len(ticket_labels) != 1
+            or len(counters) != 1
+        ):
+            raise SemanticGateClosed("current Raid remaining counter is absent or ambiguous")
+        value = counters[0].text.strip()
+        remaining = int(value if mode == "ex" else value.split("/", 1)[0].strip())
+        return RaidRemainState(
+            generation=ui_state.generation,
+            event="raid_20260827",
+            mode=mode,
+            remaining=remaining,
+            capacity=capacity,
+            root=root,
+            node_id=node_id,
+        )
+
+    def raid_page_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid page event is unsupported")
+        try:
+            self._amatsukaze_raid_page_state()
+        except SemanticGateClosed as exc:
+            if str(exc) in (
+                "current Raid page is absent",
+                "current Raid page is obscured by fleet selection",
+                "current Raid page is obscured by precombat",
+                "current Raid page is obscured by event story",
+            ):
+                return False
+            raise
+        return True
+
+    def click_raid_stage(self, event: str, mode: str) -> ActionReceipt:
+        """Click one current Raid slot after exact page and mode proof."""
+
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid stage event is unsupported")
+        button_state, _ui_state, _root, buttons = self._amatsukaze_raid_page_state()
+        if mode not in ("easy", "normal", "hard", "ex"):
+            raise SemanticGateClosed("Raid stage mode is unsupported")
+        target = buttons[mode]
+        if self._blocking_rules(button_state, f"raid/stage/{mode}"):
+            raise SemanticGateClosed("Raid stage input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id=f"raid/stage/{mode}",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_advanced_challenge(self, event: str) -> ActionReceipt:
+        """Open the separate fifth current-Raid slot without treating it as EX."""
+
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid advanced-challenge event is unsupported")
+        button_state, _ui_state, _root, buttons = self._amatsukaze_raid_page_state()
+        target = buttons["advanced"]
+        if self._blocking_rules(button_state, "raid/advanced/entry"):
+            raise SemanticGateClosed("Raid advanced-challenge input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/advanced/entry",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_home(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid page event is unsupported")
+        button_state, ui_state, root, _buttons = self._amatsukaze_raid_page_state()
+        path = root + "/adapt/top/TopPage/top/btn_home"
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == path
+            and button.name == "btn_home"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "btn_home"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if len(targets) != 1 or len(images) != 1:
+            raise SemanticGateClosed("Raid home control is absent or ambiguous")
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed("Raid home image does not cover its control")
+        if self._blocking_rules(button_state, "raid/page/home"):
+            raise SemanticGateClosed("Raid home input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="raid/page/home",
+            generation=button_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _amatsukaze_raid_fleet_selection_state(
+        self,
+    ) -> Tuple[OracleState, UiState, Dict[str, ButtonState]]:
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("Raid fleet-selection snapshots are incoherent")
+        root = "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel"
+        paths = {
+            "back": root + "/btnBack",
+            "start": root + "/start_button",
+        }
+        buttons: Dict[str, ButtonState] = {}
+        for key, path in paths.items():
+            matches = tuple(
+                button
+                for button in button_state.buttons
+                if button.path == path
+                and button.name == path.rsplit("/", 1)[-1]
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.raycast_top in (True, None)
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "Raid fleet-selection control is absent or ambiguous"
+                )
+            buttons[key] = matches[0]
+        titles = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == root + "/title/Image/text/text (1)"
+            and item.text.strip() == "FLEET SELECT"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        expected_images = {
+            paths["back"]: "x_butten",
+            paths["start"]: "qianwang_button",
+        }
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path in expected_images
+            and image.sprite == expected_images[image.path]
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if (
+            len(titles) != 1
+            or len(images) != len(expected_images)
+            or {image.path for image in images} != set(expected_images)
+        ):
+            raise SemanticGateClosed("Raid fleet-selection identity is incomplete")
+        image_by_path = {image.path: image for image in images}
+        for key, button in buttons.items():
+            assert button.bounds is not None
+            image = image_by_path[paths[key]]
+            assert image.bounds is not None
+            button_area = (button.bounds.right - button.bounds.left) * (
+                button.bounds.bottom - button.bounds.top
+            )
+            if self._bounds_overlap(button.bounds, image.bounds) < button_area * 0.99:
+                raise SemanticGateClosed(
+                    "Raid fleet-selection image does not cover its control"
+                )
+        return button_state, ui_state, buttons
+
+    def raid_fleet_selection_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        try:
+            self._amatsukaze_raid_fleet_selection_state()
+        except SemanticGateClosed as exc:
+            if str(exc) == "Raid fleet-selection control is absent or ambiguous":
+                return False
+            raise
+        return True
+
+    def raid_fleet_ready(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        button_state, _ui_state, _buttons = (
+            self._amatsukaze_raid_fleet_selection_state()
+        )
+        root = (
+            "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/"
+            "panel/fleet/1"
+        )
+        for group in ("main", "vanguard"):
+            prefix = root + "/" + group + "/"
+            slots = tuple(
+                button
+                for button in button_state.buttons
+                if button.path.startswith(prefix)
+                and button.name in ("shiptpl(Clone)", "emptytpl(Clone)")
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.raycast_top in (True, None)
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
+            )
+            if len(slots) != 3:
+                raise SemanticGateClosed(
+                    "Raid fleet-selection slot identity is incomplete"
+                )
+            if not any(button.name == "shiptpl(Clone)" for button in slots):
+                return False
+        return True
+
+    def click_raid_fleet_back(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        button_state, _ui_state, buttons = self._amatsukaze_raid_fleet_selection_state()
+        target = buttons["back"]
+        if self._blocking_rules(button_state, "raid/fleet/back"):
+            raise SemanticGateClosed("Raid fleet-selection back input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        # ActivityBossFleetSelectView anchors btnBack at its top-right edge;
+        # Unity ignores that boundary point even though it belongs to the
+        # RectTransform.  Its exact image and rectangle were proven above.
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="raid/fleet/back",
+            generation=button_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_fleet_start(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        button_state, _ui_state, buttons = self._amatsukaze_raid_fleet_selection_state()
+        target = buttons["start"]
+        if self._blocking_rules(button_state, "raid/fleet/start"):
+            raise SemanticGateClosed("Raid fleet-selection start input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.bounds is not None
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="raid/fleet/start",
+            generation=button_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_fleet_recommend(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid fleet-selection event is unsupported")
+        button_state, ui_state, _buttons = (
+            self._amatsukaze_raid_fleet_selection_state()
+        )
+        path = (
+            "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/"
+            "panel/fleet/1/btn_recom"
+        )
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == path
+            and button.name == "btn_recom"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.bounds is not None
+            and button.point is not None
+            and button.bounds.contains(button.point)
+        )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "tuijian_butten"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if len(targets) != 1 or len(images) != 1:
+            raise SemanticGateClosed(
+                "Raid fleet-selection recommend control is absent or ambiguous"
+            )
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed(
+                "Raid fleet-selection recommend image does not cover its control"
+            )
+        if self._blocking_rules(button_state, "raid/fleet/recommend"):
+            raise SemanticGateClosed("Raid fleet-selection recommend input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="raid/fleet/recommend",
+            generation=button_state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _amatsukaze_raid_precombat_state(
+        self,
+    ) -> Tuple[OracleState, UiState, ButtonState]:
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("Raid precombat snapshots are incoherent")
+        roots = (
+            "UICamera/Canvas/UIOrigin/ActivityBossPrecombatUI(Clone)",
+            "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)",
+        )
+        starts = tuple(
+            (root, button)
+            for root in roots
+            for button in button_state.buttons
+            if button.path == root + "/adapt/right/start"
+            and button.name == "start"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if not starts:
+            raise SemanticGateClosed("Raid precombat page is absent")
+        if len(starts) != 1:
+            raise SemanticGateClosed("Raid precombat start control is ambiguous")
+        root, target = starts[0]
+        start_path = root + "/adapt/right/start"
+        exact_texts = {
+            start_path + "/text_en": "WEIGH ANCHOR",
+            start_path + "/text": "出击",
+            start_path + "/cost_container/title": "消耗：",
+            root + "/adapt/middle/gear_score/main/line/Image/Text2": "MAIN",
+            root + "/adapt/middle/gear_score/vanguard/line/Image/Text2": "VANGUARD",
+        }
+        matched_texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.path in exact_texts
+            and item.text.strip() == exact_texts[item.path]
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        numeric_paths = (
+            start_path + "/cost_container/popup/Text",
+            root + "/adapt/middle/gear_score/main/Text",
+            root + "/adapt/middle/gear_score/vanguard/Text",
+        )
+        numeric_texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.path in numeric_paths
+            and re.fullmatch(r"[0-9]+", item.text.strip()) is not None
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        ordinary_paths = {
+            start_path + "/bonus/title",
+            start_path + "/bonus/Text",
+        }
+        ordinary_texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.path in ordinary_paths
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        ordinary_complete = (
+            len(ordinary_texts) == 2
+            and {item.path for item in ordinary_texts} == ordinary_paths
+            and next(
+                item.text.strip()
+                for item in ordinary_texts
+                if item.path == start_path + "/bonus/title"
+            )
+            == "额外收益次数："
+            and re.fullmatch(
+                r"[0-9]+",
+                next(
+                    item.text.strip()
+                    for item in ordinary_texts
+                    if item.path == start_path + "/bonus/Text"
+                ),
+            )
+            is not None
+        )
+        ex_paths = {
+            start_path + "/ticket/title",
+            start_path + "/ticket/Text",
+        }
+        ex_texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.path in ex_paths
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        ex_image_sprites = {
+            start_path + "/ticket/icon": "nvpu_ticket",
+            start_path + "/ticket/checkbox": "check_frame_bg",
+            start_path + "/ticket/bg": "frame_bg",
+        }
+        ex_images = tuple(
+            image
+            for image in ui_state.images
+            if image.path in ex_image_sprites
+            and image.sprite == ex_image_sprites[image.path]
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        ex_complete = (
+            len(ex_texts) == 2
+            and {item.path for item in ex_texts} == ex_paths
+            and next(
+                item.text.strip()
+                for item in ex_texts
+                if item.path == start_path + "/ticket/title"
+            )
+            == "使用"
+            and re.fullmatch(
+                r"[0-9]+/[0-9]+",
+                next(
+                    item.text.strip()
+                    for item in ex_texts
+                    if item.path == start_path + "/ticket/Text"
+                ),
+            )
+            is not None
+            and len(ex_images) == len(ex_image_sprites)
+            and {image.path for image in ex_images} == set(ex_image_sprites)
+        )
+        heroes = tuple(
+            button
+            for button in button_state.buttons
+            if button.path.startswith(root + "/adapt/middle/HeroContainer/info/")
+            and button.path.endswith("_root/mouseChild")
+            and button.name == "mouseChild"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.bounds is not None
+        )
+        start_images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == start_path
+            and image.sprite == "btn_formation_sel"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        oil_images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == start_path + "/cost_container/popup/icon"
+            and image.sprite == "res_oil"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.bounds is not None
+        )
+        if (
+            len(matched_texts) != len(exact_texts)
+            or {item.path for item in matched_texts} != set(exact_texts)
+            or len(numeric_texts) != len(numeric_paths)
+            or {item.path for item in numeric_texts} != set(numeric_paths)
+            or ordinary_complete == ex_complete
+            or (ordinary_complete and (ex_texts or ex_images))
+            or (ex_complete and ordinary_texts)
+            or len(heroes) != 6
+            or len(start_images) != 1
+            or len(oil_images) != 1
+        ):
+            raise SemanticGateClosed("Raid precombat identity is incomplete")
+        assert target.bounds is not None
+        assert start_images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if (
+            self._bounds_overlap(target.bounds, start_images[0].bounds)
+            < button_area * 0.99
+        ):
+            raise SemanticGateClosed("Raid precombat image does not cover start")
+        return button_state, ui_state, target
+
+    def raid_precombat_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        candidate_state = self.read_state()
+        precombat_start_paths = {
+            "UICamera/Canvas/UIOrigin/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+            "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+        }
+        if not any(
+            button.path in precombat_start_paths
+            and button.name == "start"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            for button in candidate_state.buttons
+        ):
+            # This is a passive recovery probe on every validation startup.
+            # Do not read an independently advancing UI endpoint unless the
+            # exact precombat start object makes this a real candidate.
+            return False
+        try:
+            button_state, _ui_state, _target = self._amatsukaze_raid_precombat_state()
+        except SemanticGateClosed as exc:
+            if str(exc) in (
+                "Raid precombat page is absent",
+                "Raid precombat identity is incomplete",
+                "Raid precombat image does not cover start",
+            ):
+                # ActivityBossPrecombatUI mounts its typed texts/images and
+                # animates the start Button/Image over separate observer
+                # generations. Presence polling may wait through either
+                # harmless transient; the click path repeats the complete
+                # identity and coverage proof and remains fail-closed.
+                return False
+            raise
+        if (
+            self._blocking_rules(button_state, "raid/precombat/start")
+            and not self.raid_precombat_notice_visible(event)
+        ):
+            return False
+        return True
+
+    def _amatsukaze_raid_multiple_target(
+        self,
+    ) -> Tuple[OracleState, UiState, ButtonState]:
+        """Prove the update's multiple-sortie entry on current Raid precombat."""
+
+        button_state, ui_state, start = self._amatsukaze_raid_precombat_state()
+        root = start.path.rsplit("/adapt/right/start", 1)[0]
+        path = root + "/adapt/right/multiple"
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == path
+            and button.name == "multiple"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        labels = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == path + "/text_en"
+            and item.text.strip() == "MULTIPLE SORTIES"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "btn_blue"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if len(targets) != 1 or len(labels) != 1 or len(images) != 1:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie entry identity is absent or ambiguous"
+            )
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie image does not cover its entry"
+            )
+        return button_state, ui_state, target
+
+    def raid_precombat_multiple_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        candidate = self.read_state()
+        if not any(
+            button.name == "multiple"
+            and button.path.endswith("/ActivityBossPrecombatUI(Clone)/adapt/right/multiple")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            for button in candidate.buttons
+        ):
+            return False
+        self._amatsukaze_raid_multiple_target()
+        return True
+
+    def click_raid_precombat_multiple(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        button_state, _ui_state, target = self._amatsukaze_raid_multiple_target()
+        if self.raid_precombat_notice_visible(event):
+            raise SemanticGateClosed("Raid multiple-sortie entry is obscured by notice")
+        if self._blocking_rules(button_state, "raid/precombat/multiple"):
+            raise SemanticGateClosed("Raid multiple-sortie entry is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/precombat/multiple",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _amatsukaze_raid_multiple_back_target(
+        self,
+    ) -> Tuple[OracleState, UiState, ButtonState]:
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("Raid multiple-sortie snapshots are incoherent")
+        root = "OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)"
+        back_path = root + "/window/top/btnBack"
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == back_path
+            and button.name == "btnBack"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        title_path = root + "/window/top/bg/title/title/title_en"
+        titles = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == title_path
+            and item.text.strip() == "MULTIPLE SORTIES"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        exact_texts = {
+            root + "/window/panel/content/value_bg/value": r"[1-9][0-9]*",
+            root + "/window/panel/ticket/Number": r"[0-9]+/[0-9]+",
+            root + "/window/panel/bonus/Number": r"[0-9]+",
+        }
+        for path, pattern in exact_texts.items():
+            matches = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == path
+                and re.fullmatch(pattern, item.text.strip()) is not None
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "Raid multiple-sortie panel identity is incomplete"
+                )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == back_path
+            and image.sprite == "close_btn"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if len(targets) != 1 or len(titles) != 1 or len(images) != 1:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie panel identity is incomplete"
+            )
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie close image does not cover its button"
+            )
+        return button_state, ui_state, target
+
+    def raid_multiple_sortie_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        candidate = self.read_state()
+        root = "OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)"
+        if not any(
+            button.path == root + "/window/top/btnBack"
+            and button.name == "btnBack"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            for button in candidate.buttons
+        ):
+            return False
+        self._amatsukaze_raid_multiple_back_target()
+        return True
+
+    def raid_multiple_sortie_state(self, event: str) -> RaidMultipleSortieState:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        button_state, ui_state, _target = self._amatsukaze_raid_multiple_back_target()
+        root = "OverlayCamera/Overlay/UIMain/ContinuousOperationWindowUI(Clone)"
+
+        def exact_text(path: str, pattern: str) -> str:
+            matches = tuple(
+                item.text.strip()
+                for item in ui_state.texts
+                if item.path == path
+                and re.fullmatch(pattern, item.text.strip()) is not None
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "Raid multiple-sortie value is absent or ambiguous"
+                )
+            return matches[0]
+
+        sortie_count = int(
+            exact_text(root + "/window/panel/content/value_bg/value", r"[1-9][0-9]*")
+        )
+        selected_text, owned_text = exact_text(
+            root + "/window/panel/ticket/Number", r"[0-9]+/[0-9]+"
+        ).split("/", 1)
+        ticket_selected = int(selected_text)
+        ticket_owned = int(owned_text)
+        bonus_count = int(
+            exact_text(root + "/window/panel/bonus/Number", r"[0-9]+")
+        )
+        if ticket_selected > ticket_owned:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie ticket selection exceeds inventory"
+            )
+
+        disabled = tuple(
+            image
+            for image in ui_state.images
+            if image.path.startswith(root + "/window/panel/ticket/")
+            and image.sprite == "checkmark_ban"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if ticket_owned == 0:
+            if ticket_selected != 0 or len(disabled) != 1:
+                raise SemanticGateClosed(
+                    "Raid multiple-sortie zero-ticket state is inconsistent"
+                )
+        elif disabled:
+            raise SemanticGateClosed(
+                "Raid multiple-sortie positive ticket state is disabled"
+            )
+        return RaidMultipleSortieState(
+            generation=button_state.generation,
+            event=event,
+            sortie_count=sortie_count,
+            ticket_selected=ticket_selected,
+            ticket_owned=ticket_owned,
+            bonus_count=bonus_count,
+            zero_ticket_disabled=bool(disabled),
+            root=root,
+        )
+
+    def click_raid_multiple_sortie_back(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid multiple-sortie event is unsupported")
+        button_state, _ui_state, target = self._amatsukaze_raid_multiple_back_target()
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/multiple-sortie/back",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _amatsukaze_raid_notice_target(
+        self,
+    ) -> Tuple[OracleState, UiState, ButtonState]:
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not (
+            button_state.generation <= ui_state.generation
+            <= button_state.generation + 2
+        ):
+            raise SemanticGateClosed("Raid precombat notice snapshots are incoherent")
+        root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window"
+        path = root + "/button_container/custom_button_1(Clone)"
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == path
+            and button.name == "custom_button_1(Clone)"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is True
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if not targets:
+            raise SemanticGateClosed("Raid precombat notice is absent")
+        texts = tuple(
+            item
+            for item in ui_state.texts
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        exact = {
+            path + "/pic": "知道了",
+            root + "/top/bg/infomation/title": "信息",
+            root + "/top/bg/infomation/title_en": "INFORMATION",
+        }
+        exact_matches = tuple(
+            item
+            for item in texts
+            if item.path in exact and item.text.strip() == exact[item.path]
+        )
+        notices = tuple(
+            item
+            for item in texts
+            if item.path == root + "/help_panel/list/help_tpl"
+            and item.text.strip().startswith("注意，自律战斗时可能出现以下情况")
+        )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "btn_big_blue"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if (
+            len(targets) != 1
+            or len(exact_matches) != len(exact)
+            or {item.path for item in exact_matches} != set(exact)
+            or len(notices) != 1
+            or len(images) != 1
+        ):
+            raise SemanticGateClosed("Raid precombat notice identity is incomplete")
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed("Raid precombat notice image does not cover button")
+        return button_state, ui_state, target
+
+    def raid_precombat_notice_visible(self, event: str) -> bool:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        try:
+            self._amatsukaze_raid_notice_target()
+        except SemanticGateClosed as exc:
+            if str(exc) == "Raid precombat notice is absent":
+                return False
+            raise
+        return True
+
+    def click_raid_precombat_notice(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        button_state, _ui_state, target = self._amatsukaze_raid_notice_target()
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/precombat/notice/acknowledge",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_precombat_start(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        button_state, _ui_state, target = self._amatsukaze_raid_precombat_state()
+        if self.raid_precombat_notice_visible(event):
+            raise SemanticGateClosed("Raid precombat start is obscured by notice")
+        if self._blocking_rules(button_state, "raid/precombat/start"):
+            raise SemanticGateClosed("Raid precombat start input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        assert target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/precombat/start",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def click_raid_precombat_back(self, event: str) -> ActionReceipt:
+        if event != "raid_20260827":
+            raise SemanticGateClosed("Raid precombat event is unsupported")
+        button_state, ui_state, start = self._amatsukaze_raid_precombat_state()
+        if self.raid_precombat_notice_visible(event):
+            raise SemanticGateClosed("Raid precombat back is obscured by notice")
+        root = start.path.rsplit("/adapt/right/start", 1)[0]
+        path = root + "/blur_panel/top/back_btn"
+        targets = tuple(
+            button
+            for button in button_state.buttons
+            if button.path == path
+            and button.name == "back_btn"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top in (True, None)
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        images = tuple(
+            image
+            for image in ui_state.images
+            if image.path == path
+            and image.sprite == "icon_bg_front_1920"
+            and image.active_in_hierarchy
+            and image.active_and_enabled
+            and not image.truncated
+            and image.color[3] >= 0.99
+            and image.fill_amount >= 0.99
+            and image.bounds is not None
+        )
+        if len(targets) != 1 or len(images) != 1:
+            raise SemanticGateClosed("Raid precombat back identity is incomplete")
+        target = targets[0]
+        assert target.bounds is not None
+        assert images[0].bounds is not None
+        button_area = (target.bounds.right - target.bounds.left) * (
+            target.bounds.bottom - target.bounds.top
+        )
+        if self._bounds_overlap(target.bounds, images[0].bounds) < button_area * 0.99:
+            raise SemanticGateClosed("Raid precombat image does not cover back")
+        if self._blocking_rules(button_state, "raid/precombat/back"):
+            raise SemanticGateClosed("Raid precombat back input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before Raid input")
+        assert target.point is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="raid/precombat/back",
+            generation=button_state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def raid_remain(self, event: str, mode: str) -> int:
+        return self.raid_remain_state(event=event, mode=mode).remaining
+
     def campaign_oil(self) -> int:
         """Read the exact global oil counter on a proven campaign surface."""
 
@@ -19962,7 +23065,9 @@ class SemanticOracle:
         try:
             self.campaign_page_state()
         except SemanticTargetMissing:
-            if self.event_campaign_page_visible():
+            if self.main_page_visible():
+                pass
+            elif self.event_campaign_page_visible():
                 pass
             else:
                 # The global resource panel remains visible after sortie.  A
@@ -19971,7 +23076,9 @@ class SemanticOracle:
                 # map root/anchor proof succeeds.
                 self.campaign_map_entry_state()
         except SemanticGateClosed as exc:
-            if self._event_campaign_detail_visible(self.read_state()):
+            if self.main_page_visible():
+                pass
+            elif self._event_campaign_detail_visible(self.read_state()):
                 pass
             elif self.event_campaign_page_visible():
                 # Event selectors use LevelSelectSPFullUI rather than the
@@ -19990,6 +23097,7 @@ class SemanticOracle:
             "OverlayCamera/Overlay/UIMain/ResPanel(Clone)/frame/oil/oil_value",
             "UICamera/Canvas/UIOrigin/ResPanel(Clone)/frame/oil/oil_value",
             "LevelCamera/Canvas/LevelOrigin/ResPanel(Clone)/frame/oil/oil_value",
+            "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/top/res/oil/Text",
         )
         matches = tuple(
             item
@@ -20808,7 +23916,15 @@ class SemanticOracle:
         # already applies this exact path-scoped admission; presence must use
         # the same predicate or ALAS can never reach the click boundary.
         return bool(
-            "LevelSelectSPFullUI(Clone)/Battle/Nodes/Chapter_" in button.path
+            (
+                "LevelSelectSPFullUI(Clone)/Battle/Nodes/Chapter_" in button.path
+                or re.search(
+                    r"LevelMainScene\(Clone\)/float/levels/items/"
+                    r"Chapter_21[0-9]{5}/main$",
+                    button.path,
+                )
+                is not None
+            )
             and button.path.endswith("/main")
             and button.active_in_hierarchy
             and button.active_and_enabled
@@ -20857,20 +23973,42 @@ class SemanticOracle:
         """Return a reviewed preparation view root for one active UI record."""
 
         live_map_prefix = _CAMPAIGN_LIVE_MAP_VIEW_ROOT + "/"
+        live_map_uiorigin_prefix = _CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT + "/"
         live_normal_map_prefix = _CAMPAIGN_LIVE_NORMAL_MAP_VIEW_ROOT + "/"
-        if path.startswith(live_map_prefix):
-            relative = path[len(live_map_prefix) :]
+        if path.startswith(live_map_prefix) or path.startswith(
+            live_map_uiorigin_prefix
+        ):
+            matched_prefix, matched_panel_root = (
+                (live_map_prefix, _CAMPAIGN_LIVE_MAP_PANEL_ROOT)
+                if path.startswith(live_map_prefix)
+                else (
+                    live_map_uiorigin_prefix,
+                    _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
+                )
+            )
+            relative = path[len(matched_prefix) :]
             reviewed = {
-                "button": _CAMPAIGN_LIVE_MAP_BUTTON_SPECS,
+                "button": {
+                    **_CAMPAIGN_LIVE_MAP_BUTTON_SPECS,
+                    **_CAMPAIGN_LIVE_D1_MAP_BUTTON_ADDITIONS,
+                    **_CAMPAIGN_LIVE_B2_MAP_BUTTON_ADDITIONS,
+                },
                 "toggle": _CAMPAIGN_LIVE_MAP_TOGGLE_SPECS,
-                "text": _CAMPAIGN_LIVE_MAP_TEXT_COUNTS,
-                "image": _CAMPAIGN_LIVE_MAP_IMAGE_SPECS,
+                "text": {
+                    **_CAMPAIGN_LIVE_MAP_TEXT_COUNTS,
+                    **_CAMPAIGN_LIVE_D1_MAP_TEXT_ADDITIONS,
+                },
+                "image": {
+                    **_CAMPAIGN_LIVE_MAP_IMAGE_SPECS,
+                    **_CAMPAIGN_LIVE_D1_MAP_IMAGE_ADDITIONS,
+                    **_CAMPAIGN_LIVE_B2_MAP_IMAGE_ADDITIONS,
+                },
             }.get(record_kind)
             if reviewed is None or relative not in reviewed:
                 raise SemanticGateClosed(
                     "campaign live map-preparation record is not reviewed"
                 )
-            observed = (("map", _CAMPAIGN_LIVE_MAP_PANEL_ROOT),)
+            observed = (("map", matched_panel_root),)
         elif path.startswith(live_normal_map_prefix):
             # The reviewed normal-stage live surface contains active records
             # beside ``panel`` (for example the view-owned background).  They
@@ -20912,10 +24050,16 @@ class SemanticOracle:
     @staticmethod
     def _validate_campaign_live_map_records(
         records: Mapping[str, Sequence[Any]],
+        view_root: str,
     ) -> None:
-        """Require the exact reviewed 81-record LevelInfoSPUI live surface."""
+        """Require one exact reviewed LevelInfoSPUI live profile."""
 
-        root_prefix = _CAMPAIGN_LIVE_MAP_VIEW_ROOT + "/"
+        if view_root not in (
+            _CAMPAIGN_LIVE_MAP_VIEW_ROOT,
+            _CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT,
+        ):
+            raise SemanticGateClosed("campaign live map-preparation root changed")
+        root_prefix = view_root + "/"
 
         def by_relative(kind: str) -> Dict[str, List[Any]]:
             grouped: Dict[str, List[Any]] = {}
@@ -20929,11 +24073,133 @@ class SemanticOracle:
         toggles = by_relative("toggle")
         texts = by_relative("text")
         images = by_relative("image")
-        if set(buttons) != set(_CAMPAIGN_LIVE_MAP_BUTTON_SPECS):
+        title_path = "panel/title_form/title_index"
+        if title_path not in texts or len(texts[title_path]) != 1:
+            raise SemanticGateClosed(
+                "campaign live map-preparation stage identity is incomplete"
+            )
+        stage_identity = texts[title_path][0].text.strip().lower()
+        if stage_identity == "sp":
+            button_specs = _CAMPAIGN_LIVE_MAP_BUTTON_SPECS
+            text_counts = _CAMPAIGN_LIVE_MAP_TEXT_COUNTS
+            image_specs = _CAMPAIGN_LIVE_MAP_IMAGE_SPECS
+        elif stage_identity in ("c1", "c2", "c3", "d1", "d2", "d3"):
+            profile = {
+                "c1": {
+                    "head": "emotion_zhongxun",
+                    "level": "LV 75",
+                    "points": "90",
+                    "cost_limit": False,
+                },
+                "c2": {
+                    "head": "emotion_zhanlie",
+                    "level": "LV 80",
+                    "points": "100",
+                    "cost_limit": False,
+                },
+                "c3": {
+                    "head": "emotion_hangmu",
+                    "level": "LV 85",
+                    "points": "110",
+                    "cost_limit": False,
+                },
+                "d1": {
+                    "head": "haorenlichade_m_qianting",
+                    "level": "LV 95",
+                    "points": "120",
+                    "cost_limit": True,
+                },
+                "d2": {
+                    "head": "haorenlichade_m_zhanlie",
+                    "level": "LV 100",
+                    "points": "150",
+                    "cost_limit": True,
+                },
+                "d3": {
+                    "head": "haorenlichade_m_hangmu",
+                    "level": "LV 105",
+                    "points": "180",
+                    "cost_limit": True,
+                },
+            }[stage_identity]
+            button_specs = {
+                **_CAMPAIGN_LIVE_MAP_BUTTON_SPECS,
+                **_CAMPAIGN_LIVE_D1_MAP_BUTTON_ADDITIONS,
+            }
+            text_counts = {
+                **_CAMPAIGN_LIVE_MAP_TEXT_COUNTS,
+                **_CAMPAIGN_LIVE_D1_MAP_TEXT_ADDITIONS,
+            }
+            image_specs = {
+                **_CAMPAIGN_LIVE_MAP_IMAGE_SPECS,
+                **{
+                    path: value
+                    for path, value in _CAMPAIGN_LIVE_D1_MAP_IMAGE_ADDITIONS.items()
+                    if profile["cost_limit"]
+                    or path
+                    != "panel/BottomExtra/LoopGroup/view/container/CostLimit"
+                },
+                "panel/head/Image": ((profile["head"],), True),
+            }
+        elif stage_identity in ("a2", "a3", "b2", "b3"):
+            profile = {
+                "a2": {
+                    "clone_bgs": ("bg1", "bg1", "bg2", "bg2"),
+                    "clone_icons": ("30002", "54000", "54012", "55000"),
+                    "head": "emotion_zhanlie",
+                },
+                "a3": {
+                    "clone_bgs": ("bg1", "bg1", "bg2", "bg2"),
+                    "clone_icons": ("30002", "54000", "54012", "55000"),
+                    "head": "emotion_hangmu",
+                },
+                "b2": {
+                    "clone_bgs": ("bg1", "bg1", "bg2", "bg3"),
+                    "clone_icons": ("30003", "54000", "54012", "55000"),
+                    "head": "haorenlichade_m_zhanlie",
+                },
+                "b3": {
+                    "clone_bgs": ("bg1", "bg1", "bg2", "bg4"),
+                    "clone_icons": ("30004", "54000", "54012", "55000"),
+                    "head": "haorenlichade_m_hangmu",
+                },
+            }[stage_identity]
+            button_specs = {
+                **_CAMPAIGN_LIVE_MAP_BUTTON_SPECS,
+                **_CAMPAIGN_LIVE_B2_MAP_BUTTON_ADDITIONS,
+            }
+            text_counts = {
+                **_CAMPAIGN_LIVE_MAP_TEXT_COUNTS,
+                **_CAMPAIGN_LIVE_D1_MAP_TEXT_ADDITIONS,
+            }
+            image_specs = {
+                **{
+                    path: value
+                    for path, value in _CAMPAIGN_LIVE_MAP_IMAGE_SPECS.items()
+                    if path not in ("panel/Level/Hard", "panel/title/Hard")
+                },
+                **_CAMPAIGN_LIVE_B2_MAP_IMAGE_ADDITIONS,
+                "panel/Level/Normal": (("bg_lv_normal",), False),
+                "panel/title/Normal": (("bg_title_normal",), False),
+                "panel/drops/frame/list/item(Clone)/icon_bg": (
+                    profile["clone_bgs"],
+                    True,
+                ),
+                "panel/drops/frame/list/item(Clone)/icon_bg/icon": (
+                    profile["clone_icons"],
+                    False,
+                ),
+                "panel/head/Image": ((profile["head"],), True),
+            }
+        else:
+            raise SemanticGateClosed(
+                "campaign live map-preparation stage profile is not reviewed"
+            )
+        if set(buttons) != set(button_specs):
             raise SemanticGateClosed(
                 "campaign live map-preparation button surface is incomplete"
             )
-        for path, (name, count) in _CAMPAIGN_LIVE_MAP_BUTTON_SPECS.items():
+        for path, (name, count) in button_specs.items():
             observed = buttons[path]
             if len(observed) != count or any(
                 button.name != name
@@ -20960,7 +24226,7 @@ class SemanticOracle:
                 not toggle.active_in_hierarchy
                 or not toggle.active_and_enabled
                 or not toggle.interactable
-                or not toggle.checked
+                or (path == "panel/quickPlay" and not toggle.checked)
                 or toggle.raycast_top is not None
                 or toggle.point is None
                 or toggle.bounds is None
@@ -20970,12 +24236,12 @@ class SemanticOracle:
                     "campaign live map-preparation toggle identity is malformed"
                 )
 
-        if set(texts) != set(_CAMPAIGN_LIVE_MAP_TEXT_COUNTS):
+        if set(texts) != set(text_counts):
             raise SemanticGateClosed(
                 "campaign live map-preparation text surface is incomplete"
             )
         title_en_path = "panel/title_form/title_en"
-        for path, count in _CAMPAIGN_LIVE_MAP_TEXT_COUNTS.items():
+        for path, count in text_counts.items():
             observed = texts[path]
             if len(observed) != count or any(
                 text.kind != "ugui-text"
@@ -20992,18 +24258,41 @@ class SemanticOracle:
                 raise SemanticGateClosed(
                     "campaign live map-preparation text identity is malformed"
                 )
-        exact_text = {
-            "panel/Level/Text": "LV 110",
-            "panel/cost/text": "10",
-            "panel/drops/frame/list/item/icon_bg/count": "800",
-            "panel/title_form/title_en": "",
-        }
+        if stage_identity == "sp":
+            exact_text = {
+                "panel/Level/Text": "LV 110",
+                "panel/cost/text": "10",
+                "panel/drops/frame/list/item/icon_bg/count": "800",
+                "panel/title_form/title_en": "",
+            }
+        elif stage_identity in ("c1", "c2", "c3", "d1", "d2", "d3"):
+            exact_text = {
+                "panel/Level/Text": profile["level"],
+                "panel/cost/text": "10",
+                "panel/drops/frame/list/item/icon_bg/count": profile["points"],
+                "panel/progress/Text/value": "100%",
+                "panel/title_form/title_en": "",
+            }
+        else:
+            level, points = {
+                "a2": ("LV 30", "40"),
+                "a3": ("LV 35", "50"),
+                "b2": ("LV 55", "70"),
+                "b3": ("LV 60", "80"),
+            }[stage_identity]
+            exact_text = {
+                "panel/Level/Text": level,
+                "panel/cost/text": "10",
+                "panel/drops/frame/list/item/icon_bg/count": points,
+                "panel/progress/Text/value": "100%",
+                "panel/title_form/title_en": "",
+            }
         for path, expected in exact_text.items():
             if texts[path][0].text != expected:
                 raise SemanticGateClosed(
                     "campaign live map-preparation text value changed"
                 )
-        if texts["panel/title_form/title_index"][0].text.strip().lower() != "sp":
+        if texts[title_path][0].text.strip().lower() != stage_identity:
             raise SemanticGateClosed(
                 "campaign live map-preparation stage identity changed"
             )
@@ -21024,27 +24313,79 @@ class SemanticOracle:
             "panel/quickPlay/desc",
             "panel/title_form/title",
             "panel/win_conditions/desc",
+            *(
+                (
+                    "panel/achieves/achieve(Clone)/desc",
+                    "panel/progress/Text",
+                )
+                if stage_identity
+                in (
+                    "c1",
+                    "c2",
+                    "c3",
+                    "d1",
+                    "d2",
+                    "d3",
+                    "a2",
+                    "a3",
+                    "b2",
+                    "b3",
+                )
+                else ()
+            ),
         ):
-            if not texts[path][0].text.strip():
+            if any(not item.text.strip() for item in texts[path]):
                 raise SemanticGateClosed(
                     "campaign live map-preparation required text is empty"
                 )
 
-        if set(images) != set(_CAMPAIGN_LIVE_MAP_IMAGE_SPECS):
+        optional_bonus_group = (
+            {
+                "panel/Difficulty/Normal/Bonus1",
+                "panel/Difficulty/Normal/Bonus1/Image",
+            }
+            if stage_identity in ("a2", "a3", "b2", "b3")
+            else (
+                {
+                    "panel/Difficulty/Hard/Bonus1",
+                    "panel/Difficulty/Hard/Bonus1/Image",
+                }
+                if stage_identity in ("c1", "c2", "c3", "d1", "d2", "d3")
+                else set()
+            )
+        )
+        optional_image_paths = {
+            "panel/BottomExtra/LoopGroup/view/container/AutoFight/Flag"
+        } | optional_bonus_group
+        required_image_paths = set(image_specs) - optional_image_paths
+        observed_image_paths = set(images)
+        if not (
+            required_image_paths <= observed_image_paths
+            and observed_image_paths <= required_image_paths | optional_image_paths
+            and (
+                not (observed_image_paths & optional_bonus_group)
+                or optional_bonus_group <= observed_image_paths
+            )
+        ):
             raise SemanticGateClosed(
                 "campaign live map-preparation image surface is incomplete"
             )
-        for path, (sprites, raycast_target) in _CAMPAIGN_LIVE_MAP_IMAGE_SPECS.items():
+        for path, (sprites, raycast_target) in image_specs.items():
+            if path not in images and path in optional_image_paths:
+                continue
             observed = images[path]
-            if tuple(sorted(image.sprite for image in observed)) != tuple(
-                sorted(sprites)
+            if (
+                sprites
+                and tuple(sorted(image.sprite for image in observed))
+                != tuple(sorted(sprites))
             ) or any(
                 not image.active_in_hierarchy
                 or not image.active_and_enabled
                 or image.truncated
+                or not image.sprite
                 or image.raycast_target is not raycast_target
                 or image.raycast_top is not None
-                or image.bounds is None
+                or (sprites and image.bounds is None)
                 for image in observed
             ):
                 raise SemanticGateClosed(
@@ -21077,8 +24418,15 @@ class SemanticOracle:
                 if resolved is not None:
                     kind, root = resolved
                     roots[kind].add(root)
-        if _CAMPAIGN_LIVE_MAP_PANEL_ROOT in roots["map"]:
-            self._validate_campaign_live_map_records(active_by_kind)
+        for panel_root, view_root in (
+            (_CAMPAIGN_LIVE_MAP_PANEL_ROOT, _CAMPAIGN_LIVE_MAP_VIEW_ROOT),
+            (
+                _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
+                _CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT,
+            ),
+        ):
+            if panel_root in roots["map"]:
+                self._validate_campaign_live_map_records(active_by_kind, view_root)
         return tuple(sorted(roots["map"])), tuple(sorted(roots["fleet"]))
 
     @staticmethod
@@ -21112,9 +24460,12 @@ class SemanticOracle:
         stage_code: str,
         *,
         event: bool,
+        archive: bool = False,
     ) -> Tuple[ButtonState, TextState, TextState]:
         """Select one exact stage pair after validating every family record."""
 
+        if event and archive:
+            raise ValueError("campaign underlay cannot be event and archive")
         family = "LevelSelectSPFullUI" if event else "LevelMainScene"
         roots = (
             _CAMPAIGN_EVENT_UNDERLAY_ROOTS
@@ -21206,14 +24557,14 @@ class SemanticOracle:
                 or title.truncated
                 or not title.text.strip()
                 or (
-                event
+                (event or archive)
                 and re.fullmatch(r"[a-z]+[0-9]*", observed_stage) is None
                 )
             ):
                 raise SemanticGateClosed(
                     "campaign fleet-preparation underlay identity is malformed"
                 )
-            if not event:
+            if not event and not archive:
                 if observed_normal is None:
                     raise SemanticGateClosed(
                         "campaign fleet-preparation underlay identity is malformed"
@@ -21245,7 +24596,7 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "campaign fleet-preparation underlay identity is absent or ambiguous"
             )
-        if not event and requested_normal is None:
+        if not event and not archive and requested_normal is None:
             raise SemanticGateClosed("campaign stage code is not canonical")
         return selected[0]
 
@@ -21324,15 +24675,53 @@ class SemanticOracle:
         )
 
     @staticmethod
+    def _campaign_eventsp_remaining_attempts(text: str) -> int:
+        exact = {
+            "<color=#92FC63FF>1/1</color>": 1,
+            "<color=#FF5C5CFF>0/1</color>": 0,
+        }
+        remaining = exact.get(text.strip())
+        if remaining is None:
+            raise SemanticGateClosed("event SP attempt counter is malformed")
+        return remaining
+
+    @staticmethod
     def _validate_campaign_live_map_underlay(
         button_state: OracleState,
         ui_state: UiState,
         stage_button: ButtonState,
-    ) -> None:
-        """Require the exact live SP selector identity obscured by LevelInfoSPUI."""
+        stage_code: str,
+    ) -> Optional[int]:
+        """Require the exact reviewed selector identity obscured by LevelInfoSPUI."""
 
+        expected_stage_roots = {
+            "sp": (_CAMPAIGN_LIVE_EVENTSP_STAGE_ROOT,),
+            "a2": (_CAMPAIGN_LIVE_EVENTA2_STAGE_ROOT,),
+            "a3": (_CAMPAIGN_LIVE_EVENTA3_STAGE_ROOT,),
+            "c1": (_CAMPAIGN_LIVE_EVENTC1_STAGE_ROOT,),
+            "c2": (
+                _CAMPAIGN_LIVE_EVENTA2_STAGE_ROOT,
+                _CAMPAIGN_LIVE_EVENTC2_STAGE_ROOT,
+            ),
+            "c3": (
+                _CAMPAIGN_LIVE_EVENTA3_STAGE_ROOT,
+                _CAMPAIGN_LIVE_EVENTC3_STAGE_ROOT,
+            ),
+            "d1": (_CAMPAIGN_LIVE_EVENTD1_STAGE_ROOT,),
+            "d2": (
+                _CAMPAIGN_LIVE_EVENTB2_STAGE_ROOT,
+                _CAMPAIGN_LIVE_EVENTD2_STAGE_ROOT,
+            ),
+            "d3": (
+                _CAMPAIGN_LIVE_EVENTB3_STAGE_ROOT,
+                _CAMPAIGN_LIVE_EVENTD3_STAGE_ROOT,
+            ),
+            "b2": (_CAMPAIGN_LIVE_EVENTB2_STAGE_ROOT,),
+            "b3": (_CAMPAIGN_LIVE_EVENTB3_STAGE_ROOT,),
+        }.get(stage_code)
         if (
-            stage_button.path != _CAMPAIGN_LIVE_EVENTSP_STAGE_ROOT
+            expected_stage_roots is None
+            or stage_button.path not in expected_stage_roots
             or stage_button.name != "main"
             or not stage_button.active_in_hierarchy
             or not stage_button.active_and_enabled
@@ -21371,6 +24760,23 @@ class SemanticOracle:
                 "campaign live map-preparation story underlay is malformed"
             )
 
+        # Ordinary event stages have no daily attempt counter.  Their exact
+        # stage node, title, overlay profile, and actionable controls have
+        # already been bound above; the remaining checks are SP-only evidence.
+        if stage_code in (
+            "a2",
+            "a3",
+            "c1",
+            "c2",
+            "c3",
+            "d1",
+            "d2",
+            "d3",
+            "b2",
+            "b3",
+        ):
+            return None
+
         tries_path = _CAMPAIGN_LIVE_EVENTSP_STAGE_ROOT + "/triesLimit/Text"
         selected_text_path = _CAMPAIGN_LIVE_EVENTSP_SELECTED_ROOT + "Text"
         relevant_texts = tuple(
@@ -21395,7 +24801,6 @@ class SemanticOracle:
             not tries[0].active_and_enabled
             or tries[0].truncated
             or tries[0].bounds is None
-            or tries[0].text.strip() != "<color=#92FC63FF>1/1</color>"
             or not selected[0].active_and_enabled
             or selected[0].truncated
             or selected[0].bounds is None
@@ -21404,6 +24809,9 @@ class SemanticOracle:
             raise SemanticGateClosed(
                 "campaign live map-preparation selected-stage underlay changed"
             )
+        remaining_attempts = SemanticOracle._campaign_eventsp_remaining_attempts(
+            tries[0].text
+        )
 
         selected_images = {
             _CAMPAIGN_LIVE_EVENTSP_SELECTED_ROOT + "Frame": "level_item_select",
@@ -21435,6 +24843,7 @@ class SemanticOracle:
                 raise SemanticGateClosed(
                     "campaign live map-preparation selected image changed"
                 )
+        return remaining_attempts
 
     def campaign_map_preparation_state(
         self, stage_code: str
@@ -21779,6 +25188,7 @@ class SemanticOracle:
         if observed_stage != stage_code:
             raise SemanticGateClosed("campaign map-preparation stage identity changed")
         oil_cost = None
+        remaining_attempts = None
         if root.endswith("LevelInfoSPUI(Clone)/panel/"):
             stage_costs = tuple(
                 item
@@ -21799,7 +25209,11 @@ class SemanticOracle:
                     "campaign event stage oil cost is outside the pinned range"
                 )
             if (
-                root == _CAMPAIGN_LIVE_MAP_PANEL_ROOT
+                root
+                in (
+                    _CAMPAIGN_LIVE_MAP_PANEL_ROOT,
+                    _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
+                )
                 or self._campaign_event_underlay_evidence(button_state, ui_state)
             ):
                 stage_button, _underlay_index, _underlay_title = (
@@ -21811,11 +25225,15 @@ class SemanticOracle:
                     )
                 )
                 self._campaign_map_underlay_pair_is_reviewed(root, stage_button)
-                if root == _CAMPAIGN_LIVE_MAP_PANEL_ROOT:
-                    self._validate_campaign_live_map_underlay(
+                if root in (
+                    _CAMPAIGN_LIVE_MAP_PANEL_ROOT,
+                    _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT,
+                ):
+                    remaining_attempts = self._validate_campaign_live_map_underlay(
                         button_state,
                         ui_state,
                         stage_button,
+                        stage_code,
                     )
                     if titles[0].text.strip() != _underlay_title.text.strip():
                         raise SemanticGateClosed(
@@ -21829,12 +25247,15 @@ class SemanticOracle:
             proceed_button=proceed,
             cancel_button=cancel,
             oil_cost=oil_cost,
+            remaining_attempts=remaining_attempts,
         )
 
     def click_campaign_map_preparation(self, stage_code: str) -> ActionReceipt:
         """Advance from stage details to fleet preparation, never to sortie."""
 
         observed = self.campaign_map_preparation_state(stage_code)
+        if observed.remaining_attempts == 0:
+            raise SemanticGateClosed("campaign stage attempts are exhausted")
         target = observed.proceed_button
         actionable = target.actionable or (
             "LevelInfoSPUI(Clone)/panel/" in target.path
@@ -21859,6 +25280,168 @@ class SemanticOracle:
         return ActionReceipt(
             semantic_id="campaign/map-preparation/proceed",
             generation=observed.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def _campaign_dock_full_targets(
+        self, state: OracleState, stage_code: str
+    ) -> Mapping[str, ButtonState]:
+        """Prove the event D3 dock-full modal without admitting gem expansion."""
+
+        if stage_code.lower() != "d3":
+            raise SemanticGateClosed(
+                "campaign dock-full recovery is reviewed only for event D3"
+            )
+        msgbox_root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/"
+        popup_root = msgbox_root + "window/"
+        target_path = popup_root + "button_container/custom_button_1(Clone)"
+        popup_paths = tuple(
+            button.path
+            for button in state.buttons
+            if button.active_in_hierarchy and button.path.startswith(msgbox_root)
+        )
+        expected_paths = tuple(
+            sorted(
+                (
+                    target_path,
+                    target_path,
+                    target_path,
+                    popup_root + "msg_panel/content",
+                    popup_root + "top/btnBack",
+                    msgbox_root + "bg",
+                )
+            )
+        )
+        if tuple(sorted(popup_paths)) != expected_paths:
+            raise SemanticGateClosed(
+                "campaign dock-full control surface is not exact"
+            )
+        buttons = tuple(
+            button
+            for button in state.buttons
+            if button.path == target_path
+            and button.name == "custom_button_1(Clone)"
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is True
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(buttons) != 3 or len({button.bounds for button in buttons}) != 3:
+            raise SemanticGateClosed(
+                "campaign dock-full buttons are absent or ambiguous"
+            )
+        for semantic_id in (
+            "campaign/dock-full/organize",
+            "campaign/dock-full/enhance",
+        ):
+            if self._blocking_rules(state, semantic_id):
+                raise SemanticGateClosed("campaign dock-full action is blocked")
+
+        ui_state = self._stable_msgbox_ui_state(state)
+        content = tuple(
+            text
+            for text in ui_state.texts
+            if text.path == popup_root + "msg_panel/content"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and text.text.strip()
+        )
+        stage_indexes = tuple(
+            text
+            for text in ui_state.texts
+            if text.path
+            == _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT + "title_form/title_index"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.text.strip().lower() == "d3"
+        )
+        labels = tuple(
+            text
+            for text in ui_state.texts
+            if text.path == target_path + "/pic"
+            and text.active_in_hierarchy
+            and text.active_and_enabled
+            and not text.truncated
+            and text.bounds is not None
+            and text.text.strip()
+        )
+        if (
+            len(content) != 1
+            or len(stage_indexes) != 1
+            or len(labels) != 3
+        ):
+            raise SemanticGateClosed(
+                "campaign dock-full identity is incomplete or ambiguous: "
+                f"content={len(content)}, stage={len(stage_indexes)}, "
+                f"labels={len(labels)}"
+            )
+
+        normalized = {"".join(label.text.split()): label for label in labels}
+        if set(normalized) != {"强化", "拓展", "整理"}:
+            raise SemanticGateClosed("campaign dock-full labels are not exact")
+        targets: dict[str, ButtonState] = {}
+        for choice, text in (
+            ("enhance", "强化"),
+            ("expand", "拓展"),
+            ("organize", "整理"),
+        ):
+            label = normalized[text]
+            centre = Point(
+                (label.bounds.left + label.bounds.right) / 2.0,
+                (label.bounds.top + label.bounds.bottom) / 2.0,
+            )
+            labelled = tuple(
+                button for button in buttons if button.bounds.contains(centre)
+            )
+            if len(labelled) != 1:
+                raise SemanticGateClosed(
+                    "campaign dock-full label is not bound to one action"
+                )
+            targets[choice] = labelled[0]
+        if len({target.bounds for target in targets.values()}) != 3:
+            raise SemanticGateClosed("campaign dock-full actions are not unique")
+        return targets
+
+    def campaign_dock_full_visible(self, stage_code: str) -> bool:
+        state = self.read_state()
+        if not any(
+            button.path.startswith(
+                "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+            )
+            for button in state.buttons
+        ):
+            return False
+        self._campaign_dock_full_targets(state, stage_code)
+        return True
+
+    def click_campaign_dock_full_choice(
+        self, stage_code: str, choice: str
+    ) -> ActionReceipt:
+        if choice not in ("organize", "enhance"):
+            raise SemanticGateClosed(
+                "campaign dock expansion is not authorized by semantic recovery"
+            )
+        state = self.read_state()
+        target = self._campaign_dock_full_targets(state, stage_code)[choice]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        assert target.bounds is not None
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="campaign/dock-full/" + choice,
+            generation=state.generation,
             point=point,
             bounds=target.bounds,
             path=target.path,
@@ -21977,12 +25560,16 @@ class SemanticOracle:
             button_state,
             ui_state,
             stage_code,
-            event=stage_id is None,
+            event=stage_id is None
+            and not self._war_archives_campaign_counter_records(ui_state),
+            archive=stage_id is None
+            and bool(self._war_archives_campaign_counter_records(ui_state)),
         )
         self._campaign_fleet_underlay_pair_is_reviewed(
             fleet_root,
             stage_button,
-            event=stage_id is None,
+            event=stage_id is None
+            and not self._war_archives_campaign_counter_records(ui_state),
         )
 
         if (
@@ -22545,13 +26132,19 @@ class SemanticOracle:
                 r"[1-9][0-9]*-[1-9][0-9]*", stage_code
             ) is not None
             event_stage = re.fullmatch(r"[a-z]+[0-9]*", stage_code) is not None
+            archive_stage = bool(
+                event_stage
+                and self._war_archives_campaign_counter_records(ui_state)
+            )
             valid_fallback = (
                 fallback_oil_cost is not None
                 and not isinstance(fallback_oil_cost, bool)
                 and isinstance(fallback_oil_cost, int)
                 and fallback_oil_cost > 0
             )
-            if not numeric_stage and not (event_stage and valid_fallback):
+            if not numeric_stage and not archive_stage and not (
+                event_stage and valid_fallback
+            ):
                 raise SemanticGateClosed(
                     "campaign fleet oil cost is absent or ambiguous"
                 )
@@ -22792,6 +26385,8 @@ class SemanticOracle:
         """Click one exact stage after revalidating its typed Unity identity."""
 
         observed = self.campaign_stage_state(stage_code)
+        if observed.remaining_attempts == 0:
+            raise SemanticGateClosed("campaign stage attempts are exhausted")
         state = None
         target = None
         for attempt in range(12):
@@ -22807,6 +26402,12 @@ class SemanticOracle:
             candidate = matches[0]
             event_node = (
                 "LevelSelectSPFullUI(Clone)/Battle/Nodes/Chapter_" in candidate.path
+                or re.search(
+                    r"LevelMainScene\(Clone\)/float/levels/items/"
+                    r"Chapter_21[0-9]{5}/main$",
+                    candidate.path,
+                )
+                is not None
             )
             candidate_actionable = candidate.actionable or (
                 event_node
@@ -22930,6 +26531,406 @@ class SemanticOracle:
             box_counts=(scalars["box_1"], scalars["box_2"], scalars["box_3"]),
         )
 
+    def meowfficer_purchase_state(self) -> MeowfficerPurchaseState:
+        """Read the exact reserve count and total coin price."""
+
+        button_state = self.read_state()
+        for semantic_id in (
+            "meowfficer/buy/min",
+            "meowfficer/buy/add",
+            "meowfficer/buy/max",
+            "meowfficer/buy/submit",
+        ):
+            matches = self._matches(button_state, semantic_id)
+            if len(matches) != 1:
+                raise SemanticGateClosed("meowfficer purchase identity is not proven")
+            control = matches[0]
+            if (
+                self._blocking_rules(button_state, semantic_id)
+                or not control.active_in_hierarchy
+                or not control.active_and_enabled
+                or not control.interactable
+                or control.raycast_top is not None
+                or control.point is None
+                or control.bounds is None
+                or not control.bounds.contains(control.point)
+            ):
+                raise SemanticGateClosed("meowfficer purchase control is not proven")
+
+        ui_state = self.read_ui_state()
+        if (
+            ui_state.generation < button_state.generation
+            or ui_state.generation > button_state.generation + 2
+            or ui_state.snapshot.get("text_truncated") is not False
+        ):
+            raise SemanticGateClosed("meowfficer purchase snapshots are not coherent")
+        root = "CommanderReserveUI(Clone)/frame/bg1/"
+
+        def exact_number(suffix: str) -> int:
+            matches = tuple(
+                item
+                for item in ui_state.texts
+                if item.path.endswith(root + suffix)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and re.fullmatch(r"[0-9]+", item.text.strip()) is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed("meowfficer purchase number is ambiguous")
+            return int(matches[0].text.strip())
+
+        count = exact_number("count/Text")
+        total_price = exact_number("price_all/Text")
+        if not 1 <= count <= 15 or total_price > 15 * 1500:
+            raise SemanticGateClosed("meowfficer purchase values are inconsistent")
+        return MeowfficerPurchaseState(
+            generation=button_state.generation,
+            count=count,
+            total_price=total_price,
+        )
+
+    def _meowfficer_purchase_prompt_proven(
+        self, button_state: ObserverState
+    ) -> bool:
+        controls = tuple(
+            self._matches(button_state, semantic_id)
+            for semantic_id in (
+                "meowfficer/buy/cancel",
+                "meowfficer/buy/confirm",
+            )
+        )
+        if any(len(matches) != 1 for matches in controls):
+            return False
+        return all(
+            not self._blocking_rules(button_state, semantic_id)
+            and control.active_in_hierarchy
+            and control.active_and_enabled
+            and control.interactable
+            and control.raycast_top is None
+            and control.point is not None
+            and control.bounds is not None
+            and control.bounds.contains(control.point)
+            for semantic_id, matches in zip(
+                ("meowfficer/buy/cancel", "meowfficer/buy/confirm"), controls
+            )
+            for control in matches
+        )
+
+    def _meowfficer_purchase_skip_proven(
+        self, button_state: ObserverState
+    ) -> bool:
+        matches = self._matches(button_state, "meowfficer/buy/skip")
+        if len(matches) != 1:
+            return False
+        target = matches[0]
+        return bool(
+            not self._blocking_rules(button_state, "meowfficer/buy/skip")
+            and target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+        )
+
+    def _meowfficer_enhance_prompt_proven(
+        self, button_state: ObserverState
+    ) -> bool:
+        """Prove the prompt nested under the reviewed enhancement surface."""
+
+        semantic_ids = (
+            "meowfficer/enhance/cancel",
+            "meowfficer/enhance/confirm",
+        )
+        controls = tuple(self._matches(button_state, item) for item in semantic_ids)
+        if any(len(matches) != 1 for matches in controls):
+            return False
+        return all(
+            not self._blocking_rules(button_state, semantic_id)
+            and control.active_in_hierarchy
+            and control.active_and_enabled
+            and control.interactable
+            and control.raycast_top is None
+            and control.point is not None
+            and control.bounds is not None
+            and control.bounds.contains(control.point)
+            for semantic_id, matches in zip(semantic_ids, controls)
+            for control in matches
+        )
+
+    def _meowfficer_reviewed_control_proven(
+        self, button_state: ObserverState, semantic_id: str
+    ) -> bool:
+        matches = self._matches(button_state, semantic_id)
+        if len(matches) != 1:
+            return False
+        target = matches[0]
+        return bool(
+            not self._blocking_rules(button_state, semantic_id)
+            and target.active_in_hierarchy
+            and target.active_and_enabled
+            and target.interactable
+            and target.raycast_top is None
+            and target.point is not None
+            and target.bounds is not None
+            and target.bounds.contains(target.point)
+        )
+
+    def _meowfficer_cat_states(
+        self, button_state: ObserverState, ui_state: UiState
+    ) -> Tuple[MeowfficerCatState, ...]:
+        icon_pattern = re.compile(
+            r"CommanderCatDockUI\(Clone\)/frame/content/(?:"
+            r"[0-9]+/info|ComanderCatTpl(?:\(Clone\))?/info/icon)$"
+        )
+        level_pattern = re.compile(
+            r"CommanderCatDockUI\(Clone\)/frame/content/(?:"
+            r"[0-9]+/info/level_bg/Text|"
+            r"ComanderCatTpl(?:\(Clone\))?/info/level_bg/Text)$"
+        )
+        selected_pattern = re.compile(
+            r"CommanderCatDockUI\(Clone\)/frame/content/(?:"
+            r"[0-9]+|ComanderCatTpl(?:\(Clone\))?)/up$"
+        )
+        icons = tuple(
+            button
+            for button in button_state.buttons
+            if button.name in ("icon", "info")
+            and icon_pattern.search(button.path)
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is None
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        levels = tuple(
+            item
+            for item in ui_state.texts
+            if level_pattern.search(item.path)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+            and re.fullmatch(r"(?:LV\.)?([1-9][0-9]?)", item.text.strip())
+        )
+        selected = tuple(
+            item
+            for item in ui_state.images
+            if selected_pattern.search(item.path)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if not icons or len(icons) > 16 or len(levels) != len(icons):
+            raise SemanticGateClosed("meowfficer cat grid is ambiguous")
+        results: List[MeowfficerCatState] = []
+        used_levels: Set[int] = set()
+        for icon in icons:
+            assert icon.bounds is not None and icon.point is not None
+            matches = tuple(
+                (index, item)
+                for index, item in enumerate(levels)
+                if index not in used_levels
+                and item.bounds is not None
+                and self._bounds_overlap(icon.bounds, item.bounds) > 0
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed("meowfficer cat level mapping is ambiguous")
+            level_index, level_item = matches[0]
+            used_levels.add(level_index)
+            level_match = re.fullmatch(
+                r"(?:LV\.)?([1-9][0-9]?)", level_item.text.strip()
+            )
+            assert level_match is not None
+            selected_matches = tuple(
+                item
+                for item in selected
+                if item.bounds is not None
+                and self._bounds_overlap(icon.bounds, item.bounds) > 0
+            )
+            if len(selected_matches) > 1:
+                raise SemanticGateClosed("meowfficer selected marker is ambiguous")
+            results.append(
+                MeowfficerCatState(
+                    path=icon.path,
+                    level=int(level_match.group(1)),
+                    selected=len(selected_matches) == 1,
+                    point=icon.point,
+                    bounds=icon.bounds,
+                )
+            )
+        ordered = tuple(
+            sorted(results, key=lambda item: (item.bounds.top, item.bounds.left))
+        )
+        if len({(item.bounds.left, item.bounds.top) for item in ordered}) != len(ordered):
+            raise SemanticGateClosed("meowfficer cat positions are ambiguous")
+        return ordered
+
+    def meowfficer_dock_cats(self) -> Tuple[MeowfficerCatState, ...]:
+        self.meowfficer_dock_state()
+        button_state = self.read_state()
+        ui_state = self.read_ui_state()
+        if (
+            not button_state.generation
+            <= ui_state.generation
+            <= button_state.generation + 2
+            or ui_state.snapshot.get("text_truncated") is not False
+            or ui_state.snapshot.get("image_truncated") is not False
+        ):
+            raise SemanticGateClosed("meowfficer cat snapshots are not coherent")
+        return self._meowfficer_cat_states(button_state, ui_state)
+
+    def meowfficer_feed_state(self) -> MeowfficerFeedState:
+        button_state = self.read_state()
+        for semantic_id in ("meowfficer/feed/cancel", "meowfficer/feed/confirm"):
+            matches = self._matches(button_state, semantic_id)
+            if len(matches) != 1:
+                raise SemanticGateClosed("meowfficer feed identity is not proven")
+            target = matches[0]
+            if (
+                self._blocking_rules(button_state, semantic_id)
+                or not target.active_in_hierarchy
+                or not target.active_and_enabled
+                or not target.interactable
+                or target.raycast_top is not None
+                or target.point is None
+                or target.bounds is None
+                or not target.bounds.contains(target.point)
+            ):
+                raise SemanticGateClosed("meowfficer feed control is not proven")
+        ui_state = self.read_ui_state()
+        if (
+            not button_state.generation
+            <= ui_state.generation
+            <= button_state.generation + 2
+            or ui_state.snapshot.get("text_truncated") is not False
+            or ui_state.snapshot.get("image_truncated") is not False
+        ):
+            raise SemanticGateClosed("meowfficer feed snapshots are not coherent")
+        counters = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith("CommanderCatDockUI(Clone)/bottom/value/Text")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and re.fullmatch(r"([0-9]+)/([1-9][0-9]*)", item.text.strip())
+        )
+        if len(counters) != 1:
+            raise SemanticGateClosed("meowfficer feed counter is ambiguous")
+        match = re.fullmatch(r"([0-9]+)/([1-9][0-9]*)", counters[0].text.strip())
+        assert match is not None
+        selected, capacity = map(int, match.groups())
+        if selected > capacity or capacity > 10:
+            raise SemanticGateClosed("meowfficer feed counter is inconsistent")
+        return MeowfficerFeedState(
+            generation=button_state.generation,
+            selected=selected,
+            capacity=capacity,
+            candidates=self._meowfficer_cat_states(button_state, ui_state),
+        )
+
+    def meowfficer_enhance_state(self) -> MeowfficerEnhanceState:
+        button_state = self.read_state()
+        for semantic_id in (
+            "meowfficer/enhance/back",
+            "meowfficer/feed/open",
+        ):
+            if not self._meowfficer_reviewed_control_proven(
+                button_state, semantic_id
+            ):
+                raise SemanticGateClosed("meowfficer enhance control is not proven")
+        ui_state = self.read_ui_state()
+        if (
+            not button_state.generation
+            <= ui_state.generation
+            <= button_state.generation + 2
+            or ui_state.snapshot.get("text_truncated") is not False
+        ):
+            raise SemanticGateClosed("meowfficer enhance snapshots are not coherent")
+
+        def exact_number(suffix: str, pattern: str) -> int:
+            matches = tuple(
+                item
+                for item in ui_state.texts
+                if item.path.endswith(suffix)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and re.fullmatch(pattern, item.text.strip())
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed("meowfficer enhance number is ambiguous")
+            value = re.fullmatch(pattern, matches[0].text.strip())
+            assert value is not None
+            return int(value.group(1))
+
+        level = exact_number(
+            "CommanderCatPlayUI(Clone)/select_panel/exp_bg/level_bg/Text",
+            r"(?:LV\.)?([1-9][0-9]?)",
+        )
+        coins = exact_number(
+            "CommanderCatUI(Clone)/blur_panel/top/res/gold/Text", r"([0-9]+)"
+        )
+        if level > 30:
+            raise SemanticGateClosed("meowfficer enhance level is inconsistent")
+        return MeowfficerEnhanceState(
+            generation=button_state.generation,
+            level=level,
+            coins=coins,
+        )
+
+    def click_meowfficer_cat(self, expected: MeowfficerCatState) -> ActionReceipt:
+        if not isinstance(expected, MeowfficerCatState):
+            raise TypeError("expected meowfficer cat state")
+        try:
+            candidates = self.meowfficer_feed_state().candidates
+        except SemanticGateClosed:
+            candidates = self.meowfficer_dock_cats()
+        current = tuple(
+            item
+            for item in candidates
+            if item.path == expected.path
+            and item.bounds == expected.bounds
+            and item.point == expected.point
+        )
+        if len(current) != 1:
+            raise SemanticGateClosed("meowfficer cat identity changed before input")
+        state = self.read_state()
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.path == expected.path
+            and button.bounds == expected.bounds
+            and button.point == expected.point
+            and button.name in ("icon", "info")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is None
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("meowfficer cat target is no longer unique")
+        if self._blocking_rules(state, "meowfficer/cat/select"):
+            raise SemanticGateClosed("meowfficer cat input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before meowfficer cat input")
+        target = matches[0]
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="meowfficer/cat/select",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def meowfficer_training_state(self) -> MeowfficerTrainingState:
         """Read the exact training queue without image matching or OCR."""
 
@@ -22998,7 +26999,11 @@ class SemanticOracle:
             if item.active_in_hierarchy
             and item.active_and_enabled
             and not item.truncated
-            and item.path.endswith("/CommanderBoxesUI(Clone)/frame/boxes/mask/content/frame/ongoing/time/Text")
+            and re.search(
+                r"/CommanderBoxesUI\(Clone\)/frame/boxes/mask/content/"
+                r"frame(?:\(Clone\))?/ongoing/time/Text$",
+                item.path,
+            )
             and item.text.strip() == "COMPLETE"
         )
         complete_buttons = self._matches(
@@ -23059,6 +27064,103 @@ class SemanticOracle:
             and item.sprite in ("R", "SR", "SSR")
         )
         return len(titles) == 1 and len(rarities) == 1
+
+    def _meowfficer_lock_toggle_proven(
+        self, button_state: ObserverState, semantic_id: str
+    ) -> bool:
+        """Prove one exact lock-state toggle on the current acquisition card."""
+
+        if semantic_id not in (
+            "meowfficer/get/lock",
+            "meowfficer/get/unlock",
+        ):
+            raise ValueError("unknown meowfficer lock toggle")
+        if not self._meowfficer_get_continue_proven(button_state):
+            return False
+        actionable: Dict[str, Tuple[ButtonState, ...]] = {}
+        for candidate in (
+            "meowfficer/get/lock",
+            "meowfficer/get/unlock",
+        ):
+            actionable[candidate] = tuple(
+                target
+                for target in self._matches(button_state, candidate)
+                if not self._blocking_rules(button_state, candidate)
+                and target.active_in_hierarchy
+                and target.active_and_enabled
+                and target.interactable
+                and target.raycast_top is None
+                and target.point is not None
+                and target.bounds is not None
+                and target.bounds.contains(target.point)
+            )
+        return bool(
+            len(actionable[semantic_id]) == 1
+            and sum(len(matches) for matches in actionable.values()) == 1
+        )
+
+    def meowfficer_acquisition_state(self) -> MeowfficerAcquisitionState:
+        """Read rarity and talent tiers from the exact acquisition card."""
+
+        button_state = self.read_state()
+        if not self._meowfficer_get_continue_proven(button_state):
+            raise SemanticGateClosed("meowfficer acquisition identity is not proven")
+        ui_state = self.read_ui_state()
+        root = "GetCommanderUI(Clone)/main/info/content/"
+
+        def exact_text(suffix: str) -> str:
+            matches = tuple(
+                item
+                for item in ui_state.texts
+                if item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.path.endswith(root + suffix)
+            )
+            if len(matches) != 1 or not matches[0].text.strip():
+                raise SemanticGateClosed("meowfficer acquisition text is ambiguous")
+            return matches[0].text.strip()
+
+        rarity_matches = tuple(
+            item
+            for item in ui_state.images
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.path.endswith(root + "rarity/value")
+            and item.sprite in ("R", "SR", "SSR")
+        )
+        talent_matches = tuple(
+            item
+            for item in ui_state.images
+            if item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and re.search(
+                r"GetCommanderUI\(Clone\)/main/info/content/talents/"
+                r"talent(?:\(Clone\))?/icon$",
+                item.path,
+            )
+            and bool(item.sprite)
+        )
+        if len(rarity_matches) != 1 or not 1 <= len(talent_matches) <= 3:
+            raise SemanticGateClosed("meowfficer acquisition fields are ambiguous")
+        sprites = tuple(item.sprite for item in talent_matches)
+        # Upstream defines a special talent as tierless or rainbow.  Ordinary
+        # talent sprites have a reviewed numeric tier suffix.  Unknown/tierless
+        # sprites are conservatively classified as special so retention cannot
+        # be skipped silently.
+        has_special = any(
+            re.fullmatch(r"[A-Za-z0-9_]+_[123]", sprite) is None
+            for sprite in sprites
+        )
+        return MeowfficerAcquisitionState(
+            generation=button_state.generation,
+            identity=exact_text("copyright/Text"),
+            rarity=rarity_matches[0].sprite,
+            talent_sprites=sprites,
+            has_special_talent=has_special,
+        )
 
     def _meowfficer_lock_prompt_proven(self, button_state: ObserverState) -> bool:
         controls = tuple(
@@ -23235,6 +27337,76 @@ class SemanticOracle:
         )
         return len(counters) == 1 and len(levels) == 1
 
+    def meowfficer_fort_chore_paths(self) -> Tuple[str, ...]:
+        """Return exact actionable Fort chore buttons in stable path order."""
+
+        button_state = self.read_state()
+        if not self._meowfficer_fort_close_proven(button_state):
+            raise SemanticGateClosed("meowfficer Fort identity is not proven")
+        pattern = re.compile(
+            r"CommanderHomeUI\(Clone\)/bg/frame/scrollrect/content/"
+            r"tpl(?:\(Clone\))?/unlock/bubble/(play|feed|clean)$"
+        )
+        chores = tuple(
+            sorted(
+                button.path
+                for button in button_state.buttons
+                if pattern.search(button.path)
+                and button.name in ("play", "feed", "clean")
+                and button.active_in_hierarchy
+                and button.active_and_enabled
+                and button.interactable
+                and button.raycast_top is None
+                and button.point is not None
+                and button.bounds is not None
+                and button.bounds.contains(button.point)
+            )
+        )
+        if len(chores) != len(set(chores)) or len(chores) > 8:
+            raise SemanticGateClosed("meowfficer Fort chores are ambiguous")
+        return chores
+
+    def click_meowfficer_fort_chore(self, expected_path: str) -> ActionReceipt:
+        """Click one still-actionable Fort chore selected from the typed state."""
+
+        if not isinstance(expected_path, str) or not expected_path:
+            raise ValueError("meowfficer Fort chore path must be text")
+        state = self.read_state()
+        if not self._meowfficer_fort_close_proven(state):
+            raise SemanticGateClosed("meowfficer Fort identity is not proven")
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.path == expected_path
+            and button.name in ("play", "feed", "clean")
+            and button.active_in_hierarchy
+            and button.active_and_enabled
+            and button.interactable
+            and button.raycast_top is None
+            and button.point is not None
+            and button.bounds is not None
+            and button.bounds.contains(button.point)
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("meowfficer Fort chore is no longer actionable")
+        target = matches[0]
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before meowfficer Fort chore")
+        point = Point(
+            (target.bounds.left + target.bounds.right) / 2.0,
+            (target.bounds.top + target.bounds.bottom) / 2.0,
+        )
+        self._tap(int(round(point.x)), int(round(point.y)))
+        return ActionReceipt(
+            semantic_id="meowfficer/fort/chore/" + target.name,
+            generation=state.generation,
+            point=point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+
     def _meowfficer_queue_prompt_proven(self, button_state: ObserverState) -> bool:
         controls = tuple(
             self._matches(button_state, semantic_id)
@@ -23265,8 +27437,11 @@ class SemanticOracle:
             and item.active_and_enabled
             and not item.truncated
             and item.path.endswith("CommanderBuildPoolUI(Clone)/statistics/Text")
-            and item.text.strip() == "10/10"
+            and re.fullmatch(r"([1-9][0-9]*)/\1", item.text.strip())
         )
+        if len(queue_counts) != 1:
+            return False
+        selected = int(queue_counts[0].text.strip().split("/", 1)[0])
         prompts = tuple(
             item
             for item in ui_state.texts
@@ -23275,7 +27450,9 @@ class SemanticOracle:
             and not item.truncated
             and item.path.endswith("CommanderMsgBoxUI(Clone)/frame/bg/content/Text")
             and item.text.startswith("<color=#847D7B>")
-            and "10" in item.text
+            and item.text.endswith("</color>")
+            and re.findall(r"[0-9]+", re.sub(r"<[^>]+>", "", item.text))
+            == [str(selected)]
         )
         selected_boxes = tuple(
             item
@@ -23287,7 +27464,7 @@ class SemanticOracle:
             and item.path.endswith("/icon")
             and item.sprite in ("R1", "sr1", "ssr1")
         )
-        return len(queue_counts) == 1 and len(prompts) == 1 and len(selected_boxes) == 10
+        return len(prompts) == 1 and len(selected_boxes) == selected
 
     def dorm_state(self) -> DormState:
         """Read the dorm summary without opening a mutating sub-page."""
@@ -25061,38 +29238,38 @@ class SemanticOracle:
             resource_id = ""
             owned = 0
             required = 0
+            resource_costs: Tuple[ResearchResourceCostState, ...] = ()
             requirement = ""
         else:
-            resource_count_path = (
-                panel + "consume_panel/bg/container/item_tpl/icon_bg/count"
-            )
-            resource_path = panel + "consume_panel/bg/container/item_tpl/icon_bg/icon"
-            resource_counts = tuple(
-                item
-                for item in ui_state.texts
-                if item.path.endswith(resource_count_path)
-                and item.active_in_hierarchy
-                and item.active_and_enabled
-                and not item.truncated
-                and item.bounds is not None
-            )
-            icons = tuple(
-                item
-                for item in ui_state.images
-                if item.path.endswith(resource_path)
-                and item.active_in_hierarchy
-                and item.active_and_enabled
-                and not item.truncated
-                and item.bounds is not None
-            )
-            if not resource_counts and not icons:
-                resource_id = ""
-                owned = 0
-                required = 0
-                requirement = ""
-            elif len(resource_counts) != 1 or len(icons) != 1:
-                raise SemanticGateClosed("research detail resource identity is ambiguous")
-            else:
+            container = panel + "consume_panel/bg/container/"
+            costs = []
+            for instance in ("item_tpl", "item_tpl(Clone)"):
+                resource_count_path = container + instance + "/icon_bg/count"
+                resource_path = container + instance + "/icon_bg/icon"
+                resource_counts = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path.endswith(resource_count_path)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.bounds is not None
+                )
+                icons = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path.endswith(resource_path)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.bounds is not None
+                )
+                if not resource_counts and not icons:
+                    continue
+                if len(resource_counts) != 1 or len(icons) != 1:
+                    raise SemanticGateClosed(
+                        "research detail resource identity is ambiguous"
+                    )
                 resource = re.fullmatch(
                     r"([0-9]+)/([1-9][0-9]*)",
                     re.sub(r"<[^>]*>", "", resource_counts[0].text),
@@ -25100,19 +29277,39 @@ class SemanticOracle:
                 if resource is None:
                     raise SemanticGateClosed("research detail resource state is malformed")
                 if re.fullmatch(r"[A-Za-z0-9_.-]+", icons[0].sprite) is None:
-                    raise SemanticGateClosed("research detail resource identity is ambiguous")
-                owned, required = map(int, resource.groups())
-                # Research Q projects display the numeric inventory sprite
-                # on their detail card, while the confirmation prompt names
-                # the component by family and tier. Keep the reviewed legacy
+                    raise SemanticGateClosed(
+                        "research detail resource identity is ambiguous"
+                    )
+                item_owned, item_required = map(int, resource.groups())
+                # Research Q projects display the numeric inventory sprite on
+                # their detail card, while the confirmation prompt names the
+                # component by family and tier. Keep the reviewed legacy
                 # carrier-aircraft aliases; other component families retain
                 # their exact numeric item ids so both observations agree.
-                resource_id = {
+                item_resource_id = {
                     "17041": "research_part_t1",
                     "17042": "research_part_t2",
                     "17043": "research_part_t3",
                     "17044": "research_part_t4",
                 }.get(icons[0].sprite, icons[0].sprite)
+                costs.append(
+                    ResearchResourceCostState(
+                        resource_id=item_resource_id,
+                        owned=item_owned,
+                        required=item_required,
+                    )
+                )
+            resource_costs = tuple(costs)
+            if not resource_costs:
+                resource_id = ""
+                owned = 0
+                required = 0
+                requirement = ""
+            else:
+                primary = resource_costs[0]
+                resource_id = primary.resource_id
+                owned = primary.owned
+                required = primary.required
                 requirement = re.sub(
                     r"<[^>]*>",
                     "",
@@ -25126,10 +29323,13 @@ class SemanticOracle:
             resource_owned=owned,
             resource_required=required,
             requirement=requirement,
-            can_start=actions["start"] and owned >= required,
+            can_start=actions["start"] and all(
+                cost.owned >= cost.required for cost in resource_costs
+            ),
             can_queue=actions["queue"],
             is_running=actions["stop"],
             is_finished=actions["finish"],
+            resource_costs=resource_costs,
         )
 
     def _research_queue_add_proven(
@@ -25823,13 +30023,26 @@ class SemanticOracle:
                 "campaign auto-search toggle is absent or ambiguous"
             )
         toggle = matches[0]
-        event_suffix = (
-            "LevelInfoSPUI(Clone)/panel/BottomExtra/LoopGroup/view/container/AutoFight"
-        )
-        if toggle.path.endswith(event_suffix):
-            loop_off_suffix = (
+        auto_suffixes = {
+            "LevelInfoSPUI(Clone)/panel/BottomExtra/LoopGroup/"
+            "view/container/AutoFight": (
                 "LevelInfoSPUI(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle/off"
-            )
+            ),
+            "LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/"
+            "view/container/AutoFight": (
+                "LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/"
+                "Toggle/off"
+            ),
+        }
+        loop_off_suffix = next(
+            (
+                off_suffix
+                for auto_suffix, off_suffix in auto_suffixes.items()
+                if toggle.path.endswith(auto_suffix)
+            ),
+            None,
+        )
+        if loop_off_suffix is not None:
             loop_off = tuple(
                 image
                 for image in state.images
@@ -25843,9 +30056,9 @@ class SemanticOracle:
             if len(loop_off) > 1:
                 raise SemanticGateClosed("campaign loop-off identity is ambiguous")
             if loop_off:
-                # LevelInfoSPUI retains the saved AutoFight Toggle value while
-                # loop mode is off.  The nested toggle is not an effective or
-                # mutable auto-search state until the outer mode is enabled.
+                # Both stage-info variants retain the saved AutoFight Toggle
+                # value while loop mode is off.  The nested toggle is not an
+                # effective or mutable state until the outer mode is enabled.
                 return False
         return toggle.checked
 
@@ -27162,7 +31375,7 @@ class SemanticOracle:
         """Leave the ship detail and prove the filtered Dock returns."""
 
         receipt: Optional[ActionReceipt] = None
-        for _ in range(3):
+        for _ in range(8):
             state = self.read_state()
             targets = tuple(
                 item
@@ -27247,6 +31460,2338 @@ class SemanticOracle:
         )
         return receipt
 
+    def _gems_farming_formation_records(self) -> Tuple[OracleState, UiState, int]:
+        """Read the exact normal Formation page and selected fleet index."""
+
+        last_error: Optional[SemanticGateClosed] = None
+        number_path = (
+            "UICamera/Canvas/UIMain/FormationUI(Clone)/blur_panel/"
+            "fleet_info/fleet_number"
+        )
+        for attempt in range(8):
+            try:
+                state = self.read_state()
+                ui_state = self.read_ui_state()
+                numbers = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path == number_path
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and re.fullmatch(r"[1-6]", item.text)
+                )
+                slots = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path.startswith(
+                        "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/"
+                        "GridFrame/"
+                    )
+                    and item.path.endswith("/shadow")
+                    and item.sprite == "shadow"
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and item.bounds is not None
+                )
+                if (
+                    state.generation <= ui_state.generation <= state.generation + 2
+                    and len(numbers) == 1
+                    and len(slots) == 6
+                ):
+                    return state, ui_state, int(numbers[0].text)
+                last_error = SemanticGateClosed(
+                    "GemsFarming formation identity is incomplete"
+                )
+            except SemanticGateClosed as exc:
+                last_error = exc
+            if attempt < 7:
+                self._sleep(0.05)
+        raise SemanticGateClosed(
+            "GemsFarming formation snapshots did not stabilize"
+        ) from last_error
+
+    def gems_farming_select_fleet_index(self, fleet_index: int) -> int:
+        """Select ALAS's attacking 1-6 fleet on the normal Formation page."""
+
+        if isinstance(fleet_index, bool) or not isinstance(fleet_index, int):
+            raise TypeError("GemsFarming fleet index must be an integer")
+        if not 1 <= fleet_index <= 6:
+            raise SemanticGateClosed("GemsFarming fleet index is outside 1 through 6")
+        for _ in range(6):
+            state, ui_state, current = self._gems_farming_formation_records()
+            if current == fleet_index:
+                return current
+            direction = "nextPage" if current < fleet_index else "prevPage"
+            pages = tuple(
+                item
+                for item in ui_state.images
+                if item.path
+                == "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/" + direction
+                and item.name == direction
+                and item.sprite == "arr"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.raycast_target
+                and item.bounds is not None
+            )
+            if len(pages) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming formation fleet navigation is incomplete"
+                )
+            before = current
+            self._click_exact_image(
+                state,
+                pages[0],
+                "gems-farming/formation/fleet/{0}".format(
+                    "next" if current < fleet_index else "previous"
+                ),
+            )
+            expected = before + 1 if before < fleet_index else before - 1
+            for _ in range(30):
+                self._sleep(0.05)
+                _, _, after = self._gems_farming_formation_records()
+                if after == expected:
+                    break
+            else:
+                raise SemanticGateClosed(
+                    "GemsFarming formation fleet index did not advance"
+                )
+        raise SemanticGateClosed("GemsFarming formation fleet selection did not settle")
+
+    def gems_farming_open_slot(self, role: str) -> ActionReceipt:
+        """Open the exact flagship or first-vanguard replacement slot."""
+
+        slot_names = {"flagship": "main_1", "vanguard": "vanguard_1"}
+        if role not in slot_names:
+            raise ValueError("GemsFarming role must be flagship or vanguard")
+        slot_path = (
+            "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/GridFrame/"
+            + slot_names[role]
+            + "/shadow"
+        )
+        semantic_id = "gems-farming/formation/{0}/open".format(role)
+        for _ in range(20):
+            state, ui_state, fleet_index = self._gems_farming_formation_records()
+            slots = tuple(item for item in ui_state.images if item.path == slot_path)
+            if len(slots) != 1 or slots[0].bounds is None:
+                raise SemanticGateClosed("GemsFarming formation slot is incomplete")
+            slot_center_x = (
+                slots[0].bounds.left + slots[0].bounds.right
+            ) / 2.0
+            ships = tuple(
+                item
+                for item in ui_state.images
+                if item.path.startswith(
+                    "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/"
+                    "HeroContainer/heroInfo(Clone)/"
+                )
+                and item.path.endswith("_root/mouseChild")
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.raycast_target
+                and not item.truncated
+                and item.bounds is not None
+                and abs(
+                    (item.bounds.left + item.bounds.right) / 2.0 - slot_center_x
+                )
+                <= 2.0
+            )
+            if len(ships) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming formation ship identity is absent or ambiguous"
+                )
+            ship_match = re.search(r"/([^/]+)_root/mouseChild$", ships[0].path)
+            if ship_match is None:
+                raise SemanticGateClosed(
+                    "GemsFarming formation ship sprite is incomplete"
+                )
+            current_ship_sprite = ship_match.group(1)
+            if not self._blocking_rules(state, semantic_id):
+                break
+            self._sleep(0.05)
+        else:
+            raise SemanticGateClosed("GemsFarming formation slot stayed blocked")
+        receipt = self._click_exact_image(state, ships[0], semantic_id)
+        self._retry_transition_read(
+            self._enhancement_dock_records,
+            attempts=50,
+            interval_seconds=0.1,
+        )
+        self._gems_farming_open_slot_context = (
+            role,
+            current_ship_sprite,
+            fleet_index,
+        )
+        return receipt
+
+    @staticmethod
+    def _gems_farming_hard_role_name(role: str) -> str:
+        if role == "flagship":
+            return "main"
+        if role == "vanguard":
+            return "vanguard"
+        raise ValueError("GemsFarming role must be flagship or vanguard")
+
+    def _gems_farming_hard_role_cards(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> Tuple[OracleState, UiState, Tuple[ImageState, ...], Tuple[str, ...]]:
+        """Read the compacted hard-fleet role row and exact ship sprites."""
+
+        if stage_code.upper() not in ("11-4", "12-1"):
+            raise SemanticGateClosed(
+                "GemsFarming hard replacement is qualified only for reviewed hard stages"
+            )
+        if fleet_index not in (1, 2):
+            raise SemanticGateClosed("GemsFarming hard fleet must be 1 or 2")
+        group = self._gems_farming_hard_role_name(role)
+        preparation = self.campaign_fleet_selection_state(stage_code)
+        if not preparation.hard_mode:
+            raise SemanticGateClosed("GemsFarming hard fleet preparation is absent")
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        path = (
+            "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/"
+            "ShipList/fleet/{0}/{1}/shiptpl(Clone)/icon_bg"
+        ).format(fleet_index, group)
+        cards = tuple(
+            sorted(
+                (
+                    item
+                    for item in ui_state.images
+                    if item.path == path
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.raycast_target
+                    and item.bounds is not None
+                ),
+                key=lambda item: item.bounds.left,
+            )
+        )
+        if len(cards) not in (2, 3):
+            raise SemanticGateClosed(
+                "GemsFarming hard role row must contain two or three ships"
+            )
+        sprites = []
+        for card in cards:
+            assert card.bounds is not None
+            icons = tuple(
+                item
+                for item in ui_state.images
+                if item.path == path + "/icon"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.sprite
+                and self._gems_equipment_in_bounds(item, card.bounds)
+            )
+            if len(icons) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming hard fleet ship identity is incomplete"
+                )
+            sprites.append(icons[0].sprite)
+        if state.generation > ui_state.generation:
+            raise SemanticGateClosed(
+                "GemsFarming hard fleet snapshots are incoherent"
+            )
+        return state, ui_state, cards, tuple(sprites)
+
+    def gems_farming_hard_slot_occupied(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> bool:
+        """Return whether ALAS's compacted first hard-fleet role slot is filled."""
+
+        _, _, cards, _ = self._gems_farming_hard_role_cards(
+            stage_code, fleet_index, role
+        )
+        return len(cards) == 3
+
+    def cancel_campaign_hard_recommend_prompt(self) -> ActionReceipt:
+        """Cancel the exact official-recommend prompt left by hard recovery."""
+
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        if not any(
+            "LevelFleetSelectView(Clone)" in item.path
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            for item in state.buttons
+        ):
+            raise SemanticGateClosed(
+                "hard fleet recommendation prompt has no fleet owner"
+            )
+        root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+        texts = {
+            item.path: item.text.strip()
+            for item in ui_state.texts
+            if item.path in {
+                root + "msg_panel/content",
+                root + "button_container/custom_button_1(Clone)/pic",
+                root + "button_container/custom_button_2(Clone)/pic",
+            }
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+        }
+        content = texts.get(root + "msg_panel/content")
+        confirm = "".join(
+            texts.get(
+                root + "button_container/custom_button_1(Clone)/pic", ""
+            ).split()
+        )
+        cancel = "".join(
+            texts.get(
+                root + "button_container/custom_button_2(Clone)/pic", ""
+            ).split()
+        )
+        if (
+            content
+            not in (
+                "是否采用推荐配置补齐空余位置?",
+                "是否使用推荐编队来填充空位?",
+                "是否使用推荐编队填充空位?",
+                "�Ƿ�����Ƽ����ò������λ��?",
+            )
+            or (cancel, confirm) not in (("取消", "确定"), ("ȡ��", "ȷ��"))
+        ):
+            raise SemanticGateClosed(
+                "hard fleet recommendation prompt text is not reviewed"
+            )
+        path = root + "button_container/custom_button_2(Clone)"
+        buttons = tuple(
+            item
+            for item in state.buttons
+            if item.path == path
+            and item.name == "custom_button_2(Clone)"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.raycast_top is True
+            and item.point is not None
+            and item.bounds is not None
+            and item.bounds.contains(item.point)
+        )
+        images = tuple(
+            item
+            for item in ui_state.images
+            if item.path == path
+            and item.sprite == "btn_big_grey"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+        )
+        if len(buttons) != 1 or len(images) != 1:
+            raise SemanticGateClosed(
+                "hard fleet recommendation cancel is absent or ambiguous"
+            )
+        target = buttons[0]
+        assert target.point is not None and target.bounds is not None
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed(
+                "foreground changed before hard recommendation cancellation"
+            )
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="campaign/hard/recommend/cancel",
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
+    def gems_farming_hard_unmount(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> ActionReceipt:
+        """Unmount the compacted first hard-fleet ship and prove one-card removal."""
+
+        state, _, cards, before = self._gems_farming_hard_role_cards(
+            stage_code, fleet_index, role
+        )
+        if len(cards) != 3:
+            raise SemanticGateClosed("GemsFarming hard source slot is already empty")
+        open_receipt = self._click_exact_image(
+            state,
+            cards[0],
+            "campaign/fleet-preparation/fleet/{0}/select".format(fleet_index),
+        )
+        dock_state, _ = self._retry_transition_read(
+            self._enhancement_dock_records, attempts=50, interval_seconds=0.1
+        )
+        current = tuple(
+            item
+            for item in dock_state.buttons
+            if item.path
+            == "UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/0"
+            and item.name == "0"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.point is not None
+            and item.bounds is not None
+        )
+        if len(current) != 1:
+            raise SemanticGateClosed(
+                "GemsFarming hard current-ship placeholder is absent or ambiguous"
+            )
+        receipt = self._gems_equipment_click_button(
+            dock_state, current[0], "tactical/dock/confirm"
+        )
+        for _ in range(60):
+            self._sleep(0.1)
+            try:
+                _, _, after_cards, after = self._gems_farming_hard_role_cards(
+                    stage_code, fleet_index, role
+                )
+            except SemanticGateClosed:
+                continue
+            if len(after_cards) == 2 and after == before[1:]:
+                self._gems_farming_hard_open_slot_context = None
+                return receipt
+        raise SemanticGateClosed(
+            "GemsFarming hard unmount postcondition was not proven; open receipt "
+            + open_receipt.semantic_id
+        )
+
+    def gems_farming_hard_open_slot(
+        self, stage_code: str, fleet_index: int, role: str
+    ) -> ActionReceipt:
+        """Open the unique third compacted hard-fleet slot after unmount."""
+
+        state, ui_state, cards, before = self._gems_farming_hard_role_cards(
+            stage_code, fleet_index, role
+        )
+        if len(cards) != 2:
+            raise SemanticGateClosed(
+                "GemsFarming hard target slot requires exactly two remaining ships"
+            )
+        group = self._gems_farming_hard_role_name(role)
+        path = (
+            "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/"
+            "ShipList/fleet/{0}/{1}/emptytpl(Clone)/icon_bg"
+        ).format(fleet_index, group)
+        blanks = tuple(
+            item
+            for item in ui_state.images
+            if item.path == path
+            and item.name == "icon_bg"
+            and item.sprite == "tianjia_icon"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.raycast_target
+            and item.bounds is not None
+        )
+        if len(blanks) != 1:
+            raise SemanticGateClosed(
+                "GemsFarming hard target blank is absent or ambiguous"
+            )
+        receipt = self._click_exact_image(
+            state,
+            blanks[0],
+            "campaign/fleet-preparation/fleet/{0}/select".format(fleet_index),
+        )
+        self._retry_transition_read(
+            self._enhancement_dock_records, attempts=50, interval_seconds=0.1
+        )
+        self._gems_farming_hard_open_slot_context = (
+            stage_code,
+            fleet_index,
+            role,
+            before,
+        )
+        return receipt
+
+    @staticmethod
+    def _gems_equipment_center(bounds: Bounds) -> Point:
+        return Point(
+            (bounds.left + bounds.right) / 2.0,
+            (bounds.top + bounds.bottom) / 2.0,
+        )
+
+    @staticmethod
+    def _gems_equipment_in_bounds(
+        item: Union[ImageState, TextState], bounds: Bounds
+    ) -> bool:
+        return item.bounds is not None and bounds.contains(
+            SemanticOracle._gems_equipment_center(item.bounds)
+        )
+
+    def _gems_equipment_click_button(
+        self,
+        state: OracleState,
+        button: ButtonState,
+        semantic_id: str,
+        *,
+        require_raycast_top: bool = False,
+    ) -> ActionReceipt:
+        if (
+            not button.active_in_hierarchy
+            or not button.active_and_enabled
+            or not button.interactable
+            or button.point is None
+            or button.bounds is None
+            or not button.bounds.contains(button.point)
+            or (require_raycast_top and button.raycast_top is not True)
+        ):
+            raise SemanticGateClosed(semantic_id + " is not safely actionable")
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed(semantic_id + " input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before equipment input")
+        self._tap(int(round(button.point.x)), int(round(button.point.y)))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed after equipment input")
+        return ActionReceipt(
+            semantic_id=semantic_id,
+            generation=state.generation,
+            point=button.point,
+            bounds=button.bounds,
+            path=button.path,
+        )
+
+    def _gems_equipment_open_ship_detail(self, role: str) -> ActionReceipt:
+        """Enter ALAS's flagship or first-vanguard detail through typed Formation."""
+
+        if role not in ("flagship", "vanguard"):
+            raise ValueError("GemsFarming role must be flagship or vanguard")
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        already_detail = tuple(
+            item
+            for item in ui_state.toggles
+            if item.path.endswith("/bottom/toggle_list/detail_toggle")
+            and item.name == "detail_toggle"
+            and item.checked
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+        )
+        if len(already_detail) > 1:
+            raise SemanticGateClosed("GemsFarming Formation detail state is ambiguous")
+        if not already_detail:
+            state, ui_state, _ = self._gems_farming_formation_records()
+        toggles = tuple(
+            item
+            for item in ui_state.toggles
+            if item.path.endswith("/bottom/toggle_list/detail_toggle")
+            and item.name == "detail_toggle"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.point is not None
+            and item.bounds is not None
+            and item.bounds.contains(item.point)
+        )
+        if len(toggles) != 1:
+            raise SemanticGateClosed("GemsFarming Formation detail toggle is incomplete")
+        if not toggles[0].checked:
+            if self._blocking_rules(state, "gems-farming/equipment/detail-toggle"):
+                raise SemanticGateClosed("GemsFarming Formation detail toggle is blocked")
+            self._tap(
+                int(round(toggles[0].point.x)), int(round(toggles[0].point.y))
+            )
+            self._sleep(0.2)
+
+        def detail_card() -> Tuple[OracleState, ImageState]:
+            current = self.read_state()
+            current_ui = self.read_ui_state()
+            group = "main" if role == "flagship" else "vanguard"
+            suffix = "/attr_frame/{0}/list/RectShipCardTpl(Clone)/content/detail".format(
+                group
+            )
+            cards = tuple(
+                item
+                for item in current_ui.images
+                if item.path.endswith(suffix)
+                and item.sprite == "rect_bg"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.bounds is not None
+            )
+            cards = tuple(sorted(cards, key=lambda item: item.bounds.left))
+            if not cards:
+                raise SemanticGateClosed("GemsFarming Formation detail cards are absent")
+            target = cards[0]
+            if role == "flagship":
+                flags = tuple(
+                    item
+                    for item in current_ui.images
+                    if item.path.endswith(
+                        "/attr_frame/main/list/RectShipCardTpl(Clone)/content/front/flag"
+                    )
+                    and item.sprite == "flag_icon"
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.bounds is not None
+                    and self._bounds_overlap(item.bounds, target.bounds) > 0
+                )
+                if len(flags) != 1:
+                    raise SemanticGateClosed(
+                        "GemsFarming flagship detail identity is incomplete"
+                    )
+            if current.generation > current_ui.generation:
+                raise SemanticGateClosed("GemsFarming detail snapshots are incoherent")
+            return current, target
+
+        card_state, card = self._retry_transition_read(
+            detail_card, attempts=120, interval_seconds=0.1
+        )
+        assert card.bounds is not None
+        point = self._gems_equipment_center(card.bounds)
+        semantic_id = "gems-farming/equipment/{0}/detail".format(role)
+        if self._blocking_rules(card_state, semantic_id):
+            raise SemanticGateClosed("GemsFarming detail card input is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before equipment detail")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        receipt = ActionReceipt(
+            semantic_id=semantic_id,
+            generation=card_state.generation,
+            point=point,
+            bounds=card.bounds,
+            path=card.path,
+        )
+        self._gems_equipment_stable_detail_loadout()
+        return receipt
+
+    def _gems_equipment_read_loadout(
+        self,
+    ) -> Tuple[OracleState, UiState, Tuple[GemsFarmingEquipmentSlot, ...]]:
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        regular_path = (
+            "/ShipDetailView(Clone)/equipments/"
+            "equipments/equipment_tpl(Clone)"
+        )
+        empty_path = (
+            "/ShipDetailView(Clone)/equipments/equipments/empty_tpl(Clone)"
+        )
+        regular = tuple(
+            sorted(
+                (
+                    item
+                    for item in state.buttons
+                    if item.path.endswith((regular_path, empty_path))
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and item.interactable
+                    and item.point is not None
+                    and item.bounds is not None
+                ),
+                key=lambda item: item.bounds.left,
+            )
+        )
+        special_path = "/ShipDetailView(Clone)/equipments/SpSlot"
+        special = tuple(
+            item
+            for item in state.buttons
+            if item.path.endswith(special_path)
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.point is not None
+            and item.bounds is not None
+        )
+        if len(regular) != 5 or len(special) != 1:
+            raise SemanticGateClosed("GemsFarming ship equipment slots are incomplete")
+        slots = []
+        for position, button in enumerate(regular, start=1):
+            assert button.bounds is not None
+            icon_path = button.path + "/IconTpl/icon_bg/icon"
+            level_path = button.path + "/IconTpl/icon_bg/slv/Text"
+            icons = tuple(
+                item
+                for item in ui_state.images
+                if item.path == icon_path
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.sprite
+                and self._gems_equipment_in_bounds(item, button.bounds)
+            )
+            levels = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == level_path
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and re.fullmatch(r"(?:[0-9]|1[0-5])", item.text)
+                and self._gems_equipment_in_bounds(item, button.bounds)
+            )
+            if not icons and not levels:
+                continue
+            if len(icons) != 1 or len(levels) > 1:
+                raise SemanticGateClosed("GemsFarming regular equipment is ambiguous")
+            slots.append(
+                GemsFarmingEquipmentSlot(
+                    position=position,
+                    equipment_id=icons[0].sprite,
+                    enhancement=int(levels[0].text) if levels else 0,
+                    special=False,
+                )
+            )
+        special_button = special[0]
+        assert special_button.bounds is not None
+        special_icons = tuple(
+            item
+            for item in ui_state.images
+            if item.path.endswith(special_path + "/Icon/Mask/icon_bg/icon")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and item.sprite
+            and self._gems_equipment_in_bounds(item, special_button.bounds)
+        )
+        special_levels = tuple(
+            item
+            for item in ui_state.texts
+            if item.path.endswith(special_path + "/Icon/LV/Text")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and re.fullmatch(r"(?:[0-9]|1[0-5])", item.text)
+            and self._gems_equipment_in_bounds(item, special_button.bounds)
+        )
+        if special_icons or special_levels:
+            if len(special_icons) != 1 or len(special_levels) > 1:
+                raise SemanticGateClosed("GemsFarming special equipment is ambiguous")
+            slots.append(
+                GemsFarmingEquipmentSlot(
+                    position=6,
+                    equipment_id=special_icons[0].sprite,
+                    enhancement=(
+                        int(special_levels[0].text) if special_levels else 0
+                    ),
+                    special=True,
+                )
+            )
+        if state.generation > ui_state.generation:
+            raise SemanticGateClosed("GemsFarming equipment snapshots are incoherent")
+        return state, ui_state, tuple(slots)
+
+    def _gems_equipment_stable_detail_loadout(
+        self,
+    ) -> Tuple[OracleState, UiState, Tuple[GemsFarmingEquipmentSlot, ...]]:
+        """Require five identical typed detail reads before branching on emptiness."""
+
+        previous: Optional[Tuple[GemsFarmingEquipmentSlot, ...]] = None
+        stable_reads = 0
+        observed: Optional[
+            Tuple[OracleState, UiState, Tuple[GemsFarmingEquipmentSlot, ...]]
+        ] = None
+        last_error: Optional[SemanticGateClosed] = None
+        for _ in range(50):
+            try:
+                observed = self._gems_equipment_read_loadout()
+            except SemanticGateClosed as exc:
+                last_error = exc
+                previous = None
+                stable_reads = 0
+                self._sleep(0.1)
+                continue
+            current = observed[2]
+            if current == previous:
+                stable_reads += 1
+            else:
+                previous = current
+                stable_reads = 1
+            if stable_reads >= 5:
+                return observed
+            self._sleep(0.1)
+        raise SemanticGateClosed(
+            "GemsFarming detail loadout did not stabilize"
+        ) from last_error
+
+    def _gems_equipment_unload_detail_slot(
+        self, slot: GemsFarmingEquipmentSlot
+    ) -> None:
+        if slot.special or not 1 <= slot.position <= 5:
+            raise SemanticGateClosed(
+                "GemsFarming only unloads the five ALAS equipment-code slots"
+            )
+        state, _, current = self._gems_equipment_stable_detail_loadout()
+        if tuple(item for item in current if item.position == slot.position) != (slot,):
+            raise SemanticGateClosed("GemsFarming unload equipment identity changed")
+        suffixes = (
+            "/ShipDetailView(Clone)/equipments/equipments/equipment_tpl(Clone)",
+            "/ShipDetailView(Clone)/equipments/equipments/empty_tpl(Clone)",
+        )
+        buttons = tuple(
+            sorted(
+                (
+                    item
+                    for item in state.buttons
+                    if item.path.endswith(suffixes)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and item.interactable
+                    and item.bounds is not None
+                    and item.point is not None
+                ),
+                key=lambda item: item.bounds.left,
+            )
+        )
+        if len(buttons) != 5:
+            raise SemanticGateClosed("GemsFarming ship equipment slots are incomplete")
+        self._gems_equipment_click_button(
+            state,
+            buttons[slot.position - 1],
+            "gems-farming/equipment/slot/{0}/unload-open".format(slot.position),
+        )
+        action_path = (
+            "OverlayCamera/Overlay/UIMain/EquipmentInfoUI(Clone)/default/"
+            "actions/action_button_4"
+        )
+
+        def require_unload() -> Tuple[OracleState, ButtonState]:
+            current_state = self.read_state()
+            text_state = self.read_text_state()
+            actions = tuple(
+                item for item in current_state.buttons if item.path == action_path
+            )
+            labels = tuple(
+                item
+                for item in text_state.texts
+                if item.path == action_path + "/change"
+                and item.text == "卸 下"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            if len(actions) != 1 or len(labels) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming unload equipment action is incomplete"
+                )
+            return current_state, actions[0]
+
+        action_state, action = self._retry_transition_read(
+            require_unload, attempts=30, interval_seconds=0.1
+        )
+        self._gems_equipment_click_button(
+            action_state,
+            action,
+            "gems-farming/equipment/slot/{0}/unload".format(slot.position),
+        )
+        _, _, after = self._gems_equipment_stable_detail_loadout()
+        if any(item.position == slot.position for item in after):
+            raise SemanticGateClosed("GemsFarming equipment slot did not unload")
+
+    def _gems_equipment_back_to_formation(self) -> ActionReceipt:
+        receipt: Optional[ActionReceipt] = None
+        for depth in range(4):
+            try:
+                self._gems_farming_formation_records()
+                if receipt is None:
+                    raise SemanticGateClosed(
+                        "GemsFarming equipment return performed no navigation"
+                    )
+                return receipt
+            except SemanticGateClosed:
+                pass
+
+            state = self.read_state()
+            ui_state = self.read_ui_state()
+            toggles = tuple(
+                item
+                for item in ui_state.toggles
+                if item.path.endswith("/bottom/toggle_list/formation_toggle")
+                and item.name == "formation_toggle"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.interactable
+                and item.point is not None
+                and item.bounds is not None
+                and item.bounds.contains(item.point)
+            )
+            if len(toggles) > 1:
+                raise SemanticGateClosed(
+                    "GemsFarming Formation view toggle is ambiguous"
+                )
+            if len(toggles) == 1:
+                toggle = toggles[0]
+                if not toggle.checked:
+                    semantic_id = "gems-farming/equipment/formation-toggle"
+                    if self._blocking_rules(state, semantic_id):
+                        self._sleep(0.1)
+                        continue
+                    assert toggle.point is not None and toggle.bounds is not None
+                    self._tap(
+                        int(round(toggle.point.x)), int(round(toggle.point.y))
+                    )
+                    if receipt is None:
+                        receipt = ActionReceipt(
+                            semantic_id=semantic_id,
+                            generation=state.generation,
+                            point=toggle.point,
+                            bounds=toggle.bounds,
+                            path=toggle.path,
+                        )
+                self._sleep(0.5)
+                continue
+
+            suffix = "/blur_panel/adapt/top/back_btn"
+            buttons = tuple(
+                item
+                for item in state.buttons
+                if item.name == "back_btn" and item.path.endswith(suffix)
+            )
+            if len(buttons) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming equipment back control is incomplete"
+                )
+            current_receipt = self._gems_equipment_click_button(
+                state,
+                buttons[0],
+                "gems-farming/equipment/back/{0}".format(depth + 1),
+            )
+            if receipt is None:
+                receipt = current_receipt
+            self._sleep(0.2)
+        raise SemanticGateClosed("GemsFarming equipment return did not settle")
+
+    def gems_farming_equipment_take_off(
+        self, role: str
+    ) -> GemsFarmingEquipmentLoadout:
+        """Capture and unload ALAS's five equipment-code slots."""
+
+        if role in self._gems_farming_equipment_loadouts:
+            raise SemanticGateClosed(
+                "GemsFarming equipment transfer is already pending for " + role
+            )
+        self._gems_equipment_open_ship_detail(role)
+        _, _, observed = self._gems_equipment_stable_detail_loadout()
+        slots = tuple(item for item in observed if not item.special)
+        special = tuple(item for item in observed if item.special)
+        for slot in slots:
+            self._gems_equipment_unload_detail_slot(slot)
+        _, _, after = self._gems_equipment_stable_detail_loadout()
+        if tuple(item for item in after if not item.special):
+            raise SemanticGateClosed("GemsFarming equipment did not unload")
+        if tuple(item for item in after if item.special) != special:
+            raise SemanticGateClosed("GemsFarming special equipment changed")
+        loadout = GemsFarmingEquipmentLoadout(role=role, slots=slots)
+        self._gems_farming_equipment_loadouts[role] = loadout
+        self._gems_equipment_back_to_formation()
+        return loadout
+
+    @staticmethod
+    def _gems_equipment_overview_path(position: int) -> str:
+        paths = {
+            1: "OverlayCamera/Overlay/UIMain/equipment_r_container(Adapt)/equipment_r_container/equipment_r/equipment/equipment_r1",
+            2: "OverlayCamera/Overlay/UIMain/equipment_r_container(Adapt)/equipment_r_container/equipment_r/equipment/equipment_r2",
+            3: "OverlayCamera/Overlay/UIMain/equipment_r_container(Adapt)/equipment_r_container/equipment_r/equipment/equipment_r3",
+            4: "OverlayCamera/Overlay/UIMain/equipment_l_container(Adapt)/equipment_l_container/equipment_l/equipment/equipment_l1",
+            5: "OverlayCamera/Overlay/UIMain/equipment_l_container(Adapt)/equipment_l_container/equipment_l/equipment/equipment_l2",
+            6: "OverlayCamera/Overlay/UIMain/equipment_b_container(Adapt)/equipment_b_container/equipment_b/equipment",
+        }
+        try:
+            return paths[position]
+        except KeyError as exc:
+            raise ValueError("GemsFarming equipment position is invalid") from exc
+
+    def _gems_equipment_overview_loadout(
+        self,
+    ) -> Tuple[OracleState, UiState, Tuple[GemsFarmingEquipmentSlot, ...]]:
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        slots = []
+        for position in range(1, 7):
+            root = self._gems_equipment_overview_path(position)
+            buttons = tuple(
+                item
+                for item in state.buttons
+                if item.path == root
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.interactable
+                and item.point is not None
+                and item.bounds is not None
+            )
+            if position == 6 and not buttons:
+                continue
+            if len(buttons) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming equipment overview slot is incomplete"
+                )
+            icon_suffix = (
+                "/info/Icon/Mask/icon_bg/icon"
+                if position == 6
+                else "/info/IconTpl/icon_bg/icon"
+            )
+            level_suffix = (
+                "/info/Icon/LV/Text"
+                if position == 6
+                else "/info/IconTpl/icon_bg/slv/Text"
+            )
+            icons = tuple(
+                item
+                for item in ui_state.images
+                if item.path == root + icon_suffix
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and item.sprite
+            )
+            levels = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == root + level_suffix
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and re.fullmatch(r"(?:[0-9]|1[0-5])", item.text)
+            )
+            if not icons and not levels:
+                continue
+            if len(icons) != 1 or len(levels) > 1:
+                raise SemanticGateClosed(
+                    "GemsFarming equipment overview identity is ambiguous"
+                )
+            slots.append(
+                GemsFarmingEquipmentSlot(
+                    position=position,
+                    equipment_id=icons[0].sprite,
+                    enhancement=int(levels[0].text) if levels else 0,
+                    special=position == 6,
+                )
+            )
+        if state.generation > ui_state.generation:
+            raise SemanticGateClosed("GemsFarming overview snapshots are incoherent")
+        return state, ui_state, tuple(slots)
+
+    def _gems_equipment_open_detail_store(
+        self, slot: GemsFarmingEquipmentSlot
+    ) -> None:
+        state, _, current = self._gems_equipment_stable_detail_loadout()
+        mounted = tuple(item for item in current if item.position == slot.position)
+        if len(mounted) > 1:
+            raise SemanticGateClosed(
+                "GemsFarming occupied equipment slot is not uniquely mounted"
+            )
+        regular_suffixes = (
+            "/ShipDetailView(Clone)/equipments/equipments/equipment_tpl(Clone)",
+            "/ShipDetailView(Clone)/equipments/equipments/empty_tpl(Clone)",
+        )
+        regular = tuple(
+            sorted(
+                (
+                    item
+                    for item in state.buttons
+                    if item.path.endswith(regular_suffixes)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and item.interactable
+                    and item.bounds is not None
+                    and item.point is not None
+                ),
+                key=lambda item: item.bounds.left,
+            )
+        )
+        special = tuple(
+            item
+            for item in state.buttons
+            if item.path.endswith("/ShipDetailView(Clone)/equipments/SpSlot")
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.interactable
+            and item.bounds is not None
+            and item.point is not None
+        )
+        if len(regular) != 5 or len(special) != 1:
+            raise SemanticGateClosed("GemsFarming ship equipment slots are incomplete")
+        button = special[0] if slot.special else regular[slot.position - 1]
+        self._gems_equipment_click_button(
+            state,
+            button,
+            "gems-farming/equipment/slot/{0}/occupied".format(slot.position),
+        )
+        page = "SpWeaponStoreHouseUI(Clone)" if slot.special else "StoreHouseUI(Clone)"
+        if not mounted:
+            def require_empty_destination() -> str:
+                current_state = self.read_state()
+                if any(page in item.path for item in current_state.buttons):
+                    return "store"
+                try:
+                    self._gems_equipment_overview_loadout()
+                except SemanticGateClosed as exc:
+                    raise SemanticGateClosed(
+                        "GemsFarming empty equipment destination is incomplete"
+                    ) from exc
+                return "overview"
+
+            destination = self._retry_transition_read(
+                require_empty_destination, attempts=50, interval_seconds=0.1
+            )
+            if destination == "overview":
+                self._gems_equipment_open_store(slot)
+            return
+
+        dialog = "SpWeaponInfoUI(Clone)" if slot.special else "EquipmentInfoUI(Clone)"
+        action_path = (
+            "OverlayCamera/Overlay/UIMain/{0}/default/actions/action_button_3".format(
+                dialog
+            )
+        )
+
+        def require_change() -> Tuple[OracleState, ButtonState]:
+            current_state = self.read_state()
+            text_state = self.read_text_state()
+            buttons = tuple(
+                item for item in current_state.buttons if item.path == action_path
+            )
+            texts = tuple(
+                item
+                for item in text_state.texts
+                if item.path == action_path + "/change"
+                and item.text == "更 换"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            if len(buttons) != 1 or len(texts) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming occupied equipment action is incomplete"
+                )
+            return current_state, buttons[0]
+
+        action_state, change = self._retry_transition_read(
+            require_change, attempts=30, interval_seconds=0.1
+        )
+        self._gems_equipment_click_button(
+            action_state,
+            change,
+            "gems-farming/equipment/slot/{0}/change".format(slot.position),
+        )
+        def require_store() -> bool:
+            current_state = self.read_state()
+            if not any(page in item.path for item in current_state.buttons):
+                raise SemanticGateClosed("GemsFarming equipment store did not open")
+            return True
+
+        self._retry_transition_read(require_store, attempts=50, interval_seconds=0.1)
+
+    def _gems_equipment_open_store(self, slot: GemsFarmingEquipmentSlot) -> None:
+        state, _, _ = self._retry_transition_read(
+            self._gems_equipment_overview_loadout,
+            attempts=30,
+            interval_seconds=0.1,
+        )
+        path = self._gems_equipment_overview_path(slot.position)
+        buttons = tuple(item for item in state.buttons if item.path == path)
+        if len(buttons) != 1:
+            raise SemanticGateClosed("GemsFarming equipment slot control changed")
+        self._gems_equipment_click_button(
+            state,
+            buttons[0],
+            "gems-farming/equipment/slot/{0}/store".format(slot.position),
+        )
+        page = "SpWeaponStoreHouseUI(Clone)" if slot.special else "StoreHouseUI(Clone)"
+
+        def require_store() -> bool:
+            current = self.read_state()
+            if not any(page in item.path for item in current.buttons):
+                raise SemanticGateClosed("GemsFarming equipment store did not open")
+            return True
+
+        self._retry_transition_read(require_store, attempts=50, interval_seconds=0.1)
+
+    def _gems_equipment_store_candidate(
+        self, slot: GemsFarmingEquipmentSlot
+    ) -> Tuple[OracleState, ButtonState, Point]:
+        state = self.read_state()
+        ui_state = self.read_ui_state()
+        candidates = []
+        if slot.special:
+            prefix = (
+                "UICamera/Canvas/UIMain/SpWeaponStoreHouseUI(Clone)/adapt/"
+                "ScrollView/Viewport/Content/StoreHouse/Grid/Template(Clone)"
+            )
+            cards = tuple(
+                item
+                for item in state.buttons
+                if item.path == prefix
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.interactable
+                and item.bounds is not None
+                and item.point is not None
+            )
+            for card in cards:
+                assert card.bounds is not None
+                icons = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path == prefix + "/frame/bg/icon_bg/icon"
+                    and item.sprite == slot.equipment_id
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and self._gems_equipment_in_bounds(item, card.bounds)
+                )
+                levels = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path == prefix + "/frame/bg/icon_bg/slv/Text"
+                    and re.fullmatch(r"(?:[0-9]|1[0-5])", item.text)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and self._gems_equipment_in_bounds(item, card.bounds)
+                )
+                assigned = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path.startswith(prefix + "/frame/bg/equip_flag")
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and self._gems_equipment_in_bounds(item, card.bounds)
+                )
+                observed_enhancement = (
+                    int(levels[0].text) if len(levels) == 1 else 0
+                )
+                if (
+                    len(icons) == 1
+                    and len(levels) <= 1
+                    and observed_enhancement == slot.enhancement
+                    and not assigned
+                ):
+                    assert icons[0].bounds is not None
+                    candidates.append(
+                        (card, self._gems_equipment_center(icons[0].bounds))
+                    )
+        else:
+            prefix = (
+                "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/"
+                "equipment_scrollview/equipment_grid/"
+            )
+            for card in state.buttons:
+                match = re.fullmatch(re.escape(prefix) + r"([0-9]+)", card.path)
+                if (
+                    match is None
+                    or not card.active_in_hierarchy
+                    or not card.active_and_enabled
+                    or not card.interactable
+                    or card.bounds is None
+                    or card.point is None
+                ):
+                    continue
+                root = card.path
+                icons = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path == root + "/frame/bg/icon_bg/icon"
+                    and item.sprite == slot.equipment_id
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                )
+                levels = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path == root + "/frame/bg/icon_bg/slv/Text"
+                    and re.fullmatch(r"(?:[0-9]|1[0-5])", item.text)
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                )
+                assigned = tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path.startswith(root + "/frame/bg/equip_flag")
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                )
+                observed_enhancement = (
+                    int(levels[0].text) if len(levels) == 1 else 0
+                )
+                if (
+                    len(icons) == 1
+                    and len(levels) <= 1
+                    and observed_enhancement == slot.enhancement
+                    and not assigned
+                ):
+                    assert icons[0].bounds is not None
+                    candidates.append(
+                        (card, self._gems_equipment_center(icons[0].bounds))
+                    )
+        visible = tuple(
+            item
+            for item in candidates
+            if item[0].bounds is not None
+            and item[0].bounds.contains(item[1])
+            and item[0].bounds.top >= 40.0
+            and item[0].bounds.bottom <= 680.0
+        )
+        visible = tuple(
+            sorted(
+                visible,
+                key=lambda item: (
+                    item[0].bounds.top,
+                    item[0].bounds.left,
+                    item[0].path,
+                ),
+            )
+        )
+        if not visible:
+            raise SemanticGateClosed("GemsFarming equipment is not visible in store")
+        if state.generation > ui_state.generation:
+            raise SemanticGateClosed("GemsFarming store snapshots are incoherent")
+        return state, visible[0][0], visible[0][1]
+
+    def _gems_equipment_reset_store(self, special: bool) -> None:
+        if self._swipe is None:
+            raise SemanticGateClosed("GemsFarming equipment store requires typed swipe")
+        previous_regular_top: Optional[Tuple[int, int]] = None
+        for _ in range(12):
+            state = self.read_state()
+            ui_state = self.read_ui_state()
+            if special:
+                banner = tuple(
+                    item
+                    for item in ui_state.texts
+                    if item.path.endswith(
+                        "/SpWeaponStoreHouseUI(Clone)/adapt/ScrollView/Viewport/Content/StoreHouse/Banner/Text"
+                    )
+                    and item.bounds is not None
+                )
+                at_top = len(banner) == 1 and banner[0].bounds.top >= 0.0
+            else:
+                prefix = (
+                    "UICamera/Canvas/UIMain/StoreHouseUI(Clone)/adapt/"
+                    "equipment_scrollview/equipment_grid/"
+                )
+                visible_indices = tuple(
+                    (
+                        int(item.path[len(prefix) :]),
+                        int(round(item.bounds.top)),
+                    )
+                    for item in state.buttons
+                    if item.path.startswith(prefix)
+                    and item.path[len(prefix) :].isdigit()
+                    and item.bounds is not None
+                    and item.bounds.bottom >= 0.0
+                    and item.bounds.top <= 680.0
+                )
+                # A partially scrolled first page can still expose an index
+                # below 7. Treating that as the top made the subsequent
+                # downward-only search miss equipment immediately above the
+                # viewport. Prove the upper boundary by one unchanged upward
+                # swipe instead of assuming a particular grid index origin.
+                regular_top = min(visible_indices) if visible_indices else None
+                at_top = (
+                    regular_top is not None
+                    and regular_top == previous_regular_top
+                )
+                previous_regular_top = regular_top
+            if at_top:
+                return
+            if self._blocking_rules(state, "gems-farming/equipment/store/reset"):
+                raise SemanticGateClosed("GemsFarming equipment store swipe is blocked")
+            self._swipe(640, 160, 640, 600, 400)
+            self._sleep(0.15)
+        raise SemanticGateClosed("GemsFarming equipment store did not reset")
+
+    def _gems_equipment_select_from_store(
+        self, slot: GemsFarmingEquipmentSlot
+    ) -> str:
+        self._gems_equipment_reset_store(slot.special)
+        candidate: Optional[Tuple[OracleState, ButtonState, Point]] = None
+        previous_signature: Optional[Tuple[str, int, int]] = None
+        stable_reads = 0
+        for attempt in range(120):
+            try:
+                observed = self._gems_equipment_store_candidate(slot)
+            except SemanticGateClosed as exc:
+                if "not visible in store" not in str(exc):
+                    raise
+                observed = None
+            if observed is not None:
+                _, button, point = observed
+                signature = (button.path, round(point.x), round(point.y))
+                if signature == previous_signature:
+                    stable_reads += 1
+                else:
+                    previous_signature = signature
+                    stable_reads = 1
+                if stable_reads >= 3:
+                    candidate = observed
+                    break
+                self._sleep(0.25)
+                continue
+            previous_signature = None
+            stable_reads = 0
+            if self._swipe is None:
+                raise SemanticGateClosed("GemsFarming equipment store requires typed swipe")
+            current = self.read_state()
+            if self._blocking_rules(current, "gems-farming/equipment/store/search"):
+                raise SemanticGateClosed("GemsFarming equipment store swipe is blocked")
+            self._swipe(640, 600, 640, 350, 300)
+            self._sleep(0.15)
+        if candidate is None:
+            raise SemanticGateClosed(
+                "GemsFarming equipment is unavailable: {0} +{1}".format(
+                    slot.equipment_id, slot.enhancement
+                )
+            )
+        state, button, point = candidate
+        semantic_id = "gems-farming/equipment/slot/{0}/candidate/{1}".format(
+            slot.position, slot.equipment_id
+        )
+        if button.bounds is None or not button.bounds.contains(point):
+            raise SemanticGateClosed("GemsFarming equipment candidate moved")
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("GemsFarming equipment candidate is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("game activity changed before equipment selection")
+        self._tap(int(round(point.x)), int(round(point.y)))
+        dialog = "SpWeaponInfoUI(Clone)" if slot.special else "EquipmentInfoUI(Clone)"
+        prefix = "OverlayCamera/Overlay/UIMain/{0}/replace".format(dialog)
+
+        def selection() -> Tuple[OracleState, ButtonState]:
+            current = self.read_state()
+            current_ui = self.read_ui_state()
+            buttons = tuple(
+                item
+                for item in current.buttons
+                if item.path == prefix + "/actions/action_button_2"
+            )
+            icons = tuple(
+                item
+                for item in current_ui.images
+                if item.path == prefix + "/equipment_on_ship/info/equip/icon_bg/icon"
+                and item.sprite == slot.equipment_id
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            levels = tuple(
+                item
+                for item in current_ui.texts
+                if item.path == prefix + "/equipment_on_ship/info/equip/slv/Text"
+                and item.text == str(slot.enhancement)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+            )
+            observed_enhancement = int(levels[0].text) if len(levels) == 1 else 0
+            if (
+                len(buttons) != 1
+                or len(icons) != 1
+                or len(levels) > 1
+                or observed_enhancement != slot.enhancement
+            ):
+                raise SemanticGateClosed("GemsFarming equipment selection changed")
+            return current, buttons[0]
+
+        selected_state, confirm = self._retry_transition_read(
+            selection, attempts=30, interval_seconds=0.1
+        )
+        self._gems_equipment_click_button(
+            selected_state,
+            confirm,
+            "gems-farming/equipment/slot/{0}/confirm".format(slot.position),
+        )
+
+        def require_mounted() -> str:
+            for page, reader in (
+                ("overview", self._gems_equipment_overview_loadout),
+                ("detail", self._gems_equipment_read_loadout),
+            ):
+                try:
+                    _, _, mounted = reader()
+                except SemanticGateClosed:
+                    continue
+                matches = tuple(
+                    item for item in mounted if item.position == slot.position
+                )
+                if matches == (slot,):
+                    return page
+            raise SemanticGateClosed("GemsFarming equipment mount was not proven")
+
+        return self._retry_transition_read(
+            require_mounted, attempts=50, interval_seconds=0.1
+        )
+
+    def gems_farming_equipment_take_on(
+        self, role: str
+    ) -> GemsFarmingEquipmentLoadout:
+        """Mount the pending typed loadout on ALAS's current Formation ship."""
+
+        try:
+            loadout = self._gems_farming_equipment_loadouts[role]
+        except KeyError as exc:
+            raise SemanticGateClosed(
+                "GemsFarming equipment transfer is not pending for " + role
+            ) from exc
+        if any(slot.special for slot in loadout.slots):
+            raise SemanticGateClosed(
+                "GemsFarming pending loadout exceeds ALAS's five equipment-code slots"
+            )
+        self._gems_equipment_open_ship_detail(role)
+        _, _, current = self._gems_equipment_stable_detail_loadout()
+        current_by_position = {
+            slot.position: slot for slot in current if not slot.special
+        }
+        desired_by_position = {slot.position: slot for slot in loadout.slots}
+        for position in tuple(sorted(current_by_position)):
+            if position not in desired_by_position:
+                self._gems_equipment_unload_detail_slot(
+                    current_by_position[position]
+                )
+                del current_by_position[position]
+        page = "detail"
+        for slot in loadout.slots:
+            if current_by_position.get(slot.position) == slot:
+                continue
+            if page == "detail":
+                self._gems_equipment_open_detail_store(slot)
+            else:
+                self._gems_equipment_open_store(slot)
+            page = self._gems_equipment_select_from_store(slot)
+            reader = (
+                self._gems_equipment_overview_loadout
+                if page == "overview"
+                else self._gems_equipment_stable_detail_loadout
+            )
+            _, _, observed = self._retry_transition_read(
+                reader, attempts=30, interval_seconds=0.1
+            )
+            current_by_position = {
+                item.position: item for item in observed if not item.special
+            }
+        reader = (
+            self._gems_equipment_overview_loadout
+            if page == "overview"
+            else self._gems_equipment_stable_detail_loadout
+        )
+        _, _, mounted = self._retry_transition_read(
+            reader, attempts=30, interval_seconds=0.1
+        )
+        mounted_regular = tuple(item for item in mounted if not item.special)
+        if mounted_regular != loadout.slots:
+            raise SemanticGateClosed("GemsFarming equipment loadout did not restore")
+        self._gems_equipment_back_to_formation()
+        del self._gems_farming_equipment_loadouts[role]
+        return loadout
+
+    def set_gems_farming_dock_sort(self, descending: bool) -> Optional[ActionReceipt]:
+        """Set the Dock result direction through its exact typed arrow."""
+
+        if not isinstance(descending, bool):
+            raise TypeError("GemsFarming Dock sort direction must be boolean")
+        state, ui_state = self._enhancement_dock_records()
+        root = "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/sort_button/"
+        directions = {
+            "desc": tuple(
+                item
+                for item in ui_state.images
+                if item.path == root + "desc"
+                and item.sprite == "down"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.raycast_target
+                and not item.truncated
+                and item.bounds is not None
+            ),
+            "asc": tuple(
+                item
+                for item in ui_state.images
+                if item.path == root + "asc"
+                and item.sprite == "up"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.raycast_target
+                and not item.truncated
+                and item.bounds is not None
+            ),
+        }
+        if len(directions["desc"]) > 1 or len(directions["asc"]) > 1:
+            raise SemanticGateClosed("GemsFarming Dock sort direction is ambiguous")
+        current_descending = bool(directions["desc"])
+        if current_descending == descending:
+            return None
+        current_name = "desc" if current_descending else "asc"
+        if len(directions[current_name]) != 1:
+            raise SemanticGateClosed("GemsFarming Dock sort direction is incomplete")
+        parents = tuple(
+            item
+            for item in ui_state.images
+            if item.path == root[:-1]
+            and item.name == "sort_button"
+            and item.sprite == "shaixuan01"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.raycast_target
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(parents) != 1:
+            raise SemanticGateClosed("GemsFarming Dock sort control is incomplete")
+        target = parents[0]
+        for _ in range(20):
+            if not self._blocking_rules(state, "gems-farming/dock/sort"):
+                break
+            self._sleep(0.05)
+            state, refreshed = self._enhancement_dock_records()
+            matches = tuple(
+                item
+                for item in refreshed.images
+                if item.path == root[:-1]
+                and item.name == "sort_button"
+                and item.sprite == "shaixuan01"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.raycast_target
+                and not item.truncated
+                and item.bounds is not None
+            )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming Dock sort direction changed while blocked"
+                )
+            target = matches[0]
+        else:
+            raise SemanticGateClosed("GemsFarming Dock sort input stayed blocked")
+        receipt = self._click_exact_image(
+            state,
+            target,
+            "gems-farming/dock/sort/" + ("descending" if descending else "ascending"),
+        )
+        for _ in range(30):
+            self._sleep(0.05)
+            _, after = self._enhancement_dock_records()
+            expected = tuple(
+                item
+                for item in after.images
+                if item.path == root + ("desc" if descending else "asc")
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+            )
+            if len(expected) == 1:
+                return receipt
+        raise SemanticGateClosed("GemsFarming Dock sort direction did not change")
+
+    def set_gems_farming_dock_filter(
+        self,
+        role: str,
+        factions: Tuple[str, ...],
+        *,
+        enhanceable_only: bool = True,
+    ) -> Tuple[ActionReceipt, ...]:
+        """Apply the exact ALAS GemsFarming Dock filter for one ship role."""
+
+        role_options = {
+            "flagship": ("7", "航母", "3", "可强化"),
+            "vanguard": ("3", "驱逐", "4", "可突破"),
+        }
+        faction_options = {
+            "all": ("tpl", "全阵营"),
+            "eagle": ("1", "白鹰"),
+            "iron": ("4", "铁血"),
+        }
+        if role not in role_options:
+            raise ValueError("GemsFarming role must be flagship or vanguard")
+        if not isinstance(enhanceable_only, bool):
+            raise TypeError("GemsFarming enhanceable_only must be boolean")
+        if (
+            not isinstance(factions, tuple)
+            or not factions
+            or any(item not in faction_options for item in factions)
+            or ("all" in factions and len(factions) != 1)
+        ):
+            raise SemanticGateClosed("GemsFarming Dock faction scope is invalid")
+        state, ui_state = self._enhancement_dock_records()
+        opener = tuple(
+            item
+            for item in ui_state.images
+            if item.path
+            == "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/index_button"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.raycast_target
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if len(opener) != 1:
+            raise SemanticGateClosed("GemsFarming Dock filter opener is incomplete")
+        receipts = [
+            self._click_exact_image(
+                state, opener[0], "gems-farming/dock/filter/open"
+            )
+        ]
+        self._sleep(0.1)
+        index_option, index_label, extra_option, extra_label = role_options[role]
+        if not enhanceable_only:
+            extra_option, extra_label = "tpl", "无限制"
+        # Match upstream ``Setting.reset_first``: selecting each group's
+        # default clears stale multi-select state before applying the task
+        # filter. Merely proving the desired option selected is insufficient;
+        # an old incompatible option can remain selected and produce an empty
+        # Dock while every desired label still looks correct.
+        choices = [
+            ("sort", "1", "等级", "btn_index_yellow"),
+            ("index", "tpl", "全部", "btn_index_blue"),
+            ("camp", "tpl", "全阵营", "btn_index_blue"),
+            ("rarity", "tpl", "全部", "btn_index_blue"),
+            ("extraindex", "tpl", "无限制", "btn_index_blue"),
+            ("sort", "2", "综合性能", "btn_index_yellow"),
+            ("index", index_option, index_label, "btn_index_blue"),
+        ]
+        choices.extend(
+            ("camp", faction_options[item][0], faction_options[item][1], "btn_index_blue")
+            for item in factions
+        )
+        choices.extend(
+            (
+                ("rarity", "1", "普通", "btn_index_blue"),
+                ("extraindex", extra_option, extra_label, "btn_index_blue"),
+            )
+        )
+        for group, option, label, selected_sprite in choices:
+            semantic_id = "gems-farming/dock/filter/{0}/{1}".format(
+                group, option
+            )
+            for click_attempt in range(3):
+                state, _, image = self._wait_enhancement_filter_option(
+                    group, option, label
+                )
+                if image.sprite == selected_sprite:
+                    break
+                if image.sprite != "btn_index_grey":
+                    raise SemanticGateClosed(
+                        "GemsFarming Dock filter state is unknown"
+                    )
+                for _ in range(20):
+                    if not self._blocking_rules(state, semantic_id):
+                        break
+                    self._sleep(0.05)
+                    state, _, image = self._wait_enhancement_filter_option(
+                        group, option, label
+                    )
+                    if image.sprite == selected_sprite:
+                        break
+                    if image.sprite != "btn_index_grey":
+                        raise SemanticGateClosed(
+                            "GemsFarming Dock filter state became unknown"
+                        )
+                else:
+                    raise SemanticGateClosed(
+                        "GemsFarming Dock filter input stayed blocked"
+                    )
+                if image.sprite == selected_sprite:
+                    break
+                receipts.append(
+                    self._click_exact_image(state, image, semantic_id)
+                )
+                for _ in range(30):
+                    self._sleep(0.05)
+                    _, _, verified = self._wait_enhancement_filter_option(
+                        group, option, label
+                    )
+                    if verified.sprite == selected_sprite:
+                        break
+                    if verified.sprite != "btn_index_grey":
+                        raise SemanticGateClosed(
+                            "GemsFarming Dock filter selection became unknown"
+                        )
+                else:
+                    if click_attempt == 2:
+                        raise SemanticGateClosed(
+                            "GemsFarming Dock filter option did not select"
+                        )
+                    continue
+                break
+            else:
+                raise SemanticGateClosed(
+                    "GemsFarming Dock filter option did not select"
+                )
+        expected_selected = {
+            "sort": {"2"},
+            "index": {index_option},
+            "camp": {faction_options[item][0] for item in factions},
+            "rarity": {"1"},
+            "extraindex": {extra_option},
+        }
+        option_pattern = re.compile(
+            r"OverlayCamera/Overlay/UIMain/CustomIndexUI\(Clone\)/index_panel/"
+            r"layout/container/indexsort_(sort|index|camp|rarity|extraindex)/"
+            r"bg/([^/]+)"
+        )
+
+        def selected_options(
+            current: UiState,
+        ) -> Dict[str, Dict[str, ImageState]]:
+            selected: Dict[str, Dict[str, ImageState]] = {
+                group: {} for group in expected_selected
+            }
+            for image in current.images:
+                match = option_pattern.fullmatch(image.path)
+                if (
+                    match is None
+                    or image.sprite not in ("btn_index_blue", "btn_index_yellow")
+                    or not image.active_in_hierarchy
+                    or not image.active_and_enabled
+                    or image.truncated
+                    or image.bounds is None
+                ):
+                    continue
+                selected[match.group(1)][match.group(2)] = image
+            return selected
+
+        # These groups are multi-select in the live client.  Selecting the
+        # requested item does not necessarily clear prior selections, so
+        # explicitly deselect every observed extra option and prove the exact
+        # final set before confirming.
+        for _ in range(40):
+            state, ui_state = self._retirement_records()
+            selected = selected_options(ui_state)
+            unexpected = [
+                (group, option, image)
+                for group, options in selected.items()
+                for option, image in options.items()
+                if option not in expected_selected[group]
+            ]
+            if not unexpected:
+                if all(
+                    set(selected[group]) == expected
+                    for group, expected in expected_selected.items()
+                ):
+                    break
+                raise SemanticGateClosed(
+                    "GemsFarming Dock filter selected set is incomplete"
+                )
+            group, option, image = unexpected[0]
+            semantic_id = "gems-farming/dock/filter/{0}/{1}/deselect".format(
+                group, option
+            )
+            if self._blocking_rules(state, semantic_id):
+                self._sleep(0.05)
+                continue
+            receipts.append(self._click_exact_image(state, image, semantic_id))
+            self._sleep(0.05)
+        else:
+            raise SemanticGateClosed(
+                "GemsFarming Dock filter extras did not clear"
+            )
+        for _ in range(20):
+            state, ui_state = self._retirement_records()
+            if not self._blocking_rules(
+                state, "gems-farming/dock/filter/confirm"
+            ):
+                break
+            self._sleep(0.05)
+        else:
+            raise SemanticGateClosed(
+                "GemsFarming Dock filter confirm stayed blocked"
+            )
+        confirm_path = (
+            "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/"
+            "layout/btns/ok"
+        )
+        confirm = tuple(
+            item
+            for item in ui_state.images
+            if item.path == confirm_path
+            and item.sprite == "btn_big_blue"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.raycast_target
+            and not item.truncated
+            and item.bounds is not None
+        )
+        confirm_text = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == confirm_path + "/Image"
+            and item.text == "确 定"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+        )
+        if len(confirm) != 1 or len(confirm_text) != 1:
+            raise SemanticGateClosed("GemsFarming Dock filter confirm is incomplete")
+        receipts.append(
+            self._click_exact_image(
+                state, confirm[0], "gems-farming/dock/filter/confirm"
+            )
+        )
+        self._retry_transition_read(
+            self._enhancement_dock_records,
+            attempts=30,
+            interval_seconds=0.1,
+        )
+        return tuple(receipts)
+
+    def cancel_gems_farming_dock_filter_if_visible(
+        self,
+    ) -> Optional[ActionReceipt]:
+        """Cancel only the exact open CustomIndexUI and prove Dock recovery."""
+
+        state, ui_state = self._retirement_records()
+        cancel_path = (
+            "OverlayCamera/Overlay/UIMain/CustomIndexUI(Clone)/index_panel/"
+            "layout/btns/cancel"
+        )
+        controls = tuple(
+            item
+            for item in ui_state.images
+            if item.path == cancel_path
+            and item.name == "cancel"
+            and item.sprite == "btn_big_red"
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and item.raycast_target
+            and not item.truncated
+            and item.bounds is not None
+        )
+        if not controls:
+            return None
+        if len(controls) != 1:
+            raise SemanticGateClosed(
+                "GemsFarming Dock filter cancel is ambiguous"
+            )
+        semantic_id = "gems-farming/dock/filter/cancel"
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("GemsFarming Dock filter cancel is blocked")
+        receipt = self._click_exact_image(state, controls[0], semantic_id)
+        self._retry_transition_read(
+            self._enhancement_dock_records,
+            attempts=30,
+            interval_seconds=0.1,
+        )
+        return receipt
+
+    def _gems_farming_dock_candidates_once(
+        self,
+        *,
+        ship_ids: Optional[FrozenSet[int]] = None,
+    ) -> Tuple[GemsFarmingDockCandidate, ...]:
+        """Read one candidate snapshot after a Dock filter or scroll update."""
+
+        state, ui_state = self._enhancement_dock_records()
+        base = self.enhancement_dock_candidates()
+        rarity_names = {
+            "1": "common",
+            "2": "rare",
+            "3": "elite",
+            "4": "super_rare",
+            "4_0": "super_rare",
+            "5": "ultra",
+            # Research/PR ships use the rainbow frame variant while keeping
+            # the same Dock card contract.  It may coexist with ordinary
+            # GemsFarming candidates in a broad recovery view.
+            "5_0": "ultra",
+            "prop": "special",
+            # META carriers can share a broad recovery page with the exact
+            # target ship.  Classify their observed frame locally so an
+            # unrelated card does not invalidate every typed candidate; it
+            # still cannot satisfy GemsFarming's required common rarity.
+            "3_1": "special",
+            "4_1": "special",
+            "prop4_1": "special",
+        }
+        type_names = {
+            "hangmu": "cv",
+            "quzhu": "dd",
+            "zhongxun": "ca",
+            "zhanlie": "bb",
+        }
+        result = []
+        for candidate in base:
+            if ship_ids is not None and candidate.ship_id not in ship_ids:
+                continue
+            root = candidate.button.path + "/content/"
+            if candidate.button.bounds is None:
+                raise SemanticGateClosed("GemsFarming Dock card bounds are absent")
+            card_bounds = candidate.button.bounds
+
+            def belongs_to_card(item: Union[ImageState, TextState]) -> bool:
+                if item.bounds is None:
+                    return False
+                center = Point(
+                    (item.bounds.left + item.bounds.right) / 2.0,
+                    (item.bounds.top + item.bounds.bottom) / 2.0,
+                )
+                return card_bounds.contains(center)
+
+            def images(suffix: str) -> Tuple[ImageState, ...]:
+                return tuple(
+                    item
+                    for item in ui_state.images
+                    if item.path == root + suffix
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and belongs_to_card(item)
+                )
+            emotion = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == root + "energy/Text"
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and re.fullmatch(r"(?:[0-9]|[1-9][0-9]|1[0-4][0-9]|150)", item.text)
+                and belongs_to_card(item)
+            )
+            ship_icon = images("ship_icon")
+            ship_type = images("info/top/type")
+            frame = images("front/frame")
+            status = images("dockyard/status")
+            if (
+                len(emotion) != 1
+                or len(ship_icon) != 1
+                or len(ship_type) != 1
+                or len(frame) != 1
+                or len(status) > 1
+                or ship_type[0].sprite not in type_names
+                or frame[0].sprite not in rarity_names
+                or not ship_icon[0].sprite
+            ):
+                raise SemanticGateClosed(
+                    "GemsFarming Dock card semantics are incomplete"
+                )
+            status_sprite = status[0].sprite if status else ""
+            fleet_match = re.fullmatch(r"biandui0?([1-6])", status_sprite)
+            if fleet_match is not None:
+                fleet_index = int(fleet_match.group(1))
+                context = self._gems_farming_open_slot_context
+                availability = (
+                    "current"
+                    if context is not None
+                    and context[1] == ship_icon[0].sprite
+                    and context[2] == fleet_index
+                    else "free"
+                )
+            elif not status_sprite:
+                fleet_index = 0
+                availability = "free"
+            else:
+                fleet_index = 0
+                availability = status_sprite
+            result.append(
+                GemsFarmingDockCandidate(
+                    position=candidate.position,
+                    ship_id=candidate.ship_id,
+                    ship_name=candidate.ship_name,
+                    ship_sprite=ship_icon[0].sprite,
+                    ship_type=type_names[ship_type[0].sprite],
+                    rarity=rarity_names[frame[0].sprite],
+                    level=candidate.level,
+                    emotion=int(emotion[0].text),
+                    fleet_index=fleet_index,
+                    status=availability,
+                    button=candidate.button,
+                )
+            )
+        if state.generation > ui_state.generation:
+            raise SemanticGateClosed("GemsFarming Dock candidate snapshots are incoherent")
+        return tuple(result)
+
+    def gems_farming_dock_candidates(
+        self, *, ship_ids: Optional[Iterable[int]] = None
+    ) -> Tuple[GemsFarmingDockCandidate, ...]:
+        """Return a stable typed Dock view without OCR or templates."""
+
+        exact_ship_ids: Optional[FrozenSet[int]] = None
+        if ship_ids is not None:
+            exact_ship_ids = frozenset(ship_ids)
+            if (
+                not exact_ship_ids
+                or any(
+                    isinstance(ship_id, bool)
+                    or not isinstance(ship_id, int)
+                    or ship_id <= 0
+                    for ship_id in exact_ship_ids
+                )
+            ):
+                raise ValueError("GemsFarming exact ship IDs are invalid")
+
+        retryable = (
+            "enhancement Dock card identity is incomplete",
+            "GemsFarming Dock card semantics are incomplete",
+            "GemsFarming Dock candidate snapshots are incoherent",
+        )
+        last_error: Optional[SemanticGateClosed] = None
+        last_result: Tuple[GemsFarmingDockCandidate, ...] = ()
+        # The live Dock replaces its virtualized cards with off-screen ``-1``
+        # placeholders while a new filter is loading.  Upstream deliberately
+        # waits about 1.2 seconds before treating that view as empty.  Preserve
+        # that timing boundary here: a non-empty typed view may return early,
+        # while a genuinely empty filter still returns after the bounded wait.
+        for attempt in range(13):
+            try:
+                if exact_ship_ids is None:
+                    last_result = self._gems_farming_dock_candidates_once()
+                else:
+                    last_result = self._gems_farming_dock_candidates_once(
+                        ship_ids=exact_ship_ids
+                    )
+            except SemanticGateClosed as exc:
+                if str(exc) not in retryable:
+                    raise
+                last_error = exc
+            else:
+                if last_result:
+                    return last_result
+                last_error = None
+            if attempt < 12:
+                self._sleep(0.1)
+        if last_error is not None:
+            raise SemanticGateClosed(
+                "GemsFarming Dock candidate snapshots did not stabilize"
+            ) from last_error
+        return last_result
+
+    def click_gems_farming_candidate(
+        self, candidate: GemsFarmingDockCandidate
+    ) -> ActionReceipt:
+        """Select one unchanged typed candidate and prove the 1/1 counter."""
+
+        if not isinstance(candidate, GemsFarmingDockCandidate):
+            raise TypeError("GemsFarming candidate is invalid")
+        identity = (
+            candidate.ship_id,
+            candidate.ship_name,
+            candidate.ship_sprite,
+            candidate.ship_type,
+            candidate.rarity,
+            candidate.level,
+            candidate.emotion,
+            candidate.fleet_index,
+            candidate.status,
+        )
+        stable_signature: Optional[Tuple[str, Bounds, Point]] = None
+        stable_reads = 0
+        for attempt in range(20):
+            # A broad recovery filter may contain unrelated cards whose
+            # optional semantics are incomplete. Re-prove only the selected
+            # immutable ship identity here; duplicate cards with the same ID
+            # remain visible and must still resolve uniquely by full identity
+            # and bounds below.
+            current = self.gems_farming_dock_candidates(
+                ship_ids=(candidate.ship_id,)
+            )
+            matches = tuple(item for item in current if item == candidate)
+            if len(matches) != 1:
+                matches = tuple(
+                    item
+                    for item in current
+                    if (
+                        item.ship_id,
+                        item.ship_name,
+                        item.ship_sprite,
+                        item.ship_type,
+                        item.rarity,
+                        item.level,
+                        item.emotion,
+                        item.fleet_index,
+                        item.status,
+                    )
+                    == identity
+                )
+            if len(matches) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming Dock candidate changed or became ambiguous"
+                )
+            target = matches[0].button
+            state = self.read_state()
+            buttons = tuple(
+                item
+                for item in state.buttons
+                if item.path == target.path
+                and item.name == target.name
+                and item.actionable
+                and item.bounds == target.bounds
+            )
+            if (
+                len(buttons) == 1
+                and target.point is not None
+                and target.bounds is not None
+            ):
+                signature = (target.path, target.bounds, target.point)
+                if signature == stable_signature:
+                    stable_reads += 1
+                else:
+                    stable_signature = signature
+                    stable_reads = 1
+                if stable_reads >= 3:
+                    break
+            else:
+                stable_signature = None
+                stable_reads = 0
+            if attempt < 19:
+                self._sleep(0.05)
+        else:
+            raise SemanticGateClosed("GemsFarming Dock candidate is not actionable")
+        if self._blocking_rules(state, "gems-farming/dock/candidate"):
+            raise SemanticGateClosed("GemsFarming Dock candidate input is blocked")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        receipt = ActionReceipt(
+            semantic_id="gems-farming/dock/ship/{0}".format(candidate.ship_id),
+            generation=state.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+        count_path = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/"
+            "bottom_info/bg_input/count"
+        )
+        for _ in range(40):
+            self._sleep(0.05)
+            # The selected-count postcondition owns only this exact Text.
+            # Large Dock views may truncate unrelated Toggle records.
+            ui_state = self.read_text_state()
+            selected = tuple(
+                item
+                for item in ui_state.texts
+                if item.path == count_path
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and not item.truncated
+                and re.fullmatch(r"<color=#[0-9A-Fa-f]{8}>1</color>/1", item.text)
+            )
+            if len(selected) == 1:
+                return receipt
+        raise SemanticGateClosed("GemsFarming Dock candidate did not select")
+
+    def cancel_gems_farming_candidate_selection(self) -> ActionReceipt:
+        hard_context = self._gems_farming_hard_open_slot_context
+        if hard_context is not None:
+            state = self.read_state()
+            controls = tuple(
+                item
+                for item in state.buttons
+                if item.path.endswith("/select_panel/cancel_button")
+                and item.name == "cancel_button"
+            )
+            if len(controls) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming hard Dock cancel is absent or ambiguous"
+                )
+            receipt = self._gems_equipment_click_button(
+                state, controls[0], "tactical/dock/cancel"
+            )
+            stage_code, _, _, _ = hard_context
+            self._retry_transition_read(
+                lambda: self.campaign_fleet_selection_state(stage_code),
+                attempts=50,
+                interval_seconds=0.1,
+            )
+            self._gems_farming_hard_open_slot_context = None
+            return receipt
+        receipt = self.click("tactical/dock/cancel")
+        self._retry_transition_read(
+            self._gems_farming_formation_records,
+            attempts=50,
+            interval_seconds=0.1,
+        )
+        return receipt
+
+    def confirm_gems_farming_candidate_selection(
+        self, candidate: GemsFarmingDockCandidate, role: str
+    ) -> ActionReceipt:
+        """Confirm exactly one selected ship and prove it mounted in formation."""
+
+        if not isinstance(candidate, GemsFarmingDockCandidate):
+            raise TypeError("GemsFarming candidate is invalid")
+        slot_names = {"flagship": "main_1", "vanguard": "vanguard_1"}
+        if role not in slot_names:
+            raise ValueError("GemsFarming role must be flagship or vanguard")
+        # A large unfiltered Dock can exhaust the unrelated Toggle slice.
+        # Confirmation owns only the exact 1/1 Text record; keep that slice
+        # complete and fail closed without making Toggle completeness global.
+        ui_state = self.read_text_state()
+        count_path = (
+            "OverlayCamera/Overlay/UIMain/blur_panel/select_panel/"
+            "bottom_info/bg_input/count"
+        )
+        selected = tuple(
+            item
+            for item in ui_state.texts
+            if item.path == count_path
+            and item.active_in_hierarchy
+            and item.active_and_enabled
+            and not item.truncated
+            and re.fullmatch(r"<color=#[0-9A-Fa-f]{8}>1</color>/1", item.text)
+        )
+        if len(selected) != 1:
+            raise SemanticGateClosed("GemsFarming Dock selection count changed")
+        hard_context = self._gems_farming_hard_open_slot_context
+        if hard_context is not None:
+            state = self.read_state()
+            controls = tuple(
+                item
+                for item in state.buttons
+                if item.path.endswith("/select_panel/confirm_button")
+                and item.name == "confirm_button"
+            )
+            if len(controls) != 1:
+                raise SemanticGateClosed(
+                    "GemsFarming hard Dock confirm is absent or ambiguous"
+                )
+            receipt = self._gems_equipment_click_button(
+                state, controls[0], "tactical/dock/confirm"
+            )
+            stage_code, fleet_index, hard_role, before = hard_context
+            if role != hard_role:
+                raise SemanticGateClosed(
+                    "GemsFarming hard replacement role changed before confirmation"
+                )
+            for _ in range(60):
+                self._sleep(0.1)
+                try:
+                    _, _, cards, after = self._gems_farming_hard_role_cards(
+                        stage_code, fleet_index, role
+                    )
+                except SemanticGateClosed:
+                    continue
+                if len(cards) == 3 and after == before + (candidate.ship_sprite,):
+                    self._gems_farming_hard_open_slot_context = None
+                    return receipt
+            raise SemanticGateClosed(
+                "GemsFarming hard replacement postcondition was not proven"
+            )
+        receipt = self.click("tactical/dock/confirm")
+        expected_suffix = "/{0}_root/mouseChild".format(candidate.ship_sprite)
+        for _ in range(60):
+            self._sleep(0.1)
+            try:
+                _, after, _ = self._gems_farming_formation_records()
+            except SemanticGateClosed:
+                continue
+            slot_path = (
+                "UICamera/Canvas/UIMain/FormationUI(Clone)/adapt/GridFrame/"
+                + slot_names[role]
+                + "/shadow"
+            )
+            slots = tuple(item for item in after.images if item.path == slot_path)
+            if len(slots) != 1 or slots[0].bounds is None:
+                continue
+            slot_center_x = (slots[0].bounds.left + slots[0].bounds.right) / 2.0
+            mounted = tuple(
+                item
+                for item in after.images
+                if item.path.endswith(expected_suffix)
+                and item.active_in_hierarchy
+                and item.active_and_enabled
+                and item.bounds is not None
+                and abs(
+                    (item.bounds.left + item.bounds.right) / 2.0 - slot_center_x
+                )
+                <= 2.0
+            )
+            if len(mounted) == 1:
+                return receipt
+        raise SemanticGateClosed("GemsFarming replacement postcondition was not proven")
+
     def set_enhancement_dock_favourite(self, enabled: bool) -> Optional[ActionReceipt]:
         """Set the Dock favourite scope using its currently rendered toggle."""
 
@@ -27292,18 +33837,29 @@ class SemanticOracle:
         deadline = time.monotonic() + 5.0
         while time.monotonic() < deadline:
             _, after = self._enhancement_dock_records()
-            visible = tuple(
-                item
-                for item in after.images
-                if item.path == root + target_name
-                and item.sprite
-                == ("changyong_butten01" if enabled else "changyong_butten02")
-                and item.active_in_hierarchy
-                and item.active_and_enabled
-                and not item.truncated
-                and item.bounds is not None
-            )
-            if len(visible) == 1:
+            visible = {
+                suffix: tuple(
+                    item
+                    for item in after.images
+                    if item.path == root + suffix
+                    and item.sprite == sprite
+                    and item.active_in_hierarchy
+                    and item.active_and_enabled
+                    and not item.truncated
+                    and item.bounds is not None
+                )
+                for suffix, sprite in (
+                    ("on", "changyong_butten01"),
+                    ("off", "changyong_butten02"),
+                )
+            }
+            if enabled and len(visible["on"]) == 1:
+                return receipt
+            if (
+                not enabled
+                and not visible["on"]
+                and len(visible["off"]) == 1
+            ):
                 return receipt
             self._sleep(0.05)
         raise SemanticGateClosed("Dock favourite state did not change")
@@ -27353,43 +33909,59 @@ class SemanticOracle:
             ),
         )
         for group, option, label, selected_sprite in choices:
-            state, _, image = self._wait_enhancement_filter_option(
-                group, option, label
+            semantic_id = "enhancement/dock/filter/{0}/{1}".format(
+                group, option
             )
-            if image.sprite == selected_sprite:
-                continue
-            if image.sprite != "btn_index_grey":
-                raise SemanticGateClosed("enhancement Dock filter state is unknown")
-            for _ in range(20):
-                if not self._blocking_rules(
-                    state,
-                    "enhancement/dock/filter/{0}/{1}".format(group, option),
-                ):
-                    break
-                self._sleep(0.05)
+            for click_attempt in range(3):
                 state, _, image = self._wait_enhancement_filter_option(
                     group, option, label
                 )
-            else:
-                raise SemanticGateClosed("enhancement Dock filter input stayed blocked")
-            receipts.append(
-                self._click_exact_image(
-                    state,
-                    image,
-                    "enhancement/dock/filter/{0}/{1}".format(group, option),
-                )
-            )
-            for _ in range(30):
-                self._sleep(0.05)
-                _, _, verified = self._wait_enhancement_filter_option(
-                    group, option, label
-                )
-                if verified.sprite == selected_sprite:
+                if image.sprite == selected_sprite:
                     break
-                if verified.sprite != "btn_index_grey":
+                if image.sprite != "btn_index_grey":
                     raise SemanticGateClosed(
-                        "enhancement Dock filter selection became unknown"
+                        "enhancement Dock filter state is unknown"
                     )
+                for _ in range(20):
+                    if not self._blocking_rules(state, semantic_id):
+                        break
+                    self._sleep(0.05)
+                    state, _, image = self._wait_enhancement_filter_option(
+                        group, option, label
+                    )
+                    if image.sprite == selected_sprite:
+                        break
+                    if image.sprite != "btn_index_grey":
+                        raise SemanticGateClosed(
+                            "enhancement Dock filter state became unknown"
+                        )
+                else:
+                    raise SemanticGateClosed(
+                        "enhancement Dock filter input stayed blocked"
+                    )
+                if image.sprite == selected_sprite:
+                    break
+                receipts.append(
+                    self._click_exact_image(state, image, semantic_id)
+                )
+                for _ in range(30):
+                    self._sleep(0.05)
+                    _, _, verified = self._wait_enhancement_filter_option(
+                        group, option, label
+                    )
+                    if verified.sprite == selected_sprite:
+                        break
+                    if verified.sprite != "btn_index_grey":
+                        raise SemanticGateClosed(
+                            "enhancement Dock filter selection became unknown"
+                        )
+                else:
+                    if click_attempt == 2:
+                        raise SemanticGateClosed(
+                            "enhancement Dock filter option did not select"
+                        )
+                    continue
+                break
             else:
                 raise SemanticGateClosed(
                     "enhancement Dock filter option did not select"
@@ -27458,6 +34030,18 @@ class SemanticOracle:
         result = []
         for position, button in enumerate(ordered):
             root = button.path + "/content/"
+            assert button.bounds is not None
+
+            def belongs_to_button(item: TextState) -> bool:
+                if item.bounds is None:
+                    return False
+                return button.bounds.contains(
+                    Point(
+                        (item.bounds.left + item.bounds.right) / 2.0,
+                        (item.bounds.top + item.bounds.bottom) / 2.0,
+                    )
+                )
+
             name = tuple(
                 item
                 for item in ui_state.texts
@@ -27466,6 +34050,7 @@ class SemanticOracle:
                 and item.active_and_enabled
                 and not item.truncated
                 and item.text.strip()
+                and belongs_to_button(item)
             )
             level = tuple(
                 item
@@ -27475,6 +34060,7 @@ class SemanticOracle:
                 and item.active_and_enabled
                 and not item.truncated
                 and re.fullmatch(r"[1-9][0-9]{0,2}", item.text)
+                and belongs_to_button(item)
             )
             if (
                 not name
@@ -28594,6 +35180,36 @@ class SemanticOracle:
             selected_count=selected,
         )
 
+    def click_retirement_page_back(self) -> ActionReceipt:
+        """Exit only an idle, unselected retirement page."""
+
+        selection = self.retirement_selection_state()
+        if selection.selected_count != 0:
+            raise SemanticGateClosed("retirement page has a live selection")
+        state, _ui_state = self._retirement_records()
+        matches = tuple(
+            button
+            for button in state.buttons
+            if button.name == "back"
+            and button.path
+            == "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back"
+            and button.actionable
+        )
+        if len(matches) != 1:
+            raise SemanticGateClosed("retirement page back control is ambiguous")
+        target = matches[0]
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately before input")
+        assert target.point is not None and target.bounds is not None
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(
+            semantic_id="retirement/page/back",
+            generation=selection.generation,
+            point=target.point,
+            bounds=target.bounds,
+            path=target.path,
+        )
+
     def open_retirement_settings(self) -> ActionReceipt:
         page = self.retirement_selection_state()
         if page.selected_count:
@@ -28887,7 +35503,7 @@ class SemanticOracle:
     def _recover_retirement_network_reconnect(self) -> Optional[ActionReceipt]:
         """Resume only the independently reviewed exact reconnect prompt."""
 
-        state = self.read_state()
+        state, ui_state = self._retirement_records()
         confirm = self._matches(state, "overlay/network-reconnect/confirm")
         cancel = self._matches(state, "overlay/network-reconnect/cancel")
         if not confirm and not cancel:
@@ -28896,11 +35512,39 @@ class SemanticOracle:
         # Msgbox button paths.  A reconnect prompt always owns the exact pair.
         if not confirm or not cancel:
             return None
-        if not self._network_reconnect_prompt_matches(state):
-            raise SemanticGateClosed("unreviewed popup interrupted retirement")
         if len(confirm) != 1 or len(cancel) != 1:
             raise SemanticGateClosed("retirement reconnect prompt is ambiguous")
-        return self.click("overlay/network-reconnect/confirm")
+        content = self._active_retirement_texts(
+            ui_state, "Msgbox(Clone)/window/msg_panel/content"
+        )
+        confirm_text = self._active_retirement_texts(
+            ui_state,
+            "Msgbox(Clone)/window/button_container/custom_button_1(Clone)/pic",
+        )
+        cancel_text = self._active_retirement_texts(
+            ui_state,
+            "Msgbox(Clone)/window/button_container/custom_button_2(Clone)/pic",
+        )
+        if len(content) != 1 or len(confirm_text) != 1 or len(cancel_text) != 1:
+            return None
+        plain = re.sub(r"<[^>]*>", "", content[0].text).strip()
+        if not (
+            re.fullmatch(
+                r"服务器连接失败，是否重新连接？\s*"
+                r"\[(?:NetworkDown|HostNotFound|ConnectionReset)\]",
+                plain,
+            )
+            and "".join(confirm_text[0].text.split()) == "确定"
+            and "".join(cancel_text[0].text.split()) == "取消"
+        ):
+            # Rarity/equipment dialogs own their own exact branches below.
+            return None
+        return self._click_retirement_button(
+            "overlay/network-reconnect/confirm",
+            "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+            identity_text_suffix="Msgbox(Clone)/window/msg_panel/content",
+            identity_text=content[0].text,
+        )
 
     def _retirement_reward_state(self) -> RetirementRewardState:
         state, ui_state = self._retirement_records()
@@ -29402,11 +36046,26 @@ class SemanticOracle:
                     semantic_id.startswith("enhancement/dock/")
                     or semantic_id.startswith("awaken/")
                     or semantic_id.startswith("os/port/dock/")
+                    or semantic_id.startswith("gems-farming/dock/")
                 )
             )
             and not (
                 rule.blocker_id == "tactical-page"
                 and semantic_id.startswith("enhancement/dock/favourite/")
+            )
+            and not (
+                rule.blocker_id == "archive-page"
+                and (
+                    semantic_id.startswith("archive/category/")
+                    or semantic_id.startswith("archive/campaign/")
+                )
+            )
+            and not (
+                rule.blocker_id == "campaign-menu"
+                and (
+                    semantic_id.startswith("archive/category/")
+                    or semantic_id.startswith("archive/campaign/")
+                )
             )
             and any(rule.path_fragment in button.path for button in state.buttons)
         )
@@ -30298,12 +36957,80 @@ class SemanticOracle:
 
     def _enabled_once(self, semantic_id: str) -> bool:
         state = self.read_state()
+        if semantic_id == "main/raid":
+            return bool(
+                self._main_raid_entry_proven(state)
+                and not self._blocking_rules(state, semantic_id)
+            )
         if semantic_id == "os/boss/start":
             return self.operation_siren_boss_preparation_visible()
         if semantic_id == "reward/new-ship/continue":
             return self._new_ship_reward_visible_in_state(state)
+        if semantic_id in (
+            "meowfficer/buy/min",
+            "meowfficer/buy/add",
+            "meowfficer/buy/max",
+            "meowfficer/buy/submit",
+        ):
+            try:
+                self.meowfficer_purchase_state()
+            except SemanticGateClosed:
+                return False
+            matches = self._matches(state, semantic_id)
+            return bool(
+                len(matches) == 1
+                and matches[0].active_in_hierarchy
+                and matches[0].active_and_enabled
+                and matches[0].interactable
+                and matches[0].raycast_top is None
+                and matches[0].point is not None
+                and matches[0].bounds is not None
+                and matches[0].bounds.contains(matches[0].point)
+            )
+        if semantic_id == "meowfficer/buy/skip":
+            return self._meowfficer_purchase_skip_proven(state)
+        if semantic_id in (
+            "meowfficer/buy/cancel",
+            "meowfficer/buy/confirm",
+        ):
+            return self._meowfficer_purchase_prompt_proven(state)
+        if semantic_id == "meowfficer/enhance/open":
+            try:
+                self.meowfficer_dock_state()
+            except SemanticGateClosed:
+                return False
+            return self._meowfficer_reviewed_control_proven(state, semantic_id)
+        if semantic_id in (
+            "meowfficer/enhance/back",
+            "meowfficer/feed/open",
+            "meowfficer/enhance/submit",
+        ):
+            try:
+                self.meowfficer_enhance_state()
+            except SemanticGateClosed:
+                return False
+            return self._meowfficer_reviewed_control_proven(state, semantic_id)
+        if semantic_id in (
+            "meowfficer/feed/cancel",
+            "meowfficer/feed/confirm",
+        ):
+            try:
+                self.meowfficer_feed_state()
+            except SemanticGateClosed:
+                return False
+            return self._meowfficer_reviewed_control_proven(state, semantic_id)
+        if semantic_id in (
+            "meowfficer/enhance/cancel",
+            "meowfficer/enhance/confirm",
+        ):
+            return self._meowfficer_enhance_prompt_proven(state)
         if semantic_id == "meowfficer/get/continue":
             return self._meowfficer_get_continue_proven(state)
+        if semantic_id in (
+            "meowfficer/get/lock",
+            "meowfficer/get/unlock",
+        ):
+            return self._meowfficer_lock_toggle_proven(state, semantic_id)
         if semantic_id in (
             "meowfficer/get/lock-cancel",
             "meowfficer/get/lock-confirm",
@@ -30367,6 +37094,15 @@ class SemanticOracle:
             return self._mail_manager_back_delegated_raycast_proven(state)
         if semantic_id == "exercise/opponent/start":
             return self.exercise_opponent_detail_visible()
+        matches = self._matches(state, semantic_id)
+        if semantic_id in (
+            "overlay/network-reconnect/cancel",
+            "overlay/network-reconnect/confirm",
+        ) and not matches:
+            # Dock pages can legitimately exceed the observer toggle budget.
+            # Do not demand an unrelated full Msgbox/UI snapshot when the
+            # colliding NetworkDown button target is absent in typed state.
+            return False
         if semantic_id in (
             "overlay/network-reconnect/cancel",
             "overlay/network-reconnect/confirm",
@@ -30377,7 +37113,6 @@ class SemanticOracle:
             and not self._login_data_expired_prompt_matches(state)
         ):
             return False
-        matches = self._matches(state, semantic_id)
         if len(matches) > 1:
             raise SemanticGateClosed("semantic target mapping is ambiguous")
         if semantic_id.startswith("guild/") and semantic_id in (
@@ -31086,9 +37821,86 @@ class SemanticOracle:
             and target.bounds.contains(target.point)
             and self.main_page_visible()
         )
+        delegated_main_raid = bool(
+            semantic_id == "main/raid" and self._main_raid_entry_proven(state)
+        )
         delegated_meowfficer_get_continue = bool(
             semantic_id == "meowfficer/get/continue"
             and self._meowfficer_get_continue_proven(state)
+        )
+        delegated_meowfficer_purchase_control = False
+        if semantic_id in (
+            "meowfficer/buy/min",
+            "meowfficer/buy/add",
+            "meowfficer/buy/max",
+            "meowfficer/buy/submit",
+        ):
+            try:
+                self.meowfficer_purchase_state()
+            except SemanticGateClosed:
+                pass
+            else:
+                delegated_meowfficer_purchase_control = bool(
+                    target.active_in_hierarchy
+                    and target.active_and_enabled
+                    and target.interactable
+                    and target.raycast_top is None
+                    and target.point is not None
+                    and target.bounds is not None
+                    and target.bounds.contains(target.point)
+                )
+        delegated_meowfficer_purchase_skip = bool(
+            semantic_id == "meowfficer/buy/skip"
+            and self._meowfficer_purchase_skip_proven(state)
+        )
+        delegated_meowfficer_purchase_prompt = bool(
+            semantic_id
+            in ("meowfficer/buy/cancel", "meowfficer/buy/confirm")
+            and self._meowfficer_purchase_prompt_proven(state)
+        )
+        delegated_meowfficer_enhance_control = False
+        if semantic_id == "meowfficer/enhance/open":
+            try:
+                self.meowfficer_dock_state()
+            except SemanticGateClosed:
+                pass
+            else:
+                delegated_meowfficer_enhance_control = (
+                    self._meowfficer_reviewed_control_proven(state, semantic_id)
+                )
+        elif semantic_id in (
+            "meowfficer/enhance/back",
+            "meowfficer/feed/open",
+            "meowfficer/enhance/submit",
+        ):
+            try:
+                self.meowfficer_enhance_state()
+            except SemanticGateClosed:
+                pass
+            else:
+                delegated_meowfficer_enhance_control = (
+                    self._meowfficer_reviewed_control_proven(state, semantic_id)
+                )
+        elif semantic_id in (
+            "meowfficer/feed/cancel",
+            "meowfficer/feed/confirm",
+        ):
+            try:
+                self.meowfficer_feed_state()
+            except SemanticGateClosed:
+                pass
+            else:
+                delegated_meowfficer_enhance_control = (
+                    self._meowfficer_reviewed_control_proven(state, semantic_id)
+                )
+        delegated_meowfficer_enhance_prompt = bool(
+            semantic_id
+            in ("meowfficer/enhance/cancel", "meowfficer/enhance/confirm")
+            and self._meowfficer_enhance_prompt_proven(state)
+        )
+        delegated_meowfficer_lock_toggle = bool(
+            semantic_id in ("meowfficer/get/lock", "meowfficer/get/unlock")
+            and self._meowfficer_lock_toggle_proven(state, semantic_id)
         )
         delegated_meowfficer_lock_prompt = bool(
             semantic_id
@@ -31409,13 +38221,20 @@ class SemanticOracle:
                 and not delegated_new_ship_reward
                 and not delegated_meowfficer_dock_control
                 and not delegated_meowfficer_training_control
+                and not delegated_meowfficer_purchase_control
+                and not delegated_meowfficer_purchase_skip
+                and not delegated_meowfficer_purchase_prompt
+                and not delegated_meowfficer_enhance_control
+                and not delegated_meowfficer_enhance_prompt
                 and not delegated_meowfficer_get_continue
+                and not delegated_meowfficer_lock_toggle
                 and not delegated_meowfficer_lock_prompt
                 and not delegated_meowfficer_get_result
                 and not delegated_meowfficer_fort_close
                 and not delegated_meowfficer_queue_control
                 and not delegated_meowfficer_queue_prompt
                 and not delegated_main_guild
+                and not delegated_main_raid
                 and not delegated_guild_control
                 and not delegated_guild_dispatch_detail
                 and not delegated_guild_report
@@ -31474,6 +38293,17 @@ class SemanticOracle:
                     + min(target.bounds.bottom, self.fingerprint.height - 1.0)
                 )
                 / 2.0,
+            )
+        if semantic_id == "meowfficer/train/complete/first":
+            # CommanderBoxesUI anchors each completed-slot Button on the top
+            # edge of its exact RectTransform.  That pivot is inside the
+            # reported bounds but Unity ignores it as a boundary tap.  The
+            # training identity and completed-slot text were proven above, so
+            # use the centre of this uniquely mapped Button rectangle.
+            assert target.bounds is not None
+            point = Point(
+                (target.bounds.left + target.bounds.right) / 2.0,
+                (target.bounds.top + target.bounds.bottom) / 2.0,
             )
         if dorm_page_control:
             ui_state = self.read_ui_state()

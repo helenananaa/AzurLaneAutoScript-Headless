@@ -35,7 +35,7 @@ be identified safely.
 
 The primary local AVD is currently:
 
-`H:\AndroidAVD\alas_game_api32_x64.avd`
+`E:\Runtime\AndroidAVD\alas_game_api32_x64.avd`
 
 Verify that the path still exists before using it. Do not assume an emulator
 serial from documentation examples; discover and bind the exact device.

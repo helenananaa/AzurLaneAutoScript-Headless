@@ -40,7 +40,11 @@ def _verify_args(alas_root: Path) -> None:
 def _verify_consumers(freebies_path: Path, data_key_path: Path) -> dict[str, list[str]]:
     expected = {
         "DataKey_Collect": (freebies_path, "Freebies", {"run"}),
-        "DataKey_ForceCollect": (data_key_path, "DataKey", {"data_key_collect"}),
+        "DataKey_ForceCollect": (
+            data_key_path,
+            "DataKey",
+            {"data_key_collect", "run"},
+        ),
     }
     result = {}
     for field, (path, class_name, methods_expected) in expected.items():

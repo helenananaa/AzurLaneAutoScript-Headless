@@ -1,0 +1,93 @@
+{
+  "schema": "alas-headless.gems-farming-vanguard-ship-equip-live-validation/v1",
+  "passed": true,
+  "captured_at_utc": "2026-08-25T11:46:35Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "package": "com.bilibili.azurlane",
+  "pid": 2030,
+  "qualification_scope": "typed normal-mode ChangeVanguard=ship_equip empty-source production boundary with reversible five-slot fixture",
+  "configuration": {
+    "campaign_mode": "normal",
+    "fleet_index": 6,
+    "change_vanguard": "ship_equip",
+    "common_dd": "any",
+    "max_level": 100,
+    "min_emotion": 0
+  },
+  "source_ship": {
+    "ship_id": 699024,
+    "ship_sprite": "nabulesi",
+    "ship_name": "Napoli",
+    "fleet_index": 6
+  },
+  "reversible_fixture": {
+    "statement": "The production typed take-off port captured and unloaded Napoli's five regular slots. The retained exact loadout was held only for cleanup; the production ship_equip boundary then independently captured an empty source loadout.",
+    "original_loadout": [
+      {"position": 1, "equipment_id": "23120", "enhancement": 10, "special": false},
+      {"position": 2, "equipment_id": "32260", "enhancement": 10, "special": false},
+      {"position": 3, "equipment_id": "26500", "enhancement": 10, "special": false},
+      {"position": 4, "equipment_id": "1760", "enhancement": 10, "special": false},
+      {"position": 5, "equipment_id": "2400", "enhancement": 10, "special": false}
+    ],
+    "production_source_loadout": []
+  },
+  "production_boundary": {
+    "eligible_candidates": [
+      {
+        "ship_id": 101153,
+        "ship_sprite": "sipengsi",
+        "ship_name": "Spence",
+        "level": 100,
+        "emotion": 136,
+        "status": "free"
+      }
+    ],
+    "original_alas_choice": "max(candidate, key=emotion)",
+    "target_ship_sprite": "sipengsi",
+    "target_observed_generation": 602207,
+    "target_loadout": [],
+    "operations": [
+      "production gems_farming_equipment_take_off(vanguard) captured an empty prepared source",
+      "production CommonDD=any admission returned exactly one eligible Spence",
+      "production select and confirm proved Spence in vanguard_1",
+      "production gems_farming_equipment_take_on(vanguard) proved the empty target loadout and cleared the pending transfer"
+    ]
+  },
+  "recovery": {
+    "napoli_lookup": "bounded typed Dock virtual-list traversal with exact ship_id=699024 and sprite=nabulesi",
+    "napoli_confirm_generation": 604573,
+    "first_mount_attempt": "slots 1-4 mounted; slot 5 stopped fail-closed because 2400 +10 was not visible in that bounded inventory traversal",
+    "retry": "the same retained five-slot loadout was re-injected after returning through the reviewed equipment back path; only the missing slot required mounting",
+    "restored_loadout": [
+      {"position": 1, "equipment_id": "23120", "enhancement": 10, "special": false},
+      {"position": 2, "equipment_id": "32260", "enhancement": 10, "special": false},
+      {"position": 3, "equipment_id": "26500", "enhancement": 10, "special": false},
+      {"position": 4, "equipment_id": "1760", "enhancement": 10, "special": false},
+      {"position": 5, "equipment_id": "2400", "enhancement": 10, "special": false}
+    ],
+    "final_fleet_index": 1,
+    "formation_back_semantic_id": "gems-farming/startup/formation/back",
+    "formation_back_generation": 607244,
+    "final_main_page": true,
+    "final_generation": 607249
+  },
+  "supervision": {
+    "stalled_process_terminated": true,
+    "statement": "After the production target postcondition, the first host process stopped issuing input while cleanup had not started. It was terminated before a separate recovery session was opened; no concurrent input chains were used."
+  },
+  "mutation_accounting": {
+    "fleet_confirmation_count": 2,
+    "temporary_replacement": "Napoli -> Spence -> Napoli",
+    "premium_or_purchase_actions": 0,
+    "battle_attempts": 0,
+    "raw_input_fallback_count": 0
+  },
+  "unsupported_branches": [
+    "non-empty five-slot cross-ship compatibility",
+    "named CommonDD action selectors",
+    "natural Lv32 replacement trigger",
+    "natural low-emotion replacement trigger"
+  ],
+  "statement": "This receipt promotes only the empty-source ChangeVanguard=ship_equip value to live-partial support. It does not claim that Napoli's cruiser-class five-slot loadout can be mounted on Spence or that arbitrary non-empty vanguard transfers are compatible."
+}

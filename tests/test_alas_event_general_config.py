@@ -1,4 +1,5 @@
 import ast
+import ast
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -81,6 +82,8 @@ class AlasEventGeneralConfigTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("diff --git a/module/campaign/campaign_event.py", patch)
         self.assertEqual(patch.count("self._validate_event_general_config()"), 4)
+        self.assertIn("pt = semantic_adapter.event_points()", patch)
+        self.assertIn("return semantic_session.event_coin()", patch)
 
     def test_sources_compile(self):
         for relative in (

@@ -1,0 +1,86 @@
+{
+  "schema": "alas-headless.gems-farming-common-dd-filter-preflight/v1",
+  "passed": true,
+  "captured_at_utc": "2026-08-25T12:21:01Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "package": "com.bilibili.azurlane",
+  "pid": 2030,
+  "qualification_scope": "typed observation-only CommonDD named-filter and candidate-admission preflight from Fleet 6 first-vanguard Dock",
+  "configuration": {
+    "campaign_mode": "normal",
+    "fleet_index": 6,
+    "max_level": 100,
+    "min_emotion": 0
+  },
+  "android_input_injected": true,
+  "raw_input_fallback_used": false,
+  "fleet_mutation_count": 0,
+  "confirmation_count": 0,
+  "selectors": {
+    "favourite": {
+      "visible": [],
+      "eligible": [],
+      "disposition": "safe empty result"
+    },
+    "aulick_or_foote": {
+      "visible": [
+        {
+          "ship_id": 101153,
+          "ship_sprite": "sipengsi",
+          "level": 100,
+          "emotion": 136,
+          "status": "free",
+          "rarity": "common"
+        }
+      ],
+      "eligible": [],
+      "disposition": "the Eagle filter admitted Spence to the visible page, but the exact Aulick/Foote name rule excluded it"
+    },
+    "cassin_or_downes": {
+      "visible": [
+        {
+          "ship_id": 101153,
+          "ship_sprite": "sipengsi",
+          "level": 100,
+          "emotion": 136,
+          "status": "free",
+          "rarity": "common"
+        }
+      ],
+      "eligible": [],
+      "disposition": "the Eagle filter admitted Spence to the visible page, but the exact Cassin/Downes name rule excluded it"
+    },
+    "z20_or_z21": {
+      "visible": [
+        {
+          "ship_id": 401211,
+          "ship_name": "Z21",
+          "ship_sprite": "Z21",
+          "level": 77,
+          "emotion": 150,
+          "status": "green",
+          "rarity": "common"
+        },
+        {
+          "ship_id": 401201,
+          "ship_name": "Z20",
+          "ship_sprite": "Z20",
+          "level": 77,
+          "emotion": 150,
+          "status": "green",
+          "rarity": "common"
+        }
+      ],
+      "eligible": [],
+      "disposition": "the exact named ships were observed, but neither met the level-100 and free-status admission contract"
+    }
+  },
+  "recovery": {
+    "formation_back_semantic_id": "gems-farming/startup/formation/back",
+    "formation_back_generation": 646431,
+    "final_main_page": true,
+    "final_generation": 646434
+  },
+  "statement": "All four named CommonDD filter values now have controlled live observation and safe empty-result evidence. Only CommonDD=any has an action-qualified replacement on this account; no named value is promoted to action support without a level-100 free matching ship."
+}

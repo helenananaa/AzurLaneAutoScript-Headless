@@ -1,0 +1,147 @@
+{
+  "schema": "alas-headless.meowfficer-train-full-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "semantic_e2e",
+  "seed_config_sha256": "6b4c45dd68096bb265c844f7725cea5c3a52a6c517bf68754e843d6b3798ca48",
+  "configured": {
+    "Meowfficer.BuyAmount": 0,
+    "Meowfficer.FortChoreMeowfficer": false,
+    "Meowfficer.OverflowCoins": -1,
+    "MeowfficerTrain.Enable": true,
+    "MeowfficerTrain.Mode": "once_a_day"
+  },
+  "source_sha256": {
+    "train": "9fc613edbc9853e1c41222ee9ef0a8d266d3241f1ce3f2833718734e2352a81d",
+    "task": "6cbfc20aad935451b697e22e2d35ce9e0ffdcbb940a5af7175c76be8efa37da8",
+    "adapter": "f053fd946c1ad161ba9110e8a6b5f2a834859fa401998a5e04012f698af79720",
+    "oracle": "82169c736d6a86b821da1d20fec6367f7830e1cd308971cf55945dd3b868c94c"
+  },
+  "passed": true,
+  "temporary_config": "codex_meowfficer_train_full_live_6fe9edb7465f4ea18e7222ad661431ff.json",
+  "validation_branch": "collect-one-and-requeue",
+  "elapsed_seconds": 36.156,
+  "before": {
+    "purchased": 15,
+    "purchase_total": 15,
+    "coins": 109368,
+    "capacity_used": 36,
+    "capacity_total": 40,
+    "fort_current": 0,
+    "fort_total": 8,
+    "training_finished": 9,
+    "training_total": 10,
+    "box_counts": [
+      2205,
+      1531,
+      470
+    ]
+  },
+  "after": {
+    "purchased": 15,
+    "purchase_total": 15,
+    "coins": 109368,
+    "capacity_used": 37,
+    "capacity_total": 40,
+    "fort_current": 0,
+    "fort_total": 8,
+    "training_finished": 8,
+    "training_total": 10,
+    "box_counts": [
+      2205,
+      1531,
+      469
+    ]
+  },
+  "navigation_taps": [
+    [
+      1185,
+      622
+    ],
+    [
+      438,
+      272
+    ],
+    [
+      640,
+      360
+    ],
+    [
+      512,
+      453
+    ],
+    [
+      980,
+      565
+    ],
+    [
+      819,
+      558
+    ],
+    [
+      972,
+      558
+    ],
+    [
+      784,
+      453
+    ],
+    [
+      1019,
+      164
+    ]
+  ],
+  "actions": [
+    {
+      "semantic_id": "meowfficer/train/enter",
+      "generation": 960337,
+      "path": "UICamera/Canvas/UIMain/CommanderCatUI(Clone)/blur_panel/pages/CommanderCatDockUI(Clone)/box/boxes_btn"
+    },
+    {
+      "semantic_id": "meowfficer/train/complete/first",
+      "generation": 960416,
+      "path": "OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/frame/boxes/mask/content/frame"
+    },
+    {
+      "semantic_id": "meowfficer/get/continue",
+      "generation": 960622,
+      "path": "OverlayCamera/Overlay/UIMain/GetCommanderUI(Clone)/click"
+    },
+    {
+      "semantic_id": "meowfficer/get/lock-cancel",
+      "generation": 960634,
+      "path": "OverlayCamera/Overlay/UIMain/GetCommanderUI(Clone)/CommanderMsgBoxUI(Clone)/frame/cancel_btn"
+    },
+    {
+      "semantic_id": "meowfficer/train/start",
+      "generation": 960687,
+      "path": "OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/frame/boxes/start_btn"
+    },
+    {
+      "semantic_id": "meowfficer/queue/auto",
+      "generation": 960726,
+      "path": "OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/CommanderBuildPoolUI(Clone)/frame/bg/auto_btn"
+    },
+    {
+      "semantic_id": "meowfficer/queue/start",
+      "generation": 960745,
+      "path": "OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/CommanderBuildPoolUI(Clone)/frame/bg/start_btn"
+    },
+    {
+      "semantic_id": "meowfficer/queue/confirm",
+      "generation": 960759,
+      "path": "OverlayCamera/Overlay/UIMain/CommanderMsgBoxUI(Clone)/frame/confirm_btn"
+    },
+    {
+      "semantic_id": "meowfficer/train/close",
+      "generation": 960918,
+      "path": "OverlayCamera/Overlay/UIMain/CommanderBoxesUI(Clone)/frame/close_btn"
+    }
+  ],
+  "android_mutation_dispatched": false,
+  "mutation_dispatches": [],
+  "before_next_run": "2020-01-01T00:00:00",
+  "after_next_run": "2026-08-26 04:12:28",
+  "temporary_config_removed": true
+}

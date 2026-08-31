@@ -41,17 +41,19 @@ def validate(
     seed_config: str,
     driver_revision: str,
     *,
+    serial: str,
+    package: str,
+    adb: str,
     do_mission: bool,
     use_tuning_sample: bool,
     fleet: int,
     submarine: bool,
+    expect_min_finished: int,
 ) -> Mapping[str, Any]:
     seed_path = alas_root / "config" / f"{seed_config}.json"
     seed = _read(seed_path)
-    serial = seed["Alas"]["Emulator"]["Serial"]
-    package = seed["Alas"]["Emulator"]["PackageName"]
     pid = subprocess.run(
-        ("adb", "-s", serial, "shell", "pidof", package),
+        (adb, "-s", serial, "shell", "pidof", package),
         check=True,
         capture_output=True,
         text=True,
@@ -61,6 +63,13 @@ def validate(
         raise RuntimeError("game package is not running")
 
     payload = copy.deepcopy(seed)
+    payload["Alas"]["Emulator"].update(
+        {
+            "Serial": serial,
+            "PackageName": package,
+            "ScreenshotMethod": "ADB",
+        }
+    )
     for group in payload.values():
         if not isinstance(group, dict):
             continue
@@ -94,6 +103,7 @@ def validate(
             "UseTuningSample": use_tuning_sample,
             "Fleet": fleet,
             "Submarine": submarine,
+            "ExpectMinFinished": expect_min_finished,
         },
         "tuning_sample_calls": [],
         "overview_accepts": [],
@@ -101,9 +111,12 @@ def validate(
         "fleet_actions": [],
         "order_actions": [],
         "auto_searches": [],
+        "login_recovered": False,
+        "runtime_preflight": {},
     }
     instance = None
     originals: dict[str, Any] = {}
+    prior_cwd = Path.cwd()
     previous = {
         name: os.environ.get(name)
         for name in (
@@ -116,7 +129,7 @@ def validate(
             {
                 "ALAS_SEMANTIC_MODE": "1",
                 "ALAS_SEMANTIC_DRIVER_REVISION": driver_revision,
-                "ALAS_SEMANTIC_ADB": "adb",
+                "ALAS_SEMANTIC_ADB": adb,
                 "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS": "30",
                 "ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS": "60000",
             }
@@ -125,6 +138,7 @@ def validate(
         os.chdir(alas_root)
         from alas import AzurLaneAutoScript
         from module.config.config import AzurLaneConfig, name_to_function
+        from module.handler.login import LoginHandler
         from module.os.map import OSMap
         from module.os.tasks.daily import OpsiDaily
 
@@ -196,6 +210,28 @@ def validate(
         AzurLaneConfig.check_task_switch = lambda self, message="": None
 
         instance = AzurLaneAutoScript(config_name)
+        session = instance.device.semantic_adapter
+        adapter = session.open()
+        oracle = adapter.oracle
+        # The task owns startup recovery before any runner-level login/main
+        # navigation. This is the same bounded passive owner that OSMap.os_init
+        # declares; it never authorizes an input by itself.
+        session.begin_operation_siren_startup_recovery()
+        observed = oracle.read_state()
+        result["runtime_preflight"] = {
+            "package": observed.snapshot.get("package"),
+            "pid": observed.snapshot.get("pid"),
+            "generation": observed.generation,
+            "scene_handle": observed.scene_handle,
+            "status": observed.snapshot.get("status"),
+            "age_ms": observed.snapshot.get("age_ms"),
+            "main_thread": observed.snapshot.get("main_thread"),
+            "driver_revision": observed.snapshot.get("driver_revision"),
+        }
+        if oracle.enabled("login/enter"):
+            LoginHandler(instance.config, device=instance.device).handle_app_login()
+            result["login_recovered"] = True
+            instance.goto_main()
         task = name_to_function("OpsiDaily")
         instance.config.task = task
         instance.config.bind(task)
@@ -212,6 +248,19 @@ def validate(
             errors.append("daily mission overview was not visited")
         if not do_mission and result["overview_accepts"]:
             errors.append("disabled daily mission branch visited overview")
+        finished_total = sum(
+            int(item["count"])
+            for item in result["mission_finish_counts"]
+            if isinstance(item.get("count"), int)
+        )
+        result["finished_total"] = finished_total
+        if do_mission and finished_total < expect_min_finished:
+            errors.append(
+                "daily mission completion count was below the live expectation: "
+                f"{finished_total} < {expect_min_finished}"
+            )
+        if result.get("task_result") is not True:
+            errors.append("original OpsiDaily task did not return success")
         result["validation_errors"] = errors
         result["passed"] = not errors
     except BaseException as exc:
@@ -242,6 +291,7 @@ def validate(
                 os.environ.pop(name, None)
             else:
                 os.environ[name] = value
+        os.chdir(prior_cwd)
         config_path.unlink(missing_ok=True)
         result["temporary_config_removed"] = not config_path.exists()
 
@@ -260,20 +310,32 @@ def main() -> int:
     parser.add_argument("--alas-root", type=Path, required=True)
     parser.add_argument("--seed-config", default="semantic_e2e")
     parser.add_argument("--driver-revision", required=True)
+    parser.add_argument("--serial", required=True)
+    parser.add_argument("--package", default="com.bilibili.azurlane")
+    parser.add_argument("--adb", default="adb")
     parser.add_argument("--do-mission", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--use-tuning-sample", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--fleet", type=int, choices=(1, 2, 3, 4), default=1)
     parser.add_argument("--submarine", action="store_true")
+    parser.add_argument("--expect-min-finished", type=int, default=1)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if args.expect_min_finished < 0:
+        parser.error("--expect-min-finished must be non-negative")
+    if not args.do_mission and args.expect_min_finished:
+        parser.error("--expect-min-finished requires --do-mission")
     result = validate(
         args.alas_root.resolve(),
         args.seed_config,
         args.driver_revision,
+        serial=args.serial,
+        package=args.package,
+        adb=args.adb,
         do_mission=args.do_mission,
         use_tuning_sample=args.use_tuning_sample,
         fleet=args.fleet,
         submarine=args.submarine,
+        expect_min_finished=args.expect_min_finished,
     )
     _write(args.output.resolve(), result)
     print(json.dumps(result, ensure_ascii=False, indent=2))

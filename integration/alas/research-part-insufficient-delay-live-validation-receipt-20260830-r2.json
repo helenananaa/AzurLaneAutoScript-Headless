@@ -1,0 +1,36 @@
+{
+  "schema": "alas-headless.research-resource-policy-live-validation/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "template",
+  "seed_config_sha256": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+  "configured": {
+    "Research.PresetFilter": "custom",
+    "Research.CustomFilter": "S9-Q",
+    "Research.AllowDelay": true,
+    "Research.UseCoin": "do_not_use",
+    "Research.UseCube": "do_not_use",
+    "Research.UsePart": "always_use"
+  },
+  "target_resource": "part",
+  "strategy": "always_use",
+  "expect": "insufficient_delay",
+  "source_sha256": {
+    "research": "c75e6c57308507bb912d2d7de1ded0bf39e825f03dbff7ab9eacc103c64e6077",
+    "selector": "a4c6da69e72f8e4d43c5f7769fad75d8e266faeedefc7a5684d1cd5e7a31edc2",
+    "adapter": "c30daa77edbe5073b8b0bd9890ef7646c6ada9ea9ce0b2e1057c1181e6c96b8b",
+    "oracle": "411f3136cea6fa04e7667ab162c738cbc74e4697f86604cff1df9bc45bea43c0",
+    "runner": "51b7f2fd0a599577a93f2cfcda072b9b202778a1fe35f5284c97bdbb775fb35e"
+  },
+  "passed": false,
+  "dispatches": [],
+  "reward_dispatches": [],
+  "research_detail_observations": [],
+  "delay_checks": [],
+  "error": "SemanticGateClosed: shop shell snapshots are not coherent",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_research_resource_policy_live_validation.py\", line 305, in validate\n    result[\"task_return\"] = task.run()\n                            ^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\research\\research.py\", line 648, in run\n    return self._run_alas_state_machine()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\research\\research.py\", line 606, in _run_alas_state_machine\n    self.ui_ensure(page_research)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\ui\\ui.py\", line 334, in ui_ensure\n    self.ui_goto(destination, skip_first_screenshot=True)\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\ui\\ui.py\", line 267, in ui_goto\n    if self.ui_page_appear(page=destination, offset=offset):\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\ui\\ui.py\", line 45, in ui_page_appear\n    return self.appear(page.check_button, offset=offset, interval=interval)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\module\\base\\base.py\", line 255, in appear\n    appear = semantic_adapter.appear(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 15792, in appear\n    return self.open().appear(button)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 5835, in appear\n    result = self._appear_once(button)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 6743, in _appear_once\n    self.oracle.recommendation_shop_visible()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 9642, in recommendation_shop_visible\n    return self._retry_transition_read(self._recommendation_shop_visible_once)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 5238, in _retry_transition_read\n    raise last_error\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 5232, in _retry_transition_read\n    return reader()\n           ^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 9647, in _recommendation_shop_visible_once\n    return self._recommendation_shop_visible_from_states(state, ui_state)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 9655, in _recommendation_shop_visible_from_states\n    raise SemanticGateClosed(\"shop shell snapshots are not coherent\")\nalas_headless.semantic_oracle.SemanticGateClosed: shop shell snapshots are not coherent\n",
+  "research_start_grant_remaining": 0,
+  "research_reward_grant_remaining": 0,
+  "temporary_config_removed": true
+}

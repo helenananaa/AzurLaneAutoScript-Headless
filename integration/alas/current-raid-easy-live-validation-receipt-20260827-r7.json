@@ -1,0 +1,20 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-27T13:32:31.933185Z",
+  "finished_at": "2026-08-27T13:32:35.267846Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "mode": "easy",
+  "before": {},
+  "after": {},
+  "stage_receipts": [],
+  "recommend_receipts": [],
+  "fleet_receipts": [],
+  "notice_receipts": [],
+  "sortie_receipts": [],
+  "error": "RuntimeError: current Raid validation requires main or Raid page",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 132, in run\n    raise RuntimeError(\"current Raid validation requires main or Raid page\")\nRuntimeError: current Raid validation requires main or Raid page\n",
+  "raw_input_fallback_used": false
+}

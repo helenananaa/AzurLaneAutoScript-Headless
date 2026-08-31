@@ -1,0 +1,32 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-29T12:58:32.461407Z",
+  "finished_at": "2026-08-29T12:58:36.716672Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "mode": "normal",
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 4155,
+    "generation": 8697,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 50,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44"
+  },
+  "login_recovered": false,
+  "ui_recovered": false,
+  "before": {},
+  "after": {},
+  "stage_receipts": [],
+  "recommend_receipts": [],
+  "fleet_receipts": [],
+  "notice_receipts": [],
+  "sortie_receipts": [],
+  "error": "SemanticGateClosed: current Raid event story overlay is malformed",
+  "traceback": "Traceback (most recent call last):\n  File \"H:\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\scripts\\python\\run_alas_raid_live_validation.py\", line 145, in run\n    and not session.raid_page_visible(\"raid_20260827\")\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 17894, in raid_page_visible\n    return self.open().raid_page_visible(event=event)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\alas_adapter.py\", line 9867, in raid_page_visible\n    return self.oracle.raid_page_visible(event=event)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 21839, in raid_page_visible\n    self._amatsukaze_raid_page_state()\n  File \"E:\\Disk0Merged\\H\\program\\AzurLaneAutoScript-Headless-eventsp-rescue\\python\\alas_headless\\semantic_oracle.py\", line 21700, in _amatsukaze_raid_page_state\n    raise SemanticGateClosed(\"current Raid event story overlay is malformed\")\nalas_headless.semantic_oracle.SemanticGateClosed: current Raid event story overlay is malformed\n",
+  "raw_input_fallback_used": false
+}

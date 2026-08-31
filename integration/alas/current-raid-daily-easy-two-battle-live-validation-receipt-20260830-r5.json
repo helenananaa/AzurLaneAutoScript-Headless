@@ -1,0 +1,179 @@
+{
+  "schema": "alas-headless.current-raid-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-08-30T01:55:55.433646Z",
+  "finished_at": "2026-08-30T01:57:14.762229Z",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "event": "raid_20260827",
+  "task": "RaidDaily",
+  "mode": "easy",
+  "daily_battle_count": 2,
+  "task_result": true,
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 5252,
+    "generation": 42784,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 18,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "game_version": "9.7.10",
+    "resource_hot_version": "9.7.343"
+  },
+  "login_recovered": false,
+  "ui_recovered": true,
+  "ui_recovery_steps": [
+    "orphan_combat_result"
+  ],
+  "orphan_result_receipts": [
+    {
+      "semantic_id": "daily/battle/result",
+      "generation": 42791,
+      "point": {
+        "x": 640.0,
+        "y": 360.0
+      },
+      "bounds": {
+        "left": -0.0,
+        "top": 0.0,
+        "right": 1280.0,
+        "bottom": 720.0
+      },
+      "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultGradePage(Clone)",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "reward/award-info/close",
+      "generation": 42808,
+      "point": {
+        "x": 640.0,
+        "y": 482.067
+      },
+      "bounds": {
+        "left": 564.667,
+        "top": 465.4,
+        "right": 715.333,
+        "bottom": 498.733
+      },
+      "path": "OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "daily/battle/result",
+      "generation": 42830,
+      "point": {
+        "x": 1177.333,
+        "y": 665.177
+      },
+      "bounds": {
+        "left": 1086.333,
+        "top": 631.51,
+        "right": 1268.333,
+        "bottom": 698.844
+      },
+      "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "daily/battle/result",
+      "generation": 42850,
+      "point": {
+        "x": 1177.333,
+        "y": 665.177
+      },
+      "bounds": {
+        "left": 1086.333,
+        "top": 631.51,
+        "right": 1268.333,
+        "bottom": 698.844
+      },
+      "path": "OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/NewBattleResultStatisticsPage(Clone)/bottom/confirmBtn",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "before": {
+    "remaining": 11,
+    "points": 902,
+    "sortie_grant": 2
+  },
+  "after": {
+    "raid_page": true,
+    "remaining": 10,
+    "points": 932,
+    "sortie_grant": 1
+  },
+  "stage_receipts": [
+    {
+      "semantic_id": "raid/stage/easy",
+      "generation": 43282,
+      "point": {
+        "x": 1024.067,
+        "y": 561.933
+      },
+      "bounds": {
+        "left": 900.067,
+        "top": 527.933,
+        "right": 1148.067,
+        "bottom": 595.933
+      },
+      "path": "UICamera/Canvas/UIMain/ActivityBossAmatsukazeUI(Clone)/adapt/right/1",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "recommend_receipts": [],
+  "fleet_receipts": [
+    {
+      "semantic_id": "raid/fleet/start",
+      "generation": 43293,
+      "point": {
+        "x": 1082.0,
+        "y": 613.5335
+      },
+      "bounds": {
+        "left": 966.333,
+        "top": 566.867,
+        "right": 1197.667,
+        "bottom": 660.2
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossFleetSelectView(Clone)/panel/start_button",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "notice_receipts": [],
+  "sortie_receipts": [
+    {
+      "semantic_id": "raid/precombat/start",
+      "generation": 43309,
+      "point": {
+        "x": 1166.667,
+        "y": 641.467
+      },
+      "bounds": {
+        "left": 1051.0,
+        "top": 596.467,
+        "right": 1282.333,
+        "bottom": 686.467
+      },
+      "path": "OverlayCamera/Overlay/UIMain/ActivityBossPrecombatUI(Clone)/adapt/right/start",
+      "policy_sha256": "9be5edfad505e5b733d51118350141149778f4de6be12748f2fdce81e90ff9c8",
+      "capability_id": "campaign.sortie"
+    }
+  ],
+  "raw_input_fallback_used": false,
+  "source_sha256": {
+    "raid": "b06ecce80365705183ced09023fc88e38fa1c3d7c2f5109ce655f3b893f94bcc",
+    "run": "36fcba32425497e4d838bf354482498296b66abadedf27a12fb06c453071c180",
+    "daily": "3a5321c7bed02376e8da5ab593741ea4729cfd9fca51ef0185296856658b0ca7",
+    "adapter": "9e139199f5504a2155fdc9ab549b181057aaa48bbf808b1c7aa9b774d272bd67",
+    "oracle": "a0f0b2040100260506f3bca8ca5bc928951f866d8c11f285f57909383d54c45d",
+    "runner": "a68a0f6784e4271614f2f9bfdb80aff01377bd69dd22d08d377c22f4514642f0"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "adapter_sha256": "8c66d9cff20aa3f4ad3f5d7eed6aad6eb010eb605dba6549c1d64113f88b0202",
+  "android_input_injected": true,
+  "captured_at_utc": "2026-08-25T03:08:57Z",
+  "controlled_preparation": {
+    "counted_as_qualification": false,
+    "equipment": {
+      "enhancement": 0,
+      "equipment_id": "17000",
+      "position": 1,
+      "special": false
+    },
+    "source_ship": {
+      "level": 1,
+      "ship_id": 11100061,
+      "ship_sprite": "gushouchuan_tolove",
+      "status": "free"
+    },
+    "source_ship_confirm_generation": 29672,
+    "statement": "A broad typed Dock view selected an otherwise idle carrier and mounted one known compatible warehouse item before the qualification boundary. This preparation is not an ALAS production-candidate claim."
+  },
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "full_task_executed": false,
+  "game_version": "9.7.10",
+  "input_budget": {
+    "maximum_campaign_fleet_mutation_grant_per_session": 12,
+    "consumed_confirmations": 4,
+    "premium_or_purchase_actions": 0
+  },
+  "package": "com.bilibili.azurlane",
+  "patch_member_sha256": "5a0d55af0216030d73c4fd1e841f25dd477193829224b812ab287973d6d4b77b",
+  "pid": 2030,
+  "production_candidate_admission": {
+    "eligible_count": 0,
+    "filter": "carrier + common + enhanceable",
+    "statement": "The current account had no production-eligible common carrier. Candidate selection and the full GemsFarming task were therefore not qualified by this receipt."
+  },
+  "qualification": {
+    "equipment_loadout": {
+      "role": "flagship",
+      "slots": [
+        {
+          "enhancement": 0,
+          "equipment_id": "17000",
+          "position": 1,
+          "special": false
+        }
+      ]
+    },
+    "operations": [
+      "typed take_off returned the exact non-empty source loadout",
+      "typed target replacement was confirmed in main_1",
+      "typed take_on mounted the exact loadout on the target",
+      "a second typed take_off returned the same loadout from the target"
+    ],
+    "source_ship": {
+      "ship_id": 11100061,
+      "ship_sprite": "gushouchuan_tolove"
+    },
+    "target_confirm_generation": 30244,
+    "target_ship": {
+      "level": 1,
+      "ship_id": 11000061,
+      "ship_sprite": "zi_shanluan",
+      "status": "free"
+    }
+  },
+  "qualification_scope": "controlled typed normal-mode non-empty single-slot equipment transfer boundary",
+  "recovery": {
+    "arromanches_confirm_generation": 38760,
+    "arromanches_loadout_generation": 38817,
+    "arromanches_restored_loadout": [
+      {"enhancement": 10, "equipment_id": "17420", "position": 1, "special": false},
+      {"enhancement": 10, "equipment_id": "19160", "position": 2, "special": false},
+      {"enhancement": 10, "equipment_id": "48040", "position": 3, "special": false},
+      {"enhancement": 10, "equipment_id": "1400", "position": 4, "special": false},
+      {"enhancement": 10, "equipment_id": "1400", "position": 5, "special": false},
+      {"enhancement": 10, "equipment_id": "1070200", "position": 6, "special": true}
+    ],
+    "equipment_17000_returned_to_warehouse": true,
+    "final_fleet_index": 1,
+    "final_formation_generation": 38934,
+    "final_hero_roots": [
+      "nandaketa_root",
+      "linggu_root"
+    ],
+    "source_and_target_regular_slots_empty": true
+  },
+  "schema": "alas-headless.gems-farming-normal-ship-equip-live-validation/v1",
+  "semantic_oracle_sha256": "2b6c1ae5f5e46f496c4b2f328d77e6d91dcb9628813514f951ce486da5014d53",
+  "serial": "emulator-5580",
+  "unsupported_branches": [
+    "production common-carrier candidate admission on this account",
+    "Campaign_Mode=hard",
+    "multi-slot cross-ship compatibility",
+    "post-replacement enhancement",
+    "end-to-end GemsFarming campaign loop"
+  ]
+}

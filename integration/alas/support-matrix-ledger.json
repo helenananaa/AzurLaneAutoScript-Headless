@@ -175,16 +175,21 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_battle_pass_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_battle_pass_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0460-freebies-battle-pass-port.patch",
+        "integration/alas/freebies-battle-pass-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -404,6 +409,12 @@
         "python/alas_headless/alas_event_shared_entry_replay.py",
         "integration/alas/event-shared-entry-equivalence-20260822.json",
         "integration/alas/series/0420-event-shared-entry-runtime.patch",
+        "tests/test_alas_raid_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "scripts/python/run_alas_raid_live_validation.py",
+        "integration/alas/series/0480-current-raid-runtime.patch",
+        "integration/alas/current-raid-easy-live-validation-receipt-20260827-r10.json",
         "integration/alas/series/0050-combat-flow-ports.patch",
         "docs/status.md"
       ],
@@ -428,9 +439,9 @@
         "RaidDaily"
       ],
       "path": "Campaign.Event",
-      "status_label": "🧪 三主线路由 + 七活动入口",
+      "status_label": "◐ 三主线路由 + 当前 Raid 实机",
       "support": "supported",
-      "values": "options: \"campaign_main\", \"coalition_20260723\", \"event_20260625_cn\", \"event_20260813_cn\", \"raid_20260212\", \"war_archives_20180607_cn\", \"war_archives_20180726_cn\", \"war_archives_20181020_en\", \"war_archives_20181026_en\", \"war_archives_20181227_cn\", \"war_archives_20190221_en\", \"war_archives_20190314_en\", \"war_archives_20190321_en\", \"war_archives_20190620_en\", \"war_archives_20190911_cn\", \"war_archives_20191010_en\", \"war_archives_20191031_en\", \"war_archives_20200312_cn\", \"war_archives_20200507_cn\", \"war_archives_20200603_cn\", \"war_archives_20200806_cn\", \"war_archives_20200820_cn\", \"war_archives_20200903_cn\", \"war_archives_20200917_cn\", \"war_archives_20201012_cn\", \"war_archives_20201029_cn\", \"war_archives_20201229_cn\", \"war_archives_20210225_cn\", \"war_archives_20210325_cn\", \"war_archives_20210422_cn\", \"war_archives_20210527_cn\", \"war_archives_20210624_cn\", \"war_archives_20210819_cn\", \"war_archives_20210916_cn\", \"war_archives_20211014_cn\", \"war_archives_20211028_cn\", \"war_archives_20211111_cn\", \"war_archives_20211229_cn\", \"war_archives_20220210_cn\", \"war_archives_20220224_cn\", \"war_archives_20220324_cn\", \"war_archives_20220414_cn\", \"war_archives_20220428_cn\", \"war_archives_20220526_cn\", \"war_archives_20220728_cn\", \"war_archives_20220818_cn\", \"war_archives_20220915_cn\", \"war_archives_20221222_cn\", \"war_archives_20230223_cn\", \"war_archives_20230525_cn\", \"war_archives_20230803_cn\", \"war_archives_20231026_cn\", \"war_archives_20240725_cn\"; default: \"campaign_main\""
+      "values": "options: \"campaign_main\", \"coalition_20260723\", \"event_20260625_cn\", \"event_20260813_cn\", \"raid_20260212\", \"raid_20260827\", \"war_archives_20180607_cn\", \"war_archives_20180726_cn\", \"war_archives_20181020_en\", \"war_archives_20181026_en\", \"war_archives_20181227_cn\", \"war_archives_20190221_en\", \"war_archives_20190314_en\", \"war_archives_20190321_en\", \"war_archives_20190620_en\", \"war_archives_20190911_cn\", \"war_archives_20191010_en\", \"war_archives_20191031_en\", \"war_archives_20200312_cn\", \"war_archives_20200507_cn\", \"war_archives_20200603_cn\", \"war_archives_20200806_cn\", \"war_archives_20200820_cn\", \"war_archives_20200903_cn\", \"war_archives_20200917_cn\", \"war_archives_20201012_cn\", \"war_archives_20201029_cn\", \"war_archives_20201229_cn\", \"war_archives_20210225_cn\", \"war_archives_20210325_cn\", \"war_archives_20210422_cn\", \"war_archives_20210527_cn\", \"war_archives_20210624_cn\", \"war_archives_20210819_cn\", \"war_archives_20210916_cn\", \"war_archives_20211014_cn\", \"war_archives_20211028_cn\", \"war_archives_20211111_cn\", \"war_archives_20211229_cn\", \"war_archives_20220210_cn\", \"war_archives_20220224_cn\", \"war_archives_20220324_cn\", \"war_archives_20220414_cn\", \"war_archives_20220428_cn\", \"war_archives_20220526_cn\", \"war_archives_20220728_cn\", \"war_archives_20220818_cn\", \"war_archives_20220915_cn\", \"war_archives_20221222_cn\", \"war_archives_20230223_cn\", \"war_archives_20230525_cn\", \"war_archives_20230803_cn\", \"war_archives_20231026_cn\", \"war_archives_20240725_cn\"; default: \"campaign_main\""
     },
     {
       "dimensions": {
@@ -648,7 +659,7 @@
         "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -981,7 +992,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -991,6 +1002,14 @@
         "tests/test_alas_daemon_config.py",
         "python/alas_headless/alas_daemon_config_replay.py",
         "integration/alas/series/0100-tool-flow-ports.patch",
+        "scripts/python/run_alas_daemon_idle_soak_live_validation.py",
+        "integration/alas/daemon-idle-soak-live-validation-receipt-20260826-r4.json",
+        "scripts/python/run_alas_daemon_enter_map_live_validation.py",
+        "integration/alas/daemon-enter-map-live-validation-receipt-20260826-r3.json",
+        "scripts/python/run_alas_daemon_sortie_live_validation.py",
+        "integration/alas/daemon-sortie-live-validation-receipt-20260826-r9.json",
+        "integration/alas/daemon-auto-search-live-validation-receipt-20260826-r8.json",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -1361,16 +1380,25 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_data_key_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_data_key_config_replay.py",
+        "scripts/python/run_alas_freebies_data_key_live_validation.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0460-freebies-battle-pass-port.patch",
+        "integration/alas/freebies-data-key-capacity-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-data-key-force-live-validation-receipt-20260826-r1.json",
+        "integration/alas/freebies-data-key-force-post-live-validation-receipt-20260826-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260826-r2.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1379,22 +1407,31 @@
         "Freebies"
       ],
       "path": "DataKey.Collect",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 满仓强制实机",
       "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_data_key_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_data_key_config_replay.py",
+        "scripts/python/run_alas_freebies_data_key_live_validation.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0460-freebies-battle-pass-port.patch",
+        "integration/alas/freebies-data-key-capacity-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-data-key-force-live-validation-receipt-20260826-r1.json",
+        "integration/alas/freebies-data-key-force-post-live-validation-receipt-20260826-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260826-r2.json",
         "docs/status.md"
       ],
       "group_code": "L",
@@ -1403,7 +1440,7 @@
         "Freebies"
       ],
       "path": "DataKey.ForceCollect",
-      "status_label": "◐ 实机当前值",
+      "status_label": "◐ 满仓强制实机",
       "support": "supported",
       "values": "input/default: false"
     },
@@ -2473,21 +2510,30 @@
     },
     {
       "dimensions": {
-        "action": "unsupported",
+        "action": "partial",
         "configuration": "complete",
-        "live": "unsupported",
-        "observation": "unsupported",
-        "offline": "unsupported"
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
       },
-      "evidence": [],
-      "group_code": "M",
+      "evidence": [
+        "tests/test_alas_gems_farming_config.py",
+        "python/alas_headless/alas_gems_farming_config_replay.py",
+        "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/gems-farming-normal-ship-equip-live-validation-receipt-20260825-r2.json",
+        "integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json",
+        "docs/status.md"
+      ],
+      "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "EquipmentCode.ExportToConfig",
-      "status_label": "⊘ 未适配",
-      "support": "unsupported",
+      "status_label": "◐ normal ship_equip 实机",
+      "support": "supported",
       "values": "input/default: true"
     },
     {
@@ -2643,16 +2689,20 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_event_general_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_event_general_config_replay.py",
         "integration/alas/series/0040-campaign-flow-ports.patch",
+        "integration/alas/event-general-pt-limit-reached-live-validation-receipt-20260826-r3.json",
+        "integration/alas/event-general-pt-limit-below-live-validation-receipt-20260826-r1.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -2661,22 +2711,26 @@
         "EventGeneral"
       ],
       "path": "EventGeneral.PtLimit",
-      "status_label": "☐ 未逐值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: 0"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_event_general_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_event_general_config_replay.py",
         "integration/alas/series/0040-campaign-flow-ports.patch",
+        "integration/alas/event-general-time-limit-expired-live-validation-receipt-20260826-r1.json",
+        "integration/alas/event-general-time-limit-future-eventc-c1-live-validation-receipt-20260826-r1.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -2685,7 +2739,7 @@
         "EventGeneral"
       ],
       "path": "EventGeneral.TimeLimit",
-      "status_label": "☐ 未逐值",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: \"2020-01-01 00:00:00\""
     },
@@ -3365,49 +3419,61 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_gems_farming_config.py",
         "python/alas_headless/alas_gems_farming_config_replay.py",
         "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/gems-farming-normal-ship-equip-live-validation-receipt-20260825-r2.json",
+        "integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json",
+        "integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r25.json",
+        "integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r26.json",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "GemsFarming.ChangeFlagship",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ normal 两模式及 hard ship 主路径实机",
       "support": "supported",
       "values": "options: \"ship_equip\", \"ship\"; default: \"ship\""
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_gems_farming_config.py",
         "python/alas_headless/alas_gems_farming_config_replay.py",
         "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/gems-farming-normal-ship-live-validation-receipt-20260824-r1.json",
+        "integration/alas/gems-farming-vanguard-ship-equip-live-validation-receipt-20260825-r1.json",
+        "integration/alas/gems-farming-vanguard-ship-equip-live-validation-receipt-20260825-r2.json",
+        "integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "GemsFarming.ChangeVanguard",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 三值实机；ship_equip 已过兼容两槽",
       "support": "supported",
       "values": "options: \"disabled\", \"ship_equip\", \"ship\"; default: \"ship\""
     },
@@ -3415,7 +3481,7 @@
       "dimensions": {
         "action": "missing",
         "configuration": "complete",
-        "live": "missing",
+        "live": "partial",
         "observation": "missing",
         "offline": "complete"
       },
@@ -3423,63 +3489,75 @@
         "tests/test_alas_gems_farming_config.py",
         "python/alas_headless/alas_gems_farming_config_replay.py",
         "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "P",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "GemsFarming.CommissionLimit",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ false 实机；true 未通过",
       "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_gems_farming_config.py",
         "python/alas_headless/alas_gems_farming_config_replay.py",
         "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/gems-farming-normal-ship-live-validation-receipt-20260824-r1.json",
+        "integration/alas/gems-farming-normal-ship-equip-live-validation-receipt-20260825-r2.json",
+        "integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json",
+        "integration/alas/gems-farming-common-cv-filter-preflight-20260825-r1.json",
+        "integration/alas/gems-farming-filter-recovery-live-validation-receipt-20260825-r1.json",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "GemsFarming.CommonCV",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ any→langley/ranger 已确认；bogue/hermes 筛选已观察",
       "support": "supported",
       "values": "options: \"any\", \"bogue\", \"hermes\", \"langley\", \"ranger\"; default: \"any\""
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_gems_farming_config.py",
         "python/alas_headless/alas_gems_farming_config_replay.py",
         "integration/alas/series/0195-gems-farming-config-contract.patch",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
+        "integration/alas/gems-farming-normal-ship-live-validation-receipt-20260824-r1.json",
+        "integration/alas/gems-farming-common-dd-filter-preflight-20260825-r1.json",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "P",
       "metadata": "type=select; display=default",
       "panels": [
         "GemsFarming"
       ],
       "path": "GemsFarming.CommonDD",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ any 已确认；四命名筛选实机空结果",
       "support": "supported",
       "values": "options: \"any\", \"aulick_or_foote\", \"cassin_or_downes\", \"favourite\", \"z20_or_z21\"; default: \"any\""
     },
@@ -4830,10 +4908,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -4858,10 +4936,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -4869,6 +4947,9 @@
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
         "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-fort-empty-live-validation-receipt-20260826-r1.json",
+        "scripts/python/run_alas_meowfficer_fort_empty_live_validation.py",
+        "tests/test_alas_adapter.py",
         "tests/test_semantic_oracle.py",
         "docs/status.md"
       ],
@@ -4884,10 +4965,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -4912,10 +4993,10 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -4924,6 +5005,7 @@
         "integration/alas/series/0190-meowfficer-config-contract.patch",
         "integration/alas/series/0350-meowfficer-dock-training-port.patch",
         "integration/alas/meowfficer-train-full-live-validation-receipt.json",
+        "integration/alas/meowfficer-train-positive-live-validation-receipt-20260826-r7.json",
         "scripts/python/run_alas_meowfficer_train_full_live_validation.py",
         "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
@@ -4941,58 +5023,68 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-enhance-level-max-live-validation-receipt-20260826.json",
+        "scripts/python/run_alas_meowfficer_enhance_live_validation.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=input; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.EnhanceIndex",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机等级已满分支",
       "support": "supported",
       "values": "input/default: 1"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-enhance-level-max-live-validation-receipt-20260826.json",
+        "scripts/python/run_alas_meowfficer_enhance_live_validation.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=input; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.MaxFeedLevel",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机等级已满分支",
       "support": "supported",
       "values": "input/default: 5"
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
@@ -5001,6 +5093,7 @@
         "integration/alas/series/0190-meowfficer-config-contract.patch",
         "integration/alas/series/0350-meowfficer-dock-training-port.patch",
         "integration/alas/meowfficer-train-full-live-validation-receipt.json",
+        "integration/alas/meowfficer-train-positive-live-validation-receipt-20260826-r7.json",
         "scripts/python/run_alas_meowfficer_train_full_live_validation.py",
         "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
@@ -5018,40 +5111,48 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "integration/alas/meowfficer-train-positive-live-validation-receipt-20260826-r7.json",
+        "scripts/python/run_alas_meowfficer_train_full_live_validation.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
-      "group_code": "M",
+      "group_code": "B",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.RetainTalentedGold",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "◐ 实机普通金猫",
       "support": "supported",
       "values": "input/default: true"
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "complete",
         "configuration": "complete",
         "live": "missing",
-        "observation": "missing",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_meowfficer_config.py",
         "python/alas_headless/alas_meowfficer_config_replay.py",
         "integration/alas/series/0190-meowfficer-config-contract.patch",
+        "integration/alas/series/0350-meowfficer-dock-training-port.patch",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
       "group_code": "M",
@@ -5060,7 +5161,7 @@
         "Meowfficer"
       ],
       "path": "MeowfficerTrain.RetainTalentedPurple",
-      "status_label": "🧪 仅离线完成",
+      "status_label": "🧪 离线闭环",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -6431,78 +6532,6 @@
     },
     {
       "dimensions": {
-        "action": "missing",
-        "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
-        "offline": "complete"
-      },
-      "evidence": [
-        "tests/test_alas_raid_config.py",
-        "python/alas_headless/alas_raid_config_replay.py",
-        "integration/alas/series/0170-raid-config-contract.patch",
-        "docs/status.md"
-      ],
-      "group_code": "O",
-      "metadata": "type=select; display=default",
-      "panels": [
-        "Raid"
-      ],
-      "path": "Raid.Mode",
-      "status_label": "🧪 离线回放",
-      "support": "supported",
-      "values": "options: \"easy\", \"ex\", \"hard\", \"normal\"; default: \"hard\""
-    },
-    {
-      "dimensions": {
-        "action": "missing",
-        "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
-        "offline": "complete"
-      },
-      "evidence": [
-        "tests/test_alas_raid_config.py",
-        "python/alas_headless/alas_raid_config_replay.py",
-        "integration/alas/series/0170-raid-config-contract.patch",
-        "docs/status.md"
-      ],
-      "group_code": "O",
-      "metadata": "type=checkbox; display=default",
-      "panels": [
-        "Raid"
-      ],
-      "path": "Raid.UseTicket",
-      "status_label": "🧪 离线回放",
-      "support": "supported",
-      "values": "input/default: false"
-    },
-    {
-      "dimensions": {
-        "action": "missing",
-        "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
-        "offline": "complete"
-      },
-      "evidence": [
-        "tests/test_alas_raid_config.py",
-        "python/alas_headless/alas_raid_config_replay.py",
-        "integration/alas/series/0010-mission-mail-flow-ports.patch",
-        "docs/status.md"
-      ],
-      "group_code": "O",
-      "metadata": "type=textarea; display=default",
-      "panels": [
-        "RaidDaily"
-      ],
-      "path": "RaidDaily.StageFilter",
-      "status_label": "🧪 离线回放",
-      "support": "supported",
-      "values": "input/default: \"hard > normal > easy\""
-    },
-    {
-      "dimensions": {
         "action": "partial",
         "configuration": "complete",
         "live": "partial",
@@ -6510,24 +6539,144 @@
         "offline": "complete"
       },
       "evidence": [
+        "tests/test_alas_raid_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "python/alas_headless/alas_raid_config_replay.py",
+        "integration/alas/series/0170-raid-config-contract.patch",
+        "integration/alas/series/0480-current-raid-runtime.patch",
+        "scripts/python/run_alas_raid_live_validation.py",
+        "integration/alas/current-raid-easy-live-validation-receipt-20260827-r10.json",
+        "integration/alas/current-raid-normal-live-validation-receipt-20260829-r8.json",
+        "integration/alas/current-raid-hard-live-validation-receipt-20260829-r2.json",
+        "integration/alas/current-raid-ex-live-validation-receipt-20260829-r6.json",
+        "integration/alas/current-raid-easy-live-validation-receipt-20260829-r11.json",
+        "integration/alas/current-raid-daily-easy-normal-full-clear-live-validation-receipt-20260830-r2.json",
+        "integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r3.json",
+        "integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r5.json",
+        "integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r6.json",
+        "docs/status.md"
+      ],
+      "group_code": "L",
+      "metadata": "type=select; display=default",
+      "panels": [
+        "Raid"
+      ],
+      "path": "Raid.Mode",
+      "status_label": "◐ 四模式单局实机闭环",
+      "support": "supported",
+      "values": "options: \"easy\", \"ex\", \"hard\", \"normal\"; default: \"hard\""
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_raid_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "python/alas_headless/alas_raid_config_replay.py",
+        "integration/alas/series/0170-raid-config-contract.patch",
+        "integration/alas/series/0480-current-raid-runtime.patch",
+        "scripts/python/run_alas_raid_live_validation.py",
+        "integration/alas/current-raid-easy-live-validation-receipt-20260827-r10.json",
+        "integration/alas/current-raid-normal-live-validation-receipt-20260829-r8.json",
+        "integration/alas/current-raid-hard-live-validation-receipt-20260829-r2.json",
+        "integration/alas/current-raid-ex-live-validation-receipt-20260829-r6.json",
+        "integration/alas/current-raid-easy-live-validation-receipt-20260829-r11.json",
+        "integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r4.json",
+        "integration/alas/current-raid-daily-easy-normal-full-clear-live-validation-receipt-20260830-r2.json",
+        "integration/alas/current-raid-use-ticket-zero-fallback-patch-tree-verification-20260830-r1/result.json",
+        "integration/alas/current-raid-use-ticket-zero-fallback-login-flow-replay-20260830-r1.json",
+        "integration/alas/current-raid-use-ticket-zero-fallback-frame-clock-replay-20260830-r1.json",
+        "integration/alas/current-raid-pixel-inventory-verification-20260830-r3.json",
+        "python/alas_headless/semantic_oracle.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "docs/status.md"
+      ],
+      "group_code": "L",
+      "metadata": "type=checkbox; display=default",
+      "panels": [
+        "Raid"
+      ],
+      "path": "Raid.UseTicket",
+      "status_label": "◐ false 实机；true 零票回退待实机",
+      "support": "supported",
+      "values": "input/default: false"
+    },
+    {
+      "dimensions": {
+        "action": "partial",
+        "configuration": "complete",
+        "live": "partial",
+        "observation": "partial",
+        "offline": "complete"
+      },
+      "evidence": [
+        "tests/test_alas_raid_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
+        "python/alas_headless/alas_raid_config_replay.py",
+        "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "integration/alas/series/0480-current-raid-runtime.patch",
+        "scripts/python/run_alas_raid_live_validation.py",
+        "integration/alas/current-raid-daily-empty-ex-live-validation-receipt-20260829-r1.json",
+        "integration/alas/current-raid-daily-easy-zero-state-live-validation-receipt-20260830-r1.json",
+        "integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r1.json",
+        "integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r3.json",
+        "integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r4.json",
+        "integration/alas/current-raid-daily-easy-normal-full-clear-live-validation-receipt-20260830-r2.json",
+        "integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r3.json",
+        "integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r5.json",
+        "integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r6.json",
+        "integration/alas/current-raid-restart-warm-workload-20260830-r1/result.json",
+        "integration/alas/current-raid-daily-post-restart-zero-state-live-validation-receipt-20260830-r1.json",
+        "docs/status.md"
+      ],
+      "group_code": "L",
+      "metadata": "type=textarea; display=default",
+      "panels": [
+        "RaidDaily"
+      ],
+      "path": "RaidDaily.StageFilter",
+      "status_label": "◐ normal 连续 + hard 分段全清",
+      "support": "supported",
+      "values": "input/default: \"hard > normal > easy\""
+    },
+    {
+      "dimensions": {
+        "action": "complete",
+        "configuration": "complete",
+        "live": "complete",
+        "observation": "complete",
+        "offline": "complete"
+      },
+      "evidence": [
         "tests/test_alas_research_config_replay.py",
         "python/alas_headless/alas_research_config_contract.py",
         "python/alas_headless/alas_research_config_replay.py",
+        "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
         "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-coin-only-05-hour-current-final-r1-live-validation-receipt.json",
         "integration/alas/research-resource-policy-recovery-20260822.json",
+        "integration/alas/research-coin-insufficient-delay-live-validation-receipt-20260830-r1.json",
         "docs/status.md"
       ],
-      "group_code": "L",
+      "group_code": "F",
       "metadata": "type=checkbox; display=default",
       "panels": [
         "Research"
       ],
       "path": "Research.AllowDelay",
-      "status_label": "◐ 双值严校/延迟待条件",
+      "status_label": "☑ 完整",
       "support": "supported",
       "values": "input/default: true"
     },
@@ -7924,13 +8073,19 @@
         "action": "partial",
         "configuration": "complete",
         "live": "partial",
-        "observation": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_supply_pack_config.py",
+        "tests/test_alas_adapter.py",
+        "tests/test_semantic_oracle.py",
         "python/alas_headless/alas_supply_pack_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0460-freebies-battle-pass-port.patch",
+        "scripts/python/run_alas_freebies_remaining_live_validation.py",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260826-r2.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -7945,7 +8100,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -7953,8 +8108,12 @@
       },
       "evidence": [
         "tests/test_alas_supply_pack_config.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_supply_pack_config_replay.py",
         "integration/alas/series/0080-current-task-flow-ports.patch",
+        "integration/alas/series/0460-freebies-battle-pass-port.patch",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260825-r1.json",
+        "integration/alas/freebies-remaining-live-validation-receipt-20260826-r2.json",
         "docs/status.md"
       ],
       "group_code": "B",
@@ -8022,14 +8181,17 @@
       "dimensions": {
         "action": "missing",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_event_general_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_event_general_config_replay.py",
         "integration/alas/series/0040-campaign-flow-ports.patch",
+        "integration/alas/event-general-task-balancer-main-live-validation-receipt-20260826-r9.json",
         "docs/status.md"
       ],
       "group_code": "P",
@@ -8046,7 +8208,7 @@
       "dimensions": {
         "action": "missing",
         "configuration": "complete",
-        "live": "missing",
+        "live": "partial",
         "observation": "missing",
         "offline": "complete"
       },
@@ -8070,7 +8232,7 @@
       "dimensions": {
         "action": "missing",
         "configuration": "complete",
-        "live": "missing",
+        "live": "partial",
         "observation": "missing",
         "offline": "complete"
       },
@@ -8167,7 +8329,7 @@
         "Daemon"
       ],
       "name": "Daemon",
-      "note": "EnterMap 双值与单轮地图/编队分派已离线等价；真实进入 postcondition、长期值守和稀有恢复仍未闭环",
+      "note": "EnterMap 双值与单轮分派已离线等价；主界面完成 180 秒/63 轮 typed idle soak；实机闭环 1-1 手动 sortie 到战前撤退，以及 12-4 双舰队校正、官方 auto-search、完整战斗、总奖励和主界面恢复。冷启动继承准备层、跨场景长期值守和稀有恢复仍未闭环",
       "status": "P"
     },
     {
@@ -8252,7 +8414,7 @@
         "Storage"
       ],
       "name": "EventB",
-      "note": "共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；EventB 已用 B1 自动寻敌完成原任务实机闭环，LastStage 写回 b1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventb-b1-auto-search-live-validation-receipt-20260823-r2.json。普通 `GET_SHIP` 可继续，首次获得 `NEW_SHIP` 仍未适配，B2/B3 未验证",
+      "note": "共享活动目录/模式/B 分区关卡门禁已完成并早于目录枚举；EventB 的 B1 已有既有实机闭环，B2、B3 又在 2026-08-26 当前活动与游戏版本上分别通过原 normal 入口完成官方自动寻敌闭环，LastStage 分别写回 b2、b3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventb-b2-auto-search-live-validation-receipt-20260826-r3.json 和 integration/alas/eventb-b3-auto-search-live-validation-receipt-20260826-r2.json。普通 `GET_SHIP` 可继续，首次获得 `NEW_SHIP` 及非默认共用地图配置仍未完整覆盖，因此保持 L",
       "status": "L"
     },
     {
@@ -8269,7 +8431,7 @@
         "Storage"
       ],
       "name": "EventC",
-      "note": "共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；EventC 已通过原 normal 入口选择共享 C1 困难脚本并完成自动寻敌实机闭环，LastStage 写回 c1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventc-c1-auto-search-live-validation-receipt-20260823-r14.json。C2/C3 未验证",
+      "note": "共享活动目录/模式/C 分区关卡门禁已完成并早于目录枚举；EventC 的 C1-C3 均已通过原 normal 入口完成官方自动寻敌实机闭环，LastStage 分别写回 c1/c2/c3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventc-c1-auto-search-live-validation-receipt-20260823-r14.json、integration/alas/eventc-c2-auto-search-live-validation-receipt-20260826-r1.json 和 integration/alas/eventc-c3-auto-search-live-validation-receipt-20260826-r1.json。首次获得 NEW_SHIP、非默认舰队组合和共用地图配置仍未完整覆盖，因此保持 L",
       "status": "L"
     },
     {
@@ -8286,7 +8448,7 @@
         "Storage"
       ],
       "name": "EventD",
-      "note": "共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；EventD 已通过原 normal 入口选择共享 D1 困难脚本并完成自动寻敌实机闭环，LastStage 写回 d1、RunCount 1→0、返回活动页且无 raw-input fallback，凭证见 integration/alas/eventd-d1-auto-search-live-validation-receipt-20260823.json。D2/D3 未验证",
+      "note": "共享活动目录/模式/D 分区关卡门禁已完成并早于目录枚举；EventD 的 D1-D3 均已在 2026-08-26 当前活动与游戏版本上通过原 normal 入口完成官方自动寻敌实机闭环，LastStage 分别写回 d1/d2/d3，RunCount 均 1→0，返回活动页且无 raw-input fallback，凭证见 integration/alas/eventd-d1-auto-search-live-validation-receipt-20260826-r7.json、integration/alas/eventd-d2-auto-search-live-validation-receipt-20260826-r1.json 和 integration/alas/eventd-d3-auto-search-live-validation-receipt-20260826-r1.json。首次获得 NEW_SHIP、非默认舰队组合和共用地图配置仍未完整覆盖，因此保持 L",
       "status": "L"
     },
     {
@@ -8295,7 +8457,7 @@
         "TaskBalancer"
       ],
       "name": "EventGeneral",
-      "note": "五字段离线决策已完整；仍缺 typed PT/金币实机观察、时间相关性、真实任务切换恢复和防调度环证据",
+      "note": "PtLimit 已完成 typed PT 精确观察及已达/未达双向实机闭环：17060/17060 零出击停刷且油量不变，17060/17061 放行 D1 后点数增至 17180、油量 11119→10925。TimeLimit 也完成过期零出击禁用与未来时间放行一局 C1 的双向实机闭环。TaskBalancer 已完成 exact typed 金币观察；2026-08-26 末班 D3 在 23:59:35 完成，但 ALAS 的 task_switched() 从磁盘重载后由到期 Restart 抢先切走，因此真实金币阈值切换和防调度环仍未完成，保持 P。",
       "status": "P"
     },
     {
@@ -8311,8 +8473,8 @@
         "Storage"
       ],
       "name": "EventSp",
-      "note": "共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；实机已证明初始 (1,2,0) 舰队配置可零变更保留、自动寻敌职责与语义出击，且今日次数变为 0/1 并返回活动页。但控制器未在进程内捕获完整地图/战斗/结算收据，边界凭证见 integration/alas/eventsp-sp-auto-search-live-boundary-20260823.json；仍保持 P，不升级为主路径闭环",
-      "status": "P"
+      "note": "共享活动目录/normal 模式/SP 唯一关卡门禁已完成并早于文件探测；原 EventSp 任务已在固定 API 32 x86_64 AVD 上从主页完成活动入口、SP 选择、100% clear 与官方自动寻敌确认、(1,2,0) 舰队零变更出击、315 秒被动地图/战斗、Boss 总奖励退出、返回活动页及 1/1→0/1 次数后置。RunCount 1→0 并写入次日 00:00 调度；同一 supervised runner 捕获全部 generation/receipt，recovery、combat/grid/viewport 输入和 raw fallback 均为 0。凭证见 integration/alas/eventsp-sp-auto-search-live-validation-receipt-20260825-r11.json。其他舰队组合、非默认共用地图配置及新的活动布局仍按字段保持部分支持，因此为 L 而非 F",
+      "status": "L"
     },
     {
       "groups": [
@@ -8340,7 +8502,7 @@
         "SupplyPack"
       ],
       "name": "Freebies",
-      "note": "BattlePass 分派开关、Mail 四开关、DataKey 两开关和 SupplyPack 两字段已离线完成；真实战令奖励、Data Key 容量、免费补给和领取收据仍未闭环",
+      "note": "原 Freebies 已再次组合实机成功：BattlePass 无待领奖、DataKey 已领取、SupplyPack 油量 4477 且无免费卡时零购买并调度次日。BattlePass 普通 claim-all 已单独实机领取且未触碰付费升级；DataKey 300/300 的安全跳过、取消和 ForceCollect=true 精确确认均已执行，独立后置复跑证明 state_after、计数不变及零重复动作。强制分支因日状态不可逆尚缺单一不间断通过收据；自然免费礼包确认/领奖仍待样本",
       "status": "P"
     },
     {
@@ -8372,8 +8534,8 @@
         "Emotion"
       ],
       "name": "GemsFarming",
-      "note": "换旗舰/前排、常用舰选择、装备导入导出和换船后的强化衔接缺失；只有委托限制可复用",
-      "status": "M"
+      "note": "六项专属设置及原 run 收尾/调度已离线回放；normal + ship 的 Fleet 索引、白皮航母/驱逐候选和旗舰/前排唯一确认已实机闭环并恢复原编队；normal + ship_equip 已按 pinned ALAS 的五项 equipment code 接入逐槽 typed 卸装/替换，特殊兵装保持随原舰；当前槽位舰卡不再误入 free 候选，Fleet 6 突击者的生产筛选返回两张真实空闲突击者，并完成现有 18100 +0、19000 +0 双槽 take_off -> replace -> take_on 及目标读回；同舰五槽卸装恢复、空 code 控制流、两类舰装不兼容 fail-closed 亦已覆盖；normal 1-1 已完成 Fleet 6 单舰队完整原任务闭环，凭证见 integration/alas/gems-farming-task-live-validation-receipt-20260825-r3.json；hard 11-4 的第一主力槽为 type 7 正航而不兼容 type 6 轻航突击者，正确返回无候选；改用兼容轻航的 hard 12-1 后，原 HardNotSatisfied -> hard_fleet_prepare 从三张空闲突击者中选择等级/心情最高的 Lv9 突击者并确认旗舰，随后原任务完成既有 Boss 进度、结算、RunCount 归零、Scheduler 关闭和章节页返回，全程无 raw fallback，组件凭证见 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r25.json 与 integration/alas/gems-farming-hard-task-live-validation-receipt-20260825-r26.json；两张历史收据的顶层 passed=false 分别来自零出击替换探针与旧 runner 错把换船重复发生绑定到完整任务，底层 replacement/task completion 后置条件已分别通过且 runner 已修正；仍缺五槽跨舰兼容及 Lv32/emotion 自然触发分支，因此为 L 而非 F；enhanceable 仅为候选过滤而非换船后强化动作",
+      "status": "L"
     },
     {
       "groups": [
@@ -8471,7 +8633,7 @@
         "MeowfficerTrain"
       ],
       "name": "Meowfficer",
-      "note": "已用 typed 状态完成购买次数已满无操作、训练 10/10 已满无资源变化的原 ALAS 实机闭环；训练领取与排队控件已完成一次受控实机侦察。正向购买、自动领取/排队、指挥喵宿舍、增强与紫/金天赋保留全分支仍未闭环",
+      "note": "原 Meowfficer 状态机现已接入完整 typed 边界：购买精确数量与金币后置条件、Fort 已入住猫的 play/feed/clean chores、相同卡面的连续领取、特殊紫/金天赋锁定、seamlessly/周日增强，以及按 EnhanceIndex 与 MaxFeedLevel 选择目标和最多 10 只材料。实机证据覆盖购买次数已满零输入、Fort 0/8 安全跳过、训练 10/10 已满零资源变化、once_a_day 领取 1 只普通 SSR 后补排金箱，以及当前数字卡片层级下 EnhanceIndex=1 命中 LV30 后零输入返回 leveled_max；当前可见前 12 个 ALAS 目标均为 LV30，需出现可见非满级目标和合格材料后才能复核强化正向消耗。正向购买、已入住 Fort、特殊天赋、多只领取和完整强化消耗仍只离线闭环，因此面板保持 B",
       "status": "B"
     },
     {
@@ -8649,8 +8811,8 @@
         "Emotion"
       ],
       "name": "Raid",
-      "note": "难度和票券的声明值及票券确认最终按钮已离线回放；活动入口、次数和结算未适配",
-      "status": "O"
+      "note": "当前 CN Raid 已由原 Raid 状态机完成 easy/normal/hard/ex 四模式独立单局实机闭环：typed 活动入口、五槽身份、剩余次数、PT、编队准备、普通与 EX 战前页、真实出击、战斗结算及返回均已接入；权威通过收据分别记录 easy 14→13/PT 30→60、normal 15→14/PT 60→130、hard 15→14/PT 130→250、ex 1→0/PT 250→562，均无 raw fallback。9.7.343 热更暴露的普通次数清零后计数隐藏、页面双端点代次错位、结果所有权换帧、领奖后任务页恢复和中断战果恢复已按当前 typed 结构局部补齐；共享运行时连续完成 normal 14→0/PT 2168→3148，并通过诚实保留失败段和孤立战果恢复的链路完成 hard 14→0/PT 3148→4828。原 Restart 任务随后以 -force-gfx-st 将 PID 5252→7648、typed 登录回主页且无新 forward，重启后 RaidDaily 再次零输入读取 easy/normal=0、PT=3148 并完成调度。Raid.UseTicket=true 现由原 Raid 状态机在精确 count=1、ticket=0/0 且禁用标记唯一时关闭多次出击面板并回退单次出击；该零票分支已通过 focused、patched-tree、login/frame-clock 和 pixel-boundary 离线验证，但因普通次数为零仍待端到端实机。正票选择、票券切换及最终提交继续局部拒绝；第五槽已有独立 typed 入口，但零票实机未暴露可审查的后续表面，进阶执行仍 unsupported，故为 L 而非 F",
+      "status": "L"
     },
     {
       "groups": [
@@ -8661,8 +8823,8 @@
         "Emotion"
       ],
       "name": "RaidDaily",
-      "note": "难度过滤的 64 个无重复排列及 EX 奖励路由已离线回放；每日次数、战斗和领奖未适配",
-      "status": "O"
+      "note": "难度过滤与 EX 奖励路由已离线回放，当前活动仍保留上游 RaidDaily 的 RunCount=0 原语义，不传播伪单战上限。9.7.343 上原任务已证明 EX=0 与 easy=0 的零输入次日调度；StageFilter='easy > normal' 在 easy=0 时安全跳过并由同一任务实例连续完成 normal 14→0、PT 2168→3148，恰好 14 组关卡/舰队/出击收据且无 raw fallback。15 次普通清理后的领奖产生 3 张 EX 票；诚实保留的 r1/r3 失败收据与最终 r4 通过收据合起来证明一次任务页失败、一次中断战果恢复和剩余两票连续清空，而不冒充单次不间断通过。随后 hard 14→0、PT 3148→4828 的十四战也通过 r3/r5 失败收据、r4 孤立战果恢复与 r6 最终四战通过收据形成可审计的分段全清；新增 current-Raid 结果所有权避免原通用 BATTLE_STATUS_S 输入接管 typed 结果。本轮又以可审计分段链消费账号现有两张 EX 票，EX 2→1→0、PT 4828→5140→5452；精确 NetworkDown 恢复覆盖 combat_execute、结果结束和返回主界面，最终零预算任务闭合为 task_result=true 且无 raw fallback。更新后原 Restart 任务已完成 -force-gfx-st PID turnover 与 typed 登录，紧随其后的 RaidDaily 在新 PID 上零输入确认 easy/normal=0、PT=3148 并再次调度。Raid.UseTicket=true 的严格零票单次回退已离线验证但仍待次数重置后的端到端实机；实际跨日唤醒、正票最终提交、进阶挑战执行和 easy 完整整轮仍未资格化，因此为 L",
+      "status": "L"
     },
     {
       "groups": [
@@ -8670,7 +8832,7 @@
         "Research"
       ],
       "name": "Research",
-      "note": "三资源 always/do_not、队列容量、部件映射和重名卡已实机；最终哈希全策略、资源不足延迟、重置、26 预设及跨轮仍未闭环",
+      "note": "三资源 always/do_not、队列容量、部件映射、重名卡和真实物资不足延迟已实机；最终哈希全策略、重置、26 预设及跨轮仍未闭环",
       "status": "L"
     },
     {
@@ -8744,8 +8906,8 @@
         "EnemyPriority"
       ],
       "name": "WarArchives",
-      "note": "能观察入口/Data Key；48 个档案值的进入、消耗、地图和结算均未形成覆盖台账",
-      "status": "B"
+      "note": "常驻档案入口、分类、45 个当前 CN 客户端可识别档案卡、字母关卡、普通/困难切换、档案钥匙计数与精确 5-key 入场确认均已 typed 化。原 WarArchives 在冬冠 A1 完成 4 场普通战和 Boss、奖励结算并回到档案关卡页，钥匙 295→290，凭证见 integration/alas/war-archives-live-validation-receipt-20260826-r18.json。红染 A1 因原图脚本要求舰队前移到空格 C2，仍在现有敌人/拾取格输入边界局部拒绝；war_archives_20230525_cn、war_archives_20230803_cn、war_archives_20240725_cn 在当前固定 CN 游戏表中不存在并按任务局部不可用，其余档案仅有共享路径离线覆盖，尚未逐档案实机闭环",
+      "status": "L"
     }
   ],
   "promotions": [
@@ -9675,45 +9837,64 @@
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_event_general_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_event_general_config_replay.py",
         "integration/alas/series/0040-campaign-flow-ports.patch",
+        "integration/alas/event-general-pt-limit-reached-live-validation-receipt-20260826-r3.json",
+        "integration/alas/event-general-pt-limit-below-live-validation-receipt-20260826-r1.json",
         "docs/status.md"
       ],
       "field": "EventGeneral.PtLimit",
-      "note": "Zero, integer, and pinned punctuation formats execute original PT comparisons and event-disable result handling offline."
+      "note": "Typed xNNN point observation is exact and fail-closed. At 17060/17060 the original ALAS path disabled event tasks with zero sortie and unchanged oil; at 17060/17061 it admitted exactly one D1 run and returned with 17180 points and 10925 oil."
     },
     {
       "dimensions": {
+        "action": "complete",
+        "live": "complete",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_event_general_config.py",
         "python/alas_headless/alas_event_general_config_replay.py",
         "integration/alas/series/0040-campaign-flow-ports.patch",
+        "integration/alas/event-general-time-limit-live-blocker-20260826-r1.json",
+        "integration/alas/event-general-time-limit-expired-live-validation-receipt-20260826-r1.json",
+        "integration/alas/event-general-time-limit-future-eventc-c1-live-validation-receipt-20260826-r1.json",
         "docs/status.md"
       ],
       "field": "EventGeneral.TimeLimit",
-      "note": "Default, future, expired, non-event, and GemsFarming main-stage classes execute with a frozen clock."
+      "note": "Default, future, expired, non-event, and GemsFarming main-stage classes execute with a frozen clock. After the observer recovered fresh coherent state, an expired limit disabled the event with zero sortie and a future limit admitted exactly one C1 run; both branches returned cleanly without raw-input fallback."
     },
     {
       "dimensions": {
+        "live": "partial",
+        "observation": "complete",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_event_general_config.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "python/alas_headless/alas_event_general_config_replay.py",
         "integration/alas/series/0040-campaign-flow-ports.patch",
+        "integration/alas/event-general-task-balancer-main-live-validation-receipt-20260826-r9.json",
         "docs/status.md"
       ],
       "field": "TaskBalancer.CoinLimit",
-      "note": "Zero-observation, below, equality, above, and non-balancer task decisions execute pinned ALAS logic offline."
+      "note": "Zero-observation, below, equality, above, and non-balancer task decisions execute pinned ALAS logic offline. Exact active event gold_value is now read with bracketed coherent generations and was observed live; the threshold action was preempted by an unrelated due Restart task after ALAS reloaded scheduling state, so action remains missing."
     },
     {
       "dimensions": {
+        "live": "partial",
         "offline": "complete"
       },
       "evidence": [
@@ -9727,6 +9908,7 @@
     },
     {
       "dimensions": {
+        "live": "partial",
         "offline": "complete"
       },
       "evidence": [
@@ -11335,10 +11517,18 @@
         "tests/test_alas_raid_config.py",
         "python/alas_headless/alas_raid_config_replay.py",
         "integration/alas/series/0170-raid-config-contract.patch",
+        "integration/alas/series/0480-current-raid-runtime.patch",
+        "integration/alas/current-raid-use-ticket-zero-fallback-patch-tree-verification-20260830-r1/result.json",
+        "integration/alas/current-raid-use-ticket-zero-fallback-login-flow-replay-20260830-r1.json",
+        "integration/alas/current-raid-use-ticket-zero-fallback-frame-clock-replay-20260830-r1.json",
+        "integration/alas/current-raid-pixel-inventory-verification-20260830-r3.json",
+        "python/alas_headless/semantic_oracle.py",
+        "tests/test_semantic_oracle.py",
+        "tests/test_alas_adapter.py",
         "docs/status.md"
       ],
       "field": "Raid.UseTicket",
-      "note": "Both exact boolean states preserve the original confirm/cancel split with its two final-input boundaries replaced by a recorder; malformed values fail before observation or a ticket click."
+      "note": "Both exact boolean states preserve the pinned original confirm/cancel split in offline replay. On current raid_20260827, false is live-qualified. True now enters the original Raid state machine and may take only a strict zero-ticket fallback: the exact multiple-sortie panel must report count 1, ticket 0/0, and one disabled marker before the panel is closed and one ordinary sortie resumes. Focused tests, patched-tree compilation, login/frame-clock replays, and pixel-boundary verification cover that branch offline; end-to-end live validation awaits the next ordinary-attempt reset. Positive selection, toggle, and final commit remain localized fail-closed actions, and malformed values still fail before observation or a ticket click."
     },
     {
       "dimensions": {
@@ -11348,10 +11538,20 @@
         "tests/test_alas_raid_config.py",
         "python/alas_headless/alas_raid_config_replay.py",
         "integration/alas/series/0010-mission-mail-flow-ports.patch",
+        "integration/alas/series/0480-current-raid-runtime.patch",
+        "integration/alas/current-raid-daily-easy-zero-state-live-validation-receipt-20260830-r1.json",
+        "integration/alas/current-raid-daily-reward-ex-live-validation-receipt-20260830-r4.json",
+        "integration/alas/current-raid-daily-easy-normal-full-clear-live-validation-receipt-20260830-r2.json",
+        "integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r3.json",
+        "integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r5.json",
+        "integration/alas/current-raid-daily-hard-full-clear-live-validation-receipt-20260830-r6.json",
+        "integration/alas/current-raid-restart-warm-workload-20260830-r1/result.json",
+        "integration/alas/current-raid-daily-post-restart-zero-state-live-validation-receipt-20260830-r1.json",
+        "integration/alas/current-raid-daily-existing-two-ex-segmented-live-validation-receipt-20260830-r1.json",
         "docs/status.md"
       ],
       "field": "RaidDaily.StageFilter",
-      "note": "All 64 non-repeating ordered subsets of easy, normal, hard, and ex preserve the original filter forwarding and EX reward route; malformed filters fail before a RaidDaily stateful boundary."
+      "note": "All 64 non-repeating ordered subsets preserve the original filter forwarding and EX reward route offline; current live evidence adds an easy-zero skip followed by a 14-battle uninterrupted normal clear, the segmented three-ticket EX reward/recovery path, a segmented hard 14→0 clear whose final four battles passed under the explicit current-Raid result owner, a second segmented existing-ticket EX 2→0 / PT 4828→5452 recovery with exact NetworkDown handling and a passing zero-budget task close, and a typed zero-state re-entry after the original Restart scheduler cold-started the game with -force-gfx-st. Malformed filters fail before a RaidDaily stateful boundary."
     },
     {
       "dimensions": {
@@ -11567,22 +11767,25 @@
     },
     {
       "dimensions": {
-        "action": "partial",
+        "action": "complete",
+        "live": "complete",
         "observation": "complete"
       },
       "evidence": [
         "tests/test_alas_research_config_replay.py",
         "python/alas_headless/alas_research_config_contract.py",
+        "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
         "integration/alas/series/0402-research-six-field-runtime.patch",
         "scripts/python/run_alas_research_resource_policy_live_validation.py",
         "integration/alas/research-allow-delay-true-no-match-current-r1-live-validation-receipt.json",
         "integration/alas/research-use-coin-only-05-hour-current-final-r1-live-validation-receipt.json",
         "integration/alas/research-resource-policy-recovery-20260822.json",
+        "integration/alas/research-coin-insufficient-delay-live-validation-receipt-20260830-r1.json",
         "docs/status.md"
       ],
       "field": "Research.AllowDelay",
-      "note": "The pinned runtime now rejects non-boolean values before the original delay branch, and both booleans are complete offline. Current live runs exercised true and false through the original selector and exact start path. The actual insufficient-resource delay decision remains account-blocked and live-partial."
+      "note": "Both booleans are complete offline and reject malformed values before the original delay branch. Current live runs cover true and false through the original selector, and the final typed multi-resource run selected S9 Q-068-UL, proved gold 1380/5000 plus part 17033 29858/20, returned the original insufficient-resource delay decision, issued zero Research mutations, and preserved gold at 1380."
     },
     {
       "dimensions": {
@@ -11682,14 +11885,14 @@
     "adapter_evidence_commit": "73433ccbac00be4c0fb367803d4affa7cb1ea599",
     "config_sha256": {
       "config/template.json": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
-      "module/config/argument/args.json": "94a4e553e857e7e3bada215e08b8963f46d287ac530f32a02b7daf6b7533ad90",
+      "module/config/argument/args.json": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
       "module/config/argument/task.yaml": "19e6464aaa1e92913ba9f31de590096a09b101638969c41e14c70dd1a4eb6c5a"
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "7a1a69478fcfe04168be731a19bc5dbd8776d3dd8b7eedb5ce9776a739a14803",
-      "manifest_sha256": "c58f158e456fdf2b9be39fb82e8f689fc241cdba6b3401e18c0f1c178b8c4981",
-      "member_count": 88
+      "combined_sha256": "cc931e355cc31ad42b1d4bea9a9eadded45f04a01998e9eb6eb4b593fcfdf5bc",
+      "manifest_sha256": "040830de47eff9236f49a950f30226b18f589d7e636208a57cf38928646bd8e7",
+      "member_count": 93
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

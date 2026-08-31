@@ -1,0 +1,87 @@
+{
+  "schema": "alas-headless.event-task-live-validation/v1",
+  "passed": true,
+  "started_at": "2026-08-26T11:54:36.502438Z",
+  "finished_at": "2026-08-26T11:55:06.790881Z",
+  "task": "EventD",
+  "stage": "D1",
+  "event": "event_20260813_cn",
+  "mode": "hard",
+  "upstream_invocation_mode": "normal",
+  "serial": "emulator-5580",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "scheduler_command": "EventD",
+  "effective_config": {
+    "event": "event_20260813_cn",
+    "name": "dynamic",
+    "mode": "normal",
+    "use_auto_search": true,
+    "run_count": 1,
+    "pt_limit": 17060
+  },
+  "run_result": true,
+  "run_error": null,
+  "run_count_before": 1,
+  "run_count_after": 0,
+  "event_points_before": 17060,
+  "event_points_after": 17060,
+  "oil_before": 11119,
+  "oil_after": 11119,
+  "pt_limit_expected_triggered": true,
+  "scheduler_enabled_after": false,
+  "event_daily_last_stage_after": 0,
+  "use_auto_search": true,
+  "materialized_alas": null,
+  "login_recovery_performed": false,
+  "orphan_result_recovery_count": 0,
+  "preparation_recovery_count": 0,
+  "recovery_total": 0,
+  "qualification_stop": null,
+  "starting_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "event_page": true,
+    "generation": 98396
+  },
+  "budgets": {
+    "stage_entry": 0,
+    "fleet_mutation": 0,
+    "sortie": 0,
+    "combat": 0,
+    "grid_click": 0,
+    "viewport_swipe": 2,
+    "camera_positioning": 0,
+    "recovery_total": 1
+  },
+  "observer": {
+    "generation": 98922,
+    "scene_handle": -76,
+    "button_count": 17
+  },
+  "final_surface": {
+    "main_page": false,
+    "campaign_map": false,
+    "event_page": true
+  },
+  "event_sp_auto_search_evidence": {
+    "bundle": null,
+    "sortie": null,
+    "completion": null,
+    "final_attempt": null
+  },
+  "validation_errors": [],
+  "raw_input_fallback_used": false,
+  "worker_cleanup": {
+    "completed": true,
+    "actions": [
+      "semantic_session_close",
+      "cwd_restore",
+      "temp_config_remove",
+      "environment_restore"
+    ],
+    "errors": [],
+    "temp_config_path": "H:\\program\\AzurLaneAutoScript-alas-eventsp-rescue-live\\config\\_codex_event_live_eventd_f454ac9ad59348d8b1f35eedd987255c.json",
+    "temp_config_present_after": false,
+    "config_state": null
+  }
+}
