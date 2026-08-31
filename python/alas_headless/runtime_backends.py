@@ -148,8 +148,7 @@ def backend_from_config(
             "container_id",
             "image_reference",
             "image_manifest_digest",
-            "userdata_image",
-            "metadata_image",
+            "userdata_path",
             "start_script",
         }
         allowed = required | {
@@ -186,8 +185,7 @@ def backend_from_config(
             container_id=value["container_id"],
             image_reference=value["image_reference"],
             image_manifest_digest=value["image_manifest_digest"],
-            userdata_image=value["userdata_image"],
-            metadata_image=value["metadata_image"],
+            userdata_path=value["userdata_path"],
             start_script=value["start_script"],
             stop_script=value.get("stop_script"),
             ctr=value.get("ctr", "ctr"),
@@ -206,7 +204,7 @@ def backend_from_config(
                 "disable_system_ui_for_headless", False
             ),
             poll_interval_seconds=value.get("poll_interval_seconds", 1.0),
-            storage_layout=value.get("storage_layout", "srv-v1"),
+            storage_layout=value.get("storage_layout", "host-directory-v1"),
         )
         return RedroidBackend(config, executor, trace=trace, **kwargs)
 

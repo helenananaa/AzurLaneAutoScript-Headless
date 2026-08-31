@@ -1,0 +1,103 @@
+diff --git a/target/product/full_base.mk b/target/product/full_base.mk
+--- a/target/product/full_base.mk
++++ b/target/product/full_base.mk
+@@ -24,8 +24,8 @@ PRODUCT_PACKAGES := \
+     WAPPushManager
+ 
+ PRODUCT_PACKAGES += \
+-    LiveWallpapersPicker \
+-    PhotoTable \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,LiveWallpapersPicker) \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,PhotoTable) \
+     preinstalled-packages-platform-full-base.xml
+ 
+ # Net:
+diff --git a/target/product/handheld_product.mk b/target/product/handheld_product.mk
+--- a/target/product/handheld_product.mk
++++ b/target/product/handheld_product.mk
+@@ -22,17 +22,17 @@
+ $(call inherit-product, $(SRC_TARGET_DIR)/product/media_product.mk)
+ 
+ # /product packages
+ PRODUCT_PACKAGES += \
+-    Browser2 \
+-    Calendar \
+-    Camera2 \
+-    Contacts \
+-    DeskClock \
+-    Gallery2 \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,Browser2) \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,Calendar) \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,Camera2) \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,Contacts) \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,DeskClock) \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,Gallery2) \
+     LatinIME \
+-    Music \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,Music) \
+     preinstalled-packages-platform-handheld-product.xml \
+-    QuickSearchBox \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,QuickSearchBox) \
+     SettingsIntelligence \
+     frameworks-base-overlays
+ 
+diff --git a/target/product/handheld_system.mk b/target/product/handheld_system.mk
+--- a/target/product/handheld_system.mk
++++ b/target/product/handheld_system.mk
+@@ -34,20 +34,20 @@ $(call inherit-product-if-exists, frameworks/webview/chromium/chromium.mk)
+ 
+ PRODUCT_PACKAGES += \
+-    BasicDreams \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,BasicDreams) \
+     BlockedNumberProvider \
+     BluetoothMidiService \
+-    BookmarkProvider \
+-    BuiltInPrintService \
+-    CalendarProvider \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,BookmarkProvider) \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,BuiltInPrintService) \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,CalendarProvider) \
+     cameraserver \
+-    CameraExtensionsProxy \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,CameraExtensionsProxy) \
+     CaptivePortalLogin \
+     CertInstaller \
+     CredentialManager \
+-    DeviceAsWebcam \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,DeviceAsWebcam) \
+     DocumentsUI \
+     DownloadProviderUi \
+-    EasterEgg \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,EasterEgg) \
+     ExternalStorageProvider \
+     FusedLocation \
+     InputDevices \
+@@ -56,11 +56,11 @@ PRODUCT_PACKAGES += \
+     ManagedProvisioning \
+     MmsService \
+-    MtpService \
+-    MusicFX \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,MtpService) \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,MusicFX) \
+     PacProcessor \
+     preinstalled-packages-platform-handheld-system.xml \
+-    PrintRecommendationService \
+-    PrintSpooler \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,PrintRecommendationService) \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,PrintSpooler) \
+     ProxyHandler \
+     screenrecord \
+     SecureElement \
+@@ -70,10 +70,10 @@ PRODUCT_PACKAGES += \
+     Telecom \
+     TelephonyProvider \
+     TeleService \
+-    Traceur \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,Traceur) \
+     UserDictionaryProvider \
+     VpnDialogs \
+-    vr \
++    $(if $(filter redroid_x86_64_only,$(TARGET_PRODUCT)),,vr) \
+ 
+ PRODUCT_PACKAGES += $(RELEASE_PACKAGE_VIRTUAL_CAMERA)
+ # Set virtual_camera_service_enabled soong config variable based on the

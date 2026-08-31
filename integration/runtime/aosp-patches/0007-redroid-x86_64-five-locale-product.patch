@@ -1,0 +1,16 @@
+diff --git a/redroid_x86_64_only.mk b/redroid_x86_64_only.mk
+--- a/redroid_x86_64_only.mk
++++ b/redroid_x86_64_only.mk
+@@ -30,3 +30,12 @@ PRODUCT_MODEL := redroid14_x86_64_only
+ 
+ DEVICE_PACKAGE_OVERLAYS := $(LOCAL_PATH)/overlay
+ 
++# Keep only the locale families required by the pinned game, WebView login,
++# recovery UI, and typed ALAS workflow. This assignment must follow every
++# inherited product so languages_default.mk cannot append the full list back.
++PRODUCT_LOCALES := \
++    en_US \
++    zh_CN \
++    zh_TW \
++    ja_JP \
++    ko_KR

@@ -56,6 +56,8 @@ WEBVIEW_PROJECTS = {
     ),
 }
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
+REMOTE_REF_TIMEOUT_SECONDS = 30
+REMOTE_FETCH_TIMEOUT_SECONDS = 60
 
 
 class AndroidImageSourceError(ValueError):
@@ -163,7 +165,10 @@ class AndroidImageSourceLock:
                 "frameworks/base",
                 "frameworks/native",
                 "external/swiftshader",
+                "external/chromium-webview",
+                "external/noto-fonts",
                 "build/make",
+                "device/redroid",
             }:
                 raise AndroidImageSourceError("project patch target is not approved")
             if not path.startswith("integration/runtime/aosp-patches/") or (
@@ -346,10 +351,51 @@ def webview_projects_for_abi(
     )
 
 
+def _local_git_object_available(project: Path, expected: str) -> bool:
+    if not project.is_dir():
+        return False
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(project), "cat-file", "-e", expected + "^{object}"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
+
+
+def _local_tag_commit(project: Path, tag_object: str) -> str:
+    if not project.is_dir():
+        return ""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(project), "cat-file", "-p", tag_object],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding="utf-8", errors="replace", check=False, timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    if result.returncode == 0:
+        first = result.stdout.splitlines()[0] if result.stdout else ""
+        if first.startswith("object "):
+            return first.removeprefix("object ")
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(project), "rev-parse", "HEAD"],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding="utf-8", errors="replace", check=False, timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
 def verify_remote_refs(
     lock: AndroidImageSourceLock, abi: str = "all",
+    prepared_source_root: Path | None = None,
 ) -> Mapping[str, Any]:
-    """Verify upstream refs shared by, or directly consumed by, the selected ABI."""
+    """Verify remote identities without treating a moving branch tip as build input."""
     platform_source = lock.document["platform"]
     redroid = lock.document["redroid"]
     refs = [
@@ -358,18 +404,21 @@ def verify_remote_refs(
             platform_source["manifest_url"],
             "refs/tags/{0}".format(platform_source["revision"]),
             platform_source["tag_object"],
+            ".repo/manifests",
         ),
         (
             "redroid-local-manifests",
             redroid["local_manifests_url"],
             "refs/heads/{0}".format(redroid["local_manifests_revision"]),
             redroid["local_manifests_commit"],
+            ".repo/local_manifests",
         ),
         (
             "redroid-patches",
             redroid["patches_url"],
             "refs/heads/{0}".format(redroid["patches_revision"]),
             redroid["patches_commit"],
+            ".alas-redroid-patches",
         ),
     ]
     for project in redroid["projects"]:
@@ -378,6 +427,7 @@ def verify_remote_refs(
             "https://github.com/remote-android/{0}.git".format(project["name"]),
             "refs/heads/{0}".format(project["revision"]),
             project["commit"],
+            project["path"],
         ))
     for project in webview_projects_for_abi(redroid["webview_projects"], abi):
         refs.append((
@@ -385,54 +435,141 @@ def verify_remote_refs(
             project["url"],
             "refs/heads/{0}".format(project["revision"]),
             project["commit"],
+            project["path"],
         ))
     records = []
     blockers = []
-    for name, url, ref, expected in refs:
-        result = subprocess.run(
-            ["git", "ls-remote", url, ref], stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace",
-            check=False,
+    for name, url, ref, expected, local_path in refs:
+        local_expected = (
+            str(platform_source["commit"])
+            if name == "platform-manifest-tag-object"
+            else expected
         )
+        pinned_object_available = (
+            prepared_source_root is not None
+            and _local_git_object_available(
+                prepared_source_root / local_path, local_expected
+            )
+        )
+        remote_error = None
+        remote_check = "skipped-prepared-source" if pinned_object_available else "attempted"
+        if pinned_object_available:
+            result = None
+        else:
+            try:
+                result = subprocess.run(
+                    ["git", "ls-remote", url, ref], stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace",
+                    check=False, timeout=REMOTE_REF_TIMEOUT_SECONDS,
+                )
+            except subprocess.TimeoutExpired:
+                result = None
+                remote_error = "timeout"
         observed = ""
-        if result.returncode == 0 and result.stdout.strip():
+        if result is not None and result.returncode == 0 and result.stdout.strip():
             observed = result.stdout.split()[0]
-        outcome = "pass" if observed == expected else "blocked"
+        immutable_ref = ref.startswith("refs/tags/")
+        if pinned_object_available:
+            outcome = "pass"
+            ref_state = (
+                "prepared-local-platform-commit"
+                if local_expected != expected
+                else "prepared-local-object"
+            )
+            verification_source = (
+                "prepared-local-peeled-commit"
+                if local_expected != expected
+                else "prepared-local-object"
+            )
+        elif prepared_source_root is not None:
+            outcome = "blocked"
+            ref_state = "prepared-source-pinned-object-missing"
+            verification_source = "prepared-source"
+        elif not observed:
+            outcome = "blocked"
+            ref_state = "unavailable"
+            verification_source = "remote"
+        elif immutable_ref and observed != expected:
+            outcome = "blocked"
+            ref_state = "immutable-ref-mismatch"
+            verification_source = "remote"
+        elif observed == expected:
+            outcome = "pass"
+            ref_state = "exact"
+            verification_source = "remote"
+        else:
+            # Branches are discovery inputs, not reproducible build identity.
+            # The full expected commit remains locked in the resolved manifest;
+            # repo sync or the prepared checkout must still supply that commit.
+            outcome = "pass"
+            ref_state = "advertised-tip-moved"
+            verification_source = "remote"
         if outcome != "pass":
             blockers.append("{0}-ref-mismatch".format(name))
         records.append({
             "name": name, "url": url, "ref": ref, "expected_commit": expected,
-            "observed_commit": observed or None, "outcome": outcome,
+            "observed_commit": observed or None, "ref_state": ref_state,
+            "error": remote_error,
+            "remote_check": remote_check,
+            "local_project": local_path,
+            "local_expected_commit": local_expected,
+            "pinned_object_available": pinned_object_available,
+            "verification_source": verification_source,
+            "outcome": outcome,
         })
-    with tempfile.TemporaryDirectory(prefix="alas-platform-tag-") as raw:
-        subprocess.run(["git", "init", "-q", raw], check=True)
-        fetched = subprocess.run(
-            ["git", "-C", raw, "fetch", "-q", "--depth=1",
-             platform_source["manifest_url"],
-             "refs/tags/{0}".format(platform_source["revision"])],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-            encoding="utf-8", errors="replace", check=False,
+    local_peeled = (
+        _local_tag_commit(
+            prepared_source_root / ".repo/manifests",
+            str(platform_source["tag_object"]),
         )
+        if prepared_source_root is not None
+        else ""
+    )
+    fetch_error = None
+    if local_peeled:
+        peeled = local_peeled
+        peel_source = "prepared-local-tag"
+        peel_remote_check = "skipped-prepared-source"
+    else:
         peeled = ""
-        if fetched.returncode == 0:
-            result = subprocess.run(
-                ["git", "-C", raw, "rev-parse", "FETCH_HEAD^{commit}"],
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-                encoding="utf-8", errors="replace", check=False,
-            )
-            if result.returncode == 0:
-                peeled = result.stdout.strip()
-        peeled_outcome = "pass" if peeled == platform_source["commit"] else "blocked"
-        if peeled_outcome != "pass":
-            blockers.append("platform-manifest-peeled-commit-mismatch")
-        records.append({
-            "name": "platform-manifest-peeled-commit",
-            "url": platform_source["manifest_url"],
-            "ref": "refs/tags/{0}^{{commit}}".format(platform_source["revision"]),
-            "expected_commit": platform_source["commit"],
-            "observed_commit": peeled or None,
-            "outcome": peeled_outcome,
-        })
+        peel_source = "remote"
+        peel_remote_check = "attempted"
+        with tempfile.TemporaryDirectory(prefix="alas-platform-tag-") as raw:
+            subprocess.run(["git", "init", "-q", raw], check=True)
+            try:
+                fetched = subprocess.run(
+                    ["git", "-C", raw, "fetch", "-q", "--depth=1",
+                     platform_source["manifest_url"],
+                     "refs/tags/{0}".format(platform_source["revision"])],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                    encoding="utf-8", errors="replace", check=False,
+                    timeout=REMOTE_FETCH_TIMEOUT_SECONDS,
+                )
+            except subprocess.TimeoutExpired:
+                fetched = None
+                fetch_error = "timeout"
+            if fetched is not None and fetched.returncode == 0:
+                result = subprocess.run(
+                    ["git", "-C", raw, "rev-parse", "FETCH_HEAD^{commit}"],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                    encoding="utf-8", errors="replace", check=False,
+                )
+                if result.returncode == 0:
+                    peeled = result.stdout.strip()
+    peeled_outcome = "pass" if peeled == platform_source["commit"] else "blocked"
+    if peeled_outcome != "pass":
+        blockers.append("platform-manifest-peeled-commit-mismatch")
+    records.append({
+        "name": "platform-manifest-peeled-commit",
+        "url": platform_source["manifest_url"],
+        "ref": "refs/tags/{0}^{{commit}}".format(platform_source["revision"]),
+        "expected_commit": platform_source["commit"],
+        "observed_commit": peeled or None,
+        "error": fetch_error,
+        "remote_check": peel_remote_check,
+        "verification_source": peel_source,
+        "outcome": peeled_outcome,
+    })
     return {
         "schema": "alas-headless.android-image-source-remote-verification/v1",
         "source_lock_sha256": lock.sha256,

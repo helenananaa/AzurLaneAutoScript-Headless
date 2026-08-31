@@ -64,7 +64,15 @@ if ([string]::IsNullOrWhiteSpace($DismissOverlayName) -xor
 }
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
-$expectedDriverRevision = (Get-Content -LiteralPath (Join-Path $repoRoot 'ANGLE_REVISION') -Raw).Trim()
+$angleSourceRevision = (Get-Content -LiteralPath (Join-Path $repoRoot 'ANGLE_REVISION') -Raw).Trim()
+$observerServer = Join-Path $repoRoot `
+    'overlays\angle-g3\src\libANGLE\renderer\null\ObserverServer.cpp'
+$observerServerText = Get-Content -LiteralPath $observerServer -Raw
+if ($observerServerText -notmatch `
+    'kDriverRevision\[\]\s*=\s*"([0-9a-f]{40})"') {
+    throw "Observer driver revision is missing or malformed: $observerServer"
+}
+$expectedDriverRevision = $Matches[1]
 $capturedAt = [DateTimeOffset]::UtcNow
 $captureName = 'g4-game-init-{0}-{1}' -f $capturedAt.ToString('yyyyMMddTHHmmssZ'),
     ($Serial -replace '[^A-Za-z0-9._-]', '_')
@@ -115,8 +123,9 @@ function Restore-GlobalSetting {
 function Get-ForegroundComponent {
     $activities = Invoke-Adb -Arguments @('-s', $Serial, 'shell', 'dumpsys', 'activity',
         'activities')
-    $line = $activities -split "`r?`n" | Where-Object { $_ -match 'topResumedActivity=' } |
-        Select-Object -First 1
+    $line = $activities -split "`r?`n" | Where-Object {
+        $_ -match '(?:topResumedActivity=|mResumedActivity:)'
+    } | Select-Object -First 1
     if ($line -match 'u\d+\s+([^\s}]+/[^\s}]+)') { return $Matches[1] }
     return $null
 }
@@ -808,6 +817,7 @@ try {
         socket_name = $socketName
         unity_command_line = $UnityCommandLine
         angle_apk_sha256 = (Get-FileHash -LiteralPath $angleApkPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        angle_source_revision = $angleSourceRevision
         driver_revision = $expectedDriverRevision
         package_version_name = $versionName
         package_version_code = $versionCode

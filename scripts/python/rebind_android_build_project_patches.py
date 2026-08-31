@@ -55,6 +55,58 @@ def dirty_project_paths(project: Path) -> set[str]:
     return paths
 
 
+def exact_patch_commit(
+    project: Path,
+    patch: Path,
+    expected_metadata: Sequence[str],
+    temporary_root: Path,
+) -> str | None:
+    """Find the exact locked patch commit in the current HEAD ancestry."""
+    for commit in git(project, "rev-list", "HEAD").splitlines():
+        metadata = git(
+            project,
+            "show",
+            "-s",
+            "--format=%an%n%ae%n%at%n%ct%n%s",
+            commit,
+        ).splitlines()
+        if metadata != list(expected_metadata):
+            continue
+        with tempfile.TemporaryDirectory(dir=temporary_root) as raw:
+            temporary = Path(raw)
+            index_path = temporary / "index"
+            work_tree = temporary / "worktree"
+            normalized_patch = temporary / "locked.patch"
+            work_tree.mkdir()
+            normalized_patch.write_bytes(patch.read_bytes().replace(b"\r\n", b"\n"))
+            index_env = dict(os.environ)
+            index_env["GIT_INDEX_FILE"] = str(index_path)
+            index_env["GIT_WORK_TREE"] = str(work_tree)
+            try:
+                parent = git(project, "rev-parse", commit + "^")
+                subprocess.run(
+                    ["git", "-C", str(project), "read-tree", parent],
+                    check=True,
+                    env=index_env,
+                )
+                subprocess.run(
+                    [
+                        "git", "-C", str(project), "-c", "core.autocrlf=false",
+                        "apply", "--cached", str(normalized_patch),
+                    ],
+                    check=True,
+                    env=index_env,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                patched_tree = git(project, "write-tree", env=index_env)
+            except subprocess.CalledProcessError:
+                continue
+        if patched_tree == git(project, "rev-parse", commit + "^{tree}"):
+            return commit
+    return None
+
+
 def _require_within(path: Path, root: Path, name: str) -> None:
     resolved = path.resolve()
     resolved_root = root.resolve()
@@ -132,7 +184,10 @@ def _main(argv: Sequence[str]) -> int:
         project = args.source_root / item["project"]
         status = git(project, "status", "--porcelain")
         forward = subprocess.run(
-            ["git", "-C", str(project), "apply", "--check", str(patch)], check=False
+            ["git", "-C", str(project), "apply", "--check", str(patch)],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         ).returncode == 0
         if status:
             if item in old_patches:
@@ -202,42 +257,32 @@ def _main(argv: Sequence[str]) -> int:
             )
             action = "applied"
         else:
-            reverse = subprocess.run(
-                ["git", "-C", str(project), "apply", "--reverse", "--check", str(patch)],
-                check=False,
-            ).returncode == 0
-            with tempfile.NamedTemporaryFile(dir=args.output.parent, delete=False) as handle:
-                index_path = Path(handle.name)
-            index_path.unlink()
-            index_env = dict(os.environ)
-            index_env["GIT_INDEX_FILE"] = str(index_path)
-            try:
-                subprocess.run(
-                    ["git", "-C", str(project), "read-tree", "HEAD^"],
-                    check=True, env=index_env,
-                )
-                subprocess.run(
-                    ["git", "-C", str(project), "apply", "--cached", str(patch)],
-                    check=True, env=index_env,
-                )
-                patched_tree = git(project, "write-tree", env=index_env)
-            finally:
-                index_path.unlink(missing_ok=True)
-            if not reverse or patched_tree != git(project, "rev-parse", "HEAD^{tree}"):
-                raise ValueError("project patch is neither applicable nor exact HEAD: " + item["project"])
-            metadata = git(project, "show", "-s", "--format=%an%n%ae%n%at%n%ct%n%s").splitlines()
             expected = [
                 build["git_identity"]["name"], build["git_identity"]["email"],
                 str(build["source_date_epoch"]), str(build["source_date_epoch"]),
                 item["commit_message"],
             ]
-            if metadata != expected:
-                raise ValueError("existing project patch commit identity differs")
+            matched_commit = exact_patch_commit(
+                project, patch, expected, args.output.parent
+            )
+            # A later locked patch in the same project may overlap this patch's
+            # context, making a reverse apply against HEAD fail even though the
+            # exact patch commit is still an active ancestor. Reconstructing
+            # the commit tree from its parent is the stronger identity check.
+            if matched_commit is None:
+                raise ValueError(
+                    "project patch is neither applicable nor an exact active ancestor: "
+                    + item["project"]
+                )
             action = "verified-existing"
+        result_head = (
+            matched_commit if action == "verified-existing"
+            else git(project, "rev-parse", "HEAD")
+        )
         project_results.append({
             "project": item["project"], "patch_sha256": item["sha256"],
-            "action": action, "head": git(project, "rev-parse", "HEAD"),
-            "tree": git(project, "rev-parse", "HEAD^{tree}"),
+            "action": action, "head": result_head,
+            "tree": git(project, "rev-parse", result_head + "^{tree}"),
         })
 
     patch_identity = hashlib.sha256(json.dumps(

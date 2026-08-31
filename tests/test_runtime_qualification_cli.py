@@ -121,7 +121,7 @@ class RuntimeQualificationCliTests(unittest.TestCase):
             self.assertTrue(plan["container_contract"]["manifest_digest_verified"])
             self.assertEqual(
                 plan["image_manifest_digest"],
-                "sha256:c8bed99e50609a5cd542328eefc79e504a7e38a94088ed7fdeb7eb704555dac5",
+                "sha256:881be994eb02237524b070bd15638eaef5cdbc15108355d4137aa9e141854eac",
             )
 
 

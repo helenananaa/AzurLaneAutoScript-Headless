@@ -1,0 +1,30 @@
+diff --git a/Android.bp b/Android.bp
+--- a/Android.bp
++++ b/Android.bp
+@@ -30,6 +30,17 @@ license {
+     // large-scale-change unable to identify any license_text files
+ }
+ 
++// redroid_x86_64_only is a 64-bit-only product. The upstream x86_64 prebuilt
++// is a dual-ABI APK, so remove its unused 32-bit Chromium payload before Soong
++// applies the normal default-dev-certificate signing and dexpreopt steps.
++genrule {
++    name: "redroid_webview_x86_64_only_apk",
++    srcs: ["prebuilt/x86_64/webview.apk"],
++    tools: ["zip2zip"],
++    out: ["webview-redroid-x86_64-only.apk"],
++    cmd: "$(location zip2zip) -i $(in) -o $(out) -x 'lib/x86/*'",
++}
++
+ android_app_import {
+     name: "webview",
+     product_specific: true,
+@@ -49,7 +60,7 @@ android_app_import {
+             apk: "prebuilt/x86/webview.apk",
+         },
+         x86_64: {
+-            apk: "prebuilt/x86_64/webview.apk",
++            apk: ":redroid_webview_x86_64_only_apk",
+         },
+     },
+ }

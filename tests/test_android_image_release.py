@@ -19,7 +19,7 @@ def evidence_identity():
 def release_inputs(abi: str):
     source_lock = "c" * 64
     provenance = {
-        "schema": "alas-headless.android-image-build-provenance/v1",
+        "schema": "alas-headless.android-image-build-provenance/v2",
         "source_lock_sha256": source_lock,
         "target": {"abi": abi},
         "game_artifact_included": False,
@@ -30,16 +30,7 @@ def release_inputs(abi: str):
         "artifacts": {
             "system.img": {"sha256": "4" * 64, "bytes": 1},
             "vendor.img": {"sha256": "5" * 64, "bytes": 1},
-            "redroid-native-fbe-overlay.json": {"sha256": "9" * 64, "bytes": 1},
             "post-patch-state.json": {"sha256": "8" * 64, "bytes": 1},
-        },
-        "native_fbe_overlay": {
-            "schema": "alas-headless.redroid-native-fbe-overlay-validation/v1",
-            "outcome": "pass",
-            "android_fbe_proven": False,
-            "direct_boot_proven": False,
-            "source_lock_sha256": source_lock,
-            "artifact_sha256": "9" * 64,
         },
         "sbom": {"sha256": "6" * 64, "bytes": 1, "format": "SPDX-2.3"},
         "notices": [{"sha256": "7" * 64, "bytes": 1}],
@@ -78,53 +69,6 @@ def release_inputs(abi: str):
 
 
 class AndroidImageReleaseTests(unittest.TestCase):
-    def test_host_fbe_volume_set_is_auxiliary_and_cannot_overclaim(self) -> None:
-        evidence = {
-            "schema": "alas-headless.redroid-host-fbe-volume-set/v1",
-            "outcome": "pass",
-            "ceiling": "host-fbe-volume-set-qualified",
-            "android_fbe_proven": False,
-            "direct_boot_proven": False,
-            "_evidence_file": evidence_identity(),
-        }
-        record = target_record(
-            "arm64-v8a", None, None, None, {}, None, None,
-            fbe_volume_set_evidence=evidence,
-        )
-        self.assertEqual(record["host_fbe_volume_set"]["outcome"], "pass")
-        self.assertNotIn("fbe-volume-set-evidence-overclaims-fbe", record["blockers"])
-        evidence["direct_boot_proven"] = True
-        record = target_record(
-            "arm64-v8a", None, None, None, {}, None, None,
-            fbe_volume_set_evidence=evidence,
-        )
-        self.assertIn("fbe-volume-set-evidence-overclaims-fbe", record["blockers"])
-
-    def test_host_userdata_volume_is_bound_but_cannot_claim_android_fbe(self) -> None:
-        evidence = {
-            "schema": "alas-headless.redroid-userdata-volume-qualification/v1",
-            "outcome": "pass",
-            "ceiling": "host-volume-qualified",
-            "android_fbe_proven": False,
-            "direct_boot_proven": False,
-            "_evidence_file": evidence_identity(),
-        }
-        record = target_record(
-            "arm64-v8a", None, None, None, {}, None, None,
-            userdata_volume_evidence=evidence,
-        )
-        self.assertEqual(record["host_userdata_volume"]["outcome"], "pass")
-        self.assertNotIn("userdata-volume-evidence-file-invalid", record["blockers"])
-        self.assertNotIn("userdata-volume-evidence-overclaims-fbe", record["blockers"])
-
-        overclaim = dict(evidence)
-        overclaim["android_fbe_proven"] = True
-        record = target_record(
-            "arm64-v8a", None, None, None, {}, None, None,
-            userdata_volume_evidence=overclaim,
-        )
-        self.assertIn("userdata-volume-evidence-overclaims-fbe", record["blockers"])
-
     def test_dual_target_clean_release_can_promote(self) -> None:
         source_lock_sha256 = "c" * 64
         target = {

@@ -10,7 +10,7 @@ from .android_image_policy import REQUIRED_PROTECTED_CAPABILITIES
 from .android_update_lab import AdbClient, AndroidUpdateLabError
 
 
-AUDIT_SCHEMA = "alas-headless.android-foundation-audit/v1"
+AUDIT_SCHEMA = "alas-headless.android-foundation-audit/v2"
 CPU_LINE = re.compile(r"^cpu\s+((?:\d+\s+){3,}\d+)", re.MULTILINE)
 TOTAL_PSS = re.compile(r"^\s*Total RAM:\s+([\d,]+)K", re.MULTILINE)
 RAM_VALUE = re.compile(r"^\s*(Used|Free) RAM:\s+([\d,]+)K", re.MULTILINE)
@@ -28,7 +28,7 @@ PROBES = (
     CapabilityProbe("android-framework", ("getprop", "sys.boot_completed"), ("1",)),
     CapabilityProbe("art-runtime", ("ls", "-l", "/system/bin/app_process64"), ("app_process64",)),
     CapabilityProbe("audio-framework", ("service", "check", "audio"), ("found",), ("not found",)),
-    CapabilityProbe("credential-encrypted-storage", ("dumpsys", "user"), ("RUNNING_UNLOCKED",)),
+    CapabilityProbe("user-storage-ready", ("dumpsys", "user"), ("RUNNING_UNLOCKED",)),
     CapabilityProbe("dns", ("service", "list"), ("dnsresolver:",)),
     CapabilityProbe("download-provider", ("pm", "path", "com.android.providers.downloads"), ("package:",)),
     CapabilityProbe("hwui-egl", ("service", "check", "SurfaceFlinger"), ("found",), ("not found",)),
@@ -45,26 +45,6 @@ PROBES = (
     CapabilityProbe("tls-ca-store", ("ls", "/system/etc/security/cacerts"), (".0",)),
     CapabilityProbe("webview", ("dumpsys", "webviewupdate"), ("Current WebView package",), ("null",)),
 )
-
-FBE_COMMANDS = {
-    "crypto_state": ("getprop", "ro.crypto.state"),
-    "crypto_type": ("getprop", "ro.crypto.type"),
-    "package_feature": ("pm", "has-feature", "android.software.file_based_encryption"),
-    "storage_manager_mode": ("sm", "get-fbe-mode"),
-    "vold_mount_service": ("service", "check", "mount"),
-}
-
-
-def native_fbe_passes(values: Mapping[str, str]) -> bool:
-    return (
-        values.get("crypto_state", "").strip() == "encrypted"
-        and values.get("crypto_type", "").strip() == "file"
-        and values.get("package_feature", "").strip().lower() == "true"
-        and values.get("storage_manager_mode", "").strip() == "native"
-        and "found" in values.get("vold_mount_service", "").lower()
-        and "not found" not in values.get("vold_mount_service", "").lower()
-    )
-
 
 def parse_cpu_totals(text: str) -> Tuple[int, int]:
     match = CPU_LINE.search(text)
@@ -117,27 +97,6 @@ def audit_capabilities(adb: AdbClient, update_evidence: Mapping[str, Any]) -> Ma
             "returncode": result.returncode,
             "evidence": combined[:10000],
         }
-
-    fbe_values: Dict[str, str] = {}
-    fbe_commands = []
-    fbe_returncodes = []
-    for name, command in FBE_COMMANDS.items():
-        result = adb.shell(command, timeout_seconds=30, check=False)
-        combined = (result.stdout + "\n" + result.stderr).strip()
-        fbe_values[name] = combined
-        fbe_returncodes.append(result.returncode)
-        fbe_commands.append({
-            "name": name,
-            "command": list(command),
-            "returncode": result.returncode,
-            "evidence": combined[:2000],
-        })
-    fbe_passed = all(code == 0 for code in fbe_returncodes) and native_fbe_passes(fbe_values)
-    results["device-encrypted-storage"] = {
-        "outcome": "pass" if fbe_passed else "fail",
-        "mode_required": "native",
-        "probes": fbe_commands,
-    }
 
     phases = update_evidence.get("phases", [])
     phase_names = {

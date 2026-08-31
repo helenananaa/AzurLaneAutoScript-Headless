@@ -18,10 +18,12 @@ def main(argv: Sequence[str] = ()) -> int:
     parser.add_argument(
         "--abi", choices=("all", "x86_64", "arm64-v8a"), default="all"
     )
+    parser.add_argument("--prepared-source-root", type=Path)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args(list(argv) if argv else None)
     value = verify_remote_refs(
-        AndroidImageSourceLock.from_path(args.source_lock), abi=args.abi
+        AndroidImageSourceLock.from_path(args.source_lock), abi=args.abi,
+        prepared_source_root=args.prepared_source_root,
     )
     rendered = json.dumps(value, indent=2, sort_keys=True) + "\n"
     if args.output:

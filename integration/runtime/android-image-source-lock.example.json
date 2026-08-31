@@ -108,6 +108,30 @@
       "path": "integration/runtime/aosp-patches/0004-swiftshader-keep-llvm-state-process-lived.patch",
       "sha256": "2f8dd2bdff8b97dce0c4b5cf79f5aa12d73a26cabe011b18d1dcc8ad23187c72",
       "commit_message": "ALAS: keep SwiftShader LLVM state process-lived"
+    },
+    {
+      "project": "external/chromium-webview",
+      "path": "integration/runtime/aosp-patches/0005-redroid-webview-x86_64-only-prebuilt.patch",
+      "sha256": "06d3a8b23c421dbbc323019878c35f40ac7109c76754929d4a1f508a63acbc13",
+      "commit_message": "ALAS: strip x86 payload from x86_64 Redroid WebView"
+    },
+    {
+      "project": "build/make",
+      "path": "integration/runtime/aosp-patches/0006-redroid-x86_64-headless-consumer-app-trim.patch",
+      "sha256": "96e71d18e6b48d130e0f2147b23623c85f76fb515697d0d4ac06e3744f7760c9",
+      "commit_message": "ALAS: trim x86_64 Redroid consumer applications"
+    },
+    {
+      "project": "device/redroid",
+      "path": "integration/runtime/aosp-patches/0007-redroid-x86_64-five-locale-product.patch",
+      "sha256": "e6cb5467410b0bd02b26d017a4433a9263b4bb80e10c22a27dd44f4192a44e3b",
+      "commit_message": "ALAS: keep five x86_64 Redroid locale families"
+    },
+    {
+      "project": "external/noto-fonts",
+      "path": "integration/runtime/aosp-patches/0008-redroid-x86_64-noto-font-whitelist.patch",
+      "sha256": "d7317a6baa085e3f16cd3693400f52a5643020bedffa0914f9a69687a169d49b",
+      "commit_message": "ALAS: retain required x86_64 Redroid Noto fonts"
     }
   ],
   "products": [

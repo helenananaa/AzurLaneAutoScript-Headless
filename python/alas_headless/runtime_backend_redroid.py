@@ -9,7 +9,7 @@ import math
 import re
 import uuid
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping, Optional, Sequence, Tuple
+from typing import Any, Dict, Mapping, Optional, Sequence
 
 from .runtime_backend import BackendKind, RuntimeProbeResult, built_in_backend_profiles
 from .runtime_backend_adb import (
@@ -30,7 +30,6 @@ _IMAGE_REFERENCE_PATTERN = re.compile(r"^[A-Za-z0-9._:/-]+:[A-Za-z0-9_.-]+$")
 _MANIFEST_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 _POSIX_ABSOLUTE_PATH_PATTERN = re.compile(r"^/(?:[^\x00\r\n/]+/?)*$")
 _SERIAL_IP_PATTERN = re.compile(r"^([^:]+):([1-9][0-9]{0,4})$")
-_LOOP_RECORD_PATTERN = re.compile(r"^/dev/loop([0-9]+):")
 _SYSTEM_UI_PACKAGE = "com.android.systemui"
 
 
@@ -80,8 +79,7 @@ class RedroidRuntimeConfig:
     container_id: str
     image_reference: str
     image_manifest_digest: str
-    userdata_image: str
-    metadata_image: str
+    userdata_path: str
     start_script: str
     stop_script: Optional[str] = None
     ctr: str = "ctr"
@@ -98,7 +96,7 @@ class RedroidRuntimeConfig:
     stop_container_on_cleanup: bool = True
     disable_system_ui_for_headless: bool = False
     poll_interval_seconds: float = 1.0
-    storage_layout: str = "srv-v1"
+    storage_layout: str = "host-directory-v1"
 
     def __post_init__(self) -> None:
         _validate_adb_identity(self.serial, self.package, self.component)
@@ -116,15 +114,12 @@ class RedroidRuntimeConfig:
         if _MANIFEST_DIGEST_PATTERN.fullmatch(self.image_manifest_digest) is None:
             raise ValueError("Redroid image manifest digest is malformed")
         for name, value in (
-            ("userdata_image", self.userdata_image),
-            ("metadata_image", self.metadata_image),
+            ("userdata_path", self.userdata_path),
             ("start_script", self.start_script),
         ):
             _validate_narrow_path(name, value)
         if self.stop_script is not None:
             _validate_narrow_path("stop_script", self.stop_script)
-        if self.userdata_image == self.metadata_image:
-            raise ValueError("Redroid userdata and metadata images must be distinct")
         if self.unity_command_line not in (None, "-force-gfx-st"):
             raise ValueError("Unity command line is not allowlisted")
         for name, value in (("ctr", self.ctr), ("sudo", self.sudo), ("adb", self.adb)):
@@ -150,7 +145,7 @@ class RedroidRuntimeConfig:
             or self.poll_interval_seconds <= 0
         ):
             raise ValueError("Redroid polling interval must be positive")
-        if self.storage_layout != "srv-v1":
+        if self.storage_layout != "host-directory-v1":
             raise ValueError("Redroid storage layout is unsupported")
 
 
@@ -299,16 +294,39 @@ class RedroidBackend(AdbAttachedBackend):
         device_paths = {
             item.get("path") for item in devices
         }
-        if not {"/dev/block/alas_userdata", "/dev/block/alas_metadata"}.issubset(device_paths):
-            raise RuntimeIdentityMismatch("redroid-storage-device-contract-mismatch")
+        legacy_storage_paths = {
+            "/dev/block/alas_userdata",
+            "/dev/block/alas_metadata",
+            "/dev/mapper/control",
+        }
+        if device_paths & legacy_storage_paths:
+            raise RuntimeIdentityMismatch("redroid-legacy-storage-device-present")
         if any(
             item.get("type") == "b"
             and isinstance(path, str)
-            and (re.fullmatch(r"/dev/dm-[0-9]+", path) or path.startswith("/dev/mapper/"))
+            and re.fullmatch(r"/dev/dm-[0-9]+", path)
             for item in devices
             for path in (item.get("path"),)
         ):
-            raise RuntimeIdentityMismatch("redroid-container-frozen-dm-device")
+            raise RuntimeIdentityMismatch("redroid-legacy-storage-device-present")
+        mounts = spec.get("mounts") if isinstance(spec, dict) else None
+        if not isinstance(mounts, list) or any(
+            not isinstance(item, dict) for item in mounts
+        ):
+            raise RuntimeIdentityMismatch("redroid-container-mounts-malformed")
+        data_mounts = [item for item in mounts if item.get("destination") == "/data"]
+        if len(data_mounts) != 1:
+            raise RuntimeIdentityMismatch("redroid-userdata-mount-contract-mismatch")
+        data_mount = data_mounts[0]
+        options = data_mount.get("options")
+        if (
+            data_mount.get("source") != self.config.userdata_path
+            or data_mount.get("type") not in ("bind", "none")
+            or not isinstance(options, list)
+            or not ({"bind", "rbind"} & set(options))
+            or "ro" in options
+        ):
+            raise RuntimeIdentityMismatch("redroid-userdata-mount-contract-mismatch")
         namespaces = linux.get("namespaces")
         if not isinstance(namespaces, list) or any(
             not isinstance(item, dict) for item in namespaces
@@ -324,56 +342,13 @@ class RedroidBackend(AdbAttachedBackend):
             raise RuntimeIdentityMismatch("redroid-container-host-network-namespace")
         return info
 
-    def _validate_loop_image(self, label: str, path: str) -> Tuple[int, int]:
-        output = self._require_success(
+    def _validate_container_and_userdata(self) -> None:
+        self._validate_image_and_container()
+        self._require_success(
             self._command(
-                label,
-                (self.config.sudo, "-n", "losetup", "-j", path),
+                "redroid-userdata-path-probe", ("test", "-d", self.config.userdata_path)
             ),
-            "redroid-loop-image-probe-failed",
-        )
-        records = [line for line in output.splitlines() if line.strip()]
-        if len(records) != 1 or ("(" + path + ")") not in records[0]:
-            raise RuntimeIdentityMismatch("redroid-loop-image-mismatch")
-        match = _LOOP_RECORD_PATTERN.match(records[0])
-        if match is None:
-            raise RuntimeIdentityMismatch("redroid-loop-device-malformed")
-        return 7, int(match.group(1))
-
-    @staticmethod
-    def _validate_storage_device_identity(
-        info: Mapping[str, Any],
-        userdata_device: Tuple[int, int],
-        metadata_device: Tuple[int, int],
-    ) -> None:
-        if userdata_device == metadata_device:
-            raise RuntimeIdentityMismatch("redroid-storage-loop-alias")
-        devices = info["Spec"]["linux"]["devices"]
-        expected = {
-            "/dev/block/alas_userdata": userdata_device,
-            "/dev/block/alas_metadata": metadata_device,
-        }
-        for path, identity in expected.items():
-            matches = [item for item in devices if item.get("path") == path]
-            observed = {
-                (item.get("type"), item.get("major"), item.get("minor"))
-                for item in matches
-            }
-            if observed != {("b", identity[0], identity[1])}:
-                raise RuntimeIdentityMismatch(
-                    "redroid-storage-device-identity-mismatch"
-                )
-
-    def _validate_container_and_storage(self) -> None:
-        info = self._validate_image_and_container()
-        userdata_device = self._validate_loop_image(
-            "redroid-userdata-loop", self.config.userdata_image
-        )
-        metadata_device = self._validate_loop_image(
-            "redroid-metadata-loop", self.config.metadata_image
-        )
-        self._validate_storage_device_identity(
-            info, userdata_device, metadata_device
+            "redroid-userdata-path-unavailable",
         )
 
     def _host_architecture(self) -> Optional[str]:
@@ -428,7 +403,7 @@ class RedroidBackend(AdbAttachedBackend):
                 ),
                 "redroid-stop-script-unavailable",
             )
-        self._validate_container_and_storage()
+        self._validate_container_and_userdata()
         provisioned["initially_running"] = self._task_running()
         return provisioned
 
@@ -442,7 +417,7 @@ class RedroidBackend(AdbAttachedBackend):
             ),
             "redroid-container-start-failed",
         )
-        self._validate_container_and_storage()
+        self._validate_container_and_userdata()
         if not self._task_running():
             raise RuntimeBackendNotReady("redroid-task-not-running")
 
@@ -470,7 +445,7 @@ class RedroidBackend(AdbAttachedBackend):
     def fingerprint(self, instance: Mapping[str, Any]) -> Mapping[str, Any]:
         if not self._task_running():
             raise RuntimeBackendNotReady("redroid-task-not-running")
-        self._validate_container_and_storage()
+        self._validate_container_and_userdata()
         return super().fingerprint(instance)
 
     def _system_ui_disabled(self) -> bool:
@@ -670,7 +645,7 @@ class RedroidBackend(AdbAttachedBackend):
                 + list(plan["state_changes"]),
                 "container_contract": {
                     "manifest_digest_verified": True,
-                    "persistent_block_userdata": True,
+                    "persistent_userdata_directory": True,
                     "adb_private_only": True,
                     "preprovisioned_container_required": True,
                     "start_script_starts_task": True,
