@@ -329,15 +329,65 @@ fingerprint are reported under `rejected`; they are not guessed into a group.
 
 ## Deliberately deferred
 
-No current code chooses final vCPU count, MTTCG, affinity, NULL refresh rate,
-Unity worker count, unpaced execution, Android service removal, instance
-density, root governor, or PGO workload. Those decisions require the first
-repeatable real ALAS task slice and its trace.
+The KVM AVD now uses 3,072 MiB guest RAM and a `960x540@180` physical virtual
+display. Immediately
+before every game cold launch and recovery restart, the backend applies and
+verifies the qualified `1280x720@240` Android/Unity logical override, then
+applies and verifies the measured 30 Hz ANGLE NULL refresh rate. It then reads
+the one installed `org.chromium.angle` APK into the guest page cache before the
+mandatory `-force-gfx-st` launch. This reduces the emulator framebuffer by one
+16:9 tier without changing ALAS semantic coordinates and narrows the measured
+first-process ANGLE loader race without changing renderer selection. No current
+code chooses final vCPU count, MTTCG, Unity worker count, unpaced execution,
+Android service removal, instance density, root governor, or PGO workload.
+Those decisions require a repeatable real ALAS task slice and trace.
+
+An old-server static observer experiment on 2026-08-30 tested a further
+`854x480@160` physical reduction while holding the logical display, 30 Hz
+refresh, 3,072 MiB RAM, and CPU affinity constant. The two pre-change windows
+averaged 0.466860 QEMU CPU cores; three post-change windows averaged 0.473302
+cores, with every window returning 91/91 typed snapshots and no observer
+failures. Because the smaller display produced no measured CPU benefit and the
+post-change mean was 1.4% higher, the live AVD and this default were restored to
+`960x540@180`. Do not adopt the lower tier without a different workload or new
+evidence.
+
+CPU affinity is optional and host-specific. The old dual-socket KVM server
+measured a repeatable improvement when its resident emulator was restricted to
+NUMA node 1 CPUs `26-51`, where most of that process's memory was already
+resident. Set `cpu_affinity` only in that host's runtime configuration; the
+portable default remains `null` because CPU and NUMA numbering are not stable
+across servers.
+
+NUMA memory binding is likewise optional and host-specific. Set `numa_node` to
+the measured local node only alongside a matching CPU affinity. The backend
+first verifies that Linux accepts `MPOL_BIND`, then replaces the verifier
+process with the emulator so QEMU inherits the policy without a `numactl`
+dependency. The portable default remains `null`. A separately managed systemd
+unit can apply the equivalent policy with `NUMAPolicy=bind` and `NUMAMask=1`.
+
+On the old server, the reverse A/B experiment compared four unbound windows
+(0.477253 QEMU CPU cores mean) with three node-1-bound windows (0.467383 mean),
+all returning 91/91 typed snapshots without observer failures. Binding reduced
+the measured mean by 2.1% and raised QEMU's node-1 page share from roughly
+60-66% to about 99%, so that host retains node 1 binding. Across both control
+and treatment emulator restarts, the first game process after boot crashed in
+RenderThread and the second mandatory `-force-gfx-st` cold launch recovered.
+Four captured crashes had the same `libEGL.so` null call path after
+`eglGetDisplay(0x0)` could not resolve `eglGetPlatformDisplay` from ANGLE, so the
+issue was independent of the NUMA result. With a read-only ANGLE APK prewarm,
+two further independent full emulator restarts each kept their first game PID
+alive for the observation window, produced fresh coherent typed state at
+`1280x720`, and created no game tombstone. The prewarm is therefore retained as
+the operational KVM mitigation. It does not prove that the underlying Android
+EGL loader race is eliminated; a source patch was only apply-checked because
+the retained build checkout was missing its Rust prebuilts and could not
+produce a trustworthy replacement `libEGL`.
 
 The next implementation milestone is to replace one plan-only adapter at a
 time with a reproducible provisioner, beginning with Redroid image and `/data`
 ownership or ARM64-QEMU recovery after the corresponding host is available.
 Separately, the first repeatable harmless ALAS task slice can start using these
 same manifests and traces without mixing backend branches or artifact
-generations. No live KVM or phone qualification is claimed by this code-only
-milestone.
+generations. These host-specific tuning windows do not promote broad live
+ALAS task or phone qualification.

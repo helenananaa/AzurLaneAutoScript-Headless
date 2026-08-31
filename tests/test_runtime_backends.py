@@ -1,6 +1,7 @@
 import json
 import os
 import itertools
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -778,6 +779,8 @@ class RuntimeBackendsTests(unittest.TestCase):
             )
             plan = backend.qualification_plan(make_lock("kvm"))
             self.assertFalse(plan["compatibility_start_profile"]["experimental_tuning"])
+            self.assertEqual(plan["compatibility_start_profile"]["null_refresh_hz"], 30)
+            self.assertIn("set-angle-null-refresh-rate", plan["state_changes"])
             self.assertNotIn("vcpu", json.dumps(plan).lower())
             self.assertNotIn("mttcg", json.dumps(plan).lower())
 
@@ -869,6 +872,8 @@ class RuntimeBackendsTests(unittest.TestCase):
                     5043,
                     release,
                     sdk_root,
+                    cpu_affinity="26-51",
+                    numa_node=1,
                 ),
                 ScriptedExecutor(
                     {"adb-device-inventory": (0, "List of devices attached\n", "")}
@@ -887,6 +892,92 @@ class RuntimeBackendsTests(unittest.TestCase):
             )
             self.assertEqual(started.environment["ANDROID_SDK_ROOT"], str(sdk_root.resolve()))
             self.assertEqual(started.environment["ANDROID_ADB_SERVER_PORT"], "5043")
+            self.assertEqual(
+                started.argv[:7],
+                (
+                    sys.executable,
+                    "-m",
+                    "alas_headless.numa_exec",
+                    "--node",
+                    "1",
+                    "--",
+                    str(release / "emulator" / "emulator"),
+                ),
+            )
+            numa_check = next(
+                spec
+                for spec in backend.executor.calls
+                if spec.label == "kvm-emulator-numa-memory-policy-check"
+            )
+            self.assertEqual(
+                numa_check.argv,
+                (
+                    sys.executable,
+                    "-m",
+                    "alas_headless.numa_exec",
+                    "--node",
+                    "1",
+                    "--check",
+                ),
+            )
+            self.assertTrue(numa_check.mutating)
+            affinity = next(
+                spec
+                for spec in backend.executor.calls
+                if spec.label == "kvm-emulator-cpu-affinity"
+            )
+            self.assertEqual(
+                affinity.argv,
+                (
+                    "taskset",
+                    "--all-tasks",
+                    "--pid",
+                    "--cpu-list",
+                    "26-51",
+                    "4321",
+                ),
+            )
+            self.assertTrue(affinity.mutating)
+
+            backend.executor.results["kvm-emulator-numa-memory-policy-check"] = (
+                1,
+                "",
+                "set_mempolicy failed",
+            )
+            unavailable = KvmBackend(
+                backend.config,
+                backend.executor,
+                kvm_probe=lambda: (True, "ready", {}),
+            )
+            started_count = len(unavailable.executor.started)
+            with self.assertRaisesRegex(
+                RuntimeBackendNotReady,
+                "kvm-emulator-numa-memory-policy-unavailable",
+            ):
+                unavailable.start({})
+            self.assertEqual(len(unavailable.executor.started), started_count)
+
+            backend.executor.results["kvm-emulator-numa-memory-policy-check"] = (
+                0,
+                "",
+                "",
+            )
+            backend.executor.results["kvm-emulator-cpu-affinity"] = (
+                1,
+                "",
+                "invalid affinity",
+            )
+            failed = KvmBackend(
+                backend.config,
+                backend.executor,
+                kvm_probe=lambda: (True, "ready", {}),
+            )
+            with self.assertRaisesRegex(
+                RuntimeBackendNotReady,
+                "kvm-emulator-cpu-affinity-failed",
+            ):
+                failed.start({})
+            self.assertEqual(failed.executor.stopped[-1].pid, 4321)
 
     def test_kvm_config_rejects_adb_outside_its_pinned_release(self):
         release = Path("/runtime/releases/test")
@@ -1042,6 +1133,264 @@ class RuntimeBackendsTests(unittest.TestCase):
             "kvm-network-provisioning-ready-timeout",
         ):
             backend.wait_android_ready({}, 0.0)
+
+    def test_kvm_prepares_display_refresh_and_angle_apk_before_every_launch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            release = root / "releases" / "test"
+            results = {
+                "kvm-logical-display-size-set": (0, "", ""),
+                "kvm-logical-display-density-set": (0, "", ""),
+                "kvm-logical-display-size-readback": (
+                    0,
+                    "Physical size: 960x540\r\nOverride size: 1280x720\r\n",
+                    "",
+                ),
+                "kvm-logical-display-density-readback": (
+                    0,
+                    "Physical density: 180\r\nOverride density: 240\r\n",
+                    "",
+                ),
+                "angle-null-refresh-rate-set": (0, "", ""),
+                "angle-null-refresh-rate-readback": (0, "30\n", ""),
+                "angle-apk-prewarm-path": (
+                    0,
+                    "package:/data/app/org.chromium.angle/base.apk\n",
+                    "",
+                ),
+                "angle-apk-prewarm-read": (0, "", "14+0 records in\n"),
+                "angle-setting-read-angle-debug-package": (
+                    0,
+                    "org.chromium.angle",
+                    "",
+                ),
+                "angle-setting-read-angle-gl-driver-selection-pkgs": (
+                    0,
+                    PACKAGE,
+                    "",
+                ),
+                "angle-setting-read-angle-gl-driver-selection-values": (
+                    0,
+                    "angle",
+                    "",
+                ),
+                "angle-setting-read-show-angle-in-use-dialog-box": (0, "0", ""),
+                "game-force-stop-before-launch": (0, "", ""),
+                "game-launch": (0, "Status: ok", ""),
+                "game-pid": (0, "1234", ""),
+                "game-foreground": (
+                    0,
+                    "topResumedActivity=ActivityRecord{x u0 " + COMPONENT + " t1}",
+                    "",
+                ),
+            }
+            executor = ScriptedExecutor(results)
+            backend = KvmBackend(
+                KvmRuntimeConfig(
+                    serial="127.0.0.1:5589",
+                    package=PACKAGE,
+                    component=COMPONENT,
+                    host_class="linux-x86_64-kvm",
+                    emulator=release / "emulator" / "emulator",
+                    emulator_check=release / "emulator" / "emulator-check",
+                    adb=release / "sdk" / "platform-tools" / "adb",
+                    avd_name="test",
+                    avd_home=root / "avd",
+                    console_port=5588,
+                    adb_server_port=5043,
+                    runtime_release_root=release,
+                    sdk_root=release / "sdk",
+                ),
+                executor,
+                kvm_probe=lambda: (True, "ready", {}),
+                release_verifier=lambda path: path,
+                sleep=lambda _: None,
+            )
+
+            state = backend.wait_game_ready({"instance_id": "test"}, 1.0)
+            self.assertEqual(state["pid"], 1234)
+            labels = [spec.label for spec in executor.calls]
+            self.assertLess(
+                labels.index("game-force-stop-before-launch"),
+                labels.index("kvm-logical-display-size-set"),
+            )
+            self.assertLess(
+                labels.index("kvm-logical-display-density-set"),
+                labels.index("angle-null-refresh-rate-set"),
+            )
+            self.assertLess(
+                labels.index("angle-null-refresh-rate-set"),
+                labels.index("angle-apk-prewarm-path"),
+            )
+            self.assertLess(
+                labels.index("angle-apk-prewarm-read"),
+                labels.index("game-launch"),
+            )
+            size_set = next(
+                spec
+                for spec in executor.calls
+                if spec.label == "kvm-logical-display-size-set"
+            )
+            self.assertEqual(size_set.argv[-4:], ("shell", "wm", "size", "1280x720"))
+            self.assertTrue(size_set.mutating)
+            configured = next(
+                spec
+                for spec in executor.calls
+                if spec.label == "angle-null-refresh-rate-set"
+            )
+            self.assertEqual(
+                configured.argv[-4:],
+                ("shell", "setprop", "debug.angle.null_refresh_hz", "30"),
+            )
+            self.assertTrue(configured.mutating)
+            prewarm = next(
+                spec
+                for spec in executor.calls
+                if spec.label == "angle-apk-prewarm-read"
+            )
+            self.assertEqual(
+                prewarm.argv[-5:],
+                (
+                    "shell",
+                    "dd",
+                    "if=/data/app/org.chromium.angle/base.apk",
+                    "of=/dev/null",
+                    "bs=1048576",
+                ),
+            )
+            self.assertFalse(prewarm.mutating)
+            self.assertEqual(
+                backend.qualification_plan(make_lock("kvm"))["compatibility_start_profile"],
+                {
+                    "gpu": "swiftshader_indirect",
+                    "acceleration": "kvm",
+                    "snapshots": "load-save-disabled-for-qualification",
+                    "experimental_tuning": False,
+                    "guest_ram_mib": 3072,
+                    "cpu_affinity": "host-default",
+                    "numa_memory_node": "host-default",
+                    "null_refresh_hz": 30,
+                    "physical_display": "960x540@180",
+                    "logical_display": "1280x720@240",
+                },
+            )
+            self.assertEqual(
+                backend.qualification_plan(make_lock("kvm"))["game_launch_profile"][
+                    "null_refresh_hz"
+                ],
+                30,
+            )
+            self.assertEqual(
+                backend.qualification_plan(make_lock("kvm"))["game_launch_profile"][
+                    "angle_apk_prewarm"
+                ],
+                "required-before-every-game-launch",
+            )
+
+            executor.results["angle-null-refresh-rate-readback"] = (0, "60\n", "")
+            with self.assertRaisesRegex(
+                RuntimeIdentityMismatch,
+                "angle-null-refresh-rate-mismatch",
+            ):
+                backend.restart_game({"instance_id": "test"})
+
+            executor.results["angle-null-refresh-rate-readback"] = (0, "30\n", "")
+            executor.results["angle-apk-prewarm-path"] = (0, "", "")
+            with self.assertRaisesRegex(
+                RuntimeIdentityMismatch,
+                "angle-apk-prewarm-path-mismatch",
+            ):
+                backend.restart_game({"instance_id": "test"})
+
+            executor.results["angle-apk-prewarm-path"] = (
+                0,
+                "package:/data/app/org.chromium.angle/base.apk\n",
+                "",
+            )
+            executor.results["angle-apk-prewarm-read"] = (1, "", "read error")
+            with self.assertRaisesRegex(
+                RuntimeBackendNotReady,
+                "angle-apk-prewarm-read-failed",
+            ):
+                backend.restart_game({"instance_id": "test"})
+
+            executor.results["angle-null-refresh-rate-readback"] = (0, "30\n", "")
+            executor.results["angle-apk-prewarm-read"] = (0, "", "")
+            executor.results["kvm-logical-display-size-readback"] = (
+                0,
+                "Physical size: 1280x720\n",
+                "",
+            )
+            executor.results["kvm-logical-display-density-readback"] = (
+                0,
+                "Physical density: 240\n",
+                "",
+            )
+            backend.restart_game({"instance_id": "test"})
+
+            executor.results["kvm-logical-display-size-readback"] = (
+                0,
+                "Physical size: 960x540\n",
+                "",
+            )
+            executor.results["kvm-logical-display-density-readback"] = (
+                0,
+                "Physical density: 180\n",
+                "",
+            )
+            with self.assertRaisesRegex(
+                RuntimeIdentityMismatch,
+                "logical-display-mismatch",
+            ):
+                backend.restart_game({"instance_id": "test"})
+
+    def test_kvm_null_refresh_rate_matches_angle_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            release = Path(directory) / "releases" / "test"
+            common = {
+                "serial": "127.0.0.1:5589",
+                "package": PACKAGE,
+                "component": COMPONENT,
+                "host_class": "linux-x86_64-kvm",
+                "emulator": release / "emulator" / "emulator",
+                "emulator_check": release / "emulator" / "emulator-check",
+                "adb": release / "sdk" / "platform-tools" / "adb",
+                "avd_name": "test",
+                "avd_home": release.parent.parent / "avd",
+                "console_port": 5588,
+                "adb_server_port": 5043,
+                "runtime_release_root": release,
+                "sdk_root": release / "sdk",
+            }
+            self.assertEqual(KvmRuntimeConfig(**common).null_refresh_hz, 30)
+            self.assertIsNone(KvmRuntimeConfig(**common).cpu_affinity)
+            self.assertIsNone(KvmRuntimeConfig(**common).numa_node)
+            self.assertEqual(
+                KvmRuntimeConfig(**common, cpu_affinity="26-51").cpu_affinity,
+                "26-51",
+            )
+            self.assertEqual(KvmRuntimeConfig(**common, numa_node=1).numa_node, 1)
+            self.assertIsNone(
+                KvmRuntimeConfig(**common, null_refresh_hz=None).null_refresh_hz
+            )
+            for invalid in (True, 0, 241, 30.0):
+                with self.subTest(invalid=invalid), self.assertRaisesRegex(
+                    ValueError,
+                    "ANGLE NULL refresh rate",
+                ):
+                    KvmRuntimeConfig(**common, null_refresh_hz=invalid)
+            for invalid in (True, "", "51-26", "1,,2", "all"):
+                with self.subTest(cpu_affinity=invalid), self.assertRaisesRegex(
+                    ValueError,
+                    "KVM CPU affinity",
+                ):
+                    KvmRuntimeConfig(**common, cpu_affinity=invalid)
+            for invalid in (True, -1, "1", 1.0):
+                with self.subTest(numa_node=invalid), self.assertRaisesRegex(
+                    ValueError,
+                    "KVM NUMA node",
+                ):
+                    KvmRuntimeConfig(**common, numa_node=invalid)
 
     def test_observer_readiness_retries_transient_transport_failure(self):
         executor = ScriptedExecutor()
@@ -1262,6 +1611,7 @@ class RuntimeBackendsTests(unittest.TestCase):
         self.assertEqual(kvm.serial, "127.0.0.1:5589")
         self.assertEqual(kvm.config.console_port, 5588)
         self.assertEqual(kvm.adb_server_port, 5043)
+        self.assertEqual(kvm.config.null_refresh_hz, 30)
         self.assertIn("/releases/kvm-r75-x86_64-v2/", kvm.config.emulator.as_posix())
         self.assertIn("/releases/kvm-r75-x86_64-v2/", kvm.config.adb.as_posix())
         self.assertNotIn("android-build/src", kvm.config.emulator.as_posix())
@@ -1289,6 +1639,22 @@ class RuntimeBackendsTests(unittest.TestCase):
         invalid_redroid["unknown"] = True
         with self.assertRaises(ValueError):
             backend_from_config(invalid_redroid, executor)
+
+        current_example = (
+            Path(__file__).resolve().parents[1]
+            / "integration"
+            / "runtime"
+            / "kvm.config.example.json"
+        )
+        current = backend_from_config(
+            json.loads(current_example.read_text(encoding="utf-8")),
+            executor,
+            kvm_probe=lambda: (True, "ready", {}),
+        )
+        self.assertIsInstance(current, KvmBackend)
+        self.assertEqual(current.config.null_refresh_hz, 30)
+        self.assertIsNone(current.config.cpu_affinity)
+        self.assertIsNone(current.config.numa_node)
 
 
 if __name__ == "__main__":

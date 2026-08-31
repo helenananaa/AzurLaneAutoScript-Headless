@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import math
 import os
+import re
 import stat
+import sys
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,6 +16,7 @@ from .runtime_backend import BackendKind, RuntimeProbeResult, built_in_backend_p
 from .runtime_backend_adb import (
     AdbAttachedBackend,
     RuntimeBackendNotReady,
+    RuntimeIdentityMismatch,
     _PACKAGE_PATTERN,
     _validate_adb_identity,
     _validate_adb_server_port,
@@ -44,6 +47,9 @@ class KvmRuntimeConfig:
     sdk_root: Optional[Path] = None
     angle_package: str = "org.chromium.angle"
     unity_command_line: Optional[str] = "-force-gfx-st"
+    null_refresh_hz: Optional[int] = 30
+    cpu_affinity: Optional[str] = None
+    numa_node: Optional[int] = None
     launch_game: bool = True
     manage_angle_routing: bool = False
     poll_interval_seconds: float = 1.0
@@ -54,6 +60,28 @@ class KvmRuntimeConfig:
             raise ValueError("ANGLE package is malformed")
         if self.unity_command_line not in (None, "-force-gfx-st"):
             raise ValueError("Unity command line is not allowlisted")
+        if self.null_refresh_hz is not None and (
+            isinstance(self.null_refresh_hz, bool)
+            or not isinstance(self.null_refresh_hz, int)
+            or not 1 <= self.null_refresh_hz <= 240
+        ):
+            raise ValueError("ANGLE NULL refresh rate must be in [1, 240]")
+        if self.cpu_affinity is not None:
+            if not isinstance(self.cpu_affinity, str) or re.fullmatch(
+                r"[0-9]+(?:-[0-9]+)?(?:,[0-9]+(?:-[0-9]+)?)*",
+                self.cpu_affinity,
+            ) is None:
+                raise ValueError("KVM CPU affinity must be a canonical CPU list")
+            for item in self.cpu_affinity.split(","):
+                bounds = tuple(int(value) for value in item.split("-"))
+                if len(bounds) == 2 and bounds[0] > bounds[1]:
+                    raise ValueError("KVM CPU affinity range is reversed")
+        if self.numa_node is not None and (
+            isinstance(self.numa_node, bool)
+            or not isinstance(self.numa_node, int)
+            or self.numa_node < 0
+        ):
+            raise ValueError("KVM NUMA node must be a non-negative integer")
         if (
             not isinstance(self.host_class, str)
             or not self.host_class.strip()
@@ -173,6 +201,10 @@ def probe_linux_kvm() -> Tuple[bool, str, Mapping[str, str]]:
 
 
 class KvmBackend(AdbAttachedBackend):
+    _LOGICAL_DISPLAY_WIDTH = 1280
+    _LOGICAL_DISPLAY_HEIGHT = 720
+    _LOGICAL_DISPLAY_DENSITY = 240
+
     def __init__(
         self,
         config: KvmRuntimeConfig,
@@ -395,6 +427,28 @@ class KvmBackend(AdbAttachedBackend):
             "none",
             "-no-metrics",
         )
+        if self.config.numa_node is not None:
+            numa_prefix = (
+                sys.executable,
+                "-m",
+                "alas_headless.numa_exec",
+                "--node",
+                str(self.config.numa_node),
+            )
+            checked = self.executor.run(
+                RuntimeCommandSpec(
+                    "kvm-emulator-numa-memory-policy-check",
+                    numa_prefix + ("--check",),
+                    timeout_seconds=10.0,
+                    mutating=True,
+                    environment=environment,
+                )
+            )
+            self._require_success(
+                checked,
+                "kvm-emulator-numa-memory-policy-unavailable",
+            )
+            arguments = numa_prefix + ("--",) + arguments
         instance_id = uuid.uuid4().hex
         process = self.executor.start(
             RuntimeCommandSpec(
@@ -406,6 +460,30 @@ class KvmBackend(AdbAttachedBackend):
             ),
             handle_id=instance_id,
         )
+        if self.config.cpu_affinity is not None:
+            try:
+                affinity = self.executor.run(
+                    RuntimeCommandSpec(
+                        "kvm-emulator-cpu-affinity",
+                        (
+                            "taskset",
+                            "--all-tasks",
+                            "--pid",
+                            "--cpu-list",
+                            self.config.cpu_affinity,
+                            str(process.pid),
+                        ),
+                        timeout_seconds=10.0,
+                        mutating=True,
+                    )
+                )
+                self._require_success(
+                    affinity,
+                    "kvm-emulator-cpu-affinity-failed",
+                )
+            except Exception:
+                self.executor.stop_owned(process, timeout_seconds=30.0)
+                raise
         self._owned_processes[instance_id] = process
         return {
             "instance_id": instance_id,
@@ -413,6 +491,146 @@ class KvmBackend(AdbAttachedBackend):
             "owned": True,
             "pid": process.pid,
         }
+
+    def _configure_null_refresh_rate(self) -> None:
+        rate = self.config.null_refresh_hz
+        if rate is None:
+            return
+        configured = self._adb(
+            "angle-null-refresh-rate-set",
+            (
+                "shell",
+                "setprop",
+                "debug.angle.null_refresh_hz",
+                str(rate),
+            ),
+            mutating=True,
+        )
+        self._require_success(configured, "angle-null-refresh-rate-set-failed")
+        observed = self._adb(
+            "angle-null-refresh-rate-readback",
+            ("shell", "getprop", "debug.angle.null_refresh_hz"),
+        )
+        if not observed.succeeded or observed.stdout.strip() != str(rate):
+            raise RuntimeIdentityMismatch("angle-null-refresh-rate-mismatch")
+
+    def _prewarm_angle_apk(self) -> None:
+        path_result = self._adb(
+            "angle-apk-prewarm-path",
+            ("shell", "pm", "path", self.config.angle_package),
+        )
+        path_output = self._require_success(
+            path_result,
+            "angle-apk-prewarm-package-unavailable",
+        )
+        paths = [
+            line[len("package:") :]
+            for line in path_output.splitlines()
+            if line.startswith("package:")
+        ]
+        if (
+            len(paths) != 1
+            or re.fullmatch(r"/[A-Za-z0-9._/+=:@~-]+", paths[0]) is None
+        ):
+            raise RuntimeIdentityMismatch("angle-apk-prewarm-path-mismatch")
+        prewarmed = self._adb(
+            "angle-apk-prewarm-read",
+            (
+                "shell",
+                "dd",
+                "if={0}".format(paths[0]),
+                "of=/dev/null",
+                "bs=1048576",
+            ),
+            timeout_seconds=30.0,
+        )
+        self._require_success(prewarmed, "angle-apk-prewarm-read-failed")
+
+    @staticmethod
+    def _effective_display_value(
+        output: str,
+        label: str,
+        value_pattern: str,
+    ) -> Tuple[int, ...]:
+        physical = re.search(
+            r"^Physical " + re.escape(label) + r": " + value_pattern + r"\r?$",
+            output,
+            re.MULTILINE,
+        )
+        override = re.search(
+            r"^Override " + re.escape(label) + r": " + value_pattern + r"\r?$",
+            output,
+            re.MULTILINE,
+        )
+        selected = override or physical
+        if selected is None:
+            raise RuntimeIdentityMismatch("logical-display-readback-malformed")
+        return tuple(int(value) for value in selected.groups())
+
+    def _configure_logical_display(self) -> None:
+        logical_size = "{0}x{1}".format(
+            self._LOGICAL_DISPLAY_WIDTH,
+            self._LOGICAL_DISPLAY_HEIGHT,
+        )
+        size_set = self._adb(
+            "kvm-logical-display-size-set",
+            ("shell", "wm", "size", logical_size),
+            mutating=True,
+        )
+        self._require_success(size_set, "logical-display-size-set-failed")
+        density_set = self._adb(
+            "kvm-logical-display-density-set",
+            (
+                "shell",
+                "wm",
+                "density",
+                str(self._LOGICAL_DISPLAY_DENSITY),
+            ),
+            mutating=True,
+        )
+        self._require_success(density_set, "logical-display-density-set-failed")
+        size_readback = self._adb(
+            "kvm-logical-display-size-readback",
+            ("shell", "wm", "size"),
+        )
+        density_readback = self._adb(
+            "kvm-logical-display-density-readback",
+            ("shell", "wm", "density"),
+        )
+        self._require_success(size_readback, "logical-display-size-readback-failed")
+        self._require_success(
+            density_readback,
+            "logical-display-density-readback-failed",
+        )
+        effective_size = self._effective_display_value(
+            size_readback.stdout,
+            "size",
+            r"([0-9]+)x([0-9]+)",
+        )
+        effective_density = self._effective_display_value(
+            density_readback.stdout,
+            "density",
+            r"([0-9]+)",
+        )
+        if effective_size != (
+            self._LOGICAL_DISPLAY_WIDTH,
+            self._LOGICAL_DISPLAY_HEIGHT,
+        ) or effective_density != (self._LOGICAL_DISPLAY_DENSITY,):
+            raise RuntimeIdentityMismatch("logical-display-mismatch")
+
+    def _prepare_game_cold_launch(self, instance: Mapping[str, Any]) -> None:
+        # The emulator framebuffer is deliberately smaller, while Unity and
+        # ALAS retain their qualified 1280x720 semantic coordinate surface.
+        self._configure_logical_display()
+        # SurfaceNULL reads this property when the game's EGL surface is
+        # created, so every cold launch and recovery restart must set it first.
+        self._configure_null_refresh_rate()
+        # The old KVM host repeatedly exposed a first-process race while
+        # competing EGL initialization paths loaded the APK ANGLE driver from
+        # cold storage. Reading the exact selected APK here closes that measured
+        # window without changing renderer selection or introducing a pixel
+        # fallback.
+        self._prewarm_angle_apk()
 
     def stop(self, instance: Mapping[str, Any]) -> None:
         cleanup_failure: Optional[Exception] = None
@@ -478,14 +696,29 @@ class KvmBackend(AdbAttachedBackend):
             "acceleration": "kvm",
             "snapshots": "load-save-disabled-for-qualification",
             "experimental_tuning": False,
+            "guest_ram_mib": 3072,
+            "cpu_affinity": self.config.cpu_affinity or "host-default",
+            "numa_memory_node": (
+                self.config.numa_node
+                if self.config.numa_node is not None
+                else "host-default"
+            ),
+            "null_refresh_hz": self.config.null_refresh_hz,
+            "physical_display": "960x540@180",
+            "logical_display": "1280x720@240",
         }
         plan["game_launch_profile"] = {
             "force_stop_before_launch": self.launch_game,
             "unity_command_line": self.unity_command_line,
+            "null_refresh_hz": self.config.null_refresh_hz,
+            "angle_apk_prewarm": "required-before-every-game-launch",
             "angle_routing": (
                 "managed-ephemeral" if self.manage_angle_routing else "verify-only"
             ),
         }
+        plan["state_changes"].insert(1, "set-canonical-logical-display")
+        if self.config.null_refresh_hz is not None:
+            plan["state_changes"].insert(2, "set-angle-null-refresh-rate")
         if self.manage_angle_routing:
-            plan["state_changes"].insert(1, "temporarily-set-and-restore-angle-routing")
+            plan["state_changes"].insert(3, "temporarily-set-and-restore-angle-routing")
         return plan
