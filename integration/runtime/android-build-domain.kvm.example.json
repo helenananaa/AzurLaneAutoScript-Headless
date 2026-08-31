@@ -1,0 +1,16 @@
+{
+  "schema": "alas-headless.android-build-domain/v3",
+  "backend": "kvm",
+  "paths": {
+    "source_root": "/srv/android-build/kvm/source/aosp-14-r75",
+    "repo_metadata_root": "/srv/android-build/kvm/repo/aosp-14-r75",
+    "output_root": "/srv/android-build/kvm/out/x86_64",
+    "ccache_root": "/srv/android-build/kvm/ccache/x86_64",
+    "build_home": "/srv/android-build/kvm/home",
+    "temp_root": "/srv/android-build/kvm/tmp/x86_64",
+    "runtime_root": "/srv/android-build/kvm/runtime",
+    "archive_root": "/srv/android-build/kvm/archive/images",
+    "evidence_root": "/srv/android-build/kvm/evidence",
+    "apk_archive": "/srv/android-build/kvm/archive/apks"
+  }
+}
