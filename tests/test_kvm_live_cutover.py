@@ -46,6 +46,11 @@ def _write_executable(path: Path, payload: bytes) -> None:
         path.chmod(0o755)
 
 
+def _run_identity(tmp_path: Path) -> UserIdentity:
+    uid = os.getuid() if hasattr(os, "getuid") else 1000
+    return UserIdentity("weipa", uid, tmp_path / "home-weipa")
+
+
 def _context(tmp_path: Path) -> CutoverContext:
     source = tmp_path / "source-kvm"
     output = tmp_path / "output-kvm"
@@ -221,7 +226,7 @@ def test_systemd_unit_is_non_root_bounded_and_exact(tmp_path: Path) -> None:
     run_script = tmp_path / "run-kvm-avd.sh"
     _write_executable(run_script, b"#!/bin/sh\n")
     alas_python = _alas_python(context)
-    identity = UserIdentity("weipa", 1000, tmp_path / "home-weipa")
+    identity = _run_identity(tmp_path)
 
     content = render_systemd_unit(
         context,
@@ -265,7 +270,7 @@ def test_install_unit_is_atomic_inactive_and_not_enabled(
     unit_directory = tmp_path / "systemd"
     unit_directory.mkdir()
     unit_path = unit_directory / "alas-kvm.service"
-    identity = UserIdentity("weipa", 1000, tmp_path / "home-weipa")
+    identity = _run_identity(tmp_path)
     reloaded = False
     calls: list[tuple[str, ...]] = []
     monkeypatch.setattr(
@@ -351,7 +356,7 @@ def test_effective_environment_keeps_logical_venv_symlink_and_decodes_quotes(
     _write_executable(run_script, b"#!/bin/sh\n")
     unit_path = tmp_path / "alas-kvm.service"
     unit_path.write_text("[Service]\n", encoding="utf-8")
-    identity = UserIdentity("weipa", 1000, tmp_path / "home-weipa")
+    identity = _run_identity(tmp_path)
     properties = _effective_properties(
         context, unit_path, run_script, logical, identity
     )
@@ -433,7 +438,7 @@ def test_unit_install_failure_restores_previous_unit(
         install_systemd_unit(
             context,
             "alas-kvm.service",
-            UserIdentity("weipa", 1000, tmp_path / "home-weipa"),
+            _run_identity(tmp_path),
             run_script,
             alas_python,
             unit_directory,
@@ -612,7 +617,7 @@ def test_offline_snapshot_contains_full_avd_descriptor_and_contracts(
         "run_script": str(run_script),
         "alas_python": cutover._validate_alas_python(
             alas_python,
-            UserIdentity("weipa", 1000, tmp_path / "home-weipa"),
+            _run_identity(tmp_path),
             context.inputs.runtime_root,
         ),
         "control_plane": {
@@ -1074,7 +1079,7 @@ def test_adb_wait_uses_release_binary_port_and_exact_serial(tmp_path: Path) -> N
 
     result = wait_for_dedicated_adb_transport(
         context,
-        UserIdentity("weipa", 1000, tmp_path / "home-weipa"),
+        _run_identity(tmp_path),
         10.0,
         runner=runner,
     )
@@ -1109,7 +1114,7 @@ def test_adb_wait_rejects_transport_that_turns_offline_in_final_inventory(
     with pytest.raises(KvmLiveCutoverError, match="inventory differs"):
         wait_for_dedicated_adb_transport(
             context,
-            UserIdentity("weipa", 1000, tmp_path / "home-weipa"),
+            _run_identity(tmp_path),
             10.0,
             runner=runner,
         )
@@ -1366,7 +1371,7 @@ def test_effective_systemd_contract_rejects_drop_in_override(tmp_path: Path) -> 
     alas_python = _alas_python(context)
     unit = tmp_path / "alas-kvm.service"
     unit.write_text("[Service]\n", encoding="utf-8")
-    identity = UserIdentity("weipa", 1000, tmp_path / "home-weipa")
+    identity = _run_identity(tmp_path)
     properties = _effective_properties(context, unit, run_script, alas_python, identity)
     properties["DropInPaths"] = "/etc/systemd/system/alas-kvm.service.d/override.conf"
 
@@ -1470,7 +1475,10 @@ def test_adb_unknown_listener_is_rejected_before_kill(tmp_path: Path) -> None:
     process = proc_root / "91"
     process.mkdir(parents=True)
     (process / "status").write_text(
-        "Name:\tadb\nUid:\t1000\t1000\t1000\t1000\n", encoding="ascii"
+        "Name:\tadb\nUid:\t{0}\t{0}\t{0}\t{0}\n".format(
+            _run_identity(tmp_path).uid
+        ),
+        encoding="ascii",
     )
     calls: list[tuple[str, ...]] = []
 
@@ -1487,7 +1495,7 @@ def test_adb_unknown_listener_is_rejected_before_kill(tmp_path: Path) -> None:
     with pytest.raises(KvmLiveCutoverError, match="pinned KVM runtime"):
         cutover.restart_dedicated_adb_server(
             context,
-            UserIdentity("weipa", 1000, tmp_path / "home-weipa"),
+            _run_identity(tmp_path),
             runner=runner,
             proc_root=proc_root,
             readlink=lambda _path: str(foreign),
@@ -1524,7 +1532,7 @@ def test_adb_post_start_failure_kills_candidate_transactionally(
     with pytest.raises(KvmLiveCutoverError, match="transactionally"):
         cutover.restart_dedicated_adb_server(
             context,
-            UserIdentity("weipa", 1000, tmp_path / "home-weipa"),
+            _run_identity(tmp_path),
             runner=runner,
             proc_root=tmp_path / "proc",
         )
