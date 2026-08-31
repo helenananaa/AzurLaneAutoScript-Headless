@@ -179,6 +179,9 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
     fleet_receipts: list[dict[str, Any]] = []
     notice_receipts: list[dict[str, Any]] = []
     sortie_receipts: list[dict[str, Any]] = []
+    multiple_sortie_entry_receipts: list[dict[str, Any]] = []
+    multiple_sortie_states: list[dict[str, Any]] = []
+    multiple_sortie_back_receipts: list[dict[str, Any]] = []
     before: dict[str, Any] = {}
     after: dict[str, Any] = {}
     runtime_preflight: dict[str, Any] = {}
@@ -478,6 +481,9 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
         original_fleet = session.click_raid_fleet_start
         original_notice = session.click_raid_precombat_notice
         original_sortie = session.click_raid_precombat_start
+        original_multiple_entry = session.click_raid_precombat_multiple
+        original_multiple_state = session.raid_multiple_sortie_state
+        original_multiple_back = session.click_raid_multiple_sortie_back
         original_dispatch = adapter._dispatch_mutation
 
         def record_dispatch(capability: str, operation: object):
@@ -511,11 +517,29 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             sortie_receipts.append(asdict(receipt))
             return receipt
 
+        def record_multiple_entry(event: str):
+            receipt = original_multiple_entry(event)
+            multiple_sortie_entry_receipts.append(asdict(receipt))
+            return receipt
+
+        def record_multiple_state(event: str):
+            state = original_multiple_state(event)
+            multiple_sortie_states.append(asdict(state))
+            return state
+
+        def record_multiple_back(event: str):
+            receipt = original_multiple_back(event)
+            multiple_sortie_back_receipts.append(asdict(receipt))
+            return receipt
+
         session.click_raid_stage = record_stage
         session.click_raid_fleet_recommend = record_recommend
         session.click_raid_fleet_start = record_fleet
         session.click_raid_precombat_notice = record_notice
         session.click_raid_precombat_start = record_sortie
+        session.click_raid_precombat_multiple = record_multiple_entry
+        session.raid_multiple_sortie_state = record_multiple_state
+        session.click_raid_multiple_sortie_back = record_multiple_back
         adapter._dispatch_mutation = record_dispatch
         task_result = instance.run(command_name)
 
@@ -567,11 +591,28 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             )
         else:
             expected_battles = daily_battle_count or 1
+            remaining_closed = (
+                after["remaining"] == 0
+                if daily_task
+                else after["remaining"] == before["remaining"] - expected_battles
+            )
+            ticket_fallback_closed = (
+                not args.use_ticket
+                or (
+                    len(multiple_sortie_entry_receipts) == 1
+                    and len(multiple_sortie_states) == 1
+                    and len(multiple_sortie_back_receipts) == 1
+                    and multiple_sortie_states[0]["sortie_count"] == 1
+                    and multiple_sortie_states[0]["ticket_owned"] == 0
+                    and multiple_sortie_states[0]["ticket_selected"] == 0
+                    and multiple_sortie_states[0]["zero_ticket_disabled"] is True
+                )
+            )
             passed = bool(
                 task_result is True
                 and after["raid_page"]
                 and before["remaining"] - after["remaining"] == expected_battles
-                and after["remaining"] == 0
+                and remaining_closed
                 and after["points"] > before["points"]
                 and len(stage_receipts) == expected_battles
                 and len(recommend_receipts) <= expected_battles
@@ -579,6 +620,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
                 and len(notice_receipts) <= expected_battles
                 and len(sortie_receipts) == expected_battles
                 and after["sortie_grant"] == 0
+                and ticket_fallback_closed
             )
         return {
             "schema": "alas-headless.current-raid-live-validation/v1",
@@ -611,6 +653,9 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "fleet_receipts": fleet_receipts,
             "notice_receipts": notice_receipts,
             "sortie_receipts": sortie_receipts,
+            "multiple_sortie_entry_receipts": multiple_sortie_entry_receipts,
+            "multiple_sortie_states": multiple_sortie_states,
+            "multiple_sortie_back_receipts": multiple_sortie_back_receipts,
             "raw_input_fallback_used": False,
             "source_sha256": {
                 "raid": _sha256(alas_root / "module" / "raid" / "raid.py"),
@@ -652,6 +697,9 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "fleet_receipts": fleet_receipts,
             "notice_receipts": notice_receipts,
             "sortie_receipts": sortie_receipts,
+            "multiple_sortie_entry_receipts": multiple_sortie_entry_receipts,
+            "multiple_sortie_states": multiple_sortie_states,
+            "multiple_sortie_back_receipts": multiple_sortie_back_receipts,
             "error": f"{type(exc).__name__}: {exc}",
             "traceback": traceback.format_exc(),
             "raw_input_fallback_used": False,

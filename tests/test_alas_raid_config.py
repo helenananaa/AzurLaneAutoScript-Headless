@@ -223,6 +223,12 @@ class AlasRaidConfigTests(unittest.TestCase):
             'before["remaining"] - after["remaining"] == expected_battles',
             source,
         )
+        self.assertIn('if daily_task\n                else after["remaining"]', source)
+        self.assertIn("multiple_sortie_entry_receipts", source)
+        self.assertIn("multiple_sortie_states", source)
+        self.assertIn("multiple_sortie_back_receipts", source)
+        self.assertIn('multiple_sortie_states[0]["ticket_owned"] == 0', source)
+        self.assertIn('multiple_sortie_states[0]["zero_ticket_disabled"] is True', source)
         self.assertIn('and after["remaining"] == 0', source)
         self.assertIn('before["remaining"] != daily_battle_count', source)
         self.assertIn("len(sortie_receipts) == expected_battles", source)

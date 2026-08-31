@@ -1,0 +1,62 @@
+{
+  "schema": "alas-headless.operation-siren-daily-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 2008,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "template",
+  "seed_config_sha256": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+  "configured": {
+    "DoMission": true,
+    "UseTuningSample": false,
+    "Fleet": 1,
+    "Submarine": false,
+    "ExpectMinFinished": 1
+  },
+  "tuning_sample_calls": [],
+  "overview_accepts": [
+    {
+      "returned": true,
+      "elapsed_seconds": 21.719
+    }
+  ],
+  "mission_finish_counts": [],
+  "fleet_actions": [],
+  "order_actions": [],
+  "auto_searches": [
+    {
+      "finished_combat": 0,
+      "elapsed_seconds": 33.828
+    }
+  ],
+  "login_recovered": false,
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 2008,
+    "generation": 21838,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 55,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44"
+  },
+  "task_result": false,
+  "elapsed_seconds": 377.938,
+  "final_config": {
+    "NextRun": "2020-01-01 00:00:00"
+  },
+  "finished_total": 0,
+  "validation_errors": [
+    "daily mission completion count was below the live expectation: 0 < 1",
+    "original OpsiDaily task did not return success"
+  ],
+  "passed": false,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "daily_task": "a1a5f6516b142cfd7fc816873bc8227a2987ee7c34e9e5544e69568fa1627785",
+    "mission_handler": "d4e520cd4f0b16ee34880da15c220c18f035051cd1d1f2ffcc95b96bd5bba34c",
+    "storage_handler": "75f08f566df7333d7381af02cf0d5edb08f935676d9de8d77f170d3ed2115e82",
+    "adapter": "00fc2fbafe6c5a602bb12a06b4727d889056fa3be2516f98304ade792183e19c",
+    "oracle": "d254a615dc4fc00b5aa69666718e198a79e9019d776703d014034329e9a3f018"
+  }
+}

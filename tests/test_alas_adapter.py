@@ -1772,6 +1772,23 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         self.assertEqual(receipt.semantic_id, "main/formation")
         self.assertEqual(len(gate_calls), 2)
 
+    def test_main_battle_transition_reuses_receipt_under_exact_campaign_menu(self):
+        adapter, oracle, _ = self.make_adapter()
+
+        first = adapter.click(NamedButton("MAIN_GOTO_CAMPAIGN_WHITE"))
+        oracle.campaign_menu_value = True
+        oracle.enabled_values["main/battle"] = False
+        repeated = adapter.click(NamedButton("MAIN_GOTO_CAMPAIGN_WHITE"))
+
+        self.assertIs(repeated, first)
+        self.assertEqual(oracle.click_calls, ["main/battle"])
+
+        oracle.campaign_menu_value = False
+        oracle.enabled_values["main/battle"] = True
+        next_entry = adapter.click(NamedButton("MAIN_GOTO_CAMPAIGN_WHITE"))
+        self.assertEqual(next_entry.semantic_id, "main/battle")
+        self.assertEqual(oracle.click_calls, ["main/battle", "main/battle"])
+
     def test_main_raid_aliases_preserve_the_original_alas_page_edge(self):
         adapter, oracle, gate_calls = self.make_adapter()
 
@@ -10907,6 +10924,38 @@ class AlasSemanticAdapterTests(unittest.TestCase):
         )
         self.assertFalse(adapter.appear(NamedButton("RETIRE_APPEAR_1")))
         self.assertEqual(gate_calls, [])
+        self.assertEqual(oracle.click_calls, [])
+
+    def test_operation_siren_mission_entry_requires_exact_actionable_map(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.operation_siren_mission_list_visible = Mock(return_value=False)
+        oracle.operation_siren_state = Mock(
+            return_value=SimpleNamespace(zone_name="Gibraltar")
+        )
+        oracle.enabled_values["os/map/mission-list"] = True
+
+        self.assertTrue(adapter.operation_siren_mission_entry_available())
+        oracle.operation_siren_state.assert_called_once_with()
+        self.assertIn("os/map/mission-list", oracle.enabled_calls)
+        self.assertEqual(gate_calls, [True])
+        self.assertEqual(oracle.click_calls, [])
+
+        oracle.operation_siren_state.side_effect = SemanticGateClosed(
+            "Operation Siren page identity is not proven"
+        )
+        with self.assertRaises(SemanticGateClosed):
+            adapter.operation_siren_mission_entry_available()
+
+    def test_operation_siren_mission_entry_is_hidden_by_open_list(self):
+        adapter, oracle, gate_calls = self.make_adapter()
+        oracle.operation_siren_mission_list_visible = Mock(return_value=True)
+        oracle.operation_siren_state = Mock()
+        oracle.enabled_values["os/map/mission-list"] = True
+
+        self.assertFalse(adapter.operation_siren_mission_entry_available())
+        oracle.operation_siren_state.assert_not_called()
+        self.assertNotIn("os/map/mission-list", oracle.enabled_calls)
+        self.assertEqual(gate_calls, [True])
         self.assertEqual(oracle.click_calls, [])
 
     def test_operation_siren_startup_recovery_owns_reward_and_clears_on_map(self):

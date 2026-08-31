@@ -650,6 +650,23 @@ class AlasOpsiTaskConfigTests(unittest.TestCase):
             scheduler_patch.count("validate_alas_opsi_fleet_filter("), 1
         )
 
+    def test_mission_entry_patch_single_commits_and_waits_for_list(self):
+        patch = ROOT.joinpath(
+            "integration/alas/series/0490-operation-siren-mission-entry-first.patch"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("operation_siren_mission_entry_available()", patch)
+        self.assertIn("self.device.click(MISSION_ENTER)", patch)
+        self.assertIn("mission_entry_committed = True", patch)
+        self.assertIn("mission_entry_timer = Timer(20)", patch)
+        self.assertIn("elif not mission_entry_timer.reached():", patch)
+        self.assertIn(
+            "operation_siren_mission_list_visible()", patch
+        )
+        self.assertIn(
+            "if semantic_adapter is None and self.appear_then_click(", patch
+        )
+
     def test_shop_runtime_patch_owns_typed_entry_and_atomic_purchase(self):
         patch = ROOT.joinpath(
             "integration/alas/series/0102-operation-siren-shop-runtime.patch"

@@ -1,0 +1,64 @@
+{
+  "schema": "alas-headless.operation-siren-daily-live-qualification/v1",
+  "serial": "emulator-5580",
+  "package": "com.bilibili.azurlane",
+  "pid": 6316,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "seed_config": "template",
+  "seed_config_sha256": "2de0a47643d9ad73417473f66be75dadcc1a82e11d405e1f2421ade3e31eaced",
+  "configured": {
+    "DoMission": true,
+    "UseTuningSample": false,
+    "Fleet": 1,
+    "Submarine": false,
+    "ExpectMinFinished": 0
+  },
+  "tuning_sample_calls": [],
+  "overview_accepts": [
+    {
+      "returned": true,
+      "elapsed_seconds": 6.063
+    }
+  ],
+  "mission_finish_counts": [
+    {
+      "count": 0,
+      "elapsed_seconds": 38.718
+    }
+  ],
+  "fleet_actions": [],
+  "order_actions": [],
+  "auto_searches": [
+    {
+      "finished_combat": 0,
+      "elapsed_seconds": 46.969
+    }
+  ],
+  "login_recovered": false,
+  "runtime_preflight": {
+    "package": "com.bilibili.azurlane",
+    "pid": 6316,
+    "generation": 29714,
+    "scene_handle": -76,
+    "status": "ok",
+    "age_ms": 82,
+    "main_thread": true,
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44"
+  },
+  "task_result": true,
+  "elapsed_seconds": 121.578,
+  "final_config": {
+    "NextRun": "2026-09-01 00:00:00"
+  },
+  "finished_total": 0,
+  "validation_errors": [],
+  "passed": true,
+  "temporary_config_removed": true,
+  "source_sha256": {
+    "daily_task": "a1a5f6516b142cfd7fc816873bc8227a2987ee7c34e9e5544e69568fa1627785",
+    "mission_handler": "9658d1c7171061054291bd5d456499aae1170ae2952ff8dbce2632e139a73d2a",
+    "storage_handler": "75f08f566df7333d7381af02cf0d5edb08f935676d9de8d77f170d3ed2115e82",
+    "adapter": "2ec86f5fc53ebb8184d29c6d12f5a8472629c55c2fc49be146e197b56810152d",
+    "oracle": "d254a615dc4fc00b5aa69666718e198a79e9019d776703d014034329e9a3f018"
+  }
+}
