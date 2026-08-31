@@ -159,7 +159,12 @@ class AndroidImageSourceLock:
             project = str(patch.get("project", ""))
             path = str(patch.get("path", ""))
             digest = str(patch.get("sha256", ""))
-            if project not in {"frameworks/base", "build/make"}:
+            if project not in {
+                "frameworks/base",
+                "frameworks/native",
+                "external/swiftshader",
+                "build/make",
+            }:
                 raise AndroidImageSourceError("project patch target is not approved")
             if not path.startswith("integration/runtime/aosp-patches/") or (
                 ".." in Path(path).parts
@@ -322,8 +327,29 @@ def host_preflight(
     }
 
 
-def verify_remote_refs(lock: AndroidImageSourceLock) -> Mapping[str, Any]:
-    """Verify that every human-readable upstream ref still names the locked commit."""
+def webview_projects_for_abi(
+    projects: Sequence[Mapping[str, Any]], abi: str,
+) -> Sequence[Mapping[str, Any]]:
+    """Return the WebView source refs that can affect the selected product ABI."""
+    if abi == "all":
+        return projects
+    suffixes = {
+        "x86_64": ("/x86", "/x86_64"),
+        "arm64-v8a": ("/arm", "/arm64"),
+    }
+    if abi not in suffixes:
+        raise AndroidImageSourceError("unsupported remote-verification ABI: " + abi)
+    return tuple(
+        project for project in projects
+        if project["name"] == "chromium-webview-stub"
+        or str(project["path"]).endswith(suffixes[abi])
+    )
+
+
+def verify_remote_refs(
+    lock: AndroidImageSourceLock, abi: str = "all",
+) -> Mapping[str, Any]:
+    """Verify upstream refs shared by, or directly consumed by, the selected ABI."""
     platform_source = lock.document["platform"]
     redroid = lock.document["redroid"]
     refs = [
@@ -353,7 +379,7 @@ def verify_remote_refs(lock: AndroidImageSourceLock) -> Mapping[str, Any]:
             "refs/heads/{0}".format(project["revision"]),
             project["commit"],
         ))
-    for project in redroid["webview_projects"]:
+    for project in webview_projects_for_abi(redroid["webview_projects"], abi):
         refs.append((
             "webview-project:{0}".format(project["name"]),
             project["url"],
@@ -410,6 +436,7 @@ def verify_remote_refs(lock: AndroidImageSourceLock) -> Mapping[str, Any]:
     return {
         "schema": "alas-headless.android-image-source-remote-verification/v1",
         "source_lock_sha256": lock.sha256,
+        "abi": abi,
         "refs": records,
         "outcome": "pass" if not blockers else "blocked",
         "blockers": sorted(blockers),

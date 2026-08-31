@@ -16,6 +16,7 @@ from .runtime_backend_adb import (
 )
 from .runtime_backend_deferred import DeferredRuntimeBackend
 from .runtime_backend_kvm import KvmBackend, KvmRuntimeConfig, probe_linux_kvm
+from .runtime_backend_redroid import RedroidBackend, RedroidRuntimeConfig
 from .runtime_command import RuntimeCommandExecutor
 from .runtime_trace import RuntimeTraceRecorder
 
@@ -50,6 +51,8 @@ def backend_from_config(
     if kind == BackendKind.EXTERNAL_ADB:
         allowed = common_required | {
             "adb",
+            "adb_server_port",
+            "connect_transport",
             "angle_package",
             "unity_command_line",
             "launch_game",
@@ -72,6 +75,8 @@ def backend_from_config(
             component=value["component"],
             host_class=value["host_class"],
             adb=value.get("adb", "adb"),
+            adb_server_port=value.get("adb_server_port", 5037),
+            connect_transport=value.get("connect_transport", False),
             angle_package=value.get("angle_package", "org.chromium.angle"),
             unity_command_line=value.get("unity_command_line"),
             launch_game=value.get("launch_game", False),
@@ -95,6 +100,7 @@ def backend_from_config(
         }
         allowed = required | {
             "sdk_root",
+            "adb_server_port",
             "angle_package",
             "unity_command_line",
             "launch_game",
@@ -131,6 +137,73 @@ def backend_from_config(
         )
         return KvmBackend(config, executor, trace=trace, **kwargs)
 
+    if kind == BackendKind.REDROID:
+        required = common_required | {
+            "container_id",
+            "image_reference",
+            "image_manifest_digest",
+            "userdata_image",
+            "metadata_image",
+            "start_script",
+        }
+        allowed = required | {
+            "stop_script",
+            "ctr",
+            "sudo",
+            "namespace",
+            "adb",
+            "adb_server_port",
+            "angle_package",
+            "unity_command_line",
+            "launch_game",
+            "manage_angle_routing",
+            "allow_game_restart",
+            "allow_android_restart",
+            "stop_container_on_cleanup",
+            "disable_system_ui_for_headless",
+            "poll_interval_seconds",
+            "storage_layout",
+        }
+        missing = sorted(required - set(value))
+        unknown = sorted(set(value) - allowed)
+        if missing or unknown:
+            raise ValueError(
+                "Redroid config fields differ (missing={0}; unknown={1})".format(
+                    ",".join(missing), ",".join(unknown)
+                )
+            )
+        config = RedroidRuntimeConfig(
+            serial=value["serial"],
+            package=value["package"],
+            component=value["component"],
+            host_class=value["host_class"],
+            container_id=value["container_id"],
+            image_reference=value["image_reference"],
+            image_manifest_digest=value["image_manifest_digest"],
+            userdata_image=value["userdata_image"],
+            metadata_image=value["metadata_image"],
+            start_script=value["start_script"],
+            stop_script=value.get("stop_script"),
+            ctr=value.get("ctr", "ctr"),
+            sudo=value.get("sudo", "sudo"),
+            namespace=value.get("namespace", "alas-headless"),
+            adb=value.get("adb", "adb"),
+            adb_server_port=value.get("adb_server_port", 5037),
+            angle_package=value.get("angle_package", "org.chromium.angle"),
+            unity_command_line=value.get("unity_command_line", "-force-gfx-st"),
+            launch_game=value.get("launch_game", True),
+            manage_angle_routing=value.get("manage_angle_routing", False),
+            allow_game_restart=value.get("allow_game_restart", True),
+            allow_android_restart=value.get("allow_android_restart", True),
+            stop_container_on_cleanup=value.get("stop_container_on_cleanup", True),
+            disable_system_ui_for_headless=value.get(
+                "disable_system_ui_for_headless", False
+            ),
+            poll_interval_seconds=value.get("poll_interval_seconds", 1.0),
+            storage_layout=value.get("storage_layout", "srv-v1"),
+        )
+        return RedroidBackend(config, executor, trace=trace, **kwargs)
+
     allowed = {"schema", "backend", "host_class"}
     missing = sorted(allowed - set(value))
     unknown = sorted(set(value) - allowed)
@@ -153,6 +226,8 @@ __all__ = [
     "ExternalAdbConfig",
     "KvmBackend",
     "KvmRuntimeConfig",
+    "RedroidBackend",
+    "RedroidRuntimeConfig",
     "RuntimeBackendError",
     "RuntimeBackendNotReady",
     "RuntimeIdentityMismatch",

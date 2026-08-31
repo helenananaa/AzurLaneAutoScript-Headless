@@ -82,8 +82,8 @@ python -m unittest tests.test_android_image_policy tests.test_runtime_artifacts 
 | 目标 | ABI | 用途 | 当前控制器状态 |
 | --- | --- | --- | --- |
 | KVM/Android Emulator | `x86_64` | x86 主资格线 | 可执行参考适配器 |
-| Redroid | `x86_64` | x86 容器线 | plan-only |
-| Redroid | `arm64-v8a` | 原生 ARM 主线 | plan-only |
+| Redroid | `x86_64` | x86 容器线 | backend 已实现；隔离实例执行资格待完成 |
+| Redroid | `arm64-v8a` | 原生 ARM 主线 | backend 已实现；真实登录前通过，lifecycle 资格待完成 |
 | Cuttlefish/QEMU | `arm64-v8a` | ARM 兼容性线 | plan-only |
 
 首个镜像必须是“足够完整、游戏更新链完整”的基线。不要为了得到一个漂亮的镜像体积数字，提前删除 WebView、PackageInstaller、DownloadProvider、keystore、SystemUI、AudioFlinger 或存储服务。
@@ -106,6 +106,17 @@ NOTICE/SBOM SHA-256
 这些记录属于镜像证据，不是 ALAS 性能结论。
 
 ### 3.1 固定源码并做构建宿主预检
+
+新构建机必须直接登录对应构建账户：Redroid 使用 `ssh alas-redroid-new`，KVM 使用
+`ssh alas-kvm-new`；`asus` 只保留作全局宿主维护和故障恢复。两个构建账户均有完整
+`NOPASSWD: ALL`，连接后可用 `sudo -n true` 验证。完整 sudo 等价于 root，因此普通权限下的
+跨目录拒绝不是针对构建账户的安全边界；开发人员必须继续遵守 backend 目录归属。
+
+源码 checkout、`repo sync`、Git、Soong/Ninja、ccache 和普通证据写入一律保持构建账户身份，
+不能用 `sudo` 启动整次构建或进入长期 root shell。只有安装宿主依赖、loop/mount、systemd，
+以及构建器已经明确标出的 OCI/userdata root 步骤才提升单条命令，统一使用 `sudo -n`。提升后
+检查制品属主；不得借 sudo 跨写、清理或改权另一 backend，不得重建共享组、共享输出或锁。
+影响两侧的宿主变更必须先查看活动工作负载，并在运行记录中写明命令、目标、结果和回滚。
 
 源码锁是 `integration/runtime/android-image-source-lock.example.json`。它固定 AOSP tag/commit、Redroid local manifest commit、patch commit/patch set、五个 Redroid项目、Chromium WebView stub及四个 Lineage ABI预编译项目，以及两个 64 位 product；只有分支名或 tag 名而没有 40 位 commit 不算锁定。
 
@@ -148,44 +159,60 @@ wsl.exe -e sh -lc "cd /mnt/h/program/AzurLaneAutoScript-Headless-android-image-f
 
 ### 3.2 同步、构建并生成供应链证据
 
-构建入口只接受空目录，按 commit checkout local manifest/patch，输出 `repo manifest -r`，检查 patch driver 的隐性 `[ERROR]`，依次构建两个 ABI，并调用 AOSP 官方 `m sbom`：
+构建入口读取 Redroid 自有 build domain，按 commit checkout local manifest/patch，输出
+`repo manifest -r`，检查 patch driver 的隐性 `[ERROR]`，依次构建两个 ABI，并调用
+AOSP 官方 `m sbom`：
 
 ```bash
 ./scripts/wsl/build-redroid-images.sh \
+  integration/runtime/android-build-domain.redroid.example.json \
+  integration/runtime/android-build-domain.kvm.example.json \
   integration/runtime/android-image-source-lock.example.json \
-  /srv/android/redroid-14-r75 \
-  /srv/android/evidence/redroid-14-r75-build-1
+  redroid-14-r75-build-1
 ```
 
-构建入口按 `SOURCE_ROOT` 所在文件系统检查 400 GiB 下限，并要求源码目录与证据目录
-位于同一个、不同于宿主 `/` 的设备。不能用根盘剩余空间代替 AOSP 工作盘，也不能把
-源码放根盘后只把 `out` 链接到数据盘。对于本文使用的专用服务器，两个独立构建应分别
-使用 `/mnt/aosp/src/build-1`、`/mnt/aosp/src/build-2`，证据使用
-`/mnt/aosp/evidence/build-1`、`/mnt/aosp/evidence/build-2`。
+build domain v3 将 source、`.repo` metadata、ccache、build home、临时目录、output、
+runtime、archive、evidence 和 APK archive 都放在 `/srv/android-build/redroid/` 内，KVM
+对应状态全部位于 `/srv/android-build/kvm/`。配置不再包含 `locks` 或单一热输出槽；两侧
+输出可以同时存在并并行构建。构建入口直接使用独立的绝对 `OUT_DIR`，不再在源码树创建
+`out-redroid` 别名。构建前仍要求所有 repo project 干净。
+
+构建入口按 `paths.source_root` 所在文件系统检查 400 GiB 下限。源码、输出和证据允许位于
+宿主根文件系统所在的同一物理盘；隔离要求是 backend 路径不重叠，而不是额外磁盘。
+每次证据写入 `paths.evidence_root/<RUN_ID>`；已有 run 只允许身份完全一致的断点恢复。
 
 必须在干净、独立输出目录再执行第二次，随后比较两次 payload：
 
 ```bash
 ./scripts/wsl/build-redroid-images.sh \
+  /srv/android-build/config/android-build-domain-redroid-build-2.json \
+  /srv/android-build/config/android-build-domain-kvm.json \
   integration/runtime/android-image-source-lock.example.json \
-  /srv/android/redroid-14-r75-rebuild \
-  /srv/android/evidence/redroid-14-r75-build-2
+  redroid-14-r75-build-2
 
 PYTHONPATH=python python3 scripts/python/compare_android_image_builds.py \
-  --first /srv/android/evidence/redroid-14-r75-build-1/provenance-x86_64.json \
-  --second /srv/android/evidence/redroid-14-r75-build-2/provenance-x86_64.json \
-  --output /srv/android/evidence/reproducibility-x86_64.json
+  --first /srv/android-build/redroid/evidence/redroid-14-r75-build-1/provenance-x86_64.json \
+  --second /srv/android-build/redroid/evidence/redroid-14-r75-build-2/provenance-x86_64.json \
+  --output /srv/android-build/redroid/evidence/reproducibility-x86_64.json
 PYTHONPATH=python python3 scripts/python/compare_android_image_builds.py \
-  --first /srv/android/evidence/redroid-14-r75-build-1/provenance-arm64-v8a.json \
-  --second /srv/android/evidence/redroid-14-r75-build-2/provenance-arm64-v8a.json \
-  --output /srv/android/evidence/reproducibility-arm64-v8a.json
+  --first /srv/android-build/redroid/evidence/redroid-14-r75-build-1/provenance-arm64-v8a.json \
+  --second /srv/android-build/redroid/evidence/redroid-14-r75-build-2/provenance-arm64-v8a.json \
+  --output /srv/android-build/redroid/evidence/reproducibility-arm64-v8a.json
 ```
+
+第二次发布里程碑构建使用另一个经过验证的 Redroid domain，只改变 output/evidence run；
+仍复用 Redroid 自己的固定源码和缓存，但使用另一个 Redroid output/evidence 路径。它不依赖
+KVM 状态，也不等待任何构建锁。普通开发迭代不要求这次昂贵重构建。
 
 provenance 必须同时绑定源码锁、resolved manifest、fingerprint、安全补丁、`system.img`/`vendor.img`、AOSP SPDX 2.3 SBOM、NOTICE 与 installed-files；inventory 中发现游戏包名会直接失败。源码锁还逐个固定 local manifest 引入的五个 Redroid 子项目；构建器用 `extend-project` overlay 锁 commit，并在 sync 后逐项核对 `repo manifest -r`，不能让上游 `master` 漂移。当前仓库已有可执行构建入口，但尚未在满足资源下限的宿主完成上述两次全量构建，因此仍不得称为可复现发布制品。
 
 ### 3.3 确定性 OCI 打包
 
-`build-redroid-images.sh` 在每个 product 完成后自动调用 `package-redroid-oci.sh`。打包器只读挂载 system/vendor，按路径排序、统一 `SOURCE_DATE_EPOCH`、owner/group 和 pax 时间字段，保留 xattr，生成单平台 OCI layout archive；OCI config 固定 Redroid entrypoint，并写入 ABI、fingerprint、源码锁和 `game-delivery=external-install` labels。archive 同样进入 provenance。
+`build-redroid-images.sh` 在每个 product 完成后自动调用 `package-redroid-oci.sh`。打包器只读挂载 system/vendor，先核对镜像内 `libEGL.so`、`vulkan.pastel.so` 与当前 product output 逐字节一致，再按路径排序、统一 `SOURCE_DATE_EPOCH` 和 pax 时间字段、保留 Android 数字 owner/group 与 xattr，生成单平台 OCI layout archive。OCI config 固定 Redroid entrypoint，并写入 ABI、fingerprint、源码锁和 `game-delivery=external-install` labels；关键组件验证 JSON 和 archive 都进入 provenance。
+
+目标级增量编译只会更新 product output，不一定重新生成 `system.img/vendor.img`。若验证器
+返回 `*-partition-image-stale`，必须先执行对应的 `m systemimage vendorimage` 或完整 `m`，
+不能直接重打 OCI，也不能从旧容器 writable layer 取文件冒充镜像内容。
 
 构建脚本还会强制校验并注入
 `integration/runtime/redroid-native-fbe`。该 overlay 固定 AOSP 14 goldfish 与 Redroid
@@ -199,11 +226,14 @@ device commit 和 source-lock SHA-256 一致。若源码树已经存在本地 `p
 
 ```bash
 sudo ./scripts/wsl/package-redroid-oci.sh \
-  out/target/product/redroid_arm64_only/system.img \
-  out/target/product/redroid_arm64_only/vendor.img \
+  /srv/android-build/redroid/out/dual-abi/target/product/redroid_arm64_only/system.img \
+  /srv/android-build/redroid/out/dual-abi/target/product/redroid_arm64_only/vendor.img \
   arm64-v8a <source-lock-sha256> '<build-fingerprint>' <source-date-epoch> \
+  /srv/android-build/redroid/out/dual-abi/target/product/redroid_arm64_only/system/lib64/libEGL.so \
+  /srv/android-build/redroid/out/dual-abi/target/product/redroid_arm64_only/vendor/lib64/hw/vulkan.pastel.so \
   evidence/redroid-arm64-v8a.oci.tar \
-  evidence/redroid-arm64-v8a.oci-build.json
+  evidence/redroid-arm64-v8a.oci-build.json \
+  evidence/runtime-components-arm64-v8a.json
 
 docker load --platform linux/arm64 -i evidence/redroid-arm64-v8a.oci.tar
 ```
@@ -265,8 +295,8 @@ Redroid 的 `/data` fstab、完成 Android 五路 FBE 门和 Direct Boot/CE 解�
 
 ```bash
 cd /mnt/h/program/AzurLaneAutoScript-Headless-android-image-foundation
-export ALAS_ANGLE_WORKSPACE="${HOME}/src/alas-headless-angle"
-export ALAS_DEPOT_TOOLS_DIR="${HOME}/src/depot_tools"
+export ALAS_ANGLE_WORKSPACE="${HOME}/src/alas-headless-angle-redroid"
+export ALAS_DEPOT_TOOLS_DIR="${HOME}/src/depot_tools-redroid"
 
 ./scripts/wsl/bootstrap-angle.sh
 ./scripts/wsl/apply-angle-patches.sh
@@ -356,7 +386,7 @@ G2 示例：
   -OutputRoot (Join-Path $ImageRepo 'evidence\android-image')
 ```
 
-当前 `qualify_runtime.py` 只有 KVM 和 external-ADB 是可执行参考适配器。Redroid 与 ARM64-QEMU 必须等相应 adapter 实现后再使用 `--execute`，不得绕过 fail-closed 门。
+当前 `qualify_runtime.py` 已有 KVM、external-ADB 和 Redroid 实现。Redroid 已能生成可执行计划，但在 ARM 隔离实例完成 start/ready/recover/stop/cleanup 资格前，不得把离线实现测试写成实机 PASS。ARM64-QEMU 仍需等待对应 adapter，不得绕过 fail-closed 门。
 
 ## 7. 验证游戏安装和包升级能力
 
@@ -547,7 +577,9 @@ python scripts/python/create_android_image_release.py `
   --require-promotable
 ```
 
-ARM64 Redroid 开始前先在目标 ARM64 Linux 宿主执行：
+ARM64 的统一端到端流程、已关闭故障和未解决重入条件见
+[ARM64 Redroid 端到端运行手册与故障账本](arm64-redroid-end-to-end-runbook.zh-CN.md)。
+开始前先在目标 ARM64 Linux 宿主执行：
 
 ```bash
 export ALAS_REDROID_IMAGE='registry.example/redroid@sha256:<digest>'
@@ -555,6 +587,21 @@ export ALAS_REDROID_IMAGE='registry.example/redroid@sha256:<digest>'
 ```
 
 当前 x86 Windows 主机或未运行 Docker/binderfs 的环境应返回 `blocked`；不得把预检失败改写成 plan PASS。
+
+ARM64 的真实游戏路径还要求宿主用户虚拟地址宽度不超过 47 位。游戏内嵌的旧版
+LuaJIT 直接编码 lightuserdata；当 48-bit VA 内核把 `libtolua.so` 映射到
+`0x800000000000` 以上时，合法的库内全局地址也会触发
+`bad light userdata pointer`，随后 Unity 进程以状态 1 退出。探针从正在运行的内核
+`/proc/config.gz`（或同版本 `/boot/config-*`）读取 `CONFIG_ARM64_VA_BITS`，并分别
+报告 `kernel_va_bits` 与 `game_lightuserdata_va_outcome`。48-bit 只阻止这个游戏能力
+的资格声明，不应被扩展成对无关 Redroid/合成 APK 能力的全局否定。
+
+4 KiB 页宿主的已验证恢复入口是保留原内核、另装启用
+`CONFIG_ARM64_VA_BITS_39=y` 的独立内核并验证真实游戏进程；不要通过抬高
+`RLIMIT_STACK` 或截断指针改变进程布局，这两种做法都不是稳定的语义边界。宿主重启
+后、启动使用 ext4 quota 的 userdata 容器前，还要确认 `quota_tree` 与 `quota_v2`
+可用；模块化内核可先执行 `modprobe quota_tree quota_v2`。这一项只解决宿主挂载能力，
+不能替代 Android boot、userdata persistence 或游戏进程验证。
 
 Redroid 使用 OCI 镜像时，先从运行容器只读采集 digest、架构、端口和 `/data` 挂载身份：
 
@@ -636,7 +683,7 @@ SSH shell 与 containerd/runc。x86_64 回退必须在具备 Binder 的原生 x8
 - 没有进行或暗示任何依赖真实 ALAS 工作负载的调优；
 - 状态最高为 `platform-and-update-qualified`。
 
-## 12. 当前实现与实测状态（2026-08-12）
+## 12. 当前实现与实测状态（截至 2026-08-26）
 
 本 worktree 已完成以下不依赖真实 ALAS 挂机数据的基础工作：
 
@@ -670,10 +717,31 @@ SSH shell 与 containerd/runc。x86_64 回退必须在具备 Binder 的原生 x8
   `direct_boot_proven=false`。生产 `/var/lib/redroid/data` 未被挂载或修改；
 - 与干净提交绑定的 fail-closed 候选清单中，双架构 G1/G2/G3 和更新证据均闭环；
   仍保留自建 provenance/reproducibility、x86 OCI 回退以及 ARM FBE blocker。
+- AWS ARM64 实机已把游戏退出定位到宿主 48-bit VA 与内嵌旧 LuaJIT lightuserdata
+  地址窗不兼容：同一事件的 `0xe559fdef1b58` 是 `libtolua.so` 的有效可写映射，调用方
+  位于 `libil2cpp.so`，不是 ANGLE NULL、RSA 或悬空指针。保留原 48-bit 内核作为回退后，
+  增量安装并启动 `6.1.176-alas-dmdefault-ikconfig-va39+`，实机验证后才将它设为
+  GRUB `saved_entry`；Android 12 与 Android 14
+  Redroid 均重新达到 `sys.boot_completed=1`。Android 14 真实游戏 PID 连续 120 秒稳定，
+  私有 `libEGL_alasx.so`、`libGLESv2_alasx.so` 已映射，日志未再出现
+  `bad light userdata pointer`、Lua unprotected panic、fatal signal 或 `exit_group`。
+  这组 120 秒稳定性证据本身只关闭该 ARM 游戏进程退出 blocker；不能单独证明
+  typed observer、userdata 恢复、完整 ALAS 任务或发布基线已经重新取得资格。
+- 同一 AWS ARM64 实机随后在 VA39 内核上完成 Android 14 Redroid 真实登录前路径：
+  Unity 以官方 `-force-gfx-st` 参数启动，NULL observer 在 Unity 主线程生成 typed frame；
+  observer 只新增资源基础包确认、附加资源确认和下载确认三个精确 raycast path，并在
+  首帧尚未就绪时执行最多 120 swap 的有界重试。对应 testkey observer APK SHA-256 为
+  `f37379fde001ee60f3916cbd56163fef55181d16e889383237968f7e7ea23401`。
+  `/data` 在容器停止且保留离线稀疏备份后由 16 GiB 非破坏扩展到 48 GiB；游戏确认
+  28.1 GB 下载，监控样本中的失败数始终为 0，约 643 秒后自然进入
+  `com.gsc.phone_login.PhoneLoginActivity`。最终证据确认手机号输入框未聚焦且为空、
+  “下一步”禁用，未输入或提交账号；本轮 userdata 已持有隐私同意状态，因此没有出现
+  新协议页，也没有为制造证据而重复点击同意。证据边界仍不包含账号登录、主界面、
+  ALAS 工作负载、恢复、soak 或发布资格。
 
 当前仍然 fail-closed 的项目：
 
-- 当前 Redroid `/data` 是宿主 ext4 bind mount，镜像没有 `ro.crypto.type=file` 或 FBE fstab 合同；ARM 受保护能力为 20/21，`device-encrypted-storage` 必须保持 fail，不能通过启动参数豁免；
+- 历史 stock Redroid 基线的 `/data` 是宿主 ext4 bind mount；最新 AWS 登录候选已经使用独立 loop/dm userdata，但仍未形成 `ro.crypto.type=file`、native FBE 与 Direct Boot 的五项闭环。ARM `device-encrypted-storage` 必须保持 fail，不能凭块设备或启动参数豁免；
 - 当前生产 Android 12 ARM 基线的安全补丁级别为 `2021-10-05`；已验证的 stock
   Android 14 候选也仅为 `2024-05-05`。二者都需要由自维护镜像线替代，不能作为长期发布基线；
 - 当前 x86 镜像是内容哈希固定的 SDK API 32 基线，ARM 是 digest 固定的 stock Redroid 基线；二者都不是本项目从固定 AOSP/Redroid 产品配置构建出的精简镜像，尚未删除任何系统服务；

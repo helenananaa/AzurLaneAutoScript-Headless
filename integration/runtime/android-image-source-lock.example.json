@@ -96,6 +96,18 @@
       "path": "integration/runtime/aosp-patches/0002-build-image-source-date-epoch.patch",
       "sha256": "1b5030f3851974d3892741f5a19cbe05fb3df96a241d306f6a09cc98d27efb79",
       "commit_message": "ALAS: make filesystem image timestamps reproducible"
+    },
+    {
+      "project": "frameworks/native",
+      "path": "integration/runtime/aosp-patches/0003-angle-apk-private-loader-suffix.patch",
+      "sha256": "71ee77c7c18f3b8bf79806f827666534a0964f245806aa8013006802c511971d",
+      "commit_message": "ALAS: isolate packaged ANGLE from preloaded system ANGLE"
+    },
+    {
+      "project": "external/swiftshader",
+      "path": "integration/runtime/aosp-patches/0004-swiftshader-keep-llvm-state-process-lived.patch",
+      "sha256": "2f8dd2bdff8b97dce0c4b5cf79f5aa12d73a26cabe011b18d1dcc8ad23187c72",
+      "commit_message": "ALAS: keep SwiftShader LLVM state process-lived"
     }
   ],
   "products": [

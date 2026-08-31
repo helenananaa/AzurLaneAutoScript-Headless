@@ -202,8 +202,8 @@ Unity.exe -batchmode -quit `
 |---|---|---|---|
 | x86_64 Linux + KVM / Android Emulator | **主线可执行，当前最成熟** | API 32 x86_64、ANGLE NULL、Unity、observer、游戏与 Android recovery；当前 ALAS 任务有独立实机证据 | 仍需长期 soak、容量和多实例密度验证 |
 | External ADB | **主线可执行** | 附着到精确指定设备，执行身份、生命周期和恢复合同 | 不负责设备 provisioning、root、升级或持久化 |
-| x86_64 Linux + Redroid | **真实探索** | 无 `/dev/kvm` 云主机上的 Binder、容器、ANGLE NULL、observer、完整资源、重启持久化和登录界面 | 主线 backend、当前 OCI 回退和 ALAS 工作负载尚未闭环 |
-| ARM64 Linux + Redroid | **平台与更新探索较完整** | 双 ABI 制品、G1/G2/G3、APK/资源更新、restart、持久化和真实 OCI rollback | 尚无真实游戏和 ALAS 证据；主线 backend 仍为 plan-only |
+| x86_64 Linux + Redroid | **真实探索；backend 待实机资格** | 无 `/dev/kvm` 云主机上的 Binder、容器、ANGLE NULL、observer、完整资源、重启持久化和登录界面 | backend 已实现但隔离实例 lifecycle、当前 OCI 回退和 ALAS 工作负载尚未闭环 |
+| ARM64 Linux + Redroid | **全新容器的真实游戏登录前路径已通过** | VA39、Android 14、新 userdata 首次协议、私有 ANGLE NULL、typed observer、28.1 GB 资源下载和一次有界冷重启后到达手机号登录 Activity；未输入账号 | 两项运行时修复尚未封入 OCI，私有 NULL 从首次启动起的协议转场仍需复验；ALAS workload、backend recovery/cleanup、FBE 和 soak 仍缺失 |
 | x86_64 QEMU TCG | **部分通过，fallback** | Q1/Q2/Q3、Unity 长运行、observer freshness，游戏到达隐私协议边界 | WebView 黑屏与 System UI ANR 阻塞更深游戏验证，性能低于 KVM |
 | 已 root ARM64 Android 设备 | **真实工具链探索** | systemless ANGLE 安装、验证、移除和回滚；G1 NULL renderer 合同 | 未验证当前游戏、完整 observer、ALAS、温控和长期运行 |
 | 无 root ARM64 手机/平板作为 QEMU 宿主 | **实验性部分通过** | 普通应用权限托管 ARM64 guest、ANGLE NULL、Unity，游戏到达无输入登录前 | 无硬件加速且很慢；没有 observer、ALAS 和恢复闭环 |
@@ -218,7 +218,9 @@ Unity.exe -batchmode -quit `
 
 准确的 host、ABI、Android、backend、恢复能力和未解决问题见
 [运行环境支持矩阵](docs/runtime-support-matrix.md)。可复现镜像构建和回滚流程见
-[Android 镜像基础运行手册](docs/android-image-foundation-runbook.zh-CN.md)，Mac
+[Android 镜像基础运行手册](docs/android-image-foundation-runbook.zh-CN.md)；ARM64
+端到端操作、故障根因和重新进入条件见
+[ARM64 Redroid 运行手册与故障账本](docs/arm64-redroid-end-to-end-runbook.zh-CN.md)。Mac
 实机证据见 [Apple Silicon Mac / HVF 登录页验证报告](docs/mac-apple-silicon-hvf-login-validation-report.md)。
 
 ## 仓库结构
@@ -243,6 +245,8 @@ Unity.exe -batchmode -quit `
 
 - [配置项级支持矩阵](docs/alas-config-support-matrix.md) — 60 个面板的权威支持范围和待完成分支。
 - [运行环境支持矩阵](docs/runtime-support-matrix.md) — host、ABI、Android 和 backend 的支持与实验状态。
+- [ARM64 Redroid 端到端运行手册](docs/arm64-redroid-end-to-end-runbook.zh-CN.md) — ARM 构建、内核、容器、ANGLE、observer、资源登录流程和故障账本。
+- [AWS ARM64 Redroid 全新容器登录复现](docs/aws-arm64-redroid-fresh-login-validation-20260826.md) — 新 userdata 首次协议、OCI writable-layer 偏差、28.1 GB 下载、冷重启与无账号输入登录边界。
 - [Apple Silicon Mac / HVF 登录页验证](docs/mac-apple-silicon-hvf-login-validation-report.md) — Mac ARM64 Emulator、ANGLE NULL、游戏登录页与 typed observer 的实机证据。
 - [系统架构](docs/architecture.md) — observer、adapter、controller 和 fail-closed 边界。
 - [验证状态](docs/status.md) — 按时间记录、限定证据范围的验证结果。

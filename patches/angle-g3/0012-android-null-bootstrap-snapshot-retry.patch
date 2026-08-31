@@ -1,0 +1,82 @@
+From 1b0534b1f6ebf3b24bbc88d64ad14f0152af17ee Mon Sep 17 00:00:00 2001
+From: ALAS Headless Research <local@alas-headless.invalid>
+Date: Wed, 26 Aug 2026 09:24:00 +0800
+Subject: [PATCH] null: retry the initial observer snapshot until ready
+
+---
+ src/libANGLE/renderer/null/SurfaceNULL.cpp | 28 +++++++++++++++++++++++++---
+ src/libANGLE/renderer/null/SurfaceNULL.h   |  1 +
+ 2 files changed, 25 insertions(+), 2 deletions(-)
+
+diff --git a/src/libANGLE/renderer/null/SurfaceNULL.cpp b/src/libANGLE/renderer/null/SurfaceNULL.cpp
+index 3d71c879a..fe3ab0812 100644
+--- a/src/libANGLE/renderer/null/SurfaceNULL.cpp
++++ b/src/libANGLE/renderer/null/SurfaceNULL.cpp
+@@ -10,12 +10,14 @@
+ #include "libANGLE/renderer/null/SurfaceNULL.h"
+ 
+ #include <algorithm>
++#include <cinttypes>
+ #include <chrono>
+ #include <cstdlib>
+ #include <cstring>
+ #include <thread>
+ 
+ #if defined(ANGLE_PLATFORM_ANDROID)
++#    include <android/log.h>
+ #    include <android/native_window.h>
+ #    include <android/rect.h>
+ #    include <sys/system_properties.h>
+@@ -66,6 +67,7 @@ SurfaceNULL::SurfaceNULL(const egl::SurfaceState &surfaceState,
+       mSwapInterval(surfaceState.swapInterval),
+       mRefreshRateHz(GetRefreshRateHz()),
+       mSwapCount(0),
++      mObserverReady(false),
+       mNextSwapDeadline()
+ {
+ #if defined(ANGLE_PLATFORM_ANDROID)
+@@ -172,9 +174,28 @@ egl::Error SurfaceNULL::swap(const gl::Context *context, SurfaceSwapFeedback *fee
+     paceSwap();
+     ++mSwapCount;
+ #if defined(ANGLE_PLATFORM_ANDROID)
+-    if (mSwapCount == 1 || mSwapCount % 60 == 0)
++    const bool bootstrapSample =
++        !mObserverReady && (mSwapCount == 1 || (mSwapCount <= 120 && mSwapCount % 3 == 0));
++    if (bootstrapSample || mSwapCount % 60 == 0)
+     {
+-        alas::ObserverFrameTick(mSwapCount, mWidth, mHeight);
++        const int32_t status = alas::ObserverFrameTick(mSwapCount, mWidth, mHeight);
++        if (status == 0 && !mObserverReady)
++        {
++            mObserverReady = true;
++            __android_log_print(ANDROID_LOG_INFO, "ALAS_G3",
++                                "ALAS_G3_BOOTSTRAP_READY {\"swap\":%" PRIu64 "}",
++                                static_cast<uint64_t>(mSwapCount));
++        }
++        else if (!mObserverReady &&
++                 (mSwapCount == 1 || mSwapCount == 3 || mSwapCount == 6 ||
++                  mSwapCount == 12 || mSwapCount == 30 || mSwapCount == 60 ||
++                  mSwapCount == 120))
++        {
++            __android_log_print(ANDROID_LOG_INFO, "ALAS_G3",
++                                "ALAS_G3_BOOTSTRAP_RETRY {\"swap\":%" PRIu64
++                                ",\"status\":%d}",
++                                static_cast<uint64_t>(mSwapCount), status);
++        }
+     }
+ #endif
+     return egl::NoError();
+diff --git a/src/libANGLE/renderer/null/SurfaceNULL.h b/src/libANGLE/renderer/null/SurfaceNULL.h
+index 6c92acf53..a31c181ab 100644
+--- a/src/libANGLE/renderer/null/SurfaceNULL.h
++++ b/src/libANGLE/renderer/null/SurfaceNULL.h
+@@ -68,6 +68,7 @@ class SurfaceNULL : public SurfaceImpl
+     EGLint mSwapInterval;
+     EGLint mRefreshRateHz;
+     EGLuint64KHR mSwapCount;
++    bool mObserverReady;
+     std::chrono::steady_clock::time_point mNextSwapDeadline;
+ };
+ 
+-- 
+2.34.1

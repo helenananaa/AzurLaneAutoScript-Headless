@@ -18,6 +18,9 @@ class RuntimeQualificationCliTests(unittest.TestCase):
         cls.example_config = (
             cls.repository / "integration" / "runtime" / "kvm.config.example.json"
         )
+        cls.redroid_config = (
+            cls.repository / "integration" / "runtime" / "redroid.config.example.json"
+        )
 
     def run_cli(self, *arguments):
         environment = dict(os.environ)
@@ -95,40 +98,31 @@ class RuntimeQualificationCliTests(unittest.TestCase):
             self.assertIn("adb-offline", plan["phases"])
             self.assertTrue(plan["executable"])
 
-    def test_deferred_backend_cannot_cross_the_execute_gate(self):
+    def test_redroid_backend_emits_executable_plan_without_probing_host(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             lock = json.loads(self.example_lock.read_text(encoding="utf-8"))
             lock["android"]["backend"] = "redroid"
             lock_path = root / "runtime-lock.json"
             lock_path.write_text(json.dumps(lock), encoding="utf-8")
-            config_path = root / "runtime-config.json"
-            config_path.write_text(
-                json.dumps(
-                    {
-                        "schema": "alas-headless.runtime-config/v1",
-                        "backend": "redroid",
-                        "host_class": "linux-x86_64-redroid",
-                    }
-                ),
-                encoding="utf-8",
-            )
-            output = root / "evidence"
+            plan_output = root / "plan.json"
             completed = self.run_cli(
                 "--backend",
                 "redroid",
-                "--config",
-                config_path,
+                "--config", self.redroid_config,
                 "--lock",
                 lock_path,
-                "--execute",
-                "--allow-runtime-mutation",
-                "--output",
-                output,
+                "--plan-output",
+                plan_output,
             )
-            self.assertEqual(completed.returncode, 2)
-            self.assertIn("backend is plan-only", completed.stderr)
-            self.assertFalse(output.exists())
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            plan = json.loads(plan_output.read_text(encoding="utf-8"))
+            self.assertTrue(plan["executable"])
+            self.assertTrue(plan["container_contract"]["manifest_digest_verified"])
+            self.assertEqual(
+                plan["image_manifest_digest"],
+                "sha256:c8bed99e50609a5cd542328eefc79e504a7e38a94088ed7fdeb7eb704555dac5",
+            )
 
 
 if __name__ == "__main__":

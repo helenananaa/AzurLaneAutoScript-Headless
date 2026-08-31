@@ -1,8 +1,9 @@
 # 运行时支持矩阵与探索状态
 
 本文记录 AzurLaneAutoScript Headless 在不同宿主架构、Android 运行方式和
-物理设备上的当前证据边界。服务器/物理设备基线快照日期为 **2026-08-13**；
-Apple Silicon Mac / HVF 登录页证据已补充至 **2026-08-23**。
+物理设备上的当前证据边界。服务器/物理设备基线快照日期为 **2026-08-26**；
+Apple Silicon Mac / HVF 登录页证据已补充至 **2026-08-23**，x86_64
+Redroid 后端只读预检证据已补充至 **2026-08-25**。
 
 这里的“通过”只对表格中写明的范围有效。Android 能启动、ANGLE NULL 合同
 通过、游戏到达登录前，以及完整 ALAS 长期运行是四个不同结论。目前没有任一
@@ -28,7 +29,7 @@ TCG 或外部设备之间静默切换。ANGLE NULL 消除的是游戏对硬件 G
 | Android 运行方式 | x86_64 Linux 服务器 | ARM64 Linux 服务器 |
 | --- | --- | --- |
 | KVM / Android Emulator | **主线可执行；当前最成熟。** API 32 x86_64、KVM 探测、ANGLE NULL、Unity、observer、游戏登录前、game/Android recovery 均有证据。仍缺当前 ALAS 全任务、长期 soak 与多实例资格。 | **未验证。** 已有 ARM64 ANGLE、Unity 和 runtime-lock 构件，但没有真实 ARM KVM 宿主、guest 生命周期、游戏或恢复证据。 |
-| Redroid | **真实探索。** 原生 x86 云宿主在无 /dev/kvm 条件下完成 Binder/容器路径、完整游戏资源、重启持久化并到达登录界面；未输入账号。主线 redroid 后端仍为 fail-closed plan-only，当前镜像线也缺 x86 OCI 真实回退。 | **平台与更新探索较完整。** 真实 ARM 宿主上的 digest-pinned Redroid 通过 G1/G2/G3、APK/资源更新、三轮 restart、持久化 /data 和真实 OCI 回退。尚无真实游戏或 ALAS 证据；原生 FBE 仍阻塞，主线后端仍为 plan-only。 |
+| Redroid | **真实探索；后端实现待执行资格。** 原生 x86 云宿主在无 /dev/kvm 条件下完成 Binder/容器路径、完整游戏资源、重启持久化并到达登录界面；未输入账号。主线后端已实现，并在当前 containerd 宿主通过 manifest、容器、ABI 和持久卷只读预检；尚未对隔离实例执行完整 lifecycle/recovery/cleanup，也缺当前 x86 OCI 真实回退。 | **全新容器的真实游戏登录前路径已通过，尚未取得 ALAS 资格。** AWS ARM64 宿主在 VA39 内核、Android 14 Redroid、新 userdata 首次协议、ANGLE NULL 和 typed observer 下完成 28.1 GB 资源下载；下载后按窄条件冷重启一次进入手机号登录 Activity，未输入或提交账号。当前 OCI 未封入两个运行时修复，原生 FBE、后端生命周期、登录后主界面、ALAS 工作负载、恢复与 soak 仍缺失。 |
 | QEMU TCG | **部分通过，仅作为 fallback。** Q1/Q2/Q3、Unity 长运行和 observer freshness 通过，游戏到达隐私协议边界；WebView 黑屏/System UI ANR 阻止更深 Q4。单线程 portable PGO 候选保留，MTTCG 已因超时或退化被否决。 | **服务器格未验证。** 没有真实 ARM 服务器资格结果。相邻证据来自非 root ARM64 平板托管同架构 QEMU/Cuttlefish：Unity 通过且游戏到达无输入登录前，但极慢，不能替代服务器证据。ARM64 API 32 的另一实验还受 keystore2 崩溃阻塞。 |
 
 ### x86_64 KVM
@@ -55,10 +56,13 @@ Binder/BinderFS、MemFD、privileged 容器、ANGLE NULL、observer、约 27.8 G
 资源下载、容器重启后的 /data 持久化和游戏登录界面均有证据。ADB 只允许绑定
 loopback，测试没有输入账号。
 
-这条路径当前缺的是产品化后端和当前制品闭环，而不是最初可行性证明：
+这条路径当前缺的是后端执行资格和当前制品闭环，而不是最初可行性证明：
 
-- RedroidBackend 尚未实现，主线仍明确拒绝执行；
-- 缺少当前 OCI digest、runtime lock、恢复和 cleanup 的统一 manifest；
+- RedroidBackend 已实现预配置 containerd 实例的严格配置、digest/标签/ABI/
+  持久卷校验、所有权感知 start/stop，以及 game/Android recovery；
+- 当前 x86_64 宿主已通过只读 probe、resolve 和 provision，未启停现有实例；
+- 尚未用隔离实例执行完整 start、ADB、Android、游戏、observer、恢复和 cleanup；
+- 缺少当前 OCI digest、runtime lock、恢复和 cleanup 的统一资格 manifest；
 - x86_64 原生宿主上的真实 OCI 回退尚未完成；
 - 尚未绑定当前 ALAS 工作负载。
 
@@ -77,11 +81,16 @@ loopback，测试没有输入账号。
 当前不能 promotion 的原因：
 
 - stock Redroid 14 的受保护能力为 20/21，原生 FBE 未通过；
-- 当前 /data 是宿主 ext4 bind mount，不能冒充 Android FBE 或 Direct Boot；
+- 历史 stock 资格实例的 /data 是宿主 ext4 bind mount；最新登录候选虽已使用
+  独立 loop/dm userdata，仍未通过 Android native FBE 与 Direct Boot 五项门；
 - stock 基线安全补丁不足以作为长期发布基线；
-- 自维护 AOSP/Redroid 双构建尚未在满足 400 GiB 空间和 64 GiB RAM 的构建机完成；
-- 没有真实游戏、资源全集或 ALAS 工作负载证据；
-- 主线 Redroid 后端仍为 plan-only。
+- 自维护 AOSP/Redroid 双 ABI 构建和 owner-preserving OCI 已完成，但尚未在满足
+  dm-default-key/FBE 条件的 ARM 运行宿主完成自建候选首启资格；
+- 真实游戏与资源全集已在 fresh userdata 到登录边界，首次隐私转场单次通过；但该次
+  转场发生在私有 loader 恢复前，且两项运行时修复尚未封入 OCI。主界面和 ALAS
+  工作负载仍未验证；
+- RedroidBackend 已实现并通过离线合同与只读预检，尚未在 ARM 隔离实例完成
+  lifecycle/recovery/cleanup 资格。
 
 ### QEMU TCG
 
@@ -198,7 +207,7 @@ arm64-qemu-qualification 和 arm64-venus-qualification 分支是证据与实现�
 ## 推荐推进顺序
 
 1. 将当前 ALAS top-down 工作负载绑定到 x86_64 KVM，形成第一条端到端支持线。
-2. 实现独立 RedroidBackend，先接入已有 ARM64 平台/更新证据，再复验真实游戏。
+2. 对已实现的独立 RedroidBackend 执行 ARM64 隔离实例 lifecycle/recovery/cleanup 资格，并把当前真实登录前证据绑定到 runtime lock。
 3. 在原生 x86_64 Binder 宿主补齐当前 Redroid OCI、restart 和 rollback。
 4. 将已 root 手机部署工具与 external-adb runtime lock 接通，并重新执行当前游戏 G4。
 5. 获得真实 ARM64 KVM 服务器后，从 host Q0 开始建立独立 ARM KVM 证据。

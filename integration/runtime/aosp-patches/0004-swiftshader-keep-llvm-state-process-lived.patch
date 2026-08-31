@@ -1,0 +1,123 @@
+diff --git a/src/Reactor/LLVMReactor.cpp b/src/Reactor/LLVMReactor.cpp
+--- a/src/Reactor/LLVMReactor.cpp
++++ b/src/Reactor/LLVMReactor.cpp
+@@ -27,7 +27,6 @@
+ #include "llvm/IR/IntrinsicsX86.h"
+ #include "llvm/Support/Alignment.h"
+ #include "llvm/Support/Error.h"
+-#include "llvm/Support/ManagedStatic.h"
+ 
+ #include <fstream>
+ #include <iostream>
+@@ -61,8 +60,9 @@ using FixedVectorType = VectorType;
+ 
+ namespace {
+ 
+-// Used to automatically invoke llvm_shutdown() when driver is unloaded
+-llvm::llvm_shutdown_obj llvmShutdownObj;
++// LLVM state is process-wide. Android can tear down one Vulkan client while
++// another client still has Reactor work in flight, so it must not be destroyed
++// when this driver instance is unloaded. The process reclaims it at exit.
+ 
+ // This has to be a raw pointer because glibc 2.17 doesn't support __cxa_thread_atexit_impl
+ // for destructing objects at exit. See crbug.com/1074222
+@@ -2703,9 +2703,14 @@ RValue<Int4> RoundIntClamped(RValue<Float4> cast)
+ 	// 2147483520.0, so clamp to 2147483520. Values less than -2147483520.0
+ 	// saturate to 0x80000000.
+ 	return x86::cvtps2dq(Min(cast, Float4(0x7FFFFF80)));
++#elif(defined(__arm__) || defined(__aarch64__)) && LLVM_VERSION_MAJOR >= 14
++	// Use explicit saturating conversion on ARM/AArch64. Relying on target
++	// lowering for out-of-range values is not a portable LLVM IR contract.
++	llvm::Value *rounded = lowerRound(V(cast.value()));
++	llvm::Function *fptosi_sat = llvm::Intrinsic::getDeclaration(
++	    jit->module.get(), llvm::Intrinsic::fptosi_sat, { T(Int4::type()), T(Float4::type()) });
++	return RValue<Int4>(V(jit->builder->CreateCall(fptosi_sat, { rounded })));
+ #elif defined(__arm__) || defined(__aarch64__)
+-	// ARM saturates to the largest positive or negative integer. Unit tests
+-	// verify that lowerRoundInt() behaves as desired.
+ 	return As<Int4>(V(lowerRoundInt(V(cast.value()), T(Int4::type()))));
+ #elif LLVM_VERSION_MAJOR >= 14
+ 	llvm::Value *rounded = lowerRound(V(cast.value()));
+diff --git a/third_party/llvm-16.0/llvm/lib/IR/PassRegistry.cpp b/third_party/llvm-16.0/llvm/lib/IR/PassRegistry.cpp
+--- a/third_party/llvm-16.0/llvm/lib/IR/PassRegistry.cpp
++++ b/third_party/llvm-16.0/llvm/lib/IR/PassRegistry.cpp
+@@ -19,8 +19,11 @@
+ using namespace llvm;
+ 
+ PassRegistry *PassRegistry::getPassRegistry() {
+-  static PassRegistry PassRegistryObj;
+-  return &PassRegistryObj;
++  // SwiftShader's Vulkan driver can be unloaded and loaded again while other
++  // process threads still use LLVM. Keep the registry and its mutex alive for
++  // the process lifetime instead of registering a DSO-scoped destructor.
++  static PassRegistry *PassRegistryObj = new PassRegistry();
++  return PassRegistryObj;
+ }
+ 
+ //===----------------------------------------------------------------------===//
+diff --git a/third_party/llvm-16.0/llvm/lib/Support/ErrorHandling.cpp b/third_party/llvm-16.0/llvm/lib/Support/ErrorHandling.cpp
+--- a/third_party/llvm-16.0/llvm/lib/Support/ErrorHandling.cpp
++++ b/third_party/llvm-16.0/llvm/lib/Support/ErrorHandling.cpp
+@@ -57,14 +57,14 @@ static void *BadAllocErrorHandlerUserData = nullptr;
+ // STL and hide all of its symbols with 'opt -internalize'. To reduce size, it
+ // cuts out the threading portions of the hermetic copy of libc++ that it
+ // builds. We can remove these ifdefs if that script goes away.
+-static std::mutex ErrorHandlerMutex;
+-static std::mutex BadAllocErrorHandlerMutex;
++static std::mutex *ErrorHandlerMutex = new std::mutex();
++static std::mutex *BadAllocErrorHandlerMutex = new std::mutex();
+ #endif
+ 
+ void llvm::install_fatal_error_handler(fatal_error_handler_t handler,
+                                        void *user_data) {
+ #if LLVM_ENABLE_THREADS == 1
+-  std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
++  std::lock_guard<std::mutex> Lock(*ErrorHandlerMutex);
+ #endif
+   assert(!ErrorHandler && "Error handler already registered!\n");
+   ErrorHandler = handler;
+@@ -73,7 +73,7 @@ void llvm::install_fatal_error_handler(fatal_error_handler_t handler,
+ 
+ void llvm::remove_fatal_error_handler() {
+ #if LLVM_ENABLE_THREADS == 1
+-  std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
++  std::lock_guard<std::mutex> Lock(*ErrorHandlerMutex);
+ #endif
+   ErrorHandler = nullptr;
+   ErrorHandlerUserData = nullptr;
+@@ -94,7 +94,7 @@ void llvm::report_fatal_error(const Twine &Reason, bool GenCrashDiag) {
+     // Only acquire the mutex while reading the handler, so as not to invoke a
+     // user-supplied callback under a lock.
+ #if LLVM_ENABLE_THREADS == 1
+-    std::lock_guard<std::mutex> Lock(ErrorHandlerMutex);
++    std::lock_guard<std::mutex> Lock(*ErrorHandlerMutex);
+ #endif
+     handler = ErrorHandler;
+     handlerData = ErrorHandlerUserData;
+@@ -128,7 +128,7 @@ void llvm::report_fatal_error(const Twine &Reason, bool GenCrashDiag) {
+ void llvm::install_bad_alloc_error_handler(fatal_error_handler_t handler,
+                                            void *user_data) {
+ #if LLVM_ENABLE_THREADS == 1
+-  std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
++  std::lock_guard<std::mutex> Lock(*BadAllocErrorHandlerMutex);
+ #endif
+   assert(!ErrorHandler && "Bad alloc error handler already registered!\n");
+   BadAllocErrorHandler = handler;
+@@ -137,7 +137,7 @@ void llvm::install_bad_alloc_error_handler(fatal_error_handler_t handler,
+ 
+ void llvm::remove_bad_alloc_error_handler() {
+ #if LLVM_ENABLE_THREADS == 1
+-  std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
++  std::lock_guard<std::mutex> Lock(*BadAllocErrorHandlerMutex);
+ #endif
+   BadAllocErrorHandler = nullptr;
+   BadAllocErrorHandlerUserData = nullptr;
+@@ -150,7 +150,7 @@ void llvm::report_bad_alloc_error(const char *Reason, bool GenCrashDiag) {
+     // Only acquire the mutex while reading the handler, so as not to invoke a
+     // user-supplied callback under a lock.
+ #if LLVM_ENABLE_THREADS == 1
+-    std::lock_guard<std::mutex> Lock(BadAllocErrorHandlerMutex);
++    std::lock_guard<std::mutex> Lock(*BadAllocErrorHandlerMutex);
+ #endif
+     Handler = BadAllocErrorHandler;
+     HandlerData = BadAllocErrorHandlerUserData;

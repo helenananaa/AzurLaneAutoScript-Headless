@@ -2,7 +2,13 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle-kvm}/angle}"
+angle_backend="${ALAS_ANGLE_BACKEND:-kvm}"
+case "${angle_backend}" in
+  kvm) default_angle_workspace="${HOME}/src/alas-headless-angle-kvm" ;;
+  redroid) default_angle_workspace="${HOME}/src/alas-headless-angle-redroid" ;;
+  *) echo "Unsupported ALAS_ANGLE_BACKEND: ${angle_backend} (expected kvm or redroid)" >&2; exit 2 ;;
+esac
+angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${default_angle_workspace}}/angle}"
 gradle_version="9.4.1"
 gradle_cache="${ALAS_GRADLE_CACHE:-${HOME}/.cache/alas-headless/gradle-${gradle_version}}"
 target_sdk="${ALAS_TARGET_SDK:-32}"

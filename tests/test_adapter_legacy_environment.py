@@ -187,6 +187,12 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
                 environment["ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS"] = max_age
                 with self.assertRaises(SemanticGateClosed):
                     translate_legacy_semantic_environment(environment)
+        for port in ("0", "65536"):
+            with self.subTest(adb_server_port=port):
+                environment = dict(BASE_ENVIRONMENT)
+                environment["ALAS_SEMANTIC_ADB_SERVER_PORT"] = port
+                with self.assertRaises(SemanticGateClosed):
+                    translate_legacy_semantic_environment(environment)
         environment = dict(BASE_ENVIRONMENT)
         environment["ALAS_SEMANTIC_DRIVER_REVISION"] = "not-pinned"
         with self.assertRaises(SemanticGateClosed):

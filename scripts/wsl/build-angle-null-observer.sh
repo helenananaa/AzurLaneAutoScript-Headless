@@ -1,8 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle-kvm}/angle}"
-depot_tools_dir="${ALAS_DEPOT_TOOLS_DIR:-${HOME}/src/depot_tools-kvm}"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+angle_backend="${ALAS_ANGLE_BACKEND:-kvm}"
+case "${angle_backend}" in
+  kvm)
+    default_angle_workspace="${HOME}/src/alas-headless-angle-kvm"
+    default_depot_tools_dir="${HOME}/src/depot_tools-kvm"
+    ;;
+  redroid)
+    default_angle_workspace="${HOME}/src/alas-headless-angle-redroid"
+    default_depot_tools_dir="${HOME}/src/depot_tools-redroid"
+    ;;
+  *) echo "Unsupported ALAS_ANGLE_BACKEND: ${angle_backend} (expected kvm or redroid)" >&2; exit 2 ;;
+esac
+angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${default_angle_workspace}}/angle}"
+depot_tools_dir="${ALAS_DEPOT_TOOLS_DIR:-${default_depot_tools_dir}}"
 target_cpu="${ALAS_ANGLE_TARGET_CPU:-x64}"
 case "${target_cpu}" in
   x64)
@@ -157,6 +170,13 @@ fi
 if ! grep -Fq 'frameGeneration % 3' \
     "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
   echo "Bounded typed-snapshot cadence is missing" >&2
+  exit 1
+fi
+if ! grep -Fq 'ALAS_G3_BOOTSTRAP_READY' \
+    "${angle_dir}/src/libANGLE/renderer/null/SurfaceNULL.cpp" && \
+   ! grep -Fq 'frameGeneration % 3' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
+  echo "Initial typed-snapshot retry is missing" >&2
   exit 1
 fi
 if ! grep -Fq 'kReviewedRaycastFractions' \
@@ -323,6 +343,21 @@ if ! grep -Fq 'TaskScene(Clone)/blur_panel/adapt/top/GetAllButton' \
   echo "G5 mission Button raycast allowlist is missing" >&2
   exit 1
 fi
+if ! grep -Fq 'PaintingPrefsPanel(Clone)/Panel/Confirm' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
+  echo "Resource-selection Confirm raycast allowlist is missing" >&2
+  exit 1
+fi
+if ! grep -Fq 'OtherPrefsPanel(Clone)/Panel/Confirm' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
+  echo "Additional-resource Confirm raycast allowlist is missing" >&2
+  exit 1
+fi
+if ! grep -Fq 'DialogPanel/dialog/action_button' \
+    "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
+  echo "Resource-download action raycast allowlist is missing" >&2
+  exit 1
+fi
 if ! grep -Fq 'AwardInfoUI(Clone)/items/close' \
     "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
   echo "G5 reward popup raycast allowlist is missing" >&2
@@ -346,6 +381,10 @@ fi
 if ! grep -Fq 'EventUI(Clone)/blur_panel/adapt/scroll_bar/Image' \
     "${angle_dir}/src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp"; then
   echo "Commission scrollbar Image raycast allowlist is missing" >&2
+  exit 1
+fi
+if ! grep -Fq 'angle_extract_native_libs = true' "${angle_dir}/gni/angle.gni"; then
+  echo "Private Android 14 ANGLE loader support is missing" >&2
   exit 1
 fi
 
@@ -373,6 +412,9 @@ if [[ ! -f "${apk}" ]]; then
   echo "Expected observer ANGLE APK was not produced: ${apk}" >&2
   exit 1
 fi
+
+"${script_dir}/package-angle-private-loader.sh" \
+  "${apk}" "${target_cpu}" "${angle_dir}"
 
 sha256sum "${apk}"
 echo "ANGLE NULL observer APK: ${apk}"

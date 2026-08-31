@@ -16,6 +16,7 @@ from .runtime_backend_adb import (
     RuntimeBackendNotReady,
     _PACKAGE_PATTERN,
     _validate_adb_identity,
+    _validate_adb_server_port,
 )
 from .runtime_command import (
     RuntimeCommandExecutor,
@@ -119,12 +120,13 @@ class KvmRuntimeConfig:
             or self.console_port % 2
         ):
             raise ValueError("KVM emulator console port must be even and in [5554, 5680]")
-        if (
-            isinstance(self.adb_server_port, bool)
-            or not isinstance(self.adb_server_port, int)
-            or not 1 <= self.adb_server_port <= 65535
-        ):
-            raise ValueError("KVM ADB server port must be in [1, 65535]")
+        allowed_serials = {
+            "emulator-{0}".format(self.console_port),
+            "127.0.0.1:{0}".format(self.console_port + 1),
+        }
+        if self.serial not in allowed_serials:
+            raise ValueError("KVM ADB transport must match its emulator console port")
+        _validate_adb_server_port(self.adb_server_port)
         if (
             isinstance(self.poll_interval_seconds, bool)
             or not isinstance(self.poll_interval_seconds, (int, float))
@@ -191,13 +193,14 @@ class KvmBackend(AdbAttachedBackend):
             config.component,
             config.host_class,
             str(config.adb),
+            config.adb_server_port,
+            True,
             config.angle_package,
             config.unity_command_line,
             config.manage_angle_routing,
             executor,
             config.launch_game,
             config.poll_interval_seconds,
-            adb_server_port=config.adb_server_port,
             trace=trace,
             **kwargs
         )
@@ -359,6 +362,7 @@ class KvmBackend(AdbAttachedBackend):
                 raise RuntimeBackendNotReady("emulator-serial-already-in-use")
         environment = {
             "ANDROID_AVD_HOME": str(self.config.avd_home.resolve()),
+            "ADB_SERVER_PORT": str(self.config.adb_server_port),
             "ANDROID_ADB_SERVER_PORT": str(self.config.adb_server_port),
         }
         if self.config.sdk_root is not None:

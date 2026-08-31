@@ -1,0 +1,31 @@
+From b85311a0a1efef6aa90f5f039c7e2166b342ca19 Mon Sep 17 00:00:00 2001
+From: ALAS Headless Research <local@alas-headless.invalid>
+Date: Tue, 25 Aug 2026 18:00:00 +0800
+Subject: [PATCH] EGL: isolate packaged ANGLE from preloaded system ANGLE
+
+Redroid uses system ANGLE for its own display stack, so libEGL_angle and
+libGLESv2_angle are already present in the shared application namespace before
+a package-specific debug ANGLE is selected.  Android's shared isolated ANGLE
+namespace then reuses those system SONAMEs instead of the observer package.
+
+Use a private, same-length suffix only for ANGLE loaded from an APK.  System
+ANGLE continues through attempt_to_load_system_driver with the upstream
+"angle" suffix, so unrelated Android processes keep the stock renderer.
+---
+ opengl/libs/EGL/Loader.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/opengl/libs/EGL/Loader.cpp b/opengl/libs/EGL/Loader.cpp
+--- a/opengl/libs/EGL/Loader.cpp
++++ b/opengl/libs/EGL/Loader.cpp
+@@ -540,7 +540,7 @@ static void* load_system_driver(const char* kind, const char* suffix, const bool
+ }
+ 
+ static void* load_angle(const char* kind, android_namespace_t* ns) {
+-    std::string name = std::string("lib") + kind + "_angle.so";
++    std::string name = std::string("lib") + kind + "_alasx.so";
+     void* so = nullptr;
+ 
+     if (android::GraphicsEnv::getInstance().shouldUseSystemAngle()) {
+-- 
+2.47.0

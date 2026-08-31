@@ -1,8 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${HOME}/src/alas-headless-angle-kvm}/angle}"
-depot_tools_dir="${ALAS_DEPOT_TOOLS_DIR:-${HOME}/src/depot_tools-kvm}"
+angle_backend="${ALAS_ANGLE_BACKEND:-kvm}"
+case "${angle_backend}" in
+  kvm)
+    default_angle_workspace="${HOME}/src/alas-headless-angle-kvm"
+    default_depot_tools_dir="${HOME}/src/depot_tools-kvm"
+    ;;
+  redroid)
+    default_angle_workspace="${HOME}/src/alas-headless-angle-redroid"
+    default_depot_tools_dir="${HOME}/src/depot_tools-redroid"
+    ;;
+  *) echo "Unsupported ALAS_ANGLE_BACKEND: ${angle_backend} (expected kvm or redroid)" >&2; exit 2 ;;
+esac
+angle_dir="${ALAS_ANGLE_DIR:-${ALAS_ANGLE_WORKSPACE:-${default_angle_workspace}}/angle}"
+depot_tools_dir="${ALAS_DEPOT_TOOLS_DIR:-${default_depot_tools_dir}}"
 target_cpu="${ALAS_ANGLE_TARGET_CPU:-x64}"
 case "${target_cpu}" in
   x64)

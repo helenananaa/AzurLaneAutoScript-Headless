@@ -9,6 +9,7 @@ from alas_headless.android_image_source import AndroidImageSourceError
 from alas_headless.android_image_source import AndroidImageSourceLock
 from alas_headless.android_image_source import disk_checks
 from alas_headless.android_image_source import host_preflight
+from alas_headless.android_image_source import webview_projects_for_abi
 
 
 class AndroidImageSourceTests(unittest.TestCase):
@@ -81,6 +82,32 @@ class AndroidImageSourceTests(unittest.TestCase):
         with self.assertRaisesRegex(AndroidImageSourceError, "all WebView"):
             AndroidImageSourceLock.from_mapping(value)
 
+    def test_remote_verification_scopes_webview_refs_to_selected_abi(self) -> None:
+        projects = self.value["redroid"]["webview_projects"]
+        x86_names = {
+            item["name"] for item in webview_projects_for_abi(projects, "x86_64")
+        }
+        self.assertEqual(x86_names, {
+            "chromium-webview-stub",
+            "android_external_chromium-webview_prebuilt_x86",
+            "android_external_chromium-webview_prebuilt_x86_64",
+        })
+        arm_names = {
+            item["name"] for item in webview_projects_for_abi(projects, "arm64-v8a")
+        }
+        self.assertEqual(arm_names, {
+            "chromium-webview-stub",
+            "android_external_chromium-webview_prebuilt_arm",
+            "android_external_chromium-webview_prebuilt_arm64",
+        })
+        self.assertEqual(len(webview_projects_for_abi(projects, "all")), 5)
+
+    def test_remote_verification_rejects_unknown_abi(self) -> None:
+        with self.assertRaisesRegex(AndroidImageSourceError, "unsupported"):
+            webview_projects_for_abi(
+                self.value["redroid"]["webview_projects"], "x86"
+            )
+
     def test_rejects_32_bit_or_single_arch_product(self) -> None:
         value = copy.deepcopy(self.value)
         value["products"] = value["products"][:1]
@@ -107,6 +134,12 @@ class AndroidImageSourceTests(unittest.TestCase):
         value = copy.deepcopy(self.value)
         value["project_patches"][0]["sha256"] = "main"
         with self.assertRaisesRegex(AndroidImageSourceError, "sha256"):
+            AndroidImageSourceLock.from_mapping(value)
+
+    def test_rejects_unapproved_project_patch_target(self) -> None:
+        value = copy.deepcopy(self.value)
+        value["project_patches"][0]["project"] = "system/core"
+        with self.assertRaisesRegex(AndroidImageSourceError, "not approved"):
             AndroidImageSourceLock.from_mapping(value)
 
     def test_wsl_requires_real_backing_drive_capacity(self) -> None:

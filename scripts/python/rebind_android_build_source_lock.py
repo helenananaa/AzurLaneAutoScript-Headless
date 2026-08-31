@@ -7,11 +7,13 @@ import argparse
 import hashlib
 import json
 import os
+import sys
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Mapping, Sequence
 
+from alas_headless.android_build_domain import AndroidBuildDomain
 from alas_headless.android_image_source import AndroidImageSourceLock
 
 
@@ -44,14 +46,25 @@ def load_object(path: Path) -> dict:
     return value
 
 
-def main(argv: Sequence[str] = ()) -> int:
+def _require_within(path: Path, root: Path, name: str) -> None:
+    resolved = path.resolve()
+    resolved_root = root.resolve()
+    if resolved != resolved_root and resolved_root not in resolved.parents:
+        raise ValueError(f"{name} must stay inside Redroid evidence_root")
+
+
+def _main(argv: Sequence[str]) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--domain", required=True, type=Path)
     parser.add_argument("--old-source-lock", required=True, type=Path)
     parser.add_argument("--new-source-lock", required=True, type=Path)
-    parser.add_argument("--resume-marker", required=True, type=Path)
     parser.add_argument("--resolved-manifest", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
-    args = parser.parse_args(list(argv) if argv else None)
+    args = parser.parse_args(list(argv))
+    domain = AndroidBuildDomain.from_path(args.domain, expected_backend="redroid")
+    source_root = Path(domain.path("source_root"))
+    args.resume_marker = source_root / ".alas-redroid-build-source-lock"
+    _require_within(args.output, Path(domain.path("evidence_root")), "--output")
     if args.output.exists():
         parser.error("--output must not already exist")
 
@@ -106,6 +119,11 @@ def main(argv: Sequence[str] = ()) -> int:
     os.replace(temporary, args.resume_marker)
     print(args.output)
     return 0
+
+
+def main(argv: Sequence[str] = ()) -> int:
+    raw_args = list(argv) if argv else sys.argv[1:]
+    return _main(raw_args)
 
 
 if __name__ == "__main__":

@@ -5,12 +5,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "wsl" / "build-redroid-images.sh"
 
 
-def test_kvm_repository_redroid_entrypoint_is_fail_closed():
+def test_unified_repository_redroid_entrypoint_requires_isolated_domains():
     text = SCRIPT.read_text(encoding="utf-8")
-    assert "Redroid builds are disabled in the KVM control repository" in text
-    assert "v2 dual-domain Redroid entrypoint" in text
-    assert "exit 2" in text
-    assert "repo sync" not in text
-    assert "source build/envsetup.sh" not in text
-    assert " m " not in text
-    assert ".alas-redroid" not in text
+    assert "REDROID_BUILD_DOMAIN_JSON KVM_BUILD_DOMAIN_JSON" in text
+    assert "--expected-backend redroid" in text
+    assert "--expected-backend kvm" in text
+    assert "require_isolated_domain_pair" in text
+    assert "source build/envsetup.sh" in text

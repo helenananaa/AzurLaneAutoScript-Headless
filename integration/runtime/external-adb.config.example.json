@@ -6,6 +6,8 @@
   "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
   "host_class": "android-arm64-external",
   "adb": "adb",
+  "adb_server_port": 5037,
+  "connect_transport": true,
   "angle_package": "org.chromium.angle",
   "unity_command_line": null,
   "launch_game": false,

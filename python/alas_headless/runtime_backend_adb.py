@@ -55,6 +55,11 @@ _SERIAL_PATTERN = re.compile(r"^[A-Za-z0-9_.:-]+$")
 _PACKAGE_PATTERN = re.compile(r"^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$")
 
 
+def _validate_adb_server_port(port: int) -> None:
+    if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
+        raise ValueError("ADB server port must be an integer in [1, 65535]")
+
+
 def _validate_adb_identity(serial: str, package: str, component: str) -> None:
     if not all(isinstance(value, str) for value in (serial, package, component)):
         raise ValueError("ADB identity fields must be text")
@@ -75,6 +80,8 @@ class ExternalAdbConfig:
     component: str
     host_class: str
     adb: str = "adb"
+    adb_server_port: int = 5037
+    connect_transport: bool = False
     angle_package: str = "org.chromium.angle"
     unity_command_line: Optional[str] = None
     launch_game: bool = False
@@ -93,11 +100,13 @@ class ExternalAdbConfig:
             raise ValueError("external ADB host class cannot be empty")
         if not isinstance(self.adb, str) or not self.adb:
             raise ValueError("external ADB executable cannot be empty")
+        _validate_adb_server_port(self.adb_server_port)
         for value in (
             self.launch_game,
             self.manage_angle_routing,
             self.allow_game_restart,
             self.allow_android_restart,
+            self.connect_transport,
         ):
             if not isinstance(value, bool):
                 raise ValueError("external ADB feature switches must be booleans")
@@ -123,13 +132,14 @@ class AdbAttachedBackend(RuntimeBackend):
         component: str,
         host_class: str,
         adb: str,
+        adb_server_port: Optional[int],
+        connect_transport: bool,
         angle_package: str,
         unity_command_line: Optional[str],
         manage_angle_routing: bool,
         executor: RuntimeCommandExecutor,
         launch_game: bool,
         poll_interval_seconds: float,
-        adb_server_port: Optional[int] = None,
         trace: Optional[RuntimeTraceRecorder] = None,
         bridge_factory: Callable[..., AdbObserverBridge] = AdbObserverBridge,
         monotonic: Callable[[], float] = time.monotonic,
@@ -148,6 +158,7 @@ class AdbAttachedBackend(RuntimeBackend):
         ):
             raise ValueError("ADB server port must be in [1, 65535]")
         self.adb_server_port = adb_server_port
+        self.connect_transport = connect_transport
         self.angle_package = angle_package
         self.unity_command_line = unity_command_line
         self.manage_angle_routing = manage_angle_routing
@@ -201,6 +212,32 @@ class AdbAttachedBackend(RuntimeBackend):
     ) -> RuntimeCommandResult:
         return self.executor.run(
             self._adb_spec(label, arguments, timeout_seconds, mutating)
+        )
+
+    def _adb_server_spec(
+        self,
+        label: str,
+        arguments: Sequence[str],
+        timeout_seconds: float = 30.0,
+        mutating: bool = False,
+    ) -> RuntimeCommandSpec:
+        return RuntimeCommandSpec(
+            label,
+            tuple(
+                [self.adb, "-P", str(self.adb_server_port)] + list(arguments)
+            ),
+            timeout_seconds=timeout_seconds,
+            mutating=mutating,
+        )
+
+    def _connect_adb_transport(self) -> RuntimeCommandResult:
+        return self.executor.run(
+            self._adb_server_spec(
+                "adb-connect",
+                ("connect", self.serial),
+                timeout_seconds=10.0,
+                mutating=True,
+            )
         )
 
     @staticmethod
@@ -324,6 +361,8 @@ class AdbAttachedBackend(RuntimeBackend):
 
     def wait_adb(self, instance: Mapping[str, Any], timeout_seconds: float) -> str:
         def ready() -> Optional[Mapping[str, Any]]:
+            if self.connect_transport:
+                self._connect_adb_transport()
             result = self._adb("adb-get-state", ("get-state",), timeout_seconds=5.0)
             if result.succeeded and result.stdout.strip() == "device":
                 return {"serial": self.serial}
@@ -714,6 +753,8 @@ class ExternalAdbBackend(AdbAttachedBackend):
             config.component,
             config.host_class,
             config.adb,
+            config.adb_server_port,
+            config.connect_transport,
             config.angle_package,
             config.unity_command_line,
             config.manage_angle_routing,
@@ -725,11 +766,18 @@ class ExternalAdbBackend(AdbAttachedBackend):
         )
 
     def probe_host(self) -> RuntimeProbeResult:
+        version_prefix = [self.adb]
+        if self.adb_server_port is not None:
+            version_prefix.extend(("-P", str(self.adb_server_port)))
         version = self.executor.run(
             RuntimeCommandSpec(
-                "adb-version", (self.adb, "version"), timeout_seconds=10.0
+                "adb-version",
+                tuple(version_prefix + ["version"]),
+                timeout_seconds=10.0,
             )
         )
+        if self.connect_transport:
+            self._connect_adb_transport()
         state = self._adb("adb-get-state", ("get-state",), timeout_seconds=10.0)
         available = (
             version.succeeded and state.succeeded and state.stdout.strip() == "device"
