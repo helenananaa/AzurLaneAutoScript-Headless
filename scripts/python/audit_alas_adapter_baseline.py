@@ -9,6 +9,7 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path, PurePosixPath
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -25,6 +26,11 @@ except ImportError:  # Direct script execution.
 
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT / "python") not in sys.path:
+    sys.path.insert(0, str(ROOT / "python"))
+
+from alas_headless.semantic_sources import semantic_source_paths
+
 SCHEMA = "alas-headless.adapter-baseline/v1"
 UPSTREAM_LOCK_SCHEMA = "alas-headless.alas-upstream-lock/v1"
 COMMIT_PATTERN = re.compile(r"^[0-9a-f]{40}$")
@@ -173,14 +179,21 @@ def _class_methods(tree: ast.Module, class_name: str) -> tuple[str, ...]:
     ]
     if len(matches) != 1:
         raise AdapterBaselineError("required adapter class is missing or duplicated")
-    return tuple(
-        sorted(
-            node.name
-            for node in matches[0].body
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-            and not node.name.startswith("_")
-        )
-    )
+    classes = {node.name: node for node in tree.body if isinstance(node, ast.ClassDef)}
+
+    def methods(node: ast.ClassDef) -> set[str]:
+        result = {
+            child.name
+            for child in node.body
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and not child.name.startswith("_")
+        }
+        for base in node.bases:
+            if isinstance(base, ast.Name) and base.id in classes:
+                result.update(methods(classes[base.id]))
+        return result
+
+    return tuple(sorted(methods(matches[0])))
 
 
 def _method_count(tree: ast.Module) -> int:
@@ -367,14 +380,23 @@ def collect_baseline(
 ) -> Mapping[str, Any]:
     if COMMIT_PATTERN.fullmatch(core_commit) is None:
         raise AdapterBaselineError("core commit is malformed")
-    adapter_path = root / "python" / "alas_headless" / "alas_adapter.py"
-    oracle_path = root / "python" / "alas_headless" / "semantic_oracle.py"
     patch_path = root / "integration" / "alas" / "0001-semantic-oracle-hooks.patch"
     series_manifest_path = root / "integration" / "alas" / "series" / "series.json"
     manifest_path = root / "integration" / "alas" / "combat-observer-manifest.json"
-    adapter_source, adapter_tree = _parse_python(adapter_path)
-    oracle_source, oracle_tree = _parse_python(oracle_path)
+    def parse_component(component: str) -> tuple[str, ast.Module]:
+        parsed = [_parse_python(path) for path in semantic_source_paths(root, component)]
+        return (
+            "".join(source for source, _ in parsed),
+            ast.Module(
+                body=[node for _, tree in parsed for node in tree.body],
+                type_ignores=[],
+            ),
+        )
+
+    adapter_source, adapter_tree = parse_component("adapter")
+    oracle_source, oracle_tree = parse_component("oracle")
     sources = tuple(tracked_paths) if tracked_paths is not None else tracked_source_paths(root)
+    sources = tuple(set(sources).union(semantic_source_paths(root)))
     try:
         check_generated_patch(series_manifest_path, patch_path, root=root)
     except AlasPatchSeriesError as exc:

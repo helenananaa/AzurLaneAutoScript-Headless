@@ -8722,7 +8722,7 @@
         "OpsiFleet"
       ],
       "name": "OpsiExplore",
-      "note": "72 个常规海域已从 LastZone=0 按原顺序完整实机遍历，覆盖 typed unpin、邻区重锚、局部探针耗尽后的全局锚恢复、SAFE/要塞重叠选层、无事件自动搜索返回 off、游标逐区持久化及月度重置；Fleet=1、Submarine=false、SpecialRadar=false 已证明。危险海域调律样本实际消费、Fleet 2–4、Submarine=true、SpecialRadar=true 仍缺实机闭环",
+      "note": "历史 72 海域证据为 SAFE 遍历及任务游标/时间重置，不代表游戏月初重置或全部危险海域开荒。2026-09-02 已实证月初结算、舰队准备入口与原 ALAS 危险海域 44 清理，正常断点随后按 24→22→31→21→23 推进；21 在恢复启动时清理，后续原流程确认 SAFE 后保存。最终 23 区运行源码起止一致，修复扫描弹窗下层重复输入及当前海域恢复。Fleet=1、Submarine=false、SpecialRadar=false，未购买记录仪。另用独立配置完成危险海域 33，不混入正常顺序。六类样本 typed 使用接口已实现，实测仍为空库存，非零消费待实证；全部 72 危险海域、其他舰队/潜艇组合、记录仪和无人值守自动恢复未闭环。见 docs/operation-siren-monthstart-continuation-20260902.zh-CN.md",
       "status": "L"
     },
     {
@@ -11909,9 +11909,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "cc5fd7bd9963d05129e08aa7cfcca8fa2926d9f1c8c26d8239e45f343e66c05b",
-      "manifest_sha256": "daf1f58001be27db9ce3d0fe20537fbe53ebe4146fa4f0abbe1dadd215362901",
-      "member_count": 94
+      "combined_sha256": "2d281f8ea1fd76148f42da972b09c111dc38c637bd9d852627c816ec7868b928",
+      "manifest_sha256": "8d097c67e2ed6186771a0d20cecfcfda42d9aa26f79aafd1121ff1efe8d0e966",
+      "member_count": 96
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

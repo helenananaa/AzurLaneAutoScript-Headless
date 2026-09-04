@@ -34,6 +34,9 @@ from scripts.python.run_alas_tactical_new_student_live_validation import (
 )
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -336,6 +339,7 @@ def validate(
             "ControlExpOverflow.T4Allow": None if overflow_limits is None else overflow_limits[3],
         },
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "tactical": _sha256(alas_root / "module" / "tactical" / "tactical_class.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),
             "oracle": _sha256(ROOT / "python" / "alas_headless" / "semantic_oracle.py"),

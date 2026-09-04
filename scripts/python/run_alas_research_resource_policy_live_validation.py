@@ -49,6 +49,9 @@ RESOURCE_FILTERS = {
 STRATEGIES = ("always_use", "only_05_hour", "only_no_project", "do_not_use")
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -545,6 +548,7 @@ def validate(
         "strategy": strategy,
         "expect": expect,
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "research": _sha256(alas_root / "module" / "research" / "research.py"),
             "selector": _sha256(alas_root / "module" / "research" / "selector.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),

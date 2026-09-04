@@ -1,0 +1,161 @@
+{
+  "schema": "alas-headless.opsi-monthstart-continuation/v1",
+  "normal_cursor_sequence": [
+    24,
+    22,
+    31,
+    21,
+    23
+  ],
+  "final_cursor": 23,
+  "scheduler_enabled": false,
+  "full_month_qualified": false,
+  "final_explore_passed": true,
+  "nonzero_sample_consumption_qualified": false,
+  "final_resources": {
+    "zone_name": "NA海域西南C",
+    "coins": 11426,
+    "action_points": 66,
+    "action_point_capacity": 200,
+    "beacon_points": 190,
+    "beacon_capacity": 200,
+    "daily_beacon_points": 190,
+    "daily_beacon_capacity": 200,
+    "fleet_levels": [
+      125,
+      125,
+      125,
+      125,
+      125,
+      125
+    ]
+  },
+  "live_identity": {
+    "package": "com.bilibili.azurlane",
+    "pid": 1903,
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+  },
+  "final_source_sha256": {
+    "python/alas_headless/opsi_monthstart.py": "03358209b4bd66e440fd61322b29176233bd0d40326ef3f8b85e5e60f9b8adad",
+    "python/alas_headless/semantic_oracle.py": "ca498ef63b26680b6dbe47133c97e13599b682391e69078f1079445240bbe87a",
+    "python/alas_headless/alas_adapter.py": "9fe4107aaea1546f366c45ef80d2a14b98db35708f8c344f0d87fc32cfd6c514",
+    "integration/alas/0001-semantic-oracle-hooks.patch": "82896d7af5ec7e13d68c62c05a1567a6cc13f913d6d7155b1a11fcf802f47dc0",
+    "scripts/python/run_alas_opsi_monthstart_live_validation.py": "6705b5042027d8dbfb39b5d7343b66e838c71f6f50e90a9dc8eec408e9b30661"
+  },
+  "final_alas_source_sha256": {
+    "module/os/map.py": "08d36484774ed8755c4c3f20b51ad6acea8de68111121f5825e41ee0d1041c5f",
+    "module/os/globe_operation.py": "fbdd923452a49ab937e07ea07c70160c3d2d464c07b37b8b8117acaba78ae8e0",
+    "module/os/tasks/explore.py": "7a3f826aba75fe9ce8a63ea96eb2c00c7bd265f17d35f805bf93ddacb46ed294",
+    "module/os_handler/storage.py": "e29b193d58110d8c111884de4eb633ea4f288e96a9185dd5e7d60cddec88a55c"
+  },
+  "validation": {
+    "focused_tests_passed": 897,
+    "patch_tree": "integration/alas/operation-siren-monthstart-patch-tree-verification-20260902-r4/result.json",
+    "config_fields": 31
+  },
+  "caveats": [
+    "22 and 31 passed on earlier source revisions; each slice records its own stable hashes.",
+    "21 combat completed in startup auto-search in r4; r4 then failed before cursor persistence. r5 confirmed SAFE and persisted 21 before clearing 23.",
+    "The repeated order-input run was manually interrupted and is not a pass; temporary button-center geometry in that slice was reverted.",
+    "Application and Android restarts were supervised; unattended automatic recovery is not qualified.",
+    "No premium purchase, recorder purchase or userdata reset. AP net change includes natural recovery.",
+    "Final sample check with zero inventory is not nonzero consumption qualification."
+  ],
+  "files": {
+    "continue22-r1.json": {
+      "source": "artifacts/monthstart-20260902/continue22-r1/result.json",
+      "sha256": "ad769a3015fdde1348d4e3c3926d39cca4ede723f5bcdd3359b7931aa1123f4d",
+      "bytes": 3296
+    },
+    "continue22-r3.json": {
+      "source": "artifacts/monthstart-20260902/continue22-r3/result.json",
+      "sha256": "f19ec512e2524567343f605ade575683e4337da8aa6ada9bef5c246269c33ee4",
+      "bytes": 3923
+    },
+    "continue31-r1.json": {
+      "source": "artifacts/monthstart-20260902/continue31-r1/result.json",
+      "sha256": "bf39e9f299ac4ef16ee3d8aba6a4b65953942395b2a44de9d94ca288e425dd36",
+      "bytes": 3921
+    },
+    "continue21-r1.json": {
+      "source": "artifacts/monthstart-20260902/continue21-r1/result.json",
+      "sha256": "7f8f274fb33eefe763d24a506d42a73088c9d3cf6fca68e4de6222d11d7d1d8f",
+      "bytes": 3925
+    },
+    "continue21-r2.json": {
+      "source": "artifacts/monthstart-20260902/continue21-r2/result.json",
+      "sha256": "f88059047697a0ce2c15657c21507b051cf97288c557567742cef8a268d616fa",
+      "bytes": 3663
+    },
+    "continue21-r4.json": {
+      "source": "artifacts/monthstart-20260902/continue21-r4/result.json",
+      "sha256": "dc902127538801f43be86cbf7787b4c7d43fd702019da2ac0afdaf741398d3f4",
+      "bytes": 3295
+    },
+    "continue21-r5.json": {
+      "source": "artifacts/monthstart-20260902/continue21-r5/result.json",
+      "sha256": "8202bca2bcd1677d95c18db5a9a6171ddd316f441886549c99762b7ebf899b42",
+      "bytes": 4495
+    },
+    "continuation-samples-final.json": {
+      "source": "artifacts/monthstart-20260902/continuation-samples-final/result.json",
+      "sha256": "13d0ae984fb5d1602f7ac5200c2aaa3573a1d07df6c1a1475f6907eca92b0f03",
+      "bytes": 3813
+    },
+    "continue22-r3.log": {
+      "source": "artifacts/monthstart-20260902/continue22-r3.log",
+      "sha256": "6e6bdb94c3777fc70de4399cf265d997668e1518f6de0260e1638b035d86fea1",
+      "bytes": 28217
+    },
+    "continue31-r1.log": {
+      "source": "artifacts/monthstart-20260902/continue31-r1.log",
+      "sha256": "92ea5603db8e04f175741573067900cdaa95c165bb9cf83feebef4c2c59e5d06",
+      "bytes": 22544
+    },
+    "continue21-r4.log": {
+      "source": "artifacts/monthstart-20260902/continue21-r4.log",
+      "sha256": "dbcc6cdbc5d8c7147551d4dd2fec987be80965625aedf9ea261a09ec992e8ef2",
+      "bytes": 114382
+    },
+    "continue21-r5.log": {
+      "source": "artifacts/monthstart-20260902/continue21-r5.log",
+      "sha256": "7a21c6a503040b136c19f1c8ce6d0f87dcc3e096760dfb3d47cd5b9138cf3465",
+      "bytes": 28279
+    },
+    "continuation-samples-final.log": {
+      "source": "artifacts/monthstart-20260902/continuation-samples-final.log",
+      "sha256": "a1794021bb3086db54b9daa46fd2e773f8bc4b9318fff771779b6b20135779c4",
+      "bytes": 14498
+    },
+    "interrupted-order-run.json": {
+      "source": "artifacts/monthstart-20260902/continue21-r3/interruption.json",
+      "sha256": "d636e31a633478405bf6bd807f988ece8f196984954eb3c8c5983072a446e2b1",
+      "bytes": 189
+    },
+    "interrupted-order-inputs.jsonl": {
+      "source": "artifacts/monthstart-20260902/continue21-r3/order-inputs.jsonl",
+      "sha256": "1fac2a1dca98793742abdb9901956283e816bdb0058febd9d1b774bf1abc1ede",
+      "bytes": 4120
+    },
+    "repaired-order-inputs.jsonl": {
+      "source": "artifacts/monthstart-20260902/continue21-r5/order-inputs.jsonl",
+      "sha256": "79372e1ec2ff45d80a1bd387ac2aff955a7770314768c17863ce1b2ad14d375f",
+      "bytes": 324
+    },
+    "configuration-verification.json": {
+      "source": "artifacts/monthstart-20260902/continuation-final-config.json",
+      "sha256": "a6e0e0b3aae9dc291442617eec3f878f98d4ae5d4d523a8e8de3e21396f5cabe",
+      "bytes": 81107
+    },
+    "typed-progress.jsonl": {
+      "source": "artifacts/monthstart-20260902/continue-progress.jsonl",
+      "sha256": "1e6d552097c8622c1f43aaecab739ccd73a37aaef7febb3b03b9022041b276c1",
+      "bytes": 4044
+    },
+    "support-verification.json": {
+      "source": "artifacts/monthstart-20260902/continuation-support-verification.json",
+      "sha256": "b14c593d656df752cf5a2246064d8399c3e2ab9de3806808ce11a6dfa5445bce",
+      "bytes": 1077
+    }
+  }
+}

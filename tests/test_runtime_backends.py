@@ -142,6 +142,10 @@ class FakeBridge:
                     "pid": 1234,
                     "driver_revision": "d" * 40,
                     "generation": 10,
+                    "main_thread": True,
+                    "flags": 15,
+                    "ui_stage": 100,
+                    "ui_method_mask": 15,
                 },
                 "buttons": {
                     "protocol_schema": "alas-headless.observer/v1",
@@ -203,7 +207,42 @@ class StartingObserverBridge(FakeBridge):
         return value
 
 
+class IncompleteObserverBridge(FakeBridge):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request_count = 0
+
+    def request(self, request):
+        self.request_count += 1
+        value = super().request(request)
+        if self.request_count == 1:
+            value["snapshot"]["ui_method_mask"] = 7
+        return value
+
+
 class RuntimeBackendsTests(unittest.TestCase):
+    def test_managed_launch_config_requires_the_headless_unity_extra(self):
+        with self.assertRaisesRegex(ValueError, "requires Unity -force-gfx-st"):
+            ExternalAdbConfig(
+                "device-1",
+                PACKAGE,
+                COMPONENT,
+                "android-arm64-test",
+                launch_game=True,
+                unity_command_line=None,
+            )
+        with self.assertRaisesRegex(ValueError, "requires Unity -force-gfx-st"):
+            ExternalAdbConfig(
+                "device-1",
+                PACKAGE,
+                COMPONENT,
+                "android-arm64-test",
+                allow_game_restart=True,
+                unity_command_line=None,
+            )
+        with self.assertRaisesRegex(ValueError, "requires Unity -force-gfx-st"):
+            self.redroid_config(unity_command_line=None)
+
     def test_compatibility_facade_reexports_split_implementations(self):
         self.assertIs(ExternalAdbBackend, ExternalAdbBackendImplementation)
         self.assertIs(KvmBackend, KvmBackendImplementation)
@@ -1436,6 +1475,27 @@ class RuntimeBackendsTests(unittest.TestCase):
         instance = backend.start({})
         state = backend.wait_observer_ready(instance, 1.0)
         self.assertTrue(state["atomic"])
+
+    def test_observer_readiness_waits_for_complete_main_thread_ui_probe(self):
+        executor = ScriptedExecutor()
+        backend = ExternalAdbBackend(
+            ExternalAdbConfig(
+                "device-1", PACKAGE, COMPONENT, "android-arm64-test"
+            ),
+            executor,
+            bridge_factory=IncompleteObserverBridge,
+            sleep=lambda _: None,
+        )
+        backend.resolve_artifacts(make_lock("external-adb"))
+        instance = backend.start({})
+
+        state = backend.wait_observer_ready(instance, 1.0)
+
+        self.assertTrue(state["atomic"])
+        self.assertEqual(
+            backend._bridges[instance["instance_id"]].request_count,
+            2,
+        )
         backend.stop(instance)
 
     def test_observer_readiness_retries_transient_non_ok_state(self):

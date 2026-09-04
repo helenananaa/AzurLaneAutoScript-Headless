@@ -1,0 +1,151 @@
+{
+  "schema": "alas-headless.opsi-monthstart-live/v1",
+  "mode": "explore",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "visits": [],
+  "samples": [],
+  "inputs": [],
+  "bounded_stop": false,
+  "full_month_qualified": false,
+  "passed": false,
+  "explore_order": [
+    44,
+    24,
+    22,
+    31,
+    21,
+    23,
+    83,
+    43,
+    81,
+    84,
+    92,
+    93,
+    131,
+    134,
+    132,
+    122,
+    112,
+    33,
+    34,
+    32,
+    25,
+    41,
+    105,
+    95,
+    94,
+    141,
+    143,
+    133,
+    135,
+    111,
+    113,
+    114,
+    125,
+    123,
+    65,
+    62,
+    66,
+    14,
+    42,
+    85,
+    82,
+    91,
+    104,
+    103,
+    142,
+    61,
+    52,
+    51,
+    53,
+    54,
+    63,
+    64,
+    13,
+    12,
+    101,
+    102,
+    144,
+    124,
+    71,
+    73,
+    11,
+    106,
+    121,
+    72,
+    151,
+    152,
+    159,
+    158,
+    153,
+    157,
+    156,
+    155
+  ],
+  "config_before": {
+    "Scheduler": {
+      "Enable": false,
+      "NextRun": "2026-09-02 11:18:13",
+      "Command": "OpsiExplore",
+      "SuccessInterval": 0,
+      "FailureInterval": 0,
+      "ServerUpdate": "00:00"
+    },
+    "OpsiExplore": {
+      "SpecialRadar": false,
+      "ForceRun": false,
+      "LastZone": 24
+    },
+    "OpsiFleet": {
+      "Fleet": 1,
+      "Submarine": false
+    },
+    "Storage": {
+      "Storage": {}
+    }
+  },
+  "source_sha256": {
+    "python/alas_headless/opsi_monthstart.py": "03358209b4bd66e440fd61322b29176233bd0d40326ef3f8b85e5e60f9b8adad",
+    "python/alas_headless/semantic_oracle.py": "b90c9e7a2239da6eb0e2f795b812c801bb3057b9bec44e954c9ce0ff74d95085",
+    "python/alas_headless/alas_adapter.py": "9fe4107aaea1546f366c45ef80d2a14b98db35708f8c344f0d87fc32cfd6c514",
+    "integration/alas/0001-semantic-oracle-hooks.patch": "e4a695fd4ff3eb7783650ec4055e013404780acf3b2bb411eeabf94f0b5d5390",
+    "scripts/python/run_alas_opsi_monthstart_live_validation.py": "84f567c998e532ecae51c8ed3bdc2cdae03b34139f67595a95e5578d5ef0187f"
+  },
+  "alas_source_sha256": {
+    "module/os/map.py": "662dba006ec9fe774bbd3e3a30aaf7f94573e3ca5ea1cd375a3724343bafbf78",
+    "module/os/globe_operation.py": "fbdd923452a49ab937e07ea07c70160c3d2d464c07b37b8b8117acaba78ae8e0",
+    "module/os/tasks/explore.py": "7a3f826aba75fe9ce8a63ea96eb2c00c7bd265f17d35f805bf93ddacb46ed294",
+    "module/os_handler/storage.py": "e29b193d58110d8c111884de4eb633ea4f288e96a9185dd5e7d60cddec88a55c"
+  },
+  "runtime": {
+    "package": "com.bilibili.azurlane",
+    "pid": 20885,
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+  },
+  "error": "SystemExit: 1",
+  "elapsed_seconds": 294.672,
+  "config_after": {
+    "Scheduler": {
+      "Enable": false,
+      "NextRun": "2026-09-02 11:18:13",
+      "Command": "OpsiExplore",
+      "SuccessInterval": 0,
+      "FailureInterval": 0,
+      "ServerUpdate": "00:00"
+    },
+    "OpsiExplore": {
+      "SpecialRadar": false,
+      "ForceRun": false,
+      "LastZone": 24
+    },
+    "OpsiFleet": {
+      "Fleet": 1,
+      "Submarine": false
+    },
+    "Storage": {
+      "Storage": {}
+    }
+  },
+  "source_changed_during_run": false,
+  "alas_source_changed_during_run": false
+}

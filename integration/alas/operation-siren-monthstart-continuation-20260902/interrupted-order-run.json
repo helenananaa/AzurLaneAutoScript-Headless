@@ -1,0 +1,6 @@
+{
+  "passed": false,
+  "manually_interrupted": true,
+  "reason": "Recorded repeated order inputs through native Msgbox underlay; stopped for repair.",
+  "order_inputs_recorded": 13
+}

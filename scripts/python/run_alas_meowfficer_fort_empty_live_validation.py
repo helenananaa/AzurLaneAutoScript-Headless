@@ -21,6 +21,9 @@ if str(ROOT / "python") not in sys.path:
     sys.path.insert(0, str(ROOT / "python"))
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -179,6 +182,7 @@ def validate(*, alas_root: Path, seed_config: str, driver_revision: str) -> Mapp
             "MeowfficerTrain.Enable": False,
         },
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "fort": _sha256(alas_root / "module" / "meowfficer" / "fort.py"),
             "task": _sha256(alas_root / "module" / "meowfficer" / "meowfficer.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),

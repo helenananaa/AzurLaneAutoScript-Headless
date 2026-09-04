@@ -22,6 +22,9 @@ if str(ROOT / "python") not in sys.path:
     sys.path.insert(0, str(ROOT / "python"))
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -185,6 +188,7 @@ def validate(
             "SupplyPack.DayOfWeek": 0,
         },
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "freebies": _sha256(alas_root / "module/freebies/freebies.py"),
             "battle_pass": _sha256(alas_root / "module/freebies/battle_pass.py"),
             "data_key": _sha256(alas_root / "module/freebies/data_key.py"),

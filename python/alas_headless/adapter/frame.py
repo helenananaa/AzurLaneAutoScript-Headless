@@ -369,6 +369,10 @@ class SemanticFrameClock:
         self._invalidated_generation = self._current.generation
         self._current = None
 
+    def release_frame(self) -> None:
+        """Drop borrowed task observations without resetting input generations."""
+        self._current = None
+
     def close(self) -> None:
         self._current = None
         self._invalidated_generation = None

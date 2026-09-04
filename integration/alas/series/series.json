@@ -469,6 +469,16 @@
       "order": 94,
       "path": "integration/alas/series/0490-operation-siren-mission-entry-first.patch",
       "sha256": "7e5c98a90f589341a8a75666da1386a99174ec1f2f858f09eda7e0f8b3cb05f4"
+    },
+    {
+      "order": 95,
+      "path": "integration/alas/series/0500-operation-siren-monthstart.patch",
+      "sha256": "ddff6d4819ed5646921d2a15b64b74adfe6b3d3b0b4ecc7f0f0fd1ab0d0473ce"
+    },
+    {
+      "order": 96,
+      "path": "integration/alas/series/0510-semantic-task-isolation.patch",
+      "sha256": "196011b89c8154481645827a199e4aa2b641e2f4d4485e5c6f013012d74dc705"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

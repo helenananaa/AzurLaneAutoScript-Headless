@@ -53,6 +53,9 @@ MAIL_CLAIM_VARIANTS: Mapping[str, Mapping[str, Any]] = {
 }
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -301,6 +304,7 @@ def validate(
             "SupplyPack.Collect": False,
         },
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "freebies": _sha256(alas_root / "module" / "freebies" / "freebies.py"),
             "mail": _sha256(alas_root / "module" / "freebies" / "mail_white.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),

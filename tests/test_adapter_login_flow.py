@@ -47,6 +47,10 @@ class LoginOracle:
         self.frame = frame
         self.events = []
 
+    def observation_surface_present(self, surface):
+        # Login parity frames contain only the declared login resources.
+        return False
+
     def enabled(self, semantic_id):
         self.events.append(("enabled", semantic_id))
         error = self.frame.enabled_errors.get(semantic_id)

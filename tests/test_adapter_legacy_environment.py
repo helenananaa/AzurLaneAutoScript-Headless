@@ -84,6 +84,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             "ALAS_SEMANTIC_MODE",
             "ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET",
             "ALAS_SEMANTIC_RESEARCH_START_BUDGET",
+            "ALAS_SEMANTIC_REQUIRED_PRIMARY_ABI",
             "ALAS_SEMANTIC_RETIREMENT_BUDGET",
             "ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET",
             "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET",
@@ -96,6 +97,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             "ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS",
             "ALAS_SEMANTIC_ADB_SERVER_PORT",
             "ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS",
+            "ALAS_SEMANTIC_REQUIRED_PRIMARY_ABI",
             "ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS",
             *LEGACY_BOOLEAN_GRANTS,
             *LEGACY_BUDGET_GRANTS,
@@ -110,6 +112,7 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
             ("ALAS_SEMANTIC_ADB_COMMAND_TIMEOUT_SECONDS", "30", "timeout", 30),
             ("ALAS_SEMANTIC_ADB_SERVER_PORT", "5044", "adb_port", 5044),
             ("ALAS_SEMANTIC_OBSERVER_MAX_AGE_MS", "60000", "max_age", 60000),
+            ("ALAS_SEMANTIC_REQUIRED_PRIMARY_ABI", "arm64-v8a", "abi", "arm64-v8a"),
             ("ALAS_SEMANTIC_ALLOW_COMMISSION_REWARDS", "0", "reject", None),
         ]
         cases.extend(
@@ -141,17 +144,27 @@ class LegacyEnvironmentTranslationTests(unittest.TestCase):
                     self.assertEqual(result.adb_server_port, expected)
                 elif behavior == "max_age":
                     self.assertEqual(result.observer_max_age_ms, expected)
+                elif behavior == "abi":
+                    self.assertEqual(result.required_primary_abi, expected)
                 else:
                     self.assertEqual(result.grant(expected), int(value))
 
     def test_default_translation_is_zero_input(self):
         result = translate_legacy_semantic_environment(BASE_ENVIRONMENT)
+        self.assertEqual(result.required_primary_abi, "x86_64")
         expected_capabilities = set(LEGACY_BOOLEAN_GRANTS.values()) | {
             capability for capability, _label in LEGACY_BUDGET_GRANTS.values()
         }
         self.assertEqual(set(result.grants), expected_capabilities)
         self.assertTrue(all(value == 0 for value in result.grants.values()))
         self.assertEqual(result.nondefault_legacy_grants, 0)
+
+    def test_primary_abi_rejects_an_unimplemented_runtime(self):
+        environment = dict(BASE_ENVIRONMENT)
+        environment["ALAS_SEMANTIC_REQUIRED_PRIMARY_ABI"] = "armeabi-v7a"
+
+        with self.assertRaisesRegex(SemanticGateClosed, "ABI is unsupported"):
+            translate_legacy_semantic_environment(environment)
 
     def test_integer_variables_reject_noncanonical_values(self):
         variables = [

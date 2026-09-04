@@ -31,9 +31,31 @@ be identified safely.
   branch. An unsupported optional task must not prevent unrelated supported
   tasks from running.
 
-## Android build-host login and account rules
+## Android development environments and build-host rules
 
-The current lock-free Android build host uses dedicated SSH identities:
+Local Windows/WSL development is the default. Use the local environment for
+repository work, adapter and observer development, focused tests, Redroid
+runtime debugging, and other work that does not require a paid build host. The
+validated local Redroid workflow is documented in
+`docs/local-wsl-redroid-dev.zh-CN.md`.
+
+The local machine is being prepared for full Android image builds, including a
+memory upgrade. Do not infer that the upgrade or the full build environment is
+complete. Before a full AOSP sync or image build, re-run the documented host
+preflight against the actual WSL memory, physical-disk free space, toolchain,
+source roots, and backend-owned output paths. Until that preflight passes, use
+the local machine for the already validated development/runtime surface and do
+not claim local clean-build, provenance, or reproducibility capability.
+
+The lock-free host on port 22023 is a temporary paid build resource scheduled
+to expire on 2026-09-03 (Asia/Shanghai). Before that date it may be used when a
+named build objective justifies the remote cost, after verifying that the host
+is still active and unchanged. It is not the default development environment.
+After the expiry date, do not attempt these connections unless the user
+explicitly confirms that the rental was renewed and provides or confirms the
+current endpoint details.
+
+While the temporary host is available, use its dedicated SSH identities:
 
 ```powershell
 ssh alas-redroid-new
@@ -49,8 +71,8 @@ ssh -p 22023 alas-kvm-build@47.110.157.178
 ssh -p 22023 asus@47.110.157.178
 ```
 
-Routine Redroid source edits, `repo` operations, builds, packaging, and evidence
-generation must log in directly as `alas-redroid-build`. Routine KVM work must
+On that host, Redroid source edits, `repo` operations, builds, packaging, and
+evidence generation must log in directly as `alas-redroid-build`. KVM work must
 log in directly as `alas-kvm-build`. Both accounts are public-key-only, are not
 members of each other's group, and have full passwordless sudo through
 `/etc/sudoers.d/90-alas-build-users`. Their ordinary unprivileged identities
@@ -98,36 +120,45 @@ Use sudo under a build account according to these rules:
   Passwordless sudo does not authorize premium, credential, destructive
   userdata, or unrelated account actions.
 
-The former build server remains a source/evidence fallback, not the default
-development login:
+The former server exposed through ports 22022 and 43676 has expired. Do not
+attempt either historical connection:
 
 ```powershell
 ssh -p 22022 weipa@47.110.157.178
 ssh -p 43676 weipa@weipa.k9.luyouxia.net
 ```
 
-No listed build endpoint is automatically a Redroid runtime qualification host.
-Run container boot, persistence, recovery, rollback, and game-path qualification
-on the separately rented compatible AWS x86 test server. That server is billed
-on demand and its public IP may change after it is stopped, so this file
-intentionally does not provide an SSH command for it. Ask the user for the
-current test-server connection details before attempting Redroid container
-validation; do not infer or reuse a historical IP address.
+Those commands are retained here only to identify obsolete endpoints in old
+reports. The verified local retained archives and evidence, not the expired
+server, are the source/evidence fallback. Do not rewrite historical validation
+reports merely to remove the endpoints they actually used.
 
-Treat these as connection endpoints only. Verify the remote host identity,
-available resources, active workloads, and current build state after connecting
-before running image builds or cleanup operations.
+Neither the temporary 22023 build host nor a local WSL result automatically
+qualifies native-Linux Redroid runtime behavior. Local WSL may be used for its
+documented development, boot, persistence, observer, and login-before-account
+surface. When a support decision requires native-Linux container boot,
+persistence, recovery, rollback, or game-path qualification, use a separately
+rented compatible x86 runtime host. Such a host is billed on demand and its
+public IP may change after it is stopped, so this file intentionally does not
+provide an SSH command for it. Ask the user for the current runtime-host
+connection details before attempting that qualification; do not infer or reuse
+a historical IP address.
 
-Redroid and KVM may use this same physical host, but they must use independent
-build domains. Do not share or cross-write AOSP source trees, `.repo` metadata,
+Treat live SSH details as connection endpoints only. Verify the remote host
+identity, available resources, active workloads, and current build state after
+connecting before running image builds or cleanup operations.
+
+Redroid and KVM must use independent build domains in both local and remote
+environments. Do not share or cross-write AOSP source trees, `.repo` metadata,
 ccache, build homes, temporary directories, outputs, runtimes, archives,
 evidence, or APK archives. Do not add build locks, hot-slot locks, `flock`, a
 shared output slot, or a shared build group. KVM and Redroid may build at the
 same time because correctness comes from disjoint directories, not mutual
-exclusion. This is logical state isolation, not hardware isolation: CPU, RAM,
-I/O bandwidth, the physical disks, and host failure remain common failure and
-contention domains. Treat contention as an observable performance concern; do
-not reintroduce locks to hide it.
+exclusion. When they run on the same physical machine, this is logical state
+isolation rather than hardware isolation: CPU, RAM, I/O bandwidth, physical
+disks, and host failure remain common failure and contention domains. Treat
+contention as an observable performance concern; do not reintroduce locks to
+hide it.
 
 ## Cost-aware Android image development
 

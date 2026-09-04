@@ -19,16 +19,23 @@ from alas_headless.adapter import (
 )
 from alas_headless.alas_adapter import AlasSemanticAdapter
 from alas_headless.semantic_oracle import OperationSirenDaemonTarget
+from alas_headless.semantic_sources import semantic_source_paths
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "python" / "alas_headless" / "alas_adapter.py"
 
 
 class ActionLedgerWiringTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.tree = ast.parse(SOURCE.read_text(encoding="utf-8"))
+        cls.tree = ast.Module(
+            body=[
+                node
+                for path in semantic_source_paths(ROOT, "adapter")
+                for node in ast.parse(path.read_text(encoding="utf-8")).body
+            ],
+            type_ignores=[],
+        )
 
     def test_every_current_mutation_capability_has_a_central_dispatch_site(self):
         dispatched = set()

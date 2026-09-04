@@ -1,0 +1,210 @@
+{
+  "schema": "alas-headless.opsi-monthstart-live/v1",
+  "mode": "explore",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "visits": [
+    {
+      "zone": 21,
+      "entered": false,
+      "stop_if_safe": true
+    },
+    {
+      "zone": 23,
+      "entered": true,
+      "stop_if_safe": true
+    }
+  ],
+  "samples": [
+    {
+      "before": {
+        "generation": 1603,
+        "items": []
+      },
+      "after": {
+        "generation": 1603,
+        "items": []
+      }
+    }
+  ],
+  "inputs": [],
+  "bounded_stop": true,
+  "full_month_qualified": false,
+  "passed": true,
+  "explore_order": [
+    44,
+    24,
+    22,
+    31,
+    21,
+    23,
+    83,
+    43,
+    81,
+    84,
+    92,
+    93,
+    131,
+    134,
+    132,
+    122,
+    112,
+    33,
+    34,
+    32,
+    25,
+    41,
+    105,
+    95,
+    94,
+    141,
+    143,
+    133,
+    135,
+    111,
+    113,
+    114,
+    125,
+    123,
+    65,
+    62,
+    66,
+    14,
+    42,
+    85,
+    82,
+    91,
+    104,
+    103,
+    142,
+    61,
+    52,
+    51,
+    53,
+    54,
+    63,
+    64,
+    13,
+    12,
+    101,
+    102,
+    144,
+    124,
+    71,
+    73,
+    11,
+    106,
+    121,
+    72,
+    151,
+    152,
+    159,
+    158,
+    153,
+    157,
+    156,
+    155
+  ],
+  "config_before": {
+    "Scheduler": {
+      "Enable": false,
+      "NextRun": "2026-09-02 13:04:25",
+      "Command": "OpsiExplore",
+      "SuccessInterval": 0,
+      "FailureInterval": 0,
+      "ServerUpdate": "00:00"
+    },
+    "OpsiExplore": {
+      "SpecialRadar": false,
+      "ForceRun": false,
+      "LastZone": 31
+    },
+    "OpsiFleet": {
+      "Fleet": 1,
+      "Submarine": false
+    },
+    "Storage": {
+      "Storage": {}
+    }
+  },
+  "source_sha256": {
+    "python/alas_headless/opsi_monthstart.py": "03358209b4bd66e440fd61322b29176233bd0d40326ef3f8b85e5e60f9b8adad",
+    "python/alas_headless/semantic_oracle.py": "ca498ef63b26680b6dbe47133c97e13599b682391e69078f1079445240bbe87a",
+    "python/alas_headless/alas_adapter.py": "9fe4107aaea1546f366c45ef80d2a14b98db35708f8c344f0d87fc32cfd6c514",
+    "integration/alas/0001-semantic-oracle-hooks.patch": "82896d7af5ec7e13d68c62c05a1567a6cc13f913d6d7155b1a11fcf802f47dc0",
+    "scripts/python/run_alas_opsi_monthstart_live_validation.py": "6705b5042027d8dbfb39b5d7343b66e838c71f6f50e90a9dc8eec408e9b30661"
+  },
+  "alas_source_sha256": {
+    "module/os/map.py": "08d36484774ed8755c4c3f20b51ad6acea8de68111121f5825e41ee0d1041c5f",
+    "module/os/globe_operation.py": "fbdd923452a49ab937e07ea07c70160c3d2d464c07b37b8b8117acaba78ae8e0",
+    "module/os/tasks/explore.py": "7a3f826aba75fe9ce8a63ea96eb2c00c7bd265f17d35f805bf93ddacb46ed294",
+    "module/os_handler/storage.py": "e29b193d58110d8c111884de4eb633ea4f288e96a9185dd5e7d60cddec88a55c"
+  },
+  "runtime": {
+    "package": "com.bilibili.azurlane",
+    "pid": 1903,
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+  },
+  "order_inputs": [
+    {
+      "semantic_id": "os/order/scan",
+      "generation": 1623,
+      "point": {
+        "x": 1153.5430000000001,
+        "y": 415.001
+      },
+      "bounds": {
+        "left": 920.027,
+        "top": 375.338,
+        "right": 1220.0,
+        "bottom": 471.329
+      },
+      "path": "OverlayCamera/Overlay/UIMain/SVOrderPanel(Clone)/adapt/order_list/fov/type_enable",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "task_result": true,
+  "resources_after": {
+    "zone_name": "NA海域西南C",
+    "coins": 11426,
+    "action_points": 66,
+    "action_point_capacity": 200,
+    "beacon_points": 190,
+    "beacon_capacity": 200,
+    "daily_beacon_points": 190,
+    "daily_beacon_capacity": 200,
+    "fleet_levels": [
+      125,
+      125,
+      125,
+      125,
+      125,
+      125
+    ]
+  },
+  "elapsed_seconds": 409.094,
+  "config_after": {
+    "Scheduler": {
+      "Enable": false,
+      "NextRun": "2026-09-02 13:40:43",
+      "Command": "OpsiExplore",
+      "SuccessInterval": 0,
+      "FailureInterval": 0,
+      "ServerUpdate": "00:00"
+    },
+    "OpsiExplore": {
+      "SpecialRadar": false,
+      "ForceRun": false,
+      "LastZone": 23
+    },
+    "OpsiFleet": {
+      "Fleet": 1,
+      "Submarine": false
+    },
+    "Storage": {
+      "Storage": {}
+    }
+  },
+  "source_changed_during_run": false,
+  "alas_source_changed_during_run": false
+}

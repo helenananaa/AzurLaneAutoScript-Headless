@@ -1,0 +1,108 @@
+{
+  "schema": "alas-headless.opsi-monthstart-live/v1",
+  "mode": "explore",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "visits": [
+    {
+      "zone": 33,
+      "entered": true,
+      "stop_if_safe": true
+    }
+  ],
+  "samples": [
+    {
+      "before": {
+        "generation": 1709,
+        "items": []
+      },
+      "after": {
+        "generation": 1709,
+        "items": []
+      }
+    }
+  ],
+  "inputs": [],
+  "bounded_stop": true,
+  "full_month_qualified": false,
+  "passed": true,
+  "explore_order": [
+    33
+  ],
+  "config_before": {
+    "Scheduler": {
+      "Enable": false,
+      "NextRun": "2026-09-02 11:31:29",
+      "Command": "OpsiExplore",
+      "SuccessInterval": 0,
+      "FailureInterval": 0,
+      "ServerUpdate": "00:00"
+    },
+    "OpsiExplore": {
+      "SpecialRadar": false,
+      "ForceRun": false,
+      "LastZone": 0
+    },
+    "OpsiFleet": {
+      "Fleet": 1,
+      "Submarine": false
+    },
+    "Storage": {
+      "Storage": {}
+    }
+  },
+  "source_sha256": {
+    "python/alas_headless/opsi_monthstart.py": "03358209b4bd66e440fd61322b29176233bd0d40326ef3f8b85e5e60f9b8adad",
+    "python/alas_headless/semantic_oracle.py": "b90c9e7a2239da6eb0e2f795b812c801bb3057b9bec44e954c9ce0ff74d95085",
+    "python/alas_headless/alas_adapter.py": "9fe4107aaea1546f366c45ef80d2a14b98db35708f8c344f0d87fc32cfd6c514",
+    "integration/alas/0001-semantic-oracle-hooks.patch": "90384ac319a80f752db9f4e46252867264a035000da9695347d5a9dc52a1c717",
+    "scripts/python/run_alas_opsi_monthstart_live_validation.py": "f6d243b20689b80bec997e565152fd7207e3f16c8d03a0ad42ab73d24fe165be"
+  },
+  "runtime": {
+    "package": "com.bilibili.azurlane",
+    "pid": 20885,
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+  },
+  "task_result": true,
+  "resources_after": {
+    "zone_name": "西南洋脊C",
+    "coins": 7090,
+    "action_points": 138,
+    "action_point_capacity": 200,
+    "beacon_points": 100,
+    "beacon_capacity": 200,
+    "daily_beacon_points": 100,
+    "daily_beacon_capacity": 200,
+    "fleet_levels": [
+      125,
+      125,
+      125,
+      125,
+      125,
+      125
+    ]
+  },
+  "elapsed_seconds": 742.359,
+  "config_after": {
+    "Scheduler": {
+      "Enable": false,
+      "NextRun": "2026-09-02 11:43:11",
+      "Command": "OpsiExplore",
+      "SuccessInterval": 0,
+      "FailureInterval": 0,
+      "ServerUpdate": "00:00"
+    },
+    "OpsiExplore": {
+      "SpecialRadar": false,
+      "ForceRun": false,
+      "LastZone": 33
+    },
+    "OpsiFleet": {
+      "Fleet": 1,
+      "Submarine": false
+    },
+    "Storage": {
+      "Storage": {}
+    }
+  },
+  "source_changed_during_run": true
+}

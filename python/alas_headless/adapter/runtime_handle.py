@@ -18,6 +18,7 @@ from ..semantic_oracle import (
     ObserverTransportError,
     SemanticGateClosed,
 )
+from ..oracle.transport import observer_snapshot_semantic_ready
 from .ports import RuntimeHandlePort
 
 
@@ -212,6 +213,7 @@ class AdbRuntimeHandleFactory:
     command_timeout_seconds: float
     fingerprint_sha256: str
     driver_revision: str
+    required_primary_abi: str = "x86_64"
     adb_server_port: int = 5037
     process_lease: Optional[AlasPackageProcessLease] = None
     trace: Optional[RuntimeTraceRecorder] = None
@@ -228,6 +230,11 @@ class AdbRuntimeHandleFactory:
     _OBSERVER_STARTUP_PID_POLL_SECONDS = 10.0
 
     def __post_init__(self) -> None:
+        if (
+            not isinstance(self.required_primary_abi, str)
+            or not self.required_primary_abi
+        ):
+            raise ValueError("required primary ABI is missing")
         self._bridge = AdbObserverBridge(
             self.serial,
             self.package,
@@ -239,7 +246,10 @@ class AdbRuntimeHandleFactory:
 
     def __call__(self) -> PreparedRuntimeHandle:
         self._bridge.open()
-        package_gate = PinnedPackageGate(self._bridge)
+        package_gate = PinnedPackageGate(
+            self._bridge,
+            required_primary_abi=self.required_primary_abi,
+        )
         if self.process_lease is None:
             if self._preverified_restart_pid == self._bridge.pid:
                 package_gate._verified_pid = self._bridge.pid
@@ -300,6 +310,7 @@ class AdbRuntimeHandleFactory:
                         snapshot.get("status") == "ok"
                         and snapshot.get("pid") == expected_pid
                         and snapshot.get("driver_revision") == self.driver_revision
+                        and observer_snapshot_semantic_ready(snapshot)
                         and isinstance(age_ms, (int, float))
                         and not isinstance(age_ms, bool)
                         and 0 <= age_ms <= self._OBSERVER_STARTUP_MAX_AGE_MS
@@ -330,6 +341,6 @@ class AdbRuntimeHandleFactory:
         self._preverified_restart_pid = None
         self._bridge.restart_game(
             component,
-            required_primary_abi="x86_64",
+            required_primary_abi=self.required_primary_abi,
         )
         self._preverified_restart_pid = self._bridge.pid

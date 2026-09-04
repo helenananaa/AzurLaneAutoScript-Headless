@@ -1,0 +1,9 @@
+{
+  "schema": "alas-headless.local-patch-sync/v1",
+  "member": "integration/alas/series/0510-semantic-task-isolation.patch",
+  "installed_root": "H:\\program\\AzurLaneAutoScript-alas-topdown-live",
+  "before_sha256": "49cd48a83360f326646a851f2dbb5c2b1142bf53a074f04e5398866bc1194b28",
+  "after_sha256": "6deb41200cb468d797baf9f1fa14ed0d753a5b91bc72571167f070bec138ef0e",
+  "matches_qualified_source_exactly": true,
+  "other_files_changed": false
+}

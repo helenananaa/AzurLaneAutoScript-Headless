@@ -2,6 +2,25 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-09-02
+
+### Classified task failures are contained at the original ALAS run boundary
+
+- Shared page, popup and home navigation routes now inspect ownership before
+  entering optional task parsers. Live validation also repaired guild-notice
+  underlay detection, reward-sidebar priority and repeated sidebar closure.
+- Explicit unsupported semantic ports defer only the current task using ALAS'
+  existing failure interval. Task contexts and borrowed frames are released;
+  action consumption and input-generation invalidation remain intact. Runtime
+  identity, freshness, ambiguity and unclassified errors keep their stop paths.
+- A controlled failure, original ALAS return to main, and original Reward task
+  with all collection options disabled passed on one game PID and one session,
+  with four semantic navigation inputs. This qualifies that handoff, not reward
+  collection or arbitrary task combinations. Patch 0510 is also applied to the
+  local ALAS validation checkout. No task/field support classification changed.
+- See the [task isolation report](task-isolation-20260902.zh-CN.md) and retained
+  evidence under `integration/alas/task-isolation-20260902/`.
+
 ## 2026-08-30
 
 ### Research multi-resource detail and insufficient-resource delay are live complete
@@ -3964,3 +3983,24 @@ See [G8 real ALAS reward and commission validation](g8-alas-reward-commission-va
 - `OpsiMonthBoss` remains `B`: this account still cannot prove a successful
   normal kill/reward stack or the hard-mode combat path, so those conditions
   are not promoted to `F`.
+
+### Operation Siren month-start adaptation (2026-09-02)
+
+- Added typed ports for the real monthly settlement, fleet preparation and
+  free shop-navigation prompt, retaining the original ALAS popup handlers.
+- Original exploration cleared dangerous zone 44 and a separate process resumed
+  at zone 24, cleared it and persisted the cursor. Inventory exit, foreground
+  overlay detection, locked-zone recovery and slow observer generations were
+  repaired along this path.
+- The six tuning-sample types now use typed inventory selection and the original
+  item-use loop, with inventory decrease required as the consumption postcondition.
+  Empty inventory is live-proven; nonzero consumption remains unqualified.
+- The earlier 72-zone evidence was SAFE traversal and scheduler/cursor reset,
+  not actual monthly reset or 72 dangerous-zone clears. `OpsiExplore` remains
+  `L`, and `OpsiCrossMonth` remains `B`. See
+  [the scoped report](operation-siren-monthstart-20260902.zh-CN.md).
+- A subsequent bounded live batch advanced the normal cursor from 24 through
+  22, 31 and 21 to 23. It repaired loading-overlay readiness, native order-prompt
+  underlay clicks and interrupted same-zone recovery. The final 23 run retained
+  stable source hashes and the original ALAS completion/persistence flow. See
+  [continuation evidence and limits](operation-siren-monthstart-continuation-20260902.zh-CN.md).

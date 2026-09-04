@@ -25,6 +25,9 @@ if str(ROOT / "python") not in sys.path:
     sys.path.insert(0, str(ROOT / "python"))
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -658,6 +661,7 @@ def run(args: argparse.Namespace) -> Mapping[str, Any]:
             "multiple_sortie_back_receipts": multiple_sortie_back_receipts,
             "raw_input_fallback_used": False,
             "source_sha256": {
+                **semantic_source_hashes(ROOT),
                 "raid": _sha256(alas_root / "module" / "raid" / "raid.py"),
                 "run": _sha256(alas_root / "module" / "raid" / "run.py"),
                 "daily": _sha256(alas_root / "module" / "raid" / "daily.py"),

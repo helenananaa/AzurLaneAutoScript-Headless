@@ -1,0 +1,6338 @@
+{
+  "protocol_schema": "alas-headless.observer/v1",
+  "semantic_schema": "alas-headless.ui/v1",
+  "status": "ok",
+  "package": "com.bilibili.azurlane",
+  "pid": 1948,
+  "uid": 10105,
+  "peer_uid": 2000,
+  "driver_revision": "be80ce591a481c12d60c50d6040d40c035b40a2b",
+  "schema": 1,
+  "struct_size": 402752,
+  "generation": 280,
+  "snapshot_monotonic_ns": 505144208600,
+  "response_monotonic_ns": 506257112400,
+  "age_ms": 1112,
+  "method_mask": 15,
+  "toggle_count": 2,
+  "text_count": 69,
+  "image_count": 218,
+  "toggle_truncated": false,
+  "text_truncated": false,
+  "image_truncated": false,
+  "error_count": 0,
+  "skipped_count": 23,
+  "toggles": [
+    {
+      "kind": "toggle",
+      "name": "formation_btn",
+      "path": "OverlayCamera/Overlay/UIMain/panel/formation_btn",
+      "flags": 1535,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "checked": false,
+      "adb_point": {
+        "x": 1206.667,
+        "y": 190.067
+      },
+      "adb_bounds": {
+        "left": 1178.1,
+        "top": 137.733,
+        "right": 1235.233,
+        "bottom": 242.4
+      }
+    },
+    {
+      "kind": "toggle",
+      "name": "commander_btn",
+      "path": "OverlayCamera/Overlay/UIMain/panel/commander_btn",
+      "flags": 1535,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "checked": true,
+      "adb_point": {
+        "x": 1206.667,
+        "y": 300.6
+      },
+      "adb_bounds": {
+        "left": 1178.1,
+        "top": 248.267,
+        "right": 1235.233,
+        "bottom": 352.933
+      }
+    }
+  ],
+  "texts": [
+    {
+      "kind": "ugui-text",
+      "name": "text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/title/Image/text",
+      "text": "舰队选择",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 113.333,
+        "top": 67.9,
+        "right": 245.333,
+        "bottom": 114.9
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/formation_btn/text",
+      "text": "编队",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 1195.233,
+        "top": 137.733,
+        "right": 1228.567,
+        "bottom": 242.4
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/commander_btn/text",
+      "text": "指挥喵",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 1195.233,
+        "top": 248.267,
+        "right": 1228.567,
+        "bottom": 352.933
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/limit_tip/Text",
+      "text": "<color=#80e742>在大型作战中，战斗将不会影响心情与消耗石油</color>",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 110.0,
+        "top": 612.667,
+        "right": 467.0,
+        "bottom": 646.0
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/limit_world/limit_sub/Text",
+      "text": "*不计算潜艇舰队的数据",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 491.333,
+        "top": 569.333,
+        "right": 669.333,
+        "bottom": 602.667
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/limit_world/limit_list/condition/Text",
+      "text": "舰船等级总和大于480的舰队数量大于等于1（4）",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 110.0,
+        "top": 569.333,
+        "right": 478.0,
+        "bottom": 602.667
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "name",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/bg/name",
+      "text": "潜艇编队一",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 182.0,
+        "top": 704.472,
+        "right": 343.281,
+        "bottom": 739.128
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "name",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/bg/name",
+      "text": "第一舰队",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 182.0,
+        "top": 183.667,
+        "right": 343.333,
+        "bottom": 218.333
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "name",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/bg/name",
+      "text": "第二舰队",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 182.0,
+        "top": 309.667,
+        "right": 343.333,
+        "bottom": 344.333
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "name",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/bg/name",
+      "text": "第三舰队",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 182.0,
+        "top": 435.667,
+        "right": 343.333,
+        "bottom": 470.333
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "name",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/bg/name",
+      "text": "第四舰队",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 182.0,
+        "top": 561.667,
+        "right": 343.333,
+        "bottom": 596.333
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/dialogue/1/options_panel/options_c/option_tpl/content/Text",
+      "text": "确认",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 314.51,
+        "top": 319.533,
+        "right": 965.49,
+        "bottom": 367.533
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "content",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/dialogue/1/content",
+      "text": "大型作战已经重置！请重新派遣舰队前往海域中进行新一轮作战行动！",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 106.0,
+        "top": 607.906,
+        "right": 1160.001,
+        "bottom": 720.001
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_38501/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 476.775,
+        "top": 685.778,
+        "right": 493.484,
+        "bottom": 708.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_38501/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 493.484,
+        "top": 685.778,
+        "right": 516.691,
+        "bottom": 708.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_40424/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 586.108,
+        "top": 685.778,
+        "right": 602.817,
+        "bottom": 708.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_40424/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 602.817,
+        "top": 685.778,
+        "right": 626.024,
+        "bottom": 708.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_48165/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 695.442,
+        "top": 685.778,
+        "right": 712.151,
+        "bottom": 708.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_48165/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 712.151,
+        "top": 685.778,
+        "right": 735.357,
+        "bottom": 708.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_53868/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 411.775,
+        "top": 167.778,
+        "right": 428.484,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_53868/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 428.484,
+        "top": 167.778,
+        "right": 451.691,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_11921/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 513.775,
+        "top": 167.778,
+        "right": 530.484,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_11921/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 530.484,
+        "top": 167.778,
+        "right": 553.691,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_17687/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 615.775,
+        "top": 167.778,
+        "right": 632.484,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_17687/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 632.484,
+        "top": 167.778,
+        "right": 655.691,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_14303/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 727.435,
+        "top": 167.778,
+        "right": 744.144,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_14303/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 744.144,
+        "top": 167.778,
+        "right": 767.351,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_6857/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 829.435,
+        "top": 167.778,
+        "right": 846.144,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_6857/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 846.144,
+        "top": 167.778,
+        "right": 869.351,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_46965/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 931.435,
+        "top": 167.778,
+        "right": 948.144,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_46965/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 948.144,
+        "top": 167.778,
+        "right": 971.351,
+        "bottom": 190.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_51739/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 411.775,
+        "top": 293.778,
+        "right": 428.484,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_51739/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 428.484,
+        "top": 293.778,
+        "right": 451.691,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_29772/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 513.775,
+        "top": 293.778,
+        "right": 530.484,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_29772/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 530.484,
+        "top": 293.778,
+        "right": 553.691,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_89658/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 615.775,
+        "top": 293.778,
+        "right": 632.484,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_89658/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 632.484,
+        "top": 293.778,
+        "right": 655.691,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_47760/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 727.435,
+        "top": 293.778,
+        "right": 744.144,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_47760/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 744.144,
+        "top": 293.778,
+        "right": 767.351,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_48026/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 829.435,
+        "top": 293.778,
+        "right": 846.144,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_48026/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 846.144,
+        "top": 293.778,
+        "right": 869.351,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_90175/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 931.435,
+        "top": 293.778,
+        "right": 948.144,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_90175/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 948.144,
+        "top": 293.778,
+        "right": 971.351,
+        "bottom": 316.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_101629/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 411.775,
+        "top": 419.778,
+        "right": 428.484,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_101629/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 428.484,
+        "top": 419.778,
+        "right": 451.691,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82346/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 513.775,
+        "top": 419.778,
+        "right": 530.484,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82346/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 530.484,
+        "top": 419.778,
+        "right": 553.691,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_74254/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 615.775,
+        "top": 419.778,
+        "right": 632.484,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_74254/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 632.484,
+        "top": 419.778,
+        "right": 655.691,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_95218/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 727.435,
+        "top": 419.778,
+        "right": 744.144,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_95218/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 744.144,
+        "top": 419.778,
+        "right": 767.351,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_1484/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 829.435,
+        "top": 419.778,
+        "right": 846.144,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_1484/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 846.144,
+        "top": 419.778,
+        "right": 869.351,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_7/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 931.435,
+        "top": 419.778,
+        "right": 948.144,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_7/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 948.144,
+        "top": 419.778,
+        "right": 971.351,
+        "bottom": 442.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82946/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 411.775,
+        "top": 545.778,
+        "right": 428.484,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82946/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 428.484,
+        "top": 545.778,
+        "right": 451.691,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_59911/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 513.775,
+        "top": 545.778,
+        "right": 530.484,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_59911/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 530.484,
+        "top": 545.778,
+        "right": 553.691,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_22410/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 615.775,
+        "top": 545.778,
+        "right": 632.484,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_22410/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 632.484,
+        "top": 545.778,
+        "right": 655.691,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_65892/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 727.435,
+        "top": 545.778,
+        "right": 744.144,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_65892/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 744.144,
+        "top": 545.778,
+        "right": 767.351,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_4051/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 829.435,
+        "top": 545.778,
+        "right": 846.144,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_4051/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 846.144,
+        "top": 545.778,
+        "right": 869.351,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "lv_label",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_21616/icon_bg/lv/lv_label",
+      "text": "LV.",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 931.435,
+        "top": 545.778,
+        "right": 948.144,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_21616/icon_bg/lv/Text",
+      "text": "125",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 948.144,
+        "top": 545.778,
+        "right": 971.351,
+        "bottom": 568.984
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "text (1)",
+      "path": "OverlayCamera/Overlay/UIMain/panel/title/Image/text/text (1)",
+      "text": "FLEET SELECT",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 249.4,
+        "top": 98.769,
+        "right": 382.69,
+        "bottom": 113.364
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "FpsPanel",
+      "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+      "text": "",
+      "flags": 271,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "adb_bounds": {
+        "left": 573.333,
+        "top": 0.0,
+        "right": 706.667,
+        "bottom": 34.667
+      }
+    }
+  ],
+  "images": [
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos2/info/mask/icon",
+      "sprite": "yuehanmiao",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 948.6,
+        "top": 595.2,
+        "right": 1213.267,
+        "bottom": 637.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos1/info/mask/icon",
+      "sprite": "aogumiao",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 948.6,
+        "top": 536.533,
+        "right": 1213.267,
+        "bottom": 578.533
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos2/info/mask/icon",
+      "sprite": "keleimiao",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 948.6,
+        "top": 469.2,
+        "right": 1213.267,
+        "bottom": 511.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos1/info/mask/icon",
+      "sprite": "lindemiao",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 948.6,
+        "top": 410.533,
+        "right": 1213.267,
+        "bottom": 452.533
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos2/info/mask/icon",
+      "sprite": "duoduowan",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 948.6,
+        "top": 343.2,
+        "right": 1213.267,
+        "bottom": 385.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos1/info/mask/icon",
+      "sprite": "pangdemiao",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 948.6,
+        "top": 284.533,
+        "right": 1213.267,
+        "bottom": 326.533
+      }
+    },
+    {
+      "kind": "image",
+      "name": "top",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/dialogue/1/print/top",
+      "sprite": "dialogue_bg",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": -25.376,
+        "top": -119.407,
+        "right": 1297.389,
+        "bottom": 113.927
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/dialogue/1/print/bg",
+      "sprite": "dialogue_bg",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": -17.403,
+        "top": 456.813,
+        "right": 1297.39,
+        "bottom": 734.54
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/commander/pos1/info/mask/icon",
+      "sprite": "duoduowan",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 948.6,
+        "top": 676.533,
+        "right": 1213.267,
+        "bottom": 718.533
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/commander/pos2/info/mask/icon",
+      "sprite": "keleimiao",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 948.6,
+        "top": 217.2,
+        "right": 1213.267,
+        "bottom": 259.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/commander/pos1/info/mask/icon",
+      "sprite": "xiaozhuwan",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 948.6,
+        "top": 158.533,
+        "right": 1213.267,
+        "bottom": 200.533
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/commander/pos2/info/mask/icon",
+      "sprite": "keleimiao",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 948.6,
+        "top": 735.2,
+        "right": 1213.267,
+        "bottom": 777.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "sel",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/btns/btns/auto_button/sel",
+      "sprite": "text_auto",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 0.8705,
+        "blue": 0.4196,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 1065.041,
+        "top": 25.999,
+        "right": 1137.7,
+        "bottom": 49.328
+      }
+    },
+    {
+      "kind": "image",
+      "name": "NewStoryUI(Clone)",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)",
+      "sprite": "white_dot ",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 0.0,
+        "green": 0.0,
+        "blue": 0.0,
+        "alpha": 0.568
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": -0.0,
+        "top": 0.0,
+        "right": 1280.0,
+        "bottom": 720.0
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/btns/btns/speed/Text",
+      "sprite": "10",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 0.870588,
+        "blue": 0.419608,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 967.781,
+        "top": 29.333,
+        "right": 1005.115,
+        "bottom": 46.0
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_38501/icon_bg/icon",
+      "sprite": "daqinghuayu",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 438.133,
+        "top": 686.733,
+        "right": 519.6,
+        "bottom": 768.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_40424/icon_bg/icon",
+      "sprite": "sheshuiyu",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 547.467,
+        "top": 686.733,
+        "right": 628.933,
+        "bottom": 768.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_48165/icon_bg/icon",
+      "sprite": "songdiao",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 656.8,
+        "top": 686.733,
+        "right": 738.267,
+        "bottom": 768.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_53868/icon_bg/icon",
+      "sprite": "aersasi",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 373.133,
+        "top": 168.733,
+        "right": 454.6,
+        "bottom": 250.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_11921/icon_bg/icon",
+      "sprite": "wuerlixi_h",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 475.133,
+        "top": 168.733,
+        "right": 556.6,
+        "bottom": 250.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_17687/icon_bg/icon",
+      "sprite": "yingxianzuo",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 577.133,
+        "top": 168.733,
+        "right": 658.6,
+        "bottom": 250.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_14303/icon_bg/icon",
+      "sprite": "kalangshitade",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 688.793,
+        "top": 168.733,
+        "right": 770.26,
+        "bottom": 250.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "1",
+      "path": "UICamera/Canvas/UIMain/WorldFleetSelect(Clone)/bg/1",
+      "sprite": "port_chuanwu1",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": -0.0,
+        "top": 0.0,
+        "right": 1280.0,
+        "bottom": 720.0
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/btns/record/icon",
+      "sprite": "log",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 21.267,
+        "top": 15.667,
+        "right": 65.267,
+        "bottom": 65.0
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/btns/btns/hide_ui_button/bg",
+      "sprite": "btn_bg",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 821.534,
+        "top": 12.997,
+        "right": 921.534,
+        "bottom": 62.33
+      }
+    },
+    {
+      "kind": "image",
+      "name": "sel",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/btns/btns/hide_ui_button/sel",
+      "sprite": "text_hide",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 830.204,
+        "top": 25.665,
+        "right": 912.863,
+        "bottom": 49.662
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/btns/btns/auto_button/bg",
+      "sprite": "btn_bg",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 1051.37,
+        "top": 12.997,
+        "right": 1151.37,
+        "bottom": 62.33
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/btns/btns/skip_button/Image",
+      "sprite": "text_skip",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 1173.407,
+        "top": 26.333,
+        "right": 1250.074,
+        "bottom": 49.0
+      }
+    },
+    {
+      "kind": "image",
+      "name": "line",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/dialogue/1/line",
+      "sprite": "white_dot ",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 0.14902
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 106.0,
+        "top": 590.633,
+        "right": 1173.225,
+        "bottom": 591.967
+      }
+    },
+    {
+      "kind": "image",
+      "name": "letf",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/dialogue/1/line/letf",
+      "sprite": "white_dot ",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 0.14902
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 106.0,
+        "top": 589.967,
+        "right": 116.651,
+        "bottom": 592.633
+      }
+    },
+    {
+      "kind": "image",
+      "name": "right",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/dialogue/1/line/right",
+      "sprite": "white_dot ",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 0.14902
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 1162.574,
+        "top": 589.967,
+        "right": 1173.225,
+        "bottom": 592.633
+      }
+    },
+    {
+      "kind": "image",
+      "name": "next",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/dialogue/1/next",
+      "sprite": "next",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 1224.867,
+        "top": 661.047,
+        "right": 1259.533,
+        "bottom": 687.714
+      }
+    },
+    {
+      "kind": "image",
+      "name": "content",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/dialogue/1/options_panel/options_c/option_tpl/content",
+      "sprite": "option_bg_center",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 277.333,
+        "top": 319.533,
+        "right": 1002.667,
+        "bottom": 367.533
+      }
+    },
+    {
+      "kind": "image",
+      "name": "speed",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/btns/btns/speed",
+      "sprite": "speed_frame_1",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 941.112,
+        "top": 18.0,
+        "right": 1031.784,
+        "bottom": 57.333
+      }
+    },
+    {
+      "kind": "image",
+      "name": "top",
+      "path": "OverlayCamera/Adpter/top/top",
+      "sprite": "mask1",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": -0.0,
+        "top": -140.667,
+        "right": 1280.0,
+        "bottom": 0.0
+      }
+    },
+    {
+      "kind": "image",
+      "name": "left",
+      "path": "OverlayCamera/Adpter/left/left",
+      "sprite": "mask",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": -140.667,
+        "top": 0.0,
+        "right": -0.0,
+        "bottom": 720.0
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bottom",
+      "path": "OverlayCamera/Adpter/bottom/bottom",
+      "sprite": "mask1",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": -0.0,
+        "top": 720.0,
+        "right": 1280.0,
+        "bottom": 860.667
+      }
+    },
+    {
+      "kind": "image",
+      "name": "right",
+      "path": "OverlayCamera/Adpter/right/right",
+      "sprite": "mask",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 1280.0,
+        "top": 0.0,
+        "right": 1420.667,
+        "bottom": 720.0
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos1/info/frame",
+      "sprite": "commander_4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 999.6,
+        "top": 406.8,
+        "right": 1162.267,
+        "bottom": 456.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_7/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 419.867,
+        "right": 975.127,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_1484/icon_bg",
+      "sprite": "bg4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 419.867,
+        "right": 873.127,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_95218/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 419.867,
+        "right": 771.127,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_74254/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 419.867,
+        "right": 659.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82346/icon_bg",
+      "sprite": "bg5_0",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 419.867,
+        "right": 557.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_101629/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 419.867,
+        "right": 455.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/bg",
+      "sprite": "icon_bar03",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 172.0,
+        "top": 396.467,
+        "right": 998.667,
+        "bottom": 529.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos2/info/frame",
+      "sprite": "commander_4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 999.6,
+        "top": 339.467,
+        "right": 1162.267,
+        "bottom": 388.8
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos1/info/frame",
+      "sprite": "commander_4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 999.6,
+        "top": 280.8,
+        "right": 1162.267,
+        "bottom": 330.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_90175/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 293.867,
+        "right": 975.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_48026/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 293.867,
+        "right": 873.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_47760/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 293.867,
+        "right": 771.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_89658/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 293.867,
+        "right": 659.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_29772/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 293.867,
+        "right": 557.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_51739/icon_bg",
+      "sprite": "bg5_0",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 293.867,
+        "right": 455.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/bg",
+      "sprite": "icon_bar03",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 172.0,
+        "top": 270.467,
+        "right": 998.667,
+        "bottom": 403.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/commander/pos2/info/frame",
+      "sprite": "commander_4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 999.6,
+        "top": 213.467,
+        "right": 1162.267,
+        "bottom": 262.8
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/commander/pos1/info/frame",
+      "sprite": "commander_4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 999.6,
+        "top": 154.8,
+        "right": 1162.267,
+        "bottom": 204.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_46965/icon_bg",
+      "sprite": "bg5_0",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 167.867,
+        "right": 975.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_6857/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 167.867,
+        "right": 873.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_14303/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 167.867,
+        "right": 771.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_17687/icon_bg",
+      "sprite": "bg4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 167.867,
+        "right": 659.467,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_11921/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 167.867,
+        "right": 557.467,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_53868/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 167.867,
+        "right": 455.467,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/bg",
+      "sprite": "icon_bar03",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 172.0,
+        "top": 144.467,
+        "right": 998.667,
+        "bottom": 277.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "fleet",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet",
+      "sprite": "shuimianjiandui_bar",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 114.667,
+        "top": 151.133,
+        "right": 172.0,
+        "bottom": 641.8
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg",
+      "sprite": "white_dot",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 0.376471,
+        "green": 0.443137,
+        "blue": 0.572549,
+        "alpha": 0.335
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 102.667,
+        "top": 137.8,
+        "right": 1177.333,
+        "bottom": 547.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "btnBack",
+      "path": "OverlayCamera/Overlay/UIMain/panel/btnBack",
+      "sprite": "close_btn",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 1107.667,
+        "top": 69.133,
+        "right": 1179.0,
+        "bottom": 119.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "print",
+      "path": "OverlayCamera/Overlay/UIMain/panel/title/Image/print",
+      "sprite": "title_print",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 100.0,
+        "top": 75.933,
+        "right": 352.667,
+        "bottom": 111.267
+      }
+    },
+    {
+      "kind": "image",
+      "name": "title",
+      "path": "OverlayCamera/Overlay/UIMain/panel/title",
+      "sprite": "jianduixuanze_bg",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 100.0,
+        "top": 71.0,
+        "right": 1097.333,
+        "bottom": 114.333
+      }
+    },
+    {
+      "kind": "image",
+      "name": "panel",
+      "path": "OverlayCamera/Overlay/UIMain/panel",
+      "sprite": "white_dot",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 0.0,
+        "green": 0.0,
+        "blue": 0.0,
+        "alpha": 0.313726
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 90.0,
+        "top": 60.667,
+        "right": 1190.0,
+        "bottom": 659.333
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos2/info/frame",
+      "sprite": "commander_4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 999.6,
+        "top": 465.467,
+        "right": 1162.267,
+        "bottom": 514.8
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/bg",
+      "sprite": "icon_bar03",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 172.0,
+        "top": 522.467,
+        "right": 998.667,
+        "bottom": 655.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82946/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 545.867,
+        "right": 455.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_59911/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 545.867,
+        "right": 557.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_22410/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 545.867,
+        "right": 659.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_65892/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 545.867,
+        "right": 771.127,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_4051/icon_bg",
+      "sprite": "bg4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 545.867,
+        "right": 873.127,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_21616/icon_bg",
+      "sprite": "bg5",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 545.867,
+        "right": 975.127,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos1/info/frame",
+      "sprite": "commander_4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 999.6,
+        "top": 532.8,
+        "right": 1162.267,
+        "bottom": 582.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/commander/pos2/info/frame",
+      "sprite": "commander_4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 999.6,
+        "top": 591.467,
+        "right": 1162.267,
+        "bottom": 640.8
+      }
+    },
+    {
+      "kind": "image",
+      "name": "sub",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub",
+      "sprite": "qiantingjiandui_bar",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 114.667,
+        "top": 669.133,
+        "right": 172.0,
+        "bottom": 784.467
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/bg",
+      "sprite": "icon_bar04",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 172.0,
+        "top": 662.467,
+        "right": 998.667,
+        "bottom": 795.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_38501/icon_bg",
+      "sprite": "bg4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 437.267,
+        "top": 685.867,
+        "right": 520.467,
+        "bottom": 769.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_40424/icon_bg",
+      "sprite": "bg4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 546.6,
+        "top": 685.867,
+        "right": 629.8,
+        "bottom": 769.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_48165/icon_bg",
+      "sprite": "bg4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 655.933,
+        "top": 685.867,
+        "right": 739.133,
+        "bottom": 769.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/commander/pos1/info/frame",
+      "sprite": "commander_4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 999.6,
+        "top": 672.8,
+        "right": 1162.267,
+        "bottom": 722.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/commander/pos2/info/frame",
+      "sprite": "commander_4",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 999.6,
+        "top": 731.467,
+        "right": 1162.267,
+        "bottom": 780.8
+      }
+    },
+    {
+      "kind": "image",
+      "name": "start_button",
+      "path": "OverlayCamera/Overlay/UIMain/panel/start_button",
+      "sprite": "qianwang_butten",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 955.8,
+        "top": 575.867,
+        "right": 1166.467,
+        "bottom": 648.533
+      }
+    },
+    {
+      "kind": "image",
+      "name": "condition",
+      "path": "OverlayCamera/Overlay/UIMain/panel/limit_world/limit_list/condition",
+      "sprite": "white_dot",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 0.0,
+        "green": 0.0,
+        "blue": 0.0,
+        "alpha": 0.303
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 103.333,
+        "top": 569.333,
+        "right": 484.667,
+        "bottom": 602.667
+      }
+    },
+    {
+      "kind": "image",
+      "name": "limit_tip",
+      "path": "OverlayCamera/Overlay/UIMain/panel/limit_tip",
+      "sprite": "white_dot",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 0.0,
+        "green": 0.0,
+        "blue": 0.0,
+        "alpha": 0.303
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 103.333,
+        "top": 612.667,
+        "right": 473.667,
+        "bottom": 646.0
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_53868/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 167.867,
+        "right": 455.467,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_53868/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 167.867,
+        "right": 455.467,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_11921/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 167.867,
+        "right": 557.467,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_11921/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 167.867,
+        "right": 557.467,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_14303/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 167.867,
+        "right": 771.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_14303/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 167.867,
+        "right": 771.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_6857/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 167.867,
+        "right": 873.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_6857/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 167.867,
+        "right": 873.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_46965/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 167.867,
+        "right": 975.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_46965/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 167.867,
+        "right": 975.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_51739/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 293.867,
+        "right": 455.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_51739/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 293.867,
+        "right": 455.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_29772/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 293.867,
+        "right": 557.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_29772/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 293.867,
+        "right": 557.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_89658/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 293.867,
+        "right": 659.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_89658/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 293.867,
+        "right": 659.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_47760/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 293.867,
+        "right": 771.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_47760/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 293.867,
+        "right": 771.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_48026/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 293.867,
+        "right": 873.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_48026/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 293.867,
+        "right": 873.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_90175/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 293.867,
+        "right": 975.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_90175/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 293.867,
+        "right": 975.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_101629/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 419.867,
+        "right": 455.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_101629/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 419.867,
+        "right": 455.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82346/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 419.867,
+        "right": 557.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82346/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 419.867,
+        "right": 557.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_74254/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 419.867,
+        "right": 659.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_74254/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 419.867,
+        "right": 659.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_95218/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 419.867,
+        "right": 771.127,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_95218/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 419.867,
+        "right": 771.127,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_7/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 419.867,
+        "right": 975.127,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_7/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 419.867,
+        "right": 975.127,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82946/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 545.867,
+        "right": 455.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82946/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 545.867,
+        "right": 455.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_59911/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 545.867,
+        "right": 557.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_59911/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 545.867,
+        "right": 557.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_22410/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 545.867,
+        "right": 659.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_22410/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 545.867,
+        "right": 659.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_65892/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 545.867,
+        "right": 771.127,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_65892/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 545.867,
+        "right": 771.127,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image0",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_21616/icon_bg/frame/IconColorful(Clone)/Image0",
+      "sprite": "IconColorfulring02",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 545.867,
+        "right": 975.127,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "Image",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_21616/icon_bg/frame/IconColorful(Clone)/Image",
+      "sprite": "IconColorfulring01",
+      "flags": 495,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 545.867,
+        "right": 975.127,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)/front/btns/btns/skip_button/bg",
+      "sprite": "btn_bg",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 1161.741,
+        "top": 13.0,
+        "right": 1261.741,
+        "bottom": 62.333
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_6857/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 167.867,
+        "right": 873.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_6857/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 793.973,
+        "top": 169.909,
+        "right": 871.328,
+        "bottom": 190.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_14303/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 167.867,
+        "right": 771.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_14303/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 691.973,
+        "top": 169.909,
+        "right": 769.328,
+        "bottom": 190.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_17687/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 0.905882,
+        "blue": 0.262745,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 167.867,
+        "right": 659.467,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_17687/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 580.313,
+        "top": 169.909,
+        "right": 657.668,
+        "bottom": 190.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "specialFrame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_11921/icon_bg/frame/specialFrame",
+      "sprite": "frame_prop",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 469.5,
+        "top": 161.8,
+        "right": 563.533,
+        "bottom": 256.267
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_11921/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 167.867,
+        "right": 557.467,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_11921/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 478.313,
+        "top": 169.909,
+        "right": 555.668,
+        "bottom": 190.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_53868/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 167.867,
+        "right": 455.467,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/main/ship_53868/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 376.313,
+        "top": 169.909,
+        "right": 453.668,
+        "bottom": 190.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_46965/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 895.973,
+        "top": 169.909,
+        "right": 973.328,
+        "bottom": 190.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_46965/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 167.867,
+        "right": 975.127,
+        "bottom": 251.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "specialFrame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_46965/icon_bg/frame/specialFrame",
+      "sprite": "frame5_0",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 888.46,
+        "top": 164.4,
+        "right": 978.593,
+        "bottom": 254.75
+      }
+    },
+    {
+      "kind": "image",
+      "name": "selected",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/selected",
+      "sprite": "7_frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 172.0,
+        "top": 144.467,
+        "right": 998.667,
+        "bottom": 277.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_51739/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 376.313,
+        "top": 295.909,
+        "right": 453.668,
+        "bottom": 316.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_51739/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 293.867,
+        "right": 455.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "specialFrame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_51739/icon_bg/frame/specialFrame",
+      "sprite": "frame5_0",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 368.8,
+        "top": 290.4,
+        "right": 458.933,
+        "bottom": 380.75
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_29772/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 478.313,
+        "top": 295.909,
+        "right": 555.668,
+        "bottom": 316.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_29772/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 293.867,
+        "right": 557.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_89658/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 580.313,
+        "top": 295.909,
+        "right": 657.668,
+        "bottom": 316.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_89658/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 293.867,
+        "right": 659.467,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_47760/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 691.973,
+        "top": 295.909,
+        "right": 769.328,
+        "bottom": 316.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_47760/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 293.867,
+        "right": 771.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_48026/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 793.973,
+        "top": 295.909,
+        "right": 871.328,
+        "bottom": 316.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_48026/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 293.867,
+        "right": 873.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_90175/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 895.973,
+        "top": 295.909,
+        "right": 973.328,
+        "bottom": 316.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_90175/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 293.867,
+        "right": 975.127,
+        "bottom": 377.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "selected",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/selected",
+      "sprite": "7_frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 172.0,
+        "top": 270.467,
+        "right": 998.667,
+        "bottom": 403.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_101629/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 376.313,
+        "top": 421.91,
+        "right": 453.668,
+        "bottom": 442.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_101629/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 419.867,
+        "right": 455.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82346/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 478.313,
+        "top": 421.91,
+        "right": 555.668,
+        "bottom": 442.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82346/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 419.867,
+        "right": 557.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "specialFrame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82346/icon_bg/frame/specialFrame",
+      "sprite": "frame5_0",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 470.8,
+        "top": 416.4,
+        "right": 560.933,
+        "bottom": 506.75
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_74254/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 580.313,
+        "top": 421.91,
+        "right": 657.668,
+        "bottom": 442.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_74254/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 419.867,
+        "right": 659.467,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_95218/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 691.973,
+        "top": 421.91,
+        "right": 769.328,
+        "bottom": 442.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_95218/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 419.867,
+        "right": 771.127,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_1484/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 793.973,
+        "top": 421.91,
+        "right": 871.328,
+        "bottom": 442.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_1484/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 0.905882,
+        "blue": 0.262745,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 419.867,
+        "right": 873.127,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_7/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 895.973,
+        "top": 421.91,
+        "right": 973.328,
+        "bottom": 442.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_7/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 419.867,
+        "right": 975.127,
+        "bottom": 503.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "selected",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/selected",
+      "sprite": "7_frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 172.0,
+        "top": 396.467,
+        "right": 998.667,
+        "bottom": 529.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82946/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 376.313,
+        "top": 547.91,
+        "right": 453.668,
+        "bottom": 568.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82946/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 372.267,
+        "top": 545.867,
+        "right": 455.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_59911/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 478.313,
+        "top": 547.91,
+        "right": 555.668,
+        "bottom": 568.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_59911/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 474.267,
+        "top": 545.867,
+        "right": 557.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_22410/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 580.313,
+        "top": 547.91,
+        "right": 657.668,
+        "bottom": 568.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_22410/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 576.267,
+        "top": 545.867,
+        "right": 659.467,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_65892/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 691.973,
+        "top": 547.91,
+        "right": 769.328,
+        "bottom": 568.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_65892/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 687.927,
+        "top": 545.867,
+        "right": 771.127,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_4051/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 793.973,
+        "top": 547.91,
+        "right": 871.328,
+        "bottom": 568.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_4051/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 0.905882,
+        "blue": 0.262745,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 789.927,
+        "top": 545.867,
+        "right": 873.127,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_21616/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 895.973,
+        "top": 547.91,
+        "right": 973.328,
+        "bottom": 568.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_21616/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 891.927,
+        "top": 545.867,
+        "right": 975.127,
+        "bottom": 629.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "selected",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/selected",
+      "sprite": "7_frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 172.0,
+        "top": 522.467,
+        "right": 998.667,
+        "bottom": 655.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_38501/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 441.313,
+        "top": 687.91,
+        "right": 518.668,
+        "bottom": 708.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_38501/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 0.905882,
+        "blue": 0.262745,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 437.267,
+        "top": 685.867,
+        "right": 520.467,
+        "bottom": 769.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_40424/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 550.646,
+        "top": 687.91,
+        "right": 628.002,
+        "bottom": 708.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_40424/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 0.905882,
+        "blue": 0.262745,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 546.6,
+        "top": 685.867,
+        "right": 629.8,
+        "bottom": 769.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "lv_bg",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_48165/icon_bg/lv/lv_bg",
+      "sprite": "bg_lv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 659.979,
+        "top": 687.91,
+        "right": 737.335,
+        "bottom": 708.331
+      }
+    },
+    {
+      "kind": "image",
+      "name": "frame",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/submarine/ship_48165/icon_bg/frame",
+      "sprite": "frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 0.905882,
+        "blue": 0.262745,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 655.933,
+        "top": 685.867,
+        "right": 739.133,
+        "bottom": 769.067
+      }
+    },
+    {
+      "kind": "image",
+      "name": "selected",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/sub/1/selected",
+      "sprite": "7_frame",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 172.0,
+        "top": 662.467,
+        "right": 998.667,
+        "bottom": 795.133
+      }
+    },
+    {
+      "kind": "image",
+      "name": "unsel",
+      "path": "OverlayCamera/Overlay/UIMain/panel/formation_btn/unsel",
+      "sprite": "zhihuimiao_OFF",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 1178.1,
+        "top": 137.733,
+        "right": 1235.233,
+        "bottom": 242.4
+      }
+    },
+    {
+      "kind": "image",
+      "name": "sel",
+      "path": "OverlayCamera/Overlay/UIMain/panel/commander_btn/sel",
+      "sprite": "zhihuimiao_ON",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 1178.1,
+        "top": 248.267,
+        "right": 1235.233,
+        "bottom": 352.933
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_6857/icon_bg/icon",
+      "sprite": "daofeng",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 790.793,
+        "top": 168.733,
+        "right": 872.26,
+        "bottom": 250.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1/vanguard/ship_46965/icon_bg/icon",
+      "sprite": "pulimaosi",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 892.793,
+        "top": 168.733,
+        "right": 974.26,
+        "bottom": 250.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_51739/icon_bg/icon",
+      "sprite": "qiershazhi",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 373.133,
+        "top": 294.733,
+        "right": 454.6,
+        "bottom": 376.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_29772/icon_bg/icon",
+      "sprite": "yuekechengII_4",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 475.133,
+        "top": 294.733,
+        "right": 556.6,
+        "bottom": 376.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_89658/icon_bg/icon",
+      "sprite": "liekexingdunII",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 577.133,
+        "top": 294.733,
+        "right": 658.6,
+        "bottom": 376.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_47760/icon_bg/icon",
+      "sprite": "guandao_3",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 688.793,
+        "top": 294.733,
+        "right": 770.26,
+        "bottom": 376.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_48026/icon_bg/icon",
+      "sprite": "lafeiII",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 790.793,
+        "top": 294.733,
+        "right": 872.26,
+        "bottom": 376.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_90175/icon_bg/icon",
+      "sprite": "bote",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 892.793,
+        "top": 294.733,
+        "right": 974.26,
+        "bottom": 376.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_101629/icon_bg/icon",
+      "sprite": "gezi",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 373.133,
+        "top": 420.733,
+        "right": 454.6,
+        "bottom": 502.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82346/icon_bg/icon",
+      "sprite": "meikelunbao_2",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 475.133,
+        "top": 420.733,
+        "right": 556.6,
+        "bottom": 502.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_74254/icon_bg/icon",
+      "sprite": "shi",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 577.133,
+        "top": 420.733,
+        "right": 658.6,
+        "bottom": 502.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_95218/icon_bg/icon",
+      "sprite": "mosike",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 688.793,
+        "top": 420.733,
+        "right": 770.26,
+        "bottom": 502.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_1484/icon_bg/icon",
+      "sprite": "hailunna_g",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 790.793,
+        "top": 420.733,
+        "right": 872.26,
+        "bottom": 502.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_7/icon_bg/icon",
+      "sprite": "beierfasite_g",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 892.793,
+        "top": 420.733,
+        "right": 974.26,
+        "bottom": 502.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_82946/icon_bg/icon",
+      "sprite": "baifeng_2",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 373.133,
+        "top": 546.733,
+        "right": 454.6,
+        "bottom": 628.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_59911/icon_bg/icon",
+      "sprite": "tiancheng_cv",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 475.133,
+        "top": 546.733,
+        "right": 556.6,
+        "bottom": 628.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/main/ship_22410/icon_bg/icon",
+      "sprite": "xinnong",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 577.133,
+        "top": 546.733,
+        "right": 658.6,
+        "bottom": 628.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_65892/icon_bg/icon",
+      "sprite": "z52_3",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 688.793,
+        "top": 546.733,
+        "right": 770.26,
+        "bottom": 628.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_4051/icon_bg/icon",
+      "sprite": "fengyun",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 790.793,
+        "top": 546.733,
+        "right": 872.26,
+        "bottom": 628.2
+      }
+    },
+    {
+      "kind": "image",
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/panel/bg/content/fleet/1(Clone)/vanguard/ship_21616/icon_bg/icon",
+      "sprite": "aierdeliqi_g",
+      "flags": 431,
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": {
+        "red": 1.0,
+        "green": 1.0,
+        "blue": 1.0,
+        "alpha": 1.0
+      },
+      "fill_amount": 1.0,
+      "adb_bounds": {
+        "left": 892.793,
+        "top": 546.733,
+        "right": 974.26,
+        "bottom": 628.2
+      }
+    }
+  ]
+}
