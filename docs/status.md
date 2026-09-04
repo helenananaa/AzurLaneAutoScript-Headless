@@ -2,6 +2,27 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-09-01
+
+### Local-first development supersedes the expiring build hosts
+
+- Local Windows/WSL is now the default development and Redroid runtime-debug
+  environment. The machine is awaiting a memory upgrade; full local AOSP sync
+  and image builds remain unavailable as a support claim until the documented
+  memory, physical-disk, toolchain, source-root, and output-domain preflight
+  passes.
+- The isolated host on port 22023 remains a temporary paid build resource only
+  until its scheduled 2026-09-03 expiry. It may be used before expiry for a
+  named build objective after fresh host and workload preflight; after expiry it
+  must not be contacted unless the user confirms renewal and current details.
+- The former server on ports 22022 and 43676 has expired. Historical reports
+  retain those endpoints as run identity, but verified local archives and
+  evidence are now the only fallback from that server.
+- Redroid/KVM source, `.repo`, output, ccache, home, temporary, runtime,
+  archive, evidence, and APK domains remain independent in local and remote
+  environments. Local WSL development does not replace native-Linux/AWS runtime
+  qualification when a support claim requires it.
+
 ## 2026-08-30
 
 ### Research multi-resource detail and insufficient-resource delay are live complete
@@ -257,10 +278,10 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   container boot, persistence, recovery, rollback, and game-path claims still
   require the compatible AWS runtime host.
 
-### Current default build domains are lock-free and fully disjoint
+### 2026-08-27 remote build domains were lock-free and fully disjoint
 
-- Current development uses the dedicated `alas-kvm-build` and
-  `alas-redroid-build` accounts on the new build host. The
+- At this 2026-08-27 snapshot, remote development used the dedicated
+  `alas-kvm-build` and `alas-redroid-build` accounts on the new build host. The
   `alas-kvm-run x86_64 -- bash` and architecture-specific Redroid wrappers bind
   backend-owned source, `.repo`, output, ccache, home, temporary, runtime,
   archive, evidence, and APK paths.
@@ -268,9 +289,9 @@ Status is evidence-scoped. A later gate is not implied by an earlier pass.
   lock, shared hot-output slot, or peer-writable mutable path. KVM and Redroid
   may build concurrently; CPU, RAM, I/O, physical disks, and host failure remain
   shared contention and failure domains.
-- The former server is now source/evidence fallback only. Its active KVM
-  service and retained AVD/userdata are not migrated or changed by this source
-  reorganization.
+- At this snapshot, the former server was source/evidence fallback only. It has
+  since expired; the active KVM service and retained AVD/userdata described here
+  are historical evidence rather than a current connection target.
 ## 2026-08-27
 
 ### Lock-free Redroid/KVM build domains are active on the new host

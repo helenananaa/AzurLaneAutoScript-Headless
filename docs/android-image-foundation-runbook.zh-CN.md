@@ -107,16 +107,27 @@ NOTICE/SBOM SHA-256
 
 ### 3.1 固定源码并做构建宿主预检
 
-新构建机必须直接登录对应构建账户：Redroid 使用 `ssh alas-redroid-new`，KVM 使用
-`ssh alas-kvm-new`；`asus` 只保留作全局宿主维护和故障恢复。两个构建账户均有完整
-`NOPASSWD: ALL`，连接后可用 `sudo -n true` 验证。完整 sudo 等价于 root，因此普通权限下的
-跨目录拒绝不是针对构建账户的安全边界；开发人员必须继续遵守 backend 目录归属。
+本地 Windows/WSL 是默认开发环境，但本机内存升级和完整 Android 构建域准备完成前，不得
+把本地运行/调试能力外推为完整 AOSP 构建能力。必须先按本节重新检查实际 WSL 内存、物理磁盘
+可用空间、工具链、源码目录和 backend 输出目录；预检未通过时不得启动完整 sync/build，也不得
+生成本地 clean-build、provenance 或 reproducibility 声明。
 
-源码 checkout、`repo sync`、Git、Soong/Ninja、ccache 和普通证据写入一律保持构建账户身份，
-不能用 `sudo` 启动整次构建或进入长期 root shell。只有安装宿主依赖、loop/mount、systemd，
-以及构建器已经明确标出的 OCI/userdata root 步骤才提升单条命令，统一使用 `sudo -n`。提升后
-检查制品属主；不得借 sudo 跨写、清理或改权另一 backend，不得重建共享组、共享输出或锁。
-影响两侧的宿主变更必须先查看活动工作负载，并在运行记录中写明命令、目标、结果和回滚。
+端口 22023 的付费构建机计划于 2026-09-03（Asia/Shanghai）到期。到期前，只有在具体构建目标
+值得远程成本且主机预检通过时才使用它：Redroid 登录 `ssh alas-redroid-new`，KVM 登录
+`ssh alas-kvm-new`；`asus` 只保留作全局宿主维护和故障恢复。到期后不得继续尝试连接，除非用户
+明确确认已经续费并确认当前入口。旧端口 22022/43676 所在服务器已经到期，只能作为历史报告中
+的运行身份，不再是源码或证据回退入口；回退以本地已校验留存为准。
+
+22023 上的两个构建账户均有完整 `NOPASSWD: ALL`，连接后可用 `sudo -n true` 验证。完整 sudo
+等价于 root，因此普通权限下的跨目录拒绝不是针对构建账户的安全边界；开发人员必须继续遵守
+backend 目录归属。
+
+源码 checkout、`repo sync`、Git、Soong/Ninja、ccache 和普通证据写入一律保持非 root 身份：
+22023 上使用对应构建账户，本地使用当前开发用户。不能用 `sudo` 启动整次构建或进入长期 root
+shell。只有安装宿主依赖、loop/mount、systemd，以及构建器已经明确标出的 OCI/userdata root
+步骤才提升单条命令；22023 上统一使用 `sudo -n`。提升后检查制品属主；不得借 sudo 跨写、清理
+或改权另一 backend，不得重建共享组、共享输出或锁。影响两侧的宿主变更必须先查看活动工作
+负载，并在运行记录中写明命令、目标、结果和回滚。
 
 源码锁是 `integration/runtime/android-image-source-lock.example.json`。它固定 AOSP tag/commit、Redroid local manifest commit、patch commit/patch set、五个 Redroid项目、Chromium WebView stub及四个 Lineage ABI预编译项目，以及两个 64 位 product；只有分支名或 tag 名而没有 40 位 commit 不算锁定。
 
@@ -689,7 +700,7 @@ SSH shell 与 containerd/runc。x86_64 回退必须在具备 Binder 的原生 x8
 - 当前生产 Android 12 ARM 基线的安全补丁级别为 `2021-10-05`；已验证的 stock
   Android 14 候选也仅为 `2024-05-05`。二者都需要由自维护镜像线替代，不能作为长期发布基线；
 - 当前 x86 镜像是内容哈希固定的 SDK API 32 基线，ARM 是 digest 固定的 stock Redroid 基线；二者都不是本项目从固定 AOSP/Redroid 产品配置构建出的精简镜像，尚未删除任何系统服务；
-- 当前 WSL 已安装 `repo` launcher，系统、架构、Git、Repo 项通过；VHD 内部虽报告约 621 GiB 可用，但 VHD 所在 H 盘实际仅约 218.5 GiB 可用，低于 400 GiB 下限；RAM 仅 `20971327488` bytes，也低于 64 GiB 下限。因此没有启动完整 sync/build，也没有生成伪 SBOM/provenance；
+- 2026-08-30 的本地预检快照中，WSL 已安装 `repo` launcher，系统、架构、Git、Repo 项通过；VHD 内部虽报告约 621 GiB 可用，但 VHD 所在 H 盘实际仅约 218.5 GiB 可用，低于 400 GiB 下限；RAM 仅 `20971327488` bytes，也低于 64 GiB 下限。因此当时没有启动完整 sync/build，也没有生成伪 SBOM/provenance。内存升级、VHD 或磁盘布局变化后必须重新预检，不得继续引用该快照判断当前能力；
 - x86_64 的真实 Redroid OCI 镜像回退尚未执行；ARM 回退证据不能替代 x86 证据；
 - worktree 未提交时，发布清单还会附加 `source:dirty-worktree` blocker；最新干净候选
   的实际 blocker 是双架构 build provenance/reproducibility 与 x86 OCI 回退；
