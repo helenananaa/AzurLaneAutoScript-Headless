@@ -1,0 +1,151 @@
+diff --git a/module/os_handler/storage.py b/module/os_handler/storage.py
+--- a/module/os_handler/storage.py
++++ b/module/os_handler/storage.py
+@@ -55,9 +55,16 @@
+         if semantic_adapter is not None:
+             semantic_adapter.refresh_frame()
+             semantic_adapter.click_operation_siren_storage_back()
++            retry = Timer(3).start()
+             for _ in self.loop():
+-                if self.is_in_map():
+-                    break
++                # The map remains mounted below this overlay. Its presence is
++                # not proof that the inventory back input completed.
++                in_storage = semantic_adapter.operation_siren_storage_visible()
++                if not in_storage and self.is_in_map():
++                    break
++                if in_storage and retry.reached():
++                    semantic_adapter.click_operation_siren_storage_back()
++                    retry.reset()
+             return
+         self.ui_back(STORAGE_ENTER, offset=(200, 5), skip_first_screenshot=True)
+ 
+@@ -157,28 +164,25 @@
+             out: STORAGE_CHECK, scroll to bottom
+         """
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+-        if semantic_adapter is not None:
+-            state = semantic_adapter.operation_siren_storage_state()
+-            logger.attr('Storage_sample', state.sample_count)
+-            if state.sample_count:
+-                raise SemanticGateClosed(
+-                    'typed tuning sample consumption is not qualified'
+-                )
+-            logger.info('All samples in storage have been used')
+-            return
+-
+         sample_types = [
+             TEMPLATE_STORAGE_OFFENSE, TEMPLATE_STORAGE_SURVIVAL, TEMPLATE_STORAGE_COMBAT,
+             TEMPLATE_STORAGE_QUALITY_OFFENSE, TEMPLATE_STORAGE_QUALITY_SURVIVAL, TEMPLATE_STORAGE_QUALITY_COMBAT
+         ]
+         for sample_type in sample_types:
+             for _ in self.loop():
+-                image = rgb2gray(self.device.image)
+-                items = sample_type.match_multi(image, similarity=0.75)
++                if semantic_adapter is not None:
++                    items = semantic_adapter.operation_siren_sample_buttons(sample_type.name)
++                else:
++                    image = rgb2gray(self.device.image)
++                    items = sample_type.match_multi(image, similarity=0.75)
+                 logger.attr('Storage_sample', len(items))
+ 
+                 if len(items):
+-                    self._storage_item_use(items[0])
++                    if semantic_adapter is not None:
++                        with semantic_adapter.operation_siren_sample_use(items[0]):
++                            self._storage_item_use(items[0])
++                    else:
++                        self._storage_item_use(items[0])
+                 else:
+                     break
+         logger.info('All samples in storage have been used')
+diff --git a/module/os/globe_operation.py b/module/os/globe_operation.py
+--- a/module/os/globe_operation.py
++++ b/module/os/globe_operation.py
+@@ -393,7 +393,13 @@
+         if semantic_adapter is not None:
+             pinned = self.get_zone_pinned_name()
+             logger.info(f'Enter pinned zone {zone} (typed {pinned})')
+-            semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
++            # Coordinate checkout uses a placeholder zone; its typed special
++            # pin remains the authority. Normal exploration has an exact name.
++            entry_name = zone.cn if pinned in ('SAFE', 'DANGEROUS') else None
++            if semantic_adapter.open().oracle.operation_siren_globe_zone_locked():
++                logger.warning(f'Zone {zone} locked, neighbouring zones may not have been explored')
++                raise OSExploreError
++            semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+             for attempt in range(80):
+                 self.device.sleep(0.25)
+                 if semantic_adapter.operation_siren_map_visible():
+@@ -415,7 +421,7 @@
+                             except SemanticOracleError:
+                                 continue
+                             if state.zone_type == special_types[pinned]:
+-                                semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
++                                semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+                                 break
+                         else:
+                             raise OSExploreError(
+@@ -425,7 +431,7 @@
+                     # Normal zones can be selected again through the modeled
+                     # globe camera after the AP panel closes.
+                     self.globe_focus_to(zone)
+-                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
++                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+                     continue
+                 if attempt and attempt % 20 == 0:
+                     # The client can swallow the first exact entrance click
+@@ -433,7 +439,7 @@
+                     # Match the bounded retry semantics of the legacy path,
+                     # but re-prove the pinned typed control before every tap.
+                     logger.info('Retry exact typed zone entrance')
+-                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter()
++                    semantic_adapter.open().oracle.click_operation_siren_globe_zone_enter(expected_zone_name=entry_name)
+             raise OSExploreError(f'Unable to enter typed zone {zone}')
+ 
+         click_timer = Timer(10)
+diff --git a/module/os/map.py b/module/os/map.py
+--- a/module/os/map.py
++++ b/module/os/map.py
+@@ -119,10 +119,10 @@
+             self.os_globe_goto_map()
+         if semantic_adapter is not None and semantic_adapter.appear(ORDER_CHECK):
+             logger.info('Recover retained Operation Siren order panel')
+-            self.device.click(ORDER_CHECK)
+-            for _ in self.loop():
+-                if not semantic_adapter.appear(ORDER_CHECK) and self.is_in_map():
+-                    break
++            self.order_quit()
++        if semantic_adapter is not None and semantic_adapter.operation_siren_storage_visible():
++            logger.info('Recover retained Operation Siren inventory')
++            self.storage_quit()
+         if self.is_in_map():
+             logger.info('Already in os map')
+         elif self.is_in_globe():
+@@ -249,16 +249,25 @@
+         """
+         zone = self.name_to_zone(zone)
+         logger.hr(f'Globe goto: {zone}')
++        # A resumed semantic exploration may still be in an uncleared zone.
++        # Use ALAS's normal globe/type check instead of reporting it safe merely
++        # because the destination equals the current map.
+         if self.zone == zone:
+             if refresh:
+                 logger.info('Goto another zone to refresh current zone')
+                 self.globe_goto(self.zone_nearest_azur_port(self.zone),
+                                 types=('SAFE', 'DANGEROUS'), refresh=False)
+-            else:
++            elif not (
++                stop_if_safe and getattr(self.device, 'semantic_adapter', None) is not None
++            ):
+                 if self.is_in_globe():
+                     self.os_globe_goto_map()
+                 logger.info('Already at target zone')
+                 return False
++            elif not self.is_in_globe():
++                # Startup auto-search may just have finished this same zone.
++                # Settle its map events before taking the new globe/type path.
++                self.ensure_no_map_event()
+         # MAP_EXIT
+         if self.is_in_special_zone():
+             self.map_exit()

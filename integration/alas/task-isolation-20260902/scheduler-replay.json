@@ -1,0 +1,32 @@
+{
+  "additive_drift": {
+    "passed": true,
+    "scenarios": [
+      "repeated-unsupported-task-then-independent-task",
+      "runtime-identity-freshness-and-code-errors-still-stop",
+      "original-alas-restart-recovery-preserved",
+      "native-mode-and-restart-screenshot-semantics-preserved"
+    ]
+  },
+  "alas_py_sha256": "6deb41200cb468d797baf9f1fa14ed0d753a5b91bc72571167f070bec138ef0e",
+  "android_input_injected": false,
+  "baseline": {
+    "passed": true,
+    "scenarios": [
+      "repeated-unsupported-task-then-independent-task",
+      "runtime-identity-freshness-and-code-errors-still-stop",
+      "original-alas-restart-recovery-preserved",
+      "native-mode-and-restart-screenshot-semantics-preserved"
+    ]
+  },
+  "live_qualified": false,
+  "schema": "alas-headless.task-isolation-replay/v1",
+  "source_sha256": {
+    "integration/alas/0001-semantic-oracle-hooks.patch": "2d281f8ea1fd76148f42da972b09c111dc38c637bd9d852627c816ec7868b928",
+    "integration/alas/series/series.json": "8d097c67e2ed6186771a0d20cecfcfda42d9aa26f79aafd1121ff1efe8d0e966",
+    "python/alas_headless/adapter/frame.py": "dc3cd1fead1c8181ef19705fe5390f479be1ebcb3e55190d90f373fc9d2d7477",
+    "python/alas_headless/adapter/semantic/core.py": "058d79bf248bcf5c913ae78a22366850bec1858944c00ebacdeb3fe5ee794165",
+    "python/alas_headless/adapter/semantic/session.py": "c631ee21adb1bec95951309d121006b97ea81d53ad76514280dd9c98c67c30c7",
+    "python/alas_headless/adapter/task_lifecycle.py": "2f653129104e2b33fbcf71dbce218216b1cbcc105cafa3c0ce369583fec0b98c"
+  }
+}

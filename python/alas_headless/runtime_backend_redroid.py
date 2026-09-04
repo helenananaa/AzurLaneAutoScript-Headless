@@ -136,6 +136,12 @@ class RedroidRuntimeConfig:
         ):
             if not isinstance(value, bool):
                 raise ValueError("Redroid feature switches must be booleans")
+        if (
+            self.launch_game or self.allow_game_restart
+        ) and self.unity_command_line != "-force-gfx-st":
+            raise ValueError(
+                "managed game launch requires Unity -force-gfx-st"
+            )
         if self.manage_angle_routing and not self.launch_game:
             raise ValueError("managed ANGLE routing requires launch_game")
         if (

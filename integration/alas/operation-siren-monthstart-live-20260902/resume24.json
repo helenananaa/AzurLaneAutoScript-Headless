@@ -1,0 +1,103 @@
+{
+  "schema": "alas-headless.opsi-monthstart-live/v1",
+  "mode": "explore",
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "visits": [
+    {
+      "zone": 24,
+      "entered": true,
+      "stop_if_safe": true
+    }
+  ],
+  "samples": [
+    {
+      "before": {
+        "generation": 1107,
+        "items": []
+      },
+      "after": {
+        "generation": 1107,
+        "items": []
+      }
+    }
+  ],
+  "inputs": [],
+  "bounded_stop": true,
+  "full_month_qualified": false,
+  "passed": true,
+  "config_before": {
+    "Scheduler": {
+      "Enable": false,
+      "NextRun": "2026-09-02 11:06:30",
+      "Command": "OpsiExplore",
+      "SuccessInterval": 0,
+      "FailureInterval": 0,
+      "ServerUpdate": "00:00"
+    },
+    "OpsiExplore": {
+      "SpecialRadar": false,
+      "ForceRun": false,
+      "LastZone": 44
+    },
+    "OpsiFleet": {
+      "Fleet": 1,
+      "Submarine": false
+    },
+    "Storage": {
+      "Storage": {}
+    }
+  },
+  "runtime": {
+    "package": "com.bilibili.azurlane",
+    "pid": 20885,
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity"
+  },
+  "task_result": true,
+  "resources_after": {
+    "zone_name": "NA海域西南D",
+    "coins": 4014,
+    "action_points": 166,
+    "action_point_capacity": 200,
+    "beacon_points": 50,
+    "beacon_capacity": 200,
+    "daily_beacon_points": 50,
+    "daily_beacon_capacity": 200,
+    "fleet_levels": [
+      125,
+      125,
+      125,
+      125,
+      125,
+      125
+    ]
+  },
+  "elapsed_seconds": 321.812,
+  "config_after": {
+    "Scheduler": {
+      "Enable": false,
+      "NextRun": "2026-09-02 11:18:13",
+      "Command": "OpsiExplore",
+      "SuccessInterval": 0,
+      "FailureInterval": 0,
+      "ServerUpdate": "00:00"
+    },
+    "OpsiExplore": {
+      "SpecialRadar": false,
+      "ForceRun": false,
+      "LastZone": 24
+    },
+    "OpsiFleet": {
+      "Fleet": 1,
+      "Submarine": false
+    },
+    "Storage": {
+      "Storage": {}
+    }
+  },
+  "source_sha256": {
+    "python\\alas_headless\\opsi_monthstart.py": "d115c7715f0d54594d1b0cb0eed562c5e3489774302cd297b54c721cf957a5dd",
+    "python\\alas_headless\\semantic_oracle.py": "d08ef070e091591dce7b07e68716a664c2062d2f4c12ac538f079c1f4f552664",
+    "python\\alas_headless\\alas_adapter.py": "c22681e439ca6c12d3b1956e1642a42ac78d28be3ae44a31c7d44fb825ba4601",
+    "integration\\alas\\0001-semantic-oracle-hooks.patch": "90384ac319a80f752db9f4e46252867264a035000da9695347d5a9dc52a1c717"
+  }
+}

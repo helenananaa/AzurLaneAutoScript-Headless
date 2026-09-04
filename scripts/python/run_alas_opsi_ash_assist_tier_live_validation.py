@@ -23,6 +23,9 @@ sys.path.insert(0, str(ROOT / "python"))
 from alas_headless import SemanticGateClosed  # noqa: E402
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _read(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -244,6 +247,7 @@ def validate(
         result["temporary_config_removed"] = not config_path.exists()
 
     result["source_sha256"] = {
+        **semantic_source_hashes(ROOT),
         "meta_task": _sha(alas_root / "module" / "os_ash" / "meta.py"),
         "adapter": _sha(ROOT / "python" / "alas_headless" / "alas_adapter.py"),
         "oracle": _sha(ROOT / "python" / "alas_headless" / "semantic_oracle.py"),

@@ -131,6 +131,10 @@ class KvmRuntimeConfig:
             self.manage_angle_routing, bool
         ):
             raise ValueError("KVM launch switches must be boolean")
+        if self.unity_command_line != "-force-gfx-st":
+            raise ValueError(
+                "KVM game launch requires Unity -force-gfx-st"
+            )
         if self.manage_angle_routing and not self.launch_game:
             raise ValueError("managed ANGLE routing requires launch_game")
         if (

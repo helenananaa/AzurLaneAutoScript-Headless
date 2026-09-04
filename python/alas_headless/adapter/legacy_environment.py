@@ -55,6 +55,7 @@ LEGACY_SEMANTIC_ENVIRONMENT_VARIABLES = frozenset(
         "ALAS_SEMANTIC_MODE",
         "ALAS_SEMANTIC_RESEARCH_REWARD_BUDGET",
         "ALAS_SEMANTIC_RESEARCH_START_BUDGET",
+        "ALAS_SEMANTIC_REQUIRED_PRIMARY_ABI",
         "ALAS_SEMANTIC_RETIREMENT_BUDGET",
         "ALAS_SEMANTIC_SHOP_PURCHASE_BUDGET",
         "ALAS_SEMANTIC_TACTICAL_ASSIGN_BUDGET",
@@ -184,6 +185,7 @@ LEGACY_BUDGET_GRANTS: Mapping[str, tuple[str, str]] = MappingProxyType(
 
 _CANONICAL_NON_NEGATIVE_INTEGER = re.compile(r"0|[1-9][0-9]*")
 _PINNED_REVISION = re.compile(r"[0-9a-f]{40}")
+_SUPPORTED_PRIMARY_ABI = frozenset(("x86_64", "arm64-v8a"))
 
 
 class _TracePort(Protocol):
@@ -209,6 +211,7 @@ class LegacyEnvironmentTranslation:
     explicit_policy: RunPolicy | None
     legacy_grant_variables_present: int
     nondefault_legacy_grants: int
+    required_primary_abi: str = "x86_64"
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "grants", MappingProxyType(dict(self.grants)))
@@ -254,6 +257,7 @@ class LegacyEnvironmentTranslation:
                 "campaign_viewport_swipe_budget": self.grant("campaign.viewport_swipe"),
                 "adb_command_timeout_seconds": self.adb_command_timeout_seconds,
                 "observer_max_age_ms": self.observer_max_age_ms,
+                "required_primary_abi": self.required_primary_abi,
             }
         )
 
@@ -330,6 +334,11 @@ def translate_legacy_semantic_environment(
     revision = environment.get("ALAS_SEMANTIC_DRIVER_REVISION", "").lower()
     if _PINNED_REVISION.fullmatch(revision) is None:
         raise SemanticGateClosed("semantic ALAS mode requires a pinned ANGLE revision")
+    required_primary_abi = environment.get(
+        "ALAS_SEMANTIC_REQUIRED_PRIMARY_ABI", "x86_64"
+    )
+    if required_primary_abi not in _SUPPORTED_PRIMARY_ABI:
+        raise SemanticGateClosed("semantic ALAS primary ABI is unsupported")
 
     legacy_grants: dict[str, int] = {}
     for variable, capability in LEGACY_BOOLEAN_GRANTS.items():
@@ -357,6 +366,7 @@ def translate_legacy_semantic_environment(
         explicit_policy=explicit_policy,
         legacy_grant_variables_present=present,
         nondefault_legacy_grants=nondefault,
+        required_primary_abi=required_primary_abi,
     )
     if trace is not None:
         trace.emit(

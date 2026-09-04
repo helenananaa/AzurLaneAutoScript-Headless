@@ -20,6 +20,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "python"))
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _read(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -231,6 +234,7 @@ def validate(
         result["temporary_config_removed"] = not config_path.exists()
 
     result["source_sha256"] = {
+        **semantic_source_hashes(ROOT),
         "archive_task": _sha(alas_root / "module" / "os" / "tasks" / "archive.py"),
         "map_event": _sha(alas_root / "module" / "os_handler" / "map_event.py"),
         "voucher_shop": _sha(alas_root / "module" / "shop" / "shop_voucher.py"),

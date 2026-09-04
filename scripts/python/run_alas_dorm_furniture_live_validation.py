@@ -22,6 +22,9 @@ if str(ROOT / "python") not in sys.path:
     sys.path.insert(0, str(ROOT / "python"))
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -230,6 +233,7 @@ def validate(
         "seed_config": seed_config,
         "seed_config_sha256": _sha256(seed_path),
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "buy_furniture": _sha256(alas_root / "module" / "dorm" / "buy_furniture.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),
             "oracle": _sha256(ROOT / "python" / "alas_headless" / "semantic_oracle.py"),

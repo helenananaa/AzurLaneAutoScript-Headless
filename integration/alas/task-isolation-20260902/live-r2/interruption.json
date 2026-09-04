@@ -1,0 +1,12 @@
+{
+  "schema": "alas-headless.controlled-run-interruption/v1",
+  "passed": false,
+  "reason": "Stopped helper PID 3284 after three main/more toggles failed to expose REWARD_CHECK. Typed generation 267 proved the reward sidebar was active above retained main controls.",
+  "completed_before_interruption": [
+    "login and guild popup close",
+    "controlled task failure",
+    "original ALAS goto_main recovery"
+  ],
+  "log": "artifacts/task-isolation-live-r2.log",
+  "android_restart_performed": false
+}

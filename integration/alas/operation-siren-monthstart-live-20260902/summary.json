@@ -1,0 +1,65 @@
+{
+  "schema": "alas-headless.opsi-monthstart-summary/v1",
+  "date": "2026-09-02",
+  "scope": "local AVD development and bounded real game paths",
+  "full_month_qualified": false,
+  "nonzero_sample_qualified": false,
+  "normal_cursor": 24,
+  "independent_sample_source_zone": 33,
+  "final_resources": {
+    "coins": 7090,
+    "action_points": 138,
+    "beacon_points": 100
+  },
+  "processes_finished": true,
+  "premium_spending": 0,
+  "purchases": 0,
+  "tests": {
+    "passed": 962,
+    "warnings": 26
+  },
+  "patch_sha256": "e4a695fd4ff3eb7783650ec4055e013404780acf3b2bb411eeabf94f0b5d5390",
+  "patch_tree_verification": "integration/alas/operation-siren-monthstart-patch-tree-verification-20260902-r2/result.json",
+  "driver": {
+    "revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "apk_sha256": "04281ef4afa52427192680e498dd1ba0ffdbb278a1b6029a21b7a1026fd8306b",
+    "previous_apk": "artifacts/monthstart-20260902/angle-before.apk"
+  },
+  "limitations": [
+    "Reset is a development slice, not an end-to-end replay on final sources.",
+    "The earlier resume24 source hashes were collected at run end.",
+    "source33 records source_changed_during_run=true while the combined patch was regenerated.",
+    "samples-empty passed=false means no nonzero sample consumption was observed; it has no error.",
+    "No full 72 dangerous-zone, all-fleet, submarine, special-radar or OpsiCrossMonth claim."
+  ],
+  "evidence": [
+    {
+      "path": "reset-ui.json",
+      "sha256": "ecd6004cf77f0398f369fdc04a5d7fbaded422bddcb0202d36b36d5e29bf49f7"
+    },
+    {
+      "path": "reset-buttons.json",
+      "sha256": "47012299ac9ede5b38722852febf402eae14bae181aa823e1ec271941104feef"
+    },
+    {
+      "path": "zone44.log",
+      "sha256": "ef0f81bbb197449ff75bcd1cfec85bd7711ab039ad9ccded57fbe6fef433d96e"
+    },
+    {
+      "path": "resume24.json",
+      "sha256": "f0e17851259d3d95d3190cb656f19b8d9a64c02ba044e8274252f947787075e9"
+    },
+    {
+      "path": "source33.json",
+      "sha256": "1294b947cfd410fccd4146d27a2e020cea4734dbd784c69a9fc994057e93e43b"
+    },
+    {
+      "path": "samples-empty.json",
+      "sha256": "0cb9a9ae09c8c2a450ae3045fcfd39ec22549273188fc0abc42f334e3c19e90a"
+    },
+    {
+      "path": "config-verification.json",
+      "sha256": "5f9785cf8ac9f22950eccffab3e0ace56ec5c327708f917c2adedb3b5be53ba5"
+    }
+  ]
+}

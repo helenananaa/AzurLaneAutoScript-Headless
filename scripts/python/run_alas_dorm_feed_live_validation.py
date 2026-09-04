@@ -25,6 +25,9 @@ if str(ROOT / "python") not in sys.path:
 DEFAULT_FEED_FILTER = "20000 > 10000 > 5000 > 3000 > 2000 > 1000"
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -387,6 +390,7 @@ def validate(
         "planned_feeds": list(planned_feeds),
         "planned_dispatch_count": expected_dispatch_count,
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "dorm": _sha256(alas_root / "module" / "dorm" / "dorm.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),
             "oracle": _sha256(ROOT / "python" / "alas_headless" / "semantic_oracle.py"),

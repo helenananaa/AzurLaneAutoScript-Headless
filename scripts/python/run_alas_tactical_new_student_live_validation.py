@@ -24,6 +24,9 @@ if str(ROOT / "python") not in sys.path:
     sys.path.insert(0, str(ROOT / "python"))
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -474,6 +477,7 @@ def validate(
         "expect_reward_claim": expect_reward_claim,
         "expect_no_slot": expect_no_slot,
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "tactical": _sha256(alas_root / "module" / "tactical" / "tactical_class.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),
             "oracle": _sha256(ROOT / "python" / "alas_headless" / "semantic_oracle.py"),
@@ -597,6 +601,7 @@ def validate_resumed_postcondition(
         "tactical_assign_budget": tactical_assign_budget,
         "expected_ship_id": expected_ship_id,
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "tactical": _sha256(alas_root / "module" / "tactical" / "tactical_class.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),
             "oracle": _sha256(ROOT / "python" / "alas_headless" / "semantic_oracle.py"),

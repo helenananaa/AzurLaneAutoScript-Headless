@@ -40,6 +40,9 @@ RESOURCE_FIELDS = {
 }
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -287,6 +290,7 @@ def validate(
             "Reward.CollectWeeklyMission": False,
         },
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "reward": _sha256(alas_root / "module" / "reward" / "reward.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),
             "oracle": _sha256(ROOT / "python" / "alas_headless" / "semantic_oracle.py"),

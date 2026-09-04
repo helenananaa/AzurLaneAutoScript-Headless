@@ -262,7 +262,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             "_live_combat_manifest",
             return_value=object(),
         ), mock.patch(
-            "alas_headless.alas_adapter."
+            "alas_headless.adapter.semantic.session_combat."
             "commit_alas_combat_resource_action_for_evidence",
             return_value=commit,
         ), mock.patch(
@@ -384,6 +384,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             runtime_handle=FakeRuntimeHandle(),
         )
         oracle = SimpleNamespace(
+            observation_surface_present=lambda _surface: False,
             enabled=lambda _semantic_id: False,
             new_ship_reward_visible=mock.Mock(return_value=True),
             daily_battle_result_visible=lambda: False,
@@ -392,6 +393,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         context = SimpleNamespace(passive_transition_until=0.0)
         session.adapter = SimpleNamespace(
             oracle=oracle,
+            _frame_or_live_observation_oracle=lambda: oracle,
             campaign_combat_committed=lambda: True,
             _campaign_context=context,
             _login_flow=SimpleNamespace(active=False),
@@ -466,6 +468,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         )
         network_checks = iter((False, True))
         oracle = SimpleNamespace(
+            observation_surface_present=lambda _surface: False,
             enabled=lambda semantic_id: (
                 next(network_checks)
                 if semantic_id == "overlay/network-reconnect/confirm"
@@ -476,6 +479,7 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         )
         session.adapter = SimpleNamespace(
             oracle=oracle,
+            _frame_or_live_observation_oracle=lambda: oracle,
             campaign_combat_committed=lambda: True,
             _campaign_context=SimpleNamespace(passive_transition_until=0.0),
             _login_flow=SimpleNamespace(active=False),
@@ -580,7 +584,9 @@ class SessionRuntimeHandleTests(unittest.TestCase):
             runtime_handle=FakeRuntimeHandle(),
         )
         session.adapter = SimpleNamespace(
+            _frame_or_live_observation_oracle=lambda: session.adapter.oracle,
             oracle=SimpleNamespace(
+                observation_surface_present=lambda _surface: False,
                 daily_battle_result_visible=lambda: False,
                 enabled=lambda _semantic_id: False,
                 daily_combat_visible=lambda: False,
@@ -1198,6 +1204,10 @@ class SessionRuntimeHandleTests(unittest.TestCase):
                 "pid": 4242,
                 "driver_revision": REVISION,
                 "age_ms": 10,
+                "main_thread": True,
+                "flags": 15,
+                "ui_stage": 100,
+                "ui_method_mask": 15,
             },
         }
         with mock.patch.object(bridge, "open", return_value=bridge), mock.patch.object(
@@ -1215,6 +1225,19 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         request.assert_called_once_with("GET /v1/state\n")
         self.assertIsNone(factory._preverified_restart_pid)
 
+    def test_session_propagates_arm64_abi_to_runtime_handle_factory(self):
+        session = AlasSemanticSession(
+            "device-1",
+            REVISION,
+            required_primary_abi="arm64-v8a",
+        )
+
+        self.assertEqual(session.required_primary_abi, "arm64-v8a")
+        self.assertEqual(
+            session._runtime_handle_factory.required_primary_abi,
+            "arm64-v8a",
+        )
+
     def test_game_manager_restart_waits_for_fresh_observer_snapshot(self):
         session = AlasSemanticSession("device-1", REVISION)
         factory = session._runtime_handle_factory
@@ -1229,6 +1252,10 @@ class SessionRuntimeHandleTests(unittest.TestCase):
                 "pid": 4242,
                 "driver_revision": REVISION,
                 "age_ms": 10,
+                "main_thread": True,
+                "flags": 15,
+                "ui_stage": 100,
+                "ui_method_mask": 15,
             },
         }
 
@@ -1249,6 +1276,37 @@ class SessionRuntimeHandleTests(unittest.TestCase):
         self.assertEqual(request.call_count, 4)
         self.assertEqual(sleep.call_count, 3)
         self.assertIsNone(factory._preverified_restart_pid)
+
+    def test_game_manager_restart_waits_for_complete_main_thread_probe(self):
+        session = AlasSemanticSession("device-1", REVISION)
+        factory = session._runtime_handle_factory
+        self.assertIsNotNone(factory)
+        bridge = factory._bridge
+        bridge.pid = 4242
+        factory._preverified_restart_pid = 4242
+        snapshot = {
+            "status": "ok",
+            "pid": 4242,
+            "driver_revision": REVISION,
+            "age_ms": 10,
+            "main_thread": True,
+            "flags": 15,
+            "ui_stage": 100,
+            "ui_method_mask": 7,
+        }
+        incomplete = {"status": "ok", "snapshot": dict(snapshot)}
+        snapshot["ui_method_mask"] = 15
+        ready = {"status": "ok", "snapshot": snapshot}
+
+        with mock.patch.object(bridge, "open", return_value=bridge), mock.patch.object(
+            bridge, "request", side_effect=[incomplete, ready]
+        ) as request, mock.patch(
+            "alas_headless.adapter.runtime_handle.time.sleep"
+        ) as sleep:
+            factory()
+
+        self.assertEqual(request.call_count, 2)
+        self.assertEqual(sleep.call_count, 1)
 
     def test_game_manager_restart_does_not_retry_other_transport_errors(self):
         session = AlasSemanticSession("device-1", REVISION)

@@ -30,6 +30,10 @@ from .semantic_oracle import (
     OBSERVER_SCHEMA,
     request_observer_state,
 )
+from .oracle.transport import (
+    encode_adb_shell_string_extra,
+    observer_snapshot_semantic_ready,
+)
 
 
 class RuntimeBackendError(RuntimeError):
@@ -110,6 +114,12 @@ class ExternalAdbConfig:
         ):
             if not isinstance(value, bool):
                 raise ValueError("external ADB feature switches must be booleans")
+        if (
+            self.launch_game or self.allow_game_restart
+        ) and self.unity_command_line != "-force-gfx-st":
+            raise ValueError(
+                "managed game launch requires Unity -force-gfx-st"
+            )
         if self.manage_angle_routing and not self.launch_game:
             raise ValueError("managed ANGLE routing requires launch_game")
         if (
@@ -173,12 +183,6 @@ class AdbAttachedBackend(RuntimeBackend):
         self._bridges: Dict[str, AdbObserverBridge] = {}
         self._original_angle_settings: Dict[str, Mapping[str, Optional[str]]] = {}
 
-    _UNITY_EXTRA_TRANSPORT = {
-        # adb v39 reparses `adb shell` argv into a device-shell command.  The
-        # leading dash must survive that layer as string data for `am --es`,
-        # not become another Activity Manager option.
-        "-force-gfx-st": "\\-force-gfx-st",
-    }
     _ANGLE_SETTINGS = (
         "angle_debug_package",
         "angle_gl_driver_selection_pkgs",
@@ -416,8 +420,8 @@ class AdbAttachedBackend(RuntimeBackend):
         self._prepare_game_cold_launch(instance)
         launch_arguments = ["shell", "am", "start", "-W"]
         if self.unity_command_line is not None:
-            transport_value = self._UNITY_EXTRA_TRANSPORT.get(
-                self.unity_command_line, self.unity_command_line
+            transport_value = encode_adb_shell_string_extra(
+                self.unity_command_line
             )
             launch_arguments.extend(("--es", "unity", transport_value))
         launch_arguments.extend(("-n", self.component))
@@ -575,6 +579,8 @@ class AdbAttachedBackend(RuntimeBackend):
                 )
             )
             if not coherent:
+                return None
+            if not observer_snapshot_semantic_ready(snapshot):
                 return None
             return {
                 "pid": bridge.pid,

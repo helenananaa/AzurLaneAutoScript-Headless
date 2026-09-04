@@ -1,0 +1,8 @@
+{
+  "schema": "alas-headless.task-isolation-cleanup/v1",
+  "avd_restored_to_stopped": true,
+  "temporary_worktree_removed": false,
+  "temporary_worktree": "E:/CacheVault/Temp/alas-task-isolation-20260902-ux7kg1ky/patched",
+  "reason": "Automatic approval review rejected the recursive cleanup command with blocked by policy. No deletion was performed.",
+  "configurations_retained": "artifacts/task-isolation-retained-configs"
+}

@@ -21,6 +21,9 @@ if str(ROOT / "python") not in sys.path:
     sys.path.insert(0, str(ROOT / "python"))
 
 
+from alas_headless.semantic_sources import semantic_source_hashes
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -238,6 +241,7 @@ def validate(
         "configured": {"Daemon.EnterMap": True, "stage": "1-1"},
         **result,
         "source_sha256": {
+            **semantic_source_hashes(ROOT),
             "daemon": _sha256(alas_root / "module" / "daemon" / "daemon.py"),
             "adapter": _sha256(ROOT / "python" / "alas_headless" / "alas_adapter.py"),
             "oracle": _sha256(ROOT / "python" / "alas_headless" / "semantic_oracle.py"),
