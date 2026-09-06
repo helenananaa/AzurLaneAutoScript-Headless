@@ -194,10 +194,14 @@ for key in (
 PY
     rm -f "$current_preflight"
 fi
+source_verification_args=(--source-lock "$source_lock" --abi "$selected_abi")
+if [[ -e "$source_root/.alas-redroid-patches-applied" \
+    || -e "$source_root/.alas-project-patches-applied" ]]; then
+    source_verification_args+=(--prepared-source-root "$source_root")
+fi
 run_json_evidence "$evidence_root/source-remotes.json" \
     "$python_bin" "$repo_root/scripts/python/verify_android_image_source_remotes.py" \
-    --source-lock "$source_lock" --abi "$selected_abi" \
-    --prepared-source-root "$source_root"
+    "${source_verification_args[@]}"
 
 json_field() {
     "$python_bin" - "$source_lock" "$1" <<'PY'
@@ -235,7 +239,7 @@ export GIT_AUTHOR_DATE="$GIT_COMMITTER_DATE"
 export E2FSPROGS_FAKE_TIME="$source_date_epoch"
 
 cd "$source_root"
-if [[ ! -d .repo ]]; then
+if [[ ! -d .repo/manifests/.git ]]; then
     repo init -u "$manifest_url" -b "$platform_revision" --git-lfs --depth=1
 fi
 [[ $(git -C .repo/manifests rev-parse HEAD) == "$platform_commit" ]] || {

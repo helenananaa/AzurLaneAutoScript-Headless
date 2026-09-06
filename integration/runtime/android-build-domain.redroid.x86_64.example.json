@@ -9,8 +9,8 @@
     "build_home": "/srv/android-build/redroid/home",
     "temp_root": "/srv/android-build/redroid/tmp/x86_64",
     "runtime_root": "/srv/android-build/redroid/runtime",
-    "archive_root": "/srv/android-build/redroid/archive/x86_64",
-    "evidence_root": "/srv/android-build/redroid/evidence/x86_64",
+    "archive_root": "/srv/android-build/redroid/archive/images",
+    "evidence_root": "/srv/android-build/redroid/evidence",
     "apk_archive": "/srv/android-build/redroid/archive/apks"
   }
 }

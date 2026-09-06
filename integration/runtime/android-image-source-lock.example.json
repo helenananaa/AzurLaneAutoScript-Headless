@@ -93,7 +93,7 @@
     },
     {
       "project": "build/make",
-      "path": "integration/runtime/aosp-patches/0002-build-image-source-date-epoch.patch",
+      "path": "integration/runtime/aosp-patches/0002-redroid-build-image-source-date-epoch.patch",
       "sha256": "1b5030f3851974d3892741f5a19cbe05fb3df96a241d306f6a09cc98d27efb79",
       "commit_message": "ALAS: make filesystem image timestamps reproducible"
     },
@@ -151,6 +151,10 @@
     "host_arch": "x86_64",
     "minimum_free_disk_gib": 400,
     "minimum_ram_gib": 64,
+    "wsl": {
+      "minimum_ram_gib": 58,
+      "minimum_swap_gib": 16
+    },
     "commands": [
       "m",
       "m sbom"

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import unittest
 from pathlib import Path
@@ -10,6 +11,7 @@ from alas_headless.android_image_source import AndroidImageSourceError
 from alas_headless.android_image_source import AndroidImageSourceLock
 from alas_headless.android_image_source import disk_checks
 from alas_headless.android_image_source import host_preflight
+from alas_headless.android_image_source import memory_checks
 from alas_headless.android_image_source import webview_projects_for_abi
 from alas_headless.android_image_source import verify_remote_refs
 
@@ -30,6 +32,15 @@ class AndroidImageSourceTests(unittest.TestCase):
         self.assertEqual([item["abi"] for item in first.document["products"]], [
             "x86_64", "arm64-v8a"
         ])
+
+    def test_locked_project_patch_files_match_their_digests(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        for item in self.value["project_patches"]:
+            with self.subTest(path=item["path"]):
+                self.assertEqual(
+                    hashlib.sha256((root / item["path"]).read_bytes()).hexdigest(),
+                    item["sha256"],
+                )
 
     def test_rejects_moving_or_short_source_identity(self) -> None:
         value = copy.deepcopy(self.value)
@@ -306,6 +317,42 @@ class AndroidImageSourceTests(unittest.TestCase):
         self.assertFalse(low["disk_floor"])
         enough = disk_checks(600 * gib, 400 * gib, "microsoft-standard-WSL2", 500 * gib)
         self.assertTrue(all(enough.values()))
+
+    def test_wsl_memory_policy_requires_ram_and_swap(self) -> None:
+        gib = 1024 ** 3
+        build = self.value["build"]
+        allowed = memory_checks(58 * gib, 16 * gib, "microsoft-standard-WSL2", build)
+        self.assertTrue(all(allowed.values()))
+        low_ram = memory_checks(57 * gib, 16 * gib, "microsoft-standard-WSL2", build)
+        self.assertFalse(low_ram["ram_floor"])
+        self.assertTrue(low_ram["swap_floor"])
+        low_swap = memory_checks(58 * gib, 15 * gib, "microsoft-standard-WSL2", build)
+        self.assertTrue(low_swap["ram_floor"])
+        self.assertFalse(low_swap["swap_floor"])
+
+    def test_native_memory_policy_keeps_64_gib_floor(self) -> None:
+        gib = 1024 ** 3
+        build = self.value["build"]
+        rejected = memory_checks(63 * gib, 64 * gib, "6.8.0-generic", build)
+        self.assertFalse(rejected["ram_floor"])
+        allowed = memory_checks(64 * gib, 0, "6.8.0-generic", build)
+        self.assertTrue(all(allowed.values()))
+
+    def test_rejects_unsafe_wsl_resource_policy(self) -> None:
+        for field, value, message in (
+            ("minimum_ram_gib", 57, "RAM floor"),
+            ("minimum_swap_gib", 15, "swap floor"),
+        ):
+            with self.subTest(field=field):
+                source = copy.deepcopy(self.value)
+                source["build"]["wsl"][field] = value
+                with self.assertRaisesRegex(AndroidImageSourceError, message):
+                    AndroidImageSourceLock.from_mapping(source)
+
+    def test_legacy_job_count_metadata_does_not_gate_source_compatibility(self) -> None:
+        value = copy.deepcopy(self.value)
+        value["build"]["wsl"]["maximum_build_jobs"] = 24
+        AndroidImageSourceLock.from_mapping(value)
 
     def test_host_preflight_records_work_and_evidence_devices(self) -> None:
         lock = AndroidImageSourceLock.from_mapping(copy.deepcopy(self.value))

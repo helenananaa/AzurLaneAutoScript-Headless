@@ -146,7 +146,13 @@ python scripts/python/verify_android_image_source_remotes.py `
   --output evidence/android-image-foundation/source-remotes.json
 ```
 
-正式同步前在 Linux x86_64 构建机执行资源预检。400 GiB 可用空间、64 GiB RAM 和 `repo` 缺一项都返回非零，不允许绕过：
+正式同步前在 Linux x86_64 构建机执行资源预检。原生 Linux 要求 400 GiB 可用空间和
+64 GiB RAM；本地 WSL 构建域允许使用源码锁中的窄化策略：至少 58 GiB WSL 可见 RAM、
+16 GiB swap。并发数属于执行设置，通过 `ALAS_BUILD_JOBS` 按实际 CPU、可用内存和 swap
+压力调整，不设固定的 `-j8` 上限；可用 `NINJA_ARGS='-l28'` 配合负载控制，并保留 AOSP
+自带的大内存任务池。调整后继续使用同一输出目录，不做 clean rebuild。该内存策略用于标称
+64 GB 的 Windows 宿主，不适用于原生 Linux，也不能省略 WSL VHD 所在物理盘的真实空闲量。任一项或
+`repo` 缺失都返回非零，不允许绕过：
 
 ```bash
 PYTHONPATH=python python3 scripts/python/preflight_redroid_build.py \

@@ -207,6 +207,11 @@ class AndroidImageSourceLock:
             raise AndroidImageSourceError("build disk floor cannot be below AOSP's 400 GiB reference")
         if int(build.get("minimum_ram_gib", 0)) < 64:
             raise AndroidImageSourceError("build RAM floor cannot be below AOSP's 64 GiB reference")
+        wsl = _mapping(build.get("wsl"), "build.wsl")
+        if int(wsl.get("minimum_ram_gib", 0)) < 58:
+            raise AndroidImageSourceError("WSL build RAM floor cannot be below 58 GiB")
+        if int(wsl.get("minimum_swap_gib", 0)) < 16:
+            raise AndroidImageSourceError("WSL build swap floor cannot be below 16 GiB")
         if build.get("commands") != ["m", "m sbom"]:
             raise AndroidImageSourceError("build must produce the product and official AOSP SBOM")
         if int(build.get("source_date_epoch", 0)) <= 0:
@@ -257,6 +262,26 @@ def disk_checks(
     }
 
 
+def memory_checks(
+    memory_bytes: int,
+    swap_bytes: int,
+    kernel_release: str,
+    build: Mapping[str, Any],
+) -> Mapping[str, bool]:
+    """Apply the native floor or the bounded local-WSL RAM/swap policy."""
+    is_wsl = "microsoft" in kernel_release.lower()
+    if not is_wsl:
+        return {
+            "ram_floor": memory_bytes >= int(build["minimum_ram_gib"]) * 1024 ** 3,
+            "swap_floor": True,
+        }
+    wsl = _mapping(build["wsl"], "build.wsl")
+    return {
+        "ram_floor": memory_bytes >= int(wsl["minimum_ram_gib"]) * 1024 ** 3,
+        "swap_floor": swap_bytes >= int(wsl["minimum_swap_gib"]) * 1024 ** 3,
+    }
+
+
 def host_preflight(
     lock: AndroidImageSourceLock,
     root: Path = Path("/"),
@@ -273,17 +298,18 @@ def host_preflight(
     system_root_stat = Path("/").stat()
     evidence_stat = evidence_root.stat() if evidence_root is not None else None
     memory_bytes = 0
+    swap_bytes = 0
     meminfo = Path("/proc/meminfo")
     if meminfo.exists():
         for line in meminfo.read_text(encoding="utf-8").splitlines():
             if line.startswith("MemTotal:"):
                 memory_bytes = int(line.split()[1]) * 1024
-                break
+            elif line.startswith("SwapTotal:"):
+                swap_bytes = int(line.split()[1]) * 1024
     minimum_disk_bytes = int(build["minimum_free_disk_gib"]) * 1024 ** 3
     checks = {
         "host_os_linux": platform.system().lower() == "linux",
         "host_arch_x86_64": platform.machine().lower() in ("x86_64", "amd64"),
-        "ram_floor": memory_bytes >= int(build["minimum_ram_gib"]) * 1024 ** 3,
         "git_available": shutil.which("git") is not None,
         "repo_available": shutil.which("repo") is not None,
         "work_path_exists": root.is_dir(),
@@ -295,6 +321,7 @@ def host_preflight(
             not require_non_root_device or work_stat.st_dev != system_root_stat.st_dev
         ),
     }
+    checks.update(memory_checks(memory_bytes, swap_bytes, platform.release(), build))
     checks.update(disk_checks(
         disk.free, minimum_disk_bytes, platform.release(), backing_free_bytes
     ))
@@ -324,6 +351,8 @@ def host_preflight(
         "free_disk_bytes": disk.free,
         "backing_free_bytes": backing_free_bytes,
         "memory_bytes": memory_bytes,
+        "swap_bytes": swap_bytes,
+        "memory_policy": "wsl" if "microsoft" in platform.release().lower() else "native",
         "checks": checks,
         "tools": tools,
         "kernel": platform.release(),

@@ -57,6 +57,12 @@ class AndroidBuildDomainTests(unittest.TestCase):
         self.assertEqual(
             domain.path("temp_root"), "/srv/android-build/redroid/tmp/x86_64"
         )
+        self.assertEqual(
+            domain.path("archive_root"), "/srv/android-build/redroid/archive/images"
+        )
+        self.assertEqual(
+            domain.path("evidence_root"), "/srv/android-build/redroid/evidence"
+        )
 
     def test_redroid_entry_rejects_kvm_domain(self) -> None:
         with self.assertRaisesRegex(AndroidBuildDomainError, "must be redroid"):

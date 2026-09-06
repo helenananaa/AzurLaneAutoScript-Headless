@@ -48,6 +48,26 @@ passes, use the local machine for the already validated development/runtime
 surface and do not claim local clean-build, provenance, or reproducibility
 capability.
 
+The synchronized KVM and Redroid source trees live on independent VHDX
+filesystems, not on the WSL distribution root. Every `wsl --shutdown`, Windows
+restart, distribution restart, or build-host reconfiguration invalidates the
+assumption that those filesystems are still mounted. Before inspecting source
+state or running `repo init`, `repo sync`, patching, or a build, run:
+
+```powershell
+& 'E:\Runtime\ALAS\Mount-ALASBuildDisks.ps1'
+```
+
+Then verify with `findmnt` and `blkid` that `/srv/android-build/kvm` is UUID
+`7febc493-864e-4e35-a01c-3090515de95e` and
+`/srv/android-build/redroid` is UUID
+`fd5ab68a-32b8-4fd7-987c-3b1c0575a12f`. Inspect each checkout as its owning
+`alas-kvm-build` or `alas-redroid-build` account and confirm the locked manifest,
+project inventory, and retained sync receipt. An empty or small directory at a
+mount point is not evidence that the source is missing. If either UUID is not
+mounted, stop: do not write into the underlying WSL root directory and do not
+start a replacement source sync.
+
 External build machines are retired and out of scope. Do not search for,
 connect to, renew, or request credentials or endpoint details for an external
 build machine. Use only the local Windows/WSL build domains and retained local

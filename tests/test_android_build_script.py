@@ -61,7 +61,23 @@ class AndroidBuildScriptTests(unittest.TestCase):
         self.assertIn('[[ $out_root == */arm64', script)
         self.assertIn('case "$selected_abi" in', script)
         self.assertIn('--source-lock "$source_lock" --abi "$selected_abi"', script)
-        self.assertIn('--prepared-source-root "$source_root"', script)
+        self.assertIn('source_verification_args+=(--prepared-source-root "$source_root")', script)
+
+    def test_initial_empty_source_is_not_treated_as_prepared(self) -> None:
+        script = self.script()
+        self.assertIn('if [[ ! -d .repo/manifests/.git ]]; then', script)
+        self.assertNotIn('if [[ ! -d .repo ]]; then', script)
+        prepared = script.index(
+            'source_verification_args+=(--prepared-source-root "$source_root")'
+        )
+        condition = script.rfind(
+            'if [[ -e "$source_root/.alas-redroid-patches-applied"', 0, prepared
+        )
+        self.assertGreater(condition, -1)
+        self.assertIn(
+            '|| -e "$source_root/.alas-project-patches-applied"',
+            script[condition:prepared],
+        )
 
     def test_redroid_angle_workspace_defaults_are_backend_owned(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -102,6 +118,12 @@ class AndroidBuildScriptTests(unittest.TestCase):
         self.assertIn('ALAS_BUILD_JOBS must be a positive integer', script)
         self.assertEqual(script.count('\n    m -j"$build_jobs"'), 1)
         self.assertEqual(script.count('\n    m sbom -j"$build_jobs"'), 1)
+
+    def test_build_parallelism_is_an_execution_setting(self) -> None:
+        script = self.script()
+        self.assertIn('build_jobs=${ALAS_BUILD_JOBS:-$(nproc)}', script)
+        self.assertIn('ALAS_BUILD_JOBS must be a positive integer', script)
+        self.assertNotIn('wsl_maximum_build_jobs', script)
 
     def test_project_patches_and_artifact_times_are_deterministic(self) -> None:
         script = self.script()
