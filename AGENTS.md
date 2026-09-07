@@ -33,6 +33,18 @@ be identified safely.
 
 ## Android development environments and local build-domain rules
 
+The Apple Silicon Mac used for macOS/HVF adaptation is reached over the local
+network with:
+
+```powershell
+ssh ryanliang@Ryans-MacBook-Air.local
+```
+
+Prefer this mDNS hostname over a DHCP address. If it does not resolve, confirm
+the Mac is online and on the same LAN before using a currently verified LAN IP
+as a temporary fallback. Do not persist credentials, account data, or a stale
+DHCP address in the repository.
+
 Local Windows/WSL is the only active development and image-build environment.
 Use it for repository work, adapter and observer development, focused tests,
 Redroid runtime debugging, source synchronization, and Android image builds.

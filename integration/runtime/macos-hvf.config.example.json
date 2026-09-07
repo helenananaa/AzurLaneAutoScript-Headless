@@ -1,0 +1,21 @@
+{
+  "schema": "alas-headless.runtime-config/v1",
+  "backend": "macos-hvf",
+  "serial": "emulator-5554",
+  "package": "com.bilibili.azurlane",
+  "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+  "host_class": "macos-arm64-hvf",
+  "emulator": "/Users/ryanliang/Library/Android/sdk/emulator/emulator",
+  "adb": "/Users/ryanliang/Library/Android/sdk/platform-tools/adb",
+  "sdk_root": "/Users/ryanliang/Library/Android/sdk",
+  "avd_name": "alas_api32_arm64",
+  "avd_home": "/Users/ryanliang/.android/avd",
+  "console_port": 5554,
+  "adb_server_port": 5037,
+  "angle_package": "org.chromium.angle",
+  "unity_command_line": "-force-gfx-st",
+  "null_refresh_hz": 30,
+  "launch_game": true,
+  "manage_angle_routing": false,
+  "poll_interval_seconds": 1.0
+}

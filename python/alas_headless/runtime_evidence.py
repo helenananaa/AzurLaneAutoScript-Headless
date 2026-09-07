@@ -59,6 +59,7 @@ class RuntimeFingerprint:
         if indexed["backend"] not in (
             "kvm",
             "redroid",
+            "macos-hvf",
             "tcg",
             "arm64-qemu",
             "external-adb",

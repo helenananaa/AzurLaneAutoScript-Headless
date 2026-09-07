@@ -19,6 +19,7 @@ RUNTIME_BACKEND_SCHEMA = "alas-headless.runtime-backend/v1"
 class BackendKind(str, Enum):
     KVM = "kvm"
     REDROID = "redroid"
+    MACOS_HVF = "macos-hvf"
     TCG = "tcg"
     ARM64_QEMU = "arm64-qemu"
     EXTERNAL_ADB = "external-adb"
@@ -184,6 +185,7 @@ class RuntimeBackendRegistry:
     DEFAULT_AUTO_ORDER = (
         BackendKind.KVM,
         BackendKind.REDROID,
+        BackendKind.MACOS_HVF,
         BackendKind.EXTERNAL_ADB,
         BackendKind.TCG,
         BackendKind.ARM64_QEMU,
@@ -261,6 +263,13 @@ def built_in_backend_profiles() -> Mapping[BackendKind, RuntimeBackendProfile]:
             RuntimeCapabilities(True, True, False, True, True, True),
             required_host_features=("binderfs", "cgroup-v2", "adb"),
             backend_options={"storage_model": "oci-plus-persistent-data"},
+        ),
+        BackendKind.MACOS_HVF: RuntimeBackendProfile(
+            BackendKind.MACOS_HVF,
+            "macos-hvf-arm64-default-v1",
+            RuntimeCapabilities(True, False, False, False, False, True),
+            required_host_features=("apple-silicon", "hypervisor.framework", "adb"),
+            backend_options={"storage_model": "sdk-avd-plus-userdata"},
         ),
         BackendKind.TCG: RuntimeBackendProfile(
             BackendKind.TCG,
