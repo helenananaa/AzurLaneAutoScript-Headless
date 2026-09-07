@@ -233,7 +233,7 @@ claims.
 | Rooted ARM64 Android device | **Real tooling exploration** | Systemless ANGLE install, verify, remove, and rollback; G1 NULL-renderer contract | Current game, full observer, ALAS, thermal behavior, and long runs are unverified |
 | Unrooted ARM64 phone/tablet as QEMU host | **Experimental partial pass** | Hosts an ARM64 guest under ordinary app permissions; ANGLE NULL, Unity, and no-input pre-login game boundary | No acceleration and very slow; no observer, ALAS, or recovery closure |
 | Unrooted device routing the release game directly | **Currently unsupported** | A debug/queryable GLES probe can load debug ANGLE | A locked user build cannot route side-loaded debug ANGLE into the release game |
-| Apple Silicon Mac + Android Emulator/HVF | **Real exploration: G4 login page and typed observer passed** | M1, Emulator 37.1.11, API 32 ARM64, and `-accel on`; ANGLE NULL observer read exact `LoginUI2` paths from the CN 9.7.10 game | Account login, main page, ALAS workload, recovery, soak, and a dedicated `macos-hvf` backend remain open |
+| Apple Silicon Mac + Android Emulator/HVF | **Engineering baseline: dedicated backend, lifecycle, and both recovery gates passed** | M1, API 32 ARM64, Hypervisor.Framework, and an exact runtime lock; owned-AVD lifecycle, game recovery, Android reboot recovery, and cleanup passed on the real host | Account login, main page, ALAS workload, soak, snapshot restore, and multi-instance qualification remain open |
 | Intel Mac + Android Emulator/HVF | **Future candidate** | Same-architecture x86/x86_64 guest path is feasible | No repository-owned Intel Mac lifecycle or game evidence |
 
 The table describes a cross-device program instead of hiding maturity
