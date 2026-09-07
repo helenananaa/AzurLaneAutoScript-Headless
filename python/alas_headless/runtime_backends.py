@@ -155,6 +155,7 @@ def backend_from_config(
             "sdk_root",
             "avd_name",
             "avd_home",
+            "provision_profile",
             "console_port",
             "adb_server_port",
         }
@@ -184,6 +185,7 @@ def backend_from_config(
             sdk_root=path_field("sdk_root"),
             avd_name=value["avd_name"],
             avd_home=path_field("avd_home"),
+            provision_profile=path_field("provision_profile"),
             console_port=value["console_port"],
             adb_server_port=value["adb_server_port"],
             angle_package=value.get("angle_package", "org.chromium.angle"),

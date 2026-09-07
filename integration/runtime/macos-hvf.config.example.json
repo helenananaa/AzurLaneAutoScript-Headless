@@ -10,6 +10,7 @@
   "sdk_root": "/Users/ryanliang/Library/Android/sdk",
   "avd_name": "alas_api32_arm64",
   "avd_home": "/Users/ryanliang/.android/avd",
+  "provision_profile": "/Users/ryanliang/alas-headless/runtime/macos-hvf-provision-profile.json",
   "console_port": 5554,
   "adb_server_port": 5037,
   "angle_package": "org.chromium.angle",

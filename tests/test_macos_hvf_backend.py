@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,6 +13,7 @@ from alas_headless.runtime_backend_macos_hvf import (
     MacosHvfRuntimeConfig,
 )
 from alas_headless.runtime_backends import backend_from_config
+from alas_headless.runtime_backends import RuntimeIdentityMismatch
 from alas_headless.runtime_command import (
     RuntimeCommandResult,
     RuntimeExecutionPolicy,
@@ -63,6 +65,11 @@ class MacosHvfBackendTests(unittest.TestCase):
             "image.sysdir.1=system-images/android-32/google_apis/arm64-v8a/\n",
             encoding="utf-8",
         )
+        system_image = sdk / "system-images/android-32/google_apis/arm64-v8a/system.img"
+        system_image.parent.mkdir(parents=True)
+        system_image.write_bytes(b"system-image")
+        provision_profile = root / "macos-hvf-provision-profile.json"
+        provision_profile.write_text("{}", encoding="utf-8")
         values = {
             "serial": "emulator-5554",
             "package": PACKAGE,
@@ -73,6 +80,7 @@ class MacosHvfBackendTests(unittest.TestCase):
             "sdk_root": sdk,
             "avd_name": "alas_api32_arm64",
             "avd_home": avd_home,
+            "provision_profile": provision_profile,
             "console_port": 5554,
             "poll_interval_seconds": 0.01,
         }
@@ -190,6 +198,37 @@ class MacosHvfBackendTests(unittest.TestCase):
             ValueError, "macos-hvf requires the arm64-v8a ABI"
         ):
             RuntimeLock.from_mapping(value)
+
+    def test_provision_binds_system_image_and_profile_hashes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config = self.make_config(root)
+            value = json.loads(
+                (
+                    Path(__file__).resolve().parents[1]
+                    / "integration/runtime/runtime-lock.macos-hvf.example.json"
+                ).read_text(encoding="utf-8")
+            )
+            system_image = (
+                config.sdk_root
+                / "system-images/android-32/google_apis/arm64-v8a/system.img"
+            )
+            value["android"]["system_image_sha256"] = hashlib.sha256(
+                system_image.read_bytes()
+            ).hexdigest()
+            value["android"]["provision_profile_sha256"] = hashlib.sha256(
+                config.provision_profile.read_bytes()
+            ).hexdigest()
+            lock = RuntimeLock.from_mapping(value)
+            backend = MacosHvfBackend(config, ScriptedExecutor())
+            artifacts = backend.resolve_artifacts(lock)
+            provisioned = backend.provision(artifacts)
+            self.assertEqual(provisioned["system_image"], str(system_image.resolve()))
+            system_image.write_bytes(b"drift")
+            with self.assertRaisesRegex(
+                RuntimeIdentityMismatch, "system-image-hash-mismatch"
+            ):
+                backend.provision(artifacts)
 
     def test_config_rejects_mismatched_serial_and_non_headless_launch(self):
         with tempfile.TemporaryDirectory() as temporary:

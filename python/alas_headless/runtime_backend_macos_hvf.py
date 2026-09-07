@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import hashlib
 import os
 import platform
 import re
@@ -36,6 +37,7 @@ class MacosHvfRuntimeConfig:
     sdk_root: Path
     avd_name: str
     avd_home: Path
+    provision_profile: Path
     console_port: int
     adb_server_port: int = 5037
     angle_package: str = "org.chromium.angle"
@@ -84,7 +86,13 @@ class MacosHvfRuntimeConfig:
             raise ValueError("macOS HVF console port must be even and in [5554, 5680]")
         if self.serial != "emulator-{0}".format(self.console_port):
             raise ValueError("macOS HVF serial must match its emulator console port")
-        for path in (self.emulator, self.adb, self.sdk_root, self.avd_home):
+        for path in (
+            self.emulator,
+            self.adb,
+            self.sdk_root,
+            self.avd_home,
+            self.provision_profile,
+        ):
             if not isinstance(path, Path):
                 raise ValueError("macOS HVF runtime paths must be pathlib.Path values")
         sdk_root = self.sdk_root.resolve(strict=False)
@@ -162,13 +170,51 @@ class MacosHvfBackend(AdbAttachedBackend):
             raise RuntimeIdentityMismatch("macos-hvf-avd-abi-mismatch")
         return values
 
+    def _system_image_path(self, avd_values: Mapping[str, str]) -> Path:
+        raw = avd_values.get("image.sysdir.1", "")
+        if not raw:
+            raise RuntimeIdentityMismatch("macos-hvf-system-image-path-missing")
+        configured = Path(raw.rstrip("/\\"))
+        image_directory = (
+            configured
+            if configured.is_absolute()
+            else self.config.sdk_root / configured
+        ).resolve(strict=False)
+        sdk_root = self.config.sdk_root.resolve(strict=False)
+        try:
+            image_directory.relative_to(sdk_root)
+        except ValueError as exc:
+            raise RuntimeIdentityMismatch(
+                "macos-hvf-system-image-outside-sdk"
+            ) from exc
+        system_image = image_directory / "system.img"
+        if not system_image.is_file():
+            raise RuntimeBackendNotReady("macos-hvf-system-image-missing")
+        return system_image
+
+    @staticmethod
+    def _file_sha256(path: Path) -> str:
+        digest = hashlib.sha256()
+        try:
+            with path.open("rb") as handle:
+                for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                    digest.update(chunk)
+        except OSError as exc:
+            raise RuntimeBackendNotReady("macos-hvf-artifact-unreadable") from exc
+        return digest.hexdigest()
+
     def probe_host(self) -> RuntimeProbeResult:
         available, reason, fingerprint = self.host_probe()
         avd_verified = False
         acceleration_verified = False
         missing = [
             str(path)
-            for path in (self.config.emulator, self.config.adb, self.avd_config_path)
+            for path in (
+                self.config.emulator,
+                self.config.adb,
+                self.avd_config_path,
+                self.config.provision_profile,
+            )
             if not path.is_file()
         ]
         if missing:
@@ -176,7 +222,8 @@ class MacosHvfBackend(AdbAttachedBackend):
             reason = "macos-hvf-runtime-path-missing"
         if available:
             try:
-                self._require_arm64_avd()
+                avd_values = self._require_arm64_avd()
+                self._system_image_path(avd_values)
                 avd_verified = True
             except Exception:
                 available = False
@@ -221,12 +268,24 @@ class MacosHvfBackend(AdbAttachedBackend):
 
     def provision(self, artifacts: Mapping[str, Any]) -> Mapping[str, Any]:
         provisioned = dict(super().provision(artifacts))
-        self._require_arm64_avd()
+        avd_values = self._require_arm64_avd()
+        system_image = self._system_image_path(avd_values)
+        assert self._runtime_lock is not None
+        expected_android = self._runtime_lock.document["android"]
+        if self._file_sha256(system_image) != expected_android["system_image_sha256"]:
+            raise RuntimeIdentityMismatch("macos-hvf-system-image-hash-mismatch")
+        if (
+            self._file_sha256(self.config.provision_profile)
+            != expected_android["provision_profile_sha256"]
+        ):
+            raise RuntimeIdentityMismatch("macos-hvf-provision-profile-hash-mismatch")
         provisioned.update(
             {
                 "avd_name": self.config.avd_name,
                 "avd_config": str(self.avd_config_path.resolve()),
                 "sdk_root": str(self.config.sdk_root.resolve()),
+                "system_image": str(system_image.resolve()),
+                "provision_profile": str(self.config.provision_profile.resolve()),
             }
         )
         return provisioned
