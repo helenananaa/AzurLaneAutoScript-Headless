@@ -12,6 +12,9 @@ from types import SimpleNamespace
 
 
 class FakeDockOracle:
+    def retirement_selection_visible(self):
+        return False
+
     def retire_ships_one_click(self, keep_limit_break):
         self.retirement_keep_limit_break = keep_limit_break
         return self.retirement_receipt_value

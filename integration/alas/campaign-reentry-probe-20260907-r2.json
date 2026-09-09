@@ -1,0 +1,60 @@
+{
+  "schema": "alas-headless.campaign-reentry-probe/v1",
+  "passed": true,
+  "serial": "emulator-5580",
+  "stage": "3-1",
+  "go_input_count": 1,
+  "resumed_from": "integration\\alas\\campaign-reentry-probe-20260907-r1.json",
+  "sortie": {
+    "stage_code": "3-1",
+    "initial_fleets": [
+      2,
+      1,
+      0
+    ],
+    "requested_fleets": [
+      2,
+      1,
+      0
+    ],
+    "prepared_fleets": [
+      2,
+      1,
+      0
+    ],
+    "mutation_semantic_ids": [],
+    "oil_before_sortie": 11959,
+    "required_oil": 1000,
+    "sortie_generation": 63127,
+    "map_generation": 63447,
+    "map_root_path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)",
+    "oil_cost_source": "conservative-uncapped-reserve"
+  },
+  "oil_before": 11959,
+  "pid": 7890,
+  "oil_at_result": 11678,
+  "go_receipt": {
+    "semantic_id": "reward/campaign-total/go",
+    "generation": 65452,
+    "point": {
+      "x": 916.067,
+      "y": 625.593
+    },
+    "bounds": {
+      "left": 838.813,
+      "top": 596.13,
+      "right": 993.32,
+      "bottom": 655.057
+    },
+    "path": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonGO",
+    "policy_sha256": null,
+    "capability_id": null
+  },
+  "postcondition": "official-auto-started",
+  "active": {
+    "generation": 65753,
+    "root_path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)"
+  },
+  "stage_page_after_cleanup": true,
+  "oil_after": 11397
+}

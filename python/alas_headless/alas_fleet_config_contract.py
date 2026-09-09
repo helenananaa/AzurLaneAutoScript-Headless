@@ -110,25 +110,18 @@ def validate_alas_fleet_config(
         ),
     )
     if (
-        snapshot.fleet1_formation != "double_line"
-        or snapshot.fleet2_formation != "double_line"
-    ):
-        raise SemanticGateClosed(
-            "non-default Fleet formation is not consumed by pinned ALAS"
-        )
-    if (
         snapshot.fleet1_mode != "combat_auto"
         or snapshot.fleet2_mode != "combat_auto"
     ):
         raise SemanticGateClosed(
             "manual Fleet modes require unqualified directional or weapon input"
         )
-    reviewed_order = snapshot.fleet_order == "fleet1_mob_fleet2_boss" or (
+    reviewed_order = snapshot.fleet_order in ("fleet1_mob_fleet2_boss", "fleet1_boss_fleet2_mob") or (
         snapshot.fleet2 == 0
         and snapshot.fleet_order == "fleet1_all_fleet2_standby"
     ) or (
         snapshot.fleet2 != 0
-        and snapshot.fleet_order == "fleet1_standby_fleet2_all"
+        and snapshot.fleet_order in ("fleet1_standby_fleet2_all", "fleet1_all_fleet2_standby")
     )
     if not reviewed_order:
         raise SemanticGateClosed(

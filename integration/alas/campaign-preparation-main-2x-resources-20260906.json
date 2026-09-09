@@ -1,0 +1,18 @@
+{
+  "schema": "alas-headless.campaign-preparation-resource-observation/v1",
+  "serial": "emulator-5580",
+  "pid": 13240,
+  "stage": "12-4",
+  "task_receipt": "integration/alas/campaign-preparation-main-2x-live-20260906-r8.json",
+  "book_before_evidence": "integration/alas/campaign-preparation-book-on-observation-20260906.json",
+  "book_after_evidence": "integration/alas/campaign-preparation-book-after-main-20260906.json",
+  "book_before": 569,
+  "book_after": 568,
+  "oil_before": 3096,
+  "oil_after": 2462,
+  "oil_observation_source": "Typed campaign_oil() readings in the live tool transcript before sortie and after task completion",
+  "book_consumed": 1,
+  "oil_consumed": 634,
+  "scope": "One original Main 12-4 official-auto run with Use2xBook=true; not all campaign configurations or unattended qualification",
+  "observer_apk_sha256": "c7fb25a6ed41d0184cc0d3d137773440a46c341f9cb5ea62ac2f96404cc51c27"
+}

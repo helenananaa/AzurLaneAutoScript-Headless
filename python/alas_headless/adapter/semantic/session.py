@@ -446,6 +446,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
         return handle
 
     def _release_owned_runtime_handle(self) -> None:
+        self._retirement_return_receipt = None
         if self._frame_clock is not None:
             self._frame_clock.close()
         self._frame_clock = None
@@ -601,6 +602,7 @@ class AlasSemanticSession(SessionTasksPorts, SessionCombatPorts, SessionDispatch
             raise
 
     def close(self) -> None:
+        self._retirement_return_receipt = None
         self.adapter = None
         self.action_ledger.close()
         self._release_owned_runtime_handle()

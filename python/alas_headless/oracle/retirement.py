@@ -157,7 +157,7 @@ class RetirementOracle:
             raise SemanticGateClosed("retirement control identity is ambiguous")
         button = buttons[0]
         if (
-            button.raycast_top is False
+            button.raycast_top is not True
             or button.point is None
             or button.bounds is None
             or not button.bounds.contains(button.point)
@@ -167,6 +167,8 @@ class RetirementOracle:
             )
         ):
             raise SemanticGateClosed("retirement control is not actionable")
+        if self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("retirement control is blocked")
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
         self._tap(int(round(button.point.x)), int(round(button.point.y)))
@@ -218,7 +220,10 @@ class RetirementOracle:
             raise SemanticGateClosed("retirement counters are malformed")
         used, total = (int(value) for value in capacity_match.groups())
         selected = int(count_match.group(0))
-        if used > total or selected > used:
+        # A reward can overflow the dock before the game raises its full
+        # dialog (observed 931/930). That is precisely a recovery entry, not
+        # malformed data. Selection and the eventual count delta stay exact.
+        if selected > used:
             raise SemanticGateClosed("retirement counters are inconsistent")
         return RetirementSelectionState(
             generation=ui_state.generation,
@@ -227,9 +232,31 @@ class RetirementOracle:
             selected_count=selected,
         )
 
-    def click_retirement_page_back(self) -> ActionReceipt:
-        """Exit only an idle, unselected retirement page."""
+    def click_dock_page_back(self) -> ActionReceipt:
+        """Leave the ordinary dock, never an active selection dialog."""
+        state, ui = self._retirement_records()
+        if any("/blur_panel/select_panel/" in item.path for item in state.buttons):
+            raise SemanticGateClosed("dock has an active selection page")
+        return self._click_retirement_button(
+            "dock/page/back", "/Overlay/UIMain/blur_panel/adapt/top/back",
+            identity_text_suffix="/blur_panel/adapt/top/capacity/label",
+            identity_text="船坞容量:",
+        )
 
+    def retirement_selection_visible(self) -> bool:
+        state = self.read_state()
+        if not any(b.path.endswith('/blur_panel/select_panel/quick_select')
+                   and b.active_in_hierarchy for b in state.buttons):
+            return False
+        _, ui = self._retirement_records()
+        if not self._active_retirement_texts(ui, '/blur_panel/select_panel/tip',
+                '请选择用于<color=#92fc63>退役</color>的角色：'):
+            return False
+        # Presence must survive controls mounting/unmounting. Input and the
+        # retirement transaction independently require the complete selection.
+        return True
+
+    def _retirement_page_back_target(self):
         selection = self.retirement_selection_state()
         if selection.selected_count != 0:
             raise SemanticGateClosed("retirement page has a live selection")
@@ -239,16 +266,30 @@ class RetirementOracle:
             for button in state.buttons
             if button.name == "back"
             and button.path
-            == "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back"
+            in ("OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back",
+                "UICamera/Canvas/UIOrigin/blur_panel/adapt/top/back")
             and button.actionable
         )
         if len(matches) != 1:
             raise SemanticGateClosed("retirement page back control is ambiguous")
         target = matches[0]
+        if self._blocking_rules(state, "retirement/page/back"):
+            raise SemanticGateClosed("retirement page back is blocked")
+        return selection, target
+
+    def retirement_page_back_available(self) -> bool:
+        self._retirement_page_back_target()
+        return True
+
+    def click_retirement_page_back(self) -> ActionReceipt:
+        """Exit only an idle, unselected retirement page."""
+        selection, target = self._retirement_page_back_target()
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
         assert target.point is not None and target.bounds is not None
         self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed immediately after input")
         return ActionReceipt(
             semantic_id="retirement/page/back",
             generation=selection.generation,
@@ -294,7 +335,6 @@ class RetirementOracle:
                     and item.active_in_hierarchy
                     and item.active_and_enabled
                     and item.interactable
-                    and item.raycast_top is None
                 )
                 if len(matches) != 1:
                     raise SemanticGateClosed(
@@ -363,7 +403,6 @@ class RetirementOracle:
             and item.active_in_hierarchy
             and item.active_and_enabled
             and item.interactable
-            and item.raycast_top is None
         )
         if len(toggles) != 1 or toggles[0].checked:
             raise SemanticGateClosed("retirement setting target is not selectable")
@@ -380,7 +419,7 @@ class RetirementOracle:
                 and item.active_in_hierarchy
                 and item.active_and_enabled
                 and item.raycast_target
-                and item.raycast_top is None
+                and item.raycast_top is True
                 and item.bounds is not None
             )
             if len(images) != 1:
@@ -401,6 +440,10 @@ class RetirementOracle:
             )
         ):
             raise SemanticGateClosed("retirement setting input point is invalid")
+        if group != 0 and toggle.raycast_top is not True:
+            raise SemanticGateClosed("retirement setting has no positive hit proof")
+        if self._blocking_rules(state, "retirement/settings/{0}/{1}".format(group, option)):
+            raise SemanticGateClosed("retirement setting is blocked")
         if self._foreground_component() != self.fingerprint.component:
             raise SemanticGateClosed("foreground changed immediately before input")
         self._tap(int(round(point.x)), int(round(point.y)))
@@ -803,9 +846,15 @@ class RetirementOracle:
             )
         )
 
+        return self._finish_retirement_transaction(before, selected_count, settings, actions, timeout_seconds)
+
+    def _finish_retirement_transaction(self, before, selected_count, settings, actions, timeout_seconds):
+        """Finish reward/equipment dialogs; never select or submit ships."""
         rewards: Tuple[Tuple[str, int], ...] = ()
         warning_confirmed = False
         equipment_preserved = False
+        equipment_seen = False
+        idle_since = None
         completion_deadline = self._monotonic() + timeout_seconds
         while self._monotonic() < completion_deadline:
             reconnect = self._recover_retirement_network_reconnect()
@@ -814,6 +863,8 @@ class RetirementOracle:
                 self._sleep(0.2)
                 continue
             kind = self._retirement_screen_kind()
+            if kind != 'selection':
+                idle_since = None
             if kind in ("transition", "preconfirm"):
                 self._sleep(0.2)
                 continue
@@ -856,6 +907,7 @@ class RetirementOracle:
                 self._sleep(0.2)
                 continue
             if kind == "equipment":
+                equipment_seen = True
                 equipment = self._retirement_equipment_state()
                 if equipment.selected_slots:
                     if not equipment.all_checked or set(equipment.selected_slots) != {
@@ -907,6 +959,21 @@ class RetirementOracle:
                 self._sleep(0.2)
                 continue
             if kind == "selection":
+                # Unity briefly exposes the dock after the server removes
+                # ships but before mounting awards. That is not completion.
+                if not rewards or (equipment_seen and not equipment_preserved):
+                    self._sleep(0.2)
+                    continue
+                state, _ = self._retirement_records()
+                if self._blocking_rules(state, 'retirement/page/back'):
+                    idle_since = None
+                    self._sleep(0.2)
+                    continue
+                if idle_since is None:
+                    idle_since = self._monotonic()
+                if self._monotonic() - idle_since < 1.0:
+                    self._sleep(0.2)
+                    continue
                 after = self.retirement_selection_state()
                 if after.selected_count != 0:
                     raise SemanticGateClosed("retirement selection did not clear")

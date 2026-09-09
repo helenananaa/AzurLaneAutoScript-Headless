@@ -1,0 +1,26 @@
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+index 4b55dd9..fd98106 100644
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -184,12 +184,20 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+         if getattr(getattr(self, 'device', None), 'semantic_adapter', None) is not None:
+             self.handle_popup_single(name='CAMPAIGN_MAP')
+         self.semantic_prepare_a_battle()
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            self.device.screenshot()
++            self.update()
+         logger.hr(f'{self.FUNCTION_NAME_BASE}{self.battle_count}', level=2)
+         prev = self.battle_count
+         result = False
+         for _ in range(10):
+             try:
+-                result = self.battle_function()
++                if getattr(self.device, 'semantic_adapter', None) is not None:
++                    from alas_headless.alas_campaign_map_binding import bind_alas_campaign_execution_map
++                    with bind_alas_campaign_execution_map(self):
++                        result = self.battle_function()
++                else:
++                    result = self.battle_function()
+                 semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+                 if (
+                     result

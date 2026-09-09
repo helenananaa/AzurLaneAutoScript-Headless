@@ -58,13 +58,245 @@ from .errors import SemanticGateClosed
 class CampaignPreparationOracle:
     """Campaign preparation operations sharing the oracle frame and input boundary."""
 
+    def _campaign_clear_mode_control(self):
+        return self._retry_transition_read(self._campaign_clear_mode_control_once)
+
+    def _campaign_clear_mode_control_once(self):
+        state = self.read_state()
+        # read_state already checked foreground. Avoid an intervening ADB
+        # round trip between the two snapshots; input checks foreground again.
+        ui = self.read_ui_state(check_foreground=False)
+        if (ui.generation < state.generation
+                or ui.generation > state.generation + 8 or ui.image_truncated):
+            raise SemanticGateClosed("campaign clear-mode frame is incomplete")
+        suffixes = tuple(
+            root + "/panel/BottomExtra/LoopGroup/Loop/Toggle"
+            for root in (
+                _CAMPAIGN_LIVE_NORMAL_MAP_VIEW_ROOT,
+                _CAMPAIGN_LIVE_MAP_VIEW_ROOT,
+                _CAMPAIGN_LIVE_MAP_UIORIGIN_VIEW_ROOT,
+            )
+        )
+        controls = tuple(b for b in state.buttons if b.path in suffixes)
+        if not controls:
+            return state, None, None
+        if len(controls) != 1:
+            raise SemanticGateClosed("campaign clear-mode control is ambiguous")
+        button = controls[0]
+        markers = tuple(
+            image for image in ui.images
+            if image.path in (button.path + "/on", button.path + "/off")
+            and image.active_in_hierarchy and image.active_and_enabled
+        )
+        if len(markers) != 1 or any(
+            image.sprite != "live2d_" + image.name
+            or image.path != button.path + "/" + image.name
+            for image in markers
+        ):
+            raise SemanticGateClosed("campaign clear-mode state is absent or ambiguous")
+        return state, button, markers[0].name == "on"
+
+    def campaign_clear_mode_selected(self) -> Optional[bool]:
+        """Read the current client's official loop-mode switch."""
+        return self._campaign_clear_mode_control()[2]
+
+    def _campaign_2x_book_control(self, mode=None):
+        if mode not in (None, "prep", "auto"):
+            raise ValueError("campaign book mode must be prep or auto")
+        def read_once():
+            state = self.read_state()
+            ui = self.read_ui_state(check_foreground=False)
+            if ui.generation < state.generation or ui.generation > state.generation + 8 or ui.image_truncated:
+                raise SemanticGateClosed("campaign 2x-book frame is incomplete")
+            roots = {
+                "prep": _CAMPAIGN_LIVE_FLEET_PANEL_ROOT + "Fixed/sp",
+                "auto": "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/SpList/Item",
+            }
+            present = [key for key, path in roots.items() if any(b.path == path for b in state.buttons)]
+            if len(present) > 1:
+                raise SemanticGateClosed("campaign book preparation surfaces are ambiguous")
+            active_mode = mode or (present[0] if present else "prep")
+            root = roots[active_mode]
+            buttons = tuple(b for b in state.buttons if b.path == root)
+            if not buttons:
+                return state, None, None, 0
+            item = root + ("/item" if active_mode == "prep" else "/Active/Item/IconTpl/icon_bg")
+            checkbox = root + ("/checkbox" if active_mode == "prep" else "/Active/Checkbox")
+            icons = tuple(i for i in ui.images if i.path == item + "/icon" and i.sprite == "tebiezuozhan")
+            boxes = tuple(i for i in ui.images if i.path == checkbox and i.sprite == "bg_rect")
+            counts = tuple(t for t in ui.texts if t.path == item + "/count" and not t.truncated)
+            if len(buttons) != 1 or len(icons) != 1 or len(boxes) != 1 or len(counts) != 1:
+                raise SemanticGateClosed("campaign 2x-book identity is incomplete or ambiguous")
+            if re.fullmatch(r"[0-9]+", counts[0].text.strip()) is None:
+                raise SemanticGateClosed("campaign 2x-book inventory is malformed")
+            markers = tuple(i for i in ui.images if i.path.startswith(checkbox + "/"))
+            if len(markers) > 1 or any(i.path.rsplit("/", 1)[0] != checkbox or i.sprite != "gou" for i in markers):
+                raise SemanticGateClosed("campaign 2x-book selected marker is not reviewed")
+            if active_mode == "prep" and any(i.path != checkbox + "/mark" for i in markers):
+                raise SemanticGateClosed("campaign 2x-book selected marker is not reviewed")
+            return state, buttons[0], bool(markers), int(counts[0].text.strip())
+        return self._retry_transition_read(read_once)
+
+    def _campaign_auto_search_reentry_target(self):
+        state = self.read_state()
+        root = "OverlayCamera/Overlay/UIMain/LevelStageTotalRewardPanel(Clone)/Window/Fixed/"
+        matches = tuple(b for b in state.buttons if b.path == root + "ButtonGO" and b.name == "ButtonGO")
+        if not matches:
+            return state, None
+        if len(matches) != 1:
+            raise SemanticGateClosed("campaign reentry target is ambiguous")
+        ui = self.read_ui_state(check_foreground=False)
+        if ui.generation < state.generation or ui.generation > state.generation + 8:
+            raise SemanticGateClosed("campaign reentry frame is incomplete")
+        labels = tuple("".join(t.text.split()) for t in ui.texts
+                       if t.path == root + "ButtonGO/pic" and not t.truncated)
+        if labels != ("再次前往",):
+            raise SemanticGateClosed("campaign reentry label is not proven")
+        return state, matches[0]
+
+    def campaign_auto_search_reentry_available(self) -> bool:
+        try:
+            state, target = self._campaign_auto_search_reentry_target()
+        except SemanticGateClosed:
+            # Optional reentry may degrade to the independently checked Exit
+            # route. This never admits input; clicking still proves everything.
+            return False
+        return bool(target is not None and target.actionable
+                    and not self._blocking_rules(state, "reward/campaign-total/go"))
+
+    def click_campaign_auto_search_reentry(self) -> ActionReceipt:
+        state, target = self._campaign_auto_search_reentry_target()
+        if target is None or not target.actionable or self._blocking_rules(state, "reward/campaign-total/go"):
+            raise SemanticGateClosed("campaign reentry is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before campaign reentry")
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(semantic_id="reward/campaign-total/go", generation=state.generation,
+                             point=target.point, bounds=target.bounds, path=target.path)
+
+    def campaign_2x_book_selected(self, mode=None) -> Optional[bool]:
+        return self._campaign_2x_book_control(mode)[2]
+
+    def click_campaign_2x_book(self, expected: bool, mode=None) -> ActionReceipt:
+        state, button, selected, count = self._campaign_2x_book_control(mode)
+        if type(expected) is not bool or button is None or selected is not expected:
+            raise SemanticGateClosed("campaign 2x-book state changed before input")
+        if not expected and count == 0:
+            raise SemanticGateClosed("campaign 2x-book inventory is empty")
+        semantic_id = "campaign/2x-book-auto" if "/LevelStageTotalRewardPanel(Clone)/" in button.path else "campaign/2x-book"
+        if not button.actionable:
+            raise SemanticGateClosed("campaign 2x-book target is not actionable")
+        blockers = self._blocking_rules(state, semantic_id)
+        if blockers:
+            raise SemanticGateClosed("campaign 2x-book blocked by " + ", ".join(rule.blocker_id for rule in blockers))
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before 2x-book input")
+        self._tap(int(round(button.point.x)), int(round(button.point.y)))
+        return ActionReceipt(semantic_id=semantic_id, generation=state.generation,
+                             point=button.point, bounds=button.bounds, path=button.path)
+
+    def _campaign_2x_book_prompt(self, confirm: bool):
+        state = self.read_state()
+        root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+        if not any(b.path.startswith(root) for b in state.buttons):
+            return state, None
+        ui = self._stable_msgbox_ui_state(state)
+        def texts(suffix):
+            return tuple(t.text.strip() for t in ui.texts if t.path == root + suffix
+                         and t.active_in_hierarchy and t.active_and_enabled and not t.truncated)
+        title = texts("single_item_panel/display_panel/name_container/name/Text")
+        if title != ("高效作战指令书",):
+            return state, None
+        description = texts("single_item_panel/display_panel/desc/Text")
+        inventory = texts("single_item_panel/left/own/Text")
+        quantity = texts("single_item_panel/left/IconTpl/icon_bg/count")
+        if (len(description) != 1 or not description[0].startswith("是否使用高效作战指令书")
+                or "石油消耗增加100%" not in description[0]
+                or quantity != ("1",) or len(inventory) != 1
+                or re.fullmatch(r"[0-9]+", inventory[0]) is None or int(inventory[0]) < 1):
+            raise SemanticGateClosed("campaign 2x-book confirmation terms are not proven")
+        name = "custom_button_1(Clone)" if confirm else "custom_button_2(Clone)"
+        path = root + "button_container/" + name
+        label = texts("button_container/" + name + "/pic")
+        if len(label) != 1 or "".join(label[0].split()) != ("确定" if confirm else "取消"):
+            raise SemanticGateClosed("campaign 2x-book confirmation label is ambiguous")
+        buttons = tuple(b for b in state.buttons if b.path == path and b.name == name)
+        if len(buttons) != 1 or not buttons[0].actionable:
+            raise SemanticGateClosed("campaign 2x-book confirmation is not actionable")
+        return state, buttons[0]
+
+    def campaign_2x_book_prompt_visible(self) -> bool:
+        return self._campaign_2x_book_prompt(True)[1] is not None
+
+    def _campaign_2x_book_warning(self):
+        state = self.read_state()
+        root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/"
+        if not any(b.path.startswith(root) for b in state.buttons):
+            return state, None
+        ui = self._stable_msgbox_ui_state(state)
+        content = [re.sub(r"<[^>]*>", "", t.text) for t in ui.texts
+                   if t.path == root + "msg_panel/content" and not t.truncated]
+        if len(content) != 1 or not all(s in content[0] for s in
+                ("已为您取消高效作战指令书", "自律寻敌模式", "再次手动选择使用")):
+            return state, None
+        path = root + "button_container/custom_button_1(Clone)"
+        buttons = tuple(b for b in state.buttons if b.path == path)
+        labels = ["".join(t.text.split()) for t in ui.texts if t.path == path + "/pic" and not t.truncated]
+        if len(buttons) != 1 or not buttons[0].actionable or labels != ["确定"]:
+            raise SemanticGateClosed("campaign 2x-book cancellation notice is ambiguous")
+        return state, buttons[0]
+
+    def campaign_2x_book_cancelled(self) -> bool:
+        return self._campaign_2x_book_warning()[1] is not None
+
+    def dismiss_campaign_2x_book_warning(self) -> ActionReceipt:
+        state, button = self._campaign_2x_book_warning()
+        semantic_id = "campaign/2x-book/warning-dismiss"
+        if button is None or self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("campaign 2x-book cancellation notice is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before book notice dismissal")
+        self._tap(int(round(button.point.x)), int(round(button.point.y)))
+        return ActionReceipt(semantic_id=semantic_id, generation=state.generation,
+                             point=button.point, bounds=button.bounds, path=button.path)
+
+    def click_campaign_2x_book_prompt(self, confirm: bool) -> ActionReceipt:
+        if type(confirm) is not bool:
+            raise SemanticGateClosed("campaign 2x-book confirmation choice must be bool")
+        state, button = self._campaign_2x_book_prompt(confirm)
+        semantic_id = "campaign/2x-book/" + ("confirm" if confirm else "cancel")
+        if button is None or self._blocking_rules(state, semantic_id):
+            raise SemanticGateClosed("campaign 2x-book confirmation is blocked")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before 2x-book confirmation")
+        self._tap(int(round(button.point.x)), int(round(button.point.y)))
+        return ActionReceipt(semantic_id=semantic_id, generation=state.generation,
+                             point=button.point, bounds=button.bounds, path=button.path)
+
+    def click_campaign_clear_mode(self, expected: bool) -> ActionReceipt:
+        if type(expected) is not bool:
+            raise SemanticGateClosed("campaign clear-mode expected state must be bool")
+        state, button, selected = self._campaign_clear_mode_control()
+        if button is None or selected is not expected:
+            raise SemanticGateClosed("campaign clear-mode state changed before input")
+        if not button.actionable or self._blocking_rules(state, "campaign/clear-mode"):
+            raise SemanticGateClosed("campaign clear-mode target is not actionable")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before clear-mode input")
+        self._tap(int(round(button.point.x)), int(round(button.point.y)))
+        return ActionReceipt(
+            semantic_id="campaign/clear-mode/" + ("on" if expected else "off"),
+            generation=state.generation, point=button.point,
+            bounds=button.bounds, path=button.path,
+        )
+
     def campaign_preparation_state(
         self, stage_code: str
     ) -> Optional[CampaignPreparationState]:
         """Return the one exact pre-sortie layer, or None before it appears."""
 
         button_state = self.read_state()
-        ui_state = self.read_ui_state()
+        ui_state = self.read_ui_state(check_foreground=False)
         map_roots, fleet_roots = self._campaign_preparation_roots(
             button_state, ui_state
         )
@@ -982,6 +1214,12 @@ class CampaignPreparationOracle:
         """Return the exact normal/hard state on a shared event-stage detail."""
 
         preparation = self.campaign_map_preparation_state(stage_code)
+        if (re.fullmatch(r"[1-9][0-9]*-[1-9][0-9]*", stage_code)
+                and "LevelStageInfoView(Clone)/panel/" in preparation.proceed_button.path):
+            # The chapter-page button names its destination, not the active
+            # difficulty. Normal stages have no event-detail mode switch.
+            destination = self.campaign_mode_switch_state()
+            return "normal" if destination == "hard" else "hard"
         if "LevelInfoSPUI(Clone)/panel/" not in preparation.proceed_button.path:
             raise SemanticGateClosed(
                 "campaign map-preparation mode switch is not on an event stage"
@@ -1230,7 +1468,7 @@ class CampaignPreparationOracle:
             raise ValueError("map preparation snapshots must be supplied together")
         if button_state is None:
             button_state = self.read_state()
-            ui_state = self.read_ui_state()
+            ui_state = self.read_ui_state(check_foreground=False)
         assert ui_state is not None
         map_roots, fleet_roots = self._campaign_preparation_roots(
             button_state, ui_state
@@ -1412,12 +1650,11 @@ class CampaignPreparationOracle:
     def _campaign_dock_full_targets(
         self, state: OracleState, stage_code: str
     ) -> Mapping[str, ButtonState]:
-        """Prove the event D3 dock-full modal without admitting gem expansion."""
+        """Prove the shared dock-full modal without admitting gem expansion.
 
-        if stage_code.lower() != "d3":
-            raise SemanticGateClosed(
-                "campaign dock-full recovery is reviewed only for event D3"
-            )
+        Dock capacity is account-wide; a historical D3 title underneath the
+        modal is not part of its identity, and is absent during map combat.
+        """
         msgbox_root = "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/"
         popup_root = msgbox_root + "window/"
         target_path = popup_root + "button_container/custom_button_1(Clone)"
@@ -1477,16 +1714,6 @@ class CampaignPreparationOracle:
             and text.bounds is not None
             and text.text.strip()
         )
-        stage_indexes = tuple(
-            text
-            for text in ui_state.texts
-            if text.path
-            == _CAMPAIGN_LIVE_MAP_UIORIGIN_PANEL_ROOT + "title_form/title_index"
-            and text.active_in_hierarchy
-            and text.active_and_enabled
-            and not text.truncated
-            and text.text.strip().lower() == "d3"
-        )
         labels = tuple(
             text
             for text in ui_state.texts
@@ -1499,14 +1726,15 @@ class CampaignPreparationOracle:
         )
         if (
             len(content) != 1
-            or len(stage_indexes) != 1
             or len(labels) != 3
         ):
             raise SemanticGateClosed(
                 "campaign dock-full identity is incomplete or ambiguous: "
-                f"content={len(content)}, stage={len(stage_indexes)}, "
+                f"content={len(content)}, "
                 f"labels={len(labels)}"
             )
+        if not content[0].text.strip().startswith("船坞已满") or "整理" not in content[0].text:
+            raise SemanticGateClosed("campaign dock-full message is not proven")
 
         normalized = {"".join(label.text.split()): label for label in labels}
         if set(normalized) != {"强化", "拓展", "整理"}:
@@ -1542,6 +1770,12 @@ class CampaignPreparationOracle:
             )
             for button in state.buttons
         ):
+            return False
+        ui = self._stable_msgbox_ui_state(state)
+        labels = {"".join(t.text.split()) for t in ui.texts
+                  if t.path.startswith("OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/")
+                  and t.path.endswith("/pic") and t.active_in_hierarchy and not t.truncated}
+        if not labels.intersection({"强化", "拓展", "整理"}):
             return False
         self._campaign_dock_full_targets(state, stage_code)
         return True

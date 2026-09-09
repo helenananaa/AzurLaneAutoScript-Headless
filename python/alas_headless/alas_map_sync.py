@@ -396,6 +396,12 @@ def synchronize_alas_campaign_map(
     try:
         projected_map = copy.deepcopy(source_map)
         campaign.map_data_init(projected_map)
+        # This is an observation refresh, not a new sortie. The original ALAS
+        # FSM owns progress; map_data_init must not rewind its counters.
+        for name in ('battle_count', 'mystery_count', 'carrier_count', 'siren_count'):
+            present, value = previous[name]
+            if present:
+                setattr(campaign, name, value)
 
         pickup_locations = {
             _node_to_location(
@@ -434,6 +440,11 @@ def synchronize_alas_campaign_map(
             ),
             (),
         )
+        if state.submarine is not None:
+            submarine_location = _node_to_location(state.submarine.node,
+                columns=state.columns, rows=state.rows)
+            campaign.map[submarine_location].is_submarine = True
+            campaign.fleet_submarine_location = submarine_location
         for enemy in state.enemies:
             location = _node_to_location(
                 enemy.node, columns=state.columns, rows=state.rows
@@ -461,7 +472,10 @@ def synchronize_alas_campaign_map(
                     and not getattr(grid, "may_enemy", False)
                 ):
                     grid.is_movable = True
-        campaign.siren_count = sum(enemy.is_siren for enemy in state.enemies)
+        # ALAS increments this after defeating a siren and subtracts it from
+        # spawn counts; visible living sirens are not completed battles.
+        if not hasattr(campaign, 'siren_count'):
+            campaign.siren_count = 0
         for pickup in state.pickups:
             location = _node_to_location(
                 pickup.node, columns=state.columns, rows=state.rows

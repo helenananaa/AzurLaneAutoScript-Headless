@@ -1,0 +1,23 @@
+diff --git a/module/map/camera.py b/module/map/camera.py
+index d2c4fe2..bde3ae6 100644
+--- a/module/map/camera.py
++++ b/module/map/camera.py
+@@ -56,7 +56,17 @@ class Camera(MapOperation):
+ 
+             vector = distance * vector
+             vector = -vector
+-            self.device.swipe_vector(vector, name=name, box=box, whitelist_area=whitelist, blacklist_area=blacklist)
++            from alas_headless.oracle.errors import SemanticViewportReanchorRequired
++            try:
++                self.device.swipe_vector(vector, name=name, box=box, whitelist_area=whitelist, blacklist_area=blacklist)
++            except SemanticViewportReanchorRequired:
++                # No input: the sampled path or game-driven camera motion
++                # requires a fresh calculation by the original caller.
++                self._prev_view = None
++                self._prev_swipe = None
++                self.update()
++                logger.info('Semantic camera reanchored without input')
++                return False
+             # Donno why initial commit have a sleep here
+             # self.device.sleep(0.3)
+             self.update(wait_swipe=True)

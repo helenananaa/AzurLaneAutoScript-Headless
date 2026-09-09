@@ -37,10 +37,11 @@ class AlasCampaignDecisionPreview:
     goto_nodes: Tuple[str, ...]
     step_optimize: bool
     turning_optimize: bool
+    submarine_destination_node: str | None = None
 
     @property
     def signature(self) -> Tuple[Any, ...]:
-        return (
+        base = (
             self.generation,
             self.stage_code,
             self.battle_count,
@@ -58,6 +59,7 @@ class AlasCampaignDecisionPreview:
             self.step_optimize,
             self.turning_optimize,
         )
+        return base if self.submarine_destination_node is None else (*base, ('submarine_destination', self.submarine_destination_node))
 
 
 class _DecisionCaptured(Exception):
@@ -311,6 +313,7 @@ def preview_alas_campaign_decision(
         setattr(sandbox, name, MethodType(_blocked_method(name), sandbox))
 
     projected_map = copy.deepcopy(campaign.map)
+    submarine_destination = None
     with _DECISION_LOCK, _native_map_overlay(campaign.MAP, projected_map) as native_map:
         sandbox.map = native_map
         try:
@@ -401,6 +404,7 @@ def preview_alas_campaign_decision(
                     goto_nodes=goto_nodes,
                     step_optimize=use_step,
                     turning_optimize=use_turning,
+                    submarine_destination_node=submarine_destination,
                 )
             )
 
@@ -429,6 +433,26 @@ def preview_alas_campaign_decision(
             self.find_path_initial()
             return True
 
+        def preview_submarine_goto(self: Any, location: Any) -> bool:
+            nonlocal submarine_destination
+            location = _location_tuple(location)
+            if not getattr(self, 'fleet_submarine_location', ()):
+                raise SemanticGateClosed('ALAS submarine movement has no observed submarine')
+            grids = _grid_index(native_map)
+            if location not in grids or grids[location].is_land:
+                raise SemanticGateClosed('ALAS submarine destination is outside navigable topology')
+            if tuple(self.fleet_submarine_location) == location:
+                return False
+            destination = _location_to_node(location)
+            if submarine_destination is not None and submarine_destination != destination:
+                raise SemanticGateClosed('ALAS branch requested multiple submarine destinations before combat')
+            submarine_destination = destination
+            for grid in native_map:
+                grid.is_submarine = grid.location == location
+            self.fleet_submarine_location = location
+            return True
+
+        sandbox.submarine_goto = MethodType(preview_submarine_goto, sandbox)
         sandbox.goto = capture_goto
         sandbox._goto = capture_goto
         sandbox.fleet_ensure = MethodType(preview_fleet_ensure, sandbox)

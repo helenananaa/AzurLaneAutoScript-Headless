@@ -81,6 +81,7 @@ def verify_fleet_config(alas_root: Path) -> Mapping[str, object]:
         "fleet": alas_root / "module/map/fleet.py",
         "combat_auto": alas_root / "module/combat/combat_auto.py",
         "combat_manual": alas_root / "module/combat/combat_manual.py",
+        "strategy": alas_root / "module/handler/strategy.py",
     }
     for path in paths.values():
         if not path.is_file():
@@ -137,8 +138,7 @@ def verify_fleet_config(alas_root: Path) -> Mapping[str, object]:
         for value in FLEET_FORMATIONS:
             check(
                 f"{side}-formation-{value}",
-                classify(f"{side}_formation", value)
-                is (value == "double_line"),
+                classify(f"{side}_formation", value),
             )
         for value in FLEET_MODES:
             check(
@@ -150,14 +150,7 @@ def verify_fleet_config(alas_root: Path) -> Mapping[str, object]:
     for value in FLEET_ORDERS:
         check(
             f"fleet-order-{value}",
-            classify("fleet_order", value)
-            is (
-                value
-                in (
-                    "fleet1_mob_fleet2_boss",
-                    "fleet1_standby_fleet2_all",
-                )
-            ),
+            classify("fleet_order", value),
         )
     for field, value in (
         ("fleet1", 0),
@@ -216,18 +209,50 @@ def verify_fleet_config(alas_root: Path) -> Mapping[str, object]:
         )
         for field in ("Fleet_Fleet1Formation", "Fleet_Fleet2Formation")
     }
-    check(
-        "formation1-is-runtime-noop",
-        not formation_reads["Fleet_Fleet1Formation"],
-    )
-    check(
-        "formation2-is-runtime-noop",
-        not formation_reads["Fleet_Fleet2Formation"],
-    )
+    # Attribute-only scans miss the formatted __getattribute__ in the
+    # original handler. Execute that consumer to prove both slot mappings.
+    strategy = _method(paths["strategy"], "StrategyHandler", "handle_strategy")
+    strategy.__globals__["logger"] = SimpleNamespace(info=lambda *args: None)
+    for index in (1, 2):
+        for formation in FLEET_FORMATIONS:
+            calls = []
+            host = SimpleNamespace(
+                config=SimpleNamespace(Fleet_Fleet1Formation=formation,
+                                       Fleet_Fleet2Formation=formation, Submarine_Fleet=0),
+                fleet_1_formation_fixed=False, fleet_2_formation_fixed=False,
+                _strategy_get_from_map_buff=lambda: "other",
+                strategy_open=lambda: calls.append("open"),
+                strategy_set_execute=lambda **kw: calls.append(kw["formation"]),
+                strategy_close=lambda: calls.append("close"),
+            )
+            check(f"formation-dynamic-consumer-{index}-{formation}",
+                  MethodType(strategy, host)(index) is True
+                  and calls == ["open", formation, "close"]
+                  and getattr(host, f"fleet_{index}_formation_fixed") is True)
     check(
         "formation-gate-read-is-bounded",
         all(value in (0, 1) for value in formation_gate_reads.values()),
     )
+    # Both slots share one handler instance in a real campaign. A proof made
+    # with a new instance per slot misses leakage of the fixed-formation flag.
+    for first, second in (("line_ahead", "double_line"), ("diamond", "line_ahead")):
+        calls = []
+        host = SimpleNamespace(
+            config=SimpleNamespace(Fleet_Fleet1Formation=first,
+                                   Fleet_Fleet2Formation=second, Submarine_Fleet=0),
+            fleet_1_formation_fixed=False, fleet_2_formation_fixed=False,
+            _strategy_get_from_map_buff=lambda: "other",
+            strategy_open=lambda: None,
+            strategy_set_execute=lambda **kw: calls.append(kw["formation"]),
+            strategy_close=lambda: None,
+        )
+        execute = MethodType(strategy, host)
+        execute(1)
+        execute(2)
+        execute(1)
+        execute(2)
+        check(f"formation-two-slots-{first}-{second}", calls == [first, second]
+              and host.fleet_1_formation_fixed and host.fleet_2_formation_fixed)
 
     auto_source = paths["combat_auto"].read_text(encoding="utf-8")
     manual_source = paths["combat_manual"].read_text(encoding="utf-8")

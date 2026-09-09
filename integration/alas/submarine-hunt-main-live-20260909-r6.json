@@ -1,0 +1,232 @@
+{
+  "schema": "alas-headless.main-task-live-validation/v1",
+  "passed": false,
+  "started_at": "2026-09-09T04:35:08.446026Z",
+  "finished_at": "2026-09-09T04:42:52.347394Z",
+  "task": "Main",
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "run_count_requested": 1,
+  "execution_status": "incomplete",
+  "error": "SystemExit: 1",
+  "preparations": [],
+  "completed_sorties": [],
+  "auto_menu_observations": [],
+  "continuation_receipts": [],
+  "submarine_observations": [],
+  "submarine_calls": [
+    {
+      "semantic_id": "campaign/combat/submarine/call",
+      "generation": 142741,
+      "point": {
+        "x": 742.4,
+        "y": 622.8
+      },
+      "bounds": {
+        "left": 709.067,
+        "top": 589.467,
+        "right": 775.733,
+        "bottom": 656.133
+      },
+      "path": "UICamera/Canvas/UIMain/CombatUIStandard(Clone)/Weapon_button_container/Weapon_button(Clone)/ActCtl",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "combat_admissions": [
+    {
+      "generation": 138618,
+      "battle_count": 6,
+      "target": "H6",
+      "expected": "combat_boss",
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "E4",
+        "ammo": 3,
+        "ammo_capacity": 6
+      },
+      "hunting_nodes": [
+        "B3",
+        "B4",
+        "D2",
+        "E1",
+        "E2",
+        "E3",
+        "E4",
+        "F3",
+        "F4",
+        "G2",
+        "G3",
+        "G4",
+        "H5"
+      ],
+      "submarine_destination": "G5"
+    }
+  ],
+  "submarine_moves": [
+    {
+      "entry": {
+        "semantic_id": "campaign/map/strategy/submarine/move",
+        "generation": 139652,
+        "point": {
+          "x": 1138.667,
+          "y": 492.667
+        },
+        "bounds": {
+          "left": 1096.0,
+          "top": 450.0,
+          "right": 1181.333,
+          "bottom": 535.333
+        },
+        "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "destination": {
+        "semantic_id": "campaign/map/submarine/destination/G5",
+        "generation": 139776,
+        "point": {
+          "x": 1054.863,
+          "y": 455.344
+        },
+        "bounds": {
+          "left": 982.351,
+          "top": 408.419,
+          "right": 1130.705,
+          "bottom": 504.425
+        },
+        "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/quads/chapter_cell_quad_6_7",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "confirm": {
+        "semantic_id": "campaign/map/submarine/deployment/confirm",
+        "generation": 139830,
+        "point": {
+          "x": 1161.233,
+          "y": 662.667
+        },
+        "bounds": {
+          "left": 1070.233,
+          "top": 629.0,
+          "right": 1252.233,
+          "bottom": 696.333
+        },
+        "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Action/MissileStrike/confirm_button",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "post_generation": 139969,
+      "oil_confirmation": {
+        "semantic_id": "campaign/map/submarine/oil/confirm",
+        "generation": 139933,
+        "point": {
+          "x": 790.0,
+          "y": 515.0
+        },
+        "bounds": {
+          "left": 699.0,
+          "top": 481.333,
+          "right": 881.0,
+          "bottom": 548.667
+        },
+        "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+        "policy_sha256": null,
+        "capability_id": null
+      },
+      "submarine": {
+        "marker": "cell_fleet_dafenqi",
+        "node": "G5",
+        "ammo": 3,
+        "ammo_capacity": 6
+      }
+    }
+  ],
+  "submarine_strategy": [
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 138178,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 138445,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 139153,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 139461,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/strategy/submarine/view",
+      "generation": 140023,
+      "point": {
+        "x": 1230.667,
+        "y": 398.0
+      },
+      "bounds": {
+        "left": 1188.0,
+        "top": 355.333,
+        "right": 1273.333,
+        "bottom": 440.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ]
+}

@@ -82,6 +82,14 @@ def make_single_row_state(*, generation=10, dx=0.0):
 
 
 class AlasCampaignCameraViewTests(unittest.TestCase):
+    def test_submarine_is_projected_without_becoming_a_surface_fleet(self):
+        state = replace(make_state(), submarine=CampaignMapFleetState('cell_fleet_sub', 'C3', 6, 6))
+        view = build_alas_campaign_camera_view(state, screen_center=(350., 300.), target_node='C3')
+        grid = view[(2, 2)]
+        self.assertTrue(grid.is_submarine)
+        self.assertTrue(grid.predict_submarine())
+        self.assertEqual(grid.is_fleet, any(f.node == 'C3' for f in state.fleets))
+
     def test_builds_single_row_camera_from_typed_centers_and_bounds(self):
         view = build_alas_campaign_camera_view(
             make_single_row_state(),
@@ -289,6 +297,22 @@ class AlasCampaignCameraViewTests(unittest.TestCase):
             screen_center=(350.0, 300.0),
         )
         self.assertEqual(before.predict_swipe(edge_after), (0, 0))
+
+    def test_predict_swipe_allows_submarine_ammo_not_identity_change(self):
+        sub = CampaignMapFleetState('submarine','C3',6,6)
+        before = build_alas_campaign_camera_view(replace(make_state(generation=10),submarine=sub),screen_center=(350.,300.))
+        after_state = replace(make_state(generation=12,dx=-100.),submarine=replace(sub,ammo=5))
+        after = build_alas_campaign_camera_view(after_state,screen_center=(350.,300.))
+        self.assertEqual(before.predict_swipe(after),(1,0))
+        hidden = replace(sub, node='D3', ammo=None, ammo_capacity=None)
+        hidden_view = build_alas_campaign_camera_view(replace(after_state,submarine=hidden),screen_center=(350.,300.))
+        self.assertEqual(before.predict_swipe(hidden_view),(1,0))
+        hidden_before = build_alas_campaign_camera_view(replace(make_state(generation=10),submarine=hidden),screen_center=(350.,300.))
+        self.assertEqual(hidden_before.predict_swipe(hidden_view),(1,0))
+        for changed in (replace(sub,marker='another'),replace(sub,node='D3'),replace(sub,ammo=7,ammo_capacity=7)):
+            invalid = build_alas_campaign_camera_view(replace(after_state,submarine=changed),screen_center=(350.,300.))
+            with self.assertRaisesRegex(SemanticGateClosed,'changed map'):
+                before.predict_swipe(invalid)
 
     def test_rejects_incoherent_projection_and_unqualified_edge(self):
         with self.assertRaisesRegex(SemanticGateClosed, "incoherent"):

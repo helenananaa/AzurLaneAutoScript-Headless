@@ -1,0 +1,68 @@
+{
+  "schema": "alas-headless.submarine-map-probe/v1",
+  "passed": false,
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "combat_budget": 0,
+  "oil_before": 8716,
+  "sortie": {
+    "stage_code": "10-2",
+    "initial_fleets": [
+      2,
+      1,
+      1
+    ],
+    "requested_fleets": [
+      2,
+      1,
+      1
+    ],
+    "prepared_fleets": [
+      2,
+      1,
+      1
+    ],
+    "mutation_semantic_ids": [],
+    "oil_before_sortie": 8716,
+    "required_oil": 91,
+    "sortie_generation": 18870,
+    "map_generation": 18999,
+    "map_root_path": "LevelCamera/Canvas/UIMain/LevelGrid",
+    "oil_cost_source": "observed-fleet-summary",
+    "submarine_auto_mode": null
+  },
+  "move_requested": {
+    "origin": "E3",
+    "destination": "E2"
+  },
+  "error": "AlasSemanticUnmapped: ALAS resource has no stable name",
+  "fingerprint": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 19236
+  },
+  "deployment_cancel_receipt": {
+    "semantic_id": "campaign/map/deployment/cancel",
+    "generation": 19164,
+    "point": {
+      "x": 947.9,
+      "y": 662.667
+    },
+    "bounds": {
+      "left": 856.9,
+      "top": 629.0,
+      "right": 1038.9,
+      "bottom": 696.333
+    },
+    "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Action/MissileStrike/cancel_button",
+    "policy_sha256": null,
+    "capability_id": null
+  },
+  "stage_after": true,
+  "oil_after": 8706
+}

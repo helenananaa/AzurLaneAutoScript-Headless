@@ -128,12 +128,19 @@ class SessionTasksPorts:
 
         adapter = self.open()
         oracle = adapter.oracle
-        return bool(
-            adapter.campaign_combat_committed()
+        returned = bool(
+            adapter._campaign_context is not None
+            and adapter._campaign_context.combat_receipt is not None
             and not oracle.daily_battle_result_visible()
             and not oracle.operation_siren_battle_result_visible()
             and oracle.campaign_page_is_normal()
         )
+        if returned:
+            # This is the same typed result that the original CampaignBase
+            # uses to raise CampaignEnd. Retain it for its next outer run;
+            # do not infer completion from an arbitrary map disappearance.
+            adapter._campaign_context.manual_completion_proven = True
+        return returned
 
     def close_campaign_battle_fail_tip_if_present(self) -> bool:
         self.refresh_frame()
@@ -684,6 +691,22 @@ class SessionTasksPorts:
     def handle_campaign_ambush(self, *, evade: bool) -> bool:
         return self.open().handle_campaign_ambush(evade=evade)
 
+    def campaign_ambush_present(self) -> bool:
+        return self.open().campaign_ambush_present()
+
+    def campaign_ambush_outcome(self) -> Optional[str]:
+        return self.open().campaign_ambush_outcome()
+
+    def finish_campaign_ambush(self) -> None:
+        self.open().finish_campaign_ambush()
+
+    def campaign_ambush_info_count(self) -> int:
+        adapter = self.open()
+        if adapter._campaign_context is None:
+            return 0
+        notice = adapter._frame_or_live_observation_oracle().campaign_ambush_notice()
+        return int(notice in ("success", "failed"))
+
     def campaign_stage_entry_allowed(self) -> bool:
         return self.open().campaign_stage_entry_allowed()
 
@@ -764,11 +787,31 @@ class SessionTasksPorts:
         return self.open().confirm_campaign_auto_search_started()
 
     def wait_campaign_auto_search_completion(
-        self, stage_code: str, timeout_seconds: float = 1800.0
+        self, stage_code: str, timeout_seconds: float = 1800.0,
+        *, keep_result: bool = False, recovery_handler=None, submarine_handler=None,
     ) -> CampaignAutoSearchCompletionProof:
         return self.open().wait_campaign_auto_search_completion(
-            stage_code, timeout_seconds=timeout_seconds
+            stage_code, timeout_seconds=timeout_seconds, keep_result=keep_result,
+            recovery_handler=recovery_handler, submarine_handler=submarine_handler,
         )
+
+    def campaign_submarine_call_battle(self):
+        adapter = self.open()
+        if adapter._campaign_context is None:
+            return False  # Not a Campaign task; leave its original handler untouched.
+        return adapter.campaign_submarine_call_battle()
+
+    def campaign_submarine_grid(self, location):
+        return self.open().campaign_submarine_grid(location)
+
+    def authorize_campaign_auto_search_continue(self, **values) -> bool:
+        return self.open().authorize_campaign_auto_search_continue(**values)
+
+    def ensure_campaign_submarine_auto_mode(self, desired: str) -> str:
+        return self.open().ensure_campaign_submarine_auto_mode(desired)
+
+    def campaign_retirement_visible(self) -> bool:
+        return self.open().oracle.retirement_selection_visible()
 
     def last_campaign_auto_search_completion(
         self,
@@ -813,6 +856,15 @@ class SessionTasksPorts:
             submarine_mode=submarine_mode,
             fleet_order=fleet_order,
         )
+
+    def campaign_clear_mode_available(self) -> bool:
+        return self.open().campaign_clear_mode_available()
+
+    def campaign_2x_book_selected(self) -> bool:
+        return self.open().campaign_2x_book_selected()
+
+    def handle_campaign_2x_book_popup(self) -> bool:
+        return self.open().handle_campaign_2x_book_popup()
 
     def campaign_sortie_committed(self) -> bool:
         return self.open().campaign_sortie_committed()
@@ -1347,6 +1399,9 @@ class SessionTasksPorts:
         self, stage_code: str, mode: str = "normal"
     ) -> None:
         self.open().begin_campaign_pre_sortie(stage_code, mode=mode)
+
+    def prepare_campaign_run(self) -> None:
+        self.open().prepare_campaign_run()
 
     def campaign_pre_sortie_stage_code(self) -> str:
         return self.open().campaign_pre_sortie_stage_code()

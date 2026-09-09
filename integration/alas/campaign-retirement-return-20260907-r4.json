@@ -1,0 +1,27 @@
+{
+  "schema": "alas-headless.authorized-retirement-live/v1",
+  "passed": true,
+  "serial": "emulator-5580",
+  "observer_apk_sha256": "dad26171386fae7daa99bc8e02c33264045df5f5e29bb830df06273108655511",
+  "transaction_budget": 0,
+  "premium_spending_authorized": false,
+  "before": {
+    "generation": 8960,
+    "capacity_used": 833,
+    "capacity_total": 930,
+    "selected_count": 0
+  },
+  "fingerprint": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 9181
+  },
+  "quit_only": true,
+  "returned_to_main": false,
+  "returned_to_build": true
+}

@@ -1,0 +1,40 @@
+{
+  "schema": "alas-headless.campaign-settlement-recovery/v1",
+  "passed": false,
+  "claimed_completed_sorties": 0,
+  "serial": "emulator-5580",
+  "kind": "urgent-notice",
+  "fingerprint": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 17018
+  },
+  "notice_before": true,
+  "handled": true,
+  "notice_after": false,
+  "map_after": false,
+  "receipts": [
+    {
+      "semantic_id": "campaign/urgent-notice/confirm",
+      "generation": 110444,
+      "point": {
+        "x": 640.0,
+        "y": 515.0
+      },
+      "bounds": {
+        "left": 549.0,
+        "top": 481.333,
+        "right": 731.0,
+        "bottom": 548.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ]
+}

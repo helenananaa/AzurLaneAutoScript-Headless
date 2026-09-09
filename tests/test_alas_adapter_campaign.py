@@ -200,13 +200,16 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         oracle.daily_battle_result_visible = Mock(return_value=False)
         oracle.operation_siren_battle_result_visible = Mock(return_value=False)
         oracle.campaign_page_value = True
-        adapter.campaign_combat_committed = Mock(return_value=True)
+        adapter.begin_campaign_pre_sortie("12-4")
+        adapter._campaign_context.combat_receipt = oracle.click_receipt("campaign/grid")
 
         self.assertTrue(session.campaign_boss_returned_to_stage())
         oracle.daily_battle_result_visible.return_value = True
         self.assertFalse(session.campaign_boss_returned_to_stage())
         oracle.daily_battle_result_visible.return_value = False
-        adapter.campaign_combat_committed.return_value = False
+        adapter._campaign_context.combat_receipt = None
+        adapter._campaign_context.ambush_receipt = oracle.click_receipt("campaign/ambush/fight")
+        self.assertTrue(adapter.campaign_combat_committed())
         self.assertFalse(session.campaign_boss_returned_to_stage())
 
     def test_orphan_campaign_result_accepts_reviewed_map_return(self):

@@ -1,0 +1,34 @@
+{
+  "schema": "alas-headless.submarine-preparation-probe/v1",
+  "stage": "10-2",
+  "serial": "emulator-5580",
+  "submarine_fleet": 2,
+  "sortie_budget": 0,
+  "combat_budget": 0,
+  "passed": false,
+  "stop": "AlasSemanticUnmapped: ALAS mail resource used outside mail flow: GOTO_MAIN_WHITE",
+  "fingerprint": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 17018
+  },
+  "state": {
+    "generation": 9732,
+    "buttons": []
+  },
+  "ui": {
+    "generation": 9733,
+    "texts": [],
+    "images": [],
+    "toggles": []
+  },
+  "observation_error": "SemanticGateClosed: campaign fleet-preparation root is absent or ambiguous",
+  "sortie_sent": false,
+  "role_actions": [],
+  "stage_page_after": false
+}

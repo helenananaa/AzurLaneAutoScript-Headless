@@ -19,6 +19,9 @@ class ActionsOracle:
             if delegated_new_ship_reward
             else self.read_state()
         )
+        if (semantic_id == "campaign/urgent-notice/confirm"
+                and not self._campaign_urgent_notice_matches(state)):
+            raise SemanticGateClosed("campaign urgent notice identity is not proven")
         delegated_login_update = (
             semantic_id == "login/update/download"
             and self._login_update_download_prompt_matches(state)

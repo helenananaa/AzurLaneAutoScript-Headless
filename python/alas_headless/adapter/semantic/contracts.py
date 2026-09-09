@@ -118,6 +118,8 @@ class CampaignSortieProof:
     map_generation: int
     map_root_path: str
     oil_cost_source: str = "observed-fleet-summary"
+    submarine_auto_mode: Optional[str] = None
+
 
 
 @dataclass
@@ -301,7 +303,7 @@ class CampaignAutoSearchCompletionProof:
     fleet2_role: str
     waited_seconds: float
     combat_auto_generation: int
-    result_exit_receipt: ActionReceipt
+    result_exit_receipt: Optional[ActionReceipt]
     combat_auto_proven: bool = True
     passive_after_sortie: bool = True
 
@@ -351,6 +353,27 @@ class _CampaignFlowContext:
     fleet_proof: Optional[CampaignFleetPreparationProof] = None
     oil_before_sortie: Optional[int] = None
     sortie_authorized: bool = False
+    sortie_budget_before: Optional[int] = None
+    use_2x_book: bool = False
+    book_confirmation_receipt: Optional[ActionReceipt] = None
+    book_toggle_from: Optional[Tuple[str, bool]] = None
+    continuation_authorized: bool = False
+    submarine_auto_mode: Optional[str] = None
+    submarine_mode: str = 'do_not_use'
+    declared_submarine_fleet: int = 0
+    submarine_strategy_pending: Dict[str, bool] = field(default_factory=dict)
+    submarine_strategy_receipts: List[ActionReceipt] = field(default_factory=list)
+    submarine_call_receipts: Dict[int, ActionReceipt] = field(default_factory=dict)
+    submarine_move_entry: Optional[ActionReceipt] = None
+    submarine_move_destination: Optional[ActionReceipt] = None
+    submarine_move_confirm: Optional[ActionReceipt] = None
+    submarine_move_oil: Optional[ActionReceipt] = None
+    submarine_move_history: List[dict] = field(default_factory=list)
+    submarine_viewport_proofs: List[CampaignMapViewportSwipeProof] = field(default_factory=list)
+    manual_result_exit_receipt: Optional[ActionReceipt] = None
+    submarine_planned_destination: Optional[str] = None
+    ambush_receipt: Optional[ActionReceipt] = None
+    fleet_lock_receipt: Optional[ActionReceipt] = None
     sortie_receipt: Optional[ActionReceipt] = None
     archive_entry_confirm_receipt: Optional[ActionReceipt] = None
     map_entry_state: Optional[CampaignMapEntryState] = None
@@ -383,6 +406,7 @@ class _CampaignFlowContext:
     combat_input_retry_count: int = 0
     combat_proof: Optional[AlasCampaignCombatProof] = None
     auto_search_completion: Optional[CampaignAutoSearchCompletionProof] = None
+    manual_completion_proven: bool = False
     passive_transition_until: float = 0.0
 
 

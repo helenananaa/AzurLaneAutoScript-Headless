@@ -17,6 +17,10 @@ class SemanticTargetMissing(SemanticGateClosed):
     """A mapped semantic target is not present in the current valid snapshot."""
 
 
+class SemanticViewportReanchorRequired(SemanticGateClosed):
+    """No input was sent: ALAS must refresh its View and recompute the gesture."""
+
+
 class ObserverTransportError(SemanticOracleError):
     """The local observer transport failed or returned malformed data."""
 

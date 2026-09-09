@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from typing import Optional, Tuple
 from .contracts import (
     ActionReceipt,
@@ -15,8 +16,77 @@ from .contracts import (
 from .errors import SemanticGateClosed
 
 
+@dataclass(frozen=True)
+class SubmarineCallState:
+    """Observed weapon control, not evidence that a submarine was deployed."""
+
+    generation: int
+    battle_instance_id: int
+    button: Optional[ButtonState]
+
+
 class CombatOracle:
     """Combat operations sharing the oracle frame and input boundary."""
+
+    def campaign_submarine_call_state(self) -> Optional[SubmarineCallState]:
+        state = self.read_state()
+        root = 'UICamera/Canvas/UIMain/CombatUIStandard(Clone)'
+        pauses = [b for b in state.buttons if b.path == root + '/PauseBtn'
+                  and b.active_in_hierarchy and b.active_and_enabled]
+        if not pauses:
+            return None
+        if self._daily_battle_result_buttons(state) or self._blocking_rules(state, 'campaign/combat/submarine/call'):
+            return None
+        if len(pauses) != 1:
+            raise SemanticGateClosed('submarine combat identity is ambiguous')
+        identity = pauses[0].raw.get('instance_id')
+        if type(identity) is not int or identity == 0:
+            raise SemanticGateClosed('submarine combat identity is unavailable')
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2 or ui.image_truncated:
+            raise SemanticGateClosed('submarine combat frame is incomplete')
+        path = root + '/Weapon_button_container/Weapon_button(Clone)/ActCtl'
+        icons = [i for i in ui.images if i.path == path + '/skill_icon/filled'
+                 and i.sprite == 'filled_combined_submarine'
+                 and i.active_in_hierarchy and i.active_and_enabled]
+        if not icons:
+            return SubmarineCallState(ui.generation, identity, None)
+        if len(icons) != 1 or icons[0].truncated or icons[0].bounds is None:
+            raise SemanticGateClosed('submarine weapon icon is ambiguous or incomplete')
+        bounds = icons[0].bounds
+        centre = Point((bounds.left + bounds.right) / 2, (bounds.top + bounds.bottom) / 2)
+        buttons = [b for b in state.buttons if b.path == path
+                   and b.active_in_hierarchy and b.active_and_enabled
+                   and b.bounds is not None and b.bounds.contains(centre)]
+        backgrounds = [i for i in ui.images if i.path == path + '/unselect'
+                       and i.sprite == 'sub_unselecte' and i.active_in_hierarchy
+                       and i.active_and_enabled and not i.truncated
+                       and i.bounds is not None and i.bounds.contains(centre)]
+        if len(buttons) != 1 or len(backgrounds) != 1:
+            raise SemanticGateClosed('submarine weapon binding is ambiguous or incomplete')
+        return SubmarineCallState(ui.generation, identity, buttons[0])
+
+    def click_campaign_submarine_call(self, expected_battle_instance_id: int) -> ActionReceipt:
+        observed = self.campaign_submarine_call_state()
+        if (observed is None or type(expected_battle_instance_id) is not int
+                or observed.battle_instance_id != expected_battle_instance_id):
+            raise SemanticGateClosed('submarine battle changed before input')
+        target = observed.button
+        if target is None or not target.actionable:
+            raise SemanticGateClosed('submarine call is not actionable')
+        state = self.read_state()
+        semantic_id = 'campaign/combat/submarine/call'
+        pauses = [b for b in state.buttons if b.path == 'UICamera/Canvas/UIMain/CombatUIStandard(Clone)/PauseBtn'
+                  and b.active_in_hierarchy and b.active_and_enabled]
+        if len(pauses) != 1 or pauses[0].raw.get('instance_id') != expected_battle_instance_id:
+            raise SemanticGateClosed('submarine battle changed before input')
+        if state.generation - observed.generation not in (0, 1, 2):
+            raise SemanticGateClosed('submarine call frame changed before input')
+        if self._blocking_rules(state, semantic_id) or self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('submarine call is blocked')
+        self._tap(int(round(target.point.x)), int(round(target.point.y)))
+        return ActionReceipt(semantic_id=semantic_id, generation=observed.generation,
+                             point=target.point, bounds=target.bounds, path=target.path)
 
     def daily_page_visible(self) -> bool:
         state = self.read_state()
@@ -169,14 +239,20 @@ class CombatOracle:
         # Operation Siren's result grade page is an EventTrigger surface, not
         # a Unity Button.  Prove that exact typed stack instead of allowing the
         # still-mounted CombatUI underneath to win the surface classification.
-        ui_state = self.read_ui_state()
+        ui_state = self.read_ui_state(check_foreground=False)
+        # This is a passive probe used even on Campaign preparation. A fresh
+        # UI without the result identity proves absence by itself; only a
+        # positive result needs to combine that UI with state blocker proof.
+        result = self._operation_siren_battle_result_continue(ui_state)
+        if result is None:
+            return False
         if (
             ui_state.generation < state.generation
             or ui_state.generation > state.generation + 2
         ):
             raise SemanticGateClosed("battle result snapshots are not coherent")
         return bool(
-            self._operation_siren_battle_result_continue(ui_state) is not None
+            result is not None
             and not self._blocking_rules(
                 state, "operation-siren/battle/result"
             )

@@ -16,6 +16,9 @@ from types import SimpleNamespace
 
 
 class FakeCampaignOracle:
+    def campaign_2x_book_selected(self, mode=None):
+        return getattr(self, "campaign_2x_book_value", False)
+
     def campaign_auto_search_selected(self):
         return self.toggle_selected_values.get(
             "campaign/map-preparation/auto-search", False

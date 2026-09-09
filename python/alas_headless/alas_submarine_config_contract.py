@@ -45,7 +45,7 @@ def validate_alas_submarine_config(
     auto_search_mode: object,
     distance_to_boss: object,
 ) -> AlasSubmarineConfigSnapshot:
-    """Classify every value, then refuse active legacy submarine input."""
+    """Classify configuration; capability-specific ports own execution admission."""
 
     if isinstance(fleet, bool) or not isinstance(fleet, int) or fleet not in SUBMARINE_FLEETS:
         raise SemanticGateClosed("Submarine.Fleet must be 0, 1, or 2")
@@ -63,9 +63,4 @@ def validate_alas_submarine_config(
             SUBMARINE_BOSS_DISTANCES,
         ),
     )
-    if snapshot.fleet:
-        raise SemanticGateClosed(
-            "active submarine fleet requires unqualified fleet selection, "
-            "strategy, movement, or combat-call input"
-        )
     return snapshot

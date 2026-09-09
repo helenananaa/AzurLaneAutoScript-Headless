@@ -1,0 +1,435 @@
+{
+  "schema": "alas-headless.campaign-preparation-observation/v1",
+  "serial": "emulator-5580",
+  "pid": 13240,
+  "generation": 10512,
+  "ui_generation": 10514,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "input_injected": false,
+  "buttons": [
+    {
+      "name": "item",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/item",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": null,
+      "point": {
+        "x": 498.91,
+        "y": 583.392
+      },
+      "bounds": {
+        "left": 498.91,
+        "top": 549.725,
+        "right": 564.91,
+        "bottom": 617.058
+      },
+      "raw": {
+        "name": "item",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/item",
+        "canvas": "Overlay",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "world_position": {
+          "x": -3.135,
+          "y": -4.964,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -0.0,
+          "y": -50.5,
+          "width": 99.0,
+          "height": 101.0
+        },
+        "screen_point": {
+          "x": 498.91,
+          "y": 136.608
+        },
+        "adb_point": {
+          "x": 498.91,
+          "y": 583.392
+        },
+        "screen_bounds": {
+          "left": 498.91,
+          "bottom": 102.942,
+          "right": 564.91,
+          "top": 170.275
+        },
+        "adb_bounds": {
+          "left": 498.91,
+          "top": 549.725,
+          "right": 564.91,
+          "bottom": 617.058
+        }
+      }
+    },
+    {
+      "name": "sp",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": true,
+      "point": {
+        "x": 618.277,
+        "y": 583.392
+      },
+      "bounds": {
+        "left": 496.91,
+        "top": 548.317,
+        "right": 739.643,
+        "bottom": 618.467
+      },
+      "raw": {
+        "name": "sp",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp",
+        "canvas": "Overlay",
+        "flags": 7679,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": true,
+        "canvas_render_mode": 1,
+        "world_position": {
+          "x": -3.18,
+          "y": -5.744,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -0.0,
+          "y": -0.0,
+          "width": 364.1,
+          "height": 105.225
+        },
+        "screen_point": {
+          "x": 618.277,
+          "y": 136.608
+        },
+        "adb_point": {
+          "x": 618.277,
+          "y": 583.392
+        },
+        "screen_bounds": {
+          "left": 496.91,
+          "bottom": 101.533,
+          "right": 739.643,
+          "top": 171.683
+        },
+        "adb_bounds": {
+          "left": 496.91,
+          "top": 548.317,
+          "right": 739.643,
+          "bottom": 618.467
+        }
+      }
+    }
+  ],
+  "images": [
+    {
+      "name": "mark",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/checkbox/mark",
+      "sprite": "gou",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "fill_amount": 1.0,
+      "truncated": false,
+      "bounds": {
+        "left": 710.744,
+        "top": 576.401,
+        "right": 732.077,
+        "bottom": 592.401
+      },
+      "raw": {
+        "kind": "image",
+        "name": "mark",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/checkbox/mark",
+        "sprite": "gou",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 710.744,
+          "top": 576.401,
+          "right": 732.077,
+          "bottom": 592.401
+        },
+        "anchor_world_position": null
+      }
+    },
+    {
+      "name": "checkbox",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/checkbox",
+      "sprite": "bg_rect",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "fill_amount": 1.0,
+      "truncated": false,
+      "bounds": {
+        "left": 710.257,
+        "top": 576.358,
+        "right": 728.963,
+        "bottom": 595.065
+      },
+      "raw": {
+        "kind": "image",
+        "name": "checkbox",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/checkbox",
+        "sprite": "bg_rect",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 710.257,
+          "top": 576.358,
+          "right": 728.963,
+          "bottom": 595.065
+        },
+        "anchor_world_position": null
+      }
+    },
+    {
+      "name": "icon",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/item/icon",
+      "sprite": "tebiezuozhan",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": false,
+      "raycast_top": null,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "fill_amount": 1.0,
+      "truncated": false,
+      "bounds": {
+        "left": 499.91,
+        "top": 551.392,
+        "right": 563.91,
+        "bottom": 615.392
+      },
+      "raw": {
+        "kind": "image",
+        "name": "icon",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/item/icon",
+        "sprite": "tebiezuozhan",
+        "flags": 431,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 499.91,
+          "top": 551.392,
+          "right": 563.91,
+          "bottom": 615.392
+        },
+        "anchor_world_position": null
+      }
+    },
+    {
+      "name": "item",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/item",
+      "sprite": "sp_item_icon_bg",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "fill_amount": 1.0,
+      "truncated": false,
+      "bounds": {
+        "left": 498.91,
+        "top": 549.725,
+        "right": 564.91,
+        "bottom": 617.058
+      },
+      "raw": {
+        "kind": "image",
+        "name": "item",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/item",
+        "sprite": "sp_item_icon_bg",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 498.91,
+          "top": 549.725,
+          "right": 564.91,
+          "bottom": 617.058
+        },
+        "anchor_world_position": null
+      }
+    },
+    {
+      "name": "bg",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/bg",
+      "sprite": "sp_btn_bg",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "fill_amount": 1.0,
+      "truncated": false,
+      "bounds": {
+        "left": 496.91,
+        "top": 548.317,
+        "right": 739.643,
+        "bottom": 618.467
+      },
+      "raw": {
+        "kind": "image",
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/bg",
+        "sprite": "sp_btn_bg",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 496.91,
+          "top": 548.317,
+          "right": 739.643,
+          "bottom": 618.467
+        },
+        "anchor_world_position": null
+      }
+    }
+  ],
+  "texts": [
+    {
+      "kind": "ugui-text",
+      "name": "desc",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/desc",
+      "text": "消耗2倍石油\n结算收益2倍",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "truncated": false,
+      "bounds": {
+        "left": 580.377,
+        "top": 548.317,
+        "right": 705.783,
+        "bottom": 618.467
+      },
+      "raw": {
+        "kind": "ugui-text",
+        "name": "desc",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/desc",
+        "text": "消耗2倍石油\n结算收益2倍",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 580.377,
+          "top": 548.317,
+          "right": 705.783,
+          "bottom": 618.467
+        }
+      }
+    },
+    {
+      "kind": "ugui-text",
+      "name": "count",
+      "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/item/count",
+      "text": "569",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "truncated": false,
+      "bounds": {
+        "left": 495.263,
+        "top": 593.375,
+        "right": 561.93,
+        "bottom": 617.822
+      },
+      "raw": {
+        "kind": "ugui-text",
+        "name": "count",
+        "path": "OverlayCamera/Overlay/UIMain/LevelFleetSelectView(Clone)/panel/Fixed/sp/item/count",
+        "text": "569",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 495.263,
+          "top": 593.375,
+          "right": 561.93,
+          "bottom": 617.822
+        }
+      }
+    }
+  ]
+}

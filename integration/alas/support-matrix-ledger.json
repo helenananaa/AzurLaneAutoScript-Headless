@@ -351,7 +351,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -365,7 +365,8 @@
         "integration/alas/series/0050-combat-flow-ports.patch",
         "integration/alas/series/0340-campaign-auto-search-port.patch",
         "integration/alas/main-12-4-auto-search-live-validation-receipt.json",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-remaining-20260907.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
@@ -535,7 +536,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -545,7 +546,8 @@
         "tests/test_alas_campaign_switch_config.py",
         "python/alas_headless/alas_campaign_switch_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-preparation-20260906.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
@@ -613,7 +615,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -627,7 +629,8 @@
         "integration/alas/series/0110-stop-condition-ports.patch",
         "integration/alas/series/0340-campaign-auto-search-port.patch",
         "integration/alas/main-12-4-auto-search-live-validation-receipt.json",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-preparation-20260906.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
@@ -666,7 +669,8 @@
         "tests/test_alas_campaign_switch_config.py",
         "python/alas_headless/alas_campaign_switch_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-remaining-20260907.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=checkbox; display=default/hide",
@@ -2994,7 +2998,8 @@
         "python/alas_headless/alas_fleet_config_contract.py",
         "python/alas_headless/alas_fleet_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-preparation-20260906.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -3138,7 +3143,8 @@
         "python/alas_headless/alas_fleet_config_contract.py",
         "python/alas_headless/alas_fleet_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-preparation-20260906.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default",
@@ -3246,7 +3252,8 @@
         "python/alas_headless/alas_fleet_config_contract.py",
         "python/alas_headless/alas_fleet_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-preparation-20260906.zh-CN.md"
       ],
       "group_code": "P",
       "metadata": "type=select; display=default/display",
@@ -7938,10 +7945,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
@@ -7973,10 +7980,10 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
-        "live": "missing",
-        "observation": "missing",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
@@ -8008,7 +8015,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -8043,7 +8050,7 @@
     },
     {
       "dimensions": {
-        "action": "missing",
+        "action": "partial",
         "configuration": "complete",
         "live": "partial",
         "observation": "partial",
@@ -9351,10 +9358,12 @@
       "evidence": [
         "tests/test_alas_fleet_config.py",
         "python/alas_headless/alas_fleet_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-repeat-20260907.zh-CN.md",
+        "integration/alas/campaign-formations-live-20260907-r1.json"
       ],
       "field": "Fleet.Fleet1Formation",
-      "note": "All three values are classified; source audit proves pinned ALAS does not consume the field, so non-default values fail closed."
+      "note": "Original StrategyHandler consumes all three formations with independent slot flags offline. Controlled manual 12-4 proved slot1 line_ahead and slot2 diamond, then restored their original formations; withdrawal needed a typed follow-up. Official auto-search does not prove this strategy path. See docs/campaign-repeat-20260907.zh-CN.md."
     },
     {
       "dimensions": {
@@ -9399,10 +9408,12 @@
       "evidence": [
         "tests/test_alas_fleet_config.py",
         "python/alas_headless/alas_fleet_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-repeat-20260907.zh-CN.md",
+        "integration/alas/campaign-formations-live-20260907-r1.json"
       ],
       "field": "Fleet.Fleet2Formation",
-      "note": "All three values are classified; source audit proves pinned ALAS does not consume the field, so non-default values fail closed."
+      "note": "Original StrategyHandler consumes all three formations with independent slot flags offline. Controlled manual 12-4 proved slot1 line_ahead and slot2 diamond, then restored their original formations; withdrawal needed a typed follow-up. Official auto-search does not prove this strategy path. See docs/campaign-repeat-20260907.zh-CN.md."
     },
     {
       "dimensions": {
@@ -9435,10 +9446,12 @@
       "evidence": [
         "tests/test_alas_fleet_config.py",
         "python/alas_headless/alas_fleet_config_replay.py",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-repeat-20260907.zh-CN.md",
+        "integration/alas/campaign-repeat-main-live-20260907-r5.json"
       ],
       "field": "Fleet.FleetOrder",
-      "note": "All four orders preserve original ALAS boss routing offline; only the reviewed mob-boss order is admitted to semantic navigation."
+      "note": "All four orders preserve original ALAS boss routing and normal auto-search typed duties. Swapped fleet indices remain slot-based; hard-mode restrictions are separate. See docs/campaign-repeat-20260907.zh-CN.md for evidence scope."
     },
     {
       "dimensions": {
@@ -9499,10 +9512,12 @@
         "tests/test_semantic_oracle.py",
         "tests/test_alas_adapter.py",
         "tests/test_alas_integration_patch.py",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/campaign-retirement-full-handler-20260907-r3.json",
+        "docs/campaign-reentry-retirement-20260907.zh-CN.md"
       ],
       "field": "OneClickRetire.KeepLimitBreak",
-      "note": "Both setting values share one exact typed toggle contract; only keep_limit_break has destructive live execution evidence."
+      "note": "Both settings share an exact typed toggle contract; only keep_limit_break has destructive live evidence. The latest original handler passed an 8-ship transaction with unique protection, keep_needed, equipment preservation and return. Earlier overflow and premature-completion failures remain retained separately; see docs/campaign-reentry-retirement-20260907.zh-CN.md."
     },
     {
       "dimensions": {
@@ -9517,10 +9532,12 @@
         "python/alas_headless/alas_retirement_config_replay.py",
         "integration/alas/series/0120-retirement-flow-ports.patch",
         "integration/alas/series/0130-enhancement-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/campaign-retirement-full-handler-20260907-r3.json",
+        "docs/campaign-reentry-retirement-20260907.zh-CN.md"
       ],
       "field": "Retirement.RetireMode",
-      "note": "All three pinned modes preserve original amount and task dispatch decisions offline; one-click and enhancement remain admitted, while semantic old_retire and invalid values fail before page events because the legacy transaction is still unsupported."
+      "note": "Pinned modes preserve original amount and dispatch offline; semantic old_retire remains unsupported. The original one-click retirement handler passed a full 8-ship transaction, delayed award/equipment preservation and return to the build predecessor in integration/alas/campaign-retirement-full-handler-20260907-r3.json. Overflow counts keep exact deltas; natural Campaign dock-full trigger plus map resume is not claimed from that sample. See docs/campaign-reentry-retirement-20260907.zh-CN.md."
     },
     {
       "dimensions": {
@@ -9793,55 +9810,89 @@
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_submarine_config.py",
         "python/alas_headless/alas_submarine_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "tests/test_campaign_submarine_ports.py",
+        "integration/alas/submarine-preparation-probe-20260907-r3.json",
+        "integration/alas/submarine-call-main-live-20260908-r3.json",
+        "integration/alas/submarine-call-ammo-observation-20260908-r1.json"
       ],
       "field": "Submarine.AutoSearchMode",
-      "note": "Both values preserve original auto-search setting selection offline; active submarine fleet input remains refused."
+      "note": "Both values preserve original selection and completed a live PREP duty round trip with submarine fleet 1; active AUTO and standby Main sorties passed. These settings alone do not prove actual calls. See docs/campaign-submarine-progress-20260907.zh-CN.md."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_submarine_config.py",
         "python/alas_headless/alas_submarine_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "integration/alas/submarine-original-move-live-20260908-r7.json",
+        "tests/test_campaign_submarine_ports.py",
+        "integration/alas/submarine-hunt-main-live-20260909-r7.json",
+        "integration/alas/submarine-hunt-main-live-20260909-r6.json",
+        "integration/alas/submarine-boss-position-main-live-20260909-r1.json",
+        "integration/alas/submarine-one-grid-final-live-20260909-r2.json"
       ],
       "field": "Submarine.DistanceToBoss",
-      "note": "All four distance values execute pinned target planning; three movement targets and the open-ocean no-move branch are captured without input."
+      "note": "All four distance values retain pinned offline planning and live action/subpath evidence. Complete Main passed with fleet 2 hunt_and_boss plus two-grid deployment (G2/H1), and boss_only plus one-grid deployment (G1/H1); both returned to stage with RunCount zero. Direct deployment to occupied Boss H6 and a call have live subpath receipts, as do open-ocean calls outside range at H1/H6. The latest call-pending and single-exit fixes passed the one-grid full run. This is not every stage/configuration combination. See docs/campaign-submarine-ocean-20260909.zh-CN.md."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_submarine_config.py",
         "python/alas_headless/alas_submarine_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "tests/test_campaign_submarine_ports.py",
+        "integration/alas/submarine-preparation-probe-20260907-r3.json",
+        "integration/alas/submarine-call-main-live-20260908-r3.json",
+        "integration/alas/submarine-call-ammo-observation-20260908-r1.json",
+        "integration/alas/submarine-hunt-main-live-20260909-r7.json"
       ],
       "field": "Submarine.Fleet",
-      "note": "Fleet 0 admits the complete inactive enum product; fleets 1 and 2 fail before unqualified selection, movement, strategy, or combat input."
+      "note": "Fleets 0/1/2 are accepted configuration values. Fleet 1 preparation, occupancy/oil, AUTO duty, calls and movement have live evidence. Fleet 2 preparation (u37/u96/dafenqi), duty round trip, open-ocean calls and complete hunt_and_boss Main with G2 deployment/H1 call/settlement exit passed on 2026-09-09. This is representative configuration coverage, not every fleet and stage combination. See docs/campaign-submarine-ocean-20260909.zh-CN.md."
     },
     {
       "dimensions": {
+        "action": "partial",
+        "live": "partial",
+        "observation": "partial",
         "offline": "complete"
       },
       "evidence": [
         "tests/test_alas_submarine_config.py",
         "python/alas_headless/alas_submarine_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "tests/test_campaign_submarine_ports.py",
+        "integration/alas/submarine-preparation-probe-20260907-r3.json",
+        "integration/alas/submarine-call-main-live-20260908-r3.json",
+        "integration/alas/submarine-call-ammo-observation-20260908-r1.json",
+        "integration/alas/submarine-hunt-main-live-20260909-r7.json",
+        "integration/alas/submarine-hunting-hidden-ammo-20260909.json",
+        "integration/alas/submarine-one-grid-final-live-20260909-r2.json"
       ],
       "field": "Submarine.Mode",
-      "note": "All five modes preserve original combat-call and boss mapping decisions; active submarine fleet input remains refused."
+      "note": "All five modes retain original offline decisions. Complete Main passed with fleet 2 hunt_and_boss/two-grid and boss_only/one-grid deployment plus battle-correlated calls; every_combat standby AUTO and boss_only open-ocean calls have prior live evidence. Pending call receipts suppress duplicate fallback clicks until a fresh same-battle acknowledgment; this passed the latest full Main. Hunting-hidden ammo remains explicitly unknown, never fabricated zero or consumption. Other mode/stage combinations are not blanket-qualified. See docs/campaign-submarine-ocean-20260909.zh-CN.md."
     },
     {
       "dimensions": {
@@ -10566,10 +10617,14 @@
         "tests/test_alas_campaign_switch_config.py",
         "python/alas_headless/alas_campaign_switch_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-repeat-20260907.zh-CN.md",
+        "integration/alas/campaign-repeat-main-live-20260907-r5.json",
+        "integration/alas/campaign-reentry-main-live-20260907-r2.json",
+        "docs/campaign-reentry-retirement-20260907.zh-CN.md"
       ],
       "field": "Campaign.UseAutoSearch",
-      "note": "Both booleans preserve original clear-mode auto-search selection and invalid values fail before campaign routing or input."
+      "note": "Both booleans preserve original clear-mode selection. Normal preparation, duty, sortie and completion reuse typed structure rather than a historical stage whitelist. Original Main passed two 12-4 sorties via fresh PREP and two 3-1 sorties via retained menu plus actual ButtonGO (fleets 2,1,0; Boss/mob; RunCount 2 to 0). See integration/alas/campaign-reentry-main-live-20260907-r2.json and docs/campaign-reentry-retirement-20260907.zh-CN.md. Budgets are not refilled; hard/event support remains separately scoped."
     },
     {
       "dimensions": {
@@ -10579,10 +10634,14 @@
         "tests/test_alas_campaign_switch_config.py",
         "python/alas_headless/alas_campaign_switch_config_replay.py",
         "integration/alas/series/0050-combat-flow-ports.patch",
-        "docs/status.md"
+        "docs/status.md",
+        "docs/campaign-repeat-20260907.zh-CN.md",
+        "integration/alas/campaign-auto-book-live-20260907.json",
+        "integration/alas/campaign-reentry-main-live-20260907-r2.json",
+        "docs/campaign-reentry-retirement-20260907.zh-CN.md"
       ],
       "field": "Campaign.Use2xBook",
-      "note": "Both booleans preserve original fast-forward two-times-book selection and invalid values fail before campaign routing or input."
+      "note": "Both booleans preserve original FastForward selection. AUTO off-on-off has separate unchanged-stock evidence. Original Main passed two 12-4 PREP sorties (566 to 565 to 564), then two 3-1 sorties using PREP and AUTO ButtonGO (563 to 562 to 561), with an actual AUTO checkbox action and one Go receipt, RunCount 2 to 0. See integration/alas/campaign-reentry-main-live-20260907-r2.json and docs/campaign-reentry-retirement-20260907.zh-CN.md; this does not qualify every hard/event branch."
     },
     {
       "dimensions": {
@@ -11909,9 +11968,9 @@
     },
     "matrix_introduced_commit": "e2fc2fe9f177e308fde3823a11ae404dcde8e33a",
     "patch_series": {
-      "combined_sha256": "2d281f8ea1fd76148f42da972b09c111dc38c637bd9d852627c816ec7868b928",
-      "manifest_sha256": "8d097c67e2ed6186771a0d20cecfcfda42d9aa26f79aafd1121ff1efe8d0e966",
-      "member_count": 96
+      "combined_sha256": "a06c4f2f1ac8dadce2669aeb9a509cfaff873dae637f339965be24b718da770b",
+      "manifest_sha256": "361a07cbd1a7f7f57de6405860af078eb602a035b1c683d0297ab6301dd8febd",
+      "member_count": 107
     },
     "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
   }

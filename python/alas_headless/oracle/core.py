@@ -497,7 +497,13 @@ class CoreOracle:
             buttons=buttons,
         )
 
-    def read_ui_state(self, *, check_foreground: bool = True) -> UiState:
+    def read_ui_state(self, *, check_foreground: bool = True,
+                      _preserve_partial_toggles: bool = False) -> UiState:
+        """Read UI; frame capture may retain, but never clear, a partial flag.
+
+        Ordinary observation/input consumers retain the strict default. A
+        capability-local reader must independently prove its complete slice.
+        """
         if (
             check_foreground
             and self._foreground_component() != self.fingerprint.component
@@ -509,7 +515,9 @@ class CoreOracle:
         self._validate_identity(ui_snapshot, UI_SCHEMA)
         if ui_snapshot.get("schema") != 1:
             raise SemanticGateClosed("UI snapshot schema mismatch")
-        if ui_snapshot.get("toggle_truncated") is not False:
+        if (ui_snapshot.get("toggle_truncated") is not False
+                and not (_preserve_partial_toggles is True
+                         and ui_snapshot.get("toggle_truncated") is True)):
             raise SemanticGateClosed("toggle snapshot is truncated")
         if ui_snapshot.get("text_truncated") is not False:
             raise SemanticGateClosed("text snapshot is truncated")

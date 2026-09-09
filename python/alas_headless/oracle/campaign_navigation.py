@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import re
+import re
 from typing import List, Optional, Sequence, Tuple
 from .contracts import (
     ActionReceipt,
@@ -22,6 +23,39 @@ from .errors import SemanticGateClosed, SemanticTargetMissing
 
 class CampaignNavigationOracle:
     """Campaign navigation operations sharing the oracle frame and input boundary."""
+
+    def _campaign_fleet_lock_control(self):
+        state = self.read_state()
+        suffix = "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/right_stage/event/collapse/lock_fleet"
+        buttons = tuple(b for b in state.buttons if b.path == suffix and b.name == "lock_fleet")
+        if not buttons:
+            return state, None, None
+        ui = self.read_ui_state(check_foreground=False)
+        if ui.image_truncated or ui.generation < state.generation or ui.generation > state.generation + 2:
+            raise SemanticGateClosed("campaign fleet-lock snapshots are not coherent")
+        images = tuple(i for i in ui.images if i.path == suffix
+                       and i.active_in_hierarchy and i.active_and_enabled and not i.truncated)
+        if len(buttons) != 1 or len(images) != 1 or images[0].sprite not in ("auto_battle_on", "auto_battle_off"):
+            raise SemanticGateClosed("campaign fleet-lock identity is absent or ambiguous")
+        return state, buttons[0], images[0].sprite == "auto_battle_on"
+
+    def campaign_fleet_lock_selected(self) -> Optional[bool]:
+        return self._retry_transition_read(self._campaign_fleet_lock_control)[2]
+
+    def click_campaign_fleet_lock(self, expected: bool) -> ActionReceipt:
+        state, button, selected = self._retry_transition_read(self._campaign_fleet_lock_control)
+        if type(expected) is not bool or button is None or selected is not expected:
+            raise SemanticGateClosed("campaign fleet-lock state changed before input")
+        if not button.actionable or self._blocking_rules(state, "campaign/fleet-lock"):
+            raise SemanticGateClosed("campaign fleet-lock target is not actionable")
+        if not (0 <= button.point.x < self.fingerprint.width and 0 <= button.point.y < self.fingerprint.height):
+            raise SemanticGateClosed("campaign fleet-lock target is outside the screen")
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed("foreground changed before fleet-lock input")
+        self._tap(int(round(button.point.x)), int(round(button.point.y)))
+        return ActionReceipt(semantic_id="campaign/fleet-lock/" + ("on" if expected else "off"),
+                             generation=state.generation, point=button.point,
+                             bounds=button.bounds, path=button.path)
 
     def campaign_map_entry_state(self) -> CampaignMapEntryState:
         """Read the exact map-scene root without exposing any map input."""
@@ -104,6 +138,7 @@ class CampaignNavigationOracle:
     def _campaign_map_entry_state_from_snapshots(
         button_state: OracleState,
         ui_state: UiState,
+        *, allow_deployment: bool = False,
     ) -> CampaignMapEntryState:
         if (
             ui_state.generation < button_state.generation
@@ -209,9 +244,18 @@ class CampaignNavigationOracle:
             )
             == 1
         )
+        deployment_proven = False
+        if allow_deployment and len(stage_back_matches) == 1:
+            deployment_root = stage_back_matches[0][0].removesuffix('/top_stage/back_button') + '/bottom_stage/Action/MissileStrike/'
+            deployment_proven = all(
+                sum(b.path == deployment_root+name for b in active_buttons) == 1
+                and sum(t.path == deployment_root+name+'/Text' and t.text.strip() == label
+                        and t.active_in_hierarchy and t.active_and_enabled and not t.truncated
+                        for t in ui_state.texts) == 1
+                for name, label in (('cancel_button', '取消部署'), ('confirm_button', '确认部署')))
         if (
             len(stage_back_matches) != 1
-            or not retreat_variant_matches
+            or not (retreat_variant_matches or deployment_proven)
             or not grid_button_paths
             or any(
                 len(matches) != 1 or matches[0].sprite not in allowed_sprites
@@ -264,6 +308,7 @@ class CampaignNavigationOracle:
         rows: int,
         land_cells: Sequence[Tuple[int, int]],
         expected_fleet_count: int,
+        allow_deployment: bool = False,
     ) -> CampaignMapState:
         """Build a stable, complete, read-only map model from typed Unity state.
 
@@ -327,6 +372,7 @@ class CampaignNavigationOracle:
             rows=rows,
             land=land,
             expected_fleet_count=expected_fleet_count,
+            **({'allow_deployment': True} if allow_deployment else {}),
         )
         previous = self._retry_transition_read(reader, attempts=12)
         for _ in range(11):
@@ -673,6 +719,7 @@ class CampaignNavigationOracle:
         land_cells: Sequence[Tuple[int, int]],
         expected_fleet_count: int,
         allow_enemy_additions: bool = False,
+        allow_deployment: bool = False,
     ) -> CampaignMapViewportSwipeProof:
         """Inject and prove one typed ALAS-requested campaign viewport swipe."""
 
@@ -696,6 +743,7 @@ class CampaignNavigationOracle:
             rows=rows,
             land_cells=land_cells,
             expected_fleet_count=expected_fleet_count,
+            **({'allow_deployment': True} if allow_deployment else {}),
         )
         if post_state.generation <= input_generation:
             raise SemanticGateClosed("campaign map viewport post-state predates input")
@@ -916,29 +964,39 @@ class CampaignNavigationOracle:
             path=target.path,
         )
 
+    @staticmethod
+    def _campaign_ambush_roots(state: OracleState) -> Tuple[str, ...]:
+        roots = set()
+        for button in state.buttons:
+            if not button.active_in_hierarchy or not button.active_and_enabled:
+                continue
+            if button.name == "LevelAmbushView(Clone)" and button.path.endswith("/LevelAmbushView(Clone)"):
+                roots.add(button.path)
+            elif button.name in ("dodge_button", "fight_button") and button.path.endswith(
+                "/LevelAmbushView(Clone)/window/" + button.name
+            ):
+                roots.add(button.path.rsplit("/window/", 1)[0])
+        if len(roots) > 1:
+            raise SemanticGateClosed("campaign ambush root is ambiguous")
+        return tuple(roots)
+
     def _campaign_ambush_target(self, *, evade: bool) -> Optional[ButtonState]:
         """Return the exact live ambush action, including delegated Buttons."""
 
+        if type(evade) is not bool:
+            raise SemanticGateClosed("campaign ambush choice must be bool")
         state = self.read_state()
-        root_suffix = "/LevelAmbushView(Clone)"
-        roots = tuple(
-            button
-            for button in state.buttons
-            if button.name == "LevelAmbushView(Clone)"
-            and button.path.endswith(root_suffix)
-            and button.active_in_hierarchy
-            and button.active_and_enabled
-        )
+        roots = self._campaign_ambush_roots(state)
         if not roots:
             return None
         if len(roots) != 1:
             raise SemanticGateClosed("campaign ambush root is ambiguous")
         name = "dodge_button" if evade else "fight_button"
-        suffix = root_suffix + "/window/" + name
+        target_path = roots[0] + "/window/" + name
         matches = tuple(
             button
             for button in state.buttons
-            if button.name == name and button.path.endswith(suffix)
+            if button.name == name and button.path == target_path
         )
         if len(matches) != 1:
             raise SemanticGateClosed("campaign ambush action is absent or ambiguous")
@@ -947,7 +1005,7 @@ class CampaignNavigationOracle:
             not target.active_in_hierarchy
             or not target.active_and_enabled
             or not target.interactable
-            or target.raycast_top is False
+            or target.raycast_top is not True
             or target.point is None
             or target.bounds is None
             or not target.bounds.contains(target.point)
@@ -960,6 +1018,20 @@ class CampaignNavigationOracle:
 
     def campaign_ambush_visible(self, *, evade: bool) -> bool:
         return self._campaign_ambush_target(evade=evade) is not None
+
+    def campaign_ambush_present(self) -> bool:
+        return bool(self._campaign_ambush_roots(self.read_state()))
+
+    def campaign_ambush_notice(self) -> Optional[str]:
+        ui = self.read_ui_state()
+        path = "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text"
+        notices = [re.sub(r"<[^>]*>", "", t.text).strip() for t in ui.texts
+                   if t.path.endswith(path) and t.active_in_hierarchy and not t.truncated]
+        results = {"success" if t == "规避成功" else "failed" for t in notices
+                   if t in ("规避成功", "规避失败")}
+        if len(results) > 1:
+            raise SemanticGateClosed("campaign ambush notices conflict")
+        return next(iter(results)) if results else ("unknown" if notices else None)
 
     def click_campaign_ambush(self, *, evade: bool) -> ActionReceipt:
         target = self._campaign_ambush_target(evade=evade)

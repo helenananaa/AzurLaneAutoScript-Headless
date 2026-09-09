@@ -176,6 +176,26 @@ def make_clock(handle=None, monotonic=None, max_age_ms=2500):
 
 
 class SemanticFrameTests(unittest.TestCase):
+    def test_frame_preserves_truncation_without_admitting_generic_ui_reads(self):
+        from tests.semantic_support.observer_fixtures import FakeBackend, set_retirement_selection
+        handle, _, clock = make_clock()
+        backend = FakeBackend([])
+        set_retirement_selection(backend, 10, 833)
+        handle.buttons['buttons'] = backend.buttons['buttons']
+        handle.buttons['button_count'] = len(handle.buttons['buttons'])
+        handle.ui['texts'] = backend.ui['texts']
+        handle.ui['text_count'] = len(handle.ui['texts'])
+        handle.ui['toggle_truncated'] = True
+        frame = clock.acquire(include_ui=True)
+        self.assertTrue(frame.projections['ui']['toggle_truncated'])
+        reader = SemanticFrameReader(clock, clock._oracle).oracle()
+        self.assertEqual(reader.retirement_selection_state().capacity_used, 833)
+        with self.assertRaisesRegex(SemanticGateClosed, 'toggle snapshot is truncated'):
+            reader.read_ui_state()
+        handle.ui['text_truncated'] = True
+        with self.assertRaisesRegex(SemanticGateClosed, 'text snapshot is truncated'):
+            clock.acquire(include_ui=True)
+
     def test_acquire_builds_one_immutable_atomic_frame(self):
         handle, monotonic, clock = make_clock()
 

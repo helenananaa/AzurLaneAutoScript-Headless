@@ -618,6 +618,13 @@ class ArchivesOracle:
         state = self.read_state()
         if not any("/Msgbox(Clone)/" in button.path for button in state.buttons):
             return None
+        # Campaign calls this optional probe during every sortie. A generic
+        # Msgbox is not an archive identity: the archive-only key HUD must
+        # also be present before this branch parses/claims the confirmation.
+        if not self._war_archives_campaign_counter_records(
+            self.read_ui_state(check_foreground=False)
+        ):
+            return None
         parts = self._msgbox_prompt_parts(state)
         if parts is None:
             raise SemanticGateClosed("war archives entry prompt is incomplete")

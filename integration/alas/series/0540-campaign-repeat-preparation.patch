@@ -1,0 +1,14 @@
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -539,7 +539,10 @@
+             self.device.stuck_record_clear()
+             self.device.click_record_clear()
+             try:
++                if semantic_adapter is not None:
++                    semantic_adapter.prepare_campaign_run()
++                    self.campaign.map_fleet_checked = False
+                 if (
+                     semantic_adapter is not None
+                     and not semantic_adapter.campaign_stage_entry_allowed()
+                     and not semantic_map_resume

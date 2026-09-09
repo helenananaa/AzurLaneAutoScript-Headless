@@ -46,6 +46,10 @@ class DispatchObservationPorts:
             else self.oracle
         )
         if name in UI_PAGE_CHECK_RESOURCES:
+            if observation_oracle.observation_target_present('reward/campaign-total/exit'):
+                # The retained result owns the screen. Optional chapter/page
+                # checks (e.g. commission notice) are absent, not malformed.
+                return False
             # A visible overlay is enough to hide its underlay. Parsing reset
             # conditions, shop labels or story choices belongs to their ports,
             # not to every task's Page.iter_pages() sweep.

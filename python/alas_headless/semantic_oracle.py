@@ -33,6 +33,7 @@ from .oracle.contracts import CampaignMapCellState as CampaignMapCellState
 from .oracle.contracts import CampaignMapEnemyState as CampaignMapEnemyState
 from .oracle.contracts import CampaignMapEntryState as CampaignMapEntryState
 from .oracle.contracts import CampaignMapFleetState as CampaignMapFleetState
+from .oracle.contracts import CampaignMapSubmarineState as CampaignMapSubmarineState
 from .oracle.contracts import CampaignMapPickupState as CampaignMapPickupState
 from .oracle.contracts import CampaignMapState as CampaignMapState
 from .oracle.contracts import CampaignMapViewportSwipeIntent as CampaignMapViewportSwipeIntent

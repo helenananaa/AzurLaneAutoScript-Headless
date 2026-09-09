@@ -1,12 +1,14 @@
 import ast
 import itertools
 import unittest
+import tempfile
 from pathlib import Path
 
 from alas_headless.alas_campaign_switch_config_contract import (
     validate_alas_campaign_switch_config,
 )
 from alas_headless.alas_campaign_switch_config_replay import (
+    _verify_guard,
     verify_campaign_switch_config,
 )
 from alas_headless.semantic_oracle import SemanticGateClosed
@@ -17,6 +19,29 @@ LIVE_ALAS = Path(r"E:\Disk0Merged\H\program\AzurLaneAutoScript-alas-topdown-live
 
 
 class AlasCampaignSwitchConfigTests(unittest.TestCase):
+    def test_guard_accepts_shared_validators_but_rejects_early_side_effect(self):
+        fields = "\n".join("        self.config.Campaign_" + name for name in
+                             ("UseFleetLock", "UseAutoSearch", "Use2xBook", "AmbushEvade"))
+        for middle, accepted in (
+            ("", True),
+            ("        self._validate_main_stop_condition_config()\n"
+             "        self._validate_event_shared_entry_config(name, folder, mode)\n", True),
+            ("        self.device.click(None)\n", False),
+            ("        self.navigate()\n", False),
+        ):
+            source = ("class CampaignRun:\n    def _validate_campaign_switch_config(self):\n"
+                      + fields + "\n    def run(self, name, folder, mode):\n"
+                      "        self._validate_main_campaign_route_config(name, folder, mode)\n"
+                      + middle + "        self._validate_campaign_switch_config()\n")
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "run.py"
+                path.write_text(source, encoding="utf-8")
+                if accepted:
+                    self.assertTrue(_verify_guard(path))
+                else:
+                    with self.assertRaises(AssertionError):
+                        _verify_guard(path)
+
     def test_exact_live_tree_replay_when_available(self):
         if not LIVE_ALAS.joinpath("module/campaign/run.py").is_file():
             self.skipTest("local pinned/patched ALAS verification tree is unavailable")

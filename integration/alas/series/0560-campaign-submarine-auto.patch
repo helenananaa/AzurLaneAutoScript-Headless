@@ -1,0 +1,33 @@
+diff --git a/module/handler/fast_forward.py b/module/handler/fast_forward.py
+index 58edee5..25b502e 100644
+--- a/module/handler/fast_forward.py
++++ b/module/handler/fast_forward.py
+@@ -320,6 +320,8 @@ class FastForwardHandler(AutoSearchHandler):
+             state = semantic_adapter.ensure_campaign_auto_search_roles(
+                 self.config.Fleet_FleetOrder
+             )
++            if self.config.SUBMARINE:
++                semantic_adapter.ensure_campaign_submarine_auto_mode(self.config.Submarine_AutoSearchMode)
+             logger.attr(
+                 'Auto_Search_Roles',
+                 f'fleet1={state.fleet1_role}, fleet2={state.fleet2_role}',
+@@ -356,6 +358,10 @@ class FastForwardHandler(AutoSearchHandler):
+             return False
+ 
+         logger.info('Disable auto submarine call')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.ensure_campaign_submarine_auto_mode('sub_standby')
++            return True
+         self.fleet_preparation_sidebar_ensure(3)
+         self.auto_search_setting_ensure('sub_standby')
+         return True
+@@ -374,6 +380,8 @@ class FastForwardHandler(AutoSearchHandler):
+                     use_2x_book=self.map_is_2x_book,
+                     fleet1=self.config.Fleet_Fleet1, fleet2=self.config.Fleet_Fleet2,
+                     fleet_order=self.config.Fleet_FleetOrder,
++                    submarine=self.config.Submarine_Fleet,
++                    submarine_auto_mode=self.config.Submarine_AutoSearchMode,
+                 )
+             if self.appear_then_click(AUTO_SEARCH_MENU_CONTINUE, offset=self._auto_search_menu_offset):
+                 self.interval_reset(AUTO_SEARCH_MENU_CONTINUE)

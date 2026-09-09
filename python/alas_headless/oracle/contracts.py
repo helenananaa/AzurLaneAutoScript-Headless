@@ -531,7 +531,7 @@ class RetirementExecutionReceipt:
             raise ValueError("retirement receipt count must be positive")
         if self.capacity_before - self.capacity_after != self.retired_count:
             raise ValueError("retirement receipt capacity delta is inconsistent")
-        if not (0 <= self.capacity_after < self.capacity_before <= self.capacity_total):
+        if not (0 <= self.capacity_after < self.capacity_before and self.capacity_total > 0):
             raise ValueError("retirement receipt capacity values are invalid")
         if (self.policy_sha256 is None) != (self.capability_id is None):
             raise ValueError("retirement receipt authority metadata is incomplete")
@@ -555,7 +555,7 @@ class RetirementNoCandidateReceipt:
     capability_id: Optional[str] = None
 
     def __post_init__(self) -> None:
-        if not (0 <= self.capacity_used <= self.capacity_total):
+        if not (self.capacity_used >= 0 and self.capacity_total > 0):
             raise ValueError("no-candidate receipt capacity values are invalid")
         if self.official_message != "<color=white>没找到符合条件的舰船</color>":
             raise ValueError("no-candidate receipt message is not official")
@@ -1250,6 +1250,12 @@ class CampaignFleetSelectionState:
             for item in (self.mob_oil_cost, self.boss_oil_cost)
         ):
             value = self.mob_oil_cost + self.boss_oil_cost
+            if self.submarine_fleets[0]:
+                if (isinstance(self.submarine_oil_cost, bool)
+                        or not isinstance(self.submarine_oil_cost, int)
+                        or self.submarine_oil_cost < 0):
+                    raise ValueError("campaign submarine oil requirement is not proven")
+                value += self.submarine_oil_cost
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             raise ValueError("campaign sortie oil requirement is not proven")
         return value
@@ -1331,6 +1337,15 @@ class CampaignMapFleetState:
 
 
 @dataclass(frozen=True)
+class CampaignMapSubmarineState:
+    marker: str
+    node: str
+    # Both ammo widgets can be hidden (e.g. hunting); unknown is not zero.
+    ammo: Optional[int]
+    ammo_capacity: Optional[int]
+
+
+@dataclass(frozen=True)
 class CampaignMapState:
     generation: int
     stage_code: str
@@ -1344,10 +1359,13 @@ class CampaignMapState:
     displayed_fleet_index: int
     current_fleet_marker: str
     current_fleet_roster_sprites: Tuple[str, ...]
+    submarine: Optional[CampaignMapSubmarineState] = None
+    submarine_hunting_nodes: Optional[Tuple[str, ...]] = None
+    submarine_destination_node: Optional[str] = None
 
     @property
     def signature(self) -> Tuple[Any, ...]:
-        return (
+        base = (
             self.stage_code,
             self.rows,
             self.columns,
@@ -1375,6 +1393,11 @@ class CampaignMapState:
             self.current_fleet_marker,
             self.current_fleet_roster_sprites,
         )
+        if self.submarine is None:
+            return base
+        return (*base, ('submarine', self.submarine.marker, self.submarine.node,
+                       self.submarine.ammo, self.submarine.ammo_capacity),
+                self.submarine_hunting_nodes, self.submarine_destination_node)
 
 
 @dataclass(frozen=True)

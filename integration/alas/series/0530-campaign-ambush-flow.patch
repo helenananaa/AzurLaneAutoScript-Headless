@@ -1,0 +1,112 @@
+diff --git a/module/handler/ambush.py b/module/handler/ambush.py
+--- a/module/handler/ambush.py
++++ b/module/handler/ambush.py
+@@ -52,37 +52,49 @@
+                     break
+ 
+-    def _handle_ambush_evade(self):
+-        logger.info('Map ambushed')
+-        # Wait MAP_AMBUSH_EVADE
+-        self.wait_until_appear(MAP_AMBUSH_EVADE, offset=(30, 30))
+-        self.handle_info_bar()
+-
+-        # Click MAP_AMBUSH_EVADE
+-        skip_first_screenshot = True
+-        while 1:
+-            if skip_first_screenshot:
+-                skip_first_screenshot = False
+-            else:
+-                self.device.screenshot()
+-
+-            # End
+-            if self.info_bar_count():
+-                break
+-
+-            if self.appear_then_click(MAP_AMBUSH_EVADE, offset=(30, 30), interval=3):
+-                continue
+-
+-        # Handle evade success and failures
+-        image = info_letter_preprocess(self.image_crop(INFO_BAR_DETECT, copy=False))
+-        if TEMPLATE_AMBUSH_EVADE_SUCCESS.match(image):
+-            logger.attr('Ambush_evade', 'success')
+-        elif TEMPLATE_AMBUSH_EVADE_FAILED.match(image):
+-            logger.attr('Ambush_evade', 'failed')
+-            self.combat(expected_end='no_searching', fleet_index=self.fleet_show_index)
+-        else:
+-            logger.warning('Unrecognized info when ambush evade.')
+-            self.ensure_no_info_bar()
+-            if self.combat_appear():
+-                self.combat(fleet_index=self.fleet_show_index)
++    def _handle_ambush_evade(self):
++        logger.info('Map ambushed')
++        # Wait MAP_AMBUSH_EVADE
++        self.wait_until_appear(MAP_AMBUSH_EVADE, offset=(30, 30))
++        self.handle_info_bar()
++
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        outcome = None
++
++        # Click MAP_AMBUSH_EVADE
++        skip_first_screenshot = True
++        while 1:
++            if skip_first_screenshot:
++                skip_first_screenshot = False
++            else:
++                self.device.screenshot()
++
++            # End
++            if semantic_adapter is not None:
++                outcome = semantic_adapter.campaign_ambush_outcome()
++                if outcome is not None or self.combat_appear():
++                    break
++            elif self.info_bar_count():
++                break
++
++            if self.appear_then_click(MAP_AMBUSH_EVADE, offset=(30, 30), interval=3):
++                continue
++
++        # Handle evade success and failures
++        if semantic_adapter is not None:
++            succeeded, failed = outcome == 'success', outcome == 'failed'
++        else:
++            image = info_letter_preprocess(self.image_crop(INFO_BAR_DETECT, copy=False))
++            succeeded = TEMPLATE_AMBUSH_EVADE_SUCCESS.match(image)
++            failed = not succeeded and TEMPLATE_AMBUSH_EVADE_FAILED.match(image)
++        if succeeded:
++            logger.attr('Ambush_evade', 'success')
++        elif failed:
++            logger.attr('Ambush_evade', 'failed')
++            self.combat(expected_end='no_searching', fleet_index=self.fleet_show_index)
++        else:
++            logger.warning('Unrecognized info when ambush evade.')
++            self.ensure_no_info_bar()
++            if self.combat_appear():
++                self.combat(fleet_index=self.fleet_show_index)
+ 
+     def _handle_ambush_attack(self):
+@@ -125,9 +137,9 @@
+             if not self.config.MAP_HAS_AMBUSH:
+                 return False
+-            handled = semantic_adapter.handle_campaign_ambush(
+-                evade=bool(self.config.Campaign_AmbushEvade))
+-            if handled:
+-                logger.info('Semantic campaign ambush handled')
+-            return handled
++            if not semantic_adapter.campaign_ambush_present():
++                return False
++            self._handle_ambush()
++            semantic_adapter.finish_campaign_ambush()
++            return True
+         if not self.config.MAP_HAS_AMBUSH:
+             return False
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -47,4 +47,7 @@
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
++            ambush_count = getattr(semantic_adapter, 'campaign_ambush_info_count', lambda: 0)()
++            if ambush_count:
++                return ambush_count
+             from alas_headless import current_semantic_session
+             session = current_semantic_session()

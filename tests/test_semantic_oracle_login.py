@@ -45,7 +45,7 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         backend.ui["texts"][0]["text"] = "是否购买资源？"
         self.assertFalse(oracle.enabled("overlay/login-data-expired/confirm"))
 
-    def test_server_maintenance_requires_exact_single_button_prompt(self):
+    def test_server_maintenance_accepts_exact_prompt_with_optional_cancel(self):
         popup = "root/Overlay/UIMain/Msgbox(Clone)/window/"
         backend = FakeBackend(
             [
@@ -66,6 +66,13 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         )
         oracle = make_oracle(backend)
 
+        self.assertTrue(oracle.server_maintenance_visible())
+        self.assertEqual(backend.taps, [])
+
+        backend.buttons['buttons'].append(make_button('custom_button_2(Clone)', popup+'button_container/custom_button_2(Clone)'))
+        backend.buttons['button_count'] += 1
+        backend.ui['texts'].append(make_text('取 消', popup+'button_container/custom_button_2(Clone)/pic'))
+        backend.ui['text_count'] += 1
         self.assertTrue(oracle.server_maintenance_visible())
         self.assertEqual(backend.taps, [])
 

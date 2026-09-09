@@ -43,7 +43,7 @@ class LoginOracle:
         )
 
     def server_maintenance_visible(self) -> bool:
-        """Recognize the exact one-button CN server-maintenance prompt."""
+        """Recognize CN maintenance; a cancel button does not make it actionable login."""
 
         state = self.read_state()
         ui_state = self._stable_msgbox_ui_state(state)
@@ -72,7 +72,7 @@ class LoginOracle:
             and content[0].text.strip() == "服务器维护"
             and len(confirm) == 1
             and "".join(confirm[0].text.split()) == "确定"
-            and not cancel
+            and (not cancel or (len(cancel) == 1 and ''.join(cancel[0].text.split()) == '取消'))
             and len(buttons) == 1
             and buttons[0].actionable
         )

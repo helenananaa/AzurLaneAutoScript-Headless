@@ -1,0 +1,64 @@
+{
+  "android_input_injected": false,
+  "classified_pixel_accesses": 0,
+  "failure_scenario": {
+    "android_input_injected": false,
+    "classified_pixel_accesses": 0,
+    "exception": "scripted login replay failure",
+    "frame_id": "login-replay-failure",
+    "package_gate_calls": 3,
+    "scenario": "failure",
+    "scope_closed": true,
+    "unclassified_pixel_accesses": 0
+  },
+  "handler_module": "module.handler.login.LoginHandler",
+  "passed": true,
+  "patch_series_manifest_sha256": "d66788828cb5ba0173a151deb3751227d95adc3eb5e0d01fd93d1e6af2c4814d",
+  "patch_sha256": "972c28305ede0df49356ec4c13624a4c1a22ad62396ee377ad5fb71dbf52ff4c",
+  "patched_login_sha256": "5581e448854dada9b84a3d9855d3519930e24a8a677bff1eb215efb085254a76",
+  "scenario_count": 4,
+  "scenarios": [
+    {
+      "android_input_injected": false,
+      "classified_pixel_accesses": 0,
+      "frame_id": "login-replay-entry",
+      "package_gate_calls": 10,
+      "registry_dispatches": 1,
+      "scenario": "entry",
+      "scope_closed": true,
+      "semantic_actions": [
+        "login/enter"
+      ],
+      "unclassified_pixel_accesses": 0
+    },
+    {
+      "android_input_injected": false,
+      "classified_pixel_accesses": 0,
+      "frame_id": "login-replay-bulletin",
+      "package_gate_calls": 12,
+      "registry_dispatches": 1,
+      "scenario": "bulletin",
+      "scope_closed": true,
+      "semantic_actions": [
+        "overlay/bulletin/close"
+      ],
+      "unclassified_pixel_accesses": 0
+    },
+    {
+      "android_input_injected": false,
+      "classified_pixel_accesses": 0,
+      "frame_id": "login-replay-expired",
+      "package_gate_calls": 20,
+      "registry_dispatches": 1,
+      "scenario": "expired",
+      "scope_closed": true,
+      "semantic_actions": [
+        "overlay/login-data-expired/confirm"
+      ],
+      "unclassified_pixel_accesses": 0
+    }
+  ],
+  "schema": "alas-headless.login-flow-replay/v1",
+  "unclassified_pixel_accesses": 0,
+  "upstream_commit": "81ccf63b4540f00241628c82a58c02c7a2bb11af"
+}

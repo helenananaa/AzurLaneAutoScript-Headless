@@ -22,7 +22,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "award-info",
         "/AwardInfoUI(Clone)/",
-        ("reward/award-info/close",),
+        ("reward/award-info/close", "retirement/reward/close"),
     ),
     BlockerRule(
         "award-info1",
@@ -37,7 +37,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "campaign-total-reward",
         "/LevelStageTotalRewardPanel(Clone)/",
-        ("reward/campaign-total/exit", "reward/campaign-total/continue"),
+        ("reward/campaign-total/exit", "reward/campaign-total/continue", "reward/campaign-total/go", "campaign/2x-book-auto"),
     ),
     BlockerRule(
         "mail-manager",
@@ -241,6 +241,11 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "campaign/mode/hard",
             "campaign/chapter/previous",
             "campaign/chapter/next",
+            "campaign/clear-mode",
+            "campaign/2x-book",
+            "campaign/2x-book/confirm",
+            "campaign/2x-book/cancel",
+            "campaign/2x-book/warning-dismiss",
             "campaign/map-preparation/auto-search",
             "campaign/map-preparation/mode/normal",
             "campaign/map-preparation/mode/hard",
@@ -253,6 +258,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "archive/entry/cancel",
             "reward/campaign-total/exit",
             "reward/campaign-total/continue",
+            "reward/campaign-total/go",
+            "campaign/2x-book-auto",
             *_CAMPAIGN_FLEET_INPUT_TARGETS,
         ),
     ),
@@ -408,6 +415,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "campaign-map-preparation",
         "/LevelStageInfoView(Clone)/",
         (
+            "campaign/clear-mode",
             "campaign/map-preparation/auto-search",
             "campaign/map-preparation/mode/normal",
             "campaign/map-preparation/mode/hard",
@@ -419,6 +427,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "campaign-map-preparation-sp",
         "/LevelInfoSPUI(Clone)/",
         (
+            "campaign/clear-mode",
             "campaign/map-preparation/auto-search",
             "campaign/map-preparation/mode/normal",
             "campaign/map-preparation/mode/hard",
@@ -432,6 +441,10 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "campaign-fleet-preparation",
         "/LevelFleetSelectView(Clone)/",
         (
+            "campaign/2x-book",
+            "campaign/2x-book/confirm",
+            "campaign/2x-book/cancel",
+            "campaign/2x-book/warning-dismiss",
             "campaign/fleet-preparation/cancel",
             *_CAMPAIGN_FLEET_INPUT_TARGETS,
         ),
@@ -718,6 +731,12 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "tactical-continue",
         "/Msgbox(Clone)/",
         (
+            "retirement/equipment/preserve/confirm",
+            "campaign/map/submarine/oil/confirm",
+            "campaign/map/submarine/oil/cancel",
+            "campaign/2x-book/confirm",
+            "campaign/2x-book/cancel",
+            "campaign/2x-book/warning-dismiss",
             "campaign/dock-full/organize",
             "campaign/dock-full/enhance",
             "tactical/continue/cancel",
@@ -732,6 +751,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
             "research/queue/cancel",
             "research/queue/confirm",
             "overlay/network-reconnect/cancel",
+            "campaign/urgent-notice/confirm",
             "overlay/network-reconnect/confirm",
             "overlay/login-data-expired/confirm",
             "login/update/restart-msgbox",

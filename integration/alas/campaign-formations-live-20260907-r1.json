@@ -1,0 +1,142 @@
+{
+  "schema": "alas-headless.campaign-formations-live/v1",
+  "passed": false,
+  "stage": "12-4",
+  "serial": "emulator-5580",
+  "cases": [
+    {
+      "slot": 1,
+      "desired": "line_ahead",
+      "observed": "line_ahead",
+      "handler_changed": false,
+      "generation": 6391
+    },
+    {
+      "slot": 2,
+      "desired": "diamond",
+      "observed": "diamond",
+      "handler_changed": true,
+      "generation": 6760
+    }
+  ],
+  "switches": [
+    {
+      "semantic_id": "campaign/map/fleet/switch",
+      "generation": 6396,
+      "point": {
+        "x": 1032.3335,
+        "y": 682.3335
+      },
+      "bounds": {
+        "left": 930.667,
+        "top": 644.0,
+        "right": 1134.0,
+        "bottom": 720.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/switch_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/fleet/switch",
+      "generation": 6766,
+      "point": {
+        "x": 1032.3335,
+        "y": 682.3335
+      },
+      "bounds": {
+        "left": 930.667,
+        "top": 644.0,
+        "right": 1134.0,
+        "bottom": 720.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/switch_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/fleet/switch",
+      "generation": 6785,
+      "point": {
+        "x": 1032.3335,
+        "y": 682.3335
+      },
+      "bounds": {
+        "left": 930.667,
+        "top": 644.0,
+        "right": 1134.0,
+        "bottom": 720.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/switch_button",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "campaign/map/fleet/switch",
+      "generation": 7212,
+      "point": {
+        "x": 1032.3335,
+        "y": 682.3335
+      },
+      "bounds": {
+        "left": 930.667,
+        "top": 644.0,
+        "right": 1134.0,
+        "bottom": 720.667
+      },
+      "path": "OverlayCamera/Overlay/UIMain/top/LevelStageView(Clone)/bottom_stage/Normal/switch_button",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "restored": [
+    {
+      "slot": 1,
+      "desired": "line_ahead",
+      "observed": "line_ahead",
+      "handler_changed": false,
+      "generation": 6780
+    },
+    {
+      "slot": 2,
+      "desired": "double_line",
+      "observed": "double_line",
+      "handler_changed": true,
+      "generation": 7207
+    }
+  ],
+  "combat_budget": 0,
+  "oil_before": 1447,
+  "sortie": {
+    "stage_code": "12-4",
+    "initial_fleets": [
+      1,
+      2,
+      1
+    ],
+    "requested_fleets": [
+      2,
+      1,
+      0
+    ],
+    "prepared_fleets": [
+      2,
+      1,
+      0
+    ],
+    "mutation_semantic_ids": [
+      "campaign/fleet-preparation/fleet/2/clear",
+      "campaign/fleet-preparation/submarine/1/clear",
+      "campaign/fleet-preparation/option/2",
+      "campaign/fleet-preparation/option/1"
+    ],
+    "oil_before_sortie": 1447,
+    "required_oil": 97,
+    "sortie_generation": 6289,
+    "map_generation": 6372,
+    "map_root_path": "LevelCamera/Canvas/UIMain/LevelGrid",
+    "oil_cost_source": "observed-fleet-summary"
+  },
+  "pid": 6454,
+  "cleanup_error": "SemanticGateClosed: campaign withdrawal dialog is ambiguous"
+}

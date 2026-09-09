@@ -1,0 +1,48 @@
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+index deb7841..a1fa10f 100644
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -1165,10 +1165,14 @@ class Fleet(Camera, AmbushHandler):
+         """
+         location = location_ensure(location)
+         moved = True
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         while 1:
+-            self.in_sight(location, sight=self._walk_sight)
+-            self.focus_to_grid_center()
+-            grid = self.convert_global_to_local(location)
++            if semantic_adapter is not None:
++                grid = semantic_adapter.campaign_submarine_grid(location)
++            else:
++                self.in_sight(location, sight=self._walk_sight)
++                self.focus_to_grid_center()
++                grid = self.convert_global_to_local(location)
+             grid.__str__ = location
+ 
+             self.device.click(grid)
+@@ -1180,7 +1184,10 @@ class Fleet(Camera, AmbushHandler):
+ 
+             while 1:
+                 self.device.screenshot()
+-                self.view.update(image=self.device.image)
++                if semantic_adapter is not None:
++                    grid = semantic_adapter.campaign_submarine_grid(location)
++                else:
++                    self.view.update(image=self.device.image)
+ 
+                 # Arrive
+                 arrive_checker = grid.predict_submarine_move()
+@@ -1237,6 +1244,13 @@ class Fleet(Camera, AmbushHandler):
+         # Hunt zone view re-enabled by game, after entering sub move mode
+         self.strategy_set_execute(sub_view=False)
+         self.strategy_close()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if result and semantic_adapter is not None:
++            state = semantic_adapter.campaign_camera_state()
++            if state.submarine is None:
++                raise MapDetectionError('Semantic submarine disappeared after deployment')
++            self.fleet_submarine = location_ensure(state.submarine.node)
++            self.update()
+         return result
+ 
+     def submarine_move_near_boss(self, boss):

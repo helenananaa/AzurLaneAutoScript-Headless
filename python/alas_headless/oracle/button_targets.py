@@ -945,6 +945,12 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
         "LevelFleetSelectView(Clone)/panel/Fixed/title/DropSide/Click",
     ),
     *tuple(
+        SemanticTarget('campaign/fleet-preparation/roles/submarine/' + mode,
+            'Item' + str(index),
+            'LevelFleetSelectView(Clone)/panel/ShipList/sub/1/DutySelect/Item' + str(index))
+        for index, mode in ((1, 'sub_auto_call'), (2, 'sub_standby'))
+    ),
+    *tuple(
         SemanticTarget(
             "campaign/fleet-preparation/roles/fleet{0}/{1}".format(
                 fleet_index, role
@@ -1170,6 +1176,11 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     ),
     SemanticTarget(
         "research/queue/confirm",
+        "custom_button_1(Clone)",
+        "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
+    ),
+    SemanticTarget(
+        "campaign/urgent-notice/confirm",
         "custom_button_1(Clone)",
         "Msgbox(Clone)/window/button_container/custom_button_1(Clone)",
     ),

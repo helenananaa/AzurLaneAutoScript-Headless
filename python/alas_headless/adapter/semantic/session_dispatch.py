@@ -42,6 +42,32 @@ class SessionDispatchPorts:
     def appear(self, button: Any) -> bool:
         name = AlasSemanticAdapter._button_name(button)
         adapter = self.open()
+        if name == 'GET_MISSION' and adapter._campaign_context is not None:
+            oracle = adapter._frame_or_live_observation_oracle()
+            if oracle._campaign_urgent_notice_matches(oracle.read_state()):
+                return True
+        if (name in ('POPUP_CONFIRM', 'POPUP_CANCEL') and getattr(adapter, '_campaign_context', None) is not None
+                and adapter._campaign_context.submarine_move_confirm is not None):
+            return adapter.campaign_submarine_move_popup_appear(name)
+        if name in (
+            'SUBMARINE_READY', 'SUBMARINE_CALLED',
+            'SUBMARINE_AVAILABLE_CHECK_1', 'SUBMARINE_AVAILABLE_CHECK_2') and adapter._campaign_context is not None:
+            return adapter.campaign_submarine_call_appear(name)
+        retirement_return = getattr(self, '_retirement_return_receipt', None)
+        if retirement_return is not None and name in ('IN_RETIREMENT_CHECK', 'DOCK_CHECK'):
+            state = adapter._frame_or_live_observation_oracle().read_state()
+            still_dock = state.generation <= retirement_return.generation or any(
+                b.active_in_hierarchy and ('/DockyardUI(Clone)/' in b.path
+                    or b.path.endswith('/blur_panel/select_panel/quick_select')) for b in state.buttons)
+            if not still_dock and name == 'DOCK_CHECK':
+                self._retirement_return_receipt = None
+            return still_dock
+        if name == "IN_RETIREMENT_CHECK":
+            return adapter._frame_or_live_observation_oracle().retirement_selection_visible()
+        if name == "DOCK_CHECK" and adapter._frame_or_live_observation_oracle().retirement_selection_visible():
+            return True
+        if name == 'BACK_ARROW' and adapter._frame_or_live_observation_oracle().retirement_selection_visible():
+            return adapter._frame_or_live_observation_oracle().retirement_page_back_available()
         sample_use = getattr(self, '_opsi_sample_use', None)
         if sample_use is not None:
             adapter._package_gate()
@@ -81,6 +107,8 @@ class SessionDispatchPorts:
                     "overlay/network-reconnect/cancel"
                 )
             return False
+        if adapter._campaign_context is not None and name in ("MAP_AMBUSH_EVADE", "MAP_AMBUSH_ATTACK"):
+            return adapter.appear(button)
         if (
             name == "GET_SHIP"
             and adapter._campaign_context is not None
@@ -93,11 +121,15 @@ class SessionDispatchPorts:
             # exact top raycast above coherent ship-name/type/dialogue text.
             return adapter.oracle.new_ship_reward_visible()
         if (
-            name == "CAMPAIGN_CHECK"
+            name in ("CAMPAIGN_CHECK", "AUTO_SEARCH_MENU_EXIT")
             and adapter._campaign_context is not None
             and adapter.campaign_combat_committed()
         ):
-            # CAMPAIGN_CHECK is part of the broad defensive combat query set,
+            if name == 'AUTO_SEARCH_MENU_EXIT' and adapter._campaign_context.manual_result_exit_receipt is not None:
+                # The preceding exit may still be visible in the closing
+                # animation frame. Wait for the chapter, never submit it twice.
+                return False
+            # Both markers are part of the broad defensive combat query set,
             # but after the boss result it must be decided by the strict
             # chapter-page identity in the campaign adapter.  Otherwise the
             # combat observer's empty visible-resource set masks the restored
@@ -250,8 +282,22 @@ class SessionDispatchPorts:
     def click(self, button: Any) -> ActionReceipt:
         if AlasSemanticAdapter._campaign_grid_location(button) is not None:
             self.refresh_frame()
+            context = self.open()._campaign_context
+            if context is not None and context.submarine_move_entry is not None:
+                return self.open().click_campaign_submarine_grid(button)
             return self.open().click_campaign_combat_grid(button)
         name = AlasSemanticAdapter._button_name(button)
+        if name == 'SUBMARINE_READY' and self.open()._campaign_context is not None:
+            self.refresh_frame()
+            return self.open().click_campaign_submarine_call()
+        if name == "BACK_ARROW" and self.open().oracle.retirement_selection_visible():
+            self.refresh_frame()
+            receipt = self.open().oracle.click_retirement_page_back()
+            self._retirement_return_receipt = receipt
+            return receipt
+        if name in ("MAP_AMBUSH_EVADE", "MAP_AMBUSH_ATTACK"):
+            self.refresh_frame()
+            return self.open().click(button)
         sample_use = getattr(self, '_opsi_sample_use', None)
         if sample_use is not None and name in (sample_use.selected.name, 'STORAGE_USE', 'BOX_USE', 'CLICK_SAFE_AREA'):
             self.refresh_frame()
@@ -433,6 +479,10 @@ class SessionDispatchPorts:
         if name == "GOTO_MAIN" and self.open().oracle.exercise_page_visible():
             self.refresh_frame()
             return self.open().oracle.click("exercise/page/back")
+        if (name == 'AUTO_SEARCH_MENU_EXIT' and self.adapter is not None
+                and self.adapter._campaign_context is not None):
+            self.refresh_frame()
+            return self.open().click(button)
         if (
             name in ALAS_COMBAT_RESOURCE_ACTION_TARGETS
             and self.adapter is not None

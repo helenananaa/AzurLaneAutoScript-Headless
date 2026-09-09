@@ -430,6 +430,8 @@ class TargetsOracle:
                     or semantic_id.startswith("awaken/")
                     or semantic_id.startswith("os/port/dock/")
                     or semantic_id.startswith("gems-farming/dock/")
+                    or semantic_id.startswith("retirement/")
+                    or semantic_id == "dock/page/back"
                 )
             )
             and not (

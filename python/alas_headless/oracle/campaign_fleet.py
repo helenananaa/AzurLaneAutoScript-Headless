@@ -53,7 +53,7 @@ class CampaignFleetOracle:
             raise ValueError("fleet preparation snapshots must be supplied together")
         if button_state is None:
             button_state = self.read_state()
-            ui_state = self.read_ui_state()
+            ui_state = self.read_ui_state(check_foreground=False)
         assert ui_state is not None
         map_roots, fleet_roots = self._campaign_preparation_roots(
             button_state, ui_state
@@ -202,6 +202,44 @@ class CampaignFleetOracle:
             self._campaign_auto_search_role_state_once,
             attempts=12,
         )
+
+    def campaign_submarine_auto_mode(self) -> str:
+        return self._retry_transition_read(self._campaign_submarine_auto_mode_once)
+
+    def _campaign_submarine_auto_mode_once(self) -> str:
+        state = self.read_state()
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2 or ui.image_truncated:
+            raise SemanticGateClosed('submarine duty frame is incomplete')
+        tabs = self._toggle_matches(ui, 'campaign/fleet-preparation/roles/tab')
+        if len(tabs) != 1 or not tabs[0].checked:
+            raise SemanticGateClosed('submarine duty tab is not selected')
+        root = 'LevelFleetSelectView(Clone)/panel/ShipList/sub/1/DutySelect/'
+        selected = []
+        for index, mode, label in ((1, 'sub_auto_call', '自动召唤潜艇'), (2, 'sub_standby', '待机')):
+            prefix = root + 'Item' + str(index)
+            targets = self._matches(state, 'campaign/fleet-preparation/roles/submarine/' + mode)
+            labels = [t for t in ui.texts if t.path.endswith(prefix + '/Text')
+                      and t.active_in_hierarchy and t.active_and_enabled and not t.truncated and t.text == label]
+            if len(targets) != 1 or len(labels) != 1:
+                raise SemanticGateClosed('submarine duty identity is ambiguous')
+            marks = [i for i in ui.images if i.path.endswith(prefix + '/Checkmark')
+                     and i.active_in_hierarchy and i.active_and_enabled and not i.truncated
+                     and i.sprite == 'gou' and i.color[3] > .99]
+            if len(marks) > 1:
+                raise SemanticGateClosed('submarine duty checkmark is ambiguous')
+            if marks:
+                selected.append(mode)
+        if len(selected) != 1:
+            raise SemanticGateClosed('submarine duty selection is not exclusive')
+        return selected[0]
+
+    def click_campaign_submarine_auto_mode(self, expected: str, desired: str) -> ActionReceipt:
+        if desired not in ('sub_auto_call', 'sub_standby') or expected == desired:
+            raise SemanticGateClosed('submarine duty change is invalid')
+        if self.campaign_submarine_auto_mode() != expected:
+            raise SemanticGateClosed('submarine duty changed before input')
+        return self.click('campaign/fleet-preparation/roles/submarine/' + desired)
 
     def _campaign_auto_search_role_state_once(
         self,
@@ -665,6 +703,9 @@ class CampaignFleetOracle:
             if hard_mode:
                 costs = (mob, boss, sub_cost)
                 sortie_oil_requirement = (mob or 0) + boss
+                if submarine_counts[0]:
+                    sortie_oil_requirement = (None if sub_cost is None
+                                             else sortie_oil_requirement + sub_cost)
                 oil_cost_source = "fleet-summary-hard-omitted-zero"
             else:
                 if mob is None or sub_cost is None:
@@ -672,7 +713,7 @@ class CampaignFleetOracle:
                         "campaign fleet summary text is absent or ambiguous"
                     )
                 costs = (mob, boss, sub_cost)
-                sortie_oil_requirement = mob + boss
+                sortie_oil_requirement = mob + boss + (sub_cost if submarine_counts[0] else 0)
                 oil_cost_source = "observed-fleet-summary"
         else:
             numeric_stage = re.fullmatch(
@@ -732,7 +773,7 @@ class CampaignFleetOracle:
     def campaign_fleet_dropdown_state(
         self,
     ) -> Optional[CampaignFleetDropdownState]:
-        """Read the exact six-option fleet dropdown, or return None if closed."""
+        """Read a complete surface (six) or submarine (two) fleet dropdown."""
 
         return self._retry_transition_read(
             self._campaign_fleet_dropdown_state_once,
@@ -754,7 +795,8 @@ class CampaignFleetOracle:
         )
         if all(not matches for matches in option_matches):
             return None
-        if any(len(matches) != 1 for matches in option_matches):
+        indices = tuple(index for index, matches in enumerate(option_matches, 1) if matches)
+        if indices not in ((1, 2), (1, 2, 3, 4, 5, 6)) or any(len(matches) > 1 for matches in option_matches):
             raise SemanticGateClosed(
                 "campaign fleet dropdown options are incomplete or ambiguous"
             )
@@ -775,7 +817,7 @@ class CampaignFleetOracle:
         )
         if len(masks) != 1:
             raise SemanticGateClosed("campaign fleet dropdown mask is absent")
-        options = tuple(matches[0] for matches in option_matches)
+        options = tuple(matches[0] for matches in option_matches if matches)
         for index, option in enumerate(options, 1):
             semantic_id = "campaign/fleet-preparation/option/{0}".format(index)
             if not option.actionable or self._blocking_rules(button_state, semantic_id):
@@ -783,7 +825,7 @@ class CampaignFleetOracle:
                     "campaign fleet dropdown option is not actionable"
                 )
         active_indices = []
-        for index in range(1, 7):
+        for index in indices:
             prefix = "LevelFleetSelectView(Clone)/mask/list/item{0}/".format(index)
             states = tuple(
                 state

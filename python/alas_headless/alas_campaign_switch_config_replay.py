@@ -105,18 +105,27 @@ def _verify_guard(run_path: Path) -> bool:
             raise AssertionError("CampaignRun.run is missing")
         if len(run.body) < 2:
             raise AssertionError("CampaignRun.run guards are missing")
-        first = run.body[0]
-        second = run.body[1]
-        if not (
-            isinstance(first, ast.Expr)
-            and isinstance(first.value, ast.Call)
-            and isinstance(first.value.func, ast.Attribute)
-            and first.value.func.attr == "_validate_main_campaign_route_config"
-            and isinstance(second, ast.Expr)
-            and isinstance(second.value, ast.Call)
-            and isinstance(second.value.func, ast.Attribute)
-            and second.value.func.attr == "_validate_campaign_switch_config"
-        ):
+        prefix = []
+        for statement in run.body:
+            if not (
+                isinstance(statement, ast.Expr)
+                and isinstance(statement.value, ast.Call)
+                and isinstance(statement.value.func, ast.Attribute)
+                and isinstance(statement.value.func.value, ast.Name)
+                and statement.value.func.value.id == "self"
+            ):
+                break
+            prefix.append(statement.value.func.attr)
+            if prefix[-1] == "_validate_campaign_switch_config":
+                break
+        allowed_prefixes = (
+            ["_validate_main_campaign_route_config", "_validate_campaign_switch_config"],
+            ["_validate_main_campaign_route_config", "_validate_main_stop_condition_config",
+             "_validate_campaign_switch_config"],
+            ["_validate_main_campaign_route_config", "_validate_main_stop_condition_config",
+             "_validate_event_shared_entry_config", "_validate_campaign_switch_config"],
+        )
+        if prefix not in allowed_prefixes:
             raise AssertionError("Campaign route/switch guards are not first in CampaignRun.run")
         attrs = {
             item.attr
@@ -133,6 +142,13 @@ def _verify_guard(run_path: Path) -> bool:
 def _switch_config(values: tuple[bool, bool, bool, bool]):
     fleet_lock, auto_search, two_x_book, ambush_evade = values
     return SimpleNamespace(
+        Scheduler_Command="Main",
+        StopCondition_OilLimit=0,
+        StopCondition_RunCount=1,
+        StopCondition_MapAchievement="non_stop",
+        StopCondition_StageIncrease=False,
+        StopCondition_GetNewShip=False,
+        StopCondition_ReachLevel=0,
         Campaign_UseFleetLock=fleet_lock,
         Campaign_UseAutoSearch=auto_search,
         Campaign_Use2xBook=two_x_book,

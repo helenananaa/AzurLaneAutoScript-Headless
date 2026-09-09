@@ -4,6 +4,7 @@ import time
 import unittest
 from alas_headless import (
     AlasSemanticAdapter,
+    AlasSemanticSession,
     SemanticGateClosed,
     SemanticOracle,
     SemanticTargetMissing,
@@ -16,6 +17,114 @@ from unittest.mock import Mock, patch
 
 
 class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCase):
+    def test_completed_inherited_run_resets_observations_without_refilling_grants(self):
+        oracle = FakeOracle()
+        oracle.campaign_page_value = True
+        adapter = AlasSemanticAdapter(oracle, lambda: None)
+        adapter.begin_campaign_pre_sortie("12-4")
+        previous = adapter._campaign_context
+        previous.auto_search_completion = SimpleNamespace(result_exit_receipt=object())
+        adapter.prepare_campaign_run()
+        self.assertIsNot(adapter._campaign_context, previous)
+        self.assertIsNone(adapter._campaign_context.auto_search_completion)
+        self.assertEqual(adapter._action_ledger.remaining("campaign.sortie"), 0)
+
+    def test_manual_repeat_uses_the_completion_alas_already_observed(self):
+        oracle = FakeOracle()
+        adapter = AlasSemanticAdapter(oracle, lambda: None, campaign_sortie_budget=2)
+        adapter.begin_campaign_pre_sortie("12-4")
+        context = adapter._campaign_context
+        context.sortie_receipt = adapter._dispatch_mutation(
+            "campaign.sortie", lambda: oracle.click_receipt("campaign/fleet-preparation/sortie"))
+        context.combat_receipt = oracle.click_receipt("campaign/grid")
+        oracle.daily_battle_result_visible = Mock(return_value=False)
+        oracle.operation_siren_battle_result_visible = Mock(return_value=False)
+        oracle.campaign_page_value = True
+        with self.assertRaisesRegex(SemanticGateClosed, "completion"):
+            adapter.prepare_campaign_run()
+        session = AlasSemanticSession.__new__(AlasSemanticSession)
+        session.open = lambda: adapter
+        self.assertTrue(session.campaign_boss_returned_to_stage())
+        self.assertTrue(context.manual_completion_proven)
+        adapter.prepare_campaign_run()
+        self.assertFalse(adapter._campaign_context.manual_completion_proven)
+        self.assertIsNone(adapter._campaign_context.sortie_receipt)
+        self.assertEqual(adapter._action_ledger.remaining("campaign.sortie"), 1)
+
+    def test_book_toggle_blocks_unchanged_state_but_allows_inverse_setting(self):
+        oracle = FakeOracle()
+        oracle.enabled_values["reward/campaign-total/exit"] = True
+        oracle.click_campaign_2x_book = Mock(
+            side_effect=lambda *args, **kwargs: oracle.click_receipt("campaign/2x-book-auto"))
+        adapter = AlasSemanticAdapter(oracle, lambda: None)
+        adapter.begin_campaign_pre_sortie("3-1")
+        adapter.click(NamedButton("BOOK_BOX_AUTO"))
+        with self.assertRaisesRegex(SemanticGateClosed, "did not advance"):
+            adapter.click(NamedButton("BOOK_BOX_AUTO"))
+        oracle.campaign_2x_book_value = True
+        adapter.click(NamedButton("BOOK_BOX_AUTO"))
+        self.assertEqual(oracle.click_campaign_2x_book.call_count, 2)
+        oracle.campaign_2x_book_value = False
+        self.assertFalse(adapter.campaign_2x_book_selected())
+        self.assertIsNone(adapter._campaign_context.book_toggle_from)
+
+    def test_optional_preparation_popups_share_the_alas_frame(self):
+        live = FakeOracle()
+        live.campaign_dock_full_visible = Mock(side_effect=AssertionError("unexpected live observation"))
+        live.campaign_2x_book_cancelled = Mock(side_effect=AssertionError("unexpected live observation"))
+        live.campaign_2x_book_prompt_visible = Mock(side_effect=AssertionError("unexpected live observation"))
+        frame = SimpleNamespace(
+            campaign_dock_full_visible=Mock(return_value=False),
+            campaign_2x_book_cancelled=Mock(return_value=False),
+            campaign_2x_book_prompt_visible=Mock(return_value=False),
+        )
+        adapter = AlasSemanticAdapter(live, lambda: None, frame_observation_oracle=lambda: frame)
+        adapter.begin_campaign_pre_sortie("7-2")
+        self.assertFalse(adapter.campaign_dock_full_visible())
+        self.assertFalse(adapter.handle_campaign_2x_book_popup())
+        frame.campaign_dock_full_visible.assert_called_once_with("7-2")
+        frame.campaign_2x_book_prompt_visible.assert_called_once_with()
+        self.assertEqual(live.click_calls, [])
+
+    def test_repeated_normal_sortie_reacquires_preparation_without_refilling_budget(self):
+        for stage in ("7-2", "12-4"):
+            oracle = FakeOracle()
+            oracle.campaign_fleets.update(fleet1=2, fleet2=1, submarine=0)
+            adapter = AlasSemanticAdapter(oracle, lambda: None,
+                campaign_stage_entry_budget=2, campaign_sortie_budget=2,
+                campaign_fleet_mutation_budget=6)
+            adapter.begin_campaign_pre_sortie(stage)
+            for remaining in (1, 0):
+                adapter.prepare_campaign_run()
+                self.assertIsNone(adapter._campaign_context.prepared_fleet_state)
+                entrance = NamedButton(stage)
+                entrance.semantic_campaign_stage_code = stage
+                adapter.click(entrance)
+                # The spent entrance stays non-actionable even if Unity has
+                # not mounted preparation in the current screenshot yet.
+                self.assertFalse(adapter.appear(entrance))
+                adapter.click(NamedButton("MAP_PREPARATION"))
+                adapter.authorize_campaign_fleet_preparation(2, 1, 0)
+                adapter.confirm_campaign_fleet_selection()
+                roles = adapter.ensure_campaign_auto_search_roles("fleet1_boss_fleet2_mob")
+                self.assertEqual((roles.fleet1_role, roles.fleet2_role), ("boss", "mob"))
+                self.assertTrue(adapter.authorize_campaign_sortie(
+                    use_auto_search=True, use_2x_book=False,
+                    submarine_mode="do_not_use", fleet_order="fleet1_boss_fleet2_mob"))
+                adapter.click(NamedButton("FLEET_PREPARATION"))
+                adapter.confirm_campaign_auto_search_started()
+                self.assertEqual(adapter._action_ledger.remaining("campaign.sortie"), remaining)
+                with self.assertRaisesRegex(SemanticGateClosed, "completion"):
+                    adapter.prepare_campaign_run()
+                # Completion is supplied here; its live/parser validation is
+                # independently covered by the original completion test below.
+                adapter._campaign_context.auto_search_completion = SimpleNamespace(result_exit_receipt=object())
+                oracle.campaign_page_value = True
+                oracle.campaign_preparation_kind_value = None
+            adapter.prepare_campaign_run()
+            with self.assertRaisesRegex(SemanticGateClosed, "budget"):
+                adapter.click(entrance)
+
     def test_campaign_check_short_circuits_restored_chapter_before_preparation(self):
         adapter, oracle, _ = self.make_adapter()
         adapter.begin_campaign_pre_sortie("12-4")
@@ -59,6 +168,11 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         with patch("alas_headless.alas_adapter.time.monotonic", return_value=31.0):
             self.assertFalse(adapter.appear(button))
             oracle.campaign_preparation_value = None
+            self.assertFalse(adapter.appear(button))
+            with self.assertRaisesRegex(SemanticGateClosed, "budget"):
+                adapter.click(button)
+            adapter.end_campaign_pre_sortie()
+            adapter.begin_campaign_pre_sortie("12-4")
             with self.assertRaisesRegex(SemanticGateClosed, "identity is not proven"):
                 adapter.appear(button)
 
@@ -523,7 +637,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
             lambda: None,
             campaign_stage_entry_budget=1,
             campaign_fleet_mutation_budget=3,
-            campaign_sortie_budget=1,
+            campaign_sortie_budget=2,
         )
         entrance = NamedButton("12-4")
         entrance.semantic_campaign_stage_code = "12-4"
@@ -552,6 +666,7 @@ class AlasSemanticAdapterTests(AlasSemanticAdapterTestsSupport, unittest.TestCas
         self.assertTrue(adapter.campaign_sortie_committed())
         self.assertTrue(adapter.appear(NamedButton("IN_MAP")))
         proof = adapter.confirm_campaign_sortie()
+        self.assertEqual(adapter._action_ledger.remaining("campaign.sortie"), 1)
         adapter.end_campaign_pre_sortie()
 
         self.assertEqual(proof.stage_code, "12-4")

@@ -78,6 +78,7 @@ struct ObserverButtonRecord {
   std::array<char, kObserverPathBytes> path = {};
   std::array<char, kObserverNameBytes> canvasName = {};
   uint32_t flags = 0;
+  int32_t instanceId = 0;
   int32_t canvasRenderMode = -1;
   float worldX = 0.0f;
   float worldY = 0.0f;

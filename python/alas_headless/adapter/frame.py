@@ -220,7 +220,16 @@ class SemanticFrameClock:
                 # rebasing its clock metadata onto the closing state.
                 for attempt in range(30):
                     before = state
-                    candidate_ui = self._oracle.read_ui_state()
+                    try:
+                        candidate_ui = self._oracle.read_ui_state()
+                    except SemanticGateClosed as exc:
+                        if str(exc) != 'toggle snapshot is truncated':
+                            raise
+                        # Dock cards can exhaust unrelated Toggle/Image caps.
+                        # Preserve those flags in the immutable frame: only the
+                        # retirement slice reader validates its exact records;
+                        # generic UI consumers still reject the partial frame.
+                        candidate_ui = self._oracle.read_ui_state(_preserve_partial_toggles=True)
                     if candidate_ui.generation == before.generation:
                         ui_state = candidate_ui
                         ui_snapshot = dict(candidate_ui.snapshot)

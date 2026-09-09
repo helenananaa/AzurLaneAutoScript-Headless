@@ -1,0 +1,249 @@
+{
+  "schema": "alas-headless.campaign-preparation-observation/v1",
+  "serial": "emulator-5580",
+  "pid": 1520,
+  "generation": 1023,
+  "ui_generation": 1023,
+  "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+  "input_injected": false,
+  "buttons": [
+    {
+      "name": "Toggle",
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "interactable": true,
+      "raycast_top": null,
+      "point": {
+        "x": 1123.0,
+        "y": 596.333
+      },
+      "bounds": {
+        "left": 1037.0,
+        "top": 584.0,
+        "right": 1123.0,
+        "bottom": 608.667
+      },
+      "raw": {
+        "name": "Toggle",
+        "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle",
+        "canvas": "Overlay",
+        "flags": 1535,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "canvas_render_mode": 1,
+        "world_position": {
+          "x": 10.733,
+          "y": -5.252,
+          "z": -390.0
+        },
+        "local_rect": {
+          "x": -129.0,
+          "y": -18.5,
+          "width": 129.0,
+          "height": 37.0
+        },
+        "screen_point": {
+          "x": 1123.0,
+          "y": 123.667
+        },
+        "adb_point": {
+          "x": 1123.0,
+          "y": 596.333
+        },
+        "screen_bounds": {
+          "left": 1037.0,
+          "bottom": 111.333,
+          "right": 1123.0,
+          "top": 136.0
+        },
+        "adb_bounds": {
+          "left": 1037.0,
+          "top": 584.0,
+          "right": 1123.0,
+          "bottom": 608.667
+        }
+      }
+    }
+  ],
+  "images": [
+    {
+      "name": "GameObject",
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle/on/GameObject",
+      "sprite": "btn_switch_loop",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "fill_amount": 1.0,
+      "truncated": false,
+      "bounds": {
+        "left": 1080.0,
+        "top": 587.333,
+        "right": 1120.0,
+        "bottom": 605.333
+      },
+      "raw": {
+        "kind": "image",
+        "name": "GameObject",
+        "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle/on/GameObject",
+        "sprite": "btn_switch_loop",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1080.0,
+          "top": 587.333,
+          "right": 1120.0,
+          "bottom": 605.333
+        },
+        "anchor_world_position": null
+      }
+    },
+    {
+      "name": "on",
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle/on",
+      "sprite": "live2d_on",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "fill_amount": 1.0,
+      "truncated": false,
+      "bounds": {
+        "left": 1052.333,
+        "top": 590.0,
+        "right": 1067.667,
+        "bottom": 602.667
+      },
+      "raw": {
+        "kind": "image",
+        "name": "on",
+        "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle/on",
+        "sprite": "live2d_on",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 1.0,
+          "green": 1.0,
+          "blue": 1.0,
+          "alpha": 1.0
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1052.333,
+          "top": 590.0,
+          "right": 1067.667,
+          "bottom": 602.667
+        },
+        "anchor_world_position": null
+      }
+    },
+    {
+      "name": "Toggle",
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle",
+      "sprite": "white_dot",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "raycast_target": true,
+      "raycast_top": null,
+      "color": [
+        0.0,
+        0.0,
+        0.0,
+        0.098039
+      ],
+      "fill_amount": 1.0,
+      "truncated": false,
+      "bounds": {
+        "left": 1037.0,
+        "top": 584.0,
+        "right": 1123.0,
+        "bottom": 608.667
+      },
+      "raw": {
+        "kind": "image",
+        "name": "Toggle",
+        "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle",
+        "sprite": "white_dot",
+        "flags": 495,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "alpha": 0.098039
+        },
+        "fill_amount": 1.0,
+        "adb_bounds": {
+          "left": 1037.0,
+          "top": 584.0,
+          "right": 1123.0,
+          "bottom": 608.667
+        },
+        "anchor_world_position": null
+      }
+    }
+  ],
+  "texts": [
+    {
+      "kind": "ugui-text",
+      "name": "Text",
+      "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Text",
+      "text": "周回模式",
+      "active_in_hierarchy": true,
+      "active_and_enabled": true,
+      "truncated": false,
+      "bounds": {
+        "left": 961.667,
+        "top": 586.333,
+        "right": 1033.667,
+        "bottom": 606.333
+      },
+      "raw": {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Text",
+        "text": "周回模式",
+        "flags": 271,
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "adb_bounds": {
+          "left": 961.667,
+          "top": 586.333,
+          "right": 1033.667,
+          "bottom": 606.333
+        }
+      }
+    }
+  ]
+}

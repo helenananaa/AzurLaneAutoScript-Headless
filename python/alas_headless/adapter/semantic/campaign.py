@@ -185,7 +185,9 @@ class CampaignAdapterPorts:
                 errors.append("campaign_evidence.start_generation_not_advanced")
         if completion is not None and completion.stage_code != bundle.stage_code:
             errors.append("campaign_evidence.completion_stage_mismatch")
-        if sortie is not None and completion is not None:
+        if completion is not None and completion.result_exit_receipt is None:
+            errors.append("campaign_evidence.result_menu_retained")
+        if sortie is not None and completion is not None and completion.result_exit_receipt is not None:
             chain = (
                 sortie.map_generation,
                 completion.combat_auto_generation,
@@ -227,10 +229,16 @@ class CampaignAdapterPorts:
     def validate_campaign_submarine_config(
         self, **values: object
     ) -> AlasSubmarineConfigSnapshot:
-        return validate_alas_submarine_config(**values)
+        snapshot = validate_alas_submarine_config(**values)
+        self._next_submarine_config = snapshot
+        return snapshot
 
     def campaign_stage_entry_allowed(self) -> bool:
         context = self._require_campaign_context()
+        if (context.auto_search_completion is not None
+                and context.auto_search_completion.result_exit_receipt is None
+                and self.oracle.campaign_auto_search_reentry_available()):
+            return self._action_ledger.allowed('campaign.sortie')
         return (
             self._action_ledger.allowed("campaign.stage_entry")
             and context.entry_receipt is None
@@ -248,7 +256,7 @@ class CampaignAdapterPorts:
 
     def campaign_dock_full_visible(self) -> bool:
         context = self._require_campaign_context()
-        return self.oracle.campaign_dock_full_visible(
+        return self._frame_or_live_observation_oracle().campaign_dock_full_visible(
             context.resolved_stage_code or context.stage_code
         )
 
@@ -284,7 +292,7 @@ class CampaignAdapterPorts:
         context = self._require_campaign_context()
         if context.sortie_receipt is None:
             return None
-        cost = self.oracle.war_archives_entry_confirmation_cost()
+        cost = self._frame_or_live_observation_oracle().war_archives_entry_confirmation_cost()
         if cost is None:
             return None
         if context.archive_entry_confirm_receipt is not None:
@@ -548,11 +556,12 @@ class CampaignAdapterPorts:
                 for receipt in context.fleet_mutation_receipts
             ),
             oil_before_sortie=context.oil_before_sortie,
-            required_oil=required_oil,
+            required_oil=required_oil * (2 if context.use_2x_book else 1),
             sortie_generation=context.sortie_receipt.generation,
             map_generation=active.generation,
             map_root_path=active.root_path,
             oil_cost_source=context.prepared_fleet_state.oil_cost_source,
+            submarine_auto_mode=context.submarine_auto_mode,
         )
         if self._campaign_evidence_bundle is not None:
             self._campaign_evidence_bundle = replace(
@@ -561,25 +570,123 @@ class CampaignAdapterPorts:
             )
         return context.sortie_proof
 
+    def _campaign_submarine_deployed(self):
+        context = self._require_campaign_context()
+        return bool((context.requested_fleets and context.requested_fleets[2]) or
+                    (context.declared_submarine_fleet and getattr(context.map_state, 'submarine', None) is not None))
+
+    def campaign_submarine_call_battle(self):
+        self._package_gate()
+        context = self._require_campaign_context()
+        if not self._campaign_submarine_deployed():
+            return None
+        observed = self._frame_or_live_observation_oracle().campaign_submarine_call_state()
+        return observed.battle_instance_id if observed is not None else None
+
+    def campaign_submarine_grid(self, location):
+        from ...alas_camera_view import build_alas_campaign_camera_view
+        self._package_gate()
+        context = self._require_campaign_context()
+        if context.submarine_move_entry is None or context.map_columns is None:
+            raise SemanticGateClosed('submarine grid requires original map and deployment entry')
+        state = self.oracle.campaign_map_state(context.stage_code, columns=context.map_columns,
+            rows=context.map_rows, land_cells=context.map_land_cells,
+            expected_fleet_count=context.map_expected_fleet_count, allow_deployment=True)
+        view = build_alas_campaign_camera_view(state, screen_center=(640, 360))
+        key = tuple(location)
+        if key not in view.grids:
+            raise SemanticGateClosed('submarine destination is outside the observed map')
+        grid = view.grids[key]
+        grid.__str__ = grid.location
+        context.map_state = state
+        return grid
+
+    def campaign_submarine_move_popup_appear(self, name):
+        context = self._require_campaign_context()
+        if context.submarine_move_confirm is None or context.submarine_move_oil is not None:
+            return False
+        observed = self._frame_or_live_observation_oracle().campaign_submarine_move_confirmation()
+        if observed is None:
+            return False
+        expected = context.submarine_move_destination.semantic_id.rsplit('/',1)[1]
+        if observed[2:4] != (context.map_state.submarine.node, expected):
+            raise SemanticGateClosed('submarine oil prompt differs from planned movement')
+        return name in ('POPUP_CONFIRM', 'POPUP_CANCEL')
+
+    def click_campaign_submarine_grid(self, button):
+        context = self._require_campaign_context()
+        location = self._campaign_grid_location(button)
+        grid = self.campaign_submarine_grid(location)
+        node = chr(65+grid.location[0]) + str(grid.location[1]+1)
+        if context.submarine_planned_destination is not None and node != context.submarine_planned_destination:
+            raise SemanticGateClosed('submarine destination differs from original ALAS preview')
+        if context.submarine_move_destination is not None:
+            raise SemanticGateClosed('submarine destination already submitted; inspect before retry')
+        receipt = self.oracle.click_campaign_submarine_destination(context.map_state, node, context.submarine_move_entry)
+        context.submarine_move_destination = receipt
+        return receipt
+
+    def campaign_submarine_call_appear(self, name):
+        self._package_gate()
+        context = self._require_campaign_context()
+        if not self._campaign_submarine_deployed():
+            return False
+        observed = self._frame_or_live_observation_oracle().campaign_submarine_call_state()
+        if observed is None:
+            return False
+        receipt = context.submarine_call_receipts.get(observed.battle_instance_id)
+        acknowledged = (receipt is not None and observed.generation > receipt.generation
+                        and observed.button is None)
+        if name == 'SUBMARINE_CALLED':
+            # UI acknowledgment of our own call only; deployment/ammo is separate evidence.
+            return acknowledged
+        if name in ('SUBMARINE_AVAILABLE_CHECK_1', 'SUBMARINE_AVAILABLE_CHECK_2'):
+            # While our submitted call is awaiting its UI acknowledgment,
+            # neither called nor ready is proven. Keep the original handler
+            # waiting instead of entering its unconditional fallback click.
+            return (receipt is None and observed.button is not None) or acknowledged
+        if name == 'SUBMARINE_READY':
+            return receipt is None and observed.button is not None and observed.button.actionable
+        raise SemanticGateClosed('unknown submarine call resource')
+
+    def click_campaign_submarine_call(self):
+        self._package_gate()
+        context = self._require_campaign_context()
+        call_mode = context.submarine_mode == 'every_combat' or (
+            context.submarine_mode in ('boss_only', 'hunt_and_boss') and context.combat_admission is not None) or (
+            context.submarine_mode == 'boss_only' and context.submarine_auto_mode == 'sub_standby'
+            and context.auto_search_role_state is not None)
+        if (not self._campaign_submarine_deployed()
+                or (context.sortie_proof is None and context.combat_admission is None) or not call_mode):
+            raise SemanticGateClosed('submarine call requires prepared sortie and original call mode')
+        observed = self.oracle.campaign_submarine_call_state()
+        if observed is None:
+            raise SemanticGateClosed('submarine combat is absent')
+        if observed.battle_instance_id in context.submarine_call_receipts:
+            raise SemanticGateClosed('submarine call already submitted in this battle')
+        receipt = self.oracle.click_campaign_submarine_call(observed.battle_instance_id)
+        context.submarine_call_receipts[observed.battle_instance_id] = receipt
+        return receipt
+
     def wait_campaign_auto_search_completion(
-        self, stage_code: str, timeout_seconds: float = 1800.0
+        self, stage_code: str, timeout_seconds: float = 1800.0,
+        *, keep_result: bool = False, recovery_handler=None, submarine_handler=None,
     ) -> CampaignAutoSearchCompletionProof:
         """Passively wait for the official auto-search total-reward panel."""
 
         self._package_gate()
         context = self._require_campaign_context()
+        manual_submarine = (context.requested_fleets and context.requested_fleets[2]
+                            and context.submarine_auto_mode == 'sub_standby'
+                            and context.submarine_mode in ('every_combat', 'boss_only'))
+        if manual_submarine and submarine_handler is None:
+            raise SemanticGateClosed('submarine standby requires original call handler')
+        if type(keep_result) is not bool:
+            raise TypeError("keep_result must be boolean")
+        recovery_used = False
         if stage_code != context.stage_code:
             raise SemanticGateClosed(
                 "campaign auto-search completion identity changed"
-            )
-        if (
-            context.mode == "normal"
-            and stage_code != "12-4"
-            and re.fullmatch(r"(?:[abcd][1-3]|sp)", stage_code) is None
-        ):
-            raise SemanticGateClosed(
-                "normal campaign auto-search completion is not qualified for "
-                + stage_code
             )
         if (
             context.mode == "hard"
@@ -605,7 +712,19 @@ class CampaignAdapterPorts:
         combat_auto_generation: Optional[int] = None
         while time.monotonic() < deadline:
             self._package_gate()
+            if recovery_handler is not None:
+                if self.oracle.campaign_dock_full_visible(context.stage_code) or self.oracle.retirement_selection_visible():
+                    if self._input_frame_refresher is not None:
+                        self._input_frame_refresher()
+                    recovery_used = True
+                    recovery_handler()
+                    continue
             combat_auto = self.oracle.campaign_official_combat_auto_state()
+            if manual_submarine:
+                if self._input_frame_refresher is not None:
+                    self._input_frame_refresher()
+                submarine_handler()
+                recovery_used = recovery_used or bool(context.submarine_call_receipts)
             if combat_auto is not None:
                 generation, enabled = combat_auto
                 if isinstance(generation, bool) or not isinstance(generation, int):
@@ -657,6 +776,20 @@ class CampaignAdapterPorts:
                     raise SemanticGateClosed(
                         "campaign auto-search result generation did not advance"
                     )
+                if keep_result and self.oracle.campaign_auto_search_reentry_available():
+                    roles = context.auto_search_role_state
+                    proof = CampaignAutoSearchCompletionProof(
+                        stage_code=stage_code, result_generation=state.generation,
+                        result_path=targets[0].path, fleet1_role=roles.fleet1_role,
+                        fleet2_role=roles.fleet2_role,
+                        waited_seconds=round(time.monotonic() - started, 3),
+                        combat_auto_generation=combat_auto_generation,
+                        result_exit_receipt=None, passive_after_sortie=not recovery_used)
+                    context.auto_search_completion = proof
+                    self._last_campaign_auto_search_completion = proof
+                    if self._campaign_evidence_bundle is not None:
+                        self._campaign_evidence_bundle = replace(self._campaign_evidence_bundle, completion_proof=proof)
+                    return proof
                 result_exit_receipt = self.oracle.click(
                     "reward/campaign-total/exit"
                 )
@@ -685,6 +818,7 @@ class CampaignAdapterPorts:
                     waited_seconds=round(time.monotonic() - started, 3),
                     combat_auto_generation=combat_auto_generation,
                     result_exit_receipt=result_exit_receipt,
+                    passive_after_sortie=not recovery_used,
                 )
                 stage_deadline = time.monotonic() + 30.0
                 while time.monotonic() < stage_deadline:
@@ -729,6 +863,69 @@ class CampaignAdapterPorts:
         raise SemanticGateClosed(
             "orphan campaign auto-search result did not return to stage"
         )
+
+    def authorize_campaign_auto_search_continue(self, *, use_2x_book: bool,
+                                                fleet1: int, fleet2: int,
+                                                fleet_order: str, submarine: int = 0,
+                                                submarine_auto_mode: str = 'sub_standby') -> bool:
+        """Authorize ALAS's next run using its retained game-owned menu."""
+        self._package_gate()
+        context = self._require_campaign_context()
+        if context.mode == 'hard':
+            return True  # Existing hard Continue owns its separate contract.
+        if (context.auto_search_completion is None or context.sortie_proof is None
+                or context.prepared_fleet_state is None or context.auto_search_role_state is None
+                or not self._action_ledger.allowed('campaign.sortie')):
+            raise SemanticGateClosed('campaign Continue requires a completed owned sortie and remaining budget')
+        roles = {'fleet1_mob_fleet2_boss': ('mob', 'boss'),
+                 'fleet1_boss_fleet2_mob': ('boss', 'mob'),
+                 'fleet1_all_fleet2_standby': ('all', 'standby'),
+                 'fleet1_standby_fleet2_all': ('standby', 'all')}
+        observed_roles = (context.auto_search_role_state.fleet1_role, context.auto_search_role_state.fleet2_role)
+        if context.requested_fleets != (fleet1, fleet2, submarine) or roles.get(fleet_order) != observed_roles:
+            raise SemanticGateClosed('campaign Continue configuration differs from retained preparation')
+        if submarine and context.submarine_auto_mode != submarine_auto_mode:
+            raise SemanticGateClosed('campaign Continue submarine duty differs from retained preparation')
+        if not self.oracle.campaign_auto_search_reentry_available():
+            raise SemanticGateClosed('campaign Continue menu is unavailable')
+        _, _, selected, count = self.oracle._campaign_2x_book_control('auto')
+        if type(use_2x_book) is not bool or (selected is not use_2x_book and not (selected is None and not use_2x_book)):
+            raise SemanticGateClosed('campaign Continue book selection is not proven')
+        if use_2x_book and count < 1:
+            raise SemanticGateClosed('campaign Continue book inventory is empty')
+        oil = self.oracle.campaign_oil()
+        required = context.prepared_fleet_state.required_sortie_oil * (2 if use_2x_book else 1)
+        if oil < required:
+            raise SemanticGateClosed('campaign Continue oil precondition failed')
+        context.oil_before_sortie = oil
+        context.use_2x_book = use_2x_book
+        context.sortie_budget_before = self._action_ledger.remaining('campaign.sortie')
+        context.continuation_authorized = True
+        return True
+
+    def continue_campaign_normal_auto_search(self) -> ActionReceipt:
+        self._package_gate()
+        context = self._require_campaign_context()
+        if (context.mode != 'normal' or not context.continuation_authorized
+                or context.auto_search_completion is None
+                or self._action_ledger.remaining('campaign.sortie') != context.sortie_budget_before):
+            raise SemanticGateClosed('campaign Continue has no fresh authorization')
+        selected = self.oracle.campaign_2x_book_selected(mode='auto')
+        if selected is not context.use_2x_book and not (selected is None and not context.use_2x_book):
+            raise SemanticGateClosed('campaign Continue book changed before input')
+        context.continuation_authorized = False
+        receipt = self._dispatch_mutation('campaign.sortie', self.oracle.click_campaign_auto_search_reentry)
+        context.initial_fleet_state = context.prepared_fleet_state
+        context.fleet_mutation_receipts = []
+        context.sortie_receipt = receipt
+        context.sortie_proof = None
+        context.map_entry_state = None
+        context.auto_search_completion = None
+        context.book_confirmation_receipt = None
+        context.passive_transition_until = time.monotonic() + 180.0
+        if self._campaign_evidence_bundle is not None:
+            self._campaign_evidence_bundle = replace(self._campaign_evidence_bundle, sortie_proof=None, completion_proof=None)
+        return receipt
 
     def continue_campaign_hard_auto_search(self) -> ActionReceipt:
         """Spend one remaining sortie lease on the exact official Continue button."""
@@ -1019,6 +1216,12 @@ class CampaignAdapterPorts:
                 not in (context.stage_code, shared_hard_entrance)
             ):
                 raise SemanticGateClosed("campaign stage identity changed")
+            if context.entry_receipt is not None:
+                # This invocation has already spent its one-shot entrance.
+                # A still-mounted chapter underlay cannot authorize a second
+                # entry. Let ALAS take its next screenshot and inspect the
+                # preparation instead of reparsing that obscured underlay.
+                return False
             try:
                 return self.oracle.campaign_stage_actionable(campaign_stage_code)
             except SemanticGateClosed:
@@ -1033,15 +1236,78 @@ class CampaignAdapterPorts:
                     campaign_stage_code
                 ) is not None:
                     return False
-                if (
-                    context.entry_receipt is not None
-                    and time.monotonic() <= context.passive_transition_until
-                ):
-                    return False
                 raise
         return UNHANDLED
 
     def _appear_campaign(self, name):
+        if (name == 'SP_CHECK' and self._campaign_context is not None
+                and re.fullmatch(r'[1-9][0-9]*-[1-9][0-9]*', self._campaign_context.stage_code)):
+            if self.oracle.campaign_is_in_map() or self.oracle.campaign_page_is_normal():
+                return False
+        if self._campaign_context is not None and name in ('SUBMARINE_MOVE_ENTER', 'SUBMARINE_MOVE_CONFIRM', 'SUBMARINE_MOVE_CANCEL'):
+            if name == 'SUBMARINE_MOVE_ENTER':
+                if self.oracle.campaign_deployment_controls() is not None:
+                    return False
+                context = self._campaign_context
+                if context.submarine_move_confirm is not None:
+                    from dataclasses import asdict
+                    previous_marker = context.map_state.submarine.marker
+                    # An appearance probe owns one immutable screenshot frame.
+                    # Parse that complete frame; do not wait for two increasing
+                    # generations inside it. Subsequent map input still re-proves
+                    # the stable map at its existing mutation boundary.
+                    state = self.oracle._campaign_map_state_once(
+                        context.stage_code, columns=context.map_columns,
+                        rows=context.map_rows,
+                        land=tuple(sorted((r+1,c+1) for c,r in context.map_land_cells)),
+                        expected_fleet_count=context.map_expected_fleet_count)
+                    last_input = context.submarine_move_oil or context.submarine_move_confirm
+                    if state.generation <= last_input.generation:
+                        return False
+                    expected = context.submarine_move_destination.semantic_id.rsplit('/',1)[1]
+                    if state.submarine is None or state.submarine.node != expected or state.submarine.marker != previous_marker:
+                        raise SemanticGateClosed('submarine deployment did not reach the selected node')
+                    if context.combat_admission is not None:
+                        self._validate_campaign_combat_route_state(context, state, for_next_input=True)
+                        context.combat_admission = replace(context.combat_admission, map_signature=state.signature)
+                    context.map_state = state
+                    context.submarine_move_history.append(dict(
+                        entry=asdict(context.submarine_move_entry), destination=asdict(context.submarine_move_destination),
+                        confirm=asdict(context.submarine_move_confirm), post_generation=state.generation,
+                        oil_confirmation=asdict(context.submarine_move_oil) if context.submarine_move_oil else None,
+                        submarine=asdict(state.submarine)))
+                    context.submarine_move_entry = context.submarine_move_destination = context.submarine_move_confirm = None
+                    context.submarine_move_oil = None
+                return self.oracle.campaign_submarine_strategy_state('move') is not None
+            if name == 'SUBMARINE_MOVE_CONFIRM' and self._campaign_context.submarine_move_confirm is not None:
+                return False
+            return self._campaign_context.submarine_move_entry is not None and self.oracle.campaign_deployment_controls() is not None
+        if self._campaign_context is not None and name in ('SUBMARINE_HUNT_ON', 'SUBMARINE_HUNT_OFF', 'SUBMARINE_VIEW_ON', 'SUBMARINE_VIEW_OFF'):
+            context = self._campaign_context
+            if not self._campaign_submarine_deployed():
+                return False
+            feature = 'hunt' if '_HUNT_' in name else 'view'
+            state = self.oracle.campaign_submarine_strategy_state(feature)
+            if state is not None and feature in context.submarine_strategy_pending and state is not context.submarine_strategy_pending[feature]:
+                context.submarine_strategy_pending.pop(feature)
+            return state is not None and state is name.endswith('_ON')
+        if self._campaign_context is not None and name == 'AUTO_SEARCH_MENU_CONTINUE' and self._campaign_context.mode == 'normal':
+            return (self._campaign_context.auto_search_completion is not None
+                    and self.oracle.campaign_auto_search_reentry_available())
+        if self._campaign_context is not None and name in ("MAP_AMBUSH_EVADE", "MAP_AMBUSH_ATTACK"):
+            return self.oracle.campaign_ambush_visible(evade=name == "MAP_AMBUSH_EVADE")
+        if self._campaign_context is not None and name in ("FLEET_LOCKED", "FLEET_UNLOCKED"):
+            selected = self.oracle.campaign_fleet_lock_selected()
+            return selected is not None and selected == (name == "FLEET_LOCKED")
+        if self._campaign_context is not None and name in ("BOOK_CHECK_PREP", "BOOK_CHECK_AUTO"):
+            return self.oracle.campaign_2x_book_selected(mode="auto" if name.endswith("AUTO") else "prep") is not None
+        if self._campaign_context is not None and name in (
+            "FAST_FORWARD_ON", "FAST_FORWARD_OFF",
+        ):
+            if self._campaign_preparation_kind() != "map":
+                return False
+            selected = self.oracle.campaign_clear_mode_selected()
+            return selected is not None and selected == (name == "FAST_FORWARD_ON")
         if self._campaign_context is not None and name in (
             "FLEET_NUM_1",
             "FLEET_NUM_2",
@@ -1064,8 +1330,8 @@ class CampaignAdapterPorts:
             admission = context.combat_admission
             if admission is None:
                 return False
-            state = self._refresh_campaign_map_state()
-            if state.displayed_fleet_index == admission.fleet_index:
+            displayed = self.oracle.campaign_map_displayed_fleet_index()
+            if displayed == admission.fleet_index:
                 return False
             return self.oracle.campaign_map_fleet_switch_available()
         if (
@@ -1204,6 +1470,21 @@ class CampaignAdapterPorts:
         return UNHANDLED
 
     def _click_campaign_confirmation(self, name):
+        if name == 'POPUP_CONFIRM_CAMPAIGN_MAP' and self._campaign_context is not None:
+            return self.oracle.click('campaign/urgent-notice/confirm')
+        if name in ('POPUP_CONFIRM_SUBMARINE_MOVE', 'POPUP_CANCEL_SUBMARINE_MOVE'):
+            if self._campaign_context is None or self._campaign_context.submarine_move_confirm is None:
+                raise SemanticGateClosed('submarine movement popup has no pending deployment')
+            name = 'POPUP_CONFIRM' if name.startswith('POPUP_CONFIRM_') else 'POPUP_CANCEL'
+        if self._campaign_context is not None and name in ('POPUP_CONFIRM', 'POPUP_CANCEL') and self._campaign_context.submarine_move_confirm is not None:
+            context = self._campaign_context
+            if not self.campaign_submarine_move_popup_appear(name):
+                raise SemanticGateClosed('submarine movement oil confirmation is unavailable')
+            destination = context.submarine_move_destination.semantic_id.rsplit('/',1)[1]
+            receipt = self.oracle.click_campaign_submarine_move_confirmation(context.map_state.submarine.node,
+                destination, confirm=name == 'POPUP_CONFIRM')
+            context.submarine_move_oil = receipt
+            return receipt
         if (
             self._campaign_context is not None
             and name in ("POPUP_CONFIRM", "POPUP_CANCEL")
@@ -1222,6 +1503,75 @@ class CampaignAdapterPorts:
         return UNHANDLED
 
     def _click_campaign_strategy(self, name):
+        if self._campaign_context is not None and name == 'SUBMARINE_MOVE_ENTER':
+            context = self._campaign_context
+            if not self._campaign_submarine_deployed() or (context.sortie_proof is None and context.combat_admission is None):
+                raise SemanticGateClosed('submarine move requires prepared sortie')
+            if context.submarine_move_entry is not None:
+                raise SemanticGateClosed('submarine deployment already entered')
+            receipt = self.oracle.click_campaign_submarine_strategy('move', False)
+            context.submarine_move_entry = receipt
+            context.submarine_move_destination = None
+            context.submarine_move_confirm = None
+            context.submarine_move_oil = None
+            return receipt
+        if self._campaign_context is not None and name == 'SUBMARINE_MOVE_CONFIRM':
+            context = self._campaign_context
+            if context.submarine_move_destination is None or context.submarine_move_confirm is not None:
+                raise SemanticGateClosed('submarine deployment has no new destination to confirm')
+            location = context.submarine_move_destination.semantic_id.rsplit('/',1)[1]
+            self.campaign_submarine_grid((ord(location[0])-65,int(location[1:])-1))
+            receipt = self.oracle.click_campaign_submarine_deployment_confirm(context.map_state, context.submarine_move_destination)
+            context.submarine_move_confirm = receipt
+            return receipt
+        if self._campaign_context is not None and name == 'SUBMARINE_MOVE_CANCEL':
+            receipt = self.oracle.click_campaign_deployment_cancel()
+            self._campaign_context.submarine_move_entry = None
+            self._campaign_context.submarine_move_destination = None
+            self._campaign_context.submarine_move_confirm = None
+            self._campaign_context.submarine_move_oil = None
+            return receipt
+        if self._campaign_context is not None and name in ('SUBMARINE_HUNT_ON', 'SUBMARINE_HUNT_OFF', 'SUBMARINE_VIEW_ON', 'SUBMARINE_VIEW_OFF'):
+            context = self._campaign_context
+            if not self._campaign_submarine_deployed():
+                raise SemanticGateClosed('submarine strategy requires the prepared submarine')
+            feature = 'hunt' if '_HUNT_' in name else 'view'
+            expected = name.endswith('_ON')
+            if feature in context.submarine_strategy_pending and context.submarine_strategy_pending[feature] is expected:
+                raise SemanticGateClosed('submarine strategy state did not advance after input')
+            receipt = self.oracle.click_campaign_submarine_strategy(feature, expected)
+            context.submarine_strategy_pending[feature] = expected
+            context.submarine_strategy_receipts.append(receipt)
+            return receipt
+        if self._campaign_context is not None and name == 'AUTO_SEARCH_MENU_EXIT':
+            context = self._campaign_context
+            if context.manual_result_exit_receipt is not None:
+                raise SemanticGateClosed('manual campaign result exit already submitted')
+            receipt = self.oracle.click('reward/campaign-total/exit')
+            if self.campaign_combat_committed():
+                context.manual_result_exit_receipt = receipt
+            if context.auto_search_completion is not None:
+                proof = replace(context.auto_search_completion, result_exit_receipt=receipt)
+                context.auto_search_completion = proof
+                self._last_campaign_auto_search_completion = proof
+                if self._campaign_evidence_bundle is not None:
+                    self._campaign_evidence_bundle = replace(self._campaign_evidence_bundle, completion_proof=proof)
+            return receipt
+        if self._campaign_context is not None and name in ("MAP_AMBUSH_EVADE", "MAP_AMBUSH_ATTACK"):
+            if not self.handle_campaign_ambush(evade=name == "MAP_AMBUSH_EVADE"):
+                raise SemanticGateClosed("campaign ambush disappeared before input")
+            return self._require_campaign_context().ambush_receipt
+        if self._campaign_context is not None and name in ("FLEET_LOCKED", "FLEET_UNLOCKED"):
+            context = self._require_campaign_context()
+            previous = context.fleet_lock_receipt
+            expected = name == "FLEET_LOCKED"
+            if previous is not None and previous.semantic_id.endswith("/on" if expected else "/off"):
+                raise SemanticGateClosed("fleet-lock state did not advance after its previous input")
+            if previous is not None and self.oracle.read_state().generation <= previous.generation:
+                raise SemanticGateClosed("fleet-lock input frame did not advance")
+            receipt = self.oracle.click_campaign_fleet_lock(expected)
+            context.fleet_lock_receipt = receipt
+            return receipt
         if self._campaign_context is not None and name == "STRATEGY_OPEN":
             receipt = self.oracle.click_campaign_strategy_open()
             self._campaign_context.passive_transition_until = (
@@ -1232,6 +1582,8 @@ class CampaignAdapterPorts:
             self._campaign_context is not None
             and name == "AUTO_SEARCH_MENU_CONTINUE"
         ):
+            if self._campaign_context.mode == 'normal':
+                return self.continue_campaign_normal_auto_search()
             return self.continue_campaign_hard_auto_search()
         if self._campaign_context is not None and name == "STRATEGY_OPENED":
             receipt = self.oracle.click_campaign_strategy_close()
@@ -1350,7 +1702,7 @@ class CampaignAdapterPorts:
             context = self._require_campaign_context()
             remaining_sorties = self._action_ledger.remaining("campaign.sortie")
             exact_sortie_budget = (
-                remaining_sorties == 1
+                remaining_sorties > 0
                 if context.mode == "normal"
                 else remaining_sorties in (1, 2, 3)
             )
@@ -1358,6 +1710,7 @@ class CampaignAdapterPorts:
                 not context.sortie_authorized
                 or not self._action_ledger.allowed("campaign.sortie")
                 or not exact_sortie_budget
+                or remaining_sorties != context.sortie_budget_before
                 or context.sortie_receipt is not None
                 or context.prepared_fleet_state is None
             ):
@@ -1370,7 +1723,9 @@ class CampaignAdapterPorts:
                     self.oracle.click_campaign_auto_search_sortie(
                         self._campaign_resolved_entrance_stage()
                     )
-                    if context.auto_search_role_state is not None
+                    if (context.auto_search_role_state is not None or
+                        (context.submarine_auto_mode is not None
+                         and self.oracle.toggle_selected('campaign/fleet-preparation/roles/tab')))
                     else self.oracle.click_campaign_sortie(
                         self._campaign_resolved_entrance_stage(),
                         fallback_oil_cost=context.map_preparation_oil_cost,
@@ -1543,6 +1898,27 @@ class CampaignAdapterPorts:
         return UNHANDLED
 
     def _click_campaign_preparation(self, name, semantic_id):
+        if self._campaign_context is not None and name == "BOOK_BOX_AUTO":
+            # Configuring the checkbox spends no book or oil. Inherited
+            # result menus can be configured too; Continue retains its own
+            # independent sortie/resource authorization.
+            if not self.oracle.enabled("reward/campaign-total/exit"):
+                raise SemanticGateClosed("AUTO book input requires the exact result menu")
+            return self._click_campaign_book("auto")
+        if self._campaign_context is not None and name == "BOOK_BOX_PREP":
+            self._require_campaign_context()
+            if self._campaign_preparation_kind() != "fleet":
+                raise SemanticGateClosed("2x-book input requires fleet preparation")
+            return self._click_campaign_book("prep")
+        if self._campaign_context is not None and name in (
+            "FAST_FORWARD_ON", "FAST_FORWARD_OFF",
+        ):
+            context = self._require_campaign_context()
+            if context.entry_receipt is None or context.map_preparation_receipt is not None:
+                raise SemanticGateClosed("clear-mode input requires owned map preparation")
+            if self._campaign_preparation_kind() != "map":
+                raise SemanticGateClosed("clear-mode input requires map preparation")
+            return self.oracle.click_campaign_clear_mode(name == "FAST_FORWARD_ON")
         if (
             self._campaign_context is not None
             and name in CAMPAIGN_AUTO_SEARCH_RESOURCES

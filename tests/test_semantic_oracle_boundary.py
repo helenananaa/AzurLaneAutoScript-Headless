@@ -267,6 +267,12 @@ class SemanticOracleTests(SemanticOracleTestsSupport, unittest.TestCase):
         ):
             oracle.war_archives_entry_confirmation_cost()
         self.assertEqual(backend.taps, [(800, 520)])
+        backend.ui["texts"] = []
+        backend.ui["text_count"] = 0
+        self.assertIsNone(oracle.war_archives_entry_confirmation_cost())
+        with self.assertRaises(SemanticGateClosed):
+            oracle.confirm_war_archives_entry()
+        self.assertEqual(backend.taps, [(800, 520)])
 
     def test_foreground_parser_accepts_resumed_markers_only(self):
         for output in (

@@ -1,6 +1,7 @@
 """Retirement regression cases for the oracle."""
 
 import unittest
+import dataclasses
 from alas_headless.semantic_oracle import (
     RetirementNoCandidateReceipt,
     SemanticGateClosed,
@@ -20,6 +21,71 @@ from tests.semantic_support.observer_fixtures import (
 
 
 class RetirementSemanticOracleTests(unittest.TestCase):
+    def test_retirement_presence_does_not_claim_other_dock_selection_modes(self):
+        backend = FakeBackend([])
+        set_retirement_selection(backend, 20, 829)
+        oracle = make_oracle(backend)
+        self.assertTrue(oracle.retirement_selection_visible())
+        backend.ui['texts'][0]['text'] = '请选择用于强化的角色：'
+        self.assertFalse(oracle.retirement_selection_visible())
+        self.assertEqual(backend.taps, [])
+
+    def test_overfull_receipt_keeps_exact_capacity_delta(self):
+        from tests.semantic_support.adapter_cases import AlasSemanticAdapterTestsSupport
+        adapter, _, _ = AlasSemanticAdapterTestsSupport().make_adapter(retirement_budget=1)
+        adapter.retire_ships_one_click(True)
+        receipt = adapter.retirement_receipt()
+        valid = dataclasses.replace(receipt, capacity_before=931, capacity_after=829,
+                                    retired_count=102, capacity_total=930)
+        self.assertEqual(valid.retired_count, 102)
+        with self.assertRaisesRegex(ValueError, 'delta'):
+            dataclasses.replace(valid, capacity_after=828)
+        with self.assertRaises(ValueError):
+            dataclasses.replace(valid, capacity_total=0)
+
+    def test_ordinary_dock_back_requires_label_hit_and_no_selection(self):
+        root = "OverlayCamera/Overlay/UIMain/blur_panel/"
+        backend = FakeBackend([make_button("back", root + "adapt/top/back", 58, 54)])
+        backend.ui = make_ui([make_text("船坞容量:", root + "adapt/top/capacity/label")])
+        make_oracle(backend).click_dock_page_back()
+        self.assertEqual(len(backend.taps), 1)
+        backend.buttons['buttons'][0]['raycast_top'] = None
+        with self.assertRaises(SemanticGateClosed):
+            make_oracle(backend).click_dock_page_back()
+        self.assertEqual(len(backend.taps), 1)
+        set_retirement_selection(backend, 20, 931)
+        with self.assertRaisesRegex(SemanticGateClosed, 'active selection'):
+            make_oracle(backend).click_dock_page_back()
+
+    def test_overfull_dock_is_valid_but_impossible_selection_is_not(self):
+        backend = FakeBackend([])
+        set_retirement_selection(backend, 20, 931)
+        state = make_oracle(backend).retirement_selection_state()
+        self.assertEqual(state.capacity_used, 931)
+        set_retirement_selection(backend, 21, 931, selected=932)
+        with self.assertRaisesRegex(SemanticGateClosed, "inconsistent"):
+            make_oracle(backend).retirement_selection_state()
+
+    def test_retirement_input_rejects_missing_hit_without_mutation(self):
+        backend = FakeBackend([])
+        set_retirement_selection(backend, 20, 814)
+        backend.buttons["buttons"][0]["raycast_top"] = None
+        with self.assertRaisesRegex(SemanticGateClosed, "not actionable"):
+            make_oracle(backend).open_retirement_settings()
+        self.assertEqual(backend.taps, [])
+
+    def test_retirement_owns_dock_but_not_an_unrelated_msgbox(self):
+        backend = FakeBackend([])
+        set_retirement_selection(backend, 20, 931)
+        backend.buttons['buttons'].append(make_button('123', 'UICamera/Canvas/UIMain/DockyardUI(Clone)/main/ship_container/ships/123'))
+        backend.buttons['button_count'] = len(backend.buttons['buttons'])
+        make_oracle(backend).open_retirement_settings()
+        backend.buttons['buttons'].append(make_button('content', 'OverlayCamera/Overlay/UIMain/Msgbox(Clone)/window/msg_panel/content'))
+        backend.buttons['button_count'] = len(backend.buttons['buttons'])
+        with self.assertRaisesRegex(SemanticGateClosed, 'blocked'):
+            make_oracle(backend).open_retirement_settings()
+        self.assertEqual(len(backend.taps), 1)
+
     def test_retirement_settings_tolerate_unrelated_global_toggle_cap(self):
         backend = FakeBackend([])
         set_retirement_settings(backend, 20, keep_needed=True)
@@ -30,6 +96,18 @@ class RetirementSemanticOracleTests(unittest.TestCase):
         self.assertEqual(state.priority, ("R", "SR", "N"))
         self.assertEqual(state.full_star_policy, "keep_none")
         self.assertEqual(state.no_full_star_policy, "keep_needed")
+
+    def test_retirement_setting_requires_positive_hit(self):
+        backend = FakeBackend([])
+        set_retirement_settings(backend, 20, keep_needed=False)
+        target = next(t for t in backend.ui['toggles'] if t['path'].endswith('notify_tpl_5/keep_needed'))
+        target['raycast_top'] = None
+        with self.assertRaisesRegex(SemanticGateClosed, 'positive hit'):
+            make_oracle(backend)._click_retirement_setting_option(5, 'keep_needed')
+        self.assertEqual(backend.taps, [])
+        target['raycast_top'] = True
+        make_oracle(backend)._click_retirement_setting_option(5, 'keep_needed')
+        self.assertEqual(len(backend.taps), 1)
 
     def test_retirement_settings_require_every_exact_protection_toggle(self):
         backend = FakeBackend([])
@@ -158,7 +236,7 @@ class RetirementSemanticOracleTests(unittest.TestCase):
                         root + "confirm_button",
                         1014,
                         649,
-                        raycast_top=None,
+                        raycast_top=True,
                     )
                 ],
                 generation=generation,
@@ -184,7 +262,7 @@ class RetirementSemanticOracleTests(unittest.TestCase):
             backend.buttons = make_buttons(
                 [
                     make_button(
-                        "confirm_btn", root + "confirm_btn", 793, 505, raycast_top=None
+                        "confirm_btn", root + "confirm_btn", 793, 505, raycast_top=True
                     )
                 ],
                 generation=generation,
@@ -205,7 +283,7 @@ class RetirementSemanticOracleTests(unittest.TestCase):
             item = root + "items_scroll/content/item_tpl(Clone)/bg/"
             backend.snapshot = make_snapshot(generation=generation)
             backend.buttons = make_buttons(
-                [make_button("close", root + "close", 640, 482, raycast_top=None)],
+                [make_button("close", root + "close", 640, 482, raycast_top=True)],
                 generation=generation,
             )
             backend.ui = make_ui(
@@ -222,14 +300,14 @@ class RetirementSemanticOracleTests(unittest.TestCase):
             root = "root/OverlayCamera/Overlay/UIMain/ResolveEquipmentUI(Clone)/main/"
             buttons = [
                 make_button(
-                    "cancel_btn", root + "cancel_btn", 844, 606, raycast_top=None
+                    "cancel_btn", root + "cancel_btn", 844, 606, raycast_top=True
                 ),
-                make_button("ALL", root + "options/ALL", 200, 601, raycast_top=None),
+                make_button("ALL", root + "options/ALL", 200, 601, raycast_top=True),
                 make_button(
-                    "0", root + "frame/view/content/0", 218, 187, raycast_top=None
+                    "0", root + "frame/view/content/0", 218, 187, raycast_top=True
                 ),
                 make_button(
-                    "1", root + "frame/view/content/1", 336, 187, raycast_top=None
+                    "1", root + "frame/view/content/1", 336, 187, raycast_top=True
                 ),
             ]
             if selected:
@@ -240,14 +318,14 @@ class RetirementSemanticOracleTests(unittest.TestCase):
                             root + "frame/view/content/0/frame/bg/selected/reduce",
                             250,
                             156,
-                            raycast_top=None,
+                            raycast_top=True,
                         ),
                         make_button(
                             "reduce",
                             root + "frame/view/content/1/frame/bg/selected/reduce",
                             368,
                             156,
-                            raycast_top=None,
+                            raycast_top=True,
                         ),
                     ]
                 )
@@ -288,7 +366,7 @@ class RetirementSemanticOracleTests(unittest.TestCase):
                         root + "button_container/custom_button_1(Clone)",
                         790,
                         515,
-                        raycast_top=None,
+                        raycast_top=True,
                     )
                 ],
                 generation=generation,
@@ -327,7 +405,22 @@ class RetirementSemanticOracleTests(unittest.TestCase):
             stages[stage_index]()
 
         backend.on_tap = advance
-        receipt = make_oracle(backend).retire_ships_one_click(True)
+        oracle = make_oracle(backend)
+        pending_award = False
+        def advance_with_transient_dock():
+            nonlocal pending_award
+            advance()
+            if stage_index == 5:
+                stage_selection(25, 814)
+                pending_award = True
+        def settle_award(_):
+            nonlocal pending_award
+            if pending_award:
+                stage_award(25)
+                pending_award = False
+        backend.on_tap = advance_with_transient_dock
+        oracle._sleep = settle_award
+        receipt = oracle.retire_ships_one_click(True)
 
         self.assertIsNotNone(receipt)
         assert receipt is not None

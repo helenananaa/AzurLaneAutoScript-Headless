@@ -215,6 +215,9 @@ class ReplayOracle:
         # These login scenarios contain no task-owned modal or combat surface.
         return False
 
+    def observation_target_present(self, semantic_id: str) -> bool:
+        return self.enabled_values.get(semantic_id, False)
+
     def enabled(self, semantic_id: str) -> bool:
         self.events.append(("enabled", semantic_id))
         return self.enabled_values.get(semantic_id, False)

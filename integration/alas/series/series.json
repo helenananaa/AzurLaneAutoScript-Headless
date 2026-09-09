@@ -479,6 +479,61 @@
       "order": 96,
       "path": "integration/alas/series/0510-semantic-task-isolation.patch",
       "sha256": "196011b89c8154481645827a199e4aa2b641e2f4d4485e5c6f013012d74dc705"
+    },
+    {
+      "order": 97,
+      "path": "integration/alas/series/0520-campaign-preparation-decisions.patch",
+      "sha256": "9847666552d56b97cf6b5b6ef5a04612781641c5c111bc69bb24be218dfaf366"
+    },
+    {
+      "order": 98,
+      "path": "integration/alas/series/0530-campaign-ambush-flow.patch",
+      "sha256": "18a7eb6709578087fac212c432f0e4f748142bd383f46a65d4f32234d6b359ef"
+    },
+    {
+      "order": 99,
+      "path": "integration/alas/series/0540-campaign-repeat-preparation.patch",
+      "sha256": "85924f2c16f5c044b86b8e692a462c8aa5b7c810062b6c428c32e423d88d8ddc"
+    },
+    {
+      "order": 100,
+      "path": "integration/alas/series/0550-campaign-reentry-retirement.patch",
+      "sha256": "cc3e88950e7a6f400c3e78cc2218df84e0d25e38e7cbd8af6768750d4c658b38"
+    },
+    {
+      "order": 101,
+      "path": "integration/alas/series/0560-campaign-submarine-auto.patch",
+      "sha256": "b1e42a338c07bc7c58579d5fc876a645bd0b7b202e62da6208b87ef4d0d2d696"
+    },
+    {
+      "order": 102,
+      "path": "integration/alas/series/0570-campaign-submarine-call.patch",
+      "sha256": "b6e9b0a0ba0b5f9fcdea0f2e5c46d4be6d2cb4991f009e667d77100b59265f7b"
+    },
+    {
+      "order": 103,
+      "path": "integration/alas/series/0580-campaign-submarine-movement.patch",
+      "sha256": "1d8ff7f98d696caf68005db2d8241cff9b8b3b84f19137444558a00aae7213c3"
+    },
+    {
+      "order": 104,
+      "path": "integration/alas/series/0590-campaign-execution-map-aliases.patch",
+      "sha256": "434df938b9e9cae2d350f35ab017f0ca0a77445d8fb9cfdff2086258b77c6992"
+    },
+    {
+      "order": 105,
+      "path": "integration/alas/series/0600-campaign-camera-reanchor.patch",
+      "sha256": "95a0dcabe79ce54dcd872a428929e9385960ec320e97b96760945bbf47f368e1"
+    },
+    {
+      "order": 106,
+      "path": "integration/alas/series/0601-campaign-boss-settlement.patch",
+      "sha256": "c84dd43bd1941718361ac3cee15853e901d7be888e57aa84894643093aa84292"
+    },
+    {
+      "order": 107,
+      "path": "integration/alas/series/0602-submarine-deployment-camera.patch",
+      "sha256": "92c0cf1fe3b879179993f25441976237988c1868e3ecb6380ee4bf40e6f7f00f"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

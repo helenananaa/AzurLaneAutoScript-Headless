@@ -17,6 +17,7 @@ from ...semantic_oracle import (
 )
 from .contracts import AlasSemanticUnmapped
 from ...oracle.surfaces import ObservationSurface
+from ...oracle.errors import SemanticViewportReanchorRequired
 from .resources import (
     BUILD_POOL_NAVBAR_ACTIVE_COLOR,
     BUILD_POOL_NAVBAR_INACTIVE_COLOR,
@@ -548,7 +549,7 @@ class ObservationAdapterPorts:
                 ):
                     break
                 if attempt == 2:
-                    raise SemanticGateClosed(
+                    raise SemanticViewportReanchorRequired(
                         "campaign map viewport easing is not a uniform shift"
                     )
             else:  # pragma: no cover - the bounded loop always breaks or raises
@@ -575,7 +576,7 @@ class ObservationAdapterPorts:
                 self._campaign_point_in_area(point, area)
                 for area in blacklist_areas
             ):
-                raise SemanticGateClosed("campaign map viewport path entered its blacklist")
+                raise SemanticViewportReanchorRequired("campaign map viewport path entered its blacklist")
         duration_value = (
             float(duration)
             if isinstance(duration, (int, float)) and not isinstance(duration, bool)
@@ -637,7 +638,11 @@ class ObservationAdapterPorts:
                 raise SemanticGateClosed("campaign map viewport lease is incomplete")
             assert combat is not None
             capability = "campaign.viewport_swipe"
-            if post_combat:
+            if context.submarine_move_entry is not None:
+                target_node = context.submarine_planned_destination
+                if target_node is None:
+                    raise SemanticGateClosed('submarine viewport requires original planned destination')
+            elif post_combat:
                 fleets = tuple(
                     fleet
                     for fleet in context.map_state.fleets
@@ -672,10 +677,13 @@ class ObservationAdapterPorts:
                 land_cells=context.map_land_cells,
                 expected_fleet_count=context.map_expected_fleet_count,
                 allow_enemy_additions=post_combat,
+                **({'allow_deployment': True} if context.submarine_move_entry is not None else {}),
             ),
         )
         context.map_state = proof.post_state
-        if positioning is not None:
+        if context.submarine_move_entry is not None:
+            context.submarine_viewport_proofs.append(proof)
+        elif positioning is not None:
             context.camera_positioning_proofs.append(proof)
         else:
             assert combat is not None

@@ -16037,3 +16037,465 @@ diff --git a/alas.py b/alas.py
              # Check failures
              failed = deep_get(self.failure_record, keys=task, default=0)
              failed = 0 if success else failed + 1
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -185,1 +185,4 @@
++                    if self.handle_2x_book_popup():
++                        campaign_timer.reset()
++                        continue
+                     if semantic_adapter.campaign_sortie_committed():
+@@ -345,21 +348,11 @@
+-                        if self.config.Campaign_UseAutoSearch:
+-                            self.map_clear_percentage = (
+-                                semantic_adapter.campaign_map_clear_percentage()
+-                            )
+-                            self.map_is_100_percent_clear = (
+-                                self.map_clear_percentage > 0.95)
+-                            self.map_has_clear_mode = self.map_is_100_percent_clear
+-                            self.map_is_clear_mode = self.map_has_clear_mode
+-                            self.map_is_auto_search = self.map_has_clear_mode
+-                            self.map_is_2x_book = False
+-                            logger.attr(
+-                                'SemanticMapClear',
+-                                f'{self.map_clear_percentage:.2%}')
+-                            if not self.map_has_clear_mode:
+-                                raise RuntimeError(
+-                                    'Official auto-search is locked until the '
+-                                    'stage is fully cleared: '
+-                                    f'{self.map_clear_percentage:.2%}')
++                        self.map_clear_percentage = (
++                            semantic_adapter.campaign_map_clear_percentage()
++                        )
++                        self.map_is_100_percent_clear = self.map_clear_percentage > 0.95
++                        self.map_has_clear_mode = (
++                            self.map_is_100_percent_clear
++                            and semantic_adapter.campaign_clear_mode_available())
++                        self.handle_fast_forward()
+                         auto_search_selected = (
+                             semantic_adapter.campaign_auto_search_selected()
+                         )
+diff --git a/module/handler/fast_forward.py b/module/handler/fast_forward.py
+--- a/module/handler/fast_forward.py
++++ b/module/handler/fast_forward.py
+@@ -500,4 +500,8 @@
+                 box_button.load_offset(check_button)
+-                enabled = self.image_color_count(box_button.button, color=(156, 255, 82), threshold=221, count=20)
++                semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++                if semantic_adapter is not None:
++                    enabled = semantic_adapter.campaign_2x_book_selected()
++                else:
++                    enabled = self.image_color_count(box_button.button, color=(156, 255, 82), threshold=221, count=20)
+                 if (status == 'on' and enabled) or (status == 'off' and not enabled):
+                     return True
+@@ -581,2 +585,5 @@
+     def handle_2x_book_popup(self):
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.handle_campaign_2x_book_popup()
+         if self.appear(BOOK_POPUP_CHECK, offset=(20, 20)):
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -270,2 +270,1 @@
+-                                self.handle_2x_book_setting(mode='prep')
+                                 if semantic_adapter.campaign_fleet_preparation_required():
+@@ -276,2 +275,3 @@
+                                 self.handle_auto_search_setting()
++                                self.handle_2x_book_setting(mode='prep')
+                                 self.map_fleet_checked = True
+diff --git a/module/handler/ambush.py b/module/handler/ambush.py
+--- a/module/handler/ambush.py
++++ b/module/handler/ambush.py
+@@ -52,37 +52,49 @@
+                     break
+ 
+-    def _handle_ambush_evade(self):
+-        logger.info('Map ambushed')
+-        # Wait MAP_AMBUSH_EVADE
+-        self.wait_until_appear(MAP_AMBUSH_EVADE, offset=(30, 30))
+-        self.handle_info_bar()
+-
+-        # Click MAP_AMBUSH_EVADE
+-        skip_first_screenshot = True
+-        while 1:
+-            if skip_first_screenshot:
+-                skip_first_screenshot = False
+-            else:
+-                self.device.screenshot()
+-
+-            # End
+-            if self.info_bar_count():
+-                break
+-
+-            if self.appear_then_click(MAP_AMBUSH_EVADE, offset=(30, 30), interval=3):
+-                continue
+-
+-        # Handle evade success and failures
+-        image = info_letter_preprocess(self.image_crop(INFO_BAR_DETECT, copy=False))
+-        if TEMPLATE_AMBUSH_EVADE_SUCCESS.match(image):
+-            logger.attr('Ambush_evade', 'success')
+-        elif TEMPLATE_AMBUSH_EVADE_FAILED.match(image):
+-            logger.attr('Ambush_evade', 'failed')
+-            self.combat(expected_end='no_searching', fleet_index=self.fleet_show_index)
+-        else:
+-            logger.warning('Unrecognized info when ambush evade.')
+-            self.ensure_no_info_bar()
+-            if self.combat_appear():
+-                self.combat(fleet_index=self.fleet_show_index)
++    def _handle_ambush_evade(self):
++        logger.info('Map ambushed')
++        # Wait MAP_AMBUSH_EVADE
++        self.wait_until_appear(MAP_AMBUSH_EVADE, offset=(30, 30))
++        self.handle_info_bar()
++
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        outcome = None
++
++        # Click MAP_AMBUSH_EVADE
++        skip_first_screenshot = True
++        while 1:
++            if skip_first_screenshot:
++                skip_first_screenshot = False
++            else:
++                self.device.screenshot()
++
++            # End
++            if semantic_adapter is not None:
++                outcome = semantic_adapter.campaign_ambush_outcome()
++                if outcome is not None or self.combat_appear():
++                    break
++            elif self.info_bar_count():
++                break
++
++            if self.appear_then_click(MAP_AMBUSH_EVADE, offset=(30, 30), interval=3):
++                continue
++
++        # Handle evade success and failures
++        if semantic_adapter is not None:
++            succeeded, failed = outcome == 'success', outcome == 'failed'
++        else:
++            image = info_letter_preprocess(self.image_crop(INFO_BAR_DETECT, copy=False))
++            succeeded = TEMPLATE_AMBUSH_EVADE_SUCCESS.match(image)
++            failed = not succeeded and TEMPLATE_AMBUSH_EVADE_FAILED.match(image)
++        if succeeded:
++            logger.attr('Ambush_evade', 'success')
++        elif failed:
++            logger.attr('Ambush_evade', 'failed')
++            self.combat(expected_end='no_searching', fleet_index=self.fleet_show_index)
++        else:
++            logger.warning('Unrecognized info when ambush evade.')
++            self.ensure_no_info_bar()
++            if self.combat_appear():
++                self.combat(fleet_index=self.fleet_show_index)
+ 
+     def _handle_ambush_attack(self):
+@@ -125,9 +137,9 @@
+             if not self.config.MAP_HAS_AMBUSH:
+                 return False
+-            handled = semantic_adapter.handle_campaign_ambush(
+-                evade=bool(self.config.Campaign_AmbushEvade))
+-            if handled:
+-                logger.info('Semantic campaign ambush handled')
+-            return handled
++            if not semantic_adapter.campaign_ambush_present():
++                return False
++            self._handle_ambush()
++            semantic_adapter.finish_campaign_ambush()
++            return True
+         if not self.config.MAP_HAS_AMBUSH:
+             return False
+diff --git a/module/handler/info_handler.py b/module/handler/info_handler.py
+--- a/module/handler/info_handler.py
++++ b/module/handler/info_handler.py
+@@ -47,4 +47,7 @@
+         semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         if semantic_adapter is not None:
++            ambush_count = getattr(semantic_adapter, 'campaign_ambush_info_count', lambda: 0)()
++            if ambush_count:
++                return ambush_count
+             from alas_headless import current_semantic_session
+             session = current_semantic_session()
+diff --git a/module/campaign/run.py b/module/campaign/run.py
+--- a/module/campaign/run.py
++++ b/module/campaign/run.py
+@@ -539,7 +539,10 @@
+             self.device.stuck_record_clear()
+             self.device.click_record_clear()
+             try:
++                if semantic_adapter is not None:
++                    semantic_adapter.prepare_campaign_run()
++                    self.campaign.map_fleet_checked = False
+                 if (
+                     semantic_adapter is not None
+                     and not semantic_adapter.campaign_stage_entry_allowed()
+                     and not semantic_map_resume
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+index 4136e33..e6baec3 100644
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -228,7 +228,9 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+         if self.map_is_auto_search and semantic_adapter is not None:
+             semantic_stage = semantic_adapter.campaign_pre_sortie_stage_code()
+             proof = semantic_adapter.wait_campaign_auto_search_completion(
+-                semantic_stage
++                semantic_stage,
++                keep_result=(self.config.Campaign_Mode == 'normal' and '-' in semantic_stage),
++                recovery_handler=self._semantic_campaign_retirement_recovery,
+             )
+             logger.attr(
+                 'Semantic_Auto_Search_Result',
+@@ -287,6 +289,16 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+         logger.warning('No boss data found in spawn_data')
+         return 0
+ 
++    def _semantic_campaign_retirement_recovery(self):
++        # The existing ALAS retirement handler owns configuration, retries,
++        # quit and continuation; the observer only detects the interruption.
++        self.device.screenshot()
++        handled = self.handle_retirement()
++        if handled and self.is_in_map():
++            self.device.screenshot()
++            self.handle_auto_search_map_option()
++        return handled
++
+     def auto_search_execute_a_battle(self):
+         logger.hr(f'{self.FUNCTION_NAME_BASE}{self.battle_count}', level=2)
+         self.auto_search_moving()
+diff --git a/module/map/map_operation.py b/module/map/map_operation.py
+index 660e5f2..9361a5e 100644
+--- a/module/map/map_operation.py
++++ b/module/map/map_operation.py
+@@ -174,12 +174,14 @@ class MapOperation(MysteryHandler, FleetPreparation, Retirement, FastForwardHand
+                     and semantic_adapter.campaign_pre_sortie_active()
+                 ):
+                     logger.info('Semantic pre-sortie: scan fleet preparation')
+-                    if semantic_adapter.campaign_dock_full_visible():
++                    if (semantic_adapter.campaign_dock_full_visible()
++                            or semantic_adapter.campaign_retirement_visible()):
+                         # Preserve ALAS's configured one-click-retire versus
+                         # enhancement state machine. The adapter maps only the
+                         # exact labelled non-premium entry choices; dock
+                         # expansion remains unavailable.
+-                        self.handle_retirement()
++                        if self.handle_retirement() and self.is_in_map():
++                            self.handle_auto_search_map_option()
+                         campaign_timer.reset()
+                         fleet_timer.reset()
+                         continue
+diff --git a/module/handler/fast_forward.py b/module/handler/fast_forward.py
+index 5e819b9..58edee5 100644
+--- a/module/handler/fast_forward.py
++++ b/module/handler/fast_forward.py
+@@ -368,6 +368,13 @@ class FastForwardHandler(AutoSearchHandler):
+         if self.appear(AUTO_SEARCH_MENU_CONTINUE, offset=self._auto_search_menu_offset, interval=2):
+             self.map_is_2x_book = self.config.Campaign_Use2xBook
+             self.handle_2x_book_setting(mode='auto')
++            semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++            if semantic_adapter is not None:
++                semantic_adapter.authorize_campaign_auto_search_continue(
++                    use_2x_book=self.map_is_2x_book,
++                    fleet1=self.config.Fleet_Fleet1, fleet2=self.config.Fleet_Fleet2,
++                    fleet_order=self.config.Fleet_FleetOrder,
++                )
+             if self.appear_then_click(AUTO_SEARCH_MENU_CONTINUE, offset=self._auto_search_menu_offset):
+                 self.interval_reset(AUTO_SEARCH_MENU_CONTINUE)
+             else:
+diff --git a/module/handler/fast_forward.py b/module/handler/fast_forward.py
+index 58edee5..25b502e 100644
+--- a/module/handler/fast_forward.py
++++ b/module/handler/fast_forward.py
+@@ -320,6 +320,8 @@ class FastForwardHandler(AutoSearchHandler):
+             state = semantic_adapter.ensure_campaign_auto_search_roles(
+                 self.config.Fleet_FleetOrder
+             )
++            if self.config.SUBMARINE:
++                semantic_adapter.ensure_campaign_submarine_auto_mode(self.config.Submarine_AutoSearchMode)
+             logger.attr(
+                 'Auto_Search_Roles',
+                 f'fleet1={state.fleet1_role}, fleet2={state.fleet2_role}',
+@@ -356,6 +358,10 @@ class FastForwardHandler(AutoSearchHandler):
+             return False
+ 
+         logger.info('Disable auto submarine call')
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            semantic_adapter.ensure_campaign_submarine_auto_mode('sub_standby')
++            return True
+         self.fleet_preparation_sidebar_ensure(3)
+         self.auto_search_setting_ensure('sub_standby')
+         return True
+@@ -374,6 +380,8 @@ class FastForwardHandler(AutoSearchHandler):
+                     use_2x_book=self.map_is_2x_book,
+                     fleet1=self.config.Fleet_Fleet1, fleet2=self.config.Fleet_Fleet2,
+                     fleet_order=self.config.Fleet_FleetOrder,
++                    submarine=self.config.Submarine_Fleet,
++                    submarine_auto_mode=self.config.Submarine_AutoSearchMode,
+                 )
+             if self.appear_then_click(AUTO_SEARCH_MENU_CONTINUE, offset=self._auto_search_menu_offset):
+                 self.interval_reset(AUTO_SEARCH_MENU_CONTINUE)
+diff --git a/module/combat/submarine.py b/module/combat/submarine.py
+index cceb381..b029a3c 100644
+--- a/module/combat/submarine.py
++++ b/module/combat/submarine.py
+@@ -21,6 +21,14 @@ class SubmarineCall(ModuleBase):
+         Returns:
+             str: If call.
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None and submarine in ('every_combat', 'boss_only'):
++            battle = semantic_adapter.campaign_submarine_call_battle()
++            if battle is not False and battle != getattr(self, '_semantic_submarine_battle', None):
++                self._semantic_submarine_battle = battle
++                self.submarine_call_reset()
++            if battle is None:
++                return False
+         if self.submarine_call_flag:
+             return False
+         if submarine in ['do_not_use', 'hunt_only', 'hunt_and_boss']:
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+index e6baec3..4b55dd9 100644
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -231,6 +231,7 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+                 semantic_stage,
+                 keep_result=(self.config.Campaign_Mode == 'normal' and '-' in semantic_stage),
+                 recovery_handler=self._semantic_campaign_retirement_recovery,
++                submarine_handler=lambda: self.handle_submarine_call(self.config.Submarine_Mode),
+             )
+             logger.attr(
+                 'Semantic_Auto_Search_Result',
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+index deb7841..a1fa10f 100644
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -1165,10 +1165,14 @@ class Fleet(Camera, AmbushHandler):
+         """
+         location = location_ensure(location)
+         moved = True
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+         while 1:
+-            self.in_sight(location, sight=self._walk_sight)
+-            self.focus_to_grid_center()
+-            grid = self.convert_global_to_local(location)
++            if semantic_adapter is not None:
++                grid = semantic_adapter.campaign_submarine_grid(location)
++            else:
++                self.in_sight(location, sight=self._walk_sight)
++                self.focus_to_grid_center()
++                grid = self.convert_global_to_local(location)
+             grid.__str__ = location
+ 
+             self.device.click(grid)
+@@ -1180,7 +1184,10 @@ class Fleet(Camera, AmbushHandler):
+ 
+             while 1:
+                 self.device.screenshot()
+-                self.view.update(image=self.device.image)
++                if semantic_adapter is not None:
++                    grid = semantic_adapter.campaign_submarine_grid(location)
++                else:
++                    self.view.update(image=self.device.image)
+ 
+                 # Arrive
+                 arrive_checker = grid.predict_submarine_move()
+@@ -1237,6 +1244,13 @@ class Fleet(Camera, AmbushHandler):
+         # Hunt zone view re-enabled by game, after entering sub move mode
+         self.strategy_set_execute(sub_view=False)
+         self.strategy_close()
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if result and semantic_adapter is not None:
++            state = semantic_adapter.campaign_camera_state()
++            if state.submarine is None:
++                raise MapDetectionError('Semantic submarine disappeared after deployment')
++            self.fleet_submarine = location_ensure(state.submarine.node)
++            self.update()
+         return result
+ 
+     def submarine_move_near_boss(self, boss):
+diff --git a/module/campaign/campaign_base.py b/module/campaign/campaign_base.py
+index 4b55dd9..fd98106 100644
+--- a/module/campaign/campaign_base.py
++++ b/module/campaign/campaign_base.py
+@@ -184,12 +184,20 @@ class CampaignBase(CampaignUI, Map, AutoSearchCombat):
+         if getattr(getattr(self, 'device', None), 'semantic_adapter', None) is not None:
+             self.handle_popup_single(name='CAMPAIGN_MAP')
+         self.semantic_prepare_a_battle()
++        if getattr(self.device, 'semantic_adapter', None) is not None:
++            self.device.screenshot()
++            self.update()
+         logger.hr(f'{self.FUNCTION_NAME_BASE}{self.battle_count}', level=2)
+         prev = self.battle_count
+         result = False
+         for _ in range(10):
+             try:
+-                result = self.battle_function()
++                if getattr(self.device, 'semantic_adapter', None) is not None:
++                    from alas_headless.alas_campaign_map_binding import bind_alas_campaign_execution_map
++                    with bind_alas_campaign_execution_map(self):
++                        result = self.battle_function()
++                else:
++                    result = self.battle_function()
+                 semantic_adapter = getattr(self.device, 'semantic_adapter', None)
+                 if (
+                     result
+diff --git a/module/map/camera.py b/module/map/camera.py
+index d2c4fe2..bde3ae6 100644
+--- a/module/map/camera.py
++++ b/module/map/camera.py
+@@ -56,7 +56,17 @@ class Camera(MapOperation):
+ 
+             vector = distance * vector
+             vector = -vector
+-            self.device.swipe_vector(vector, name=name, box=box, whitelist_area=whitelist, blacklist_area=blacklist)
++            from alas_headless.oracle.errors import SemanticViewportReanchorRequired
++            try:
++                self.device.swipe_vector(vector, name=name, box=box, whitelist_area=whitelist, blacklist_area=blacklist)
++            except SemanticViewportReanchorRequired:
++                # No input: the sampled path or game-driven camera motion
++                # requires a fresh calculation by the original caller.
++                self._prev_view = None
++                self._prev_swipe = None
++                self.update()
++                logger.info('Semantic camera reanchored without input')
++                return False
+             # Donno why initial commit have a sleep here
+             # self.device.sleep(0.3)
+             self.update(wait_swipe=True)
+diff --git a/module/combat/combat.py b/module/combat/combat.py
+index ccc05bf..604e824 100644
+--- a/module/combat/combat.py
++++ b/module/combat/combat.py
+@@ -666,6 +666,8 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+                 and battle_status
+                 and semantic_adapter.open().campaign_combat_committed()
+             )
++            if semantic_campaign_stage_wait and self.handle_popup_single(name='CAMPAIGN_MAP'):
++                continue
+             semantic_campaign_map_state = (
+                 semantic_adapter.campaign_is_in_map_after_combat()
+                 if semantic_campaign_result_wait or semantic_campaign_stage_wait
+@@ -687,6 +689,8 @@ class Combat(Level, HPBalancer, Retirement, SubmarineCall, CombatAuto, CombatMan
+             if semantic_campaign_stage_wait:
+                 if semantic_campaign_map_stable:
+                     continue
++                if self.handle_auto_search_exit(drop=drop):
++                    continue
+                 if semantic_adapter.open().oracle.campaign_page_is_normal():
+                     logger.info(
+                         'Semantic boss result returned to stable campaign stage'
+diff --git a/module/map/fleet.py b/module/map/fleet.py
+index a1fa10f..369fb91 100644
+--- a/module/map/fleet.py
++++ b/module/map/fleet.py
+@@ -1169,6 +1169,10 @@ class Fleet(Camera, AmbushHandler):
+         while 1:
+             if semantic_adapter is not None:
+                 grid = semantic_adapter.campaign_submarine_grid(location)
++                self.update()
++                self.in_sight(location, sight=self._walk_sight)
++                self.focus_to_grid_center()
++                grid = semantic_adapter.campaign_submarine_grid(location)
+             else:
+                 self.in_sight(location, sight=self._walk_sight)
+                 self.focus_to_grid_center()

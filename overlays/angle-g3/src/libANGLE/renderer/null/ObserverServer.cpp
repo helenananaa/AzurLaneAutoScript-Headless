@@ -229,7 +229,7 @@ std::string SemanticResponseFor(uid_t peerUid, const std::string &package,
     const int fieldCount = ANGLE_UNSAFE_TODO(std::snprintf(
         fields, sizeof(fields),
         ",\"flags\":%u,\"active_in_hierarchy\":%s,\"active_and_enabled\":%s,"
-        "\"interactable\":%s,\"raycast_top\":%s,\"canvas_render_mode\":%d,"
+        "\"interactable\":%s,\"raycast_top\":%s,\"canvas_render_mode\":%d,\"instance_id\":%d,"
         "\"world_position\":%s,\"local_rect\":%s,\"screen_point\":%s,"
         "\"adb_point\":%s,\"screen_bounds\":%s,\"adb_bounds\":%s}",
         button.flags, (button.flags & 0x1u) != 0 ? "true" : "false",
@@ -238,7 +238,7 @@ std::string SemanticResponseFor(uid_t peerUid, const std::string &package,
         (button.flags & 0x800u) != 0
             ? ((button.flags & 0x1000u) != 0 ? "true" : "false")
             : "null",
-        button.canvasRenderMode, (button.flags & 0x20u) != 0 ? "{}" : "null",
+        button.canvasRenderMode, button.instanceId, (button.flags & 0x20u) != 0 ? "{}" : "null",
         (button.flags & 0x40u) != 0 ? "{}" : "null",
         (button.flags & 0x100u) != 0 ? "{}" : "null",
         (button.flags & 0x100u) != 0 ? "{}" : "null",

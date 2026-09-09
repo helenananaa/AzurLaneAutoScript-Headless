@@ -2,6 +2,115 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+## 2026-09-09
+
+Final submarine closeout: one-grid Boss deployment and the latest call/exit
+fixes passed a complete 10-2 Main run, fleet (2,1,2), boss_only and standby.
+G1 deployment, H1 call and one settlement exit completed; RunCount 1→0 and
+scheduler disabled. Receipt: `integration/alas/submarine-one-grid-final-live-20260909-r2.json`.
+Current code passes 290 focused tests. Final typed read: ordinary stage page,
+PID 17018, oil 11938, no retained result or active validation process.
+The remaining one-grid/latest-exit closeout items are complete. Earlier
+failed runs remain failed; support is evidence-scoped, not all combinations.
+
+Earlier: original Main passed a complete 10-2 sortie using submarine fleet 2,
+hunt_and_boss, 2_grid_to_boss and standby. Six mob battles, G2 deployment,
+H1 Boss call and settlement exit completed with RunCount 1→0 and scheduler
+disabled. Receipt: `integration/alas/submarine-hunt-main-live-20260909-r7.json`.
+The fixed series now has 107 members; patch-tree, login, frame and pixel checks
+pass. Direct deployment onto Boss H6 and a subsequent call also have live
+receipts. That separate run clicked settlement exit, then rejected a duplicate
+exit while its old animation frame remained visible; it is still marked failed.
+The duplicate-exit race is fixed with one-shot receipt handling and focused
+coverage. The final live read proved the ordinary stage page, oil 12488, PID
+17018. That historical one-grid qualification gap is now closed by the final
+receipt above; these results are not blanket qualification for all stages.
+See [current evidence](campaign-submarine-ocean-20260909.zh-CN.md).
+
+## 2026-09-08
+
+Original Campaign SubmarineCall completed four battle-correlated manual calls
+on a single 10-2 standby AUTO run. Stable typed submarine ammo moved 3/6→2/6
+across a recorded call; original Main completed and disabled its run counter.
+Original submarine_goto also completed E3→E2 through the game's 4-oil prompt,
+proved the same submarine at E2, then restored the stage page. The fixed series
+has 104 members with patch-tree, login, frame and pixel verification.
+Boss-distance planning, open-ocean support and full manual-map submarine
+execution remain live-incomplete. The client now explicitly reports server
+maintenance; original LoginHandler stops on its two-button variant without
+input. User confirmed no open-ocean skill ship is currently assigned.
+See [receipts, fixes and re-entry scope](campaign-submarine-call-20260908.zh-CN.md).
+
+## 2026-09-07
+
+### Campaign submarine preparation, strategy and call-port progress
+
+Pinned 101-member integration now accepts active submarine configuration,
+proves submarine preparation/oil and AUTO duty selection, and projects the
+submarine separately from surface fleets. Original Main completed 12-4
+auto-call-mode and 10-2 standby sorties; these do not prove actual calls.
+Hunt/view switches completed a live round trip. The dynamic combat-call
+Oracle boundary has focused coverage, but its new observer is not installed
+and original SubmarineCall integration, movement and open-ocean support remain
+unfinished. See [evidence and remaining work](campaign-submarine-progress-20260907.zh-CN.md).
+
+### Original AUTO Continue and retirement handler closure
+
+Original Main passed two 3-1 normal sorties using PREP then actual ButtonGO,
+with Boss/mob duties on fleets (2,1,0), books 563→562→561 and RunCount 2→0.
+Original FastForward sets the AUTO checkbox; no second fleet preparation or
+adapter-owned task loop replaces ALAS's continuation decision. Original
+retirement handler passed one complete 8-ship transaction, equipment
+preservation, return to its build-page predecessor and DOCK_FULL_TRIGGERED.
+Natural dock-full → retirement → map-resume combined live evidence remains
+condition-dependent; no deliberate dock filling was performed. Final main-page
+oil 9711, gems 5040; fixed patch series now has 100 members.
+See [scope, failures, receipts and resource accounting](campaign-reentry-retirement-20260907.zh-CN.md).
+
+### Repeat preparation and normal-stage structural reuse
+
+Normal sorties retain multi-run authorization while refreshing preparation
+only after proven completion; normal official-auto preparation no longer uses
+the historical 12-4 whitelist. Original Main completed individual 3-1 sorties
+with swapped fleets/duties. Original FastForward passed AUTO book on/off with
+no book consumption. Original StrategyHandler proved two different formations
+on manual 12-4 and restored them; withdrawal required a typed follow-up after
+an early dialog sample. The original outer-loop replay passes two rounds;
+the earlier live run stopped at ALAS's oil floor (449, minimum 500). After
+user refill and authorized one-click retirement (dock 931 to 829), original
+Main completed two 12-4 normal sorties with swapped fleets and Boss/mob duties:
+RunCount 2 to 0, books 566 to 565 to 564, final oil 11959, returned to main.
+Retirement's final receipt failed an overflow assertion despite actual cleanup;
+the failed receipt and independent readback are retained separately. AUTO
+ButtonGO and full automatic dock-full return/resume were unqualified at that
+earlier milestone; the later closure above supersedes the ButtonGO gap.
+Relevant final regression: 194 passed; fixed 99-member patch check passed.
+See [new live closure](campaign-oil-refill-closure-20260907.zh-CN.md) and
+[earlier scope and evidence](campaign-repeat-20260907.zh-CN.md).
+
+### FleetLock live switch and original ambush flow
+
+The original ALAS FleetLock Switch passed on/off/on on the clear-mode manual
+12-4 map. Ambush choices now require positive top-raycast proof, remain bound
+to one view, and feed the original evade/result/combat flow without completing
+the planned map target. Two existing fleets on non-clear-mode 7-2 showed
+reconnaissance 175/147 and no ambush probability; natural positive ambush
+qualification remains open. Relevant regression: 207 passed.
+See [scope and evidence](campaign-remaining-20260907.zh-CN.md).
+
+## 2026-09-06
+
+### Shared Campaign preparation: clear mode, 2x book, and fleet configuration
+
+The fixed-upstream semantic path now reuses the original clear-mode decision,
+sets the 2x book after fleet/duty preparation, and recognizes its exact item
+confirmation. A real Main 12-4 official-auto run completed with RunCount 1 to 0;
+typed follow-up showed one book and 634 oil consumed. A separate manual-map
+probe exercised clear-mode off and the original formation switch without combat.
+Two distinct normal surface-fleet indices and four official duty combinations
+are covered offline. FleetLock and naturally triggered ambush remain open.
+See [the implementation and evidence scope](campaign-preparation-20260906.zh-CN.md).
+
 ## 2026-09-02
 
 ### Classified task failures are contained at the original ALAS run boundary

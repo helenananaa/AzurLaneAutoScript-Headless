@@ -42,15 +42,11 @@ class AlasSubmarineConfigTests(unittest.TestCase):
                     count += 1
         self.assertEqual(count, 40)
 
-    def test_active_fleets_and_invalid_values_fail_closed(self):
+    def test_active_configuration_is_classified_and_invalid_values_fail_closed(self):
         for fleet in (1, 2):
-            with self.assertRaisesRegex(SemanticGateClosed, "unqualified"):
-                validate_alas_submarine_config(
-                    fleet=fleet,
-                    mode="every_combat",
-                    auto_search_mode="sub_auto_call",
-                    distance_to_boss="to_boss_position",
-                )
+            snapshot = validate_alas_submarine_config(fleet=fleet, mode="every_combat",
+                auto_search_mode="sub_auto_call", distance_to_boss="to_boss_position")
+            self.assertEqual(snapshot.fleet, fleet)
         for field, value in (
             ("fleet", -1),
             ("fleet", 3),

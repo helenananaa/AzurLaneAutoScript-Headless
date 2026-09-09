@@ -178,10 +178,10 @@ MATERIALIZED_ALAS_RELATIVE_PATH = Path("module/map/map_operation.py")
 MATERIALIZED_ALAS_MODULE_NAME = "module.map.map_operation"
 MATERIALIZED_ALAS_LOADER_ID = "verified-canonical-source-bytes/v3"
 MATERIALIZED_ALAS_CANONICAL_SOURCE_SHA256 = (
-    "0ddeec74cde1a94e686830d0504f07fc789aab85b7552073f4226779992e57f8"
+    "695d50bdacfdf860e098005e7ad53997df80a4a88b322d02ad3e803e03a4201f"
 )
 MATERIALIZED_ALAS_SEMANTIC_BRANCH_SHA256 = (
-    "a0ac35cb40e6ad29711c0200598a77a18c88ec0060666adace3d46f30301f4d6"
+    "e6868451eff9daad2f81abee2b6c86d44c9bd0d27799946ef30680c0f19333b7"
 )
 MATERIALIZED_ALAS_MAX_SOURCE_BYTES = 2 * 1024 * 1024
 MATERIALIZED_ALAS_MAX_CONTROL_BYTES = 8 * 1024
@@ -653,6 +653,8 @@ def _validate_materialized_enter_map(tree: ast.Module) -> str:
         ("self", "enter_map_cancel"),
         legacy_chain,
         ("self", "handle_2x_book_setting"),
+        ("self", "handle_fast_forward"),
+        ("self", "handle_2x_book_popup"),
         ("self", "handle_auto_search"),
         ("self", "handle_auto_search_setting"),
         ("self", "handle_auto_submarine_call_disable"),
@@ -773,11 +775,11 @@ def _validate_materialized_enter_map(tree: ast.Module) -> str:
     ):
         raise MaterializedAlasAdmissionError(MATERIALIZED_ALAS_UNPROVEN)
     if not (
-        two_x_index
-        < guard_index
+        guard_index
         < confirm_index
         < auto_submarine_index
         < auto_search_index
+        < two_x_index
         < checked_indices[0]
         < sortie_indices[0]
     ):

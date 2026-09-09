@@ -237,20 +237,13 @@ def verify_submarine_config(alas_root: Path) -> dict[str, Any]:
                     distance_to_boss=distance,
                 )
                 accepted_count += 1
-    refused_active_count = 0
+    accepted_active_count = 0
     for fleet in (1, 2):
         for mode in SUBMARINE_MODES:
-            try:
-                validate_alas_submarine_config(
-                    fleet=fleet,
-                    mode=mode,
-                    auto_search_mode="sub_standby",
-                    distance_to_boss="2_grid_to_boss",
-                )
-            except SemanticGateClosed:
-                refused_active_count += 1
-            else:
-                raise AssertionError("active submarine fleet was admitted")
+            validate_alas_submarine_config(
+                fleet=fleet, mode=mode, auto_search_mode="sub_standby",
+                distance_to_boss="2_grid_to_boss")
+            accepted_active_count += 1
     invalid_count = 0
     for field, value in (
         ("fleet", -1),
@@ -281,7 +274,8 @@ def verify_submarine_config(alas_root: Path) -> dict[str, Any]:
         "panel_count": len(panels),
         "panels": list(panels),
         "accepted_inactive_count": accepted_count,
-        "refused_active_count": refused_active_count,
+        "accepted_active_configuration_count": accepted_active_count,
+        "execution_admission": "capability-local; configuration is not live qualification",
         "invalid_case_count": invalid_count,
         "original_decisions": decisions,
         "mutation_budget": 0,

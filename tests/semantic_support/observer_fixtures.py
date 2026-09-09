@@ -410,28 +410,28 @@ def set_retirement_selection(backend, generation, used, selected=0):
                 root + "adapt/left_length/frame/setting",
                 36,
                 520,
-                raycast_top=None,
+                raycast_top=True,
             ),
             make_button(
                 "quick_select",
                 root + "select_panel/quick_select",
                 725,
                 673,
-                raycast_top=None,
+                raycast_top=True,
             ),
             make_button(
                 "confirm_button",
                 root + "select_panel/confirm_button",
                 1156,
                 673,
-                raycast_top=None,
+                raycast_top=True,
             ),
             make_button(
                 "cancel_button",
                 root + "select_panel/cancel_button",
                 940,
                 673,
-                raycast_top=None,
+                raycast_top=True,
             ),
         ],
         generation=generation,
@@ -478,7 +478,7 @@ def set_retirement_settings(backend, generation, *, keep_needed=True):
                     root
                     + "notifications/options/notify_tpl_{0}/{1}".format(group, name),
                     checked=selected[group] == name,
-                    raycast_top=None,
+                    raycast_top=True,
                     x=400 + offset * 80,
                     y=180 + group * 60,
                 )
@@ -508,7 +508,7 @@ def set_retirement_settings(backend, generation, *, keep_needed=True):
     ]
     backend.snapshot = make_snapshot(generation=generation)
     backend.buttons = make_buttons(
-        [make_button("btnBack", root + "top/btnBack", 1001, 111, raycast_top=None)],
+        [make_button("btnBack", root + "top/btnBack", 1001, 111, raycast_top=True)],
         generation=generation,
     )
     backend.ui = make_ui(texts, toggles=toggles, generation=generation)

@@ -1,0 +1,20 @@
+{
+  "schema": "alas-headless.campaign-settlement-recovery/v1",
+  "passed": false,
+  "claimed_completed_sorties": 0,
+  "serial": "emulator-5580",
+  "kind": "settlement",
+  "fingerprint": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 10000,
+    "peer_uid": 2000,
+    "expected_pid": 17018
+  },
+  "settlement_before": false,
+  "error": "RuntimeError: Expected retained settlement is absent",
+  "receipts": []
+}

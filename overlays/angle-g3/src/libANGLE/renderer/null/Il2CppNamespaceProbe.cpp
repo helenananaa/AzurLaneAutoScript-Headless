@@ -272,7 +272,75 @@ bool EndsWith(std::string_view value, std::string_view suffix) {
          value.substr(value.size() - suffix.size()) == suffix;
 }
 
+bool IsSubmarineCallControl(std::string_view path) {
+  return EndsWith(path, "CombatUIStandard(Clone)/Weapon_button_container/Weapon_button(Clone)/ActCtl");
+}
+
+bool IsCampaignStrategyDetailsControl(std::string_view path) {
+  return EndsWith(path, "LevelStageView(Clone)/right_stage/event/detail/show_detail");
+}
+
+bool IsCampaignDeploymentControl(std::string_view path) {
+  return EndsWith(path, "LevelStageView(Clone)/bottom_stage/Action/MissileStrike/cancel_button") ||
+         EndsWith(path, "LevelStageView(Clone)/bottom_stage/Action/MissileStrike/confirm_button");
+}
+
+bool IsRetirementControl(std::string_view path) {
+  const std::string_view suffixes[] = {
+      "UICamera/Canvas/UIOrigin/blur_panel/adapt/top/back",
+      "Overlay/UIMain/blur_panel/adapt/left_length/frame/setting",
+      "Overlay/UIMain/blur_panel/select_panel/quick_select",
+      "DockyardQuickSelectSettingUI(Clone)/window/top/btnBack",
+      "DestoryInfoUI(Clone)/frame/confirm_button",
+      "DestoryConfirmWindow(Clone)/window/confirm_btn",
+      "ResolveEquipmentUI(Clone)/main/options/ALL",
+      "ResolveEquipmentUI(Clone)/main/cancel_btn",
+  };
+  for (auto suffix : suffixes) {
+    if (EndsWith(path, suffix)) return true;
+  }
+  return false;
+}
+
+bool IsCampaignPreparationSwitch(std::string_view name, std::string_view path) {
+  if (name == "ButtonGO" &&
+      EndsWith(path, "LevelStageTotalRewardPanel(Clone)/Window/Fixed/ButtonGO")) {
+    return true;
+  }
+  if (EndsWith(path, "LevelStageView(Clone)/bottom_stage/Normal/switch_button") ||
+      EndsWith(path, "LevelStageView(Clone)/right_stage/event/collapse") ||
+      EndsWith(path, "LevelStageView(Clone)/right_stage/event/detail/click") ||
+      (name == "icon" &&
+       (EndsWith(path, "LevelStageView(Clone)/right_stage/event/detail/items/item/icon") ||
+        EndsWith(path, "LevelStageView(Clone)/right_stage/event/detail/items/item(Clone)/icon")))) {
+    return true;
+  }
+  if (name == "Item" &&
+      EndsWith(path, "LevelStageTotalRewardPanel(Clone)/Window/Fixed/SpList/Item")) {
+    return true;
+  }
+  if (name == "Toggle" &&
+      (EndsWith(path, "LevelStageInfoView(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle") ||
+       EndsWith(path, "LevelInfoSPUI(Clone)/panel/BottomExtra/LoopGroup/Loop/Toggle"))) {
+    return true;
+  }
+  if (name == "sp" &&
+      EndsWith(path, "LevelFleetSelectView(Clone)/panel/Fixed/sp")) {
+    return true;
+  }
+  return false;
+}
+
 bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
+  if (IsRetirementControl(path) || IsSubmarineCallControl(path) ||
+      IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path)) return true;
+  if ((name == "dodge_button" || name == "fight_button") &&
+      EndsWith(path, "LevelAmbushView(Clone)/window/" + std::string(name))) {
+    return true;
+  }
+  if (IsCampaignPreparationSwitch(name, path)) {
+    return true;
+  }
   if (name == "bg" &&
       EndsWith(path, "Overlay/UIMain/LevelRemasterView(Clone)/bg")) {
     return true;
@@ -561,6 +629,10 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
                     std::string(name)))) {
     return true;
   }
+  if ((name == "Item1" || name == "Item2") &&
+      EndsWith(path, "LevelFleetSelectView(Clone)/panel/ShipList/sub/1/DutySelect/" + std::string(name))) {
+    return true;
+  }
   if (name.size() == 5 && name.substr(0, 4) == "Item" &&
       name[4] >= '1' && name[4] <= '4' &&
       (EndsWith(path,
@@ -721,6 +793,7 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
 
 bool ShouldEvaluateToggleTopRaycast(std::string_view name,
                                     std::string_view path) {
+  if (path.find("DockyardQuickSelectSettingUI(Clone)/window/notifications/options/notify_tpl_") != std::string_view::npos) return true;
   if (name == "AutoFight" &&
       EndsWith(path,
                "OverlayCamera/Overlay/UIMain/LevelStageInfoView(Clone)/"
@@ -744,7 +817,7 @@ bool ShouldEvaluateToggleTopRaycast(std::string_view name,
                "LevelFleetSelectView(Clone)/panel/Fixed/RightTabs/duty_btn")) {
     return true;
   }
-  if ((name == "build_btn" || name == "queue_btn") &&
+  if ((name == "build_btn" || name == "queue_btn" || name == "unseam_btn") &&
       EndsWith(path,
                "Overlay/UIMain/blur_panel/adapt/left_length/frame/tagRoot/" +
                    std::string(name))) {
@@ -783,6 +856,7 @@ bool ShouldEvaluateToggleTopRaycast(std::string_view name,
 
 bool ShouldEvaluateImageTopRaycast(std::string_view name,
                                    std::string_view path) {
+  if (EndsWith(path, "DockyardQuickSelectSettingUI(Clone)/window/notifications/options/notify_tpl_0/on/Image2")) return true;
   if (name == "bg" &&
       EndsWith(path,
                "ChapterPreCombatUI(Clone)/adapt/middle/auto_toggle/bg")) {
@@ -1078,6 +1152,8 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
       gameObjectClass != nullptr
           ? findMethodInHierarchy(gameObjectClass, "get_transform")
           : nullptr;
+  const void *getInstanceId = gameObjectClass != nullptr
+      ? findMethodInHierarchy(gameObjectClass, "GetInstanceID") : nullptr;
   const void *getParent =
       transformClass != nullptr
           ? findMethodInHierarchy(transformClass, "get_parent")
@@ -1598,6 +1674,9 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
 
     ObserverButtonRecord &record = result.records[result.recordCount++];
     record.flags = 0x1u | 0x2u | (interactable ? 0x4u : 0u);
+    if (getInstanceId != nullptr) {
+      invokeValue(getInstanceId, gameObject, nullptr, &record.instanceId, sizeof(record.instanceId));
+    }
     const std::string objectName = invokeString(gameObject);
     if (!objectName.empty()) {
       if (!CopyBoundedString(objectName, &record.name)) {
@@ -1736,8 +1815,13 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
     }
     if (ShouldEvaluateTopRaycast(objectName, path) &&
         (record.flags & 0x100u) != 0 && (record.flags & 0x400u) != 0) {
-      if (objectName == "extend" &&
-          EndsWith(path, "NewMainMellowTheme(Clone)/frame/left/extend")) {
+      if ((objectName == "extend" &&
+           EndsWith(path, "NewMainMellowTheme(Clone)/frame/left/extend")) ||
+          IsCampaignPreparationSwitch(objectName, path) ||
+          IsRetirementControl(path) || IsSubmarineCallControl(path) ||
+          IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path) ||
+          ((objectName == "dodge_button" || objectName == "fight_button") &&
+           EndsWith(path, "LevelAmbushView(Clone)/window/" + objectName))) {
         const float visibleLeft = std::max(0.0f, record.screenLeft);
         const float visibleRight =
             std::min(static_cast<float>(screenWidth), record.screenRight);
@@ -1892,6 +1976,12 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
         if (ShouldEvaluateToggleTopRaycast(toggleName, togglePath) &&
             (record.control.flags & 0x100u) != 0 &&
             (record.control.flags & 0x400u) != 0) {
+          if (togglePath.find("DockyardQuickSelectSettingUI(Clone)/") != std::string_view::npos) {
+            record.control.screenX = (record.control.screenLeft + record.control.screenRight) / 2.0f;
+            record.control.screenY = (record.control.screenBottom + record.control.screenTop) / 2.0f;
+            record.control.adbX = record.control.screenX;
+            record.control.adbY = static_cast<float>(screenHeight) - record.control.screenY;
+          }
           void *gameObject = invokeObject(getGameObject, toggle);
           void *transform = gameObject != nullptr
                                 ? invokeObject(getTransform, gameObject)
@@ -2093,6 +2183,10 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
             ANGLE_UNSAFE_TODO(strnlen(record.path.data(), record.path.size())));
         if (ShouldEvaluateImageTopRaycast(imageName, imagePath) &&
             (geometry.flags & 0x100u) != 0 && (geometry.flags & 0x400u) != 0) {
+          if (EndsWith(imagePath, "DockyardQuickSelectSettingUI(Clone)/window/notifications/options/notify_tpl_0/on/Image2")) {
+            geometry.screenX = (geometry.screenLeft + geometry.screenRight) / 2.0f;
+            geometry.screenY = (geometry.screenBottom + geometry.screenTop) / 2.0f;
+          }
           bool raycastEvaluated = false;
           const bool raycastMatches = topRaycastMatches(
               imageTransform, Vector2{geometry.screenX, geometry.screenY},

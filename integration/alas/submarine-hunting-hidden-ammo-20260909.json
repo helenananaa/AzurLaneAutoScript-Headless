@@ -1,0 +1,567 @@
+{
+  "schema": "alas-headless.submarine-ammo-observation/v1",
+  "serial": "emulator-5580",
+  "observed_at": "2026-09-09T04:05:27.615029+00:00",
+  "fingerprint": {
+    "package": "com.bilibili.azurlane",
+    "component": "com.bilibili.azurlane/com.manjuu.azurlane.MainActivity",
+    "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+    "width": 1280,
+    "height": 720,
+    "max_age_ms": 2500,
+    "peer_uid": 2000,
+    "expected_pid": 17018
+  },
+  "input_count": 0,
+  "records": [
+    {
+      "generation": 120165,
+      "ui_generation": 120165,
+      "runtime_messages": [],
+      "submarine_markers": [
+        {
+          "name": "mark",
+          "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+          "sprite": "qianting_icon",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "fill_amount": 1.0,
+          "truncated": false,
+          "bounds": {
+            "left": 946.958,
+            "top": 292.317,
+            "right": 1002.114,
+            "bottom": 340.279
+          },
+          "raw": {
+            "kind": "image",
+            "name": "mark",
+            "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+            "sprite": "qianting_icon",
+            "flags": 2479,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 946.958,
+              "top": 292.317,
+              "right": 1002.114,
+              "bottom": 340.279
+            },
+            "anchor_world_position": {
+              "x": 4.555,
+              "y": 0.8,
+              "z": -174.98
+            }
+          }
+        }
+      ],
+      "ammo": [],
+      "controls": []
+    },
+    {
+      "generation": 120173,
+      "ui_generation": 120174,
+      "runtime_messages": [],
+      "submarine_markers": [
+        {
+          "name": "mark",
+          "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+          "sprite": "qianting_icon",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "fill_amount": 1.0,
+          "truncated": false,
+          "bounds": {
+            "left": 946.958,
+            "top": 292.317,
+            "right": 1002.114,
+            "bottom": 340.279
+          },
+          "raw": {
+            "kind": "image",
+            "name": "mark",
+            "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+            "sprite": "qianting_icon",
+            "flags": 2479,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 946.958,
+              "top": 292.317,
+              "right": 1002.114,
+              "bottom": 340.279
+            },
+            "anchor_world_position": {
+              "x": 4.555,
+              "y": 0.8,
+              "z": -174.98
+            }
+          }
+        }
+      ],
+      "ammo": [],
+      "controls": []
+    },
+    {
+      "generation": 120181,
+      "ui_generation": 120182,
+      "runtime_messages": [],
+      "submarine_markers": [
+        {
+          "name": "mark",
+          "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+          "sprite": "qianting_icon",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "fill_amount": 1.0,
+          "truncated": false,
+          "bounds": {
+            "left": 946.958,
+            "top": 292.317,
+            "right": 1002.114,
+            "bottom": 340.279
+          },
+          "raw": {
+            "kind": "image",
+            "name": "mark",
+            "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+            "sprite": "qianting_icon",
+            "flags": 2479,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 946.958,
+              "top": 292.317,
+              "right": 1002.114,
+              "bottom": 340.279
+            },
+            "anchor_world_position": {
+              "x": 4.555,
+              "y": 0.8,
+              "z": -174.98
+            }
+          }
+        }
+      ],
+      "ammo": [],
+      "controls": []
+    },
+    {
+      "generation": 120189,
+      "ui_generation": 120190,
+      "runtime_messages": [],
+      "submarine_markers": [
+        {
+          "name": "mark",
+          "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+          "sprite": "qianting_icon",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "fill_amount": 1.0,
+          "truncated": false,
+          "bounds": {
+            "left": 946.958,
+            "top": 292.317,
+            "right": 1002.114,
+            "bottom": 340.279
+          },
+          "raw": {
+            "kind": "image",
+            "name": "mark",
+            "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+            "sprite": "qianting_icon",
+            "flags": 2479,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 946.958,
+              "top": 292.317,
+              "right": 1002.114,
+              "bottom": 340.279
+            },
+            "anchor_world_position": {
+              "x": 4.555,
+              "y": 0.8,
+              "z": -174.98
+            }
+          }
+        }
+      ],
+      "ammo": [],
+      "controls": []
+    },
+    {
+      "generation": 120197,
+      "ui_generation": 120198,
+      "runtime_messages": [],
+      "submarine_markers": [
+        {
+          "name": "mark",
+          "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+          "sprite": "qianting_icon",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "fill_amount": 1.0,
+          "truncated": false,
+          "bounds": {
+            "left": 946.958,
+            "top": 292.317,
+            "right": 1002.114,
+            "bottom": 340.279
+          },
+          "raw": {
+            "kind": "image",
+            "name": "mark",
+            "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+            "sprite": "qianting_icon",
+            "flags": 2479,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 946.958,
+              "top": 292.317,
+              "right": 1002.114,
+              "bottom": 340.279
+            },
+            "anchor_world_position": {
+              "x": 4.555,
+              "y": 0.8,
+              "z": -174.98
+            }
+          }
+        }
+      ],
+      "ammo": [],
+      "controls": []
+    },
+    {
+      "generation": 120205,
+      "ui_generation": 120205,
+      "runtime_messages": [],
+      "submarine_markers": [
+        {
+          "name": "mark",
+          "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+          "sprite": "qianting_icon",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "fill_amount": 1.0,
+          "truncated": false,
+          "bounds": {
+            "left": 946.958,
+            "top": 292.317,
+            "right": 1002.114,
+            "bottom": 340.279
+          },
+          "raw": {
+            "kind": "image",
+            "name": "mark",
+            "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+            "sprite": "qianting_icon",
+            "flags": 2479,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 946.958,
+              "top": 292.317,
+              "right": 1002.114,
+              "bottom": 340.279
+            },
+            "anchor_world_position": {
+              "x": 4.555,
+              "y": 0.8,
+              "z": -174.98
+            }
+          }
+        }
+      ],
+      "ammo": [],
+      "controls": []
+    },
+    {
+      "generation": 120213,
+      "ui_generation": 120214,
+      "runtime_messages": [],
+      "submarine_markers": [
+        {
+          "name": "mark",
+          "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+          "sprite": "qianting_icon",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "fill_amount": 1.0,
+          "truncated": false,
+          "bounds": {
+            "left": 946.958,
+            "top": 292.317,
+            "right": 1002.114,
+            "bottom": 340.279
+          },
+          "raw": {
+            "kind": "image",
+            "name": "mark",
+            "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+            "sprite": "qianting_icon",
+            "flags": 2479,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 946.958,
+              "top": 292.317,
+              "right": 1002.114,
+              "bottom": 340.279
+            },
+            "anchor_world_position": {
+              "x": 4.555,
+              "y": 0.8,
+              "z": -174.98
+            }
+          }
+        }
+      ],
+      "ammo": [],
+      "controls": []
+    },
+    {
+      "generation": 120221,
+      "ui_generation": 120222,
+      "runtime_messages": [],
+      "submarine_markers": [
+        {
+          "name": "mark",
+          "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+          "sprite": "qianting_icon",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "fill_amount": 1.0,
+          "truncated": false,
+          "bounds": {
+            "left": 946.958,
+            "top": 292.317,
+            "right": 1002.114,
+            "bottom": 340.279
+          },
+          "raw": {
+            "kind": "image",
+            "name": "mark",
+            "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+            "sprite": "qianting_icon",
+            "flags": 2479,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 946.958,
+              "top": 292.317,
+              "right": 1002.114,
+              "bottom": 340.279
+            },
+            "anchor_world_position": {
+              "x": 4.555,
+              "y": 0.8,
+              "z": -174.98
+            }
+          }
+        }
+      ],
+      "ammo": [],
+      "controls": []
+    },
+    {
+      "generation": 120230,
+      "ui_generation": 120230,
+      "runtime_messages": [],
+      "submarine_markers": [
+        {
+          "name": "mark",
+          "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+          "sprite": "qianting_icon",
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": [
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "fill_amount": 1.0,
+          "truncated": false,
+          "bounds": {
+            "left": 946.958,
+            "top": 292.317,
+            "right": 1002.114,
+            "bottom": 340.279
+          },
+          "raw": {
+            "kind": "image",
+            "name": "mark",
+            "path": "LevelCamera/Canvas/UIMain/LevelGrid/DragLayer/plane/cells/cell_fleet_dafenqi/mark",
+            "sprite": "qianting_icon",
+            "flags": 2479,
+            "active_in_hierarchy": true,
+            "active_and_enabled": true,
+            "raycast_target": false,
+            "raycast_top": null,
+            "color": {
+              "red": 1.0,
+              "green": 1.0,
+              "blue": 1.0,
+              "alpha": 1.0
+            },
+            "fill_amount": 1.0,
+            "adb_bounds": {
+              "left": 946.958,
+              "top": 292.317,
+              "right": 1002.114,
+              "bottom": 340.279
+            },
+            "anchor_world_position": {
+              "x": 4.555,
+              "y": 0.8,
+              "z": -174.98
+            }
+          }
+        }
+      ],
+      "ammo": [],
+      "controls": []
+    }
+  ]
+}

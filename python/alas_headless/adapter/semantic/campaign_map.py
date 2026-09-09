@@ -169,6 +169,13 @@ class CampaignMapAdapterPorts:
         context = self._require_campaign_context()
         if not self._action_ledger.allowed("campaign.grid_click"):
             return None
+        has_submarine = (context.declared_submarine_fleet or
+            (context.requested_fleets and context.requested_fleets[2]) or getattr(state, 'submarine', None) is not None)
+        prepared_submarine = ((context.declared_submarine_fleet or
+                               (context.requested_fleets and context.requested_fleets[2]))
+                              and getattr(state, 'submarine', None) is not None)
+        if has_submarine and not prepared_submarine:
+            raise SemanticGateClosed('manual submarine battle requires enabled configuration and an observed submarine')
         if (
             context.combat_admission is not None
             or context.combat_route_receipts
@@ -183,6 +190,7 @@ class CampaignMapAdapterPorts:
             state,
             input_generation=state.generation,
         )
+        context.submarine_planned_destination = decision.submarine_destination_node
         if self._action_ledger.remaining("campaign.grid_click") < len(
             admission.input_nodes
         ):
@@ -713,10 +721,20 @@ class CampaignMapAdapterPorts:
             rows=context.map_rows,
             land_cells=context.map_land_cells,
             expected_fleet_count=context.map_expected_fleet_count,
+            **({'allow_deployment': True} if context.submarine_move_entry is not None else {}),
         )
         admission = context.combat_admission
         post_combat_state = False
-        if admission is not None and context.combat_route_receipts:
+        deployment = context.submarine_move_entry is not None and admission is not None
+        if deployment:
+            # Entering deployment recalls the hunting avatar to its station and
+            # reveals ammo/range. Re-prove the entire surface-fleet route, but
+            # do not mistake that game-owned sub presentation for a grid input.
+            self._validate_campaign_combat_route_state(context, state, for_next_input=True)
+            if (state.submarine is None or len(admission.map_signature) <= 11
+                    or state.submarine.marker != admission.map_signature[11][1]):
+                raise SemanticGateClosed('submarine deployment camera identity changed')
+        elif admission is not None and context.combat_route_receipts:
             if (
                 context.combat_receipt is not None
                 and len(context.combat_route_receipts) == len(admission.input_nodes)
@@ -751,6 +769,7 @@ class CampaignMapAdapterPorts:
             )
         if (
             admission is not None
+            and not deployment
             and not context.combat_route_receipts
             and not context.map_fleet_switch_receipts
             and state.signature != admission.map_signature
@@ -772,6 +791,8 @@ class CampaignMapAdapterPorts:
 
     def campaign_camera_target_node(self) -> Optional[str]:
         context = self._require_campaign_context()
+        if context.submarine_move_entry is not None and context.submarine_planned_destination is not None:
+            return context.submarine_planned_destination
         admission = context.combat_admission
         if admission is not None:
             index = len(context.combat_route_receipts)
@@ -1205,7 +1226,12 @@ class CampaignMapAdapterPorts:
 
     def campaign_combat_committed(self) -> bool:
         context = self._campaign_context
-        return context is not None and context.combat_receipt is not None
+        # Both a grid entry and an accepted ambush choice can lead to the
+        # original Combat flow. Keep their receipts separate: an ambush must
+        # never count as defeating the planned map target.
+        return context is not None and (
+            context.combat_receipt is not None or context.ambush_receipt is not None
+        )
 
     def campaign_combat_active(self) -> bool:
         """Report the admitted ALAS goto/combat lease, including waypoints."""
@@ -1225,12 +1251,38 @@ class CampaignMapAdapterPorts:
             or self._action_ledger.remaining("campaign.grid_click") < 1
         ):
             raise SemanticGateClosed("campaign ambush requires remaining budget")
-        self._dispatch_mutation(
+        if context.ambush_receipt is not None:
+            raise SemanticGateClosed("campaign ambush input has not reached its postcondition")
+        context.ambush_receipt = self._dispatch_mutation(
             "campaign.grid_click",
             lambda: self.oracle.click_campaign_ambush(evade=evade),
         )
         context.passive_transition_until = time.monotonic() + 20.0
         return True
+
+    def campaign_ambush_present(self) -> bool:
+        self._package_gate()
+        self._require_campaign_context()
+        return self._frame_or_live_observation_oracle().campaign_ambush_present()
+
+    def campaign_ambush_outcome(self) -> Optional[str]:
+        context = self._require_campaign_context()
+        if context.ambush_receipt is None:
+            return None
+        oracle = self._frame_or_live_observation_oracle()
+        if oracle.campaign_ambush_present():
+            return None
+        if oracle.read_state().generation <= context.ambush_receipt.generation:
+            raise SemanticGateClosed("ambush result predates its input")
+        return oracle.campaign_ambush_notice()
+
+    def finish_campaign_ambush(self) -> None:
+        context = self._require_campaign_context()
+        if context.ambush_receipt is None or self.oracle.campaign_ambush_present():
+            raise SemanticGateClosed("campaign ambush completion is not proven")
+        if self.oracle.read_state().generation <= context.ambush_receipt.generation:
+            raise SemanticGateClosed("ambush completion predates its input")
+        context.ambush_receipt = None
 
     def confirm_campaign_combat(
         self,
