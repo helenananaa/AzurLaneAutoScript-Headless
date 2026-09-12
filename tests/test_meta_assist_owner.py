@@ -3,6 +3,50 @@ from alas_headless import AlasSemanticAdapter, AlasSemanticSession, SemanticGate
 from tests.semantic_support.adapter_fixtures import FakeOracle
 
 
+def test_assist_counter_retries_only_incoherent_observation():
+    oracle = FakeOracle()
+    calls = []
+    def read():
+        calls.append(1)
+        if len(calls) == 1:
+            raise SemanticGateClosed('META assist snapshots are not coherent')
+        return 'coherent-state'
+    oracle.meta_assist_state = read
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    assert adapter.meta_assist_state() == 'coherent-state'
+    assert len(calls) == 2
+    def malformed():
+        raise SemanticGateClosed('META selected assist candidate is ambiguous')
+    oracle.meta_assist_state = malformed
+    with pytest.raises(SemanticGateClosed, match='ambiguous'):
+        adapter.meta_assist_state()
+    assert oracle.click_calls == []
+
+
+def test_assist_start_consumes_once_and_pending_transition_never_reclicks():
+    oracle = FakeOracle()
+    calls = []
+    oracle.meta_precombat_fleet_ready = lambda: True
+    oracle.click_daily_precombat_start = lambda: (calls.append('start') or oracle.click_receipt('daily/precombat/start'))
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None, meta_assist_budget=1)
+    adapter.begin_meta_assist()
+    receipt = adapter.click_meta_precombat_start()
+    assert adapter._action_ledger.remaining('meta.assist') == 0
+    assert adapter.click_meta_precombat_start() is receipt
+    assert calls == ['start']
+    oracle.observation_prompt_kind = lambda: 'meta-sortie'
+    oracle.meta_assist_sortie_prompt_visible = lambda: True
+    oracle.click_meta_assist_sortie = lambda confirm: (calls.append('confirm') or oracle.click_receipt('meta/assist/sortie/confirm'))
+    adapter._click_confirmation('POPUP_CONFIRM')
+    assert calls == ['start', 'confirm']
+    assert adapter._action_ledger.remaining('meta.assist') == 0
+    adapter._meta_precombat_start_until = 0
+    with pytest.raises(SemanticGateClosed, match='remaining sortie budget'):
+        adapter.click_meta_precombat_start()
+    adapter.end_meta_assist()
+    assert adapter._meta_precombat_start_receipt is None
+
+
 def test_assist_scope_does_not_grant_beacon_bypass_or_leak_combat_owner():
     oracle = FakeOracle()
     oracle.observation_prompt_kind = lambda: 'meta-sortie'

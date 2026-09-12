@@ -16774,7 +16774,7 @@ diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
          if point >= check_number:
              return True
          return False
-@@ -715,10 +719,17 @@
+@@ -715,10 +719,18 @@
          return self._attack_meta(skip_first_screenshot=False)
  
      def run(self):
@@ -16789,7 +16789,8 @@ diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
 +        if semantic_adapter is not None:
 +            semantic_adapter.begin_meta_assist()
 +        try:
-+            self.ui_ensure(page_reward)
++            if semantic_adapter is None or not self._in_meta_assist_page():
++                self.ui_ensure(page_reward)
 +
 +            if self._begin_meta_assist():
 +                MetaReward(self.config, self.device).run()
@@ -16799,3 +16800,15 @@ diff --git a/module/os_ash/meta.py b/module/os_ash/meta.py
 +        finally:
 +            if semantic_adapter is not None:
 +                semantic_adapter.end_meta_assist()
+diff --git a/module/private_quarters/status.py b/module/private_quarters/status.py
+--- a/module/private_quarters/status.py
++++ b/module/private_quarters/status.py
+@@ -52,5 +52,8 @@
+         Pages:
+             in:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.private_quarters_daily_count()
+         count, _, _ = OCR_DAILY_COUNT.ocr(self.device.image)
+         return count

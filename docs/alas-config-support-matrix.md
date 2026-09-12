@@ -1,9 +1,11 @@
 # ALAS Headless 配置项级支持矩阵
 
-更新日期：2026-08-23
+日常推进请先看 [ALAS 适配任务大表](alas-adaptation-task-board.zh-CN.md)：60项当前范围、下一步、条件和优先顺序。本文保留字段级明细与历史验收说明。
+
+更新日期：2026-09-12（台账与近期证据整理）
 Headless 适配证据提交：`73433ccbac00be4c0fb367803d4affa7cb1ea599`
 固定 ALAS 上游基线：`81ccf63b4540f00241628c82a58c02c7a2bb11af`
-当前 ALAS `master` 观察：`d816310324bf686dff3252b37efbb997d9a328a4`（仅作差异盘点，尚未成为适配锁）
+历史 ALAS `master` 观察（2026-08-22）：`d816310324bf686dff3252b37efbb997d9a328a4`（仅作差异盘点，尚未成为适配锁）
 
 ## 1. 目的与口径
 
@@ -30,7 +32,7 @@ Headless 适配证据提交：`73433ccbac00be4c0fb367803d4affa7cb1ea599`
 
 | 标记 | 完成度标注 | 含义 |
 |---|---|---|
-| `F` | ✅ 完整支持 | 面板内全部配置值和必要异常分支均已按本文口径闭环；Benchmark、Commission、GameManager、Restart 已达到此状态 |
+| `F` | ✅ 完整支持 | 面板内全部配置值和必要异常分支均已按本文口径闭环 |
 | `L` | 🟢 主路径已完成，完整支持未完成 | 至少一条实机主路径闭环，但不代表组内所有配置值已闭环 |
 | `P` | 🟡 部分完成 | 有实现或可到达部分页面，配置分支仍不完整 |
 | `B` | 🧱 已到边界，尚未完成 | 已安全到达账号、资源、日期或观察能力边界 |
@@ -38,7 +40,7 @@ Headless 适配证据提交：`73433ccbac00be4c0fb367803d4affa7cb1ea599`
 | `M` | 🔴 尚未完成 | 缺少任务级适配或关键语义端口 |
 | `R` | ⚙️ 运行时待验收 | ALAS 内部/运行时管理字段；仍需验证调度与恢复契约 |
 
-### 1.1 完成度汇总（2026-08-23 标注）
+### 1.1 完成度汇总（2026-09-12 台账整理）
 
 这里的“完成”严格指整块面板的全部配置值和必要异常分支均已闭环，不能用“默认路径跑过”替代。
 
@@ -46,14 +48,16 @@ Headless 适配证据提交：`73433ccbac00be4c0fb367803d4affa7cb1ea599`
 |---|---:|---|
 | ✅ 完整支持（`F`） | **9 / 60** | Awaken、Benchmark、Commission、GameManager、Minigame、OpsiHazard1Leveling、OpsiMeowfficerFarming、Restart、Reward |
 | 🟢 主路径已完成、全配置未完成（`L`） | **31 / 60** | Daily、Dorm、Event、Event2、EventA、EventB、EventC、EventD、EventSp、Exercise、Gacha、GemsFarming、Guild、Hard、Main、Main2、Main3、OpsiAbyssal、OpsiArchive、OpsiExplore、OpsiObscure、OpsiShop、OpsiStronghold、OpsiVoucher、Raid、RaidDaily、Research、ShopFrequent、ShopOnce、Tactical、WarArchives |
-| 🧪 仅离线完成（`O`） | **4 / 60** | Coalition、CoalitionSp、Hospital、PrivateQuarters |
-| 🟡 部分完成（`P`） | **9 / 60** | Alas、AzurLaneUncensored、Daemon、EventGeneral、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral |
+| 🧪 仅离线完成（`O`） | **3 / 60** | Coalition、CoalitionSp、Hospital |
+| 🟡 部分完成（`P`） | **10 / 60** | Alas、AzurLaneUncensored、Daemon、EventGeneral、EventStory、Freebies、General、OpsiDaemon、OpsiGeneral、PrivateQuarters |
 | 🧱 已到边界、尚未完成（`B`） | **7 / 60** | Meowfficer、OpsiAshAssist、OpsiAshBeacon、OpsiCrossMonth、OpsiDaily、OpsiMonthBoss、Shipyard |
 | 🔴 尚未完成（`M`） | **0 / 60** | 暂无 |
 
-当前账本的已提交功能证据基线为 `73433cc`；2026-08-22 的月度 Boss 证据已纳入该提交，但 r61 资格收据本身仍为未通过，因此不会伪装成完整任务验收。矩阵首次提交为 `e2fc2fe`；authoritative patch series 的成员数与哈希由校验器现场验证。离线或仓库测试通过不会自动提升任何实机复核栏。
+账本保留的历史已提交证据基线为 `73433cc`，不包含近期工作树中的全部改动；矩阵首次提交为 `e2fc2fe`。2026-09-12 当前结论以结构化台账及各专题收据为准，尚未提交的验证不能归入旧提交。月度 Boss r61 仍未通过。补丁系列当前为113成员，成员数与哈希由校验器核对；本次文档整理没有重新实跑全部任务，也不提升实机等级。
 
-### 1.1A 当前上游配置差异（2026-08-22）
+> 以下1.1A至第2节之前为历史专题记录，保留用于追溯。当前执行缺口以任务大表和第2节台账生成结果为准；历史文字中的“当前”“本轮”均指该条记录当时。
+
+### 1.1A 历史上游配置差异（2026-08-22；不属于本工作树当前任务范围）
 
 2026-08-22 重新读取 GitHub `master` 的 `task.yaml`、`args.json` 与 `template.json`，远端提交为 `d816310324bf686dff3252b37efbb997d9a328a4`。原始上游配置面为 **68 个面板、315 个唯一非 `Storage` 字段、1,296 个面板字段实例**；相对当前适配锁 `81ccf63` 的 60/278/1,217，新增 **8 个面板、37 个唯一字段和 79 个实例**，没有删除。
 
@@ -421,25 +425,25 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 21 | RaidDaily | Scheduler, RaidDaily, Campaign, StopCondition, Emotion | L | 难度过滤与 EX 奖励路由已离线回放，当前活动仍保留上游 RaidDaily 的 RunCount=0 原语义，不传播伪单战上限。9.7.343 上原任务已证明 EX=0 与 easy=0 的零输入次日调度；StageFilter='easy > normal' 在 easy=0 时安全跳过并由同一任务实例连续完成 normal 14→0、PT 2168→3148，恰好 14 组关卡/舰队/出击收据且无 raw fallback。15 次普通清理后的领奖产生 3 张 EX 票；诚实保留的 r1/r3 失败收据与最终 r4 通过收据合起来证明一次任务页失败、一次中断战果恢复和剩余两票连续清空，而不冒充单次不间断通过。随后 hard 14→0、PT 3148→4828 的十四战也通过 r3/r5 失败收据、r4 孤立战果恢复与 r6 最终四战通过收据形成可审计的分段全清；新增 current-Raid 结果所有权避免原通用 BATTLE_STATUS_S 输入接管 typed 结果。本轮又以可审计分段链消费账号现有两张 EX 票，EX 2→1→0、PT 4828→5140→5452；精确 NetworkDown 恢复覆盖 combat_execute、结果结束和返回主界面，最终零预算任务闭合为 task_result=true 且无 raw fallback。更新后原 Restart 任务已完成 -force-gfx-st PID turnover 与 typed 登录，紧随其后的 RaidDaily 在新 PID 上零输入确认 easy/normal=0、PT=3148 并再次调度。共享 Raid.UseTicket=true 的严格零票单次回退已在独立 Raid easy 15→14、PT 5452→5482 实机闭环；RaidDaily 本身的实际跨日唤醒、正票最终提交、进阶挑战执行和 easy 完整整轮仍未资格化，因此为 L |
 | 22 | Commission | Scheduler, Commission | F | 六预设、custom、重大委托双值、动态多页、奖励、零油/非零油开始、1200 油确认、取消、补位和最早完成调度均已闭环 |
 | 23 | Tactical | Scheduler, Tactical, ControlExpOverflow, AddNewStudent | L | 新学员、选书过滤与经验溢出均已实机闭环；快速学习因当前非活动期仍未闭环 |
-| 24 | Research | Scheduler, Research | L | 三资源 always/do_not、队列容量、部件映射、重名卡和真实物资不足延迟已实机；最终哈希全策略、重置、26 预设及跨轮仍未闭环 |
+| 24 | Research | Scheduler, Research | L | 三资源always_use/do_not_use、队列容量、部件映射、重名卡和真实物资不足延迟有实机证据；公共科研菜单两轮原生进出通过，重复请求未多发输入。其余资源策略、重置、26个预设及跨轮完整任务仍未闭环。见 docs/research-navigation-20260912.zh-CN.md。 |
 | 25 | Dorm | Scheduler, Dorm, BuyFurniture | L | 收取、喂食与食物过滤均已完整闭环；BuyFurniture 已完成活动主题 set 实买、家具币扣款、LastRun、调度与主页恢复，all 原生路径已实现但因 set 后活动候选从当前账号消失，尚缺另一未购买活动主题的最终实买回执 |
 | 26 | Meowfficer | Scheduler, Meowfficer, MeowfficerTrain | B | 原 Meowfficer 状态机现已接入完整 typed 边界：购买精确数量与金币后置条件、Fort 已入住猫的 play/feed/clean chores、相同卡面的连续领取、特殊紫/金天赋锁定、seamlessly/周日增强，以及按 EnhanceIndex 与 MaxFeedLevel 选择目标和最多 10 只材料。实机证据覆盖购买次数已满零输入、Fort 0/8 安全跳过、训练 10/10 已满零资源变化、once_a_day 领取 1 只普通 SSR 后补排金箱，以及当前数字卡片层级下 EnhanceIndex=1 命中 LV30 后零输入返回 leveled_max；当前可见前 12 个 ALAS 目标均为 LV30，需出现可见非满级目标和合格材料后才能复核强化正向消耗。正向购买、已入住 Fort、特殊天赋、多只领取和完整强化消耗仍只离线闭环，因此面板保持 B |
 | 27 | Guild | Scheduler, GuildLogistics, GuildOperation | L | 普通成员实机主路径已闭环：大厅 20/20 报告全领、后勤补给领取与 3 次按过滤器兑换、7-1 推荐编队并派遣；新任务选择、加入阈值、新行动创建、Boss 攻击与 Boss 推荐仍待对应角色和页面状态验证 |
 | 28 | Reward | Scheduler, Reward | F | 五个 Reward 领取开关均已在原始 ALAS 流程中完成开启与关闭的实机闭环 |
 | 29 | Awaken | Scheduler, Awaken | F | 原始 Awaken 任务已实机覆盖收藏开关、阵列优先与芯片回退、精确候选过滤、资源充足门、单次授权、完成弹窗、实际等级与上限分离、无候选退出及恢复主页。 |
-| 30 | Daily | Scheduler, Daily | L | 原 Daily 状态机已实机闭环 Tactical Training 第二关/舰队 2 与 Fierce Assault 第一关/舰队 1；新版展开层的普通、单次快速和批量快速控件已 typed 区分，普通模式实机通过，UseDailySkip=true 的批量快速动作仅完成有界实现而未实耗验收；其余星期类型、难度和舰队仍未完整覆盖 2026-09-11 补齐快速挑战命中检查、按挑战身份读次数及返回主页；当天未触发快速消耗，仍未实机验收该分支。 |
+| 30 | Daily | Scheduler, Daily | L | 普通挑战指定关卡/舰队已闭环；战术研修与斩首行动批量快速各实耗3→0，领奖为分段恢复，修复后的完整连续任务仍待验收。每日页归属及重复入口已通过两轮原生往返，重复请求零额外输入。其他星期类型、难度和舰队未完整覆盖；2026-09-12余下3/3类型均锁定。见 docs/daily-meta-live-20260912.zh-CN.md、docs/daily-navigation-20260912.zh-CN.md。 |
 | 31 | Hard | Scheduler, Hard | L | 困难 11-4 已在真实 API 32 x86_64 AVD 上完成三次首通推进并达到 100%：舰队 1 清理 6 队道中、舰队 2 击破 Boss，全部战斗使用官方自动战斗；覆盖零弹药、伏击、紧急委托、地图恢复和三类结算。刷新额度后，ALAS 原 Hard 入口又完成官方地图自律实机闭环：9.7.328 职能页签精确设置 fleet1=all/fleet2=standby，出击后游戏接管地图与战斗，观察器证明官方自动战斗并被动验收合计奖励页，随后精确退出；三份凭证均无 raw-input fallback。官方地图自律仅在精确进度大于 95% 时放行。HardFleet=2 与其他困难关卡未外推 |
 | 32 | Exercise | Scheduler, Exercise | L | 演习主流程、四种选敌、对手刷新、结构化血量、低血退出、胜负结算与七字段入口契约均已适配并实机闭环；仅非 aggressive 时段边界及 OpponentTrial 大于 1 的自然实机样本未逐值触发 |
 | 33 | ShopFrequent | Scheduler, GeneralShop | L | 原 ShopFrequent 已实机完成当前过滤器的十卡读取、金币/钻石余额与零购买安全退出；普通商店共用单件购买事务已有真实余额/库存后置条件，General 正向金币购买仍因触控重连在点击前失败关闭，刷新、钻石与自定义消费未逐值 |
 | 34 | ShopOnce | Scheduler, GuildShop, MedalShop2, MeritShop, CoreShop | L | 军需、舰队、核心月度、勋章四页已由原 ShopOnce 实机贯通；勋章 DR 单件购买与舰队商店一次刷新均以精确余额和库存后置条件闭环，二级品类选择及非当前过滤分支未逐值 |
-| 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口已门禁；LastRun 完整离线、BuyAmount 0..15 部分离线，>15 及真实页面/价格/确认/结果仍拒绝 |
+| 35 | Shipyard | Scheduler, ShipyardDr, Shipyard | B | 八字段入口与LastRun/BuyAmount合法范围有离线契约；科研菜单入口已实测。当前高梁研究中、蓝图50的选中状态读取和原生不能强化helper两次通过，包含重进、退出及重复入口零输入。已修复开发等级误计为蓝图及研究中舰船强制读开发等级。其他舰船阶段、期数、购买价格/确认/结果、强化消费及完整任务仍未资格化。见 docs/shipyard-state-20260912.zh-CN.md。 |
 | 36 | Gacha | Scheduler, Gacha | L | 四配置字段已离线等价；Event/Special 各两单已实机提交并核对资源与队列，UseDrill 两值均已完成原任务闭环；票券、祈愿池、其余卡池和数量仍未闭环 |
 | 37 | Freebies | Scheduler, BattlePass, DataKey, Mail, SupplyPack | P | 原 Freebies 已再次组合实机成功：BattlePass 无待领奖、DataKey 已领取、SupplyPack 油量 4477 且无免费卡时零购买并调度次日。BattlePass 普通 claim-all 已单独实机领取且未触碰付费升级；DataKey 300/300 的安全跳过、取消和 ForceCollect=true 精确确认均已执行，独立后置复跑证明 state_after、计数不变及零重复动作。强制分支因日状态不可逆尚缺单一不间断通过收据；自然免费礼包确认/领奖仍待样本 |
 | 38 | Minigame | Scheduler | F | 固定源代码仅声明抚顺挑战；无用户字段，单票实机任务已完整进入、结算、退出、预算耗尽停止并返回主界面 |
-| 39 | PrivateQuarters | Scheduler, PrivateQuarters | O | 四项设置有固定上游的严格门禁和原方法离线回放；页面、货币、互动与输入闭环仍缺 |
+| 39 | PrivateQuarters | Scheduler, PrivateQuarters | P | 选房页、真实次数、原生全部关闭分支与次日调度已验证；新泽西物理点击、原生三次触摸及IK/watch/base返回有实机证据。好感升3级弹窗阻断最终退出，原任务超时；重启恢复后确认0/3并回主页，属于分段清空。升级弹窗自动关闭、完整TargetInteract=true、自动选角色/地点、其他角色、礼物和商店仍未资格化。见 docs/private-quarters-physics-20260912.zh-CN.md。 |
 | 40 | OpsiGeneral | OpsiGeneral | P | 六字段继续保持离线等价；BuyActionPointLimit/OilLimit 已读取当前渐进式原生条款并以一次性预算证明行动力 240→340、石油 16077→15077、周次数 4→3，默认零预算复跑不再变化。满血无修、Akashi 出现、非空 Logger、随机事件全结果与异常恢复仍未闭环 |
 | 41 | OpsiAshBeacon | Scheduler, OpsiAshBeacon | B | 当前信标的一击模式主路径已实机闭环：200 点创建、三类求助、出击、战斗、两层结算、276085 伤害读取和 30 分钟延后；击杀领奖、档案与非一击分支仍缺独立实证 |
-| 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | Tier 已以 typed 候选身份和 stale-state gate 完成整数等价类及五次轮换实机闭环；助战次数 3/3 未变且未出击。面板仍缺无目标、舰队不可用、出击、战斗和领奖主链 2026-09-11 实机补齐旧档案到当前列表导航及原生 0/3 helper 判断；任务上下文与 typed 次数已接通，完整战斗及 MetaReward 仍未验收。 |
+| 42 | OpsiAshAssist | Scheduler, OpsiAshAssist | B | Tier候选选择、档案到当前列表、任务上下文及真实次数已接通。2026-09-12实耗三次支援，最后一场1→0的原生战斗、结算与返回单进程通过。同步页已纠正，1830/2000的原生无奖励分支通过。实际同步奖励领取、支援到奖励的完整任务、无目标和舰队不可用分支仍未完整验收。见 docs/daily-meta-live-20260912.zh-CN.md、docs/meta-reward-page-20260912.zh-CN.md。 |
 | 43 | OpsiExplore | Scheduler, OpsiExplore, OpsiFleet | L | 历史 72 海域证据为 SAFE 遍历及任务游标/时间重置，不代表游戏月初重置或全部危险海域开荒。2026-09-02 已实证月初结算、舰队准备入口与原 ALAS 危险海域 44 清理，正常断点随后按 24→22→31→21→23 推进；21 在恢复启动时清理，后续原流程确认 SAFE 后保存。最终 23 区运行源码起止一致，修复扫描弹窗下层重复输入及当前海域恢复。Fleet=1、Submarine=false、SpecialRadar=false，未购买记录仪。另用独立配置完成危险海域 33，不混入正常顺序。六类样本 typed 使用接口已实现，实测仍为空库存，非零消费待实证；全部 72 危险海域、其他舰队/潜艇组合、记录仪和无人值守自动恢复未闭环。见 docs/operation-siren-monthstart-continuation-20260902.zh-CN.md |
 | 44 | OpsiShop | Scheduler, OpsiShop | L | 新版统一港口商店已完成类型化 19 卡库存、票券余额、精确商品身份/价格/余量及单件购买后置闭环；自定义过滤实机命中并完成 DevelopmentMaterialT2 的 3→2、票券 1205→1200，含输入超时后按精确对话框恢复；黄币购买、五预设逐值实机、余额不足、刷新及全港口分支仍未闭环 |
 | 45 | OpsiVoucher | Scheduler, OpsiVoucher | L | 新版兑换页 22 卡 typed 观察、凭证余额、筛选命中和单件兑换已由原任务实机闭环；HECombatPlan 余量 28→27、凭证 21592→21492，默认过滤器售罄分支安全停止；石油商品、所有过滤优先级逐值及异常恢复仍未全部实机闭环 |
@@ -459,7 +463,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | 59 | AzurLaneUncensored | AzurLaneUncensored | P | 本地 localization 路径可用；`Repository` 对应的远端同步在上游被注释，配置与能力不一致 |
 | 60 | GameManager | GameManager | F | 真假双值、已停止幂等、连续 PID 冷启动、登录、停止/启动/断网/600 秒 observer 超时、恢复及零 forward 遗留均已闭环 |
 
-## 3. 配置组字段级矩阵
+## 3. 配置组字段级矩阵（历史分组摘要；当前逐字段结论见第7节）
 
 ### 3.1 全局、调度、退役与强化
 
@@ -575,7 +579,7 @@ Daily 组的 7 个关卡选择、6 个舰队选择和 `UseDailySkip` 现在会�
 | AzurLaneUncensored | `Repository` | P | 先决定恢复远端同步还是删除/禁用该配置；网络失败、仓库不可达、本地文件和回滚必须有明确契约 |
 | GameManager | `AutoRestart` | F | true/false、运行中/已停止、连续 PID 冷启动、登录、停止/启动/断网/完整 observer 超时、恢复和 session/forward 清理均已实机与回放闭环 |
 
-## 4. 关键中断面与观察缺口
+## 4. 历史关键中断面与观察缺口（当前执行项见任务大表）
 
 以下分支会横向影响多个配置项，不能只在单个任务里打补丁：
 

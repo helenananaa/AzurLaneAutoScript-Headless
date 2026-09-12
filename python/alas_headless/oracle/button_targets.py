@@ -7,6 +7,12 @@ from .contracts import SemanticTarget
 
 
 DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
+    SemanticTarget('private-quarters/home', 'home', 'SelectDorm3DUI(Clone)/Main/option/home'),
+    SemanticTarget('private-quarters/interact', 'tpl', 'Dorm3dMainUI(Clone)/UI/watch/Role/Touch/tpl'),
+    SemanticTarget('private-quarters/room/back', 'btn_back', tuple(
+        f'Dorm3dMainUI(Clone)/UI/{mode}/btn_back' for mode in ('base', 'watch', 'ik'))),
+    SemanticTarget('private-quarters/dialogue/continue', 'NewStoryUI(Clone)', 'OverlayCamera/Overlay/UIOverlay/NewStoryUI(Clone)'),
+    SemanticTarget('private-quarters/room/new-jersey', 'Xinzexi', 'SelectDorm3DUI(Clone)/Map/floor_2/Xinzexi'),
     SemanticTarget(
         "login/enter",
         "LoginUI2(Clone)",
@@ -48,6 +54,8 @@ DEFAULT_TARGETS: Tuple[SemanticTarget, ...] = (
     SemanticTarget("main/mail", "mail", "frame/top/btns/mail"),
     SemanticTarget("main/shop", "shop", "frame/bottom/frame/shop"),
     SemanticTarget("main/dock", "dock", "frame/bottom/frame/dock"),
+    SemanticTarget("meta/character/back", "back", "OverlayCamera/Overlay/UIMain/blur_panel/adapt/top/back"),
+    SemanticTarget("meta/reward-preview/open", "award_btn", "WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/award_btn"),
     SemanticTarget("meta/dossier/list", "list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/list_btn"),
     SemanticTarget("meta/dossier/current", "current_list_btn", "WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn"),
     SemanticTarget("main/task", "task", "frame/bottom/frame/task"),

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Tuple
+import time
 from ...semantic_oracle import (
     ActionReceipt,
     MetaAssistState,
@@ -24,6 +25,8 @@ class MetaAdapterPorts:
     def end_meta_assist(self) -> None:
         self._meta_assist_active = False
         self._operation_siren_combat_active = False
+        self._meta_precombat_start_receipt = None
+        self._meta_precombat_start_until = 0.0
 
     def begin_meta_beacon(self) -> None:
         """Own one complete META beacon task until its explicit finally block."""
@@ -55,7 +58,13 @@ class MetaAdapterPorts:
 
     def meta_assist_state(self) -> MetaAssistState:
         self._package_gate()
-        return self.oracle.meta_assist_state()
+        for attempt in range(5):
+            try:
+                return self.oracle.meta_assist_state()
+            except SemanticGateClosed as exc:
+                if str(exc) != 'META assist snapshots are not coherent' or attempt == 4:
+                    raise
+                time.sleep(.05)
 
     def click_meta_assist_next_candidate(
         self, *, expected_index: int, expected_level: int
@@ -80,13 +89,22 @@ class MetaAdapterPorts:
 
     def click_meta_precombat_start(self) -> ActionReceipt:
         self._package_gate()
+        if (self._meta_assist_active and self._meta_precombat_start_receipt is not None
+                and time.monotonic() < self._meta_precombat_start_until):
+            return self._meta_precombat_start_receipt
         if self._meta_assist_active and not self._action_ledger.allowed('meta.assist'):
             raise SemanticGateClosed('META assist requires remaining sortie budget')
         if not self.oracle.meta_precombat_fleet_ready():
             raise SemanticGateClosed(
                 "META precombat requires non-empty main and vanguard fleets"
             )
-        receipt = self.oracle.click_daily_precombat_start()
+        if self._meta_assist_active:
+            receipt = self._dispatch_mutation('meta.assist', self.oracle.click_daily_precombat_start)
+        else:
+            receipt = self.oracle.click_daily_precombat_start()
+        if self._meta_assist_active:
+            self._meta_precombat_start_receipt = receipt
+            self._meta_precombat_start_until = time.monotonic() + 20.0
         self._operation_siren_combat_active = True
         return receipt
 
@@ -95,6 +113,13 @@ class MetaAdapterPorts:
         return self.oracle.click_daily_precombat_back()
 
     def _appear_meta(self, name, semantic_id):
+        if name == 'META_CHECK':
+            return self.oracle.meta_character_page_visible()
+        if name in ('SYNC_ENTER', 'SYNC_ENTER2', 'SYNC_REWARD_NOTICE', 'SYNC_TAP',
+                    'META_REWARD_NOTICE', 'REWARD_ENTER'):
+            # These belong to MetaCharacterUI, never WorldBoss's reward preview.
+            self.oracle.meta_character_pending_sync()
+            return name == 'SYNC_ENTER'
         if name == 'BEACON_MY':
             try:
                 self.oracle.meta_assist_state()
@@ -112,8 +137,6 @@ class MetaAdapterPorts:
                 REWARD_RESOURCE_FIELDS[name]
             )
         if semantic_id == "meta/page/back":
-            if name == "META_CHECK":
-                return self.oracle.meta_page_visible()
             try:
                 self.oracle.meta_entrance_state()
                 return True

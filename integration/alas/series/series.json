@@ -558,7 +558,12 @@
     {
       "order": 112,
       "path": "integration/alas/series/0650-meta-assist-task-owner.patch",
-      "sha256": "4d17a675590056a3c0b2d1f19c69cc9bf4031f1056e9e98d086432aca8818efd"
+      "sha256": "bd69fe25ef0d7f5561356346e5c2f7decca8500fe582b52403a6997e0ad80083"
+    },
+    {
+      "order": 113,
+      "path": "integration/alas/series/0660-private-quarters-overview.patch",
+      "sha256": "1e0eb70169612ed19a8258d55d0dd4db342b598f37c80b19f686f3528b240944"
     }
   ],
   "schema": "alas-headless.alas-patch-series/v1",

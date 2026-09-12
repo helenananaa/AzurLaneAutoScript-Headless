@@ -535,12 +535,16 @@ class SessionTasksPorts:
     def meta_page_visible(self) -> bool:
         return self.open().meta_page_visible()
 
+    def private_quarters_daily_count(self) -> int:
+        return self.open()._frame_or_live_observation_oracle().private_quarters_overview().remaining
+
     def meta_assist_state(self) -> MetaAssistState:
         return self.open().meta_assist_state()
 
     def click_meta_assist_next_candidate(
         self, *, expected_index: int, expected_level: int
     ) -> ActionReceipt:
+        self.refresh_tactical_input_frame()
         return self.open().click_meta_assist_next_candidate(
             expected_index=expected_index,
             expected_level=expected_level,

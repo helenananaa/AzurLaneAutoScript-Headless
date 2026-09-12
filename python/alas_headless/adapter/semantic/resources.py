@@ -16,6 +16,11 @@ _LEGACY_TASK_CONFIG_SHA256 = (
 # These aliases are intentionally asymmetric.  For example, BACK_ARROW is not
 # mapped to settings/back because ALAS reuses that asset on many unrelated pages.
 DEFAULT_ALAS_BUTTON_TARGETS: Mapping[str, str] = {
+    'PQ_GOTO_MAIN': 'private-quarters/home',
+    'PRIVATE_QUARTERS_INTERACT': 'private-quarters/interact',
+    'PRIVATE_QUARTERS_ROOM_TARGET_CLICK_AREA': 'private-quarters/character/new-jersey',
+    'PRIVATE_QUARTERS_ROOM_BACK': 'private-quarters/room/back',
+    'PRIVATE_QUARTERS_ROOM_CHECK': 'private-quarters/room/back',
     "LOGIN_CHECK": "login/enter",
     "POPUP_CONFIRM_WHITE": "overlay/login-data-expired/confirm",
     "MAIN_GOTO_CAMPAIGN": "main/battle",

@@ -1,0 +1,11 @@
+{
+  "passed": false,
+  "status": "original_method_failed_at_observed_level_up_overlay",
+  "original_three_loop_log": "interact-live-r5.log",
+  "postcondition_snapshot": "level-up-r4.json",
+  "original_method_returned": false,
+  "reason": "LevelUpWindow obscures room back; no reviewed dismiss hit on installed r4 observer",
+  "last_known_remaining": 2,
+  "final_remaining": null,
+  "original_error": "Wait too long"
+}

@@ -2,6 +2,54 @@
 
 Status is evidence-scoped. A later gate is not implied by an earlier pass.
 
+For the current 60-panel work queue and re-entry conditions, see the
+[adaptation task board](alas-adaptation-task-board.zh-CN.md).
+
+## 2026-09-12
+
+Shipyard now reads the selected in-progress ship without mixing development
+levels into blueprint inventory or inventing a missing level. Takahashi/50
+blueprints and the original cannot-strengthen helper passed twice, including
+re-entry and return to main; duplicate entry sent zero new input. Purchase and
+strengthening workflows remain unqualified. See [state evidence](shipyard-state-20260912.zh-CN.md).
+
+Daily navigation now survives stale source-frame entry retries and owns its
+page-registry sweep without an unrelated Dock flow. Two original main/Daily/main
+round trips passed in one process; each explicit duplicate request sent zero
+extra input. 67 focused checks passed, resources stayed unchanged, and locked
+challenge types were not executed. See [navigation evidence](daily-navigation-20260912.zh-CN.md).
+
+PrivateQuarters now has typed overview/count ports, an original disabled-action
+branch and New Jersey collider input. The original three-interaction loop ran,
+but a favor-level-3 popup blocked final room exit and ALAS timed out. Recovery
+confirmed 0/3 remaining and returned to main; this is segmented evidence, not a
+complete TargetInteract task pass. IK/watch/base back controls passed live
+checks; level-up dismissal, gifts, shop and other characters remain unqualified.
+96 focused checks passed. See [interaction evidence](private-quarters-physics-20260912.zh-CN.md)
+and the [earlier overview scope](private-quarters-20260912.zh-CN.md).
+
+Research-menu entry now survives ALAS's fading-main duplicate click. Two
+consecutive original UI round trips passed, with exactly one actual entry input
+per round; round two naturally repeated the entry request with zero extra input.
+45 focused checks and Research configuration verification passed. See
+[navigation evidence](research-navigation-20260912.zh-CN.md).
+
+META reward follow-up corrected the page identity: WorldBoss reward preview is
+not MetaCharacterUI. The original MetaReward pending-sync branch now finishes
+without timeout on actual 1830/2000 typed progress. Ready/unknown reward phases
+fail locally instead of becoming false no-reward reports. Actual claiming and
+the complete assist-to-sync-page task remain unqualified. See
+[page correction and live scope](meta-reward-page-20260912.zh-CN.md).
+
+Daily quick execution now has two real batch receipts (Tactical first and Fierce
+first, each 3→0), with segmented award recovery. The observer row pivot and
+Daily award ownership/blocking bugs are fixed. META consumed 3 assists; its last
+original battle completed uninterrupted from 1→0 through result and list return.
+Earlier attempts retain transition failures. Zero-attempt original task returned
+and scheduled tomorrow, but MetaReward reported no reward after a page wait
+timeout, so actual reward-marker/claim support remains unqualified. No oil or
+premium currency consumed. See [scope and evidence](daily-meta-live-20260912.zh-CN.md).
+
 ## 2026-09-11
 
 ### Daily quick and META assist boundary repairs

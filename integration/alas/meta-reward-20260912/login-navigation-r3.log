@@ -1,0 +1,63 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 12:00:37.226 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 12:00:37.356 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 12:00:37.360 │ DEVICE                                      
+INFO     2026-09-12 12:00:37.362 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 12:00:37.364 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 12:00:37.367 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 12:00:37.369 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 12:00:37.371 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 12:00:37.374 │ emulator-5580                               
+INFO     2026-09-12 12:00:37.377 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 12:00:37.379 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 12:00:37.385 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 12:00:37.386 │ [Server] cn                                 
+WARNING  2026-09-12 12:00:37.388 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 12:00:37.391 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 12:00:37.443 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 12:00:37.446 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 12:00:37.448 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 12:00:37.449 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 12:00:37.450 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:00:37.899 │ handle_app_login                            
+INFO     2026-09-12 12:00:37.900 │ Screenshot interval set to 1.0s             
+INFO     2026-09-12 12:00:37.902 │ <<< APP LOGIN >>>                           
+INFO     2026-09-12 12:00:37.923 │ [Device Orientation] 0 (Normal)             
+INFO     2026-09-12 12:00:41.769 │ Semantic click login/enter @                
+         UICamera/Canvas/UIMain/LoginUI2(Clone)                                
+INFO     2026-09-12 12:00:41.772 │ Login success                               
+INFO     2026-09-12 12:01:10.484 │ Login to main confirm                       
+INFO     2026-09-12 12:01:10.486 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 12:01:10.487 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:01:10.489 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 12:01:11.712 │ UI get current page                         
+INFO     2026-09-12 12:01:12.989 │ [UI] page_main                              
+INFO     2026-09-12 12:01:12.990 │ Goto page_reward                            
+INFO     2026-09-12 12:01:12.992 │ <<< UI GOTO PAGE_REWARD >>>                 
+INFO     2026-09-12 12:01:15.421 │ Page switch: page_main -> page_reward       
+INFO     2026-09-12 12:01:15.889 │ Semantic click main/more @                  
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/left/exte
+         nd                                                                    
+INFO     2026-09-12 12:01:17.565 │ Page arrive: page_reward                    
+INFO     2026-09-12 12:01:17.566 │ Ensure beacon assist page                   
+INFO     2026-09-12 12:02:21.201 │ In meta page dossier                        
+INFO     2026-09-12 12:02:48.047 │ In beacon assist page                       
+LIST READY

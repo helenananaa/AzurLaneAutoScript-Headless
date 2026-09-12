@@ -1,0 +1,46 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 17:50:04.655 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 17:50:04.669 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 17:50:04.674 │ DEVICE                                      
+INFO     2026-09-12 17:50:04.677 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 17:50:04.679 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 17:50:04.683 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 17:50:04.686 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 17:50:04.688 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 17:50:04.691 │ emulator-5580                               
+INFO     2026-09-12 17:50:04.694 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 17:50:04.697 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 17:50:04.705 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 17:50:04.707 │ [Server] cn                                 
+WARNING  2026-09-12 17:50:04.709 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 17:50:04.712 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 17:50:04.767 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 17:50:04.768 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 17:50:04.770 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 17:50:04.773 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 17:50:06.606 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 17:50:07.760 │ <<< UI CLICK >>>                            
+INFO     2026-09-12 17:50:10.307 │ Semantic click private-quarters/room/back @ 
+         UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/ik/btn_back             
+INFO     2026-09-12 17:50:21.401 │ Semantic click private-quarters/room/back @ 
+         UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/watch/btn_back          
+INFO     2026-09-12 17:50:31.471 │ Semantic click private-quarters/room/back @ 
+         UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/base/btn_back           
+None {'generation': 2989, 'remaining': 2, 'capacity': 3, 'locale': '汐语小筑'}

@@ -15,7 +15,8 @@ Unity UI 状态，提供给锁定版本的 ALAS。这样不仅改变了自动化
 > **项目状态：**目前属于研究级运行时，已经可以执行通过资格验证的任务路径，
 > 但还不是普通 ALAS 安装的一键替代品，也不代表全部任务都能长期无人值守运行。
 
-[任务支持情况](docs/alas-config-support-matrix.md) ·
+[适配任务大表](docs/alas-adaptation-task-board.zh-CN.md) ·
+[字段支持明细](docs/alas-config-support-matrix.md) ·
 [运行环境支持](docs/runtime-support-matrix.md) ·
 [系统架构](docs/architecture.md) ·
 [最新验证状态](docs/status.md) ·

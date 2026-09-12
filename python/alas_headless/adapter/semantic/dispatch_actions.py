@@ -226,6 +226,10 @@ class DispatchActionsPorts:
                     self.oracle.click("mail/manage/back")
                 )
             target = self._goto_main_target()
+            if target == 'private-quarters/home':
+                return self.oracle.click_private_quarters_home()
+            if target == 'meta/character/back':
+                return self.oracle.click_meta_character_back()
             if target is None:
                 context = self._battle_pass_context
                 if (
@@ -356,10 +360,14 @@ class DispatchActionsPorts:
                         self._operation_siren_combat_active = True
                     return receipt
                 if name == "POPUP_CONFIRM":
-                    receipt = self._dispatch_mutation(
-                        "meta.assist",
-                        lambda: self.oracle.click_meta_assist_sortie(True),
-                    )
+                    if (self._meta_assist_active and self._meta_precombat_start_receipt is not None
+                            and time.monotonic() < self._meta_precombat_start_until):
+                        receipt = self.oracle.click_meta_assist_sortie(True)
+                    else:
+                        receipt = self._dispatch_mutation(
+                            "meta.assist",
+                            lambda: self.oracle.click_meta_assist_sortie(True),
+                        )
                     self._operation_siren_combat_active = True
                     return receipt
                 return self.oracle.click_meta_assist_sortie(False)
@@ -367,6 +375,35 @@ class DispatchActionsPorts:
 
     def _click_mapped(self, name, semantic_id):
         if semantic_id is not None:
+            if semantic_id == 'private-quarters/room/back':
+                return self.oracle.click_private_quarters_room_back()
+            if semantic_id == 'private-quarters/home':
+                if (not self.oracle.private_quarters_page_visible()
+                        and self.oracle.main_page_visible()
+                        and self.oracle.enabled('main/battle')):
+                    return self.oracle.main_page_receipt()
+                return self.oracle.click_private_quarters_home()
+            if (semantic_id == 'dorm-menu/private-quarters' and self._private_quarters_entry_receipt is not None
+                    and self.oracle.private_quarters_page_visible()
+                    and self.oracle.enabled('private-quarters/home')
+                    and self.oracle.read_state().generation > self._private_quarters_entry_receipt.generation):
+                return self._private_quarters_entry_receipt
+            if (semantic_id == 'main/live' and self._main_live_entry_receipt is not None
+                    and self.oracle.observation_target_present('dorm-menu/dorm')
+                    and self.oracle.enabled('dorm-menu/dorm')
+                    and self.oracle.read_state().generation > self._main_live_entry_receipt.generation):
+                return self._main_live_entry_receipt
+            if (semantic_id == 'research-menu/shipyard' and self._shipyard_entry_receipt is not None
+                    and self.oracle.shipyard_page_visible()
+                    and self.oracle.read_state().generation > self._shipyard_entry_receipt.generation):
+                return self._shipyard_entry_receipt
+            if (semantic_id == 'main/tech' and self._main_tech_entry_receipt is not None
+                    and self.oracle.observation_target_present('research-menu/page/back')
+                    and self.oracle.enabled('research-menu/page/back')
+                    and self.oracle.read_state().generation > self._main_tech_entry_receipt.generation):
+                # The destination mounted after ALAS observed the fading main
+                # frame. Acknowledge the actual entry; do not click its underlay.
+                return self._main_tech_entry_receipt
             if semantic_id == 'meta/current/list' and getattr(self.oracle, 'meta_dossier_assist_visible', lambda: False)():
                 return self.oracle.click_meta_dossier_current()
             if semantic_id == 'meta/dossier/list':
@@ -495,7 +532,23 @@ class DispatchActionsPorts:
                     return self.oracle.click_meta_current_start()
                 return self.oracle.click_meta_assist_start()
             if semantic_id == "campaign-menu/daily":
-                return self.oracle.click_campaign_daily_entrance()
+                def arrived():
+                    return (self._daily_entry_receipt is not None
+                            and self.oracle.daily_entry_visible()
+                            and self.oracle.read_state().generation > self._daily_entry_receipt.generation)
+                if arrived():
+                    return self._daily_entry_receipt
+                before_input = self.oracle.input_dispatch_count
+                try:
+                    receipt = self.oracle.click_campaign_daily_entrance()
+                except SemanticGateClosed:
+                    # A source-frame retry may meet the newly mounted Daily page.
+                    # Only acknowledge a real earlier entry and no new input.
+                    if self.oracle.input_dispatch_count == before_input and arrived():
+                        return self._daily_entry_receipt
+                    raise
+                self._daily_entry_receipt = receipt
+                return receipt
             if semantic_id == "daily/precombat/start" and self._exercise_pending:
                 return self.click_exercise_precombat_start()
             if semantic_id == "daily/precombat/start":
@@ -679,6 +732,12 @@ class DispatchActionsPorts:
                 try:
                     receipt = self.oracle.click(semantic_id)
                 except SemanticTargetMissing:
+                    if (semantic_id == 'main/tech' and self._main_tech_entry_receipt is not None
+                            and getattr(self.oracle, 'input_dispatch_count', 0) == before_input
+                            and self.oracle.observation_target_present('research-menu/page/back')
+                            and self.oracle.enabled('research-menu/page/back')
+                            and self.oracle.read_state().generation > self._main_tech_entry_receipt.generation):
+                        return self._main_tech_entry_receipt
                     if (semantic_id == 'main/battle'
                             and self._main_battle_transition_receipt is not None
                             and time.monotonic() <= self._main_battle_transition_until
@@ -688,6 +747,14 @@ class DispatchActionsPorts:
                     raise
             if semantic_id == 'main/more':
                 self._main_more_entry_receipt = receipt
+            if semantic_id == 'research-menu/shipyard':
+                self._shipyard_entry_receipt = receipt
+            if semantic_id == 'main/tech':
+                self._main_tech_entry_receipt = receipt
+            if semantic_id == 'main/live':
+                self._main_live_entry_receipt = receipt
+            if semantic_id == 'dorm-menu/private-quarters':
+                self._private_quarters_entry_receipt = receipt
             if semantic_id == "main/battle":
                 self._main_battle_transition_receipt = receipt
                 self._main_battle_transition_until = time.monotonic() + 20.0

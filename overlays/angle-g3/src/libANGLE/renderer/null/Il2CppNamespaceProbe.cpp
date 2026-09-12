@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
+#include <cmath>
 #include <limits>
 #include <string>
 #include <string_view>
@@ -249,6 +250,12 @@ struct UiProbeResult {
   std::array<ObserverToggleRecord, kMaxObserverToggles> toggles = {};
   std::array<ObserverTextRecord, kMaxObserverTexts> texts = {};
   std::array<ObserverImageRecord, kMaxObserverImages> images = {};
+  uint32_t privatePhysicsStatus = 0;
+  uint32_t colliderCount = 0;
+  uint32_t colliderTruncated = 0;
+  uint32_t colliderErrors = 0;
+  std::array<char, kObserverPathBytes> physicsCameraPath = {};
+  std::array<ObserverColliderRecord, 256> colliders = {};
 };
 
 template <size_t Size>
@@ -685,6 +692,21 @@ bool ShouldEvaluateTopRaycast(std::string_view name, std::string_view path) {
       EndsWith(path, "WorldBossUI(Clone)/pages/ArchivesWorldBossDetailUI(Clone)/list_btn")) {
     return true;
   }
+  if (EndsWith(path, "Overlay/UIMain/LevelUpWindow/bg") ||
+      EndsWith(path, "Overlay/UIOverlay/NewStoryUI(Clone)") ||
+      path.find("Dorm3d") != std::string_view::npos) {
+    return true;
+  }
+  if (EndsWith(path, "SelectDorm3DUI(Clone)/Main/option/home") ||
+      EndsWith(path, "SelectDorm3DUI(Clone)/Main/btn_switch/left") ||
+      EndsWith(path, "SelectDorm3DUI(Clone)/Main/btn_switch/right") ||
+      EndsWith(path, "SelectDorm3DUI(Clone)/Map/floor_2/Xinzexi")) {
+    return true;
+  }
+  if (name == "award_btn" &&
+      EndsWith(path, "WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/main/award_btn")) {
+    return true;
+  }
   if (name == "current_list_btn" &&
       EndsWith(path, "WorldBossUI(Clone)/pages/ArchivesWorldBossChallengeUI(Clone)/current_list_btn")) {
     return true;
@@ -975,7 +997,7 @@ using LoadedImageObjectCollector =
 const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
                                  const void *coreImage, const void *uiImage,
                                  const void *uiModuleImage,
-                                 const void *textMeshProImage, int screenWidth,
+                                 const void *textMeshProImage, const void *physicsImage, int screenWidth,
                                  int screenHeight) {
   // Campaign maps need more complete Image records than overlay pages.  Keep
   // the large reusable collection out of UnityMain's comparatively small
@@ -999,6 +1021,11 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
   result.imageRecordTruncated = 0;
   result.imageSourceCount = 0;
   result.imageSourceCapacity = 0;
+  result.privatePhysicsStatus = 0;
+  result.colliderCount = 0;
+  result.colliderTruncated = 0;
+  result.colliderErrors = 0;
+  result.physicsCameraPath.fill(0);
   result.uiRecordErrors = 0;
   result.uiRecordSkipped = 0;
   result.uiMethodMask = 0;
@@ -1853,6 +1880,11 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           IsRetirementControl(path) || IsSubmarineCallControl(path) ||
           IsCampaignStrategyDetailsControl(path) || IsCampaignDeploymentControl(path) ||
           IsCampaignScoutControl(path) ||
+          (EndsWith(path, "Dorm3dMainUI(Clone)/UI/base/btn_back") ||
+          EndsWith(path, "Dorm3dMainUI(Clone)/UI/watch/btn_back") ||
+          EndsWith(path, "Dorm3dMainUI(Clone)/UI/ik/btn_back")) ||
+          EndsWith(path, "DailyLevelUI(Clone)/desc_panel/main_mask/main/"
+                         "scrollview/content/stagetpl(Clone)/info") ||
           ((objectName == "dodge_button" || objectName == "fight_button") &&
            EndsWith(path, "LevelAmbushView(Clone)/window/" + objectName))) {
         const float visibleLeft = std::max(0.0f, record.screenLeft);
@@ -1867,6 +1899,19 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
           record.adbX = record.screenX;
           record.adbY = static_cast<float>(screenHeight) - record.screenY;
         }
+      }
+      if ((EndsWith(path, "Dorm3dMainUI(Clone)/UI/base/btn_back") ||
+          EndsWith(path, "Dorm3dMainUI(Clone)/UI/watch/btn_back") ||
+          EndsWith(path, "Dorm3dMainUI(Clone)/UI/ik/btn_back")) ||
+          EndsWith(path, "DailyLevelUI(Clone)/desc_panel/main_mask/main/"
+                         "scrollview/content/stagetpl(Clone)/info")) {
+        // The row pivot can sit exactly on its upper edge. Prove the actual
+        // integer ADB point inside the visible row, rather than a float pivot
+        // that rounds outside before input.
+        record.adbX = std::round(record.screenX);
+        record.adbY = std::round(static_cast<float>(screenHeight) - record.screenY);
+        record.screenX = record.adbX;
+        record.screenY = static_cast<float>(screenHeight) - record.adbY;
       }
       if (objectName == "CommissionInfoUI4Mellow(Clone)" &&
           EndsWith(path, "Overlay/UIMain/CommissionInfoUI4Mellow(Clone)")) {
@@ -2317,6 +2362,191 @@ const UiProbeResult &ProbeUnityUi(const Il2CppDynamicProbe &probe,
     }
   }
 
+  // Optional room-only 3D observation. Missing physics reflection must not
+  // disable the established UI observation capabilities.
+  bool privateRoom = false;
+  for (size_t i = 0; i < result.recordCount; ++i) {
+    if (EndsWith(std::string(result.records[i].path.data()), "Dorm3dMainUI(Clone)/UI/base/btn_back")) {
+      privateRoom = true;
+      break;
+    }
+  }
+  if (privateRoom) {
+    result.privatePhysicsStatus = 2;
+    void *colliderClass = physicsImage ? classFromName(physicsImage, "UnityEngine", "Collider") : nullptr;
+    void *boundsClass = classFromName(coreImage, "UnityEngine", "Bounds");
+    const void *getEnabled = colliderClass ? findMethodInHierarchy(colliderClass, "get_enabled") : nullptr;
+    const void *getTrigger = colliderClass ? findMethodInHierarchy(colliderClass, "get_isTrigger") : nullptr;
+    const void *getBounds = colliderClass ? findMethodInHierarchy(colliderClass, "get_bounds") : nullptr;
+    void *centerField = boundsClass ? classGetFieldFromName(boundsClass, "m_Center") : nullptr;
+    void *extentField = boundsClass ? classGetFieldFromName(boundsClass, "m_Extents") : nullptr;
+    const void *getMainCamera = cameraClass ? findMethodInHierarchy(cameraClass, "get_main") : nullptr;
+    void *camera = getMainCamera ? invokeObject(getMainCamera, nullptr) : nullptr;
+    auto pathOf = [&](void *transform) {
+      std::string path;
+      for (int depth = 0; transform != nullptr && depth < 64; ++depth) {
+        const std::string part = invokeString(transform);
+        if (part.empty()) break;
+        path = path.empty() ? part : part + "/" + path;
+        transform = getParent ? invokeObject(getParent, transform) : nullptr;
+      }
+      return path;
+    };
+    if (camera) {
+      void *go = invokeObject(getGameObject, camera);
+      CopyBoundedString(pathOf(go ? invokeObject(getTransform, go) : nullptr), &result.physicsCameraPath);
+    }
+    static thread_local LoadedObjectCollector physicsCollector;
+    std::array<void *, 256> activeColliders = {};
+    if (getEnabled && getTrigger && getBounds && centerField && extentField &&
+        collectLoadedInstances(colliderClass, &physicsCollector)) {
+      result.privatePhysicsStatus = 1;
+      result.colliderTruncated = physicsCollector.truncated ? 1u : 0u;
+      for (size_t i = 0; i < physicsCollector.count; ++i) {
+        void *collider = physicsCollector.objects[i];
+        bool enabled = false, active = false, trigger = false;
+        void *go = collider ? invokeObject(getGameObject, collider) : nullptr;
+        if (!go || !invokeBoolean(getEnabled, collider, &enabled) ||
+            !invokeBoolean(getActiveInHierarchy, go, &active)) {
+          ++result.colliderErrors;
+          continue;
+        }
+        if (!enabled || !active) continue;
+        if (result.colliderCount >= result.colliders.size()) {
+          result.colliderTruncated = 1;
+          break;
+        }
+        auto &record = result.colliders[result.colliderCount];
+        record = {};
+        if (!CopyBoundedString(invokeString(go), &record.name) ||
+            !CopyBoundedString(pathOf(invokeObject(getTransform, go)), &record.path)) record.flags |= 4u;
+        void *bounds = invokeObject(getBounds, collider);
+        if (!bounds || !invokeBoolean(getTrigger, collider, &trigger) ||
+            !invokeValue(getInstanceId, collider, nullptr, &record.instanceId, sizeof(record.instanceId))) {
+          ++result.colliderErrors;
+          continue;
+        }
+        fieldGetValue(bounds, centerField, record.center.data());
+        fieldGetValue(bounds, extentField, record.extents.data());
+        bool finite = true;
+        for (int axis = 0; axis < 3; ++axis) {
+          finite &= std::isfinite(record.center[axis]) && std::isfinite(record.extents[axis]);
+        }
+        if (!finite) { ++result.colliderErrors; continue; }
+        if (trigger) record.flags |= 1u;
+        Vector3 point{record.center[0], record.center[1], record.center[2]}, screen{};
+        void *arguments[] = {&point};
+        if (camera && worldToScreenPoint && invokeValue(worldToScreenPoint, camera, arguments, &screen, sizeof(screen)) &&
+            std::isfinite(screen.x) && std::isfinite(screen.y) && std::isfinite(screen.z)) {
+          record.screen[0] = screen.x;
+          record.screen[1] = static_cast<float>(screenHeight) - screen.y;
+          record.screen[2] = screen.z;
+          record.flags |= 2u;
+        }
+        activeColliders[result.colliderCount] = collider;
+        ++result.colliderCount;
+      }
+      void *rayClass = classFromName(coreImage, "UnityEngine", "Ray");
+      void *hitClass = classFromName(physicsImage, "UnityEngine", "RaycastHit");
+      const void *makeRay = cameraClass ? findMethodInHierarchy(cameraClass, "ScreenPointToRay", 1) : nullptr;
+      const void *cast = findMethodInHierarchy(colliderClass, "Raycast", 3);
+      void *distanceField = hitClass ? classGetFieldFromName(hitClass, "m_Distance") : nullptr;
+      // Collider has public and private three-argument Raycast overloads.
+      // Select by types, not parameter count or reflection ordering.
+      void *floatClass = getImageFillAmount ? classFromType(methodGetReturnType(getImageFillAmount)) : nullptr;
+      void *boolClass = classFromType(methodGetReturnType(getActiveAndEnabled));
+      const bool publicSweep = cast && rayClass && hitClass && floatClass && boolClass &&
+          classFromType(methodGetParam(cast, 0)) == rayClass &&
+          classFromType(methodGetParam(cast, 1)) == hitClass &&
+          classFromType(methodGetParam(cast, 2)) == floatClass &&
+          classFromType(methodGetReturnType(cast)) == boolClass;
+      const bool privateSweep = cast && rayClass && hitClass && floatClass && boolClass &&
+          classFromType(methodGetParam(cast, 0)) == rayClass &&
+          classFromType(methodGetParam(cast, 1)) == floatClass &&
+          classFromType(methodGetParam(cast, 2)) == boolClass &&
+          classFromType(methodGetReturnType(cast)) == hitClass;
+      const bool sweepReady = camera && makeRay && distanceField && (publicSweep || privateSweep);
+      for (size_t i = 0; i < result.colliderCount; ++i) {
+        auto &record = result.colliders[i];
+        const std::string_view path(record.path.data());
+        if (path != "xinzexi_noshoes(Clone)/all/Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/BodyCollider" ||
+            (record.flags & 4u) || !(record.flags & 2u) || record.screen[2] <= 0) continue;
+        // Search only within the observed body volume. Every candidate gets
+        // a fresh complete collider sweep and EventSystem occlusion query.
+        for (float verticalFraction : std::array<float, 3>{0.0f, 0.5f, 0.85f}) {
+        record.flags &= 7u;
+        record.nearestId = 0;
+        record.uiTopPath.fill(0);
+        Vector3 candidateWorld{record.center[0], record.center[1] + record.extents[1] * verticalFraction, record.center[2]};
+        Vector3 candidateScreen{};
+        void *projectionArguments[] = {&candidateWorld};
+        if (!invokeValue(worldToScreenPoint, camera, projectionArguments, &candidateScreen, sizeof(candidateScreen)) ||
+            !std::isfinite(candidateScreen.x) || !std::isfinite(candidateScreen.y) || candidateScreen.z <= 0) continue;
+        record.inputX = std::round(candidateScreen.x);
+        record.inputY = std::round(static_cast<float>(screenHeight) - candidateScreen.y);
+        if (record.inputX < 0 || record.inputY < 0 || record.inputX >= screenWidth || record.inputY >= screenHeight) continue;
+        record.flags |= 128u;
+        record.sweepStatus = 1;
+        if (!sweepReady || result.colliderTruncated || result.colliderErrors) continue;
+        Vector3 screenPoint{record.inputX, static_cast<float>(screenHeight) - record.inputY, 0.0f};
+        void *rayArguments[] = {&screenPoint};
+        void *ray = invokeObject(makeRay, camera, rayArguments);
+        void *hit = objectNew(hitClass);
+        record.sweepStatus = 2;
+        if (!ray || !hit || !objectUnbox(ray) || !objectUnbox(hit)) continue;
+        float nearestDistance = std::numeric_limits<float>::max();
+        bool complete = true;
+        float maxDistance = 10000.0f;
+        for (size_t j = 0; j < result.colliderCount; ++j) {
+          uint8_t hitValue = 0;
+          void *currentHit = hit;
+          if (privateSweep) {
+            void *arguments[] = {objectUnbox(ray), &maxDistance, &hitValue};
+            currentHit = invokeObject(cast, activeColliders[j], arguments);
+            if (!currentHit) { complete = false; break; }
+          } else {
+            void *arguments[] = {objectUnbox(ray), objectUnbox(hit), &maxDistance};
+            if (!invokeValue(cast, activeColliders[j], arguments, &hitValue, sizeof(hitValue))) {
+              complete = false;
+              break;
+            }
+          }
+          if (!hitValue) continue;
+          float distance = 0.0f;
+          fieldGetValue(currentHit, distanceField, &distance);
+          if (!std::isfinite(distance) || distance < 0) { complete = false; break; }
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            record.nearestId = result.colliders[j].instanceId;
+          }
+        }
+        record.sweepStatus = complete ? 4u : 3u;
+        if (complete) {
+          record.flags |= 8u;
+          if (record.nearestId == record.instanceId) record.flags |= 16u;
+        }
+        bool evaluated = false;
+        void *go = invokeObject(getGameObject, activeColliders[i]);
+        bool same = topRaycastMatches(invokeObject(getTransform, go), Vector2{screenPoint.x, screenPoint.y}, &evaluated);
+        int32_t uiHits = -1;
+        if (evaluated && invokeValue(getRaycastCount, raycastResults, nullptr, &uiHits, sizeof(uiHits)) && uiHits >= 0) {
+          record.flags |= 32u;
+          if (same || uiHits == 0) record.flags |= 64u;
+          if (uiHits > 0) {
+            int32_t first = 0;
+            void *itemArguments[] = {&first};
+            void *firstHit = invokeObject(getRaycastItem, raycastResults, itemArguments);
+            void *hitObject = nullptr;
+            if (firstHit) fieldGetValue(firstHit, raycastGameObjectField, &hitObject);
+            if (hitObject) CopyBoundedString(pathOf(invokeObject(getTransform, hitObject)), &record.uiTopPath);
+          }
+        }
+        if ((record.flags & (8u | 16u | 32u | 64u)) == (8u | 16u | 32u | 64u)) break;
+        }
+      }
+    }
+  }
+
   result.success = true;
   result.diagnosticStage = 100;
   return result;
@@ -2438,6 +2668,7 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
   const void *uiImage = nullptr;
   const void *uiModuleImage = nullptr;
   const void *textMeshProImage = nullptr;
+  const void *physicsImage = nullptr;
   for (size_t index = 0; index < assemblyCount; ++index) {
     const void *assembly = ANGLE_UNSAFE_BUFFERS(assemblies[index]);
     const void *image = assemblyGetImage(assembly);
@@ -2460,6 +2691,9 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
     if (imageName == "UnityEngine.UIModule" ||
         imageName == "UnityEngine.UIModule.dll") {
       uiModuleImage = image;
+    }
+    if (imageName == "UnityEngine.PhysicsModule" || imageName == "UnityEngine.PhysicsModule.dll") {
+      physicsImage = image;
     }
     if (imageName == "Unity.TextMeshPro" ||
         imageName == "Unity.TextMeshPro.dll") {
@@ -2497,7 +2731,7 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
   snapshot.mainThread = actualTid == gObserverMainThreadTid.load() ? 1u : 0u;
   if (snapshot.mainThread != 0) {
     const UiProbeResult &ui = ProbeUnityUi(
-        probe, coreImage, uiImage, uiModuleImage, textMeshProImage, width,
+        probe, coreImage, uiImage, uiModuleImage, textMeshProImage, physicsImage, width,
         height);
     snapshot.uiDiagnosticStage = ui.diagnosticStage;
     snapshot.uiMethodMask = ui.methodMask;
@@ -2519,6 +2753,12 @@ int32_t ObserverMainThreadTick(uint64_t requestGeneration,
     uiSnapshot.toggles = ui.toggles;
     uiSnapshot.texts = ui.texts;
     uiSnapshot.images = ui.images;
+    uiSnapshot.privatePhysicsStatus = ui.privatePhysicsStatus;
+    uiSnapshot.colliderCount = ui.colliderCount;
+    uiSnapshot.colliderTruncated = ui.colliderTruncated;
+    uiSnapshot.colliderErrors = ui.colliderErrors;
+    uiSnapshot.physicsCameraPath = ui.physicsCameraPath;
+    uiSnapshot.colliders = ui.colliders;
     if (ui.success) {
       snapshot.flags |= 0x8;
       snapshot.buttonCount = ui.buttonCount;

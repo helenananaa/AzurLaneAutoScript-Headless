@@ -200,6 +200,10 @@ class DailyAdapterPorts:
         return self.oracle.click_daily_precombat_back()
 
     def _click_daily(self, name):
+        if name in ('GET_ITEMS_1', 'GET_ITEMS_2', 'GET_ITEMS_3') and self.daily_execution_active():
+            target = self._award_close_target()
+            if target is not None:
+                return self.oracle.click(target)
         if name == "DAILY_ENTER":
             return self.click_daily_current_card()
         if name.startswith("DAILY_MISSION_"):

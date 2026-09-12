@@ -1,0 +1,366 @@
+�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+                                     START                                     
+�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+WARNING  2026-09-12 18:17:28.796 �� Unknown daily stage `0` from daily_current=4
+-------------------------------- DAILY RUN ONE --------------------------------
+INFO     2026-09-12 18:17:28.801 �� DAILY RUN ONE                               
+INFO     2026-09-12 18:17:28.804 �� [emergency_module_development] False        
+INFO     2026-09-12 18:17:28.806 �� Checked_list: [0]                           
+-------------------------------- DAILY RUN ONE --------------------------------
+INFO     2026-09-12 18:17:28.810 �� DAILY RUN ONE                               
+INFO     2026-09-12 18:17:28.811 �� [emergency_module_development] False        
+INFO     2026-09-12 18:17:28.812 �� Checked_list: [0]                           
+INFO     2026-09-12 18:17:28.813 �� No stage set on daily_current: 1, skip      
+INFO     2026-09-12 18:17:28.814 �� Skip supply line disruption if UseDailySkip 
+         disabled                                                              
+INFO     2026-09-12 18:17:28.815 �� No stage set on daily_current: 3, skip      
+INFO     2026-09-12 18:17:28.817 �� This daily is not open now                  
+INFO     2026-09-12 18:17:28.818 �� No stage set on daily_current: 5, skip      
+INFO     2026-09-12 18:17:28.819 �� No stage set on daily_current: 6, skip      
+INFO     2026-09-12 18:17:28.821 �� No stage set on daily_current: 7, skip      
+-------------------------------- DAILY RUN ONE --------------------------------
+INFO     2026-09-12 18:17:28.823 �� DAILY RUN ONE                               
+INFO     2026-09-12 18:17:28.824 �� [emergency_module_development] False        
+INFO     2026-09-12 18:17:28.825 �� Checked_list: [0]                           
+INFO     2026-09-12 18:17:28.826 �� No stage set on daily_current: 1, skip      
+-------------------------------- DAILY RUN ONE --------------------------------
+INFO     2026-09-12 18:17:28.828 �� DAILY RUN ONE                               
+INFO     2026-09-12 18:17:28.829 �� [emergency_module_development] False        
+INFO     2026-09-12 18:17:28.830 �� Checked_list: [0]                           
+INFO     2026-09-12 18:17:28.831 �� No stage set on daily_current: 2, skip      
+INFO     2026-09-12 18:17:28.831 �� No stage set on daily_current: 3, skip      
+INFO     2026-09-12 18:17:28.833 �� This daily is not open now                  
+INFO     2026-09-12 18:17:28.834 �� No stage set on daily_current: 5, skip      
+INFO     2026-09-12 18:17:28.835 �� No stage set on daily_current: 6, skip      
+INFO     2026-09-12 18:17:28.837 �� No stage set on daily_current: 7, skip      
+-------------------------------- DAILY RUN ONE --------------------------------
+INFO     2026-09-12 18:17:28.838 �� DAILY RUN ONE                               
+INFO     2026-09-12 18:17:28.840 �� [emergency_module_development] False        
+INFO     2026-09-12 18:17:28.841 �� Checked_list: [0]                           
+INFO     2026-09-12 18:17:28.842 �� No stage set on daily_current: 2, skip      
+INFO     2026-09-12 18:17:28.844 �� No stage set on daily_current: 3, skip      
+INFO     2026-09-12 18:17:28.845 �� This daily is not open now                  
+INFO     2026-09-12 18:17:28.847 �� No stage set on daily_current: 5, skip      
+INFO     2026-09-12 18:17:28.849 �� No stage set on daily_current: 6, skip      
+INFO     2026-09-12 18:17:28.851 �� No stage set on daily_current: 7, skip      
+{
+  "schema": "alas-headless.daily-config-replay/v1",
+  "passed": true,
+  "field_count": 14,
+  "accepted_case_count": 64,
+  "invalid_case_count": 80,
+  "defaults": {
+    "UseDailySkip": true,
+    "EscortMission": "first",
+    "AdvanceMission": "first",
+    "FierceAssault": "first",
+    "TacticalTraining": "second",
+    "SupplyLineDisruption": "second",
+    "ModuleDevelopment": "first",
+    "EmergencyModuleDevelopment": "first",
+    "EscortMissionFleet": 1,
+    "AdvanceMissionFleet": 1,
+    "FierceAssaultFleet": 1,
+    "TacticalTrainingFleet": 1,
+    "ModuleDevelopmentFleet": 1,
+    "EmergencyModuleDevelopmentFleet": 1
+  },
+  "runtime_consumers": {
+    "Daily.stage_and_fleet": [
+      "Daily.get_daily_stage_and_fleet"
+    ],
+    "Daily.UseDailySkip": [
+      "daily_enter",
+      "daily_run_one"
+    ],
+    "patched_guards": [
+      "_validate_daily_config"
+    ]
+  },
+  "original_decisions": {
+    "standard_mapping": [
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        6
+      ]
+    ],
+    "emergency_mapping": [
+      [
+        2,
+        5
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "cases": {
+      "daily_skip_control": "daily_skip",
+      "normal_run_control": "normal_run",
+      "tactical_execute": {
+        "events": [
+          [
+            "ui_ensure"
+          ],
+          [
+            "execute",
+            {
+              "remain": 2,
+              "stage": 2,
+              "fleet": 4
+            }
+          ],
+          [
+            "ui_goto"
+          ]
+        ],
+        "checked": [
+          0,
+          1
+        ],
+        "executions": [
+          {
+            "remain": 2,
+            "stage": 2,
+            "fleet": 4
+          }
+        ]
+      },
+      "supply_skip_disabled": {
+        "events": [
+          [
+            "ui_ensure"
+          ],
+          [
+            "next",
+            1
+          ],
+          [
+            "next",
+            2
+          ],
+          [
+            "next",
+            3
+          ],
+          [
+            "next",
+            4
+          ],
+          [
+            "next",
+            5
+          ],
+          [
+            "next",
+            6
+          ],
+          [
+            "next",
+            7
+          ]
+        ],
+        "checked": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "executions": []
+      },
+      "supply_skip_enabled": {
+        "events": [
+          [
+            "ui_ensure"
+          ],
+          [
+            "next",
+            1
+          ],
+          [
+            "execute",
+            {
+              "remain": 2,
+              "stage": 2,
+              "fleet": 0
+            }
+          ],
+          [
+            "ui_goto"
+          ]
+        ],
+        "checked": [
+          0,
+          1,
+          2
+        ],
+        "executions": [
+          {
+            "remain": 2,
+            "stage": 2,
+            "fleet": 0
+          }
+        ]
+      },
+      "inactive": {
+        "events": [
+          [
+            "ui_ensure"
+          ],
+          [
+            "next",
+            1
+          ],
+          [
+            "next",
+            2
+          ],
+          [
+            "next",
+            3
+          ],
+          [
+            "next",
+            4
+          ],
+          [
+            "next",
+            5
+          ],
+          [
+            "next",
+            6
+          ],
+          [
+            "next",
+            7
+          ]
+        ],
+        "checked": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "executions": []
+      },
+      "zero_remain": {
+        "events": [
+          [
+            "ui_ensure"
+          ],
+          [
+            "next",
+            1
+          ],
+          [
+            "next",
+            2
+          ],
+          [
+            "next",
+            3
+          ],
+          [
+            "next",
+            4
+          ],
+          [
+            "next",
+            5
+          ],
+          [
+            "next",
+            6
+          ],
+          [
+            "next",
+            7
+          ]
+        ],
+        "checked": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "executions": []
+      }
+    },
+    "run_gate": {
+      "valid_events": [
+        "daily_run",
+        [
+          "delay",
+          {
+            "server_update": true
+          }
+        ]
+      ],
+      "invalid_events": []
+    }
+  },
+  "temporary_config_only": true,
+  "mutation_budget": 0,
+  "android_input_injected": false,
+  "source_sha256": {
+    "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+    "daily": "cdd69958f1d7b4d8dffcd73a1c40c81a60f416039fb93b9a013b33bdd87a05c0"
+  }
+}

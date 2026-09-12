@@ -1,0 +1,291 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 11:53:24.903 │ HpControl_HpBalanceWeight 1000， 500， 250  
+         is revised to 1000, 500, 250                                          
+INFO     2026-09-12 11:53:24.909 │ [HP]  90%  80%  70%  90%  80% ____          
+INFO     2026-09-12 11:53:24.912 │ [HP_weight]  90%  80%  70%  90%  40%  17%   
+WARNING  2026-09-12 11:53:24.914 │ HP invalid: [0. 0. 0.]                      
+INFO     2026-09-12 11:53:24.916 │ Low HP retreat triggered.                   
+INFO     2026-09-12 11:53:24.918 │ EMERGENCY_REPAIR_AVAILABLE                  
+INFO     2026-09-12 11:53:24.919 │ Use emergency repair                        
+INFO     2026-09-12 11:53:24.919 │ EMERGENCY_REPAIR_AVAILABLE                  
+INFO     2026-09-12 11:53:24.922 │ Use emergency repair                        
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 11:53:24.969 │ Expect emotion reduce: (np.int64(4),        
+         np.int64(2))                                                          
+INFO     2026-09-12 11:53:24.969 │ Expect emotion reduce: (np.int64(4),        
+         np.int64(2))                                                          
+INFO     2026-09-12 11:53:24.972 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:24.972 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:24.976 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:24.976 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:24.979 │ Expect emotion reduce: (np.int64(2),        
+         np.int64(4))                                                          
+INFO     2026-09-12 11:53:24.979 │ Expect emotion reduce: (np.int64(2),        
+         np.int64(4))                                                          
+INFO     2026-09-12 11:53:24.983 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:24.983 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:24.986 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:24.986 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:24.989 │ Expect emotion reduce: (np.int64(6),        
+         np.int64(0))                                                          
+INFO     2026-09-12 11:53:24.989 │ Expect emotion reduce: (np.int64(6),        
+         np.int64(0))                                                          
+INFO     2026-09-12 11:53:24.992 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:24.992 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:24.995 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:24.995 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:24.997 │ Expect emotion reduce: (np.int64(0),        
+         np.int64(6))                                                          
+INFO     2026-09-12 11:53:24.997 │ Expect emotion reduce: (np.int64(0),        
+         np.int64(6))                                                          
+INFO     2026-09-12 11:53:25.001 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:25.001 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:25.004 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:25.004 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:25.007 │ Expect emotion reduce: (np.int64(12),       
+         np.int64(0))                                                          
+INFO     2026-09-12 11:53:25.007 │ Expect emotion reduce: (np.int64(12),       
+         np.int64(0))                                                          
+INFO     2026-09-12 11:53:25.009 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:25.009 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:25.014 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:25.014 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:25.018 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:25.018 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:25.021 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:25.021 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:25.024 │ <<< EMOTION REDUCE >>>                      
+INFO     2026-09-12 11:53:25.024 │ <<< EMOTION REDUCE >>>                      
+INFO     2026-09-12 11:53:25.028 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:25.028 │ [Emotion fleet_1] 119                       
+INFO     2026-09-12 11:53:25.031 │ [Emotion fleet_2] 119                       
+INFO     2026-09-12 11:53:25.031 │ [Emotion fleet_2] 119                       
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+                                     START                                     
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 11:53:25.343 │ Call submarine                              
+INFO     2026-09-12 11:53:25.343 │ Call submarine                              
+INFO     2026-09-12 11:53:25.343 │ Call submarine                              
+INFO     2026-09-12 11:53:25.348 │ Call submarine                              
+INFO     2026-09-12 11:53:25.348 │ Call submarine                              
+INFO     2026-09-12 11:53:25.348 │ Call submarine                              
+INFO     2026-09-12 11:53:25.353 │ Auto search setting                         
+INFO     2026-09-12 11:53:25.353 │ Auto search setting                         
+INFO     2026-09-12 11:53:25.353 │ Auto search setting                         
+INFO     2026-09-12 11:53:25.357 │ Auto search setting                         
+INFO     2026-09-12 11:53:25.357 │ Auto search setting                         
+INFO     2026-09-12 11:53:25.357 │ Auto search setting                         
+INFO     2026-09-12 11:53:25.362 │ Move submarine near F6                      
+INFO     2026-09-12 11:53:25.362 │ Move submarine near F6                      
+INFO     2026-09-12 11:53:25.362 │ Move submarine near F6                      
+INFO     2026-09-12 11:53:25.368 │ [Distance to boss] 0                        
+INFO     2026-09-12 11:53:25.368 │ [Distance to boss] 0                        
+INFO     2026-09-12 11:53:25.368 │ [Distance to boss] 0                        
+INFO     2026-09-12 11:53:25.372 │ Move submarine to F6                        
+INFO     2026-09-12 11:53:25.372 │ Move submarine to F6                        
+INFO     2026-09-12 11:53:25.372 │ Move submarine to F6                        
+INFO     2026-09-12 11:53:25.377 │ Move submarine near F6                      
+INFO     2026-09-12 11:53:25.377 │ Move submarine near F6                      
+INFO     2026-09-12 11:53:25.377 │ Move submarine near F6                      
+INFO     2026-09-12 11:53:25.380 │ [Distance to boss] 1                        
+INFO     2026-09-12 11:53:25.380 │ [Distance to boss] 1                        
+INFO     2026-09-12 11:53:25.380 │ [Distance to boss] 1                        
+INFO     2026-09-12 11:53:25.385 │ Move submarine to E6                        
+INFO     2026-09-12 11:53:25.385 │ Move submarine to E6                        
+INFO     2026-09-12 11:53:25.385 │ Move submarine to E6                        
+INFO     2026-09-12 11:53:25.389 │ Move submarine near F6                      
+INFO     2026-09-12 11:53:25.389 │ Move submarine near F6                      
+INFO     2026-09-12 11:53:25.389 │ Move submarine near F6                      
+INFO     2026-09-12 11:53:25.394 │ [Distance to boss] 2                        
+INFO     2026-09-12 11:53:25.394 │ [Distance to boss] 2                        
+INFO     2026-09-12 11:53:25.394 │ [Distance to boss] 2                        
+INFO     2026-09-12 11:53:25.399 │ Move submarine to D6                        
+INFO     2026-09-12 11:53:25.399 │ Move submarine to D6                        
+INFO     2026-09-12 11:53:25.399 │ Move submarine to D6                        
+INFO     2026-09-12 11:53:25.404 │ Going to use Open Ocean Support, skip moving
+         submarines                                                            
+INFO     2026-09-12 11:53:25.404 │ Going to use Open Ocean Support, skip moving
+         submarines                                                            
+INFO     2026-09-12 11:53:25.404 │ Going to use Open Ocean Support, skip moving
+         submarines                                                            
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+                                     START                                     
+                                     START                                     
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 11:53:25.644 │ [Event_PT_limit] 99999/100000               
+INFO     2026-09-12 11:53:25.644 │ [Event_PT_limit] 99999/100000               
+INFO     2026-09-12 11:53:25.644 │ [Event_PT_limit] 99999/100000               
+INFO     2026-09-12 11:53:25.644 │ [Event_PT_limit] 99999/100000               
+INFO     2026-09-12 11:53:25.653 │ [Event_PT_limit] 100000/100000              
+INFO     2026-09-12 11:53:25.653 │ [Event_PT_limit] 100000/100000              
+INFO     2026-09-12 11:53:25.653 │ [Event_PT_limit] 100000/100000              
+INFO     2026-09-12 11:53:25.653 │ [Event_PT_limit] 100000/100000              
+INFO     2026-09-12 11:53:25.659 │ <<< REACH EVENT PT LIMIT: 100000 >>>        
+INFO     2026-09-12 11:53:25.659 │ <<< REACH EVENT PT LIMIT: 100000 >>>        
+INFO     2026-09-12 11:53:25.659 │ <<< REACH EVENT PT LIMIT: 100000 >>>        
+INFO     2026-09-12 11:53:25.659 │ <<< REACH EVENT PT LIMIT: 100000 >>>        
+INFO     2026-09-12 11:53:25.665 │ [Event_time_limit] 2026-08-15 12:00:00 ->   
+         2026-08-15 12:00:01                                                   
+INFO     2026-09-12 11:53:25.665 │ [Event_time_limit] 2026-08-15 12:00:00 ->   
+         2026-08-15 12:00:01                                                   
+INFO     2026-09-12 11:53:25.665 │ [Event_time_limit] 2026-08-15 12:00:00 ->   
+         2026-08-15 12:00:01                                                   
+INFO     2026-09-12 11:53:25.665 │ [Event_time_limit] 2026-08-15 12:00:00 ->   
+         2026-08-15 12:00:01                                                   
+INFO     2026-09-12 11:53:25.671 │ [Event_time_limit] 2026-08-15 12:00:00 ->   
+         2026-08-15 11:59:59                                                   
+INFO     2026-09-12 11:53:25.671 │ [Event_time_limit] 2026-08-15 12:00:00 ->   
+         2026-08-15 11:59:59                                                   
+INFO     2026-09-12 11:53:25.671 │ [Event_time_limit] 2026-08-15 12:00:00 ->   
+         2026-08-15 11:59:59                                                   
+INFO     2026-09-12 11:53:25.671 │ [Event_time_limit] 2026-08-15 12:00:00 ->   
+         2026-08-15 11:59:59                                                   
+INFO     2026-09-12 11:53:25.679 │ <<< REACH EVENT TIME LIMIT: 2026-08-15      
+         11:59:59 >>>                                                          
+INFO     2026-09-12 11:53:25.679 │ <<< REACH EVENT TIME LIMIT: 2026-08-15      
+         11:59:59 >>>                                                          
+INFO     2026-09-12 11:53:25.679 │ <<< REACH EVENT TIME LIMIT: 2026-08-15      
+         11:59:59 >>>                                                          
+INFO     2026-09-12 11:53:25.679 │ <<< REACH EVENT TIME LIMIT: 2026-08-15      
+         11:59:59 >>>                                                          
+WARNING  2026-09-12 11:53:25.685 │ Coin not found                              
+WARNING  2026-09-12 11:53:25.685 │ Coin not found                              
+WARNING  2026-09-12 11:53:25.685 │ Coin not found                              
+WARNING  2026-09-12 11:53:25.685 │ Coin not found                              
+INFO     2026-09-12 11:53:25.691 │ <<< REACH COIN LIMIT >>>                    
+INFO     2026-09-12 11:53:25.691 │ <<< REACH COIN LIMIT >>>                    
+INFO     2026-09-12 11:53:25.691 │ <<< REACH COIN LIMIT >>>                    
+INFO     2026-09-12 11:53:25.691 │ <<< REACH COIN LIMIT >>>                    
+INFO     2026-09-12 11:53:25.699 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN >>>                                                           
+INFO     2026-09-12 11:53:25.699 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN >>>                                                           
+INFO     2026-09-12 11:53:25.699 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN >>>                                                           
+INFO     2026-09-12 11:53:25.699 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN >>>                                                           
+INFO     2026-09-12 11:53:25.705 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN2 >>>                                                          
+INFO     2026-09-12 11:53:25.705 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN2 >>>                                                          
+INFO     2026-09-12 11:53:25.705 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN2 >>>                                                          
+INFO     2026-09-12 11:53:25.705 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN2 >>>                                                          
+INFO     2026-09-12 11:53:25.713 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN3 >>>                                                          
+INFO     2026-09-12 11:53:25.713 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN3 >>>                                                          
+INFO     2026-09-12 11:53:25.713 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN3 >>>                                                          
+INFO     2026-09-12 11:53:25.713 │ <<< TASKBALANCER TRIGGERED, SWITCHING TASK  
+         TO MAIN3 >>>                                                          
+INFO     2026-09-12 11:53:25.720 │ Disable task `Event`                        
+INFO     2026-09-12 11:53:25.720 │ Disable task `Event`                        
+INFO     2026-09-12 11:53:25.720 │ Disable task `Event`                        
+INFO     2026-09-12 11:53:25.720 │ Disable task `Event`                        
+INFO     2026-09-12 11:53:25.726 │ Reset GemsFarming to 2-4                    
+INFO     2026-09-12 11:53:25.726 │ Reset GemsFarming to 2-4                    
+INFO     2026-09-12 11:53:25.726 │ Reset GemsFarming to 2-4                    
+INFO     2026-09-12 11:53:25.726 │ Reset GemsFarming to 2-4                    
+INFO     2026-09-12 11:53:25.732 │ Reset event time limit                      
+INFO     2026-09-12 11:53:25.732 │ Reset event time limit                      
+INFO     2026-09-12 11:53:25.732 │ Reset event time limit                      
+INFO     2026-09-12 11:53:25.732 │ Reset event time limit                      
+{
+  "android_input_injected": false,
+  "campaign_pairwise_case_count": 21,
+  "campaign_pairwise_sha256": "c198854c573fcaa3ab4b822445c93305d18c5dac75e1a16e16f975913edfcc78",
+  "invalid_case_count": 8,
+  "mutation_budget": 0,
+  "original_method_replays": {
+    "emotion": {
+      "case_count": 48,
+      "source_sha256": {
+        "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+        "emotion": "1cb456b08834422e3d98524551b2953c89b8dd3c18cd92be922582d4a815d7b7"
+      }
+    },
+    "event_general": {
+      "case_count": 30,
+      "source_sha256": {
+        "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+        "campaign_event": "9ec5c6b6c48421e94b278f4dc35a9e0a7c5aef852b5731676c555641c4f3821f"
+      }
+    },
+    "fleet": {
+      "case_count": 74,
+      "source_sha256": {
+        "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+        "combat_auto": "d0c822d4942ff9d793d7e57c6782e39068f92899988bdd72f3771c4cb0034dfa",
+        "combat_manual": "7974450b7946745ba46a9855b19bba914b425b08f3a08851480d37b76903792e",
+        "config": "f335620923dd4a7e86f4731d6834ca9f0f7d1b75d04a865aaebd193475d0dfbf",
+        "fleet": "ce8f262f3eaa050a9dcebaa231d4b0ca69bd98ccc15c337c402d9b89acd5c1c2",
+        "strategy": "a46c021d782a04455d285a8ac89eb724290181fa55fa5dd3d15dfd9eab310dff"
+      }
+    },
+    "hp_control": {
+      "case_count": null,
+      "source_sha256": {
+        "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+        "combat": "898cd7acb8957d8f5d6511d276f6b5d154f1f35fbe9b92d562455b5108d563d0",
+        "hp_balancer": "ece7c2f12d71c220d2f8b7f52b80fa8721d225ac4f3d0ec14b2075bca680d61f"
+      }
+    },
+    "optimization": {
+      "case_count": 9,
+      "source_sha256": {
+        "alas": "f9fb25225d8ff322fc451d6eee52fe1fa1d693e983c0872097877c38d8900354",
+        "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+        "screenshot": "fe035cae51df84188abfe20a9c84f446b8ce1ee4c30d2fcc8800f6584edb4342"
+      }
+    },
+    "scheduler": {
+      "case_count": 24,
+      "source_sha256": {
+        "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+        "config": "f335620923dd4a7e86f4731d6834ca9f0f7d1b75d04a865aaebd193475d0dfbf",
+        "deep": "1058902625fcdb02f14a0acab9c354c8983807d83742d8d0f6b99e09df95e87e",
+        "filter": "2879f33b23dbfe863ede4015cc8d5a96cbbd090fc0faf81cba6b1416acde3730",
+        "utils": "84594eda0c29f64893088fa6eb59a83f94f842d8c74572145960a5d8671274c2"
+      }
+    },
+    "submarine": {
+      "case_count": null,
+      "source_sha256": {
+        "args": "2ce9c2af6f33c3340c27903e9bb76c7455fdc8d94052c823e4477df0aae93022",
+        "call": "8fa1620c332868b727d34f31cf9a6f8197a8afb31b881414ff6468c5003d9f40",
+        "fast": "fc8eef17a5a0e52f28412e87c5e5832e5ab82d1465111b6e8933f3e444239e6d",
+        "fleet": "ce8f262f3eaa050a9dcebaa231d4b0ca69bd98ccc15c337c402d9b89acd5c1c2"
+      }
+    }
+  },
+  "passed": true,
+  "pixel_fallback_used": false,
+  "scheduler_pairwise_case_count": 18,
+  "scheduler_pairwise_sha256": "bf0bec7312f768081ed5d3cce614c37c64acc64ae7cc19eff1c02512cfd61d86",
+  "schema": "alas-headless.configuration-attack-matrix/v1",
+  "seed": 2711994590,
+  "seeded_sequence_count": 32
+}

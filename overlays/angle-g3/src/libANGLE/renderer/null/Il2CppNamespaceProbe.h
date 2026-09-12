@@ -148,6 +148,20 @@ struct ObserverImageRecord {
   float anchorWorldZ = 0.0f;
 };
 
+struct ObserverColliderRecord {
+  std::array<char, kObserverNameBytes> name = {};
+  std::array<char, kObserverPathBytes> path = {};
+  std::array<char, kObserverPathBytes> uiTopPath = {};
+  int32_t instanceId = 0;
+  int32_t nearestId = 0;
+  uint32_t sweepStatus = 0;
+  float inputX = 0.0f, inputY = 0.0f;
+  uint32_t flags = 0; // 1: trigger, 2: valid screen projection, 4: string truncated
+  std::array<float, 3> center = {};
+  std::array<float, 3> extents = {};
+  std::array<float, 3> screen = {}; // Android x/y and camera-space depth
+};
+
 struct ObserverUiSnapshot {
   uint32_t structSize = sizeof(ObserverUiSnapshot);
   uint32_t schema = 1;
@@ -167,6 +181,12 @@ struct ObserverUiSnapshot {
   std::array<ObserverToggleRecord, kMaxObserverToggles> toggles = {};
   std::array<ObserverTextRecord, kMaxObserverTexts> texts = {};
   std::array<ObserverImageRecord, kMaxObserverImages> images = {};
+  uint32_t privatePhysicsStatus = 0; // 0: outside room, 1: observed, 2: unavailable
+  uint32_t colliderCount = 0;
+  uint32_t colliderTruncated = 0;
+  uint32_t colliderErrors = 0;
+  std::array<char, kObserverPathBytes> physicsCameraPath = {};
+  std::array<ObserverColliderRecord, 256> colliders = {};
 };
 
 Il2CppDynamicProbe ProbeIl2CppDynamicSymbols();

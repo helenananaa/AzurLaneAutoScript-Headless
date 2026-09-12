@@ -1,0 +1,66 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 12:27:18.999 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 12:27:19.006 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 12:27:19.008 │ DEVICE                                      
+INFO     2026-09-12 12:27:19.010 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 12:27:19.011 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 12:27:19.013 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 12:27:19.014 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 12:27:19.016 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 12:27:19.018 │ emulator-5580                               
+INFO     2026-09-12 12:27:19.020 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 12:27:19.021 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 12:27:19.026 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 12:27:19.027 │ [Server] cn                                 
+WARNING  2026-09-12 12:27:19.028 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 12:27:19.030 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 12:27:19.076 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 12:27:19.078 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 12:27:19.080 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 12:27:19.081 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 12:27:19.082 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:27:19.828 │ handle_app_login                            
+INFO     2026-09-12 12:27:19.830 │ Screenshot interval set to 1.0s             
+INFO     2026-09-12 12:27:19.830 │ <<< APP LOGIN >>>                           
+INFO     2026-09-12 12:27:19.861 │ [Device Orientation] 0 (Normal)             
+INFO     2026-09-12 12:27:25.627 │ [Device Orientation] 0 (Normal)             
+INFO     2026-09-12 12:27:31.608 │ [Device Orientation] 0 (Normal)             
+INFO     2026-09-12 12:27:41.027 │ [Device Orientation] 0 (Normal)             
+INFO     2026-09-12 12:27:41.526 │ Screenshot interval set to 0.3s             
+Traceback (most recent call last):
+  File "<stdin>", line 9, in <module>
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\artifacts\campaign-preparation\upstream\module\handler\login.py", line 176, in handle_app_login
+    self._handle_app_login()
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\artifacts\campaign-preparation\upstream\module\handler\login.py", line 48, in _handle_app_login
+    self.device.screenshot()
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\artifacts\campaign-preparation\upstream\module\device\device.py", line 216, in screenshot
+    super().screenshot()
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\artifacts\campaign-preparation\upstream\module\device\screenshot.py", line 72, in screenshot
+    frame = semantic_session.refresh_frame()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\adapter\semantic\session.py", line 628, in refresh_frame
+    frame = self._frame_clock.acquire(include_ui=include_ui)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\adapter\frame.py", line 211, in acquire
+    state = self._oracle.read_state()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Disk0Merged\H\program\AzurLaneAutoScript-Headless-alas-adaptation\python\alas_headless\oracle\core.py", line 444, in read_state
+    raise SemanticGateClosed("game activity is not top-resumed")
+alas_headless.oracle.errors.SemanticGateClosed: game activity is not top-resumed

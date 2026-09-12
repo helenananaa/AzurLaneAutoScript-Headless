@@ -31,6 +31,10 @@ class DispatchObservationPorts:
     """Dispatch observation ports on the shared adapter context."""
 
     def _appear_priority(self, name):
+        if name == 'PRIVATE_QUARTERS_INTERACT_CHECK':
+            return self.oracle.private_quarters_interact_check_visible()
+        if name == 'PRIVATE_QUARTERS_INTERACT':
+            return self.oracle.private_quarters_interact_visible()
         if name == "RESET_FLEET_PREPARATION":
             return self._frame_or_live_observation_oracle().operation_siren_reset_fleet_ready()
         if name == "RESET_TICKET_POPUP":
@@ -89,6 +93,18 @@ class DispatchObservationPorts:
                 )
             ):
                 return False
+            if getattr(observation_oracle, 'shipyard_page_visible', lambda: False)():
+                return name == 'SHIPYARD_CHECK'
+            if getattr(observation_oracle, 'daily_entry_visible', lambda: False)():
+                return name == 'DAILY_CHECK'
+            if observation_oracle.observation_target_present('dorm-menu/page/root'):
+                return name == 'DORMMENU_CHECK'
+            if getattr(observation_oracle, 'private_quarters_page_visible', lambda: False)():
+                return name == 'PRIVATE_QUARTERS_CHECK'
+            if getattr(observation_oracle, 'private_quarters_room_visible', lambda: False)():
+                return False
+            if getattr(observation_oracle, 'meta_character_page_visible', lambda: False)():
+                return name == 'META_CHECK'
             if (observation_oracle.observation_target_present('archive/page/back')
                     and observation_oracle.war_archives_page_visible()):
                 return name == 'WAR_ARCHIVES_CHECK'
@@ -836,6 +852,7 @@ class DispatchObservationPorts:
             if name == "DAILY_ENTER_CHECK":
                 return bool(
                     self.oracle.daily_detail_visible()
+                    and self._award_close_target() is None
                     and not (
                         self._daily_stage in (1, 2, 3)
                         and self.oracle.daily_selected_stage_visible(self._daily_stage)

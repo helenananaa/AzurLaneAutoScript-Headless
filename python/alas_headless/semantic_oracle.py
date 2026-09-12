@@ -193,6 +193,7 @@ from .oracle.combat import CombatOracle
 from .oracle.commission import CommissionOracle
 from .oracle.core import CoreOracle
 from .oracle.dorm import DormOracle
+from .oracle.private_quarters import PrivateQuartersOracle
 from .oracle.enhancement import EnhancementOracle
 from .oracle.event import EventOracle
 from .oracle.exercise import ExerciseOracle
@@ -235,6 +236,7 @@ class SemanticOracle(
     CombatOracle,
     CommissionOracle,
     DormOracle,
+    PrivateQuartersOracle,
     EnhancementOracle,
     EventOracle,
     ExerciseOracle,

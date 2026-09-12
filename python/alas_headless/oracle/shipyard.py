@@ -38,6 +38,8 @@ class ShipyardOracle:
             raise ValueError("shipyard index must be in [1, 6]")
         state = self.read_state()
         ui_state = self.read_ui_state()
+        if not state.generation <= ui_state.generation <= state.generation + 2:
+            raise SemanticGateClosed("shipyard state frames are incoherent")
         if not self.shipyard_page_visible():
             raise SemanticGateClosed("shipyard page identity is absent")
 
@@ -76,22 +78,30 @@ class ShipyardOracle:
         if not name:
             raise SemanticGateClosed("shipyard ship name is absent")
 
-        counts = tuple(
-            text
-            for text in ui_state.texts
-            if text.name in ("count", "Text")
-            and "/bottom_panel/ships/bg/content/ship_tpl" in text.path
-            and (text.path.endswith("/count") or text.path.endswith("/state/dev/Text"))
-            and text.active_in_hierarchy
-            and text.active_and_enabled
-            and not text.truncated
-            and text.bounds is not None
-            and re.fullmatch(r"\d+", text.text.strip())
-        )
-        counts = tuple(sorted(counts, key=lambda item: item.bounds.left))
-        if len(counts) != len(toggles):
-            raise SemanticGateClosed("shipyard blueprint counts are incomplete")
-        blueprint_count = int(counts[index - 1].text.strip())
+        selected_toggle = toggles[index - 1]
+        def belongs_to_selected(item):
+            return (item.bounds is not None and selected_toggle.bounds.left <=
+                    (item.bounds.left + item.bounds.right) / 2 < selected_toggle.bounds.right)
+
+        counts = tuple(text for text in ui_state.texts
+                       if text.path == selected_toggle.path + '/count'
+                       and text.active_in_hierarchy and text.active_and_enabled
+                       and not text.truncated and belongs_to_selected(text))
+        if len(counts) != 1 or re.fullmatch(r"\d+", counts[0].text.strip()) is None:
+            raise SemanticGateClosed("shipyard selected blueprint count is absent or ambiguous")
+        blueprint_count = int(counts[0].text.strip())
+        status_text = exact_text(
+            "ShipBluePrintUI(Clone)/main/center_panel/state_info/progress/label")
+        if status_text == "研究进行中...":
+            markers = [image for image in ui_state.images
+                       if image.path == selected_toggle.path + '/state/research/1'
+                       and image.active_in_hierarchy and image.active_and_enabled
+                       and not image.truncated and image.sprite == 'sel_dev'
+                       and belongs_to_selected(image)]
+            if len(markers) != 1:
+                raise SemanticGateClosed("shipyard research identity is absent or ambiguous")
+            return ShipyardState(ui_state.generation, index, name, blueprint_count,
+                                 'research', None, None, 'in-progress')
 
         level_text = exact_text(
             "blur_panel/adapt/right_panel/mod_panel/title/level_bg/Text"
@@ -111,6 +121,8 @@ class ShipyardOracle:
             and image.active_and_enabled
             and image.bounds is not None
             and image.path.startswith(selected_toggle.path + "/state/")
+            and belongs_to_selected(image)
+            and not image.truncated
             and image.name in ("dev", "fate")
         )
         if len(phase_images) != 1:

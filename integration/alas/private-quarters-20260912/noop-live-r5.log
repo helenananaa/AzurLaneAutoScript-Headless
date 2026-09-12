@@ -1,0 +1,53 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 12:37:20.810 │ [Server] cn                                 
+read: ./config\_codex_pq_792b259c8e0b477c8df8efc7d8f7e963.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 12:37:20.837 │ Bind task ['General', 'Alas']               
+read: ./config\_codex_pq_792b259c8e0b477c8df8efc7d8f7e963.json
+INFO     2026-09-12 12:37:20.846 │ Bind task ['General', 'Alas',               
+         'PrivateQuarters']                                                    
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 12:37:20.851 │ DEVICE                                      
+INFO     2026-09-12 12:37:20.852 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 12:37:20.854 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 12:37:20.858 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 12:37:20.859 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 12:37:20.862 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 12:37:20.867 │ emulator-5580                               
+INFO     2026-09-12 12:37:20.872 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 12:37:20.874 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 12:37:20.886 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 12:37:20.889 │ [Server] cn                                 
+WARNING  2026-09-12 12:37:20.891 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 12:37:20.895 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 12:37:20.996 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 12:37:21.000 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 12:37:21.004 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 12:37:21.008 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 12:37:21.063 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:37:21.065 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 12:37:23.032 │ UI get current page                         
+INFO     2026-09-12 12:37:58.684 │ [UI] page_private_quarters                  
+INFO     2026-09-12 12:37:58.685 │ Goto page_dormmenu                          
+INFO     2026-09-12 12:37:58.689 │ <<< UI GOTO PAGE_DORMMENU >>>               
+INFO     2026-09-12 12:38:35.445 │ Page switch: page_private_quarters ->       
+         page_main                                                             
+INFO     2026-09-12 12:38:36.430 │ Semantic click private-quarters/home @      
+         UICamera/Canvas/UIMain/SelectDorm3DUI(Clone)/Main/option/home         
+INFO     2026-09-12 12:39:10.299 │ Page switch: page_private_quarters ->       
+         page_main                                                             
+PASSED False

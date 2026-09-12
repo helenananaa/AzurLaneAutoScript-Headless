@@ -18,6 +18,91 @@ from .errors import SemanticGateClosed
 class MetaOracle:
     """Meta operations sharing the oracle frame and input boundary."""
 
+    def meta_character_page_visible(self) -> bool:
+        state = self.read_state()
+        root = 'UICamera/Canvas/UIMain/MetaCharacterUI(Clone)/HidePanel/PTPanel/'
+        return any(b.path.startswith(root) and b.active_in_hierarchy
+                   and b.active_and_enabled for b in state.buttons)
+
+    def meta_character_pending_sync(self) -> Tuple[int, int]:
+        """Read the pre-unlock phase; other reward phases remain unqualified."""
+        state = self.read_state()
+        root = 'UICamera/Canvas/UIMain/MetaCharacterUI(Clone)/HidePanel/PTPanel/'
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('META character progress frames are incoherent')
+        for name, sprite in [('ShowWayBtn', 'ptpanel_btn_showway'), ('PreviewBtn', 'ptpanel_btn_preview')]:
+            buttons = [b for b in state.buttons if b.path == root + name
+                       and b.active_in_hierarchy and b.active_and_enabled]
+            images = [i for i in ui.images if i.path == root + name and i.active_in_hierarchy
+                      and i.active_and_enabled and not i.truncated]
+            if len(buttons) != 1 or len(images) != 1 or images[0].sprite != sprite:
+                raise SemanticGateClosed('META character reward phase is not yet adapted')
+        texts = [t for t in ui.texts if t.path == root + 'Progress/PT/PTProgressText'
+                 and t.active_in_hierarchy and t.active_and_enabled and not t.truncated]
+        if len(texts) != 1:
+            raise SemanticGateClosed('META character progress is missing or ambiguous')
+        match = re.fullmatch(r'([0-9]+)/([1-9][0-9]*)', re.sub(r'<[^>]*>', '', texts[0].text).strip())
+        if match is None:
+            raise SemanticGateClosed('META character progress is malformed')
+        current, required = int(match[1]), int(match[2])
+        if current >= required:
+            raise SemanticGateClosed('META synchronization-ready reward phase is not yet adapted')
+        if self._blocking_rules(state, 'meta/character/progress'):
+            raise SemanticGateClosed('META character progress is obscured')
+        return current, required
+
+    def click_meta_character_back(self) -> ActionReceipt:
+        if not self.meta_character_page_visible():
+            raise SemanticGateClosed('META character page is absent')
+        state = self.read_state()
+        target = self._unique(state, 'meta/character/back')
+        if (not target.active_in_hierarchy or not target.active_and_enabled
+                or not target.interactable or target.raycast_top is False
+                or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or self._blocking_rules(state, 'meta/character/back')):
+            raise SemanticGateClosed('META character back is not actionable')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before META character back')
+        self._tap(round(target.point.x), round(target.point.y))
+        return ActionReceipt(semantic_id='meta/character/back', generation=state.generation,
+                             path=target.path, point=target.point, bounds=target.bounds)
+
+    def meta_reward_preview_entry_visible(self) -> bool:
+        state = self.read_state()
+        targets = [b for b in self._matches(state, 'meta/reward-preview/open')
+                   if b.active_in_hierarchy and b.active_and_enabled]
+        if not targets:
+            return False
+        if len(targets) != 1:
+            raise SemanticGateClosed('META reward entry is ambiguous')
+        target = targets[0]
+        ui = self.read_ui_state()
+        if not state.generation <= ui.generation <= state.generation + 2:
+            raise SemanticGateClosed('META reward entry frames are incoherent')
+        images = [i for i in ui.images if i.path == target.path
+                  and i.active_in_hierarchy and i.active_and_enabled and not i.truncated]
+        if len(images) != 1 or images[0].sprite != 'btn_award':
+            raise SemanticGateClosed('META reward entry identity is unsupported')
+        return not self._blocking_rules(state, 'meta/reward-preview/open')
+
+    def click_meta_reward_preview_entry(self) -> ActionReceipt:
+        if not self.meta_reward_preview_entry_visible():
+            raise SemanticGateClosed('META reward entry is absent')
+        state = self.read_state()
+        target = self._unique(state, 'meta/reward-preview/open')
+        if (not target.actionable or target.raycast_top is not True
+                or target.point is None or target.bounds is None
+                or not target.bounds.contains(target.point)
+                or self._blocking_rules(state, 'meta/reward-preview/open')):
+            raise SemanticGateClosed('META reward entry is not actionable')
+        if self._foreground_component() != self.fingerprint.component:
+            raise SemanticGateClosed('foreground changed before META reward entry')
+        self._tap(round(target.point.x), round(target.point.y))
+        return ActionReceipt(semantic_id='meta/reward-preview/open', generation=state.generation,
+                             path=target.path, point=target.point, bounds=target.bounds)
+
     def meta_dossier_detail_visible(self) -> bool:
         state = self.read_state()
         targets = [b for b in self._matches(state, 'meta/dossier/list')

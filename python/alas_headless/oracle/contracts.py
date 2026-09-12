@@ -280,15 +280,17 @@ class ShipyardState:
     ship_name: str
     blueprint_count: int
     phase: str
-    level: int
-    level_max: int
+    level: Optional[int]
+    level_max: Optional[int]
     research_status: str
 
     @property
     def cannot_strengthen(self) -> bool:
-        return self.research_status in ("incomplete", "in-progress") or (
-            self.level >= self.level_max
-        )
+        if self.research_status in ("incomplete", "in-progress"):
+            return True
+        if self.level is None or self.level_max is None:
+            raise ValueError("shipyard development level is unavailable")
+        return self.level >= self.level_max
 
 
 @dataclass(frozen=True)

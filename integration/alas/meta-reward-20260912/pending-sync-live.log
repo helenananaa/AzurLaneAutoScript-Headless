@@ -1,0 +1,46 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 12:08:25.595 │ [Server] cn                                 
+read: ./config\semantic_e2e.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 12:08:25.603 │ Bind task ['General', 'Alas']               
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 12:08:25.606 │ DEVICE                                      
+INFO     2026-09-12 12:08:25.607 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 12:08:25.609 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 12:08:25.612 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 12:08:25.613 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 12:08:25.616 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 12:08:25.618 │ emulator-5580                               
+INFO     2026-09-12 12:08:25.622 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 12:08:25.624 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 12:08:25.631 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 12:08:25.633 │ [Server] cn                                 
+WARNING  2026-09-12 12:08:25.635 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 12:08:25.638 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 12:08:25.695 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 12:08:25.697 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 12:08:25.699 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 12:08:25.701 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 12:08:26.302 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:08:26.303 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:08:26.305 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 12:08:28.277 │ Already at page_meta                        
+INFO     2026-09-12 12:08:29.980 │ meta_wait_reward_page ends at SYNC_ENTER    
+INFO     2026-09-12 12:08:31.779 │ No meta sync red dot or sync tap            
+INFO     2026-09-12 12:08:32.613 │ No meta reward red dot                      
+True (1830, 2000) (1830, 2000)

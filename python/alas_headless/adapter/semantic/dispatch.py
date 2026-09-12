@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from typing import Union
+from ...oracle.private_quarters import PrivateQuartersPhysicsReceipt
+
 from typing import Any
 from ...semantic_oracle import ActionReceipt
 from .dispatch_result import UNHANDLED
@@ -128,7 +131,7 @@ class DispatchAdapterPorts:
         if result is not UNHANDLED:
             return result
 
-    def click(self, button: Any) -> ActionReceipt:
+    def click(self, button: Any) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
         if self._campaign_grid_location(button) is not None:
             return self.click_campaign_combat_grid(button)
         name = self._button_name(button)

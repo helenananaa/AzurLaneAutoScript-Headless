@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from typing import Union
+from ...oracle.private_quarters import PrivateQuartersPhysicsReceipt
+
 import time
 from dataclasses import replace
 from typing import Any, Tuple
@@ -209,6 +212,17 @@ class SessionDispatchPorts:
                     self._combat_result_observation = (name, time.monotonic())
                 return visible
             except SemanticGateClosed as exc:
+                if (adapter._meta_assist_active and str(exc).startswith(
+                        'combat action control is not exact top-raycast actionable: '
+                        'OverlayCamera/Overlay/UIMain/NewBattleResultEmptyUI(Clone)/')):
+                    # The statistics Button can outlive its result page during
+                    # the return animation. Only the fresh typed assist list
+                    # can complete that transition; never click the old Button.
+                    self.refresh_frame()
+                    adapter = self.open()
+                    adapter.oracle.meta_assist_state()
+                    adapter._operation_siren_combat_active = False
+                    return adapter.appear(button)
                 if (str(exc) == 'combat Unity selector path is ambiguous'
                         and adapter._campaign_context is not None):
                     # The live combat reader may observe a newly mounted dock
@@ -295,7 +309,7 @@ class SessionDispatchPorts:
     ) -> bool:
         return self.open().image_color_count(button, color, threshold, count)
 
-    def click(self, button: Any) -> ActionReceipt:
+    def click(self, button: Any) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
         if AlasSemanticAdapter._campaign_grid_location(button) is not None:
             self.refresh_frame()
             context = self.open()._campaign_context

@@ -5,6 +5,39 @@ from types import SimpleNamespace
 from alas_headless import AlasSemanticAdapter
 
 
+def test_daily_award_uses_daily_owner_without_mission_context():
+    daily = 'UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button'
+    award = 'OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close'
+    backend = FakeBackend([make_button('back_button', daily), make_button('close', award)])
+    adapter = AlasSemanticAdapter(make_oracle(backend), package_gate=lambda: None)
+    adapter._daily_kind = 'fierce_assault'
+    receipt = adapter._click_daily('GET_ITEMS_1')
+    assert receipt.semantic_id == 'reward/award-info/close'
+    assert adapter._mission_context is None
+    assert len(backend.taps) == 1
+
+
+def test_quick_award_can_close_over_daily_but_cannot_click_underlay():
+    daily = 'UICamera/Canvas/UIMain/DailyLevelUI(Clone)/blur_panel/adapt/top/back_button'
+    award = 'OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close'
+    backend = FakeBackend([make_button('back_button', daily), make_button('close', award)])
+    oracle = make_oracle(backend)
+    assert oracle.enabled('reward/award-info/close')
+    assert not oracle.enabled('daily/page/back')
+    assert oracle.click('reward/award-info/close').path == award
+    assert len(backend.taps) == 1
+
+
+@pytest.mark.parametrize('award', [True, False])
+def test_daily_detail_yields_to_award_before_original_stage_click(award):
+    from tests.semantic_support.adapter_fixtures import FakeOracle
+    oracle = FakeOracle()
+    oracle.daily_detail_visible = lambda: True
+    adapter = AlasSemanticAdapter(oracle, package_gate=lambda: None)
+    adapter._award_close_target = lambda: 'award/close' if award else None
+    assert adapter._appear_pages('DAILY_ENTER_CHECK') is (not award)
+
+
 def test_normal_run_preserves_legacy_observer_without_optional_raycast():
     path = 'OverlayCamera/Overlay/UIMain/selected/stagetpl/quickly/bg/challenge'
     backend = FakeBackend([make_button('challenge', path, raycast_top=None)])

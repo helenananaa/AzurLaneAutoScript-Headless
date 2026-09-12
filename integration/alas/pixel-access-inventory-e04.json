@@ -1,7 +1,7 @@
 {
   "android_input_injected": false,
-  "combined_patch_sha256": "3ccc4fe1fa4dc70c7c268ef3aa3e6bdfb2385b3a99b3e0e2d0cd46ea749e1be2",
-  "patch_series_manifest_sha256": "a7808472679a9e14a571b1daed3b823b0cc7f0b63895392f2df2bda32f4f5f85",
+  "combined_patch_sha256": "9f87f0710ecebbc2b3f81c52b5656681530419b749c3fa9b28da98df3d226a5c",
+  "patch_series_manifest_sha256": "810f1452b9d95ae593a2407f60df849de4a27a4cb0b371e2adab2c9595720cbf",
   "production_ready": false,
   "replay_surfaces": [
     {

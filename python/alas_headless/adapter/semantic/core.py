@@ -309,7 +309,14 @@ class CoreAdapterPorts:
         self._operation_siren_defeated_fleets: set[int] = set()
         self._meta_beacon_active = False
         self._meta_assist_active = False
+        self._meta_precombat_start_receipt = None
+        self._meta_precombat_start_until = 0.0
         self._main_more_entry_receipt = None
+        self._shipyard_entry_receipt = None
+        self._daily_entry_receipt = None
+        self._main_tech_entry_receipt = None
+        self._main_live_entry_receipt = None
+        self._private_quarters_entry_receipt = None
         self._operation_siren_pending_order: Optional[str] = None
         self._exercise_pending = False
         self._exercise_execution_active = False

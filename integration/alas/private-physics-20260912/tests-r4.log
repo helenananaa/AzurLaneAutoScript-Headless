@@ -1,0 +1,36 @@
+.............................F......................                     [100%]
+================================== FAILURES ===================================
+___________________ test_touch_identity_drift_rejects_input ___________________
+
+    def test_touch_identity_drift_rejects_input():
+        root = 'UICamera/Canvas/UIMain/Dorm3dMainUI(Clone)/UI/watch/Role/Touch/tpl'
+        b = FakeBackend([make_button('tpl', root)])
+        b.ui = make_ui([make_text('�������չ��޵���',root+'/bg/Text')],
+                       [make_image('icon_touch',root+'/bg/Image')])
+        o = make_oracle(b)
+>       assert o.private_quarters_interact_visible()
+
+tests\test_private_quarters_overview.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+python\alas_headless\oracle\private_quarters.py:65: in private_quarters_interact_visible
+    ui = self.read_ui_state()
+python\alas_headless\oracle\core.py:582: in read_ui_state
+    toggles=tuple(self._parse_toggle(raw) for raw in raw_toggles),
+python\alas_headless\oracle\core.py:582: in <genexpr>
+    toggles=tuple(self._parse_toggle(raw) for raw in raw_toggles),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alas_headless.semantic_oracle.SemanticOracle object at 0x0000020E4FA26EA0>
+raw = {'active_and_enabled': True, 'active_in_hierarchy': True, 'adb_bounds': {'bottom': 140.0, 'left': 200.0, 'right': 240.0, 'top': 100.0}, 'color': {'alpha': 1.0, 'blue': 0.25, 'green': 0.5, 'red': 1.0}, ...}
+
+    def _parse_toggle(self, raw: Any) -> ToggleState:
+        button = self._parse_button(raw)
+        checked = raw.get("checked") if isinstance(raw, dict) else None
+        if not isinstance(checked, bool):
+>           raise SemanticGateClosed("toggle state is malformed")
+E           alas_headless.oracle.errors.SemanticGateClosed: toggle state is malformed
+
+python\alas_headless\oracle\core.py:329: SemanticGateClosed
+=========================== short test summary info ===========================
+FAILED tests/test_private_quarters_overview.py::test_touch_identity_drift_rejects_input
+1 failed, 51 passed in 1.06s

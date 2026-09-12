@@ -1,0 +1,2113 @@
+{
+  "passed": false,
+  "receipts": [
+    {
+      "semantic_id": "main/live",
+      "generation": 14142,
+      "point": {
+        "x": 561.926,
+        "y": 683.572
+      },
+      "bounds": {
+        "left": 478.952,
+        "top": 650.25,
+        "right": 644.899,
+        "bottom": 716.895
+      },
+      "path": "OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/bottom/frame/live",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "dorm-menu/private-quarters",
+      "generation": 14150,
+      "point": {
+        "x": 1078.13,
+        "y": 480.0
+      },
+      "bounds": {
+        "left": 984.796,
+        "top": 309.0,
+        "right": 1171.463,
+        "bottom": 651.0
+      },
+      "path": "OverlayCamera/Overlay/UIMain/MainLiveAreaUI(Clone)/dorm_btn",
+      "policy_sha256": null,
+      "capability_id": null
+    },
+    {
+      "semantic_id": "private-quarters/room/new-jersey",
+      "generation": 14185,
+      "point": {
+        "x": 998.667,
+        "y": 322.0
+      },
+      "bounds": {
+        "left": 965.333,
+        "top": 288.667,
+        "right": 1032.0,
+        "bottom": 355.333
+      },
+      "path": "UICamera/Canvas/UIMain/SelectDorm3DUI(Clone)/Map/floor_2/Xinzexi",
+      "policy_sha256": null,
+      "capability_id": null
+    }
+  ],
+  "before": {
+    "generation": 14165,
+    "remaining": 3,
+    "capacity": 3,
+    "locale": "汐语小筑"
+  },
+  "unlocked": true,
+  "state": {
+    "generation": 14209,
+    "scene_handle": -76,
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 10923,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "abi": "x86_64",
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "snapshot_schema": 1,
+      "snapshot_struct_size": 104,
+      "generation": 14209,
+      "scene_generation": 2,
+      "semantic_generation": 2,
+      "snapshot_monotonic_ns": 5439539540800,
+      "response_monotonic_ns": 5440434702200,
+      "age_ms": 895,
+      "observer_tid": 10956,
+      "assembly_count": 129,
+      "semantic_code": 1,
+      "width": 1280,
+      "height": 720,
+      "flags": 15,
+      "observer_attached": false,
+      "main_thread": true,
+      "button_count": 163,
+      "active_button_count": 1,
+      "interactable_button_count": 163,
+      "scene_handle": -76,
+      "ui_stage": 100,
+      "ui_method_mask": 15
+    },
+    "buttons_snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.buttons/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 10923,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 340008,
+      "generation": 14209,
+      "snapshot_monotonic_ns": 5439539540800,
+      "response_monotonic_ns": 5440434735200,
+      "age_ms": 895,
+      "button_count": 1,
+      "truncated": false,
+      "error_count": 0,
+      "buttons": [
+        {
+          "name": "Loading(Clone)",
+          "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+          "canvas": "Loading(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -1368,
+          "world_position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -390.0
+          },
+          "local_rect": {
+            "x": -960.0,
+            "y": -540.0,
+            "width": 1920.0,
+            "height": 1080.0
+          },
+          "screen_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": -0.0,
+            "bottom": 0.0,
+            "right": 1280.0,
+            "top": 720.0
+          },
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          }
+        }
+      ]
+    },
+    "buttons": [
+      {
+        "name": "Loading(Clone)",
+        "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "interactable": true,
+        "raycast_top": null,
+        "point": {
+          "x": 640.0,
+          "y": 360.0
+        },
+        "bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "raw": {
+          "name": "Loading(Clone)",
+          "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+          "canvas": "Loading(Clone)",
+          "flags": 1535,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "interactable": true,
+          "raycast_top": null,
+          "canvas_render_mode": 1,
+          "instance_id": -1368,
+          "world_position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -390.0
+          },
+          "local_rect": {
+            "x": -960.0,
+            "y": -540.0,
+            "width": 1920.0,
+            "height": 1080.0
+          },
+          "screen_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "adb_point": {
+            "x": 640.0,
+            "y": 360.0
+          },
+          "screen_bounds": {
+            "left": -0.0,
+            "bottom": 0.0,
+            "right": 1280.0,
+            "top": 720.0
+          },
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          }
+        }
+      }
+    ]
+  },
+  "ui": {
+    "generation": 14209,
+    "method_mask": 15,
+    "skipped_count": 0,
+    "image_truncated": false,
+    "snapshot": {
+      "protocol_schema": "alas-headless.observer/v1",
+      "semantic_schema": "alas-headless.ui/v1",
+      "status": "ok",
+      "package": "com.bilibili.azurlane",
+      "pid": 10923,
+      "uid": 10105,
+      "peer_uid": 2000,
+      "driver_revision": "506b76f698b5089aaa29c4e7908b48edb8532a44",
+      "schema": 1,
+      "struct_size": 1533000,
+      "generation": 14209,
+      "snapshot_monotonic_ns": 5439539540800,
+      "response_monotonic_ns": 5440526899000,
+      "age_ms": 987,
+      "method_mask": 15,
+      "toggle_count": 0,
+      "text_count": 2,
+      "image_count": 24,
+      "toggle_truncated": false,
+      "text_truncated": false,
+      "image_truncated": false,
+      "error_count": 0,
+      "skipped_count": 0,
+      "image_source_count": 1835,
+      "image_source_capacity": 16384,
+      "toggles": [],
+      "texts": [
+        {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text",
+          "text": "<color=white>当前机型内存小于推荐配置，可能存在闪退风险。</color>",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 349.6,
+            "top": 309.0,
+            "right": 930.4,
+            "bottom": 335.4
+          }
+        },
+        {
+          "kind": "ugui-text",
+          "name": "FpsPanel",
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 573.333,
+            "top": 0.0,
+            "right": 706.667,
+            "bottom": 34.667
+          }
+        }
+      ],
+      "images": [
+        {
+          "kind": "image",
+          "name": "sl (7)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (7)",
+          "sprite": "tex_3ddorm_loading_G",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 689.333,
+            "top": 377.28,
+            "right": 702.0,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sl (6)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (6)",
+          "sprite": "tex_3ddorm_loading_n",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 669.333,
+            "top": 377.28,
+            "right": 682.667,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sl (5)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (5)",
+          "sprite": "tex_3ddorm_loading_i",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 656.267,
+            "top": 377.28,
+            "right": 662.933,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sl (4)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (4)",
+          "sprite": "tex_3ddorm_loading_d",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 636.2,
+            "top": 377.28,
+            "right": 648.867,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sl (3)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (3)",
+          "sprite": "tex_3ddorm_loading_a",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 617.533,
+            "top": 377.28,
+            "right": 630.2,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sl (2)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (2)",
+          "sprite": "tex_3ddorm_loading_o",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 598.867,
+            "top": 377.28,
+            "right": 610.867,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sl (1)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (1)",
+          "sprite": "tex_3ddorm_loading_l",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.9,
+            "green": 0.9,
+            "blue": 0.9,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 580.46,
+            "top": 375.947,
+            "right": 593.26,
+            "bottom": 391.947
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sha1",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/shang/mask/sha1",
+          "sprite": "tex_3ddorm_loading_4_1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 647.636,
+            "top": 291.788,
+            "right": 673.863,
+            "bottom": 332.73
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sha",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/shang/mask/sha",
+          "sprite": "tex_3ddorm_loading_4",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 647.636,
+            "top": 291.788,
+            "right": 673.863,
+            "bottom": 332.73
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "mask",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/shang/mask",
+          "sprite": "phone",
+          "flags": 487,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 669.587,
+            "top": 255.524,
+            "right": 675.353,
+            "bottom": 366.16
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "xia1",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/xia/mask/xia1",
+          "sprite": "tex_3ddorm_loading_4_1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.332244
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 609.662,
+            "top": 292.334,
+            "right": 635.888,
+            "bottom": 333.276
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "xia",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/xia/mask/xia",
+          "sprite": "tex_3ddorm_loading_4",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 609.662,
+            "top": 292.334,
+            "right": 635.888,
+            "bottom": 333.276
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "mask",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/xia/mask",
+          "sprite": "banner_dot",
+          "flags": 487,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 609.604,
+            "top": 257.022,
+            "right": 637.435,
+            "bottom": 368.529
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "sl",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl",
+          "sprite": "tex_3ddorm_loading_3",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 598.986,
+            "top": 272.119,
+            "right": 684.614,
+            "bottom": 351.988
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "SLBG1",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SLBG1",
+          "sprite": "tex_3ddorm_loading_2",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 586.326,
+            "top": 254.773,
+            "right": 697.274,
+            "bottom": 371.067
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "SLBG",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SLBG",
+          "sprite": "tex_3ddorm_loading_1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 546.667,
+            "top": 221.333,
+            "right": 722.0,
+            "bottom": 418.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bg",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/bg",
+          "sprite": "tex_3ddorm_loading_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "Image",
+          "path": "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text/Image",
+          "sprite": "info",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 286.533,
+            "top": 290.667,
+            "right": 349.6,
+            "bottom": 353.733
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "BG",
+          "path": "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/BG",
+          "sprite": "tip_warning",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 200.0,
+            "top": 296.533,
+            "right": 1080.0,
+            "bottom": 347.867
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "Loading(Clone)",
+          "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "top",
+          "path": "OverlayCamera/Adpter/top/top",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": -140.667,
+            "right": 1280.0,
+            "bottom": 0.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "left",
+          "path": "OverlayCamera/Adpter/left/left",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -140.667,
+            "top": 0.0,
+            "right": -0.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "bottom",
+          "path": "OverlayCamera/Adpter/bottom/bottom",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 720.0,
+            "right": 1280.0,
+            "bottom": 860.667
+          },
+          "anchor_world_position": null
+        },
+        {
+          "kind": "image",
+          "name": "right",
+          "path": "OverlayCamera/Adpter/right/right",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1280.0,
+            "top": 0.0,
+            "right": 1420.667,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      ]
+    },
+    "toggles": [],
+    "texts": [
+      {
+        "kind": "ugui-text",
+        "name": "Text",
+        "path": "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text",
+        "text": "<color=white>当前机型内存小于推荐配置，可能存在闪退风险。</color>",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 349.6,
+          "top": 309.0,
+          "right": 930.4,
+          "bottom": 335.4
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "Text",
+          "path": "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text",
+          "text": "<color=white>当前机型内存小于推荐配置，可能存在闪退风险。</color>",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 349.6,
+            "top": 309.0,
+            "right": 930.4,
+            "bottom": 335.4
+          }
+        }
+      },
+      {
+        "kind": "ugui-text",
+        "name": "FpsPanel",
+        "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+        "text": "",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "truncated": false,
+        "bounds": {
+          "left": 573.333,
+          "top": 0.0,
+          "right": 706.667,
+          "bottom": 34.667
+        },
+        "raw": {
+          "kind": "ugui-text",
+          "name": "FpsPanel",
+          "path": "OverlayCamera/Overlay/UIOverlay/FpsPanel",
+          "text": "",
+          "flags": 271,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "adb_bounds": {
+            "left": 573.333,
+            "top": 0.0,
+            "right": 706.667,
+            "bottom": 34.667
+          }
+        }
+      }
+    ],
+    "images": [
+      {
+        "name": "sl (7)",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (7)",
+        "sprite": "tex_3ddorm_loading_G",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 689.333,
+          "top": 377.28,
+          "right": 702.0,
+          "bottom": 390.613
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sl (7)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (7)",
+          "sprite": "tex_3ddorm_loading_G",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 689.333,
+            "top": 377.28,
+            "right": 702.0,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sl (6)",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (6)",
+        "sprite": "tex_3ddorm_loading_n",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 669.333,
+          "top": 377.28,
+          "right": 682.667,
+          "bottom": 390.613
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sl (6)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (6)",
+          "sprite": "tex_3ddorm_loading_n",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 669.333,
+            "top": 377.28,
+            "right": 682.667,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sl (5)",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (5)",
+        "sprite": "tex_3ddorm_loading_i",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 656.267,
+          "top": 377.28,
+          "right": 662.933,
+          "bottom": 390.613
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sl (5)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (5)",
+          "sprite": "tex_3ddorm_loading_i",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 656.267,
+            "top": 377.28,
+            "right": 662.933,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sl (4)",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (4)",
+        "sprite": "tex_3ddorm_loading_d",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 636.2,
+          "top": 377.28,
+          "right": 648.867,
+          "bottom": 390.613
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sl (4)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (4)",
+          "sprite": "tex_3ddorm_loading_d",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 636.2,
+            "top": 377.28,
+            "right": 648.867,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sl (3)",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (3)",
+        "sprite": "tex_3ddorm_loading_a",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 617.533,
+          "top": 377.28,
+          "right": 630.2,
+          "bottom": 390.613
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sl (3)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (3)",
+          "sprite": "tex_3ddorm_loading_a",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 617.533,
+            "top": 377.28,
+            "right": 630.2,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sl (2)",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (2)",
+        "sprite": "tex_3ddorm_loading_o",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 598.867,
+          "top": 377.28,
+          "right": 610.867,
+          "bottom": 390.613
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sl (2)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (2)",
+          "sprite": "tex_3ddorm_loading_o",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 598.867,
+            "top": 377.28,
+            "right": 610.867,
+            "bottom": 390.613
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sl (1)",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (1)",
+        "sprite": "tex_3ddorm_loading_l",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          0.9,
+          0.9,
+          0.9,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 580.46,
+          "top": 375.947,
+          "right": 593.26,
+          "bottom": 391.947
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sl (1)",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/text/sl/sl (1)",
+          "sprite": "tex_3ddorm_loading_l",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.9,
+            "green": 0.9,
+            "blue": 0.9,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 580.46,
+            "top": 375.947,
+            "right": 593.26,
+            "bottom": 391.947
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sha1",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/shang/mask/sha1",
+        "sprite": "tex_3ddorm_loading_4_1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 647.636,
+          "top": 291.788,
+          "right": 673.863,
+          "bottom": 332.73
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sha1",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/shang/mask/sha1",
+          "sprite": "tex_3ddorm_loading_4_1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 647.636,
+            "top": 291.788,
+            "right": 673.863,
+            "bottom": 332.73
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sha",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/shang/mask/sha",
+        "sprite": "tex_3ddorm_loading_4",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 647.636,
+          "top": 291.788,
+          "right": 673.863,
+          "bottom": 332.73
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sha",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/shang/mask/sha",
+          "sprite": "tex_3ddorm_loading_4",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 647.636,
+            "top": 291.788,
+            "right": 673.863,
+            "bottom": 332.73
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "mask",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/shang/mask",
+        "sprite": "phone",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 669.587,
+          "top": 255.524,
+          "right": 675.353,
+          "bottom": 366.16
+        },
+        "raw": {
+          "kind": "image",
+          "name": "mask",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/shang/mask",
+          "sprite": "phone",
+          "flags": 487,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 669.587,
+            "top": 255.524,
+            "right": 675.353,
+            "bottom": 366.16
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "xia1",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/xia/mask/xia1",
+        "sprite": "tex_3ddorm_loading_4_1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          0.332244
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 609.662,
+          "top": 292.334,
+          "right": 635.888,
+          "bottom": 333.276
+        },
+        "raw": {
+          "kind": "image",
+          "name": "xia1",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/xia/mask/xia1",
+          "sprite": "tex_3ddorm_loading_4_1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.332244
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 609.662,
+            "top": 292.334,
+            "right": 635.888,
+            "bottom": 333.276
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "xia",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/xia/mask/xia",
+        "sprite": "tex_3ddorm_loading_4",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 609.662,
+          "top": 292.334,
+          "right": 635.888,
+          "bottom": 333.276
+        },
+        "raw": {
+          "kind": "image",
+          "name": "xia",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/xia/mask/xia",
+          "sprite": "tex_3ddorm_loading_4",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 609.662,
+            "top": 292.334,
+            "right": 635.888,
+            "bottom": 333.276
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "mask",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/xia/mask",
+        "sprite": "banner_dot",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 609.604,
+          "top": 257.022,
+          "right": 637.435,
+          "bottom": 368.529
+        },
+        "raw": {
+          "kind": "image",
+          "name": "mask",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl/xia/mask",
+          "sprite": "banner_dot",
+          "flags": 487,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 609.604,
+            "top": 257.022,
+            "right": 637.435,
+            "bottom": 368.529
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "sl",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl",
+        "sprite": "tex_3ddorm_loading_3",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 598.986,
+          "top": 272.119,
+          "right": 684.614,
+          "bottom": 351.988
+        },
+        "raw": {
+          "kind": "image",
+          "name": "sl",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SL/sl",
+          "sprite": "tex_3ddorm_loading_3",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 598.986,
+            "top": 272.119,
+            "right": 684.614,
+            "bottom": 351.988
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "SLBG1",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SLBG1",
+        "sprite": "tex_3ddorm_loading_2",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 586.326,
+          "top": 254.773,
+          "right": 697.274,
+          "bottom": 371.067
+        },
+        "raw": {
+          "kind": "image",
+          "name": "SLBG1",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SLBG1",
+          "sprite": "tex_3ddorm_loading_2",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 586.326,
+            "top": 254.773,
+            "right": 697.274,
+            "bottom": 371.067
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "SLBG",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SLBG",
+        "sprite": "tex_3ddorm_loading_1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 546.667,
+          "top": 221.333,
+          "right": 722.0,
+          "bottom": 418.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "SLBG",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/SLBG",
+          "sprite": "tex_3ddorm_loading_1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 546.667,
+            "top": 221.333,
+            "right": 722.0,
+            "bottom": 418.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bg",
+        "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/bg",
+        "sprite": "tex_3ddorm_loading_bg",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bg",
+          "path": "OverlayCamera/Overlay/UIOverlay/SceneAnimUI(Clone)/container/Dorm3DLoading(Clone)/bg",
+          "sprite": "tex_3ddorm_loading_bg",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "Image",
+        "path": "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text/Image",
+        "sprite": "info",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 286.533,
+          "top": 290.667,
+          "right": 349.6,
+          "bottom": 353.733
+        },
+        "raw": {
+          "kind": "image",
+          "name": "Image",
+          "path": "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/Text/Image",
+          "sprite": "info",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 286.533,
+            "top": 290.667,
+            "right": 349.6,
+            "bottom": 353.733
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "BG",
+        "path": "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/BG",
+        "sprite": "tip_warning",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": false,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 200.0,
+          "top": 296.533,
+          "right": 1080.0,
+          "bottom": 347.867
+        },
+        "raw": {
+          "kind": "image",
+          "name": "BG",
+          "path": "OverlayCamera/Overlay/UIOverlay/TipPanel(Clone)/Grid/toolTip(Clone)/BG",
+          "sprite": "tip_warning",
+          "flags": 431,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": false,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 200.0,
+            "top": 296.533,
+            "right": 1080.0,
+            "bottom": 347.867
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "Loading(Clone)",
+        "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+        "sprite": "white_dot",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": 0.0,
+          "right": 1280.0,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "Loading(Clone)",
+          "path": "OverlayCamera/Overlay/UIOverlay/Loading(Clone)",
+          "sprite": "white_dot",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 0.0,
+            "green": 0.0,
+            "blue": 0.0,
+            "alpha": 0.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 0.0,
+            "right": 1280.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "top",
+        "path": "OverlayCamera/Adpter/top/top",
+        "sprite": "mask1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": -140.667,
+          "right": 1280.0,
+          "bottom": 0.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "top",
+          "path": "OverlayCamera/Adpter/top/top",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": -140.667,
+            "right": 1280.0,
+            "bottom": 0.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "left",
+        "path": "OverlayCamera/Adpter/left/left",
+        "sprite": "mask",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -140.667,
+          "top": 0.0,
+          "right": -0.0,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "left",
+          "path": "OverlayCamera/Adpter/left/left",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -140.667,
+            "top": 0.0,
+            "right": -0.0,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "bottom",
+        "path": "OverlayCamera/Adpter/bottom/bottom",
+        "sprite": "mask1",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": -0.0,
+          "top": 720.0,
+          "right": 1280.0,
+          "bottom": 860.667
+        },
+        "raw": {
+          "kind": "image",
+          "name": "bottom",
+          "path": "OverlayCamera/Adpter/bottom/bottom",
+          "sprite": "mask1",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": -0.0,
+            "top": 720.0,
+            "right": 1280.0,
+            "bottom": 860.667
+          },
+          "anchor_world_position": null
+        }
+      },
+      {
+        "name": "right",
+        "path": "OverlayCamera/Adpter/right/right",
+        "sprite": "mask",
+        "active_in_hierarchy": true,
+        "active_and_enabled": true,
+        "raycast_target": true,
+        "raycast_top": null,
+        "color": [
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "fill_amount": 1.0,
+        "truncated": false,
+        "bounds": {
+          "left": 1280.0,
+          "top": 0.0,
+          "right": 1420.667,
+          "bottom": 720.0
+        },
+        "raw": {
+          "kind": "image",
+          "name": "right",
+          "path": "OverlayCamera/Adpter/right/right",
+          "sprite": "mask",
+          "flags": 495,
+          "active_in_hierarchy": true,
+          "active_and_enabled": true,
+          "raycast_target": true,
+          "raycast_top": null,
+          "color": {
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 1.0
+          },
+          "fill_amount": 1.0,
+          "adb_bounds": {
+            "left": 1280.0,
+            "top": 0.0,
+            "right": 1420.667,
+            "bottom": 720.0
+          },
+          "anchor_world_position": null
+        }
+      }
+    ],
+    "image_source_count": 1835,
+    "image_source_capacity": 16384
+  }
+}

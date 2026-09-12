@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from typing import Union
+from .private_quarters import PrivateQuartersPhysicsReceipt
+
 import math
 import re
 from typing import Optional, Tuple
@@ -12,7 +15,18 @@ from .errors import SemanticGateClosed, SemanticOracleError
 class ActionsOracle:
     """Actions operations sharing the oracle frame and input boundary."""
 
-    def click(self, semantic_id: str) -> ActionReceipt:
+    def click(self, semantic_id: str) -> Union[ActionReceipt, PrivateQuartersPhysicsReceipt]:
+        if semantic_id.startswith('private-quarters/'):
+            private_quarters_actions = {
+                'private-quarters/interact': self.click_private_quarters_interact,
+                'private-quarters/character/new-jersey': self.click_private_quarters_new_jersey_body,
+                'private-quarters/home': self.click_private_quarters_home,
+                'private-quarters/room/back': self.click_private_quarters_room_back,
+                'private-quarters/room/new-jersey': self.click_private_quarters_new_jersey,
+                'private-quarters/dialogue/continue': self.click_private_quarters_new_jersey_dialogue,
+            }
+            if semantic_id in private_quarters_actions:
+                return private_quarters_actions[semantic_id]()
         delegated_new_ship_reward = semantic_id == "reward/new-ship/continue"
         state = (
             self._new_ship_reward_action_state()

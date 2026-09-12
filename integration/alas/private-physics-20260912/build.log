@@ -1,0 +1,61 @@
+offline mode
+ninja: Entering directory `out/AndroidNullObserverX64'
+
+
+disable fast local for non-interactive: fastlocal=1->0
+ use `--fast_local` to enable fast local with non-interactive mode
+schedule pending:1+ready:0 (node:5637 edge:2)
+build start: Ready 1 Pending 1
+rebuild manifest finished
+
+loading build.ninja... done 188.063475ms
+load siso config done 71.025223ms
+schedule pending:1+ready:0 (node:23134 edge:2)
+build start: Ready 1 Pending 1
+rebuild manifest finished
+schedule pending:1+ready:0 (node:23134 edge:8)
+build start: Ready 252 Pending 1877
+[0/827] 0.57s S ACTION //:angle_program_version_id(//build/toolchain/android:android_clang_x64)
+[0/258] 0.57s S CXX obj/src/libANGLE/renderer/null/angle_null_backend/ObserverServer.o obj/src/libANGLE/renderer/null/angle_null_backend/ObserverServer.dwo
+[0/258] 0.57s S CXX obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.dwo
+[0/257] 0.57s S CXX obj/src/libANGLE/renderer/null/angle_null_backend/SurfaceNULL.o obj/src/libANGLE/renderer/null/angle_null_backend/SurfaceNULL.dwo
+[0/257] 0.57s S CXX obj/src/libANGLE/renderer/null/angle_null_backend/DisplayNULL.o obj/src/libANGLE/renderer/null/angle_null_backend/DisplayNULL.dwo
+[0/246] 1.29s F ACTION //:angle_program_version_id(//build/toolchain/android:android_clang_x64)
+[1/203] 1.29s S CXX obj/angle_version_info/angle_version_info.o obj/angle_version_info/angle_version_info.dwo
+[1/43] 1.96s F CXX obj/angle_version_info/angle_version_info.o obj/angle_version_info/angle_version_info.dwo
+[2/41] 2.95s F CXX obj/src/libANGLE/renderer/null/angle_null_backend/ObserverServer.o obj/src/libANGLE/renderer/null/angle_null_backend/ObserverServer.dwo
+[3/41] 3.57s E CXX obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.dwo	
+FAILED: a0f10d8c-0846-43e1-96d3-8a691d71f1d2 "./obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o" CXX obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.dwo
+err: exit=1
+../../third_party/llvm-build/Release+Asserts/bin/clang++ -MMD -MF obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o.d -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -D_GNU_SOURCE -DANDROID -D__ANDROID_UNAVAILABLE_SYMBOLS_ARE_WEAK__ -DHAVE_SYS_UIO_H -DANDROID_NDK_VERSION_ROLL=2@30.0.15729638_1 -DCR_CLANG_REVISION=\"llvmorg-23-init-19482-g53d18800-2\" -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE -D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCPP_INSTRUMENTED_WITH_ASAN=0 -DCR_LIBCXX_REVISION=b16984ce99c702355a5b2b4c52574e82cec41fb9 -DNDEBUG -DNVALGRIND -DDYNAMIC_ANNOTATIONS_ENABLED=0 -DANGLE_ASSERT_ALWAYS_ON -DANGLE_ENABLE_SHARE_CONTEXT_LOCK=1 -DANGLE_USE_ANDROID_TLS_SLOT=1 -DANGLE_ENABLE_GLOBAL_MUTEX_LOAD_TIME_ALLOCATE=1 -DANGLE_ENABLE_CONTEXT_MUTEX=1 -DEGL_NO_X11 -DANGLE_DEBUG_LAYERS_ENABLED -DANGLE_OUTSIDE_WEBKIT -DANGLE_TRACE_EVENTS_IGNORE_TIMESTAMP -DLIBANGLE_IMPLEMENTATION -DANGLE_USE_ABSEIL -DABSL_ALLOCATOR_NOTHROW=1 -DANGLE_USE_PERFETTO -I../../buildtools/third_party/libc++ -I../../include -I../../src -I../../src/common/base -I../../src/common/third_party/xxhash -I../../third_party/abseil-cpp -I../../third_party/perfetto/include -Igen/third_party/perfetto -Igen/third_party/perfetto/build_config -I../../third_party/protobuf/src -Wall -Wextra -Wimplicit-fallthrough -Wextra-semi -Wunreachable-code-aggressive -Wgnu -Wno-gnu-anonymous-struct -Wno-gnu-conditional-omitted-operand -Wno-gnu-include-next -Wno-gnu-label-as-value -Wno-gnu-redeclared-enum -Wno-gnu-statement-expression -Wno-gnu-zero-variadic-macro-arguments -Wno-zero-length-array -Wthread-safety -Wno-unused-template -Wunguarded-availability -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wloop-analysis -Wno-unneeded-internal-declaration -Wno-cast-function-type -Wno-thread-safety-reference-return -Wno-nontrivial-memcall -Wno-uninitialized-const-pointer -Wno-unused-but-set-global -Wshadow -Werror -fno-delete-null-pointer-checks -fno-strict-overflow -fno-ident -fno-math-errno -fno-strict-aliasing -fstack-protector -funwind-tables -fPIC -fcolor-diagnostics -fdiagnostics-show-inlining-chain -fmerge-all-constants -fcrash-diagnostics-dir=../clang-crashreports -fno-lifetime-dse -mllvm -instcombine-lower-dbg-declare=0 -mllvm -split-threshold-for-reg-with-hint=0 -ffp-contract=off -fcomplete-member-pointers -ffunction-sections -fno-short-enums --target=x86_64-linux-android29 -m64 -msse3 -Wno-builtin-macro-redefined -D__DATE__= -D__TIME__= -D__TIMESTAMP__= -ffile-compilation-dir=. -no-canonical-prefixes -ftrivial-auto-var-init=pattern -fomit-frame-pointer -gdwarf-5 -g1 -fdebug-info-for-profiling -gsplit-dwarf -fsanitize=return -fsanitize-trap=return -fsanitize-ignore-for-ubsan-feature=return -fvisibility=hidden -Wheader-hygiene -Wstring-conversion -Wtautological-overlap-compare -DUNSAFE_BUFFERS_BUILD -Wunsafe-buffer-usage -Wno-error=unsafe-buffer-usage -Xclang -add-plugin -Xclang unsafe-buffers -Xclang -plugin-arg-unsafe-buffers -Xclang ../../unsafe_buffers_paths.txt -Wbad-function-cast -Wconditional-uninitialized -Wextra-semi-stmt -Wfloat-conversion -Winconsistent-missing-destructor-override -Wmissing-field-initializers -Wnewline-eof -Wnon-virtual-dtor -Wredundant-parens -Wreturn-std-move -Wshadow -Wshadow-field -Wtautological-type-limit-compare -Wundefined-reinterpret-cast -Wunneeded-internal-declaration -Wunused-but-set-variable -Wsuggest-destructor-override -Wsuggest-override -Wparentheses -Wrange-loop-analysis -Wstrict-prototypes -Wunreachable-code-aggressive -Wshorten-64-to-32 -O2 -fdata-sections -ffunction-sections -fno-unique-section-names -Wno-invalid-offsetof -Wenum-compare-conditional -Wno-nullability-completeness -std=c++20 -Wno-trigraphs -gsimple-template-names -fno-exceptions -fno-rtti -nostdinc++ -isystem../../third_party/libc++/src/include -isystem../../third_party/libc++abi/src/include --sysroot=../../third_party/android_toolchain/ndk/toolchains/llvm/prebuilt/linux-x86_64/sysroot -fvisibility-inlines-hidden -Wno-thread-safety  -fmodule-name="//src/libANGLE/renderer/null:angle_null_backend_Private" -c ../../src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp -o obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o
+build step: cxx "./obj/src/libANGLE/renderer/null/angle_null_backend/Il2CppNamespaceProbe.o"
+siso_rule: clang/cxx
+stderr:
+../../src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp:2427:35: error: unsafe buffer access [-Werror,-Wunsafe-buffer-usage]
+ 2427 |           finite &= std::isfinite(record.center[axis]) && std::isfinite(record.extents[axis]);
+      |                                   ^~~~~~~~~~~~~
+../../src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp:2427:35: note: See //docs/unsafe_buffers.md for help.
+../../src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp:2427:73: error: unsafe buffer access [-Werror,-Wunsafe-buffer-usage]
+ 2427 |           finite &= std::isfinite(record.center[axis]) && std::isfinite(record.extents[axis]);
+      |                                                                         ^~~~~~~~~~~~~~
+../../src/libANGLE/renderer/null/Il2CppNamespaceProbe.cpp:2427:73: note: See //docs/unsafe_buffers.md for help.
+2 errors generated.
+
+
+[4/41] 3.58s - CXX obj/src/libANGLE/renderer/null/angle_null_backend/SurfaceNULL.o obj/src/libANGLE/renderer/null/angle_null_backend/SurfaceNULL.dwo
+[4/41] 3.58s - CXX obj/src/libANGLE/renderer/null/angle_null_backend/DisplayNULL.o obj/src/libANGLE/renderer/null/angle_null_backend/DisplayNULL.dwo
+build failed
+
+	
+noexec:0 local:4 remote:0 cache:0 skip:2088
+  cache-write:0(err:0) fallback:0 retry:0
+fs: ops: 66(err:7) / r:22(err:0) 28.91MiB / w:1(err:0) 54.54KiB
+
+
+shutdown cloud logging/monitoring done 68.309µs
+
+ 3.64s Build Failure: 4 done, 1 failed, 37 remaining - 1.10/s
+ 1 steps failed: exit=1
+see ./out/AndroidNullObserverX64/siso_output for full command line and output
+ or ./out/AndroidNullObserverX64/siso.INFO
+use ./out/AndroidNullObserverX64/siso_failed_commands.sh to re-run failed commands

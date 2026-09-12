@@ -1,0 +1,80 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 12:40:42.381 │ [Server] cn                                 
+read: ./config\_codex_pq_1d0e527861f042d6a9d5e7946f47d873.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 12:40:42.402 │ Bind task ['General', 'Alas']               
+read: ./config\_codex_pq_1d0e527861f042d6a9d5e7946f47d873.json
+INFO     2026-09-12 12:40:42.409 │ Bind task ['General', 'Alas',               
+         'PrivateQuarters']                                                    
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 12:40:42.412 │ DEVICE                                      
+INFO     2026-09-12 12:40:42.413 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 12:40:42.415 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 12:40:42.419 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 12:40:42.421 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 12:40:42.423 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 12:40:42.425 │ emulator-5580                               
+INFO     2026-09-12 12:40:42.428 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 12:40:42.429 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 12:40:42.437 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 12:40:42.440 │ [Server] cn                                 
+WARNING  2026-09-12 12:40:42.442 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 12:40:42.444 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 12:40:42.503 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 12:40:42.505 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 12:40:42.507 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 12:40:42.510 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 12:40:42.548 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:40:42.550 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 12:40:44.013 │ Already at page_dormmenu                    
+INFO     2026-09-12 12:40:44.017 │ <<< UI GOTO PAGE_PRIVATE_QUARTERS >>>       
+INFO     2026-09-12 12:41:13.973 │ Page switch: page_dormmenu ->               
+         page_private_quarters                                                 
+INFO     2026-09-12 12:41:14.575 │ Semantic click dorm-menu/private-quarters @ 
+         OverlayCamera/Overlay/UIMain/MainLiveAreaUI(Clone)/dorm_btn           
+INFO     2026-09-12 12:41:16.413 │ Page arrive: page_private_quarters          
+════════════════════════════ PRIVATE QUARTERS RUN ═════════════════════════════
+INFO     2026-09-12 12:41:16.501 │ PRIVATE QUARTERS RUN                        
+INFO     2026-09-12 12:41:16.503 │ Task configured for Buy_Roses=False,        
+         Buy_Cake=False, Interact_ShipGirl=False, Target_ShipGirl=New Jersey   
+INFO     2026-09-12 12:41:16.504 │ Delay task `PrivateQuarters` to 2026-09-13  
+         00:00:00 (server_update='00:00')                                      
+read: ./config\_codex_pq_1d0e527861f042d6a9d5e7946f47d873.json
+INFO     2026-09-12 12:41:16.510 │ Bind task ['General', 'Alas',               
+         'PrivateQuarters']                                                    
+INFO     2026-09-12 12:41:16.512 │ Save config                                 
+         ./config\_codex_pq_1d0e527861f042d6a9d5e7946f47d873.json,             
+         PrivateQuarters.Scheduler.NextRun=datetime.datetime(2026, 9, 13, 0, 0)
+write: ./config\_codex_pq_1d0e527861f042d6a9d5e7946f47d873.json
+INFO     2026-09-12 12:41:17.209 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:41:17.210 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 12:41:18.796 │ UI get current page                         
+INFO     2026-09-12 12:41:47.116 │ [UI] page_private_quarters                  
+INFO     2026-09-12 12:41:47.118 │ Goto page_main                              
+INFO     2026-09-12 12:41:47.119 │ <<< UI GOTO PAGE_MAIN >>>                   
+INFO     2026-09-12 12:42:12.776 │ Page switch: page_private_quarters ->       
+         page_main                                                             
+INFO     2026-09-12 12:42:13.524 │ Semantic click private-quarters/home @      
+         UICamera/Canvas/UIMain/SelectDorm3DUI(Clone)/Main/option/home         
+INFO     2026-09-12 12:42:42.992 │ Page switch: page_private_quarters ->       
+         page_main                                                             
+INFO     2026-09-12 12:42:43.702 │ Semantic click main/already @               
+         OverlayCamera/Overlay/UIMain/NewMainMellowTheme(Clone)/frame/right/1/b
+         attle                                                                 
+INFO     2026-09-12 12:42:45.518 │ Page arrive: page_main                      
+PASSED True

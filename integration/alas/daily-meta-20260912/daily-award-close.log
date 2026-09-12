@@ -1,0 +1,2 @@
+ActionReceipt(semantic_id='reward/award-info/close', generation=10035, point=Point(x=640.0, y=556.733), bounds=Bounds(left=564.667, top=540.067, right=715.333, bottom=573.4), path='OverlayCamera/Overlay/UIMain/AwardInfoUI(Clone)/items/close', policy_sha256=None, capability_id=None)
+remaining 0

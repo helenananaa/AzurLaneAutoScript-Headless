@@ -1,0 +1,21 @@
+...............................................................F........ [ 90%]
+........                                                                 [100%]
+================================== FAILURES ===================================
+_ AlasAdapterBaselineTests.test_current_source_inventory_is_exact_and_fail_closed _
+
+self = <test_alas_adapter_baseline.AlasAdapterBaselineTests testMethod=test_current_source_inventory_is_exact_and_fail_closed>
+
+    def test_current_source_inventory_is_exact_and_fail_closed(self):
+        document = self.document
+        self.assertEqual(document["schema"], "alas-headless.adapter-baseline/v1")
+        self.assertEqual(
+            document["upstream_alas_commit"],
+            "81ccf63b4540f00241628c82a58c02c7a2bb11af",
+        )
+>       self.assertEqual(document["integration_patch"]["changed_file_count"], 150)
+E       AssertionError: 151 != 150
+
+tests\test_alas_adapter_baseline.py:38: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_alas_adapter_baseline.py::AlasAdapterBaselineTests::test_current_source_inventory_is_exact_and_fail_closed
+1 failed, 79 passed in 31.91s

@@ -133,7 +133,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "meta-assist",
         "/WorldBossUI(Clone)/pages/CurrentWorldBossChallengeUI(Clone)/",
-        ("meta/home", "meta/assist/start"),
+        ("meta/home", "meta/assist/start", "meta/reward-preview/open"),
     ),
     BlockerRule(
         "task-page",
@@ -266,7 +266,7 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
     BlockerRule(
         "event-story",
         "/NewStoryUI(Clone)/",
-        ("story/skip", "story/skip/confirm", "story/skip/cancel"),
+        ("story/skip", "story/skip/confirm", "story/skip/cancel", "private-quarters/dialogue/continue"),
     ),
     BlockerRule(
         "event-story-skip-prompt",
@@ -395,6 +395,8 @@ DEFAULT_BLOCKERS: Tuple[BlockerRule, ...] = (
         "daily-page",
         "/DailyLevelUI(Clone)/",
         (
+            "reward/award-info/close",
+            "reward/award-info1/close",
             "daily/page/back",
             "daily/run/normal",
             "daily/run/skip",

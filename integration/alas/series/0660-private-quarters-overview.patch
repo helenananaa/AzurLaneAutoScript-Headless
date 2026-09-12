@@ -1,0 +1,12 @@
+diff --git a/module/private_quarters/status.py b/module/private_quarters/status.py
+--- a/module/private_quarters/status.py
++++ b/module/private_quarters/status.py
+@@ -52,5 +52,8 @@
+         Pages:
+             in:
+         """
++        semantic_adapter = getattr(self.device, 'semantic_adapter', None)
++        if semantic_adapter is not None:
++            return semantic_adapter.private_quarters_daily_count()
+         count, _, _ = OCR_DAILY_COUNT.ocr(self.device.image)
+         return count

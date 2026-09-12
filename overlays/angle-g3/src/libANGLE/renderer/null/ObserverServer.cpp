@@ -544,7 +544,54 @@ std::string UiResponse(uid_t peerUid, const std::string &package) {
                        static_cast<size_t>(count));
     }
   }
-  response.append("]}\n");
+  response.append("],\"private_quarters_physics\":{");
+  char physicsFields[256];
+  const int physicsCount = ANGLE_UNSAFE_TODO(std::snprintf(
+      physicsFields, sizeof(physicsFields),
+      "\"schema\":\"alas-headless.private-colliders/v1\",\"status\":%u,\"truncated\":%s,\"error_count\":%u,\"camera_path\":",
+      snapshot.privatePhysicsStatus, snapshot.colliderTruncated ? "true" : "false", snapshot.colliderErrors));
+  if (physicsCount <= 0 || static_cast<size_t>(physicsCount) >= sizeof(physicsFields)) return {};
+  response.append(physicsFields, static_cast<size_t>(physicsCount));
+  AppendJsonString(&response, BoundedStringView(snapshot.physicsCameraPath));
+  response.append(",\"colliders\":[");
+  const size_t colliderCount = std::min(static_cast<size_t>(snapshot.colliderCount), snapshot.colliders.size());
+  for (size_t i = 0; i < colliderCount; ++i) {
+    const auto &record = snapshot.colliders[i];
+    if (i) response.push_back(',');
+    response.append("{\"name\":");
+    AppendJsonString(&response, BoundedStringView(record.name));
+    response.append(",\"path\":");
+    AppendJsonString(&response, BoundedStringView(record.path));
+    char values[768];
+    const int count = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values),
+        ",\"instance_id\":%d,\"is_trigger\":%s,\"truncated\":%s,\"world_center\":[%.6f,%.6f,%.6f],\"extents\":[%.6f,%.6f,%.6f],\"screen\":",
+        record.instanceId, (record.flags & 1u) ? "true" : "false", (record.flags & 4u) ? "true" : "false",
+        record.center[0], record.center[1], record.center[2], record.extents[0], record.extents[1], record.extents[2]));
+    if (count <= 0 || static_cast<size_t>(count) >= sizeof(values)) return {};
+    response.append(values, static_cast<size_t>(count));
+    if (record.flags & 2u) {
+      const int projected = ANGLE_UNSAFE_TODO(std::snprintf(values, sizeof(values), "[%.6f,%.6f,%.6f]", record.screen[0], record.screen[1], record.screen[2]));
+      if (projected <= 0 || static_cast<size_t>(projected) >= sizeof(values)) return {};
+      response.append(values, static_cast<size_t>(projected));
+    } else response.append("null");
+    response.append(",\"ui_top_path\":");
+    AppendJsonString(&response, BoundedStringView(record.uiTopPath));
+    char hitFields[384];
+    const int hitCount = ANGLE_UNSAFE_TODO(std::snprintf(hitFields, sizeof(hitFields),
+        ",\"sweep_status\":%u,\"nearest_id\":%d,\"raycast_top\":%s,\"ui_clear\":%s,\"input_point\":",
+        record.sweepStatus, record.nearestId,
+        (record.flags & 8u) ? ((record.flags & 16u) ? "true" : "false") : "null",
+        (record.flags & 32u) ? ((record.flags & 64u) ? "true" : "false") : "null"));
+    if (hitCount <= 0 || static_cast<size_t>(hitCount) >= sizeof(hitFields)) return {};
+    response.append(hitFields, static_cast<size_t>(hitCount));
+    if (record.flags & 128u) {
+      const int n = ANGLE_UNSAFE_TODO(std::snprintf(hitFields, sizeof(hitFields), "[%.0f,%.0f]", record.inputX, record.inputY));
+      if (n <= 0 || static_cast<size_t>(n) >= sizeof(hitFields)) return {};
+      response.append(hitFields, static_cast<size_t>(n));
+    } else response.append("null");
+    response.push_back('}');
+  }
+  response.append("]}}\n");
   return response;
 }
 

@@ -104,6 +104,16 @@ class CombatOracle:
             and not self._daily_precombat_visible(state)
         )
 
+    def daily_entry_visible(self) -> bool:
+        """Prove arrival without treating a UI observation as new input authority."""
+        state = self.read_state()
+        targets = self._matches(state, 'daily/page/back')
+        return bool(len(targets) == 1 and targets[0].active_in_hierarchy
+                    and targets[0].active_and_enabled and targets[0].interactable
+                    and targets[0].raycast_top is not False
+                    and not self._daily_precombat_visible(state)
+                    and not self._blocking_rules(state, 'daily/page/back'))
+
     def daily_detail_visible(self) -> bool:
         state = self.read_state()
         return self._daily_detail_visible(state)

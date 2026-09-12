@@ -1,0 +1,51 @@
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════════
+                                     START                                     
+═══════════════════════════════════════════════════════════════════════════════
+INFO     2026-09-12 12:33:18.809 │ [Server] cn                                 
+read: ./config\_codex_pq_d322915695634c23be8e085e2683de07.json
+read: ./module/config/argument/args.json
+INFO     2026-09-12 12:33:18.838 │ Bind task ['General', 'Alas']               
+read: ./config\_codex_pq_d322915695634c23be8e085e2683de07.json
+INFO     2026-09-12 12:33:18.846 │ Bind task ['General', 'Alas',               
+         'PrivateQuarters']                                                    
+═══════════════════════════════════ DEVICE ════════════════════════════════════
+INFO     2026-09-12 12:33:18.848 │ DEVICE                                      
+INFO     2026-09-12 12:33:18.850 │ [IS_ON_PHONE_CLOUD] False                   
+INFO     2026-09-12 12:33:18.851 │ [AdbBinary]                                 
+         D:/anaconda/Lib/site-packages/adbutils/binaries/adb.exe               
+INFO     2026-09-12 12:33:18.853 │ [AdbClient] AdbClient(127.0.0.1, 5037)      
+INFO     2026-09-12 12:33:18.855 │ <<< DETECT DEVICE >>>                       
+INFO     2026-09-12 12:33:18.857 │ Here are the available devices, copy to     
+         Alas.Emulator.Serial to use it or set Alas.Emulator.Serial="auto"     
+INFO     2026-09-12 12:33:18.861 │ emulator-5580                               
+INFO     2026-09-12 12:33:18.863 │ "emulator-5580" is a `emulator-*` serial,   
+         skip adb connect                                                      
+INFO     2026-09-12 12:33:18.865 │ [AdbDevice] AdbDevice(serial=emulator-5580) 
+INFO     2026-09-12 12:33:18.870 │ [PackageName] com.bilibili.azurlane         
+INFO     2026-09-12 12:33:18.872 │ [Server] cn                                 
+WARNING  2026-09-12 12:33:18.873 │ ALAS semantic mode enabled; unmapped        
+         detection and raw input fail closed                                   
+─────────────────────────── FIND EMULATOR INSTANCE ────────────────────────────
+INFO     2026-09-12 12:33:18.875 │ FIND EMULATOR INSTANCE                      
+INFO     2026-09-12 12:33:18.929 │ MuMuPlayer12(serial="127.0.0.1:16384",      
+         name="MuMuPlayer-12.0-0", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+INFO     2026-09-12 12:33:18.932 │ MuMuPlayer12(serial="127.0.0.1:16416",      
+         name="MuMuPlayer-12.0-1", path="F:/MuMuPlayer/nx_main/MuMuNxMain.exe")
+WARNING  2026-09-12 12:33:18.934 │ No emulator instance with {'serial':        
+         '127.0.0.1:5581'}, serial invalid                                     
+INFO     2026-09-12 12:33:18.935 │ Screenshot interval set to 0.3s             
+INFO     2026-09-12 12:33:18.977 │ Semantic mode uses typed text, skip         
+         early_ocr_import                                                      
+INFO     2026-09-12 12:33:18.979 │ <<< UI ENSURE >>>                           
+INFO     2026-09-12 12:33:20.484 │ Already at page_dormmenu                    
+INFO     2026-09-12 12:33:20.487 │ <<< UI GOTO PAGE_PRIVATE_QUARTERS >>>       
+INFO     2026-09-12 12:33:50.021 │ Page switch: page_dormmenu ->               
+         page_private_quarters                                                 
+INFO     2026-09-12 12:33:50.663 │ Semantic click dorm-menu/private-quarters @ 
+         OverlayCamera/Overlay/UIMain/MainLiveAreaUI(Clone)/dorm_btn           
+INFO     2026-09-12 12:34:14.295 │ Page switch: page_dormmenu ->               
+         page_private_quarters                                                 
+PASSED False
